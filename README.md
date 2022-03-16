@@ -1,4 +1,4 @@
-![Blogpost launch](https://user-images.githubusercontent.com/20115649/158687215-4a5f2b1e-8849-4c33-85d2-898f66797c53.svg)
+![Social media Launch](https://user-images.githubusercontent.com/20115649/158687556-291e08f7-6b54-43e1-afe9-d780f19d6382.svg)
 
 # Build your product, not another (password) login
 ## About Hanko
