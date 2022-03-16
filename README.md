@@ -2,7 +2,7 @@
 ## About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by a combination of magic links and WebAuthn-based biometrics, aka passkeys.
 
-Passwordless logins have been promised to us for quite a while now. But only since very recently, the ecosystem of devices, browsers, and operating systems is finally there. With most devices now supporting WebAuthn right out of the box, and shipping with biometric sensors like Touch ID and Face ID, a truly fascinating login experience becomes possible and will replace passwords for good.
+Passwordless logins have been promised to us for quite some time. But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. With most devices now supporting WebAuthn out of the box and shipping with biometric sensors like Touch ID, Face ID, and Windows Hello, it's enabling a truly fascinating login experience that will replace passwords for good.
 
 That's where Hanko comes in. Hanko enables a polished, end-to-end passwordless user experience on the web. Self-hosted or as a lean SaaS hosted by us (coming soon). API-first, small footprint, for developers.
 
