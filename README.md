@@ -1,4 +1,4 @@
-# A beautiful login for your app
+# Hanko
 ## Everything you need to onboard and authenticate users
 Hanko is the open-source alternative for passwordless authentication, powered by a combination of magic links and WebAuthn-based biometrics, aka passkeys.
 
