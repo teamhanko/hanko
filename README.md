@@ -1,3 +1,5 @@
+![Blogpost launch](https://user-images.githubusercontent.com/20115649/158687215-4a5f2b1e-8849-4c33-85d2-898f66797c53.svg)
+
 # Build your product, not another (password) login
 ## About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by a combination of magic links and WebAuthn-based biometrics, aka passkeys.
