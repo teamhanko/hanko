@@ -6,6 +6,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
 )
@@ -14,9 +15,13 @@ import (
 var serveCmd = &cobra.Command{
 	Use:   "serve",
 	Short: "Start the hanko server",
-	Long: ``,
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("serve called")
+		fmt.Printf("serving on %v", C.Server.Public.Adress)
+		err := http.ListenAndServe(C.Server.Public.Adress, nil)
+		if err != nil {
+			return 
+		}
 	},
 }
 
