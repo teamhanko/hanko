@@ -6,7 +6,9 @@ Passwordless logins have been promised to us for quite a while now. But only sin
 
 That's where Hanko comes in. It enables a polished, end-to-end passwordless user experience on the web. Self-hosted or as a lean SaaS hosted by us (coming soon). API-first, small footprint, for developers.
 
-Integrate Hanko in your web apps in just 5 minutes -- with a single line of code. Try it now and never look back.
+Integrate Hanko in your web apps in just 5 minutes -- with a single line of code.
+
+Try it now and never look back.
 
 ## Built with
 - Go
