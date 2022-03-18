@@ -4,8 +4,6 @@
 
 ![Social media Launch](https://user-images.githubusercontent.com/20115649/158687556-291e08f7-6b54-43e1-afe9-d780f19d6382.svg)
 
-Join our [Slack community](https://www.hanko.io/community)
-
 # Build your product, not another (password) login
 
 ## About Hanko
@@ -22,6 +20,9 @@ Integrate Hanko in your web apps in just 5 minutes – with a single line of cod
 With Hanko, your users will be able to login to your web app with biometrics instead of passwords. On devices that do not support WebAuthn, or for the first-time login on a new device, a magic link (we call them passlinks) is automatically sent. If possible, the user is then guided to enroll their biometrics.
 
 For us, this project is the sum of six years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
+
+## Community
+Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about authentication, identity, or life in general.
 
 # Quickstart
 TODO
