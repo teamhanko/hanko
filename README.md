@@ -23,10 +23,6 @@ With Hanko, your users will be able to login to your web app with biometrics ins
 
 For us, this project is the sum of six years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
 
-## Built with
-- Go
-- Typescript
-
 # Quickstart
 TODO
 
