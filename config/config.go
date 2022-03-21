@@ -1,21 +1,64 @@
 package config
 
+import (
+	"fmt"
+	"github.com/spf13/viper"
+	"path/filepath"
+	"runtime"
+	"strings"
+)
+
+// Config is the central configuration type
 type Config struct {
-	Server         Server
-	Webauthn       WebauthnSettings
-	Passlink       Passlink
-	Logging        Logging
-	PrivateApiKeys ApiKeys
+	Server   Server
+	Webauthn WebauthnSettings
+	Passlink Passlink
+	Logging  Logging
+	Database Database
 }
 
-func Default() *Config {
+// Load loads config from given file or default places
+func Load(cfgFile *string) *Config {
+	if cfgFile != nil && *cfgFile != "" {
+		// Use given config file
+		viper.SetConfigFile(*cfgFile)
+	} else {
+		// Use config file from default places
+		// Get base path of binary call
+		_, b, _, _ := runtime.Caller(0)
+		basePath := filepath.Dir(b)
+
+		viper.SetConfigType("yaml")
+		viper.AddConfigPath(basePath)
+		viper.AddConfigPath("/etc/config")
+		viper.AddConfigPath("/etc/secrets")
+		viper.AddConfigPath("./config")
+		viper.SetConfigName("hanko-config")
+	}
+
+	viper.AutomaticEnv()
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	if err := viper.ReadInConfig(); err == nil {
+		fmt.Println("Using config file:", viper.ConfigFileUsed())
+	}
+	c := defaultConfig()
+	err := viper.Unmarshal(c)
+	if err != nil {
+		panic(fmt.Sprintf("unable to decode config into struct, %v", err))
+	}
+
+	return c
+}
+
+func defaultConfig() *Config {
 	return &Config{
 		Server: Server{
 			Public: ServerSettings{
-				Adress: ":8000",
+				Address: ":8000",
 			},
 			Private: ServerSettings{
-				Adress: ":8001",
+				Address: ":8001",
 			},
 			ExternalHost: "",
 		},
@@ -31,21 +74,29 @@ func Default() *Config {
 				Registration:   60000,
 			},
 		},
-		Passlink:       Passlink{
+		Passlink: Passlink{
 			Email:               Email{},
 			Limit:               Limit{},
 			AllowedRedirectUrls: nil,
 			DefaultRedirectUrl:  "",
 			Smtp:                SMTP{},
 		},
-		Logging:        Logging{
+		Logging: Logging{
 			Level:  "info",
 			Format: "",
 		},
-		PrivateApiKeys: map[string]string{"apiKeyId": "apiKey"},
+		Database: Database{
+			Database: "hanko",
+			User:     "postgres",
+			Password: "postgres",
+			Host:     "localhost",
+			Port:     "5432",
+			Dialect:  "postgres",
+		},
 	}
 }
 
+// Server contains the setting for the public and private server
 type Server struct {
 	Public       ServerSettings
 	Private      ServerSettings
@@ -53,27 +104,18 @@ type Server struct {
 }
 
 type ServerSettings struct {
-	// The Adress to listen on in the form of host:port
+	// The Address to listen on in the form of host:port
 	// See net.Dial for details of the address format.
-	Adress string
+	Address string
 }
 
+// WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
 	RelyingParty RelyingParty
 	Timeouts     Timeouts
 }
 
-type ApiKeys map[string]string
-
-func (c ApiKeys) Contains(secret string) bool {
-	for _, v := range c {
-		if v == secret {
-			return true
-		}
-	}
-	return false
-}
-
+// RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
 	Id          string
 	DisplayName string
@@ -81,11 +123,13 @@ type RelyingParty struct {
 	Origins     []string
 }
 
+// Timeouts defines when an Authentication or Registration Webauthn flow times out
 type Timeouts struct {
 	Authentication int
 	Registration   int
 }
 
+// SMTP Server Settings for sending passlinks
 type SMTP struct {
 	Host     string
 	Port     string
@@ -123,4 +167,14 @@ type Passlink struct {
 type Logging struct {
 	Level  string
 	Format string
+}
+
+// Database connection settings
+type Database struct {
+	Database string `json:"database"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+	Dialect  string `json:"dialect"`
 }
