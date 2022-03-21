@@ -1,0 +1,13 @@
+create_table("passlinks") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("user_id", "string")
+	t.Column("transport", "string")
+	t.Column("email", "string")
+	t.Column("phone_no", "string")
+	t.Column("status", "string")
+	t.Column("redirect_to", "string", {size: 511})
+	t.Column("valid_until", "timestamp")
+	t.Column("template", "string")
+	t.Column("locale", "string")
+	t.Timestamps()
+}

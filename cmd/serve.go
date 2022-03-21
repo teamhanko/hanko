@@ -6,25 +6,23 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/config"
 	"net/http"
 
 	"github.com/spf13/cobra"
 )
 
-// serveCmd represents the serve command
-var serveCmd = &cobra.Command{
-	Use:   "serve",
-	Short: "Start the hanko server",
-	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("serving on %v", C.Server.Public.Adress)
-		err := http.ListenAndServe(C.Server.Public.Adress, nil)
-		if err != nil {
-			return 
-		}
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(serveCmd)
+func NewServeCommand(config *config.Config) *cobra.Command {
+	return &cobra.Command{
+		Use:   "serve",
+		Short: "Start the hanko server",
+		Long:  ``,
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Printf("serving on %v", config.Server.Public.Address)
+			err := http.ListenAndServe(config.Server.Public.Address, nil)
+			if err != nil {
+				return
+			}
+		},
+	}
 }
