@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/persistence"
+	"os"
 	"strconv"
 )
 
@@ -26,6 +27,7 @@ func NewMigrateDownCommand(persister *persistence.Persister) *cobra.Command {
 			err := persister.MigrateDown(steps)
 			if err != nil {
 				fmt.Println(err)
+				os.Exit(1)
 			}
 		},
 	}
