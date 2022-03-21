@@ -2,4 +2,4 @@ database:
   user: hanko
   password: hanko
   host: postgresd
-  port: 55432
+  port: 5432
