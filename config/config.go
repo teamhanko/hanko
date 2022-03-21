@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Config is the central configuration type
 type Config struct {
 	Server   Server
 	Webauthn WebauthnSettings
@@ -95,6 +96,7 @@ func defaultConfig() *Config {
 	}
 }
 
+// Server contains the setting for the public and private server
 type Server struct {
 	Public       ServerSettings
 	Private      ServerSettings
@@ -107,11 +109,13 @@ type ServerSettings struct {
 	Address string
 }
 
+// WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
 	RelyingParty RelyingParty
 	Timeouts     Timeouts
 }
 
+// RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
 	Id          string
 	DisplayName string
@@ -119,11 +123,13 @@ type RelyingParty struct {
 	Origins     []string
 }
 
+// Timeouts defines when an Authentication or Registration Webauthn flow times out
 type Timeouts struct {
 	Authentication int
 	Registration   int
 }
 
+// SMTP Server Settings for sending passlinks
 type SMTP struct {
 	Host     string
 	Port     string
