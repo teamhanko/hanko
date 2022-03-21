@@ -24,7 +24,10 @@ func NewRootCmd() *cobra.Command {
 	}
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	initConfig()
-	initPersister()
+	err := initPersister()
+	if err != nil {
+		os.Exit(1)
+	}
 	migrate.RegisterCommands(cmd, persister)
 	cmd.AddCommand(NewServeCommand(cfg))
 
