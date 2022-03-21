@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+  hanko-migrate:
+    image: ghcr.io/teamhanko/hanko:main
+    volumes:
+      - type: bind
+        source: ../../config/quickstart.yaml
+        target: /etc/config/hanko-config.yaml
+    command: --config /etc/config/hanko-config.yaml migrate up
+    restart: on-failure
+    depends_on:
+      - postgresd
+    networks:
+      - intranet
+  hanko:
+    depends_on:
+      - hanko-migrate
+    image: ghcr.io/teamhanko/hanko:main
+    ports:
+      - '8000:8000' # public
+      - '8001:8001' # private
+    restart: unless-stopped
+    command: serve --config /etc/config/hanko-config.yaml
+    volumes:
+      - type: bind
+        source: ../../config/quickstart.yaml
+        target: /etc/config/hanko-config.yaml
+    networks:
+      - intranet
+  postgresd:
+    image: postgres:12
+    ports:
+      - "55432:55432"
+    environment:
+      - POSTGRES_USER=hanko
+      - POSTGRES_PASSWORD=hanko
+      - POSTGRES_DB=hanko
+    networks:
+      - intranet
+#  mailslurper:
+#    image: oryd/mailslurper:latest-smtps
+#    ports:
+#      - '4436:4436'
+#      - '4437:4437'
+#    networks:
+#      - intranet
+networks:
+  intranet:
