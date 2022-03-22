@@ -1,0 +1,10 @@
+namespace: hanko
+resources:
+  - namespace.yaml
+  - ingress.yaml
+  - ../../base
+  - ../../postgres
+configMapGenerator:
+  - files:
+      - hanko-config.yaml
+    name: hanko-config

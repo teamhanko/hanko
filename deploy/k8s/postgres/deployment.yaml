@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: hanko
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:12-alpine
+          ports:
+            - containerPort: 5432
+              name: postgres-hanko
+          env:
+            - name: POSTGRES_DB
+              value: hanko
+            - name: POSTGRES_USER
+              value: hanko
+            - name: POSTGRES_PASSWORD
+              value: hanko
+          volumeMounts:
+            - mountPath: /docker-entrypoint-initdb.d
+              name: initdb
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-pv-claim
+      volumes:
+        - name: initdb
+          configMap:
+            name: initdb
+        - name: postgres-pv-claim
+          persistentVolumeClaim:
+            claimName: postgres-pv-claim
+  selector:
+    matchLabels:
+      app: postgres
