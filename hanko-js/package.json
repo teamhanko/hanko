@@ -1,14 +1,39 @@
 {
   "name": "@teamhanko/hanko",
   "version": "0.1.0",
-  "description": "TODO",
-  "main": "dist/index.js",
-  "repository": "github:teamhanko/hanko",
-  "types": "dist/index.d.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "private": false,
+  "publishConfig": {
+    "access": "public"
   },
-  "author": "Hanko GmbH <developers@hanko.io>",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "module",
-  "license": "AGPL"
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "lint": "eslint 'src/**/*.ts?(x)'",
+    "format": "pretty-quick --staged",
+    "build": "tsc --noEmit & tsup src/index.ts --format esm,cjs --dts --minify"
+  },
+  "description": "",
+  "repository": "github:teamhanko/hanko",
+  "author": "Hanko GmbH <developers@hanko.io>",
+  "license": "AGPL-3.0-or-later",
+  "keywords": [],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "eslint": "^8.11.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "prettier": "^2.6.0",
+    "pretty-quick": "^3.1.3",
+    "tsup": "^5.12.1",
+    "typescript": "^4.6.2"
+  }
 }
