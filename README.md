@@ -2,12 +2,14 @@
 ![Build Status](https://github.com/teamhanko/hanko/workflows/Go/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/teamhanko/hanko)](https://goreportcard.com/report/github.com/teamhanko/hanko)
 
-![Social media Launch](https://user-images.githubusercontent.com/20115649/158687556-291e08f7-6b54-43e1-afe9-d780f19d6382.svg)
+![Hanko – Welcome to the post-password era](https://user-images.githubusercontent.com/20115649/158687556-291e08f7-6b54-43e1-afe9-d780f19d6382.svg)
 
 # About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by WebAuthn-based biometrics (passkeys) and magic links.
 
-We're a startup based in Kiel, Germany. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
+We're a startup based in Kiel, Germany, and an active member in the FIDO Alliance. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
+
+![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159890212-c0ee0d79-d622-4194-b9cb-7a696a0fd89b.svg)
 
 # Build your product, not another (password) login
 Passwordless logins have been promised to us for quite some time. But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good. 
