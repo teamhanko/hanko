@@ -4,6 +4,8 @@
 
 ![Hanko – Welcome to the post-password era](https://user-images.githubusercontent.com/20115649/158687556-291e08f7-6b54-43e1-afe9-d780f19d6382.svg)
 
+🚧 PLEASE NOTE: This project is pre-alpha and not yet functional. If you want to get notified as soon as we're ready you can sign up to our [newsletter](https://www.hanko.io/updates) or join our [Slack community](https://www.hanko.io/community).
+
 # About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by WebAuthn-based biometrics (passkeys) and magic links.
 
