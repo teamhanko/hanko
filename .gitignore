@@ -14,4 +14,5 @@
 hanko
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+hanko-js/dist/
+hanko-js/node_modules/
