@@ -4,14 +4,12 @@
 
 ![Social media Launch](https://user-images.githubusercontent.com/20115649/158687556-291e08f7-6b54-43e1-afe9-d780f19d6382.svg)
 
-# Build your product, not another (password) login
-
-## About Hanko
+# About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by WebAuthn-based biometrics (passkeys) and magic links.
 
 We're a startup based in Kiel, Germany. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
 
-## Welcome to the post-password era
+# Build your product, not another (password) login
 Passwordless logins have been promised to us for quite some time. But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good. 
 
 The only thing is: Implementing an end-to-end passwordless flow that benefits from biometric convenience through WebAuthn but also handles all edge cases and recovery flows is not a simple task, even when using existing open source libraries.
