@@ -18,11 +18,10 @@ The only thing is: Implementing an end-to-end passwordless flow that benefits fr
 
 With Hanko, your users will be able to login to your apps with biometrics instead of passwords. On devices that do not support WebAuthn, or for the first-time login on a new device, a magic link (we call them passlinks) is used. If possible, the user is then guided to enroll their biometrics.
 
-- A polished, end-to-end passwordless user experience on the web
-- Mobile app support coming soon™
+- A polished, end-to-end passwordless user experience on the web (mobile app support is planned)
 - Biometrics, WebAuthn (passkeys, FIDO Security Keys), magic links
 - All edge cases are handled that normally will keep you busy much longer than you would like (e.g., account recovery, unsupported devices, multi-language UI & emails)
-- Self-hosted or as a lean SaaS hosted by us (coming soon™)
+- Self-hosted or as a lean SaaS hosted by us
 - API-first, small footprint, cloud-native
 
 Integrate Hanko in your web apps in just 5 minutes – with a single line of code – and never look back.
