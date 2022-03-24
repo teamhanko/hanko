@@ -9,18 +9,23 @@
 # About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by WebAuthn-based biometrics (passkeys) and magic links.
 
-We're a startup based in Kiel, Germany, and an active member in the FIDO Alliance. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
+We're a startup based in Kiel, Germany, and an active member in the FIDO Alliance. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. 
+And we are happy to share this with you.
+
 
 ![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)
 
 # Build your product, not another (password) login
-Passwordless logins have been promised to us for quite some time. But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good. 
+Passwordless logins have been promised to us for quite some time. 
+But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. 
+With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good. 
 
 The only thing is: Implementing an end-to-end passwordless flow that benefits from biometric convenience through WebAuthn but also handles all edge cases and recovery flows is not a simple task, even when using existing open source libraries.
 
 **That's where Hanko comes in:**
 
-With Hanko, your users will be able to login to your apps with biometrics instead of passwords. On devices that do not support WebAuthn, or for the first-time login on a new device, a magic link (we call them passlinks) is used. If possible, the user is then guided to enroll their biometrics.
+With Hanko, your users will be able to login to your apps with biometrics instead of passwords. On devices that do not support WebAuthn, or for the first-time login on a new device, a magic link (we call them passlinks) is used. 
+If possible, the user is then guided to enroll their biometrics.
 
 - A polished, end-to-end passwordless user experience on the web (mobile app support is planned)
 - Biometrics, WebAuthn (passkeys, FIDO Security Keys), magic links
@@ -34,7 +39,21 @@ Integrate Hanko in your web apps in just 5 minutes – with a single line of cod
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about authentication, identity, or life in general.
 
 # Quickstart
-TODO
+To try out hanko you can use either docker-compose or kubernetes manifests. For either way you have to first clone this repository with:
+```
+git clone https://github.com/teamhanko/hanko.git
+```
 
+## With docker-compose
+Just run:
+```
+docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --force-recreate
+```
+TODO describe setup.
+## With kubernetes
+```
+kubectl apply -k deploy/k8s/overlays/quickstart
+```
+TODO describe setup.
 # Develop
 TODO

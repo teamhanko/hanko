@@ -28,7 +28,7 @@ services:
     networks:
       - intranet
   postgresd:
-    image: postgres:12
+    image: postgres:12-alpine
     ports:
       - "5432:5432"
     environment:
