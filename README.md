@@ -13,7 +13,7 @@ Passwordless logins have been promised to us for quite some time. But it's only 
 
 The only thing is: Implementing an end-to-end passwordless flow that benefits from biometric convenience through WebAuthn is not a simple task, even when using libraries.
 
-That's where Hanko comes in: 
+**That's where Hanko comes in:**
 
 - Hanko enables a polished, end-to-end passwordless user experience on the web **and** for mobile apps
 - We took care of combining WebAuthn flows with magic links and Hanko also manages all edge cases for you that normally will keep you busy much longer than you would like (e.g., account recovery, unsupported devices, multi-language UI & emails)
