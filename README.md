@@ -27,7 +27,7 @@ With Hanko, your users will be able to login to your apps with biometrics instea
 - Self-hosted or as a lean SaaS hosted by us (coming soon™)
 - API-first, small footprint, cloud-native
 
-Integrate Hanko in your web apps in just 5 minutes – with a single line of code. Try Hanko now and never look back.
+Integrate Hanko in your web apps in just 5 minutes – with a single line of code – and never look back.
 
 ## Community
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about authentication, identity, or life in general.
