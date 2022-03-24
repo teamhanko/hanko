@@ -9,7 +9,7 @@
 # About Hanko
 Hanko is the open-source alternative for passwordless authentication, powered by WebAuthn-based biometrics (passkeys) and magic links.
 
-We're a startup based in Kiel, Germany, and an active member in the FIDO Alliance. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. 
+We're a startup based in Kiel, Germany, and an active member in the [FIDO Alliance](https://fidoalliance.org/). This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. 
 And we are happy to share this with you.
 
 
