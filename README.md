@@ -11,7 +11,7 @@ Hanko is the open-source alternative for passwordless authentication, powered by
 
 We're a startup based in Kiel, Germany, and an active member in the FIDO Alliance. This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
 
-![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159894502-32dbeeeb-aaf9-4d21-8df8-c61308ec4dd1.svg)
+![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)
 
 # Build your product, not another (password) login
 Passwordless logins have been promised to us for quite some time. But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good. 
