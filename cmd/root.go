@@ -7,6 +7,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/cmd/migrate"
+	"github.com/teamhanko/hanko/cmd/serve"
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/persistence"
 	"os"
@@ -29,7 +30,7 @@ func NewRootCmd() *cobra.Command {
 		os.Exit(1)
 	}
 	migrate.RegisterCommands(cmd, persister)
-	cmd.AddCommand(NewServeCommand(cfg))
+	serve.RegisterCommands(cmd, cfg, persister)
 
 	return cmd
 }
