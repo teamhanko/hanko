@@ -9,7 +9,7 @@ servers:
 paths:
   /register:
     post:
-      summary: 'Register an account/a user?'
+      summary: 'Register a user'
       operationId: register
       tags:
         - authentication
@@ -20,6 +20,8 @@ paths:
               type: object
               properties:
                 email:
+                  type: string
+                password:
                   type: string
               required:
                 - email
@@ -42,44 +44,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /passlink/{id}:
-    get:
-      summary: 'Get Passlink'
-      operationId: passlinkGet
-      tags:
-        - authentication
-      security:
-        - CookieAuth: []
-      parameters:
-        - name: id
-          in: path
-          description: ID of the user
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID4'
-      responses:
-        '200':
-          description: 'Passlink'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Passlink'
-        '404':
-          description: 'Not found'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '500':
-          description: 'Internal server error'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-  /passlink/login/initialize:
+  /passcode/login/initialize:
     post:
-      summary: 'Initialize Passlink login'
-      operationId: passlinkInit
+      summary: 'Initialize Passcode login'
+      operationId: passcodeInit
       tags:
         - authentication
       requestBody:
@@ -92,11 +60,11 @@ paths:
                   $ref: '#/components/schemas/UUID4'
       responses:
         '200':
-          description: 'Passlink'
+          description: 'Passcode'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Passlink'
+                $ref: '#/components/schemas/Passcode'
         '400':
           description: 'Bad request'
           content:
@@ -109,10 +77,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /passlink/login/finalize:
+  /passcode/login/finalize:
     post:
-      summary: 'Finalize Passlink login'
-      operationId: passlinkFinal
+      summary: 'Finalize Passcode login'
+      operationId: passcodeFinal
       tags:
         - authentication
       requestBody:
@@ -121,13 +89,13 @@ paths:
             schema:
               type: object
               properties:
-                passlink_id:
+                id:
                   $ref: '#/components/schemas/UUID4'
-                secret:
+                code:
                   type: string
       responses:
         '200':
-          description: 'Details about a used Passlink'
+          description: 'Details about a used Passcode'
           headers:
             Set-Cookie:
               schema:
@@ -135,7 +103,49 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Passlink'
+                $ref: '#/components/schemas/Passcode'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /password/login:
+    post:
+      summary: 'Do password login'
+      operationId: passwordLogin
+      tags:
+        - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: 'Successful password login'
+          headers:
+            Set-Cookie:
+              schema:
+                $ref: '#/components/schemas/CookieSession'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Passcode'
         '400':
           description: 'Bad request'
           content:
@@ -164,16 +174,11 @@ paths:
                   $ref: '#/components/schemas/UUID4'
       responses:
         '200':
-          description: 'Challenge plus user ID'
+          description: 'Successful initialization'
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  challenge:
-                    type: object
-                  user_id:
-                    $ref: '#/components/schemas/UUID4'
+                $ref: '#/components/schemas/CredentialRequestOptions'
         '400':
           description: 'Bad request'
           content:
@@ -196,8 +201,7 @@ paths:
         content:
           application/json:
             schema:
-              description: 'Challenge response'
-              type: object
+              $ref: '#/components/schemas/PublicKeyCredentialAssertionResponse'
       responses:
         '204':
           description: 'Successful login'
@@ -231,9 +235,15 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/CredentialCreationOptions'
         '400':
           description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized'
           content:
             application/json:
               schema:
@@ -253,14 +263,14 @@ paths:
       security:
         - CookieAuth: []
       requestBody:
+        description: "Challenge response"
         content:
           application/json:
             schema:
-              description: 'Challenge response'
-              type: object
+              $ref: '#/components/schemas/PublicKeyCredentialAttestationResponse'
       responses:
         '200':
-          description: 'Credential ID plus User ID'
+          description: 'Credential ID'
           content:
             application/json:
               schema:
@@ -268,11 +278,14 @@ paths:
                 properties:
                   credential_id:
                     type: string
-                  user_id:
-                    type: integer
-                    format: int64
         '400':
           description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized'
           content:
             application/json:
               schema:
@@ -308,13 +321,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /user:
+    get:
+      summary: 'Get user ID'
+      operationId: getUserId
+      tags:
+        - authentication
+      parameters:
+        - in: query
+          name: email
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'User'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    $ref:  '#/components/schemas/UUID4'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: 'Create a user'
       operationId: createUser
-      security:
-        - BearerTokenAuth: []
-        - CookieAuth: []
       tags:
         - management
       requestBody:
@@ -355,9 +405,6 @@ paths:
     get:
       summary: 'Get a list of users'
       operationId: listUsers
-      security:
-        - BearerTokenAuth: []
-        - CookieAuth: []
       tags:
         - management
       responses:
@@ -379,9 +426,6 @@ paths:
     get:
       summary: 'Get a user by ID'
       operationId: listUser
-      security:
-        - BearerTokenAuth: []
-        - CookieAuth: []
       tags:
         - management
       parameters:
@@ -419,9 +463,6 @@ paths:
     patch:
       summary: 'Update a user by ID'
       operationId: updateUser
-      security:
-        - BearerTokenAuth: []
-        - CookieAuth: []
       tags:
         - management
       parameters:
@@ -470,9 +511,6 @@ paths:
     delete:
       summary: 'Delete a user by ID'
       operationId: deleteUser
-      security:
-        - BearerTokenAuth: []
-        - CookieAuth: []
       tags:
         - management
       parameters:
@@ -502,6 +540,50 @@ components:
     CookieSession:
       type: string
       example: HANKOSESSION=abcde12345; Path=/; HttpOnly
+    CredentialCreationOptions:
+      description: "Options for Credential Creation with the WebAuthn API"
+      externalDocs:
+        url: https://www.w3.org/TR/webauthn-2/#dictionary-makecredentialoptions
+      type: object
+      properties:
+        rp:
+          type: object
+        user:
+          type: object
+        challenge:
+          type: object
+        pubKeyCredParams:
+          type: array
+          items:
+            type: object
+        timeout:
+          type: number
+          format: int64
+        authenticatorSelection:
+          type: object
+        attestation:
+          type: string
+    CredentialRequestOptions:
+      description: "Options for Assertion Generation with the WebAuthn API"
+      externalDocs:
+        url: https://www.w3.org/TR/webauthn-2/#dictionary-assertion-options
+      type: object
+      properties:
+        challenge:
+          type: object
+        timeout:
+          type: number
+          format: int64
+        rp:
+          type: object
+        allowCredentials:
+          type: object
+        userVerification:
+          type: string
+          enum:
+            - required
+            - preferred
+            - discouraged
     JSONWebKey:
       type: object
       externalDocs:
@@ -572,19 +654,64 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/JSONWebKey'
-    Passlink:
+    Passcode:
       type: object
       properties:
         id:
           $ref: '#/components/schemas/UUID4'
         ttl:
           type: integer
-        status:
-          type: string
-          enum: [PENDING, FINISHED, EXPIRED]
         created_at:
           type: string
           format: date-time
+    PublicKeyCredentialAssertionResponse:
+      description: 'WebAuthn API response to a navigator.credentials.get() call'
+      type: object
+      properties:
+        id:
+          type: string
+        rawId:
+          type: string
+        type:
+          type: string
+          enum:
+            - public-key
+        response:
+          type: object
+          properties:
+            clientDataJson:
+              type: string
+              format: base64url
+            authenticatorData:
+              type: string
+              format: base64url
+            signature:
+              type: string
+              format: base64url
+            userHandle:
+              type: string
+              format: base64url
+    PublicKeyCredentialAttestationResponse:
+      description: 'WebAuthn API response to a navigator.credentials.create() call'
+      type: object
+      properties:
+        id:
+          type: string
+        rawId:
+          type: string
+        type:
+          type: string
+          enum:
+            - public-key
+        response:
+          type: object
+          properties:
+            clientDataJson:
+              type: string
+              format: base64url
+            attestationObject:
+              type: string
+              format: base64url
     User:
       type: object
       properties:
@@ -593,9 +720,6 @@ components:
         email:
           type: string
           format: email
-        status:
-          type: string
-          enum: [active, inactive]
         created_at:
           type: string
           format: date-time
@@ -617,11 +741,6 @@ components:
         message:
           type: string
   securitySchemes:
-    BearerTokenAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: Token obtained through authentication with the Authentication API
     CookieAuth:
       type: apiKey
       in: cookie
