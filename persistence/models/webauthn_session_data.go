@@ -8,6 +8,13 @@ import (
 	"time"
 )
 
+type Operation string
+
+var (
+	WebauthnOperationRegistration   Operation = "registration"
+	WebauthnOperationAuthentication Operation = "authentication"
+)
+
 // WebauthnSessionData is used by pop to map your webauthn_session_data database table to your go code.
 type WebauthnSessionData struct {
 	ID                 uuid.UUID                              `db:"id"`
@@ -16,6 +23,7 @@ type WebauthnSessionData struct {
 	UserVerification   string                                 `db:"user_verification"`
 	CreatedAt          time.Time                              `db:"created_at"`
 	UpdatedAt          time.Time                              `db:"updated_at"`
+	Operation          Operation                              `db:"operation"`
 	AllowedCredentials []WebauthnSessionDataAllowedCredential `has_many:"webauthn_session_data_allowed_credentials"`
 }
 
@@ -25,6 +33,7 @@ func (sd *WebauthnSessionData) Validate(tx *pop.Connection) (*validate.Errors, e
 		&validators.UUIDIsPresent{Name: "ID", Field: sd.ID},
 		&validators.StringIsPresent{Name: "Challenge", Field: sd.Challenge},
 		&validators.UUIDIsPresent{Name: "UserId", Field: sd.UserId},
+		&validators.StringInclusion{Name: "Operation", Field: string(sd.Operation), List: []string{string(WebauthnOperationRegistration), string(WebauthnOperationAuthentication)}},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: sd.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: sd.CreatedAt},
 	), nil
