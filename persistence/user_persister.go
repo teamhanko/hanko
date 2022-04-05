@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/models"
+	"github.com/teamhanko/hanko/persistence/models"
 )
 
 type UserPersister struct {
