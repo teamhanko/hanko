@@ -1,8 +1,0 @@
-create_table("webauthn_authentication_requests") {
-	t.Column("id", "uuid", {primary: true})
-	t.Column("challenge", "string", {"size": 255})
-	t.Column("user_verification_requirement", "string", {"size": 15, "default": "preferred"})
-	t.Timestamps()
-	t.Column("timeout", "integer", {})
-	t.Index("challenge", {"unique": true})
-}

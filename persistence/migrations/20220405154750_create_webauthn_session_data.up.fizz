@@ -1,0 +1,9 @@
+create_table("webauthn_session_data") {
+    t.Column("id", "uuid", {primary: true})
+    t.Column("challenge", "string", {})
+    t.Column("user_id", "uuid", {})
+    t.Column("user_verification", "string", {})
+    t.Column("operation", "string", {})
+    t.Timestamps()
+    t.Index("challenge", {"unique": true})
+}
