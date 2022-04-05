@@ -10,12 +10,12 @@ import (
 
 // WebauthnSessionDataAllowedCredential is used by pop to map your webauthn_session_data_allowed_credential database table to your go code.
 type WebauthnSessionDataAllowedCredential struct {
-	ID                  uuid.UUID            `db:"id"`
-	CredentialId        string               `db:"credential_id"`
-	WebauthnRequestID   uuid.UUID            `db:"request_id"`
-	CreatedAt           time.Time            `db:"created_at"`
-	UpdatedAt           time.Time            `db:"updated_at"`
-	WebauthnSessionData *WebauthnSessionData `belongs_to:"webauthn_session_data"`
+	ID                    uuid.UUID            `db:"id"`
+	CredentialId          string               `db:"credential_id"`
+	WebauthnSessionDataID uuid.UUID            `db:"session_data_id"`
+	CreatedAt             time.Time            `db:"created_at"`
+	UpdatedAt             time.Time            `db:"updated_at"`
+	WebauthnSessionData   *WebauthnSessionData `belongs_to:"webauthn_session_data"`
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
