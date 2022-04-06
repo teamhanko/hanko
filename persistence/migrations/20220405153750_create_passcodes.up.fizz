@@ -1,0 +1,8 @@
+create_table("passcodes") {
+    t.Column("id", "uuid", {primary: true})
+    t.Column("user_id", "uuid", {})
+    t.Column("ttl", "integer", {})
+    t.Column("code", "string", {})
+    t.Timestamps()
+    t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}

@@ -11,7 +11,11 @@ var migrations embed.FS
 
 // Persister is the persistence interface connecting to the database and capable of doing migrations
 type Persister struct {
-	DB *pop.Connection
+	DB                  *pop.Connection
+	User                *UserPersister
+	Passcode            *PasscodePersister
+	WebAuthnCredential  *WebauthnCredentialPersister
+	WebAuthnSessionData *WebauthnSessionDataPersister
 }
 
 //New return a new Persister Object with given configuration
@@ -35,7 +39,13 @@ func New(config config.Database) (*Persister, error) {
 		return nil, err
 	}
 
-	return &Persister{DB: DB}, nil
+	return &Persister{
+		DB:                  DB,
+		User:                NewUserPersister(DB),
+		Passcode:            NewPasscodePersister(DB),
+		WebAuthnCredential:  NewWebauthnCredentialPersister(DB),
+		WebAuthnSessionData: NewWebauthnSessionDataPersister(DB),
+	}, nil
 }
 
 // MigrateUp applies all pending up migrations to the Database
