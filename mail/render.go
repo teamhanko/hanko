@@ -31,9 +31,6 @@ func NewRenderer() (*Renderer, error) {
 	for _, entry := range dir {
 		_, _ = bundle.LoadMessageFileFS(mailFS, fmt.Sprintf("locales/%s", entry.Name()))
 	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to load translations: %w", err)
-	}
 	r.bundle = bundle
 
 	// add the translate function to the template, so it can be used inside
