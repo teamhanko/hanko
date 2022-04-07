@@ -1,0 +1,15 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Enter the following passcode in your login screen at {{ .ServiceDomain }} to sign in as {{ .UserEmail }}:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "The passcode is valid for {{ .Ttl }} minutes."
+password_recovery_text:
+  description: "The content of the text email for password recovery"
+  other: "A password reset for {{ .UserEmail }} was requested at {{ .ServiceDomain }}. Enter the following passcode to access your account and create a new password:"
+email_subject_login:
+  description: ""
+  other: "Login to {{ .ServiceName }}"
+email_subject_recovery:
+  description: ""
+  other: "Reset password for {{ .ServiceName }}"
