@@ -61,7 +61,7 @@ func (r *Renderer) translate(messageID string, templateData map[string]interface
 func (r *Renderer) Render(templateName string, lang string, data map[string]interface{}) (string, error) {
 	r.localizer = i18n.NewLocalizer(r.bundle, lang) // set the localizer, so the test will be translated to the given language
 	templateBuffer := &bytes.Buffer{}
-	err := r.template.ExecuteTemplate(templateBuffer, fmt.Sprintf("%s", templateName), data)
+	err := r.template.ExecuteTemplate(templateBuffer, templateName, data)
 	if err != nil {
 		return "", fmt.Errorf("failed to fill template with data: %w", err)
 	}
