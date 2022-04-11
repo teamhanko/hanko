@@ -15,7 +15,7 @@ type Config struct {
 	Passlink Passlink
 	Logging  Logging
 	Database Database
-	Secrets Secrets
+	Secrets  Secrets
 }
 
 // Load loads config from given file or default places
@@ -182,5 +182,5 @@ type Database struct {
 
 type Secrets struct {
 	// Keys secret is used to en- and decrypt the JWKs to sign the JWT tokens
-	Keys []string `json:"system"`
+	Keys []string `json:"keys"`
 }
