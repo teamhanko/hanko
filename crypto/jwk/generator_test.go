@@ -12,8 +12,8 @@ import (
 
 func TestGenerator(t *testing.T) {
 	for k, c := range []struct {
-		g     KeyGenerator
-		use   string
+		g   KeyGenerator
+		use string
 		check func(ks *jwk.Key)
 	}{
 		{
