@@ -1,13 +1,15 @@
 package server
 
 import (
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/handler"
 	"github.com/teamhanko/hanko/persistence"
 )
 
-func NewPublicRouter(persister *persistence.Persister) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister *persistence.Persister) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 
@@ -20,10 +22,24 @@ func NewPublicRouter(persister *persistence.Persister) *echo.Echo {
 	}))
 
 	healthHandler := handler.NewHealthHandler()
+	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister)
+	if err != nil {
+		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
+	}
 
 	health := e.Group("/health")
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
+
+	webauthn := e.Group("/webauthn")
+	// TODO: webauthnRegistration must be protected with JWT/Session
+	webauthnRegistration := webauthn.Group("/registration")
+	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
+	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
+
+	webauthnLogin := webauthn.Group("/login")
+	webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
+	webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
 
 	return e
 }

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
@@ -13,6 +14,10 @@ type WebauthnCredentialPersister struct {
 
 func NewWebauthnCredentialPersister(db *pop.Connection) *WebauthnCredentialPersister {
 	return &WebauthnCredentialPersister{db: db}
+}
+
+func (p WebauthnCredentialPersister) WithConnection(con *pop.Connection) *WebauthnCredentialPersister {
+	return NewWebauthnCredentialPersister(con)
 }
 
 func (p *WebauthnCredentialPersister) Get(id string) (*models.WebauthnCredential, error) {
@@ -61,4 +66,17 @@ func (p *WebauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 	}
 
 	return nil
+}
+
+func (p *WebauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
+	var credentials []models.WebauthnCredential
+	err := p.db.Where("user_id = ?", &userId).All(&credentials)
+	if err != nil && err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get credentials: %w", err)
+	}
+
+	return credentials, nil
 }

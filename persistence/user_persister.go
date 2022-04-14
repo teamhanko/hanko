@@ -16,6 +16,10 @@ func NewUserPersister(db *pop.Connection) *UserPersister {
 	return &UserPersister{db: db}
 }
 
+func (p UserPersister) WithConnection(con *pop.Connection) *UserPersister {
+	return NewUserPersister(con)
+}
+
 func (p *UserPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
 	err := p.db.Find(&user, id)

@@ -16,6 +16,10 @@ func NewWebauthnSessionDataPersister(db *pop.Connection) *WebauthnSessionDataPer
 	return &WebauthnSessionDataPersister{db: db}
 }
 
+func (p *WebauthnSessionDataPersister) WithConnection(con *pop.Connection) *WebauthnSessionDataPersister {
+	return NewWebauthnSessionDataPersister(con)
+}
+
 func (p *WebauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessionData, error) {
 	sessionData := models.WebauthnSessionData{}
 	err := p.db.Eager().Find(&sessionData, id)
@@ -29,7 +33,7 @@ func (p *WebauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessio
 	return &sessionData, nil
 }
 
-func (p WebauthnSessionDataPersister) GetByChallenge(challenge string) (*models.WebauthnSessionData, error) {
+func (p *WebauthnSessionDataPersister) GetByChallenge(challenge string) (*models.WebauthnSessionData, error) {
 	var sessionData []models.WebauthnSessionData
 	err := p.db.Eager().Where("challenge = ?", challenge).All(&sessionData)
 	if err != nil {
@@ -70,7 +74,7 @@ func (p *WebauthnSessionDataPersister) Update(sessionData models.WebauthnSession
 }
 
 func (p *WebauthnSessionDataPersister) Delete(sessionData models.WebauthnSessionData) error {
-	err := p.db.Eager().Destroy(&sessionData)
+	err := p.db.Destroy(&sessionData)
 	if err != nil {
 		return fmt.Errorf("failed to delete sessionData: %w", err)
 	}

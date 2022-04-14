@@ -16,6 +16,10 @@ func NewPasscodePersister(db *pop.Connection) *PasscodePersister {
 	return &PasscodePersister{db: db}
 }
 
+func (p *PasscodePersister) WithConnection(con *pop.Connection) *PasscodePersister {
+	return NewPasscodePersister(con)
+}
+
 func (p *PasscodePersister) Get(id uuid.UUID) (*models.Passcode, error) {
 	passcode := models.Passcode{}
 	err := p.db.Find(&passcode, id)
