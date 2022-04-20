@@ -21,14 +21,7 @@ func NewCreateCommand(cfg *config.Config, persister *persistence.Persister) *cob
 				fmt.Println(err)
 				return
 			}
-			//k, err := m.GenerateKeySet()
-			//if err != nil {
-			//	fmt.Println(err)
-			//	panic(err)
-			//}
-			//fmt.Println(*k)
 		},
 	}
-	//cmd.Flags().StringP("alg", "a", "RS256", "Which algorithm to use. On of: RS256")
 	return cmd
 }
