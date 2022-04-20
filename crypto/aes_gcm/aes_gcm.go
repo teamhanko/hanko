@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -20,23 +21,22 @@ func NewAESGCM(keys []string) (*AESGCM, error) {
 	if len(keys) < 1 {
 		return nil, errors.New("At least one encryption key must be provided.")
 	}
-	fixedKeys := [][32]byte{}
+	hashedKeys := [][32]byte{}
 
-	//TODO: Sha265.Sum of provided keys to allow secret lengths of different size
 	for i, v := range keys {
-		if len(v) != 32 {
-			return nil, errors.New(fmt.Sprintf("Key Nr. %v has the wrong length. Is %v but needs to be 32.", i, len(v)))
+		if len(v) < 16 {
+			return nil, errors.New(fmt.Sprintf("Secret Nr. %v is too short. It is %v but needs to be at least 16.", i, len(v)))
 		} else {
-			fixedKeys = append(fixedKeys, convertKey(v))
+			hashedKeys = append(hashedKeys, hashSecret(v))
 		}
 	}
 
-	return &AESGCM{keys: fixedKeys}, nil
+	return &AESGCM{keys: hashedKeys}, nil
 }
 
-// convertKey converts strings to fixed 32byte long AES keys
-func convertKey(key string) (res [32]byte) {
-	copy(res[:], key[:32])
+// hashSecret converts strings to fixed 32byte long AES keys
+func hashSecret(key string) (res [32]byte) {
+	res = sha256.Sum256([]byte(key))
 	return res
 }
 
