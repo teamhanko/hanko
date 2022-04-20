@@ -2,6 +2,8 @@ package jwk
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/persistence"
 )
 
 
@@ -13,7 +15,8 @@ func NewMigrateCmd() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command) {
+func RegisterCommands(parent *cobra.Command, cfg *config.Config, persister *persistence.Persister) {
 	cmd := NewMigrateCmd()
 	parent.AddCommand(cmd)
+	cmd.AddCommand(NewCreateCommand(cfg, persister))
 }
