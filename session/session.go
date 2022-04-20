@@ -14,8 +14,8 @@ type Generator struct {
 	sessionLength time.Duration
 }
 
-func NewGenerator(privateKey *jwk.Key) (*Generator, error) {
-	g, err := hankoJwt.NewGenerator(privateKey)
+func NewGenerator(signatureKey jwk.Key, verificationKeys []jwk.Key) (*Generator, error) {
+	g, err := hankoJwt.NewGenerator(signatureKey, verificationKeys)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session generator: %w", err)
 	}

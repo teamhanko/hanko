@@ -16,7 +16,7 @@ func TestNewGenerator(t *testing.T) {
 	signatureKey := getJwk(t)
 	require.NotEmpty(t, signatureKey)
 
-	sessionGenerator, err := NewGenerator(&signatureKey)
+	sessionGenerator, err := NewGenerator(signatureKey, []jwk.Key{signatureKey})
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 }
@@ -25,7 +25,7 @@ func TestGenerator_Generate(t *testing.T) {
 	signatureKey := getJwk(t)
 	require.NotEmpty(t, signatureKey)
 
-	sessionGenerator, err := NewGenerator(&signatureKey)
+	sessionGenerator, err := NewGenerator(signatureKey, []jwk.Key{signatureKey})
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -41,7 +41,7 @@ func TestGenerator_Verify(t *testing.T) {
 	signatureKey := getJwk(t)
 	require.NotEmpty(t, signatureKey)
 
-	sessionGenerator, err := NewGenerator(&signatureKey)
+	sessionGenerator, err := NewGenerator(signatureKey, []jwk.Key{signatureKey})
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -64,7 +64,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 	signatureKey := getJwk(t)
 	require.NotEmpty(t, signatureKey)
 
-	sessionGenerator, err := NewGenerator(&signatureKey)
+	sessionGenerator, err := NewGenerator(signatureKey, []jwk.Key{signatureKey})
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
