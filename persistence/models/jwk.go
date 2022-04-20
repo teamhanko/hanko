@@ -16,7 +16,6 @@ type Jwk struct {
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (jwk *Jwk) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
-		//&validators.IntIsPresent{Name: "ID", Field: jwk.ID},
 		&validators.StringIsPresent{Name: "KeyData", Field: jwk.KeyData},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: jwk.CreatedAt},
 	), nil

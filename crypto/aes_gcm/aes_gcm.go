@@ -21,6 +21,8 @@ func NewAESGCM(keys []string) (*AESGCM, error) {
 		return nil, errors.New("At least one encryption key must be provided.")
 	}
 	fixedKeys := [][32]byte{}
+
+	//TODO: Sha265.Sum of provided keys to allow secret lengths of different size
 	for i, v := range keys {
 		if len(v) != 32 {
 			return nil, errors.New(fmt.Sprintf("Key Nr. %v has the wrong length. Is %v but needs to be 32.", i, len(v)))

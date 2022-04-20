@@ -32,9 +32,14 @@ func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*Def
 	}
 	// for every key we should check if a jwk with index exists and create one if not.
 	for i, _ := range keys {
-		_, err := persister.Get(i)
-		if err != nil {
-			manager.GenerateKeySet()
+		jwk, err := persister.Get(i - 1)
+		if jwk == nil && err == nil {
+			_, err := manager.GenerateKeySet()
+			if err != nil {
+				return nil, err
+			}
+		} else if err != nil {
+			return nil, err
 		}
 	}
 

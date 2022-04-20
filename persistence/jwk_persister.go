@@ -27,6 +27,18 @@ func (p *JwkPersister) Get(id int) (*models.Jwk, error) {
 	return &jwk, nil
 }
 
+func (p *JwkPersister) GetAll() ([]models.Jwk, error) {
+	jwks := []models.Jwk{}
+	err := p.db.All(jwks)
+	if err != nil && err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get all jwks: %w", err)
+	}
+	return jwks, nil
+}
+
 func (p *JwkPersister) Create(jwk models.Jwk) error {
 	vErr, err := p.db.ValidateAndCreate(&jwk)
 	if err != nil {
