@@ -39,6 +39,18 @@ func (p *JwkPersister) GetAll() ([]models.Jwk, error) {
 	return jwks, nil
 }
 
+func (p *JwkPersister) GetLast() (*models.Jwk, error) {
+	jwk := models.Jwk{}
+	err := p.db.Order("id asc").Last(jwk)
+	if err != nil && err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get jwk: %w", err)
+	}
+	return &jwk, nil
+}
+
 func (p *JwkPersister) Create(jwk models.Jwk) error {
 	vErr, err := p.db.ValidateAndCreate(&jwk)
 	if err != nil {

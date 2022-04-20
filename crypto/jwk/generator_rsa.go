@@ -10,7 +10,7 @@ import (
 type RSAKeyGenerator struct {
 }
 
-func (g *RSAKeyGenerator) Generate(id string) (*jwk.Key, error) {
+func (g *RSAKeyGenerator) Generate(id string) (jwk.Key, error) {
 	rawKey, err := rsa.GenerateKey(rand.Reader, 4096)
 	if err != nil {
 		return nil, err
@@ -28,5 +28,5 @@ func (g *RSAKeyGenerator) Generate(id string) (*jwk.Key, error) {
 		return nil, err
 	}
 
-	return &key, nil
+	return key, nil
 }

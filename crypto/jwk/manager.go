@@ -14,11 +14,12 @@ type Manager interface {
 	GenerateKeySet() (*jwk.KeyPair, error)
 	GetKeySet(id string) *jwk.KeyPair
 	GetPublicKeys() []jwk.Key
+	GetSigningKey() jwk.Key
 }
 
 type DefaultManager struct {
-	encrypter *aes_gcm.AESGCM
-	persister *persistence.JwkPersister
+	encrypter   *aes_gcm.AESGCM
+	persister   *persistence.JwkPersister
 }
 
 func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*DefaultManager, error) {
@@ -46,7 +47,7 @@ func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*Def
 	return manager, nil
 }
 
-func (m *DefaultManager) GenerateKeySet() (*jwk.Key, error) {
+func (m *DefaultManager) GenerateKeySet() (jwk.Key, error) {
 	rsa := &RSAKeyGenerator{}
 	id, _ := uuid.NewV4()
 	key, err := rsa.Generate(id.String())
@@ -64,6 +65,22 @@ func (m *DefaultManager) GenerateKeySet() (*jwk.Key, error) {
 		CreatedAt: time.Now(),
 	}
 	err = m.persister.Create(model)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
+
+func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
+	sigModel, err := m.persister.GetLast()
+	if err != nil {
+		return nil, err
+	}
+	k, err := m.encrypter.Decrypt(sigModel.KeyData)
+	if err != nil{
+		return nil, err
+	}
+	key, err := jwk.FromRaw(k);
 	if err != nil {
 		return nil, err
 	}
