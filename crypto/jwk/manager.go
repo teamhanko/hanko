@@ -11,9 +11,11 @@ import (
 )
 
 type Manager interface {
-	GenerateKeySet() (*jwk.KeyPair, error)
-	GetKeySet(id string) *jwk.KeyPair
+	//Used to generate a jwk Key
+	GenerateKeySet() (jwk.Key, error)
+	//Returns all Public keys that are persisted
 	GetPublicKeys() ([]jwk.Key, error)
+	// Returns the last added private key that is used for signing
 	GetSigningKey() (jwk.Key, error)
 }
 
@@ -22,6 +24,7 @@ type DefaultManager struct {
 	persister *persistence.JwkPersister
 }
 
+//Returns a DefaultManager that reads and persists the jwks to database and generates jwks if a new secret gets added to the config.
 func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*DefaultManager, error) {
 	encrypter, err := aes_gcm.NewAESGCM(keys)
 	if err != nil {
