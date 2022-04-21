@@ -1,0 +1,6 @@
+create_table("jwks") {
+    t.Column("id", "int", {primary: true})
+    t.Column("key_data", "text", {})
+    t.Column("created_at", "timestamp", {})
+    t.DisableTimestamps()
+}
