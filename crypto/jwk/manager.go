@@ -63,7 +63,9 @@ func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 		return nil, err
 	}
 	encryptedKey, err := m.encrypter.Encrypt(marshalled)
-
+	if err != nil {
+		return nil, err
+	}
 	model := models.Jwk{
 		KeyData:   encryptedKey,
 		CreatedAt: time.Now(),

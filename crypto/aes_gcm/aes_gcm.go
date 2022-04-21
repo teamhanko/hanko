@@ -19,13 +19,13 @@ type AESGCM struct {
 // Construct a AES GCM encrypter/decrypter and check the keys as a prerequisite
 func NewAESGCM(keys []string) (*AESGCM, error) {
 	if len(keys) < 1 {
-		return nil, errors.New("At least one encryption key must be provided.")
+		return nil, errors.New("at least one encryption key must be provided")
 	}
 	hashedKeys := [][32]byte{}
 
 	for i, v := range keys {
 		if len(v) < 16 {
-			return nil, errors.New(fmt.Sprintf("Secret Nr. %v is too short. It is %v but needs to be at least 16.", i, len(v)))
+			return nil, fmt.Errorf("secret Nr. %v is too short. It is %v but needs to be at least 16", i, len(v))
 		} else {
 			hashedKeys = append(hashedKeys, hashSecret(v))
 		}
