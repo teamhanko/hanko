@@ -40,16 +40,6 @@ func hashSecret(key string) (res [32]byte) {
 	return res
 }
 
-// NewEncryptionKey generates a random 256-bit key. It panics if the source of randomness fails.
-func NewEncryptionKey() *[32]byte {
-	key := [32]byte{}
-	_, err := io.ReadFull(rand.Reader, key[:])
-	if err != nil {
-		panic(err)
-	}
-	return &key
-}
-
 // Encrypt encrypts some data with the first key in list and base64 encodes it for storage in database. mostly copy/pasted from https://github.com/gtank/cryptopasta/blob/master/encrypt.go
 func (a *AESGCM) Encrypt(plaintext []byte) (string, error) {
 	block, err := aes.NewCipher(a.keys[0][:])

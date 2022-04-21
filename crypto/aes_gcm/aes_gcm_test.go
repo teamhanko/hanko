@@ -1,14 +1,16 @@
 package aes_gcm
 
 import (
+	"crypto/rand"
 	"fmt"
+	"io"
 	"testing"
 )
 import "github.com/stretchr/testify/assert"
 
 func TestNewEncryptionKey(t *testing.T) {
-	key1 := NewEncryptionKey()
-	key2 := NewEncryptionKey()
+	key1 := newEncryptionKey()
+	key2 := newEncryptionKey()
 	assert.Equal(t, len(key1), 32)
 	assert.Equal(t, len(key2), 32)
 	assert.NotEqualf(t, key1, key2, "two separate constructed keys should not be equal.")
@@ -34,21 +36,21 @@ func TestNewAESGCM(t *testing.T) {
 			},
 		},
 		{
-			keys: []string{string(NewEncryptionKey()[:]), "too-short"},
+			keys: []string{string(newEncryptionKey()[:]), "too-short"},
 			check: func(aesgcm *AESGCM, err error) {
 				assert.Error(t, err, "too short key in any position should get rejected.")
 				assert.Nil(t, aesgcm)
 			},
 		},
 		{
-			keys: []string{string(NewEncryptionKey()[:])},
+			keys: []string{string(newEncryptionKey()[:])},
 			check: func(aesgcm *AESGCM, err error) {
 				assert.NoError(t, err, "Generated Key should be accepted")
 				assert.NotNil(t, aesgcm)
 			},
 		},
 		{
-			keys: []string{string(NewEncryptionKey()[:]), string(NewEncryptionKey()[:])},
+			keys: []string{string(newEncryptionKey()[:]), string(newEncryptionKey()[:])},
 			check: func(aesgcm *AESGCM, err error) {
 				assert.NoError(t, err, "two generated keys should be accepted")
 				assert.NotNil(t, aesgcm)
@@ -64,7 +66,7 @@ func TestNewAESGCM(t *testing.T) {
 func TestAESGCM_EncryptDecrypt(t *testing.T) {
 	// Encrypt
 	plaintext := "testTesttestTestTestTEST"
-	aesgcm, err := NewAESGCM([]string{string(NewEncryptionKey()[:])})
+	aesgcm, err := NewAESGCM([]string{string(newEncryptionKey()[:])})
 	assert.NoError(t, err)
 	assert.NotNil(t, aesgcm)
 	ciphertext, err := aesgcm.Encrypt([]byte(plaintext))
@@ -73,13 +75,13 @@ func TestAESGCM_EncryptDecrypt(t *testing.T) {
 	//Decrypt
 	plainAgain, err := aesgcm.Decrypt(ciphertext)
 	assert.NoError(t, err)
-	assert.Equal(t, string(plainAgain),plaintext)
+	assert.Equal(t, string(plainAgain), plaintext)
 }
 
 func TestAESGCM_SomeoneModifiedTheCiphertext(t *testing.T) {
 	// Encrypt
 	plaintext := "testTesttestTestTestTEST"
-	aesgcm, err := NewAESGCM([]string{string(NewEncryptionKey()[:])})
+	aesgcm, err := NewAESGCM([]string{string(newEncryptionKey()[:])})
 	assert.NoError(t, err)
 	assert.NotNil(t, aesgcm)
 	ciphertext, err := aesgcm.Encrypt([]byte(plaintext))
@@ -93,5 +95,15 @@ func TestAESGCM_SomeoneModifiedTheCiphertext(t *testing.T) {
 	//Try to decrypt
 	plainAgain, err := aesgcm.Decrypt(string(cipher))
 	assert.Error(t, err)
-	assert.NotEqual(t, string(plainAgain),plaintext)
+	assert.NotEqual(t, string(plainAgain), plaintext)
+}
+
+// newEncryptionKey generates a random 256-bit key. It panics if the source of randomness fails.
+func newEncryptionKey() *[32]byte {
+	key := [32]byte{}
+	_, err := io.ReadFull(rand.Reader, key[:])
+	if err != nil {
+		panic(err)
+	}
+	return &key
 }

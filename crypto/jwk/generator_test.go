@@ -13,12 +13,12 @@ import (
 func TestGenerator(t *testing.T) {
 	for k, c := range []struct {
 		g     KeyGenerator
-		use   string
+		name  string
 		check func(ks jwk.Key)
 	}{
 		{
-			g:   &RSAKeyGenerator{},
-			use: "sig",
+			g:    &RSAKeyGenerator{},
+			name: "generate_rsa_jwk",
 			check: func(ks jwk.Key) {
 				//assert.Len(t, ks, 2)
 				rsaKey, ok := (ks).(jwk.RSAPrivateKey)
@@ -34,7 +34,7 @@ func TestGenerator(t *testing.T) {
 			},
 		},
 	} {
-		t.Run(fmt.Sprintf("case=%d", k), func(t *testing.T) {
+		t.Run(fmt.Sprintf("case=%d - %v", k, c.name), func(t *testing.T) {
 			keys, err := c.g.Generate("my_key_id")
 			require.NoError(t, err)
 			if err == nil {
