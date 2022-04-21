@@ -15,6 +15,7 @@ type Config struct {
 	Passlink Passlink
 	Logging  Logging
 	Database Database
+	Secrets  Secrets
 }
 
 // Load loads config from given file or default places
@@ -177,4 +178,13 @@ type Database struct {
 	Host     string `json:"host"`
 	Port     string `json:"port"`
 	Dialect  string `json:"dialect"`
+}
+
+type Secrets struct {
+	// Keys secret is used to en- and decrypt the JWKs which get used to sign the JWT tokens.
+	// For every key a JWK is generated, encrypted with the key and persisted in the database.
+	// The first key in the list is the one getting used for signing. If you want to use a new key, add it to the top of the list.
+	// You can use this list for key rotation.
+	// Each key must be at least 16 characters long.
+	Keys []string `json:"keys"`
 }
