@@ -6,6 +6,7 @@ import (
 	"github.com/teamhanko/hanko/session"
 )
 
+// Session is a convenience function to create a middleware.JWT with custom JWT verification
 func Session(generator session.Generator) echo.MiddlewareFunc {
 	c := middleware.JWTConfig{
 		ContextKey:     "session",

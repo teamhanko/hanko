@@ -9,11 +9,13 @@ import (
 	"time"
 )
 
+// Generator is used to create and verify session JWTs
 type Generator struct {
 	jwtGenerator  *hankoJwt.Generator
 	sessionLength time.Duration
 }
 
+// NewGenerator returns a new Generator which will be used to create and verify sessions JWTs
 func NewGenerator(jwkManager hankoJwk.Manager) (*Generator, error) {
 	signatureKey, err := jwkManager.GetSigningKey()
 	if err != nil {
@@ -33,6 +35,7 @@ func NewGenerator(jwkManager hankoJwk.Manager) (*Generator, error) {
 	}, nil
 }
 
+// Generate creates a new session JWT for the given user
 func (g *Generator) Generate(userId uuid.UUID) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(g.sessionLength)
@@ -51,6 +54,7 @@ func (g *Generator) Generate(userId uuid.UUID) (string, error) {
 	return string(signed), nil
 }
 
+// Verify verifies the given JWT and returns a parsed one if verification was successful
 func (g *Generator) Verify(token string) (jwt.Token, error) {
 	parsedToken, err := g.jwtGenerator.Verify([]byte(token))
 	if err != nil {
