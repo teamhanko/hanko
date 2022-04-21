@@ -183,7 +183,8 @@ type Database struct {
 type Secrets struct {
 	// Keys secret is used to en- and decrypt the JWKs which get used to sign the JWT tokens.
 	// For every key a JWK is generated, encrypted with the key and persisted in the database.
-	// The last key in the list is the one getting used for signing.
-	// Each key must be at least 16 characters long
+	// The first key in the list is the one getting used for signing.
+	// You can use this list for key rotation.
+	// Each key must be at least 16 characters long.
 	Keys []string `json:"keys"`
 }
