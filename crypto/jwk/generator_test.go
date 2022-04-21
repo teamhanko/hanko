@@ -12,16 +12,16 @@ import (
 
 func TestGenerator(t *testing.T) {
 	for k, c := range []struct {
-		g   KeyGenerator
-		use string
-		check func(ks *jwk.Key)
+		g     KeyGenerator
+		use   string
+		check func(ks jwk.Key)
 	}{
 		{
 			g:   &RSAKeyGenerator{},
 			use: "sig",
-			check: func(ks *jwk.Key) {
+			check: func(ks jwk.Key) {
 				//assert.Len(t, ks, 2)
-				rsaKey, ok := (*ks).(jwk.RSAPrivateKey)
+				rsaKey, ok := (ks).(jwk.RSAPrivateKey)
 				if !ok {
 					t.Fail()
 				}

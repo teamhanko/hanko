@@ -3,8 +3,8 @@ package session
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	hankoJwk "github.com/teamhanko/hanko/crypto/jwk"
 	hankoJwt "github.com/teamhanko/hanko/crypto/jwt"
 	"time"
 )
@@ -14,7 +14,15 @@ type Generator struct {
 	sessionLength time.Duration
 }
 
-func NewGenerator(signatureKey jwk.Key, verificationKeys []jwk.Key) (*Generator, error) {
+func NewGenerator(jwkManager hankoJwk.Manager) (*Generator, error) {
+	signatureKey, err := jwkManager.GetSigningKey()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session generator: %w", err)
+	}
+	verificationKeys, err := jwkManager.GetPublicKeys()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create session generator: %w", err)
+	}
 	g, err := hankoJwt.NewGenerator(signatureKey, verificationKeys)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session generator: %w", err)

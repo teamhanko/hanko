@@ -13,13 +13,13 @@ import (
 type Manager interface {
 	GenerateKeySet() (*jwk.KeyPair, error)
 	GetKeySet(id string) *jwk.KeyPair
-	GetPublicKeys() []jwk.Key
-	GetSigningKey() jwk.Key
+	GetPublicKeys() ([]jwk.Key, error)
+	GetSigningKey() (jwk.Key, error)
 }
 
 type DefaultManager struct {
-	encrypter   *aes_gcm.AESGCM
-	persister   *persistence.JwkPersister
+	encrypter *aes_gcm.AESGCM
+	persister *persistence.JwkPersister
 }
 
 func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*DefaultManager, error) {
@@ -77,12 +77,41 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 		return nil, err
 	}
 	k, err := m.encrypter.Decrypt(sigModel.KeyData)
-	if err != nil{
+	if err != nil {
 		return nil, err
 	}
-	key, err := jwk.FromRaw(k);
+	key, err := jwk.FromRaw(k)
 	if err != nil {
 		return nil, err
 	}
 	return key, nil
+}
+
+func (m *DefaultManager) GetPublicKeys() ([]jwk.Key, error) {
+	modelList, err := m.persister.GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var publicKeys []jwk.Key
+	for _, model := range modelList {
+		k, err := m.encrypter.Decrypt(model.KeyData)
+		if err != nil {
+			return nil, err
+		}
+
+		key, err := jwk.FromRaw(k)
+		if err != nil {
+			return nil, err
+		}
+
+		publicKey, err := jwk.PublicKeyOf(key)
+		if err != nil {
+			return nil, err
+		}
+
+		publicKeys = append(publicKeys, publicKey)
+	}
+
+	return publicKeys, nil
 }
