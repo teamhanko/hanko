@@ -78,6 +78,18 @@ func TestAESGCM_EncryptDecrypt(t *testing.T) {
 	assert.Equal(t, string(plainAgain), plaintext)
 }
 
+func TestAESGCM_Decrypt(t *testing.T) {
+	plaintext := "testTesttestTestTestTEST"
+	key := []string{"superSecureAndRandomlyCreatedKey"}
+	ciphertext := "1SiZZlBRnNM8P9xzppDI4n8YYVMG4Hf9UKNANqmxXtsxpHPt3fojlxRmwwOhkfQSCPooOA=="
+	aesgcm, err := NewAESGCM(key)
+	assert.NoError(t, err)
+	assert.NotNil(t, aesgcm)
+	decrypted, err := aesgcm.Decrypt(ciphertext)
+	assert.NoError(t, err)
+	assert.Equal(t, []byte(plaintext), decrypted)
+}
+
 func TestAESGCM_SomeoneModifiedTheCiphertext(t *testing.T) {
 	// Encrypt
 	plaintext := "testTesttestTestTestTEST"

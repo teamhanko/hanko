@@ -11,11 +11,11 @@ import (
 )
 
 type Manager interface {
-	//Used to generate a jwk Key
+	// GenerateKey is used to generate a jwk Key
 	GenerateKey() (jwk.Key, error)
-	//Returns all Public keys that are persisted
+	// GetPublicKeys returns all Public keys that are persisted
 	GetPublicKeys() ([]jwk.Key, error)
-	// Returns the last added private key that is used for signing
+	// GetSigningKey returns the last added private key that is used for signing
 	GetSigningKey() (jwk.Key, error)
 }
 
