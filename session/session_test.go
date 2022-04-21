@@ -88,13 +88,10 @@ var privateKey = "MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDhZLLiFJXZc3
 
 type jwkManager struct{}
 
-func (m *jwkManager) GenerateKeySet() (*jwk.KeyPair, error) {
+func (m *jwkManager) GenerateKey() (jwk.Key, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m *jwkManager) GetKeySet(id string) *jwk.KeyPair {
-	return nil
-}
 
 func (m *jwkManager) GetPublicKeys() ([]jwk.Key, error) {
 	key, err := getJwk()

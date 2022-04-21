@@ -12,12 +12,13 @@ import (
 
 type Manager interface {
 	//Used to generate a jwk Key
-	GenerateKeySet() (jwk.Key, error)
+	GenerateKey() (jwk.Key, error)
 	//Returns all Public keys that are persisted
 	GetPublicKeys() ([]jwk.Key, error)
 	// Returns the last added private key that is used for signing
 	GetSigningKey() (jwk.Key, error)
 }
+
 
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
@@ -38,7 +39,7 @@ func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*Def
 	for i := range keys {
 		j, err := persister.Get(i + 1)
 		if j == nil && err == nil {
-			_, err := manager.GenerateKeySet()
+			_, err := manager.GenerateKey()
 			if err != nil {
 				return nil, err
 			}
@@ -50,7 +51,7 @@ func NewDefaultManager(keys []string, persister *persistence.JwkPersister) (*Def
 	return manager, nil
 }
 
-func (m *DefaultManager) GenerateKeySet() (jwk.Key, error) {
+func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 	rsa := &RSAKeyGenerator{}
 	id, _ := uuid.NewV4()
 	key, err := rsa.Generate(id.String())
