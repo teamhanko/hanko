@@ -1,27 +1,31 @@
 package handler
 
 import (
-	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/dto/intern"
 	"github.com/teamhanko/hanko/persistence"
 	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/session"
 	"net/http"
 )
 
 type WebauthnHandler struct {
-	persister *persistence.Persister
-	webauthn  *webauthn.WebAuthn
+	persister        *persistence.Persister
+	webauthn         *webauthn.WebAuthn
+	sessionGenerator *session.Generator
 }
 
-func NewWebauthnHandler(cfg config.WebauthnSettings, persister *persistence.Persister) (*WebauthnHandler, error) {
+// NewWebauthnHandler creates a new handler which handles all webauthn related routes
+func NewWebauthnHandler(cfg config.WebauthnSettings, persister *persistence.Persister, sessionGenerator *session.Generator) (*WebauthnHandler, error) {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.RelyingParty.DisplayName,
@@ -42,18 +46,20 @@ func NewWebauthnHandler(cfg config.WebauthnSettings, persister *persistence.Pers
 	}
 
 	return &WebauthnHandler{
-		persister: persister,
-		webauthn:  wa,
+		persister:        persister,
+		webauthn:         wa,
+		sessionGenerator: sessionGenerator,
 	}, nil
 }
 
+// BeginRegistration returns credential creation options for the WebAuthnAPI. It expects a valid session JWT in the request.
 func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
-	cookie, err := c.Cookie("hanko-session")
-	if err != nil {
-		return fmt.Errorf("failed to get cookie: %w", err)
+	sessionToken, ok := c.Get("hanko").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
 	}
-	uId, err := uuid.FromString(cookie.Value)
-	webauthnUser, err := h.getWebauthnUser(uId) // TODO: get user from JWT/Session
+	uId, err := uuid.FromString(sessionToken.Subject())
+	webauthnUser, err := h.getWebauthnUser(uId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -61,13 +67,13 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
 	}
 
-	f := false
+	t := true
 	options, sessionData, err := h.webauthn.BeginRegistration(
 		webauthnUser,
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
 			AuthenticatorAttachment: protocol.Platform,
-			RequireResidentKey:      &f,
-			ResidentKey:             protocol.ResidentKeyRequirementPreferred,
+			RequireResidentKey:      &t,
+			ResidentKey:             protocol.ResidentKeyRequirementRequired,
 			UserVerification:        protocol.VerificationRequired,
 		}),
 		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
@@ -86,10 +92,12 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 	return c.JSON(http.StatusOK, options)
 }
 
+// FinishRegistration validates the WebAuthnAPI response and associates the credential with the user. It expects a valid session JWT in the request.
+// The session JWT must be associated to the same user who requested the credential creation options.
 func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
-	cookie, err := c.Cookie("hanko-session")
-	if err != nil {
-		return fmt.Errorf("failed to get cookie: %w", err)
+	sessionToken, ok := c.Get("hanko").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
 	}
 	request, err := protocol.ParseCredentialCreationResponse(c.Request())
 	if err != nil {
@@ -110,8 +118,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 		}
 
-		// TODO: check that userID in sessionData equals user from JWT/Session
-		if cookie.Value != sessionData.UserId.String() {
+		if sessionToken.Subject() != sessionData.UserId.String() {
 			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 		}
 
@@ -152,44 +159,11 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 	})
 }
 
+// BeginAuthentication returns credential assertion options for the WebAuthnAPI.
 func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
-	body := WebauthnLoginRequest{}
-	err := (&echo.DefaultBinder{}).BindBody(c, &body)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
-	}
-
-	userId, err := uuid.FromString(body.UserId)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
-	}
-
-	webauthnUser, err := h.getWebauthnUser(userId)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-
-	if webauthnUser == nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
-	}
-
-	var allowedCredentials []protocol.CredentialDescriptor
-	for _, credential := range webauthnUser.WebauthnCredentials {
-		id, _ := base64.RawURLEncoding.DecodeString(credential.ID)
-		credentialDescriptor := protocol.CredentialDescriptor{
-			Type:         protocol.PublicKeyCredentialType,
-			CredentialID: id,
-		}
-
-		allowedCredentials = append(allowedCredentials, credentialDescriptor)
-	}
-
-	options, sessionData, err := h.webauthn.BeginLogin(
-		webauthnUser,
+	options, sessionData, err := h.webauthn.BeginDiscoverableLogin(
 		webauthn.WithUserVerification(protocol.VerificationRequired),
-		webauthn.WithAllowedCredentials(allowedCredentials),
 	)
-
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn assertion options: %w", err)
 	}
@@ -202,10 +176,16 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 	return c.JSON(http.StatusOK, options)
 }
 
+// FinishAuthentication validates the WebAuthnAPI response and on success it returns a new session JWT.
 func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 	request, err := protocol.ParseCredentialRequestResponse(c.Request())
 	if err != nil {
-		c.Logger().Errorf("%w", err)
+		c.Logger().Errorf("failed to parse credential request response: %w", err)
+		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+	}
+
+	userId, err := uuid.FromBytes(request.Response.UserHandle)
+	if err != nil {
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
@@ -223,7 +203,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 		}
 
-		webauthnUser, err := h.getWebauthnUser(sessionData.UserId)
+		webauthnUser, err := h.getWebauthnUser(userId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -233,7 +213,9 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		model := intern.WebauthnSessionDataFromModel(sessionData)
-		_, err = h.webauthn.ValidateLogin(webauthnUser, *model, request)
+		_, err = h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+			return webauthnUser, nil
+		}, *model, request)
 		if err != nil {
 			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 		}
@@ -243,10 +225,14 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return fmt.Errorf("failed to delete assertion session data: %w", err)
 		}
 
-		// TODO: create JWT and return it
+		sessionToken, err := h.sessionGenerator.Generate(webauthnUser.UserId)
+		if err != nil {
+			return fmt.Errorf("failed to create session token: %w", err)
+		}
+
 		cookie := &http.Cookie{
-			Name:     "hanko-session",
-			Value:    webauthnUser.UserId.String(),
+			Name:     "hanko",
+			Value:    sessionToken,
 			Domain:   "",
 			Secure:   true,
 			HttpOnly: false,
@@ -273,8 +259,4 @@ func (h WebauthnHandler) getWebauthnUser(userId uuid.UUID) (*intern.WebauthnUser
 	}
 
 	return intern.NewWebauthnUser(*user, credentials), nil
-}
-
-type WebauthnLoginRequest struct {
-	UserId string `json:"user_id"`
 }

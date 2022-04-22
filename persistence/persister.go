@@ -16,6 +16,7 @@ type Persister struct {
 	Passcode            *PasscodePersister
 	WebAuthnCredential  *WebauthnCredentialPersister
 	WebAuthnSessionData *WebauthnSessionDataPersister
+	Jwk                 *JwkPersister
 }
 
 //New return a new Persister Object with given configuration
@@ -45,6 +46,7 @@ func New(config config.Database) (*Persister, error) {
 		Passcode:            NewPasscodePersister(DB),
 		WebAuthnCredential:  NewWebauthnCredentialPersister(DB),
 		WebAuthnSessionData: NewWebauthnSessionDataPersister(DB),
+		Jwk:                 NewJwkPersister(DB),
 	}, nil
 }
 
