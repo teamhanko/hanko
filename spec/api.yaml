@@ -162,14 +162,6 @@ paths:
       operationId: webauthnLoginInit
       tags:
         - authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                user_id:
-                  $ref: '#/components/schemas/UUID4'
       responses:
         '200':
           description: 'Successful initialization'
