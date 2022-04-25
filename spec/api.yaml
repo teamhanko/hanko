@@ -7,43 +7,6 @@ info:
 servers:
   - url: 'localhost:3000'
 paths:
-  /register:
-    post:
-      summary: 'Register a user'
-      operationId: register
-      tags:
-        - authentication
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                password:
-                  type: string
-              required:
-                - email
-      responses:
-        '200':
-          description: 'Details about a the registered account/user'
-          headers:
-            Set-Cookie:
-              schema:
-                $ref: '#/components/schemas/CookieSession'
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
-        default:
-          description: Unexpected error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
   /passcode/login/initialize:
     post:
       summary: 'Initialize Passcode login'
@@ -146,6 +109,41 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Passcode'
+        '400':
+          description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /password/registration:
+    post:
+      summary: 'Register/Set a password'
+      operationId: passwordRegistrations
+      tags:
+        - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                # TODO: email? must be authenticated
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: 'Successful password registration'
         '400':
           description: 'Bad request'
           content:
@@ -298,7 +296,7 @@ paths:
                 $ref: '#/components/schemas/Error'
   /.well-known/jwks.json:
     get:
-      summary: 'Get public key'
+      summary: 'Get public keys'
       operationId: getPublicKey
       tags:
         - .well-known
@@ -321,6 +319,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /.well-known/config.json:
+    get:
+      summary: 'Get hanko configuration'
+      operationId: getConfig
+      tags:
+        - .well-known
+      responses:
+        '200':
+          description: 'Configuration'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HankoConfiguration'
   /user:
     get:
       summary: 'Get user ID'
@@ -537,6 +548,11 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    HankoConfiguration:
+      type: object
+      externalDocs:
+        description: Hanko Configuration
+        url: https://github.com/teamhanko/hanko/blob/main/config/config.go
     CookieSession:
       type: string
       example: HANKOSESSION=abcde12345; Path=/; HttpOnly
