@@ -21,8 +21,6 @@ import (
 var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 var userIdBytes = []byte{0xec, 0x4e, 0xf0, 0x49, 0x5b, 0x88, 0x43, 0x21, 0xa1, 0x73, 0x21, 0xb0, 0xef, 0xf0, 0x6a, 0x4}
 
-//var userIdInvalid = "144f449b-217b-4f9e-9f3c-7700ee06ae08"
-
 func TestNewWebauthnHandler(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
@@ -81,9 +79,20 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.FinishRegistration(c)) {
-		//strings.TrimSpace()
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
 		assert.Regexp(t, `{"credential_id":".*"}`, rec.Body.String())
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
+	rec2 := httptest.NewRecorder()
+	c2 := e.NewContext(req2, rec2)
+	token2 := jwt.New()
+	err = token.Set(jwt.SubjectKey, userId)
+	require.NoError(t, err)
+	c2.Set("hanko", token2)
+
+	if assert.NoError(t, handler.FinishRegistration(c2)) {
+		assert.Equal(t, http.StatusBadRequest, rec2.Result().StatusCode)
 	}
 }
 
@@ -139,6 +148,14 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 				}
 			}
 		}
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec2 := httptest.NewRecorder()
+	c2 := e.NewContext(req2, rec2)
+
+	if assert.NoError(t, handler.FinishAuthentication(c2)) {
+		assert.Equal(t, http.StatusBadRequest, rec2.Result().StatusCode)
 	}
 }
 
