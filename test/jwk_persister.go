@@ -6,7 +6,7 @@ import (
 )
 
 func NewJwkPersister(init []models.Jwk) persistence.JwkPersister {
-	return &jwkPersister{init}
+	return &jwkPersister{append([]models.Jwk{}, init...)}
 }
 
 type jwkPersister struct {

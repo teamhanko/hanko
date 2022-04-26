@@ -7,7 +7,7 @@ import (
 )
 
 func NewWebauthnSessionDataPersister(init []models.WebauthnSessionData) persistence.WebauthnSessionDataPersister {
-	return &webauthnSessionDataPersister{init}
+	return &webauthnSessionDataPersister{append([]models.WebauthnSessionData{}, init...)}
 }
 
 type webauthnSessionDataPersister struct {

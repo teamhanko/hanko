@@ -7,7 +7,7 @@ import (
 )
 
 func NewPasscodePersister(init []models.Passcode) persistence.PasscodePersister {
-	return &passcodePersister{init}
+	return &passcodePersister{append([]models.Passcode{}, init...)}
 }
 
 type passcodePersister struct {

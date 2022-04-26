@@ -7,7 +7,7 @@ import (
 )
 
 func NewUserPersister(init []models.User) persistence.UserPersister {
-	return &userPersister{init}
+	return &userPersister{append([]models.User{}, init...)}
 }
 
 type userPersister struct {

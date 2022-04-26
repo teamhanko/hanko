@@ -7,7 +7,7 @@ import (
 )
 
 func NewWebauthnCredentialPersister(init []models.WebauthnCredential) persistence.WebauthnCredentialPersister {
-	return &webauthnCredentialPersister{init}
+	return &webauthnCredentialPersister{append([]models.WebauthnCredential{}, init...)}
 }
 
 type webauthnCredentialPersister struct {
