@@ -13,7 +13,7 @@ We're a startup based in Kiel, Germany, and an active member in the [FIDO Allian
 And we are happy to share this with you.
 
 
-![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)
+[![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)](https://fidoalliance.org/company/hanko/)
 
 # Build your product, not another (password) login
 Passwordless logins have been promised to us for quite some time. 
