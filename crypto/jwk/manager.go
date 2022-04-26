@@ -19,7 +19,6 @@ type Manager interface {
 	GetSigningKey() (jwk.Key, error)
 }
 
-
 type DefaultManager struct {
 	encrypter *aes_gcm.AESGCM
 	persister *persistence.JwkPersister
@@ -86,7 +85,9 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	key, err := jwk.FromRaw(k)
+
+	set, err := jwk.Parse(k)
+	key, _ := set.Key(0)
 	if err != nil {
 		return nil, err
 	}
