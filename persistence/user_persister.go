@@ -8,19 +8,22 @@ import (
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
-type UserPersister struct {
+type UserPersister interface {
+	Get(uuid.UUID) (*models.User, error)
+	Create(models.User) error
+	Update(models.User) error
+	Delete(models.User) error
+}
+
+type userPersister struct {
 	db *pop.Connection
 }
 
-func NewUserPersister(db *pop.Connection) *UserPersister {
-	return &UserPersister{db: db}
+func NewUserPersister(db *pop.Connection) UserPersister {
+	return &userPersister{db: db}
 }
 
-func (p UserPersister) WithConnection(con *pop.Connection) *UserPersister {
-	return NewUserPersister(con)
-}
-
-func (p *UserPersister) Get(id uuid.UUID) (*models.User, error) {
+func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
 	err := p.db.Find(&user, id)
 	if err != nil && err == sql.ErrNoRows {
@@ -33,7 +36,7 @@ func (p *UserPersister) Get(id uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (p *UserPersister) Create(user models.User) error {
+func (p *userPersister) Create(user models.User) error {
 	vErr, err := p.db.ValidateAndCreate(&user)
 	if err != nil {
 		return fmt.Errorf("failed to store user: %w", err)
@@ -46,7 +49,7 @@ func (p *UserPersister) Create(user models.User) error {
 	return nil
 }
 
-func (p *UserPersister) Update(user models.User) error {
+func (p *userPersister) Update(user models.User) error {
 	vErr, err := p.db.ValidateAndUpdate(&user)
 	if err != nil {
 		return fmt.Errorf("failed to update user: %w", err)
@@ -59,7 +62,7 @@ func (p *UserPersister) Update(user models.User) error {
 	return nil
 }
 
-func (p *UserPersister) Delete(user models.User) error {
+func (p *userPersister) Delete(user models.User) error {
 	err := p.db.Destroy(&user)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)

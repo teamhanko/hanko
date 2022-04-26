@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-func NewServePrivateCommand(config *config.Config, persister *persistence.Persister) *cobra.Command {
+func NewServePrivateCommand(config *config.Config, persister persistence.Persister) *cobra.Command {
 	return &cobra.Command{
 		Use:   "private",
 		Short: "Start the private portion of the hanko server",

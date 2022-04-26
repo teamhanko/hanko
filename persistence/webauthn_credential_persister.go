@@ -8,19 +8,23 @@ import (
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
-type WebauthnCredentialPersister struct {
+type WebauthnCredentialPersister interface {
+	Get(string) (*models.WebauthnCredential, error)
+	Create(models.WebauthnCredential) error
+	Update(models.WebauthnCredential) error
+	Delete(models.WebauthnCredential) error
+	GetFromUser(uuid.UUID) ([]models.WebauthnCredential, error)
+}
+
+type webauthnCredentialPersister struct {
 	db *pop.Connection
 }
 
-func NewWebauthnCredentialPersister(db *pop.Connection) *WebauthnCredentialPersister {
-	return &WebauthnCredentialPersister{db: db}
+func NewWebauthnCredentialPersister(db *pop.Connection) WebauthnCredentialPersister {
+	return &webauthnCredentialPersister{db: db}
 }
 
-func (p WebauthnCredentialPersister) WithConnection(con *pop.Connection) *WebauthnCredentialPersister {
-	return NewWebauthnCredentialPersister(con)
-}
-
-func (p *WebauthnCredentialPersister) Get(id string) (*models.WebauthnCredential, error) {
+func (p *webauthnCredentialPersister) Get(id string) (*models.WebauthnCredential, error) {
 	credential := models.WebauthnCredential{}
 	err := p.db.Find(&credential, id)
 	if err != nil && err == sql.ErrNoRows {
@@ -33,7 +37,7 @@ func (p *WebauthnCredentialPersister) Get(id string) (*models.WebauthnCredential
 	return &credential, nil
 }
 
-func (p *WebauthnCredentialPersister) Create(credential models.WebauthnCredential) error {
+func (p *webauthnCredentialPersister) Create(credential models.WebauthnCredential) error {
 	vErr, err := p.db.ValidateAndCreate(&credential)
 	if err != nil {
 		return fmt.Errorf("failed to store credential: %w", err)
@@ -46,7 +50,7 @@ func (p *WebauthnCredentialPersister) Create(credential models.WebauthnCredentia
 	return nil
 }
 
-func (p *WebauthnCredentialPersister) Update(credential models.WebauthnCredential) error {
+func (p *webauthnCredentialPersister) Update(credential models.WebauthnCredential) error {
 	vErr, err := p.db.ValidateAndUpdate(&credential)
 	if err != nil {
 		return fmt.Errorf("failed to update credential: %w", err)
@@ -59,7 +63,7 @@ func (p *WebauthnCredentialPersister) Update(credential models.WebauthnCredentia
 	return nil
 }
 
-func (p *WebauthnCredentialPersister) Delete(credential models.WebauthnCredential) error {
+func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredential) error {
 	err := p.db.Destroy(&credential)
 	if err != nil {
 		return fmt.Errorf("failed to delete credential: %w", err)
@@ -68,7 +72,7 @@ func (p *WebauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 	return nil
 }
 
-func (p *WebauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
+func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
 	var credentials []models.WebauthnCredential
 	err := p.db.Where("user_id = ?", &userId).All(&credentials)
 	if err != nil && err == sql.ErrNoRows {

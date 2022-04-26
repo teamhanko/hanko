@@ -17,7 +17,7 @@ import (
 var (
 	cfgFile   string
 	cfg       *config.Config
-	persister *persistence.Persister
+	persister persistence.Storage
 )
 
 func NewRootCmd() *cobra.Command {

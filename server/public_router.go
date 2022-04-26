@@ -12,7 +12,7 @@ import (
 	"github.com/teamhanko/hanko/session"
 )
 
-func NewPublicRouter(cfg *config.Config, persister *persistence.Persister) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 
@@ -24,17 +24,17 @@ func NewPublicRouter(cfg *config.Config, persister *persistence.Persister) *echo
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}},"referer":"${referer}"` + "\n",
 	}))
 
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.Jwk)
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionGenerator, err := session.NewGenerator(jwkManager)
+	sessionManager, err := session.NewManager(jwkManager)
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
 	healthHandler := handler.NewHealthHandler()
-	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionGenerator)
+	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionManager)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
@@ -44,7 +44,7 @@ func NewPublicRouter(cfg *config.Config, persister *persistence.Persister) *echo
 	health.GET("/ready", healthHandler.Ready)
 
 	webauthn := e.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(*sessionGenerator))
+	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 

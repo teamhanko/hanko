@@ -18,7 +18,7 @@ func NewServeCommand() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, config *config.Config, persister *persistence.Persister) {
+func RegisterCommands(parent *cobra.Command, config *config.Config, persister persistence.Persister) {
 	cmd := NewServeCommand()
 	parent.AddCommand(cmd)
 	cmd.AddCommand(NewServePublicCommand(config, persister))

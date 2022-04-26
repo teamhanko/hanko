@@ -10,7 +10,7 @@ import (
 
 var steps int
 
-func NewMigrateDownCommand(persister *persistence.Persister) *cobra.Command {
+func NewMigrateDownCommand(persister persistence.Migrator) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "down",
 		Short: "migrate the database down - given the number of steps",

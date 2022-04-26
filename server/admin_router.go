@@ -7,7 +7,7 @@ import (
 	"github.com/teamhanko/hanko/persistence"
 )
 
-func NewPrivateRouter(persister *persistence.Persister) *echo.Echo {
+func NewPrivateRouter(persister persistence.Persister) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 

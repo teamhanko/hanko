@@ -19,13 +19,13 @@ import (
 )
 
 type WebauthnHandler struct {
-	persister        *persistence.Persister
-	webauthn         *webauthn.WebAuthn
-	sessionGenerator *session.Generator
+	persister      persistence.Persister
+	webauthn       *webauthn.WebAuthn
+	sessionManager session.Manager
 }
 
 // NewWebauthnHandler creates a new handler which handles all webauthn related routes
-func NewWebauthnHandler(cfg config.WebauthnSettings, persister *persistence.Persister, sessionGenerator *session.Generator) (*WebauthnHandler, error) {
+func NewWebauthnHandler(cfg config.WebauthnSettings, persister persistence.Persister, sessionManager session.Manager) (*WebauthnHandler, error) {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.RelyingParty.DisplayName,
@@ -46,9 +46,9 @@ func NewWebauthnHandler(cfg config.WebauthnSettings, persister *persistence.Pers
 	}
 
 	return &WebauthnHandler{
-		persister:        persister,
-		webauthn:         wa,
-		sessionGenerator: sessionGenerator,
+		persister:      persister,
+		webauthn:       wa,
+		sessionManager: sessionManager,
 	}, nil
 }
 
@@ -59,7 +59,10 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return errors.New("failed to cast session object")
 	}
 	uId, err := uuid.FromString(sessionToken.Subject())
-	webauthnUser, err := h.getWebauthnUser(uId)
+	if err != nil {
+		return fmt.Errorf("failed to parse userId from JWT subject:%w", err)
+	}
+	webauthnUser, err := h.getWebauthnUser(h.persister.GetConnection(), uId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -84,7 +87,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return fmt.Errorf("failed to create webauthn creation options: %w", err)
 	}
 
-	err = h.persister.WebAuthnSessionData.Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationRegistration))
+	err = h.persister.GetWebauthnSessionDataPersister().Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationRegistration))
 	if err != nil {
 		return fmt.Errorf("failed to store creation options session data: %w", err)
 	}
@@ -104,8 +107,9 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		c.Logger().Errorf("%w", err)
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
-	return h.persister.DB.Transaction(func(tx *pop.Connection) error {
-		sessionData, err := h.persister.WebAuthnSessionData.WithConnection(tx).GetByChallenge(request.Response.CollectedClientData.Challenge)
+	return h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
+		sessionData, err := sessionDataPersister.GetByChallenge(request.Response.CollectedClientData.Challenge)
 		if err != nil {
 			return fmt.Errorf("failed to get webauthn registration session data: %w", err)
 		}
@@ -122,21 +126,14 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 		}
 
-		user, err := h.persister.User.WithConnection(tx).Get(sessionData.UserId)
+		webauthnUser, err := h.getWebauthnUser(tx, sessionData.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
 
-		if user == nil {
-			return fmt.Errorf("user not found")
+		if webauthnUser == nil {
+			return errors.New("user not found")
 		}
-
-		credentials, err := h.persister.WebAuthnCredential.WithConnection(tx).GetFromUser(user.ID)
-		if err != nil {
-			return fmt.Errorf("failed to get webauthn credentials: %w", err)
-		}
-
-		webauthnUser := intern.NewWebauthnUser(*user, credentials)
 
 		credential, err := h.webauthn.CreateCredential(webauthnUser, *intern.WebauthnSessionDataFromModel(sessionData), request)
 		if err != nil {
@@ -145,12 +142,12 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		}
 
 		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId)
-		err = h.persister.WebAuthnCredential.Create(*model)
+		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*model)
 		if err != nil {
 			return fmt.Errorf("failed to store webauthn credential")
 		}
 
-		err = h.persister.WebAuthnSessionData.WithConnection(tx).Delete(*sessionData)
+		err = sessionDataPersister.Delete(*sessionData)
 		if err != nil {
 			c.Logger().Errorf("failed to delete attestation session data: %w", err)
 		}
@@ -168,7 +165,7 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 		return fmt.Errorf("failed to create webauthn assertion options: %w", err)
 	}
 
-	err = h.persister.WebAuthnSessionData.Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationAuthentication))
+	err = h.persister.GetWebauthnSessionDataPersister().Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationAuthentication))
 	if err != nil {
 		return fmt.Errorf("failed to store webauthn assertion session data: %w", err)
 	}
@@ -189,8 +186,9 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
-	return h.persister.DB.Transaction(func(tx *pop.Connection) error {
-		sessionData, err := h.persister.WebAuthnSessionData.WithConnection(tx).GetByChallenge(request.Response.CollectedClientData.Challenge)
+	return h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
+		sessionData, err := sessionDataPersister.GetByChallenge(request.Response.CollectedClientData.Challenge)
 		if err != nil {
 			return fmt.Errorf("failed to get webauthn assertion session data: %w", err)
 		}
@@ -203,7 +201,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 		}
 
-		webauthnUser, err := h.getWebauthnUser(userId)
+		webauthnUser, err := h.getWebauthnUser(tx, userId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -220,12 +218,12 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 		}
 
-		err = h.persister.WebAuthnSessionData.WithConnection(tx).Delete(*sessionData)
+		err = sessionDataPersister.Delete(*sessionData)
 		if err != nil {
 			return fmt.Errorf("failed to delete assertion session data: %w", err)
 		}
 
-		sessionToken, err := h.sessionGenerator.Generate(webauthnUser.UserId)
+		sessionToken, err := h.sessionManager.Generate(webauthnUser.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to create session token: %w", err)
 		}
@@ -243,8 +241,8 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 	})
 }
 
-func (h WebauthnHandler) getWebauthnUser(userId uuid.UUID) (*intern.WebauthnUser, error) {
-	user, err := h.persister.User.Get(userId)
+func (h WebauthnHandler) getWebauthnUser(connection *pop.Connection, userId uuid.UUID) (*intern.WebauthnUser, error) {
+	user, err := h.persister.GetUserPersisterWithConnection(connection).Get(userId)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
 	}
@@ -253,7 +251,7 @@ func (h WebauthnHandler) getWebauthnUser(userId uuid.UUID) (*intern.WebauthnUser
 		return nil, nil
 	}
 
-	credentials, err := h.persister.WebAuthnCredential.GetFromUser(user.ID)
+	credentials, err := h.persister.GetWebauthnCredentialPersisterWithConnection(connection).GetFromUser(user.ID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
