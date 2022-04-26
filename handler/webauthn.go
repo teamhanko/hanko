@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -211,7 +212,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		model := intern.WebauthnSessionDataFromModel(sessionData)
-		_, err = h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+		credential, err := h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
 			return webauthnUser, nil
 		}, *model, request)
 		if err != nil {
@@ -237,7 +238,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			SameSite: http.SameSiteLaxMode,
 		}
 		c.SetCookie(cookie)
-		return c.String(http.StatusOK, "")
+		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID)})
 	})
 }
 
