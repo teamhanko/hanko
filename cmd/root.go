@@ -7,6 +7,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/cmd/jwk"
+	"github.com/teamhanko/hanko/cmd/jwt"
 	"github.com/teamhanko/hanko/cmd/migrate"
 	"github.com/teamhanko/hanko/cmd/serve"
 	"github.com/teamhanko/hanko/config"
@@ -33,6 +34,7 @@ func NewRootCmd() *cobra.Command {
 	migrate.RegisterCommands(cmd, persister)
 	serve.RegisterCommands(cmd, cfg, persister)
 	jwk.RegisterCommands(cmd, cfg, persister)
+	jwt.RegisterCommands(cmd, cfg, persister)
 
 	return cmd
 }

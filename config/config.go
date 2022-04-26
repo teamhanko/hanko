@@ -91,9 +91,10 @@ func defaultConfig() *Config {
 			User:     "postgres",
 			Password: "postgres",
 			Host:     "localhost",
-			Port:     "5432",
+			Port:     "5433",
 			Dialect:  "postgres",
 		},
+		Secrets: Secrets{Keys: []string{"6ef8e13a124c280eb766e9c5f9531ea3"}},
 	}
 }
 
