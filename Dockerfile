@@ -14,6 +14,8 @@ COPY persistence/ persistence/
 COPY server/ server/
 COPY handler/ handler/
 COPY crypto/ crypto/
+COPY dto/ dto/
+COPY session/ session/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o hanko main.go

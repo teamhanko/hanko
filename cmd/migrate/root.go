@@ -20,7 +20,7 @@ func NewMigrateCmd() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, persister *persistence.Persister) {
+func RegisterCommands(parent *cobra.Command, persister persistence.Migrator) {
 	cmd := NewMigrateCmd()
 	parent.AddCommand(cmd)
 	cmd.AddCommand(NewMigrateUpCommand(persister))

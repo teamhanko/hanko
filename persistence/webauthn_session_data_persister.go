@@ -8,15 +8,23 @@ import (
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
-type WebauthnSessionDataPersister struct {
+type WebauthnSessionDataPersister interface {
+	Get(id uuid.UUID) (*models.WebauthnSessionData, error)
+	GetByChallenge(challenge string) (*models.WebauthnSessionData, error)
+	Create(sessionData models.WebauthnSessionData) error
+	Update(sessionData models.WebauthnSessionData) error
+	Delete(sessionData models.WebauthnSessionData) error
+}
+
+type webauthnSessionDataPersister struct {
 	db *pop.Connection
 }
 
-func NewWebauthnSessionDataPersister(db *pop.Connection) *WebauthnSessionDataPersister {
-	return &WebauthnSessionDataPersister{db: db}
+func NewWebauthnSessionDataPersister(db *pop.Connection) WebauthnSessionDataPersister {
+	return &webauthnSessionDataPersister{db: db}
 }
 
-func (p *WebauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessionData, error) {
+func (p *webauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessionData, error) {
 	sessionData := models.WebauthnSessionData{}
 	err := p.db.Eager().Find(&sessionData, id)
 	if err != nil && err == sql.ErrNoRows {
@@ -29,7 +37,7 @@ func (p *WebauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessio
 	return &sessionData, nil
 }
 
-func (p WebauthnSessionDataPersister) GetByChallenge(challenge string) (*models.WebauthnSessionData, error) {
+func (p *webauthnSessionDataPersister) GetByChallenge(challenge string) (*models.WebauthnSessionData, error) {
 	var sessionData []models.WebauthnSessionData
 	err := p.db.Eager().Where("challenge = ?", challenge).All(&sessionData)
 	if err != nil {
@@ -43,7 +51,7 @@ func (p WebauthnSessionDataPersister) GetByChallenge(challenge string) (*models.
 	return &sessionData[0], nil
 }
 
-func (p *WebauthnSessionDataPersister) Create(sessionData models.WebauthnSessionData) error {
+func (p *webauthnSessionDataPersister) Create(sessionData models.WebauthnSessionData) error {
 	vErr, err := p.db.Eager().ValidateAndCreate(&sessionData)
 	if err != nil {
 		return fmt.Errorf("failed to store sessionData: %w", err)
@@ -56,7 +64,7 @@ func (p *WebauthnSessionDataPersister) Create(sessionData models.WebauthnSession
 	return nil
 }
 
-func (p *WebauthnSessionDataPersister) Update(sessionData models.WebauthnSessionData) error {
+func (p *webauthnSessionDataPersister) Update(sessionData models.WebauthnSessionData) error {
 	vErr, err := p.db.Eager().ValidateAndUpdate(&sessionData)
 	if err != nil {
 		return fmt.Errorf("failed to update sessionData: %w", err)
@@ -69,8 +77,8 @@ func (p *WebauthnSessionDataPersister) Update(sessionData models.WebauthnSession
 	return nil
 }
 
-func (p *WebauthnSessionDataPersister) Delete(sessionData models.WebauthnSessionData) error {
-	err := p.db.Eager().Destroy(&sessionData)
+func (p *webauthnSessionDataPersister) Delete(sessionData models.WebauthnSessionData) error {
+	err := p.db.Destroy(&sessionData)
 	if err != nil {
 		return fmt.Errorf("failed to delete sessionData: %w", err)
 	}

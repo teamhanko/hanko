@@ -10,16 +10,36 @@ import (
 var migrations embed.FS
 
 // Persister is the persistence interface connecting to the database and capable of doing migrations
-type Persister struct {
-	DB                  *pop.Connection
-	User                *UserPersister
-	Passcode            *PasscodePersister
-	WebAuthnCredential  *WebauthnCredentialPersister
-	WebAuthnSessionData *WebauthnSessionDataPersister
+type persister struct {
+	DB *pop.Connection
+}
+
+type Persister interface {
+	GetConnection() *pop.Connection
+	GetUserPersister() UserPersister
+	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
+	GetPasscodePersister() PasscodePersister
+	GetPasscodePersisterWithConnection(tx *pop.Connection) PasscodePersister
+	GetWebauthnCredentialPersister() WebauthnCredentialPersister
+	GetWebauthnCredentialPersisterWithConnection(tx *pop.Connection) WebauthnCredentialPersister
+	GetWebauthnSessionDataPersister() WebauthnSessionDataPersister
+	GetWebauthnSessionDataPersisterWithConnection(tx *pop.Connection) WebauthnSessionDataPersister
+	GetJwkPersister() JwkPersister
+	GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister
+}
+
+type Migrator interface {
+	MigrateUp() error
+	MigrateDown(int) error
+}
+
+type Storage interface {
+	Migrator
+	Persister
 }
 
 //New return a new Persister Object with given configuration
-func New(config config.Database) (*Persister, error) {
+func New(config config.Database) (Storage, error) {
 	DB, err := pop.NewConnection(&pop.ConnectionDetails{
 		Dialect:  config.Dialect,
 		Database: config.Database,
@@ -39,17 +59,13 @@ func New(config config.Database) (*Persister, error) {
 		return nil, err
 	}
 
-	return &Persister{
-		DB:                  DB,
-		User:                NewUserPersister(DB),
-		Passcode:            NewPasscodePersister(DB),
-		WebAuthnCredential:  NewWebauthnCredentialPersister(DB),
-		WebAuthnSessionData: NewWebauthnSessionDataPersister(DB),
+	return &persister{
+		DB: DB,
 	}, nil
 }
 
 // MigrateUp applies all pending up migrations to the Database
-func (p *Persister) MigrateUp() error {
+func (p *persister) MigrateUp() error {
 	migrationBox, err := pop.NewMigrationBox(migrations, p.DB)
 	if err != nil {
 		return err
@@ -62,7 +78,7 @@ func (p *Persister) MigrateUp() error {
 }
 
 // MigrateDown migrates the Database down by the given number of steps
-func (p *Persister) MigrateDown(steps int) error {
+func (p *persister) MigrateDown(steps int) error {
 	migrationBox, err := pop.NewMigrationBox(migrations, p.DB)
 	if err != nil {
 		return err
@@ -72,4 +88,48 @@ func (p *Persister) MigrateDown(steps int) error {
 		return err
 	}
 	return nil
+}
+
+func (p *persister) GetConnection() *pop.Connection {
+	return p.DB
+}
+
+func (p *persister) GetUserPersister() UserPersister {
+	return NewUserPersister(p.DB)
+}
+
+func (p *persister) GetUserPersisterWithConnection(tx *pop.Connection) UserPersister {
+	return NewUserPersister(tx)
+}
+
+func (p *persister) GetPasscodePersister() PasscodePersister {
+	return NewPasscodePersister(p.DB)
+}
+
+func (p *persister) GetPasscodePersisterWithConnection(tx *pop.Connection) PasscodePersister {
+	return NewPasscodePersister(tx)
+}
+
+func (p *persister) GetWebauthnCredentialPersister() WebauthnCredentialPersister {
+	return NewWebauthnCredentialPersister(p.DB)
+}
+
+func (p *persister) GetWebauthnCredentialPersisterWithConnection(tx *pop.Connection) WebauthnCredentialPersister {
+	return NewWebauthnCredentialPersister(tx)
+}
+
+func (p *persister) GetWebauthnSessionDataPersister() WebauthnSessionDataPersister {
+	return NewWebauthnSessionDataPersister(p.DB)
+}
+
+func (p *persister) GetWebauthnSessionDataPersisterWithConnection(tx *pop.Connection) WebauthnSessionDataPersister {
+	return NewWebauthnSessionDataPersister(tx)
+}
+
+func (p *persister) GetJwkPersister() JwkPersister {
+	return NewJwkPersister(p.DB)
+}
+
+func (p *persister) GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister {
+	return NewJwkPersister(tx)
 }

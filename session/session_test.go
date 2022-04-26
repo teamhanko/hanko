@@ -15,14 +15,14 @@ import (
 
 func TestNewGenerator(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewGenerator(&manager)
+	sessionGenerator, err := NewManager(&manager)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 }
 
 func TestGenerator_Generate(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewGenerator(&manager)
+	sessionGenerator, err := NewManager(&manager)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -36,7 +36,7 @@ func TestGenerator_Generate(t *testing.T) {
 
 func TestGenerator_Verify(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewGenerator(&manager)
+	sessionGenerator, err := NewManager(&manager)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -57,7 +57,7 @@ func TestGenerator_Verify(t *testing.T) {
 
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewGenerator(&manager)
+	sessionGenerator, err := NewManager(&manager)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 

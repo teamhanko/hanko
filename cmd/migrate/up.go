@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func NewMigrateUpCommand(persister *persistence.Persister) *cobra.Command {
+func NewMigrateUpCommand(persister persistence.Migrator) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "up",
 		Short: "migrate the database up",

@@ -12,7 +12,7 @@ import (
 type WebauthnSessionDataAllowedCredential struct {
 	ID                    uuid.UUID            `db:"id"`
 	CredentialId          string               `db:"credential_id"`
-	WebauthnSessionDataID uuid.UUID            `db:"session_data_id"`
+	WebauthnSessionDataID uuid.UUID            `db:"webauthn_session_data_id"`
 	CreatedAt             time.Time            `db:"created_at"`
 	UpdatedAt             time.Time            `db:"updated_at"`
 	WebauthnSessionData   *WebauthnSessionData `belongs_to:"webauthn_session_data"`

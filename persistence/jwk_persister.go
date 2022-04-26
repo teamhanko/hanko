@@ -7,15 +7,22 @@ import (
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
-type JwkPersister struct {
+type JwkPersister interface {
+	Get(int) (*models.Jwk, error)
+	GetAll() ([]models.Jwk, error)
+	GetLast() (*models.Jwk, error)
+	Create(models.Jwk) error
+}
+
+type jwkPersister struct {
 	db *pop.Connection
 }
 
-func NewJwkPersister(db *pop.Connection) *JwkPersister {
-	return &JwkPersister{db: db}
+func NewJwkPersister(db *pop.Connection) JwkPersister {
+	return &jwkPersister{db: db}
 }
 
-func (p *JwkPersister) Get(id int) (*models.Jwk, error) {
+func (p *jwkPersister) Get(id int) (*models.Jwk, error) {
 	jwk := models.Jwk{}
 	err := p.db.Find(&jwk, id)
 	if err != nil && err == sql.ErrNoRows {
@@ -27,7 +34,7 @@ func (p *JwkPersister) Get(id int) (*models.Jwk, error) {
 	return &jwk, nil
 }
 
-func (p *JwkPersister) GetAll() ([]models.Jwk, error) {
+func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
 	jwks := []models.Jwk{}
 	err := p.db.All(&jwks)
 	if err != nil && err == sql.ErrNoRows {
@@ -39,7 +46,7 @@ func (p *JwkPersister) GetAll() ([]models.Jwk, error) {
 	return jwks, nil
 }
 
-func (p *JwkPersister) GetLast() (*models.Jwk, error) {
+func (p *jwkPersister) GetLast() (*models.Jwk, error) {
 	jwk := models.Jwk{}
 	err := p.db.Order("id asc").Last(&jwk)
 	if err != nil && err == sql.ErrNoRows {
@@ -51,7 +58,7 @@ func (p *JwkPersister) GetLast() (*models.Jwk, error) {
 	return &jwk, nil
 }
 
-func (p *JwkPersister) Create(jwk models.Jwk) error {
+func (p *jwkPersister) Create(jwk models.Jwk) error {
 	vErr, err := p.db.ValidateAndCreate(&jwk)
 	if err != nil {
 		return fmt.Errorf("failed to store jwk: %w", err)
