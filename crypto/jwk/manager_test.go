@@ -7,6 +7,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	jwt2 "github.com/teamhanko/hanko/crypto/jwt"
 	"github.com/teamhanko/hanko/persistence/models"
 	"testing"
 )
@@ -63,4 +64,9 @@ func TestDefaultManager(t *testing.T) {
 	signed, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, sk))
 	require.NoError(t, err)
 	fmt.Println(string(signed))
+
+
+	jg, err := jwt2.NewGenerator(sk, js)
+	_, err = jg.Verify(signed)
+	require.NoError(t, err)
 }

@@ -110,7 +110,8 @@ func (m *DefaultManager) GetPublicKeys() ([]jwk.Key, error) {
 			return nil, err
 		}
 
-		key, err := jwk.FromRaw(k)
+		key, err := jwk.ParseKey(k)
+
 		if err != nil {
 			return nil, err
 		}
