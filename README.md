@@ -16,12 +16,13 @@ And we are happy to share this with you.
 
 🚧 PLEASE NOTE: This project is pre-alpha and not yet functional. If you want to get notified as soon as we're ready you can sign up to our [newsletter](https://www.hanko.io/updates) or join our [Slack community](https://www.hanko.io/community).
 
-# Build your product, not another (password) login
+# We take you on a journey beyond passwords, and make sure your users won't get lost on the way
 Passwordless logins have been promised to us for quite some time. 
 But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. 
 With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good.
 
-The only thing is: Implementing an end-to-end passwordless flow that benefits from biometric convenience through WebAuthn but also handles all edge cases and recovery flows is not a simple task, even when using existing open source libraries.
+# Build your product, not another (password) login
+Implementing an end-to-end passwordless flow that benefits from biometric convenience through WebAuthn but also handles all edge cases and recovery flows is not a simple task, even when using existing open source libraries.
 
 **That's where Hanko comes in:**
 
@@ -29,6 +30,7 @@ With Hanko, your users will be able to login to your apps with biometrics instea
 
 - A polished, end-to-end passwordless user experience on the web (mobile app support is planned)
 - Biometrics, WebAuthn (passkeys, FIDO Security Keys), passcodes
+- Optional password authentication instead of email passcodes
 - All edge cases are handled that normally will keep you busy much longer than you would like (e.g., account recovery, unsupported devices, multi-language UI & emails)
 - Self-hosted or as a lean SaaS hosted by us
 - API-first, small footprint, cloud-native
