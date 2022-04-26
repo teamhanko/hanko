@@ -18,7 +18,8 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	var found *models.User
 	for _, data := range p.users {
 		if data.ID == id {
-			found = &data
+			d := data
+			found = &d
 		}
 	}
 	return found, nil

@@ -18,7 +18,8 @@ func (p *passcodePersister) Get(id uuid.UUID) (*models.Passcode, error) {
 	var found *models.Passcode
 	for _, data := range p.passcodes {
 		if data.ID == id {
-			found = &data
+			d := data
+			found = &d
 		}
 	}
 	return found, nil

@@ -18,7 +18,8 @@ func (p *webauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessio
 	var found *models.WebauthnSessionData
 	for _, data := range p.sessionData {
 		if data.ID == id {
-			found = &data
+			d := data
+			found = &d
 		}
 	}
 	return found, nil

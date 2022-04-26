@@ -17,7 +17,8 @@ func (j jwkPersister) Get(id int) (*models.Jwk, error) {
 	var found *models.Jwk
 	for _, data := range j.keys {
 		if data.ID == id {
-			found = &data
+			d := data
+			found = &d
 		}
 	}
 	return found, nil

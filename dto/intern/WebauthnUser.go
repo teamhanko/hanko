@@ -39,7 +39,8 @@ func (u *WebauthnUser) WebAuthnIcon() string {
 func (u *WebauthnUser) WebAuthnCredentials() []webauthn.Credential {
 	var credentials []webauthn.Credential
 	for _, credential := range u.WebauthnCredentials {
-		c := WebauthnCredentialFromModel(&credential)
+		cred := credential
+		c := WebauthnCredentialFromModel(&cred)
 		credentials = append(credentials, *c)
 	}
 
