@@ -18,9 +18,13 @@ func WebauthnSessionDataFromModel(data *models.WebauthnSessionData) *webauthn.Se
 		}
 		allowedCredentials = append(allowedCredentials, credentialId)
 	}
+	var userId []byte = nil
+	if !data.UserId.IsNil() {
+		userId = data.UserId.Bytes()
+	}
 	return &webauthn.SessionData{
 		Challenge:            data.Challenge,
-		UserID:               data.UserId.Bytes(),
+		UserID:               userId,
 		AllowedCredentialIDs: allowedCredentials,
 		UserVerification:     protocol.UserVerificationRequirement(data.UserVerification),
 	}

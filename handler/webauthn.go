@@ -107,7 +107,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		c.Logger().Errorf("%w", err)
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
-	return h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
 		sessionData, err := sessionDataPersister.GetByChallenge(request.Response.CollectedClientData.Challenge)
 		if err != nil {
@@ -186,7 +186,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
-	return h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
 		sessionData, err := sessionDataPersister.GetByChallenge(request.Response.CollectedClientData.Challenge)
 		if err != nil {
