@@ -35,8 +35,8 @@ func (p *jwkPersister) Get(id int) (*models.Jwk, error) {
 }
 
 func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
-	var jwks []models.Jwk
-	err := p.db.All(jwks)
+	jwks := []models.Jwk{}
+	err := p.db.All(&jwks)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil
 	}
@@ -48,7 +48,7 @@ func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
 
 func (p *jwkPersister) GetLast() (*models.Jwk, error) {
 	jwk := models.Jwk{}
-	err := p.db.Order("id asc").Last(jwk)
+	err := p.db.Order("id asc").Last(&jwk)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil
 	}
