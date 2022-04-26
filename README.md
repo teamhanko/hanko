@@ -16,9 +16,8 @@ And we are happy to share this with you.
 
 🚧 PLEASE NOTE: This project is pre-alpha and not yet functional. If you want to get notified as soon as we're ready you can sign up to our [newsletter](https://www.hanko.io/updates) or join our [Slack community](https://www.hanko.io/community).
 
-# We take you on a journey beyond passwords, and make sure your users won't get lost on the way
-Passwordless logins have been promised to us for quite some time. 
-But it's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. 
+# We take you on the journey beyond passwords, and make sure your users won't get lost on the way
+Passwordless logins have been promised to us for quite some time. But until now, passwordless was a compromise that only worked for some of the users and was deemed immature and ultimately not truly better than passwords. It's only recently that the ecosystem of devices, browsers, and operating systems is finally ready. 
 With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that will replace passwords for good.
 
 # Build your product, not another (password) login
@@ -28,10 +27,11 @@ Implementing an end-to-end passwordless flow that benefits from biometric conven
 
 With Hanko, your users will be able to login to your apps with biometrics instead of passwords. On devices that do not support WebAuthn, or for the first-time login on a new device where no WebAuthn credential is available, an email passcode is used. But then, the user is always guided to enroll their biometrics.
 
-- A polished, end-to-end passwordless user experience on the web (mobile app support is planned)
+- A polished, passwordless user experience
 - Biometrics, WebAuthn (passkeys, FIDO Security Keys), passcodes
-- Optional password authentication instead of email passcodes
+- Optional password authentication instead of email passcodes to make sure your users won't feel lost
 - All edge cases are handled that normally will keep you busy much longer than you would like (e.g., account recovery, unsupported devices, multi-language UI & emails)
+- Mobile app support is planned
 - Self-hosted or as a lean SaaS hosted by us
 - API-first, small footprint, cloud-native
 
