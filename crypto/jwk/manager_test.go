@@ -1,12 +1,12 @@
 package jwk
 
 import (
-	"fmt"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/test"
 	"testing"
 )
 
@@ -43,11 +43,15 @@ func (m *mockJwkPersister) Create(jwk models.Jwk) error {
 
 func TestDefaultManager(t *testing.T) {
 	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
-	persister := mockJwkPersister{jwks: []models.Jwk{}}
+	//persister := mockJwkPersister{jwks: []models.Jwk{}}
+	persister := test.NewJwkPersister(nil)
 
-	dm, err := NewDefaultManager(keys, &persister)
+	dm, err := NewDefaultManager(keys, persister)
 	require.NoError(t, err)
-	assert.Equal(t, 2, len(persister.jwks))
+	all, err := persister.GetAll()
+
+	require.NoError(t, err)
+	assert.Equal(t, 2, len(all))
 
 	js, err := dm.GetPublicKeys()
 	require.NoError(t, err)
@@ -60,7 +64,6 @@ func TestDefaultManager(t *testing.T) {
 	token.Set("Payload", "isJustFine")
 	signed, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, sk))
 	require.NoError(t, err)
-	fmt.Println(string(signed))
 
 	// Get Public Key of signing key
 	pk, err := sk.PublicKey()
