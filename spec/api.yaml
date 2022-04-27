@@ -121,25 +121,26 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /password/registration:
-    post:
-      summary: 'Register/Set a password'
-      operationId: passwordRegistrations
+  /password:
+    put:
+      summary: 'Create/Set a password'
+      operationId: password
       tags:
         - authentication
+      security:
+        - CookieAuth: [ ]
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                # TODO: email? must be authenticated
-                email:
-                  type: string
+                user_id:
+                  $ref: '#/components/schemas/UUID4'
                 password:
                   type: string
               required:
-                - email
+                - user_id
                 - password
       responses:
         '200':
