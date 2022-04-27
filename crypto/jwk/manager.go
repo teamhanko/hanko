@@ -86,12 +86,8 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 		return nil, err
 	}
 
-	set, err := jwk.Parse(k)
+	key, err := jwk.ParseKey(k)
 	if err != nil {
-		return nil, err
-	}
-	key, bErr := set.Key(0)
-	if !bErr {
 		return nil, err
 	}
 	return key, nil
