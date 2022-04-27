@@ -1,13 +1,11 @@
 package jwk
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	jwt2 "github.com/teamhanko/hanko/crypto/jwt"
 	"github.com/teamhanko/hanko/persistence/models"
 	"testing"
 )
@@ -44,29 +42,32 @@ func (m *mockJwkPersister) Create(jwk models.Jwk) error {
 }
 
 func TestDefaultManager(t *testing.T) {
-	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng"}
+	keys := []string{"asfnoadnfoaegnq3094intoaegjnoadjgnoadng", "apdisfoaiegnoaiegnbouaebgn982"}
 	persister := mockJwkPersister{jwks: []models.Jwk{}}
 
 	dm, err := NewDefaultManager(keys, &persister)
 	require.NoError(t, err)
-	assert.Equal(t, 1, len(persister.jwks))
-	//dm.GenerateKey()
+	assert.Equal(t, 2, len(persister.jwks))
+
 	js, err := dm.GetPublicKeys()
 	require.NoError(t, err)
-	assert.Equal(t, 1, len(js))
+	assert.Equal(t, 2, len(js))
+
 	sk, err := dm.GetSigningKey()
-	pk, err := sk.PublicKey()
-	pkJson, err := json.Marshal(pk)
-	fmt.Println(string(pkJson))
 	require.NoError(t, err)
+
 	token := jwt.New()
 	token.Set("Payload", "isJustFine")
 	signed, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, sk))
 	require.NoError(t, err)
 	fmt.Println(string(signed))
 
-
-	jg, err := jwt2.NewGenerator(sk, js)
-	_, err = jg.Verify(signed)
+	// Get Public Key of signing key
+	pk, err := sk.PublicKey()
 	require.NoError(t, err)
+
+	// Parse and Verify
+	tokenParsed, err := jwt.Parse(signed, jwt.WithKey(jwa.RS256, pk))
+	assert.NoError(t, err)
+	assert.Equal(t, token, tokenParsed)
 }
