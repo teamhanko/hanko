@@ -129,6 +129,7 @@ paths:
         - authentication
       security:
         - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
       requestBody:
         content:
           application/json:
@@ -219,7 +220,8 @@ paths:
       tags:
         - authentication
       security:
-        - CookieAuth: []
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
       responses:
         '200':
           description: 'Challenge'
@@ -252,7 +254,8 @@ paths:
       tags:
         - authentication
       security:
-        - CookieAuth: []
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
       requestBody:
         description: "Challenge response"
         content:
@@ -756,3 +759,7 @@ components:
       type: apiKey
       in: cookie
       name: HANKOSESSION
+    BearerTokenAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
