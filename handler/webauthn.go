@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -107,7 +108,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		c.Logger().Errorf("%w", err)
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
-	return h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
 		sessionData, err := sessionDataPersister.GetByChallenge(request.Response.CollectedClientData.Challenge)
 		if err != nil {
@@ -186,7 +187,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
-	return h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
 		sessionData, err := sessionDataPersister.GetByChallenge(request.Response.CollectedClientData.Challenge)
 		if err != nil {
@@ -211,7 +212,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		model := intern.WebauthnSessionDataFromModel(sessionData)
-		_, err = h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+		credential, err := h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
 			return webauthnUser, nil
 		}, *model, request)
 		if err != nil {
@@ -233,11 +234,11 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			Value:    sessionToken,
 			Domain:   "",
 			Secure:   true,
-			HttpOnly: false,
+			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 		}
 		c.SetCookie(cookie)
-		return c.String(http.StatusOK, "")
+		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID)})
 	})
 }
 

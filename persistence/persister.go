@@ -16,6 +16,7 @@ type persister struct {
 
 type Persister interface {
 	GetConnection() *pop.Connection
+	Transaction(func(tx *pop.Connection) error) error
 	GetUserPersister() UserPersister
 	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
 	GetPasscodePersister() PasscodePersister
@@ -132,4 +133,8 @@ func (p *persister) GetJwkPersister() JwkPersister {
 
 func (p *persister) GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister {
 	return NewJwkPersister(tx)
+}
+
+func (p *persister) Transaction(fn func(tx *pop.Connection) error) error {
+	return p.DB.Transaction(fn)
 }
