@@ -735,6 +735,8 @@ components:
         updated_at:
           type: string
           format: date-time
+        verified:
+          type: boolean
     UUID4:
       type: string
       format: uuid4
