@@ -12,7 +12,7 @@ import (
 	"sync"
 )
 
-func NewServeAllCommand(config *config.Config, persister *persistence.Persister) *cobra.Command {
+func NewServeAllCommand(config *config.Config, persister persistence.Persister) *cobra.Command {
 	return &cobra.Command{
 		Use:   "all",
 		Short: "Start the public and private portion of the hanko server",

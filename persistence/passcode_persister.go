@@ -8,15 +8,22 @@ import (
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
-type PasscodePersister struct {
+type PasscodePersister interface {
+	Get(uuid.UUID) (*models.Passcode, error)
+	Create(models.Passcode) error
+	Update(models.Passcode) error
+	Delete(models.Passcode) error
+}
+
+type passcodePersister struct {
 	db *pop.Connection
 }
 
-func NewPasscodePersister(db *pop.Connection) *PasscodePersister {
-	return &PasscodePersister{db: db}
+func NewPasscodePersister(db *pop.Connection) PasscodePersister {
+	return &passcodePersister{db: db}
 }
 
-func (p *PasscodePersister) Get(id uuid.UUID) (*models.Passcode, error) {
+func (p *passcodePersister) Get(id uuid.UUID) (*models.Passcode, error) {
 	passcode := models.Passcode{}
 	err := p.db.Find(&passcode, id)
 	if err != nil && err == sql.ErrNoRows {
@@ -29,7 +36,7 @@ func (p *PasscodePersister) Get(id uuid.UUID) (*models.Passcode, error) {
 	return &passcode, nil
 }
 
-func (p *PasscodePersister) Create(passcode models.Passcode) error {
+func (p *passcodePersister) Create(passcode models.Passcode) error {
 	vErr, err := p.db.ValidateAndCreate(&passcode)
 	if err != nil {
 		return fmt.Errorf("failed to store passcode: %w", err)
@@ -42,7 +49,7 @@ func (p *PasscodePersister) Create(passcode models.Passcode) error {
 	return nil
 }
 
-func (p *PasscodePersister) Update(passcode models.Passcode) error {
+func (p *passcodePersister) Update(passcode models.Passcode) error {
 	vErr, err := p.db.ValidateAndUpdate(&passcode)
 	if err != nil {
 		return fmt.Errorf("failed to update passcode: %w", err)
@@ -55,7 +62,7 @@ func (p *PasscodePersister) Update(passcode models.Passcode) error {
 	return nil
 }
 
-func (p *PasscodePersister) Delete(passcode models.Passcode) error {
+func (p *passcodePersister) Delete(passcode models.Passcode) error {
 	err := p.db.Destroy(&passcode)
 	if err != nil {
 		return fmt.Errorf("failed to delete passcode: %w", err)
