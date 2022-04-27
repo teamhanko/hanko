@@ -91,12 +91,12 @@ paths:
             schema:
               type: object
               properties:
-                email:
-                  type: string
+                user_id:
+                  $ref: '#/components/schemas/UUID4'
                 password:
                   type: string
               required:
-                - email
+                - user_id
                 - password
       responses:
         '200':
