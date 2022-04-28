@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 	"path/filepath"
@@ -12,10 +13,11 @@ import (
 type Config struct {
 	Server   Server
 	Webauthn WebauthnSettings
-	Passlink Passlink
-	Logging  Logging
+	Passcode Passcode
+	Password Password
 	Database Database
 	Secrets  Secrets
+	Cookies  Cookie
 }
 
 // Load loads config from given file or default places
@@ -40,11 +42,12 @@ func Load(cfgFile *string) *Config {
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
-	if err := viper.ReadInConfig(); err == nil {
+	var err error
+	if err = viper.ReadInConfig(); err == nil {
 		fmt.Println("Using config file:", viper.ConfigFileUsed())
 	}
 	c := defaultConfig()
-	err := viper.Unmarshal(c)
+	err = viper.Unmarshal(c)
 	if err != nil {
 		panic(fmt.Sprintf("unable to decode config into struct, %v", err))
 	}
@@ -61,47 +64,80 @@ func defaultConfig() *Config {
 			Private: ServerSettings{
 				Address: ":8001",
 			},
-			ExternalHost: "",
+		},
+		Cookies: Cookie{
+			HttpOnly: true,
+			SameSite: "strict",
 		},
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
-				DisplayName: "Hanko GmbH",
-				Icon:        "https://hanko.io/logo.png",
-				Origins:     []string{"http://localhost:3000"},
+				DisplayName: "Hanko Authentication Service",
+				Origin:      "http://localhost",
 			},
-			Timeouts: Timeouts{
-				Authentication: 60000,
-				Registration:   60000,
+			Timeout: 60000,
+		},
+		Passcode: Passcode{
+			Smtp: SMTP{
+				Port: "465",
 			},
-		},
-		Passlink: Passlink{
-			Email:               Email{},
-			Limit:               Limit{},
-			AllowedRedirectUrls: nil,
-			DefaultRedirectUrl:  "",
-			Smtp:                SMTP{},
-		},
-		Logging: Logging{
-			Level:  "info",
-			Format: "",
 		},
 		Database: Database{
 			Database: "hanko",
-			User:     "postgres",
-			Password: "postgres",
-			Host:     "localhost",
-			Port:     "5432",
-			Dialect:  "postgres",
 		},
 	}
 }
 
+func (c *Config) Validate() error {
+	err := c.Server.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate server settings: %w", err)
+	}
+	err = c.Webauthn.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate webauthn settings: %w", err)
+	}
+	err = c.Passcode.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate passcode settings: %w", err)
+	}
+	err = c.Database.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate database settings: %w", err)
+	}
+	err = c.Secrets.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate secrets: %w", err)
+	}
+	return nil
+}
+
 // Server contains the setting for the public and private server
 type Server struct {
-	Public       ServerSettings
-	Private      ServerSettings
-	ExternalHost string
+	Public  ServerSettings
+	Private ServerSettings
+}
+
+func (s *Server) Validate() error {
+	err := s.Public.Validate()
+	if err != nil {
+		return fmt.Errorf("error validating public server settings: %w", err)
+	}
+	err = s.Private.Validate()
+	if err != nil {
+		return fmt.Errorf("error validating private server settings: %w", err)
+	}
+	return nil
+}
+
+type Password struct {
+	Enabled bool
+}
+
+type Cookie struct {
+	Domain   string
+	HttpOnly bool   `mapstructure:"http_only"`
+	SameSite string `mapstructure:"same_site"`
 }
 
 type ServerSettings struct {
@@ -110,27 +146,33 @@ type ServerSettings struct {
 	Address string
 }
 
+func (s *ServerSettings) Validate() error {
+	if len(strings.TrimSpace(s.Address)) == 0 {
+		return errors.New("field Address must not be empty")
+	}
+	return nil
+}
+
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty RelyingParty
-	Timeouts     Timeouts
+	RelyingParty RelyingParty `mapstructure:"relying_party"`
+	Timeout      int
+}
+
+// Validate does not need to validate the config, because the library does this already
+func (r *WebauthnSettings) Validate() error {
+	return nil
 }
 
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
 	Id          string
-	DisplayName string
+	DisplayName string `mapstructure:"display_name"`
 	Icon        string
-	Origins     []string
+	Origin      string
 }
 
-// Timeouts defines when an Authentication or Registration Webauthn flow times out
-type Timeouts struct {
-	Authentication int
-	Registration   int
-}
-
-// SMTP Server Settings for sending passlinks
+// SMTP Server Settings for sending passcodes
 type SMTP struct {
 	Host     string
 	Port     string
@@ -138,36 +180,49 @@ type SMTP struct {
 	Password string
 }
 
+func (s *SMTP) Validate() error {
+	if len(strings.TrimSpace(s.Host)) == 0 {
+		return errors.New("smtp host must not be empty")
+	}
+	if len(strings.TrimSpace(s.Port)) == 0 {
+		return errors.New("smtp port must not be empty")
+	}
+	if len(strings.TrimSpace(s.User)) == 0 {
+		return errors.New("smtp user must not be empty")
+	}
+	if len(strings.TrimSpace(s.Password)) == 0 {
+		return errors.New("smtp password must not be empty")
+	}
+	return nil
+}
+
 type Email struct {
-	Interval            string
-	From                string
-	Customization       *Customization
-	CustomTemplatesPath string
+	FromAddress string `mapstructure:"from_address"`
+	FromName    string `mapstructure:"from_name"`
 }
 
-type Limit struct {
-	Tokens        uint64
-	Interval      string
-	SweepInterval string
-	SweepMinTTL   string
+func (e *Email) Validate() error {
+	if len(strings.TrimSpace(e.FromAddress)) == 0 {
+		return errors.New("from_address must not be empty")
+	}
+	return nil
 }
 
-type Customization struct {
-	BrandColor   *string
-	BorderRadius *int
+type Passcode struct {
+	Email Email
+	Smtp  SMTP
 }
 
-type Passlink struct {
-	Email               Email
-	Limit               Limit
-	AllowedRedirectUrls []string
-	DefaultRedirectUrl  string
-	Smtp                SMTP
-}
-
-type Logging struct {
-	Level  string
-	Format string
+func (p *Passcode) Validate() error {
+	err := p.Email.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate email settings: %w", err)
+	}
+	err = p.Smtp.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate smtp settings: %w", err)
+	}
+	return nil
 }
 
 // Database connection settings
@@ -180,6 +235,25 @@ type Database struct {
 	Dialect  string `json:"dialect"`
 }
 
+func (d *Database) Validate() error {
+	if len(strings.TrimSpace(d.Database)) == 0 {
+		return errors.New("database must not be empty")
+	}
+	if len(strings.TrimSpace(d.User)) == 0 {
+		return errors.New("user must not be empty")
+	}
+	if len(strings.TrimSpace(d.Host)) == 0 {
+		return errors.New("host must not be empty")
+	}
+	if len(strings.TrimSpace(d.Port)) == 0 {
+		return errors.New("port must not be empty")
+	}
+	if len(strings.TrimSpace(d.Dialect)) == 0 {
+		return errors.New("dialect must not be empty")
+	}
+	return nil
+}
+
 type Secrets struct {
 	// Keys secret is used to en- and decrypt the JWKs which get used to sign the JWT tokens.
 	// For every key a JWK is generated, encrypted with the key and persisted in the database.
@@ -187,4 +261,11 @@ type Secrets struct {
 	// You can use this list for key rotation.
 	// Each key must be at least 16 characters long.
 	Keys []string `json:"keys"`
+}
+
+func (s *Secrets) Validate() error {
+	if len(s.Keys) == 0 {
+		return errors.New("at least one key must be defined")
+	}
+	return nil
 }
