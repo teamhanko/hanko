@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/cmd/serve"
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/persistence"
+	"log"
 	"os"
 )
 
@@ -28,8 +29,7 @@ func NewRootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	err := initConfig()
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	err = initPersister()
 	if err != nil {
@@ -54,7 +54,11 @@ func Execute() {
 }
 
 func initConfig() error {
-	cfg = config.Load(&cfgFile)
+	var err error
+	cfg, err = config.Load(&cfgFile)
+	if err != nil {
+		return fmt.Errorf("failed to load config: %w", err)
+	}
 	return cfg.Validate()
 }
 
