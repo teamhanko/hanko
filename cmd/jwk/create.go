@@ -6,6 +6,7 @@ import (
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/crypto/jwk"
 	"github.com/teamhanko/hanko/persistence"
+	"log"
 )
 
 func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobra.Command {
@@ -18,8 +19,7 @@ func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobr
 			jwkPersister := persister.GetJwkPersister()
 			_, err := jwk.NewDefaultManager(cfg.Secrets.Keys, jwkPersister)
 			if err != nil {
-				fmt.Println(err)
-				return
+				log.Fatal(err)
 			}
 		},
 	}

@@ -1,10 +1,9 @@
 package migrate
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/persistence"
-	"os"
+	"log"
 )
 
 func NewMigrateUpCommand(persister persistence.Migrator) *cobra.Command {
@@ -15,8 +14,7 @@ func NewMigrateUpCommand(persister persistence.Migrator) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			err := persister.MigrateUp()
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 		},
 	}

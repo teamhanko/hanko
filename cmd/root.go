@@ -13,7 +13,6 @@ import (
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/persistence"
 	"log"
-	"os"
 )
 
 var (
@@ -33,7 +32,7 @@ func NewRootCmd() *cobra.Command {
 	}
 	err = initPersister()
 	if err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	migrate.RegisterCommands(cmd, persister)
 	serve.RegisterCommands(cmd, cfg, persister)
@@ -49,7 +48,7 @@ func Execute() {
 
 	err := cmd.Execute()
 	if err != nil {
-		os.Exit(1)
+		log.Fatal(err)
 	}
 }
 
