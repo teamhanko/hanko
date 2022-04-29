@@ -148,7 +148,7 @@ func (s *Service) Validate() error {
 }
 
 type Password struct {
-	Enabled bool
+	Enabled bool `json:"enabled"`
 }
 
 type Cookie struct {
