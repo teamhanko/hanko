@@ -1,5 +1,0 @@
-database:
-  user: hanko
-  password: hanko
-  host: postgresd
-  port: 5432

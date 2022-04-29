@@ -3,9 +3,11 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/spf13/viper"
-	"path/filepath"
-	"runtime"
+	"github.com/knadh/koanf"
+	"github.com/knadh/koanf/parsers/yaml"
+	"github.com/knadh/koanf/providers/env"
+	"github.com/knadh/koanf/providers/file"
+	"log"
 	"strings"
 )
 
@@ -20,39 +22,37 @@ type Config struct {
 	Cookies  Cookie
 }
 
-// Load loads config from given file or default places
-func Load(cfgFile *string) *Config {
-	if cfgFile != nil && *cfgFile != "" {
-		// Use given config file
-		viper.SetConfigFile(*cfgFile)
-	} else {
-		// Use config file from default places
-		// Get base path of binary call
-		_, b, _, _ := runtime.Caller(0)
-		basePath := filepath.Dir(b)
-
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(basePath)
-		viper.AddConfigPath("/etc/config")
-		viper.AddConfigPath("/etc/secrets")
-		viper.AddConfigPath("./config")
-		viper.SetConfigName("hanko-config")
-	}
-
-	viper.AutomaticEnv()
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
-
+func Load(cfgFile *string) (*Config, error) {
+	k := koanf.New(".")
 	var err error
-	if err = viper.ReadInConfig(); err == nil {
-		fmt.Println("Using config file:", viper.ConfigFileUsed())
-	}
-	c := defaultConfig()
-	err = viper.Unmarshal(c)
-	if err != nil {
-		panic(fmt.Sprintf("unable to decode config into struct, %v", err))
+	if cfgFile != nil && *cfgFile != "" {
+		if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err == nil {
+			log.Println("Using config file:", *cfgFile)
+		} else {
+			log.Println("Failed to load config from:", *cfgFile)
+		}
+	} else {
+		if err = k.Load(file.Provider("./config/config.yaml"), yaml.Parser()); err == nil {
+			log.Println("Using config file:", "./config/config.yaml")
+		} else {
+			log.Println("failed to load config from:", "./config/config.yaml")
+		}
 	}
 
-	return c
+	err = k.Load(env.Provider("", ".", func(s string) string {
+		return strings.Replace(strings.ToLower(s), "_", ".", -1)
+	}), nil)
+	if err != nil {
+		log.Println("failed to load config from env vars")
+	}
+
+	c := defaultConfig()
+	err = k.Unmarshal("", c)
+	if err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	return c, nil
 }
 
 func defaultConfig() *Config {
@@ -136,8 +136,8 @@ type Password struct {
 
 type Cookie struct {
 	Domain   string
-	HttpOnly bool   `mapstructure:"http_only"`
-	SameSite string `mapstructure:"same_site"`
+	HttpOnly bool   `koanf:"http_only"`
+	SameSite string `koanf:"same_site"`
 }
 
 type ServerSettings struct {
@@ -155,7 +155,7 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty RelyingParty `mapstructure:"relying_party"`
+	RelyingParty RelyingParty `koanf:"relying_party"`
 	Timeout      int
 }
 
@@ -167,7 +167,7 @@ func (r *WebauthnSettings) Validate() error {
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
 	Id          string
-	DisplayName string `mapstructure:"display_name"`
+	DisplayName string `koanf:"display_name"`
 	Icon        string
 	Origin      string
 }
@@ -197,8 +197,8 @@ func (s *SMTP) Validate() error {
 }
 
 type Email struct {
-	FromAddress string `mapstructure:"from_address"`
-	FromName    string `mapstructure:"from_name"`
+	FromAddress string `koanf:"from_address"`
+	FromName    string `koanf:"from_name"`
 }
 
 func (e *Email) Validate() error {

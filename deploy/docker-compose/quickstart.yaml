@@ -4,9 +4,9 @@ services:
     image: ghcr.io/teamhanko/hanko:main
     volumes:
       - type: bind
-        source: ../../config/quickstart.yaml
-        target: /etc/config/hanko-config.yaml
-    command: --config /etc/config/hanko-config.yaml migrate up
+        source: ../../config/config.yaml
+        target: /etc/config/config.yaml
+    command: --config /etc/config/config.yaml migrate up
     restart: on-failure
     depends_on:
       - postgresd
@@ -20,11 +20,11 @@ services:
       - '8000:8000' # public
       - '8001:8001' # private
     restart: unless-stopped
-    command: serve --config /etc/config/hanko-config.yaml
+    command: serve --config /etc/config/config.yaml
     volumes:
       - type: bind
-        source: ../../config/quickstart.yaml
-        target: /etc/config/hanko-config.yaml
+        source: ../../config/config.yaml
+        target: /etc/config/config.yaml
     networks:
       - intranet
   postgresd:
