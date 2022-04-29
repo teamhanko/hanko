@@ -136,7 +136,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		Value:    sessionToken,
 		Domain:   "",
 		Secure:   true,
-		HttpOnly: false,
+		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 	}
 	c.SetCookie(cookie)
