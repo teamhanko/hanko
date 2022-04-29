@@ -114,7 +114,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithValidationErrors'
         '500':
           description: 'Internal server error'
           content:
@@ -151,7 +151,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithValidationErrors'
         '500':
           description: 'Internal server error'
           content:
@@ -406,7 +406,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/ErrorWithValidationErrors'
         '500':
           description: 'Internal server error'
           content:
@@ -758,6 +758,15 @@ components:
           format: int32
         message:
           type: string
+    ErrorWithValidationErrors:
+      allOf:
+        - $ref: '#/components/schemas/Error'
+        - type: object
+          properties:
+            validation_errors:
+              type: array
+              items:
+                type: string
   securitySchemes:
     CookieAuth:
       type: apiKey
