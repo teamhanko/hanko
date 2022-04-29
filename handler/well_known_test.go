@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo/v4"
 	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
+	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/crypto/jwk"
 	"github.com/teamhanko/hanko/test"
 	"net/http"
@@ -34,7 +35,8 @@ func TestSomethingWrongWithKeys(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	jwkMan := faultyJwkManager{}
-	h, err := NewWellKnownHandler(jwkMan)
+	cfg := config.Config{Password: config.Password{Enabled: true}}
+	h, err := NewWellKnownHandler(cfg, jwkMan)
 	assert.NoError(t, err)
 
 	if assert.NoError(t, h.GetPublicKeys(c)) {
@@ -51,7 +53,8 @@ func TestGetPublicKeys(t *testing.T) {
 
 	jwkMan, err := jwk.NewDefaultManager([]string{"superRandomAndSecure"}, test.NewJwkPersister(nil))
 	assert.NoError(t, err)
-	h, err := NewWellKnownHandler(jwkMan)
+	cfg := config.Config{Password: config.Password{Enabled: true}}
+	h, err := NewWellKnownHandler(cfg, jwkMan)
 	assert.NoError(t, err)
 
 	if assert.NoError(t, h.GetPublicKeys(c)) {
