@@ -164,12 +164,9 @@ var defaultConfig = config.WebauthnSettings{
 		Id:          "localhost",
 		DisplayName: "Test Relying Party",
 		Icon:        "",
-		Origins:     []string{"http://localhost:8080"},
+		Origin:      "http://localhost:8080",
 	},
-	Timeouts: config.Timeouts{
-		Authentication: 60000,
-		Registration:   60000,
-	},
+	Timeout: 60000,
 }
 
 type sessionManager struct {

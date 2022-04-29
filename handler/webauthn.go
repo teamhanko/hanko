@@ -31,14 +31,14 @@ func NewWebauthnHandler(cfg config.WebauthnSettings, persister persistence.Persi
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.RelyingParty.DisplayName,
 		RPID:                  cfg.RelyingParty.Id,
-		RPOrigin:              cfg.RelyingParty.Origins[0], // TODO:
+		RPOrigin:              cfg.RelyingParty.Origin,
 		AttestationPreference: protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
 			RequireResidentKey: &f,
 			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
 			UserVerification:   protocol.VerificationRequired,
 		},
-		Timeout: cfg.Timeouts.Registration, // TODO:
+		Timeout: cfg.Timeout,
 		Debug:   false,
 	})
 

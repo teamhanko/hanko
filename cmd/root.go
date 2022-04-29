@@ -5,6 +5,7 @@ Copyright © 2022 Hanko GmbH <developers@hanko.io>
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/cmd/jwk"
 	"github.com/teamhanko/hanko/cmd/migrate"
@@ -25,8 +26,12 @@ func NewRootCmd() *cobra.Command {
 		Use: "hanko",
 	}
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
-	initConfig()
-	err := initPersister()
+	err := initConfig()
+	if err != nil {
+		_, _ = fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	err = initPersister()
 	if err != nil {
 		os.Exit(1)
 	}
@@ -48,8 +53,9 @@ func Execute() {
 	}
 }
 
-func initConfig() {
+func initConfig() error {
 	cfg = config.Load(&cfgFile)
+	return cfg.Validate()
 }
 
 func initPersister() error {
