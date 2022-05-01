@@ -16,8 +16,8 @@ And we are happy to share this with you.
 
 🚧 PLEASE NOTE: This project is pre-alpha and not yet functional. If you want to get notified as soon as we're ready you can sign up to our [newsletter](https://www.hanko.io/updates) or join our [Slack community](https://www.hanko.io/community).
 
-# We take you on the journey beyond passwords...
-...and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords. 
+# We take you on the journey beyond passwords ...
+... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords. 
 With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that has the potential to replace passwords for good.
 
 # Build your product, not another (password) login
