@@ -16,9 +16,6 @@ func NewApiError(code int) *ApiError {
 }
 
 func (e *ApiError) WithValidationErrors(validationErrors []string) *ApiError {
-	if e.ValidationErrors == nil {
-		e.ValidationErrors = []string{}
-	}
 	e.ValidationErrors = validationErrors
 	return e
 }
