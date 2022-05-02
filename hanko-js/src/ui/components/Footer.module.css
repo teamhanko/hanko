@@ -1,0 +1,12 @@
+.footer {
+    width: 350px;
+    flex: 0 1 auto;
+}
+
+.footer :nth-child(1) {
+    float: left;
+}
+
+.footer :nth-child(2) {
+    float: right;
+}

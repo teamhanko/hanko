@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hanko Web Component Test</title>
+    <script type="text/javascript" src="../dist/hanko.js"></script>
+    <script>
+        document.addEventListener("onSuccess", (event) => {
+            console.log(event);
+            document.getElementsByTagName("body")[0].innerHTML = "<h1>secured content...</h1>"
+        })
+    </script>
+</head>
+<body>
+<x-hanko lang="en" api="http://localhost:8000"></x-hanko>
+</body>
+</html>

@@ -1,0 +1,11 @@
+.linkWithLoadingIndicator {
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px;
+}
+
+.linkWithLoadingIndicator.reverse {
+    flex-direction: row-reverse;
+}

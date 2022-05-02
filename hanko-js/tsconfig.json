@@ -1,12 +1,29 @@
 {
   "include": [
-    "src/*"
+    "src/**/*"
   ],
   "compilerOptions": {
-    "target": "es6",
-    "lib": [
-      "ES2019",
-      "dom"
-    ]
+    "paths": {
+      "*": [
+        "./*"
+      ]
+    },
+    "esModuleInterop": true,
+    "baseUrl": "./src",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "jsxFactory": "preact.h",
+    "noResolve": false,
+    "declaration": true,
+    "diagnostics": true,
+    "outDir": "./dist",
+    "lib":["ES2015", "ES2016", "dom"],
+    "sourceMap": true,
+    "noImplicitAny": true,
+    "target": "es5",
+    "module": "commonjs"
   }
 }
