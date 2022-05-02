@@ -43,7 +43,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		}
 
 		newUser := models.NewUser(body.Email)
-		err = h.persister.GetUserPersister().Create(newUser)
+		err = h.persister.GetUserPersisterWithConnection(tx).Create(newUser)
 		if err != nil {
 			return err
 		}
