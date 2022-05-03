@@ -22,7 +22,7 @@ var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 var userIdBytes = []byte{0xec, 0x4e, 0xf0, 0x49, 0x5b, 0x88, 0x43, 0x21, 0xa1, 0x73, 0x21, 0xb0, 0xef, 0xf0, 0x6a, 0x4}
 
 func TestNewWebauthnHandler(t *testing.T) {
-	p := test.NewPersister(nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, handler)
@@ -38,7 +38,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("hanko", token)
 
-	p := test.NewPersister(users, nil, nil, credentials, sessionData)
+	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
@@ -74,7 +74,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("hanko", token)
 
-	p := test.NewPersister(users, nil, nil, nil, sessionData)
+	p := test.NewPersister(users, nil, nil, nil, sessionData, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
@@ -102,7 +102,7 @@ func TestWebauthnHandler_BeginAuthentication(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, sessionData)
+	p := test.NewPersister(users, nil, nil, nil, sessionData, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
@@ -134,7 +134,7 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, credentials, sessionData)
+	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
