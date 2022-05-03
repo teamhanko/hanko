@@ -18,13 +18,13 @@ import (
 )
 
 func TestNewPasscodeHandler(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(nil, nil, nil, nil, nil), sessionManager{}, mailer{})
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, passcodeHandler)
 }
 
 func TestPasscodeHandler_Init(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, nil, nil, nil, nil), sessionManager{}, mailer{})
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, nil, nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
 	body := passcodeInit{
@@ -46,7 +46,7 @@ func TestPasscodeHandler_Init(t *testing.T) {
 }
 
 func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, nil, nil, nil, nil), sessionManager{}, mailer{})
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, nil, nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
 	body := passcodeInit{
@@ -67,7 +67,7 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, passcodes(), nil, nil, nil), sessionManager{}, mailer{})
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
 	body := passcodeFinish{
@@ -89,7 +89,7 @@ func TestPasscodeHandler_Finish(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, passcodes(), nil, nil, nil), sessionManager{}, mailer{})
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
 	body := passcodeFinish{
@@ -111,7 +111,7 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, passcodes(), nil, nil, nil), sessionManager{}, mailer{})
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
 	body := passcodeFinish{

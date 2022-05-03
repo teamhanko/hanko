@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/crypto/jwk"
+	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/handler"
 	"github.com/teamhanko/hanko/mail"
 	"github.com/teamhanko/hanko/persistence"
@@ -25,6 +26,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}},"referer":"${referer}"` + "\n",
 	}))
 
+	e.Validator = dto.NewCustomValidator()
+
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
@@ -38,6 +41,17 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
+
+	passwordHandler := handler.NewPasswordHandler(persister, sessionManager)
+
+	password := e.Group("/password")
+	password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
+	password.POST("/login", passwordHandler.Login)
+
+	userHandler := handler.NewUserHandler(persister)
+
+	user := e.Group("/users")
+	user.POST("", userHandler.Create)
 
 	healthHandler := handler.NewHealthHandler()
 	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionManager)

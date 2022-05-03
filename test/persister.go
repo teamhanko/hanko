@@ -6,13 +6,14 @@ import (
 	"github.com/teamhanko/hanko/persistence/models"
 )
 
-func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData) persistence.Persister {
+func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
 		jwkPersister:                 NewJwkPersister(jwks),
 		webauthnCredentialPersister:  NewWebauthnCredentialPersister(credentials),
 		webauthnSessionDataPersister: NewWebauthnSessionDataPersister(sessionData),
+		passwordCredentialPersister:  NewPasswordCredentialPersister(passwords),
 	}
 }
 
@@ -22,6 +23,15 @@ type persister struct {
 	jwkPersister                 persistence.JwkPersister
 	webauthnCredentialPersister  persistence.WebauthnCredentialPersister
 	webauthnSessionDataPersister persistence.WebauthnSessionDataPersister
+	passwordCredentialPersister  persistence.PasswordCredentialPersister
+}
+
+func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
+	return p.passwordCredentialPersister
+}
+
+func (p *persister) GetPasswordCredentialPersisterWithConnection(tx *pop.Connection) persistence.PasswordCredentialPersister {
+	return p.passwordCredentialPersister
 }
 
 func (p *persister) GetConnection() *pop.Connection {

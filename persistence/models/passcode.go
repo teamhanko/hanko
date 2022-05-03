@@ -22,7 +22,7 @@ type Passcode struct {
 func (passcode *Passcode) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: passcode.ID},
-		&validators.UUIDIsPresent{Name: "Email", Field: passcode.UserId},
+		&validators.UUIDIsPresent{Name: "UserID", Field: passcode.UserId},
 		&validators.StringLengthInRange{Name: "Code", Field: passcode.Code, Min: 6},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: passcode.CreatedAt},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: passcode.UpdatedAt},

@@ -1,7 +1,7 @@
 create_table("users") {
     t.Column("id", "uuid", {primary: true})
     t.Column("email", "string", {})
-    t.Column("password", "string", {})
+    t.Column("verified", "bool", {})
     t.Timestamps()
     t.Index("email", {"unique": true})
 }

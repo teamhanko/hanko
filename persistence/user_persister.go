@@ -10,6 +10,7 @@ import (
 
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
+	GetByEmail(email string) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
@@ -26,6 +27,20 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
 	err := p.db.Find(&user, id)
+	if err != nil && err == sql.ErrNoRows {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (p *userPersister) GetByEmail(email string) (*models.User, error) {
+	user := models.User{}
+	query := p.db.Where("email = (?)", email)
+	err := query.First(&user)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil
 	}

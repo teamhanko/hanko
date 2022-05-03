@@ -10,11 +10,22 @@ import (
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID        uuid.UUID `db:"id"`
-	Email     string    `db:"email"`
-	Password  string    `db:"password"` // password is optional, when login method is not set to password
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        uuid.UUID `db:"id" json:"id"`
+	Email     string    `db:"email" json:"email"`
+	Verified  bool      `db:"verified" json:"verified"`
+	CreatedAt time.Time `db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `db:"updated_at" json:"updated_at"`
+}
+
+func NewUser(email string) User {
+	id, _ := uuid.NewV4()
+	return User{
+		ID:        id,
+		Email:     email,
+		Verified:  false,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
