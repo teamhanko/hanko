@@ -21,7 +21,7 @@ func TestRenderer_Render(t *testing.T) {
 	templateData := map[string]interface{}{
 		"UserEmail":     "example@example.com",
 		"ServiceDomain": "example.com",
-		"Ttl":           5,
+		"TTL":           5,
 		"Code":          "123456",
 	}
 

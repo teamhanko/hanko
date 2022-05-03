@@ -81,6 +81,7 @@ func defaultConfig() *Config {
 			Smtp: SMTP{
 				Port: "465",
 			},
+			TTL: 300,
 		},
 		Database: Database{
 			Database: "hanko",
@@ -211,6 +212,7 @@ func (e *Email) Validate() error {
 type Passcode struct {
 	Email Email
 	Smtp  SMTP
+	TTL   int
 }
 
 func (p *Passcode) Validate() error {

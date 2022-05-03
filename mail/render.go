@@ -64,3 +64,11 @@ func (r *Renderer) Render(templateName string, lang string, data map[string]inte
 	}
 	return templateBuffer.String(), nil
 }
+
+func (r *Renderer) Translate(lang string, messageID string, data map[string]interface{}) string {
+	loc := i18n.NewLocalizer(r.bundle, lang)
+	return loc.MustLocalize(&i18n.LocalizeConfig{
+		MessageID:    messageID,
+		TemplateData: data,
+	})
+}

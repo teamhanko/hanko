@@ -7,21 +7,25 @@ import (
 	"strconv"
 )
 
-type Mailer struct {
+type Mailer interface {
+	Send(message *gomail.Message) error
+}
+
+type mailer struct {
 	dialer *gomail.Dialer
 }
 
-func NewMailer(config config.SMTP) (*Mailer, error) {
+func NewMailer(config config.SMTP) (Mailer, error) {
 	port, err := strconv.Atoi(config.Port)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse SMTP port: %w", err)
 	}
 	d := gomail.NewDialer(config.Host, port, config.User, config.Password)
-	return &Mailer{
+	return &mailer{
 		dialer: d,
 	}, nil
 }
 
-func (m Mailer) Send(message *gomail.Message) error {
+func (m *mailer) Send(message *gomail.Message) error {
 	return m.dialer.DialAndSend(message)
 }

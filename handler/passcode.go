@@ -1,0 +1,184 @@
+package handler
+
+import (
+	"fmt"
+	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/crypto"
+	"github.com/teamhanko/hanko/dto"
+	"github.com/teamhanko/hanko/mail"
+	"github.com/teamhanko/hanko/persistence"
+	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/session"
+	"gopkg.in/gomail.v2"
+	"net/http"
+	"time"
+)
+
+type passcodeInit struct {
+	UserId string `json:"user_id"`
+}
+
+type passcodeReturn struct {
+	Id        string    `json:"id"`
+	TTL       int       `json:"ttl"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type PasscodeHandler struct {
+	mailer            mail.Mailer
+	renderer          *mail.Renderer
+	passcodeGenerator crypto.PasscodeGenerator
+	persister         persistence.Persister
+	emailConfig       config.Email
+	TTL               int
+	sessionManager    session.Manager
+}
+
+func NewPasscodeHandler(config config.Passcode, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
+	renderer, err := mail.NewRenderer()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create new renderer: %w", err)
+	}
+	return &PasscodeHandler{
+		mailer:            mailer,
+		renderer:          renderer,
+		passcodeGenerator: crypto.NewPasscodeGenerator(),
+		persister:         persister,
+		emailConfig:       config.Email,
+		TTL:               config.TTL,
+		sessionManager:    sessionManager,
+	}, nil
+}
+
+func (h *PasscodeHandler) Init(c echo.Context) error {
+	var body passcodeInit
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	userId, err := uuid.FromString(body.UserId)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+	}
+
+	passcode, err := h.passcodeGenerator.Generate()
+
+	passcodeId, err := uuid.NewV4()
+	now := time.Now()
+	passcodeModel := models.Passcode{
+		ID:        passcodeId,
+		UserId:    userId,
+		Ttl:       h.TTL,
+		Code:      passcode,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	err = h.persister.GetPasscodePersister().Create(passcodeModel)
+	if err != nil {
+		return fmt.Errorf("failed to store passcode: %w", err)
+	}
+
+	data := map[string]interface{}{
+		"Code":          passcode,
+		"UserEmail":     user.Email,
+		"ServiceDomain": "change_me.example.com", // TODO:
+		"ServiceName":   "Login service",         // TODO:
+		"TTL":           h.TTL,
+	}
+
+	lang := c.Request().Header.Get("Accept-Language")
+	str, err := h.renderer.Render("loginTextMail", lang, data)
+
+	message := gomail.NewMessage()
+	message.SetAddressHeader("To", user.Email, "")
+	message.SetAddressHeader("From", h.emailConfig.FromAddress, h.emailConfig.FromName)
+
+	message.SetHeader("Subject", h.renderer.Translate(lang, "email_subject_login", data))
+
+	message.SetBody("test/plain", str)
+
+	err = h.mailer.Send(message)
+	if err != nil {
+		return fmt.Errorf("failed to send passcode: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, passcodeReturn{
+		Id:        passcodeId.String(),
+		TTL:       h.TTL,
+		CreatedAt: passcodeModel.CreatedAt,
+	})
+}
+
+func (h *PasscodeHandler) Finish(c echo.Context) error {
+	startTime := time.Now()
+	var body passcodeFinish
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	passcodeId, err := uuid.FromString(body.Id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+	}
+
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		passcodePersister := h.persister.GetPasscodePersisterWithConnection(tx)
+		passcode, err := passcodePersister.Get(passcodeId)
+		if err != nil {
+			return fmt.Errorf("failed to get passcode: %w", err)
+		}
+		if passcode == nil {
+			return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		}
+
+		if passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second).Before(startTime) {
+			return c.JSON(http.StatusRequestTimeout, dto.NewApiError(http.StatusRequestTimeout))
+		}
+
+		if passcode.Code != body.Code {
+			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
+		}
+
+		err = passcodePersister.Delete(*passcode)
+		if err != nil {
+			return fmt.Errorf("failed to delete passcode: %w", err)
+		}
+
+		sessionToken, err := h.sessionManager.Generate(passcode.ID)
+		if err != nil {
+			return fmt.Errorf("failed to create session token: %w", err)
+		}
+
+		cookie := &http.Cookie{
+			Name:     "hanko",
+			Value:    sessionToken,
+			Domain:   "",
+			Secure:   true,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+		}
+		c.SetCookie(cookie)
+		return c.JSON(http.StatusOK, passcodeReturn{
+			Id:        passcode.ID.String(),
+			TTL:       passcode.Ttl,
+			CreatedAt: passcode.CreatedAt,
+		})
+	})
+}
+
+type passcodeFinish struct {
+	Id   string
+	Code string
+}
