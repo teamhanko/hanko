@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/persistence"
 	"github.com/teamhanko/hanko/persistence/models"
 	"github.com/teamhanko/hanko/session"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 	"net/http"
 	"time"
@@ -76,11 +77,15 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	passcodeId, err := uuid.NewV4()
 	now := time.Now()
+	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte(passcode), 12)
+	if err != nil {
+		return fmt.Errorf("failed to hash passcode: %w", err)
+	}
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
 		UserId:    userId,
 		Ttl:       h.TTL,
-		Code:      passcode,
+		Code:      string(hashedPasscode),
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
@@ -147,7 +152,8 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return c.JSON(http.StatusRequestTimeout, dto.NewApiError(http.StatusRequestTimeout))
 		}
 
-		if passcode.Code != body.Code {
+		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(body.Code))
+		if err != nil {
 			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 		}
 
