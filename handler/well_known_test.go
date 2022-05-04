@@ -10,7 +10,6 @@ import (
 	"github.com/teamhanko/hanko/test"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
@@ -40,7 +39,6 @@ func TestSomethingWrongWithKeys(t *testing.T) {
 	assert.NoError(t, err)
 
 	if assert.NoError(t, h.GetPublicKeys(c)) {
-		assert.Equal(t, `{"Code":500,"Message":"Internal Server Error"}`, strings.TrimSuffix(rec.Body.String(), "\n"))
 		assert.Equal(t, http.StatusInternalServerError, rec.Result().StatusCode)
 	}
 }
