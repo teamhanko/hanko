@@ -8,6 +8,6 @@ type PublicConfig struct {
 }
 
 // FromConfig Returns a PublicConfig from the Application configuration
-func FromConfig(config2 config.Config) PublicConfig {
-	return PublicConfig{Password: config2.Password}
+func FromConfig(config config.Config) PublicConfig {
+	return PublicConfig{Password: config.Password}
 }
