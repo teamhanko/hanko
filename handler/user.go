@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/persistence"
@@ -50,4 +51,19 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 		return c.JSON(http.StatusOK, newUser)
 	})
+}
+
+func (h *UserHandler) Get(c echo.Context) error {
+	userId := c.Param("id")
+
+	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(userId))
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+	}
+
+	return c.JSON(http.StatusOK, user)
 }
