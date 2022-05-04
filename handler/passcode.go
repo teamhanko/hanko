@@ -186,19 +186,11 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			}
 		}
 
-		sessionToken, err := h.sessionManager.Generate(passcode.UserId)
+		cookie, err := h.sessionManager.GenerateCookie(passcode.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to create session token: %w", err)
 		}
 
-		cookie := &http.Cookie{
-			Name:     "hanko",
-			Value:    sessionToken,
-			Domain:   "",
-			Secure:   true,
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-		}
 		c.SetCookie(cookie)
 		return c.JSON(http.StatusOK, passcodeReturn{
 			Id:        passcode.ID.String(),
