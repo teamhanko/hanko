@@ -97,7 +97,6 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	data := map[string]interface{}{
 		"Code":          passcode,
-		"UserEmail":     user.Email,
 		"ServiceDomain": "change_me.example.com", // TODO:
 		"ServiceName":   "Login service",         // TODO:
 		"TTL":           h.TTL,
