@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/labstack/echo/v4"
-	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/crypto/jwk"
+	hankoJwk "github.com/teamhanko/hanko/crypto/jwk"
 	"github.com/teamhanko/hanko/test"
 	"net/http"
 	"net/http/httptest"
@@ -16,15 +17,15 @@ import (
 type faultyJwkManager struct {
 }
 
-func (f faultyJwkManager) GenerateKey() (jwk2.Key, error) {
+func (f faultyJwkManager) GenerateKey() (jwk.Key, error) {
 	panic("implement me")
 }
 
-func (f faultyJwkManager) GetPublicKeys() ([]jwk2.Key, error) {
+func (f faultyJwkManager) GetPublicKeys() ([]jwk.Key, error) {
 	return nil, errors.New("No Public Keys!")
 }
 
-func (f faultyJwkManager) GetSigningKey() (jwk2.Key, error) {
+func (f faultyJwkManager) GetSigningKey() (jwk.Key, error) {
 	panic("implement me")
 }
 
@@ -49,7 +50,7 @@ func TestGetPublicKeys(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	jwkMan, err := jwk.NewDefaultManager([]string{"superRandomAndSecure"}, test.NewJwkPersister(nil))
+	jwkMan, err := hankoJwk.NewDefaultManager([]string{"superRandomAndSecure"}, test.NewJwkPersister(nil))
 	assert.NoError(t, err)
 	cfg := config.Config{Password: config.Password{Enabled: true}}
 	h, err := NewWellKnownHandler(cfg, jwkMan)
@@ -57,5 +58,9 @@ func TestGetPublicKeys(t *testing.T) {
 
 	if assert.NoError(t, h.GetPublicKeys(c)) {
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+		set := jwk.NewSet()
+		err = json.Unmarshal(rec.Body.Bytes(), set)
+		assert.Equal(t, 1, set.Len())
+		assert.NoError(t, err)
 	}
 }
