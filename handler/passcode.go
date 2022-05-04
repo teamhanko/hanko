@@ -148,6 +148,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		passcodePersister := h.persister.GetPasscodePersisterWithConnection(tx)
+		userPersister := h.persister.GetUserPersisterWithConnection(tx)
 		passcode, err := passcodePersister.Get(passcodeId)
 		if err != nil {
 			return fmt.Errorf("failed to get passcode: %w", err)
@@ -170,7 +171,20 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to delete passcode: %w", err)
 		}
 
-		sessionToken, err := h.sessionManager.Generate(passcode.ID)
+		user, err := userPersister.Get(passcode.UserId)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
+
+		if !user.Verified {
+			user.Verified = true
+			err = userPersister.Update(*user)
+			if err != nil {
+				return fmt.Errorf("failed to update user: %w", err)
+			}
+		}
+
+		sessionToken, err := h.sessionManager.Generate(passcode.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to create session token: %w", err)
 		}
