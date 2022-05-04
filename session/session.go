@@ -4,24 +4,28 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/teamhanko/hanko/config"
 	hankoJwk "github.com/teamhanko/hanko/crypto/jwk"
 	hankoJwt "github.com/teamhanko/hanko/crypto/jwt"
+	"net/http"
 	"time"
 )
 
 type Manager interface {
-	Generate(uuid.UUID) (string, error)
+	GenerateJWT(uuid.UUID) (string, error)
 	Verify(string) (jwt.Token, error)
+	GenerateCookie(userId uuid.UUID) (*http.Cookie, error)
 }
 
 // Manager is used to create and verify session JWTs
 type manager struct {
 	jwtGenerator  hankoJwt.Generator
 	sessionLength time.Duration
+	cookieConfig   config.Cookie
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager hankoJwk.Manager) (Manager, error) {
+func NewManager(jwkManager hankoJwk.Manager, config config.Cookie) (Manager, error) {
 	signatureKey, err := jwkManager.GetSigningKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session generator: %w", err)
@@ -41,7 +45,7 @@ func NewManager(jwkManager hankoJwk.Manager) (Manager, error) {
 }
 
 // Generate creates a new session JWT for the given user
-func (g *manager) Generate(userId uuid.UUID) (string, error) {
+func (g *manager) GenerateJWT(userId uuid.UUID) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(g.sessionLength)
 
@@ -67,4 +71,20 @@ func (g *manager) Verify(token string) (jwt.Token, error) {
 	}
 
 	return parsedToken, nil
+}
+
+func (g *manager) GenerateCookie(userId uuid.UUID) (*http.Cookie, error) {
+	jwt, err := g.GenerateJWT(userId)
+	if err != nil {
+		return nil, err
+	}
+	return &http.Cookie{
+		Name:     "hanko",
+		Value:    jwt,
+		Domain:   g.cookieConfig.Domain,
+		Secure:   true,
+		HttpOnly: g.cookieConfig.HttpOnly,
+		//TODO: config has the SameSite Parameter which is string, http.SameSite is int do we need to make this configurable?
+		SameSite: http.SameSiteLaxMode,
+	}, nil
 }

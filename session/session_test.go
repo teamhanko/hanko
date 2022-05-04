@@ -9,41 +9,45 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/config"
 	"testing"
 	"time"
 )
 
 func TestNewGenerator(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewManager(&manager)
+	cfg := config.Cookie{}
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 }
 
 func TestGenerator_Generate(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewManager(&manager)
+	cfg := config.Cookie{}
+	sessionGenerator, err := NewManager(&manager,cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
 
-	session, err := sessionGenerator.Generate(userId)
+	session, err := sessionGenerator.GenerateJWT(userId)
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 }
 
 func TestGenerator_Verify(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewManager(&manager)
+	cfg := config.Cookie{}
+	sessionGenerator, err := NewManager(&manager,cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
 
-	session, err := sessionGenerator.Generate(userId)
+	session, err := sessionGenerator.GenerateJWT(userId)
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 
@@ -57,7 +61,8 @@ func TestGenerator_Verify(t *testing.T) {
 
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := jwkManager{}
-	sessionGenerator, err := NewManager(&manager)
+	cfg := config.Cookie{}
+	sessionGenerator, err := NewManager(&manager,cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
