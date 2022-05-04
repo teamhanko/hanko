@@ -74,8 +74,14 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	passcode, err := h.passcodeGenerator.Generate()
+	if err != nil {
+		return fmt.Errorf("failed to generate passcode: %w", err)
+	}
 
 	passcodeId, err := uuid.NewV4()
+	if err != nil {
+		return fmt.Errorf("failed to create passcodeId: %w", err)
+	}
 	now := time.Now()
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte(passcode), 12)
 	if err != nil {
@@ -104,6 +110,9 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	lang := c.Request().Header.Get("Accept-Language")
 	str, err := h.renderer.Render("loginTextMail", lang, data)
+	if err != nil {
+		return fmt.Errorf("failed to render email template: %w", err)
+	}
 
 	message := gomail.NewMessage()
 	message.SetAddressHeader("To", user.Email, "")

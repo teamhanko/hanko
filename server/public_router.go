@@ -55,9 +55,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 
 	healthHandler := handler.NewHealthHandler()
 	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionManager)
-	passcodeHandler, err := handler.NewPasscodeHandler(cfg.Passcode, persister, sessionManager, mailer)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
+	}
+	passcodeHandler, err := handler.NewPasscodeHandler(cfg.Passcode, persister, sessionManager, mailer)
+	if err != nil {
+		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
 	}
 
 	health := e.Group("/health")
