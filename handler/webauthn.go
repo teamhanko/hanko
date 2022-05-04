@@ -224,19 +224,11 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return fmt.Errorf("failed to delete assertion session data: %w", err)
 		}
 
-		sessionToken, err := h.sessionManager.Generate(webauthnUser.UserId)
+		cookie, err := h.sessionManager.GenerateCookie(webauthnUser.UserId)
 		if err != nil {
-			return fmt.Errorf("failed to create session token: %w", err)
+			return fmt.Errorf("failed to create session cookie: %w", err)
 		}
 
-		cookie := &http.Cookie{
-			Name:     "hanko",
-			Value:    sessionToken,
-			Domain:   "",
-			Secure:   true,
-			HttpOnly: true,
-			SameSite: http.SameSiteLaxMode,
-		}
 		c.SetCookie(cookie)
 		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID)})
 	})

@@ -33,13 +33,13 @@ func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobr
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager)
+			sessionManager, err := session.NewManager(jwkManager, cfg.Cookies)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return
 			}
 
-			token, err := sessionManager.Generate(uuid.FromStringOrNil(args[0]))
+			token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(args[0]))
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return

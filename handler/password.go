@@ -126,18 +126,9 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 	}
 
-	sessionToken, err := h.sessionManager.Generate(pw.UserId)
+	cookie, err := h.sessionManager.GenerateCookie(pw.UserId)
 	if err != nil {
-		return fmt.Errorf("failed to create session token: %w", err)
-	}
-
-	cookie := &http.Cookie{
-		Name:     "hanko",
-		Value:    sessionToken,
-		Domain:   "",
-		Secure:   true,
-		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		return fmt.Errorf("failed to create session cookie: %w", err)
 	}
 	c.SetCookie(cookie)
 	return c.String(http.StatusOK, "")

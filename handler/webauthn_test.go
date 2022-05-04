@@ -172,8 +172,18 @@ var defaultConfig = config.WebauthnSettings{
 type sessionManager struct {
 }
 
-func (s sessionManager) Generate(uuid uuid.UUID) (string, error) {
+func (s sessionManager) GenerateJWT(uuid uuid.UUID) (string, error) {
 	return userId, nil
+}
+
+func (s sessionManager) GenerateCookie(uuid uuid.UUID) (*http.Cookie, error) {
+	return &http.Cookie{
+		Name:     "hanko",
+		Value:    uuid.String(),
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+	}, nil
 }
 
 func (s sessionManager) Verify(token string) (jwt.Token, error) {
