@@ -41,7 +41,6 @@ func TestPasscodeHandler_Init(t *testing.T) {
 
 	if assert.NoError(t, passcodeHandler.Init(c)) {
 		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-		println(rec.Body.String())
 	}
 }
 
@@ -138,7 +137,7 @@ func passcodes() []models.Passcode {
 		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
 		UserId:    uuid.FromStringOrNil(userId),
 		Ttl:       300,
-		Code:      "123456",
+		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
 		CreatedAt: now,
 		UpdatedAt: now,
 	}}
