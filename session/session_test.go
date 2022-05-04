@@ -98,7 +98,7 @@ func (m *jwkManager) GenerateKey() (jwk.Key, error) {
 }
 
 
-func (m *jwkManager) GetPublicKeys() ([]jwk.Key, error) {
+func (m *jwkManager) GetPublicKeys() (jwk.Set, error) {
 	key, err := getJwk()
 	if err != nil {
 		return nil, err
@@ -107,7 +107,9 @@ func (m *jwkManager) GetPublicKeys() ([]jwk.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return []jwk.Key{publicKey}, nil
+	set := jwk.NewSet()
+	set.AddKey(publicKey)
+	return set, nil
 }
 
 func (m *jwkManager) GetSigningKey() (jwk.Key, error) {

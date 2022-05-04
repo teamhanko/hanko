@@ -107,10 +107,13 @@ func getPrivateKey(t *testing.T, key string) *rsa.PrivateKey {
 	return pKey
 }
 
-func getVerificationJwks(t *testing.T) []jwk.Key {
+func getVerificationJwks(t *testing.T) jwk.Set {
 	key1 := getSignatureJwk(t, signaturePrivateKey)
 	key2 := getSignatureJwk(t, signaturePrivateKey2)
-	return []jwk.Key{key1, key2}
+	set := jwk.NewSet()
+	set.AddKey(key1)
+	set.AddKey(key2)
+	return set
 }
 
 var subject = "c21ae0e1-39ad-494f-badd-2d54e072641e"

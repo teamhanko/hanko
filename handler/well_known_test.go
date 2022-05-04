@@ -21,7 +21,7 @@ func (f faultyJwkManager) GenerateKey() (jwk.Key, error) {
 	panic("implement me")
 }
 
-func (f faultyJwkManager) GetPublicKeys() ([]jwk.Key, error) {
+func (f faultyJwkManager) GetPublicKeys() (jwk.Set, error) {
 	return nil, errors.New("No Public Keys!")
 }
 

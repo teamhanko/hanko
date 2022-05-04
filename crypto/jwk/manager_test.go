@@ -55,7 +55,7 @@ func TestDefaultManager(t *testing.T) {
 
 	js, err := dm.GetPublicKeys()
 	require.NoError(t, err)
-	assert.Equal(t, 2, len(js))
+	assert.Equal(t, 2, js.Len())
 
 	sk, err := dm.GetSigningKey()
 	require.NoError(t, err)

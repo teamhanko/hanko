@@ -19,27 +19,34 @@ type Generator interface {
 type generator struct {
 	signatureKey     jwk.Key
 	verificationKeys []jwk.Key
+	verKeys jwk.Set
 }
 
 // NewGenerator returns a new jwt generator which signs JWTs with the given signing key and verifies JWTs with the given verificationKeys
-func NewGenerator(signatureKey jwk.Key, verificationKeys []jwk.Key) (Generator, error) {
+func NewGenerator(signatureKey jwk.Key, verificationKeys jwk.Set) (Generator, error) {
 	if signatureKey == nil {
 		return nil, errors.New("no key for signing was provided")
 	}
-	if len(verificationKeys) == 0 {
+	if verificationKeys.Len() == 0 {
 		return nil, errors.New("no keys for verification were provided")
 	}
 	var vKeys []jwk.Key
-	for _, key := range verificationKeys {
+
+
+	for it := verificationKeys.Keys(context.Background()); it.Next(context.Background()); {
+		pair := it.Pair()
+		key := pair.Value.(jwk.Key)
 		pKey, err := jwk.PublicKeyOf(key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get public key: %w", err)
 		}
 		vKeys = append(vKeys, pKey)
 	}
+
 	return &generator{
 		signatureKey:     signatureKey,
 		verificationKeys: vKeys,
+		verKeys: verificationKeys,
 	}, nil
 }
 
@@ -54,6 +61,7 @@ func (g *generator) Sign(token jwt.Token) ([]byte, error) {
 
 // Verify verifies a JWT, using the verificationKeys and returns the parsed JWT
 func (g *generator) Verify(signed []byte) (jwt.Token, error) {
+	//token, err := jwt.Parse(signed, jwt.WithKeySet(g.verKeys))
 	token, err := jwt.Parse(signed, jwt.WithKeyProvider(g))
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify jwt: %w", err)
