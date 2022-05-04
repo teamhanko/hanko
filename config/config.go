@@ -20,6 +20,7 @@ type Config struct {
 	Database Database
 	Secrets  Secrets
 	Cookies  Cookie
+	Service  Service
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -110,6 +111,10 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate secrets: %w", err)
 	}
+	err = c.Service.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate service settings: %w", err)
+	}
 	return nil
 }
 
@@ -127,6 +132,17 @@ func (s *Server) Validate() error {
 	err = s.Private.Validate()
 	if err != nil {
 		return fmt.Errorf("error validating private server settings: %w", err)
+	}
+	return nil
+}
+
+type Service struct {
+	Name string
+}
+
+func (s *Service) Validate() error {
+	if len(strings.TrimSpace(s.Name)) == 0 {
+		return errors.New("field name must not be empty")
 	}
 	return nil
 }

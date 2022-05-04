@@ -34,11 +34,12 @@ type PasscodeHandler struct {
 	passcodeGenerator crypto.PasscodeGenerator
 	persister         persistence.Persister
 	emailConfig       config.Email
+	serviceConfig     config.Service
 	TTL               int
 	sessionManager    session.Manager
 }
 
-func NewPasscodeHandler(config config.Passcode, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
+func NewPasscodeHandler(config config.Passcode, serviceConfig config.Service, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new renderer: %w", err)
@@ -49,6 +50,7 @@ func NewPasscodeHandler(config config.Passcode, persister persistence.Persister,
 		passcodeGenerator: crypto.NewPasscodeGenerator(),
 		persister:         persister,
 		emailConfig:       config.Email,
+		serviceConfig:     serviceConfig,
 		TTL:               config.TTL,
 		sessionManager:    sessionManager,
 	}, nil
@@ -101,11 +103,11 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to store passcode: %w", err)
 	}
 
+	durationTTL := time.Duration(h.TTL) * time.Second
 	data := map[string]interface{}{
-		"Code":          passcode,
-		"ServiceDomain": "change_me.example.com", // TODO:
-		"ServiceName":   "Login service",         // TODO:
-		"TTL":           h.TTL,
+		"Code":        passcode,
+		"ServiceName": h.serviceConfig.Name,
+		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
 	}
 
 	lang := c.Request().Header.Get("Accept-Language")
@@ -120,7 +122,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	message.SetHeader("Subject", h.renderer.Translate(lang, "email_subject_login", data))
 
-	message.SetBody("test/plain", str)
+	message.SetBody("text/plain", str)
 
 	err = h.mailer.Send(message)
 	if err != nil {

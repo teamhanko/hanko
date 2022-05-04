@@ -14,3 +14,5 @@ passcode:
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
