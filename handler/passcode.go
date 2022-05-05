@@ -18,16 +18,6 @@ import (
 	"time"
 )
 
-type passcodeInit struct {
-	UserId string `json:"user_id"`
-}
-
-type passcodeReturn struct {
-	Id        string    `json:"id"`
-	TTL       int       `json:"ttl"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
 type PasscodeHandler struct {
 	mailer            mail.Mailer
 	renderer          *mail.Renderer
@@ -57,7 +47,7 @@ func NewPasscodeHandler(config config.Passcode, serviceConfig config.Service, pe
 }
 
 func (h *PasscodeHandler) Init(c echo.Context) error {
-	var body passcodeInit
+	var body dto.PasscodeInitRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
@@ -129,7 +119,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to send passcode: %w", err)
 	}
 
-	return c.JSON(http.StatusOK, passcodeReturn{
+	return c.JSON(http.StatusOK, dto.PasscodeReturn{
 		Id:        passcodeId.String(),
 		TTL:       h.TTL,
 		CreatedAt: passcodeModel.CreatedAt,
@@ -138,7 +128,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 func (h *PasscodeHandler) Finish(c echo.Context) error {
 	startTime := time.Now()
-	var body passcodeFinish
+	var body dto.PasscodeFinishRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
@@ -192,15 +182,10 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		}
 
 		c.SetCookie(cookie)
-		return c.JSON(http.StatusOK, passcodeReturn{
+		return c.JSON(http.StatusOK, dto.PasscodeReturn{
 			Id:        passcode.ID.String(),
 			TTL:       passcode.Ttl,
 			CreatedAt: passcode.CreatedAt,
 		})
 	})
-}
-
-type passcodeFinish struct {
-	Id   string
-	Code string
 }
