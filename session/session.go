@@ -21,7 +21,7 @@ type Manager interface {
 type manager struct {
 	jwtGenerator  hankoJwt.Generator
 	sessionLength time.Duration
-	cookieConfig   config.Cookie
+	cookieConfig  config.Cookie
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
@@ -41,6 +41,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Cookie) (Manager, err
 	return &manager{
 		jwtGenerator:  g,
 		sessionLength: time.Minute * 60, // TODO: should come from config
+		cookieConfig:  config,
 	}, nil
 }
 
