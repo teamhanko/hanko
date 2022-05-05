@@ -52,6 +52,10 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
+	if err := c.Validate(body); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
@@ -130,6 +134,10 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	startTime := time.Now()
 	var body dto.PasscodeFinishRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	if err := c.Validate(body); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 

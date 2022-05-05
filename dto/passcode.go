@@ -3,12 +3,12 @@ package dto
 import "time"
 
 type PasscodeFinishRequest struct {
-	Id   string `json:"id"`
-	Code string `json:"code"`
+	Id   string `json:"id" validate:"required,uuid4"`
+	Code string `json:"code" validate:"required"`
 }
 
 type PasscodeInitRequest struct {
-	UserId string `json:"user_id"`
+	UserId string `json:"user_id" validate:"required"`
 }
 
 type PasscodeReturn struct {

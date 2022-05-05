@@ -35,6 +35,7 @@ func TestPasscodeHandler_Init(t *testing.T) {
 	require.NoError(t, err)
 
 	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
 	req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -56,6 +57,7 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 	require.NoError(t, err)
 
 	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
 	req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -78,6 +80,7 @@ func TestPasscodeHandler_Finish(t *testing.T) {
 	require.NoError(t, err)
 
 	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
 	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -100,6 +103,7 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 	require.NoError(t, err)
 
 	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
 	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
@@ -122,6 +126,7 @@ func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
 	require.NoError(t, err)
 
 	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
 	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
