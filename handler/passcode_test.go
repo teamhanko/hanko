@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/persistence/models"
 	"github.com/teamhanko/hanko/test"
 	"gopkg.in/gomail.v2"
@@ -27,7 +28,7 @@ func TestPasscodeHandler_Init(t *testing.T) {
 	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, nil, nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
-	body := passcodeInit{
+	body := dto.PasscodeInitRequest{
 		UserId: userId,
 	}
 	bodyJson, err := json.Marshal(body)
@@ -48,7 +49,7 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, nil, nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
-	body := passcodeInit{
+	body := dto.PasscodeInitRequest{
 		UserId: "04603148-036d-403b-bf34-cfe237974ef9",
 	}
 	bodyJson, err := json.Marshal(body)
@@ -69,7 +70,7 @@ func TestPasscodeHandler_Finish(t *testing.T) {
 	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
-	body := passcodeFinish{
+	body := dto.PasscodeFinishRequest{
 		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
 		Code: "123456",
 	}
@@ -91,7 +92,7 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
-	body := passcodeFinish{
+	body := dto.PasscodeFinishRequest{
 		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
 		Code: "012345",
 	}
@@ -113,7 +114,7 @@ func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
 	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)
 
-	body := passcodeFinish{
+	body := dto.PasscodeFinishRequest{
 		Id:   "1bc9a074-577d-497e-87da-8eaf50f32a26",
 		Code: "123456",
 	}
