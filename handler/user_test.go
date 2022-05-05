@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,9 +14,22 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestUserHandler_Create(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
 
@@ -40,6 +54,18 @@ func TestUserHandler_Create(t *testing.T) {
 }
 
 func TestUserHandler_Create_UserExists(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
 	body := UserCreateBody{Email: "john.doe@example.com"}
@@ -67,7 +93,7 @@ func TestUserHandler_Create_InvalidEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
 	if assert.NoError(t, handler.Create(c)) {
@@ -84,7 +110,7 @@ func TestUserHandler_Create_EmailMissing(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
 	if assert.NoError(t, handler.Create(c)) {
@@ -93,5 +119,53 @@ func TestUserHandler_Create_EmailMissing(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &apiError)
 		require.NoError(t, err)
 		assert.Equal(t, 1, len(apiError.ValidationErrors))
+	}
+}
+
+func TestUserHandler_Get(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/users/:id")
+	c.SetParamNames("id")
+	c.SetParamValues(userId.String())
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.Get(c)) {
+		assert.Equal(t, rec.Code, http.StatusOK)
+		user := models.User{}
+		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		require.NoError(t, err)
+		assert.Equal(t, userId, user.ID)
+	}
+}
+
+func TestUserHandler_Get_InvalidUserId(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/users/invalidUserId", nil)
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.Get(c)) {
+		assert.Equal(t, rec.Code, http.StatusNotFound)
 	}
 }

@@ -46,6 +46,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 
 	user := e.Group("/users")
 	user.POST("", userHandler.Create)
+	user.GET("/:id", userHandler.Get, hankoMiddleware.Session(sessionManager))
 
 	healthHandler := handler.NewHealthHandler()
 	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionManager)
