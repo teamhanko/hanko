@@ -3,6 +3,7 @@ package server
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/handler"
 	"github.com/teamhanko/hanko/persistence"
 )
@@ -19,6 +20,8 @@ func NewPrivateRouter(persister persistence.Persister) *echo.Echo {
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}},"referer":"${referer}"` + "\n",
 	}))
 
+	e.Validator = dto.NewCustomValidator()
+
 	healthHandler := handler.NewHealthHandler()
 
 	health := e.Group("/health")
@@ -29,6 +32,7 @@ func NewPrivateRouter(persister persistence.Persister) *echo.Echo {
 
 	user := e.Group("/users")
 	user.DELETE("/:id", userHandler.Delete)
+	user.PATCH("/:id", userHandler.Patch)
 
 	return e
 }
