@@ -25,5 +25,10 @@ func NewPrivateRouter(persister persistence.Persister) *echo.Echo {
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
+	userHandler := handler.NewUserHandlerAdmin(persister)
+
+	user := e.Group("/users")
+	user.DELETE("/:id", userHandler.Delete)
+
 	return e
 }
