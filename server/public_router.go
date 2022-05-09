@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/crypto/jwk"
 	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/handler"
+	"github.com/teamhanko/hanko/mail"
 	"github.com/teamhanko/hanko/persistence"
 	hankoMiddleware "github.com/teamhanko/hanko/server/middleware"
 	"github.com/teamhanko/hanko/session"
@@ -36,6 +37,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
+	mailer, err := mail.NewMailer(cfg.Passcode.Smtp)
+	if err != nil {
+		panic(fmt.Errorf("failed to create mailer: %w", err))
+	}
+
 	passwordHandler := handler.NewPasswordHandler(persister, sessionManager)
 
 	password := e.Group("/password")
@@ -53,6 +59,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
+	passcodeHandler, err := handler.NewPasscodeHandler(cfg.Passcode, cfg.Service, persister, sessionManager, mailer)
+	if err != nil {
+		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
+	}
 
 	health := e.Group("/health")
 	health.GET("/alive", healthHandler.Alive)
@@ -66,6 +76,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	webauthnLogin := webauthn.Group("/login")
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
+
+	passcode := e.Group("/passcode")
+	passcodeLogin := passcode.Group("/login")
+	passcodeLogin.POST("/initialize", passcodeHandler.Init)
+	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
 	return e
 }

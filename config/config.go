@@ -20,6 +20,7 @@ type Config struct {
 	Database Database
 	Secrets  Secrets
 	Cookies  Cookie
+	Service  Service
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -81,6 +82,7 @@ func defaultConfig() *Config {
 			Smtp: SMTP{
 				Port: "465",
 			},
+			TTL: 300,
 		},
 		Database: Database{
 			Database: "hanko",
@@ -109,6 +111,10 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate secrets: %w", err)
 	}
+	err = c.Service.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate service settings: %w", err)
+	}
 	return nil
 }
 
@@ -126,6 +132,17 @@ func (s *Server) Validate() error {
 	err = s.Private.Validate()
 	if err != nil {
 		return fmt.Errorf("error validating private server settings: %w", err)
+	}
+	return nil
+}
+
+type Service struct {
+	Name string
+}
+
+func (s *Service) Validate() error {
+	if len(strings.TrimSpace(s.Name)) == 0 {
+		return errors.New("field name must not be empty")
 	}
 	return nil
 }
@@ -211,6 +228,7 @@ func (e *Email) Validate() error {
 type Passcode struct {
 	Email Email
 	Smtp  SMTP
+	TTL   int
 }
 
 func (p *Passcode) Validate() error {

@@ -8,6 +8,7 @@ import (
 	"golang.org/x/text/language"
 	"gopkg.in/yaml.v3"
 	"html/template"
+	"strings"
 )
 
 //go:embed templates/* locales/*
@@ -62,5 +63,13 @@ func (r *Renderer) Render(templateName string, lang string, data map[string]inte
 	if err != nil {
 		return "", fmt.Errorf("failed to fill template with data: %w", err)
 	}
-	return templateBuffer.String(), nil
+	return strings.TrimSpace(templateBuffer.String()), nil
+}
+
+func (r *Renderer) Translate(lang string, messageID string, data map[string]interface{}) string {
+	loc := i18n.NewLocalizer(r.bundle, lang)
+	return loc.MustLocalize(&i18n.LocalizeConfig{
+		MessageID:    messageID,
+		TemplateData: data,
+	})
 }
