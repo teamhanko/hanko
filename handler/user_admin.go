@@ -97,3 +97,27 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		return c.JSON(http.StatusOK, nil)
 	})
 }
+
+type UserListRequest struct {
+	PerPage int `query:"per_page"`
+	Page    int `query:"page"`
+}
+
+func (h *UserHandlerAdmin) List(c echo.Context) error {
+	var request UserListRequest
+	err := echo.QueryParamsBinder(c).
+		Int("per_page", &request.PerPage).
+		Int("page", &request.Page).
+		BindError()
+
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest).WithMessage(err.Error()))
+	}
+
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, users)
+}

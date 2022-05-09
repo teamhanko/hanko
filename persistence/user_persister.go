@@ -14,6 +14,7 @@ type UserPersister interface {
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
+	List(page int, perPage int) ([]models.User, error)
 }
 
 type userPersister struct {
@@ -84,4 +85,15 @@ func (p *userPersister) Delete(user models.User) error {
 	}
 
 	return nil
+}
+
+func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
+	users := []models.User{}
+
+	err := p.db.Q().Paginate(page, perPage).All(&users)
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
+	}
+
+	return users, nil
 }

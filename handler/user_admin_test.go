@@ -10,6 +10,7 @@ import (
 	"github.com/teamhanko/hanko/test"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 	"time"
@@ -230,6 +231,128 @@ func TestUserHandlerAdmin_Patch_InvalidJson(t *testing.T) {
 	handler := NewUserHandlerAdmin(p)
 
 	if assert.NoError(t, handler.Patch(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	}
+}
+
+func TestUserHandlerAdmin_List(t *testing.T) {
+	users := []models.User{
+		func() models.User {
+			userId, _ := uuid.NewV4()
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+		func() models.User {
+			userId, _ := uuid.NewV4()
+			return models.User{
+				ID:        userId,
+				Email:     "jane.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+
+	req := httptest.NewRequest(http.MethodGet, "/users", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandlerAdmin(p)
+
+	if assert.NoError(t, handler.List(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var users []models.User
+		err := json.Unmarshal(rec.Body.Bytes(), &users)
+		assert.NoError(t, err)
+		assert.Equal(t, 2, len(users))
+	}
+}
+
+func TestUserHandlerAdmin_List_Pagination(t *testing.T) {
+	users := []models.User{
+		func() models.User {
+			userId, _ := uuid.NewV4()
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+		func() models.User {
+			userId, _ := uuid.NewV4()
+			return models.User{
+				ID:        userId,
+				Email:     "jane.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("per_page", "1")
+	q.Set("page", "2")
+	req := httptest.NewRequest(http.MethodGet, "/users?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandlerAdmin(p)
+
+	if assert.NoError(t, handler.List(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []models.User
+		err := json.Unmarshal(rec.Body.Bytes(), &got)
+		assert.NoError(t, err)
+		assert.Equal(t, 1, len(got))
+	}
+}
+
+func TestUserHandlerAdmin_List_NoUsers(t *testing.T) {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("per_page", "1")
+	q.Set("page", "1")
+	req := httptest.NewRequest(http.MethodGet, "/users?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandlerAdmin(p)
+
+	if assert.NoError(t, handler.List(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var got []models.User
+		err := json.Unmarshal(rec.Body.Bytes(), &got)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(got))
+	}
+}
+
+func TestUserHandlerAdmin_List_InvalidPaginationParam(t *testing.T) {
+	e := echo.New()
+
+	q := make(url.Values)
+	q.Set("per_page", "invalidPerPageValue")
+	req := httptest.NewRequest(http.MethodGet, "/users?"+q.Encode(), nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandlerAdmin(p)
+
+	if assert.NoError(t, handler.List(c)) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	}
 }
