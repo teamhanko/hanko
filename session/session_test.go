@@ -22,7 +22,7 @@ func TestNewGenerator(t *testing.T) {
 func TestGenerator_Generate(t *testing.T) {
 	manager := jwkManager{}
 	cfg := config.Cookie{}
-	sessionGenerator, err := NewManager(&manager,cfg)
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -37,7 +37,7 @@ func TestGenerator_Generate(t *testing.T) {
 func TestGenerator_Verify(t *testing.T) {
 	manager := jwkManager{}
 	cfg := config.Cookie{}
-	sessionGenerator, err := NewManager(&manager,cfg)
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -59,7 +59,7 @@ func TestGenerator_Verify(t *testing.T) {
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := jwkManager{}
 	cfg := config.Cookie{}
-	sessionGenerator, err := NewManager(&manager,cfg)
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -100,13 +100,11 @@ var privateKey = `{
   "qi": "gQh-bEfYunCcUKXuaBNuyesAAI8F6tWgwMtXqr6X_Np_GvtDdjho2YP14Jtx2_kxDDZPSnP_h003kM6OdJdF469-s-AuRXeqX99yHMfWDYEkXxkp4WsmsKQgg5mQNsBr4d4zHyzsqc1ZKf2mL9zxb5dnVgQjVKrYGgsnBlfZeP-Cz_6c1CZ1YkoxiH52dNdQPfPJUTSUlIgRs2BgCbszQHOO6a1qwkQOjhhUX3-_KF6G4agT2NmZrb_O67GHzIoqXpWZykn93cJm5119BF9dAQbQx4vl0daMuPrh8UwMYx7GO3iNL5tl_wBc77Z4bZu8fn-XzHL4bb3mSjg5DqntKQ"
 }`
 
-
 type jwkManager struct{}
 
 func (m *jwkManager) GenerateKey() (jwk.Key, error) {
 	return nil, errors.New("not implemented")
 }
-
 
 func (m *jwkManager) GetPublicKeys() (jwk.Set, error) {
 	key, err := getJwk()
@@ -118,7 +116,10 @@ func (m *jwkManager) GetPublicKeys() (jwk.Set, error) {
 		return nil, err
 	}
 	set := jwk.NewSet()
-	set.AddKey(publicKey)
+	err = set.AddKey(publicKey)
+	if err != nil {
+		return nil, err
+	}
 	return set, nil
 }
 
