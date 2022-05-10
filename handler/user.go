@@ -67,3 +67,33 @@ func (h *UserHandler) Get(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, user)
 }
+
+type UserGetByEmailBody struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
+	var request UserGetByEmailBody
+	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	if err := c.Validate(request); err != nil {
+		return c.JSON(http.StatusBadRequest, err)
+	}
+
+	user, err := h.persister.GetUserPersister().GetByEmail(request.Email)
+	if err != nil {
+		return err
+	}
+
+	if user == nil || !user.Verified {
+		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+	}
+
+	return c.JSON(http.StatusOK, struct {
+		UserId string `json:"id"`
+	}{
+		UserId: user.ID.String(),
+	})
+}
