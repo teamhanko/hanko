@@ -63,3 +63,31 @@ func (p *userPersister) Delete(user models.User) error {
 
 	return nil
 }
+
+func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
+	if len(p.users) == 0 {
+		return p.users, nil
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if perPage < 1 {
+		perPage = 20
+	}
+
+	var result [][]models.User
+	var j int
+	for i := 0; i < len(p.users); i += perPage {
+		j += perPage
+		if j > len(p.users) {
+			j = len(p.users)
+		}
+		result = append(result, p.users[i:j])
+	}
+
+	if page > len(result) {
+		return []models.User{}, nil
+	}
+	return result[page-1], nil
+}
