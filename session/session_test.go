@@ -1,9 +1,6 @@
 package session
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/base64"
 	"errors"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -25,7 +22,7 @@ func TestNewGenerator(t *testing.T) {
 func TestGenerator_Generate(t *testing.T) {
 	manager := jwkManager{}
 	cfg := config.Cookie{}
-	sessionGenerator, err := NewManager(&manager,cfg)
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -40,7 +37,7 @@ func TestGenerator_Generate(t *testing.T) {
 func TestGenerator_Verify(t *testing.T) {
 	manager := jwkManager{}
 	cfg := config.Cookie{}
-	sessionGenerator, err := NewManager(&manager,cfg)
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -62,7 +59,7 @@ func TestGenerator_Verify(t *testing.T) {
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := jwkManager{}
 	cfg := config.Cookie{}
-	sessionGenerator, err := NewManager(&manager,cfg)
+	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -73,7 +70,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 	}{
 		{
 			Name:  "expired",
-			Input: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTA0NDM0OTgsImlhdCI6MTY1MDQzOTg5OCwic3ViIjoiNzM0ZjdlYTQtNmM1MC00OTMxLTkwNDAtOGFhNTBjMWRmZTBhIn0.tMa3NGDOK8D_mKYP0ahaNOiIn9hrjvpFg191WYoCK9_ET3MUXp07qBIyhM0sE5sYv2Th0VJ6KLlyfpCsuJxDvIaUXqYd0z4uxokC64nxF6XA7TrNFI8kKgRgAlvFqCNW4Z0qanipmHsae1sKEj423jGU_4EZVWtF-_7v8sXIpNmIYpn4pxkcj-qZiEaNWO6QZhvSyUIlU9ZW1_6o8UQMM_A6D8FMR7h_rjQdE7pV6JkCacMns5ge6umcWmCA0HrHL3_3-5-GRUdLoUwAraJLTXZBUuwCES4i99LOB0J6oo5LTsCs1LA8AFCdVU47q_AFvhaB7oR8a1HUffUvlraverx9dFSu0g5WqwqlLYanh_O1-F67ClG-v2KyQ81YCLa9tQDiUB0OE2pH6-3-Hcd-A3jTHjVbL3DW9Qkb9y1GpcD91oU64tThYM-8as7xvzvb-_oFvCGFp_BI10eVuSzZGV5DV4OMcop73SV5MJWZmz7HVsufr5WoE3HpSUBTsKxGP6ZJfJNT_muXxDvhLg7FBHeQ6fBwm2P-ONDxXuFclxJ7vGbIdF-YiGVlSWmq2Zp0LVF3WkUQv8B8cRadMgpuli6vIRvrd8aS7IDnVDec2i4Tj8bOov0fRsgK12Y56CUUWIm9J8s2hhzwD9FSrYrY92tRGzbMqFbhqZ8kZceRfa4",
+			Input: "eyJhbGciOiJSUzI1NiIsImtpZCI6ImtleTEiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2NTIxNzM4NTAsImlhdCI6MTY1MjE3Mzc5MCwic3ViIjoiYzU0YTZlZTUtZjNmMy00YzExLTlhMWMtYWUzOTgyYTQxMzYyIn0.AEzZ0M1_3HnOtqd8Dz-BliHkEUc4c5mu97eXhoErgG7qbVWisJP0qfz_KrwL9VYFOYuDAmfRZ3ABnaOg-S53wlRndfL-ulk68lY34otGZfXKhk2P3GJRH8Dq7hW83KnwkSPF5_iOaIIDfUwrWOaavvtLJFgg5RcehuwLkYEA5X17ek6cUNsqz7Vw-x2REReh_f31f5zneqKN9CeVnup5_ZgtMYpOXVvXAORs3b7y2oMwFdXs-hVal9ZVunNPo3iZmaTFMHUSNXX8MceOy_dUofxtd9JDzliiPrjNWDjU5Jx5paLBA5CUc4SctBURi2oJABbkeE1l4ug6-rTOYB04-UW8XAnPZONBTnv3AjtzvScvkpUj-OFKVQLGgcXZHUo1J7ftLaezpWrGTbhlC8TVvXdX1ms5w9D1uqEUZ94lhvVSW_lGGX2DGqMWaT6tOcSpDHFQ0NR5FD3MiNGV-z43AUOOSzilAKS2WaHDS7v43PeJ75xzAAS_7xOoc6L3Z9msdToQIauLYuCrivoOVcCqrEHugknpxO8M0xo6f1fHws8RocT3S7B76YJUIBeAj2F31wJne5xtbiRF5GWiV8uS3ZTXqrPp7y4U6Btf-h6mvEos_Q9o9w5hck-8lixUs5mObPDsT-W6PdEehRaSL7-13dy1GpB8wMP5fGlnRSff9y4",
 		},
 		{
 			Name:  "wrong signature",
@@ -89,7 +86,19 @@ func TestGenerator_Verify_Error(t *testing.T) {
 	}
 }
 
-var privateKey = "MIIJQwIBADANBgkqhkiG9w0BAQEFAASCCS0wggkpAgEAAoICAQDhZLLiFJXZc37mRZ_qeXD11Y5ZbFaqZotXV0AqVCz9gVBGo2rBeVRpap_z4ADPJVJp_1dYLg52lNKRmNsqGYSCqUZyiRNaH0Pf-RmFjzwci4BDaECvD8v-EKuXZCScUTtAJaMmT0xLwsm7bNPGHqN6JICe6gh53LA9Q0bCwbYttaiKlOB8yXd3d5_-ZMRFyjXltKt7amadxpXtAAEtcgyy-y2j4Sy8xysSjr4O7XRTZmi7-zCJAlg24fTGZUITAX4wpah6tG4ATzwTwmmUbmZN1h9IGGtXSTNs1Cp81F6Jk3RdgqAq6GCY9u3wSGJ8kfygD38LjwxN3UsyLNLufNQ1Z_U9kdhQtP4TWChons7qkBKTIJVqGZ9whUnwelD7Khq4LbiSytEsMCiCib60-ybz8YClT-NTVH9j2xYyhOyh4uINpcOO2kP9gU6EYI5otPSqvMueGwBqWp4I15qdGuzHuLsFxOoOhSu9QL9diLFPOgsO4q0nzuZ6bSonnLQsR_8O-Yxak-zcWUMVjTCEz6Vs94SoS9OAgxGQhzA0SQ55k_6Z2eiU5gJLWSPXae-s89UIESf8sPVu7anQ_WZPLVs8hb09BBZvoU5oJs7Pna9p9As-pA7ENgwJiK3hzZ4ZT9Tvvb5GLl_1gPbVtJTCZuQF2aBTM-mD_SwWZe_cP33MHwIDAQABAoICAQCANYanoWwH0HHLzKkFeGTwAbVCWqUFsuTqHsBqE42v-gHO3KAaQ8jnWfZ4g-AR9Lnnf46Qo0oo28jXdyqbzP4aUO24sw5mAkjau1hwJ6Ta2-Nu9Htu2T6BW7wvlpBYtsBMYdxnK05L_hZAXcws8zqsfN0JCDkgEI_TmVRD7mqRn7aqdbsoYHVraImC7JDU3gxAiL_OqRyL_O1Fbe49ipV8rfItOSX4kBaJLNchqKK12hgTbfQSy1mghnF09R5br0q3o1Ot0LqNxIR4_OqPuyjId9c9bF6KvSHaculkLm1ENrNHiclP_vULrdJ1Dseu8l_QMGBlE8687_cZKHQnoqwWT6_0zPuOpmZZiig7lZTGY1vlt-Jt6NCh5-YjptjIfwMSFouDa7FEzqUmKaG-8B3ijL7Bo7FhFhJbN2PYfVUWkVz2_5tx6CcVjW_v8hcIQLC_MJmKUucAeLcQeJrfirCLtLQeTQZOS7U16r1JYCx22O5LECEv5J2hXq7ajxs7DPv5-KfHD-ZcamUSjRT2U1KyA3mZxGbWmWu_nV_tRH3briWidBrHI-l8ZERWoW6eV_kEd4uG5taZmUPEtj-1v32_8hhJAomHseCxYM_m0q-joAdr1TXrT0O_zzKoYgXJpmfJet_HHQS5thFoFyky8i6gCMVf6zdycTygSheUDFM3MQKCAQEA8FNQcSJuNj9Mt86tn3mfX-8qcOy7l0LpDtKgT5_HgPk6MbUXgVWWZbs3kVboqy57NznEXfb9T1ps8hvDTpN17ErS4GQPn3Xufc7pMiMc11uC0H-aKODiHGB_XFlgtGG9n86sjZ62a8VsVBj4KUIWdVrq76S8kK_xMaU9xvz2Zxv378A-OfWv5es3SRyHoog_v9CAbPo-ZA7qenLT47BPVEJOYTU8-_QKC-vGMkIPVHM_jgMFt6V9fQFhjRy5Htbd7RyEv7B3yz37Ql_NHpKBuxX0sQ7Q-IH7-9dw8VBi-n8rp2dveLLgiEqrutENR3Mod7wL6inbN4yKgQl6OFwhOQKCAQEA8BgQreq-Xgz_9qbBCO5T--JiK7Z1ZMDk70B36fIilWCGXzEIE18xZM6tUq50_2gUHqiYbMo1NnKIoCbfW7jhNFmg_cNOqwcZX2JewdfNN4fBZPDOfu58CsuDiWtboqMHzxNDuIscNDZdj28fIe74kJKHhRofSzkAYAtA6Q_UbOooFcS5QQVruBt-I4D0MuxlpMizV4_ZPNF1hpYlpQ2EJYkFSMXx3umzAKU6XC6jE_E4kr8fPYGhd2Db-wAu8DrFexAt-JvfoHFhdkFfjlIJOKtfOCIKu0o1aguoPUXyoB88HQhsRv4hNcTEkJJaSB4tFGSs6ur4_vvkYQ8FjH1QFwKCAQEAgXxyWDKz7TiX7mVGeSl_rKHhXSzAOlTL27eytpQhWyVtrIClJINn4HJKE14fSLRnoS7X1cURYOMY1i4NQlYDcIg0LMDdBg71rAWC8genL4XX6t0Fw8a_LYj0tl5V03riP6uMn1WHdnPN1VYKx7ga_6o38VzyWIbjztr4eTGs1YtlQGF1Zacx2hCtHhBoKDN_HauKtqzyVtkOj2E1N3W0mHKNZqTXse0gSKIFjOi498iM0shgGT3qaiMHW4_BUpN0yZ_XCq1bLj-8FFwn2bQYgCPpTkjsYSkwCtZevTaRzeQdMjpx_jdq8SRCeQrQO9IZWMISLV3WBo0Lx1DC8ID7SQKCAQB8ySUyH0WeAEew3G6Lw8LmsXywl35gRVk3eFxavTx4QtjT9Nnrp5g2eqzewkmQzXlXjeza7iXGDLUx98IzG94ApWzlN3NVtLTdPHVfblf8upQrcHUCx9S0j53n-GKCHxXZ7HtQGQ0pne_2spyNuHR8P4wsA62sHQ4y3OZ5u35-tRzsY3idcMHRyIhAz68cIH2brax4oA0abQsWTkd2h5XdJGAYuLjDUNd2SGoSqzKbFM6AhtEn2I4hS7hJtoiu1vz4vyoFgo4yB3vOSJ_vine8emVc-WR2f1VProtcfVRjIJjPxibwpvh_x6saMNa3kOeBJ-ovlryfWjASugn6QM81AoIBACH3YhSfwnpC6FIQ77D4YmruMQoECnqA33dZarRQGlfUuNo0JKk-7yWNLAyE1HKRrkNWlmbIzU6Fi-BbgnpuzpnX2k-jRNBLUm3m7xzo_NBck4d-qPzQGn31vJ1bmZUd-FVPOzl3Pq8gv4h0kbJ-st7z90bKFjhD1_haKXbe-lyX-4d5a56ce5jsOnYCklx0Q1VTThuTCvAnD6XkvtVWAJ682-e-cWryQHfmXDpVLOler4D_PTzYDcH-Rzj1sRig-IvJS2cQNCqkh7Uf1y7xtJg7OPBlCvkprghAOCqgltKpr5Tot_pQEpZp9jJtPNBkpyDDZUbRf0MNQKcq_fZZw5s"
+var privateKey = `{
+  "alg": "RS256",
+  "d": "hsVXyJ1VjNFjiRqLE6bNZrAJDlnE33ptT4XpbPylfhlLfLB_OOB_YC5e4cBBoXlWaIJzYQ-qX0eSD2OdNg1JC0TgyQvwOqc9y6EKGyGu2asyHsJxLy8IiaqoqdqgiV0N_DsCYzt5Ew2nJq1P3XYqO5TJBpISixO47BEHaBgQeQBwSfmV3hmGYYTzJz6bwDNDhrBtg-2WiTfaq-3trorxo5Ww17-icr69Yad47Y4EIjKNL8SLPnWCt4NZTuT6Qs6QeUn-wOYPMaLh11DyZBNOuqiNWKjs_xPoi6C8jS1Jua0loTJXblDuMTDRL6-k82SByi7q8Yywr2TAdrotYbXF8kmaMmzW2gdQhkJs3xeNm3RyoIZOiU-7uzykSG8EkC0bx3mhIGVW_IOpzD2Xo2abbweR-PyX5z07qn9F1BHScdXViDmMNq2FU25D9K4FrRUqg8k5jpzkFrhcyPuw_hwB_BheNZgxulBbKy686qC6vTT41kZceD34PdBlMpzPctsK60GQWow8qs_OTQjD5ff_sTrNk4wzFpzo74ctcHOCZavW3gnZjhrMO9yHKGUBvgQJCiQ3C9nAkEP4pSOtk3nYgNLaWFftUYS_JKf36PcpM-YJYZEO33ayrcK19fp0aZbP11W1RpCs3jOaVWGwsS3xFE-4w_0xTbWoJACBgRENy_k",
+  "dp": "qtwBo39K7eDKXoyXn1YUwk8hzaNwhDqfhWPMGHiPjS9W5PLdEpfaxkoMK38oiYkb0ohmEe_z54fmMTAD037lYAbQpW-Al8z1J0qfFEmSgmCVHL80u8Tvq6OtCJojJUDDMEBL-s67FGepXekjNCyS7S1zXJ_CFx619VQv5hadLga2p5TL8pYBjNBfS9FKFeZmaIF6tkz_fNEwud9kOXW1gOcpbgTmBZgDxlHbCiQcL44q7vdKjwHY1a6bi9cf9uvuJ7E_3ysWycTKaH3q0lveTe8I1ovZy2QbuvzEKuF9P_9B8rZiWYbPx6H9bPzd1TisEH9the3R86ILLkqZwGZhZQ",
+  "dq": "zJ8N9S677F1s5YNYJ0LyzvL9bVcjaAwA-xUjDIxRhOMJWL_I-spBKfsOSwuFtr_KRSFj1ui25gIo8KJxsC1-1PBvjsM0OzjlvmaTqzsK1SFA6yt9Wh5VQ8BvqfH25g3JqHcAOqqYsymMFyq9c2ycaq9uYG-sxXiOYP3XCoZn_KsTnMZi0LLAL6A6BQoHSDDhnUHdPMrcZ8ePFjXowFKFlBWCOj0wWugpHc21TQFIeN9mfWAuyfEqyQP0G3FS60e3JW2B2NNZiui_o6lmSLnacLz51htpe23lgsUcJHkernow7-nOsWhvBdR90j69YUzowitL6WyJ_DEc1AehGYpOUw",
+  "e": "AQAB",
+  "kid": "key1",
+  "kty": "RSA",
+  "n": "2zNqGZKiogCjODBpzyRvwFlZ6hYaxJ4ZwYeFoN24eq_yHJB5OtEtgbUZ71lPkSqawLa-5qTtm1nBWY3ZAFVh9XC4fJsHWSIrwR7Mk9PLKWyAGFLyyGJy8srwdoxSUDbWa2CMeRsUaP_Syr_iytx1Kn9S9RRMrdC7PkMWaKx1KWQmIplrJx6qAiFlsTRvDFT0Ysfm0Vkti6xqTVYSc_bnObjLfiQ6UCKqF9fQDUJNFGLAeBAhkIRcBxp5G7PEiB5QOoRTrb4aqBIdxdjMWqjjfHTmm3EPqtIWsOjWRV1FsGyPkvolcBZXaNX-jf0oY1_7AryFujAFDslzGxg071yXRF9T_Brd1DW8paULQ2Vwkhc1d2c6Ioi-0D6255jlBKAVl-h3yedKWzYe5eyCijHZRs2jV1a3NX7ixzorcXH8GHB7PgM5lyZB5Rpf9-49MgW9Vo_b7nBCvEsN8uTc8jRyeG1zPTddAQ-tsMEmhsSa55EbQT6wk_nOu7xV-7eUAW8jwijJiDPOgDPmsOHtjoYx6BgcxCOYZ71s5g6qaKiCMecFpl7S1fxoIXcgjBNvv2Gzs6plRW74R6cVcohOfGVA7e0ULv1KOqJw6H-TjRmHBXQnw_K1biwYsL0SnE1Gu-iZC1_ktVuI8vf9k6m53HC_3_xrx0zqsad0fvIjpjRj2-E",
+  "p": "_9QXKH2TREzUqChGiRrSrKeURTuufWRr8dePBurE5xbqd3Edc360J3jifwfxW9jGRUwehVEQFMAPToPQP3aVLwlroVg5CHFmt6BOChZJ1ZpYfNxvwIQDyxmcGtpGKHkMZMJj_C3XhYULz94ham8w9t3Ps5A2CTLs8erDtm_22zXw8nB7AeUMu0_QEJEtXrG12tMcsVUiG94QFx1udu2d_XortXQlEoFz4KMGQhYBQultOe1o7awgwBHhh9XdSzPifyYArk9qBQEKx-mPZsFFJ46e3IaF-pVfP15J5x4NOhTDRC_NX2ZlXIyiNw_X3cmpMBvgEuA9lY15dQtD0_iqGw",
+  "q": "21kJj4Xvm2jX1-c8HIl4TAhPKI5470cPEx-8eViGO9KEsfc45T54a3shE3dP-YY6jQkpZritNzBnuSGaxSCJFhF63XZGYdh3p2GG73voO8dLqZNTFlitKaRA4UA_4byoimKdPaDR01Bhe9XCzIJCJfYqDGlTD2tIWcsytKwK0O9QkUqg-1ROlK02CMS4tBa8fzEXCYSnsB9iJUNOiLrHb6JdUUcOnCWvmnYFHIwhbH891Dhg9CMcCOwNWL1LGiCYilW-reM1pRHHB3H5b0_gwbg3DQ6dv4VmOCmzfNM0aTSvwkYQkfMQIF_SM8QWF6r9RSunMsoz_AKIjZ3yNj1xsw",
+  "qi": "gQh-bEfYunCcUKXuaBNuyesAAI8F6tWgwMtXqr6X_Np_GvtDdjho2YP14Jtx2_kxDDZPSnP_h003kM6OdJdF469-s-AuRXeqX99yHMfWDYEkXxkp4WsmsKQgg5mQNsBr4d4zHyzsqc1ZKf2mL9zxb5dnVgQjVKrYGgsnBlfZeP-Cz_6c1CZ1YkoxiH52dNdQPfPJUTSUlIgRs2BgCbszQHOO6a1qwkQOjhhUX3-_KF6G4agT2NmZrb_O67GHzIoqXpWZykn93cJm5119BF9dAQbQx4vl0daMuPrh8UwMYx7GO3iNL5tl_wBc77Z4bZu8fn-XzHL4bb3mSjg5DqntKQ"
+}`
 
 type jwkManager struct{}
 
@@ -97,8 +106,7 @@ func (m *jwkManager) GenerateKey() (jwk.Key, error) {
 	return nil, errors.New("not implemented")
 }
 
-
-func (m *jwkManager) GetPublicKeys() ([]jwk.Key, error) {
+func (m *jwkManager) GetPublicKeys() (jwk.Set, error) {
 	key, err := getJwk()
 	if err != nil {
 		return nil, err
@@ -107,7 +115,12 @@ func (m *jwkManager) GetPublicKeys() ([]jwk.Key, error) {
 	if err != nil {
 		return nil, err
 	}
-	return []jwk.Key{publicKey}, nil
+	set := jwk.NewSet()
+	err = set.AddKey(publicKey)
+	if err != nil {
+		return nil, err
+	}
+	return set, nil
 }
 
 func (m *jwkManager) GetSigningKey() (jwk.Key, error) {
@@ -115,32 +128,5 @@ func (m *jwkManager) GetSigningKey() (jwk.Key, error) {
 }
 
 func getJwk() (jwk.Key, error) {
-	pKey, err := getPrivateKey()
-	if err != nil {
-		return nil, err
-	}
-	key, err := jwk.FromRaw(pKey)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
-}
-
-func getPrivateKey() (*rsa.PrivateKey, error) {
-	privateKeyBytes, err := base64.RawURLEncoding.DecodeString(privateKey)
-	if err != nil {
-		return nil, err
-	}
-
-	parsedPKey, err := x509.ParsePKCS8PrivateKey(privateKeyBytes)
-	if err != nil {
-		return nil, err
-	}
-
-	pKey, ok := parsedPKey.(*rsa.PrivateKey)
-	if !ok {
-		return nil, errors.New("parsed key is not type of rsa.PrivateKey")
-	}
-
-	return pKey, nil
+	return jwk.ParseKey([]byte(privateKey))
 }

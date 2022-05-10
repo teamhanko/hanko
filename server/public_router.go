@@ -68,6 +68,14 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
+	wellKnownHandler, err := handler.NewWellKnownHandler(*cfg, jwkManager)
+	if err != nil {
+		panic(fmt.Errorf("failed to create well-known handler: %w", err))
+	}
+	wellKnown := e.Group("/.well-known")
+	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
+	wellKnown.GET("/config.json", wellKnownHandler.GetConfig)
+
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)

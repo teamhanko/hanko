@@ -14,7 +14,7 @@ type Manager interface {
 	// GenerateKey is used to generate a jwk Key
 	GenerateKey() (jwk.Key, error)
 	// GetPublicKeys returns all Public keys that are persisted
-	GetPublicKeys() ([]jwk.Key, error)
+	GetPublicKeys() (jwk.Set, error)
 	// GetSigningKey returns the last added private key that is used for signing
 	GetSigningKey() (jwk.Key, error)
 }
@@ -93,13 +93,13 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 	return key, nil
 }
 
-func (m *DefaultManager) GetPublicKeys() ([]jwk.Key, error) {
+func (m *DefaultManager) GetPublicKeys() (jwk.Set, error) {
 	modelList, err := m.persister.GetAll()
 	if err != nil {
 		return nil, err
 	}
 
-	var publicKeys []jwk.Key
+	publicKeys := jwk.NewSet()
 	for _, model := range modelList {
 		k, err := m.encrypter.Decrypt(model.KeyData)
 		if err != nil {
@@ -116,8 +116,10 @@ func (m *DefaultManager) GetPublicKeys() ([]jwk.Key, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		publicKeys = append(publicKeys, publicKey)
+		err = publicKeys.AddKey(publicKey)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return publicKeys, nil
