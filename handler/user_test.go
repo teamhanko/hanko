@@ -169,3 +169,85 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 		assert.Equal(t, rec.Code, http.StatusNotFound)
 	}
 }
+
+func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "123"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		apiError := dto.ApiError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &apiError)
+		require.NoError(t, err)
+		assert.Equal(t, 1, len(apiError.ValidationErrors))
+	}
+}
+
+func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`"email": "123}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	}
+}
+
+func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
+		assert.Equal(t, http.StatusNotFound, rec.Code)
+	}
+}
+
+func TestUserHandler_GetUserIdByEmail(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		{
+			ID:        userId,
+			Email:     "john.doe@example.com",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+	}
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		response := struct {
+			UserId string `json:"id"`
+		}{}
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, userId.String(), response.UserId)
+	}
+}
