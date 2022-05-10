@@ -96,8 +96,10 @@ func getVerificationJwks(t *testing.T) jwk.Set {
 	key2 := getSignatureJwk(t, key2)
 	set := jwk.NewSet()
 
-	set.AddKey(key1)
-	set.AddKey(key2)
+	err := set.AddKey(key1)
+	require.NoError(t, err)
+	err = set.AddKey(key2)
+	require.NoError(t, err)
 	return set
 }
 
