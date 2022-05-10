@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/dto"
@@ -25,24 +24,22 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
-	return h.persister.Transaction(func(tx *pop.Connection) error {
-		p := h.persister.GetUserPersisterWithConnection(tx)
-		user, err := p.Get(userId)
-		if err != nil {
-			return err
-		}
+	p := h.persister.GetUserPersister()
+	user, err := p.Get(userId)
+	if err != nil {
+		return err
+	}
 
-		if user == nil {
-			return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
-		}
+	if user == nil {
+		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+	}
 
-		err = p.Delete(*user)
-		if err != nil {
-			return err
-		}
+	err = p.Delete(*user)
+	if err != nil {
+		return err
+	}
 
-		return c.JSON(http.StatusNoContent, nil)
-	})
+	return c.JSON(http.StatusNoContent, nil)
 }
 
 type UserPatchRequest struct {
@@ -61,41 +58,39 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	return h.persister.Transaction(func(tx *pop.Connection) error {
-		p := h.persister.GetUserPersisterWithConnection(tx)
-		user, err := p.Get(uuid.FromStringOrNil(patchRequest.UserId))
+	p := h.persister.GetUserPersister()
+	user, err := p.Get(uuid.FromStringOrNil(patchRequest.UserId))
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+	}
+
+	if patchRequest.Email != "" && patchRequest.Email != user.Email {
+		maybeExistingUser, err := p.GetByEmail(patchRequest.Email)
 		if err != nil {
 			return err
 		}
 
-		if user == nil {
-			return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		if maybeExistingUser != nil {
+			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest).
+				WithMessage("email address not available"))
 		}
 
-		if patchRequest.Email != "" && patchRequest.Email != user.Email {
-			maybeExistingUser, err := p.GetByEmail(patchRequest.Email)
-			if err != nil {
-				return err
-			}
+		user.Email = patchRequest.Email
+	}
 
-			if maybeExistingUser != nil {
-				return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest).
-					WithMessage("email address not available"))
-			}
+	if patchRequest.Verified != nil {
+		user.Verified = *patchRequest.Verified
+	}
 
-			user.Email = patchRequest.Email
-		}
-
-		if patchRequest.Verified != nil {
-			user.Verified = *patchRequest.Verified
-		}
-
-		err = p.Update(*user)
-		if err != nil {
-			return fmt.Errorf("failed to update user: %w", err)
-		}
-		return c.JSON(http.StatusOK, nil)
-	})
+	err = p.Update(*user)
+	if err != nil {
+		return fmt.Errorf("failed to update user: %w", err)
+	}
+	return c.JSON(http.StatusOK, nil)
 }
 
 type UserListRequest struct {
