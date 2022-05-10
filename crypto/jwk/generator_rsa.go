@@ -3,6 +3,7 @@ package jwk
 import (
 	"crypto/rand"
 	"crypto/rsa"
+	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )
 
@@ -24,6 +25,11 @@ func (g *RSAKeyGenerator) Generate(id string) (jwk.Key, error) {
 	}
 
 	err = key.Set(jwk.KeyIDKey, id)
+	if err != nil {
+		return nil, err
+	}
+
+	err = key.Set(jwk.AlgorithmKey, jwa.RS256)
 	if err != nil {
 		return nil, err
 	}

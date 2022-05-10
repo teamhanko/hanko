@@ -1,12 +1,10 @@
 package jwt
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/lestrrat-go/jwx/v2/jws"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
@@ -17,9 +15,8 @@ type Generator interface {
 
 // Generator is used to sign and verify JWTs
 type generator struct {
-	signatureKey     jwk.Key
-	verificationKeys []jwk.Key
-	verKeys jwk.Set
+	signatureKey jwk.Key
+	verKeys      jwk.Set
 }
 
 // NewGenerator returns a new jwt generator which signs JWTs with the given signing key and verifies JWTs with the given verificationKeys
@@ -30,23 +27,13 @@ func NewGenerator(signatureKey jwk.Key, verificationKeys jwk.Set) (Generator, er
 	if verificationKeys.Len() == 0 {
 		return nil, errors.New("no keys for verification were provided")
 	}
-	var vKeys []jwk.Key
-
-
-	for it := verificationKeys.Keys(context.Background()); it.Next(context.Background()); {
-		pair := it.Pair()
-		key := pair.Value.(jwk.Key)
-		pKey, err := jwk.PublicKeyOf(key)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get public key: %w", err)
-		}
-		vKeys = append(vKeys, pKey)
+	pubKeySet, err := jwk.PublicSetOf(verificationKeys)
+	if err != nil {
+		return nil, err
 	}
-
 	return &generator{
-		signatureKey:     signatureKey,
-		verificationKeys: vKeys,
-		verKeys: verificationKeys,
+		signatureKey: signatureKey,
+		verKeys:      pubKeySet,
 	}, nil
 }
 
@@ -61,18 +48,9 @@ func (g *generator) Sign(token jwt.Token) ([]byte, error) {
 
 // Verify verifies a JWT, using the verificationKeys and returns the parsed JWT
 func (g *generator) Verify(signed []byte) (jwt.Token, error) {
-	//token, err := jwt.Parse(signed, jwt.WithKeySet(g.verKeys))
-	token, err := jwt.Parse(signed, jwt.WithKeyProvider(g))
+	token, err := jwt.Parse(signed, jwt.WithKeySet(g.verKeys))
 	if err != nil {
 		return nil, fmt.Errorf("failed to verify jwt: %w", err)
 	}
 	return token, nil
-}
-
-// FetchKeys is the implementation of the KeyProvider interface, which provides all keys used for JWT verification
-func (g *generator) FetchKeys(ctx context.Context, sink jws.KeySink, sig *jws.Signature, msg *jws.Message) error {
-	for _, key := range g.verificationKeys {
-		sink.Key(jwa.RS256, key)
-	}
-	return nil
 }
