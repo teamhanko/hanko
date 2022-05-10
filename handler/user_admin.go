@@ -100,13 +100,10 @@ type UserListRequest struct {
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
 	var request UserListRequest
-	err := echo.QueryParamsBinder(c).
-		Int("per_page", &request.PerPage).
-		Int("page", &request.Page).
-		BindError()
+	err := (&echo.DefaultBinder{}).BindQueryParams(c, &request)
 
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest).WithMessage(err.Error()))
+		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
 	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage)
