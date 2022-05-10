@@ -87,7 +87,7 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 		return err
 	}
 
-	if user == nil {
+	if user == nil || !user.Verified {
 		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
 	}
 
