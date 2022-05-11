@@ -42,11 +42,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
 
-	passwordHandler := handler.NewPasswordHandler(persister, sessionManager)
+	if cfg.Password.Enabled {
+		passwordHandler := handler.NewPasswordHandler(persister, sessionManager)
 
-	password := e.Group("/password")
-	password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
-	password.POST("/login", passwordHandler.Login)
+		password := e.Group("/password")
+		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
+		password.POST("/login", passwordHandler.Login)
+	}
 
 	userHandler := handler.NewUserHandler(persister)
 
