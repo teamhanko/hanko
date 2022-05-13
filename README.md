@@ -2,6 +2,8 @@
 ![Build Status](https://github.com/teamhanko/hanko/workflows/Go/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/teamhanko/hanko)](https://goreportcard.com/report/github.com/teamhanko/hanko)
 
+🚧 **PRE-ALPHA** 🚧: This project is not yet functional. The alpha release is planned for June 2022. If you want to get notified as soon as we're ready you can leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates).
+
 ![Hanko - Open-source user authentication that can do more than just passwords](https://user-images.githubusercontent.com/20115649/167916572-a4d92eaa-7246-4e18-a85d-fc80b4f25c28.svg)
 
 # About Hanko
@@ -14,9 +16,7 @@ Hanko is open-source user authentication with a focus on moving the login beyond
 
 [![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)](https://fidoalliance.org/company/hanko/)
 
-Hanko is built and maintained by Hanko.io, a startup based in Kiel, Germany, and an active member in the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms. And we are happy to share this with you.
-
-🚧 PLEASE NOTE 🚧: This project is **pre-alpha** and not yet functional. If you want to get notified as soon as we're ready you can leave a star, sign up to our [newsletter](https://www.hanko.io/updates), or join our [Slack community](https://www.hanko.io/community).
+Hanko is built and maintained by [Hanko.io](https://www.hanko.io), a startup based in northern Germany, and an active member in the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5+ years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
