@@ -9,9 +9,11 @@
 # About Hanko
 Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
-- Authentication & user management API
-- Sophisticated js frontend lib with a feature-complete and highly customizable Hanko web component ("login box")
-- Passwords, passcodes, and passkeys ([WebAuthn](https://github.com/w3c/webauthn)-based biometrics)
+- Passwords, passcodes, and [passkeys](https://www.passkeys.io) API
+- JS frontend lib with a feature-complete and highly customizable Hanko web component ("login box")
+- JWT issuing
+- User management API
+- Audit logs API
 - FIDO2-certified
 
 [![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)](https://fidoalliance.org/company/hanko/)
