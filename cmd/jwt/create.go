@@ -33,7 +33,7 @@ func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobr
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager, cfg.Cookies)
+			sessionManager, err := session.NewManager(jwkManager, cfg.Session)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return

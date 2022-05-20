@@ -13,7 +13,7 @@ import (
 
 func TestNewGenerator(t *testing.T) {
 	manager := jwkManager{}
-	cfg := config.Cookie{}
+	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -21,7 +21,7 @@ func TestNewGenerator(t *testing.T) {
 
 func TestGenerator_Generate(t *testing.T) {
 	manager := jwkManager{}
-	cfg := config.Cookie{}
+	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -35,8 +35,9 @@ func TestGenerator_Generate(t *testing.T) {
 }
 
 func TestGenerator_Verify(t *testing.T) {
+	sessionLifespan := "5m"
 	manager := jwkManager{}
-	cfg := config.Cookie{}
+	cfg := config.Session{Lifespan: sessionLifespan}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -54,11 +55,14 @@ func TestGenerator_Verify(t *testing.T) {
 	assert.Equal(t, token.Subject(), userId.String())
 	assert.False(t, time.Time{}.Equal(token.IssuedAt()))
 	assert.False(t, time.Time{}.Equal(token.Expiration()))
+
+	sessionDuration, _ := time.ParseDuration(sessionLifespan)
+	assert.True(t, token.IssuedAt().Add(sessionDuration).Equal(token.Expiration()))
 }
 
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := jwkManager{}
-	cfg := config.Cookie{}
+	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
