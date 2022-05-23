@@ -9,6 +9,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"log"
 	"strings"
+	"time"
 )
 
 // Config is the central configuration type
@@ -19,8 +20,8 @@ type Config struct {
 	Password Password
 	Database Database
 	Secrets  Secrets
-	Cookies  Cookie
 	Service  Service
+	Session Session
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -66,10 +67,6 @@ func defaultConfig() *Config {
 				Address: ":8001",
 			},
 		},
-		Cookies: Cookie{
-			HttpOnly: true,
-			SameSite: "strict",
-		},
 		Webauthn: WebauthnSettings{
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
@@ -86,6 +83,13 @@ func defaultConfig() *Config {
 		},
 		Database: Database{
 			Database: "hanko",
+		},
+		Session: Session{
+			Lifespan: "1h",
+			Cookie:   Cookie{
+				HttpOnly: true,
+				SameSite: "strict",
+			},
 		},
 	}
 }
@@ -114,6 +118,10 @@ func (c *Config) Validate() error {
 	err = c.Service.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate service settings: %w", err)
+	}
+	err = c.Session.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate session settings: %w", err)
 	}
 	return nil
 }
@@ -284,6 +292,19 @@ type Secrets struct {
 func (s *Secrets) Validate() error {
 	if len(s.Keys) == 0 {
 		return errors.New("at least one key must be defined")
+	}
+	return nil
+}
+
+type Session struct {
+	Lifespan string
+	Cookie Cookie
+}
+
+func (s *Session) Validate() error {
+	_, err := time.ParseDuration(s.Lifespan)
+	if err != nil {
+		return errors.New("failed to parse lifespan")
 	}
 	return nil
 }

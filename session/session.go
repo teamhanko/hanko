@@ -21,11 +21,17 @@ type Manager interface {
 type manager struct {
 	jwtGenerator  hankoJwt.Generator
 	sessionLength time.Duration
-	cookieConfig  config.Cookie
+	cookieConfig  cookieConfig
+}
+
+type cookieConfig struct {
+	Domain   string
+	HttpOnly bool
+	SameSite http.SameSite
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager hankoJwk.Manager, config config.Cookie) (Manager, error) {
+func NewManager(jwkManager hankoJwk.Manager, config config.Session) (Manager, error) {
 	signatureKey, err := jwkManager.GetSigningKey()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session generator: %w", err)
@@ -38,14 +44,31 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Cookie) (Manager, err
 	if err != nil {
 		return nil, fmt.Errorf("failed to create session generator: %w", err)
 	}
+
+	duration, _ := time.ParseDuration(config.Lifespan) // error can be ignored, value is checked in config validation
+	sameSite := http.SameSite(0)
+	switch config.Cookie.SameSite {
+	case "lax":
+		sameSite = http.SameSiteLaxMode
+	case "strict":
+		sameSite = http.SameSiteStrictMode
+	case "none":
+		sameSite = http.SameSiteNoneMode
+	default:
+		sameSite = http.SameSiteDefaultMode
+	}
 	return &manager{
 		jwtGenerator:  g,
-		sessionLength: time.Minute * 60, // TODO: should come from config
-		cookieConfig:  config,
+		sessionLength: duration,
+		cookieConfig: cookieConfig{
+			Domain:   config.Cookie.Domain,
+			HttpOnly: config.Cookie.HttpOnly,
+			SameSite: sameSite,
+		},
 	}, nil
 }
 
-// Generate creates a new session JWT for the given user
+// GenerateJWT creates a new session JWT for the given user
 func (g *manager) GenerateJWT(userId uuid.UUID) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(g.sessionLength)
@@ -74,18 +97,19 @@ func (g *manager) Verify(token string) (jwt.Token, error) {
 	return parsedToken, nil
 }
 
+// GenerateCookie creates a new session cookie for the given user
 func (g *manager) GenerateCookie(userId uuid.UUID) (*http.Cookie, error) {
 	jwt, err := g.GenerateJWT(userId)
 	if err != nil {
 		return nil, err
 	}
+
 	return &http.Cookie{
 		Name:     "hanko",
 		Value:    jwt,
 		Domain:   g.cookieConfig.Domain,
 		Secure:   true,
 		HttpOnly: g.cookieConfig.HttpOnly,
-		//TODO: config has the SameSite Parameter which is string, http.SameSite is int do we need to make this configurable?
-		SameSite: http.SameSiteLaxMode,
+		SameSite: g.cookieConfig.SameSite,
 	}, nil
 }
