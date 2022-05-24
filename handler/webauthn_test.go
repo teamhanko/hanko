@@ -36,7 +36,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	token := jwt.New()
 	err := token.Set(jwt.SubjectKey, userId)
 	require.NoError(t, err)
-	c.Set("hanko", token)
+	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
@@ -72,7 +72,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	token := jwt.New()
 	err := token.Set(jwt.SubjectKey, userId)
 	require.NoError(t, err)
-	c.Set("hanko", token)
+	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, sessionData, nil)
 	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
@@ -89,7 +89,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	token2 := jwt.New()
 	err = token.Set(jwt.SubjectKey, userId)
 	require.NoError(t, err)
-	c2.Set("hanko", token2)
+	c2.Set("session", token2)
 
 	if assert.NoError(t, handler.FinishRegistration(c2)) {
 		assert.Equal(t, http.StatusBadRequest, rec2.Result().StatusCode)
