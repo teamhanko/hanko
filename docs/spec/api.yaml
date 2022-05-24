@@ -394,6 +394,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+  /me:
+    get:
+      summary: 'Redirects to user resource if user has valid session'
+      operationId: IsUSerAuthorized
+      tags:
+        - authentication
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      responses:
+        '307':
+          description: 'Redirect'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: Redirect target
+        '401':
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /users:
     post:
       summary: 'Create a user'

@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/persistence"
 	"github.com/teamhanko/hanko/persistence/models"
@@ -96,4 +98,13 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 	}{
 		UserId: user.ID.String(),
 	})
+}
+
+func (h *UserHandler) Me(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/users/%s", sessionToken.Subject()))
 }
