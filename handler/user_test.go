@@ -173,7 +173,7 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "123"}`))
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "123"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -192,7 +192,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 
 func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`"email": "123}`))
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`"email": "123}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -208,7 +208,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -234,7 +234,7 @@ func TestUserHandler_GetUserIdByEmail_UserNotVerified(t *testing.T) {
 	}
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -260,7 +260,7 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	}
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodGet, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
