@@ -150,8 +150,56 @@ func TestUserHandler_Get(t *testing.T) {
 		assert.Equal(t, rec.Code, http.StatusOK)
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		assert.NoError(t, err)
+		assert.Equal(t, userId, user.ID)
+		assert.Equal(t, len(user.Credentials), 0)
+	}
+}
+
+func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+				Credentials: []models.WebauthnCredential{
+					{
+						ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+						UserId:          userId,
+						PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHog",
+						AttestationType: "none",
+						AAGUID:          aaguid,
+						SignCount:       1650958750,
+						CreatedAt:       time.Time{},
+						UpdatedAt:       time.Time{},
+					},
+				},
+			}
+		}(),
+	}
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/users/:id")
+	c.SetParamNames("id")
+	c.SetParamValues(userId.String())
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.Get(c)) {
+		assert.Equal(t, rec.Code, http.StatusOK)
+		user := models.User{}
+		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		require.NoError(t, err)
 		assert.Equal(t, userId, user.ID)
+		assert.Equal(t, len(user.Credentials), 1)
 	}
 }
 
