@@ -56,7 +56,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, hankoMiddleware.Session(sessionManager))
 
-	e.GET("/user", userHandler.GetUserIdByEmail)
+	e.POST("/user", userHandler.GetUserIdByEmail)
 
 	healthHandler := handler.NewHealthHandler()
 	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionManager)
@@ -78,7 +78,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	}
 	wellKnown := e.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
-	wellKnown.GET("/config.json", wellKnownHandler.GetConfig)
+	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
