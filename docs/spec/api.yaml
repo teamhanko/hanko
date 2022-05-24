@@ -341,7 +341,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-  /.well-known/config.json:
+  /.well-known/config:
     get:
       summary: 'Get hanko configuration'
       operationId: getConfig
@@ -355,7 +355,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/HankoConfiguration'
   /user:
-    get:
+    post:
       summary: 'Get user ID'
       operationId: getUserId
       tags:
