@@ -764,6 +764,14 @@ components:
           format: date-time
         verified:
           type: boolean
+        webauthn_credentials:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: base64url
     UUID4:
       type: string
       format: uuid4

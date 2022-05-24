@@ -27,7 +27,7 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
-	err := p.db.Find(&user, id)
+	err := p.db.Eager().Find(&user, id)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil
 	}
