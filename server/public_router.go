@@ -78,7 +78,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	}
 	wellKnown := e.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
-	wellKnown.GET("/config.json", wellKnownHandler.GetConfig)
+	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
