@@ -152,7 +152,7 @@ func TestUserHandler_Get(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		assert.NoError(t, err)
 		assert.Equal(t, userId, user.ID)
-		assert.Equal(t, len(user.Credentials), 0)
+		assert.Equal(t, len(user.WebauthnCredentials), 0)
 	}
 }
 
@@ -165,7 +165,7 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 			Email:     "john.doe@example.com",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-			Credentials: []models.WebauthnCredential{
+			WebauthnCredentials: []models.WebauthnCredential{
 				{
 					ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
 					UserId:          userId,
@@ -197,7 +197,7 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		require.NoError(t, err)
 		assert.Equal(t, userId, user.ID)
-		assert.Equal(t, len(user.Credentials), 1)
+		assert.Equal(t, len(user.WebauthnCredentials), 1)
 	}
 }
 
