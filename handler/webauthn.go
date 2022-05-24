@@ -55,7 +55,7 @@ func NewWebauthnHandler(cfg config.WebauthnSettings, persister persistence.Persi
 
 // BeginRegistration returns credential creation options for the WebAuthnAPI. It expects a valid session JWT in the request.
 func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
-	sessionToken, ok := c.Get("hanko").(jwt.Token)
+	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
 	}
@@ -99,7 +99,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 // FinishRegistration validates the WebAuthnAPI response and associates the credential with the user. It expects a valid session JWT in the request.
 // The session JWT must be associated to the same user who requested the credential creation options.
 func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
-	sessionToken, ok := c.Get("hanko").(jwt.Token)
+	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
 	}
