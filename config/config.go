@@ -169,6 +169,17 @@ type ServerSettings struct {
 	// The Address to listen on in the form of host:port
 	// See net.Dial for details of the address format.
 	Address string
+	Cors    Cors
+}
+
+type Cors struct {
+	Enabled          bool
+	AllowCredentials bool     `koanf:"allow_credentials"`
+	AllowOrigins     []string `koanf:"allow_origins"`
+	AllowMethods     []string `koanf:"allow_methods"`
+	AllowHeaders     []string `koanf:"allow_headers"`
+	ExposeHeaders    []string `koanf:"expose_headers"`
+	MaxAge           int      `koanf:"max_age"`
 }
 
 func (s *ServerSettings) Validate() error {

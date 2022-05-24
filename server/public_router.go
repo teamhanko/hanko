@@ -26,6 +26,17 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}},"referer":"${referer}"` + "\n",
 	}))
 
+	if cfg.Server.Public.Cors.Enabled {
+		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     cfg.Server.Public.Cors.AllowOrigins,
+			AllowMethods:     cfg.Server.Public.Cors.AllowMethods,
+			AllowHeaders:     cfg.Server.Public.Cors.AllowHeaders,
+			ExposeHeaders:    cfg.Server.Public.Cors.ExposeHeaders,
+			AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
+			MaxAge:           cfg.Server.Public.Cors.MaxAge,
+		}))
+	}
+
 	e.Validator = dto.NewCustomValidator()
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
