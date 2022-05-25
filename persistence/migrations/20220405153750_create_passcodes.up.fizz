@@ -3,6 +3,7 @@ create_table("passcodes") {
     t.Column("user_id", "uuid", {})
     t.Column("ttl", "integer", {})
     t.Column("code", "string", {})
+    t.Column("try_count", "integer", {})
     t.Timestamps()
     t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
 }
