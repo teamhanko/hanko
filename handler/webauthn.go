@@ -230,7 +230,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		c.SetCookie(cookie)
-		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID)})
+		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID), "user_id": webauthnUser.UserId.String()})
 	})
 }
 
