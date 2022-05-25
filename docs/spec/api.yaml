@@ -233,6 +233,10 @@ paths:
             Set-Cookie:
               schema:
                 $ref: '#/components/schemas/CookieSession'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebauthnLoginResponse'
         '400':
           description: 'Bad request'
           content:
@@ -801,6 +805,16 @@ components:
               id:
                 type: string
                 format: base64url
+    WebauthnLoginResponse:
+      description: 'Response after a successful login with webauthn'
+      type: object
+      properties:
+        credential_id:
+          type: string
+          format: base64url
+        user_id:
+          type: string
+          format: uuid4
     UUID4:
       type: string
       format: uuid4
