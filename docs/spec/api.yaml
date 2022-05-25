@@ -397,7 +397,7 @@ paths:
   /me:
     get:
       summary: 'Redirects to user resource if user has valid session'
-      operationId: IsUSerAuthorized
+      operationId: IsUserAuthorized
       tags:
         - authentication
       security:
