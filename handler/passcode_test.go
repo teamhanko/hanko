@@ -64,7 +64,7 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	if assert.NoError(t, passcodeHandler.Init(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Result().StatusCode)
+		assert.Equal(t, http.StatusBadRequest, rec.Result().StatusCode)
 	}
 }
 
