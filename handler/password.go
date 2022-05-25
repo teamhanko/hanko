@@ -115,7 +115,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 
 	pw, err := h.persister.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(body.UserId))
 	if pw == nil {
-		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 	}
 
 	if err != nil {
