@@ -108,6 +108,7 @@ func (g *manager) GenerateCookie(userId uuid.UUID) (*http.Cookie, error) {
 		Name:     "hanko",
 		Value:    jwt,
 		Domain:   g.cookieConfig.Domain,
+		Path:     "/",
 		Secure:   true,
 		HttpOnly: g.cookieConfig.HttpOnly,
 		SameSite: g.cookieConfig.SameSite,
