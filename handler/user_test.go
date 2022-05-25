@@ -3,8 +3,10 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/dto"
@@ -322,5 +324,28 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, userId.String(), response.UserId)
+	}
+}
+
+func TestUserHandler_Me(t *testing.T) {
+	userId, _ := uuid.NewV4()
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodGet, "/me", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, userId.String())
+	require.NoError(t, err)
+	c.Set("session", token)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.Me(c)) {
+		assert.Equal(t, http.StatusTemporaryRedirect, rec.Code)
+		assert.Equal(t, fmt.Sprintf("/users/%s", userId.String()), rec.Header().Get("Location"))
 	}
 }
