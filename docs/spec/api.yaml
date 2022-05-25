@@ -73,6 +73,17 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized'
+          headers:
+            X-Rate-Limit-Remaining:
+              schema:
+                type: integer
+              description: Remaining attempts for this passcode
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
         '500':
           description: 'Internal server error'
           content:
