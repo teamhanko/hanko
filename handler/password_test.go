@@ -126,7 +126,7 @@ func TestPasswordHandler_Set_UserNotFound(t *testing.T) {
 	handler := NewPasswordHandler(p, sessionManager{})
 
 	if assert.NoError(t, handler.Set(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Code)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
 	}
 }
 
@@ -320,6 +320,6 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	handler := NewPasswordHandler(p, sessionManager{})
 
 	if assert.NoError(t, handler.Login(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Code)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
 	}
 }
