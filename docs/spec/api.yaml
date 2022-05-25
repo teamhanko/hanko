@@ -783,7 +783,7 @@ components:
         credential_id:
           type: string
           format: base64url
-        user_ud:
+        user_id:
           type: string
           format: uuid4
     UUID4:
