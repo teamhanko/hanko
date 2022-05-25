@@ -32,7 +32,6 @@ func (sd *WebauthnSessionData) Validate(tx *pop.Connection) (*validate.Errors, e
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: sd.ID},
 		&validators.StringIsPresent{Name: "Challenge", Field: sd.Challenge},
-		&validators.UUIDIsPresent{Name: "UserId", Field: sd.UserId},
 		&validators.StringInclusion{Name: "Operation", Field: string(sd.Operation), List: []string{string(WebauthnOperationRegistration), string(WebauthnOperationAuthentication)}},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: sd.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: sd.CreatedAt},
