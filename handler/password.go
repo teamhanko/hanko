@@ -56,7 +56,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		}
 
 		if user == nil {
-			return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 		}
 
 		if sessionUserId != user.ID {

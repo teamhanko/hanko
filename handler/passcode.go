@@ -66,7 +66,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
-		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
 	}
 
 	passcode, err := h.passcodeGenerator.Generate()
