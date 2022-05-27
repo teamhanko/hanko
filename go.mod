@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-webauthn/webauthn v0.3.1
-	github.com/gobuffalo/pop/v6 v6.0.3
+	github.com/gobuffalo/pop/v6 v6.0.4
 	github.com/gobuffalo/validate/v3 v3.3.1
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/knadh/koanf v1.4.1
