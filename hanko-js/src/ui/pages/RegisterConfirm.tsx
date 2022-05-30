@@ -8,16 +8,16 @@ import { EmailValidationRequiredError, HankoError } from "../../lib/Errors";
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { UserContext } from "../contexts/UserProvider";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import Content from "../components/Content";
 import Headline from "../components/Headline";
 import Form from "../components/Form";
 import Button from "../components/Button";
 import Footer from "../components/Footer";
-import LinkBackToEmailLogin from "../components/LinkBackToEmailLogin";
 import ErrorMessage from "../components/ErrorMessage";
 import Paragraph from "../components/Paragraph";
+import LinkToEmailLogin from "../components/link/toEmailLogin";
 
 const RegisterConfirm = () => {
   const { t } = useContext(TranslateContext);
@@ -78,7 +78,7 @@ const RegisterConfirm = () => {
       </Content>
       <Footer>
         <span hidden />
-        <LinkBackToEmailLogin disabled={isLoading} reverse={false} />
+        <LinkToEmailLogin disabled={isLoading} />
       </Footer>
     </Fragment>
   );

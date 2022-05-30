@@ -31,7 +31,7 @@ export const translations = {
       signUp: "Sign up",
       sendNewPasscode: "Send new code",
       passwordRetryAfter: "Retry in {passwordRetryAfter}",
-      passcodeRetryAfter: "Request a new code in {passcodeRetryAfter}",
+      passcodeResendAfter: "Request a new code in {passcodeResendAfter}",
     },
     errors: {
       somethingWentWrong:
@@ -81,7 +81,7 @@ export const translations = {
       signUp: "Registrieren",
       sendNewPasscode: "Neuen Code senden",
       passwordRetryAfter: "Neuer Versuch in {passwordRetryAfter}",
-      passcodeRetryAfter: "Neuen Code in {passcodeRetryAfter} anfordern",
+      passcodeResendAfter: "Neuen Code in {passcodeResendAfter} anfordern",
     },
     errors: {
       somethingWentWrong:

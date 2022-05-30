@@ -6,7 +6,7 @@ import { User } from "../../lib/HankoClient";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import Content from "../components/Content";
 import Headline from "../components/Headline";
@@ -46,7 +46,7 @@ const RegisterPassword = ({ user, registerAuthenticator }: Props) => {
       .update(user.id, password)
       .then(() => {
         if (registerAuthenticator) {
-          renderRegisterAuthenticator(user);
+          renderRegisterAuthenticator();
         } else {
           emitSuccessEvent();
           setIsSuccess(true);

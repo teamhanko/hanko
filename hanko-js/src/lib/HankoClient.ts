@@ -1,14 +1,18 @@
 import {
   isUserVerifyingPlatformAuthenticatorAvailable,
-  get,
-  create,
+  get as getWebauthnCredential,
+  create as createWebauthnCredential,
   CredentialRequestOptionsJSON,
   PublicKeyCredentialWithAssertionJSON,
   CredentialCreationOptionsJSON,
   PublicKeyCredentialWithAttestationJSON,
 } from "@teamhanko/hanko-webauthn";
 
-import { LocalStorage } from "./LocalStorage";
+import {
+  PasscodeManager,
+  PasswordManager,
+  WebAuthnManager,
+} from "./UserStateManager";
 
 import {
   InvalidPasswordError,
@@ -57,45 +61,37 @@ export interface Passcode {
   ttl: number;
 }
 
-export class Hanko {
+export class HankoClient {
   config: ConfigClient;
   user: UserClient;
-  authenticator: WebAuthnClient;
+  authenticator: WebauthnClient;
   password: PasswordClient;
   passcode: PasscodeClient;
 
-  constructor(api: string) {
-    this.config = new ConfigClient(api);
-    this.user = new UserClient(api);
-    this.authenticator = new WebAuthnClient(api);
-    this.password = new PasswordClient(api);
-    this.passcode = new PasscodeClient(api);
+  constructor(api: string, timeout: number) {
+    this.config = new ConfigClient(api, timeout);
+    this.user = new UserClient(api, timeout);
+    this.authenticator = new WebauthnClient(api, timeout);
+    this.password = new PasswordClient(api, timeout);
+    this.passcode = new PasscodeClient(api, timeout);
   }
 }
 
 class HttpClient {
   timeout: number;
   api: string;
-  defaultHeaders: RequestInit = {
-    mode: "cors",
-    credentials: "include",
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  };
 
-  constructor(api: string, timeout: number) {
+  constructor(api: string, timeout: number = 13000) {
     this.api = api;
     this.timeout = timeout;
   }
 
-  _fetch(url: string, init: RequestInit) {
+  _fetch(path: string, init: RequestInit) {
     return new Promise<Response>((resolve, reject) => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), this.timeout);
 
-      fetch(this.api + url, {
+      fetch(this.api + path, {
         mode: "cors",
         credentials: "include",
         headers: {
@@ -118,36 +114,34 @@ class HttpClient {
     });
   }
 
-  get(url: string) {
-    return this._fetch(url, { method: "GET" });
+  get(path: string) {
+    return this._fetch(path, { method: "GET" });
   }
 
-  post(url: string, body?: any) {
-    return this._fetch(url, {
+  post(path: string, body?: any) {
+    return this._fetch(path, {
       method: "POST",
       body: JSON.stringify(body),
     });
   }
 
-  put(url: string, body?: any) {
-    return this._fetch(url, {
+  put(path: string, body?: any) {
+    return this._fetch(path, {
       method: "PUT",
       body: JSON.stringify(body),
     });
   }
 }
 
-abstract class Utility {
-  store: LocalStorage;
+abstract class AbstractClient {
   client: HttpClient;
 
-  constructor(api: string) {
-    this.store = new LocalStorage("hanko");
-    this.client = new HttpClient(api, 13000);
+  constructor(api: string, timeout: number) {
+    this.client = new HttpClient(api, timeout);
   }
 }
 
-class ConfigClient extends Utility {
+class ConfigClient extends AbstractClient {
   get() {
     return new Promise<Config>((resolve, reject) => {
       this.client
@@ -156,6 +150,7 @@ class ConfigClient extends Utility {
           if (response.ok) {
             return resolve(response.json());
           }
+
           throw new TechnicalError();
         })
         .catch((e) => {
@@ -165,7 +160,7 @@ class ConfigClient extends Utility {
   }
 }
 
-class UserClient extends Utility {
+class UserClient extends AbstractClient {
   getInfo(email: string): Promise<UserInfo> {
     return new Promise<UserInfo>((resolve, reject) => {
       this.client
@@ -183,6 +178,7 @@ class UserClient extends Utility {
           if (!u.verified) {
             throw new EmailValidationRequiredError(u.id);
           }
+
           return resolve(u);
         })
         .catch((e) => {
@@ -234,7 +230,14 @@ class UserClient extends Utility {
   }
 }
 
-class WebAuthnClient extends Utility {
+class WebauthnClient extends AbstractClient {
+  webAuthnManager: WebAuthnManager;
+
+  constructor(api: string, timeout: number) {
+    super(api, timeout);
+    this.webAuthnManager = new WebAuthnManager();
+  }
+
   login(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client
@@ -247,7 +250,7 @@ class WebAuthnClient extends Utility {
           throw new TechnicalError();
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
-          return get(challenge);
+          return getWebauthnCredential(challenge);
         })
         .catch((e) => {
           throw new WebAuthnRequestCancelledError(e);
@@ -265,7 +268,7 @@ class WebAuthnClient extends Utility {
           }
         })
         .then((w: WebauthnFinalized) => {
-          this.store.setWebAuthnCredentialID(w.user_id, w.credential_id);
+          this.webAuthnManager.setCredentialID(w.user_id, w.credential_id);
           return resolve();
         })
         .catch((e) => {
@@ -286,7 +289,7 @@ class WebAuthnClient extends Utility {
           throw new TechnicalError();
         })
         .then((challenge: CredentialCreationOptionsJSON) => {
-          return create(challenge);
+          return createWebauthnCredential(challenge);
         })
         .catch((e) => {
           throw new WebAuthnRequestCancelledError(e);
@@ -305,7 +308,7 @@ class WebAuthnClient extends Utility {
           throw new TechnicalError();
         })
         .then((w: WebauthnFinalized) => {
-          this.store.setWebAuthnCredentialID(w.user_id, w.credential_id);
+          this.webAuthnManager.setCredentialID(w.user_id, w.credential_id);
           return resolve();
         })
         .catch((e) => {
@@ -322,16 +325,16 @@ class WebAuthnClient extends Utility {
     return new Promise<boolean>((resolve, reject) => {
       this.isSupported()
         .then((supported) => {
-          if (!user.webauthn_credentials) {
+          if (!user.webauthn_credentials || !user.webauthn_credentials.length) {
             return resolve(supported);
           }
 
-          const hasCredentials = this.store.matchCredentials(
+          const matched = this.webAuthnManager.matchCredentials(
             user.id,
             user.webauthn_credentials
           );
 
-          return resolve(supported && !hasCredentials);
+          return resolve(supported && !matched);
         })
         .catch((e) => {
           reject(e);
@@ -340,7 +343,14 @@ class WebAuthnClient extends Utility {
   }
 }
 
-class PasswordClient extends Utility {
+class PasswordClient extends AbstractClient {
+  passwordManager: PasswordManager;
+
+  constructor(api: string, timeout: number) {
+    super(api, timeout);
+    this.passwordManager = new PasswordManager();
+  }
+
   login(userID: string, password: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client
@@ -356,7 +366,7 @@ class PasswordClient extends Utility {
               10
             );
 
-            this.store.setPasswordRetryAfter(userID, retryAfter);
+            this.passwordManager.setRetryAfter(userID, retryAfter);
 
             throw new TooManyRequestsError(retryAfter);
           } else {
@@ -377,6 +387,7 @@ class PasswordClient extends Utility {
           if (response.ok) {
             return resolve();
           }
+
           throw new TechnicalError();
         })
         .catch((e) => {
@@ -385,12 +396,19 @@ class PasswordClient extends Utility {
     });
   }
 
-  public getRetryAfter = (userID: string) => {
-    return this.store.getPasswordRetryAfter(userID);
-  };
+  getRetryAfter(userID: string) {
+    return this.passwordManager.getRetryAfter(userID);
+  }
 }
 
-class PasscodeClient extends Utility {
+class PasscodeClient extends AbstractClient {
+  passcodeManager: PasscodeManager;
+
+  constructor(api: string, timeout: number) {
+    super(api, timeout);
+    this.passcodeManager = new PasscodeManager();
+  }
+
   initialize(userID: string): Promise<Passcode> {
     return new Promise<Passcode>((resolve, reject) => {
       this.client
@@ -404,7 +422,7 @@ class PasscodeClient extends Utility {
               10
             );
 
-            this.store.setPasscodeRetryAfter(userID, retryAfter);
+            this.passcodeManager.setResendAfter(userID, retryAfter);
 
             throw new TooManyRequestsError(retryAfter);
           } else {
@@ -412,10 +430,10 @@ class PasscodeClient extends Utility {
           }
         })
         .then((passcode: Passcode) => {
-          const expiry = passcode.ttl;
+          const ttl = passcode.ttl;
 
-          this.store.setActivePasscodeID(userID, passcode.id);
-          this.store.setPasscodeExpiry(userID, expiry);
+          this.passcodeManager.setActiveID(userID, passcode.id);
+          this.passcodeManager.setTTL(userID, ttl);
 
           return resolve(passcode);
         })
@@ -426,20 +444,20 @@ class PasscodeClient extends Utility {
   }
 
   finalize = (userID: string, code: string): Promise<void> => {
-    const passcodeID = this.store.getActivePasscodeID(userID);
+    const passcodeID = this.passcodeManager.getActiveID(userID);
 
     return new Promise<void>((resolve, reject) => {
       this.client
         .post("/passcode/login/finalize", { id: passcodeID, code })
         .then((response) => {
           if (response.ok) {
-            this.store.removeActivePasscodeID(userID);
+            this.passcodeManager.removeActive(userID);
 
             return resolve();
           } else if (response.status === 401) {
             throw new InvalidPasscodeError();
           } else if (response.status === 404 || response.status === 410) {
-            this.store.removeActivePasscodeID(userID);
+            this.passcodeManager.removeActive(userID);
             throw new MaxNumOfPasscodeAttemptsReachedError();
           } else {
             throw new TechnicalError();
@@ -451,13 +469,13 @@ class PasscodeClient extends Utility {
     });
   };
 
-  getExpiry(userID: string) {
-    return this.store.getPasscodeExpiry(userID);
+  getTTL(userID: string) {
+    return this.passcodeManager.getTTL(userID);
   }
 
-  getRetryAfter(userID: string) {
-    return this.store.getPasscodeRetryAfter(userID);
+  getResendAfter(userID: string) {
+    return this.passcodeManager.getResendAfter(userID);
   }
 }
 
-export default { HankoUtil: HttpClient };
+export default HankoClient;

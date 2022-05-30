@@ -5,7 +5,7 @@ import { UnauthorizedError } from "../../lib/Errors";
 
 import { AppContext } from "../contexts/AppProvider";
 import { UserContext } from "../contexts/UserProvider";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import LoadingIndicator from "../components/LoadingIndicator";
 

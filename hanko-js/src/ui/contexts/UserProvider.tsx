@@ -36,6 +36,7 @@ const UserProvider = ({ children }: Props) => {
         .getCurrent()
         .then((u) => {
           setUser(u);
+
           return resolve(u);
         })
         .catch((e) => {

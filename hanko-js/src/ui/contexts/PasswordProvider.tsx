@@ -26,6 +26,7 @@ const PasswordProvider = ({ children }: Props) => {
     (userID: string) => {
       return new Promise<HankoError>((resolve) => {
         const retryAfter = hanko.password.getRetryAfter(userID);
+
         setPasswordRetryAfter(retryAfter);
         resolve(retryAfter > 0 ? new TooManyRequestsError(retryAfter) : null);
       });
@@ -43,6 +44,7 @@ const PasswordProvider = ({ children }: Props) => {
             if (e instanceof TooManyRequestsError) {
               setPasswordRetryAfter(e.retryAfter);
             }
+
             return reject(e);
           });
       });
@@ -54,6 +56,7 @@ const PasswordProvider = ({ children }: Props) => {
     const timer =
       passwordRetryAfter > 0 &&
       setInterval(() => setPasswordRetryAfter(passwordRetryAfter - 1), 1000);
+
     return () => clearInterval(timer);
   }, [passwordRetryAfter]);
 

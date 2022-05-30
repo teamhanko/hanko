@@ -14,8 +14,8 @@ interface Props {
 
 interface Context {
   passcodeIsActive: boolean;
-  passcodeExpiry: number;
-  passcodeRetryAfter: number;
+  passcodeTTL: number;
+  passcodeResendAfter: number;
   passcodeInitialize: (userID: string) => Promise<HankoError>;
   passcodeResend: (userID: string) => Promise<void>;
   passcodeFinalize: (userID: string, passcode: string) => Promise<void>;
@@ -26,8 +26,8 @@ export const PasscodeContext = createContext<Context>(null);
 const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
   const { hanko } = useContext(AppContext);
 
-  const [passcodeExpiry, setPasscodeExpiry] = useState<number>(0);
-  const [passcodeRetryAfter, setPasscodeRetryAfter] = useState<number>(0);
+  const [passcodeTTL, setPasscodeTTL] = useState<number>(0);
+  const [passcodeResendAfter, setPasscodeResendAfter] = useState<number>(0);
   const [passcodeIsActive, setPasscodeIsActive] = useState<boolean>(false);
 
   const passcodeResend = useCallback(
@@ -36,14 +36,13 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
         hanko.passcode
           .initialize(userID)
           .then((passcode) => {
-            setPasscodeExpiry(passcode.ttl);
-            setPasscodeIsActive(true);
+            setPasscodeTTL(passcode.ttl);
 
             return resolve();
           })
           .catch((e) => {
             if (e instanceof TooManyRequestsError) {
-              setPasscodeRetryAfter(e.retryAfter);
+              setPasscodeResendAfter(e.retryAfter);
             }
             reject(e);
           });
@@ -55,18 +54,19 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
   const passcodeInitialize = useCallback(
     (userID: string) => {
       return new Promise<HankoError>((resolve, reject) => {
-        const expiry = hanko.passcode.getExpiry(userID);
-        const retryAfter = hanko.passcode.getRetryAfter(userID);
+        const ttl = hanko.passcode.getTTL(userID);
+        const resendAfter = hanko.passcode.getResendAfter(userID);
 
-        setPasscodeExpiry(expiry);
-        setPasscodeRetryAfter(retryAfter);
+        setPasscodeTTL(ttl);
+        setPasscodeResendAfter(resendAfter);
 
-        if (expiry > 0) {
+        if (ttl > 0) {
           setPasscodeIsActive(true);
           return resolve(null);
-        } else if (passcodeRetryAfter === 0) {
+        } else if (resendAfter === 0) {
           passcodeResend(userID)
             .then(() => {
+              setPasscodeIsActive(true);
               return resolve(null);
             })
             .catch((e) => {
@@ -77,47 +77,50 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
               }
             });
         } else {
-          reject(new TooManyRequestsError(retryAfter));
+          reject(new TooManyRequestsError(resendAfter));
         }
       });
     },
-    [hanko.passcode, passcodeResend, passcodeRetryAfter]
+    [hanko.passcode, passcodeResend]
   );
 
-  const passcodeFinalize = (userID: string, code: string) => {
-    return new Promise<void>((resolve, reject) => {
-      hanko.passcode
-        .finalize(userID, code)
-        .then(() => resolve())
-        .catch((e) => {
-          if (e instanceof MaxNumOfPasscodeAttemptsReachedError) {
-            setPasscodeIsActive(false);
-          }
-          reject(e);
-        });
-    });
-  };
+  const passcodeFinalize = useCallback(
+    (userID: string, code: string) => {
+      return new Promise<void>((resolve, reject) => {
+        hanko.passcode
+          .finalize(userID, code)
+          .then(() => resolve())
+          .catch((e) => {
+            if (e instanceof MaxNumOfPasscodeAttemptsReachedError) {
+              setPasscodeIsActive(false);
+            }
+            reject(e);
+          });
+      });
+    },
+    [hanko.passcode]
+  );
 
   useEffect(() => {
     const timer =
-      passcodeExpiry > 0 &&
-      setInterval(() => setPasscodeExpiry(passcodeExpiry - 1), 1000);
+      passcodeTTL > 0 &&
+      setInterval(() => setPasscodeTTL(passcodeTTL - 1), 1000);
     return () => clearInterval(timer);
-  }, [passcodeExpiry]);
+  }, [passcodeTTL]);
 
   useEffect(() => {
     const timer =
-      passcodeRetryAfter > 0 &&
-      setInterval(() => setPasscodeRetryAfter(passcodeRetryAfter - 1), 1000);
+      passcodeResendAfter > 0 &&
+      setInterval(() => setPasscodeResendAfter(passcodeResendAfter - 1), 1000);
     return () => clearInterval(timer);
-  }, [passcodeRetryAfter]);
+  }, [passcodeResendAfter]);
 
   return (
     <PasscodeContext.Provider
       value={{
+        passcodeTTL,
         passcodeIsActive,
-        passcodeExpiry,
-        passcodeRetryAfter,
+        passcodeResendAfter,
         passcodeResend,
         passcodeInitialize,
         passcodeFinalize,

@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { ComponentChildren, createContext } from "preact";
 import { useCallback, useMemo, useState } from "preact/compat";
 
-import { Hanko, Config } from "../../lib/HankoClient";
+import { HankoClient, Config } from "../../lib/HankoClient";
 
 interface Props {
   api?: string;
@@ -12,7 +12,7 @@ interface Props {
 interface Context {
   config: Config;
   configInitialize: () => Promise<Config>;
-  hanko: Hanko;
+  hanko: HankoClient;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -21,7 +21,7 @@ const AppProvider = ({ api, children }: Props) => {
   const [config, setConfig] = useState<Config>(null);
 
   const hanko = useMemo(
-    () => new Hanko(api.length ? api : "https://api.hanko.io"),
+    () => new HankoClient(api.length ? api : "https://api.hanko.io", 13000),
     [api]
   );
 
@@ -31,6 +31,7 @@ const AppProvider = ({ api, children }: Props) => {
         .get()
         .then((c) => {
           setConfig(c);
+
           return resolve(c);
         })
         .catch((e) => reject(e));

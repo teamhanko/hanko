@@ -6,6 +6,6 @@
     height: 20px;
 }
 
-.linkWithLoadingIndicator.reverse {
+.linkWithLoadingIndicator.swap {
     flex-direction: row-reverse;
 }

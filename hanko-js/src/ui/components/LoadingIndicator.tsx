@@ -6,11 +6,11 @@ import LoadingWheel from "./LoadingWheel";
 
 import styles from "./LoadingIndicator.module.css";
 
-type Props = {
+export type Props = {
   children?: ComponentChildren;
   isLoading?: boolean;
   isSuccess?: boolean;
-  fadeOutCheckmark?: boolean;
+  fadeOut?: boolean;
   useSecondaryStyles?: boolean;
 };
 
@@ -18,7 +18,7 @@ const LoadingIndicator = ({
   children,
   isLoading,
   isSuccess,
-  fadeOutCheckmark,
+  fadeOut,
   useSecondaryStyles,
 }: Props) => {
   return (
@@ -26,10 +26,7 @@ const LoadingIndicator = ({
       {isLoading ? (
         <LoadingWheel />
       ) : isSuccess ? (
-        <Checkmark
-          fadeOut={fadeOutCheckmark}
-          useSecondaryStyles={useSecondaryStyles}
-        />
+        <Checkmark fadeOut={fadeOut} useSecondaryStyles={useSecondaryStyles} />
       ) : (
         children
       )}

@@ -3,7 +3,7 @@ import register from "preact-custom-element";
 import { Fragment } from "preact";
 
 import { TranslateProvider } from "@denysvuika/preact-translate";
-import RenderProvider from "./contexts/RenderProvider";
+import PageProvider from "./contexts/PageProvider";
 import AppProvider from "./contexts/AppProvider";
 import UserProvider from "./contexts/UserProvider";
 import PasscodeProvider from "./contexts/PasscodeProvider";
@@ -31,7 +31,7 @@ const HankoUI = ({ api, lang }: Props) => {
           <UserProvider>
             <PasswordProvider>
               <PasscodeProvider>
-                <RenderProvider />
+                <PageProvider />
               </PasscodeProvider>
             </PasswordProvider>
           </UserProvider>

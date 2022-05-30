@@ -7,7 +7,7 @@ import { HankoError, TooManyRequestsError } from "../../lib/Errors";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { PasswordContext } from "../contexts/PasswordProvider";
 import { UserContext } from "../contexts/UserProvider";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import Content from "../components/Content";
 import Footer from "../components/Footer";
@@ -15,9 +15,9 @@ import Headline from "../components/Headline";
 import Form from "../components/Form";
 import InputText from "../components/InputText";
 import Button from "../components/Button";
-import LinkWithLoadingIndicator from "../components/LinkWithLoadingIndicator";
-import LinkBackToEmailLogin from "../components/LinkBackToEmailLogin";
 import ErrorMessage from "../components/ErrorMessage";
+import LoadingIndicatorLink from "../components/link/withLoadingIndicator";
+import LinkToEmailLogin from "../components/link/toEmailLogin";
 
 type Props = {
   userID: string;
@@ -110,16 +110,14 @@ const LoginPassword = ({ userID, initialError }: Props) => {
         </Form>
       </Content>
       <Footer>
-        <LinkBackToEmailLogin
-          disabled={isPasscodeLoading || isPasswordLoading}
-        />
-        <LinkWithLoadingIndicator
+        <LinkToEmailLogin disabled={isPasscodeLoading || isPasswordLoading} />
+        <LoadingIndicatorLink
           disabled={isPasscodeLoading || isPasswordLoading}
           onClick={onForgotPasswordClick}
           isLoading={isPasscodeLoading}
         >
           {t("labels.forgotYourPassword")}
-        </LinkWithLoadingIndicator>
+        </LoadingIndicatorLink>
       </Footer>
     </Fragment>
   );

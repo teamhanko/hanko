@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { useContext, useState } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import Headline from "../components/Headline";
 import Content from "../components/Content";

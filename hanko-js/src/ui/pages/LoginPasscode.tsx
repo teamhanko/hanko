@@ -1,6 +1,6 @@
 import * as preact from "preact";
 import { Fragment } from "preact";
-import { useCallback, useContext, useEffect, useState } from "preact/compat";
+import { useContext, useEffect, useState } from "preact/compat";
 
 import {
   HankoError,
@@ -11,7 +11,7 @@ import {
 import { UserContext } from "../contexts/UserProvider";
 import { PasscodeContext } from "../contexts/PasscodeProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import Button from "../components/Button";
 import Content from "../components/Content";
@@ -19,11 +19,12 @@ import Headline from "../components/Headline";
 import Form from "../components/Form";
 import Footer from "../components/Footer";
 import InputPasscode from "../components/InputPasscode";
-import LinkWithLoadingIndicator from "../components/LinkWithLoadingIndicator";
-import LinkBackToEmailLogin from "../components/LinkBackToEmailLogin";
-import LinkBackToPasswordLogin from "../components/LinkBackToPasswordLogin";
 import ErrorMessage from "../components/ErrorMessage";
 import Paragraph from "../components/Paragraph";
+
+import LoadingIndicatorLink from "../components/link/withLoadingIndicator";
+import LinkToEmailLogin from "../components/link/toEmailLogin";
+import LinkToPasswordLogin from "../components/link/toPasswordLogin";
 
 type Props = {
   userID: string;
@@ -45,9 +46,9 @@ const LoginPasscode = ({
     useContext(RenderContext);
   const { email, userInitialize } = useContext(UserContext);
   const {
+    passcodeTTL,
     passcodeIsActive,
-    passcodeExpiry,
-    passcodeRetryAfter,
+    passcodeResendAfter,
     passcodeResend,
     passcodeFinalize,
   } = useContext(PasscodeContext);
@@ -60,7 +61,7 @@ const LoginPasscode = ({
   const [error, setError] = useState<HankoError>(initialError);
 
   const onPasscodeInput = (digits: string[]) => {
-    // Automatically submit the Passcode if every input contains a digit.
+    // Automatically submit the Passcode when every input contains a digit.
     if (digits.filter((digit) => digit !== "").length === numberOfDigits) {
       passcodeSubmit(digits);
     }
@@ -68,42 +69,32 @@ const LoginPasscode = ({
     setPasscodeDigits(digits);
   };
 
-  const passcodeSubmit = useCallback(
-    (code: string[]) => {
-      setIsPasscodeLoading(true);
+  const passcodeSubmit = (code: string[]) => {
+    setIsPasscodeLoading(true);
 
-      passcodeFinalize(userID, code.join(""))
-        .then(() => userInitialize())
-        .then((u) => eventuallyRenderEnrollment(u, recoverPassword))
-        .then((rendered) => {
-          if (!rendered) {
-            setIsPasscodeSuccess(true);
-            setIsPasscodeLoading(false);
-            emitSuccessEvent();
-          }
-
-          return;
-        })
-        .catch((e) => {
-          // Clear Passcode digits when there is no technical error.
-          if (!(e instanceof TechnicalError)) {
-            setPasscodeDigits([]);
-          }
-
-          setIsPasscodeSuccess(false);
+    passcodeFinalize(userID, code.join(""))
+      .then(() => userInitialize())
+      .then((u) => eventuallyRenderEnrollment(u, recoverPassword))
+      .then((rendered) => {
+        if (!rendered) {
+          setIsPasscodeSuccess(true);
           setIsPasscodeLoading(false);
-          setError(e);
-        });
-    },
-    [
-      emitSuccessEvent,
-      passcodeFinalize,
-      recoverPassword,
-      eventuallyRenderEnrollment,
-      userID,
-      userInitialize,
-    ]
-  );
+          emitSuccessEvent();
+        }
+
+        return;
+      })
+      .catch((e) => {
+        // Clear Passcode digits when there is no technical error.
+        if (!(e instanceof TechnicalError)) {
+          setPasscodeDigits([]);
+        }
+
+        setIsPasscodeSuccess(false);
+        setIsPasscodeLoading(false);
+        setError(e);
+      });
+  };
 
   const onPasscodeSubmitClick = (event: Event) => {
     event.preventDefault();
@@ -132,10 +123,10 @@ const LoginPasscode = ({
   };
 
   useEffect(() => {
-    if (passcodeExpiry === 0) {
+    if (passcodeTTL === 0) {
       setError(new PasscodeExpiredError());
     }
-  }, [passcodeExpiry]);
+  }, [passcodeTTL]);
 
   return (
     <Fragment>
@@ -148,7 +139,7 @@ const LoginPasscode = ({
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
             disabled={
-              passcodeExpiry === 0 ||
+              passcodeTTL === 0 ||
               !passcodeIsActive ||
               isPasscodeLoading ||
               isPasscodeSuccess ||
@@ -157,9 +148,7 @@ const LoginPasscode = ({
           />
           <Paragraph>{t("texts.enterPasscode", { email })}</Paragraph>
           <Button
-            disabled={
-              passcodeExpiry === 0 || !passcodeIsActive || isResendLoading
-            }
+            disabled={passcodeTTL === 0 || !passcodeIsActive || isResendLoading}
             isLoading={isPasscodeLoading}
             isSuccess={isPasscodeSuccess}
           >
@@ -169,20 +158,20 @@ const LoginPasscode = ({
       </Content>
       <Footer>
         {recoverPassword ? (
-          <LinkBackToPasswordLogin
+          <LinkToPasswordLogin
             disabled={isResendLoading || isPasscodeLoading || isPasscodeSuccess}
             userID={userID}
             hidden={hideBackLink}
           />
         ) : (
-          <LinkBackToEmailLogin
+          <LinkToEmailLogin
             disabled={isResendLoading || isPasscodeLoading || isPasscodeSuccess}
             hidden={hideBackLink}
           />
         )}
-        <LinkWithLoadingIndicator
+        <LoadingIndicatorLink
           disabled={
-            passcodeRetryAfter > 0 ||
+            passcodeResendAfter > 0 ||
             isResendLoading ||
             isPasscodeLoading ||
             isPasscodeSuccess
@@ -191,10 +180,12 @@ const LoginPasscode = ({
           isLoading={isResendLoading}
           isSuccess={isResendSuccess}
         >
-          {passcodeRetryAfter > 0
-            ? t("labels.passcodeRetryAfter", { passcodeRetryAfter })
+          {passcodeResendAfter > 0
+            ? t("labels.passcodeResendAfter", {
+                passcodeResendAfter,
+              })
             : t("labels.sendNewPasscode")}
-        </LinkWithLoadingIndicator>
+        </LoadingIndicatorLink>
       </Footer>
     </Fragment>
   );

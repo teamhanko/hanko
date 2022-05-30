@@ -1,12 +1,12 @@
 import * as preact from "preact";
 import { useContext, useEffect, useState } from "preact/compat";
 
-import {HankoError, UnauthorizedError} from "../../lib/Errors";
+import { HankoError, UnauthorizedError } from "../../lib/Errors";
 
 import { AppContext } from "../contexts/AppProvider";
 import { UserContext } from "../contexts/UserProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { RenderContext } from "../contexts/RenderProvider";
+import { RenderContext } from "../contexts/PageProvider";
 
 import ErrorMessage from "../components/ErrorMessage";
 import Form from "../components/Form";
@@ -22,8 +22,12 @@ const Error = ({ initialError }: Props) => {
   const { config, configInitialize } = useContext(AppContext);
   const { t } = useContext(TranslateContext);
   const { userInitialize } = useContext(UserContext);
-  const { eventuallyRenderEnrollment, renderLoginEmail, emitSuccessEvent, renderError } =
-    useContext(RenderContext);
+  const {
+    eventuallyRenderEnrollment,
+    renderLoginEmail,
+    emitSuccessEvent,
+    renderError,
+  } = useContext(RenderContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -32,6 +36,7 @@ const Error = ({ initialError }: Props) => {
   const onContinueClick = (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
+
     configInitialize().catch((e) => {
       setIsLoading(false);
       renderError(e);
@@ -54,7 +59,6 @@ const Error = ({ initialError }: Props) => {
         return;
       })
       .catch((e) => {
-        console.log("HHERERE", e);
         if (e instanceof UnauthorizedError) {
           renderLoginEmail();
         } else {
@@ -62,7 +66,13 @@ const Error = ({ initialError }: Props) => {
           setError(e);
         }
       });
-  }, [config, emitSuccessEvent, eventuallyRenderEnrollment, renderLoginEmail, userInitialize]);
+  }, [
+    config,
+    emitSuccessEvent,
+    eventuallyRenderEnrollment,
+    renderLoginEmail,
+    userInitialize,
+  ]);
 
   return (
     <Content>

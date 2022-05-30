@@ -1,17 +1,22 @@
 import * as preact from "preact";
-import { ComponentChildren } from "preact";
+import { ComponentChildren, FunctionalComponent } from "preact";
 import cx from "classnames";
 
 import styles from "./Link.module.css";
 
-type Props = {
-  children: ComponentChildren;
-  onClick: (event: Event) => void;
+export type Props = {
+  children?: ComponentChildren;
+  onClick?: (event: Event) => void;
   disabled?: boolean;
   hidden?: boolean;
 };
 
-const Link = ({ children, onClick, disabled, hidden }: Props) => {
+const Link: FunctionalComponent<Props> = ({
+  children,
+  onClick,
+  disabled,
+  hidden,
+}: Props) => {
   return (
     <a
       onClick={onClick}
