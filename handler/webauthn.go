@@ -153,7 +153,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			c.Logger().Errorf("failed to delete attestation session data: %w", err)
 		}
 
-		return c.JSON(http.StatusOK, map[string]string{"credential_id": model.ID})
+		return c.JSON(http.StatusOK, map[string]string{"credential_id": model.ID, "user_id": webauthnUser.UserId.String()})
 	})
 }
 
