@@ -163,18 +163,23 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return c.JSON(http.StatusRequestTimeout, dto.NewApiError(http.StatusRequestTimeout))
 		}
 
-		if passcode.TryCount >= maxPasscodeTries {
-			return c.JSON(http.StatusTooManyRequests, dto.NewApiError(http.StatusTooManyRequests))
-		}
-
 		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(body.Code))
 		if err != nil {
 			passcode.TryCount = passcode.TryCount + 1
+
+			if passcode.TryCount >= maxPasscodeTries {
+				err = passcodePersister.Delete(*passcode)
+				if err != nil {
+					return fmt.Errorf("failed to delete passcode: %w", err)
+				}
+				return c.JSON(http.StatusGone, dto.NewApiError(http.StatusGone))
+			}
+
 			err = passcodePersister.Update(*passcode)
 			if err != nil {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
-			c.Response().Header().Set("X-Rate-Limit-Remaining", fmt.Sprintf("%d", maxPasscodeTries-passcode.TryCount))
+
 			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 		}
 
