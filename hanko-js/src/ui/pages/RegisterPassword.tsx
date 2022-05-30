@@ -46,7 +46,7 @@ const RegisterPassword = ({ user, registerAuthenticator }: Props) => {
       .update(user.id, password)
       .then(() => {
         if (registerAuthenticator) {
-          renderRegisterAuthenticator(user);
+          renderRegisterAuthenticator();
         } else {
           emitSuccessEvent();
           setIsSuccess(true);

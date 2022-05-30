@@ -2,12 +2,10 @@ import * as preact from "preact";
 import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
 
-import { User } from "../../lib/HankoClient";
-
 import {
   HankoError,
-  TechnicalError,
   UnauthorizedError,
+  WebAuthnRequestCancelledError,
 } from "../../lib/Errors";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -23,14 +21,10 @@ import LinkWithLoadingIndicator from "../components/LinkWithLoadingIndicator";
 import Footer from "../components/Footer";
 import Paragraph from "../components/Paragraph";
 
-interface Props {
-  user: User;
-}
-
-const RegisterAuthenticator = ({ user }: Props) => {
+const RegisterAuthenticator = () => {
+  const { t } = useContext(TranslateContext);
   const { hanko } = useContext(AppContext);
   const { renderError, emitSuccessEvent } = useContext(RenderContext);
-  const { t } = useContext(TranslateContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -56,7 +50,7 @@ const RegisterAuthenticator = ({ user }: Props) => {
           return;
         }
 
-        if (e instanceof TechnicalError) {
+        if (!(e instanceof WebAuthnRequestCancelledError)) {
           setError(e);
         } else {
           setError(null);

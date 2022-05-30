@@ -45,9 +45,9 @@ const LoginPasscode = ({
     useContext(RenderContext);
   const { email, userInitialize } = useContext(UserContext);
   const {
+    passcodeTTL,
     passcodeIsActive,
-    passcodeExpiry,
-    passcodeRetryAfter,
+    passcodeResendAfter,
     passcodeResend,
     passcodeFinalize,
   } = useContext(PasscodeContext);
@@ -132,10 +132,10 @@ const LoginPasscode = ({
   };
 
   useEffect(() => {
-    if (passcodeExpiry === 0) {
+    if (passcodeTTL === 0) {
       setError(new PasscodeExpiredError());
     }
-  }, [passcodeExpiry]);
+  }, [passcodeTTL]);
 
   return (
     <Fragment>
@@ -148,7 +148,7 @@ const LoginPasscode = ({
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
             disabled={
-              passcodeExpiry === 0 ||
+              passcodeTTL === 0 ||
               !passcodeIsActive ||
               isPasscodeLoading ||
               isPasscodeSuccess ||
@@ -157,9 +157,7 @@ const LoginPasscode = ({
           />
           <Paragraph>{t("texts.enterPasscode", { email })}</Paragraph>
           <Button
-            disabled={
-              passcodeExpiry === 0 || !passcodeIsActive || isResendLoading
-            }
+            disabled={passcodeTTL === 0 || !passcodeIsActive || isResendLoading}
             isLoading={isPasscodeLoading}
             isSuccess={isPasscodeSuccess}
           >
@@ -182,7 +180,7 @@ const LoginPasscode = ({
         )}
         <LinkWithLoadingIndicator
           disabled={
-            passcodeRetryAfter > 0 ||
+            passcodeResendAfter > 0 ||
             isResendLoading ||
             isPasscodeLoading ||
             isPasscodeSuccess
@@ -191,8 +189,10 @@ const LoginPasscode = ({
           isLoading={isResendLoading}
           isSuccess={isResendSuccess}
         >
-          {passcodeRetryAfter > 0
-            ? t("labels.passcodeRetryAfter", { passcodeRetryAfter })
+          {passcodeResendAfter > 0
+            ? t("labels.passcodeResendAfter", {
+                passcodeResendAfter,
+              })
             : t("labels.sendNewPasscode")}
         </LinkWithLoadingIndicator>
       </Footer>

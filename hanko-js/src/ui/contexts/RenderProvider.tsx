@@ -36,7 +36,7 @@ interface Context {
   renderLoginEmail: () => void;
   renderLoginFinished: () => void;
   renderRegisterConfirm: () => void;
-  renderRegisterAuthenticator: (u: User) => void;
+  renderRegisterAuthenticator: () => void;
 }
 
 export const RenderContext = createContext<Context>(null);
@@ -80,8 +80,7 @@ const RenderProvider = () => {
             registerAuthenticator={enrollWebauthn}
           />
         ),
-      registerAuthenticator: (user: User) =>
-        setPage(<RegisterAuthenticator user={user} />),
+      registerAuthenticator: () => setPage(<RegisterAuthenticator />),
       loginFinished: () => setPage(<LoginFinished />),
       error: (error: HankoError) => setPage(<Error initialError={error} />),
     }),
@@ -131,7 +130,7 @@ const RenderProvider = () => {
             if (recoverPassword) {
               pages.registerPassword(user, shouldRegister);
             } else if (shouldRegister) {
-              pages.registerAuthenticator(user);
+              pages.registerAuthenticator();
             } else {
               rendered = false;
             }
@@ -147,12 +146,9 @@ const RenderProvider = () => {
     pages.registerConfirm();
   }, [pages]);
 
-  const renderRegisterAuthenticator = useCallback(
-    (u: User) => {
-      pages.registerAuthenticator(u);
-    },
-    [pages]
-  );
+  const renderRegisterAuthenticator = useCallback(() => {
+    pages.registerAuthenticator();
+  }, [pages]);
 
   const renderError = useCallback(
     (e: HankoError) => {

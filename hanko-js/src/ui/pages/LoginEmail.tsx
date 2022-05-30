@@ -7,7 +7,7 @@ import {
   TechnicalError,
   NotFoundError,
   EmailValidationRequiredError,
-  InvalidWebauthnCredentialError,
+  WebAuthnRequestCancelledError,
 } from "../../lib/Errors";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -54,7 +54,7 @@ const LoginEmail = () => {
 
     hanko.user
       .getInfo(email)
-      .then((uID) => setUserID(uID.id))
+      .then((userInfo) => setUserID(userInfo.id))
       .catch((e) => {
         if (e instanceof NotFoundError) {
           return renderRegisterConfirm();
@@ -85,10 +85,7 @@ const LoginEmail = () => {
       .catch((e) => {
         setIsWebAuthnLoading(false);
 
-        if (
-          e instanceof TechnicalError ||
-          e instanceof InvalidWebauthnCredentialError
-        ) {
+        if (!(e instanceof WebAuthnRequestCancelledError)) {
           setError(e);
         } else {
           setError(null);
