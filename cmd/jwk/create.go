@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/crypto/jwk"
-	"github.com/teamhanko/hanko/persistence"
 	"log"
 )
 
-func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobra.Command {
+func NewCreateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "create JSON Web Key and print them in the console",

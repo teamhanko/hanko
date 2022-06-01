@@ -11,25 +11,24 @@ import (
 	"github.com/teamhanko/hanko/cmd/migrate"
 	"github.com/teamhanko/hanko/cmd/serve"
 	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/persistence"
 	"log"
 )
 
 var (
 	cfgFile   string
-	cfg       *config.Config
-	persister persistence.Storage
+	cfg       config.Config
 )
 
 func NewRootCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use: "hanko",
 	}
+
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
-	migrate.RegisterCommands(cmd, persister)
-	serve.RegisterCommands(cmd, cfg, persister)
-	jwk.RegisterCommands(cmd, cfg, persister)
-	jwt.RegisterCommands(cmd, cfg, persister)
+	migrate.RegisterCommands(cmd, &cfg)
+	serve.RegisterCommands(cmd, &cfg)
+	jwk.RegisterCommands(cmd)
+	jwt.RegisterCommands(cmd, &cfg)
 
 	return cmd
 }
@@ -47,18 +46,13 @@ func Execute() {
 }
 
 func initConfig() {
-	log.Println("initConfig()")
 	var err error
-	cfg, err = config.Load(&cfgFile)
+	conf, err := config.Load(&cfgFile)
 	if err != nil {
 		log.Fatalf("failed to load config: %w", err)
 	}
-	if err = cfg.Validate(); err != nil {
+	if err = conf.Validate(); err != nil {
 		log.Fatalf("failed to validate config: %w", err)
 	}
-	persister, err = persistence.New(cfg.Database)
-	if err != nil {
-		log.Fatalf("Failed to initialize persister")
-	}
-	persister.GetJwkPersister()
+	cfg = *conf
 }
