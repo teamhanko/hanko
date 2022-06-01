@@ -7,7 +7,7 @@ package migrate
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/persistence"
+	"github.com/teamhanko/hanko/config"
 )
 
 //var persister *persistence.Persister
@@ -20,9 +20,9 @@ func NewMigrateCmd() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, persister persistence.Migrator) {
+func RegisterCommands(parent *cobra.Command,config *config.Config) {
 	cmd := NewMigrateCmd()
 	parent.AddCommand(cmd)
-	cmd.AddCommand(NewMigrateUpCommand(persister))
-	cmd.AddCommand(NewMigrateDownCommand(persister))
+	cmd.AddCommand(NewMigrateUpCommand(config))
+	cmd.AddCommand(NewMigrateDownCommand(config))
 }

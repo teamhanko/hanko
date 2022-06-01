@@ -9,9 +9,10 @@ import (
 	"github.com/teamhanko/hanko/crypto/jwk"
 	"github.com/teamhanko/hanko/persistence"
 	"github.com/teamhanko/hanko/session"
+	"log"
 )
 
-func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobra.Command {
+func NewCreateCommand(config *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [user_id]",
 		Short: "generate a JSON Web Token for a given user_id",
@@ -26,14 +27,18 @@ func NewCreateCommand(cfg *config.Config, persister persistence.Persister) *cobr
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			persister, err := persistence.New(config.Database)
+			if err != nil {
+				log.Fatal(err)
+			}
 			jwkPersister := persister.GetJwkPersister()
-			jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, jwkPersister)
+			jwkManager, err := jwk.NewDefaultManager(config.Secrets.Keys, jwkPersister)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager, cfg.Session)
+			sessionManager, err := session.NewManager(jwkManager, config.Session)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return

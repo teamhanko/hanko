@@ -9,15 +9,20 @@ import (
 	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/persistence"
 	"github.com/teamhanko/hanko/server"
+	"log"
 	"sync"
 )
 
-func NewServeAllCommand(config *config.Config, persister persistence.Persister) *cobra.Command {
+func NewServeAllCommand(config *config.Config) *cobra.Command {
 	return &cobra.Command{
 		Use:   "all",
 		Short: "Start the public and private portion of the hanko server",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
+			persister, err := persistence.New(config.Database)
+			if err != nil {
+				log.Fatal(err)
+			}
 			var wg sync.WaitGroup
 			wg.Add(2)
 
