@@ -12,6 +12,7 @@ func NewMigrateUpCommand(persister persistence.Migrator) *cobra.Command {
 		Short: "migrate the database up",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
+			log.Println("migrate up")
 			err := persister.MigrateUp()
 			if err != nil {
 				log.Fatal(err)
