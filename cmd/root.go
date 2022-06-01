@@ -5,7 +5,6 @@ Copyright © 2022 Hanko GmbH <developers@hanko.io>
 package cmd
 
 import (
-	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/cmd/jwk"
 	"github.com/teamhanko/hanko/cmd/jwt"
@@ -27,14 +26,6 @@ func NewRootCmd() *cobra.Command {
 		Use: "hanko",
 	}
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
-	err := initConfig()
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = initPersister()
-	if err != nil {
-		log.Fatal(err)
-	}
 	migrate.RegisterCommands(cmd, persister)
 	serve.RegisterCommands(cmd, cfg, persister)
 	jwk.RegisterCommands(cmd, cfg, persister)
@@ -46,6 +37,7 @@ func NewRootCmd() *cobra.Command {
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
+	cobra.OnInitialize(initConfig)
 	cmd := NewRootCmd()
 
 	err := cmd.Execute()
@@ -54,20 +46,19 @@ func Execute() {
 	}
 }
 
-func initConfig() error {
+func initConfig() {
+	log.Println("initConfig()")
 	var err error
 	cfg, err = config.Load(&cfgFile)
 	if err != nil {
-		return fmt.Errorf("failed to load config: %w", err)
+		log.Fatalf("failed to load config: %w", err)
 	}
-	return cfg.Validate()
-}
-
-func initPersister() error {
-	var err error
+	if err = cfg.Validate(); err != nil {
+		log.Fatalf("failed to validate config: %w", err)
+	}
 	persister, err = persistence.New(cfg.Database)
 	if err != nil {
-		return err
+		log.Fatalf("Failed to initialize persister")
 	}
-	return nil
+	persister.GetJwkPersister()
 }
