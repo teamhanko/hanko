@@ -37,6 +37,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
           .initialize(userID)
           .then((passcode) => {
             setPasscodeTTL(passcode.ttl);
+            setPasscodeIsActive(true);
 
             return resolve();
           })
