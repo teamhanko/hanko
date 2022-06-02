@@ -17,6 +17,7 @@ import Button from "../components/Button";
 import Footer from "../components/Footer";
 import ErrorMessage from "../components/ErrorMessage";
 import Paragraph from "../components/Paragraph";
+
 import LinkToEmailLogin from "../components/link/toEmailLogin";
 
 const RegisterConfirm = () => {
@@ -40,6 +41,7 @@ const RegisterConfirm = () => {
         if (e instanceof EmailValidationRequiredError) {
           return hanko.user.getInfo(email);
         }
+
         throw e;
       })
       .then((userInfo) => {

@@ -16,6 +16,7 @@ import Form from "../components/Form";
 import InputText from "../components/InputText";
 import Button from "../components/Button";
 import ErrorMessage from "../components/ErrorMessage";
+
 import LoadingIndicatorLink from "../components/link/withLoadingIndicator";
 import LinkToEmailLogin from "../components/link/toEmailLogin";
 

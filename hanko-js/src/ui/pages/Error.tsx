@@ -19,8 +19,8 @@ interface Props {
 }
 
 const Error = ({ initialError }: Props) => {
-  const { config, configInitialize } = useContext(AppContext);
   const { t } = useContext(TranslateContext);
+  const { config, configInitialize } = useContext(AppContext);
   const { userInitialize } = useContext(UserContext);
   const {
     eventuallyRenderEnrollment,

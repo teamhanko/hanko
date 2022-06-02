@@ -19,6 +19,7 @@ import Button from "../components/Button";
 import ErrorMessage from "../components/ErrorMessage";
 import Footer from "../components/Footer";
 import Paragraph from "../components/Paragraph";
+
 import LoadingIndicatorLink from "../components/link/withLoadingIndicator";
 
 const RegisterAuthenticator = () => {
@@ -50,12 +51,7 @@ const RegisterAuthenticator = () => {
           return;
         }
 
-        if (!(e instanceof WebAuthnRequestCancelledError)) {
-          setError(e);
-        } else {
-          setError(null);
-        }
-
+        setError(e instanceof WebAuthnRequestCancelledError ? null : e);
         setIsLoading(false);
       });
   };

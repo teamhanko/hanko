@@ -84,12 +84,7 @@ const LoginEmail = () => {
       })
       .catch((e) => {
         setIsWebAuthnLoading(false);
-
-        if (!(e instanceof WebAuthnRequestCancelledError)) {
-          setError(e);
-        } else {
-          setError(null);
-        }
+        setError(e instanceof WebAuthnRequestCancelledError ? null : e);
       });
   };
 

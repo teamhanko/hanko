@@ -459,6 +459,7 @@ class PasscodeClient extends AbstractClient {
             throw new InvalidPasscodeError();
           } else if (response.status === 404 || response.status === 410) {
             this.passcodeManager.removeActive(userID);
+
             throw new MaxNumOfPasscodeAttemptsReachedError();
           } else {
             throw new TechnicalError();
