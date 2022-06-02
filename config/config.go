@@ -31,13 +31,13 @@ func Load(cfgFile *string) (*Config, error) {
 		if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err == nil {
 			log.Println("Using config file:", *cfgFile)
 		} else {
-			return nil, fmt.Errorf("Failed to load config from:", *cfgFile)
+			return nil, fmt.Errorf("failed to load config from: %s", *cfgFile)
 		}
 	} else {
 		if err = k.Load(file.Provider("./config/config.yaml"), yaml.Parser()); err == nil {
 			log.Println("Using config file:", "./config/config.yaml")
 		} else {
-			return nil, fmt.Errorf("failed to load config from:", "./config/config.yaml")
+			return nil, errors.New("failed to load config from: ./config/config.yaml")
 		}
 	}
 
