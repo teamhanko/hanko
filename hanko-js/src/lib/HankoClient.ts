@@ -452,6 +452,7 @@ class PasscodeClient extends AbstractClient {
         .then((response) => {
           if (response.ok) {
             this.passcodeManager.removeActive(userID);
+            this.passcodeManager.setResendAfter(userID, 0);
 
             return resolve();
           } else if (response.status === 401) {

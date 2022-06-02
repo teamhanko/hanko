@@ -33,8 +33,8 @@ const initialUserState: UserState = {
 class UserStateManager {
   key: string;
 
-  public constructor(key?: string) {
-    this.key = key || "hanko";
+  public constructor(key: string = "hanko") {
+    this.key = key;
   }
 
   read(): Store {
@@ -110,7 +110,8 @@ export class PasscodeManager extends UserStateManager {
 
   removeActive(userID: string) {
     const state = this.getUserState(userID);
-    state.passcode = initialUserState.passcode;
+    state.passcode.id = initialUserState.passcode.id;
+    state.passcode.ttl = initialUserState.passcode.ttl;
     this.setUserState(userID, state);
   }
 
