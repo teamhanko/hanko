@@ -269,32 +269,6 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	}
 }
 
-func TestUserHandler_GetUserIdByEmail_UserNotVerified(t *testing.T) {
-	userId, _ := uuid.NewV4()
-	users := []models.User{
-		{
-			ID:        userId,
-			Email:     "john.doe@example.com",
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Verified:  false,
-		},
-	}
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
-
-	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Code)
-	}
-}
-
 func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	userId, _ := uuid.NewV4()
 	users := []models.User{
@@ -319,11 +293,13 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		response := struct {
-			UserId string `json:"id"`
+			UserId   string `json:"id"`
+			Verified bool   `json:"verified"`
 		}{}
 		err := json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.NoError(t, err)
-		assert.Equal(t, userId.String(), response.UserId)
+		assert.Equal(t, users[0].ID.String(), response.UserId)
+		assert.Equal(t, users[0].Verified, response.Verified)
 	}
 }
 
