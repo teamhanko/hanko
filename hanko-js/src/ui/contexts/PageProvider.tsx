@@ -126,11 +126,11 @@ const PageProvider = () => {
       return new Promise<boolean>((resolve, reject) => {
         hanko.authenticator
           .shouldRegister(user)
-          .then((shouldRegister) => {
+          .then((shouldRegisterAuthenticator) => {
             let rendered = true;
             if (recoverPassword) {
-              pages.registerPassword(user, shouldRegister);
-            } else if (shouldRegister) {
+              pages.registerPassword(user, shouldRegisterAuthenticator);
+            } else if (shouldRegisterAuthenticator) {
               pages.registerAuthenticator();
             } else {
               rendered = false;
