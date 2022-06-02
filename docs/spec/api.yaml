@@ -1,3 +1,4 @@
+
 openapi: 3.0.0
 info:
   version: '0.0.1'
@@ -75,11 +76,12 @@ paths:
                 $ref: '#/components/schemas/Error'
         '401':
           description: 'Unauthorized'
-          headers:
-            X-Rate-Limit-Remaining:
+          content:
+            application/json:
               schema:
-                type: integer
-              description: Remaining attempts for this passcode
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 'Gone'
           content:
             application/json:
               schema:
