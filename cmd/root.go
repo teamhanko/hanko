@@ -49,10 +49,10 @@ func initConfig() {
 	var err error
 	conf, err := config.Load(&cfgFile)
 	if err != nil {
-		log.Fatalf("failed to load config: %w", err)
+		log.Fatalf("failed to load config: %s", err)
 	}
 	if err = conf.Validate(); err != nil {
-		log.Fatalf("failed to validate config: %w", err)
+		log.Fatalf("failed to validate config: %s", err)
 	}
 	cfg = *conf
 }
