@@ -29,6 +29,8 @@ type PasscodeHandler struct {
 	sessionManager    session.Manager
 }
 
+var maxPasscodeTries = 3
+
 func NewPasscodeHandler(config config.Passcode, serviceConfig config.Service, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
 	renderer, err := mail.NewRenderer()
 	if err != nil {
@@ -163,6 +165,21 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(body.Code))
 		if err != nil {
+			passcode.TryCount = passcode.TryCount + 1
+
+			if passcode.TryCount >= maxPasscodeTries {
+				err = passcodePersister.Delete(*passcode)
+				if err != nil {
+					return fmt.Errorf("failed to delete passcode: %w", err)
+				}
+				return c.JSON(http.StatusGone, dto.NewApiError(http.StatusGone))
+			}
+
+			err = passcodePersister.Update(*passcode)
+			if err != nil {
+				return fmt.Errorf("failed to update passcode: %w", err)
+			}
+
 			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
 		}
 

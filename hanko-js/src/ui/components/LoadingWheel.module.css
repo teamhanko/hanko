@@ -1,0 +1,15 @@
+.loadingWheel {
+    box-sizing: border-box;
+    display: inline-block;
+    border: 2px solid white;
+    border-top: 2px solid #FF2E4C;
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: spin 500ms ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

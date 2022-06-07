@@ -89,14 +89,16 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 		return err
 	}
 
-	if user == nil || !user.Verified {
+	if user == nil {
 		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
 	}
 
 	return c.JSON(http.StatusOK, struct {
-		UserId string `json:"id"`
+		UserId   string `json:"id"`
+		Verified bool   `json:"verified"`
 	}{
-		UserId: user.ID.String(),
+		UserId:   user.ID.String(),
+		Verified: user.Verified,
 	})
 }
 

@@ -1,0 +1,27 @@
+.button {
+    height: 50px;
+    width: 100%;
+    border-radius: 3px;
+}
+
+.button.primary {
+    color: white;
+    background: #FF2E4C;
+    border: none;
+}
+
+.button.primary:disabled {
+    background: #FFABB7;
+}
+
+.button.secondary {
+    color: black;
+    background: white;
+    border: 1px solid #042F4B;
+}
+
+.button.secondary:disabled {
+    color: #9BACB7;
+    border-color: #9BACB7;
+}
+

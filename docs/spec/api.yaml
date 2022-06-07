@@ -1,3 +1,4 @@
+
 openapi: 3.0.0
 info:
   version: '0.0.1'
@@ -69,6 +70,18 @@ paths:
                 $ref: '#/components/schemas/Passcode'
         '400':
           description: 'Bad request'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: 'Unauthorized'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '410':
+          description: 'Gone'
           content:
             application/json:
               schema:

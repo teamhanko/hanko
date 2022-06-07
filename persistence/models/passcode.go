@@ -14,6 +14,7 @@ type Passcode struct {
 	UserId    uuid.UUID `db:"user_id"`
 	Ttl       int       `db:"ttl"` // in seconds
 	Code      string    `db:"code"`
+	TryCount  int       `db:"try_count"`
 	CreatedAt time.Time `db:"created_at"`
 	UpdatedAt time.Time `db:"updated_at"`
 }

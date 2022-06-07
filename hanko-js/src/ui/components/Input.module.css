@@ -1,0 +1,81 @@
+.inputWrapper {
+    position: relative;
+}
+
+.label {
+    position: absolute;
+    font-size: 1rem;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: white;
+    color: gray;
+    padding: 0 0.3rem;
+    margin: 0 0.5rem;
+    transition: 0.1s ease;
+    transform-origin: left top;
+    pointer-events: none;
+}
+
+.input:focus+.label {
+    color: black;
+    top: 0;
+    transform: translateY(-50%) scale(0.9) !important;
+    opacity: 1;
+    transition: opacity 1s;
+    -webkit-transition: opacity 1s; /* Safari */
+}
+
+.input:not(:placeholder-shown)+.label {
+    top: 0;
+    transform: translateY(-50%) scale(0.9) !important;
+}
+
+/*.input:not(:focus)::placeholder {*/
+/*    opacity: 0;*/
+/*}*/
+
+.input {
+    height: 50px;
+    width: 350px;
+    border-radius: 3px;
+    border: 1px solid #36596F;
+    padding: 0 0.7rem;
+    font-size: 1rem;
+    outline: none;
+    color: black;
+    box-sizing: border-box;
+    transition: 0.1s ease-out;
+}
+
+.input:focus {
+    border-color: black;
+}
+
+.input:-webkit-autofill,
+.input:-webkit-autofill::first-line {
+    font-size: 1rem;
+    font-family: 'IBM Plex Sans', sans-serif;
+    -webkit-box-shadow: 0 0 0 50px white inset;
+}
+
+/* Removes native "clear text" and "password reveal" buttons from Edge */
+.input::-ms-reveal,
+.input::-ms-clear {
+    display: none;
+}
+
+.input:disabled {
+    color: #9BACB7;
+    border-color: #9BACB7;
+}
+
+.passcodeInputWrapper {
+    display: flex;
+    justify-content: space-between;
+}
+
+.passcodeDigit {
+    text-align: center;
+    width: 45px;
+}
