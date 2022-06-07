@@ -47,7 +47,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "expect": "^27.5.1",
+    "expect": "^28.1.1",
     "jest-fetch-mock": "^3.0.3",
     "postcss": "^8.4.12",
     "postcss-loader": "^6.2.1",
