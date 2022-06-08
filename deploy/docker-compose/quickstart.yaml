@@ -5,7 +5,7 @@ services:
     volumes:
       - type: bind
         source: ../../config/config.yaml
-        target: /etc/config/config.yaml
+        target: /config/config.yaml
     command: --config /etc/config/config.yaml migrate up
     restart: on-failure
     depends_on:
@@ -20,11 +20,11 @@ services:
       - '8000:8000' # public
       - '8001:8001' # private
     restart: unless-stopped
-    command: serve --config /etc/config/config.yaml
+    command: serve --config /etc/config/config.yaml all
     volumes:
       - type: bind
         source: ../../config/config.yaml
-        target: /etc/config/config.yaml
+        target: /config/config.yaml
     networks:
       - intranet
   postgresd:
