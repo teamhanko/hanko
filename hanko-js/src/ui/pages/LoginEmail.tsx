@@ -61,6 +61,7 @@ const LoginEmail = () => {
         } else if (e instanceof EmailValidationRequiredError) {
           return renderPasscode(e.userID, config.password.enabled, true);
         }
+
         throw e;
       })
       .catch((e) => {

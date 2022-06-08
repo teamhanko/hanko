@@ -45,6 +45,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
             if (e instanceof TooManyRequestsError) {
               setPasscodeResendAfter(e.retryAfter);
             }
+
             reject(e);
           });
       });
@@ -63,11 +64,13 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
 
         if (ttl > 0) {
           setPasscodeIsActive(true);
+
           return resolve(null);
-        } else if (resendAfter === 0) {
+        } else if (resendAfter <= 0) {
           passcodeResend(userID)
             .then(() => {
               setPasscodeIsActive(true);
+
               return resolve(null);
             })
             .catch((e) => {
@@ -78,7 +81,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
               }
             });
         } else {
-          reject(new TooManyRequestsError(resendAfter));
+          resolve(new TooManyRequestsError(resendAfter));
         }
       });
     },
@@ -95,6 +98,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
             if (e instanceof MaxNumOfPasscodeAttemptsReachedError) {
               setPasscodeIsActive(false);
             }
+
             reject(e);
           });
       });
@@ -106,6 +110,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
     const timer =
       passcodeTTL > 0 &&
       setInterval(() => setPasscodeTTL(passcodeTTL - 1), 1000);
+
     return () => clearInterval(timer);
   }, [passcodeTTL]);
 
@@ -113,6 +118,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
     const timer =
       passcodeResendAfter > 0 &&
       setInterval(() => setPasscodeResendAfter(passcodeResendAfter - 1), 1000);
+
     return () => clearInterval(timer);
   }, [passcodeResendAfter]);
 

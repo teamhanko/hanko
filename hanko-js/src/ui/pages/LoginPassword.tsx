@@ -77,7 +77,7 @@ const LoginPassword = ({ userID, initialError }: Props) => {
 
   // Automatically clear the too many requests error message
   useEffect(() => {
-    if (error instanceof TooManyRequestsError && passwordRetryAfter === 0) {
+    if (error instanceof TooManyRequestsError && passwordRetryAfter <= 0) {
       setError(null);
     }
   }, [error, passwordRetryAfter]);
