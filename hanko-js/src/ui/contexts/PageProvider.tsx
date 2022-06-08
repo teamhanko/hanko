@@ -135,6 +135,7 @@ const PageProvider = () => {
             } else {
               rendered = false;
             }
+
             return resolve(rendered);
           })
           .catch((e) => reject(e));

@@ -329,12 +329,12 @@ class WebauthnClient extends AbstractClient {
             return resolve(supported);
           }
 
-          const matched = this.webAuthnManager.matchCredentials(
+          const matches = this.webAuthnManager.matchCredentials(
             user.id,
             user.webauthn_credentials
           );
 
-          return resolve(supported && !matched);
+          return resolve(supported && !matches.length);
         })
         .catch((e) => {
           reject(e);

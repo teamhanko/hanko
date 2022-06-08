@@ -123,7 +123,7 @@ const LoginPasscode = ({
   };
 
   useEffect(() => {
-    if (passcodeTTL === 0) {
+    if (passcodeTTL <= 0) {
       setError(new PasscodeExpiredError());
     }
   }, [passcodeTTL]);
@@ -139,7 +139,7 @@ const LoginPasscode = ({
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
             disabled={
-              passcodeTTL === 0 ||
+              passcodeTTL <= 0 ||
               !passcodeIsActive ||
               isPasscodeLoading ||
               isPasscodeSuccess ||
@@ -148,7 +148,7 @@ const LoginPasscode = ({
           />
           <Paragraph>{t("texts.enterPasscode", { email })}</Paragraph>
           <Button
-            disabled={passcodeTTL === 0 || !passcodeIsActive || isResendLoading}
+            disabled={passcodeTTL <= 0 || !passcodeIsActive || isResendLoading}
             isLoading={isPasscodeLoading}
             isSuccess={isPasscodeSuccess}
           >

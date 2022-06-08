@@ -47,12 +47,14 @@ class UserStateManager {
     } catch (_) {
       return { userStates: {} } as Store;
     }
+
     return store;
   }
 
   write(store: Store): void {
     const data = JSON.stringify(store);
     const encoded = window.btoa(encodeURI(encodeURIComponent(data)));
+
     localStorage.setItem(this.key, encoded);
   }
 
@@ -62,11 +64,13 @@ class UserStateManager {
       store.userStates,
       userID
     );
+
     return exists ? store.userStates[userID] : initialUserState;
   }
 
   setUserState(userID: string, state: UserState) {
     const store = this.read();
+
     store.userStates[userID] = state;
     this.write(store);
   }
@@ -83,33 +87,38 @@ class UserStateManager {
 export class WebAuthnManager extends UserStateManager {
   setCredentialID(userID: string, credentialID: string): void {
     const state = super.getUserState(userID);
+
     state.webAuthnCredentials.push(credentialID);
     this.setUserState(userID, state);
   }
 
-  matchCredentials(userID: string, match: Credential[]): boolean {
+  matchCredentials(userID: string, match: Credential[]): Credential[] {
     const { webAuthnCredentials } = super.getUserState(userID);
-    const matches = webAuthnCredentials.filter((id) =>
-      match.find((c) => c.id === id)
-    );
-    return matches.length > 0;
+    const matches = webAuthnCredentials
+      .filter((id) => match.find((c) => c.id === id))
+      .map((id: string) => ({ id } as Credential));
+
+    return matches;
   }
 }
 
 export class PasscodeManager extends UserStateManager {
   getActiveID(userID: string): string {
     const { passcode } = this.getUserState(userID);
+
     return passcode.id;
   }
 
   setActiveID(userID: string, passcodeID: string) {
     const state = this.getUserState(userID);
+
     state.passcode.id = passcodeID;
     this.setUserState(userID, state);
   }
 
   removeActive(userID: string) {
     const state = this.getUserState(userID);
+
     state.passcode.id = initialUserState.passcode.id;
     state.passcode.ttl = initialUserState.passcode.ttl;
     this.setUserState(userID, state);
@@ -117,24 +126,26 @@ export class PasscodeManager extends UserStateManager {
 
   getTTL(userID: string): number {
     const state = this.getUserState(userID);
-    const ttl = this.timeToRemainingSeconds(state.passcode.ttl);
-    return ttl > 0 ? ttl : 0;
+
+    return this.timeToRemainingSeconds(state.passcode.ttl);
   }
 
   setTTL(userID: string, seconds: number): void {
     const state = this.getUserState(userID);
+
     state.passcode.ttl = this.remainingSecondsToTime(seconds);
     this.setUserState(userID, state);
   }
 
   getResendAfter(userID: string): number {
     const { passcode } = this.getUserState(userID);
-    const resendAfter = this.timeToRemainingSeconds(passcode.resendAfter);
-    return resendAfter > 0 ? resendAfter : 0;
+
+    return this.timeToRemainingSeconds(passcode.resendAfter);
   }
 
   setResendAfter(userID: string, seconds: number): void {
     const state = this.getUserState(userID);
+
     state.passcode.resendAfter = this.remainingSecondsToTime(seconds);
     this.setUserState(userID, state);
   }
@@ -143,12 +154,13 @@ export class PasscodeManager extends UserStateManager {
 export class PasswordManager extends UserStateManager {
   getRetryAfter(userID: string): number {
     const state = this.getUserState(userID);
-    const retryAfter = this.timeToRemainingSeconds(state.password.retryAfter);
-    return retryAfter > 0 ? retryAfter : 0;
+
+    return this.timeToRemainingSeconds(state.password.retryAfter);
   }
 
   setRetryAfter(userID: string, seconds: number): void {
     const state = this.getUserState(userID);
+
     state.password.retryAfter = this.remainingSecondsToTime(seconds);
     this.setUserState(userID, state);
   }
