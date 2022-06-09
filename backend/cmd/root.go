@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	cfgFile   string
-	cfg       config.Config
+	cfgFile string
+	cfg     config.Config
 )
 
 func NewRootCmd() *cobra.Command {

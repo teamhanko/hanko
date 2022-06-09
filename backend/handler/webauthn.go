@@ -20,7 +20,7 @@ import (
 )
 
 type WebauthnHandler struct {
-	persister      persistence.Persister
+	persister persistence.Persister
 	webauthn       *webauthn.WebAuthn
 	sessionManager session.Manager
 }

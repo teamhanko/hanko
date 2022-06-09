@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/dto"
-	"github.com/teamhanko/hanko/handler"
+	handler "github.com/teamhanko/hanko/handler"
 	"github.com/teamhanko/hanko/persistence"
 )
 

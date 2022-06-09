@@ -7,16 +7,16 @@ COPY go.sum go.sum
 RUN go mod download
 
 # Copy the go source
-COPY main.go main.go
-COPY cmd/ cmd/
-COPY config/ config/
-COPY persistence/ persistence/
-COPY server/ server/
-COPY handler/ handler/
-COPY crypto/ crypto/
-COPY dto/ dto/
-COPY session/ session/
-COPY mail/ mail/
+COPY ../main.go main.go
+COPY cmd cmd/
+COPY config config/
+COPY persistence persistence/
+COPY server server/
+COPY handler handler/
+COPY crypto crypto/
+COPY dto dto/
+COPY session session/
+COPY mail mail/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o hanko main.go

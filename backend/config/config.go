@@ -21,7 +21,7 @@ type Config struct {
 	Database Database
 	Secrets  Secrets
 	Service  Service
-	Session Session
+	Session  Session
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -309,7 +309,7 @@ func (s *Secrets) Validate() error {
 
 type Session struct {
 	Lifespan string
-	Cookie Cookie
+	Cookie   Cookie
 }
 
 func (s *Session) Validate() error {

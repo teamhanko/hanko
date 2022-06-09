@@ -1,6 +1,8 @@
 package dto
 
-import "github.com/teamhanko/hanko/config"
+import (
+	"github.com/teamhanko/hanko/config"
+)
 
 // PublicConfig is the part of the configuration that will be shared with the frontend
 type PublicConfig struct {
