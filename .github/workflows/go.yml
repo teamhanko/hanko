@@ -19,7 +19,9 @@ jobs:
         go-version: 1.17
 
     - name: Build
+      working-directory: ./backend
       run: go build -v ./...
 
     - name: Test
+      working-directory: ./backend
       run: go test -v ./...

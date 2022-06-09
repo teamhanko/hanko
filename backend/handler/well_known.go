@@ -4,7 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/config"
 	hankoJwk "github.com/teamhanko/hanko/crypto/jwk"
-	"github.com/teamhanko/hanko/dto"
+	dto "github.com/teamhanko/hanko/dto"
 	"net/http"
 )
 
