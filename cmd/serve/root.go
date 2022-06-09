@@ -7,7 +7,6 @@ package serve
 import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/persistence"
 )
 
 func NewServeCommand() *cobra.Command {
@@ -18,10 +17,10 @@ func NewServeCommand() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, config *config.Config, persister persistence.Persister) {
+func RegisterCommands(parent *cobra.Command, config *config.Config) {
 	cmd := NewServeCommand()
 	parent.AddCommand(cmd)
-	cmd.AddCommand(NewServePublicCommand(config, persister))
-	cmd.AddCommand(NewServePrivateCommand(config, persister))
-	cmd.AddCommand(NewServeAllCommand(config, persister))
+	cmd.AddCommand(NewServePublicCommand(config))
+	cmd.AddCommand(NewServePrivateCommand(config))
+	cmd.AddCommand(NewServeAllCommand(config))
 }

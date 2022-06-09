@@ -3,6 +3,7 @@ package migrate
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/config"
 	"github.com/teamhanko/hanko/persistence"
 	"log"
 	"strconv"
@@ -10,7 +11,7 @@ import (
 
 var steps int
 
-func NewMigrateDownCommand(persister persistence.Migrator) *cobra.Command {
+func NewMigrateDownCommand(config *config.Config) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "down",
 		Short: "migrate the database down - given the number of steps",
@@ -24,7 +25,11 @@ func NewMigrateDownCommand(persister persistence.Migrator) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("migrate down called")
-			err := persister.MigrateDown(steps)
+			persister, err := persistence.New(config.Database)
+			if err != nil {
+				log.Fatal(err)
+			}
+			err = persister.MigrateDown(steps)
 			if err != nil {
 				log.Fatal(err)
 			}
