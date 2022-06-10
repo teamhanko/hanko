@@ -56,7 +56,14 @@ Just run:
 ```
 docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --force-recreate
 ```
-TODO describe setup.
+
+After the services are up and running, the example can be opened at `localhost:8888`.
+
+> **Note:** Some services are not published to a registry yet and will be built before the services are started.
+
+> **Note:** Currently the services are not waiting for postgres to be ready. So the services output an error, that they
+> can not connect to the db. Just wait a second until the services are settled.
+
 ## With kubernetes
 ```
 kubectl apply -k deploy/k8s/overlays/quickstart
