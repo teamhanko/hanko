@@ -2,7 +2,7 @@
 ![Build Status](https://github.com/teamhanko/hanko/workflows/Go/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/teamhanko/hanko)](https://goreportcard.com/report/github.com/teamhanko/hanko)
 
-🚧 **PRE-ALPHA** 🚧: This project is not yet functional. We expect to deliver a first usable version in June 2022. If you want to get notified as soon as we're ready you can leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates).
+🚧 BETA 🚧: This project may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development.
 
 ![Hanko - Open-source user authentication that can do more than just passwords](https://user-images.githubusercontent.com/20115649/167916572-a4d92eaa-7246-4e18-a85d-fc80b4f25c28.svg)
 
