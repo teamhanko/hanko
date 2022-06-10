@@ -9,7 +9,8 @@
 # About Hanko
 Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
-- Passwords, passcodes, and [passkeys](https://www.passkeys.io) API
+- Fully built around new [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
+- Also supports passwords and email passcodes
 - JS frontend lib with a feature-complete and highly customizable Hanko web component ("login box")
 - JWT issuing
 - User management API
@@ -23,7 +24,7 @@ Hanko is built and maintained by [Hanko.io](https://www.hanko.io), a startup bas
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
 
-With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting WebAuthn APIs (web and native) out of the box, it's enabling a truly fascinating login experience that has the potential to replace passwords for good.
+With most devices now shipping with biometric sensors like Touch ID, Face ID, and Windows Hello and supporting passkeys and the WebAuthn API out of the box, it's enabling a truly fascinating login experience that has the potential to replace passwords for good.
 
 # Build your product, not another (password) login
 Implementing onboarding and authentication that benefit from end-to-end passwordless and biometric convenience through WebAuthn, but also handle all edge cases and recovery flows is not a simple task.
