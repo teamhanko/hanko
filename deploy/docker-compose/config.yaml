@@ -8,11 +8,17 @@ passcode:
   email:
     from_address: no-reply@hanko.io
   smtp:
-    host: smtp.example.com
-    user: example
-    password: example
+    host: "mailslurper"
+    port: "2500"
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz
 service:
   name: Hanko Authentication Service
+server:
+  public:
+    cors:
+      enabled: true
+      allow_credentials: true
+      allow_origins:
+        - "*"

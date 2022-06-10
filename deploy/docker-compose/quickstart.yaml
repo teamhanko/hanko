@@ -37,12 +37,24 @@ services:
       - POSTGRES_DB=hanko
     networks:
       - intranet
-#  mailslurper:
-#    image: oryd/mailslurper:latest-smtps
-#    ports:
-#      - '4436:4436'
-#      - '4437:4437'
-#    networks:
-#      - intranet
+  hankojs:
+    build: ../../hanko-js
+    ports:
+      - "9500:80"
+    networks:
+      - intranet
+  example:
+    build: ../../example
+    ports:
+      - "8888:8080"
+    networks:
+      - intranet
+  mailslurper:
+    image: marcopas/docker-mailslurper:latest
+    ports:
+      - '8080:8080' # web UI
+      - '8085:8085'
+    networks:
+      - intranet
 networks:
   intranet:
