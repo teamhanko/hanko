@@ -57,7 +57,8 @@ Just run:
 docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --force-recreate
 ```
 
-After the services are up and running, the example can be opened at `localhost:8888`.
+After the services are up and running, the example can be opened at `localhost:8888`. To receive emails, without your own
+smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
 
 > **Note:** Some services are not published to a registry yet and will be built before the services are started.
 
