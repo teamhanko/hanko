@@ -1,7 +1,7 @@
 version: "3.7"
 services:
   hanko-migrate:
-    image: ghcr.io/teamhanko/hanko:main
+    build: ../../backend
     volumes:
       - type: bind
         source: ./config.yaml
@@ -15,7 +15,7 @@ services:
   hanko:
     depends_on:
       - hanko-migrate
-    image: ghcr.io/teamhanko/hanko:main
+    build: ../../backend
     ports:
       - '8000:8000' # public
       - '8001:8001' # private
