@@ -10,6 +10,6 @@
     box-sizing: border-box;
 }
 
-[hidden] {
+.errorMessage[hidden] {
     display:none;
 }
