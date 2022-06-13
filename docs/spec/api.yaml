@@ -377,12 +377,14 @@ paths:
       operationId: getUserId
       tags:
         - authentication
-      parameters:
-        - in: query
-          name: email
-          required: true
-          schema:
-            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
       responses:
         '200':
           description: 'User'
@@ -393,6 +395,9 @@ paths:
                 properties:
                   id:
                     $ref:  '#/components/schemas/UUID4'
+                  verified:
+                    type: boolean
+
         '400':
           description: 'Bad request'
           content:
