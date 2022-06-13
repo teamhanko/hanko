@@ -65,11 +65,3 @@ smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) 
 
 > **Note:** Currently the services are not waiting for postgres to be ready. So the services output an error, that they
 > can not connect to the db. Just wait a second until the services are settled.
-
-## With kubernetes
-```
-kubectl apply -k deploy/k8s/overlays/quickstart
-```
-TODO describe setup.
-# Develop
-TODO
