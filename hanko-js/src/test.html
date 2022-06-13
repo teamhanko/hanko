@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
-    <script type="text/javascript" src="../dist/hanko.js"></script>
-    <script>
-        document.addEventListener("onSuccess", (event) => {
-            console.log(event);
-            document.getElementsByTagName("body")[0].innerHTML = "<h1>secured content...</h1>"
-        })
-    </script>
+    <script type="module" src="../dist/element.hanko-ui.js"></script>
 </head>
 <body>
-<x-hanko lang="en" api="http://localhost:8000"></x-hanko>
+<hanko-ui lang="en" api="http://localhost:8000"></hanko-ui>
+<script>
+    const hanko = document.querySelector("hanko-ui");
+
+    hanko.addEventListener("success", (event) => {
+        hanko.parentElement.innerHTML = "<h1>secured content...</h1>";
+    })
+</script>
 </body>
 </html>
