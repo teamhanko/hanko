@@ -138,7 +138,7 @@ const LoginEmail = () => {
           value={email}
           label={t("labels.email")}
           pattern={"^.*[^0-9]+$"}
-          autofocuss
+          autofocus
         />
         <Button isLoading={isEmailLoading}>{t("labels.continue")}</Button>
       </Form>
