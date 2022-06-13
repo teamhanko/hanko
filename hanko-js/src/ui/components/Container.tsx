@@ -17,8 +17,8 @@ const Container = ({ children, emitSuccessEvent }: Props) => {
       return;
     }
 
-    const event = new Event("onSuccess", {
-      bubbles: true,
+    const event = new Event("success", {
+      bubbles: false,
       composed: true,
     });
 

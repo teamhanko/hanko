@@ -34,13 +34,20 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.css', "declarations.d.ts"],
+    extensions: [
+      '.ts',
+      '.tsx',
+      '.js',
+      '.css',
+      "declarations.d.ts"
+    ],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'hanko.js',
+    filename: 'element.hanko-ui.js',
     library: {
-      name: 'Hanko', type: 'var'
+      name: 'Hanko',
+      type: 'var'
     },
   },
 };

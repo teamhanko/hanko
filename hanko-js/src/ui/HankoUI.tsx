@@ -41,7 +41,7 @@ const HankoUI = ({ api, lang }: Props) => {
   );
 };
 
-register(HankoUI, "x-hanko", ["api", "lang"], {
+register(HankoUI, "hanko-ui", ["api", "lang"], {
   shadow: true,
 });
 
