@@ -1,22 +1,22 @@
-# &lt;hanko&gt; element
+# &lt;hanko-auth&gt; element
 
-The `<hanko>` element offers a complete user interface that will bring a modern
+The `<hanko-auth>` element offers a complete user interface that will bring a modern
 login and registration experience to your users. It integrates the Hanko API,
 a backend that provides the underlying functionalities.
 
 ## Features
 
-* User registration and login flows with and without passwords
+* Registration and login flows with and without passwords
 * Platform Authenticators (e.g. Apple's Passkeys, Windows Hello, etc.)
 * Passcodes, a convenient way to recover passwords and verify email addresses
-* Internationalization
+* Language support for English and German
 
 ## Upcoming Features
 
 * Customizable UI styles
-* Customizable translations
-* Exponential backoff mechanisms
 * Support for Security Keys
+* Exponential backoff mechanisms
+* Testing and code documentation
 
 ## Installation
 
@@ -37,13 +37,13 @@ _WiP_
 ### Markup
 
 ```html
-<hanko api="https://hanko.yourdomain.com" lang="en" />
+<hanko-auth api="https://hanko.yourdomain.com" lang="en" />
 ```
 
 Please take a look at the [Hanko API](../backend/README.md) to see how to spin up the backend.
 
 Note, that we're working on a SaaS solution, so that you don't need to run the
-Hanko API by yourself and everything you need is to add the `<hanko>` element
+Hanko API by yourself and everything you need is to add the `<hanko-auth>` element
 to your page.
 
 ## Attributes
@@ -53,15 +53,16 @@ to your page.
 
 ## Events
 
-Events are dispatched on the `<hanko>` element. These events do not bubble.
+Events are dispatched on the `<hanko-auth>` element. These events do not bubble.
 
 - `success` - Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the user to protected pages.
 
 ```js
-const hanko = document.querySelector('hanko')
-const container = hanko.parentElement
+const hanko = document.querySelector('hanko-auth')
 
-hanko.addEventListener('success', () => container.innerHTML("<h1>secured content...</h1>"))
+hanko.addEventListener('success', () => {
+    hanko.parentElement.innerHTML = 'secured content...'
+})
 ```
 
 ## Demo
