@@ -75,7 +75,9 @@ const RegisterConfirm = () => {
         <ErrorMessage error={error} />
         <Form onSubmit={onConfirmSubmit}>
           <Paragraph>{t("texts.createAccount", { email })}</Paragraph>
-          <Button isLoading={isLoading}>{t("labels.signUp")}</Button>
+          <Button autofocus isLoading={isLoading}>
+            {t("labels.signUp")}
+          </Button>
         </Form>
       </Content>
       <Footer>

@@ -69,7 +69,7 @@ const RegisterAuthenticator = () => {
         <ErrorMessage error={error} />
         <Form onSubmit={registerWebAuthnCredential}>
           <Paragraph>{t("texts.setupPasskey")}</Paragraph>
-          <Button isSuccess={isSuccess} isLoading={isLoading}>
+          <Button autofocus isSuccess={isSuccess} isLoading={isLoading}>
             {t("labels.registerAuthenticator")}
           </Button>
         </Form>

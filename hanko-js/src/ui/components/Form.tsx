@@ -10,7 +10,7 @@ type Props = {
 
 const Form = ({ onSubmit, children }: Props) => {
   return (
-    <form onSubmit={onSubmit}>
+    <form onSubmit={onSubmit} selected={true}>
       <ul className={styles.ul}>
         {toChildArray(children).map((child, index) => (
           <li className={styles.li} key={index}>

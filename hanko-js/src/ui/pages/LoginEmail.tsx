@@ -132,13 +132,13 @@ const LoginEmail = () => {
       <Form onSubmit={onEmailSubmit}>
         <InputText
           name={"email"}
-          type="email"
+          type={"email"}
           required={true}
           onInput={onEmailInput}
           value={email}
           label={t("labels.email")}
           pattern={"^.*[^0-9]+$"}
-          autofocus
+          autofocuss
         />
         <Button isLoading={isEmailLoading}>{t("labels.continue")}</Button>
       </Form>

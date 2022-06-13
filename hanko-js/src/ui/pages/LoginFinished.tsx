@@ -24,7 +24,9 @@ const LoginFinished = () => {
     <Content>
       <Headline>{t("headlines.loginFinished")}</Headline>
       <Form onSubmit={onContinue}>
-        <Button isSuccess={isSuccess}>{t("labels.continue")}</Button>
+        <Button autofocus isSuccess={isSuccess}>
+          {t("labels.continue")}
+        </Button>
       </Form>
     </Content>
   );
