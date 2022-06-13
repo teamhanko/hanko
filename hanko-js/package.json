@@ -29,7 +29,7 @@
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
     "@types/preact-custom-element": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.16.0",
     "css-loader": "^6.7.1",
     "eslint": "^8.11.0",
