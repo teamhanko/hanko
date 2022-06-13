@@ -1,0 +1,24 @@
+database:
+  user: hanko
+  password: hanko
+  host: postgresd
+  port: 5432
+  dialect: postgres
+passcode:
+  email:
+    from_address: no-reply@hanko.io
+  smtp:
+    host: "mailslurper"
+    port: "2500"
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
+server:
+  public:
+    cors:
+      enabled: true
+      allow_credentials: true
+      allow_origins:
+        - "*"

@@ -1,10 +1,10 @@
 version: "3.7"
 services:
   hanko-migrate:
-    image: ghcr.io/teamhanko/hanko:main
+    build: ../../backend
     volumes:
       - type: bind
-        source: ../../config/config.yaml
+        source: ./config.yaml
         target: /etc/config/config.yaml
     command: --config /etc/config/config.yaml migrate up
     restart: on-failure
@@ -15,15 +15,15 @@ services:
   hanko:
     depends_on:
       - hanko-migrate
-    image: ghcr.io/teamhanko/hanko:main
+    build: ../../backend
     ports:
       - '8000:8000' # public
       - '8001:8001' # private
     restart: unless-stopped
-    command: serve --config /etc/config/config.yaml
+    command: serve --config /etc/config/config.yaml all
     volumes:
       - type: bind
-        source: ../../config/config.yaml
+        source: ./config.yaml
         target: /etc/config/config.yaml
     networks:
       - intranet
@@ -37,12 +37,24 @@ services:
       - POSTGRES_DB=hanko
     networks:
       - intranet
-#  mailslurper:
-#    image: oryd/mailslurper:latest-smtps
-#    ports:
-#      - '4436:4436'
-#      - '4437:4437'
-#    networks:
-#      - intranet
+  hankojs:
+    build: ../../hanko-js
+    ports:
+      - "9500:80"
+    networks:
+      - intranet
+  example:
+    build: ../../example
+    ports:
+      - "8888:8080"
+    networks:
+      - intranet
+  mailslurper:
+    image: marcopas/docker-mailslurper:latest
+    ports:
+      - '8080:8080' # web UI
+      - '8085:8085'
+    networks:
+      - intranet
 networks:
   intranet:

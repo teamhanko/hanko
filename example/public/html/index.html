@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hanko Web Component Test</title>
+    <script type="text/javascript" src="http://localhost:9500/hanko.js"></script>
+    <script>
+        document.addEventListener("onSuccess", (event) => {
+            console.log(event);
+            document.location.href = "/secured"
+        })
+    </script>
+</head>
+<body>
+<x-hanko lang="en" api="http://localhost:8000"></x-hanko>
+</body>
+</html>
+

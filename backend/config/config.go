@@ -223,12 +223,6 @@ func (s *SMTP) Validate() error {
 	if len(strings.TrimSpace(s.Port)) == 0 {
 		return errors.New("smtp port must not be empty")
 	}
-	if len(strings.TrimSpace(s.User)) == 0 {
-		return errors.New("smtp user must not be empty")
-	}
-	if len(strings.TrimSpace(s.Password)) == 0 {
-		return errors.New("smtp password must not be empty")
-	}
 	return nil
 }
 
