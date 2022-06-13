@@ -145,6 +145,11 @@ func TestUserHandler_Get(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues(userId.String())
 
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, userId.String())
+	require.NoError(t, err)
+	c.Set("session", token)
+
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
@@ -190,6 +195,11 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues(userId.String())
 
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, userId.String())
+	require.NoError(t, err)
+	c.Set("session", token)
+
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
@@ -210,11 +220,16 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, "completelyDifferentUserId")
+	require.NoError(t, err)
+	c.Set("session", token)
+
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
 	if assert.NoError(t, handler.Get(c)) {
-		assert.Equal(t, rec.Code, http.StatusNotFound)
+		assert.Equal(t, http.StatusForbidden, rec.Code)
 	}
 }
 
