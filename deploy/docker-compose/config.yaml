@@ -22,3 +22,6 @@ server:
       allow_credentials: true
       allow_origins:
         - "*"
+webauthn:
+  relying_party:
+    origin: "http://localhost:8888"
