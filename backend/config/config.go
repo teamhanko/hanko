@@ -86,9 +86,10 @@ func defaultConfig() *Config {
 		},
 		Session: Session{
 			Lifespan: "1h",
-			Cookie:   Cookie{
+			Cookie: Cookie{
 				HttpOnly: true,
 				SameSite: "strict",
+				Secure:   true,
 			},
 		},
 	}
@@ -163,6 +164,7 @@ type Cookie struct {
 	Domain   string
 	HttpOnly bool   `koanf:"http_only"`
 	SameSite string `koanf:"same_site"`
+	Secure   bool   `koanf:"secure"`
 }
 
 type ServerSettings struct {

@@ -28,6 +28,7 @@ type cookieConfig struct {
 	Domain   string
 	HttpOnly bool
 	SameSite http.SameSite
+	Secure   bool
 }
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
@@ -64,6 +65,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Session) (Manager, er
 			Domain:   config.Cookie.Domain,
 			HttpOnly: config.Cookie.HttpOnly,
 			SameSite: sameSite,
+			Secure:   config.Cookie.Secure,
 		},
 	}, nil
 }
@@ -109,7 +111,7 @@ func (g *manager) GenerateCookie(userId uuid.UUID) (*http.Cookie, error) {
 		Value:    jwt,
 		Domain:   g.cookieConfig.Domain,
 		Path:     "/",
-		Secure:   true,
+		Secure:   g.cookieConfig.Secure,
 		HttpOnly: g.cookieConfig.HttpOnly,
 		SameSite: g.cookieConfig.SameSite,
 	}, nil
