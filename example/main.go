@@ -18,6 +18,8 @@ func main() {
 			`,"bytes_in":${bytes_in},"bytes_out":${bytes_out}},"referer":"${referer}"` + "\n",
 	}))
 
+	e.Use(middleware.CacheControlMiddleware())
+
 	e.File("/", "public/html/index.html")
 	e.File("/secured", "public/html/secured.html", middleware.SessionMiddleware())
 	e.File("/unauthorized", "public/html/unauthorized.html")
