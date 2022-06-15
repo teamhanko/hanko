@@ -55,8 +55,10 @@ func TestUserHandlerAdmin_Delete_InvalidUserId(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.Delete(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	err := handler.Delete(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -73,8 +75,10 @@ func TestUserHandlerAdmin_Delete_UnknownUserId(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.Delete(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Code)
+	err := handler.Delete(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusNotFound, httpError.Code)
 	}
 }
 
@@ -123,12 +127,10 @@ func TestUserHandlerAdmin_Patch_InvalidUserIdAndEmail(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.Patch(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		apiError := dto.ApiError{}
-		err := json.Unmarshal(rec.Body.Bytes(), &apiError)
-		assert.NoError(t, err)
-		assert.Equal(t, 2, len(apiError.ValidationErrors))
+	err := handler.Patch(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -168,8 +170,10 @@ func TestUserHandlerAdmin_Patch_EmailNotAvailable(t *testing.T) {
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.Patch(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	err := handler.Patch(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -199,8 +203,10 @@ func TestUserHandlerAdmin_Patch_UnknownUserId(t *testing.T) {
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.Patch(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Code)
+	err := handler.Patch(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusNotFound, httpError.Code)
 	}
 }
 
@@ -230,8 +236,10 @@ func TestUserHandlerAdmin_Patch_InvalidJson(t *testing.T) {
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.Patch(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	err := handler.Patch(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -352,7 +360,9 @@ func TestUserHandlerAdmin_List_InvalidPaginationParam(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
-	if assert.NoError(t, handler.List(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	err := handler.List(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }

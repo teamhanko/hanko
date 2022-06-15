@@ -48,7 +48,9 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				}
 			}
 
-			return NewApiError(http.StatusBadRequest).WithValidationErrors(vErrs)
+
+			return NewHTTPError(http.StatusBadRequest, strings.Join(vErrs, " and "))
+			//return NewApiError(http.StatusBadRequest).WithValidationErrors(vErrs)
 		}
 	}
 

@@ -20,7 +20,7 @@ import (
 )
 
 type WebauthnHandler struct {
-	persister persistence.Persister
+	persister      persistence.Persister
 	webauthn       *webauthn.WebAuthn
 	sessionManager session.Manager
 }
@@ -68,7 +68,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 	if webauthnUser == nil {
-		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		return dto.NewHTTPError(http.StatusBadRequest, "user not found").SetInternal(errors.New(fmt.Sprintf("user %s not found ", uId)))
 	}
 
 	t := true
@@ -105,8 +105,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 	}
 	request, err := protocol.ParseCredentialCreationResponse(c.Request())
 	if err != nil {
-		c.Logger().Errorf("%w", err)
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
@@ -120,11 +119,11 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		}
 
 		if sessionData == nil {
-			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		if sessionToken.Subject() != sessionData.UserId.String() {
-			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("userId in webauthn.sessionData does not match user session"))
 		}
 
 		webauthnUser, err := h.getWebauthnUser(tx, sessionData.UserId)
@@ -133,19 +132,18 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		}
 
 		if webauthnUser == nil {
-			return errors.New("user not found")
+			return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 		}
 
 		credential, err := h.webauthn.CreateCredential(webauthnUser, *intern.WebauthnSessionDataFromModel(sessionData), request)
 		if err != nil {
-			// TODO: log error, should we return the error message given from the lib?
-			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+			return dto.NewHTTPError(http.StatusBadRequest, "Failed to validate attestation").SetInternal(err)
 		}
 
 		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId)
 		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*model)
 		if err != nil {
-			return fmt.Errorf("failed to store webauthn credential")
+			return fmt.Errorf("failed to store webauthn credential: %w", err)
 		}
 
 		err = sessionDataPersister.Delete(*sessionData)
@@ -178,13 +176,12 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 	request, err := protocol.ParseCredentialRequestResponse(c.Request())
 	if err != nil {
-		c.Logger().Errorf("failed to parse credential request response: %w", err)
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	userId, err := uuid.FromBytes(request.Response.UserHandle)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
@@ -199,7 +196,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		if sessionData == nil {
-			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		webauthnUser, err := h.getWebauthnUser(tx, userId)
@@ -208,7 +205,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		if webauthnUser == nil {
-			return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+			return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 		}
 
 		model := intern.WebauthnSessionDataFromModel(sessionData)
@@ -216,7 +213,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return webauthnUser, nil
 		}, *model, request)
 		if err != nil {
-			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
+			return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
 		}
 
 		err = sessionDataPersister.Delete(*sessionData)

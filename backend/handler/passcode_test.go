@@ -63,8 +63,10 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	if assert.NoError(t, passcodeHandler.Init(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Result().StatusCode)
+	err = passcodeHandler.Init(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -109,8 +111,10 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	if assert.NoError(t, passcodeHandler.Finish(c)) {
-		assert.Equal(t, http.StatusUnauthorized, rec.Result().StatusCode)
+	err = passcodeHandler.Finish(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 	}
 }
 
@@ -132,8 +136,10 @@ func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	if assert.NoError(t, passcodeHandler.Finish(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Result().StatusCode)
+	err = passcodeHandler.Finish(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusNotFound, httpError.Code)
 	}
 }
 

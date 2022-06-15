@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/persistence/models"
 	"github.com/teamhanko/hanko/test"
 	"net/http"
@@ -91,8 +92,11 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	require.NoError(t, err)
 	c2.Set("session", token2)
 
-	if assert.NoError(t, handler.FinishRegistration(c2)) {
-		assert.Equal(t, http.StatusBadRequest, rec2.Result().StatusCode)
+	err = handler.FinishRegistration(c2)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
+		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
 }
 
@@ -154,8 +158,11 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 	rec2 := httptest.NewRecorder()
 	c2 := e.NewContext(req2, rec2)
 
-	if assert.NoError(t, handler.FinishAuthentication(c2)) {
-		assert.Equal(t, http.StatusBadRequest, rec2.Result().StatusCode)
+	err = handler.FinishAuthentication(c2)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
+		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
 }
 

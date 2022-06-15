@@ -23,7 +23,7 @@ func NewWellKnownHandler(config config.Config, jwkManager hankoJwk.Manager) (*We
 func (h *WellKnownHandler) GetPublicKeys(c echo.Context) error {
 	keys, err := h.jwkManager.GetPublicKeys()
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, dto.NewApiError(http.StatusInternalServerError))
+		return err
 	}
 	return c.JSON(http.StatusOK, keys)
 }
