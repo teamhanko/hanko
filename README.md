@@ -77,7 +77,3 @@ This project is in Beta and may still have critical bugs. Leave a star, join our
  - [ ] Custom CSS
  - [ ] 2FA with TOTP and FIDO Security Keys
  - [ ] Events / Audit logs API
- - [ ] OIDC Plugin System
-  - [ ] Sign in with Google
-  - [ ] Sign in with Apple
-  - [ ] Sign in with GitHub
