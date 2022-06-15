@@ -58,6 +58,15 @@ func (h *UserHandler) Create(c echo.Context) error {
 func (h *UserHandler) Get(c echo.Context) error {
 	userId := c.Param("id")
 
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("missing or malformed jwt")
+	}
+
+	if sessionToken.Subject() != userId {
+		return c.JSON(http.StatusForbidden, dto.NewApiError(http.StatusForbidden))
+	}
+
 	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(userId))
 	if err != nil {
 		return err
