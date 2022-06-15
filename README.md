@@ -42,6 +42,19 @@ With Hanko, your users will be guided to login to your apps with passkeys and bi
 
 **Build your future-proof web app login in just 5 minutes – with two lines of code – and never look back.**
 
+# Roadmap
+This project is in **Beta** and may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. A brief overview of our current roadmap:
+ 
+ - [x] Passkeys
+ - [x] Passcodes
+ - [x] Passwords
+ - [x] JWTs
+ - [x] Admin API
+ - [x] Hanko web component (hanko-js)
+ - [ ] Custom CSS
+ - [ ] 2FA with TOTP and FIDO Security Keys
+ - [ ] Events / Audit logs API
+
 # Community
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about authentication, identity, or life in general.
 
@@ -60,20 +73,7 @@ docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up
 After the services are up and running, the example login can be opened at `localhost:8888`. To receive emails without your own
 smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
 
-> **Note:** Services are not published to a registry yet and will be built locally before the services are started.
+> **Note:** Services are not published to a registry yet and will be build locally before the services are started.
 
-> **Note:** Currently the services are not waiting for postgres to be ready. This may result in error outputs by the services, indicating that they
-> cannot connect to the database. Just wait a second until the services are settled.
-
-# Roadmap
-This project is in Beta and may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. A brief overview of our current roadmap:
- 
- - [x] Passkeys
- - [x] Passcodes
- - [x] Passwords
- - [x] JWTs
- - [x] Admin API
- - [x] Hanko web component (hanko-js)
- - [ ] Custom CSS
- - [ ] 2FA with TOTP and FIDO Security Keys
- - [ ] Events / Audit logs API
+> **Note:** Currently the services are not waiting for postgres to be ready. This sometimes results in error outputs by the services, indicating that they
+> cannot connect to the database. As soon as postgres is ready, the services reconnect on their own.
