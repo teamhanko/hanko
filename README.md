@@ -42,19 +42,20 @@ With Hanko, your users will be guided to login to your apps with passkeys and bi
 
 # Roadmap
 This project is in **Beta** and may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our current roadmap:
- - [x] Passkeys
- - [x] Passcodes
- - [x] Passwords
- - [x] JWT issuing
- - [x] Admin API
- - [x] Hanko web component (hanko-js)
- - [x] ***Hanko Beta Release***
- - [ ] Custom CSS
- - [ ] Mobile app support
- - [ ] Events / Audit logs API
- - [ ] ***Hanko 1.0 Release***
- - [ ] 2FA with TOTP and FIDO Security Keys
- - [ ] Sign in with Google/Apple/GitHub
+| Status | Feature |
+| :---: | :--- |
+| ✅ | Passkeys |
+| ✅ | Passcodes |
+| ✅ | Passwords |
+| ✅ | JWT issuing |
+| ✅ | Admin API |
+| ✅ | Hanko web component (hanko-js) |
+| 🏗️ | Custom CSS |
+| 🏗️ | Events / Audit logs API |
+| | ***Hanko 1.0 Release*** |
+| | 2FA with TOTP and FIDO Security Keys |
+| | Mobile app support |
+| | Sign in with Google/Apple/GitHub |
 
 # Community
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
