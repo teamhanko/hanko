@@ -7,12 +7,12 @@
 # About Hanko
 Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
-- Fully built around new [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
+- Fully built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
 - Also supports passwords and email passcodes
-- JS frontend lib with a feature-complete and highly customizable Hanko web component ("login box")
+- JS frontend lib with a highly customizable Hanko web component ("login box")
 - JWT issuing
 - User management API
-- Audit logs API
+- Audit logs API (coming soon)
 - Mobile SDKs (coming soon)
 - Self-hosted or Hanko Cloud (coming soon)
 - API-first, small footprint, cloud-native
@@ -20,7 +20,7 @@ Hanko is open-source user authentication with a focus on moving the login beyond
 
 [![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)](https://fidoalliance.org/company/hanko/)
 
-Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member in the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of more than 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
+Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of more than 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that passkeys were announced and the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
@@ -32,28 +32,32 @@ Implementing onboarding and authentication that benefit from end-to-end password
 
 **That's where Hanko comes in:**
 
-With Hanko, your users will be guided to login to your apps with passkeys and biometrics instead of passwords. On devices that do not support passkeys, or for the first-time login on a new device where no passkey is available, email passcodes or passwords (otional) can be used. But directly after, the user is always guided to create a passkey.
+With Hanko, your users will be guided to login to your apps with passkeys and biometrics instead of passwords. On devices that do not support passkeys, or for the first-time login on a new device where no passkey is available, email passcodes or passwords (optional) can be used. But directly after, the user is always guided to create a passkey.
 
 - A polished, passwordless user experience with optional password authentication to make sure your users won't feel lost
 - A slick Hanko web component makes integrating the Hanko login experience into your app possible with just two lines of code
 - All edge cases are handled that normally will keep you busy much longer than you would like (e.g., account recovery, unsupported devices, multi-language UI & emails)
 
-**Build your future-proof web app login in just 5 minutes – with two lines of code – and never look back.**
+**Build your passkey login in just 5 minutes – with two lines of code – and never look back.**
 
 # Roadmap
-This project is in **Beta** and may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. A brief overview of our current roadmap:
+This project is in **Beta** and may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our current roadmap:
  - [x] Passkeys
  - [x] Passcodes
  - [x] Passwords
- - [x] JWTs
+ - [x] JWT issuing
  - [x] Admin API
  - [x] Hanko web component (hanko-js)
+ - [x] ***Hanko Beta Release***
  - [ ] Custom CSS
- - [ ] 2FA with TOTP and FIDO Security Keys
+ - [ ] Mobile app support
  - [ ] Events / Audit logs API
+ - [ ] ***Hanko 1.0 Release***
+ - [ ] 2FA with TOTP and FIDO Security Keys
+ - [ ] Sign in with Google/Apple/GitHub
 
 # Community
-Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about authentication, identity, or life in general.
+Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
 
 # Quickstart
 To try out hanko you can use docker-compose. First you need to clone this repository with:
