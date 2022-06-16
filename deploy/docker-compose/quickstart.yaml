@@ -28,6 +28,8 @@ services:
         target: /etc/config/config.yaml
     networks:
       - intranet
+    environment:
+      - PASSWORD_ENABLED
   postgresd:
     image: postgres:12-alpine
     ports:

@@ -25,7 +25,9 @@ const ErrorMessage = ({ error = defaultError }: Props) => {
       <span>
         <ExclamationMark />
       </span>
-      <span>{code ? t(`errors.${code}`) : error ? error.message : null}</span>
+      <span id="errorMessage">
+        {code ? t(`errors.${code}`) : error ? error.message : null}
+      </span>
     </section>
   );
 };
