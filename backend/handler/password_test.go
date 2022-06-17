@@ -125,8 +125,10 @@ func TestPasswordHandler_Set_UserNotFound(t *testing.T) {
 	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{})
 	handler := NewPasswordHandler(p, sessionManager{})
 
-	if assert.NoError(t, handler.Set(c)) {
-		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	err = handler.Set(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 	}
 }
 
@@ -176,8 +178,10 @@ func TestPasswordHandler_Set_TokenHasWrongSubject(t *testing.T) {
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
 	handler := NewPasswordHandler(p, sessionManager{})
 
-	if assert.NoError(t, handler.Set(c)) {
-		assert.Equal(t, http.StatusForbidden, rec.Code)
+	err = handler.Set(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusForbidden, httpError.Code)
 	}
 }
 
@@ -199,12 +203,10 @@ func TestPasswordHandler_Set_BadRequestBody(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{})
 
-	if assert.NoError(t, handler.Set(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		apiError := dto.ApiError{}
-		err := json.Unmarshal(rec.Body.Bytes(), &apiError)
-		require.NoError(t, err)
-		assert.Equal(t, 2, len(apiError.ValidationErrors))
+	err = handler.Set(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -301,8 +303,10 @@ func TestPasswordHandler_Login_WrongPassword(t *testing.T) {
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
 	handler := NewPasswordHandler(p, sessionManager{})
 
-	if assert.NoError(t, handler.Login(c)) {
-		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	err = handler.Login(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 	}
 }
 
@@ -319,7 +323,9 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{})
 	handler := NewPasswordHandler(p, sessionManager{})
 
-	if assert.NoError(t, handler.Login(c)) {
-		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	err := handler.Login(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 	}
 }

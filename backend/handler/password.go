@@ -32,11 +32,11 @@ type PasswordSetBody struct {
 func (h *PasswordHandler) Set(c echo.Context) error {
 	var body PasswordSetBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	sessionToken, ok := c.Get("session").(jwt.Token)
@@ -46,7 +46,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 
 	sessionUserId, err := uuid.FromString(sessionToken.Subject())
 	if err != nil {
-		return fmt.Errorf("failed to parse userId from JWT subject: %w", err)
+		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
@@ -56,11 +56,11 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		}
 
 		if user == nil {
-			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
+			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("user %s not found ", sessionUserId)))
 		}
 
 		if sessionUserId != user.ID {
-			return c.JSON(http.StatusForbidden, dto.NewApiError(http.StatusForbidden))
+			return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New(fmt.Sprintf("session.userId %s tried to set password credentials for body.userId %s", sessionUserId, user.ID)))
 		}
 
 		pwPersister := h.persister.GetPasswordCredentialPersisterWithConnection(tx)
@@ -106,16 +106,16 @@ type PasswordLoginBody struct {
 func (h *PasswordHandler) Login(c echo.Context) error {
 	var body PasswordLoginBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	pw, err := h.persister.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(body.UserId))
 	if pw == nil {
-		return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
+		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("no password credential found for: %s", body.UserId)))
 	}
 
 	if err != nil {
@@ -123,7 +123,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 	}
 
 	if err = bcrypt.CompareHashAndPassword([]byte(pw.Password), []byte(body.Password)); err != nil {
-		return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
+		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
 	cookie, err := h.sessionManager.GenerateCookie(pw.UserId)

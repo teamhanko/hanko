@@ -28,11 +28,11 @@ type UserCreateBody struct {
 func (h *UserHandler) Create(c echo.Context) error {
 	var body UserCreateBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
@@ -42,13 +42,13 @@ func (h *UserHandler) Create(c echo.Context) error {
 		}
 
 		if user != nil {
-			return c.JSON(http.StatusConflict, dto.NewApiError(http.StatusConflict))
+			return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New(fmt.Sprintf("user with email %s already exists", user.Email)))
 		}
 
 		newUser := models.NewUser(body.Email)
 		err = h.persister.GetUserPersisterWithConnection(tx).Create(newUser)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to store user: %w", err)
 		}
 
 		return c.JSON(http.StatusOK, newUser)
@@ -64,16 +64,16 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	if sessionToken.Subject() != userId {
-		return c.JSON(http.StatusForbidden, dto.NewApiError(http.StatusForbidden))
+		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New(fmt.Sprintf("user %s tried to get user %s", sessionToken.Subject(), userId)))
 	}
 
 	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(userId))
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	if user == nil {
-		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		return dto.NewHTTPError(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -86,20 +86,20 @@ type UserGetByEmailBody struct {
 func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 	var request UserGetByEmailBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	if err := c.Validate(request); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	user, err := h.persister.GetUserPersister().GetByEmail(request.Email)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	if user == nil {
-		return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+		return dto.NewHTTPError(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, struct {

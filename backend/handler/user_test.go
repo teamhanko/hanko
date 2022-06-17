@@ -81,8 +81,10 @@ func TestUserHandler_Create_UserExists(t *testing.T) {
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.Create(c)) {
-		assert.Equal(t, http.StatusConflict, rec.Code)
+	err = handler.Create(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusConflict, httpError.Code)
 	}
 }
 
@@ -98,8 +100,10 @@ func TestUserHandler_Create_InvalidEmail(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.Create(c)) {
-		assert.Equal(t, rec.Code, http.StatusBadRequest)
+	err := handler.Create(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -115,12 +119,10 @@ func TestUserHandler_Create_EmailMissing(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.Create(c)) {
-		assert.Equal(t, rec.Code, http.StatusBadRequest)
-		apiError := dto.ApiError{}
-		err := json.Unmarshal(rec.Body.Bytes(), &apiError)
-		require.NoError(t, err)
-		assert.Equal(t, 1, len(apiError.ValidationErrors))
+	err := handler.Create(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -228,8 +230,10 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.Get(c)) {
-		assert.Equal(t, http.StatusForbidden, rec.Code)
+	err = handler.Get(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusForbidden, httpError.Code)
 	}
 }
 
@@ -244,12 +248,10 @@ func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		apiError := dto.ApiError{}
-		err := json.Unmarshal(rec.Body.Bytes(), &apiError)
-		require.NoError(t, err)
-		assert.Equal(t, 1, len(apiError.ValidationErrors))
+	err := handler.GetUserIdByEmail(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -263,9 +265,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-	}
+	assert.Error(t, handler.GetUserIdByEmail(c))
 }
 
 func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
@@ -279,8 +279,9 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(p)
 
-	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
-		assert.Equal(t, http.StatusNotFound, rec.Code)
+	err := handler.GetUserIdByEmail(c)
+	if assert.Error(t, err) {
+		assert.Equal(t, http.StatusText(http.StatusNotFound), err.Error())
 	}
 }
 

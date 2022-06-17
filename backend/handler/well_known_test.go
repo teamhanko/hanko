@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/teamhanko/hanko/config"
 	hankoJwk "github.com/teamhanko/hanko/crypto/jwk"
+	"github.com/teamhanko/hanko/dto"
 	"github.com/teamhanko/hanko/test"
 	"net/http"
 	"net/http/httptest"
@@ -39,8 +40,11 @@ func TestSomethingWrongWithKeys(t *testing.T) {
 	h, err := NewWellKnownHandler(cfg, jwkMan)
 	assert.NoError(t, err)
 
-	if assert.NoError(t, h.GetPublicKeys(c)) {
-		assert.Equal(t, http.StatusInternalServerError, rec.Result().StatusCode)
+	err = h.GetPublicKeys(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusInternalServerError, httpError.Code)
+		assert.Equal(t, "No Public Keys!", httpError.Internal.Error())
 	}
 }
 

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -51,16 +52,16 @@ func NewPasscodeHandler(config config.Passcode, serviceConfig config.Service, pe
 func (h *PasscodeHandler) Init(c echo.Context) error {
 	var body dto.PasscodeInitRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	user, err := h.persister.GetUserPersister().Get(userId)
@@ -68,7 +69,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 	}
 
 	passcode, err := h.passcodeGenerator.Generate()
@@ -136,16 +137,16 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	startTime := time.Now()
 	var body dto.PasscodeFinishRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	if err := c.Validate(body); err != nil {
-		return c.JSON(http.StatusBadRequest, err)
+		return dto.ToHttpError(err)
 	}
 
 	passcodeId, err := uuid.FromString(body.Id)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, dto.NewApiError(http.StatusBadRequest))
+		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
@@ -156,11 +157,12 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get passcode: %w", err)
 		}
 		if passcode == nil {
-			return c.JSON(http.StatusNotFound, dto.NewApiError(http.StatusNotFound))
+			return dto.NewHTTPError(http.StatusNotFound, "passcode not found")
 		}
 
-		if passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second).Before(startTime) {
-			return c.JSON(http.StatusRequestTimeout, dto.NewApiError(http.StatusRequestTimeout))
+		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
+		if lastVerificationTime.Before(startTime) {
+			return dto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(body.Code))
@@ -172,7 +174,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to delete passcode: %w", err)
 				}
-				return c.JSON(http.StatusGone, dto.NewApiError(http.StatusGone))
+				return dto.NewHTTPError(http.StatusGone, "max attempts reached")
 			}
 
 			err = passcodePersister.Update(*passcode)
@@ -180,7 +182,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
-			return c.JSON(http.StatusUnauthorized, dto.NewApiError(http.StatusUnauthorized))
+			return dto.NewHTTPError(http.StatusUnauthorized)
 		}
 
 		err = passcodePersister.Delete(*passcode)
