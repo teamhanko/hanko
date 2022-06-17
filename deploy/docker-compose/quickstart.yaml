@@ -1,4 +1,3 @@
-version: "3.7"
 services:
   hanko-migrate:
     build: ../../backend
@@ -9,12 +8,14 @@ services:
     command: --config /etc/config/config.yaml migrate up
     restart: on-failure
     depends_on:
-      - postgresd
+      postgresd:
+        condition: service_healthy
     networks:
       - intranet
   hanko:
     depends_on:
-      - hanko-migrate
+      hanko-migrate:
+        condition: service_completed_successfully
     build: ../../backend
     ports:
       - '8000:8000' # public
@@ -35,6 +36,12 @@ services:
       - POSTGRES_USER=hanko
       - POSTGRES_PASSWORD=hanko
       - POSTGRES_DB=hanko
+    healthcheck:
+      test: pg_isready -U hanko -d hanko
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
     networks:
       - intranet
   hankojs:
