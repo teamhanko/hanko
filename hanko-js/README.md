@@ -1,13 +1,13 @@
 # &lt;hanko-auth&gt; element
 
 The `<hanko-auth>` element offers a complete user interface that will bring a modern
-login and registration experience to your users. It integrates the Hanko API,
+login and registration experience to your users. It integrates the [Hanko API](../backend/README.md),
 a backend that provides the underlying functionalities.
 
 ## Features
 
 * Registration and login flows with and without passwords
-* Platform Authenticators (e.g. Apple's Passkeys, Windows Hello, etc.)
+* Passkey authentication
 * Passcodes, a convenient way to recover passwords and verify email addresses
 * Language support for English and German
 
@@ -42,9 +42,8 @@ _WiP_
 
 Please take a look at the [Hanko API](../backend/README.md) to see how to spin up the backend.
 
-Note, that we're working on a SaaS solution, so that you don't need to run the
-Hanko API by yourself and everything you need is to add the `<hanko-auth>` element
-to your page.
+Note that we're working on Hanko Cloud, so that you don't need to run the Hanko API by yourself and all you need is to
+do is adding the `<hanko-auth>` element to your page.
 
 ## Attributes
 
@@ -67,9 +66,9 @@ hanko.addEventListener('success', () => {
 
 ## Demo
 
-The GIF below demonstrates how a user registration with passwords enabled looks like. You can set up the flow you like using the Hanko API
-configuration file. The registration flow also includes email verification via passcodes and the registration of a
-platform authenticator so that the user can log in without passwords or passcodes on the current device.
+The animation below demonstrates how user registration with passwords enabled looks like. You can set up the flow you
+like using the [Hanko API](../backend/README.md) configuration file. The registration flow also includes email
+verification via passcodes and the registration of a passkey so that the user can log in without passwords or passcodes.
 
 ![](demo.gif)
 
