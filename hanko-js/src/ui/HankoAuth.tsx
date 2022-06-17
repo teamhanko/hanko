@@ -16,7 +16,7 @@ interface Props {
   lang?: string;
 }
 
-const HankoUI = ({ api, lang }: Props) => {
+const HankoAuth = ({ api, lang }: Props) => {
   return (
     <Fragment>
       <style
@@ -41,8 +41,8 @@ const HankoUI = ({ api, lang }: Props) => {
   );
 };
 
-register(HankoUI, "hanko-ui", ["api", "lang"], {
+register(HankoAuth, "hanko-auth", ["api", "lang"], {
   shadow: true,
 });
 
-export default HankoUI;
+export default HankoAuth;

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Hanko Web Component Test</title>
-    <script type="text/javascript" src="http://localhost:9500/hanko.js"></script>
+    <script type="text/javascript" src="http://localhost:9500/element.hanko-auth.js"></script>
     <script>
         document.addEventListener("onSuccess", (event) => {
             console.log(event);
@@ -13,7 +13,7 @@
     </script>
 </head>
 <body>
-<x-hanko lang="en" api="http://localhost:8000"></x-hanko>
+<hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
 </body>
 </html>
 
