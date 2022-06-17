@@ -69,13 +69,10 @@ git clone https://github.com/teamhanko/hanko.git
 ## With docker-compose
 Just run:
 ```
-docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --force-recreate
+docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --build
 ```
 
 After the services are up and running, the example login can be opened at `localhost:8888`. To receive emails without your own
 smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
 
 > **Note:** Services are not published to a registry yet and will be built locally before the services are started.
-
-> **Note:** Currently the services are not waiting for postgres to be ready. This sometimes results in error outputs by the services, indicating that they
-> cannot connect to the database. As soon as postgres is ready, the services reconnect on their own.
