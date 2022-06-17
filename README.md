@@ -50,8 +50,8 @@ This project is in **Beta** and may still have critical bugs. Leave a star, join
 | ✅ | JWT issuing |
 | ✅ | Admin API |
 | ✅ | Hanko web component (hanko-js) |
-| 🏗️ | Custom CSS |
-| 🏗️ | Events / Audit logs API |
+| ⚙️ | Custom CSS |
+| ⚙️ | Events / Audit logs API |
 | | ***Hanko 1.0 Release*** |
 | | 2FA with TOTP and FIDO Security Keys |
 | | Mobile app support |
