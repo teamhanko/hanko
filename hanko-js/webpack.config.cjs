@@ -44,7 +44,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'element.hanko-ui.js',
+    filename: 'element.hanko-auth.js',
     library: {
       name: 'Hanko',
       type: 'var'

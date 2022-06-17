@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
-    <script type="module" src="../dist/element.hanko-ui.js"></script>
+    <script type="module" src="../dist/element.hanko-auth.js"></script>
 </head>
 <body>
-<hanko-ui lang="en" api="http://localhost:8000"></hanko-ui>
+<hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
 <script>
-    const hanko = document.querySelector("hanko-ui");
+    const hanko = document.querySelector("hanko-auth");
 
     hanko.addEventListener("success", (event) => {
         hanko.parentElement.innerHTML = "<h1>secured content...</h1>";

@@ -1,3 +1,2 @@
-import Hanko from "./lib/HankoClient";
-import HankoUI from "./ui/HankoUI";
-export { HankoUI, Hanko };
+import HankoAuth from "./ui/HankoAuth";
+export { HankoAuth };
