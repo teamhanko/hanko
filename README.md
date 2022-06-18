@@ -7,14 +7,10 @@
 # About Hanko
 Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
-- Fully built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
-- Also supports passwords and email passcodes
+- Built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
+- Email passcodes
+- Optional password support
 - JS frontend lib with a highly customizable Hanko web component ("login box")
-- JWT issuing
-- User management API
-- Audit logs API (coming soon)
-- Mobile SDKs (coming soon)
-- Self-hosted or Hanko Cloud (coming soon)
 - API-first, small footprint, cloud-native
 - FIDO2-certified
 
@@ -47,11 +43,11 @@ This project is in **Beta** and may still have critical bugs. Leave a star, join
 | ✅ | Passkeys |
 | ✅ | Passcodes |
 | ✅ | Passwords |
-| ✅ | JWT issuing |
+| ✅ | JWT signing |
 | ✅ | Admin API |
-| ✅ | Hanko web component (hanko-js) |
+| ✅ | Hanko web component |
 | ⚙️ | Custom CSS |
-| ⚙️ | Events / Audit logs API |
+| ⚙️ | Events API |
 | | ***Hanko 1.0 Release*** |
 | | 2FA with TOTP and FIDO Security Keys |
 | | Mobile app support |
@@ -75,4 +71,4 @@ docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up
 After the services are up and running, the example login can be opened at `localhost:8888`. To receive emails without your own
 smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
 
-> **Note:** Services are not published to a registry yet and will be built locally before the services are started.
+> **Note**: Services are not published to a registry yet and will be built locally before the services are started.
