@@ -8,8 +8,7 @@
 Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
 - Built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
-- Email passcodes
-- Optional password support
+- Email passcodes and optional password support
 - JS frontend lib with a highly customizable Hanko web component ("login box")
 - API-first, small footprint, cloud-native
 - FIDO2-certified
