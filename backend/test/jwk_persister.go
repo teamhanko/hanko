@@ -1,8 +1,8 @@
 package test
 
 import (
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 func NewJwkPersister(init []models.Jwk) persistence.JwkPersister {

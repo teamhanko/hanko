@@ -6,11 +6,11 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/cmd/jwk"
-	"github.com/teamhanko/hanko/cmd/jwt"
-	"github.com/teamhanko/hanko/cmd/migrate"
-	"github.com/teamhanko/hanko/cmd/serve"
-	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/backend/cmd/jwk"
+	"github.com/teamhanko/hanko/backend/cmd/jwt"
+	"github.com/teamhanko/hanko/backend/cmd/migrate"
+	"github.com/teamhanko/hanko/backend/cmd/serve"
+	"github.com/teamhanko/hanko/backend/config"
 	"log"
 )
 

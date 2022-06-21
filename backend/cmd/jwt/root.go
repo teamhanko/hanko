@@ -2,7 +2,7 @@ package jwt
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/backend/config"
 )
 
 func NewJwtCmd() *cobra.Command {

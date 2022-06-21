@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/persistence"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/persistence"
 	"sync"
 )
 

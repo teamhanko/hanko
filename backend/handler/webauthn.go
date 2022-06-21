@@ -10,12 +10,12 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/dto"
-	"github.com/teamhanko/hanko/dto/intern"
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/persistence/models"
-	"github.com/teamhanko/hanko/session"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/dto/intern"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
 )
 

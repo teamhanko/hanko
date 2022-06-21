@@ -3,7 +3,7 @@ package persistence
 import (
 	"embed"
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/backend/config"
 )
 
 //go:embed migrations/*

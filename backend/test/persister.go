@@ -2,8 +2,8 @@ package test
 
 import (
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential) persistence.Persister {

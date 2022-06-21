@@ -3,7 +3,7 @@ package middleware
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/teamhanko/hanko/session"
+	"github.com/teamhanko/hanko/backend/session"
 )
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification

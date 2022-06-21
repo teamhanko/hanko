@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/config"
-	hankoJwk "github.com/teamhanko/hanko/crypto/jwk"
-	hankoJwt "github.com/teamhanko/hanko/crypto/jwt"
+	"github.com/teamhanko/hanko/backend/config"
+	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
+	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
 	"net/http"
 	"time"
 )

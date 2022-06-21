@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"log"
 )
 

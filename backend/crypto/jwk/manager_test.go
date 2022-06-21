@@ -5,8 +5,8 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/persistence/models"
-	"github.com/teamhanko/hanko/test"
+	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/test"
 	"testing"
 )
 
