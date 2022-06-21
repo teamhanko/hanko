@@ -26,7 +26,7 @@ const InputPasscodeDigit = ({ index, focus, digit = "", ...props }: Props) => {
     if (index === 0) {
       focusInput();
     }
-  }, [index]);
+  }, [index, props.disabled]);
 
   // Focus the current input element
   useMemo(() => {
