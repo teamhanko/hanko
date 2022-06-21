@@ -4,6 +4,35 @@
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
     <script type="module" src="../dist/element.hanko-auth.js"></script>
+    <style>
+        body {
+            background-color: hsl(4, 0%, 26%);
+        }
+
+        hanko-auth {
+            --hanko-default-color-h: 0;
+            --hanko-default-color-s: 100%;
+            --hanko-default-color-l: 100%;
+
+            --hanko-default-brand-color-h: 90;
+            --hanko-default-brand-color-s: 100%;
+            --hanko-default-brand-color-l: 50%;
+
+            --hanko-default-background-color-h: 0;
+            --hanko-default-background-color-s: 0%;
+            --hanko-default-background-color-l: 0%;
+
+            --hanko-default-font: 400 12px monospace;
+            --hanko-default-lightness-adjust-dark-light: 20%;
+
+            --hanko-headline-font: 800 22px monospace;
+            --hanko-headline-color: hsl(90, 100%, 50%);
+            --hanko-text-input-border-focus: 1px solid hsl(90, 100%, 50%);
+            --hanko-link-text-decoration-hover: underline;
+            --hanko-container-min-height: 0;
+            --hanko-container-padding: 0 10px;
+        }
+    </style>
 </head>
 <body>
 <hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
@@ -14,5 +43,6 @@
         hanko.parentElement.innerHTML = "<h1>secured content...</h1>";
     })
 </script>
+
 </body>
 </html>
