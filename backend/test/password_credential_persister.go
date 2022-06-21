@@ -2,8 +2,8 @@ package test
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 func NewPasswordCredentialPersister(init []models.PasswordCredential) persistence.PasswordCredentialPersister {

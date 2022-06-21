@@ -3,8 +3,8 @@ package migrate
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/persistence"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/persistence"
 	"log"
 	"strconv"
 )

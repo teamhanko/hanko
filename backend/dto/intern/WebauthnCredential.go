@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 	"time"
 )
 

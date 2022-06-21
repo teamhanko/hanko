@@ -6,9 +6,9 @@ package serve
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/server"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/server"
 	"log"
 	"sync"
 )

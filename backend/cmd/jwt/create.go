@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/config"
-	"github.com/teamhanko/hanko/crypto/jwk"
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/session"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"log"
 )
 

@@ -1,7 +1,7 @@
 package dto
 
 import (
-	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/backend/config"
 )
 
 // PublicConfig is the part of the configuration that will be shared with the frontend

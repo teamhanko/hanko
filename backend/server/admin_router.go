@@ -3,10 +3,10 @@ package server
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/teamhanko/hanko/dto"
-	"github.com/teamhanko/hanko/handler"
-	"github.com/teamhanko/hanko/persistence"
-	hankoMiddleware "github.com/teamhanko/hanko/server/middleware"
+	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/handler"
+	"github.com/teamhanko/hanko/backend/persistence"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/server/middleware"
 )
 
 func NewPrivateRouter(persister persistence.Persister) *echo.Echo {

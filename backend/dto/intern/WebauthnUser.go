@@ -3,7 +3,7 @@ package intern
 import (
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 func NewWebauthnUser(user models.User, credentials []models.WebauthnCredential) *WebauthnUser {

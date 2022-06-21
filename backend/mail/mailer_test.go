@@ -2,7 +2,7 @@ package mail
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/teamhanko/hanko/config"
+	"github.com/teamhanko/hanko/backend/config"
 	"testing"
 )
 

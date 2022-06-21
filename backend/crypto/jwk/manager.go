@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/teamhanko/hanko/crypto/aes_gcm"
-	"github.com/teamhanko/hanko/persistence"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/crypto/aes_gcm"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 	"time"
 )
 

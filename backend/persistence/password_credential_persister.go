@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/persistence/models"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type PasswordCredentialPersister interface {
