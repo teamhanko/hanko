@@ -21,7 +21,7 @@ const InputText = ({ label, ...props }: Props) => {
 
   return (
     <div className={styles.inputWrapper}>
-      <input {...props} className={styles.input} />
+      <input ref={ref} {...props} className={styles.input} />
       <label className={styles.label}>{label}</label>
     </div>
   );
