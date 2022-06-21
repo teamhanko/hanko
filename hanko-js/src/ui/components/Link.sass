@@ -1,0 +1,22 @@
+@use "custom"
+
+.link
+  font: custom.$link-font
+  color: custom.$link-color
+  text-decoration: custom.$link-text-decoration
+  cursor: pointer
+
+  &:hover
+    color: custom.$link-color-hover
+    text-decoration: custom.$link-text-decoration-hover
+
+  &.disabled
+    color: custom.$link-color-disable
+    pointer-events: none
+    cursor: default
+
+  &.left
+    float: left
+
+  &.right
+    float: right

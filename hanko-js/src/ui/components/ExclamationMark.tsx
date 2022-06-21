@@ -1,6 +1,6 @@
 import * as preact from "preact";
 
-import styles from "./ExclamationMark.module.css";
+import styles from "./ExclamationMark.sass";
 
 const ExclamationMark = () => {
   return (

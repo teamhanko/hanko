@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { ComponentChildren, FunctionalComponent } from "preact";
 import cx from "classnames";
 
-import styles from "./Link.module.css";
+import styles from "./Link.sass";
 
 export type Props = {
   children?: ComponentChildren;

@@ -5,7 +5,7 @@ import { useEffect, useRef } from "preact/compat";
 import cx from "classnames";
 
 import LoadingIndicator from "./LoadingIndicator";
-import styles from "./Button.module.css";
+import styles from "./Button.sass";
 
 type Props = {
   children: ComponentChildren;

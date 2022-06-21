@@ -3,14 +3,16 @@ import { useContext } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
-import styles from "./Divider.module.css";
+import styles from "./Divider.sass";
 
 const Divider = () => {
   const { t } = useContext(TranslateContext);
   return (
-    <div className={styles.divider}>
-      <span>{t("or")}</span>
-    </div>
+    <section className={styles.dividerWrapper}>
+      <div className={styles.divider}>
+        <span>{t("or")}</span>
+      </div>
+    </section>
   );
 };
 

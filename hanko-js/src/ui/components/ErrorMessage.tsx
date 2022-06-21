@@ -7,7 +7,7 @@ import { HankoError, TechnicalError } from "../../lib/Errors";
 
 import ExclamationMark from "./ExclamationMark";
 
-import styles from "./ErrorMessage.module.css";
+import styles from "./ErrorMessage.sass";
 
 type Props = {
   error?: Error;

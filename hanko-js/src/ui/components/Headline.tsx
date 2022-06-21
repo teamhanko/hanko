@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import { ComponentChildren } from "preact";
 
-import styles from "./Headline.module.css";
+import styles from "./Headline.sass";
 
 type Props = {
   children: ComponentChildren;
