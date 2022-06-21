@@ -3,7 +3,7 @@ import { useEffect, useState } from "preact/compat";
 
 import InputPasscodeDigit from "./InputPasscodeDigit";
 
-import styles from "./Input.module.css";
+import styles from "./Input.sass";
 
 // Inspired by https://github.com/devfolioco/react-otp-input
 

@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import { ComponentChildren } from "preact";
 
-import styles from "./Footer.module.css";
+import styles from "./Footer.sass";
 
 interface Props {
   children?: ComponentChildren;

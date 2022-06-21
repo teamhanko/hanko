@@ -1,0 +1,53 @@
+@use 'custom'
+
+.checkmark
+  display: inline-block
+  width: 16px
+  height: 16px
+  transform: rotate(45deg)
+
+  .circle
+    box-sizing: border-box
+    display: inline-block
+    border: 2px solid custom.$primary-button-background
+    position: absolute
+    width: 16px
+    height: 16px
+    border-radius: 11px
+    left: 0
+    top: 0
+
+    &.secondary
+      border-color: custom.$primary-button-background
+
+  .stem
+    position: absolute
+    width: 2px
+    height: 7px
+    background-color: custom.$primary-button-background
+    left: 8px
+    top: 3px
+
+    &.secondary
+      background-color: custom.$primary-button-background
+
+  .kick
+    position: absolute
+    width: 5px
+    height: 2px
+    background-color: custom.$primary-button-background
+    left: 5px
+    top: 10px
+
+    &.secondary
+      background-color: custom.$primary-button-background
+
+  &.fadeOut
+    animation: fadeOut ease-out 1.5s forwards !important
+
+@keyframes fadeOut
+  0%
+    opacity: 1
+
+  100%
+    opacity: 0

@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import { ComponentChildren, toChildArray } from "preact";
 
-import styles from "./Form.module.css";
+import styles from "./Form.sass";
 
 type Props = {
   onSubmit: (event: Event) => void;

@@ -1,9 +1,8 @@
 import * as preact from "preact";
 import { h } from "preact";
 import { useEffect, useMemo, useRef } from "preact/compat";
-import cx from "classnames";
 
-import styles from "./Input.module.css";
+import styles from "./Input.sass";
 
 interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
   index: number;
@@ -37,17 +36,19 @@ const InputPasscodeDigit = ({ index, focus, digit = "", ...props }: Props) => {
   }, [focus]);
 
   return (
-    <input
-      {...props}
-      name={props.name + index.toString(10)}
-      autoComplete={"off"}
-      type={"text"}
-      maxLength={1}
-      ref={ref}
-      value={digit.charAt(0)}
-      required={true}
-      className={cx(styles.input, styles.passcodeDigit)}
-    />
+    <div className={styles.passcodeDigitWrapper}>
+      <input
+        {...props}
+        name={props.name + index.toString(10)}
+        autoComplete={"off"}
+        type={"text"}
+        maxLength={1}
+        ref={ref}
+        value={digit.charAt(0)}
+        required={true}
+        className={styles.input}
+      />
+    </div>
   );
 };
 

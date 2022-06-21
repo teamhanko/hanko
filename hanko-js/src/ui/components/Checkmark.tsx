@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import cx from "classnames";
 
-import styles from "./Checkmark.module.css";
+import styles from "./Checkmark.sass";
 
 type Props = {
   fadeOut?: boolean;

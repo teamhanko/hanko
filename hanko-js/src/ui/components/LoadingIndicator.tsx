@@ -4,7 +4,7 @@ import { ComponentChildren } from "preact";
 import Checkmark from "./Checkmark";
 import LoadingWheel from "./LoadingWheel";
 
-import styles from "./LoadingIndicator.module.css";
+import styles from "./LoadingIndicator.sass";
 
 export type Props = {
   children?: ComponentChildren;

@@ -1,0 +1,21 @@
+@use 'custom'
+@use 'default'
+
+.container
+  background-color: custom.$container-background
+  padding: custom.$container-padding
+  min-width: custom.$container-min-width
+  max-width: custom.$container-max-width
+  min-height: custom.$container-min-height
+  max-height: custom.$container-max-height
+  border: custom.$container-border
+  box-shadow: custom.$container-box-shadow
+  border-radius: custom.$container-border-radius
+
+  display: flex
+  flex-direction: column
+  flex-wrap: nowrap
+  justify-content: center
+  align-items: center
+  align-content: flex-start
+  box-sizing: border-box

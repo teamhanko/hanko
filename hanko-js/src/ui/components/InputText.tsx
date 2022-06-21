@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { h } from "preact";
 import { useEffect, useRef } from "preact/compat";
 
-import styles from "./Input.module.css";
+import styles from "./Input.sass";
 
 interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
   label?: string;

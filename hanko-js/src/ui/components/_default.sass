@@ -1,0 +1,120 @@
+@use 'preset'
+@use 'sass:list'
+
+@function convert-hsl-color($variable, $default-hsl, $lightness-adjust: 0%)
+  $default-h: list.nth($default-hsl, 1)
+  $default-s: list.nth($default-hsl, 2)
+  $default-l: list.nth($default-hsl, 3)
+  @return #{"hsl(var(#{$variable}-h, #{$default-h}), var(#{$variable}-s, #{$default-s}), calc(var(#{$variable}-l, #{$default-l}) + #{$lightness-adjust}))"}
+
+// Default General Styles
+
+$font: var(--hanko-default-font, preset.$font)
+$color: convert-hsl-color(--hanko-default-color, preset.$color-hsl)
+$border-radius: var(--hanko-default-border-radius, preset.$border-radius)
+$input-height: var(--hanko-default-input-height, preset.$input-height)
+$item-margin: var(--hanko-default-item-margin, preset.$item-margin)
+
+// Default Lightness Adjust
+
+$lightness-adjust-dark: var(--hanko-default-lightness-adjust-dark, preset.$lightness-adjust-dark)
+$lightness-adjust-dark-light: var(--hanko-default-lightness-adjust-dark-light, preset.$lightness-adjust-dark-light)
+$lightness-adjust-light-dark: var(--hanko-default-lightness-adjust-light-dark, preset.$lightness-adjust-light-dark)
+$lightness-adjust-light: var(--hanko-default-lightness-adjust-light, preset.$lightness-adjust-light)
+
+// Default Container Styles
+
+$container-background: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl)
+$container-padding: preset.$container-padding
+$container-max-width: preset.$container-max-width
+$container-min-width: preset.$container-min-width
+$container-min-height: preset.$container-min-height
+$container-border-width: var(--hanko-default-border-width, preset.$border-width)
+$container-border-style: var(--hanko-default-border-style, preset.$border-style)
+$container-border: $container-border-width $container-border-style convert-hsl-color(--hanko-default-border-color, preset.$container-border-color-hsl)
+$container-border-radius: var(--hanko-default-border-radius, preset.$container-border-radius)
+$container-box-shadow: preset.$container-box-shadow
+
+// Default Text Input Styles
+
+$text-input-padding: preset.$text-input-padding
+$text-input-color: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$text-input-color-focus: convert-hsl-color(--hanko-default-color, preset.$color-hsl)
+$text-input-color-disable: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$text-input-border-width: var(--hanko-default-border-width, preset.$border-width)
+$text-input-border-style: var(--hanko-default-border-style, preset.$border-style)
+$text-input-border: $text-input-border-width $text-input-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light)
+$text-input-border-focus: $text-input-border-width $text-input-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl)
+$text-input-border-disable: $text-input-border-width $text-input-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light)
+$text-input-background: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl)
+$text-input-background-disable: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+
+// Default Primary Button Styles
+
+$primary-button-height: convert-hsl-color(--hanko-default-input-height, preset.$background-hsl)
+$primary-button-color: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl)
+$primary-button-color-focus: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+$primary-button-color-disable: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+$primary-button-border-width: var(--hanko-default-border-width, preset.$primary-button-border-width)
+$primary-button-border-style: var(--hanko-default-border-style, preset.$primary-button-border-style)
+$primary-button-border: $primary-button-border-width $primary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$primary-button-border-hover: $primary-button-border-width $primary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl)
+$primary-button-border-focus: $primary-button-border-width $primary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl)
+$primary-button-border-disable: $primary-button-border-width $primary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light)
+$primary-button-background: convert-hsl-color(--hanko-default-brand-color, preset.$brand-color-hsl)
+$primary-button-background-hover: convert-hsl-color(--hanko-default-brand-color, preset.$brand-color-hsl, $lightness-adjust-light-dark)
+$primary-button-background-focus: convert-hsl-color(--hanko-default-brand-color, preset.$brand-color-hsl)
+$primary-button-background-disable: convert-hsl-color(--hanko-default-brand-color, preset.$brand-color-hsl, $lightness-adjust-light)
+
+// Default Secondary Button Styles
+
+$secondary-button-color: convert-hsl-color(--hanko-default-color, preset.$color-hsl)
+$secondary-button-color-focus: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light)
+$secondary-button-color-disable: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$secondary-button-border-width: var(--hanko-default-border-width, preset.$border-width)
+$secondary-button-border-style: var(--hanko-default-border-style, preset.$border-style)
+$secondary-button-border: $secondary-button-border-width $secondary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light)
+$secondary-button-border-hover: $secondary-button-border-width $secondary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl)
+$secondary-button-border-focus: $secondary-button-border-width $secondary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$secondary-button-border-disable: $secondary-button-border-width $secondary-button-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light)
+$secondary-button-background: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl)
+$secondary-button-background-hover: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl, $lightness-adjust-dark-light)
+$secondary-button-background-focus: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl)
+$secondary-button-background-disable: convert-hsl-color(--hanko-default-background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+
+// Default Headline Styles
+
+$headline-font: var(--hanko-default-font, preset.$headline-font)
+$headline-display: preset.$headline-display
+$headline-margin: var(--hanko-default-item-margin, preset.$item-margin)
+
+// Default Divider Styles
+
+$divider-color: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$divider-padding: preset.$divider-padding
+$divider-border-width: var(--hanko-default-border-width, preset.$border-width)
+$divider-border-style: var(--hanko-default-border-style, preset.$border-style)
+$divider-border: $divider-border-width $divider-border-style convert-hsl-color(--hanko-default-border-color, preset.$color-hsl, $lightness-adjust-light)
+$divider-display: preset.$divider-display
+$divider-visibility: preset.$divider-visibility
+
+// Default Error Styles
+
+$error-font: var(--hanko-default-font, preset.$font)
+$error-color: convert-hsl-color(--hanko-default-error-color, preset.$error-color-hsl)
+$error-background: convert-hsl-color(--hanko-default-error-color, preset.$error-color-hsl, $lightness-adjust-light)
+$error-padding: preset.$error-padding
+$error-border-width: var(--hanko-default-border-width, preset.$border-width)
+$error-border-style: var(--hanko-default-border-style, preset.$border-style)
+$error-border: $error-border-width $error-border-style convert-hsl-color(--hanko-default-error-color, preset.$error-color-hsl)
+
+// Default Passcode Input Styles
+
+$passcode-input-space-between: preset.$passcode-input-space-between
+
+// Default Link Styles
+
+$link-color: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$link-color-disable: convert-hsl-color(--hanko-default-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$link-color-hover: convert-hsl-color(--hanko-default-color, preset.$color-hsl)
+$link-text-decoration: preset.$link-text-decoration

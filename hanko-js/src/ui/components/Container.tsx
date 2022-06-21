@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { useEffect, useRef } from "preact/compat";
 import { ComponentChildren } from "preact";
 
-import styles from "./Container.module.css";
+import styles from "./Container.sass";
 
 type Props = {
   emitSuccessEvent?: boolean;

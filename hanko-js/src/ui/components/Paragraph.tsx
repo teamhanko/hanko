@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import { ComponentChildren } from "preact";
 
-import styles from "./Paragraph.module.css";
+import styles from "./Paragraph.sass";
 
 type Props = {
   children: ComponentChildren;

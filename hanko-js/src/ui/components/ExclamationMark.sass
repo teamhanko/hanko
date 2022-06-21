@@ -1,0 +1,34 @@
+@use 'custom'
+
+.exclamationMark
+  width: 16px
+  height: 16px
+  position: relative
+  margin: 10px
+
+  .circle
+    box-sizing: border-box
+    display: inline-block
+    background-color: custom.$error-color
+    position: absolute
+    width: 16px
+    height: 16px
+    border-radius: 11px
+    left: 0
+    top: 0
+
+  .stem
+    position: absolute
+    width: 2px
+    height: 6px
+    background: custom.$error-background
+    left: 7px
+    top: 3px
+
+  .dot
+    position: absolute
+    width: 2px
+    height: 2px
+    background-color: custom.$error-background
+    left: 7px
+    top: 10px

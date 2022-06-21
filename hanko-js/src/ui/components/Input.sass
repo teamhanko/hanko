@@ -1,0 +1,80 @@
+@use 'custom'
+
+.inputWrapper
+  position: relative
+  margin: custom.$text-input-margin
+  display: flex
+  flex-grow: 1
+
+.label
+  font: custom.$text-input-font
+  position: absolute
+  left: 0
+  top: 50%
+  transform: translateY(-50%)
+  background: custom.$text-input-background
+  color: custom.$text-input-color
+  padding: 0 0.3rem
+  margin: 0 0.5rem
+  transition: 0.1s ease
+  transform-origin: left top
+  pointer-events: none
+
+.input
+  height: custom.$text-input-height
+  font: custom.$text-input-font
+  color: custom.$text-input-color
+  border: custom.$text-input-border
+  border-radius: custom.$text-input-border-radius
+  background: custom.$text-input-background
+  padding: custom.$text-input-padding
+  width: 100%
+  outline: none
+  box-sizing: border-box
+  transition: 0.1s ease-out
+
+  &:focus + .label
+    color: custom.$text-input-color-focus
+    top: 0
+    transform: translateY(-50%) scale(0.9) !important
+    opacity: 1
+    transition: opacity 1s
+    -webkit-transition: opacity 1s
+
+  &:not(:placeholder-shown) + .label
+    top: 0
+    transform: translateY(-50%) scale(0.9) !important
+
+  &:-webkit-autofill
+    -webkit-box-shadow: 0 0 0 50px custom.$text-input-background-focus inset
+
+    &::first-line
+      color: custom.$text-input-color-focus
+
+  // Removes native "clear text" and "password reveal" buttons from Edge
+  &::-ms-reveal, &::-ms-clear
+    display: none
+
+  &:focus
+    color: custom.$text-input-color-focus
+    border: custom.$text-input-border-focus
+
+  &:disabled
+    color: custom.$text-input-color-disable
+    background: custom.$text-input-background-disable
+    border: custom.$text-input-border-disable
+
+.passcodeInputWrapper
+  display: flex
+  justify-content: space-between
+  margin: custom.$text-input-margin
+
+.passcodeDigitWrapper
+  flex-grow: 1
+  margin: 0 custom.$passcode-input-space-between 0 0
+
+  &:last-child
+    margin: 0
+
+  input
+    text-align: center

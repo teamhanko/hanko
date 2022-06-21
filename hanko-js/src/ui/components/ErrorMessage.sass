@@ -1,0 +1,17 @@
+@use 'custom'
+
+.errorMessage
+  font: custom.$error-font
+  color: custom.$error-color
+  background: custom.$error-background
+  border: custom.$error-border
+  border-radius: custom.$error-border-radius
+  padding: custom.$error-padding
+  margin: custom.$error-margin
+
+  display: flex
+  align-items: center
+  box-sizing: border-box
+
+  &[hidden]
+    display: none

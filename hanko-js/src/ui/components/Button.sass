@@ -1,0 +1,53 @@
+@use 'custom'
+
+.button
+    flex-grow: 1
+    outline: none
+
+    &.primary
+      font: custom.$primary-button-font
+      color: custom.$primary-button-color
+      background: custom.$primary-button-background
+      border: custom.$primary-button-border
+      border-radius: custom.$primary-button-border-radius
+      height: custom.$primary-button-height
+      margin: custom.$primary-button-margin
+
+    &.primary:hover
+      color: custom.$primary-button-color-hover
+      background: custom.$primary-button-background-hover
+      border: custom.$primary-button-border-hover
+
+    &.primary:focus
+      color: custom.$primary-button-color-focus
+      background: custom.$primary-button-background-focus
+      border: custom.$primary-button-border-focus
+
+    &.primary:disabled
+      color: custom.$primary-button-color-disable
+      background: custom.$primary-button-background-disable
+      border: custom.$primary-button-border-disable
+
+    &.secondary
+      font: custom.$secondary-button-font
+      color: custom.$secondary-button-color
+      background: custom.$secondary-button-background
+      border: custom.$secondary-button-border
+      border-radius: custom.$secondary-button-border-radius
+      height: custom.$secondary-button-height
+      margin: custom.$secondary-button-margin
+
+    &.secondary:hover
+      color: custom.$secondary-button-color-hover
+      background: custom.$secondary-button-background-hover
+      border: custom.$secondary-button-border-hover
+
+    &.secondary:focus
+      color: custom.$secondary-button-color-focus
+      background: custom.$secondary-button-background-focus
+      border: custom.$secondary-button-border-focus
+
+    &.secondary:disabled
+      color: custom.$secondary-button-color-disable
+      background: custom.$secondary-button-background-disable
+      border: custom.$secondary-button-border-disable
