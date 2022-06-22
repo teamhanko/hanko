@@ -5,15 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Hanko Web Component Test</title>
     <script type="text/javascript" src="http://localhost:9500/element.hanko-auth.js"></script>
-    <script>
-        document.addEventListener("onSuccess", (event) => {
-            console.log(event);
-            document.location.href = "/secured"
-        })
-    </script>
 </head>
 <body>
 <hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
+<script>
+    const hanko = document.querySelector("hanko-auth");
+
+    hanko.addEventListener("success", (event) => {
+        console.log(event);
+        document.location.href = "/secured"
+    })
+</script>
 </body>
 </html>
 
