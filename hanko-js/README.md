@@ -76,7 +76,7 @@ verification via passcodes and the registration of a passkey so that the user ca
 
 ## CSS Variables
 
-CSS variables can be used to style the `hanko-auth` element to your needs. Without any variables set the UI is styled
+CSS variables can be used to style the `hanko-auth` element to your needs. Without any variables set, the UI is styled
 already (take a look at the animation above). From here you can start modifying `--default` variables which will
 override the preset values. If you like to customize the user interface even more, or set the exact property values for
 certain element types, take a look at the custom element variables.
@@ -179,13 +179,22 @@ hanko-auth {
     --primary-button-background-disable
     --primary-button-background-focus
     --primary-button-background-hover
-    --primary-button-border
-    --primary-button-border-disable
-    --primary-button-border-focus
-    --primary-button-border-hover
+    --primary-button-border-width
+    --primary-button-border-color
+    --primary-button-border-color-disabled
+    --primary-button-border-color-focus
+    --primary-button-border-color-hover
+    --primary-button-border-style
+    --primary-button-border-style-disbled
+    --primary-button-border-style-focus
+    --primary-button-border-style-hover
+    --primary-button-border-width
+    --primary-button-border-width-disabled
+    --primary-button-border-width-focus
+    --primary-button-border-width-hover
     --primary-button-border-radius
     --primary-button-color
-    --primary-button-color-disable
+    --primary-button-color-disabled
     --primary-button-color-focus
     --primary-button-color-hover
     --primary-button-font
@@ -196,10 +205,18 @@ hanko-auth {
     --secondary-button-background-disable
     --secondary-button-background-focus
     --secondary-button-background-hover
-    --secondary-button-border
-    --secondary-button-border-disable
-    --secondary-button-border-focus
-    --secondary-button-border-hover
+    --secondary-button-border-color
+    --secondary-button-border-color-disabled
+    --secondary-button-border-color-focus
+    --secondary-button-border-color-hover
+    --secondary-button-border-style
+    --secondary-button-border-style-disbled
+    --secondary-button-border-style-focus
+    --secondary-button-border-style-hover
+    --secondary-button-border-width
+    --secondary-button-border-width-disabled
+    --secondary-button-border-width-focus
+    --secondary-button-border-width-hover
     --secondary-button-border-radius
     --secondary-button-color
     --secondary-button-color-disable
@@ -210,14 +227,20 @@ hanko-auth {
     --secondary-button-margin
 
     --text-input-background
-    --text-input-background-disable
+    --text-input-background-disabled
     --text-input-background-focus
-    --text-input-border
-    --text-input-border-disable
-    --text-input-border-focus
+    --text-input-border-color
+    --text-input-border-color-disabled
+    --text-input-border-color-focus
+    --text-input-border-style
+    --text-input-border-style-disabled
+    --text-input-border-style-focus
+    --text-input-border-width
+    --text-input-border-width-disabled
+    --text-input-border-width-focus
     --text-input-border-radius
     --text-input-color
-    --text-input-color-disable
+    --text-input-color-disabled
     --text-input-color-focus
     --text-input-font
     --text-input-height
@@ -245,7 +268,6 @@ hanko-auth {
   --default-border-width: 2px;
 
   --default-font: 400 16px Helvetica;
-  --default-lightness-adjust-dark-light: 20%;
 
   --headline-font: 800 24px Helvetica;
   --headline-color: hsl(33, 93%, 55%);

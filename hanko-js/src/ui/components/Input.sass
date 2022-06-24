@@ -8,12 +8,13 @@
 
 .label
   font: custom.$text-input-font
+  background: custom.$text-input-background
+  color: custom.$text-input-color
+
   position: absolute
   left: 0
   top: 50%
   transform: translateY(-50%)
-  background: custom.$text-input-background
-  color: custom.$text-input-color
   padding: 0 0.3rem
   margin: 0 0.5rem
   transition: 0.1s ease
@@ -24,10 +25,13 @@
   height: custom.$text-input-height
   font: custom.$text-input-font
   color: custom.$text-input-color
-  border: custom.$text-input-border
+  border-style: custom.$text-input-border-style
+  border-width: custom.$text-input-border-width
+  border-color: custom.$text-input-border-color
   border-radius: custom.$text-input-border-radius
   background: custom.$text-input-background
   padding: custom.$text-input-padding
+
   width: 100%
   outline: none
   box-sizing: border-box
@@ -57,12 +61,16 @@
 
   &:focus
     color: custom.$text-input-color-focus
-    border: custom.$text-input-border-focus
+    border-style: custom.$text-input-border-style-focus
+    border-width: custom.$text-input-border-width-focus
+    border-color: custom.$text-input-border-color-focus
 
   &:disabled
     color: custom.$text-input-color-disabled
     background: custom.$text-input-background-disabled
-    border: custom.$text-input-border-disabled
+    border-style: custom.$text-input-border-style-disabled
+    border-width: custom.$text-input-border-width-disabled
+    border-color: custom.$text-input-border-color-disabled
 
 .passcodeInputWrapper
   display: flex
