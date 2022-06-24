@@ -30,7 +30,6 @@ const linkWithLoadingIndicator = <
         <LoadingIndicator
           isLoading={props.isLoading}
           isSuccess={props.isSuccess}
-          useSecondaryStyles
           fadeOut
         />
         <LinkComponent {...props} />
