@@ -43,11 +43,7 @@ const Button = ({
         useSecondaryStyles ? styles.secondary : styles.primary
       )}
     >
-      <LoadingIndicator
-        isLoading={isLoading}
-        isSuccess={isSuccess}
-        useSecondaryStyles={useSecondaryStyles}
-      >
+      <LoadingIndicator isLoading={isLoading} isSuccess={isSuccess}>
         {children}
       </LoadingIndicator>
     </button>
