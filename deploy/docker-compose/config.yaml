@@ -28,3 +28,6 @@ webauthn:
 session:
   cookie:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
+registration:
+  email_verification:
+    enabled: false

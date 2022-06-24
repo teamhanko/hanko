@@ -9,6 +9,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
@@ -18,6 +19,12 @@ import (
 	"testing"
 	"time"
 )
+
+var defaultRegistrationConfig = config.Registration{
+	EmailVerification: config.EmailVerification{
+		Enabled: true,
+	},
+}
 
 func TestUserHandler_Create(t *testing.T) {
 	userId, _ := uuid.NewV4()
@@ -44,7 +51,7 @@ func TestUserHandler_Create(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	if assert.NoError(t, handler.Create(c)) {
 		user := models.User{}
@@ -79,7 +86,7 @@ func TestUserHandler_Create_UserExists(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	err = handler.Create(c)
 	if assert.Error(t, err) {
@@ -98,7 +105,7 @@ func TestUserHandler_Create_InvalidEmail(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	err := handler.Create(c)
 	if assert.Error(t, err) {
@@ -117,7 +124,7 @@ func TestUserHandler_Create_EmailMissing(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	err := handler.Create(c)
 	if assert.Error(t, err) {
@@ -153,7 +160,7 @@ func TestUserHandler_Get(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	if assert.NoError(t, handler.Get(c)) {
 		assert.Equal(t, rec.Code, http.StatusOK)
@@ -203,7 +210,7 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	if assert.NoError(t, handler.Get(c)) {
 		assert.Equal(t, rec.Code, http.StatusOK)
@@ -228,7 +235,7 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	err = handler.Get(c)
 	if assert.Error(t, err) {
@@ -246,7 +253,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
@@ -263,7 +270,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	assert.Error(t, handler.GetUserIdByEmail(c))
 }
@@ -277,7 +284,7 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
@@ -304,7 +311,7 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -334,7 +341,7 @@ func TestUserHandler_Me(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p)
+	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	if assert.NoError(t, handler.Me(c)) {
 		assert.Equal(t, http.StatusTemporaryRedirect, rec.Code)

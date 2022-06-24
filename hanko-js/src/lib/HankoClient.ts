@@ -34,6 +34,7 @@ export interface PasswordConfig {
 
 export interface Config {
   password: PasswordConfig;
+  email_verification_enabled: boolean;
 }
 
 export interface WebauthnFinalized {

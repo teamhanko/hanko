@@ -14,14 +14,15 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server   Server
-	Webauthn WebauthnSettings
-	Passcode Passcode
-	Password Password
-	Database Database
-	Secrets  Secrets
-	Service  Service
-	Session  Session
+	Server       Server
+	Webauthn     WebauthnSettings
+	Passcode     Passcode
+	Password     Password
+	Database     Database
+	Secrets      Secrets
+	Service      Service
+	Session      Session
+	Registration Registration
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -90,6 +91,11 @@ func defaultConfig() *Config {
 				HttpOnly: true,
 				SameSite: "strict",
 				Secure:   true,
+			},
+		},
+		Registration: Registration{
+			EmailVerification: EmailVerification{
+				Enabled: true,
 			},
 		},
 	}
@@ -314,4 +320,12 @@ func (s *Session) Validate() error {
 		return errors.New("failed to parse lifespan")
 	}
 	return nil
+}
+
+type Registration struct {
+	EmailVerification EmailVerification `koanf:"email_verification"`
+}
+
+type EmailVerification struct {
+	Enabled bool
 }

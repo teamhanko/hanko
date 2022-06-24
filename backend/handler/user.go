@@ -7,18 +7,26 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
 )
 
 type UserHandler struct {
-	persister persistence.Persister
+	persister      persistence.Persister
+	sessionManager session.Manager
+	cfg            config.Registration
 }
 
-func NewUserHandler(persister persistence.Persister) *UserHandler {
-	return &UserHandler{persister: persister}
+func NewUserHandler(cfg config.Registration, persister persistence.Persister, sessionManager session.Manager) *UserHandler {
+	return &UserHandler{
+		persister:      persister,
+		sessionManager: sessionManager,
+		cfg: cfg,
+	}
 }
 
 type UserCreateBody struct {
@@ -49,6 +57,14 @@ func (h *UserHandler) Create(c echo.Context) error {
 		err = h.persister.GetUserPersisterWithConnection(tx).Create(newUser)
 		if err != nil {
 			return fmt.Errorf("failed to store user: %w", err)
+		}
+
+		if !h.cfg.EmailVerification.Enabled {
+			cookie, err := h.sessionManager.GenerateCookie(newUser.ID)
+			if err != nil {
+				return fmt.Errorf("failed to create session token: %w", err)
+			}
+			c.SetCookie(cookie)
 		}
 
 		return c.JSON(http.StatusOK, newUser)
