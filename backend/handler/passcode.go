@@ -182,7 +182,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
-			return dto.NewHTTPError(http.StatusUnauthorized)
+			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
 		}
 
 		err = passcodePersister.Delete(*passcode)
