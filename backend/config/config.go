@@ -48,7 +48,7 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to load config from env vars")
 	}
 
-	c := defaultConfig()
+	c := DefaultConfig()
 	err = k.Unmarshal("", c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
@@ -57,7 +57,7 @@ func Load(cfgFile *string) (*Config, error) {
 	return c, nil
 }
 
-func defaultConfig() *Config {
+func DefaultConfig() *Config {
 	return &Config{
 		Server: Server{
 			Public: ServerSettings{
