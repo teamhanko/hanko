@@ -157,14 +157,14 @@ func (s *Service) Validate() error {
 }
 
 type Password struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool
 }
 
 type Cookie struct {
 	Domain   string
-	HttpOnly bool   `koanf:"http_only"`
-	SameSite string `koanf:"same_site"`
-	Secure   bool   `koanf:"secure"`
+	HttpOnly bool   `koanf:"http_only" yaml:"http_only"`
+	SameSite string `koanf:"same_site" yaml:"same_site"`
+	Secure   bool
 }
 
 type ServerSettings struct {
@@ -176,12 +176,12 @@ type ServerSettings struct {
 
 type Cors struct {
 	Enabled          bool
-	AllowCredentials bool     `koanf:"allow_credentials"`
-	AllowOrigins     []string `koanf:"allow_origins"`
-	AllowMethods     []string `koanf:"allow_methods"`
-	AllowHeaders     []string `koanf:"allow_headers"`
-	ExposeHeaders    []string `koanf:"expose_headers"`
-	MaxAge           int      `koanf:"max_age"`
+	AllowCredentials bool     `koanf:"allow_credentials" yaml:"allow_credentials"`
+	AllowOrigins     []string `koanf:"allow_origins" yaml:"allow_origins"`
+	AllowMethods     []string `koanf:"allow_methods" yaml:"allow_methods"`
+	AllowHeaders     []string `koanf:"allow_headers" yaml:"allow_headers"`
+	ExposeHeaders    []string `koanf:"expose_headers" yaml:"expose_headers"`
+	MaxAge           int      `koanf:"max_age" yaml:"max_age"`
 }
 
 func (s *ServerSettings) Validate() error {
@@ -193,7 +193,7 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty RelyingParty `koanf:"relying_party"`
+	RelyingParty RelyingParty `koanf:"relying_party" yaml:"relying_party"`
 	Timeout      int
 }
 
@@ -205,7 +205,7 @@ func (r *WebauthnSettings) Validate() error {
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
 	Id          string
-	DisplayName string `koanf:"display_name"`
+	DisplayName string `koanf:"display_name" yaml:"display_name"`
 	Icon        string
 	Origin      string
 }
@@ -229,8 +229,8 @@ func (s *SMTP) Validate() error {
 }
 
 type Email struct {
-	FromAddress string `koanf:"from_address"`
-	FromName    string `koanf:"from_name"`
+	FromAddress string `koanf:"from_address" yaml:"from_address"`
+	FromName    string `koanf:"from_name" yaml:"from_name"`
 }
 
 func (e *Email) Validate() error {
@@ -260,12 +260,12 @@ func (p *Passcode) Validate() error {
 
 // Database connection settings
 type Database struct {
-	Database string `json:"database"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Dialect  string `json:"dialect"`
+	Database string
+	User     string
+	Password string
+	Host     string
+	Port     string
+	Dialect  string
 }
 
 func (d *Database) Validate() error {
@@ -293,7 +293,7 @@ type Secrets struct {
 	// The first key in the list is the one getting used for signing. If you want to use a new key, add it to the top of the list.
 	// You can use this list for key rotation.
 	// Each key must be at least 16 characters long.
-	Keys []string `json:"keys"`
+	Keys []string
 }
 
 func (s *Secrets) Validate() error {
