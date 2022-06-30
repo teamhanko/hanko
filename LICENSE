@@ -1,3 +1,9 @@
+Portions of this software are licensed as follows:
+
+* All content that resides under "hanko-js" (https://github.com/teamhanko/hanko/tree/main/hanko-js) directory of this repository is licensed under the license defined in "hanko-js/LICENSE"
+* All third party components incorporated into hanko Software are licensed under the original license provided by the owner of the applicable component.
+* Content outside of the above mentioned directories or restrictions above is available under the "AGPLv3" license as defined below.
+
                     GNU AFFERO GENERAL PUBLIC LICENSE
                        Version 3, 19 November 2007
 

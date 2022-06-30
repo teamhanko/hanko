@@ -73,4 +73,4 @@ smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) 
 > **Note**: Services are not published to a registry yet and will be built locally before the services are started.
 
 # Licenses
-The [hanko backend](backend) is licensed under the [AGPL-3.0](backend/LICENSE) whereas the [hanko element](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE).
+The [hanko element](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE). Everything else in this repository, including the [hanko backend](backend) is licensed under the [AGPL-3.0](backend/LICENSE).
