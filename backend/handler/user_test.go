@@ -281,7 +281,8 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
-		assert.Equal(t, http.StatusText(http.StatusNotFound), err.Error())
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusNotFound, httpError.Code)
 	}
 }
 

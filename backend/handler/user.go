@@ -73,7 +73,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound)
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -99,7 +99,7 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound)
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	return c.JSON(http.StatusOK, struct {
