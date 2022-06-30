@@ -98,3 +98,6 @@ webauthn:
 ## API specification
 
 The API specification can be found [here](https://teamhanko.github.io/hanko/).
+
+## License
+The hanko backend ist licensed under the [AGPL-3.0](LICENSE).
