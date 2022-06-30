@@ -1,47 +1,52 @@
 # &lt;hanko-auth&gt; element
 
 The `<hanko-auth>` element offers a complete user interface that will bring a modern login and registration experience
-to your users. It integrates the [Hanko API](../backend/README.md), a backend that provides the underlying
-functionalities.
+to your users. It integrates the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md), a backend
+that provides the underlying functionalities.
 
 ## Features
 
 * Registration and login flows with and without passwords
 * Passkey authentication
 * Passcodes, a convenient way to recover passwords and verify email addresses
-* Language support for English and German
 * Customizable UI
-
-## Upcoming Features
-
-* Support for Security Keys
-* Exponential backoff mechanisms
-* Testing and code documentation
 
 ## Installation
 
-_WiP_
+```shell
+# npm
+npm install @teamhanko/hanko-elements
+
+# yarn
+yarn add @teamhanko/hanko-elements
+
+# pnpm
+pnpm install @teamhanko/hanko-elements
+```
 
 ## Usage
 
 ### Script
 
-Import as a modules:
+Import as a module:
 
-_WiP_
+```typescript
+import "@teamhanko/hanko-elements/hanko-auth"
+```
 
 With a script tag via CDN:
 
-_WiP_
+```html
+<script type="module" src="https://unpkg.com/hanko-elements/dist/element.hanko-auth.js">
+```
 
 ### Markup
 
 ```html
-
 <hanko-auth api="https://hanko.yourdomain.com" lang="en"/>
 ```
 
-Please take a look at the [Hanko API](../backend/README.md) to see how to spin up the backend.
+Please take a look at the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) to see how to spin up the backend.
 
 Note that we're working on Hanko Cloud, so that you don't need to run the Hanko API by yourself and all you need is to
 do is adding the `<hanko-auth>` element to your page.
@@ -69,10 +74,10 @@ hanko.addEventListener('success', () => {
 ## Demo
 
 The animation below demonstrates how user registration with passwords enabled looks like. You can set up the flow you
-like using the [Hanko API](../backend/README.md) configuration file. The registration flow also includes email
+like using the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) configuration file. The registration flow also includes email
 verification via passcodes and the registration of a passkey so that the user can log in without passwords or passcodes.
 
-![](demo.gif)
+<img src="https://github.com/teamhanko/hanko/raw/main/hanko-js/demo.gif" width="410"/>
 
 ## UI Customization
 
@@ -139,18 +144,19 @@ with your own styles.
 
 The following parts are available:
 
-- `container` the UI container
-- `button` every button element
-- `primary-button` the primary button
-- `secondary-button` the secondary button on the email login page
-- `input` every input field
-- `text-input` every input field not used for passcodes
-- `passcode-input` the passcode input fields
+- `container` - the UI container
+- `button` - every button element
+- `primary-button` - the primary button
+- `secondary-button` - the secondary button on the email login page
+- `input` - every input field
+- `text-input` - every input field not used for passcodes
+- `paragraph` - the paragraph elements
+- `passcode-input` - the passcode input fields
 - `link` - the links in the footer section
-- `error` the error message container
-- `error-text` the error message
-- `divider` the horizontal divider on the login page
-- `divider-text` the divider text
+- `error` - the error message container
+- `error-text` - the error message
+- `divider` - the horizontal divider on the login page
+- `divider-text` - the divider text
 
 ### Example
 
@@ -181,35 +187,43 @@ hanko-auth {
   --item-margin: 10px;
 
   --container-min-height: 0;
+  --container-min-width: 350px;
+  --container-max-width: 450px;
   --container-padding: 10px 20px;
 
   --headline-font-weight: 800;
   --headline-font-size: 24px;
 
-  --lightness-adjust-dark: 15%;
+  --lightness-adjust-dark: 30%;
   --lightness-adjust-dark-light: 10%;
-  --lightness-adjust-light: -5%;
-  --lightness-adjust-light-dark: -10%;
+  --lightness-adjust-light: -10%;
+  --lightness-adjust-light-dark: 30%;
 }
 
 hanko-auth::part(headline) {
-  color: hsl(33, 93%, 55%)
+  color: hsl(33, 93%, 55%);
 }
 
-hanko-auth::part(button):disabled {
-  background-color: hsl(196, 10%, 30%);
+hanko-auth::part(input) {
+  color: hsl(33, 93%, 55%);
+}
+
+hanko-auth::part(input)::first-line {
+  color: hsl(33, 93%, 45%);
+}
+
+hanko-auth::part(link) {
+  color: hsl(33, 93%, 55%);
 }
 
 hanko-auth::part(link):hover {
   text-decoration: underline;
 }
-
 ```
 
 Result:
 
-![](demo-css.png)
-
+<img src="https://github.com/teamhanko/hanko/raw/main/hanko-js/demo-ui.png" width="450"/>
 
 ## Browser support
 
@@ -218,6 +232,16 @@ Result:
 - Safari
 - Microsoft Edge
 
+## Bugs
+
+- Customizable UI: In Chrome the `::part` selector is not working in combination with some pseudo classes.
+E.g. `:disabled` is currently broken. See:
+[chromium-issue-#1131396](https://bugs.chromium.org/p/chromium/issues/detail?id=1131396),
+[chromium-issue-#953648](https://bugs.chromium.org/p/chromium/issues/detail?id=953648)
+
+Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
+
 ## License
 
-The hanko-auth element is licensed under the [MIT License](LICENSE).
+The `hanko-js` project is licensed under the [MIT License](LICENSE).
+

@@ -1,29 +1,38 @@
 {
-  "name": "@teamhanko/hanko",
-  "version": "0.1.0",
+  "name": "@teamhanko/hanko-elements",
+  "version": "0.0.2-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "module",
-  "typings": "./index.d.ts",
   "files": [
-    "dist"
+    "dist/element.hanko-auth.js",
+    "dist/ui/HankoAuth.d.ts"
   ],
-  "scripts": {
+  "browser": {
+    "./hanko-auth": "./dist/element.hanko-auth.js"
+  },
+  "typesVersions": {
+    "*": {
+      "hanko-auth": [
+        "dist/ui/HankoAuth.d.ts"
+      ]
+    }
+   },
+    "scripts": {
     "lint": "eslint 'src/**/*.ts?(x)'",
     "format": "pretty-quick --staged",
     "build": "npx webpack --mode=production",
     "build:dev": "npx webpack --mode=development"
   },
-  "description": "",
+  "description": "The <hanko-auth> element offers a complete user interface that will bring a modern login and registration experience to your users.",
   "repository": "github:teamhanko/hanko",
   "author": "Hanko GmbH <developers@hanko.io>",
   "license": "MIT",
-  "keywords": [],
+  "keywords": ["hanko", "passkey", "webauthn", "passcode", "password", "login", "register"],
+  "homepage": "https://hanko.io",
   "devDependencies": {
     "@types/preact-custom-element": "^4.0.1",
     "@typescript-eslint/eslint-plugin": "^5.16.0",

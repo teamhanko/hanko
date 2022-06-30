@@ -33,23 +33,33 @@
             --item-margin: 10px;
 
             --container-min-height: 0;
+            --container-min-width: 350px;
+            --container-max-width: 450px;
             --container-padding: 10px 20px;
 
             --headline-font-weight: 800;
             --headline-font-size: 24px;
 
-            --lightness-adjust-dark: 15%;
+            --lightness-adjust-dark: 30%;
             --lightness-adjust-dark-light: 10%;
-            --lightness-adjust-light: -5%;
-            --lightness-adjust-light-dark: -10%;
+            --lightness-adjust-light: -10%;
+            --lightness-adjust-light-dark: 30%;
         }
 
         hanko-auth::part(headline) {
-            color: hsl(33, 93%, 55%)
+            color: hsl(33, 93%, 55%);
         }
 
-        hanko-auth::part(button):disabled {
-            background-color: hsl(196, 10%, 30%);
+        hanko-auth::part(input) {
+            color: hsl(33, 93%, 55%);
+        }
+
+        hanko-auth::part(input)::first-line {
+            color: hsl(33, 93%, 45%);
+        }
+
+        hanko-auth::part(link) {
+            color: hsl(33, 93%, 55%);
         }
 
         hanko-auth::part(link):hover {
