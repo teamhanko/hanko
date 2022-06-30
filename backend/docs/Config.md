@@ -1,7 +1,7 @@
-# Config options
+# Hanko backend config
 
-All config options with default values and allowed values are documented below. For some options there is an extra
-section which shows how you can determine the values for those options.
+All config parameters with their default and allowed values are documented here. For some options there is an extra
+section with more detailed instructions below.
 
 ## All available config options
 
