@@ -79,6 +79,6 @@ verification via passcodes and the registration of a passkey so that the user ca
 - Safari
 - Microsoft Edge
 
-# License
+## License
 
-The hanko-auth element is licensed under the [MIT License](LICENSE)
+The hanko-auth element is licensed under the [MIT License](LICENSE).

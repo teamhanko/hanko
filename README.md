@@ -71,3 +71,6 @@ After the services are up and running, the example login can be opened at `local
 smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
 
 > **Note**: Services are not published to a registry yet and will be built locally before the services are started.
+
+# Licenses
+The [hanko backend](backend) is licensed under the [AGPL-3.0](backend/LICENSE) whereas the [hanko element](hanko-js) is licensed under the [MIT License](LICENSE).
