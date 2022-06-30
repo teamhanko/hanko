@@ -1,57 +1,53 @@
 # Hanko backend
 
-The Hanko API offers a set of functions to create a modern login and registration experience to your users. It works
-well with the [<hanko-auth> element](../hanko-js/README.md), a web component that can be integrated in your Web App and
-provides a modern login and registration UI.
+The Hanko backend provides public and private APIs that offer a set of functions to create a modern login and registration experience for your users. Hanko backend works well with [`<hanko-auth>`](../hanko-js/README.md), a web component that can easily be integrated in any web app and provides ready-to-use login and registration UI flows.
 
-## Features
+## API features
 
-- passcodes
-- web authentication (passkeys)
-- passwords
-- email verification
+- Passkeys (WebAuthn)
+- Passcodes
+- Passwords
+- Email verification
 
 ## Upcoming features
 
-- backoff mechanisms
-- more testing and code documentation
+- Backoff mechanisms
+- More tests and code documentation
 
-## Basic Usage
+## Basic usage
 
-The easiest way to start the service is through docker. But before we can do that, we need to create a config file.
+The easiest way to start Hanko backend service is through docker. But before we can do that, we need to create a config file.
 
-> If you only want to feel the experience of passkeys and passcodes head over [here](../README.md#Quickstart).
+> **Note** If you just want to jump right into the experience of passkeys and passcodes, head over to the [quickstart guide](../README.md#Quickstart).
 
 ### Config
 
-Create a file with the name `config.yaml` and paste the config from below. Fill out the params marked
-with `<PLEASE-CHANGE-ME>`and if you have access to an SMTP server fill out the corresponding params with the information
-of your SMTP server.
+Create a file with the name `config.yaml` and paste the config from below. Fill out the parameters marked with `<CHANGE-ME>` and, if you have access to an SMTP server, fill out the corresponding parameters with the information of your SMTP server.
 
 ```yaml
 database:
-  user: <PLEASE-CHANGE-ME>
-  password: <PLEASE-CHANGE-ME>
-  host: <PLEASE-CHANGE-ME>
-  port: <PLEASE-CHANGE-ME>
+  user: <CHANGE-ME>
+  password: <CHANGE-ME>
+  host: <CHANGE-ME>
+  port: <CHANGE-ME>
   dialect: postgres
 passcode:
   email:
     from_address: no-reply@next-unicorn.io
   smtp:
-    host: <PLEASE-CHANGE-ME>
-    user: <PLEASE-CHANGE-ME>
-    password: <PLEASE-CHANGE-ME>
+    host: <CHANGE-ME>
+    user: <CHANGE-ME>
+    password: <CHANGE-ME>
 secrets:
   keys:
-    - <PLEASE-CHANGE-ME>
+    - <CHANGE-ME>
 service:
-  name: Next-Unicorn Authentication Service
+  name: Next Unicorn Authentication Service
 ```
 
 > **Note** You need to change the smtp config to start the service. You can enter any host, user and password,
-> they will not be checked at startup for correctness. But be aware, if they are incorrect, that no emails will be sent
-> and you and your users might not be able to login.
+> they will not be checked for correctness at startup. But be aware that no emails will be sent
+> and your users might not be able to login if no valid smtp server is set up.
 
 > **Note** `secrets.keys` must be a random generated string at least 16 characters long.
 
@@ -83,13 +79,13 @@ The service is now available at `localhost:8000`.
 
 #### Building
 
-To build the Hanko API you only need to have [go installed](https://go.dev/doc/install) on your computer.
+To build the Hanko backend you only need to have [go installed](https://go.dev/doc/install) installed on your computer.
 
 ```shell
 go build -a -o hanko main.go
 ```
 
-This command will create an executable with the name `hanko`, which then can be used to start the Hanko API.
+This command will create an executable with the name `hanko`, which then can be used to start the Hanko backend.
 
 #### Database migrations
 
@@ -128,24 +124,24 @@ Use this command to start the public and private API together:
 serve all
 ````
 
-> **Warning** The private API must be protected by an access management.
+> **Warning** The private API must be protected by an access management system.
 
 ### Supported Databases
 
-Currently we support following Databases:
+Currently we support the following databases:
 - CockroachDB
 - MariaDB
 - MySQL
 - PostgreSQL
 
-### Configuration
-
-All available configuration params can be found [here](./docs/Config.md).
-
 ### Rate Limiting
 
-The Hanko service does not implement rate limiting in any way. So in production you want to hide the Hanko service
-behind a proxy or gateway (e.g. kong, traeffik) which implements rate limiting.
+The Hanko service does not implement rate limiting in any way. In production systems, you want to hide the Hanko service
+behind a proxy or gateway (e.g. kong, traeffik) that implements rate limiting.
+
+### Configuration
+
+All available configuration parameters can be found [here](./docs/Config.md).
 
 ## API specification
 
