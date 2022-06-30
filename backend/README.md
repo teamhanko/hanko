@@ -49,11 +49,11 @@ service:
   name: Next-Unicorn Authentication Service
 ```
 
-> **Note:** You need to change the smtp config to start the service. You can enter any host, user and password,
+> **Note** You need to change the smtp config to start the service. You can enter any host, user and password,
 > they will not be checked at startup for correctness. But be aware, if they are incorrect, that no emails will be sent
 > and you and your users might not be able to login.
 
-> **Note:** `secrets.keys` must be a random generated string at least 16 characters long.
+> **Note** `secrets.keys` must be a random generated string at least 16 characters long.
 
 ### Docker
 
@@ -65,7 +65,7 @@ Before you can start and use the service you need to run the database migrations
 docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:main migrate up
 ```
 
-> **Note:** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
 
 #### Start the service
 
@@ -75,7 +75,7 @@ To start the service just run:
 docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:main serve public
 ```
 
-> **Note:** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
 
 The service is now available at `localhost:8000`.
 
@@ -99,7 +99,7 @@ Before you can start and use the service you need to run the database migrations
 ./hanko migrate up --config <PATH-TO-CONFIG-FILE>
 ```
 
-> **Note:** The path to the config file can be relative or absolute.
+> **Note** The path to the config file can be relative or absolute.
 
 #### Start the service
 
@@ -128,7 +128,15 @@ Use this command to start the public and private API together:
 serve all
 ````
 
-> :warning: The private API must be protected by an access management.
+> **Warning** The private API must be protected by an access management.
+
+### Supported Databases
+
+Currently we support following Databases:
+- CockroachDB
+- MariaDB
+- MySQL
+- PostgreSQL
 
 ### Configuration
 
