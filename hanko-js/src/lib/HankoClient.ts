@@ -261,7 +261,7 @@ class WebauthnClient extends AbstractClient {
         .then((response) => {
           if (response.ok) {
             return response.json();
-          } else if (response.status === 400) {
+          } else if (response.status === 400 || response.status === 401) {
             throw new InvalidWebauthnCredentialError();
           } else {
             throw new TechnicalError();

@@ -161,7 +161,7 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 	err = handler.FinishAuthentication(c2)
 	if assert.Error(t, err) {
 		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
 	}
 }

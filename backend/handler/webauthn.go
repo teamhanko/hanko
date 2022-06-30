@@ -196,7 +196,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		if sessionData == nil {
-			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
+			return dto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		webauthnUser, err := h.getWebauthnUser(tx, userId)
@@ -205,7 +205,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		if webauthnUser == nil {
-			return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
+			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 		}
 
 		model := intern.WebauthnSessionDataFromModel(sessionData)
