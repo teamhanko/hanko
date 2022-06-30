@@ -24,6 +24,8 @@ The easiest way to start Hanko backend service is through docker. But before we 
 
 Create a file with the name `config.yaml` and paste the config from below. Fill out the parameters marked with `<CHANGE-ME>` and, if you have access to an SMTP server, fill out the corresponding parameters with the information of your SMTP server.
 
+If you don't know how to fill the webauthn config, see [here](./docs/Config.md#web-authentication).
+
 ```yaml
 database:
   user: <CHANGE-ME>
@@ -43,6 +45,11 @@ secrets:
     - <CHANGE-ME>
 service:
   name: Next Unicorn Authentication Service
+webauthn:
+  relying_party:
+    id: <CHANGE-ME>
+    display_name: <CHANGE-ME>
+    origin: <CHANGE-ME>
 ```
 
 > **Note** You need to change the smtp config to start the service. You can enter any host, user and password,
