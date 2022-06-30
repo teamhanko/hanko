@@ -7,21 +7,28 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
+	"unicode/utf8"
 )
 
 type PasswordHandler struct {
 	persister      persistence.Persister
 	sessionManager session.Manager
+	cfg            config.Password
 }
 
-func NewPasswordHandler(persister persistence.Persister, sessionManager session.Manager) *PasswordHandler {
-	return &PasswordHandler{persister: persister, sessionManager: sessionManager}
+func NewPasswordHandler(persister persistence.Persister, sessionManager session.Manager, cfg config.Password) *PasswordHandler {
+	return &PasswordHandler{
+		persister:      persister,
+		sessionManager: sessionManager,
+		cfg:            cfg,
+	}
 }
 
 type PasswordSetBody struct {
@@ -49,6 +56,14 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
+	pwBytes := []byte(body.Password)
+	if utf8.RuneCountInString(body.Password) < h.cfg.MinPasswordLength { // use utf8.RuneCountInString, so utf8 characters would count as 1
+		return dto.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.MinPasswordLength))
+	}
+	if len(pwBytes) > 72 {
+		return dto.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
+	}
+
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		user, err := h.persister.GetUserPersisterWithConnection(tx).Get(uuid.FromStringOrNil(body.UserID))
 		if err != nil {
@@ -69,9 +84,9 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 			return fmt.Errorf("failed to get credential: %w", err)
 		}
 
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(body.Password), 12)
+		hashedPassword, err := bcrypt.GenerateFromPassword(pwBytes, 12)
 		if err != nil {
-			return errors.New("failed to create credential")
+			return fmt.Errorf("failed to hash password: %s", err)
 		}
 
 		newPw := models.PasswordCredential{
@@ -113,6 +128,11 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	pwBytes := []byte(body.Password)
+	if len(pwBytes) > 72 {
+		return dto.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
+	}
+
 	pw, err := h.persister.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(body.UserId))
 	if pw == nil {
 		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("no password credential found for: %s", body.UserId)))
@@ -122,7 +142,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return fmt.Errorf("error retrieving credential: %w", err)
 	}
 
-	if err = bcrypt.CompareHashAndPassword([]byte(pw.Password), []byte(body.Password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(pw.Password), pwBytes); err != nil {
 		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
