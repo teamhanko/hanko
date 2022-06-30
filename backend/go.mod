@@ -13,7 +13,7 @@ require (
 	github.com/lestrrat-go/jwx/v2 v2.0.3
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
 	github.com/spf13/cobra v1.5.0
-	github.com/stretchr/testify v1.7.5
+	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d
 	golang.org/x/text v0.3.7
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
