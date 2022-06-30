@@ -1,13 +1,13 @@
-@use 'custom'
+@use 'default'
 
 .errorMessage
-  font: custom.$error-font
-  color: custom.$error-color
-  background: custom.$error-background
-  border: custom.$error-border
-  border-radius: custom.$error-border-radius
-  padding: custom.$error-padding
-  margin: custom.$error-margin
+  @include default.font
+  color: default.$error-color
+  background: default.$error-background
+  border: default.$error-border
+  border-radius: default.$border-radius
+  padding: default.$error-padding
+  margin: default.$item-margin
 
   display: flex
   align-items: center

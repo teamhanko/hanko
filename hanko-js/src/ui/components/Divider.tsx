@@ -8,9 +8,18 @@ import styles from "./Divider.sass";
 const Divider = () => {
   const { t } = useContext(TranslateContext);
   return (
-    <section className={styles.dividerWrapper}>
+    <section
+      // @ts-ignore
+      part={"divider"}
+      className={styles.dividerWrapper}
+    >
       <div className={styles.divider}>
-        <span>{t("or")}</span>
+        <span
+          // @ts-ignore
+          part={"divider-text"}
+        >
+          {t("or")}
+        </span>
       </div>
     </section>
   );

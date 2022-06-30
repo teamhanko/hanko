@@ -10,31 +10,50 @@
         }
 
         hanko-auth {
-            --default-color-h: 188;
-            --default-color-s: 99%;
-            --default-color-l: 38%;
+            --color-h: 188;
+            --color-s: 99%;
+            --color-l: 38%;
 
-            --default-brand-color-h: 315;
-            --default-brand-color-s: 100%;
-            --default-brand-color-l: 59%;
+            --brand-color-h: 315;
+            --brand-color-s: 100%;
+            --brand-color-l: 59%;
 
-            --default-background-color-h: 196;
-            --default-background-color-s: 10%;
-            --default-background-color-l: 21%;
+            --background-color-h: 196;
+            --background-color-s: 10%;
+            --background-color-l: 21%;
 
-            --default-border-width: 2px;
+            --border-width: 1px;
+            --border-radius: 5px;
 
-            --default-font: 400 16px Helvetica;
+            --font-weight: 400;
+            --font-size: 16px;
+            --font-family: Helvetica;
 
-            --headline-font: 800 24px Helvetica;
-            --headline-color: hsl(33, 93%, 55%);
-
-            --primary-button-font: 800 15px Helvetica;
-
-            --link-text-decoration-hover: underline;
+            --input-height: 45px;
+            --item-margin: 10px;
 
             --container-min-height: 0;
             --container-padding: 10px 20px;
+
+            --headline-font-weight: 800;
+            --headline-font-size: 24px;
+
+            --lightness-adjust-dark: 15%;
+            --lightness-adjust-dark-light: 10%;
+            --lightness-adjust-light: -5%;
+            --lightness-adjust-light-dark: -10%;
+        }
+
+        hanko-auth::part(headline) {
+            color: hsl(33, 93%, 55%)
+        }
+
+        hanko-auth::part(button):disabled {
+            background-color: hsl(196, 10%, 30%);
+        }
+
+        hanko-auth::part(link):hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -47,6 +66,5 @@
         hanko.parentElement.innerHTML = "<h1>secured content...</h1>";
     })
 </script>
-
 </body>
 </html>

@@ -1,15 +1,15 @@
-@use 'custom'
+@use 'default'
 
 .inputWrapper
   position: relative
-  margin: custom.$text-input-margin
+  margin: default.$item-margin
   display: flex
   flex-grow: 1
 
 .label
-  font: custom.$text-input-font
-  background: custom.$text-input-background
-  color: custom.$text-input-color
+  @include default.font
+  background: default.$text-input-background
+  color: default.$text-input-color
 
   position: absolute
   left: 0
@@ -22,15 +22,15 @@
   pointer-events: none
 
 .input
-  height: custom.$text-input-height
-  font: custom.$text-input-font
-  color: custom.$text-input-color
-  border-style: custom.$text-input-border-style
-  border-width: custom.$text-input-border-width
-  border-color: custom.$text-input-border-color
-  border-radius: custom.$text-input-border-radius
-  background: custom.$text-input-background
-  padding: custom.$text-input-padding
+  @include default.font
+  height: default.$input-height
+  color: default.$text-input-color
+  border-style: default.$text-input-border-style
+  border-width: default.$text-input-border-width
+  border-color: default.$text-input-border-color
+  border-radius: default.$border-radius
+  background: default.$text-input-background
+  padding: default.$text-input-padding
 
   width: 100%
   outline: none
@@ -38,7 +38,7 @@
   transition: 0.1s ease-out
 
   &:focus + .label
-    color: custom.$text-input-color-focus
+    color: default.$text-input-color-focus
     top: 0
     transform: translateY(-50%) scale(0.9) !important
     opacity: 1
@@ -50,36 +50,36 @@
     transform: translateY(-50%) scale(0.9) !important
 
   &:-webkit-autofill
-    -webkit-box-shadow: 0 0 0 50px custom.$text-input-background-focus inset
+    -webkit-box-shadow: 0 0 0 50px default.$text-input-background inset
 
     &::first-line
-      color: custom.$text-input-color-focus
+      color: default.$text-input-color-focus
 
   // Removes native "clear text" and "password reveal" buttons from Edge
   &::-ms-reveal, &::-ms-clear
     display: none
 
   &:focus
-    color: custom.$text-input-color-focus
-    border-style: custom.$text-input-border-style-focus
-    border-width: custom.$text-input-border-width-focus
-    border-color: custom.$text-input-border-color-focus
+    color: default.$text-input-color-focus
+    border-style: default.$text-input-border-style-focus
+    border-width: default.$text-input-border-width-focus
+    border-color: default.$text-input-border-color-focus
 
   &:disabled
-    color: custom.$text-input-color-disabled
-    background: custom.$text-input-background-disabled
-    border-style: custom.$text-input-border-style-disabled
-    border-width: custom.$text-input-border-width-disabled
-    border-color: custom.$text-input-border-color-disabled
+    color: default.$text-input-color-disabled
+    background: default.$text-input-background-disabled
+    border-style: default.$text-input-border-style-disabled
+    border-width: default.$text-input-border-width-disabled
+    border-color: default.$text-input-border-color-disabled
 
 .passcodeInputWrapper
   display: flex
   justify-content: space-between
-  margin: custom.$text-input-margin
+  margin: default.$item-margin
 
 .passcodeDigitWrapper
   flex-grow: 1
-  margin: 0 custom.$passcode-input-space-between 0 0
+  margin: 0 default.$passcode-input-space-between 0 0
 
   &:last-child
     margin: 0

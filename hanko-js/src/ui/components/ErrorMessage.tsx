@@ -21,11 +21,21 @@ const ErrorMessage = ({ error = defaultError }: Props) => {
   const code = error instanceof HankoError ? error.code : null;
 
   return (
-    <section className={styles.errorMessage} hidden={!error}>
+    <section
+      // @ts-ignore
+      part={"error"}
+      className={styles.errorMessage}
+      hidden={!error}
+    >
       <span>
         <ExclamationMark />
       </span>
-      <span>{code ? t(`errors.${code}`) : error ? error.message : null}</span>
+      <span
+        // @ts-ignore
+        part={"error-text"}
+      >
+        {code ? t(`errors.${code}`) : error ? error.message : null}
+      </span>
     </section>
   );
 };

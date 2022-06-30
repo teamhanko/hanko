@@ -1,6 +1,7 @@
-@use 'custom'
+@use 'default'
 
 .paragraph
-  color: custom.$paragraph-color
-  font: custom.$paragraph-font
-  margin: custom.$paragraph-margin
+  @include default.font
+  text-align: left
+  color: default.$color
+  margin: default.$item-margin

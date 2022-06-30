@@ -9,7 +9,7 @@ import styles from "./Button.sass";
 
 type Props = {
   children: ComponentChildren;
-  useSecondaryStyles?: boolean;
+  secondary?: boolean;
   isLoading?: boolean;
   isSuccess?: boolean;
   disabled?: boolean;
@@ -18,7 +18,7 @@ type Props = {
 
 const Button = ({
   children,
-  useSecondaryStyles,
+  secondary,
   disabled,
   isLoading,
   isSuccess,
@@ -35,12 +35,14 @@ const Button = ({
 
   return (
     <button
+      // @ts-ignore
+      part={secondary ? "button secondary-button" : "button primary-button"}
       ref={ref}
       type={"submit"}
       disabled={disabled || isLoading || isSuccess}
       className={cx(
         styles.button,
-        useSecondaryStyles ? styles.secondary : styles.primary
+        secondary ? styles.secondary : styles.primary
       )}
     >
       <LoadingIndicator isLoading={isLoading} isSuccess={isSuccess}>

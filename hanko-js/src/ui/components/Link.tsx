@@ -19,6 +19,8 @@ const Link: FunctionalComponent<Props> = ({
 }: Props) => {
   return (
     <a
+      // @ts-ignore
+      part={"link"}
       onClick={onClick}
       hidden={hidden}
       className={cx(styles.link, disabled ? styles.disabled : null)}
