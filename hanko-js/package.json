@@ -22,7 +22,7 @@
   "description": "",
   "repository": "github:teamhanko/hanko",
   "author": "Hanko GmbH <developers@hanko.io>",
-  "license": "AGPL-3.0-or-later",
+  "license": "MIT",
   "keywords": [],
   "devDependencies": {
     "@babel/core": "^7.17.8",
