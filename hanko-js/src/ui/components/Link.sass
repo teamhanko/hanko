@@ -1,17 +1,17 @@
-@use "custom"
+@use "default"
 
 .link
-  font: custom.$link-font
-  color: custom.$link-color
-  text-decoration: custom.$link-text-decoration
+  @include default.font
+  color: default.$link-color
+  text-decoration: default.$link-text-decoration
   cursor: pointer
 
   &:hover
-    color: custom.$link-color-hover
-    text-decoration: custom.$link-text-decoration-hover
+    color: default.$link-color-hover
+    text-decoration: default.$link-text-decoration
 
   &.disabled
-    color: custom.$link-color-disabled
+    color: default.$link-color-disabled
     pointer-events: none
     cursor: default
 

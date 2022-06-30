@@ -30,7 +30,12 @@ const Container = ({ children, emitSuccessEvent }: Props) => {
   }, [emitSuccessEvent]);
 
   return (
-    <section ref={ref} className={styles.container}>
+    <section
+      // @ts-ignore
+      part={"container"}
+      ref={ref}
+      className={styles.container}
+    >
       {children}
     </section>
   );

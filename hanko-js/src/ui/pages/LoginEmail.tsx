@@ -147,7 +147,7 @@ const LoginEmail = () => {
           <Divider />
           <Form onSubmit={onWebAuthnSubmit}>
             <Button
-              useSecondaryStyles
+              secondary
               isLoading={isWebAuthnLoading}
               isSuccess={isWebAuthnSuccess}
             >

@@ -39,6 +39,8 @@ const InputPasscodeDigit = ({ index, focus, digit = "", ...props }: Props) => {
     <div className={styles.passcodeDigitWrapper}>
       <input
         {...props}
+        // @ts-ignore
+        part={"input passcode-input"}
         name={props.name + index.toString(10)}
         autoComplete={"off"}
         type={"text"}

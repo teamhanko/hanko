@@ -8,7 +8,15 @@ type Props = {
 };
 
 const Headline = ({ children }: Props) => {
-  return <h1 className={styles.title}>{children}</h1>;
+  return (
+    <h1
+      // @ts-ignore
+      part={"headline"}
+      className={styles.title}
+    >
+      {children}
+    </h1>
+  );
 };
 
 export default Headline;

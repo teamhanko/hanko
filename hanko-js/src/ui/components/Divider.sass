@@ -1,13 +1,16 @@
-@use 'custom'
+@use 'default'
 
 .dividerWrapper
-  display: custom.$divider-display
-  visibility: custom.$divider-visibility
-  margin: custom.$divider-margin
+  @include default.font
+  display: default.$divider-display
+  visibility: default.$divider-visibility
+  margin: default.$item-margin
+  color: default.$divider-color
 
 .divider
-  font: custom.$divider-font
-  border-bottom: custom.$divider-border
+  border-bottom: default.$divider-border
+  color: inherit
+  font: inherit
 
   width: 100%
   text-align: center
@@ -15,6 +18,7 @@
   margin: 0 auto
 
   span
-    color: custom.$divider-color
-    background: custom.$container-background
-    padding: custom.$divider-padding
+    font: inherit
+    color: inherit
+    background: default.$container-background
+    padding: default.$divider-padding

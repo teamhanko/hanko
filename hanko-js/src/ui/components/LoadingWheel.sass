@@ -1,10 +1,12 @@
-@use 'custom'
+@use 'default'
 
 .loadingWheel
   box-sizing: border-box
   display: inline-block
-  border: 2px solid custom.$container-background
-  border-top: 2px solid custom.$primary-button-background
+  border-width: 2px
+  border-style: solid
+  border-color: default.$container-background
+  border-top: 2px solid default.$primary-button-background
   border-radius: 50%
   width: 16px
   height: 16px

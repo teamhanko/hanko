@@ -21,8 +21,20 @@ const InputText = ({ label, ...props }: Props) => {
 
   return (
     <div className={styles.inputWrapper}>
-      <input ref={ref} {...props} className={styles.input} />
-      <label className={styles.label}>{label}</label>
+      <input
+        // @ts-ignore
+        part={"input text-input"}
+        ref={ref}
+        {...props}
+        className={styles.input}
+      />
+      <label
+        // @ts-ignore
+        part={"label"}
+        className={styles.label}
+      >
+        {label}
+      </label>
     </div>
   );
 };
