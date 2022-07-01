@@ -161,7 +161,7 @@ func (s *Service) Validate() error {
 
 type Password struct {
 	Enabled           bool
-	MinPasswordLength int `koanf:"min_password_length"`
+	MinPasswordLength int `koanf:"min_password_length" yaml:"min_password_length"`
 }
 
 type Cookie struct {
