@@ -5,14 +5,15 @@ import styles from "./Checkmark.sass";
 
 type Props = {
   fadeOut?: boolean;
+  secondary?: boolean;
 };
 
-const Checkmark = ({ fadeOut }: Props) => {
+const Checkmark = ({ fadeOut, secondary }: Props) => {
   return (
     <div className={cx(styles.checkmark, fadeOut ? styles.fadeOut : null)}>
-      <div className={styles.circle} />
-      <div className={styles.stem} />
-      <div className={styles.kick} />
+      <div className={cx(styles.circle, secondary ? styles.secondary : null)} />
+      <div className={cx(styles.stem, secondary ? styles.secondary : null)} />
+      <div className={cx(styles.kick, secondary ? styles.secondary : null)} />
     </div>
   );
 };
