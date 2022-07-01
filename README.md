@@ -1,8 +1,9 @@
-[![GoDoc](https://godoc.org/github.com/teamhanko/hanko?status.svg)](https://godoc.org/github.com/teamhanko/hanko)
-![Build Status](https://github.com/teamhanko/hanko/workflows/Go/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/teamhanko/hanko)](https://goreportcard.com/report/github.com/teamhanko/hanko)
+<p align="center">
+<img width="300" src="https://user-images.githubusercontent.com/20115649/176922807-fb92327a-15d5-4568-a4e7-78093cea045e.svg?sanitize=true#gh-light-mode-only">
+<img width="300" src="https://user-images.githubusercontent.com/20115649/176922819-61dfb644-529f-4f81-a577-7daa47185300.svg?sanitize=true#gh-dark-mode-only">
+</p>
 
-![Hanko - Open-source user authentication that can do more than just passwords](https://user-images.githubusercontent.com/20115649/167916572-a4d92eaa-7246-4e18-a85d-fc80b4f25c28.svg)
+---
 
 # About Hanko
 Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
@@ -13,9 +14,9 @@ Hanko is open-source user authentication with a focus on moving the login beyond
 - API-first, small footprint, cloud-native
 - FIDO2-certified
 
-[![FIDO2 Certified](https://user-images.githubusercontent.com/20115649/159896561-a94022ba-0e95-417e-807d-b4b7ce19371c.svg)](https://fidoalliance.org/company/hanko/)
-
 Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of more than 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
+
+![Hanko - Open-source user authentication that can do more than just passwords](https://user-images.githubusercontent.com/20115649/176924402-82869443-4b4a-42e0-aaef-e33d00146450.svg)
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that passkeys were announced and the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
@@ -25,7 +26,8 @@ With most devices now shipping with passkey support and biometric sensors like T
 **Build your passkey login in just 5 minutes – with two lines of code – and never look back.**
 
 # Roadmap
-This project is in **Beta** and may still have critical bugs. Leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our current roadmap:
+We are currently in **Alpha** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
+
 | Status | Feature |
 | :---: | :--- |
 | ✅ | Passkeys |
@@ -33,9 +35,10 @@ This project is in **Beta** and may still have critical bugs. Leave a star, join
 | ✅ | Passwords |
 | ✅ | JWT signing |
 | ✅ | Admin API |
+| ✅ | 📢 Hanko Alpha Release |
 | ✅ | Hanko web component |
 | ⚙️ | Customizable CSS |
-| | ***Hanko 0.1 Release*** |
+| | 📢 Hanko Beta Release |
 | | Passkey Conditional UI support |
 | | 2FA with FIDO Security Keys and TOTP |
 | | Mobile app support |
@@ -43,17 +46,18 @@ This project is in **Beta** and may still have critical bugs. Leave a star, join
 | | Sign in with Google/Apple/GitHub |
 
 # Quickstart
-The easiest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
+The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
 
 First you need to clone this repository:
 ```
 git clone https://github.com/teamhanko/hanko.git
 ```
 
-Then, in the newly created `hanko` folder, just run with docker-compose:
+Then, in the newly created `hanko` folder, just run:
 ```
 docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --build
 ```
+> **Note**: Docker (Desktop) needs to be running in order for the command to run.
 
 After the services are up and running, the example login can be opened at `localhost:8888`. To receive emails without your own
 smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
@@ -70,4 +74,4 @@ The Hanko project consists of
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
 
 # Licenses
-The [hanko element](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE). Everything else in this repository, including the [hanko backend](backend) is licensed under the [AGPL-3.0](backend/LICENSE).
+[hanko-js](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](backend/LICENSE).
