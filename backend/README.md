@@ -1,6 +1,6 @@
 # Hanko backend
 
-The Hanko backend provides public and private APIs that offer a set of functions to create a modern login and registration experience for your users. Hanko backend works well with [`<hanko-auth>`](../hanko-js/README.md), a web component that can easily be integrated in any web app and provides ready-to-use login and registration UI flows.
+The Hanko backend provides public and private APIs that offer a set of functions to create a modern login and registration experience for your users. Hanko backend works well with [hanko-js](../hanko-js), a web component that can easily be integrated in any web app and provides ready-to-use login and registration UI flows.
 
 ## API features
 
