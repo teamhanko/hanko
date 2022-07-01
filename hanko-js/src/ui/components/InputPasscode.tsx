@@ -70,12 +70,6 @@ const InputPasscode = ({
     onInput(digits);
   };
 
-  const handleOnChange = (event: Event) => {
-    if (event.target instanceof HTMLInputElement) {
-      changeCodeAtFocus(event.target.value);
-    }
-  };
-
   // Handle cases of backspace, delete, left arrow, right arrow, space
   const handleOnKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Backspace") {
@@ -128,7 +122,6 @@ const InputPasscode = ({
           index={index}
           focus={activeInputIndex === index}
           digit={passcodeDigits[index]}
-          onChange={handleOnChange}
           onKeyDown={handleOnKeyDown}
           onInput={handleOnInput}
           onPaste={handleOnPaste}
