@@ -28,16 +28,16 @@ func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
 	var err error
 	if cfgFile != nil && *cfgFile != "" {
-		if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err == nil {
-			log.Println("Using config file:", *cfgFile)
+		if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
+			return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
 		} else {
-			return nil, fmt.Errorf("failed to load config from: %s", *cfgFile)
+			log.Println("Using config file:", *cfgFile)
 		}
 	} else {
-		if err = k.Load(file.Provider("./config/config.yaml"), yaml.Parser()); err == nil {
-			log.Println("Using config file:", "./config/config.yaml")
+		if err = k.Load(file.Provider("./config/config.yaml"), yaml.Parser()); err != nil {
+			return nil, fmt.Errorf("failed to load config from: ./config/config.yaml: %w", err)
 		} else {
-			return nil, errors.New("failed to load config from: ./config/config.yaml")
+			log.Println("Using config file: ./config/config.yaml")
 		}
 	}
 
@@ -45,7 +45,7 @@ func Load(cfgFile *string) (*Config, error) {
 		return strings.Replace(strings.ToLower(s), "_", ".", -1)
 	}), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load config from env vars")
+		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 
 	c := DefaultConfig()
