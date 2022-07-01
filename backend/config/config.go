@@ -81,6 +81,9 @@ func DefaultConfig() *Config {
 			},
 			TTL: 300,
 		},
+		Password: Password{
+			MinPasswordLength: 8,
+		},
 		Database: Database{
 			Database: "hanko",
 		},
@@ -157,7 +160,8 @@ func (s *Service) Validate() error {
 }
 
 type Password struct {
-	Enabled bool
+	Enabled           bool
+	MinPasswordLength int `koanf:"min_password_length" yaml:"min_password_length"`
 }
 
 type Cookie struct {
