@@ -7,6 +7,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"net/http"
+	"strings"
 )
 
 type UserHandlerAdmin struct {
@@ -56,6 +57,8 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 	if err := c.Validate(patchRequest); err != nil {
 		return dto.ToHttpError(err)
 	}
+
+	patchRequest.Email = strings.ToLower(patchRequest.Email)
 
 	p := h.persister.GetUserPersister()
 	user, err := p.Get(uuid.FromStringOrNil(patchRequest.UserId))
