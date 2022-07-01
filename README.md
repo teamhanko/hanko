@@ -34,12 +34,12 @@ This project is in **Beta** and may still have critical bugs. Leave a star, join
 | ✅ | JWT signing |
 | ✅ | Admin API |
 | ✅ | Hanko web component |
-| ⚙️ | Custom CSS |
-| ⚙️ | Events API |
-| | ***Hanko 0.1.0 Release*** |
-| | Passkey conditional UI support |
-| | 2FA with TOTP and FIDO Security Keys |
+| ⚙️ | Customizable CSS |
+| | ***Hanko 0.1 Release*** |
+| | Passkey Conditional UI support |
+| | 2FA with FIDO Security Keys and TOTP |
 | | Mobile app support |
+| | Events API |
 | | Sign in with Google/Apple/GitHub |
 
 # Quickstart
