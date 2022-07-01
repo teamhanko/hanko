@@ -19,6 +19,9 @@
     left: 0
     top: 0
 
+    &.secondary
+      border-color: default.$checkmark-color-secondary
+
   .stem
     position: absolute
     width: 2px
@@ -27,6 +30,9 @@
     left: 8px
     top: 3px
 
+    &.secondary
+      background-color: default.$checkmark-color-secondary
+
   .kick
     position: absolute
     width: 5px
@@ -34,6 +40,9 @@
     background-color: default.$checkmark-color
     left: 5px
     top: 10px
+
+    &.secondary
+      background-color: default.$checkmark-color-secondary
 
   &.fadeOut
     animation: fadeOut ease-out 1.5s forwards !important

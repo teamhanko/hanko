@@ -11,6 +11,7 @@ export type Props = {
   isLoading?: boolean;
   isSuccess?: boolean;
   fadeOut?: boolean;
+  secondary?: boolean;
 };
 
 const LoadingIndicator = ({
@@ -18,13 +19,14 @@ const LoadingIndicator = ({
   isLoading,
   isSuccess,
   fadeOut,
+  secondary,
 }: Props) => {
   return (
     <div className={styles.loadingIndicator}>
       {isLoading ? (
         <LoadingWheel />
       ) : isSuccess ? (
-        <Checkmark fadeOut={fadeOut} />
+        <Checkmark fadeOut={fadeOut} secondary={secondary} />
       ) : (
         children
       )}
