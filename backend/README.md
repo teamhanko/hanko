@@ -8,10 +8,11 @@ The Hanko backend provides public and private APIs that offer a set of functions
 - Passcodes
 - Passwords
 - Email verification
+- JWT management
 
 ## Upcoming features
 
-- Backoff mechanisms
+- Exponential backoff for password and passcode attempts
 - More tests and code documentation
 
 ## Basic usage
@@ -143,8 +144,8 @@ Currently we support the following databases:
 
 ### Rate Limiting
 
-The Hanko service does not implement rate limiting in any way. In production systems, you want to hide the Hanko service
-behind a proxy or gateway (e.g. kong, traeffik) that implements rate limiting.
+The Hanko service does not implement network rate limiting in any way. In production systems, you want to hide the Hanko service
+behind a proxy or gateway (e.g. Kong, Traefik) that provides rate limiting.
 
 ### Configuration
 
