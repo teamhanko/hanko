@@ -19,7 +19,7 @@
     "e2e"
   ],
   "author": "Hanko GmbH <developers@hanko.io>",
-  "license": "MIT",
+  "license": "AGPL-3.0-or-later",
   "bugs": {
     "url": "https://github.com/teamhanko/hanko/issues"
   },
