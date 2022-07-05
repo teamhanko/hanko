@@ -61,7 +61,13 @@ docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw"
 
 ```
 
-Once the services are up and running, execute the tests from the `e2e` directory:
+Once the services are up and running, install dependencies from inside the `e2e` directory:
+
+`npm install`
+
+`npx playwright install chromium`
+
+Then execute the tests using:
 
 **Passwords disabled**:
 
