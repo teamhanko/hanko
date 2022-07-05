@@ -1,6 +1,6 @@
 # End 2 End Tests
 
-This directory contains E2E tests for the Hanko project using [Playwright](https://www.https://playwright.dev/).
+This directory contains E2E tests for the Hanko project using [Playwright](https://playwright.dev/).
 
 ## Running
 
@@ -11,7 +11,7 @@ Running the tests requires:
 - a running Hanko [backend](../backend)
 - a running frontend application (e.g. our [example](../example)) using the web component provided by
   [hanko-js](../hanko-js)
-- [Mailslurper](https://github.com/mailslurper/mailslurper) as an SMTP server (used to test Passcodes through mail
+- [Mailslurper](https://github.com/mailslurper/mailslurper) as an SMTP server (used to test passcodes through mail
   retrieval via its [API](https://github.com/mailslurper/mailslurper/wiki/API-Guide))
 
 The tests distinguish between password-based and passwordless scenarios. Each of these requires the proper
