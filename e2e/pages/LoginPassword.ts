@@ -28,8 +28,6 @@ export class LoginPassword extends BasePage {
       this.page.waitForResponse(Endpoints.API.PASSWORD_LOGIN),
       this.signInButton.click(),
     ]);
-
-    // TODO: COOKIE SHOULD BE SET
   }
 
   async back() {
