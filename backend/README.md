@@ -14,7 +14,7 @@ Hanko backend can be used on its own or in combination with [hanko-js](../hanko-
 
 ## Upcoming features
 
-- Exponential backoff for password and passcode attempts
+- Exponential backoff for password attempts and passcode email sending
 - More tests and code documentation
 
 ## Basic usage
@@ -138,7 +138,7 @@ serve all
 
 ### Supported Databases
 
-Currently we support the following databases:
+Hanko backend supports the following databases:
 - CockroachDB
 - MariaDB
 - MySQL
@@ -146,7 +146,7 @@ Currently we support the following databases:
 
 ### Rate Limiting
 
-The Hanko service does not implement network rate limiting in any way. In production systems, you want to hide the Hanko service
+Currently, Hanko backend does not implement rate limiting in any way. In production systems, you may want to hide the Hanko service
 behind a proxy or gateway (e.g. Kong, Traefik) that provides rate limiting.
 
 ### Configuration
