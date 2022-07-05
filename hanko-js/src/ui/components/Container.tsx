@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { useEffect, useRef } from "preact/compat";
 import { ComponentChildren } from "preact";
 
-import styles from "./Container.module.css";
+import styles from "./Container.sass";
 
 type Props = {
   emitSuccessEvent?: boolean;
@@ -30,7 +30,12 @@ const Container = ({ children, emitSuccessEvent }: Props) => {
   }, [emitSuccessEvent]);
 
   return (
-    <section ref={ref} className={styles.container}>
+    <section
+      // @ts-ignore
+      part={"container"}
+      ref={ref}
+      className={styles.container}
+    >
       {children}
     </section>
   );

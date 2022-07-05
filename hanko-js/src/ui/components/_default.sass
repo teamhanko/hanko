@@ -1,0 +1,149 @@
+@use 'preset'
+@use 'sass:list'
+
+@function convert-hsl-color($variable, $default-hsl, $lightness-adjust: 0%)
+  $default-h: list.nth($default-hsl, 1)
+  $default-s: list.nth($default-hsl, 2)
+  $default-l: list.nth($default-hsl, 3)
+  @return #{"hsl(var(#{$variable}-h, #{$default-h}), var(#{$variable}-s, #{$default-s}), calc(var(#{$variable}-l, #{$default-l}) + #{$lightness-adjust}))"}
+
+// Default General Styles
+
+$font-weight: var(--font-weight, preset.$font-weight)
+$font-size: var(--font-size, preset.$font-size)
+$font-family: var(--font-family, preset.$font-family)
+$color: convert-hsl-color(--color, preset.$color-hsl)
+$border-radius: var(--border-radius, preset.$border-radius)
+$input-height: var(--input-height, preset.$input-height)
+$item-margin: var(--item-margin, preset.$item-margin)
+
+// Default Lightness Adjust
+
+$lightness-adjust-dark: var(--lightness-adjust-dark, preset.$lightness-adjust-dark)
+$lightness-adjust-dark-light: var(--lightness-adjust-dark-light, preset.$lightness-adjust-dark-light)
+$lightness-adjust-light-dark: var(--lightness-adjust-light-dark, preset.$lightness-adjust-light-dark)
+$lightness-adjust-light: var(--lightness-adjust-light, preset.$lightness-adjust-light)
+
+// Default Container Styles
+
+$container-background: convert-hsl-color(--background-color, preset.$background-hsl)
+$container-padding: var(--container-padding, preset.$container-padding)
+$container-max-width: var(--container-max-width, preset.$container-max-width)
+$container-min-width: var(--container-min-width, preset.$container-min-width)
+$container-min-height: var(--container-min-height, preset.$container-height)
+$container-max-height: var(--container-max-height, preset.$container-height)
+$container-border-width: var(--border-width, preset.$border-width)
+$container-border-style: var(--border-style, preset.$border-style)
+$container-border-color: convert-hsl-color(--color, preset.$background-hsl, $lightness-adjust-dark-light)
+$container-border-radius: var(--border-radius, preset.$border-radius)
+
+// Default Text Input Styles
+
+$text-input-padding: preset.$text-input-padding
+$text-input-color: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$text-input-color-focus: convert-hsl-color(--color, preset.$color-hsl)
+$text-input-color-disabled: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-dark)
+$text-input-border-width: var(--border-width, preset.$border-width)
+$text-input-border-width-focus: var(--border-width, preset.$border-width)
+$text-input-border-style: var(--border-style, preset.$border-style)
+$text-input-border-style-focus: var(--border-style, preset.$border-style)
+$text-input-border-color: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$text-input-border-color-focus: convert-hsl-color(--color, preset.$color-hsl)
+$text-input-border-width-disabled: var(--border-width, preset.$border-width)
+$text-input-border-style-disabled: var(--border-style, preset.$border-style)
+$text-input-border-color-disabled: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-dark)
+$text-input-background: convert-hsl-color(--background-color, preset.$background-hsl)
+$text-input-background-disabled: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-dark-light)
+
+// Default Primary Button Styles
+
+$primary-button-color: convert-hsl-color(--background-color, preset.$background-hsl)
+$primary-button-color-focus: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+$primary-button-color-disabled: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+$primary-button-border-width: var(--border-width, preset.$border-width)
+$primary-button-border-width-hover: var(--border-width, preset.$border-width)
+$primary-button-border-width-focus: var(--border-width, preset.$border-width)
+$primary-button-border-width-disabled: var(--border-width, preset.$border-width)
+$primary-button-border-style: var(--border-style, preset.$border-style)
+$primary-button-border-style-hover: var(--border-style, preset.$border-style)
+$primary-button-border-style-focus: var(--border-style, preset.$border-style)
+$primary-button-border-style-disabled: var(--border-style, preset.$border-style)
+$primary-button-border-color: convert-hsl-color(--brand-color, preset.$brand-color-hsl)
+$primary-button-border-color-hover: convert-hsl-color(--brand-color, preset.$brand-color-hsl)
+$primary-button-border-color-focus: convert-hsl-color(--brand-color, preset.$brand-color-hsl, $lightness-adjust-light-dark)
+$primary-button-border-color-disabled: convert-hsl-color(--brand-color, preset.$brand-color-hsl, $lightness-adjust-light)
+$primary-button-background: convert-hsl-color(--brand-color, preset.$brand-color-hsl)
+$primary-button-background-hover: convert-hsl-color(--brand-color, preset.$brand-color-hsl, $lightness-adjust-light-dark)
+$primary-button-background-focus: convert-hsl-color(--brand-color, preset.$brand-color-hsl)
+$primary-button-background-disabled: convert-hsl-color(--brand-color, preset.$brand-color-hsl, $lightness-adjust-light)
+
+// Default Secondary Button Styles
+
+$secondary-button-color: convert-hsl-color(--color, preset.$color-hsl)
+$secondary-button-color-focus: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$secondary-button-color-disabled: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light-dark)
+$secondary-button-border-width: var(--border-width, preset.$border-width)
+$secondary-button-border-width-hover: var(--border-width, preset.$border-width)
+$secondary-button-border-width-focus: var(--border-width, preset.$border-width)
+$secondary-button-border-width-disabled: var(--border-width, preset.$border-width)
+$secondary-button-border-style: var(--border-style, preset.$border-style)
+$secondary-button-border-style-hover: var(--border-style, preset.$border-style)
+$secondary-button-border-style-focus: var(--border-style, preset.$border-style)
+$secondary-button-border-style-disabled: var(--border-style, preset.$border-style)
+$secondary-button-border-color: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$secondary-button-border-color-hover: convert-hsl-color(--color, preset.$color-hsl)
+$secondary-button-border-color-focus: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light-dark)
+$secondary-button-border-color-disabled: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$secondary-button-background: convert-hsl-color(--background-color, preset.$background-hsl)
+$secondary-button-background-hover: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-dark-light)
+$secondary-button-background-focus: convert-hsl-color(--background-color, preset.$background-hsl)
+$secondary-button-background-disabled: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+
+// Default Headline Styles
+
+$headline-font-weight: var(--headline-font-weight, preset.$headline-font-weight)
+$headline-font-size: var(--headline-font-size, preset.$headline-font-size)
+$headline-font-family: var(--font-family, preset.$font-family)
+$headline-display: preset.$headline-display
+$headline-margin: var(--item-margin, preset.$item-margin)
+
+// Default Divider Styles
+
+$divider-color: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$divider-padding: preset.$divider-padding
+$divider-border-width: var(--border-width, preset.$border-width)
+$divider-border-style: var(--border-style, preset.$border-style)
+$divider-border: $divider-border-width $divider-border-style convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$divider-display: preset.$divider-display
+$divider-visibility: preset.$divider-visibility
+
+// Default Error Styles
+
+$error-color: convert-hsl-color(--error-color, preset.$error-color-hsl)
+$error-background: convert-hsl-color(--background-color, preset.$background-hsl)
+$error-padding: preset.$error-padding
+$error-border-width: var(--border-width, preset.$border-width)
+$error-border-style: var(--border-style, preset.$border-style)
+$error-border: $error-border-width $error-border-style convert-hsl-color(--error-color, preset.$error-color-hsl)
+
+// Default Passcode Input Styles
+
+$passcode-input-space-between: preset.$passcode-input-space-between
+
+// Default Link Styles
+
+$link-color: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
+$link-color-disabled: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light-dark)
+$link-color-hover: convert-hsl-color(--color, preset.$color-hsl)
+$link-text-decoration: preset.$link-text-decoration
+
+// Default Checkmark Styles
+
+$checkmark-color: convert-hsl-color(--brand-color, preset.$brand-color-hsl)
+$checkmark-color-secondary: convert-hsl-color(---background-color, preset.$background-hsl)
+
+@mixin font
+  font-weight: $font-weight
+  font-size: $font-size
+  font-family: $font-family
+

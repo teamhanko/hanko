@@ -4,14 +4,14 @@ import { ComponentChildren } from "preact";
 import Checkmark from "./Checkmark";
 import LoadingWheel from "./LoadingWheel";
 
-import styles from "./LoadingIndicator.module.css";
+import styles from "./LoadingIndicator.sass";
 
 export type Props = {
   children?: ComponentChildren;
   isLoading?: boolean;
   isSuccess?: boolean;
   fadeOut?: boolean;
-  useSecondaryStyles?: boolean;
+  secondary?: boolean;
 };
 
 const LoadingIndicator = ({
@@ -19,14 +19,14 @@ const LoadingIndicator = ({
   isLoading,
   isSuccess,
   fadeOut,
-  useSecondaryStyles,
+  secondary,
 }: Props) => {
   return (
     <div className={styles.loadingIndicator}>
       {isLoading ? (
         <LoadingWheel />
       ) : isSuccess ? (
-        <Checkmark fadeOut={fadeOut} useSecondaryStyles={useSecondaryStyles} />
+        <Checkmark fadeOut={fadeOut} secondary={secondary} />
       ) : (
         children
       )}
