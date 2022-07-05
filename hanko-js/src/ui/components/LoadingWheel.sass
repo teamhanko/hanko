@@ -1,0 +1,20 @@
+@use 'default'
+
+.loadingWheel
+  box-sizing: border-box
+  display: inline-block
+  border-width: 2px
+  border-style: solid
+  border-color: default.$container-background
+  border-top: 2px solid default.$primary-button-background
+  border-radius: 50%
+  width: 16px
+  height: 16px
+  animation: spin 500ms ease-in-out infinite
+
+@keyframes spin
+  0%
+    transform: rotate(0deg)
+
+  100%
+    transform: rotate(360deg)

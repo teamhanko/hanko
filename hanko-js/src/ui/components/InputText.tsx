@@ -2,7 +2,7 @@ import * as preact from "preact";
 import { h } from "preact";
 import { useEffect, useRef } from "preact/compat";
 
-import styles from "./Input.module.css";
+import styles from "./Input.sass";
 
 interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
   label?: string;
@@ -21,8 +21,20 @@ const InputText = ({ label, ...props }: Props) => {
 
   return (
     <div className={styles.inputWrapper}>
-      <input {...props} className={styles.input} />
-      <label className={styles.label}>{label}</label>
+      <input
+        // @ts-ignore
+        part={"input text-input"}
+        ref={ref}
+        {...props}
+        className={styles.input}
+      />
+      <label
+        // @ts-ignore
+        part={"label"}
+        className={styles.label}
+      >
+        {label}
+      </label>
     </div>
   );
 };

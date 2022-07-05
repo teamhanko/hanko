@@ -7,7 +7,7 @@ import { HankoError, TechnicalError } from "../../lib/Errors";
 
 import ExclamationMark from "./ExclamationMark";
 
-import styles from "./ErrorMessage.module.css";
+import styles from "./ErrorMessage.sass";
 
 type Props = {
   error?: Error;
@@ -21,11 +21,20 @@ const ErrorMessage = ({ error = defaultError }: Props) => {
   const code = error instanceof HankoError ? error.code : null;
 
   return (
-    <section className={styles.errorMessage} hidden={!error}>
+    <section
+      // @ts-ignore
+      part={"error"}
+      className={styles.errorMessage}
+      hidden={!error}
+    >
       <span>
         <ExclamationMark />
       </span>
-      <span id="errorMessage">
+      <span
+        id="errorMessage"
+        // @ts-ignore
+        part={"error-text"}
+      >
         {code ? t(`errors.${code}`) : error ? error.message : null}
       </span>
     </section>

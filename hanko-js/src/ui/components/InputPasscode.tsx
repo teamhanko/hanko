@@ -3,7 +3,7 @@ import { useEffect, useState } from "preact/compat";
 
 import InputPasscodeDigit from "./InputPasscodeDigit";
 
-import styles from "./Input.module.css";
+import styles from "./Input.sass";
 
 // Inspired by https://github.com/devfolioco/react-otp-input
 
@@ -70,12 +70,6 @@ const InputPasscode = ({
     onInput(digits);
   };
 
-  const handleOnChange = (event: Event) => {
-    if (event.target instanceof HTMLInputElement) {
-      changeCodeAtFocus(event.target.value);
-    }
-  };
-
   // Handle cases of backspace, delete, left arrow, right arrow, space
   const handleOnKeyDown = (event: KeyboardEvent) => {
     if (event.key === "Backspace") {
@@ -128,7 +122,6 @@ const InputPasscode = ({
           index={index}
           focus={activeInputIndex === index}
           digit={passcodeDigits[index]}
-          onChange={handleOnChange}
           onKeyDown={handleOnKeyDown}
           onInput={handleOnInput}
           onPaste={handleOnPaste}
