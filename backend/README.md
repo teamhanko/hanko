@@ -89,7 +89,7 @@ The service is now available at `localhost:8000`.
 
 #### Building
 
-To build the Hanko backend you only need to have [go installed](https://go.dev/doc/install) installed on your computer.
+To build the Hanko backend you only need to have [go installed](https://go.dev/doc/install) on your computer.
 
 ```shell
 go build -a -o hanko main.go

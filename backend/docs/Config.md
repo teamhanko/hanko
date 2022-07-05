@@ -1,6 +1,6 @@
 # Hanko backend config
 
-All config parameters with their default and allowed values are documented here. For some options there is an extra
+All config parameters with their default and allowed values are documented here. For some parameters there is an extra
 section with more detailed instructions below.
 
 ## All available config options
