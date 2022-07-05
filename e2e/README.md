@@ -6,7 +6,7 @@ This directory contains E2E tests for the Hanko project using [Playwright](https
 
 Running the tests requires:
 
-- [Node](https://nodejs.org) / npm
+- [Node](https://nodejs.org) v. 16.5.1+/ npm
 - [Docker](https://www.docker.com/) / Docker Compose
 - a running Hanko [backend](../backend)
 - a running frontend application (e.g. our [example](../example)) using the web component provided by
