@@ -31,6 +31,7 @@ const ErrorMessage = ({ error = defaultError }: Props) => {
         <ExclamationMark />
       </span>
       <span
+        id="errorMessage"
         // @ts-ignore
         part={"error-text"}
       >

@@ -1,0 +1,57 @@
+name: E2E Test
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  passwordless:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Start containers
+        working-directory: ./deploy/docker-compose
+        run: docker compose -f "quickstart.yaml" up -d --build
+
+      - name: Install dependencies
+        working-directory: ./e2e
+        run: |
+          npm install
+          npx playwright install chromium
+
+      - name: Run tests
+        working-directory: ./e2e
+        run: npm run 'test:nopw'
+
+      - name: Stop containers
+        if: always()
+        working-directory: ./deploy/docker-compose
+        run: docker compose -f "quickstart.yaml" down
+  passwords:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Start containers
+        working-directory: ./deploy/docker-compose
+        run: docker compose -f "quickstart.yaml" up -d --build
+        env:
+          PASSWORD_ENABLED: true
+
+      - name: Install dependencies
+        working-directory: ./e2e
+        run: |
+          npm install
+          npx playwright install chromium
+
+      - name: Run tests
+        working-directory: ./e2e
+        run: npm run 'test:pw'
+
+      - name: Stop containers
+        if: always()
+        working-directory: ./deploy/docker-compose
+        run: docker compose -f "quickstart.yaml" down
