@@ -75,7 +75,7 @@ and then run
 
 ```shell
 # compose v1
-docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-nopw" up --build
+docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw" up --build
 
 # compose v2
 docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw" up --build
