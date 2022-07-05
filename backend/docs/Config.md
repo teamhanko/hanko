@@ -222,7 +222,7 @@ webauthn:
 
 ### Web Authentication
 
-For most use cases, just add the host name of your website / app on which you want to use WebaAuthn as the id and set the origin by including the scheme in the config.
+For most use cases, you just need to add the host of your website / app on which you want to use WebAuthn. Set the id to the host name and set the origin by including the scheme.
 
 #### Example
 
