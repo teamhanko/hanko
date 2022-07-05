@@ -21,7 +21,7 @@ Hanko backend can be used on its own or in combination with [hanko-js](../hanko-
 
 The easiest way to start Hanko backend service is through docker. But before we can do that, we need to create a config file.
 
-> **Note** If you just want to jump right into the experience of passkeys and passcodes, head over to the [quickstart guide](../README.md#Quickstart).
+> **Note** If you just want to jump right into the experience of passkeys and passcodes, head over to the [quickstart guide](../README.md#quickstart).
 
 ### Config
 
