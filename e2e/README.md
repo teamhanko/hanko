@@ -2,7 +2,7 @@
 
 This directory contains E2E tests for the Hanko project using [Playwright](https://playwright.dev/).
 
-## Contents
+# Contents
 
 - [Prerequisites](#prerequisites)
   - [Required software](#required-software)
@@ -12,9 +12,9 @@ This directory contains E2E tests for the Hanko project using [Playwright](https
   - [Install project dependencies](#install-project-dependencies)
   - [Execute the tests](#execute-the-tests)
 
-## Prerequisites
+# Prerequisites
 
-### Required software
+## Required software
 
 To run the tests you need to have the following software installed:
 
@@ -22,7 +22,7 @@ To run the tests you need to have the following software installed:
 - [Docker](https://www.docker.com/) / Docker Compose
 
 
-### Required services
+## Required services
 
 Furthermore, you need running instances of:
 
@@ -35,9 +35,9 @@ Furthermore, you need running instances of:
 The tests distinguish between password-based and passwordless scenarios. Each of these requires the proper
 [backend](../backend) configuration, i.e. it must be configured to run with either passwords enabled or disabled.
 
-### Run the tests
+# Run the tests
 
-#### Set up services using Docker Compose
+## Set up services using Docker Compose
 
 To get everything up and running, you can use the existing Docker Compose quickstart in
 the [`deploy/docker-compose`](..deploy/docker-compose) directory. From the root project directory, execute:
@@ -82,7 +82,7 @@ docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw"
 
 ```
 
-### Install project dependencies
+## Install project dependencies
 
 Once the services are up and running, install dependencies from inside the `e2e` directory:
 
@@ -90,7 +90,7 @@ Once the services are up and running, install dependencies from inside the `e2e`
 
 `npx playwright install chromium`
 
-### Execute the tests
+## Execute the tests
 
 Then execute the tests using:
 
