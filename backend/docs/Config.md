@@ -222,15 +222,12 @@ webauthn:
 
 ### Web Authentication
 
-Configuring Web Authentication might seem challenging, but is pretty straight forward.
-
-For most cases just add the host of your website, on which you plan to use webauthn, as the id and add the origin to
-origin in the config.
+For most use cases, just add the host name of your website / app on which you want to use WebaAuthn as the id and set the origin by including the scheme in the config.
 
 #### Example
 
-When you have a website hosted at `example.com` and you want to add a login to it. The login will be available
-at `https://example.com/login`. The config of webauthn would look like this:
+When you have a website hosted at `example.com` and you want to add a login to it that will be available
+at `https://example.com/login`, the WebAuthn config would look like this:
 
 ```yaml
 webauthn:
@@ -240,7 +237,7 @@ webauthn:
     origin: "https://example.com"
 ```
 
-If the login instead is available at `https://login.example.com` then the config would look like this:
+If the login should be available at `https://login.example.com` instead, then the WebAuthn config would look like this:
 
 ```yaml
 webauthn:
