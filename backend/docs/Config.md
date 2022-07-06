@@ -1,6 +1,6 @@
 # Hanko backend config
 
-All config parameters with their default and allowed values are documented here. For some parameters there is an extra
+All config parameters with their defaults and allowed values are documented here. For some parameters there is an extra
 section with more detailed instructions below.
 
 ## All available config options
@@ -12,7 +12,7 @@ section with more detailed instructions below.
 server:
   ## public ##
   #
-  # Configuration for the public API
+  # Configuration for the public API.
   #
   public:
     ## address ##
@@ -70,15 +70,15 @@ database:
   # - postgres
   #
   dialect: "postgres"
-  user: "hanko"
-  password: "hanko"
-  database: "hanko"
+  user: "CHANGE-ME"
+  password: "CHANGE-ME"
+  database: "CHANGE-ME"
 service:
   ## name ##
   #
-  # This is the name of the service. This value will be used in the subject header of emails
+  # This is the name of the service. This value will be used in the subject header of emails.
   #
-  name: "Hanko Authentication Service"
+  name: "Example Project"
 ## secrets ##
 #
 # The secrets section configures secrets used for signing. The secrets can be rotated by adding a new secret to the top of the list.
@@ -89,7 +89,7 @@ secrets:
   # A secret that is used to sign and verify session JWTs. The first item is used for signing. The whole list is used for verifying session JWTs.
   #
   keys:
-    - "change-me"
+    - "CHANGE-ME"
 session:
   ## lifespan ##
   #
@@ -112,7 +112,7 @@ session:
     domain: ""
     ## http_only ##
     #
-    # Sets whether the cookie is a http only cookie or can be read by javascript.
+    # Sets whether the cookie is a http-only cookie or can be accessed by javascript.
     #
     # Default value: true
     #
@@ -139,7 +139,7 @@ session:
 password:
   ## enabled ##
   #
-  # Configures whether password are enabled or not.
+  # Configures whether passwords are enabled or not.
   #
   # Default value: false
   #
@@ -151,24 +151,24 @@ passcode:
   #
   # Default value: 300
   #
-  ttl: 0
+  ttl: 300
   email:
     ## from_address ##
     #
     # Configures the sender of emails sent to the users.
     #
-    from_address: ""
+    from_address: "CHANGE-ME"
     ## from_name ##
     #
     # Configures the sender name of emails sent to the users.
     #
-    from_name: ""
+    from_name: "CHANGE-ME"
   ## smtp ##
   #
-  # Configures the backend which smtp server will be used to sent emails.
+  # Configures the backend which SMTP server will be used to send emails.
   #
   smtp:
-    host: ""
+    host: "CHANGE-ME"
     ## port ##
     #
     # TODO:
@@ -176,24 +176,24 @@ passcode:
     # Default: 465
     #
     port: ""
-    user: ""
-    password: ""
+    user: "CHANGE-ME"
+    password: "CHANGE-ME"
 ## webauthn ##
 #
-# Configures web authentication
+# Configures Web Authentication (WebAuthn).
 #
 webauthn:
   ## timeout ##
   #
-  # Configures how long a web authentication request is valid and the user can confirm it. Value is in milliseconds
+  # Configures how long a WebAuthn request is valid and the user can confirm it. Value is in milliseconds.
   #
   # Default: 60000
   #
-  timeout: 0
+  timeout: 60000
   relying_party:
     ## id ##
     #
-    # ID sets the host on which web authentication can be used.
+    # Sets the host on which WebAuthn should be used.
     #
     # Examples:
     # - localhost
@@ -203,12 +203,17 @@ webauthn:
     id: "localhost"
     ## display_name ##
     #
-    # Sets the name which the web authentication authenticator will show during the ceremony
+    # Sets the service's name that some WebAuthn Authenticators will display to the user during registration and authentication ceremonies.
+    #
+    # Examples:
+    # - Example Project
+    # - Hanko GmbH 
+    # - Acme, Inc.
     #
     display_name: ""
     ## origin ##
     #
-    # Sets the origin of which web authentication can be used.
+    # Sets the origin for which the WebAuthn credentials will be created.
     #
     # Example:
     # - http://localhost
@@ -222,9 +227,9 @@ webauthn:
 
 ### Web Authentication
 
-For most use cases, you just need to add the host of your website / app on which you want to use WebAuthn. Set the id to the host name and set the origin by including the scheme.
+For most use cases, you just need to add the host of your website on which you want to use WebAuthn. Set `id` to the host name and set `origin` to the scheme + host name.
 
-#### Example
+#### Examples
 
 When you have a website hosted at `example.com` and you want to add a login to it that will be available
 at `https://example.com/login`, the WebAuthn config would look like this:
