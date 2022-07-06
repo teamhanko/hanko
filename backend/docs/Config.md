@@ -193,7 +193,7 @@ webauthn:
   relying_party:
     ## id ##
     #
-    # Sets the host on which WebAuthn should be used.
+    # The effective domain the WebAuthn credentials will be bound to.
     #
     # Examples:
     # - localhost
@@ -213,7 +213,8 @@ webauthn:
     display_name: ""
     ## origin ##
     #
-    # Sets the origin for which the WebAuthn credentials will be created.
+    # The origin for which WebAuthn credentials will be accepted by the server. Must include the scheme and can only be the effective domain, 
+    # or a registrable domain suffix of the effective domain, as specified in the id.
     #
     # Example:
     # - http://localhost
@@ -227,7 +228,7 @@ webauthn:
 
 ### Web Authentication
 
-For most use cases, you just need to add the host of your website on which you want to use WebAuthn. Set `id` to the host name and set `origin` to the scheme + host name.
+For most use cases, you just need to add the domain of your website that Hanko will be used with. Set `id` to the domain name and set `origin` by including the protocol.
 
 #### Examples
 
@@ -251,3 +252,15 @@ webauthn:
     display_name: "Example Project"
     origin: "https://login.example.com"
 ```
+
+Given the above scenario, you still may want to bind your users WebAuthn credentials to `example.com` if you plan to add other services on other subdomains later that should be able to use existing credentials. Another reason can be if you want to have the option to move your login from `https://login.example.com` to `https://example.com/login` at some point. Then the WebAuthn config could look like this:
+
+```yaml
+webauthn:
+  relying_party:
+    id: "example.com"
+    display_name: "Example Project"
+    origin: "https://login.example.com"
+```
+
+> **Note**: Currently, only a single origin is supported. We plan to add support for a list of origins at some point.
