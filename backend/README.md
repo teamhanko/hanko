@@ -15,7 +15,7 @@ Hanko backend can be used on its own or in combination with [hanko-js](../hanko-
 ## Upcoming features
 
 - Exponential backoff for password attempts and passcode email sending
-- More tests and code documentation
+- 2FA configurations (optional, mandatory)
 
 ## Basic usage
 
