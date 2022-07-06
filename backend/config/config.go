@@ -27,18 +27,13 @@ type Config struct {
 func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
 	var err error
-	if cfgFile != nil && *cfgFile != "" {
-		if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
-			return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
-		} else {
-			log.Println("Using config file:", *cfgFile)
-		}
+	if cfgFile == nil || *cfgFile == "" {
+		*cfgFile = "./config/config.yaml"
+	}
+	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
+		return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
 	} else {
-		if err = k.Load(file.Provider("./config/config.yaml"), yaml.Parser()); err != nil {
-			return nil, fmt.Errorf("failed to load config from: ./config/config.yaml: %w", err)
-		} else {
-			log.Println("Using config file: ./config/config.yaml")
-		}
+		log.Println("Using config file:", *cfgFile)
 	}
 
 	err = k.Load(env.Provider("", ".", func(s string) string {
