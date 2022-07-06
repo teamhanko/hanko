@@ -22,7 +22,7 @@ server:
     address: ":8000"
     ## cors ##
     #
-    # Configures Cross Origin Resource Sharing for public endpoints.
+    # Cross Origin Resource Sharing for public endpoints.
     #
     cors:
       ## enabled ##
@@ -42,6 +42,10 @@ server:
       expose_headers:
         - ""
       max_age: 0
+  ## private ##
+  #
+  # Configuration for the private API.
+  #
   private:
     ## address ##
     #
@@ -50,7 +54,7 @@ server:
     address: ":8001"
 ## database ##
 #
-# This configures the backend where to persist data.
+# Configures the backend where to persist data.
 #
 database:
   host: "localhost"
@@ -61,7 +65,7 @@ database:
   port: "5432"
   ## dialect ##
   #
-  # This configures the backend which database will be used.
+  # Which database will be used.
   #
   # One of:
   # - cockroach
@@ -76,12 +80,12 @@ database:
 service:
   ## name ##
   #
-  # This is the name of the service. This value will be used in the subject header of emails.
+  # The name of the service. This value will be used in the subject header of emails.
   #
   name: "Example Project"
 ## secrets ##
 #
-# The secrets section configures secrets used for signing. The secrets can be rotated by adding a new secret to the top of the list.
+# Configures secrets used for signing. The secrets can be rotated by adding a new secret to the top of the list.
 #
 secrets:
   ## keys ##
@@ -93,7 +97,7 @@ secrets:
 session:
   ## lifespan ##
   #
-  # Sets how long a session JWT is valid.
+  # How long a session JWT is valid.
   #
   # Default value: 1h
   #
@@ -107,19 +111,19 @@ session:
   cookie:
     ## domain ##
     #
-    # Sets on which domain the cookie will be bound. Does not work cross domain, but only for subdomains.
+    # The domain the cookie will be bound to. Works for subdomains, but not cross-domain.
     #
-    domain: ""
+    domain: "CHANGE-ME"
     ## http_only ##
     #
-    # Sets whether the cookie is a http-only cookie or can be accessed by javascript.
+    # HTTP-only cookies or accessible by javascript.
     #
     # Default value: true
     #
     http_only: true
     ## same_site ##
     #
-    # Configures the same site attribute of the session cookie.
+    # Same-site attribute of the session cookie.
     #
     # Default value: strict
     #
@@ -139,7 +143,7 @@ session:
 password:
   ## enabled ##
   #
-  # Configures whether passwords are enabled or not.
+  # Enables or disables passwords for all users.
   #
   # Default value: false
   #
@@ -147,7 +151,7 @@ password:
 passcode:
   ## ttl ##
   #
-  # Sets how long a passcode is valid. Value is in seconds.
+  # How long a passcode is valid. Value is in seconds.
   #
   # Default value: 300
   #
@@ -155,17 +159,17 @@ passcode:
   email:
     ## from_address ##
     #
-    # Configures the sender of emails sent to the users.
+    # The sender of emails sent to users.
     #
     from_address: "CHANGE-ME"
     ## from_name ##
     #
-    # Configures the sender name of emails sent to the users.
+    # The sender name of emails sent to users.
     #
     from_name: "CHANGE-ME"
   ## smtp ##
   #
-  # Configures the backend which SMTP server will be used to send emails.
+  # SMTP server config to send emails.
   #
   smtp:
     host: "CHANGE-ME"
@@ -185,7 +189,7 @@ passcode:
 webauthn:
   ## timeout ##
   #
-  # Configures how long a WebAuthn request is valid and the user can confirm it. Value is in milliseconds.
+  # How long a WebAuthn request is valid and the user can confirm it. Value is in milliseconds.
   #
   # Default: 60000
   #
@@ -203,7 +207,7 @@ webauthn:
     id: "localhost"
     ## display_name ##
     #
-    # Sets the service's name that some WebAuthn Authenticators will display to the user during registration and authentication ceremonies.
+    # The service's name that some WebAuthn Authenticators will display to the user during registration and authentication ceremonies.
     #
     # Examples:
     # - Example Project
@@ -213,8 +217,8 @@ webauthn:
     display_name: ""
     ## origin ##
     #
-    # The origin for which WebAuthn credentials will be accepted by the server. Must include the scheme and can only be the effective domain, 
-    # or a registrable domain suffix of the effective domain, as specified in the id.
+    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain, 
+    # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
     #
     # Example:
     # - http://localhost
@@ -228,7 +232,7 @@ webauthn:
 
 ### Web Authentication
 
-For most use cases, you just need to add the domain of your website that Hanko will be used with. Set `id` to the domain name and set `origin` by including the protocol.
+For most use cases, you just need the domain of your website that Hanko will be used with. Set `id` to the domain and set `origin` to the domain but include the protocol.
 
 #### Examples
 
@@ -253,7 +257,7 @@ webauthn:
     origin: "https://login.example.com"
 ```
 
-Given the above scenario, you still may want to bind your users WebAuthn credentials to `example.com` if you plan to add other services on other subdomains later that should be able to use existing credentials. Another reason can be if you want to have the option to move your login from `https://login.example.com` to `https://example.com/login` at some point. Then the WebAuthn config could look like this:
+Given the above scenario, you still may want to bind your users WebAuthn credentials to `example.com` if you plan to add other services on other subdomains later that should be able to use existing credentials. Another reason can be if you want to have the option to move your login from `https://login.example.com` to `https://example.com/login` at some point. Then the WebAuthn config would look like this:
 
 ```yaml
 webauthn:
