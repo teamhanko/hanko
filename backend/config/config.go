@@ -127,8 +127,8 @@ func (c *Config) Validate() error {
 
 // Server contains the setting for the public and private server
 type Server struct {
-	Public  ServerSettings
-	Private ServerSettings
+	Public  ServerSettings `yaml:"public" json:"public" koanf:"public"`
+	Private ServerSettings `yaml:"private" json:"private" koanf:"private"`
 }
 
 func (s *Server) Validate() error {
@@ -144,7 +144,7 @@ func (s *Server) Validate() error {
 }
 
 type Service struct {
-	Name string
+	Name string `yaml:"name" json:"name" koanf:"name"`
 }
 
 func (s *Service) Validate() error {
@@ -160,7 +160,7 @@ type Password struct {
 }
 
 type Cookie struct {
-	Domain   string
+	Domain   string `yaml:"domain" json:"domain" koanf:"domain"`
 	HttpOnly bool   `yaml:"http_only" json:"http_only" koanf:"http_only"`
 	SameSite string `yaml:"same_site" json:"same_site" koanf:"same_site"`
 	Secure   bool   `yaml:"secure" json:"secure" koanf:"secure"`
