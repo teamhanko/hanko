@@ -145,12 +145,13 @@ with your own styles.
 The following parts are available:
 
 - `container` - the UI container
+- `headline` - the headline of each page
+- `paragraph` - the paragraph elements
 - `button` - every button element
 - `primary-button` - the primary button
 - `secondary-button` - the secondary button on the email login page
 - `input` - every input field
 - `text-input` - every input field not used for passcodes
-- `paragraph` - the paragraph elements
 - `passcode-input` - the passcode input fields
 - `link` - the links in the footer section
 - `error` - the error message container
@@ -208,7 +209,7 @@ hanko-auth::part(input) {
   color: hsl(33, 93%, 55%);
 }
 
-hanko-auth::part(input)::first-line {
+hanko-auth::part(input-text)::first-line {
   color: hsl(33, 93%, 45%);
 }
 
