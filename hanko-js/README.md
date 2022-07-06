@@ -223,10 +223,10 @@ Result:
 
 ## Browser support
 
-- Chrome
-- Firefox
 - Safari
-- Microsoft Edge
+- Firefox
+- Opera
+- Chromium-based browsers (Chrome, Edge, Brave,...)
 
 ## Bugs
 
