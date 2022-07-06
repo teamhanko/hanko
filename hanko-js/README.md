@@ -201,24 +201,19 @@ hanko-auth {
   --lightness-adjust-light-dark: 30%;
 }
 
-hanko-auth::part(headline) {
-  color: hsl(33, 93%, 55%);
-}
-
-hanko-auth::part(input) {
-  color: hsl(33, 93%, 55%);
-}
-
-hanko-auth::part(input-text)::first-line {
-  color: hsl(33, 93%, 45%);
-}
-
+hanko-auth::part(headline),
+hanko-auth::part(input),
 hanko-auth::part(link) {
   color: hsl(33, 93%, 55%);
 }
 
 hanko-auth::part(link):hover {
   text-decoration: underline;
+}
+
+hanko-auth::part(button):hover,
+hanko-auth::part(input):focus {
+  border-width: 2px;
 }
 ```
 
