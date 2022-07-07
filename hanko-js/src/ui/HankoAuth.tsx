@@ -16,22 +16,32 @@ interface Props {
   lang?: string;
 }
 
-const HankoAuth = ({ api, lang }: Props) => {
+declare interface HankoAuthElement
+  extends preact.JSX.HTMLAttributes<HTMLElement>,
+    Props {}
+
+declare global {
+  // eslint-disable-next-line no-unused-vars
+  namespace JSX {
+    // eslint-disable-next-line no-unused-vars
+    interface IntrinsicElements {
+      "hanko-auth": HankoAuthElement;
+    }
+  }
+}
+
+const HankoAuth = ({ api, lang = "en" }: Props) => {
   return (
     <Fragment>
       <style
         dangerouslySetInnerHTML={{ __html: window._hankoStyle.innerHTML }}
       />
       <AppProvider api={api}>
-        <TranslateProvider
-          translations={translations}
-          lang={lang}
-          fallbackLang={"en"}
-        >
+        <TranslateProvider translations={translations} fallbackLang={"en"}>
           <UserProvider>
             <PasswordProvider>
               <PasscodeProvider>
-                <PageProvider />
+                <PageProvider lang={lang} />
               </PasscodeProvider>
             </PasswordProvider>
           </UserProvider>

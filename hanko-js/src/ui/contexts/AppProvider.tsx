@@ -6,6 +6,7 @@ import { HankoClient, Config } from "../../lib/HankoClient";
 
 interface Props {
   api?: string;
+  lang?: string;
   children: ComponentChildren;
 }
 
