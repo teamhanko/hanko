@@ -40,8 +40,8 @@ We are currently in **Alpha** and may still have critical bugs. Watch our releas
 | ✅ | Customizable CSS |
 | ✅ | 📢 Hanko Beta Release |
 | ⚙️ | Passkey Conditional UI support |
-| ⚙️ | 2FA with FIDO Security Keys and TOTP |
 | ⚙️ | Events API |
+| | 2FA with FIDO Security Keys and TOTP |
 | | Mobile app support |
 | | Sign in with Google/Apple/GitHub |
 
