@@ -37,12 +37,12 @@ We are currently in **Alpha** and may still have critical bugs. Watch our releas
 | ✅ | Admin API |
 | ✅ | 📢 Hanko Alpha Release |
 | ✅ | Hanko web component |
-| ⚙️ | Customizable CSS |
-| | 📢 Hanko Beta Release |
+| ✅ | Customizable CSS |
+| ✅ | 📢 Hanko Beta Release |
 | | Passkey Conditional UI support |
 | | 2FA with FIDO Security Keys and TOTP |
-| | Mobile app support |
 | | Events API |
+| | Mobile app support |
 | | Sign in with Google/Apple/GitHub |
 
 # Quickstart
