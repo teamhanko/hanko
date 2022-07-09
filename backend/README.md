@@ -11,6 +11,7 @@ Hanko backend can be used on its own or in combination with [hanko-js](../hanko-
 - Passwords
 - Email verification
 - JWT management
+- User management
 
 ## Upcoming features
 
