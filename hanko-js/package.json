@@ -20,8 +20,8 @@
         "dist/ui/HankoAuth.d.ts"
       ]
     }
-   },
-    "scripts": {
+  },
+  "scripts": {
     "lint": "eslint 'src/**/*.ts?(x)'",
     "format": "pretty-quick --staged",
     "build": "npx webpack --mode=production",
@@ -31,7 +31,15 @@
   "repository": "github:teamhanko/hanko",
   "author": "Hanko GmbH <developers@hanko.io>",
   "license": "MIT",
-  "keywords": ["hanko", "passkey", "webauthn", "passcode", "password", "login", "register"],
+  "keywords": [
+    "hanko",
+    "passkey",
+    "webauthn",
+    "passcode",
+    "password",
+    "login",
+    "register"
+  ],
   "homepage": "https://hanko.io",
   "devDependencies": {
     "@types/preact-custom-element": "^4.0.1",
@@ -44,8 +52,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "node-sass": "^7.0.1",
-    "sass": "^1.52.3",
+    "sass": "^1.53.0",
     "sass-loader": "^13.0.0",
     "style-loader": "^3.3.1",
     "ts-jest": "^28.0.4",
