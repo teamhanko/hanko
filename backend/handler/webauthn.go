@@ -182,8 +182,8 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 		}
 
 		allowList := make([]protocol.CredentialDescriptor, len(credentials))
-		for i, credential := range credentials {
-			c := intern.WebauthnCredentialFromModel(&credential)
+		for i := range credentials {
+			c := intern.WebauthnCredentialFromModel(&credentials[i])
 			allowList[i] = c.Descriptor()
 		}
 
