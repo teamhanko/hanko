@@ -63,6 +63,10 @@ export interface Passcode {
   ttl: number;
 }
 
+interface Attestation extends PublicKeyCredentialWithAttestationJSON {
+  transports: string[];
+}
+
 export class HankoClient {
   config: ConfigClient;
   user: UserClient;
@@ -296,9 +300,11 @@ class WebauthnClient extends AbstractClient {
         .catch((e) => {
           throw new WebAuthnRequestCancelledError(e);
         })
-        .then((attestation: PublicKeyCredentialWithAttestationJSON) => {
-          // @ts-ignore
+        .then((attestation: Attestation) => {
+          // The generated PublicKeyCredentialWithAttestationJSON object does not align with the API. The list of
+          // supported transports must be available under a different path.
           attestation.transports = attestation.response.transports;
+
           return this.client.post(
             "/webauthn/registration/finalize",
             attestation
