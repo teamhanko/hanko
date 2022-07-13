@@ -47,6 +47,17 @@ func (p *webauthnCredentialPersister) Create(credential models.WebauthnCredentia
 		return fmt.Errorf("credential object validation failed: %w", vErr)
 	}
 
+	// Eager creation seems to be broken, so we need to store the transports separately.
+	// See: https://github.com/gobuffalo/pop/issues/608
+	vErr, err = p.db.ValidateAndCreate(&credential.Transports)
+	if err != nil {
+		return fmt.Errorf("failed to store credential transport: %w", err)
+	}
+
+	if vErr != nil && vErr.HasAny() {
+		return fmt.Errorf("credential transport validation failed: %w", vErr)
+	}
+
 	return nil
 }
 
@@ -74,7 +85,7 @@ func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 
 func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
 	var credentials []models.WebauthnCredential
-	err := p.db.Where("user_id = ?", &userId).All(&credentials)
+	err := p.db.Eager().Where("user_id = ?", &userId).All(&credentials)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil
 	}
