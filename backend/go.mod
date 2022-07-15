@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-webauthn/webauthn v0.3.4
-	github.com/gobuffalo/pop/v6 v6.0.4
+	github.com/gobuffalo/pop/v6 v6.0.6
 	github.com/gobuffalo/validate/v3 v3.3.2
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/knadh/koanf v1.4.2
@@ -34,13 +34,13 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/go-webauthn/revoke v0.1.2 // indirect
 	github.com/gobuffalo/envy v1.10.1 // indirect
-	github.com/gobuffalo/fizz v1.14.0 // indirect
+	github.com/gobuffalo/fizz v1.14.2 // indirect
 	github.com/gobuffalo/flect v0.2.5 // indirect
 	github.com/gobuffalo/github_flavored_markdown v1.1.1 // indirect
-	github.com/gobuffalo/helpers v0.6.4 // indirect
+	github.com/gobuffalo/helpers v0.6.5 // indirect
 	github.com/gobuffalo/nulls v0.4.1 // indirect
-	github.com/gobuffalo/plush/v4 v4.1.11 // indirect
-	github.com/gobuffalo/tags/v3 v3.1.2 // indirect
+	github.com/gobuffalo/plush/v4 v4.1.13 // indirect
+	github.com/gobuffalo/tags/v3 v3.1.3 // indirect
 	github.com/goccy/go-json v0.9.7 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.4.2 // indirect
@@ -84,7 +84,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
+	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
