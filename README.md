@@ -26,7 +26,7 @@ With most devices now shipping with passkey support and biometric sensors like T
 **Build your passkey login in just 5 minutes – with two lines of code – and never look back.**
 
 # Roadmap
-We are currently in **Alpha** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
+We are currently in **Beta** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
 
 | Status | Feature |
 | :---: | :--- |
