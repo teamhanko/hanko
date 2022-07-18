@@ -37,6 +37,8 @@ func (p *webauthnCredentialPersister) Get(id string) (*models.WebauthnCredential
 	return &credential, nil
 }
 
+// Create stores a new `WebauthnCredential`. Please run inside a transaction, since `Transports` associated with the
+// credential are stored separately in another table.
 func (p *webauthnCredentialPersister) Create(credential models.WebauthnCredential) error {
 	vErr, err := p.db.ValidateAndCreate(&credential)
 	if err != nil {
