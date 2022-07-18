@@ -303,8 +303,9 @@ func (s *Secrets) Validate() error {
 }
 
 type Session struct {
-	Lifespan string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
-	Cookie   Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
+	EnableAuthToken bool   `yaml:"enable_auth_token" json:"enable_auth_token" koanf:"enable_auth_token"`
+	Lifespan        string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
+	Cookie          Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
 }
 
 func (s *Session) Validate() error {

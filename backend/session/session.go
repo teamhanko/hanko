@@ -14,7 +14,7 @@ import (
 type Manager interface {
 	GenerateJWT(uuid.UUID) (string, error)
 	Verify(string) (jwt.Token, error)
-	GenerateCookie(userId uuid.UUID) (*http.Cookie, error)
+	GenerateCookie(token string) (*http.Cookie, error)
 }
 
 // Manager is used to create and verify session JWTs
@@ -100,15 +100,10 @@ func (g *manager) Verify(token string) (jwt.Token, error) {
 }
 
 // GenerateCookie creates a new session cookie for the given user
-func (g *manager) GenerateCookie(userId uuid.UUID) (*http.Cookie, error) {
-	jwt, err := g.GenerateJWT(userId)
-	if err != nil {
-		return nil, err
-	}
-
+func (g *manager) GenerateCookie(token string) (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hanko",
-		Value:    jwt,
+		Value:    token,
 		Domain:   g.cookieConfig.Domain,
 		Path:     "/",
 		Secure:   g.cookieConfig.Secure,

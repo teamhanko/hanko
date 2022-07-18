@@ -28,11 +28,12 @@ type PasscodeHandler struct {
 	serviceConfig     config.Service
 	TTL               int
 	sessionManager    session.Manager
+	cfg               *config.Config
 }
 
 var maxPasscodeTries = 3
 
-func NewPasscodeHandler(config config.Passcode, serviceConfig config.Service, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
+func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new renderer: %w", err)
@@ -42,10 +43,11 @@ func NewPasscodeHandler(config config.Passcode, serviceConfig config.Service, pe
 		renderer:          renderer,
 		passcodeGenerator: crypto.NewPasscodeGenerator(),
 		persister:         persister,
-		emailConfig:       config.Email,
-		serviceConfig:     serviceConfig,
-		TTL:               config.TTL,
+		emailConfig:       cfg.Passcode.Email,
+		serviceConfig:     cfg.Service,
+		TTL:               cfg.Passcode.TTL,
 		sessionManager:    sessionManager,
+		cfg:               cfg,
 	}, nil
 }
 
@@ -209,12 +211,22 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			}
 		}
 
-		cookie, err := h.sessionManager.GenerateCookie(passcode.UserId)
+		token, err := h.sessionManager.GenerateJWT(passcode.UserId)
+		if err != nil {
+			return fmt.Errorf("failed to generate jwt: %w", err)
+		}
+
+		cookie, err := h.sessionManager.GenerateCookie(token)
 		if err != nil {
 			return fmt.Errorf("failed to create session token: %w", err)
 		}
 
 		c.SetCookie(cookie)
+
+		if h.cfg.Session.EnableAuthToken {
+			c.Response().Header().Set("X-Auth-Token", token)
+		}
+
 		return c.JSON(http.StatusOK, dto.PasscodeReturn{
 			Id:        passcode.ID.String(),
 			TTL:       passcode.Ttl,

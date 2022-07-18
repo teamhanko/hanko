@@ -24,7 +24,7 @@ var userIdBytes = []byte{0xec, 0x4e, 0xf0, 0x49, 0x5b, 0x88, 0x43, 0x21, 0xa1, 0
 
 func TestNewWebauthnHandler(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{})
 	assert.NoError(t, err)
 	assert.NotEmpty(t, handler)
 }
@@ -40,7 +40,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil)
-	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.BeginRegistration(c)) {
@@ -49,8 +49,8 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, creationOptions.Response.Challenge)
 		assert.Equal(t, userIdBytes, creationOptions.Response.User.ID)
-		assert.Equal(t, defaultConfig.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
-		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementPreferred)
+		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
+		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
 		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
 	}
@@ -76,7 +76,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, sessionData, nil)
-	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.FinishRegistration(c)) {
@@ -107,7 +107,7 @@ func TestWebauthnHandler_BeginAuthentication(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, sessionData, nil)
-	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.BeginAuthentication(c)) {
@@ -117,7 +117,7 @@ func TestWebauthnHandler_BeginAuthentication(t *testing.T) {
 		assert.NoError(t, err)
 		assert.NotEmpty(t, assertionOptions.Response.Challenge)
 		assert.Equal(t, assertionOptions.Response.UserVerification, protocol.VerificationRequired)
-		assert.Equal(t, defaultConfig.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
+		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
 	}
 }
 
@@ -139,7 +139,7 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil)
-	handler, err := NewWebauthnHandler(defaultConfig, p, sessionManager{})
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{})
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.FinishAuthentication(c)) {
@@ -166,14 +166,16 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 	}
 }
 
-var defaultConfig = config.WebauthnSettings{
-	RelyingParty: config.RelyingParty{
-		Id:          "localhost",
-		DisplayName: "Test Relying Party",
-		Icon:        "",
-		Origin:      "http://localhost:8080",
+var defaultConfig = config.Config{
+	Webauthn: config.WebauthnSettings{
+		RelyingParty: config.RelyingParty{
+			Id:          "localhost",
+			DisplayName: "Test Relying Party",
+			Icon:        "",
+			Origin:      "http://localhost:8080",
+		},
+		Timeout: 60000,
 	},
-	Timeout: 60000,
 }
 
 type sessionManager struct {
@@ -183,10 +185,10 @@ func (s sessionManager) GenerateJWT(uuid uuid.UUID) (string, error) {
 	return userId, nil
 }
 
-func (s sessionManager) GenerateCookie(uuid uuid.UUID) (*http.Cookie, error) {
+func (s sessionManager) GenerateCookie(token string) (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hanko",
-		Value:    uuid.String(),
+		Value:    token,
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
