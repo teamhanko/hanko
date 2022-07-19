@@ -18,6 +18,10 @@ func main() {
 
 	hankoUrl := getEnv("HANKO_URL")
 	hankoElementUrl := getEnv("HANKO_ELEMENT_URL")
+	hankoUrlInternal := hankoUrl
+	if value, ok := os.LookupEnv("HANKO_URL_INTERNAL"); ok {
+		hankoUrlInternal = value
+	}
 
 	e := echo.New()
 
@@ -38,7 +42,7 @@ func main() {
 		}
 		return c.Render(http.StatusOK, "index.html", &indexData)
 	})
-	e.File("/secured", "public/html/secured.html", middleware.SessionMiddleware())
+	e.File("/secured", "public/html/secured.html", middleware.SessionMiddleware(hankoUrlInternal))
 	e.File("/unauthorized", "public/html/unauthorized.html")
 
 	e.GET("/logout", func(c echo.Context) error {
