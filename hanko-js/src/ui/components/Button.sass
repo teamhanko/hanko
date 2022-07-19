@@ -1,0 +1,74 @@
+@use 'default'
+
+.button
+  flex-grow: 1
+  outline: none
+  cursor: pointer
+  transition: 0.1s ease-out
+
+  &:disabled
+    cursor: default
+
+  &.primary
+    @include default.font
+    color: default.$primary-button-color
+    background: default.$primary-button-background
+    border-width: default.$primary-button-border-width
+    border-style: default.$primary-button-border-style
+    border-color: default.$primary-button-border-color
+    border-radius: default.$border-radius
+    height: default.$input-height
+    margin: default.$item-margin
+
+  &.primary:hover
+    color: default.$primary-button-color
+    background: default.$primary-button-background-hover
+    border-width: default.$primary-button-border-width-hover
+    border-style: default.$primary-button-border-style-hover
+    border-color: default.$primary-button-border-color-hover
+
+  &.primary:focus
+    color: default.$primary-button-color-focus
+    background: default.$primary-button-background-focus
+    border-width: default.$primary-button-border-width-focus
+    border-style: default.$primary-button-border-style-focus
+    border-color: default.$primary-button-border-color-focus
+
+  &.primary:disabled
+    color: default.$primary-button-color-disabled
+    background: default.$primary-button-background-disabled
+    border-width: default.$primary-button-border-width-disabled
+    border-style: default.$primary-button-border-style-disabled
+    border-color: default.$primary-button-border-color-disabled
+
+  &.secondary
+    @include default.font
+    color: default.$secondary-button-color
+    background: default.$secondary-button-background
+    border-width: default.$secondary-button-border-width
+    border-style: default.$secondary-button-border-style
+    border-color: default.$secondary-button-border-color
+    border-radius: default.$border-radius
+    height: default.$input-height
+    margin: default.$item-margin
+
+  &.secondary:hover
+    color: default.$secondary-button-color
+    background: default.$secondary-button-background-hover
+    border-width: default.$secondary-button-border-width-hover
+    border-style: default.$secondary-button-border-style-hover
+    border-color: default.$secondary-button-border-color-hover
+
+  &.secondary:focus
+    color: default.$secondary-button-color-focus
+    background: default.$secondary-button-background-focus
+    border-width: default.$secondary-button-border-width-focus
+    border-style: default.$secondary-button-border-style-focus
+    border-color: default.$secondary-button-border-color-focus
+
+  &.secondary:disabled
+    color: default.$secondary-button-color-disabled
+    background: default.$secondary-button-background-disabled
+    border-width: default.$secondary-button-border-width-disabled
+    border-style: default.$secondary-button-border-style-disabled
+    border-color: default.$secondary-button-border-color-disabled

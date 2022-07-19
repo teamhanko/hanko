@@ -1,0 +1,17 @@
+@use 'default'
+
+.errorMessage
+  @include default.font
+  color: default.$error-color
+  background: default.$error-background
+  border: default.$error-border
+  border-radius: default.$border-radius
+  padding: default.$error-padding
+  margin: default.$item-margin
+
+  display: flex
+  align-items: center
+  box-sizing: border-box
+
+  &[hidden]
+    display: none

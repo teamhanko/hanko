@@ -10,7 +10,7 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.css$/,
+        test: /\.(sass)$/,
         use: [
           {
             loader: "style-loader",
@@ -28,6 +28,12 @@ module.exports = {
               importLoaders: 1,
               modules: true,
             }
+          },
+          {
+            loader: "sass-loader",
+            options: {
+               sourceMap: true,
+            }
           }
         ]
       },
@@ -38,7 +44,7 @@ module.exports = {
       '.ts',
       '.tsx',
       '.js',
-      '.css',
+      '.sass',
       "declarations.d.ts"
     ],
   },

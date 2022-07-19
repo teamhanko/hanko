@@ -149,7 +149,9 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
 	}
 
-	return h.persister.Transaction(func(tx *pop.Connection) error {
+	// only if an internal server occurs the transaction should be rolled back
+	var businessError error
+	transactionError := h.persister.Transaction(func(tx *pop.Connection) error {
 		passcodePersister := h.persister.GetPasscodePersisterWithConnection(tx)
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
 		passcode, err := passcodePersister.Get(passcodeId)
@@ -157,12 +159,14 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get passcode: %w", err)
 		}
 		if passcode == nil {
-			return dto.NewHTTPError(http.StatusNotFound, "passcode not found")
+			businessError = dto.NewHTTPError(http.StatusNotFound, "passcode not found")
+			return nil
 		}
 
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
 		if lastVerificationTime.Before(startTime) {
-			return dto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
+			businessError = dto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
+			return nil
 		}
 
 		err = bcrypt.CompareHashAndPassword([]byte(passcode.Code), []byte(body.Code))
@@ -174,7 +178,8 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to delete passcode: %w", err)
 				}
-				return dto.NewHTTPError(http.StatusGone, "max attempts reached")
+				businessError = dto.NewHTTPError(http.StatusGone, "max attempts reached")
+				return nil
 			}
 
 			err = passcodePersister.Update(*passcode)
@@ -182,7 +187,8 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
-			return dto.NewHTTPError(http.StatusUnauthorized)
+			businessError = dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
+			return nil
 		}
 
 		err = passcodePersister.Delete(*passcode)
@@ -215,4 +221,10 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			CreatedAt: passcode.CreatedAt,
 		})
 	})
+
+	if businessError != nil {
+		return businessError
+	}
+
+	return transactionError
 }

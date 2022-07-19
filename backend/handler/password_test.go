@@ -8,6 +8,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
@@ -47,10 +48,84 @@ func TestPasswordHandler_Set_Create(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	if assert.NoError(t, handler.Set(c)) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
+	}
+}
+
+func TestPasswordHandler_Set_Create_PasswordTooShort(t *testing.T) {
+	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	body := PasswordSetBody{UserID: userId.String(), Password: "very"}
+	bodyJson, err := json.Marshal(body)
+	assert.NoError(t, err)
+	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	token := jwt.New()
+	err = token.Set(jwt.SubjectKey, userId.String())
+	require.NoError(t, err)
+	c.Set("session", token)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{MinPasswordLength: 8})
+
+	err = handler.Set(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
+	}
+}
+
+func TestPasswordHandler_Set_Create_PasswordTooLong(t *testing.T) {
+	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	body := PasswordSetBody{UserID: userId.String(), Password: "thisIsAVeryLongPasswordThatIsUsedToTestIfAnErrorWillBeReturnedForTooLongPasswords"}
+	bodyJson, err := json.Marshal(body)
+	assert.NoError(t, err)
+	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	token := jwt.New()
+	err = token.Set(jwt.SubjectKey, userId.String())
+	require.NoError(t, err)
+	c.Set("session", token)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{MinPasswordLength: 8})
+
+	err = handler.Set(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusBadRequest, httpError.Code)
 	}
 }
 
@@ -98,7 +173,7 @@ func TestPasswordHandler_Set_Update(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	if assert.NoError(t, handler.Set(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -123,7 +198,7 @@ func TestPasswordHandler_Set_UserNotFound(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -176,7 +251,7 @@ func TestPasswordHandler_Set_TokenHasWrongSubject(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -201,7 +276,7 @@ func TestPasswordHandler_Set_BadRequestBody(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -248,7 +323,7 @@ func TestPasswordHandler_Login(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	if assert.NoError(t, handler.Login(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -301,7 +376,7 @@ func TestPasswordHandler_Login_WrongPassword(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	err = handler.Login(c)
 	if assert.Error(t, err) {
@@ -321,11 +396,49 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{})
+	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
 
 	err := handler.Login(c)
 	if assert.Error(t, err) {
 		httpError := dto.ToHttpError(err)
 		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+	}
+}
+
+// TestMaxPasswordLength is only for documentation purposes, because it is nowhere documented, that the bcrypt
+// implementation of golang truncates the password silent to 72 bytes.
+func TestMaxPasswordLength(t *testing.T) {
+	tests := []struct {
+		name             string
+		creationPassword string
+		loginPassword    string
+		wantErr          bool
+	}{
+		{
+			name:             "login password 72 bytes long",
+			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+			loginPassword:    "012345678901234567890123456789012345678901234567890123456789012345678901",
+			wantErr:          false,
+		},
+		{
+			name:             "login password 71 bytes long",
+			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+			loginPassword:    "01234567890123456789012345678901234567890123456789012345678901234567890",
+			wantErr:          true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			hash, err := bcrypt.GenerateFromPassword([]byte(test.creationPassword), 12)
+			assert.NoError(t, err)
+
+			err = bcrypt.CompareHashAndPassword(hash, []byte(test.loginPassword))
+			if test.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
 	}
 }

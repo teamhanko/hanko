@@ -1,6 +1,12 @@
 import * as preact from "preact";
 import { createContext, h } from "preact";
-import { useCallback, useContext, useMemo, useState } from "preact/compat";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/compat";
 import { HankoError } from "../../lib/Errors";
 
 import { User } from "../../lib/HankoClient";
@@ -19,6 +25,14 @@ import RegisterPassword from "./../pages/RegisterPassword";
 import RegisterAuthenticator from "./../pages/RegisterAuthenticator";
 import Error from "./../pages/Error";
 import Container from "../components/Container";
+import {
+  TranslateContext,
+  TranslateProvider,
+} from "@denysvuika/preact-translate";
+
+interface Props {
+  lang?: string;
+}
 
 interface Context {
   emitSuccessEvent: () => void;
@@ -41,11 +55,11 @@ interface Context {
 
 export const RenderContext = createContext<Context>(null);
 
-const PageProvider = () => {
+const PageProvider = ({ lang }: Props) => {
   const { hanko } = useContext(AppContext);
   const { passwordInitialize } = useContext(PasswordContext);
   const { passcodeInitialize } = useContext(PasscodeContext);
-
+  const { setLang } = useContext(TranslateContext);
   const [page, setPage] = useState<h.JSX.Element>(<Initialize />);
   const [loginFinished, setLoginFinished] = useState<boolean>(false);
 
@@ -158,6 +172,10 @@ const PageProvider = () => {
     },
     [pages]
   );
+
+  useEffect(() => {
+    setLang(lang);
+  }, [lang, setLang]);
 
   return (
     <RenderContext.Provider

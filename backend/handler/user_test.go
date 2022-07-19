@@ -62,6 +62,42 @@ func TestUserHandler_Create(t *testing.T) {
 	}
 }
 
+func TestUserHandler_Create_CaseInsensitive(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+
+	body := UserCreateBody{Email: "JANE.DOE@EXAMPLE.COM"}
+	bodyJson, err := json.Marshal(body)
+	assert.NoError(t, err)
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
+
+	if assert.NoError(t, handler.Create(c)) {
+		user := models.User{}
+		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		assert.NoError(t, err)
+		assert.False(t, user.ID.IsNil())
+		assert.Equal(t, strings.ToLower(body.Email), user.Email)
+	}
+}
+
 func TestUserHandler_Create_UserExists(t *testing.T) {
 	userId, _ := uuid.NewV4()
 	users := []models.User{
@@ -87,6 +123,39 @@ func TestUserHandler_Create_UserExists(t *testing.T) {
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
+
+	err = handler.Create(c)
+	if assert.Error(t, err) {
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusConflict, httpError.Code)
+	}
+}
+
+func TestUserHandler_Create_UserExists_CaseInsensitive(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		func() models.User {
+			return models.User{
+				ID:        userId,
+				Email:     "john.doe@example.com",
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			}
+		}(),
+	}
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	body := UserCreateBody{Email: "JOHN.DOE@EXAMPLE.COM"}
+	bodyJson, err := json.Marshal(body)
+	assert.NoError(t, err)
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
 
 	err = handler.Create(c)
 	if assert.Error(t, err) {
@@ -288,7 +357,8 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
-		assert.Equal(t, http.StatusText(http.StatusNotFound), err.Error())
+		httpError := dto.ToHttpError(err)
+		assert.Equal(t, http.StatusNotFound, httpError.Code)
 	}
 }
 
@@ -312,6 +382,40 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
+
+	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		response := struct {
+			UserId   string `json:"id"`
+			Verified bool   `json:"verified"`
+		}{}
+		err := json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, users[0].ID.String(), response.UserId)
+		assert.Equal(t, users[0].Verified, response.Verified)
+	}
+}
+
+func TestUserHandler_GetUserIdByEmail_CaseInsensitive(t *testing.T) {
+	userId, _ := uuid.NewV4()
+	users := []models.User{
+		{
+			ID:        userId,
+			Email:     "john.doe@example.com",
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+			Verified:  true,
+		},
+	}
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "JOHN.DOE@EXAMPLE.COM"}`))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(p)
 
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)

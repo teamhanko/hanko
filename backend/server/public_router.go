@@ -50,7 +50,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	}
 
 	if cfg.Password.Enabled {
-		passwordHandler := handler.NewPasswordHandler(persister, sessionManager)
+		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg.Password)
 
 		password := e.Group("/password")
 		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))

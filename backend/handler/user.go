@@ -13,6 +13,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
+	"strings"
 )
 
 type UserHandler struct {
@@ -42,6 +43,8 @@ func (h *UserHandler) Create(c echo.Context) error {
 	if err := c.Validate(body); err != nil {
 		return dto.ToHttpError(err)
 	}
+
+	body.Email = strings.ToLower(body.Email)
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		user, err := h.persister.GetUserPersisterWithConnection(tx).GetByEmail(body.Email)
@@ -89,7 +92,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound)
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	return c.JSON(http.StatusOK, user)
@@ -109,13 +112,13 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	user, err := h.persister.GetUserPersister().GetByEmail(request.Email)
+	user, err := h.persister.GetUserPersister().GetByEmail(strings.ToLower(request.Email))
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound)
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	return c.JSON(http.StatusOK, struct {

@@ -118,6 +118,40 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 	}
 }
 
+func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
+	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
+	require.NoError(t, err)
+
+	body := dto.PasscodeFinishRequest{
+		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
+		Code: "012345",
+	}
+	bodyJson, err := json.Marshal(body)
+	require.NoError(t, err)
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	for i := 0; i < 3; i++ {
+		req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
+		req.Header.Set("Content-Type", "application/json")
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		err = passcodeHandler.Finish(c)
+		if i < 2 {
+			if assert.Error(t, err) {
+				httpError := dto.ToHttpError(err)
+				assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+			}
+		} else {
+			if assert.Error(t, err) {
+				httpError := dto.ToHttpError(err)
+				assert.Equal(t, http.StatusGone, httpError.Code)
+			}
+		}
+	}
+}
+
 func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
 	passcodeHandler, err := NewPasscodeHandler(config.Passcode{}, config.Service{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil), sessionManager{}, mailer{})
 	require.NoError(t, err)

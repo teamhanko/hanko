@@ -14,42 +14,37 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server       Server
-	Webauthn     WebauthnSettings
-	Passcode     Passcode
-	Password     Password
-	Database     Database
-	Secrets      Secrets
-	Service      Service
-	Session      Session
-	Registration Registration
+	Server       Server           `yaml:"server" json:"server" koanf:"server"`
+	Webauthn     WebauthnSettings `yaml:"webauthn" json:"webauthn" koanf:"webauthn"`
+	Passcode     Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password     Password         `yaml:"password" json:"password" koanf:"password"`
+	Database     Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets      Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service      Service          `yaml:"service" json:"service" koanf:"service"`
+	Session      Session          `yaml:"session" json:"session" koanf:"session"`
+	Registration Registration     `yaml:"registration" json:"registration" koanf:"registration"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
 	var err error
-	if cfgFile != nil && *cfgFile != "" {
-		if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err == nil {
-			log.Println("Using config file:", *cfgFile)
-		} else {
-			return nil, fmt.Errorf("failed to load config from: %s", *cfgFile)
-		}
+	if cfgFile == nil || *cfgFile == "" {
+		*cfgFile = "./config/config.yaml"
+	}
+	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
+		return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
 	} else {
-		if err = k.Load(file.Provider("./config/config.yaml"), yaml.Parser()); err == nil {
-			log.Println("Using config file:", "./config/config.yaml")
-		} else {
-			return nil, errors.New("failed to load config from: ./config/config.yaml")
-		}
+		log.Println("Using config file:", *cfgFile)
 	}
 
 	err = k.Load(env.Provider("", ".", func(s string) string {
 		return strings.Replace(strings.ToLower(s), "_", ".", -1)
 	}), nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load config from env vars")
+		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 
-	c := defaultConfig()
+	c := DefaultConfig()
 	err = k.Unmarshal("", c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
@@ -58,7 +53,7 @@ func Load(cfgFile *string) (*Config, error) {
 	return c, nil
 }
 
-func defaultConfig() *Config {
+func DefaultConfig() *Config {
 	return &Config{
 		Server: Server{
 			Public: ServerSettings{
@@ -81,6 +76,9 @@ func defaultConfig() *Config {
 				Port: "465",
 			},
 			TTL: 300,
+		},
+		Password: Password{
+			MinPasswordLength: 8,
 		},
 		Database: Database{
 			Database: "hanko",
@@ -135,8 +133,8 @@ func (c *Config) Validate() error {
 
 // Server contains the setting for the public and private server
 type Server struct {
-	Public  ServerSettings
-	Private ServerSettings
+	Public  ServerSettings `yaml:"public" json:"public" koanf:"public"`
+	Private ServerSettings `yaml:"private" json:"private" koanf:"private"`
 }
 
 func (s *Server) Validate() error {
@@ -152,7 +150,7 @@ func (s *Server) Validate() error {
 }
 
 type Service struct {
-	Name string
+	Name string `yaml:"name" json:"name" koanf:"name"`
 }
 
 func (s *Service) Validate() error {
@@ -163,31 +161,32 @@ func (s *Service) Validate() error {
 }
 
 type Password struct {
-	Enabled bool `json:"enabled"`
+	Enabled           bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	MinPasswordLength int  `yaml:"min_password_length" json:"min_password_length" koanf:"min_password_length"`
 }
 
 type Cookie struct {
-	Domain   string
-	HttpOnly bool   `koanf:"http_only"`
-	SameSite string `koanf:"same_site"`
-	Secure   bool   `koanf:"secure"`
+	Domain   string `yaml:"domain" json:"domain" koanf:"domain"`
+	HttpOnly bool   `yaml:"http_only" json:"http_only" koanf:"http_only"`
+	SameSite string `yaml:"same_site" json:"same_site" koanf:"same_site"`
+	Secure   bool   `yaml:"secure" json:"secure" koanf:"secure"`
 }
 
 type ServerSettings struct {
 	// The Address to listen on in the form of host:port
 	// See net.Dial for details of the address format.
-	Address string
-	Cors    Cors
+	Address string `yaml:"address" json:"address" koanf:"address"`
+	Cors    Cors   `yaml:"cors" json:"cors" koanf:"cors"`
 }
 
 type Cors struct {
-	Enabled          bool
-	AllowCredentials bool     `koanf:"allow_credentials"`
-	AllowOrigins     []string `koanf:"allow_origins"`
-	AllowMethods     []string `koanf:"allow_methods"`
-	AllowHeaders     []string `koanf:"allow_headers"`
-	ExposeHeaders    []string `koanf:"expose_headers"`
-	MaxAge           int      `koanf:"max_age"`
+	Enabled          bool     `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	AllowCredentials bool     `yaml:"allow_credentials" json:"allow_credentials" koanf:"allow_credentials"`
+	AllowOrigins     []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins"`
+	AllowMethods     []string `yaml:"allow_methods" json:"allow_methods" koanf:"allow_methods"`
+	AllowHeaders     []string `yaml:"allow_headers" json:"allow_headers" koanf:"allow_headers"`
+	ExposeHeaders    []string `yaml:"expose_headers" json:"expose_headers" koanf:"expose_headers"`
+	MaxAge           int      `yaml:"max_age" json:"max_age" koanf:"max_age"`
 }
 
 func (s *ServerSettings) Validate() error {
@@ -199,8 +198,8 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty RelyingParty `koanf:"relying_party"`
-	Timeout      int
+	RelyingParty RelyingParty `yaml:"relying_party" json:"relying_party" koanf:"relying_party"`
+	Timeout      int          `yaml:"timeout" json:"timeout" koanf:"timeout"`
 }
 
 // Validate does not need to validate the config, because the library does this already
@@ -210,18 +209,18 @@ func (r *WebauthnSettings) Validate() error {
 
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
-	Id          string
-	DisplayName string `koanf:"display_name"`
-	Icon        string
-	Origin      string
+	Id          string `yaml:"id" json:"id" koanf:"id"`
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	Icon        string `yaml:"icon" json:"icon" koanf:"icon"`
+	Origin      string `yaml:"origin" json:"origin" koanf:"origin"`
 }
 
 // SMTP Server Settings for sending passcodes
 type SMTP struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
+	Host     string `yaml:"host" json:"host" koanf:"host"`
+	Port     string `yaml:"port" json:"port" koanf:"port"`
+	User     string `yaml:"user" json:"user" koanf:"user"`
+	Password string `yaml:"password" json:"password" koanf:"password"`
 }
 
 func (s *SMTP) Validate() error {
@@ -235,8 +234,8 @@ func (s *SMTP) Validate() error {
 }
 
 type Email struct {
-	FromAddress string `koanf:"from_address"`
-	FromName    string `koanf:"from_name"`
+	FromAddress string `yaml:"from_address" json:"from_address" koanf:"from_address"`
+	FromName    string `yaml:"from_name" json:"from_name" koanf:"from_name"`
 }
 
 func (e *Email) Validate() error {
@@ -247,9 +246,9 @@ func (e *Email) Validate() error {
 }
 
 type Passcode struct {
-	Email Email
-	Smtp  SMTP
-	TTL   int
+	Email Email `yaml:"email" json:"email" koanf:"email"`
+	Smtp  SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
+	TTL   int   `yaml:"ttl" json:"ttl" koanf:"ttl"`
 }
 
 func (p *Passcode) Validate() error {
@@ -266,12 +265,12 @@ func (p *Passcode) Validate() error {
 
 // Database connection settings
 type Database struct {
-	Database string `json:"database"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
-	Dialect  string `json:"dialect"`
+	Database string `yaml:"database" json:"database" koanf:"database"`
+	User     string `yaml:"user" json:"user" koanf:"user"`
+	Password string `yaml:"password" json:"password" koanf:"password"`
+	Host     string `yaml:"host" json:"host" koanf:"host"`
+	Port     string `yaml:"port" json:"port" koanf:"port"`
+	Dialect  string `yaml:"dialect" json:"dialect" koanf:"dialect"`
 }
 
 func (d *Database) Validate() error {
@@ -299,7 +298,7 @@ type Secrets struct {
 	// The first key in the list is the one getting used for signing. If you want to use a new key, add it to the top of the list.
 	// You can use this list for key rotation.
 	// Each key must be at least 16 characters long.
-	Keys []string `json:"keys"`
+	Keys []string `yaml:"keys" json:"keys" koanf:"keys"`
 }
 
 func (s *Secrets) Validate() error {
@@ -310,8 +309,8 @@ func (s *Secrets) Validate() error {
 }
 
 type Session struct {
-	Lifespan string
-	Cookie   Cookie
+	Lifespan string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
+	Cookie   Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
 }
 
 func (s *Session) Validate() error {
@@ -323,7 +322,7 @@ func (s *Session) Validate() error {
 }
 
 type Registration struct {
-	EmailVerification EmailVerification `koanf:"email_verification"`
+	EmailVerification EmailVerification `yaml:"email_verification" json:"email_verification" koanf:"email_verification"`
 }
 
 type EmailVerification struct {

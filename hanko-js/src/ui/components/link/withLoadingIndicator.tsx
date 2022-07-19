@@ -7,7 +7,7 @@ import LoadingIndicator, {
   Props as LoadingIndicatorProps,
 } from "../LoadingIndicator";
 
-import styles from "./withLoadingIndicator.module.css";
+import styles from "./withLoadingIndicator.sass";
 
 export interface Props {
   swap?: boolean;
@@ -30,7 +30,6 @@ const linkWithLoadingIndicator = <
         <LoadingIndicator
           isLoading={props.isLoading}
           isSuccess={props.isSuccess}
-          useSecondaryStyles
           fadeOut
         />
         <LinkComponent {...props} />
