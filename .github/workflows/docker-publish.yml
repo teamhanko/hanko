@@ -9,7 +9,7 @@ on:
   schedule:
     - cron: '41 3 * * *'
   push:
-    branches: [ feat-example-generalized ]
+    branches: [ main, feat-example-generalized ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
@@ -30,9 +30,9 @@ jobs:
       matrix:
         include:
           - dockerfile: ./backend/Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+            image: ghcr.io/teamhanko/hanko
           - dockerfile: ./example/Dockerfile
-            image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-example
+            image: ghcr.io/teamhanko/hanko/example
     permissions:
       contents: read
       packages: write
