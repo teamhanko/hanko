@@ -29,9 +29,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./backend/Dockerfile
+          - context: ./backend
             image: ghcr.io/teamhanko/hanko
-          - dockerfile: ./example/Dockerfile
+          - context: ./example
             image: ghcr.io/teamhanko/hanko/example
     permissions:
       contents: read
@@ -72,8 +72,8 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v2.10.0
         with:
-          context: ./
-          file: ${{ matrix.dockerfile }}
+          context: ${{ matrix.context }}
+          file: Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
