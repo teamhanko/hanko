@@ -155,11 +155,42 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 	})
 }
 
+type BeginAuthenticationBody struct {
+	UserID *string `json:"user_id" validate:"uuid4"`
+}
+
 // BeginAuthentication returns credential assertion options for the WebAuthnAPI.
 func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
-	options, sessionData, err := h.webauthn.BeginDiscoverableLogin(
-		webauthn.WithUserVerification(protocol.VerificationRequired),
-	)
+	var request BeginAuthenticationBody
+
+	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	var loginOptions []webauthn.LoginOption
+	loginOptions = append(loginOptions, webauthn.WithUserVerification(protocol.VerificationRequired))
+
+	if request.UserID != nil {
+		userId, err := uuid.FromString(*request.UserID)
+		if err != nil {
+			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
+		}
+
+		credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(userId)
+		if err != nil {
+			return fmt.Errorf("failed to get webauthn credentials: %w", err)
+		}
+
+		allowList := make([]protocol.CredentialDescriptor, len(credentials))
+		for i := range credentials {
+			c := intern.WebauthnCredentialFromModel(&credentials[i])
+			allowList[i] = c.Descriptor()
+		}
+
+		loginOptions = append(loginOptions, webauthn.WithAllowedCredentials(allowList))
+	}
+
+	options, sessionData, err := h.webauthn.BeginDiscoverableLogin(loginOptions...)
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn assertion options: %w", err)
 	}

@@ -40,7 +40,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 
 func (p *userPersister) GetByEmail(email string) (*models.User, error) {
 	user := models.User{}
-	query := p.db.Where("email = (?)", email)
+	query := p.db.Eager().Where("email = (?)", email)
 	err := query.First(&user)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil

@@ -62,6 +62,7 @@
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.3.0",
+    "@github/webauthn-json": "^2.0.0-alpha4",
     "@teamhanko/hanko-webauthn": "^2.0.0",
     "classnames": "^2.3.1",
     "preact": "^10.6.6",
