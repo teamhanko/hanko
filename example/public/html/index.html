@@ -5,10 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Hanko Web Component Test</title>
+    <link rel="stylesheet" href="static/css/index.css">
     <script type="text/javascript" src="{{.HankoElementUrl}}"></script>
 </head>
 <body>
-<hanko-auth lang="en" api={{.HankoUrl}}></hanko-auth>
+
+<main class="main">
+    <hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
+</main>
+
+<footer class="footer">
+    <img alt="Example app" src="static/img/exampleApp.svg"/>
+    <img alt="Powered by Hanko" src="static/img/poweredBy.svg"/>
+</footer>
+
 <script>
     const hanko = document.querySelector("hanko-auth");
 
