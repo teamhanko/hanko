@@ -16,8 +16,8 @@ func main() {
 		templates: template.Must(template.ParseGlob("public/html/index.html")),
 	}
 
-	hankoUrl := getEnv("HANKO_URL", "http://localhost:8000")
-	hankoElementUrl := getEnv("HANKO_ELEMENT_URL", "http://localhost:9500/element.hanko-auth.js")
+	hankoUrl := getEnv("HANKO_URL")
+	hankoElementUrl := getEnv("HANKO_ELEMENT_URL")
 
 	e := echo.New()
 
@@ -70,9 +70,10 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func getEnv(key, fallback string) string {
+func getEnv(key string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
-	return fallback
+	log.Fatalf("env key not set: %v", key)
+	return ""
 }
