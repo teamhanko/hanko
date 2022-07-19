@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -9,7 +10,7 @@ import (
 	"net/http"
 )
 
-func SessionMiddleware() echo.MiddlewareFunc {
+func SessionMiddleware(hankoUrl string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			cookie, err := c.Cookie("hanko")
@@ -19,7 +20,7 @@ func SessionMiddleware() echo.MiddlewareFunc {
 			if err != nil {
 				return err
 			}
-			set, err := jwk.Fetch(context.Background(), "http://hanko:8000/.well-known/jwks.json")
+			set, err := jwk.Fetch(context.Background(), fmt.Sprintf("%v/.well-known/jwks.json", hankoUrl))
 			if err != nil {
 				return err
 			}
