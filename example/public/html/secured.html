@@ -4,9 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <title>Secured</title>
+    <link rel="stylesheet" href="static/css/secured.css"/>
 </head>
 <body>
-<h1>secured page</h1>
-<a href="/logout">Logout</a>
+<header>
+    <nav class="nav">
+        <ul class="nav__itemList">
+            <li class="nav__listItem">
+                <a class="nav__link" href="/logout">Logout</a>
+            </li>
+        </ul>
+    </nav>
+</header>
+
+<main class="main">
+    <div class="profile">
+        <div class="profile__title">
+            <h1>My Profile</h1>
+        </div>
+        <div class="profile__email">
+            <span>{{ .user }}</span>
+        </div>
+    </div>
+</main>
+
+<footer class="footer">
+    <img alt="Example app" src="static/img/exampleApp.svg"/>
+    <img alt="Powered by Hanko" src="static/img/poweredBy.svg"/>
+</footer>
+
 </body>
 </html>

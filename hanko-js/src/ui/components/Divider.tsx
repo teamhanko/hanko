@@ -8,12 +8,12 @@ import styles from "./Divider.sass";
 const Divider = () => {
   const { t } = useContext(TranslateContext);
   return (
-    <section
-      // @ts-ignore
-      part={"divider"}
-      className={styles.dividerWrapper}
-    >
-      <div className={styles.divider}>
+    <section className={styles.dividerWrapper}>
+      <div
+        // @ts-ignore
+        part={"divider"}
+        className={styles.divider}
+      >
         <span
           // @ts-ignore
           part={"divider-text"}

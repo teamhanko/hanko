@@ -31,6 +31,8 @@ func SessionMiddleware(hankoUrl string) echo.MiddlewareFunc {
 			}
 
 			log.Printf("session for user '%s' verified successfully", token.Subject())
+			c.Set("token", cookie.Value)
+			c.Set("user", token.Subject())
 
 			return next(c)
 		}
