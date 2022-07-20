@@ -67,7 +67,8 @@ jobs:
           images: ${{ matrix.image }}
           tags: |
             type=schedule
-            type=ref,event=branch,pattern={{branch}}-{{sha}}-{{date 'YYYYMMDD-hh-mm-ss'}}
+            type=ref,event=branch
+            type=ref,event=push,pattern={{branch}}-{{sha}}-{{date 'YYYYMMDD-hh-mm-ss'}}
             type=ref,event=tag
             type=ref,event=pr
 
