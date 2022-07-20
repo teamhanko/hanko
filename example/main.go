@@ -19,8 +19,12 @@ func main() {
 	hankoUrl := getEnv("HANKO_URL")
 	hankoElementUrl := getEnv("HANKO_ELEMENT_URL")
 	hankoUrlInternal := hankoUrl
+	domain := ""
 	if value, ok := os.LookupEnv("HANKO_URL_INTERNAL"); ok {
 		hankoUrlInternal = value
+	}
+	if value, ok := os.LookupEnv("DOMAIN"); ok {
+		domain = value
 	}
 
 	e := echo.New()
@@ -51,6 +55,7 @@ func main() {
 			Value:    "",
 			MaxAge:   -1,
 			HttpOnly: true,
+			Domain:   domain,
 		}
 		c.SetCookie(cookie)
 		return c.Redirect(http.StatusTemporaryRedirect, "/")
