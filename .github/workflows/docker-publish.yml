@@ -9,7 +9,7 @@ on:
   schedule:
     - cron: '41 3 * * *'
   push:
-    branches: [ main ]
+    branches: [ main , disable-email-verification-at-signup ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
