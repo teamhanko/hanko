@@ -65,6 +65,12 @@ jobs:
         uses: docker/metadata-action@v3.6.2
         with:
           images: ${{ matrix.image }}
+          tags: |
+            type=schedule
+            type=ref,event=branch,suffix=-{{sha}}-{{date 'YYYY-MM-DD.HHmmss'}}
+            type=ref,event=tag
+            type=ref,event=pr
+
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
