@@ -57,9 +57,9 @@ $text-input-background-disabled: convert-hsl-color(--background-color, preset.$b
 
 // Default Primary Button Styles
 
-$primary-button-color: convert-hsl-color(--background-color, preset.$background-hsl)
-$primary-button-color-focus: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-light-dark)
-$primary-button-color-disabled: convert-hsl-color(--background-color, preset.$background-hsl, $lightness-adjust-light-dark)
+$primary-button-color: convert-hsl-color(--background-color, preset.$color-hsl)
+$primary-button-color-focus: convert-hsl-color(--background-color, preset.$color-hsl, $lightness-adjust-light-dark)
+$primary-button-color-disabled: convert-hsl-color(--background-color, preset.$color-hsl, $lightness-adjust-light-dark)
 $primary-button-border-width: var(--border-width, preset.$border-width)
 $primary-button-border-width-hover: var(--border-width, preset.$border-width)
 $primary-button-border-width-focus: var(--border-width, preset.$border-width)
@@ -135,6 +135,7 @@ $passcode-input-space-between: preset.$passcode-input-space-between
 $link-color: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light)
 $link-color-disabled: convert-hsl-color(--color, preset.$color-hsl, $lightness-adjust-light-dark)
 $link-color-hover: convert-hsl-color(--color, preset.$color-hsl)
+$link-text-decoration-hover: preset.$link-text-decoration-hover
 $link-text-decoration: preset.$link-text-decoration
 
 // Default Checkmark Styles
