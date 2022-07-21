@@ -43,6 +43,11 @@ const LoginEmail = () => {
   const [isAuthenticatorSupported, setIsAuthenticatorSupported] =
     useState<boolean>(null);
 
+  // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
+  // currently no resident key support on Android.
+  const isAndroidUserAgent =
+    window.navigator.userAgent.indexOf("Android") !== -1;
+
   const onEmailInput = (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
       setEmail(event.target.value);
@@ -161,7 +166,7 @@ const LoginEmail = () => {
         />
         <Button isLoading={isEmailLoading}>{t("labels.continue")}</Button>
       </Form>
-      {isAuthenticatorSupported ? (
+      {isAuthenticatorSupported && !isAndroidUserAgent ? (
         <Fragment>
           <Divider />
           <Form onSubmit={onWebAuthnSubmit}>

@@ -77,7 +77,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
 			AuthenticatorAttachment: protocol.Platform,
 			RequireResidentKey:      &t,
-			ResidentKey:             protocol.ResidentKeyRequirementRequired,
+			ResidentKey:             protocol.ResidentKeyRequirementPreferred,
 			UserVerification:        protocol.VerificationRequired,
 		}),
 		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
