@@ -9,7 +9,7 @@ on:
   schedule:
     - cron: '41 3 * * *'
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
@@ -67,7 +67,7 @@ jobs:
           images: ${{ matrix.image }}
           tags: |
             type=schedule
-            type=ref,event=branch,suffix=-{{sha}}-{{date 'YYYYMMDD-HH-mm-ss'}}
+            type=ref,event=branch,suffix=-{{sha}}-{{date 'YYYY-MM-DD.HHmmss'}}
             type=ref,event=tag
             type=ref,event=pr
 
