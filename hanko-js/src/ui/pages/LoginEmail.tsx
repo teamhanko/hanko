@@ -1,7 +1,8 @@
 import * as preact from "preact";
-import { useContext, useEffect, useState } from "preact/compat";
+import { useCallback, useContext, useEffect, useState } from "preact/compat";
 import { Fragment } from "preact";
 
+import { UserInfo } from "../../lib/HankoClient";
 import {
   HankoError,
   TechnicalError,
@@ -34,13 +35,18 @@ const LoginEmail = () => {
     renderRegisterConfirm,
   } = useContext(RenderContext);
 
-  const [userID, setUserID] = useState<string>(null);
+  const [userInfo, setUserInfo] = useState<UserInfo>(null);
   const [isWebAuthnLoading, setIsWebAuthnLoading] = useState<boolean>(false);
   const [isWebAuthnSuccess, setIsWebAuthnSuccess] = useState<boolean>(false);
   const [isEmailLoading, setIsEmailLoading] = useState<boolean>(false);
   const [error, setError] = useState<HankoError>(null);
   const [isAuthenticatorSupported, setIsAuthenticatorSupported] =
     useState<boolean>(null);
+
+  // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
+  // currently no resident key support on Android.
+  const isAndroidUserAgent =
+    window.navigator.userAgent.indexOf("Android") !== -1;
 
   const onEmailInput = (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
@@ -54,7 +60,7 @@ const LoginEmail = () => {
 
     hanko.user
       .getInfo(email)
-      .then((userInfo) => setUserID(userInfo.id))
+      .then((info) => setUserInfo(info))
       .catch((e) => {
         if (e instanceof NotFoundError) {
           return renderRegisterConfirm();
@@ -89,9 +95,23 @@ const LoginEmail = () => {
       });
   };
 
+  const renderAlternateLoginMethod = useCallback(() => {
+    if (config.password.enabled) {
+      renderPassword(userInfo.id).catch((e) => {
+        setIsEmailLoading(false);
+        setError(e);
+      });
+    } else {
+      renderPasscode(userInfo.id, false, false).catch((e) => {
+        setIsEmailLoading(false);
+        setError(e);
+      });
+    }
+  }, [config.password.enabled, renderPasscode, renderPassword, userInfo]);
+
   useEffect(() => {
     hanko.authenticator
-      .isSupported()
+      .isAuthenticatorSupported()
       .then((supported) => setIsAuthenticatorSupported(supported))
       .catch((e) => setError(new TechnicalError(e)));
   }, [hanko]);
@@ -99,30 +119,34 @@ const LoginEmail = () => {
   // UserID has been resolved, decide what to do next.
   useEffect(() => {
     if (
-      userID === null ||
+      userInfo === null ||
       config === null ||
       isAuthenticatorSupported === null
     ) {
       return;
     }
 
-    if (config.password.enabled) {
-      renderPassword(userID).catch((e) => {
-        setIsEmailLoading(false);
-        setError(e);
-      });
+    if (userInfo.has_webauthn_credential && isAuthenticatorSupported) {
+      hanko.authenticator
+        .login(userInfo.id)
+        .then(() => {
+          emitSuccessEvent();
+
+          return;
+        })
+        .catch(() => {
+          renderAlternateLoginMethod();
+        });
     } else {
-      renderPasscode(userID, false, false).catch((e) => {
-        setIsEmailLoading(false);
-        setError(e);
-      });
+      renderAlternateLoginMethod();
     }
   }, [
     config,
+    emitSuccessEvent,
+    hanko.authenticator,
     isAuthenticatorSupported,
-    renderPasscode,
-    renderPassword,
-    userID,
+    renderAlternateLoginMethod,
+    userInfo,
   ]);
 
   return (
@@ -142,7 +166,7 @@ const LoginEmail = () => {
         />
         <Button isLoading={isEmailLoading}>{t("labels.continue")}</Button>
       </Form>
-      {isAuthenticatorSupported ? (
+      {isAuthenticatorSupported && !isAndroidUserAgent ? (
         <Fragment>
           <Divider />
           <Form onSubmit={onWebAuthnSubmit}>

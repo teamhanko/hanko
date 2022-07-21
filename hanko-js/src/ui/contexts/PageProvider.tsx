@@ -14,6 +14,7 @@ import { User } from "../../lib/HankoClient";
 import { AppContext } from "./AppProvider";
 import { PasswordContext } from "./PasswordProvider";
 import { PasscodeContext } from "./PasscodeProvider";
+import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Initialize from "../pages/Initialize";
 import LoginEmail from "./../pages/LoginEmail";
@@ -25,10 +26,6 @@ import RegisterPassword from "./../pages/RegisterPassword";
 import RegisterAuthenticator from "./../pages/RegisterAuthenticator";
 import Error from "./../pages/Error";
 import Container from "../components/Container";
-import {
-  TranslateContext,
-  TranslateProvider,
-} from "@denysvuika/preact-translate";
 
 interface Props {
   lang?: string;

@@ -1,12 +1,11 @@
 import {
-  isUserVerifyingPlatformAuthenticatorAvailable,
   get as getWebauthnCredential,
   create as createWebauthnCredential,
   CredentialRequestOptionsJSON,
   PublicKeyCredentialWithAssertionJSON,
   CredentialCreationOptionsJSON,
   PublicKeyCredentialWithAttestationJSON,
-} from "@teamhanko/hanko-webauthn";
+} from "@github/webauthn-json";
 
 import {
   PasscodeManager,
@@ -27,6 +26,8 @@ import {
   InvalidWebauthnCredentialError,
   RequestTimeoutError,
 } from "./Errors";
+
+import { isUserVerifyingPlatformAuthenticatorAvailable } from "./WebauthnSupport";
 
 export interface PasswordConfig {
   enabled: boolean;
@@ -49,6 +50,7 @@ export interface Credential {
 export interface UserInfo {
   id: string;
   verified: boolean;
+  has_webauthn_credential: boolean;
 }
 
 export interface User {
@@ -60,6 +62,10 @@ export interface User {
 export interface Passcode {
   id: string;
   ttl: number;
+}
+
+interface Attestation extends PublicKeyCredentialWithAttestationJSON {
+  transports: string[];
 }
 
 export class HankoClient {
@@ -239,10 +245,10 @@ class WebauthnClient extends AbstractClient {
     this.webAuthnManager = new WebAuthnManager();
   }
 
-  login(): Promise<void> {
+  login(userID?: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client
-        .post("/webauthn/login/initialize")
+        .post("/webauthn/login/initialize", { user_id: userID })
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -295,7 +301,11 @@ class WebauthnClient extends AbstractClient {
         .catch((e) => {
           throw new WebAuthnRequestCancelledError(e);
         })
-        .then((attestation: PublicKeyCredentialWithAttestationJSON) => {
+        .then((attestation: Attestation) => {
+          // The generated PublicKeyCredentialWithAttestationJSON object does not align with the API. The list of
+          // supported transports must be available under a different path.
+          attestation.transports = attestation.response.transports;
+
           return this.client.post(
             "/webauthn/registration/finalize",
             attestation
@@ -318,13 +328,13 @@ class WebauthnClient extends AbstractClient {
     });
   }
 
-  isSupported() {
+  isAuthenticatorSupported() {
     return isUserVerifyingPlatformAuthenticatorAvailable();
   }
 
   shouldRegister(user: User): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      this.isSupported()
+      this.isAuthenticatorSupported()
         .then((supported) => {
           if (!user.webauthn_credentials || !user.webauthn_credentials.length) {
             return resolve(supported);
