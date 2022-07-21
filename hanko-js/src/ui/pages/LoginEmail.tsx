@@ -36,9 +36,14 @@ const LoginEmail = () => {
   } = useContext(RenderContext);
 
   const [userInfo, setUserInfo] = useState<UserInfo>(null);
-  const [isWebAuthnLoading, setIsWebAuthnLoading] = useState<boolean>(false);
-  const [isWebAuthnSuccess, setIsWebAuthnSuccess] = useState<boolean>(false);
-  const [isEmailLoading, setIsEmailLoading] = useState<boolean>(false);
+  const [isPasskeyLoginLoading, setIsPasskeyLoginLoading] =
+    useState<boolean>(false);
+  const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] =
+    useState<boolean>(false);
+  const [isEmailLoginLoading, setIsEmailLoginLoading] =
+    useState<boolean>(false);
+  const [isEmailLoginSuccess, setIsEmailLoginSuccess] =
+    useState<boolean>(false);
   const [error, setError] = useState<HankoError>(null);
   const [isAuthenticatorSupported, setIsAuthenticatorSupported] =
     useState<boolean>(null);
@@ -56,7 +61,7 @@ const LoginEmail = () => {
 
   const onEmailSubmit = (event: Event) => {
     event.preventDefault();
-    setIsEmailLoading(true);
+    setIsEmailLoginLoading(true);
 
     hanko.user
       .getInfo(email)
@@ -71,26 +76,26 @@ const LoginEmail = () => {
         throw e;
       })
       .catch((e) => {
-        setIsEmailLoading(false);
+        setIsEmailLoginLoading(false);
         setError(e);
       });
   };
 
   const onWebAuthnSubmit = (event: Event) => {
     event.preventDefault();
-    setIsWebAuthnLoading(true);
+    setIsPasskeyLoginLoading(true);
 
     hanko.authenticator
       .login()
       .then(() => {
-        setIsWebAuthnLoading(false);
-        setIsWebAuthnSuccess(true);
+        setIsPasskeyLoginLoading(false);
+        setIsPasskeyLoginSuccess(true);
         emitSuccessEvent();
 
         return;
       })
       .catch((e) => {
-        setIsWebAuthnLoading(false);
+        setIsPasskeyLoginLoading(false);
         setError(e instanceof WebAuthnRequestCancelledError ? null : e);
       });
   };
@@ -98,12 +103,12 @@ const LoginEmail = () => {
   const renderAlternateLoginMethod = useCallback(() => {
     if (config.password.enabled) {
       renderPassword(userInfo.id).catch((e) => {
-        setIsEmailLoading(false);
+        setIsEmailLoginLoading(false);
         setError(e);
       });
     } else {
       renderPasscode(userInfo.id, false, false).catch((e) => {
-        setIsEmailLoading(false);
+        setIsEmailLoginLoading(false);
         setError(e);
       });
     }
@@ -130,6 +135,8 @@ const LoginEmail = () => {
       hanko.authenticator
         .login(userInfo.id)
         .then(() => {
+          setIsEmailLoginLoading(false);
+          setIsEmailLoginSuccess(true);
           emitSuccessEvent();
 
           return;
@@ -164,7 +171,9 @@ const LoginEmail = () => {
           pattern={"^.*[^0-9]+$"}
           autofocus
         />
-        <Button isLoading={isEmailLoading}>{t("labels.continue")}</Button>
+        <Button isLoading={isEmailLoginLoading} isSuccess={isEmailLoginSuccess}>
+          {t("labels.continue")}
+        </Button>
       </Form>
       {isAuthenticatorSupported && !isAndroidUserAgent ? (
         <Fragment>
@@ -172,8 +181,8 @@ const LoginEmail = () => {
           <Form onSubmit={onWebAuthnSubmit}>
             <Button
               secondary
-              isLoading={isWebAuthnLoading}
-              isSuccess={isWebAuthnSuccess}
+              isLoading={isPasskeyLoginLoading}
+              isSuccess={isPasskeyLoginSuccess}
             >
               {t("labels.signInPasskey")}
             </Button>
