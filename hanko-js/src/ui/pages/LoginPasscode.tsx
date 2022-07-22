@@ -123,10 +123,10 @@ const LoginPasscode = ({
   };
 
   useEffect(() => {
-    if (passcodeTTL <= 0) {
+    if (passcodeTTL <= 0 && !isPasscodeSuccess) {
       setError(new PasscodeExpiredError());
     }
-  }, [passcodeTTL]);
+  }, [isPasscodeSuccess, passcodeTTL]);
 
   return (
     <Fragment>
