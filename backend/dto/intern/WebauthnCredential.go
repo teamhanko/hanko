@@ -23,7 +23,6 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 		SignCount:       int(credential.Authenticator.SignCount),
 		CreatedAt:       now,
 		UpdatedAt:       now,
-		Transports:      make([]models.WebauthnCredentialTransport, len(credential.Transport)),
 	}
 
 	for _, name := range credential.Transport {
