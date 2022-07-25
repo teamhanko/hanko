@@ -164,6 +164,7 @@ const LoginEmail = () => {
         <InputText
           name={"email"}
           type={"email"}
+          autocomplete={"username"}
           required={true}
           onInput={onEmailInput}
           value={email}
