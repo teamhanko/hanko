@@ -91,6 +91,7 @@ const LoginPassword = ({ userID, initialError }: Props) => {
           <InputText
             type={"password"}
             name={"password"}
+            autocomplete={"current-password"}
             label={t("labels.password")}
             required={true}
             onInput={onPasswordInput}
