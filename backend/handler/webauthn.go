@@ -167,35 +167,38 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	var loginOptions []webauthn.LoginOption
-	loginOptions = append(loginOptions, webauthn.WithUserVerification(protocol.VerificationRequired))
-
+	var options *protocol.CredentialAssertion
+	var sessionData *webauthn.SessionData
 	if request.UserID != nil {
+		// non discoverable login initialization
 		userId, err := uuid.FromString(*request.UserID)
 		if err != nil {
 			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
 		}
-
-		credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(userId)
+		webauthnUser, err := h.getWebauthnUser(h.persister.GetConnection(), userId)
 		if err != nil {
-			return fmt.Errorf("failed to get webauthn credentials: %w", err)
+			return dto.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get user: %w", err))
+		}
+		if webauthnUser == nil {
+			return dto.NewHTTPError(http.StatusBadRequest, "user not found")
 		}
 
-		allowList := make([]protocol.CredentialDescriptor, len(credentials))
-		for i := range credentials {
-			c := intern.WebauthnCredentialFromModel(&credentials[i])
-			allowList[i] = c.Descriptor()
+		if len(webauthnUser.WebAuthnCredentials()) > 0 {
+			options, sessionData, err = h.webauthn.BeginLogin(webauthnUser, webauthn.WithUserVerification(protocol.VerificationRequired))
+			if err != nil {
+				return fmt.Errorf("failed to create webauthn assertion options: %w", err)
+			}
 		}
-
-		loginOptions = append(loginOptions, webauthn.WithAllowedCredentials(allowList))
+	}
+	if options == nil && sessionData == nil {
+		var err error
+		options, sessionData, err = h.webauthn.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
+		if err != nil {
+			return fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
+		}
 	}
 
-	options, sessionData, err := h.webauthn.BeginDiscoverableLogin(loginOptions...)
-	if err != nil {
-		return fmt.Errorf("failed to create webauthn assertion options: %w", err)
-	}
-
-	err = h.persister.GetWebauthnSessionDataPersister().Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationAuthentication))
+	err := h.persister.GetWebauthnSessionDataPersister().Create(*intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationAuthentication))
 	if err != nil {
 		return fmt.Errorf("failed to store webauthn assertion session data: %w", err)
 	}
@@ -210,10 +213,10 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	userId, err := uuid.FromBytes(request.Response.UserHandle)
-	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
-	}
+	//userId, err := uuid.FromBytes(request.Response.UserHandle)
+	//if err != nil {
+	//	return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
+	//}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
@@ -230,21 +233,44 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return dto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
-		webauthnUser, err := h.getWebauthnUser(tx, userId)
-		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
-		}
-
-		if webauthnUser == nil {
-			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
-		}
-
 		model := intern.WebauthnSessionDataFromModel(sessionData)
-		credential, err := h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
-			return webauthnUser, nil
-		}, *model, request)
-		if err != nil {
-			return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+
+		var credential *webauthn.Credential
+		var webauthnUser *intern.WebauthnUser
+		if sessionData.UserId.IsNil() {
+			// Discoverable Login
+			userId, err := uuid.FromBytes(request.Response.UserHandle)
+			if err != nil {
+				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
+			}
+			webauthnUser, err = h.getWebauthnUser(tx, userId)
+			if err != nil {
+				return fmt.Errorf("failed to get user: %w", err)
+			}
+
+			if webauthnUser == nil {
+				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+			}
+
+			credential, err = h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
+				return webauthnUser, nil
+			}, *model, request)
+			if err != nil {
+				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+			}
+		} else {
+			// non discoverable Login
+			webauthnUser, err = h.getWebauthnUser(tx, sessionData.UserId)
+			if err != nil {
+				return fmt.Errorf("failed to get user: %w", err)
+			}
+			if webauthnUser == nil {
+				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+			}
+			credential, err = h.webauthn.ValidateLogin(webauthnUser, *model, request)
+			if err != nil {
+				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+			}
 		}
 
 		err = sessionDataPersister.Delete(*sessionData)
