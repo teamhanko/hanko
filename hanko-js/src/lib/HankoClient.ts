@@ -24,9 +24,9 @@ import {
   MaxNumOfPasscodeAttemptsReachedError,
   InvalidPasscodeError,
   UnauthorizedError,
-  EmailValidationRequiredError,
   InvalidWebauthnCredentialError,
   RequestTimeoutError,
+  ConflictError,
 } from "./Errors";
 
 import { isUserVerifyingPlatformAuthenticatorAvailable } from "./WebauthnSupport";
@@ -228,7 +228,7 @@ class UserClient extends AbstractClient {
   getInfo(email: string): Promise<UserInfo> {
     return new Promise<UserInfo>((resolve, reject) => {
       this.client
-        .post("/user", { email })
+        .post2("/user", { email })
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -238,13 +238,7 @@ class UserClient extends AbstractClient {
             throw new TechnicalError();
           }
         })
-        .then((u: UserInfo) => {
-          if (!u.verified) {
-            throw new EmailValidationRequiredError(u.id);
-          }
-
-          return resolve(u);
-        })
+        .then((u: UserInfo) => resolve(u))
         .catch((e) => {
           reject(e);
         });
@@ -259,7 +253,7 @@ class UserClient extends AbstractClient {
           if (response.ok) {
             return resolve(response.json());
           } else if (response.status === 409) {
-            throw new EmailValidationRequiredError();
+            throw new ConflictError();
           } else {
             throw new TechnicalError();
           }
@@ -328,6 +322,9 @@ class WebauthnClient extends AbstractClient {
           }
 
           throw new TechnicalError();
+        })
+        .catch((e) => {
+          reject(e);
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
           return getWebauthnCredential(challenge);

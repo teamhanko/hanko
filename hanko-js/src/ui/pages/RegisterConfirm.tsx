@@ -3,7 +3,7 @@ import { Fragment } from "preact";
 import { useContext, useEffect, useState } from "preact/compat";
 
 import { User } from "../../lib/HankoClient";
-import { EmailValidationRequiredError, HankoError } from "../../lib/Errors";
+import { ConflictError, HankoError } from "../../lib/Errors";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -38,7 +38,7 @@ const RegisterConfirm = () => {
       .create(email)
       .then((u) => setUser(u))
       .catch((e) => {
-        if (e instanceof EmailValidationRequiredError) {
+        if (e instanceof ConflictError) {
           return hanko.user.getInfo(email);
         }
 
