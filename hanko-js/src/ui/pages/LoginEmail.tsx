@@ -123,7 +123,7 @@ const LoginEmail = () => {
     if (isAuthenticatorSupported) {
       loginWithEmailAndWebAuthn().catch((e) => {
         setIsEmailLoginLoading(false);
-        setError(e);
+        setError(e instanceof WebAuthnRequestCancelledError ? null : e);
       });
     } else {
       loginWithEmail().catch((e) => {
