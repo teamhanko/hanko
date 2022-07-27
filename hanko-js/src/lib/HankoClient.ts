@@ -83,6 +83,27 @@ export class HankoClient {
   }
 }
 
+/** Class Response2 is part of a workaround for a Safari bug. See HttpClient._fetch2(). */
+class Response2 {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  url: string;
+  decodedJSON: any;
+
+  constructor(xhr: XMLHttpRequest) {
+    this.ok = xhr.status >= 200 && xhr.status <= 299;
+    this.status = xhr.status;
+    this.statusText = xhr.statusText;
+    this.url = xhr.responseURL;
+    this.decodedJSON = JSON.parse(xhr.response);
+  }
+
+  json() {
+    return this.decodedJSON;
+  }
+}
+
 class HttpClient {
   timeout: number;
   api: string;
@@ -120,6 +141,33 @@ class HttpClient {
     });
   }
 
+  /** _fetch2 a workaround for a Safari bug on iOS 15.5/15.6, which causes the WebAuthn actions to no longer
+      be considered as user activated events, when using the fetch API. */
+  _fetch2(method: string, path: string, body?: string) {
+    const url = this.api + path;
+    const timeout = this.timeout;
+
+    return new Promise<Response2>(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(method, url, true);
+      xhr.setRequestHeader("Accept", "application/json");
+      xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.timeout = timeout;
+      xhr.withCredentials = true;
+      xhr.onload = () => {
+        resolve(new Response2(xhr));
+      };
+      xhr.onerror = () => {
+        reject(new TechnicalError());
+      };
+      xhr.ontimeout = () => {
+        reject(new RequestTimeoutError());
+      };
+      xhr.send(body);
+    });
+  }
+
   get(path: string) {
     return this._fetch(path, { method: "GET" });
   }
@@ -129,6 +177,11 @@ class HttpClient {
       method: "POST",
       body: JSON.stringify(body),
     });
+  }
+
+  // post2 part of a workaround for a Safari bug. See _fetch2().
+  post2(path: string, body?: any) {
+    return this._fetch2("POST", path, JSON.stringify(body));
   }
 
   put(path: string, body?: any) {
@@ -247,7 +300,7 @@ class WebauthnClient extends AbstractClient {
   login(userID?: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client
-        .post("/webauthn/login/initialize", { user_id: userID })
+        .post2("/webauthn/login/initialize", { user_id: userID })
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -262,7 +315,7 @@ class WebauthnClient extends AbstractClient {
           throw new WebAuthnRequestCancelledError(e);
         })
         .then((assertion: PublicKeyCredentialWithAssertionJSON) => {
-          return this.client.post("/webauthn/login/finalize", assertion);
+          return this.client.post2("/webauthn/login/finalize", assertion);
         })
         .then((response) => {
           if (response.ok) {
@@ -286,7 +339,7 @@ class WebauthnClient extends AbstractClient {
   register(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.client
-        .post("/webauthn/registration/initialize")
+        .post2("/webauthn/registration/initialize")
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -305,7 +358,7 @@ class WebauthnClient extends AbstractClient {
           // supported transports must be available under a different path.
           attestation.transports = attestation.response.transports;
 
-          return this.client.post(
+          return this.client.post2(
             "/webauthn/registration/finalize",
             attestation
           );
