@@ -179,7 +179,7 @@ class HttpClient {
     });
   }
 
-  // _post2 part of a workaround for a Safari bug. See _fetch2().
+  // post2 part of a workaround for a Safari bug. See _fetch2().
   post2(path: string, body?: any) {
     return this._fetch2("POST", path, JSON.stringify(body));
   }
