@@ -125,16 +125,20 @@ class HttpClient {
       const timeout = setTimeout(() => controller.abort(), this.timeout);
       const cookieName = "hanko";
       const token = Cookies.get(cookieName);
+      const headers: HeadersInit = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authrization = `Bearer ${token}`;
+      }
 
       fetch(this.api + path, {
         mode: "cors",
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
         signal: controller.signal,
+        headers,
         ...init,
       })
         .then((response) => {
