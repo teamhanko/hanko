@@ -213,10 +213,6 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	//userId, err := uuid.FromBytes(request.Response.UserHandle)
-	//if err != nil {
-	//	return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
-	//}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
