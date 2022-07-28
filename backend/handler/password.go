@@ -158,7 +158,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	if h.cfg.Session.EnableAuthToken {
+	if h.cfg.Session.EnableAuthTokenHeader {
 		c.Response().Header().Set("X-Auth-Token", token)
 	}
 
