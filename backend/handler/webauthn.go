@@ -23,22 +23,23 @@ type WebauthnHandler struct {
 	persister      persistence.Persister
 	webauthn       *webauthn.WebAuthn
 	sessionManager session.Manager
+	cfg            *config.Config
 }
 
 // NewWebauthnHandler creates a new handler which handles all webauthn related routes
-func NewWebauthnHandler(cfg config.WebauthnSettings, persister persistence.Persister, sessionManager session.Manager) (*WebauthnHandler, error) {
+func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager) (*WebauthnHandler, error) {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
-		RPDisplayName:         cfg.RelyingParty.DisplayName,
-		RPID:                  cfg.RelyingParty.Id,
-		RPOrigin:              cfg.RelyingParty.Origin,
+		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
+		RPID:                  cfg.Webauthn.RelyingParty.Id,
+		RPOrigin:              cfg.Webauthn.RelyingParty.Origin,
 		AttestationPreference: protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
 			RequireResidentKey: &f,
 			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
 			UserVerification:   protocol.VerificationRequired,
 		},
-		Timeout: cfg.Timeout,
+		Timeout: cfg.Webauthn.Timeout,
 		Debug:   false,
 	})
 
@@ -50,6 +51,7 @@ func NewWebauthnHandler(cfg config.WebauthnSettings, persister persistence.Persi
 		persister:      persister,
 		webauthn:       wa,
 		sessionManager: sessionManager,
+		cfg:            cfg,
 	}, nil
 }
 
@@ -252,12 +254,22 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return fmt.Errorf("failed to delete assertion session data: %w", err)
 		}
 
-		cookie, err := h.sessionManager.GenerateCookie(webauthnUser.UserId)
+		token, err := h.sessionManager.GenerateJWT(webauthnUser.UserId)
+		if err != nil {
+			return fmt.Errorf("failed to generate jwt: %w", err)
+		}
+
+		cookie, err := h.sessionManager.GenerateCookie(token)
 		if err != nil {
 			return fmt.Errorf("failed to create session cookie: %w", err)
 		}
 
 		c.SetCookie(cookie)
+
+		if h.cfg.Session.EnableAuthTokenHeader {
+			c.Response().Header().Set("X-Auth-Token", token)
+		}
+
 		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID), "user_id": webauthnUser.UserId.String()})
 	})
 }

@@ -140,6 +140,11 @@ session:
     # Default value: true
     #
     secure: true
+  ## enable_auth_token_header ##
+  #
+  # The JWT will be transmitted via the X-Auth-Token header. Enable during cross-domain operations.
+  #
+  enable_auth_token_header: false
 password:
   ## enabled ##
   #
@@ -211,13 +216,13 @@ webauthn:
     #
     # Examples:
     # - Example Project
-    # - Hanko GmbH 
+    # - Hanko GmbH
     # - Acme, Inc.
     #
     display_name: ""
     ## origin ##
     #
-    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain, 
+    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
     # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
     #
     # Example:

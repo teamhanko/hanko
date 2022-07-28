@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 import {
   get as getWebauthnCredential,
   create as createWebauthnCredential,
@@ -50,6 +52,10 @@ export interface UserInfo {
   id: string;
   verified: boolean;
   has_webauthn_credential: boolean;
+}
+
+export interface Me {
+  id: string;
 }
 
 export interface User {
@@ -117,20 +123,36 @@ class HttpClient {
     return new Promise<Response>((resolve, reject) => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), this.timeout);
+      const cookieName = "hanko";
+      const token = Cookies.get(cookieName);
+      const headers: HeadersInit = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
 
       fetch(this.api + path, {
         mode: "cors",
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
         signal: controller.signal,
+        headers,
         ...init,
       })
         .then((response) => {
           clearTimeout(timeout);
+          if (response.ok) {
+            // During cross domain operation the cookie set by the API cannot be read, so we retrieve the `X-Auth-Token`
+            // header and set a cookie that is valid for the current domain.
+            const token = response.headers.get("X-Auth-Token");
 
+            if (token && token.length) {
+              const secure = !!this.api.match("^https://");
+              Cookies.set(cookieName, token, { secure });
+            }
+          }
           return resolve(response);
         })
         .catch((e) => {
@@ -146,6 +168,8 @@ class HttpClient {
   _fetch2(method: string, path: string, body?: string) {
     const url = this.api + path;
     const timeout = this.timeout;
+    const cookieName = "hanko";
+    const token = Cookies.get(cookieName);
 
     return new Promise<Response2>(function (resolve, reject) {
       const xhr = new XMLHttpRequest();
@@ -153,6 +177,11 @@ class HttpClient {
       xhr.open(method, url, true);
       xhr.setRequestHeader("Accept", "application/json");
       xhr.setRequestHeader("Content-Type", "application/json");
+
+      if (token) {
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      }
+
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
@@ -269,6 +298,22 @@ class UserClient extends AbstractClient {
     return new Promise<User>((resolve, reject) =>
       this.client
         .get("/me")
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else if (
+            response.status === 400 ||
+            response.status === 401 ||
+            response.status === 404
+          ) {
+            throw new UnauthorizedError();
+          } else {
+            throw new TechnicalError();
+          }
+        })
+        .then((me: Me) => {
+          return this.client.get(`/users/${me.id}`);
+        })
         .then((response) => {
           if (response.ok) {
             return resolve(response.json());

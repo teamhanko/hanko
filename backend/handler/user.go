@@ -122,5 +122,5 @@ func (h *UserHandler) Me(c echo.Context) error {
 		return errors.New("failed to cast session object")
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("/users/%s", sessionToken.Subject()))
+	return c.JSON(http.StatusOK, map[string]string{"id": sessionToken.Subject()})
 }
