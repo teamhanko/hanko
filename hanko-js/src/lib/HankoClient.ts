@@ -131,7 +131,7 @@ class HttpClient {
       };
 
       if (token) {
-        headers.Authrization = `Bearer ${token}`;
+        headers.Authorization = `Bearer ${token}`;
       }
 
       fetch(this.api + path, {
@@ -168,6 +168,8 @@ class HttpClient {
   _fetch2(method: string, path: string, body?: string) {
     const url = this.api + path;
     const timeout = this.timeout;
+    const cookieName = "hanko";
+    const token = Cookies.get(cookieName);
 
     return new Promise<Response2>(function (resolve, reject) {
       const xhr = new XMLHttpRequest();
@@ -175,6 +177,11 @@ class HttpClient {
       xhr.open(method, url, true);
       xhr.setRequestHeader("Accept", "application/json");
       xhr.setRequestHeader("Content-Type", "application/json");
+
+      if (token) {
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      }
+
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
