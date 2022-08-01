@@ -33,6 +33,8 @@ jobs:
             image: ghcr.io/teamhanko/hanko
           - context: ./example
             image: ghcr.io/teamhanko/hanko/example
+          - context: ./hanko-js
+            image: ghcr.io/teamhanko/hanko/hanko-js
     permissions:
       contents: read
       packages: write
