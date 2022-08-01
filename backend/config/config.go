@@ -93,7 +93,7 @@ func DefaultConfig() *Config {
 		},
 		Registration: Registration{
 			EmailVerification: EmailVerification{
-				Enabled: true,
+				Enabled: false,
 			},
 		},
 	}
