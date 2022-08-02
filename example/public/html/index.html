@@ -4,14 +4,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hanko Web Component Test</title>
+    <meta name="theme-color" content="#042F4B">
+    <title>Hanko Web Component Example</title>
     <link rel="stylesheet" href="static/css/index.css">
     <script type="text/javascript" src="{{.HankoElementUrl}}"></script>
+    <link href="../static/img/Favicon_32x32.png" rel="shortcut icon" type="image/x-icon">
+    <link href="../static/img/Favicon_256x256.png" rel="apple-touch-icon">
 </head>
 <body>
 
 <main class="main">
-    <hanko-auth lang="en" api="{{.HankoUrl}}"></hanko-auth>
+    <div class="auth-container">
+        <hanko-auth lang="en" api="{{.HankoUrl}}"></hanko-auth>
+    </div>
 </main>
 
 <footer class="footer">
