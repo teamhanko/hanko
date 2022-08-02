@@ -61,7 +61,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "@denysvuika/preact-translate": "^0.3.0",
+    "@denysvuika/preact-translate": "^0.4.1",
     "@github/webauthn-json": "^2.0.0-alpha4",
     "@types/js-cookie": "^3.0.2",
     "classnames": "^2.3.1",
