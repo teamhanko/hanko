@@ -78,4 +78,4 @@ The Hanko project consists of
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
 
 # Licenses
-[hanko-js](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](backend/LICENSE).
+[hanko-js](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
