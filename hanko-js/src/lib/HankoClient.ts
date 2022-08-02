@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 import {
   get as getWebauthnCredential,
   create as createWebauthnCredential,
@@ -52,6 +54,10 @@ export interface UserInfo {
   has_webauthn_credential: boolean;
 }
 
+export interface Me {
+  id: string;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -83,6 +89,27 @@ export class HankoClient {
   }
 }
 
+/** Class Response2 is part of a workaround for a Safari bug. See HttpClient._fetch2(). */
+class Response2 {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  url: string;
+  decodedJSON: any;
+
+  constructor(xhr: XMLHttpRequest) {
+    this.ok = xhr.status >= 200 && xhr.status <= 299;
+    this.status = xhr.status;
+    this.statusText = xhr.statusText;
+    this.url = xhr.responseURL;
+    this.decodedJSON = JSON.parse(xhr.response);
+  }
+
+  json() {
+    return this.decodedJSON;
+  }
+}
+
 class HttpClient {
   timeout: number;
   api: string;
@@ -96,20 +123,36 @@ class HttpClient {
     return new Promise<Response>((resolve, reject) => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), this.timeout);
+      const cookieName = "hanko";
+      const token = Cookies.get(cookieName);
+      const headers: HeadersInit = {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
 
       fetch(this.api + path, {
         mode: "cors",
         credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
         signal: controller.signal,
+        headers,
         ...init,
       })
         .then((response) => {
           clearTimeout(timeout);
+          if (response.ok) {
+            // During cross domain operation the cookie set by the API cannot be read, so we retrieve the `X-Auth-Token`
+            // header and set a cookie that is valid for the current domain.
+            const token = response.headers.get("X-Auth-Token");
 
+            if (token && token.length) {
+              const secure = !!this.api.match("^https://");
+              Cookies.set(cookieName, token, { secure });
+            }
+          }
           return resolve(response);
         })
         .catch((e) => {
@@ -117,6 +160,40 @@ class HttpClient {
             e.code === 20 ? new RequestTimeoutError(e) : new TechnicalError(e)
           );
         });
+    });
+  }
+
+  /** _fetch2 a workaround for a Safari bug on iOS 15.5/15.6, which causes the WebAuthn actions to no longer
+      be considered as user activated events, when using the fetch API. */
+  _fetch2(method: string, path: string, body?: string) {
+    const url = this.api + path;
+    const timeout = this.timeout;
+    const cookieName = "hanko";
+    const token = Cookies.get(cookieName);
+
+    return new Promise<Response2>(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
+
+      xhr.open(method, url, true);
+      xhr.setRequestHeader("Accept", "application/json");
+      xhr.setRequestHeader("Content-Type", "application/json");
+
+      if (token) {
+        xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+      }
+
+      xhr.timeout = timeout;
+      xhr.withCredentials = true;
+      xhr.onload = () => {
+        resolve(new Response2(xhr));
+      };
+      xhr.onerror = () => {
+        reject(new TechnicalError());
+      };
+      xhr.ontimeout = () => {
+        reject(new RequestTimeoutError());
+      };
+      xhr.send(body);
     });
   }
 
@@ -129,6 +206,11 @@ class HttpClient {
       method: "POST",
       body: JSON.stringify(body),
     });
+  }
+
+  // post2 part of a workaround for a Safari bug. See _fetch2().
+  post2(path: string, body?: any) {
+    return this._fetch2("POST", path, JSON.stringify(body));
   }
 
   put(path: string, body?: any) {
@@ -218,6 +300,22 @@ class UserClient extends AbstractClient {
         .get("/me")
         .then((response) => {
           if (response.ok) {
+            return response.json();
+          } else if (
+            response.status === 400 ||
+            response.status === 401 ||
+            response.status === 404
+          ) {
+            throw new UnauthorizedError();
+          } else {
+            throw new TechnicalError();
+          }
+        })
+        .then((me: Me) => {
+          return this.client.get(`/users/${me.id}`);
+        })
+        .then((response) => {
+          if (response.ok) {
             return resolve(response.json());
           } else if (
             response.status === 400 ||
@@ -247,7 +345,7 @@ class WebauthnClient extends AbstractClient {
   login(userID?: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client
-        .post("/webauthn/login/initialize", { user_id: userID })
+        .post2("/webauthn/login/initialize", { user_id: userID })
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -262,7 +360,7 @@ class WebauthnClient extends AbstractClient {
           throw new WebAuthnRequestCancelledError(e);
         })
         .then((assertion: PublicKeyCredentialWithAssertionJSON) => {
-          return this.client.post("/webauthn/login/finalize", assertion);
+          return this.client.post2("/webauthn/login/finalize", assertion);
         })
         .then((response) => {
           if (response.ok) {
@@ -286,7 +384,7 @@ class WebauthnClient extends AbstractClient {
   register(): Promise<void> {
     return new Promise((resolve, reject) => {
       this.client
-        .post("/webauthn/registration/initialize")
+        .post2("/webauthn/registration/initialize")
         .then((response) => {
           if (response.ok) {
             return response.json();
@@ -305,7 +403,7 @@ class WebauthnClient extends AbstractClient {
           // supported transports must be available under a different path.
           attestation.transports = attestation.response.transports;
 
-          return this.client.post(
+          return this.client.post2(
             "/webauthn/registration/finalize",
             attestation
           );

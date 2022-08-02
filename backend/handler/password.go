@@ -20,10 +20,10 @@ import (
 type PasswordHandler struct {
 	persister      persistence.Persister
 	sessionManager session.Manager
-	cfg            config.Password
+	cfg            *config.Config
 }
 
-func NewPasswordHandler(persister persistence.Persister, sessionManager session.Manager, cfg config.Password) *PasswordHandler {
+func NewPasswordHandler(persister persistence.Persister, sessionManager session.Manager, cfg *config.Config) *PasswordHandler {
 	return &PasswordHandler{
 		persister:      persister,
 		sessionManager: sessionManager,
@@ -57,8 +57,8 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 	}
 
 	pwBytes := []byte(body.Password)
-	if utf8.RuneCountInString(body.Password) < h.cfg.MinPasswordLength { // use utf8.RuneCountInString, so utf8 characters would count as 1
-		return dto.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.MinPasswordLength))
+	if utf8.RuneCountInString(body.Password) < h.cfg.Password.MinPasswordLength { // use utf8.RuneCountInString, so utf8 characters would count as 1
+		return dto.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.Password.MinPasswordLength))
 	}
 	if len(pwBytes) > 72 {
 		return dto.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
@@ -146,10 +146,21 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
-	cookie, err := h.sessionManager.GenerateCookie(pw.UserId)
+	token, err := h.sessionManager.GenerateJWT(pw.UserId)
+	if err != nil {
+		return fmt.Errorf("failed to generate jwt: %w", err)
+	}
+
+	cookie, err := h.sessionManager.GenerateCookie(token)
 	if err != nil {
 		return fmt.Errorf("failed to create session cookie: %w", err)
 	}
+
 	c.SetCookie(cookie)
+
+	if h.cfg.Session.EnableAuthTokenHeader {
+		c.Response().Header().Set("X-Auth-Token", token)
+	}
+
 	return c.String(http.StatusOK, "")
 }

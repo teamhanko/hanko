@@ -41,7 +41,6 @@ func main() {
 	}))
 
 	e.Use(middleware.CacheControlMiddleware())
-	e.Renderer = t
 
 	e.Static("/static", "public/assets")
 
