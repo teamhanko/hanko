@@ -228,7 +228,7 @@ class UserClient extends AbstractClient {
   getInfo(email: string): Promise<UserInfo> {
     return new Promise<UserInfo>((resolve, reject) => {
       this.client
-        .post2("/user", { email })
+        .post("/user", { email })
         .then((response) => {
           if (response.ok) {
             return response.json();
