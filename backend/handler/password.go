@@ -162,5 +162,5 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		c.Response().Header().Set("X-Auth-Token", token)
 	}
 
-	return c.String(http.StatusOK, "")
+	return c.JSON(http.StatusOK, nil)
 }

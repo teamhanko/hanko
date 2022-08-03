@@ -19,7 +19,6 @@ test.describe("@common", () => {
             await route.fulfill({
               response,
               status: 500,
-              body: "Internal Server error",
             });
           },
           { times: 1 }
