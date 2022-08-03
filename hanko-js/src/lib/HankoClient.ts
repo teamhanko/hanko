@@ -306,10 +306,13 @@ class UserClient extends AbstractClient {
 
 class WebauthnClient extends AbstractClient {
   webAuthnManager: WebAuthnManager;
+  isAndroidUserAgent: boolean;
 
   constructor(api: string, timeout: number) {
     super(api, timeout);
     this.webAuthnManager = new WebAuthnManager();
+    this.isAndroidUserAgent =
+      window.navigator.userAgent.indexOf("Android") !== -1;
   }
 
   login(userID?: string): Promise<void> {
@@ -327,6 +330,18 @@ class WebauthnClient extends AbstractClient {
           reject(e);
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
+          if (
+            challenge.publicKey.allowCredentials != undefined &&
+            this.isAndroidUserAgent
+          ) {
+            for (
+              let i = 0;
+              i < challenge.publicKey.allowCredentials.length;
+              i++
+            ) {
+              delete challenge.publicKey.allowCredentials[i].transports;
+            }
+          }
           return getWebauthnCredential(challenge);
         })
         .catch((e) => {
