@@ -1,47 +1,62 @@
 @import url("fonts.css");
 
 body {
-    margin: 0;
-    text-align: center;
-    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+    font-family: Inter, sans-serif;
+    color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: url("../img/bg.png") no-repeat center center fixed;
+    background: url("../img/bg.jpg") no-repeat center center fixed;
     background-size: cover;
 }
 
-.main {
-    margin-top: 8rem;
+.nav__itemList {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.nav__listItem {
+    float: right;
+}
+
+.nav__link,
+.nav__link:visited,
+.nav__link:hover,
+.nav__link:active {
+    display: block;
+    margin: 2.5rem;
+    color: white;
+    background-color: transparent;
+    text-decoration: none;
+}
+
+.nav__link:hover {
+    text-decoration: underline;
+}
+
+.content {
+    margin: auto;
+    margin-bottom: 30px;
+    padding: 0 100px;
+    max-width: 1200px;
+}
+
+@media screen and (max-width: 470px) {
+    .content {
+        padding: 0 20px;
+    }
 }
 
 .footer {
-    margin-top: 6rem;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
+    margin-top: 100px;
 }
 
 .footer img{
-    padding-bottom: 2.5rem;
+    padding-bottom: 2rem;
 }
 
-@media screen and (max-height: 667px) {
-    .main {
-        margin-top: 1rem;
-    }
-    .footer {
-        margin-top: 2rem;
-    }
-    .footer img {
-        padding-bottom: 1.5rem;
-    }
-}
-
-@media screen and (max-width: 600px) {
-    .main {
-        padding: 0 1.25rem;
-    }
-}
