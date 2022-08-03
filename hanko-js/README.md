@@ -109,11 +109,8 @@ hanko-auth {
   --color-s: 0%;
   --color-l: 0%;
 
-  --container-max-height: 500px;
-  --container-max-width: 450px;
-  --container-min-height: 500px;
-  --container-min-width: 450px;
-  --container-padding: 25px;
+  --container-padding: 20px;
+  --container-max-width: 600px;
 
   --error-color-h: 351;
   --error-color-s: 100%;
@@ -187,8 +184,6 @@ hanko-auth {
   --input-height: 45px;
   --item-margin: 10px;
 
-  --container-min-height: 0;
-  --container-min-width: 350px;
   --container-max-width: 450px;
   --container-padding: 10px 20px;
 
