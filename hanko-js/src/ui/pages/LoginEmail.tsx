@@ -2,12 +2,10 @@ import * as preact from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
 import { Fragment } from "preact";
 
-import { UserInfo } from "../../lib/HankoClient";
 import {
   HankoError,
   TechnicalError,
   NotFoundError,
-  EmailValidationRequiredError,
   WebAuthnRequestCancelledError,
 } from "../../lib/Errors";
 
@@ -35,7 +33,6 @@ const LoginEmail = () => {
     renderRegisterConfirm,
   } = useContext(RenderContext);
 
-  const [userInfo, setUserInfo] = useState<UserInfo>(null);
   const [isPasskeyLoginLoading, setIsPasskeyLoginLoading] =
     useState<boolean>(false);
   const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] =
@@ -59,29 +56,84 @@ const LoginEmail = () => {
     }
   };
 
+  const loginWithEmailAndWebAuthn = () => {
+    let userID: string;
+    let webauthnLoginInitiated: boolean;
+
+    return hanko.user
+      .getInfo(email)
+      .then((userInfo) => {
+        if (!userInfo.verified) {
+          return renderPasscode(userInfo.id, config.password.enabled, true);
+        }
+
+        if (!userInfo.has_webauthn_credential) {
+          return renderAlternateLoginMethod(userInfo.id);
+        }
+
+        userID = userInfo.id;
+        webauthnLoginInitiated = true;
+        return hanko.authenticator.login(userInfo.id);
+      })
+      .then(() => {
+        if (webauthnLoginInitiated) {
+          setIsEmailLoginLoading(false);
+          setIsEmailLoginSuccess(true);
+          emitSuccessEvent();
+        }
+
+        return;
+      })
+      .catch((e) => {
+        if (e instanceof NotFoundError) {
+          return renderRegisterConfirm();
+        }
+
+        if (e instanceof WebAuthnRequestCancelledError) {
+          return renderAlternateLoginMethod(userID);
+        }
+
+        throw e;
+      });
+  };
+
+  const loginWithEmail = () => {
+    return hanko.user
+      .getInfo(email)
+      .then((info) => {
+        if (!info.verified) {
+          return renderPasscode(info.id, config.password.enabled, true);
+        }
+
+        return renderAlternateLoginMethod(info.id);
+      })
+      .catch((e) => {
+        if (e instanceof NotFoundError) {
+          return renderRegisterConfirm();
+        }
+
+        throw e;
+      });
+  };
+
   const onEmailSubmit = (event: Event) => {
     event.preventDefault();
     setIsEmailLoginLoading(true);
 
-    hanko.user
-      .getInfo(email)
-      .then((info) => setUserInfo(info))
-      .catch((e) => {
-        if (e instanceof NotFoundError) {
-          return renderRegisterConfirm();
-        } else if (e instanceof EmailValidationRequiredError) {
-          return renderPasscode(e.userID, config.password.enabled, true);
-        }
-
-        throw e;
-      })
-      .catch((e) => {
+    if (isAuthenticatorSupported) {
+      loginWithEmailAndWebAuthn().catch((e) => {
         setIsEmailLoginLoading(false);
         setError(e);
       });
+    } else {
+      loginWithEmail().catch((e) => {
+        setIsEmailLoginLoading(false);
+        setError(e);
+      });
+    }
   };
 
-  const onWebAuthnSubmit = (event: Event) => {
+  const onPasskeySubmit = (event: Event) => {
     event.preventDefault();
     setIsPasskeyLoginLoading(true);
 
@@ -100,19 +152,20 @@ const LoginEmail = () => {
       });
   };
 
-  const renderAlternateLoginMethod = useCallback(() => {
-    if (config.password.enabled) {
-      renderPassword(userInfo.id).catch((e) => {
-        setIsEmailLoginLoading(false);
-        setError(e);
+  const renderAlternateLoginMethod = useCallback(
+    (userID: string) => {
+      if (config.password.enabled) {
+        return renderPassword(userID).catch((e) => {
+          throw e;
+        });
+      }
+
+      return renderPasscode(userID, false, false).catch((e) => {
+        throw e;
       });
-    } else {
-      renderPasscode(userInfo.id, false, false).catch((e) => {
-        setIsEmailLoginLoading(false);
-        setError(e);
-      });
-    }
-  }, [config.password.enabled, renderPasscode, renderPassword, userInfo]);
+    },
+    [config.password.enabled, renderPasscode, renderPassword]
+  );
 
   useEffect(() => {
     hanko.authenticator
@@ -120,41 +173,6 @@ const LoginEmail = () => {
       .then((supported) => setIsAuthenticatorSupported(supported))
       .catch((e) => setError(new TechnicalError(e)));
   }, [hanko]);
-
-  // UserID has been resolved, decide what to do next.
-  useEffect(() => {
-    if (
-      userInfo === null ||
-      config === null ||
-      isAuthenticatorSupported === null
-    ) {
-      return;
-    }
-
-    if (userInfo.has_webauthn_credential && isAuthenticatorSupported) {
-      hanko.authenticator
-        .login(userInfo.id)
-        .then(() => {
-          setIsEmailLoginLoading(false);
-          setIsEmailLoginSuccess(true);
-          emitSuccessEvent();
-
-          return;
-        })
-        .catch(() => {
-          renderAlternateLoginMethod();
-        });
-    } else {
-      renderAlternateLoginMethod();
-    }
-  }, [
-    config,
-    emitSuccessEvent,
-    hanko.authenticator,
-    isAuthenticatorSupported,
-    renderAlternateLoginMethod,
-    userInfo,
-  ]);
 
   return (
     <Content>
@@ -170,20 +188,31 @@ const LoginEmail = () => {
           value={email}
           label={t("labels.email")}
           pattern={"^.*[^0-9]+$"}
+          disabled={
+            isEmailLoginLoading ||
+            isEmailLoginSuccess ||
+            isPasskeyLoginLoading ||
+            isPasskeyLoginSuccess
+          }
           autofocus
         />
-        <Button isLoading={isEmailLoginLoading} isSuccess={isEmailLoginSuccess}>
+        <Button
+          isLoading={isEmailLoginLoading}
+          isSuccess={isEmailLoginSuccess}
+          disabled={isPasskeyLoginLoading || isPasskeyLoginSuccess}
+        >
           {t("labels.continue")}
         </Button>
       </Form>
       {isAuthenticatorSupported && !isAndroidUserAgent ? (
         <Fragment>
           <Divider />
-          <Form onSubmit={onWebAuthnSubmit}>
+          <Form onSubmit={onPasskeySubmit}>
             <Button
               secondary
               isLoading={isPasskeyLoginLoading}
               isSuccess={isPasskeyLoginSuccess}
+              disabled={isEmailLoginLoading || isEmailLoginSuccess}
             >
               {t("labels.signInPasskey")}
             </Button>
