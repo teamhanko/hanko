@@ -5,7 +5,7 @@ import {
   HankoError,
   TooManyRequestsError,
   MaxNumOfPasscodeAttemptsReachedError,
-} from "../../lib/Errors";
+} from "../../lib/Error";
 import { AppContext } from "./AppProvider";
 
 interface Props {

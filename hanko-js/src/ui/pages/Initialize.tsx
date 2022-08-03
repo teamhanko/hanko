@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import { useContext, useEffect } from "preact/compat";
 
-import { UnauthorizedError } from "../../lib/Errors";
+import { UnauthorizedError } from "../../lib/Error";
 
 import { AppContext } from "../contexts/AppProvider";
 import { UserContext } from "../contexts/UserProvider";

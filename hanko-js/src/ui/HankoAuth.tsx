@@ -30,7 +30,7 @@ declare global {
   }
 }
 
-const HankoAuth = ({ api, lang = "en" }: Props) => {
+export const HankoAuth = ({ api, lang = "en" }: Props) => {
   return (
     <Fragment>
       <style
@@ -54,5 +54,3 @@ const HankoAuth = ({ api, lang = "en" }: Props) => {
 register(HankoAuth, "hanko-auth", ["api", "lang"], {
   shadow: true,
 });
-
-export default HankoAuth;

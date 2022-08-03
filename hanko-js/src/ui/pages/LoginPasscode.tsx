@@ -6,7 +6,7 @@ import {
   HankoError,
   PasscodeExpiredError,
   TechnicalError,
-} from "../../lib/Errors";
+} from "../../lib/Error";
 
 import { UserContext } from "../contexts/UserProvider";
 import { PasscodeContext } from "../contexts/PasscodeProvider";

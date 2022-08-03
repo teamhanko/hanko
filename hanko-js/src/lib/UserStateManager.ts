@@ -1,4 +1,4 @@
-import { Credential } from "./HankoClient";
+import { Credential } from "./Client";
 
 interface PasscodeState {
   id: string;

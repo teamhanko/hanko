@@ -6,7 +6,7 @@ import {
   HankoError,
   UnauthorizedError,
   WebAuthnRequestCancelledError,
-} from "../../lib/Errors";
+} from "../../lib/Error";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";

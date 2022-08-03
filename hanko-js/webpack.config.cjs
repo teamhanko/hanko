@@ -1,7 +1,6 @@
 const path = require("path");
 
-module.exports = {
-  entry: './src/index.ts',
+var hankoAuthConfig = {
   module: {
     rules: [
       {
@@ -32,7 +31,7 @@ module.exports = {
           {
             loader: "sass-loader",
             options: {
-               sourceMap: true,
+              sourceMap: true,
             }
           }
         ]
@@ -43,17 +42,43 @@ module.exports = {
     extensions: [
       '.ts',
       '.tsx',
-      '.js',
-      '.sass',
-      "declarations.d.ts"
+      '.sass'
     ],
+  },
+  entry: {
+    "element.hanko-auth": ['./src/ui/HankoAuth']
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'element.hanko-auth.js',
-    library: {
-      name: 'Hanko',
-      type: 'var'
-    },
+    library: "HankoAuth",
+    libraryTarget: 'umd',
   },
 };
+
+var hankoClientConfig = {
+  module: {
+    rules: [
+      {
+        test: /\.ts$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      }]
+  },
+  resolve: {
+    extensions: [
+      '.ts',
+    ],
+  },
+  entry: {
+    "client": ['./src/lib/Client'],
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: 'hanko-client.js',
+    libraryTarget: 'umd',
+    library: "Hanko"
+  },
+};
+
+module.exports = [hankoAuthConfig, hankoClientConfig];

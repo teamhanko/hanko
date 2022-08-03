@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
     <script type="module" src="../dist/element.hanko-auth.js"></script>
+    <script type="text/javascript" src="../dist/hanko-client.js"></script>
     <style>
         body {
             background-color: hsl(188, 99%, 38%);
@@ -63,10 +64,15 @@
 <body>
 <hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
 <script>
-    const hanko = document.querySelector("hanko-auth");
+    const client = new Hanko.Client("http://localhost:8000", 3000);
+    const element = document.querySelector("hanko-auth");
 
-    hanko.addEventListener("success", (event) => {
-        hanko.parentElement.innerHTML = "<h1>secured content...</h1>";
+    element.addEventListener("success", (event) => {
+        client.user.getCurrent().then((u) => {
+            element.parentElement.innerHTML = "You're logged in! (" + u.email + ")";
+        }).catch((e) => {
+            console.error(e);
+        });
     })
 </script>
 </body>

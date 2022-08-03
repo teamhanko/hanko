@@ -16,6 +16,7 @@ import {
 } from "./UserStateManager";
 
 import {
+  HankoError,
   InvalidPasswordError,
   WebAuthnRequestCancelledError,
   NotFoundError,
@@ -27,7 +28,7 @@ import {
   InvalidWebauthnCredentialError,
   RequestTimeoutError,
   ConflictError,
-} from "./Errors";
+} from "./Error";
 
 import { isUserVerifyingPlatformAuthenticatorAvailable } from "./WebauthnSupport";
 
@@ -69,11 +70,11 @@ export interface Passcode {
   ttl: number;
 }
 
-interface Attestation extends PublicKeyCredentialWithAttestationJSON {
+export interface Attestation extends PublicKeyCredentialWithAttestationJSON {
   transports: string[];
 }
 
-export class HankoClient {
+export class Client {
   config: ConfigClient;
   user: UserClient;
   authenticator: WebauthnClient;
@@ -561,4 +562,17 @@ class PasscodeClient extends AbstractClient {
   }
 }
 
-export default HankoClient;
+export {
+  HankoError,
+  InvalidPasswordError,
+  WebAuthnRequestCancelledError,
+  NotFoundError,
+  TooManyRequestsError,
+  TechnicalError,
+  MaxNumOfPasscodeAttemptsReachedError,
+  InvalidPasscodeError,
+  UnauthorizedError,
+  InvalidWebauthnCredentialError,
+  RequestTimeoutError,
+  ConflictError,
+};

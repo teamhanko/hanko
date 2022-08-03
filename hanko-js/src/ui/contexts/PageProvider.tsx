@@ -7,9 +7,9 @@ import {
   useMemo,
   useState,
 } from "preact/compat";
-import { HankoError } from "../../lib/Errors";
+import { HankoError } from "../../lib/Error";
 
-import { User } from "../../lib/HankoClient";
+import { User } from "../../lib/Client";
 
 import { AppContext } from "./AppProvider";
 import { PasswordContext } from "./PasswordProvider";

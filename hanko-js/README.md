@@ -15,13 +15,13 @@ that provides the underlying functionalities.
 
 ```shell
 # npm
-npm install @teamhanko/hanko-elements
+npm install @teamhanko/hanko
 
 # yarn
-yarn add @teamhanko/hanko-elements
+yarn add @teamhanko/hanko
 
 # pnpm
-pnpm install @teamhanko/hanko-elements
+pnpm install @teamhanko/hanko
 ```
 
 ## Usage
@@ -31,13 +31,13 @@ pnpm install @teamhanko/hanko-elements
 Import as a module:
 
 ```typescript
-import "@teamhanko/hanko-elements/hanko-auth"
+import "@teamhanko/hanko/hanko-auth"
 ```
 
 With a script tag via CDN:
 
 ```html
-<script type="module" src="https://unpkg.com/@teamhanko/hanko-elements/dist/element.hanko-auth.js">
+<script type="module" src="https://unpkg.com/@teamhanko/hanko/dist/element.hanko-auth.js">
 ```
 
 ### Markup

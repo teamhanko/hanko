@@ -2,8 +2,8 @@ import * as preact from "preact";
 import { Fragment } from "preact";
 import { useContext, useEffect, useState } from "preact/compat";
 
-import { User } from "../../lib/HankoClient";
-import { ConflictError, HankoError } from "../../lib/Errors";
+import { User } from "../../lib/Client";
+import { ConflictError, HankoError } from "../../lib/Error";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
