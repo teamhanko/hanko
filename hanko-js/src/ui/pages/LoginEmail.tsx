@@ -57,7 +57,8 @@ const LoginEmail = () => {
   };
 
   const loginWithEmailAndWebAuthn = () => {
-    let webauthnLogin: boolean;
+    let userID: string;
+    let webauthnLoginInitiated: boolean;
 
     return hanko.user
       .getInfo(email)
@@ -70,11 +71,12 @@ const LoginEmail = () => {
           return renderAlternateLoginMethod(userInfo.id);
         }
 
-        webauthnLogin = true;
+        userID = userInfo.id;
+        webauthnLoginInitiated = true;
         return hanko.authenticator.login(userInfo.id);
       })
       .then(() => {
-        if (webauthnLogin) {
+        if (webauthnLoginInitiated) {
           setIsEmailLoginLoading(false);
           setIsEmailLoginSuccess(true);
           emitSuccessEvent();
@@ -85,6 +87,10 @@ const LoginEmail = () => {
       .catch((e) => {
         if (e instanceof NotFoundError) {
           return renderRegisterConfirm();
+        }
+
+        if (e instanceof WebAuthnRequestCancelledError) {
+          return renderAlternateLoginMethod(userID);
         }
 
         throw e;
@@ -117,7 +123,7 @@ const LoginEmail = () => {
     if (isAuthenticatorSupported) {
       loginWithEmailAndWebAuthn().catch((e) => {
         setIsEmailLoginLoading(false);
-        setError(e instanceof WebAuthnRequestCancelledError ? null : e);
+        setError(e);
       });
     } else {
       loginWithEmail().catch((e) => {
