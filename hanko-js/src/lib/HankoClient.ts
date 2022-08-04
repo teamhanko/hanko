@@ -330,17 +330,10 @@ class WebauthnClient extends AbstractClient {
           reject(e);
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
-          if (
-            challenge.publicKey.allowCredentials != undefined &&
-            this.isAndroidUserAgent
-          ) {
-            for (
-              let i = 0;
-              i < challenge.publicKey.allowCredentials.length;
-              i++
-            ) {
-              delete challenge.publicKey.allowCredentials[i].transports;
-            }
+          if (this.isAndroidUserAgent) {
+            challenge.publicKey?.allowCredentials?.map((c) => {
+              delete c.transports;
+            });
           }
           return getWebauthnCredential(challenge);
         })
