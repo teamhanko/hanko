@@ -3,16 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Unauthorized</title>
-    <link rel="stylesheet" href="static/css/unauthorized.css"/>
+    <title>Hanko Web Component Example</title>
+    <link rel="stylesheet" href="static/css/common.css"/>
+    <link href="../static/img/Favicon_32x32.png" rel="shortcut icon" type="image/x-icon">
+    <link href="../static/img/Favicon_256x256.png" rel="apple-touch-icon">
 </head>
 <body>
+
+<header>
+    <nav class="nav">
+        <ul class="nav__itemList">
+            <li class="nav__listItem">
+                <a class="nav__link" href="/">Back to login</a>
+            </li>
+        </ul>
+    </nav>
+</header>
 
 <main class="main">
     <div class="content">
         <h1>Error</h1>
         <p>{{ .error }}</p>
-        <span>Back to<a href="/">Login</a></span>
     </div>
 </main>
 

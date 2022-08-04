@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Secured</title>
+    <meta name="theme-color" content="#042F4B">
+    <title>Hanko Web Component Example</title>
     <link rel="stylesheet" href="static/css/secured.css"/>
+    <link href="../static/img/Favicon_32x32.png" rel="shortcut icon" type="image/x-icon">
+    <link href="../static/img/Favicon_256x256.png" rel="apple-touch-icon">
 </head>
 <body>
 <header>
@@ -18,12 +21,14 @@
 </header>
 
 <main class="main">
-    <div class="profile">
-        <div class="profile__title">
-            <h1>My Profile</h1>
-        </div>
-        <div class="profile__email">
-            <span>{{ .user }}</span>
+    <div class="content">
+        <div class="profile">
+            <div class="profile__title">
+                <h1>My Profile</h1>
+            </div>
+            <div class="profile__email">
+                <span>{{ .user }}</span>
+            </div>
         </div>
     </div>
 </main>

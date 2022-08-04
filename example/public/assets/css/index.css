@@ -1,33 +1,37 @@
 @import url("common.css");
 
-hanko-auth {
-    --brand-color-h: 230;
-    --brand-color-s: 100%;
-    --brand-color-l: 90%;
+.main {
+    margin-top: 10%;
+}
 
+.auth-container {
+    background-color: white;
+    max-width: 370px;
+    min-width: 200px;
+    margin: auto;
+    border-radius: 16px;
+    padding: 25px;
+}
+
+@media screen and (max-width: 470px) {
+    .auth-container {
+        padding: 10px;
+    }
+}
+
+hanko-auth {
     --font-family: "Inter", sans-serif;
-    --border-radius: 16px;
-    --input-height: 52px;
+    --border-radius: 5px;
 }
 
 hanko-auth::part(input) {
-    border-radius: 5px;
     border-color: #BFC2CD;
-}
-
-hanko-auth::part(container) {
-    margin: auto;
-    min-width: 300px;
-    max-width: 450px;
-    padding: 20px;
 }
 
 hanko-auth::part(primary-button) {
     background-color: #CBD4FF;
     color: black;
     border-style: none;
-    border-radius: 5px;
-    height: 52px;
     font-weight: 500;
 }
 
@@ -39,8 +43,6 @@ hanko-auth::part(secondary-button) {
     background-color: #506CF0;
     color: white;
     border-style: none;
-    border-radius: 5px;
-    height: 52px;
     font-weight: 500;
 }
 
@@ -50,4 +52,8 @@ hanko-auth::part(secondary-button):hover {
 
 hanko-auth::part(divider) {
     border-bottom-color: #BFC2CD;
+}
+
+hanko-auth::part(link) {
+    color: #688293;
 }
