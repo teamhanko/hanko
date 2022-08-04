@@ -182,7 +182,8 @@ const LoginEmail = () => {
         <InputText
           name={"email"}
           type={"email"}
-          autocomplete={"username"}
+          autoComplete={"username"}
+          autoCorrect={"off"}
           required={true}
           onInput={onEmailInput}
           value={email}
@@ -194,7 +195,7 @@ const LoginEmail = () => {
             isPasskeyLoginLoading ||
             isPasskeyLoginSuccess
           }
-          autofocus
+          autoFocus
         />
         <Button
           isLoading={isEmailLoginLoading}
