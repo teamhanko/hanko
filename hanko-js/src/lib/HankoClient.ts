@@ -330,6 +330,8 @@ class WebauthnClient extends AbstractClient {
           reject(e);
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
+          /* Due to a bug in Android, the internal authenticator gets triggered when transports are set to `internal` although the credential is unknown.
+          As a workaround the transports are removed. In case Google fixes the problem, this can be removed. */
           if (this.isAndroidUserAgent) {
             challenge.publicKey?.allowCredentials?.map((c) => {
               delete c.transports;
