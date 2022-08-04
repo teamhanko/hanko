@@ -14,11 +14,8 @@
 }
 
 @media screen and (max-width: 470px) {
-    .main {
-        margin-top: 8px;
-    }
     .auth-container {
-        padding: 5px;
+        padding: 10px;
     }
 }
 

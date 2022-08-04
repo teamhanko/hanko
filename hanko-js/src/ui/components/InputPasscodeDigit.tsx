@@ -43,7 +43,7 @@ const InputPasscodeDigit = ({ index, focus, digit = "", ...props }: Props) => {
         part={"input passcode-input"}
         name={props.name + index.toString(10)}
         type={"text"}
-        inputmode={"numeric"}
+        inputMode={"numeric"}
         maxLength={1}
         ref={ref}
         value={digit.charAt(0)}
