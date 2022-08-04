@@ -205,6 +205,12 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 		return fmt.Errorf("failed to store webauthn assertion session data: %w", err)
 	}
 
+	// Remove all transports, because of a bug in android and windows where the internal authenticator gets triggered,
+	// when the transports array contains the type 'internal' although the credential is not available on the device.
+	for i, _ := range options.Response.AllowedCredentials {
+		options.Response.AllowedCredentials[i].Transport = nil
+	}
+
 	return c.JSON(http.StatusOK, options)
 }
 
@@ -214,7 +220,6 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 	if err != nil {
 		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
-
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
