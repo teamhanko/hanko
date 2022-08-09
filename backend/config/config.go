@@ -36,9 +36,19 @@ func Load(cfgFile *string) (*Config, error) {
 		log.Println("Using config file:", *cfgFile)
 	}
 
-	err = k.Load(env.Provider("", ".", func(s string) string {
-		return strings.Replace(strings.ToLower(s), "_", ".", -1)
-	}), nil)
+	lastAccessor := -1
+
+	for err != nil {
+		err = k.Load(env.Provider("", ".", func(s string) string {
+			r := strings.Replace(strings.ToLower(s), "_", ".", -1)
+			if lastAccessor != -1 {
+				r = r[:lastAccessor] + "_" + r[lastAccessor:]
+			}
+			lastAccessor = strings.LastIndex(s, ".")
+			return r
+		}), nil)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
