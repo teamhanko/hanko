@@ -38,7 +38,7 @@ func Load(cfgFile *string) (*Config, error) {
 
 	lastAccessor := -1
 
-	for err != nil {
+	for {
 		err = k.Load(env.Provider("", ".", func(s string) string {
 			r := strings.Replace(strings.ToLower(s), "_", ".", -1)
 			if lastAccessor != -1 {
@@ -47,6 +47,10 @@ func Load(cfgFile *string) (*Config, error) {
 			lastAccessor = strings.LastIndex(s, ".")
 			return r
 		}), nil)
+
+		if err != nil || lastAccessor == -1 {
+			break;
+		}
 	}
 
 	if err != nil {
