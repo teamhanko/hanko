@@ -48,7 +48,7 @@ func Load(cfgFile *string) (*Config, error) {
 			return r
 		}), nil)
 
-		if err != nil || lastAccessor == -1 {
+		if err == nil || lastAccessor == -1 {
 			break;
 		}
 	}
