@@ -131,7 +131,7 @@ class HttpClient {
   timeout: number;
   api: string;
 
-  constructor(api: string, timeout: number = 13000) {
+  constructor(api: string, timeout = 13000) {
     this.api = api;
     this.timeout = timeout;
   }
