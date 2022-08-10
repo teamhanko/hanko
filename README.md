@@ -10,7 +10,7 @@
 [![GoDoc](https://godoc.org/github.com/teamhanko/hanko?status.svg)](https://godoc.org/github.com/teamhanko/hanko)
 
 # About Hanko
-Hanko is open-source user authentication with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
+Hanko is an open-source user authentication system with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
 - Built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
 - An API for passkeys, email passcodes, and optional password support
