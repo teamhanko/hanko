@@ -18,7 +18,7 @@ Hanko is an open-source user authentication system with a focus on moving the lo
 - API-first, small footprint, cloud-native
 - FIDO2-certified
 
-Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of more than 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
+Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
 
 ![Hanko - Open-source user authentication that can do more than just passwords](https://user-images.githubusercontent.com/20115649/176924402-82869443-4b4a-42e0-aaef-e33d00146450.svg)
 
@@ -30,24 +30,27 @@ With most devices now shipping with passkey support and biometric sensors like T
 **Build your passkey login in just 5 minutes – with two lines of code – and never look back.**
 
 # Roadmap
-We are currently in **Beta** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [newsletter](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
+We are currently in **Beta** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
 
 | Status | Feature |
 | :---: | :--- |
 | ✅ | Passkeys |
-| ✅ | Passcodes |
+| ✅ | Email passcodes |
 | ✅ | Passwords |
 | ✅ | JWT signing |
-| ✅ | Admin API |
+| ✅ | User management API |
 | ✅ | 📢 Hanko Alpha Release |
 | ✅ | Hanko web component |
 | ✅ | Customizable CSS |
 | ✅ | 📢 Hanko Beta Release |
-| ⚙️ | Passkey Conditional UI support |
+| ⚙️ | JavaScript frontend SDK |
+| ⚙️ | [Passkey Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) support in `<hanko-auth>` |
 | ⚙️ | Events API |
-| | 2FA with FIDO Security Keys and TOTP |
-| | Mobile app support |
-| | Sign in with Google/Apple/GitHub |
+| | 2FA with FIDO Security Keys and TOTP to secure fallback auth methods|
+| | Native app support for Android and iOS apps |
+| | OAuth2 plugin system (Sign in with Google/Apple/GitHub/...) |
+| | SMS passcode delivery |
+| | Session management |
 
 # Quickstart
 The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
