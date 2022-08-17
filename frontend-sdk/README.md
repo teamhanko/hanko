@@ -98,7 +98,7 @@ try {
 } catch (e) {
     if (e instanceof UnauthorizedError) {
         // Display an error or prompt the user to login again. After a successful call to `hanko.webauthn.login()`,
-        // `hanko.password.login()` or `hanko.passcode.finalize()` a JWT will be issued and`hanko.user.getCurrent()`
+        // `hanko.password.login()` or `hanko.passcode.finalize()` a JWT will be issued and `hanko.user.getCurrent()`
         // would succeed.
     }
 }
@@ -134,3 +134,11 @@ try {
     }
 }
 ```
+
+## Bugs
+
+Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
+
+## License
+
+The `hanko-frontend-sdk` project is licensed under the [MIT License](LICENSE).
