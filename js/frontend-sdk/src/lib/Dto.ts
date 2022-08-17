@@ -38,7 +38,7 @@ interface WebauthnFinalized {
  * @subcategory DTO
  * @property {string} id - The UUID of the user.
  * @property {boolean} verified - Indicates the user's email address is verified.
- * @property {boolean} has_webauthn_credential - Indicates that the user has registered a WebAuthn credential in the past.
+ * @property {boolean} has_webauthn_credential - Indicates that the user has registered a WebAuthN credential in the past.
  */
 interface UserInfo {
   id: string;

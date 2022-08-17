@@ -72,17 +72,17 @@ class RequestTimeoutError extends HankoError {
 }
 
 /**
- * A 'WebAuthnRequestCancelledError' occurs during WebAuthN authentication or registration, when the WebAuthN API throws
+ * A 'WebauthnRequestCancelledError' occurs during WebAuthN authentication or registration, when the WebAuthN API throws
  * an error. In most cases, this happens when the user cancels the browser's WebAuthN dialog.
  *
  * @category SDK
  * @subcategory Errors
  * @extends {HankoError}
  */
-class WebAuthnRequestCancelledError extends HankoError {
+class WebauthnRequestCancelledError extends HankoError {
   constructor(cause?: Error) {
     super("Request cancelled error", "requestCancelled", cause);
-    Object.setPrototypeOf(this, WebAuthnRequestCancelledError.prototype);
+    Object.setPrototypeOf(this, WebauthnRequestCancelledError.prototype);
   }
 }
 
@@ -124,7 +124,7 @@ class InvalidPasscodeError extends HankoError {
 class InvalidWebauthnCredentialError extends HankoError {
   constructor(cause?: Error) {
     super(
-      "Invalid WebAuthn credential error",
+      "Invalid WebAuthN credential error",
       "invalidWebauthnCredential",
       cause
     );
@@ -213,7 +213,7 @@ export {
   TechnicalError,
   ConflictError,
   RequestTimeoutError,
-  WebAuthnRequestCancelledError,
+  WebauthnRequestCancelledError,
   InvalidPasswordError,
   InvalidPasscodeError,
   InvalidWebauthnCredentialError,

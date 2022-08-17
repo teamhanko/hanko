@@ -11,7 +11,7 @@ import {
   TechnicalError,
   TooManyRequestsError,
   UnauthorizedError,
-  WebAuthnRequestCancelledError,
+  WebauthnRequestCancelledError,
 } from "./Errors";
 
 import {
@@ -24,7 +24,7 @@ import {
   WebauthnFinalized,
 } from "./Dto";
 
-import { PasscodeState, PasswordState, WebAuthnState } from "./State";
+import { PasscodeState, PasswordState, WebauthnState } from "./State";
 
 import { WebauthnSupport } from "./WebauthnSupport";
 
@@ -405,16 +405,16 @@ class UserClient extends AbstractClient {
  * @extends {AbstractClient}
  */
 class WebauthnClient extends AbstractClient {
-  private state: WebAuthnState;
+  private state: WebauthnState;
   support: WebauthnSupport;
 
   constructor(api: string, timeout: number) {
     super(api, timeout);
     /**
      *  @private
-     *  @type {WebAuthnState}
+     *  @type {WebauthnState}
      */
-    this.state = new WebAuthnState();
+    this.state = new WebauthnState();
     /**
      *  @public
      *  @type {WebauthnSupport}
@@ -423,12 +423,12 @@ class WebauthnClient extends AbstractClient {
   }
 
   /**
-   * Performs a WebAuthn authentication ceremony. When 'userID' is specified, the API provides a list of
+   * Performs a WebAuthN authentication ceremony. When 'userID' is specified, the API provides a list of
    * allowed credentials and the browser is able to present a list of suitable credentials to the user.
    *
    * @param {string=} userID - The user's UUID.
    * @return {Promise<void>}
-   * @throws {WebAuthnRequestCancelledError}
+   * @throws {WebauthnRequestCancelledError}
    * @throws {InvalidWebauthnCredentialError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
@@ -454,7 +454,7 @@ class WebauthnClient extends AbstractClient {
           return getWebauthnCredential(challenge);
         })
         .catch((e) => {
-          throw new WebAuthnRequestCancelledError(e);
+          throw new WebauthnRequestCancelledError(e);
         })
         .then((assertion: PublicKeyCredentialWithAssertionJSON) => {
           return this.client.post("/webauthn/login/finalize", assertion);
@@ -482,7 +482,7 @@ class WebauthnClient extends AbstractClient {
    * Performs a WebAuthN registration ceremony.
    *
    * @return {Promise<void>}
-   * @throws {WebAuthnRequestCancelledError}
+   * @throws {WebauthnRequestCancelledError}
    * @throws {RequestTimeoutError}
    * @throws {UnauthorizedError}
    * @throws {TechnicalError}
@@ -505,7 +505,7 @@ class WebauthnClient extends AbstractClient {
           return createWebauthnCredential(challenge);
         })
         .catch((e) => {
-          throw new WebAuthnRequestCancelledError(e);
+          throw new WebauthnRequestCancelledError(e);
         })
         .then((attestation: Attestation) => {
           // The generated PublicKeyCredentialWithAttestationJSON object does not align with the API. The list of

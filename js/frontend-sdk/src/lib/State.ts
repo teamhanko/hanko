@@ -162,12 +162,12 @@ abstract class State {
 }
 
 /**
- * A class that manages WebAuthn credentials via local storage.
+ * A class that manages WebAuthN credentials via local storage.
  *
  * @category SDK
  * @subcategory Internal
  */
-class WebAuthnState extends State {
+class WebauthnState extends State {
   /**
    * Adds the given 'credentialID' to the list of known credentials and stores the updated list to the local storage.
    *
@@ -332,4 +332,4 @@ class PasswordState extends State {
   }
 }
 
-export { WebAuthnState, PasscodeState, PasswordState };
+export { WebauthnState, PasscodeState, PasswordState };

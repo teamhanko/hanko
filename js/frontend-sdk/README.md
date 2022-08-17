@@ -68,7 +68,7 @@ To see documentation, please click [here](https://teamhanko.github.io/hanko-fron
 - `TechnicalError`
 - `ConflictError`
 - `RequestTimeoutError`
-- `WebAuthnRequestCancelledError`
+- `WebauthnRequestCancelledError`
 - `InvalidPasswordError`
 - `InvalidPasscodeError`
 - `InvalidWebauthnCredentialError`
@@ -105,7 +105,7 @@ try {
 ### Register a WebAuthN credential
 
 ```typescript
-import { Hanko, UnauthorizedError, WebAuthnRequestCancelledError } from "@teamhanko/hanko-frontend-sdk"
+import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from "@teamhanko/hanko-frontend-sdk"
 
 const hanko = new Hanko("http://localhost:3000")
 
@@ -113,7 +113,7 @@ try {
     await hanko.webauthn.register()
     // Credential has been registered.
 } catch(e) {
-    if (e instanceof WebAuthnRequestCancelledError) {
+    if (e instanceof WebauthnRequestCancelledError) {
         // The WebAuthN API failed. Usually in this case the user aborted the WebAuthN dialog or there was no
         // suitable credential.
     } else if (e instanceof UnauthorizedError) {
