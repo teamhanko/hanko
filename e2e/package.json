@@ -26,7 +26,7 @@
   "homepage": "https://github.com/teamhanko/hanko#readme",
   "dependencies": {
     "@faker-js/faker": "^7.2.0",
-    "@playwright/test": "^1.23.1",
+    "@playwright/test": "^1.25.0",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
     "eslint": "^8.17.0",
