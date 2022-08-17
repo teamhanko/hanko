@@ -32,7 +32,7 @@ With a script tag via CDN:
 
 ## Documentation
 
-To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/frontend-sdk/@teamhanko/0.0.1-alpha).
+To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/@teamhanko/hanko-frontent-sdk/0.0.1-alpha).
 
 ## Exports
 

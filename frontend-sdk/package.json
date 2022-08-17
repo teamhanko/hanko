@@ -23,7 +23,7 @@
     "format": "pretty-quick --staged",
     "build": "microbundle --globals @github/webauthn-json=webauthnJson --tsconfig ./tsconfig.json",
     "dev": "microbundle watch",
-    "docs": "jsdoc -r -c jsdoc.json -d docs -P package.json --verbose --debug"
+    "docs": "jsdoc -r -c jsdoc.json -d ../docs/jsdoc -P package.json -R README.md --pedantic"
   },
   "description": "This package provides basic functionality for the UI integration with the Hanko API. It is meant for use in browsers only.",
   "repository": "github:teamhanko/hanko",
