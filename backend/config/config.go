@@ -22,6 +22,7 @@ type Config struct {
 	Secrets  Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
 	Service  Service          `yaml:"service" json:"service" koanf:"service"`
 	Session  Session          `yaml:"session" json:"session" koanf:"session"`
+	AuditLog AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -314,4 +315,8 @@ func (s *Session) Validate() error {
 		return errors.New("failed to parse lifespan")
 	}
 	return nil
+}
+
+type AuditLog struct {
+	EnableStoring bool `yaml:"enable_storing" json:"enable_storing" koanf:"enable_storing"`
 }

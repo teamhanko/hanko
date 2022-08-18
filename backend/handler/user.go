@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -15,11 +16,15 @@ import (
 )
 
 type UserHandler struct {
-	persister persistence.Persister
+	persister      persistence.Persister
+	auditLogClient auditlog.Client
 }
 
-func NewUserHandler(persister persistence.Persister) *UserHandler {
-	return &UserHandler{persister: persister}
+func NewUserHandler(persister persistence.Persister, auditLogClient auditlog.Client) *UserHandler {
+	return &UserHandler{
+		persister:      persister,
+		auditLogClient: auditLogClient,
+	}
 }
 
 type UserCreateBody struct {
@@ -53,6 +58,8 @@ func (h *UserHandler) Create(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to store user: %w", err)
 		}
+
+		_ = h.auditLogClient.Create(c, models.AuditLogUserCreated, &newUser, nil) // TODO: what to do on error
 
 		return c.JSON(http.StatusOK, newUser)
 	})

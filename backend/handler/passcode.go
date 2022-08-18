@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -29,11 +30,12 @@ type PasscodeHandler struct {
 	TTL               int
 	sessionManager    session.Manager
 	cfg               *config.Config
+	auditLogClient    auditlog.Client
 }
 
 var maxPasscodeTries = 3
 
-func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer) (*PasscodeHandler, error) {
+func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer, auditLogClient auditlog.Client) (*PasscodeHandler, error) {
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new renderer: %w", err)
@@ -48,6 +50,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 		TTL:               cfg.Passcode.TTL,
 		sessionManager:    sessionManager,
 		cfg:               cfg,
+		auditLogClient:    auditLogClient,
 	}, nil
 }
 
@@ -71,6 +74,10 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
+		err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginInitFailed, nil, fmt.Errorf("unknown user"))
+		if err != nil {
+			return fmt.Errorf("failed to create audit log: %w", err)
+		}
 		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 	}
 
@@ -128,6 +135,11 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to send passcode: %w", err)
 	}
 
+	err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginInitSucceeded, user, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create audit log: %w", err)
+	}
+
 	return c.JSON(http.StatusOK, dto.PasscodeReturn{
 		Id:        passcodeId.String(),
 		TTL:       h.TTL,
@@ -151,7 +163,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
 	}
 
-	// only if an internal server occurs the transaction should be rolled back
+	// only if an internal server error occurs the transaction should be rolled back
 	var businessError error
 	transactionError := h.persister.Transaction(func(tx *pop.Connection) error {
 		passcodePersister := h.persister.GetPasscodePersisterWithConnection(tx)
@@ -161,12 +173,25 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get passcode: %w", err)
 		}
 		if passcode == nil {
+			err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFailed, nil, fmt.Errorf("unknown passcode"))
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
 			businessError = dto.NewHTTPError(http.StatusNotFound, "passcode not found")
 			return nil
 		}
 
+		user, err := userPersister.Get(passcode.UserId)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
+
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
 		if lastVerificationTime.Before(startTime) {
+			err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFailed, user, fmt.Errorf("timed out passcode"))
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
 			businessError = dto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
 			return nil
 		}
@@ -180,6 +205,10 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to delete passcode: %w", err)
 				}
+				err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFailed, user, fmt.Errorf("max attempts reached"))
+				if err != nil {
+					return fmt.Errorf("failed to create audit log: %w", err)
+				}
 				businessError = dto.NewHTTPError(http.StatusGone, "max attempts reached")
 				return nil
 			}
@@ -189,6 +218,10 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
+			err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFailed, user, fmt.Errorf("passcode invalid"))
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
+			}
 			businessError = dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
 			return nil
 		}
@@ -196,11 +229,6 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		err = passcodePersister.Delete(*passcode)
 		if err != nil {
 			return fmt.Errorf("failed to delete passcode: %w", err)
-		}
-
-		user, err := userPersister.Get(passcode.UserId)
-		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
 		}
 
 		if !user.Verified {
@@ -225,6 +253,11 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", token)
+		}
+
+		err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginSucceeded, user, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
 		return c.JSON(http.StatusOK, dto.PasscodeReturn{

@@ -31,5 +31,10 @@ func NewPrivateRouter(persister persistence.Persister) *echo.Echo {
 	user.PATCH("/:id", userHandler.Patch)
 	user.GET("", userHandler.List)
 
+	auditLogHandler := handler.NewAuditLogHandler(persister)
+
+	auditLogs := e.Group("/audit_logs")
+	auditLogs.GET("", auditLogHandler.List)
+
 	return e
 }

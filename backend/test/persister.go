@@ -6,7 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential) persistence.Persister {
+func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
@@ -14,6 +14,7 @@ func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models
 		webauthnCredentialPersister:  NewWebauthnCredentialPersister(credentials),
 		webauthnSessionDataPersister: NewWebauthnSessionDataPersister(sessionData),
 		passwordCredentialPersister:  NewPasswordCredentialPersister(passwords),
+		auditLogPersister:            NewAuditLogPersister(auditLogs),
 	}
 }
 
@@ -24,6 +25,7 @@ type persister struct {
 	webauthnCredentialPersister  persistence.WebauthnCredentialPersister
 	webauthnSessionDataPersister persistence.WebauthnSessionDataPersister
 	passwordCredentialPersister  persistence.PasswordCredentialPersister
+	auditLogPersister            persistence.AuditLogPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -80,4 +82,12 @@ func (p *persister) GetJwkPersister() persistence.JwkPersister {
 
 func (p *persister) GetJwkPersisterWithConnection(tx *pop.Connection) persistence.JwkPersister {
 	return p.jwkPersister
+}
+
+func (p *persister) GetAuditLogPersister() persistence.AuditLogPersister {
+	return p.auditLogPersister
+}
+
+func (p *persister) GetAuditLogPersisterWithConnection(tx *pop.Connection) persistence.AuditLogPersister {
+	return p.auditLogPersister
 }
