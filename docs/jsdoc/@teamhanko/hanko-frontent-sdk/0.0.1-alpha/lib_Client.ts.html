@@ -68,7 +68,7 @@
             
             <nav>
                 
-                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / Internal</h3><ul><li><a href="AbstractClient.html">AbstractClient</a></li><li><a href="Headers.html">Headers</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="PasscodeState.html">PasscodeState</a></li><li><a href="PasswordState.html">PasswordState</a></li><li><a href="Response.html">Response</a></li><li><a href="State.html">State</a></li><li><a href="WebauthnState.html">WebauthnState</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="ConfigClient.html">ConfigClient</a></li><li><a href="PasscodeClient.html">PasscodeClient</a></li><li><a href="PasswordClient.html">PasswordClient</a></li><li><a href="UserClient.html">UserClient</a></li><li><a href="WebauthnClient.html">WebauthnClient</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="Config.html">Config</a></li><li><a href="Credential.html">Credential</a></li><li><a href="Passcode.html">Passcode</a></li><li><a href="PasswordConfig.html">PasswordConfig</a></li><li><a href="User.html">User</a></li><li><a href="UserInfo.html">UserInfo</a></li><li><a href="WebauthnFinalized.html">WebauthnFinalized</a></li></ul><h3>Interfaces / Internal</h3><ul><li><a href="LocalStorage.html">LocalStorage</a></li><li><a href="LocalStoragePasscode.html">LocalStoragePasscode</a></li><li><a href="LocalStoragePassword.html">LocalStoragePassword</a></li><li><a href="LocalStorageUser.html">LocalStorageUser</a></li><li><a href="LocalStorageUsers.html">LocalStorageUsers</a></li></ul></div>
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / Internal</h3><ul><li><a href="AbstractClient.html">AbstractClient</a></li><li><a href="Headers.html">Headers</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="PasscodeState.html">PasscodeState</a></li><li><a href="PasswordState.html">PasswordState</a></li><li><a href="Response.html">Response</a></li><li><a href="State.html">State</a></li><li><a href="WebauthnState.html">WebauthnState</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="ConfigClient.html">ConfigClient</a></li><li><a href="PasscodeClient.html">PasscodeClient</a></li><li><a href="PasswordClient.html">PasswordClient</a></li><li><a href="UserClient.html">UserClient</a></li><li><a href="WebauthnClient.html">WebauthnClient</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="Config.html">Config</a></li><li><a href="Credential.html">Credential</a></li><li><a href="Passcode.html">Passcode</a></li><li><a href="PasswordConfig.html">PasswordConfig</a></li><li><a href="User.html">User</a></li><li><a href="UserInfo.html">UserInfo</a></li><li><a href="WebauthnFinalized.html">WebauthnFinalized</a></li></ul><h3>Interfaces / Internal</h3><ul><li><a href="LocalStorage.html">LocalStorage</a></li><li><a href="LocalStoragePasscode.html">LocalStoragePasscode</a></li><li><a href="LocalStoragePassword.html">LocalStoragePassword</a></li><li><a href="LocalStorageUser.html">LocalStorageUser</a></li><li><a href="LocalStorageUsers.html">LocalStorageUsers</a></li><li><a href="LocalStorageWebauthn.html">LocalStorageWebauthn</a></li></ul></div>
                 
             </nav>
         </div>
@@ -556,7 +556,7 @@ class WebauthnClient extends AbstractClient {
           }
         })
         .then((w: WebauthnFinalized) => {
-          this.state.addCredentialID(w.user_id, w.credential_id);
+          this.state.read().addCredential(w.user_id, w.credential_id).write();
           return resolve();
         })
         .catch((e) => {
@@ -612,7 +612,8 @@ class WebauthnClient extends AbstractClient {
           throw new TechnicalError();
         })
         .then((w: WebauthnFinalized) => {
-          this.state.addCredentialID(w.user_id, w.credential_id);
+          this.state.read().addCredential(w.user_id, w.credential_id).write();
+
           return resolve();
         })
         .catch((e) => {
@@ -639,10 +640,9 @@ class WebauthnClient extends AbstractClient {
             return resolve(supported);
           }
 
-          const matches = this.state.matchCredentials(
-            user.id,
-            user.webauthn_credentials
-          );
+          const matches = this.state
+            .read()
+            .matchCredentials(user.id, user.webauthn_credentials);
 
           return resolve(supported &amp;&amp; !matches.length);
         })
@@ -699,7 +699,7 @@ class PasswordClient extends AbstractClient {
               10
             );
 
-            this.state.setRetryAfter(userID, retryAfter);
+            this.state.read().setRetryAfter(userID, retryAfter).write();
 
             throw new TooManyRequestsError(retryAfter);
           } else {
@@ -747,7 +747,7 @@ class PasswordClient extends AbstractClient {
    * @return {number}
    */
   getRetryAfter(userID: string) {
-    return this.state.getRetryAfter(userID);
+    return this.state.read().getRetryAfter(userID);
   }
 }
 
@@ -794,7 +794,7 @@ class PasscodeClient extends AbstractClient {
               10
             );
 
-            this.state.setResendAfter(userID, retryAfter);
+            this.state.read().setResendAfter(userID, retryAfter).write();
 
             throw new TooManyRequestsError(retryAfter);
           } else {
@@ -802,11 +802,11 @@ class PasscodeClient extends AbstractClient {
           }
         })
         .then((passcode: Passcode) => {
-          const ttl = passcode.ttl;
-
-          this.state.setActiveID(userID, passcode.id);
-          this.state.setTTL(userID, ttl);
-
+          this.state
+            .read()
+            .setActiveID(userID, passcode.id)
+            .setTTL(userID, passcode.ttl)
+            .write();
           return resolve(passcode);
         })
         .catch((e) => {
@@ -828,21 +828,20 @@ class PasscodeClient extends AbstractClient {
    * @see https://teamhanko.github.io/hanko/#/authentication/passcodeFinal
    */
   finalize(userID: string, code: string): Promise&lt;void> {
-    const passcodeID = this.state.getActiveID(userID);
+    const passcodeID = this.state.read().getActiveID(userID);
 
     return new Promise&lt;void>((resolve, reject) => {
       this.client
         .post("/passcode/login/finalize", { id: passcodeID, code })
         .then((response) => {
           if (response.ok) {
-            this.state.removeActive(userID);
-            this.state.setResendAfter(userID, 0);
+            this.state.reset(userID).write();
 
             return resolve();
           } else if (response.status === 401) {
             throw new InvalidPasscodeError();
           } else if (response.status === 404 || response.status === 410) {
-            this.state.removeActive(userID);
+            this.state.reset(userID).write();
 
             throw new MaxNumOfPasscodeAttemptsReachedError();
           } else {
@@ -862,7 +861,7 @@ class PasscodeClient extends AbstractClient {
    * @return {number}
    */
   getTTL(userID: string) {
-    return this.state.getTTL(userID);
+    return this.state.read().getTTL(userID);
   }
 
   /**
@@ -872,7 +871,7 @@ class PasscodeClient extends AbstractClient {
    * @return {number}
    */
   getResendAfter(userID: string) {
-    return this.state.getResendAfter(userID);
+    return this.state.read().getResendAfter(userID);
   }
 }
 

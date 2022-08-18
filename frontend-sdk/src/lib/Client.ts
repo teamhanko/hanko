@@ -469,7 +469,7 @@ class WebauthnClient extends AbstractClient {
           }
         })
         .then((w: WebauthnFinalized) => {
-          this.state.addCredentialID(w.user_id, w.credential_id);
+          this.state.read().addCredential(w.user_id, w.credential_id).write();
           return resolve();
         })
         .catch((e) => {
@@ -525,7 +525,8 @@ class WebauthnClient extends AbstractClient {
           throw new TechnicalError();
         })
         .then((w: WebauthnFinalized) => {
-          this.state.addCredentialID(w.user_id, w.credential_id);
+          this.state.read().addCredential(w.user_id, w.credential_id).write();
+
           return resolve();
         })
         .catch((e) => {
@@ -552,10 +553,9 @@ class WebauthnClient extends AbstractClient {
             return resolve(supported);
           }
 
-          const matches = this.state.matchCredentials(
-            user.id,
-            user.webauthn_credentials
-          );
+          const matches = this.state
+            .read()
+            .matchCredentials(user.id, user.webauthn_credentials);
 
           return resolve(supported && !matches.length);
         })
@@ -612,7 +612,7 @@ class PasswordClient extends AbstractClient {
               10
             );
 
-            this.state.setRetryAfter(userID, retryAfter);
+            this.state.read().setRetryAfter(userID, retryAfter).write();
 
             throw new TooManyRequestsError(retryAfter);
           } else {
@@ -660,7 +660,7 @@ class PasswordClient extends AbstractClient {
    * @return {number}
    */
   getRetryAfter(userID: string) {
-    return this.state.getRetryAfter(userID);
+    return this.state.read().getRetryAfter(userID);
   }
 }
 
@@ -707,7 +707,7 @@ class PasscodeClient extends AbstractClient {
               10
             );
 
-            this.state.setResendAfter(userID, retryAfter);
+            this.state.read().setResendAfter(userID, retryAfter).write();
 
             throw new TooManyRequestsError(retryAfter);
           } else {
@@ -715,11 +715,11 @@ class PasscodeClient extends AbstractClient {
           }
         })
         .then((passcode: Passcode) => {
-          const ttl = passcode.ttl;
-
-          this.state.setActiveID(userID, passcode.id);
-          this.state.setTTL(userID, ttl);
-
+          this.state
+            .read()
+            .setActiveID(userID, passcode.id)
+            .setTTL(userID, passcode.ttl)
+            .write();
           return resolve(passcode);
         })
         .catch((e) => {
@@ -741,21 +741,20 @@ class PasscodeClient extends AbstractClient {
    * @see https://teamhanko.github.io/hanko/#/authentication/passcodeFinal
    */
   finalize(userID: string, code: string): Promise<void> {
-    const passcodeID = this.state.getActiveID(userID);
+    const passcodeID = this.state.read().getActiveID(userID);
 
     return new Promise<void>((resolve, reject) => {
       this.client
         .post("/passcode/login/finalize", { id: passcodeID, code })
         .then((response) => {
           if (response.ok) {
-            this.state.removeActive(userID);
-            this.state.setResendAfter(userID, 0);
+            this.state.reset(userID).write();
 
             return resolve();
           } else if (response.status === 401) {
             throw new InvalidPasscodeError();
           } else if (response.status === 404 || response.status === 410) {
-            this.state.removeActive(userID);
+            this.state.reset(userID).write();
 
             throw new MaxNumOfPasscodeAttemptsReachedError();
           } else {
@@ -775,7 +774,7 @@ class PasscodeClient extends AbstractClient {
    * @return {number}
    */
   getTTL(userID: string) {
-    return this.state.getTTL(userID);
+    return this.state.read().getTTL(userID);
   }
 
   /**
@@ -785,7 +784,7 @@ class PasscodeClient extends AbstractClient {
    * @return {number}
    */
   getResendAfter(userID: string) {
-    return this.state.getResendAfter(userID);
+    return this.state.read().getResendAfter(userID);
   }
 }
 

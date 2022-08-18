@@ -25,7 +25,7 @@
     "dev": "microbundle watch",
     "docs": "jsdoc -r -c jsdoc.json -d ../docs/jsdoc -P package.json -R README.md --pedantic"
   },
-  "description": "This package provides basic functionality for the UI integration with the Hanko API. It is meant for use in browsers only.",
+  "description": "A package for simplifying UI integration with the Hanko API. It is meant for use in browsers only.",
   "repository": "github:teamhanko/hanko",
   "author": "Hanko GmbH <developers@hanko.io>",
   "license": "MIT",
