@@ -1,8 +1,11 @@
 import * as preact from "preact";
 import { useContext, useState } from "preact/compat";
 
-import { HankoError, UnauthorizedError } from "../../lib/Errors";
-import { User } from "../../lib/HankoClient";
+import {
+  User,
+  HankoError,
+  UnauthorizedError,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";

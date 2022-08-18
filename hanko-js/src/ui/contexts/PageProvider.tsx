@@ -7,9 +7,8 @@ import {
   useMemo,
   useState,
 } from "preact/compat";
-import { HankoError } from "../../lib/Errors";
 
-import { User } from "../../lib/HankoClient";
+import { HankoError, User } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "./AppProvider";
 import { PasswordContext } from "./PasswordProvider";
@@ -135,7 +134,7 @@ const PageProvider = ({ lang }: Props) => {
   const eventuallyRenderEnrollment = useCallback(
     (user: User, recoverPassword: boolean) => {
       return new Promise<boolean>((resolve, reject) => {
-        hanko.authenticator
+        hanko.webauthn
           .shouldRegister(user)
           .then((shouldRegisterAuthenticator) => {
             let rendered = true;

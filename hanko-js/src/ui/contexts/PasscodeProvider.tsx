@@ -1,11 +1,13 @@
 import * as preact from "preact";
 import { ComponentChildren, createContext, FunctionalComponent } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
+
 import {
   HankoError,
   TooManyRequestsError,
   MaxNumOfPasscodeAttemptsReachedError,
-} from "../../lib/Errors";
+} from "@teamhanko/hanko-frontend-sdk";
+
 import { AppContext } from "./AppProvider";
 
 interface Props {

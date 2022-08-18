@@ -8,7 +8,7 @@ import {
   useState,
 } from "preact/compat";
 
-import { User } from "../../lib/HankoClient";
+import { User } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "./AppProvider";
 
