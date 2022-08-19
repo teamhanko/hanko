@@ -8,7 +8,7 @@ require (
 	github.com/gobuffalo/pop/v6 v6.0.6
 	github.com/gobuffalo/validate/v3 v3.3.2
 	github.com/gofrs/uuid v4.2.0+incompatible
-	github.com/knadh/koanf v1.4.2
+	github.com/knadh/koanf v1.4.3
 	github.com/labstack/echo/v4 v4.7.2
 	github.com/lestrrat-go/jwx/v2 v2.0.4
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
