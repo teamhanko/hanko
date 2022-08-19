@@ -6,6 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"net/http"
+	"time"
 )
 
 type AuditLogHandler struct {
@@ -19,8 +20,10 @@ func NewAuditLogHandler(persister persistence.Persister) *AuditLogHandler {
 }
 
 type AuditLogListRequest struct {
-	Page    int `query:"page"`
-	PerPage int `query:"per_page"`
+	Page      int        `query:"page"`
+	PerPage   int        `query:"per_page"`
+	StartTime *time.Time `query:"start_time"`
+	EndTime   *time.Time `query:"end_time"`
 }
 
 func (h AuditLogHandler) List(c echo.Context) error {
@@ -30,12 +33,10 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage)
+	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime)
 	if err != nil {
 		return fmt.Errorf("failed to get list of audit logs: %w", err)
 	}
-
-	// TODO: maybe change return format to more structured json
 
 	return c.JSON(http.StatusOK, auditLogs)
 }

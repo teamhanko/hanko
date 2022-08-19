@@ -6,12 +6,13 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"time"
 )
 
 type AuditLogPersister interface {
 	Create(auditLog models.AuditLog) error
 	Get(id uuid.UUID) (*models.AuditLog, error)
-	List(page int, perPage int) ([]models.AuditLog, error)
+	List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error)
 	Delete(auditLog models.AuditLog) error
 }
 
@@ -48,12 +49,20 @@ func (p *auditLogPersister) Get(id uuid.UUID) (*models.AuditLog, error) {
 	return &auditLog, nil
 }
 
-func (p *auditLogPersister) List(page int, perPage int) ([]models.AuditLog, error) {
+func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error) {
 	auditLogs := []models.AuditLog{}
 
-	err := p.db.Eager().Q().Paginate(page, perPage).Order("created_at desc").All(&auditLogs)
+	query := p.db.Q()
+	if startTime != nil {
+		query = query.Where("created_at > ?", startTime)
+	}
+	if endTime != nil {
+		query = query.Where("created_at < ?", endTime)
+	}
+	err := query.Paginate(page, perPage).Order("created_at desc").All(&auditLogs)
+
 	if err != nil && err == sql.ErrNoRows {
-		return nil, nil
+		return auditLogs, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch auditLogs: %w", err)
