@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> Home</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / Internal</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Headers.html">Headers</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="PasscodeState.html">PasscodeState</a></li><li><a href="PasswordState.html">PasswordState</a></li><li><a href="Response.html">Response</a></li><li><a href="State.html">State</a></li><li><a href="WebauthnState.html">WebauthnState</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="ConfigClient.html">ConfigClient</a></li><li><a href="PasscodeClient.html">PasscodeClient</a></li><li><a href="PasswordClient.html">PasswordClient</a></li><li><a href="UserClient.html">UserClient</a></li><li><a href="WebauthnClient.html">WebauthnClient</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="Config.html">Config</a></li><li><a href="Credential.html">Credential</a></li><li><a href="Passcode.html">Passcode</a></li><li><a href="PasswordConfig.html">PasswordConfig</a></li><li><a href="User.html">User</a></li><li><a href="UserInfo.html">UserInfo</a></li><li><a href="WebauthnFinalized.html">WebauthnFinalized</a></li></ul><h3>Interfaces / Internal</h3><ul><li><a href="LocalStorage.html">LocalStorage</a></li><li><a href="LocalStoragePasscode.html">LocalStoragePasscode</a></li><li><a href="LocalStoragePassword.html">LocalStoragePassword</a></li><li><a href="LocalStorageUser.html">LocalStorageUser</a></li><li><a href="LocalStorageUsers.html">LocalStorageUsers</a></li><li><a href="LocalStorageWebauthn.html">LocalStorageWebauthn</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p></p>
+                    <h1>Home</h1>
+                </header>
+                
+
+
+
+    
+
+
+    <h3>@teamhanko/hanko-frontent-sdk 0.0.1-alpha</h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>hanko-frontend-sdk</h1>
+<p>This package utilizes the <a href="https://github.com/teamhanko/hanko/blob/main/backend/README.md">Hanko API</a> to provide
+functionality that allows an easier UI integration. It is meant for use in browsers only.</p>
+<h2>Installation</h2>
+<pre class="prettyprint source lang-shell"><code># npm
+npm install @teamhanko/hanko-frontend-sdk
+
+# yarn
+yarn add @teamhanko/hanko-frontend-sdk
+
+# pnpm
+pnpm install @teamhanko/hanko-frontend-sdk
+</code></pre>
+<h2>Usage</h2>
+<p>Import as a module:</p>
+<pre class="prettyprint source lang-typescript"><code>import { Hanko } from &quot;@teamhanko/hanko-frontend-sdk&quot;
+</code></pre>
+<p>With a script tag via CDN:</p>
+<pre class="prettyprint source lang-html"><code>&lt;script type=&quot;module&quot; src=&quot;https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.js&quot;>
+</code></pre>
+<h2>Documentation</h2>
+<p>To see the latest documentation, please click <a href="https://teamhanko.github.io/hanko/jsdoc/@teamhanko/hanko-frontent-sdk/0.0.1-alpha">here</a>.</p>
+<h2>Exports</h2>
+<h3>SDK</h3>
+<ul>
+<li><code>Hanko</code> - A class that bundles all functionalities.</li>
+</ul>
+<h3>Clients</h3>
+<ul>
+<li><code>ConfigClient</code> - A class to fetch configurations.</li>
+<li><code>UserClient</code> - A class to manage users.</li>
+<li><code>WebauthnClient</code> - A class to handle WebAuthN-related functionalities.</li>
+<li><code>PasswordClient</code> - A class to manage passwords and password logins.</li>
+<li><code>PasscodeClient</code> - A class to handle passcode logins.</li>
+</ul>
+<h3>Utilities</h3>
+<ul>
+<li><code>WebauthnSupport</code> - A class to check the browser's WebAuthN support.</li>
+</ul>
+<h3>DTOs</h3>
+<ul>
+<li><code>Config</code></li>
+<li><code>PasswordConfig</code></li>
+<li><code>WebauthnFinalized</code></li>
+<li><code>Credential</code></li>
+<li><code>UserInfo</code></li>
+<li><code>User</code></li>
+<li><code>Passcode</code></li>
+</ul>
+<h3>Errors</h3>
+<ul>
+<li><code>HankoError</code></li>
+<li><code>TechnicalError</code></li>
+<li><code>ConflictError</code></li>
+<li><code>RequestTimeoutError</code></li>
+<li><code>WebauthnRequestCancelledError</code></li>
+<li><code>InvalidPasswordError</code></li>
+<li><code>InvalidPasscodeError</code></li>
+<li><code>InvalidWebauthnCredentialError</code></li>
+<li><code>PasscodeExpiredError</code></li>
+<li><code>MaxNumOfPasscodeAttemptsReachedError</code></li>
+<li><code>NotFoundError</code></li>
+<li><code>TooManyRequestsError</code></li>
+<li><code>UnauthorizedError</code></li>
+</ul>
+<h2>Examples</h2>
+<h3>Get the current user / Validate the JWT against the Hanko API</h3>
+<p>The Hanko API issues a JWT when a user logs in. For certain actions, like obtaining the user object, a valid  JWT is
+required. The following example shows how to get the user object of the current user, or to identify that the user is
+not logged in:</p>
+<pre class="prettyprint source lang-typescript"><code>import { Hanko, UnauthorizedError } from &quot;@teamhanko/hanko-frontend-sdk&quot;
+
+const hanko = new Hanko(&quot;http://localhost:3000&quot;)
+
+try {
+    const user = await hanko.user.getCurrent()
+
+    // A valid JWT is in place so that the user object was able to be fetched.
+} catch (e) {
+    if (e instanceof UnauthorizedError) {
+        // Display an error or prompt the user to login again. After a successful call to `hanko.webauthn.login()`,
+        // `hanko.password.login()` or `hanko.passcode.finalize()` a JWT will be issued and `hanko.user.getCurrent()`
+        // would succeed.
+    }
+}
+</code></pre>
+<h3>Register a WebAuthN credential</h3>
+<p>There are a number of situations where you may want the user to register a WebAuthN credential. For example, after user
+creation, when a user logs in to a new browser/device, or to take advantage of the &quot;caBLE&quot; support and pair a smartphone
+with a desktop computer:</p>
+<pre class="prettyprint source lang-typescript"><code>import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from &quot;@teamhanko/hanko-frontend-sdk&quot;
+
+const hanko = new Hanko(&quot;http://localhost:3000&quot;)
+
+// By passing the user object (see example above) to `hanko.webauthn.shouldRegister()` you get an indication of
+// whether a WebAuthN credential registration should be performed on the current browser. This is useful if the user has
+// logged in using a method other than WebAuthN, and you then want to display a UI that allows the user to register a
+// credential when possibly none exists.
+
+try {
+    // Will cause the browser to present a dialog with various options depending on the WebAuthN implemention.
+    await hanko.webauthn.register()
+
+    // Credential has been registered.
+} catch(e) {
+    if (e instanceof WebauthnRequestCancelledError) {
+        // The WebAuthN API failed. Usually in this case the user cancelled the WebAuthN dialog or there were no
+        // suitable credentials.
+    } else if (e instanceof UnauthorizedError) {
+        // The user needs to login to perform this action.
+    }
+}
+</code></pre>
+<h2>Bugs</h2>
+<p>Found a bug? Please report on our <a href="https://github.com/teamhanko/hanko/issues">GitHub</a> page.</p>
+<h2>License</h2>
+<p>The <code>hanko-frontend-sdk</code> project is licensed under the <a href="LICENSE">MIT License</a>.</p></article>
+    </section>
+
+
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>
