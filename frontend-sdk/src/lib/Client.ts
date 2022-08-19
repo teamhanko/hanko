@@ -225,12 +225,13 @@ class HttpClient {
 /**
  * A class to be extended by the other client classes.
  *
+ * @abstract
  * @category SDK
  * @subcategory Internal
  * @param {string} api - The URL of your Hanko API instance
  * @param {number=} timeout - The request timeout in milliseconds
  */
-abstract class AbstractClient {
+abstract class Client {
   protected client: HttpClient;
 
   constructor(api: string, timeout = 13000) {
@@ -247,9 +248,9 @@ abstract class AbstractClient {
  *
  * @category SDK
  * @subcategory Clients
- * @extends {AbstractClient}
+ * @extends {Client}
  */
-class ConfigClient extends AbstractClient {
+class ConfigClient extends Client {
   /**
    * Retrieves the frontend configuration.
    * @return {Promise<Config>}
@@ -278,12 +279,11 @@ class ConfigClient extends AbstractClient {
 /**
  * A class to manage user information.
  *
- * @constructor
  * @category SDK
  * @subcategory Clients
- * @extends {AbstractClient}
+ * @extends {Client}
  */
-class UserClient extends AbstractClient {
+class UserClient extends Client {
   /**
    * Fetches basic information about the user by providing an email address. Can be used while the user is logged out
    * and is helpful in deciding which type of login to choose. For example, if the user's email is not verified, you may
@@ -402,11 +402,10 @@ class UserClient extends AbstractClient {
  * @constructor
  * @category SDK
  * @subcategory Clients
- * @extends {AbstractClient}
+ * @extends {Client}
  */
-class WebauthnClient extends AbstractClient {
+class WebauthnClient extends Client {
   private state: WebauthnState;
-  support: WebauthnSupport;
 
   constructor(api: string, timeout: number) {
     super(api, timeout);
@@ -415,11 +414,6 @@ class WebauthnClient extends AbstractClient {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
-    /**
-     *  @public
-     *  @type {WebauthnSupport}
-     */
-    this.support = new WebauthnSupport();
   }
 
   /**
@@ -546,8 +540,7 @@ class WebauthnClient extends AbstractClient {
    */
   shouldRegister(user: User): Promise<boolean> {
     return new Promise<boolean>((resolve, reject) => {
-      this.support
-        .isPlatformAuthenticatorAvailable()
+      WebauthnSupport.isPlatformAuthenticatorAvailable()
         .then((supported) => {
           if (!user.webauthn_credentials || !user.webauthn_credentials.length) {
             return resolve(supported);
@@ -572,9 +565,9 @@ class WebauthnClient extends AbstractClient {
  * @constructor
  * @category SDK
  * @subcategory Clients
- * @extends {AbstractClient}
+ * @extends {Client}
  */
-class PasswordClient extends AbstractClient {
+class PasswordClient extends Client {
   private state: PasswordState;
 
   constructor(api: string, timeout: number) {
@@ -670,9 +663,9 @@ class PasswordClient extends AbstractClient {
  * @constructor
  * @category SDK
  * @subcategory Clients
- * @extends {AbstractClient}
+ * @extends {Client}
  */
-class PasscodeClient extends AbstractClient {
+class PasscodeClient extends Client {
   private state: PasscodeState;
 
   constructor(api: string, timeout: number) {

@@ -38,7 +38,7 @@ interface LocalStoragePassword {
  * @interface
  * @category SDK
  * @subcategory Internal
- * @property {LocalStorageWebauthn=} webauthn -
+ * @property {LocalStorageWebauthn=} webauthn - Information about WebAuthN credentials.
  * @property {LocalStoragePasscode=} passcode - Information about the active passcode.
  * @property {LocalStoragePassword=} password - Information about the password login attempts.
  */
@@ -71,6 +71,8 @@ interface LocalStorage {
 /**
  * A class to read and write local storage contents.
  *
+ * @abstract
+ * @param {string} key - The local storage key.
  * @category SDK
  * @subcategory Internal
  */
@@ -94,9 +96,10 @@ abstract class State {
   /**
    * Reads and decodes the locally stored data.
    *
-   * @return {LocalStorage}
+   * @protected
+   * @return {State}
    */
-  read(): State {
+  protected read(): State {
     let store: LocalStorage;
 
     try {
@@ -118,13 +121,15 @@ abstract class State {
   /**
    * Encodes and writes the data to the local storage.
    *
-   * @return {void}
+   * @return {State}
    */
-  write(): void {
+  write(): State {
     const data = JSON.stringify(this.ls);
     const encoded = window.btoa(encodeURI(encodeURIComponent(data)));
 
     localStorage.setItem(this.key, encoded);
+
+    return this;
   }
 
   /**
@@ -172,6 +177,7 @@ abstract class State {
 /**
  * A class that manages WebAuthN credentials via local storage.
  *
+ * @extends State
  * @category SDK
  * @subcategory Internal
  */
@@ -188,9 +194,9 @@ class WebauthnState extends State {
   }
 
   /**
-   * Reads the current states.
+   * Reads the current state.
    *
-   * @private
+   * @public
    * @return {WebauthnState}
    */
   read(): WebauthnState {
@@ -240,6 +246,7 @@ class WebauthnState extends State {
 /**
  * A class that manages passcodes via local storage.
  *
+ * @extends State
  * @category SDK
  * @subcategory Internal
  */
@@ -256,9 +263,9 @@ class PasscodeState extends State {
   }
 
   /**
-   * Reads the current states.
+   * Reads the current state.
    *
-   * @private
+   * @public
    * @return {PasscodeState}
    */
   read(): PasscodeState {
@@ -268,7 +275,7 @@ class PasscodeState extends State {
   }
 
   /**
-   * Gets the UUID of the active passcode from the local storage.
+   * Gets the UUID of the active passcode.
    *
    * @param {string} userID - The UUID of the user.
    * @return {string}
@@ -278,7 +285,7 @@ class PasscodeState extends State {
   }
 
   /**
-   * Stores the UUID of the active passcode to the local storage.
+   * Sets the UUID of the active passcode.
    *
    * @param {string} userID - The UUID of the user.
    * @param {string} passcodeID - The UUID of the passcode to be set as active.
@@ -291,7 +298,7 @@ class PasscodeState extends State {
   }
 
   /**
-   * Removes the active passcode from the local storage.
+   * Removes the active passcode.
    *
    * @param {string} userID - The UUID of the user.
    * @return {PasscodeState}
@@ -356,6 +363,7 @@ class PasscodeState extends State {
 /**
  * A class that manages the password login state.
  *
+ * @extends State
  * @category SDK
  * @subcategory Internal
  */
@@ -372,9 +380,9 @@ class PasswordState extends State {
   }
 
   /**
-   * Reads the current states.
+   * Reads the current state.
    *
-   * @private
+   * @public
    * @return {PasswordState}
    */
   read(): PasswordState {

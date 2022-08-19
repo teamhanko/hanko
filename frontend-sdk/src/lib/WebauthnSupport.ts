@@ -1,6 +1,7 @@
 /**
  * A class to check the browser's WebAuthN support.
  *
+ * @hideconstructor
  * @category SDK
  * @subcategory Utilities
  */
@@ -12,7 +13,7 @@ class WebauthnSupport {
    * @see https://developers.google.com/web/updates/2018/03/webauthn-credential-management
    * @return boolean
    */
-  supported(): boolean {
+  static supported(): boolean {
     return !!(
       navigator.credentials &&
       navigator.credentials.create &&
@@ -26,7 +27,7 @@ class WebauthnSupport {
    *
    * @return Promise<boolean>
    */
-  async isPlatformAuthenticatorAvailable(): Promise<boolean> {
+  static async isPlatformAuthenticatorAvailable(): Promise<boolean> {
     if (
       this.supported() &&
       window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
@@ -42,7 +43,7 @@ class WebauthnSupport {
    *
    * @return Promise<boolean>
    */
-  async isSecurityKeySupported(): Promise<boolean> {
+  static async isSecurityKeySupported(): Promise<boolean> {
     if (
       window.PublicKeyCredential !== undefined &&
       // @ts-ignore
