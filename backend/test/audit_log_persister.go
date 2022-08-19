@@ -4,6 +4,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"time"
 )
 
 func NewAuditLogPersister(init []models.AuditLog) persistence.AuditLogPersister {
@@ -33,7 +34,7 @@ func (p *auditLogPersister) Get(id uuid.UUID) (*models.AuditLog, error) {
 	return found, nil
 }
 
-func (p *auditLogPersister) List(page int, perPage int) ([]models.AuditLog, error) {
+func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error) {
 	if len(p.logs) == 0 {
 		return p.logs, nil
 	}
