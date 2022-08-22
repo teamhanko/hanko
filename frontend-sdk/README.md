@@ -27,12 +27,12 @@ import { Hanko } from "@teamhanko/hanko-frontend-sdk"
 With a script tag via CDN:
 
 ```html
-<script type="module" src="https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.js">
+<script type="module" src="https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.cjs">
 ```
 
 ## Documentation
 
-To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/@teamhanko/hanko-frontent-sdk/0.0.1-alpha).
+To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/@teamhanko/hanko-frontend-sdk/0.0.1-alpha).
 
 ## Exports
 
