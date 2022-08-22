@@ -1,10 +1,8 @@
-import {
-  ConfigClient,
-  PasscodeClient,
-  PasswordClient,
-  UserClient,
-  WebauthnClient,
-} from "./lib/Client";
+import { ConfigClient } from "./lib/client/ConfigClient";
+import { PasscodeClient } from "./lib/client/PasscodeClient";
+import { PasswordClient } from "./lib/client/PasswordClient";
+import { UserClient } from "./lib/client/UserClient";
+import { WebauthnClient } from "./lib/client/WebauthnClient";
 
 /**
  * A class that bundles all available SDK functions.
@@ -19,6 +17,7 @@ class Hanko {
   password: PasswordClient;
   passcode: PasscodeClient;
 
+  // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
     /**
      *  @public

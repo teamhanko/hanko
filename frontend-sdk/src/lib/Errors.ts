@@ -12,7 +12,8 @@ abstract class HankoError extends Error {
   code: string;
   cause?: Error;
 
-  constructor(message: string, code: string, cause?: Error) {
+  // eslint-disable-next-line require-jsdoc
+  protected constructor(message: string, code: string, cause?: Error) {
     super(message);
     /**
      * @public
@@ -37,6 +38,7 @@ abstract class HankoError extends Error {
  * @extends {HankoError}
  */
 class TechnicalError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Technical error", "somethingWentWrong", cause);
     Object.setPrototypeOf(this, TechnicalError.prototype);
@@ -51,6 +53,7 @@ class TechnicalError extends HankoError {
  * @extends {HankoError}
  */
 class ConflictError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(userID?: string, cause?: Error) {
     super("Conflict error", "conflict", cause);
     Object.setPrototypeOf(this, ConflictError.prototype);
@@ -65,6 +68,7 @@ class ConflictError extends HankoError {
  * @extends {HankoError}
  */
 class RequestTimeoutError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Request timed out error", "requestTimeout", cause);
     Object.setPrototypeOf(this, RequestTimeoutError.prototype);
@@ -80,6 +84,7 @@ class RequestTimeoutError extends HankoError {
  * @extends {HankoError}
  */
 class WebauthnRequestCancelledError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Request cancelled error", "requestCancelled", cause);
     Object.setPrototypeOf(this, WebauthnRequestCancelledError.prototype);
@@ -94,6 +99,7 @@ class WebauthnRequestCancelledError extends HankoError {
  * @extends {HankoError}
  */
 class InvalidPasswordError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Invalid password error", "invalidPassword", cause);
     Object.setPrototypeOf(this, InvalidPasswordError.prototype);
@@ -108,6 +114,7 @@ class InvalidPasswordError extends HankoError {
  * @extends {HankoError}
  */
 class InvalidPasscodeError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Invalid Passcode error", "invalidPasscode", cause);
     Object.setPrototypeOf(this, InvalidPasscodeError.prototype);
@@ -122,6 +129,7 @@ class InvalidPasscodeError extends HankoError {
  * @extends {HankoError}
  */
 class InvalidWebauthnCredentialError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super(
       "Invalid WebAuthN credential error",
@@ -140,6 +148,7 @@ class InvalidWebauthnCredentialError extends HankoError {
  * @extends {HankoError}
  */
 class PasscodeExpiredError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Passcode expired error", "passcodeExpired", cause);
     Object.setPrototypeOf(this, PasscodeExpiredError.prototype);
@@ -154,6 +163,7 @@ class PasscodeExpiredError extends HankoError {
  * @extends {HankoError}
  */
 class MaxNumOfPasscodeAttemptsReachedError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super(
       "Maximum number of Passcode attempts reached error",
@@ -172,6 +182,7 @@ class MaxNumOfPasscodeAttemptsReachedError extends HankoError {
  * @extends {HankoError}
  */
 class NotFoundError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Not found error", "notFound", cause);
     Object.setPrototypeOf(this, NotFoundError.prototype);
@@ -187,6 +198,7 @@ class NotFoundError extends HankoError {
  */
 class TooManyRequestsError extends HankoError {
   retryAfter?: number;
+  // eslint-disable-next-line require-jsdoc
   constructor(retryAfter?: number, cause?: Error) {
     super("Too many requests error", "tooManyRequests", cause);
     this.retryAfter = retryAfter;
@@ -202,6 +214,7 @@ class TooManyRequestsError extends HankoError {
  * @extends {HankoError}
  */
 class UnauthorizedError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super("Unauthorized error", "unauthorized", cause);
     Object.setPrototypeOf(this, UnauthorizedError.prototype);

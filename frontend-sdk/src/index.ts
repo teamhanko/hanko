@@ -1,18 +1,16 @@
-// Hanko
+// SDK
 
 import { Hanko } from "./Hanko";
 
 export { Hanko };
 
-// Client
+// Clients
 
-import {
-  ConfigClient,
-  UserClient,
-  WebauthnClient,
-  PasswordClient,
-  PasscodeClient,
-} from "./lib/Client";
+import { ConfigClient } from "./lib/client/ConfigClient";
+import { PasscodeClient } from "./lib/client/PasscodeClient";
+import { PasswordClient } from "./lib/client/PasswordClient";
+import { UserClient } from "./lib/client/UserClient";
+import { WebauthnClient } from "./lib/client/WebauthnClient";
 
 export {
   ConfigClient,
@@ -22,7 +20,7 @@ export {
   PasscodeClient,
 };
 
-// WebauthnSupport
+// Utils
 
 import { WebauthnSupport } from "./lib/WebauthnSupport";
 
