@@ -48,7 +48,7 @@ func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
 
 func (p *jwkPersister) GetLast() (*models.Jwk, error) {
 	jwk := models.Jwk{}
-	err := p.db.Order("id asc").Last(&jwk)
+	err := p.db.Last(&jwk)
 	if err != nil && err == sql.ErrNoRows {
 		return nil, nil
 	}
