@@ -153,6 +153,13 @@ password:
   # Default value: false
   #
   enabled: false
+  ## min_password_length ##
+  #
+  # Sets the minimum password length.
+  #
+  # Default value: 8
+  #
+  min_password_length: 8
 passcode:
   ## ttl ##
   #
