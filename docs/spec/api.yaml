@@ -10,7 +10,12 @@ info:
 
     ## Authentication
 
-    The API uses JSON Web Tokens (JWTs) for authentication.
+    The API uses [JSON Web Tokens](https://www.rfc-editor.org/rfc/rfc7519.html) (JWTs) for authentication.
+    JWTs are verified using [JSON Web Keys](https://www.rfc-editor.org/rfc/rfc7517).
+    JWKs can be [configured](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#all-available-config-options)
+    through the `secrets.keys` options. The API also publishes public cryptographic keys as a
+    [JWK set](https://www.rfc-editor.org/rfc/rfc7517#section-2) through the `.well-known/jwks.json` endpoint
+    to enable clients to verify token signatures.
     JWTs must be provided on requests to protected endpoints using one of the following schemes:
 
     ### CookieAuth
