@@ -19,7 +19,7 @@ info:
 
     **Cookie parameter name**: `hanko`
 
-    The JWT mus be provided in a Cookie with the name `hanko`.
+    The JWT must be provided in a Cookie with the name `hanko`.
 
     ### BearerTokenAuth
 
@@ -29,7 +29,7 @@ info:
 
     **Bearer format**: `JWT`
 
-    The JWT mus be provided in an HTTP Authorization header with bearer type: `Authorization: Bearer <JWT>`.
+    The JWT must be provided in an HTTP Authorization header with bearer type: `Authorization: Bearer <JWT>`.
 
     ## Cross-Origin Resource Sharing
 
