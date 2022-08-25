@@ -58,7 +58,7 @@ paths:
         containing the actual passcode to the user. Returns a representation of the passcode.
       operationId: passcodeInit
       tags:
-        - authentication
+        - Passcode
       requestBody:
         content:
           application/json:
@@ -90,7 +90,7 @@ paths:
         On success, sets the User's `verified` status to `true`.
       operationId: passcodeFinal
       tags:
-        - authentication
+        - Passcode
       requestBody:
         content:
           application/json:
@@ -146,7 +146,7 @@ paths:
         This endpoint is only available if passwords have been enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `passwords.enabled`.
       operationId: passwordLogin
       tags:
-        - authentication
+        - Password
       requestBody:
         content:
           application/json:
@@ -199,7 +199,7 @@ paths:
         This endpoint is only available if passwords have been enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `passwords.enabled`.
       operationId: password
       tags:
-        - authentication
+        - Password
       security:
         - CookieAuth: [ ]
         - BearerTokenAuth: [ ]
@@ -244,7 +244,7 @@ paths:
         when passed to the Hanko API (e.g. using the [webauthn-json](https://github.com/github/webauthn-json) library).
       operationId: webauthnLoginInit
       tags:
-        - authentication
+        - WebAuthn
       responses:
         '200':
           description: 'Successful initialization'
@@ -270,7 +270,7 @@ paths:
         when passed to the Hanko API (e.g. using the [webauthn-json](https://github.com/github/webauthn-json) library).
       operationId: webauthnLoginFinal
       tags:
-        - authentication
+        - WebAuthn
       requestBody:
         content:
           application/json:
@@ -313,7 +313,7 @@ paths:
         when passed to the Hanko API (e.g. using the [webauthn-json](https://github.com/github/webauthn-json) library).
       operationId: webauthnRegInit
       tags:
-        - authentication
+        - WebAuthn
       security:
         - CookieAuth: [ ]
         - BearerTokenAuth: [ ]
@@ -342,7 +342,7 @@ paths:
         when passed to the Hanko API (e.g. using the [webauthn-json](https://github.com/github/webauthn-json) library).
       operationId: webauthnRegFinal
       tags:
-        - authentication
+        - WebAuthn
       security:
         - CookieAuth: [ ]
         - BearerTokenAuth: [ ]
@@ -416,7 +416,7 @@ paths:
       description: Retrieve details for user corresponding to the given `email`.
       operationId: getUserId
       tags:
-        - authentication
+        - User Management
       requestBody:
         content:
           application/json:
@@ -452,7 +452,7 @@ paths:
       description: Retrieve the user ID for the current user (i.e. the subject of the JWT).
       operationId: IsUserAuthorized
       tags:
-        - authentication
+        - User Management
       security:
         - CookieAuth: [ ]
         - BearerTokenAuth: [ ]
@@ -477,7 +477,7 @@ paths:
       summary: 'Create a user'
       operationId: createUser
       tags:
-        - management
+        - User Management
       requestBody:
         content:
           application/json:
@@ -504,7 +504,7 @@ paths:
       summary: 'Get a list of users'
       operationId: listUsers
       tags:
-        - management
+        - User Management
       responses:
         '200':
           description: 'Details about users'
@@ -521,7 +521,7 @@ paths:
       summary: 'Get a user by ID'
       operationId: listUser
       tags:
-        - management
+        - User Management
       parameters:
         - name: id
           in: path
@@ -546,7 +546,7 @@ paths:
       summary: 'Update a user by ID'
       operationId: updateUser
       tags:
-        - management
+        - User Management
       parameters:
         - name: id
           in: path
@@ -583,7 +583,7 @@ paths:
       summary: 'Delete a user by ID'
       operationId: deleteUser
       tags:
-        - management
+        - User Management
       parameters:
         - name: id
           in: path
