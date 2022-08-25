@@ -154,7 +154,9 @@ paths:
               type: object
               properties:
                 user_id:
-                  $ref: '#/components/schemas/UUID4'
+                  description: The ID of the user to perform a password login for
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
                 password:
                   $ref: '#/components/schemas/Password'
               required:
@@ -208,7 +210,9 @@ paths:
               type: object
               properties:
                 user_id:
-                  $ref: '#/components/schemas/UUID4'
+                  description: The ID of the user to create/set a password for
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
                 password:
                   $ref: '#/components/schemas/Password'
               required:
@@ -357,10 +361,13 @@ paths:
                 type: object
                 properties:
                   credential_id:
+                    description: The ID of the created credential
                     type: string
                     format: base64
                   user_id:
-                    $ref: '#/components/schemas/UUID4'
+                    description: The ID of the user on whose behalf a credential was created
+                    allOf:
+                      - $ref: '#/components/schemas/UUID4'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -458,7 +465,9 @@ paths:
                 type: object
                 properties:
                   id:
-                    $ref:  '#/components/schemas/UUID4'
+                    description: The id of the current user
+                    allOf:
+                      - $ref: '#/components/schemas/UUID4'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -903,7 +912,7 @@ components:
           format: date-time
     Password:
       description: |
-        `minLength` determined by [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `password.min_password_length`.
+        The actual password, its `minLength` is determined by [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `password.min_password_length`.
       type: string
       minLength: determined by configuration
       maxLength: 72
@@ -980,24 +989,32 @@ components:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/UUID4'
+          description: The ID of the user
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
         email:
+          description: The email address of the user
           type: string
           format: email
         created_at:
+          description: Time of creation of the the user
           type: string
           format: date-time
         updated_at:
+          description: Time of last update of the user
           type: string
           format: date-time
         verified:
+          description: Indicates whether the user's email address was verified
           type: boolean
         webauthn_credentials:
+          description: List of registered Webauthn credentials
           type: array
           items:
             type: object
             properties:
               id:
+                description: The ID of the Webauthn credential
                 type: string
                 format: base64url
                 example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
