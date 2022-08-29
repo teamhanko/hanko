@@ -48,7 +48,7 @@ class UserClient extends Client {
   }
 
   /**
-   * Creates a new user. Afterwards, the step should be to verify the email address via passcode. If a 'ConflictError'
+   * Creates a new user. Afterwards, verify the email address via passcode. If a 'ConflictError'
    * occurred, you may want to prompt the user to log in.
    *
    * @param {string} email - The email address of the user to be created.
