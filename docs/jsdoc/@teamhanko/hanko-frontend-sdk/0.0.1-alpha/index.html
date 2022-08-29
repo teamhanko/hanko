@@ -120,7 +120,7 @@ pnpm install @teamhanko/hanko-frontend-sdk
 const hanko = new Hanko(&quot;http://localhost:3000&quot;)
 </code></pre>
 <p>With a script tag via CDN:</p>
-<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.umd.js&quot;>&lt;/script>
+<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://cdn.jsdelivr.net/npm/@teamhanko/hanko-frontend-sdk/dist/sdk.umd.js&quot;>&lt;/script>
 
 &lt;script>
     const hanko = new hankoFrontendSdk.Hanko(&quot;http://localhost:3000&quot;)
@@ -213,8 +213,7 @@ try {
     // Credential has been registered.
 } catch(e) {
     if (e instanceof WebauthnRequestCancelledError) {
-        // The WebAuthn API failed. Usually in this case the user cancelled the WebAuthn dialog or there were no
-        // suitable credentials.
+        // The WebAuthn API failed. Usually in this case the user cancelled the WebAuthn dialog.
     } else if (e instanceof UnauthorizedError) {
         // The user needs to login to perform this action.
     }
