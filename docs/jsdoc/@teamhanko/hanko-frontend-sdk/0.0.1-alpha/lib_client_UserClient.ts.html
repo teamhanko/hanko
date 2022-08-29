@@ -103,7 +103,7 @@ import { Client } from "./Client";
  */
 class UserClient extends Client {
   /**
-   * Fetches basic information about the user by providing an email address. Can be used while the user is logged out
+   * Fetches basic information about the user identified by the given email address. Can be used while the user is logged out
    * and is helpful in deciding which type of login to choose. For example, if the user's email is not verified, you may
    * want to log in with a passcode, or if no WebAuthN credentials are registered, you may not want to use WebAuthN.
    *
@@ -135,7 +135,7 @@ class UserClient extends Client {
   }
 
   /**
-   * Creates a new user. Afterwards, the step should be to verify the email address via passcode. If a 'ConflictError'
+   * Creates a new user. Afterwards, verify the email address via passcode. If a 'ConflictError'
    * occurred, you may want to prompt the user to log in.
    *
    * @param {string} email - The email address of the user to be created.

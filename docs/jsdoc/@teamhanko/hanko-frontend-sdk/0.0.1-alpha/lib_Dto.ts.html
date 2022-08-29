@@ -91,7 +91,7 @@
  * @interface
  * @category SDK
  * @subcategory DTO
- * @property {boolean} enabled - Indicates passwords are enabled, so the API would accept login attempts using passwords.
+ * @property {boolean} enabled - Indicates passwords are enabled, so the API accepts login attempts using passwords.
  */
 interface PasswordConfig {
   enabled: boolean;
@@ -124,7 +124,7 @@ interface WebauthnFinalized {
  * @category SDK
  * @subcategory DTO
  * @property {string} id - The UUID of the user.
- * @property {boolean} verified - Indicates the user's email address is verified.
+ * @property {boolean} verified - Indicates whether the user's email address is verified.
  * @property {boolean} has_webauthn_credential - Indicates that the user has registered a WebAuthN credential in the past.
  */
 interface UserInfo {

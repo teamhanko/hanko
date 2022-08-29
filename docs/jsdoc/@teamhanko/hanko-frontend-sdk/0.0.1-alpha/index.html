@@ -116,9 +116,16 @@ pnpm install @teamhanko/hanko-frontend-sdk
 <h2>Usage</h2>
 <p>Import as a module:</p>
 <pre class="prettyprint source lang-typescript"><code>import { Hanko } from &quot;@teamhanko/hanko-frontend-sdk&quot;
+
+const hanko = new Hanko(&quot;http://localhost:3000&quot;)
 </code></pre>
 <p>With a script tag via CDN:</p>
-<pre class="prettyprint source lang-html"><code>&lt;script type=&quot;module&quot; src=&quot;https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.cjs&quot;>
+<pre class="prettyprint source lang-html"><code>&lt;script src=&quot;https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.umd.js&quot;>&lt;/script>
+
+&lt;script>
+    const hanko = new hankoFrontendSdk.Hanko(&quot;http://localhost:3000&quot;)
+    ...
+&lt;/script>
 </code></pre>
 <h2>Documentation</h2>
 <p>To see the latest documentation, please click <a href="https://teamhanko.github.io/hanko/jsdoc/@teamhanko/hanko-frontend-sdk/0.0.1-alpha">here</a>.</p>
@@ -194,7 +201,7 @@ with a desktop computer:</p>
 
 const hanko = new Hanko(&quot;http://localhost:3000&quot;)
 
-// By passing the user object (see example above) to `hanko.webauthn.shouldRegister()` you get an indication of
+// By passing the user object (see example above) to `hanko.webauthn.shouldRegister(user)` you get an indication of
 // whether a WebAuthN credential registration should be performed on the current browser. This is useful if the user has
 // logged in using a method other than WebAuthN, and you then want to display a UI that allows the user to register a
 // credential when possibly none exists.
