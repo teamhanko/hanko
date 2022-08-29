@@ -31,7 +31,7 @@ abstract class HankoError extends Error {
 
 /**
  * Every error that doesn't need to be handled in a special way is a 'TechnicalError'. Whenever you catch one, there is
- * usually nothing you can do but face an error to the user, e.g. "Something went wrong".
+ * usually nothing you can do but present an error to the user, e.g. "Something went wrong".
  *
  * @category SDK
  * @subcategory Errors
