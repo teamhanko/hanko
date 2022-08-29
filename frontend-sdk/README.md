@@ -29,7 +29,7 @@ const hanko = new Hanko("http://localhost:3000")
 With a script tag via CDN:
 
 ```html
-<script src="https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-frontend-sdk/dist/sdk.umd.js"></script>
 
 <script>
     const hanko = new hankoFrontendSdk.Hanko("http://localhost:3000")
