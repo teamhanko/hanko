@@ -156,7 +156,7 @@ class PasscodeExpiredError extends HankoError {
 }
 
 /**
- * A 'MaxNumOfPasscodeAttemptsReachedError' occurs when the passcode is entered incorrectly too many times.
+ * A 'MaxNumOfPasscodeAttemptsReachedError' occurs when an incorrect passcode is provided too many times.
  *
  * @category SDK
  * @subcategory Errors
