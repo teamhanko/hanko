@@ -113,7 +113,7 @@ class PasscodeClient extends Client {
   }
 
   /**
-   * Returns the seconds until the current passcode is active.
+   * Returns the number of seconds the current passcode is active for.
    *
    * @param {string} userID - The UUID of the user.
    * @return {number}
