@@ -56,7 +56,7 @@ class PasswordState extends UserState {
    * Sets the number of seconds until a new password login can be attempted.
    *
    * @param {string} userID - The UUID of the user.
-   * @param {string} seconds - Number of seconds the passcode is valid.
+   * @param {string} seconds - Number of seconds the passcode is valid for.
    * @return {PasswordState}
    */
   setRetryAfter(userID: string, seconds: number): PasswordState {
