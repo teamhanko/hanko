@@ -95,7 +95,7 @@ class PasswordClient extends Client {
   }
 
   /**
-   * Returns the seconds until the rate limiting is actives.
+   * Returns the number of seconds the rate limiting is active for.
    *
    * @param {string} userID - The UUID of the user.
    * @return {number}
