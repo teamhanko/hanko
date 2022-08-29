@@ -16,7 +16,7 @@ export const translations = {
         "Your device supports passkey authentication. If you use biometrics, we will never see or store your biometric data.",
       createAccount:
         'No account exists for "{email}". Do you want to create a new account?',
-      passwordFormatHint: "It must be at least 10 characters in length.",
+      passwordFormatHint: "Must be at least 10 characters long.",
     },
     labels: {
       or: "or",
@@ -25,8 +25,8 @@ export const translations = {
       password: "Password",
       forgotYourPassword: "Forgot your password?",
       back: "Back",
-      signInPasskey: "Sign in with passkey",
-      registerAuthenticator: "Set up passkey",
+      signInPasskey: "Sign in with a passkey",
+      registerAuthenticator: "Set up a passkey",
       signIn: "Sign in",
       signUp: "Sign up",
       sendNewPasscode: "Send new code",
@@ -75,7 +75,7 @@ export const translations = {
       password: "Passwort",
       forgotYourPassword: "Passwort vergessen?",
       back: "Zurück",
-      signInPasskey: "Einloggen mit Passkey",
+      signInPasskey: "Anmelden mit Passkey",
       registerAuthenticator: "Passkey einrichten",
       signIn: "Anmelden",
       signUp: "Registrieren",
@@ -87,7 +87,7 @@ export const translations = {
       somethingWentWrong:
         "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
       requestTimeout: "Die Anfrage hat das Zeitlimit überschritten.",
-      invalidPassword: "E-Mail Adresse oder Password falsch.",
+      invalidPassword: "E-Mail-Adresse oder Password falsch.",
       invalidPasscode: "Der Passcode war nicht richtig.",
       passcodeAttemptsReached:
         "Der Passcode wurde zu oft falsch eingegeben. Bitte fragen Sie einen neuen Code an.",
