@@ -16,7 +16,7 @@ import { Client } from "./Client";
  */
 class UserClient extends Client {
   /**
-   * Fetches basic information about the user by providing an email address. Can be used while the user is logged out
+   * Fetches basic information about the user identified by the given email address. Can be used while the user is logged out
    * and is helpful in deciding which type of login to choose. For example, if the user's email is not verified, you may
    * want to log in with a passcode, or if no WebAuthN credentials are registered, you may not want to use WebAuthN.
    *
