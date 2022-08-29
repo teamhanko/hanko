@@ -22,12 +22,19 @@ Import as a module:
 
 ```typescript
 import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+
+const hanko = new Hanko("http://localhost:3000")
 ```
 
 With a script tag via CDN:
 
 ```html
-<script type="module" src="https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.cjs">
+<script src="https://unpkg.com/@teamhanko/hanko-frontend-sdk/dist/sdk.umd.js"></script>
+
+<script>
+    const hanko = new hankoFrontendSdk.Hanko("http://localhost:3000")
+    ...
+</script>
 ```
 
 ## Documentation
