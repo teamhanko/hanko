@@ -12,7 +12,7 @@ export interface LocalStorageWebauthn {
 }
 
 /**
- * A class that manages WebAuthN credentials via local storage.
+ * A class that manages WebAuthn credentials via local storage.
  *
  * @extends UserState
  * @category SDK
@@ -20,7 +20,7 @@ export interface LocalStorageWebauthn {
  */
 class WebauthnState extends UserState {
   /**
-   * Gets the WebAuthN state.
+   * Gets the WebAuthn state.
    *
    * @private
    * @param {string} userID - The UUID of the user.
@@ -56,7 +56,7 @@ class WebauthnState extends UserState {
    * Adds the credential to the list of known credentials.
    *
    * @param {string} userID - The UUID of the user.
-   * @param {string} credentialID - The WebAuthN credential ID.
+   * @param {string} credentialID - The WebAuthn credential ID.
    * @return {WebauthnState}
    */
   addCredential(userID: string, credentialID: string): WebauthnState {

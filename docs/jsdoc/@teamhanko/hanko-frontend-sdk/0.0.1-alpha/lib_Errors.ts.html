@@ -163,8 +163,8 @@ class RequestTimeoutError extends HankoError {
 }
 
 /**
- * A 'WebauthnRequestCancelledError' occurs during WebAuthN authentication or registration, when the WebAuthN API throws
- * an error. In most cases, this happens when the user cancels the browser's WebAuthN dialog.
+ * A 'WebauthnRequestCancelledError' occurs during WebAuthn authentication or registration, when the WebAuthn API throws
+ * an error. In most cases, this happens when the user cancels the browser's WebAuthn dialog.
  *
  * @category SDK
  * @subcategory Errors
@@ -209,7 +209,7 @@ class InvalidPasscodeError extends HankoError {
 }
 
 /**
- * An 'InvalidWebauthnCredentialError' occurs if invalid credentials were used when logging in with WebAuthN.
+ * An 'InvalidWebauthnCredentialError' occurs if invalid credentials were used when logging in with WebAuthn.
  *
  * @category SDK
  * @subcategory Errors
@@ -219,7 +219,7 @@ class InvalidWebauthnCredentialError extends HankoError {
   // eslint-disable-next-line require-jsdoc
   constructor(cause?: Error) {
     super(
-      "Invalid WebAuthN credential error",
+      "Invalid WebAuthn credential error",
       "invalidWebauthnCredential",
       cause
     );

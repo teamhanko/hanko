@@ -16,7 +16,7 @@ import { WebauthnSupport } from "../WebauthnSupport";
 import { Client } from "./Client";
 
 /**
- * A class that handles WebAuthN authentication and registration.
+ * A class that handles WebAuthn authentication and registration.
  *
  * @constructor
  * @category SDK
@@ -37,7 +37,7 @@ class WebauthnClient extends Client {
   }
 
   /**
-   * Performs a WebAuthN authentication ceremony. When 'userID' is specified, the API provides a list of
+   * Performs a WebAuthn authentication ceremony. When 'userID' is specified, the API provides a list of
    * allowed credentials and the browser is able to present a list of suitable credentials to the user.
    *
    * @param {string=} userID - The user's UUID.
@@ -93,7 +93,7 @@ class WebauthnClient extends Client {
   }
 
   /**
-   * Performs a WebAuthN registration ceremony.
+   * Performs a WebAuthn registration ceremony.
    *
    * @return {Promise<void>}
    * @throws {WebauthnRequestCancelledError}

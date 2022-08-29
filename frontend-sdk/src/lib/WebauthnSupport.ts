@@ -1,5 +1,5 @@
 /**
- * A class to check the browser's WebAuthN support.
+ * A class to check the browser's WebAuthn support.
  *
  * @hideconstructor
  * @category SDK

@@ -51,13 +51,13 @@ To see the latest documentation, please click [here](https://teamhanko.github.io
 
 - `ConfigClient` - A class to fetch configurations.
 - `UserClient` - A class to manage users.
-- `WebauthnClient` - A class to handle WebAuthN-related functionalities.
+- `WebauthnClient` - A class to handle WebAuthn-related functionalities.
 - `PasswordClient` - A class to manage passwords and password logins.
 - `PasscodeClient` - A class to handle passcode logins.
 
 ### Utilities
 
-- `WebauthnSupport` - A class to check the browser's WebAuthN support.
+- `WebauthnSupport` - A class to check the browser's WebAuthn support.
 
 ### DTOs
 
@@ -111,9 +111,9 @@ try {
 }
 ```
 
-### Register a WebAuthN credential
+### Register a WebAuthn credential
 
-There are a number of situations where you may want the user to register a WebAuthN credential. For example, after user
+There are a number of situations where you may want the user to register a WebAuthn credential. For example, after user
 creation, when a user logs in to a new browser/device, or to take advantage of the "caBLE" support and pair a smartphone
 with a desktop computer:
 
@@ -123,18 +123,18 @@ import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from "@teamha
 const hanko = new Hanko("http://localhost:3000")
 
 // By passing the user object (see example above) to `hanko.webauthn.shouldRegister(user)` you get an indication of
-// whether a WebAuthN credential registration should be performed on the current browser. This is useful if the user has
-// logged in using a method other than WebAuthN, and you then want to display a UI that allows the user to register a
+// whether a WebAuthn credential registration should be performed on the current browser. This is useful if the user has
+// logged in using a method other than WebAuthn, and you then want to display a UI that allows the user to register a
 // credential when possibly none exists.
 
 try {
-    // Will cause the browser to present a dialog with various options depending on the WebAuthN implemention.
+    // Will cause the browser to present a dialog with various options depending on the WebAuthn implemention.
     await hanko.webauthn.register()
 
     // Credential has been registered.
 } catch(e) {
     if (e instanceof WebauthnRequestCancelledError) {
-        // The WebAuthN API failed. Usually in this case the user cancelled the WebAuthN dialog or there were no
+        // The WebAuthn API failed. Usually in this case the user cancelled the WebAuthn dialog or there were no
         // suitable credentials.
     } else if (e instanceof UnauthorizedError) {
         // The user needs to login to perform this action.
