@@ -115,7 +115,7 @@ import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from "@teamha
 
 const hanko = new Hanko("http://localhost:3000")
 
-// By passing the user object (see example above) to `hanko.webauthn.shouldRegister()` you get an indication of
+// By passing the user object (see example above) to `hanko.webauthn.shouldRegister(user)` you get an indication of
 // whether a WebAuthN credential registration should be performed on the current browser. This is useful if the user has
 // logged in using a method other than WebAuthN, and you then want to display a UI that allows the user to register a
 // credential when possibly none exists.
