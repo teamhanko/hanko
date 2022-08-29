@@ -134,8 +134,7 @@ try {
     // Credential has been registered.
 } catch(e) {
     if (e instanceof WebauthnRequestCancelledError) {
-        // The WebAuthn API failed. Usually in this case the user cancelled the WebAuthn dialog or there were no
-        // suitable credentials.
+        // The WebAuthn API failed. Usually in this case the user cancelled the WebAuthn dialog.
     } else if (e instanceof UnauthorizedError) {
         // The user needs to login to perform this action.
     }
