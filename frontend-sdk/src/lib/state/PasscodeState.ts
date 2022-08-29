@@ -99,7 +99,7 @@ class PasscodeState extends UserState {
    * Sets the passcode's TTL and stores it to the local storage.
    *
    * @param {string} userID - The UUID of the user.
-   * @param {string} seconds - Number of seconds the passcode is valid.
+   * @param {string} seconds - Number of seconds the passcode is valid for.
    * @return {PasscodeState}
    */
   setTTL(userID: string, seconds: number): PasscodeState {
