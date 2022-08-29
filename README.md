@@ -75,6 +75,7 @@ smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) 
 The Hanko project consists of
 - [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and passwords, as well as user management and JWT token issuing
 - [hanko-js](/hanko-js/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
+- [hanko-frontend-sdk](/frontend-sdk/README.md) - A client package for using the Hanko API
 - [example](/example) - The quickstart example app, showing off Hanko's strengths and acting as a reference implementation
 
 # Community
