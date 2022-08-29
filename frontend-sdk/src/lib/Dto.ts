@@ -4,7 +4,7 @@ import { PublicKeyCredentialWithAttestationJSON } from "@github/webauthn-json";
  * @interface
  * @category SDK
  * @subcategory DTO
- * @property {boolean} enabled - Indicates passwords are enabled, so the API would accept login attempts using passwords.
+ * @property {boolean} enabled - Indicates passwords are enabled, so the API accepts login attempts using passwords.
  */
 interface PasswordConfig {
   enabled: boolean;
