@@ -5,7 +5,7 @@ import { UserState } from "./UserState";
  * @interface
  * @category SDK
  * @subcategory Internal
- * @property {number=} retryAfter - Timestamp until when the next password login can be attempted in seconds (since January 1, 1970 00:00:00 UTC).
+ * @property {number=} retryAfter - Timestamp (in seconds since January 1, 1970 00:00:00 UTC) indicating when the next password login can be attempted.
  */
 export interface LocalStoragePassword {
   retryAfter?: number;
