@@ -122,7 +122,7 @@ class PasscodeState extends UserState {
    * Sets the number of seconds until a new passcode can be sent.
    *
    * @param {string} userID - The UUID of the user.
-   * @param {string} seconds - Number of seconds the passcode is valid.
+   * @param {string} seconds - Number of seconds the passcode is valid for.
    * @return {PasscodeState}
    */
   setResendAfter(userID: string, seconds: number): PasscodeState {
