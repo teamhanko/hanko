@@ -87,7 +87,7 @@ export const translations = {
       somethingWentWrong:
         "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
       requestTimeout: "Die Anfrage hat das Zeitlimit überschritten.",
-      invalidPassword: "E-Mail-Adresse oder Password falsch.",
+      invalidPassword: "E-Mail-Adresse oder Passwort falsch.",
       invalidPasscode: "Der Passcode war nicht richtig.",
       passcodeAttemptsReached:
         "Der Passcode wurde zu oft falsch eingegeben. Bitte fragen Sie einen neuen Code an.",
@@ -97,7 +97,7 @@ export const translations = {
         "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
       invalidWebauthnCredential: "Ungültiger Berechtigungsnachweis",
       passcodeExpired:
-        "Der Passcode ist abgelaufen. Bitte fragen Sie einen neuen Code an.",
+        "Der Passcode ist abgelaufen. Bitte fordern Sie einen neuen Code an.",
     },
   },
 };
