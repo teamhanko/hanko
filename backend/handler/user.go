@@ -26,7 +26,7 @@ func NewUserHandler(cfg config.Registration, persister persistence.Persister, se
 	return &UserHandler{
 		persister:      persister,
 		sessionManager: sessionManager,
-		cfg: cfg,
+		cfg:            cfg,
 	}
 }
 
@@ -63,7 +63,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		}
 
 		if !h.cfg.EmailVerification.Enabled {
-			cookie, err := h.sessionManager.GenerateCookie(newUser.ID)
+			cookie, err := h.sessionManager.GenerateCookie(newUser.ID.String())
 			if err != nil {
 				return fmt.Errorf("failed to create session token: %w", err)
 			}
