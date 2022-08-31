@@ -76,6 +76,7 @@ const RegisterPassword = ({ user, registerAuthenticator }: Props) => {
         <InputText
           type={"password"}
           name={"password"}
+          autocomplete={"new-password"}
           required={true}
           label={t("labels.password")}
           onInput={onPasswordInput}

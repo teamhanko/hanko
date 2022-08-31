@@ -85,12 +85,21 @@ service:
   name: "Example Project"
 ## secrets ##
 #
-# Configures secrets used for signing. The secrets can be rotated by adding a new secret to the top of the list.
+# Configures secrets used for en-/decrypting JWKs.
 #
 secrets:
   ## keys ##
   #
-  # A secret that is used to sign and verify session JWTs. The first item is used for signing. The whole list is used for verifying session JWTs.
+  # Keys secrets are used to en- and decrypt the JWKs which get used to sign the JWTs.
+  # For every key a JWK is generated, encrypted with the key and persisted in the database.
+  #
+  # You can use this list for key rotation: add a new key to the beginning of the list and the corresponding
+  # JWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still
+  # be valid until they expire. Removing a key from the list does not remove the corresponding
+  # database record. If you remove a key, you also have to remove the database record, otherwise
+  # application startup will fail.
+  #
+  # Each key must be at least 16 characters long.
   #
   keys:
     - "CHANGE-ME"
@@ -140,6 +149,11 @@ session:
     # Default value: true
     #
     secure: true
+  ## enable_auth_token_header ##
+  #
+  # The JWT will be transmitted via the X-Auth-Token header. Enable during cross-domain operations.
+  #
+  enable_auth_token_header: false
 password:
   ## enabled ##
   #
@@ -148,6 +162,13 @@ password:
   # Default value: false
   #
   enabled: false
+  ## min_password_length ##
+  #
+  # Sets the minimum password length.
+  #
+  # Default value: 8
+  #
+  min_password_length: 8
 passcode:
   ## ttl ##
   #
@@ -211,13 +232,13 @@ webauthn:
     #
     # Examples:
     # - Example Project
-    # - Hanko GmbH 
+    # - Hanko GmbH
     # - Acme, Inc.
     #
     display_name: ""
     ## origin ##
     #
-    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain, 
+    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
     # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
     #
     # Example:

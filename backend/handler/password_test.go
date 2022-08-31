@@ -48,7 +48,7 @@ func TestPasswordHandler_Set_Create(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	if assert.NoError(t, handler.Set(c)) {
 		assert.Equal(t, http.StatusCreated, rec.Code)
@@ -83,7 +83,7 @@ func TestPasswordHandler_Set_Create_PasswordTooShort(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{MinPasswordLength: 8})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{Password: config.Password{MinPasswordLength: 8}})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -120,7 +120,7 @@ func TestPasswordHandler_Set_Create_PasswordTooLong(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{MinPasswordLength: 8})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{Password: config.Password{MinPasswordLength: 8}})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -173,7 +173,7 @@ func TestPasswordHandler_Set_Update(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	if assert.NoError(t, handler.Set(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -198,7 +198,7 @@ func TestPasswordHandler_Set_UserNotFound(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -251,7 +251,7 @@ func TestPasswordHandler_Set_TokenHasWrongSubject(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -276,7 +276,7 @@ func TestPasswordHandler_Set_BadRequestBody(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	err = handler.Set(c)
 	if assert.Error(t, err) {
@@ -323,7 +323,7 @@ func TestPasswordHandler_Login(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	if assert.NoError(t, handler.Login(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -376,7 +376,7 @@ func TestPasswordHandler_Login_WrongPassword(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, passwords)
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	err = handler.Login(c)
 	if assert.Error(t, err) {
@@ -396,7 +396,7 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{})
-	handler := NewPasswordHandler(p, sessionManager{}, config.Password{})
+	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{})
 
 	err := handler.Login(c)
 	if assert.Error(t, err) {

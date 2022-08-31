@@ -50,7 +50,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	}
 
 	if cfg.Password.Enabled {
-		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg.Password)
+		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg)
 
 		password := e.Group("/password")
 		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
@@ -68,11 +68,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	e.POST("/user", userHandler.GetUserIdByEmail)
 
 	healthHandler := handler.NewHealthHandler()
-	webauthnHandler, err := handler.NewWebauthnHandler(cfg.Webauthn, persister, sessionManager)
+	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
-	passcodeHandler, err := handler.NewPasscodeHandler(cfg.Passcode, cfg.Service, persister, sessionManager, mailer)
+	passcodeHandler, err := handler.NewPasscodeHandler(cfg, persister, sessionManager, mailer)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
 	}

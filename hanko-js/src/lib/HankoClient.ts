@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 import {
   get as getWebauthnCredential,
   create as createWebauthnCredential,
@@ -22,9 +24,9 @@ import {
   MaxNumOfPasscodeAttemptsReachedError,
   InvalidPasscodeError,
   UnauthorizedError,
-  EmailValidationRequiredError,
   InvalidWebauthnCredentialError,
   RequestTimeoutError,
+  ConflictError,
 } from "./Errors";
 
 import { isUserVerifyingPlatformAuthenticatorAvailable } from "./WebauthnSupport";
@@ -51,6 +53,10 @@ export interface UserInfo {
   id: string;
   verified: boolean;
   has_webauthn_credential: boolean;
+}
+
+export interface Me {
+  id: string;
 }
 
 export interface User {
@@ -84,6 +90,44 @@ export class HankoClient {
   }
 }
 
+/** Headers2 wraps a `XMLHttpRequest` to keep compatability with the fetch API.
+ * See `HttpClient._fetch()`. */
+class Headers2 {
+  _xhr: XMLHttpRequest;
+
+  constructor(xhr: XMLHttpRequest) {
+    this._xhr = xhr;
+  }
+
+  get(name: string) {
+    return this._xhr.getResponseHeader(name);
+  }
+}
+
+/** Response2 wraps a `XMLHttpRequest` to keep compatability with the fetch API.
+ * See `HttpClient._fetch()`. */
+class Response2 {
+  headers: Headers2;
+  ok: boolean;
+  status: number;
+  statusText: string;
+  url: string;
+  decodedJSON: any;
+
+  constructor(xhr: XMLHttpRequest) {
+    this.headers = new Headers2(xhr);
+    this.ok = xhr.status >= 200 && xhr.status <= 299;
+    this.status = xhr.status;
+    this.statusText = xhr.statusText;
+    this.url = xhr.responseURL;
+    this.decodedJSON = JSON.parse(xhr.response);
+  }
+
+  json() {
+    return this.decodedJSON;
+  }
+}
+
 class HttpClient {
   timeout: number;
   api: string;
@@ -93,31 +137,45 @@ class HttpClient {
     this.timeout = timeout;
   }
 
-  _fetch(path: string, init: RequestInit) {
-    return new Promise<Response>((resolve, reject) => {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), this.timeout);
+  /** _fetch fetches data from the Hanko API. Due to a Safari/iOS 15 bug with user activated events, the JS fetch API
+   * can't be used. In case Apple fixes the problem, this method can be replaced again with one that uses the fetch API. */
+  _fetch(path: string, options: RequestInit) {
+    const api = this.api;
+    const url = api + path;
+    const timeout = this.timeout;
+    const cookieName = "hanko";
+    const bearerToken = Cookies.get(cookieName);
 
-      fetch(this.api + path, {
-        mode: "cors",
-        credentials: "include",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        signal: controller.signal,
-        ...init,
-      })
-        .then((response) => {
-          clearTimeout(timeout);
+    return new Promise<Response2>(function (resolve, reject) {
+      const xhr = new XMLHttpRequest();
 
-          return resolve(response);
-        })
-        .catch((e) => {
-          reject(
-            e.code === 20 ? new RequestTimeoutError(e) : new TechnicalError(e)
-          );
-        });
+      xhr.open(options.method, url, true);
+      xhr.setRequestHeader("Accept", "application/json");
+      xhr.setRequestHeader("Content-Type", "application/json");
+
+      if (bearerToken) {
+        xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);
+      }
+
+      xhr.timeout = timeout;
+      xhr.withCredentials = true;
+      xhr.onload = () => {
+        const authToken = xhr.getResponseHeader("X-Auth-Token");
+
+        if (authToken) {
+          const secure = !!api.match("^https://");
+          Cookies.set(cookieName, authToken, { secure });
+        }
+
+        resolve(new Response2(xhr));
+      };
+      xhr.onerror = () => {
+        reject(new TechnicalError());
+      };
+      xhr.ontimeout = () => {
+        reject(new RequestTimeoutError());
+      };
+      xhr.send(options.body?.toString());
     });
   }
 
@@ -181,13 +239,7 @@ class UserClient extends AbstractClient {
             throw new TechnicalError();
           }
         })
-        .then((u: UserInfo) => {
-          if (!u.verified) {
-            throw new EmailValidationRequiredError(u.id);
-          }
-
-          return resolve(u);
-        })
+        .then((u: UserInfo) => resolve(u))
         .catch((e) => {
           reject(e);
         });
@@ -202,7 +254,7 @@ class UserClient extends AbstractClient {
           if (response.ok) {
             return resolve(response.json());
           } else if (response.status === 409) {
-            throw new EmailValidationRequiredError();
+            throw new ConflictError();
           } else {
             throw new TechnicalError();
           }
@@ -217,6 +269,22 @@ class UserClient extends AbstractClient {
     return new Promise<User>((resolve, reject) =>
       this.client
         .get("/me")
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          } else if (
+            response.status === 400 ||
+            response.status === 401 ||
+            response.status === 404
+          ) {
+            throw new UnauthorizedError();
+          } else {
+            throw new TechnicalError();
+          }
+        })
+        .then((me: Me) => {
+          return this.client.get(`/users/${me.id}`);
+        })
         .then((response) => {
           if (response.ok) {
             return resolve(response.json());
@@ -255,6 +323,9 @@ class WebauthnClient extends AbstractClient {
           }
 
           throw new TechnicalError();
+        })
+        .catch((e) => {
+          reject(e);
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
           return getWebauthnCredential(challenge);

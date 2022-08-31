@@ -16,6 +16,13 @@ class TechnicalError extends HankoError {
   }
 }
 
+class ConflictError extends HankoError {
+  constructor(userID?: string, cause?: Error) {
+    super("Conflict error", "conflict", cause);
+    Object.setPrototypeOf(this, ConflictError.prototype);
+  }
+}
+
 class RequestTimeoutError extends HankoError {
   constructor(cause?: Error) {
     super("Request timed out error", "requestTimeout", cause);
@@ -96,18 +103,10 @@ class UnauthorizedError extends HankoError {
   }
 }
 
-class EmailValidationRequiredError extends HankoError {
-  userID?: string;
-  constructor(userID?: string, cause?: Error) {
-    super("Email validation required error", "emailValidationRequired", cause);
-    this.userID = userID;
-    Object.setPrototypeOf(this, EmailValidationRequiredError.prototype);
-  }
-}
-
 export {
   HankoError,
   TechnicalError,
+  ConflictError,
   RequestTimeoutError,
   WebAuthnRequestCancelledError,
   InvalidPasswordError,
@@ -118,5 +117,4 @@ export {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
-  EmailValidationRequiredError,
 };

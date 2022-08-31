@@ -42,8 +42,8 @@ const InputPasscodeDigit = ({ index, focus, digit = "", ...props }: Props) => {
         // @ts-ignore
         part={"input passcode-input"}
         name={props.name + index.toString(10)}
-        autoComplete={"off"}
         type={"text"}
+        inputMode={"numeric"}
         maxLength={1}
         ref={ref}
         value={digit.charAt(0)}

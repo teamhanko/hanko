@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -448,7 +447,12 @@ func TestUserHandler_Me(t *testing.T) {
 	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
 
 	if assert.NoError(t, handler.Me(c)) {
-		assert.Equal(t, http.StatusTemporaryRedirect, rec.Code)
-		assert.Equal(t, fmt.Sprintf("/users/%s", userId.String()), rec.Header().Get("Location"))
+		assert.Equal(t, http.StatusOK, rec.Code)
+		response := struct {
+			UserId string `json:"id"`
+		}{}
+		err = json.Unmarshal(rec.Body.Bytes(), &response)
+		assert.NoError(t, err)
+		assert.Equal(t, userId.String(), response.UserId)
 	}
 }
