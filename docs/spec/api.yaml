@@ -867,6 +867,12 @@ components:
           externalDocs:
             description: RFC7518 - JSON Web Algorithms (JWA) - Section 6.3.1.1
             url: https://www.rfc-editor.org/rfc/rfc7518#section-6.3.1.1
+        use:
+          type: string
+          example: sig
+          externalDocs:
+            description: RFC7517 - JSON Web Key (JWK) - Section 4.2
+            url: https://www.rfc-editor.org/rfc/rfc7517#section-4.2
     JSONWebKeySet:
       type: object
       properties:
