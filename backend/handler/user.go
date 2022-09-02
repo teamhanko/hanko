@@ -77,6 +77,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 			if h.cfg.Session.EnableAuthTokenHeader {
 				c.Response().Header().Set("X-Auth-Token", token)
+				c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 			}
 		}
 
