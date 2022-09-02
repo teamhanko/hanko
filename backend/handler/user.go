@@ -19,10 +19,10 @@ import (
 type UserHandler struct {
 	persister      persistence.Persister
 	sessionManager session.Manager
-	cfg            config.Registration
+	cfg            *config.Config
 }
 
-func NewUserHandler(cfg config.Registration, persister persistence.Persister, sessionManager session.Manager) *UserHandler {
+func NewUserHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager) *UserHandler {
 	return &UserHandler{
 		persister:      persister,
 		sessionManager: sessionManager,
@@ -62,12 +62,22 @@ func (h *UserHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to store user: %w", err)
 		}
 
-		if !h.cfg.EmailVerification.Enabled {
-			cookie, err := h.sessionManager.GenerateCookie(newUser.ID.String())
+		if !h.cfg.Registration.EmailVerification.Enabled {
+			token, err := h.sessionManager.GenerateJWT(newUser.ID)
+			if err != nil {
+				return fmt.Errorf("failed to generate jwt: %w", err)
+			}
+
+			cookie, err := h.sessionManager.GenerateCookie(token)
 			if err != nil {
 				return fmt.Errorf("failed to create session token: %w", err)
 			}
+
 			c.SetCookie(cookie)
+
+			if h.cfg.Session.EnableAuthTokenHeader {
+				c.Response().Header().Set("X-Auth-Token", token)
+			}
 		}
 
 		return c.JSON(http.StatusOK, newUser)
