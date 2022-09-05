@@ -11,7 +11,7 @@ export class RegisterAuthenticator extends BasePage {
   constructor(page: Page) {
     super(page);
     this.setUpPasskeyButton = page.locator("button[type=submit]", {
-      hasText: "Set up passkey",
+      hasText: "Set up a passkey",
     });
     this.continueLink = page.locator("a", {
       hasText: "Continue",
