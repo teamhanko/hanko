@@ -37,7 +37,7 @@ import "@teamhanko/hanko-elements/hanko-auth"
 With a script tag via CDN:
 
 ```html
-<script type="module" src="https://unpkg.com/@teamhanko/hanko-elements/dist/element.hanko-auth.js">
+<script type="module" src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/element.hanko-auth.js">
 ```
 
 ### Markup
