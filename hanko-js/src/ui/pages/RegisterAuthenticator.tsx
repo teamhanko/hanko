@@ -5,8 +5,8 @@ import { useContext, useState } from "preact/compat";
 import {
   HankoError,
   UnauthorizedError,
-  WebAuthnRequestCancelledError,
-} from "../../lib/Errors";
+  WebauthnRequestCancelledError,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";
@@ -36,7 +36,7 @@ const RegisterAuthenticator = () => {
     event.preventDefault();
     setIsLoading(true);
 
-    hanko.authenticator
+    hanko.webauthn
       .register()
       .then(() => {
         setIsSuccess(true);
@@ -51,7 +51,7 @@ const RegisterAuthenticator = () => {
           return;
         }
 
-        setError(e instanceof WebAuthnRequestCancelledError ? null : e);
+        setError(e instanceof WebauthnRequestCancelledError ? null : e);
         setIsLoading(false);
       });
   };

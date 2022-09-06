@@ -6,7 +6,7 @@ import {
   HankoError,
   PasscodeExpiredError,
   TechnicalError,
-} from "../../lib/Errors";
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { UserContext } from "../contexts/UserProvider";
 import { PasscodeContext } from "../contexts/PasscodeProvider";

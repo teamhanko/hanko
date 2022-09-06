@@ -2,7 +2,10 @@ import * as preact from "preact";
 import { ComponentChildren, createContext } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
 
-import { HankoError, TooManyRequestsError } from "../../lib/Errors";
+import {
+  HankoError,
+  TooManyRequestsError,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "./AppProvider";
 
