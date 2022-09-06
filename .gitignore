@@ -20,8 +20,8 @@
 hanko
 
 # Dependency directories (remove the comment below to include it)
-hanko-js/dist/
-hanko-js/node_modules/
+elements/dist/
+elements/node_modules/
 e2e/node_modules/
 e2e/test-results/
 e2e/playwright-report/
