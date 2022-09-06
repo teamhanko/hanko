@@ -77,7 +77,7 @@ The animation below demonstrates how user registration with passwords enabled lo
 like using the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) configuration file. The registration flow also includes email
 verification via passcodes and the registration of a passkey so that the user can log in without passwords or passcodes.
 
-<img src="https://github.com/teamhanko/hanko/raw/main/hanko-js/demo.gif" width="410"/>
+<img src="https://github.com/teamhanko/hanko/raw/main/elements/demo.gif" width="410"/>
 
 ## UI Customization
 
@@ -214,7 +214,7 @@ hanko-auth::part(input):focus {
 
 Result:
 
-<img src="https://github.com/teamhanko/hanko/raw/main/hanko-js/demo-ui.png" width="450"/>
+<img src="https://github.com/teamhanko/hanko/raw/main/elements/demo-ui.png" width="450"/>
 
 ## Browser support
 
@@ -234,5 +234,5 @@ Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/is
 
 ## License
 
-The `hanko-js` project is licensed under the [MIT License](LICENSE).
+The `elements` project is licensed under the [MIT License](LICENSE).
 
