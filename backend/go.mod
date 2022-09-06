@@ -9,7 +9,7 @@ require (
 	github.com/gobuffalo/validate/v3 v3.3.2
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/knadh/koanf v1.4.3
-	github.com/labstack/echo/v4 v4.8.0
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/lestrrat-go/jwx/v2 v2.0.6
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
 	github.com/spf13/cobra v1.5.0
