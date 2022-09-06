@@ -6,10 +6,10 @@ require (
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-webauthn/webauthn v0.4.0
 	github.com/gobuffalo/pop/v6 v6.0.6
-	github.com/gobuffalo/validate/v3 v3.3.2
+	github.com/gobuffalo/validate/v3 v3.3.3
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/knadh/koanf v1.4.3
-	github.com/labstack/echo/v4 v4.8.0
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/lestrrat-go/jwx/v2 v2.0.6
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
 	github.com/spf13/cobra v1.5.0
@@ -35,7 +35,7 @@ require (
 	github.com/go-webauthn/revoke v0.1.3 // indirect
 	github.com/gobuffalo/envy v1.10.1 // indirect
 	github.com/gobuffalo/fizz v1.14.2 // indirect
-	github.com/gobuffalo/flect v0.2.5 // indirect
+	github.com/gobuffalo/flect v0.3.0 // indirect
 	github.com/gobuffalo/github_flavored_markdown v1.1.1 // indirect
 	github.com/gobuffalo/helpers v0.6.5 // indirect
 	github.com/gobuffalo/nulls v0.4.1 // indirect

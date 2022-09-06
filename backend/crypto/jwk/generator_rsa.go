@@ -34,5 +34,10 @@ func (g *RSAKeyGenerator) Generate(id string) (jwk.Key, error) {
 		return nil, err
 	}
 
+	err = key.Set(jwk.KeyUsageKey, jwk.ForSignature)
+	if err != nil {
+		return nil, err
+	}
+
 	return key, nil
 }
