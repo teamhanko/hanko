@@ -43,10 +43,10 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | Hanko web component |
 | ✅ | Customizable CSS |
 | ✅ | 📢 Hanko Beta Release |
-| ⚙️ | JavaScript frontend SDK |
-| ⚙️ | [Passkey Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) support in `<hanko-auth>` |
+| ✅ | JavaScript frontend SDK |
+| ⚙️ | [Passkey Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) support |
 | ⚙️ | Events API |
-| | 2FA with FIDO Security Keys and TOTP to secure fallback auth methods|
+| | 2FA with FIDO Security Keys and TOTP to secure fallback auth methods |
 | | Native app support for Android and iOS apps |
 | | OAuth2 plugin system (Sign in with Google/Apple/GitHub/...) |
 | | SMS passcode delivery |
