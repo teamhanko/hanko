@@ -51,6 +51,7 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | | OAuth2 plugin system (Sign in with Google/Apple/GitHub/...) |
 | | SMS passcode delivery |
 | | Session management |
+| | Push authentication |
 
 # Quickstart
 The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
