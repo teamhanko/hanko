@@ -43,10 +43,10 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | Hanko web component |
 | ✅ | Customizable CSS |
 | ✅ | 📢 Hanko Beta Release |
-| ⚙️ | JavaScript frontend SDK |
-| ⚙️ | [Passkey Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) support in `<hanko-auth>` |
+| ✅ | JavaScript frontend SDK |
+| ⚙️ | [Passkey Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) support |
 | ⚙️ | Events API |
-| | 2FA with FIDO Security Keys and TOTP to secure fallback auth methods|
+| | 2FA with FIDO Security Keys and TOTP to secure fallback auth methods |
 | | Native app support for Android and iOS apps |
 | | OAuth2 plugin system (Sign in with Google/Apple/GitHub/...) |
 | | SMS passcode delivery |
@@ -75,7 +75,7 @@ smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) 
 # Monorepo
 The Hanko project consists of
 - [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and passwords, as well as user management and JWT token issuing
-- [hanko-js](/hanko-js/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
+- [hanko-elements](/elements/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
 - [hanko-frontend-sdk](/frontend-sdk/README.md) - A client package for using the Hanko API
 - [example](/example) - The quickstart example app, showing off Hanko's strengths and acting as a reference implementation
 
@@ -83,4 +83,4 @@ The Hanko project consists of
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
 
 # Licenses
-[hanko-js](hanko-js) is licensed under the [MIT License](hanko-js/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
+[hanko-elements](elements) is licensed under the [MIT License](elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).

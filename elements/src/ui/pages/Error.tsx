@@ -1,7 +1,7 @@
 import * as preact from "preact";
 import { useContext, useEffect, useState } from "preact/compat";
 
-import { HankoError, UnauthorizedError } from "../../lib/Errors";
+import { HankoError, UnauthorizedError } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { UserContext } from "../contexts/UserProvider";

@@ -3,7 +3,7 @@ import { useContext } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
-import { HankoError, TechnicalError } from "../../lib/Errors";
+import { HankoError, TechnicalError } from "@teamhanko/hanko-frontend-sdk";
 
 import ExclamationMark from "./ExclamationMark";
 

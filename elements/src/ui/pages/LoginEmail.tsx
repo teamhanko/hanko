@@ -6,8 +6,9 @@ import {
   HankoError,
   TechnicalError,
   NotFoundError,
-  WebAuthnRequestCancelledError,
-} from "../../lib/Errors";
+  WebauthnRequestCancelledError,
+  WebauthnSupport,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";
@@ -73,7 +74,7 @@ const LoginEmail = () => {
 
         userID = userInfo.id;
         webauthnLoginInitiated = true;
-        return hanko.authenticator.login(userInfo.id);
+        return hanko.webauthn.login(userInfo.id);
       })
       .then(() => {
         if (webauthnLoginInitiated) {
@@ -89,7 +90,7 @@ const LoginEmail = () => {
           return renderRegisterConfirm();
         }
 
-        if (e instanceof WebAuthnRequestCancelledError) {
+        if (e instanceof WebauthnRequestCancelledError) {
           return renderAlternateLoginMethod(userID);
         }
 
@@ -137,7 +138,7 @@ const LoginEmail = () => {
     event.preventDefault();
     setIsPasskeyLoginLoading(true);
 
-    hanko.authenticator
+    hanko.webauthn
       .login()
       .then(() => {
         setIsPasskeyLoginLoading(false);
@@ -147,8 +148,9 @@ const LoginEmail = () => {
         return;
       })
       .catch((e) => {
+        console.log("banana", e);
         setIsPasskeyLoginLoading(false);
-        setError(e instanceof WebAuthnRequestCancelledError ? null : e);
+        setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
   };
 
@@ -168,8 +170,7 @@ const LoginEmail = () => {
   );
 
   useEffect(() => {
-    hanko.authenticator
-      .isAuthenticatorSupported()
+    WebauthnSupport.isPlatformAuthenticatorAvailable()
       .then((supported) => setIsAuthenticatorSupported(supported))
       .catch((e) => setError(new TechnicalError(e)));
   }, [hanko]);
