@@ -243,6 +243,11 @@ paths:
         Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use
         with the Webauthn API's `navigator.credentials.get()`.
 
+        Omitting the optional request body results in generation of request options for a login using a
+        [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
+        (i.e. they will not contain
+        [allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).
+
         *Note*: The Webauthn API uses binary data represented by ArrayBuffers for certain input/output values.
         The Hanko API returns these values as base64url-encoded, so they must be converted to ArrayBuffers
         when passed to the Webauthn API. Similarly, Webauthn API output must be converted to base64url-encoded values
@@ -250,6 +255,16 @@ paths:
       operationId: webauthnLoginInit
       tags:
         - WebAuthn
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user_id:
+                  description: The ID of the user on whose behalf WebAuthn login should be performed
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
       responses:
         '200':
           description: 'Successful initialization'
