@@ -2,6 +2,7 @@ import { WebauthnState } from "../state/WebauthnState";
 import {
   InvalidWebauthnCredentialError,
   TechnicalError,
+  UnauthorizedError,
   WebauthnRequestCancelledError,
 } from "../Errors";
 import {
@@ -82,6 +83,9 @@ class WebauthnClient extends Client {
             throw new TechnicalError();
           }
         })
+        .catch((e) => {
+          reject(e);
+        })
         .then((w: WebauthnFinalized) => {
           this.state.read().addCredential(w.user_id, w.credential_id).write();
           return resolve();
@@ -111,15 +115,20 @@ class WebauthnClient extends Client {
         .then((response) => {
           if (response.ok) {
             return response.json();
+          } else if (response.status >= 400 && response.status <= 499) {
+            throw new UnauthorizedError();
           }
 
           throw new TechnicalError();
+        })
+        .catch((e) => {
+          reject(e);
         })
         .then((challenge: CredentialCreationOptionsJSON) => {
           return createWebauthnCredential(challenge);
         })
         .catch((e) => {
-          throw new WebauthnRequestCancelledError(e);
+          reject(new WebauthnRequestCancelledError(e));
         })
         .then((attestation: Attestation) => {
           // The generated PublicKeyCredentialWithAttestationJSON object does not align with the API. The list of
@@ -134,9 +143,14 @@ class WebauthnClient extends Client {
         .then((response) => {
           if (response.ok) {
             return response.json();
+          } else if (response.status >= 400 && response.status <= 499) {
+            throw new UnauthorizedError();
           }
 
           throw new TechnicalError();
+        })
+        .catch((e) => {
+          reject(e);
         })
         .then((w: WebauthnFinalized) => {
           this.state.read().addCredential(w.user_id, w.credential_id).write();
