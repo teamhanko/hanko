@@ -826,17 +826,6 @@ components:
                     type: string
                     format: base64url
                     example: Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...
-                  transports:
-                    type: array
-                    items:
-                      type: string
-                      enum:
-                        - usb
-                        - nfc
-                        - ble
-                        - internal
-                    example:
-                      - internal
             userVerification:
               type: string
               enum:
