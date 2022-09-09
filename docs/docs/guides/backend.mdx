@@ -1,0 +1,60 @@
+---
+sidebar_label: Backend guide
+sidebar_position: 3
+description: "Learn how to authenticate requests in your backend by verifying JWTs (JSON Web Token) using a JWK (JSON Web Key Set)."
+---
+
+# Backend guide
+
+After a successful login Hanko issues a cookie containing a JSON Web Token
+([JWT](https://datatracker.ietf.org/doc/html/rfc7519)). You can use this JWT to authenticate
+requests on your backend. To do so, first retrieve the JSON Web Key Set
+([JWKS](https://datatracker.ietf.org/doc/html/rfc7517))
+containing the public keys used to verify the JSON Web Token (JWT) from the Hanko API's `.well-known/jwks.json` endpoint.
+Then use the JWKS to verify the JWT using a library for the programming language of your choice.
+
+The following code shows an example of a custom middleware in a Go-based backend using
+[Echo](https://echo.labstack.com/) and the [lestrrat-go/jwx](https://github.com/lestrrat-go/jwx) package:
+
+```go
+import (
+	"context"
+	"fmt"
+	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwt"
+	"log"
+	"net/http"
+)
+
+func SessionMiddleware(hankoUrl string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			cookie, err := c.Cookie("hanko")
+			if err == http.ErrNoCookie {
+				return c.Redirect(http.StatusTemporaryRedirect, "/unauthorized")
+			}
+			if err != nil {
+				return err
+			}
+			// replace "hankoApiURL" with your API URL
+			set, err := jwk.Fetch(context.Background(), fmt.Sprintf("%v/.well-known/jwks.json", hankoApiURL))
+			if err != nil {
+				return err
+			}
+
+			token, err := jwt.Parse([]byte(cookie.Value), jwt.WithKeySet(set))
+			if err != nil {
+				return c.Redirect(http.StatusTemporaryRedirect, "/unauthorized")
+			}
+
+			log.Printf("session for user '%s' verified successfully", token.Subject())
+
+			c.Set("token", cookie.Value)
+			c.Set("user", token.Subject())
+
+			return next(c)
+		}
+	}
+}
+```

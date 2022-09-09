@@ -1,0 +1,105 @@
+---
+title: Next.js + Hanko
+sidebar_label: Next.js
+keywords: [next, nextjs]
+sidebar_custom_props:
+  docCardIconName: nextjs-dark
+---
+
+# Next.js
+
+In this guide you will learn how to add authentication to your Next.js application using the Hanko custom element.
+
+## Install dependencies
+
+Install the `@teamhanko/hanko-elements` package:
+
+```shell npm2yarn
+npm install @teamhanko/hanko-elements
+```
+
+## Import & use custom element
+
+Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
+
+```jsx title="HankoAuth.jsx" showLineNumbers
+import "@teamhanko/hanko-elements/hanko-auth";
+
+export default function HankoAuth() {
+  return (
+    <hanko-auth
+      api={process.env.NEXT_PUBLIC_HANKO_API}
+      lang={process.env.NEXT_PUBLIC_HANKO_LANG}
+    />
+  );
+}
+```
+
+If you used this component in your application, the import would attempt to register the `<hanko-auth>` element with the
+browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry) through a
+call to `window.customElements.define()`.
+Next.js pre-renders pages on the server but the browser `window` is not available during pre-rendering, so the custom
+element registration would fail.
+
+A solution for this is to use Next's [dynamic import](https://nextjs.org/docs/advanced-features/dynamic-import) feature
+to dynamically load the component on the client-side and disable server rendering for it:
+
+```jsx title="index.js" showLineNumbers
+import dynamic from "next/dynamic";
+
+export default function Home() {
+  const HankoAuthNoSSR = dynamic(
+    // replace with path to your component using the <hanko-auth> element
+    () => import('../components/HankoAuth'),
+    { ssr: false },
+  )
+  return (
+    <Suspense fallback={"Loading ..."}>
+      <HankoAuthNoSSR/>
+    </Suspense>
+  )
+}
+```
+
+## Defining login callbacks
+
+The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+event in order to, for example, redirect your users to protected pages in your application.
+
+To do so, create a [`ref`](https://reactjs.org/docs/hooks-reference.html#useref) to obtain access to the `<hanko-auth>`
+DOM element and apply an event listener with an appropriate redirect callback:
+
+```jsx {1-2,6-18,22} title="HankoAuth.jsx" showLineNumbers
+import React, { useEffect, useRef } from "react";
+import { useRouter } from "next/router";
+import "@teamhanko/hanko-elements/hanko-auth";
+
+export default function HankoAuth() {
+  const router = useRouter();
+  const ref = useRef(null);
+
+  const redirectToProfile = () => {
+    router.replace("/profile");
+  }
+
+  useEffect(() => {
+    const { current } = ref;
+
+    current?.addEventListener("success", redirectToProfile);
+    return () => current?.removeEventListener("success", redirectToProfile);
+  }, []);
+
+  return (
+    <hanko-auth
+      ref={ref}
+      api={process.env.NEXT_PUBLIC_HANKO_API}
+      lang={process.env.NEXT_PUBLIC_HANKO_LANG}
+    />
+  );
+}
+```
+
+## Backend request authentication
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).
+
