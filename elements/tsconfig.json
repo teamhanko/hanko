@@ -23,7 +23,7 @@
     "lib":["ES2015", "ES2016", "dom"],
     "sourceMap": true,
     "noImplicitAny": true,
-    "target": "es5",
+    "target": "es6",
     "module": "commonjs"
   }
 }

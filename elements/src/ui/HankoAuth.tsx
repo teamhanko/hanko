@@ -1,8 +1,9 @@
 import * as preact from "preact";
-import register from "preact-custom-element";
+import registerCustomElement from "preact-custom-element";
 import { Fragment } from "preact";
 
 import { TranslateProvider } from "@denysvuika/preact-translate";
+
 import PageProvider from "./contexts/PageProvider";
 import AppProvider from "./contexts/AppProvider";
 import UserProvider from "./contexts/UserProvider";
@@ -30,12 +31,9 @@ declare global {
   }
 }
 
-const HankoAuth = ({ api, lang = "en" }: Props) => {
+export const HankoAuth = ({ api, lang = "en" }: Props) => {
   return (
     <Fragment>
-      <style
-        dangerouslySetInnerHTML={{ __html: window._hankoStyle.innerHTML }}
-      />
       <AppProvider api={api}>
         <TranslateProvider translations={translations} fallbackLang={"en"}>
           <UserProvider>
@@ -51,8 +49,45 @@ const HankoAuth = ({ api, lang = "en" }: Props) => {
   );
 };
 
-register(HankoAuth, "hanko-auth", ["api", "lang"], {
-  shadow: true,
-});
+export interface RegisterOptions {
+  shadow?: boolean;
+  injectStyles?: boolean;
+}
 
-export default HankoAuth;
+export const register = ({
+  shadow = true,
+  injectStyles = true,
+}: RegisterOptions): Promise<void> => {
+  const tagName = "hanko-auth";
+
+  return new Promise<void>((resolve, reject) => {
+    if (!customElements.get(tagName)) {
+      registerCustomElement(HankoAuth, tagName, ["api", "lang"], {
+        shadow,
+      });
+    }
+
+    if (injectStyles) {
+      customElements
+        .whenDefined(tagName)
+        .then((_) => {
+          const elements = document.getElementsByTagName(tagName);
+
+          Array.from(elements).forEach((element) => {
+            if (shadow) {
+              element.shadowRoot.appendChild(window._hankoStyle);
+            } else {
+              element.appendChild(window._hankoStyle);
+            }
+          });
+
+          return resolve();
+        })
+        .catch((e) => {
+          reject(e);
+        });
+    } else {
+      return resolve();
+    }
+  });
+};

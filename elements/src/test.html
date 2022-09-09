@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
-    <script type="module" src="../dist/element.hanko-auth.js"></script>
+    <script src="../dist/element.hanko-auth.js"></script>
     <style>
         body {
             background-color: hsl(188, 99%, 38%);
@@ -63,10 +63,10 @@
 <body>
 <hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
 <script>
-    const hanko = document.querySelector("hanko-auth");
+     HankoAuth.register({ shadow: true });
 
-    hanko.addEventListener("success", (event) => {
-        hanko.parentElement.innerHTML = "<h1>secured content...</h1>";
+    document.addEventListener("hankoAuthSuccess", (event) => {
+        document.body.innerHTML = 'secured content...'
     })
 </script>
 </body>

@@ -1,12 +1,11 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.0.7-alpha",
+  "version": "0.0.8-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
   "types": "dist/index.d.ts",
-  "type": "module",
   "files": [
     "dist"
   ],
