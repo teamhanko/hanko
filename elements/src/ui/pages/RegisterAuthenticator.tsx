@@ -77,7 +77,7 @@ const RegisterAuthenticator = () => {
       <Footer>
         <span hidden />
         <LoadingIndicatorLink isLoading={isSkipLoading} onClick={onSkipClick}>
-          {t("labels.continue")}
+          {t("labels.skip")}
         </LoadingIndicatorLink>
       </Footer>
     </Fragment>

@@ -6,14 +6,14 @@ export const translations = {
       loginFinished: "Login successful",
       loginPasscode: "Enter passcode",
       loginPassword: "Enter password",
-      registerAuthenticator: "Set up a passkey",
+      registerAuthenticator: "Save a passkey",
       registerConfirm: "Create account?",
       registerPassword: "Set new password",
     },
     texts: {
       enterPasscode: 'Enter the passcode that was sent to "{email}".',
       setupPasskey:
-        "Your device supports passkey authentication. If you use biometrics, we will never see or store your biometric data.",
+        "Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.",
       createAccount:
         'No account exists for "{email}". Do you want to create a new account?',
       passwordFormatHint: "Must be at least 10 characters long.",
@@ -22,11 +22,12 @@ export const translations = {
       or: "or",
       email: "Email",
       continue: "Continue",
+      skip: "Skip",
       password: "Password",
       forgotYourPassword: "Forgot your password?",
       back: "Back",
       signInPasskey: "Sign in with a passkey",
-      registerAuthenticator: "Set up a passkey",
+      registerAuthenticator: "Save a passkey",
       signIn: "Sign in",
       signUp: "Sign up",
       sendNewPasscode: "Send new code",
@@ -63,7 +64,7 @@ export const translations = {
       enterPasscode:
         'Geben Sie den Passcode ein, der an die E-Mail-Adresse "{email}" gesendet wurde.',
       setupPasskey:
-        "Ihr Gerät unterstützt die Passkey-Authentifizierung. Wenn Sie biometrische Daten verwenden, werden wir Ihre biometrischen Daten niemals sehen oder speichern.",
+        "Ihr Gerät unterstützt die sichere Anmeldung mit Passkeys. Hinweis: Ihre biometrischen Daten verbleiben sicher auf Ihrem Gerät und werden niemals an unseren Server gesendet.",
       createAccount:
         'Es existiert kein Konto für "{email}". Möchten Sie ein neues Konto erstellen?',
       passwordFormatHint: "mindestens 10 Zeichen",
@@ -72,6 +73,7 @@ export const translations = {
       or: "oder",
       email: "E-Mail",
       continue: "Weiter",
+      skip: "Überspringen",
       password: "Passwort",
       forgotYourPassword: "Passwort vergessen?",
       back: "Zurück",
