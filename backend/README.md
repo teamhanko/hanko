@@ -156,7 +156,8 @@ All available configuration parameters can be found [here](./docs/Config.md).
 
 ## API specification
 
-The API specification can be found [here](https://docs.hanko.io/api).
+- [Hanko Public API](https://docs.hanko.io/api/public)
+- [Hanko Admin API](https://docs.hanko.io/api/admin)
 
 ## License
 The hanko backend ist licensed under the [AGPL-3.0](LICENSE).
