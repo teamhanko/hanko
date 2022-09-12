@@ -35,8 +35,12 @@ const config = {
         // Plugin Options for loading OpenAPI files
         specs: [
           {
-            spec: 'static/spec/api.yaml',
-            route: '/api',
+            spec: 'static/spec/public.yaml',
+            route: '/api/public',
+          },
+          {
+            spec: 'static/spec/admin.yaml',
+            route: '/api/admin',
           },
         ],
         // Theme Options for modifying how redoc renders them
@@ -127,9 +131,19 @@ const config = {
             activeBaseRegex: '^((?!\/api).)*$'
           },
           {
-            to: '/api',
+            type: 'dropdown',
             label: 'API',
             position: 'left',
+            items: [
+              {
+                label: 'Public',
+                to: 'api/public'
+              },
+              {
+                label: 'Admin',
+                to: 'api/admin'
+              }
+            ]
           },
           {
             type: 'dropdown',
