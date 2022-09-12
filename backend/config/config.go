@@ -58,7 +58,7 @@ func DefaultConfig() *Config {
 			Public: ServerSettings{
 				Address: ":8000",
 			},
-			Private: ServerSettings{
+			Admin: ServerSettings{
 				Address: ":8001",
 			},
 		},
@@ -125,10 +125,10 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// Server contains the setting for the public and private server
+// Server contains the setting for the public and admin server
 type Server struct {
-	Public  ServerSettings `yaml:"public" json:"public" koanf:"public"`
-	Private ServerSettings `yaml:"private" json:"private" koanf:"private"`
+	Public ServerSettings `yaml:"public" json:"public" koanf:"public"`
+	Admin  ServerSettings `yaml:"admin" json:"admin" koanf:"admin"`
 }
 
 func (s *Server) Validate() error {
@@ -136,9 +136,9 @@ func (s *Server) Validate() error {
 	if err != nil {
 		return fmt.Errorf("error validating public server settings: %w", err)
 	}
-	err = s.Private.Validate()
+	err = s.Admin.Validate()
 	if err != nil {
-		return fmt.Errorf("error validating private server settings: %w", err)
+		return fmt.Errorf("error validating admin server settings: %w", err)
 	}
 	return nil
 }

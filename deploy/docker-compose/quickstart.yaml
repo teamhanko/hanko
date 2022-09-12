@@ -19,7 +19,7 @@ services:
     build: ../../backend
     ports:
       - '8000:8000' # public
-      - '8001:8001' # private
+      - '8001:8001' # admin
     restart: unless-stopped
     command: serve --config /etc/config/config.yaml all
     volumes:

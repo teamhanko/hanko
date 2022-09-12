@@ -120,22 +120,22 @@ The service is now available at `localhost:8000`.
 
 ## Advanced Usage
 
-### Start private API
+### Start admin API
 
-In the usage section above we only started the public API. Use the command below to start the private API. The default
+In the usage section above we only started the public API. Use the command below to start the admin API. The default
 port is `8001`, but can be [customized](./docs/Config.md) in the config.
 
 ```shell
-serve private
+serve admin
 ```
 
-Use this command to start the public and private API together:
+Use this command to start the public and admin API together:
 
 ````shell
 serve all
 ````
 
-> **Warning** The private API must be protected by an access management system.
+> **Warning** The admin API must be protected by an access management system.
 
 ### Supported Databases
 

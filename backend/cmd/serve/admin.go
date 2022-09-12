@@ -13,10 +13,10 @@ import (
 	"sync"
 )
 
-func NewServePrivateCommand(config *config.Config) *cobra.Command {
+func NewServeAdminCommand(config *config.Config) *cobra.Command {
 	return &cobra.Command{
-		Use:   "private",
-		Short: "Start the private portion of the hanko server",
+		Use:   "admin",
+		Short: "Start the admin portion of the hanko server",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			persister, err := persistence.New(config.Database)
@@ -26,7 +26,7 @@ func NewServePrivateCommand(config *config.Config) *cobra.Command {
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			go server.StartPrivate(config, &wg, persister)
+			go server.StartAdmin(config, &wg, persister)
 
 			wg.Wait()
 		},

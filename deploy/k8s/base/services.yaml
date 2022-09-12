@@ -15,13 +15,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: hanko-private
+  name: hanko-admin
   namespace: hanko
 spec:
   selector:
     app: hanko
   ports:
     - port: 80
-      targetPort: private
+      targetPort: admin
       protocol: TCP
       name: http
