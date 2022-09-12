@@ -36,7 +36,7 @@ class PasswordClient extends Client {
    * @throws {TooManyRequestsError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/passwordLogin
+   * @see https://docs.hanko.io/api#tag/Password/operation/passwordLogin
    */
   login(userID: string, password: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -75,7 +75,7 @@ class PasswordClient extends Client {
    * @throws {RequestTimeoutError}
    * @throws {UnauthorizedError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/password
+   * @see https://docs.hanko.io/api#tag/Password/operation/password
    */
   update(userID: string, password: string): Promise<void> {
     return new Promise<void>((resolve, reject) => {

@@ -47,8 +47,8 @@ class WebauthnClient extends Client {
    * @throws {InvalidWebauthnCredentialError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/webauthnLoginInit
-   * @see https://teamhanko.github.io/hanko/#/authentication/webauthnLoginFinal
+   * @see https://docs.hanko.io/api#tag/WebAuthn/operation/webauthnLoginInit
+   * @see https://docs.hanko.io/api#tag/WebAuthn/operation/webauthnLoginFinal
    * @see https://www.w3.org/TR/webauthn-2/#authentication-ceremony
    */
   login(userID?: string): Promise<void> {
@@ -104,8 +104,8 @@ class WebauthnClient extends Client {
    * @throws {RequestTimeoutError}
    * @throws {UnauthorizedError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/webauthnRegInit
-   * @see https://teamhanko.github.io/hanko/#/authentication/webauthnRegFinal
+   * @see https://docs.hanko.io/api#tag/WebAuthn/operation/webauthnRegInit
+   * @see https://docs.hanko.io/api#tag/WebAuthn/operation/webauthnRegFinal
    * @see https://www.w3.org/TR/webauthn-2/#sctn-registering-a-new-credential
    */
   register(): Promise<void> {
