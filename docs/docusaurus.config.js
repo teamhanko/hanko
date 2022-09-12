@@ -137,8 +137,8 @@ const config = {
             position: 'left',
             items: [
               {
-                to: 'jsdoc/@teamhanko/hanko-frontend-sdk/0.0.1-alpha/index.html',
-                label: 'Frontend 0.0.1-alpha',
+                to: 'jsdoc/@teamhanko/hanko-frontend-sdk/0.0.2-alpha/index.html',
+                label: 'Frontend 0.0.2-alpha',
                 target: '_blank'
               }
             ]
