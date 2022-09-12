@@ -37,7 +37,7 @@ class PasscodeClient extends Client {
    * @throws {TooManyRequestsError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/passcodeInit
+   * @see https://docs.hanko.io/api#tag/Passcode/operation/passcodeInit
    */
   initialize(userID: string): Promise<Passcode> {
     return new Promise<Passcode>((resolve, reject) => {
@@ -83,7 +83,7 @@ class PasscodeClient extends Client {
    * @throws {MaxNumOfPasscodeAttemptsReachedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/passcodeFinal
+   * @see https://docs.hanko.io/api#tag/Passcode/operation/passcodeFinal
    */
   finalize(userID: string, code: string): Promise<void> {
     const passcodeID = this.state.read().getActiveID(userID);

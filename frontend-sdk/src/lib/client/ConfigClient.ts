@@ -15,7 +15,7 @@ class ConfigClient extends Client {
    * @return {Promise<Config>}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/.well-known/getConfig
+   * @see https://docs.hanko.io/api#tag/.well-known/operation/getConfig
    */
   get() {
     return new Promise<Config>((resolve, reject) => {

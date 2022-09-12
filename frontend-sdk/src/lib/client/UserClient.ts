@@ -25,7 +25,7 @@ class UserClient extends Client {
    * @throws {NotFoundError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/getUserId
+   * @see https://docs.hanko.io/api#tag/User-Management/operation/getUserId
    */
   getInfo(email: string): Promise<UserInfo> {
     return new Promise<UserInfo>((resolve, reject) => {
@@ -56,7 +56,7 @@ class UserClient extends Client {
    * @throws {ConflictError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/management/createUser
+   * @see https://docs.hanko.io/api#tag/User-Management/operation/createUser
    */
   create(email: string): Promise<User> {
     return new Promise<User>((resolve, reject) => {
@@ -84,8 +84,8 @@ class UserClient extends Client {
    * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
-   * @see https://teamhanko.github.io/hanko/#/authentication/IsUserAuthorized
-   * @see https://teamhanko.github.io/hanko/#/management/listUser
+   * @see https://docs.hanko.io/api#tag/User-Management/operation/IsUserAuthorized
+   * @see https://docs.hanko.io/api#tag/User-Management/operation/listUser
    */
   getCurrent(): Promise<User> {
     return new Promise<User>((resolve, reject) =>
