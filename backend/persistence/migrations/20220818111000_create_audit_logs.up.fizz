@@ -1,14 +1,16 @@
 create_table("audit_logs") {
     t.Column("id", "uuid", {"primary": true})
     t.Column("type", "string", {})
-    t.Column("error", "string", {})
+    t.Column("error", "string", {"null": true})
     t.Column("meta_http_request_id", "string", {})
     t.Column("meta_source_ip", "string", {})
     t.Column("meta_user_agent", "string", {})
     t.Column("actor_user_id", "uuid", {"null": true})
-    t.Column("actor_email", "string", {})
+    t.Column("actor_email", "string", {"null": true})
     t.Timestamps()
     t.Index("type")
     t.Index("actor_user_id")
     t.Index("actor_email")
+    t.Index("meta_http_request_id")
+    t.Index("meta_source_ip")
 }
