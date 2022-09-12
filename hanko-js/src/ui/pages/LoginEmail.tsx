@@ -63,7 +63,7 @@ const LoginEmail = () => {
     return hanko.user
       .getInfo(email)
       .then((userInfo) => {
-        if (!userInfo.verified) {
+        if (!userInfo.verified && config.email_verification_enabled) {
           return renderPasscode(userInfo.id, config.password.enabled, true);
         }
 
