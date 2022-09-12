@@ -77,6 +77,7 @@ The Hanko project consists of
 - [hanko-elements](/elements/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
 - [hanko-frontend-sdk](/frontend-sdk/README.md) - A client package for using the Hanko API
 - [example](/example) - The quickstart example app, showing off Hanko's strengths and acting as a reference implementation
+- [docs](/docs) - The Hanko documentation
 
 # Community
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
