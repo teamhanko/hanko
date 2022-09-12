@@ -133,7 +133,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		}
 
 		if sessionData == nil {
-			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFailed, nil, fmt.Errorf("received unkown challenge"))
+			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFinalFailed, nil, fmt.Errorf("received unkown challenge"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -141,7 +141,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		}
 
 		if sessionToken.Subject() != sessionData.UserId.String() {
-			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFailed, nil, fmt.Errorf("user session does not match sessionData subject"))
+			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFinalFailed, nil, fmt.Errorf("user session does not match sessionData subject"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -154,7 +154,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 		}
 
 		if webauthnUser == nil {
-			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFailed, nil, fmt.Errorf("unkown user"))
+			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFinalFailed, nil, fmt.Errorf("unkown user"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -163,7 +163,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 
 		credential, err := h.webauthn.CreateCredential(webauthnUser, *intern.WebauthnSessionDataFromModel(sessionData), request)
 		if err != nil {
-			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFailed, user, fmt.Errorf("attestation validation failed"))
+			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFinalFailed, user, fmt.Errorf("attestation validation failed"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -181,7 +181,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			c.Logger().Errorf("failed to delete attestation session data: %w", err)
 		}
 
-		err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationSucceeded, user, nil)
+		err = h.auditLogClient.Create(c, models.AuditLogWebAuthnRegistrationFinalSucceeded, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
@@ -281,7 +281,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		if sessionData == nil {
-			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFailed, nil, fmt.Errorf("received unkown challenge"))
+			err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, nil, fmt.Errorf("received unkown challenge"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -305,7 +305,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			}
 
 			if webauthnUser == nil {
-				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFailed, nil, fmt.Errorf("unkown user"))
+				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, nil, fmt.Errorf("unkown user"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -316,7 +316,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				return webauthnUser, nil
 			}, *model, request)
 			if err != nil {
-				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFailed, user, fmt.Errorf("assertion validation failed"))
+				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, user, fmt.Errorf("assertion validation failed"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -329,7 +329,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				return fmt.Errorf("failed to get user: %w", err)
 			}
 			if webauthnUser == nil {
-				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFailed, nil, fmt.Errorf("unkown user"))
+				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, nil, fmt.Errorf("unkown user"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -337,7 +337,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			}
 			credential, err = h.webauthn.ValidateLogin(webauthnUser, *model, request)
 			if err != nil {
-				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFailed, user, fmt.Errorf("assertion validation failed"))
+				err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, user, fmt.Errorf("assertion validation failed"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -366,7 +366,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			c.Response().Header().Set("X-Auth-Token", token)
 		}
 
-		err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationSucceeded, user, nil)
+		err = h.auditLogClient.Create(c, models.AuditLogWebAuthnAuthenticationFinalSucceeded, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
