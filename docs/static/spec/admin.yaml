@@ -10,7 +10,7 @@ info:
 
     ## Authentication
 
-    The administration API must be protected by an access management system.
+    The Admin API must be protected by an access management system.
 
     ---
 
