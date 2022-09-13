@@ -24,7 +24,7 @@ const RegisterConfirm = () => {
   const { t } = useContext(TranslateContext);
   const { hanko, config } = useContext(AppContext);
   const { email } = useContext(UserContext);
-  const { renderPasscode, renderRegisterAuthenticator } = useContext(RenderContext);
+  const { renderPasscode, renderRegisterAuthenticator, eventuallyRenderEnrollment, emitSuccessEvent } = useContext(RenderContext);
 
   const [user, setUser] = useState<User>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -68,9 +68,15 @@ const RegisterConfirm = () => {
         setError(e);
       });
     } else {
-      renderRegisterAuthenticator();
+      eventuallyRenderEnrollment(user, false)
+        .then((rendered) => {
+          if (!rendered) {
+            setIsLoading(false)
+            emitSuccessEvent()
+          }
+        })
     }
-  }, [config, renderPasscode, user]);
+  }, [config, renderPasscode, user, eventuallyRenderEnrollment]);
 
   return (
     <Fragment>
