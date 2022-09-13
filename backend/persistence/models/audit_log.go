@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"time"
 )
@@ -8,12 +9,12 @@ import (
 type AuditLog struct {
 	ID                uuid.UUID    `db:"id" json:"id"`
 	Type              AuditLogType `db:"type" json:"type"`
-	Error             string       `db:"error" json:"error,omitempty"`
+	Error             nulls.String `db:"error" json:"error,omitempty"`
 	MetaHttpRequestId string       `db:"meta_http_request_id" json:"meta_http_request_id"`
 	MetaSourceIp      string       `db:"meta_source_ip" json:"meta_source_ip"`
 	MetaUserAgent     string       `db:"meta_user_agent" json:"meta_user_agent"`
 	ActorUserId       *uuid.UUID   `db:"actor_user_id" json:"actor_user_id,omitempty"`
-	ActorEmail        string       `db:"actor_email" json:"actor_email,omitempty"`
+	ActorEmail        nulls.String `db:"actor_email" json:"actor_email,omitempty"`
 	CreatedAt         time.Time    `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time    `db:"updated_at" json:"updated_at"`
 }

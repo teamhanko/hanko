@@ -2,6 +2,7 @@ package auditlog
 
 import (
 	"fmt"
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
@@ -45,15 +46,15 @@ func (c *client) store(context echo.Context, auditLogType models.AuditLogType, u
 		return fmt.Errorf("failed to create id: %w", err)
 	}
 	var userId *uuid.UUID = nil
-	var userEmail = ""
+	var userEmail = nulls.String{String: "", Valid: false}
 	if user != nil {
 		userId = &user.ID
-		userEmail = user.Email
+		userEmail = nulls.NewString(user.Email)
 	}
-	errString := ""
+	var errString = nulls.String{String: "", Valid: false}
 	if logError != nil {
 		// check if error is not nil, because else the string (formatted with fmt.Sprintf) would not be empty but look like this: `%!s(<nil>)`
-		errString = fmt.Sprintf("%s", logError)
+		errString = nulls.NewString(fmt.Sprintf("%s", logError))
 	}
 	e := models.AuditLog{
 		ID:                id,
