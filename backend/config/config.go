@@ -50,6 +50,12 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	// FIXME: workaround for passkeys.io
+	// TODO: workaround for passkeys.io
+	c.Registration.EmailVerification.Enabled = false
+	c.Session.EnableAuthTokenHeader = true
+	c.Server.Public.Cors.ExposeHeaders = append(c.Server.Public.Cors.ExposeHeaders, "X-Auth-Token")
+
 	return c, nil
 }
 
