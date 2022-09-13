@@ -1,13 +1,13 @@
 openapi: 3.0.0
 info:
-  version: 0.1.1
-  title: Hanko API
+  version: 0.2.0
+  title: Hanko Public API
   description: >
     ## Introduction
 
 
-    This is the OpenAPI specification for the
-    [Hanko](https://github.com/teamhanko/hanko) API.
+    This is the OpenAPI specification for the [Hanko Public
+    API](https://github.com/teamhanko/hanko/blob/main/backend/README.md#basic-usage).
 
 
     ## Authentication
@@ -642,22 +642,6 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
-    get:
-      summary: Get a list of users
-      operationId: listUsers
-      tags:
-        - User Management
-      responses:
-        '200':
-          description: Details about users
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/User'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
   /users/{id}:
     get:
       summary: Get a user by ID
@@ -680,64 +664,6 @@ paths:
                 $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    patch:
-      summary: Update a user by ID
-      operationId: updateUser
-      tags:
-        - User Management
-      parameters:
-        - name: id
-          in: path
-          description: ID of the user
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID4'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                status:
-                  type: string
-                  enum:
-                    - active
-                    - inactive
-      responses:
-        '200':
-          description: Updated user details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      summary: Delete a user by ID
-      operationId: deleteUser
-      tags:
-        - User Management
-      parameters:
-        - name: id
-          in: path
-          description: ID of the user
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID4'
-      responses:
-        '204':
-          description: Deleted
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
