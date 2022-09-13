@@ -7,7 +7,7 @@ require (
 	github.com/go-webauthn/webauthn v0.4.0
 	github.com/gobuffalo/pop/v6 v6.0.6
 	github.com/gobuffalo/validate/v3 v3.3.3
-	github.com/gofrs/uuid v4.2.0+incompatible
+	github.com/gofrs/uuid v4.3.0+incompatible
 	github.com/knadh/koanf v1.4.3
 	github.com/labstack/echo/v4 v4.9.0
 	github.com/lestrrat-go/jwx/v2 v2.0.6
