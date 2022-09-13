@@ -146,16 +146,10 @@ const config = {
             ]
           },
           {
-            type: 'dropdown',
+            to: 'jsdoc/hanko-frontend-sdk',
             label: 'SDK',
             position: 'left',
-            items: [
-              {
-                to: 'jsdoc/@teamhanko/hanko-frontend-sdk/0.0.2-alpha/index.html',
-                label: 'Frontend 0.0.2-alpha',
-                target: '_blank'
-              }
-            ]
+            target: '_blank'
           },
           {
             href: 'https://github.com/teamhanko/hanko',
