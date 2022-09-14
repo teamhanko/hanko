@@ -15,20 +15,20 @@ type Client interface {
 }
 
 type client struct {
-	persister     persistence.Persister
-	enableStoring bool
+	persister      persistence.Persister
+	storageEnabled bool
 }
 
 func NewClient(persister persistence.Persister, config config.AuditLog) Client {
 	return &client{
-		persister:     persister,
-		enableStoring: config.EnableStoring,
+		persister:      persister,
+		storageEnabled: config.Storage.Enabled,
 	}
 }
 
 func (c *client) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
 	var err error = nil
-	if c.enableStoring {
+	if c.storageEnabled {
 		err = c.store(context, auditLogType, user, logError)
 		if err != nil {
 			return err

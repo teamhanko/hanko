@@ -318,5 +318,9 @@ func (s *Session) Validate() error {
 }
 
 type AuditLog struct {
-	EnableStoring bool `yaml:"enable_storing" json:"enable_storing" koanf:"enable_storing"`
+	Storage AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
+}
+
+type AuditLogStorage struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
 }
