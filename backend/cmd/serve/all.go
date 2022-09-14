@@ -16,7 +16,7 @@ import (
 func NewServeAllCommand(config *config.Config) *cobra.Command {
 	return &cobra.Command{
 		Use:   "all",
-		Short: "Start the public and private portion of the hanko server",
+		Short: "Start the public and admin portion of the hanko server",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			persister, err := persistence.New(config.Database)
@@ -27,7 +27,7 @@ func NewServeAllCommand(config *config.Config) *cobra.Command {
 			wg.Add(2)
 
 			go server.StartPublic(config, &wg, persister)
-			go server.StartPrivate(config, &wg, persister)
+			go server.StartAdmin(config, &wg, persister)
 
 			wg.Wait()
 		},

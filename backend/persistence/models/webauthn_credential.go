@@ -18,7 +18,7 @@ type WebauthnCredential struct {
 	SignCount       int                           `db:"sign_count" json:"-"`
 	CreatedAt       time.Time                     `db:"created_at" json:"-"`
 	UpdatedAt       time.Time                     `db:"updated_at" json:"-"`
-	Transports      []WebauthnCredentialTransport `has_many:"webauthn_credential_transports"`
+	Transports      []WebauthnCredentialTransport `has_many:"webauthn_credential_transports" json:"-"`
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.

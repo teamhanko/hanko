@@ -1,0 +1,150 @@
+---
+title: Angular + Hanko
+sidebar_label: Angular
+keywords: [angular]
+sidebar_custom_props:
+  docCardIconName: angular
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Angular
+
+In this guide you will learn how to add authentication to your Angular application using the Hanko custom element.
+
+## Install dependencies
+
+Install the `@teamhanko/hanko-elements` package:
+
+```shell npm2yarn
+npm install @teamhanko/hanko-elements
+```
+
+## Register custom element with Angular
+
+Angular requires you to explicitly declare that you are using custom elements inside your Angular modules, otherwise
+it will fail during build complaining about unknown elements. To do so, import the
+[`CUSTOM_ELEMENTS_SCHEMA`](https://angular.io/api/core/CUSTOM_ELEMENTS_SCHEMA), and add it to the `schemas` in your
+module:
+
+```js {1,14} title="app.module.ts" showLineNumbers
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+
+@NgModule({
+  declarations: [
+    AppComponent
+  ],
+  imports: [
+    BrowserModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
+})
+export class AppModule { }
+```
+
+## Import & use custom element
+
+Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
+Doing so registers the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the element
+in your component template:
+
+```mdx-code-block
+<Tabs>
+<TabItem value="html" label="login.component.html">
+```
+
+```html title="login.component.html" showLineNumbers
+<hanko-auth [api]="hankoApi" [lang]="hankoLang"></hanko-auth>
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="ts" label="login.component.ts">
+```
+
+```js {3,11-12} title="login.component.ts" showLineNumbers
+import { Component } from '@angular/core';
+import { environment } from '../../../environments/environment';
+import '@teamhanko/hanko-elements/hanko-auth';
+
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css']
+})
+export class LoginComponent {
+  hankoApi = environment.hankoApi;
+  hankoLang = environment.hankoLang;
+}
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+
+
+## Defining login callbacks
+
+The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+event in order to, for example, redirect your users to protected pages in your application.
+
+To do so, you can use Angular's event binding mechanism and supply a callback function that is defined in your component
+class directly on the `<hanko-auth>` element:
+
+```mdx-code-block
+<Tabs>
+  <TabItem value="html" label="login.component.html">
+```
+
+```html {2} title="login.component.html" showLineNumbers
+<hanko-auth
+  (success)="redirectToProfile()"
+  [api]="hankoApi"
+  [lang]="hankoLang">
+</hanko-auth>
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="ts" label="login.component.ts">
+```
+
+```js {3,15-19} title="login.component.ts" showLineNumbers
+import { Component } from '@angular/core';
+import { environment } from '../../../environments/environment';
+import { Router } from '@angular/router';
+import '@teamhanko/hanko-elements/hanko-auth';
+
+@Component({
+  selector: 'app-login',
+  templateUrl: './login.component.html',
+  styleUrls: ['./login.component.css'],
+})
+export class LoginComponent {
+  hankoApi = environment.hankoApi;
+  hankoLang = environment.hankoLang;
+
+  constructor(private router: Router) {}
+
+  redirectToProfile() {
+    this.router.navigate(['/profile']);
+  }
+}
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+## Backend request authentication
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).

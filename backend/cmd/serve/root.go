@@ -21,6 +21,6 @@ func RegisterCommands(parent *cobra.Command, config *config.Config) {
 	cmd := NewServeCommand()
 	parent.AddCommand(cmd)
 	cmd.AddCommand(NewServePublicCommand(config))
-	cmd.AddCommand(NewServePrivateCommand(config))
+	cmd.AddCommand(NewServeAdminCommand(config))
 	cmd.AddCommand(NewServeAllCommand(config))
 }

@@ -9,7 +9,7 @@ import (
 	hankoMiddleware "github.com/teamhanko/hanko/backend/server/middleware"
 )
 
-func NewPrivateRouter(persister persistence.Persister) *echo.Echo {
+func NewAdminRouter(persister persistence.Persister) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 

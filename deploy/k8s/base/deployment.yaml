@@ -25,7 +25,7 @@ spec:
             - containerPort: 8000
               name: public
             - containerPort: 8001
-              name: private
+              name: admin
           volumeMounts:
             - mountPath: /etc/config
               name: hanko-config

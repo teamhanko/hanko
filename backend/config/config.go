@@ -59,7 +59,7 @@ func DefaultConfig() *Config {
 			Public: ServerSettings{
 				Address: ":8000",
 			},
-			Private: ServerSettings{
+			Admin: ServerSettings{
 				Address: ":8001",
 			},
 		},
@@ -126,10 +126,10 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// Server contains the setting for the public and private server
+// Server contains the setting for the public and admin server
 type Server struct {
-	Public  ServerSettings `yaml:"public" json:"public" koanf:"public"`
-	Private ServerSettings `yaml:"private" json:"private" koanf:"private"`
+	Public ServerSettings `yaml:"public" json:"public" koanf:"public"`
+	Admin  ServerSettings `yaml:"admin" json:"admin" koanf:"admin"`
 }
 
 func (s *Server) Validate() error {
@@ -137,9 +137,9 @@ func (s *Server) Validate() error {
 	if err != nil {
 		return fmt.Errorf("error validating public server settings: %w", err)
 	}
-	err = s.Private.Validate()
+	err = s.Admin.Validate()
 	if err != nil {
-		return fmt.Errorf("error validating private server settings: %w", err)
+		return fmt.Errorf("error validating admin server settings: %w", err)
 	}
 	return nil
 }
@@ -288,10 +288,15 @@ func (d *Database) Validate() error {
 }
 
 type Secrets struct {
-	// Keys secret is used to en- and decrypt the JWKs which get used to sign the JWT tokens.
+	// Keys secrets are used to en- and decrypt the JWKs which get used to sign the JWTs.
 	// For every key a JWK is generated, encrypted with the key and persisted in the database.
-	// The first key in the list is the one getting used for signing. If you want to use a new key, add it to the top of the list.
-	// You can use this list for key rotation.
+	//
+	// You can use this list for key rotation: add a new key to the beginning of the list and the corresponding
+	// JWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still
+	// be valid until they expire. Removing a key from the list does not remove the corresponding
+	// database record. If you remove a key, you also have to remove the database record, otherwise
+	// application startup will fail.
+	//
 	// Each key must be at least 16 characters long.
 	Keys []string `yaml:"keys" json:"keys" koanf:"keys"`
 }

@@ -1,12 +1,32 @@
 @import url("fonts.css");
 
 body {
+    font-size: 16px;
     font-family: Inter, sans-serif;
     color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background: url("../img/bg.jpg") no-repeat center center fixed;
     background-size: cover;
+}
+
+.button {
+    font-size: 14px;
+    height: 52px;
+    width: 100%;
+    border-radius: 5px;
+    padding: 8px 30px 8px 30px;
+    background: #506CF0;
+    border: none;
+    color: white;
+}
+
+.button:hover {
+    background: #8093f4;
+}
+
+.button:disabled {
+    background: #CBD4FF;
 }
 
 .nav__itemList {
@@ -56,7 +76,6 @@ body {
     margin-top: 100px;
 }
 
-.footer img{
+.footer img {
     padding-bottom: 2rem;
 }
-

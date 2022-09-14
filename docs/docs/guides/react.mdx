@@ -1,0 +1,82 @@
+---
+title: React + Hanko
+sidebar_label: React
+keywords: [react]
+sidebar_custom_props:
+  docCardIconName: react
+---
+
+# React
+
+In this guide you will learn how to add authentication to your React application using the Hanko custom element.
+
+## Install dependencies
+Install the `@teamhanko/hanko-elements` package:
+
+```shell npm2yarn
+npm install @teamhanko/hanko-elements
+```
+
+## Import & use custom element
+
+Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
+Doing so registers the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the element
+in your JSX:
+
+```jsx {1,4-7} title="HankoAuth.jsx" showLineNumbers
+import "@teamhanko/hanko-elements/hanko-auth";
+
+function HankoAuth() {
+  return <hanko-auth
+    api={process.env.NEXT_PUBLIC_HANKO_API}
+    lang={process.env.NEXT_PUBLIC_HANKO_LANG}
+  />;
+}
+
+export default HankoAuth;
+```
+
+## Defining login callbacks
+
+The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+event in order to, for example, redirect your users to protected pages in your application.
+
+To do so, create a [`ref`](https://reactjs.org/docs/hooks-reference.html#useref) to obtain access to the `<hanko-auth>`
+DOM element and apply an event listener with an appropriate redirect callback:
+
+```jsx {1-2,6-18,22} title="HankoAuth.jsx" showLineNumbers
+import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import "@teamhanko/hanko-elements/hanko-auth";
+
+function HankoAuth() {
+  const ref = useRef(null);
+  const navigate = useNavigate();
+
+  const redirectToProfile = () => {
+    navigate("/profile", { replace: true });
+  }
+
+  useEffect(() => {
+    const { current } = ref;
+
+    current?.addEventListener("success", redirectToProfile);
+    return () => current?.removeEventListener("success", redirectToProfile);
+  }, []);
+
+  return (
+    <hanko-auth
+      ref={ref}
+      api={process.env.REACT_APP_HANKO_API}
+      lang={process.env.REACT_APP_HANKO_LANG}
+    />
+  );
+}
+
+export default HankoAuth;
+```
+
+## Backend request authentication
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).
