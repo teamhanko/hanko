@@ -231,6 +231,19 @@ webauthn:
     # - https://subdomain.example.com
     #
     origin: "http://localhost"
+## audit_log ##
+#
+# Configures audit logging
+#
+audit_log:
+  storage:
+    ## enabled ##
+    #
+    # Sets whether the audit logs are persisted in the database or not.
+    #
+    # Default: false
+    #
+    enabled: false
 ```
 
 ## Explanation
