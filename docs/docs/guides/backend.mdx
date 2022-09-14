@@ -4,57 +4,114 @@ sidebar_position: 3
 description: "Learn how to authenticate requests in your backend by verifying JWTs (JSON Web Token) using a JWK (JSON Web Key Set)."
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Backend guide
 
 After a successful login Hanko issues a cookie containing a JSON Web Token
 ([JWT](https://datatracker.ietf.org/doc/html/rfc7519)). You can use this JWT to authenticate
 requests on your backend. To do so, first retrieve the JSON Web Key Set
 ([JWKS](https://datatracker.ietf.org/doc/html/rfc7517))
-containing the public keys used to verify the JSON Web Token (JWT) from the Hanko API's `.well-known/jwks.json` endpoint.
+containing the public keys used to verify the JWT from the Hanko API's `.well-known/jwks.json` endpoint.
 Then use the JWKS to verify the JWT using a library for the programming language of your choice.
 
-The following code shows an example of a custom middleware in a Go-based backend using
+```mdx-code-block
+<Tabs>
+<TabItem value="go" label="Go">
+```
+
+This is an example of a custom middleware in a Go-based backend using
 [Echo](https://echo.labstack.com/) and the [lestrrat-go/jwx](https://github.com/lestrrat-go/jwx) package:
 
-```go
+```go showLineNumbers
 import (
 	"context"
 	"fmt"
+	"log"
+	"net/http"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"log"
-	"net/http"
 )
 
-func SessionMiddleware(hankoUrl string) echo.MiddlewareFunc {
-	return func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			cookie, err := c.Cookie("hanko")
-			if err == http.ErrNoCookie {
-				return c.Redirect(http.StatusTemporaryRedirect, "/unauthorized")
-			}
-			if err != nil {
-				return err
-			}
-			// replace "hankoApiURL" with your API URL
-			set, err := jwk.Fetch(context.Background(), fmt.Sprintf("%v/.well-known/jwks.json", hankoApiURL))
-			if err != nil {
-				return err
-			}
+func SessionMiddleware() echo.MiddlewareFunc {
+  return func(next echo.HandlerFunc) echo.HandlerFunc {
+    return func(c echo.Context) error {
+      cookie, err := c.Cookie("hanko")
+      if err == http.ErrNoCookie {
+        return c.Redirect(http.StatusTemporaryRedirect, "/unauthorized")
+      }
+      if err != nil {
+        return err
+      }
+      // replace "hankoApiURL" with your API URL
+      set, err := jwk.Fetch(
+        context.Background(),
+        fmt.Sprintf("%v/.well-known/jwks.json", hankoApiURL)
+      )
+      if err != nil {
+        return err
+      }
 
-			token, err := jwt.Parse([]byte(cookie.Value), jwt.WithKeySet(set))
-			if err != nil {
-				return c.Redirect(http.StatusTemporaryRedirect, "/unauthorized")
-			}
+      token, err := jwt.Parse([]byte(cookie.Value), jwt.WithKeySet(set))
+      if err != nil {
+        return c.Redirect(http.StatusTemporaryRedirect, "/unauthorized")
+      }
 
-			log.Printf("session for user '%s' verified successfully", token.Subject())
+      log.Printf("session for user '%s' verified successfully", token.Subject())
 
-			c.Set("token", cookie.Value)
-			c.Set("user", token.Subject())
+      c.Set("token", cookie.Value)
+      c.Set("user", token.Subject())
 
-			return next(c)
-		}
-	}
+      return next(c)
+    }
+  }
 }
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="node" label="Node.js">
+```
+
+This is an example of using a custom middleware in an [express](https://expressjs.com/)-based backend using
+the [express-jwt](https://www.npmjs.com/package/express-jwt) and [jwks-rsa](https://www.npmjs.com/package/jwks-rsa)
+packages:
+
+```javascript showLineNumbers
+const Express = require('express');
+const jwt = require('express-jwt');
+const jwksRsa = require('jwks-rsa');
+const cookieParser = require('cookie-parser');
+
+const jwksHost = process.env.HANKO_API_URL;
+
+const app = new Express();
+app.use(cookieParser())
+app.use(jwt({
+  secret: jwksRsa.expressJwtSecret({
+    cache: true,
+    rateLimit: true,
+    jwksRequestsPerMinute: 2,
+    jwksUri: `${jwksHost}/.well-known/jwks.json`
+  }),
+  algorithms: [ 'RS256' ],
+  getToken: function fromCookieOrHeader(req) {
+    if (
+      req.headers.authorization &&
+      req.headers.authorization.split(" ")[0] === "Bearer"
+    ) {
+      return req.headers.authorization.split(" ")[1];
+    } else if (req.cookies && req.cookies.hanko) {
+      return req.cookies.hanko;
+    }
+    return null;
+  }
+}));
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
 ```
