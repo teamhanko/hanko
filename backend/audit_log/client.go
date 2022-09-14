@@ -5,9 +5,12 @@ import (
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"strconv"
+	"time"
 )
 
 type Client interface {
@@ -35,7 +38,23 @@ func (c *client) Create(context echo.Context, auditLogType models.AuditLogType, 
 		}
 	}
 
-	// TODO: log each auditLogType (logrus, zerolog, ...)
+	now := time.Now()
+	loggerEvent := zeroLogger.Log().
+		Str("audience", "audit").
+		Str("type", string(auditLogType)).
+		AnErr("error", logError).
+		Str("http_request_id", context.Response().Header().Get(echo.HeaderXRequestID)).
+		Str("source_ip", context.RealIP()).
+		Str("user_agent", context.Request().UserAgent()).
+		Str("time", now.Format(time.RFC3339Nano)).
+		Str("time_unix", strconv.FormatInt(now.Unix(), 10))
+
+	if user != nil {
+		loggerEvent.Str("user_id", user.ID.String()).
+			Str("user_email", user.Email)
+	}
+
+	loggerEvent.Send()
 
 	return nil
 }
