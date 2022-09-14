@@ -5,7 +5,6 @@ go 1.17
 require (
 	github.com/go-playground/validator/v10 v10.11.0
 	github.com/go-webauthn/webauthn v0.3.4
-	github.com/gobuffalo/nulls v0.4.1
 	github.com/gobuffalo/pop/v6 v6.0.6
 	github.com/gobuffalo/validate/v3 v3.3.2
 	github.com/gofrs/uuid v4.2.0+incompatible
@@ -40,6 +39,7 @@ require (
 	github.com/gobuffalo/flect v0.2.5 // indirect
 	github.com/gobuffalo/github_flavored_markdown v1.1.1 // indirect
 	github.com/gobuffalo/helpers v0.6.5 // indirect
+	github.com/gobuffalo/nulls v0.4.1 // indirect
 	github.com/gobuffalo/plush/v4 v4.1.13 // indirect
 	github.com/gobuffalo/tags/v3 v3.1.3 // indirect
 	github.com/goccy/go-json v0.9.10 // indirect
