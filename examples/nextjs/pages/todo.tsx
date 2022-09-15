@@ -1,7 +1,7 @@
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import {NextPage} from "next";
 import {useRouter} from "next/router";
 import {TodoClient, TodoList} from "../util/TodoClient";
-import {useCallback, useEffect, useMemo, useState} from "react";
 import styles from "../styles/Todo.module.css";
 
 const api = process.env.NEXT_PUBLIC_BACKEND!;
@@ -14,7 +14,8 @@ const Todo: NextPage = () => {
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
 
-  const addTodo = () => {
+  const addTodo = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     const entry = {description, checked: false};
 
     client.addTodo(entry).then((res) => {

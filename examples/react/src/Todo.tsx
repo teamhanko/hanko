@@ -12,7 +12,8 @@ function Todo() {
   const [error, setError] = useState<Error | null>(null);
   const client = useMemo(() => new TodoClient(api), []);
 
-  const addTodo = () => {
+  const addTodo = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
     const entry = {description, checked: false};
 
     client.addTodo(entry).then((res) => {
