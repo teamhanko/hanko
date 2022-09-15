@@ -19,6 +19,13 @@
       ]
     }
   },
+  "exports": {
+    "./hanko-auth": {
+      "import": "./dist/element.hanko-auth.js",
+      "require": "./dist/element.hanko-auth.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
     "lint": "eslint 'src/**/*.ts?(x)'",
     "format": "pretty-quick --staged",
