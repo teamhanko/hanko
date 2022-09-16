@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.0.8-alpha.12",
+    "@teamhanko/hanko-elements": "^0.0.8-alpha.18",
     "@teamhanko/hanko-frontend-sdk": "^0.0.2-alpha",
     "@types/react": "^18.0.19",
     "@types/react-dom": "^18.0.6",

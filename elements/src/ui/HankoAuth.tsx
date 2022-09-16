@@ -31,7 +31,7 @@ declare global {
   }
 }
 
-export const HankoAuth = ({ api, lang = "en" }: Props) => {
+export const HankoAuth = ({ api = "", lang = "en" }: Props) => {
   return (
     <Fragment>
       <AppProvider api={api}>

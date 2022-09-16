@@ -140,8 +140,8 @@
     "tslib" "^2.4.0"
 
 "@teamhanko/hanko-elements@^0.0.8-alpha.18":
-  "integrity" "sha512-D+GJyvXIllesPTUjRKb/G4SuGeTYgDViQ/XMevVUqvuqxpS8edorJeW3sQ8EyBfZElQTsn4wvwdMVubTgUzDvA=="
-  "resolved" "http://localhost:4873/@teamhanko%2fhanko-elements/-/hanko-elements-0.0.8-alpha.18.tgz"
+  "integrity" "sha512-8wTsjmUwWh3ld5AS6TqDFjcxuVGXvmDfUzADH+Eahz25XB1T/nR65kCroxvNRRjAp9u6lamlrVHpzUBiXCmI+g=="
+  "resolved" "http://0.0.0.0:4873/@teamhanko%2fhanko-elements/-/hanko-elements-0.0.8-alpha.18.tgz"
   "version" "0.0.8-alpha.18"
   dependencies:
     "@denysvuika/preact-translate" "^0.3.0"

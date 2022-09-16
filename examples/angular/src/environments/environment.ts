@@ -3,7 +3,10 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false
+  production: false,
+  hankoApi: 'http://localhost:8000',
+  hankoElementLang: 'en',
+  todoApi: 'http://localhost:8002',
 };
 
 /*

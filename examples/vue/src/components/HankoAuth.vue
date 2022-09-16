@@ -1,0 +1,22 @@
+<script setup>
+import { useRouter } from "vue-router";
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
+import { onMounted } from "vue";
+
+onMounted(() => {
+  register({ shadow: true }).catch((e) => console.error(e));
+});
+
+const api = import.meta.env.VITE_HANKO_API;
+const lang = import.meta.env.VITE_HANKO_LANG;
+
+const router = useRouter();
+
+const redirectToTodo = () => {
+  router.push({ path: "/todo" });
+};
+</script>
+
+<template>
+  <hanko-auth @hankoAuthSuccess="redirectToTodo" :api="api" :lang="lang" />
+</template>
