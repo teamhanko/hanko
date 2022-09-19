@@ -58,7 +58,11 @@ app.post("/todo", (req, res) => {
 
 app.patch("/todo/:id", (req, res) => {
   if (req.body.hasOwnProperty("checked")) {
-    store.get(req.auth.sub)[req.params.id].checked = req.body.checked;
+    const todoID = req.params.id
+    const todos = store.get(req.auth.sub);
+    if (todos.indexOf(todoID)) {
+      todos[todoID].checked = req.body.checked;
+    }
   }
   res.status(204).end();
 });
