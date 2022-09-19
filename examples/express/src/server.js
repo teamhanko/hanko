@@ -15,7 +15,7 @@ const corsOptions = {
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
 };
 
-const store = {};
+const store = new Map();
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
@@ -44,24 +44,27 @@ app.use(
 );
 
 app.get("/todo", (req, res) => {
-  res.status(200).send(store[req.auth.sub] || []);
+  res.status(200).send(store.get(req.auth.sub) || []);
 });
 
 app.post("/todo", (req, res) => {
   const { description, checked } = req.body;
-  (store[req.auth.sub] ||= []).push({ description, checked });
+  if (!store.has(req.auth.sub)) {
+    store.set(req.auth.sub, []);
+  }
+  store.get(req.auth.sub).push({ description, checked });
   res.status(201).end();
 });
 
 app.patch("/todo/:id", (req, res) => {
   if (req.body.hasOwnProperty("checked")) {
-    store[req.auth.sub][req.params.id].checked = req.body.checked;
+    store.get(req.auth.sub)[req.params.id].checked = req.body.checked;
   }
   res.status(204).end();
 });
 
 app.delete("/todo/:id", (req, res) => {
-  store[req.auth.sub].splice(req.params.id, 1);
+  store.get(req.auth.sub).splice(req.params.id, 1);
   res.status(204).end();
 });
 
