@@ -29,7 +29,7 @@ const sidebars = {
         slug: '/guides/frontend',
         keywords: ['guides']
       },
-      items: ['guides/angular', "guides/react", "guides/next", "guides/vue"]
+      items: ['guides/angular', "guides/next", "guides/react", "guides/svelte", "guides/vue"]
     },
     'guides/backend'
   ],
