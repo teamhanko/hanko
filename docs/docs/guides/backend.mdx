@@ -109,6 +109,16 @@ app.use(jwt({
     return null;
   }
 }));
+
+// The decoded JWT is available through the `req.auth` property (the exact property
+// making it available can be customized through the `requestProperty` option on
+// middleware creation).
+// see: https://github.com/auth0/express-jwt#api
+app.get("/protected", function (req, res) {
+    if (!req.auth.sub) return res.sendStatus(401);
+    res.sendStatus(200);
+  }
+);
 ```
 
 ```mdx-code-block
