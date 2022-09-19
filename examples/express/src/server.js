@@ -3,6 +3,7 @@ const { expressjwt: jwt } = require("express-jwt");
 const jwksRsa = require("jwks-rsa");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const crypto = require("crypto");
 
 require("dotenv").config();
 
@@ -44,15 +45,18 @@ app.use(
 );
 
 app.get("/todo", (req, res) => {
-  res.status(200).send(store.get(req.auth.sub) || []);
+  res.status(200).send(store.get(req.auth.sub) || {});
 });
 
 app.post("/todo", (req, res) => {
   const { description, checked } = req.body;
+
   if (!store.has(req.auth.sub)) {
-    store.set(req.auth.sub, []);
+    store.set(req.auth.sub, new Map());
   }
-  store.get(req.auth.sub).push({ description, checked });
+
+  const todoID = crypto.randomBytes(16).toString("hex");
+  store.get(req.auth.sub).set(todoID, { description, checked });
   res.status(201).end();
 });
 
@@ -60,15 +64,15 @@ app.patch("/todo/:id", (req, res) => {
   if (req.body.hasOwnProperty("checked")) {
     const todoID = req.params.id
     const todos = store.get(req.auth.sub);
-    if (todos.indexOf(todoID)) {
-      todos[todoID].checked = req.body.checked;
+    if (todos.has(todoID)) {
+      todos.get(todoID).checked = req.body.checked;
     }
   }
   res.status(204).end();
 });
 
 app.delete("/todo/:id", (req, res) => {
-  store.get(req.auth.sub).splice(req.params.id, 1);
+  store.get(req.auth.sub).delete(req.params.id);
   res.status(204).end();
 });
 
