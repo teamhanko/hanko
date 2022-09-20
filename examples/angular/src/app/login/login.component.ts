@@ -10,7 +10,6 @@ import { register } from '@teamhanko/hanko-elements/hanko-auth';
 })
 export class LoginComponent {
   api = environment.hankoApi;
-  lang = environment.hankoElementLang;
 
   constructor(private router: Router) {
     register({ shadow: true }).catch((e) => console.error(e));

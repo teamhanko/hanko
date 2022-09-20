@@ -5,7 +5,6 @@
 export const environment = {
   production: false,
   hankoApi: 'http://localhost:8000',
-  hankoElementLang: 'en',
   todoApi: 'http://localhost:8002',
 };
 

@@ -4,7 +4,6 @@ import { register } from "@teamhanko/hanko-elements/hanko-auth";
 import styles from "./Todo.module.css";
 
 const api = process.env.REACT_APP_HANKO_API!;
-const lang = process.env.REACT_APP_HANKO_LANG;
 
 function HankoAuth() {
   const navigate = useNavigate();
@@ -14,7 +13,7 @@ function HankoAuth() {
   }, [navigate]);
 
   useEffect(() => {
-    register({ shadow: true });
+    register({ shadow: true }).catch((e) => console.error(e));
     document.addEventListener("hankoAuthSuccess", redirectToTodos);
     return () =>
       document?.removeEventListener("hankoAuthSuccess", redirectToTodos);
@@ -22,7 +21,7 @@ function HankoAuth() {
 
   return (
     <div className={styles.content}>
-      <hanko-auth api={api} lang={lang} />
+      <hanko-auth api={api} />
     </div>
   );
 }

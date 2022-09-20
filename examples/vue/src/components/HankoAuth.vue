@@ -8,7 +8,6 @@ onMounted(() => {
 });
 
 const api = import.meta.env.VITE_HANKO_API;
-const lang = import.meta.env.VITE_HANKO_LANG;
 
 const router = useRouter();
 
@@ -18,5 +17,5 @@ const redirectToTodo = () => {
 </script>
 
 <template>
-  <hanko-auth @hankoAuthSuccess="redirectToTodo" :api="api" :lang="lang" />
+  <hanko-auth @hankoAuthSuccess="redirectToTodo" :api="api" />
 </template>

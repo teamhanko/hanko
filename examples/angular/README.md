@@ -1,27 +1,21 @@
-# Angular
+# Hanko Angular example
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.3.
 
-## Development server
+## Starting the app
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+### Prerequisites
 
-## Code scaffolding
+- a running Hanko API (see the instructions on how to run the API [in Docker](../backend/README.md#Docker) or [from Source](../backend/README.md#from-source))
+- a running express backend (see the [README](../express) for the express backend)
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+### Set up environment variables
 
-## Build
+In the `src/environments/environment.ts` file set up the correct environment variables:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- `hankoApi`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the `server.public.address` option in the [configuration file](../../backend/docs/Config.md))
+- `todoApi`: this is the URL of the [express](../express) backend (default: `http://localhost:8002`)
 
-## Running unit tests
+### Run development server
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+Run `npm run start` for a development server. Navigate to `http://localhost:3000/`. The application will automatically reload if you change any of the source files.

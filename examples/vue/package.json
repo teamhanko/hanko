@@ -2,12 +2,7 @@
   "name": "vue",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite --port 3000",
-    "build": "run-p type-check build-only",
-    "preview": "vite preview --port 3000",
-    "build-only": "vite build",
-    "type-check": "vue-tsc --noEmit",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore"
+    "start": "vite --port 3000"
   },
   "dependencies": {
     "@teamhanko/hanko-elements": "^0.0.8-alpha.22",

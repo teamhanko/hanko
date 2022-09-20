@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { TodoClient, Todos } from "./TodoClient";
 import styles from "./Todo.module.css";
 
-const api = process.env.REACT_APP_BACKEND!;
+const api = process.env.REACT_APP_TODO_API!;
 
 function Todo() {
   const navigate = useNavigate();

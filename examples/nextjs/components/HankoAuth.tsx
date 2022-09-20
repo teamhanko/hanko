@@ -3,7 +3,6 @@ import { useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
-const lang = process.env.NEXT_PUBLIC_HANKO_LANG;
 
 function HankoAuth() {
   const router = useRouter();
@@ -22,7 +21,7 @@ function HankoAuth() {
       document.removeEventListener("hankoAuthSuccess", redirectToTodos);
   }, [redirectToTodos]);
 
-  return <hanko-auth api={api} lang={lang} />;
+  return <hanko-auth api={api} />;
 }
 
 export default HankoAuth;

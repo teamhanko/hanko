@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.0.8-alpha.18",
+    "@teamhanko/hanko-elements": "^0.0.8-alpha.22",
     "@teamhanko/hanko-frontend-sdk": "^0.0.2-alpha",
     "@types/react": "^18.0.19",
     "@types/react-dom": "^18.0.6",
@@ -14,10 +14,7 @@
     "typescript": "^4.8.3"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "start": "react-scripts start"
   },
   "eslintConfig": {
     "extends": [

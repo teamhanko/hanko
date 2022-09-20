@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { TodoClient, Todos } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
 
-const api = process.env.NEXT_PUBLIC_BACKEND!;
+const api = process.env.NEXT_PUBLIC_TODO_API!;
 
 const Todo: NextPage = () => {
   const client = useMemo(() => new TodoClient(api), []);
