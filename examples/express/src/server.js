@@ -45,34 +45,44 @@ app.use(
 );
 
 app.get("/todo", (req, res) => {
-  res.status(200).send(store.get(req.auth.sub) || {});
+  const userID = req.auth.sub;
+  const todos = store.get(userID) || new Map();
+  res.status(200).send(Array.from(todos.values()));
 });
 
 app.post("/todo", (req, res) => {
-  const { description, checked } = req.body;
-
-  if (!store.has(req.auth.sub)) {
-    store.set(req.auth.sub, new Map());
-  }
-
   const todoID = crypto.randomBytes(16).toString("hex");
-  store.get(req.auth.sub).set(todoID, { description, checked });
+  const { description, checked } = req.body;
+  const userID = req.auth.sub;
+  const todos = store.get(userID) || new Map();
+
+  todos.set(todoID, { todoID, description, checked });
+  store.set(userID, todos);
   res.status(201).end();
 });
 
 app.patch("/todo/:id", (req, res) => {
+  const userID = req.auth.sub;
+  const todoID = req.params.id;
+  const todos = store.get(userID);
+
   if (req.body.hasOwnProperty("checked")) {
-    const todoID = req.params.id
-    const todos = store.get(req.auth.sub);
+    const checked = req.body.checked;
+
     if (todos.has(todoID)) {
-      todos.get(todoID).checked = req.body.checked;
+      todos.get(todoID).checked = checked;
     }
   }
+
   res.status(204).end();
 });
 
 app.delete("/todo/:id", (req, res) => {
-  store.get(req.auth.sub).delete(req.params.id);
+  const userID = req.auth.sub;
+  const todoID = req.params.id;
+  const todos = store.get(userID);
+
+  todos.delete(todoID);
   res.status(204).end();
 });
 

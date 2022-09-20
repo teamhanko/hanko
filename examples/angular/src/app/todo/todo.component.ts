@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { TodoList, TodoService } from '../services/todo.service';
+import { Todos, TodoService } from '../services/todo.service';
 
 @Component({
   selector: 'app-todo',
@@ -8,7 +8,7 @@ import { TodoList, TodoService } from '../services/todo.service';
   styleUrls: ['./todo.component.css'],
 })
 export class TodoComponent implements OnInit {
-  todos: TodoList = [];
+  todos: Todos = [];
   error: Error | undefined;
   description = '';
 
@@ -19,7 +19,7 @@ export class TodoComponent implements OnInit {
 
   changeCheckbox(event: any) {
     const { currentTarget } = event;
-    this.patchTodo(Number(currentTarget.value), currentTarget.checked);
+    this.patchTodo(currentTarget.value, currentTarget.checked);
   }
 
   constructor(private todoService: TodoService, private router: Router) {}
@@ -50,7 +50,7 @@ export class TodoComponent implements OnInit {
       });
   }
 
-  patchTodo(id: number, checked: boolean) {
+  patchTodo(id: string, checked: boolean) {
     this.todoService
       .patchTodo(id, checked)
       .then((res) => {
@@ -79,9 +79,9 @@ export class TodoComponent implements OnInit {
 
         return res.json();
       })
-      .then((t) => {
-        if (t) {
-          this.todos = t;
+      .then((todo) => {
+        if (todo) {
+          this.todos = todo;
         }
       })
       .catch((e) => {
@@ -89,7 +89,7 @@ export class TodoComponent implements OnInit {
       });
   }
 
-  deleteTodo(id: number) {
+  deleteTodo(id: string) {
     this.todoService
       .deleteTodo(id)
       .then((res) => {

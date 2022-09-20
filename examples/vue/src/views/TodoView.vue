@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { TodoClient } from "@/utils/TodoClient";
-import type { TodoList } from "@/utils/TodoClient";
+import type { Todos } from "@/utils/TodoClient";
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import type { Ref } from "vue";
@@ -11,7 +11,7 @@ const api = import.meta.env.VITE_TODO_API;
 const client = new TodoClient(api);
 
 const error: Ref<Error | null> = ref(null);
-const todos: Ref<TodoList> = ref([]);
+const todos: Ref<Todos> = ref([]);
 const description = ref("");
 
 onMounted(() => {
@@ -24,14 +24,14 @@ function changeDescription(event: any) {
 
 const changeCheckbox = (event: any) => {
   const { currentTarget } = event;
-  patchTodo(Number(currentTarget.value), currentTarget.checked);
+  patchTodo(currentTarget.value, currentTarget.checked);
 };
 
 function addTodo() {
-  const entry = { description: description.value, checked: false };
+  const todo = { description: description.value, checked: false };
 
   client
-    .addTodo(entry)
+    .addTodo(todo)
     .then((res) => {
       if (res.status === 401) {
         router.push("/");
@@ -59,9 +59,9 @@ function listTodos() {
 
       return res.json();
     })
-    .then((t) => {
-      if (t) {
-        todos.value = t;
+    .then((todo) => {
+      if (todo) {
+        todos.value = todo;
       }
     })
     .catch((e) => {
@@ -69,7 +69,7 @@ function listTodos() {
     });
 }
 
-const patchTodo = (id: number, checked: boolean) => {
+const patchTodo = (id: string, checked: boolean) => {
   client
     .patchTodo(id, checked)
     .then((res) => {
@@ -87,7 +87,7 @@ const patchTodo = (id: number, checked: boolean) => {
     });
 };
 
-const deleteTodo = (id: number) => {
+const deleteTodo = (id: string) => {
   client
     .deleteTodo(id)
     .then((res) => {
@@ -120,7 +120,7 @@ function logout() {
 
 <template>
   <nav class="nav">
-    <button @click="logout" class="button">logout</button>
+    <button @click="logout" class="button">Logout</button>
   </nav>
   <div class="content">
     <h1 class="headline">Todos</h1>
@@ -136,19 +136,19 @@ function logout() {
       <button type="submit" class="button">+</button>
     </form>
     <div class="list">
-      <div v-for="(todo, id) in todos" class="item" :key="id">
+      <div v-for="(todo, index) in todos" class="item" :key="index">
         <input
           class="checkbox"
-          :id="id.toString(10)"
+          :id="todo.todoID"
           type="checkbox"
-          :value="id"
+          :value="todo.todoID"
           :checked="todo.checked"
           @change="changeCheckbox"
         />
-        <label class="description" :for="id.toString(10)">{{
+        <label class="description" :for="todo.todoID">{{
           todo.description
         }}</label>
-        <button class="button" @click="() => deleteTodo(id)">×</button>
+        <button class="button" @click="() => deleteTodo(todo.todoID)">×</button>
       </div>
     </div>
   </div>
@@ -259,7 +259,6 @@ function logout() {
   width: 0.65em;
   height: 0.65em;
   transform: scale(0);
-  transition: 120ms transform ease-in-out;
   box-shadow: inset 1em 1em black;
 
   transform-origin: bottom left;

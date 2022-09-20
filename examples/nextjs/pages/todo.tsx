@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { TodoClient, TodoList } from "../util/TodoClient";
+import { TodoClient, Todos } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
 
 const api = process.env.NEXT_PUBLIC_BACKEND!;
@@ -10,16 +10,16 @@ const Todo: NextPage = () => {
   const client = useMemo(() => new TodoClient(api), []);
   const router = useRouter();
 
-  const [todos, setTodos] = useState<TodoList>([]);
+  const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
 
   const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const entry = { description, checked: false };
+    const todo = { description, checked: false };
 
     client
-      .addTodo(entry)
+      .addTodo(todo)
       .then((res) => {
         if (res.status === 401) {
           router.replace("/").catch((e) => setError(e));
@@ -47,9 +47,9 @@ const Todo: NextPage = () => {
 
         return res.json();
       })
-      .then((t) => {
-        if (t) {
-          setTodos(t);
+      .then((todo) => {
+        if (todo) {
+          setTodos(todo);
         }
       })
       .catch((e) => {
@@ -57,7 +57,7 @@ const Todo: NextPage = () => {
       });
   }, [client, router]);
 
-  const patchTodo = (id: number, checked: boolean) => {
+  const patchTodo = (id: string, checked: boolean) => {
     client
       .patchTodo(id, checked)
       .then((res) => {
@@ -75,7 +75,7 @@ const Todo: NextPage = () => {
       });
   };
 
-  const deleteTodo = (id: number) => {
+  const deleteTodo = (id: string) => {
     client
       .deleteTodo(id)
       .then((res) => {
@@ -111,7 +111,7 @@ const Todo: NextPage = () => {
 
   const changeCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { currentTarget } = event;
-    patchTodo(Number(currentTarget.value), currentTarget.checked);
+    patchTodo(currentTarget.value, currentTarget.checked);
   };
 
   useEffect(() => {
@@ -122,7 +122,7 @@ const Todo: NextPage = () => {
     <>
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
-          logout
+          Logout
         </button>
       </nav>
       <div className={styles.content}>
@@ -141,20 +141,20 @@ const Todo: NextPage = () => {
           </button>
         </form>
         <div className={styles.list}>
-          {todos.map((t, id) => (
-            <div className={styles.item} key={id}>
+          {todos.map((todo, index) => (
+            <div className={styles.item} key={index}>
               <input
                 className={styles.checkbox}
-                id={id.toString(10)}
+                id={todo.todoID}
                 type={"checkbox"}
-                value={id}
-                checked={t.checked}
+                value={todo.todoID}
+                checked={todo.checked}
                 onChange={changeCheckbox}
               />
-              <label className={styles.description} htmlFor={id.toString(10)}>
-                {t.description}
+              <label className={styles.description} htmlFor={todo.todoID}>
+                {todo.description}
               </label>
-              <button className={styles.button} onClick={() => deleteTodo(id)}>
+              <button className={styles.button} onClick={() => deleteTodo(todo.todoID!)}>
                 ×
               </button>
             </div>

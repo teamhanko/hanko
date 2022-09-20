@@ -1,9 +1,10 @@
-export interface TodoEntry {
+export interface Todo {
+  todoID?: string;
   description: string;
   checked: boolean;
 }
 
-export type TodoList = TodoEntry[];
+export type Todos = Todo[];
 
 export class TodoClient {
   api: string;
@@ -12,43 +13,43 @@ export class TodoClient {
     this.api = api;
   }
 
-  async addTodo(t: TodoEntry) {
-    return await fetch(`${this.api}/todo`, {
+  addTodo(todo: Todo) {
+    return fetch(`${this.api}/todo`, {
       method: "POST",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(t),
+      body: JSON.stringify(todo),
     });
   }
 
-  async listTodos() {
-    return await fetch(`${this.api}/todo`, {
+  listTodos() {
+    return fetch(`${this.api}/todo`, {
       credentials: "include",
     });
   }
 
-  async patchTodo(id: number, checked: boolean) {
-    return await fetch(`${this.api}/todo/${id}`, {
+  patchTodo(id: string, checked: boolean) {
+    return fetch(`${this.api}/todo/${id}`, {
       method: "PATCH",
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ checked }),
+      body: JSON.stringify({checked}),
     });
   }
 
-  async deleteTodo(id: number) {
-    return await fetch(`${this.api}/todo/${id}`, {
+  deleteTodo(id: string) {
+    return fetch(`${this.api}/todo/${id}`, {
       method: "DELETE",
       credentials: "include",
     });
   }
 
-  async logout() {
-    return await fetch(`${this.api}/logout`, {
+  logout() {
+    return fetch(`${this.api}/logout`, {
       credentials: "include",
     });
   }

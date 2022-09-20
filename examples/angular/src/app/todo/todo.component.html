@@ -1,5 +1,5 @@
 <nav class="nav">
-  <button (click)="logout()" class="button">logout</button>
+  <button (click)="logout()" class="button">Logout</button>
 </nav>
 <div class="content">
   <h1 class="headline">Todos</h1>
@@ -15,19 +15,19 @@
     <button type="submit" class="button">+</button>
   </form>
   <div class="list">
-    <div *ngFor="let todo of todos; index as id" class="item">
+    <div *ngFor="let todo of todos" class="item">
       <input
         class="checkbox"
-        id="{{ id.toString(10) }}"
+        id="{{ todo.todoID }}"
         type="checkbox"
-        value="{{ id }}"
+        value="{{ todo.todoID }}"
         [checked]="todo.checked"
         (change)="changeCheckbox($event)"
       />
-      <label class="description" for="{{ id.toString(10) }}">{{
+      <label class="description" for="{{ todo.todoID }}">{{
         todo.description
       }}</label>
-      <button class="button" (click)="deleteTodo(id)">×</button>
+      <button class="button" (click)="deleteTodo(todo.todoID!)">×</button>
     </div>
   </div>
 </div>
