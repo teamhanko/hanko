@@ -1,13 +1,12 @@
 {
-  "name": "angular",
-  "version": "0.0.0",
+  "name": "example-angular",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve --port 3000",
     "build": "ng build",
     "watch": "ng build --watch --configuration development"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "^14.2.0",
     "@angular/common": "^14.2.0",

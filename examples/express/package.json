@@ -1,4 +1,6 @@
 {
+  "name": "example-express",
+  "private": true,
   "scripts": {
     "start": "node src/server.js"
   },

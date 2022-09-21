@@ -1,6 +1,5 @@
 {
   "name": "example-react",
-  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@teamhanko/hanko-elements": "^0.0.8-alpha.22",
