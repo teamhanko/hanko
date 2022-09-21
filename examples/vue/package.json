@@ -1,11 +1,10 @@
 {
   "name": "vue",
-  "version": "0.0.0",
   "scripts": {
     "start": "vite --port 3000"
   },
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.0.8-alpha.22",
+    "@teamhanko/hanko-elements": "^0.0.7-alpha",
     "vue": "^3.2.38",
     "vue-router": "^4.1.5"
   },

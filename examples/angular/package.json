@@ -2,10 +2,7 @@
   "name": "example-angular",
   "private": true,
   "scripts": {
-    "ng": "ng",
-    "start": "ng serve --port 3000",
-    "build": "ng build",
-    "watch": "ng build --watch --configuration development"
+    "start": "ng serve --port 3000"
   },
   "dependencies": {
     "@angular/animations": "^14.2.0",
@@ -16,7 +13,7 @@
     "@angular/platform-browser": "^14.2.0",
     "@angular/platform-browser-dynamic": "^14.2.0",
     "@angular/router": "^14.2.0",
-    "@teamhanko/hanko-elements": "^0.0.8-alpha.18",
+    "@teamhanko/hanko-elements": "^0.0.7-alpha",
     "rxjs": "~7.5.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.11.4"
