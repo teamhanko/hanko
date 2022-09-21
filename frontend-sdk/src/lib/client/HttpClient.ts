@@ -94,16 +94,40 @@ class Response {
 class HttpClient {
   timeout: number;
   api: string;
+  isSameOrigin: boolean;
 
-  constructor(api: string, timeout: number = 13000) {
+  constructor(api: string, timeout = 13000) {
     this.api = api;
     this.timeout = timeout;
+    this.isSameOrigin = this._detectSameOrigin(api);
+  }
+
+  _detectSameOrigin(api: string) {
+    const loc = window.location;
+    const a = document.createElement("a");
+
+    a.href = api;
+
+    if (
+      a.hostname === "localhost" &&
+      loc.hostname === "localhost" &&
+      a.protocol === loc.protocol
+    ) {
+      return true;
+    }
+
+    return (
+      a.hostname === loc.hostname &&
+      a.port === loc.port &&
+      a.protocol === loc.protocol
+    );
   }
 
   _fetch(path: string, options: RequestInit) {
     const api = this.api;
     const url = api + path;
     const timeout = this.timeout;
+    const isSameOrigin = this.isSameOrigin;
     const cookieName = "hanko";
     const bearerToken = Cookies.get(cookieName);
 
@@ -121,11 +145,13 @@ class HttpClient {
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
-        const authToken = xhr.getResponseHeader("X-Auth-Token");
+        if (!isSameOrigin) {
+          const authToken = xhr.getResponseHeader("X-Auth-Token");
 
-        if (authToken) {
-          const secure = !!api.match("^https://");
-          Cookies.set(cookieName, authToken, { secure });
+          if (authToken) {
+            const secure = !!api.match("^https://");
+            Cookies.set(cookieName, authToken, { secure });
+          }
         }
 
         resolve(new Response(xhr));

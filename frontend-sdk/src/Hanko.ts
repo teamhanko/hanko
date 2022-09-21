@@ -16,6 +16,7 @@ class Hanko {
   webauthn: WebauthnClient;
   password: PasswordClient;
   passcode: PasscodeClient;
+  isSameOrigin: boolean;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
