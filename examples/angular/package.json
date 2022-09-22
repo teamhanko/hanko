@@ -2,7 +2,7 @@
   "name": "example-angular",
   "private": true,
   "scripts": {
-    "start": "ng serve --port 3000"
+    "start": "ng serve --port 8888"
   },
   "dependencies": {
     "@angular/animations": "^14.2.0",

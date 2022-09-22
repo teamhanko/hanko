@@ -15,4 +15,4 @@ In the `.env` file set up the correct environment variables:
 ### Run the server
 
 Run `npm install` to install dependencies, then run `npm run start` for a development server.
-Navigate to `http://localhost:3000/`. The application will automatically reload if you change any of the source files.
+Navigate to `http://localhost:8888/`. The application will automatically reload if you change any of the source files.

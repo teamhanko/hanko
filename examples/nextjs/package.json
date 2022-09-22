@@ -2,7 +2,7 @@
   "name": "example-nextjs",
   "private": true,
   "scripts": {
-    "start": "next dev"
+    "start": "next dev -p 8888"
   },
   "dependencies": {
     "@teamhanko/hanko-elements": "^0.0.7-alpha",

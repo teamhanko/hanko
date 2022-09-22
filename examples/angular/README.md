@@ -3,7 +3,6 @@
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.3.
 
 ## Starting the app
-
 ### Prerequisites
 
 - a running Hanko API (see the instructions on how to run the API [in Docker](../backend/README.md#Docker) or [from Source](../backend/README.md#from-source))
@@ -18,4 +17,4 @@ In the `src/environments/environment.ts` file set up the correct environment var
 
 ### Run development server
 
-Run `npm install` to install dependencies, then run `npm run start` for a development server. Navigate to `http://localhost:3000/`. The application will automatically reload if you change any of the source files.
+Run `npm install` to install dependencies, then run `npm run start` for a development server. Navigate to `http://localhost:8888/`. The application will automatically reload if you change any of the source files.

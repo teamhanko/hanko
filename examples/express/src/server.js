@@ -11,7 +11,7 @@ const app = express();
 const jwksHost = process.env.HANKO_API_URL;
 
 const corsOptions = {
-  origin: "http://localhost:3000",
+  origin: "http://localhost:8888",
   credentials: true,
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
 };
@@ -26,7 +26,7 @@ app.use(
     secret: jwksRsa.expressJwtSecret({
       cache: true,
       rateLimit: true,
-      jwksRequestsPerMinute: 2,
+      jwksRequestsPerMinute: 100,
       jwksUri: `${jwksHost}/.well-known/jwks.json`,
     }),
     algorithms: ["RS256"],
