@@ -293,7 +293,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 
 		c.SetCookie(cookie)
 
-		if h.cfg.Session.EnableAuthTokenHeader {
+		if h.cfg.Server.Public.Cors.AuthTokenHeaderExposed() {
 			c.Response().Header().Set("X-Auth-Token", token)
 		}
 

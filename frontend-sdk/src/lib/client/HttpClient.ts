@@ -17,6 +17,12 @@ class Headers {
     this._xhr = xhr;
   }
 
+  /**
+   * Performs a GET request.
+   *
+   * @param {string} name
+   * @return {string}
+   */
   get(name: string) {
     return this._xhr.getResponseHeader(name);
   }
@@ -38,6 +44,7 @@ class Response {
   url: string;
   _decodedJSON: any;
 
+  // eslint-disable-next-line require-jsdoc
   constructor(xhr: XMLHttpRequest) {
     /**
      *  @public
@@ -94,40 +101,18 @@ class Response {
 class HttpClient {
   timeout: number;
   api: string;
-  isSameOrigin: boolean;
 
+  // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
     this.api = api;
     this.timeout = timeout;
-    this.isSameOrigin = this._detectSameOrigin(api);
   }
 
-  _detectSameOrigin(api: string) {
-    const loc = window.location;
-    const a = document.createElement("a");
-
-    a.href = api;
-
-    if (
-      a.hostname === "localhost" &&
-      loc.hostname === "localhost" &&
-      a.protocol === loc.protocol
-    ) {
-      return true;
-    }
-
-    return (
-      a.hostname === loc.hostname &&
-      a.port === loc.port &&
-      a.protocol === loc.protocol
-    );
-  }
-
+  // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit) {
     const api = this.api;
     const url = api + path;
     const timeout = this.timeout;
-    const isSameOrigin = this.isSameOrigin;
     const cookieName = "hanko";
     const bearerToken = Cookies.get(cookieName);
 
@@ -145,8 +130,13 @@ class HttpClient {
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
-        if (!isSameOrigin) {
-          const authToken = xhr.getResponseHeader("X-Auth-Token");
+        const headers = xhr
+          .getAllResponseHeaders()
+          .split("\r\n")
+          .filter((h) => h.toLowerCase().startsWith("x-auth-token"));
+
+        if (headers.length) {
+          const authToken = xhr.getResponseHeader("x-auth-token");
 
           if (authToken) {
             const secure = !!api.match("^https://");
