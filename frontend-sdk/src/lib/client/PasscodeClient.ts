@@ -98,7 +98,7 @@ class PasscodeClient extends Client {
             return resolve();
           } else if (response.status === 401) {
             throw new InvalidPasscodeError();
-          } else if (response.status === 404 || response.status === 410) {
+          } else if (response.status === 410) {
             this.state.reset(userID).write();
 
             throw new MaxNumOfPasscodeAttemptsReachedError();
