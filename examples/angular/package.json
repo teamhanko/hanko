@@ -2,7 +2,8 @@
   "name": "example-angular",
   "private": true,
   "scripts": {
-    "start": "ng serve --port 8888"
+    "start": "ng serve --port 8888",
+    "start-docker": "ng serve --host=0.0.0.0 --port 8888"
   },
   "dependencies": {
     "@angular/animations": "^14.2.0",
