@@ -1,7 +1,7 @@
 {
   "name": "vue",
   "scripts": {
-    "start": "vite --port 8888"
+    "start": "vite --port 8888 --host"
   },
   "dependencies": {
     "@teamhanko/hanko-elements": "^0.0.7-alpha",
