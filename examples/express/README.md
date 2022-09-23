@@ -14,5 +14,4 @@ In the `.env` file set up the correct environment variables:
 
 ### Run the server
 
-Run `npm install` to install dependencies, then run `npm run start` for a development server.
-Navigate to `http://localhost:8888/`. The application will automatically reload if you change any of the source files.
+Run `npm install` to install dependencies, then run `npm run start`. The API will be available on `http://localhost:8002/`.
