@@ -24,17 +24,17 @@ It contains:
 
 #### React
 ```
-docker-compose -f deploy/docker-compose/base.yml -f deploy/docker-compose/todo-react.yaml -p "hanko-todo-react" up --build
+docker-compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-react.yaml -p "hanko-todo-react" up --build
 ```
 #### Angular
 ```
-docker-compose -f deploy/docker-compose/base.yml -f deploy/docker-compose/todo-angular.yaml -p "hanko-todo-angular" up --build
+docker-compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-angular.yaml -p "hanko-todo-angular" up --build
 ```
 #### Next.js
 ```
-docker-compose -f deploy/docker-compose/base.yml -f deploy/docker-compose/todo-nextjs.yaml -p "hanko-todo-nextjs" up --build
+docker-compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-nextjs.yaml -p "hanko-todo-nextjs" up --build
 ```
 #### Vue
 ```
-docker-compose -f deploy/docker-compose/base.yml -f deploy/docker-compose/todo-vue.yaml -p "hanko-todo-vue" up --build
+docker-compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-vue.yaml -p "hanko-todo-vue" up --build
 ```
