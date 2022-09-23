@@ -12,7 +12,7 @@ function HankoAuth() {
   }, [router]);
 
   useEffect(() => {
-    register({ shadow: false }).catch((e) => console.error(e));
+    register({ shadow: true }).catch((e) => console.error(e));
   }, []);
 
   useEffect(() => {
