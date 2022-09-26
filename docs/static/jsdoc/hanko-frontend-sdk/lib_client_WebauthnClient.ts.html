@@ -164,7 +164,10 @@ class WebauthnClient extends Client {
             challenge.mediation =
               "conditional" as CredentialMediationRequirement;
           }
+<<<<<<< HEAD
           challenge.signal = this.controller.signal;
+=======
+>>>>>>> fa0e0d0 (feat: Add conditional UI support)
           return getWebauthnCredential(challenge);
         })
         .catch((e) => {
