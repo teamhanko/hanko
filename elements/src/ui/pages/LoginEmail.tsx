@@ -168,6 +168,28 @@ const LoginEmail = () => {
     [config.password.enabled, renderPasscode, renderPassword]
   );
 
+  const onEmailFocus = () => {
+    if (
+      // @ts-ignore
+      !PublicKeyCredential.isConditionalMediationAvailable ||
+      // @ts-ignore
+      !PublicKeyCredential.isConditionalMediationAvailable()
+    ) {
+      // Browser doesn't support AutoFill-assisted requests.
+      return;
+    }
+
+    hanko.webauthn
+      .login(null, true)
+      .then(() => {
+        emitSuccessEvent();
+        setIsEmailLoginSuccess(true);
+
+        return;
+      })
+      .catch(setError);
+  };
+
   useEffect(() => {
     WebauthnSupport.isPlatformAuthenticatorAvailable()
       .then((supported) => setIsAuthenticatorSupported(supported))
@@ -180,9 +202,10 @@ const LoginEmail = () => {
       <ErrorMessage error={error} />
       <Form onSubmit={onEmailSubmit}>
         <InputText
+          onFocus={onEmailFocus}
           name={"email"}
           type={"email"}
-          autoComplete={"username"}
+          autoComplete={"username webauthn"}
           autoCorrect={"off"}
           required={true}
           onInput={onEmailInput}
