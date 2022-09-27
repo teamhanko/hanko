@@ -15,7 +15,7 @@ export class LoginEmail extends BasePage {
       hasText: "Continue",
     });
     this.signInPasskeyButton = page.locator("button[type=submit]", {
-      hasText: "Sign in with passkey",
+      hasText: "Sign in with a passkey",
     });
     this.headline = page.locator("h1", { hasText: "Sign in or sign up" });
   }

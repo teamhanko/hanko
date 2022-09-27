@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/example/middleware"
@@ -11,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 )
 
 func main() {
@@ -21,6 +18,7 @@ func main() {
 
 	hankoUrl := getEnv("HANKO_URL")
 	hankoElementUrl := getEnv("HANKO_ELEMENT_URL")
+	hankoFrontendSdkUrl := getEnv("HANKO_FRONTEND_SDK_URL")
 	hankoUrlInternal := hankoUrl
 	domain := ""
 	if value, ok := os.LookupEnv("HANKO_URL_INTERNAL"); ok {
@@ -53,47 +51,12 @@ func main() {
 	})
 
 	e.File("/unauthorized", "public/html/unauthorized.html")
+	e.File("/error", "public/html/error.html")
+
 	e.GET("/secured", func(c echo.Context) error {
-		client := http.Client{}
-		req, err := http.NewRequest("GET", fmt.Sprintf("%s/users/%s", hankoUrlInternal, c.Get("user")), nil)
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.Get("token")))
-		if err != nil {
-			return c.Render(http.StatusOK, "error.html", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		resp, err := client.Do(req)
-		if err != nil {
-			return c.Render(http.StatusOK, "error.html", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
-		if resp != nil {
-			defer resp.Body.Close()
-		}
-
-		user := struct {
-			ID                  string    `json:"id"`
-			Email               string    `json:"email"`
-			CreatedAt           time.Time `json:"created_at"`
-			UpdatedAt           time.Time `json:"updated_at"`
-			Verified            bool      `json:"verified"`
-			WebauthnCredentials []struct {
-				ID string `json:"id"`
-			} `json:"webauthn_credentials"`
-		}{}
-		err = json.NewDecoder(resp.Body).Decode(&user)
-
-		if err != nil {
-			return c.Render(http.StatusOK, "error.html", map[string]interface{}{
-				"error": err.Error(),
-			})
-		}
-
 		return c.Render(http.StatusOK, "secured.html", map[string]interface{}{
-			"user": user.Email,
+			"HankoFrontendSdkUrl": hankoFrontendSdkUrl,
+			"HankoUrl":            hankoUrl,
 		})
 	}, middleware.SessionMiddleware(hankoUrlInternal))
 

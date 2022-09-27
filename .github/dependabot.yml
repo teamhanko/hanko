@@ -11,6 +11,6 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "npm"
-    directory: "/hanko-js/"
+    directory: "/elements/"
     schedule:
       interval: "daily"

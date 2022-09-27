@@ -19,7 +19,7 @@ services:
     build: ../../backend
     ports:
       - '8000:8000' # public
-      - '8001:8001' # private
+      - '8001:8001' # admin
     restart: unless-stopped
     command: serve --config /etc/config/config.yaml all
     volumes:
@@ -46,10 +46,16 @@ services:
       start_period: 30s
     networks:
       - intranet
-  hankojs:
-    build: ../../hanko-js
+  elements:
+    build: ../../elements
     ports:
       - "9500:80"
+    networks:
+      - intranet
+  fontendsdk:
+    build: ../../frontend-sdk
+    ports:
+      - "9501:80"
     networks:
       - intranet
   example:
@@ -60,6 +66,7 @@ services:
       - HANKO_URL=http://localhost:8000
       - HANKO_URL_INTERNAL=http://hanko:8000
       - HANKO_ELEMENT_URL=http://localhost:9500/element.hanko-auth.js
+      - HANKO_FRONTEND_SDK_URL=http://localhost:9501/sdk.umd.js
     networks:
       - intranet
   mailslurper:

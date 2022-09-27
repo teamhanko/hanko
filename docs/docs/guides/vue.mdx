@@ -1,0 +1,132 @@
+---
+title: Vue + Hanko
+sidebar_label: Vue
+keywords: [vue]
+sidebar_custom_props:
+  docCardIconName: vue
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Vue
+
+In this guide you will learn how to add authentication to your Vue application using the Hanko custom element.
+
+## Install dependencies
+
+Install the `@teamhanko/hanko-elements` package:
+
+```shell npm2yarn
+npm install @teamhanko/hanko-elements
+```
+
+## Register custom element with Vue
+
+Vue needs to know which elements to treat as custom elements, otherwise it will issue a warning regarding component
+resolution. To do so, provide a predicate function that determines which elements are to be considered custom elements
+to `compilerOptions.isCustomElement` in your configuration:
+
+```mdx-code-block
+<Tabs>
+<TabItem value="vite" label="Vite Config">
+```
+
+```js {7-9} title="vite.config.js" showLineNumbers
+import vue from '@vitejs/plugin-vue'
+
+export default {
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag === "hanko-auth"
+        }
+      }
+    })
+  ]
+}
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="cli" label="Vue CLI Config">
+```
+
+```js {8-10} title="vue.config.js" showLineNumbers
+module.exports = {
+  chainWebpack: config => {
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap(options => ({
+        ...options,
+        compilerOptions: {
+          isCustomElement: (tag) => tag === "hanko-auth"
+        }
+      }))
+  }
+}
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+## Import & use custom element
+
+Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
+Doing so registers the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the
+element in your component template:
+
+```js title="HankoAuth.vue" showLineNumbers
+<script setup>
+import "@teamhanko/hanko-elements/hanko-auth";
+
+const api = import.meta.env.VITE_HANKO_API;
+const lang = import.meta.env.VITE_HANKO_LANG;
+</script>
+
+<template>
+  <hanko-auth :api="api" :lang="lang" />
+</template>
+```
+
+## Defining login callbacks
+
+The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+event in order to, for example, redirect your users to protected pages in your application.
+
+To do so, you can use Vue's [`v-on`](https://vuejs.org/guide/essentials/event-handling.html#listening-to-events)
+directive (shorthand: `@`) and supply a callback directly on the `<hanko-auth>` element:
+
+```js {2,8-12,16} title="HankoAuth.vue" showLineNumbers
+<script setup>
+import { useRouter } from "vue-router";
+import "@teamhanko/hanko-elements/hanko-auth";
+
+const api = import.meta.env.VITE_HANKO_API;
+const lang = import.meta.env.VITE_HANKO_LANG;
+
+const router = useRouter();
+
+const redirectToProfile = () => {
+  router.push({ path: "/profile" });
+};
+</script>
+
+<template>
+  <hanko-auth @success="redirectToProfile" :api="api" :lang="lang" />
+</template>
+```
+
+## UI customization
+
+The styles of the `hanko-auth` element can be customized using CSS variables and parts. See our guide
+on customization [here](https://github.com/teamhanko/hanko/tree/main/elements#ui-customization).
+
+## Backend request authentication
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).

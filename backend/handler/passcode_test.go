@@ -173,7 +173,7 @@ func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
 	err = passcodeHandler.Finish(c)
 	if assert.Error(t, err) {
 		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusNotFound, httpError.Code)
+		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
 	}
 }
 
