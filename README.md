@@ -62,7 +62,7 @@ git clone https://github.com/teamhanko/hanko.git
 
 Then, in the newly created `hanko` folder, just run:
 ```
-docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --build
+docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --build
 ```
 > **Note**: Docker (Desktop) needs to be running in order for the command to run.
 
