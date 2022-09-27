@@ -63,7 +63,7 @@
 <body>
 <hanko-auth lang="en" api="http://localhost:8000"></hanko-auth>
 <script>
-     HankoAuth.register({ shadow: true });
+    HankoAuth.register({ shadow: false });
 
     document.addEventListener("hankoAuthSuccess", (event) => {
         document.body.innerHTML = 'secured content...'
