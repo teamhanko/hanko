@@ -6,7 +6,6 @@
     "access": "public"
   },
   "types": "dist/index.d.ts",
-  "type": "module",
   "files": [
     "dist"
   ],
@@ -18,6 +17,13 @@
       "hanko-auth": [
         "dist/ui/HankoAuth.d.ts"
       ]
+    }
+  },
+  "exports": {
+    "./hanko-auth": {
+      "import": "./dist/element.hanko-auth.js",
+      "require": "./dist/element.hanko-auth.js",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {

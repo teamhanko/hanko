@@ -1,0 +1,69 @@
+services:
+  hanko-migrate:
+    build: ../../backend
+    volumes:
+      - type: bind
+        source: ./config.yaml
+        target: /etc/config/config.yaml
+    command: --config /etc/config/config.yaml migrate up
+    restart: on-failure
+    depends_on:
+      postgresd:
+        condition: service_healthy
+    networks:
+      - intranet
+  hanko:
+    depends_on:
+      hanko-migrate:
+        condition: service_completed_successfully
+    build: ../../backend
+    ports:
+      - '8000:8000' # public
+      - '8001:8001' # admin
+    restart: unless-stopped
+    command: serve --config /etc/config/config.yaml all
+    volumes:
+      - type: bind
+        source: ./config.yaml
+        target: /etc/config/config.yaml
+    networks:
+      - intranet
+    environment:
+      - PASSWORD_ENABLED
+  postgresd:
+    image: postgres:12-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=hanko
+      - POSTGRES_PASSWORD=hanko
+      - POSTGRES_DB=hanko
+    healthcheck:
+      test: pg_isready -U hanko -d hanko
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - intranet
+  elements:
+    build: ../../elements
+    ports:
+      - "9500:80"
+    networks:
+      - intranet
+  fontendsdk:
+    build: ../../frontend-sdk
+    ports:
+      - "9501:80"
+    networks:
+      - intranet
+  mailslurper:
+    image: marcopas/docker-mailslurper:latest
+    ports:
+      - '8080:8080' # web UI
+      - '8085:8085'
+    networks:
+      - intranet
+networks:
+  intranet:
