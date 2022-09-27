@@ -62,7 +62,7 @@ git clone https://github.com/teamhanko/hanko.git
 
 Then, in the newly created `hanko` folder, just run:
 ```
-docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --build
+docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up --build
 ```
 > **Note**: Docker (Desktop) needs to be running in order for the command to run.
 
@@ -83,4 +83,4 @@ The Hanko project consists of
 Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
 
 # Licenses
-[hanko-elements](elements) is licensed under the [MIT License](elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
+[hanko-elements](elements) and [hanko-frontend-sdk](frontend-sdk) are licensed under the [MIT License](elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).

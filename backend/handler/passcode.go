@@ -177,7 +177,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = dto.NewHTTPError(http.StatusNotFound, "passcode not found")
+			businessError = dto.NewHTTPError(http.StatusUnauthorized, "passcode not found")
 			return nil
 		}
 

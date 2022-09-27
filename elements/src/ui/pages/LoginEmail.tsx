@@ -148,7 +148,6 @@ const LoginEmail = () => {
         return;
       })
       .catch((e) => {
-        console.log("banana", e);
         setIsPasskeyLoginLoading(false);
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });

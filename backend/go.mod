@@ -3,7 +3,7 @@ module github.com/teamhanko/hanko/backend
 go 1.17
 
 require (
-	github.com/go-playground/validator/v10 v10.11.0
+	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-webauthn/webauthn v0.4.0
 	github.com/gobuffalo/pop/v6 v6.0.6
 	github.com/gobuffalo/validate/v3 v3.3.3
