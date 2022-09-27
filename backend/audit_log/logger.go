@@ -12,23 +12,23 @@ import (
 	"time"
 )
 
-type Client interface {
+type Logger interface {
 	Create(echo.Context, models.AuditLogType, *models.User, error) error
 }
 
-type client struct {
+type logger struct {
 	persister      persistence.Persister
 	storageEnabled bool
 }
 
-func NewClient(persister persistence.Persister, config config.AuditLog) Client {
-	return &client{
+func NewLogger(persister persistence.Persister, config config.AuditLog) Logger {
+	return &logger{
 		persister:      persister,
 		storageEnabled: config.Storage.Enabled,
 	}
 }
 
-func (c *client) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
+func (c *logger) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
 	var err error = nil
 	if c.storageEnabled {
 		err = c.store(context, auditLogType, user, logError)
@@ -58,7 +58,7 @@ func (c *client) Create(context echo.Context, auditLogType models.AuditLogType, 
 	return nil
 }
 
-func (c *client) store(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
+func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to create id: %w", err)

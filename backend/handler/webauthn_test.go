@@ -24,7 +24,7 @@ var userIdBytes = []byte{0xec, 0x4e, 0xf0, 0x49, 0x5b, 0x88, 0x43, 0x21, 0xa1, 0
 
 func TestNewWebauthnHandler(t *testing.T) {
 	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogClient())
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, handler)
 }
@@ -40,7 +40,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogClient())
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.BeginRegistration(c)) {
@@ -76,7 +76,7 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 	c.Set("session", token)
 
 	p := test.NewPersister(users, nil, nil, nil, sessionData, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogClient())
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.FinishRegistration(c)) {
@@ -107,7 +107,7 @@ func TestWebauthnHandler_BeginAuthentication(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, sessionData, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogClient())
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.BeginAuthentication(c)) {
@@ -139,7 +139,7 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogClient())
+	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	if assert.NoError(t, handler.FinishAuthentication(c)) {

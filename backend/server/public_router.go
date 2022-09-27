@@ -50,17 +50,17 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
 
-	auditLogClient := auditlog.NewClient(persister, cfg.AuditLog)
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	if cfg.Password.Enabled {
-		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg, auditLogClient)
+		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := e.Group("/password")
 		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
 		password.POST("/login", passwordHandler.Login)
 	}
 
-	userHandler := handler.NewUserHandler(persister, auditLogClient)
+	userHandler := handler.NewUserHandler(persister, auditLogger)
 
 	e.GET("/me", userHandler.Me, hankoMiddleware.Session(sessionManager))
 
@@ -71,11 +71,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	e.POST("/user", userHandler.GetUserIdByEmail)
 
 	healthHandler := handler.NewHealthHandler()
-	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager, auditLogClient)
+	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
-	passcodeHandler, err := handler.NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogClient)
+	passcodeHandler, err := handler.NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
 	}

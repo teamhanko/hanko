@@ -30,12 +30,12 @@ type PasscodeHandler struct {
 	TTL               int
 	sessionManager    session.Manager
 	cfg               *config.Config
-	auditLogClient    auditlog.Client
+	auditLogger       auditlog.Logger
 }
 
 var maxPasscodeTries = 3
 
-func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer, auditLogClient auditlog.Client) (*PasscodeHandler, error) {
+func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, mailer mail.Mailer, auditLogger auditlog.Logger) (*PasscodeHandler, error) {
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new renderer: %w", err)
@@ -50,7 +50,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 		TTL:               cfg.Passcode.TTL,
 		sessionManager:    sessionManager,
 		cfg:               cfg,
-		auditLogClient:    auditLogClient,
+		auditLogger:       auditLogger,
 	}, nil
 }
 
@@ -74,7 +74,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 	if user == nil {
-		err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginInitFailed, nil, fmt.Errorf("unknown user"))
+		err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginInitFailed, nil, fmt.Errorf("unknown user"))
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
@@ -135,7 +135,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return fmt.Errorf("failed to send passcode: %w", err)
 	}
 
-	err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginInitSucceeded, user, nil)
+	err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginInitSucceeded, user, nil)
 	if err != nil {
 		return fmt.Errorf("failed to create audit log: %w", err)
 	}
@@ -173,7 +173,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get passcode: %w", err)
 		}
 		if passcode == nil {
-			err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFinalFailed, nil, fmt.Errorf("unknown passcode"))
+			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, nil, fmt.Errorf("unknown passcode"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -188,7 +188,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
 		if lastVerificationTime.Before(startTime) {
-			err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("timed out passcode"))
+			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("timed out passcode"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -205,7 +205,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to delete passcode: %w", err)
 				}
-				err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("max attempts reached"))
+				err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("max attempts reached"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -218,7 +218,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
-			err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("passcode invalid"))
+			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("passcode invalid"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -255,7 +255,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			c.Response().Header().Set("X-Auth-Token", token)
 		}
 
-		err = h.auditLogClient.Create(c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
+		err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}

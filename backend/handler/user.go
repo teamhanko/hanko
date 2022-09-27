@@ -16,14 +16,14 @@ import (
 )
 
 type UserHandler struct {
-	persister      persistence.Persister
-	auditLogClient auditlog.Client
+	persister   persistence.Persister
+	auditLogger auditlog.Logger
 }
 
-func NewUserHandler(persister persistence.Persister, auditLogClient auditlog.Client) *UserHandler {
+func NewUserHandler(persister persistence.Persister, auditLogger auditlog.Logger) *UserHandler {
 	return &UserHandler{
-		persister:      persister,
-		auditLogClient: auditLogClient,
+		persister:   persister,
+		auditLogger: auditLogger,
 	}
 }
 
@@ -59,7 +59,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to store user: %w", err)
 		}
 
-		_ = h.auditLogClient.Create(c, models.AuditLogUserCreated, &newUser, nil) // TODO: what to do on error
+		_ = h.auditLogger.Create(c, models.AuditLogUserCreated, &newUser, nil) // TODO: what to do on error
 
 		return c.JSON(http.StatusOK, newUser)
 	})
