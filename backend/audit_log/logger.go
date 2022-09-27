@@ -17,14 +17,16 @@ type Logger interface {
 }
 
 type logger struct {
-	persister      persistence.Persister
-	storageEnabled bool
+	persister          persistence.Persister
+	storageEnabled     bool
+	logSensitiveValues bool
 }
 
 func NewLogger(persister persistence.Persister, config config.AuditLog) Logger {
 	return &logger{
-		persister:      persister,
-		storageEnabled: config.Storage.Enabled,
+		persister:          persister,
+		storageEnabled:     config.Storage.Enabled,
+		logSensitiveValues: config.LogSensitiveValues,
 	}
 }
 
@@ -43,14 +45,14 @@ func (c *logger) Create(context echo.Context, auditLogType models.AuditLogType, 
 		Str("type", string(auditLogType)).
 		AnErr("error", logError).
 		Str("http_request_id", context.Response().Header().Get(echo.HeaderXRequestID)).
-		Str("source_ip", context.RealIP()).
-		Str("user_agent", context.Request().UserAgent()).
+		Str("source_ip", c.maskSensitiveValue(context.RealIP())).
+		Str("user_agent", c.maskSensitiveValue(context.Request().UserAgent())).
 		Str("time", now.Format(time.RFC3339Nano)).
 		Str("time_unix", strconv.FormatInt(now.Unix(), 10))
 
 	if user != nil {
-		loggerEvent.Str("user_id", user.ID.String()).
-			Str("user_email", user.Email)
+		loggerEvent.Str("user_id", c.maskSensitiveValue(user.ID.String())).
+			Str("user_email", c.maskSensitiveValue(user.Email))
 	}
 
 	loggerEvent.Send()
@@ -87,4 +89,18 @@ func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, u
 	}
 
 	return c.persister.GetAuditLogPersister().Create(e)
+}
+
+func (c *logger) maskSensitiveValue(value string) string {
+	if c.logSensitiveValues {
+		return value
+	}
+	if value == "" {
+		return ""
+	}
+
+	firstCharacter := value[:1]
+	lastCharacter := value[len(value)-1:]
+
+	return fmt.Sprintf("%s*****%s", firstCharacter, lastCharacter)
 }

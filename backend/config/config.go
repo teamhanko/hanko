@@ -323,7 +323,8 @@ func (s *Session) Validate() error {
 }
 
 type AuditLog struct {
-	Storage AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
+	Storage            AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
+	LogSensitiveValues bool            `yaml:"log_sensitive_values" json:"log_sensitive_values" koanf:"log_sensitive_values"`
 }
 
 type AuditLogStorage struct {

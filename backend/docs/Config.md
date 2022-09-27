@@ -260,6 +260,13 @@ audit_log:
     # Default: false
     #
     enabled: false
+  ## log_sensitive_values ##
+  #
+  # Sets whether the audit logs contain sensitive information (e.g. email, ip address, ...).
+  #
+  # Default: false
+  #
+  log_sensitive_values: false
 ```
 
 ## Explanation
