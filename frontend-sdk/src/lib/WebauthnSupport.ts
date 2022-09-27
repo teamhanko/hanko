@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 /**
  * A class to check the browser's WebAuthn support.
  *
@@ -32,7 +33,7 @@ class WebauthnSupport {
       this.supported() &&
       window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable
     ) {
-      return await window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      return window.PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
     }
 
     return false;
@@ -51,10 +52,25 @@ class WebauthnSupport {
         "function"
     ) {
       // @ts-ignore
-      return await window.PublicKeyCredential.isExternalCTAP2SecurityKeySupported();
+      return window.PublicKeyCredential.isExternalCTAP2SecurityKeySupported();
     }
 
     return this.supported();
+  }
+
+  /**
+   * Checks whether autofill assisted requests are supported.
+   *
+   * @return Promise<boolean>
+   */
+  static async isConditionalMediationAvailable(): Promise<boolean> {
+    // @ts-ignore
+    if (window.PublicKeyCredential.isConditionalMediationAvailable) {
+      // @ts-ignore
+      return window.PublicKeyCredential.isConditionalMediationAvailable()
+    }
+
+    return false;
   }
 }
 

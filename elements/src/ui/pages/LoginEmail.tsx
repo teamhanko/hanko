@@ -45,6 +45,8 @@ const LoginEmail = () => {
   const [error, setError] = useState<HankoError>(null);
   const [isAuthenticatorSupported, setIsAuthenticatorSupported] =
     useState<boolean>(null);
+  const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
+    useState<boolean>(null);
 
   // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
   // currently no resident key support on Android.
@@ -168,13 +170,8 @@ const LoginEmail = () => {
     [config.password.enabled, renderPasscode, renderPassword]
   );
 
-  const onEmailFocus = () => {
-    if (
-      // @ts-ignore
-      !PublicKeyCredential.isConditionalMediationAvailable ||
-      // @ts-ignore
-      !PublicKeyCredential.isConditionalMediationAvailable()
-    ) {
+  const onEmailFocus = useCallback(() => {
+    if (!isConditionalMediationSupported) {
       // Browser doesn't support AutoFill-assisted requests.
       return;
     }
@@ -188,13 +185,19 @@ const LoginEmail = () => {
         return;
       })
       .catch(setError);
-  };
+  }, [emitSuccessEvent, hanko, isConditionalMediationSupported]);
 
   useEffect(() => {
     WebauthnSupport.isPlatformAuthenticatorAvailable()
       .then((supported) => setIsAuthenticatorSupported(supported))
       .catch((e) => setError(new TechnicalError(e)));
-  }, [hanko]);
+  }, []);
+
+  useEffect(() => {
+    WebauthnSupport.isConditionalMediationAvailable()
+      .then((supported) => setIsConditionalMediationSupported(supported))
+      .catch((e) => setError(new TechnicalError(e)));
+  }, []);
 
   return (
     <Content>
