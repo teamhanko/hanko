@@ -63,7 +63,7 @@ body:
     type: textarea
   - attributes:
       label: Hanko Version
-      description: "What version of our software are you running?"
+      description: "What version of our software are you running? Either version tag (e.g. v1.0.2) or commit short sha (e.g. 26b78e3)"
     id: version
     type: input
     validations:
