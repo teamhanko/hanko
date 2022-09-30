@@ -38,6 +38,7 @@ class Response {
   url: string;
   _decodedJSON: any;
 
+  // eslint-disable-next-line require-jsdoc
   constructor(xhr: XMLHttpRequest) {
     /**
      *  @public
@@ -94,13 +95,15 @@ class Response {
 class HttpClient {
   timeout: number;
   api: string;
+  xhr: XMLHttpRequest;
 
-  constructor(api: string, timeout: number = 13000) {
+  // eslint-disable-next-line require-jsdoc
+  constructor(api: string, timeout = 13000) {
     this.api = api;
     this.timeout = timeout;
   }
 
-  _fetch(path: string, options: RequestInit) {
+  _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
     const api = this.api;
     const url = api + path;
     const timeout = this.timeout;
@@ -108,8 +111,6 @@ class HttpClient {
     const bearerToken = Cookies.get(cookieName);
 
     return new Promise<Response>(function (resolve, reject) {
-      const xhr = new XMLHttpRequest();
-
       xhr.open(options.method, url, true);
       xhr.setRequestHeader("Accept", "application/json");
       xhr.setRequestHeader("Content-Type", "application/json");
