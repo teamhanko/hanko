@@ -17,13 +17,13 @@ import { Client } from "./Client";
  * @extends {Client}
  */
 class PasscodeClient extends Client {
-  private state: PasscodeState;
+  state: PasscodeState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout: number) {
+  constructor(api: string, timeout = 13000) {
     super(api, timeout);
     /**
-     *  @private
+     *  @public
      *  @type {PasscodeState}
      */
     this.state = new PasscodeState();

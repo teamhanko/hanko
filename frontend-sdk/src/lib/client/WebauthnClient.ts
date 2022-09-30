@@ -25,14 +25,14 @@ import { Client } from "./Client";
  * @extends {Client}
  */
 class WebauthnClient extends Client {
-  private state: WebauthnState;
+  state: WebauthnState;
   controller: AbortController;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout: number) {
     super(api, timeout);
     /**
-     *  @private
+     *  @public
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();

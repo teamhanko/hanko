@@ -15,13 +15,13 @@ import { Client } from "./Client";
  * @extends {Client}
  */
 class PasswordClient extends Client {
-  private state: PasswordState;
+  state: PasswordState;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout: number) {
     super(api, timeout);
     /**
-     *  @private
+     *  @public
      *  @type {PasswordState}
      */
     this.state = new PasswordState();

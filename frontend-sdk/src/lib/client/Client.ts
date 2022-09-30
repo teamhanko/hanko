@@ -15,7 +15,7 @@ abstract class Client {
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
     /**
-     *  @protected
+     *  @public
      *  @type {HttpClient}
      */
     this.client = new HttpClient(api, timeout);
