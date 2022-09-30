@@ -112,14 +112,14 @@ import { Client } from "./Client";
  * @extends {Client}
  */
 class WebauthnClient extends Client {
-  private state: WebauthnState;
+  state: WebauthnState;
   controller: AbortController;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout: number) {
     super(api, timeout);
     /**
-     *  @private
+     *  @public
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
@@ -164,10 +164,8 @@ class WebauthnClient extends Client {
             challenge.mediation =
               "conditional" as CredentialMediationRequirement;
           }
-<<<<<<< HEAD
+
           challenge.signal = this.controller.signal;
-=======
->>>>>>> fa0e0d0 (feat: Add conditional UI support)
           return getWebauthnCredential(challenge);
         })
         .catch((e) => {
