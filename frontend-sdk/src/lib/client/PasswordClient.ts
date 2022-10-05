@@ -18,7 +18,7 @@ class PasswordClient extends Client {
   state: PasswordState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout: number) {
+  constructor(api: string, timeout = 13000) {
     super(api, timeout);
     /**
      *  @public

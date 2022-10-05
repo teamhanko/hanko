@@ -3,7 +3,7 @@ import {
   InvalidWebauthnCredentialError,
   TechnicalError,
   UnauthorizedError,
-  WebauthnRequestCancelledError,
+  WebauthnRequestCancelledError
 } from "../Errors";
 import {
   create as createWebauthnCredential,
@@ -28,8 +28,11 @@ class WebauthnClient extends Client {
   state: WebauthnState;
   controller: AbortController;
 
+  _getCredential = getWebauthnCredential;
+  _createCredential = createWebauthnCredential;
+
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout: number) {
+  constructor(api: string, timeout = 13000) {
     super(api, timeout);
     /**
      *  @public
@@ -79,7 +82,8 @@ class WebauthnClient extends Client {
           }
 
           challenge.signal = this.controller.signal;
-          return getWebauthnCredential(challenge);
+
+          return this._getCredential(challenge);
         })
         .catch((e) => {
           throw new WebauthnRequestCancelledError(e);
@@ -122,7 +126,7 @@ class WebauthnClient extends Client {
    * @see https://www.w3.org/TR/webauthn-2/#sctn-registering-a-new-credential
    */
   register(): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       this.client
         .post("/webauthn/registration/initialize")
         .then((response) => {
@@ -138,7 +142,7 @@ class WebauthnClient extends Client {
           reject(e);
         })
         .then((challenge: CredentialCreationOptionsJSON) => {
-          return createWebauthnCredential(challenge);
+          return this._createCredential(challenge);
         })
         .catch((e) => {
           reject(new WebauthnRequestCancelledError(e));

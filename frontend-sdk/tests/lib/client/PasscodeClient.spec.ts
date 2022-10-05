@@ -1,21 +1,22 @@
 import {
-  InvalidPasscodeError, MaxNumOfPasscodeAttemptsReachedError,
+  InvalidPasscodeError,
+  MaxNumOfPasscodeAttemptsReachedError,
   PasscodeClient,
   TechnicalError,
-  TooManyRequestsError
+  TooManyRequestsError,
 } from "../../../src";
 import { Response } from "../../../src/lib/client/HttpClient";
 
 const userID = "test-user-1";
 const passcodeID = "test-passcode-1";
-const passcodeTTL = 180
+const passcodeTTL = 180;
 const passcodeRetryAfter = 180;
 const passcodeValue = "123456";
 let passcodeClient: PasscodeClient;
 
 beforeEach(() => {
-  passcodeClient = new PasscodeClient("http://test.api")
-})
+  passcodeClient = new PasscodeClient("http://test.api");
+});
 
 describe("PasscodeClient.initialize()", () => {
   it("should initialize a passcode login", async () => {
@@ -34,7 +35,10 @@ describe("PasscodeClient.initialize()", () => {
     expect(passcode.ttl).toEqual(passcodeTTL);
 
     expect(passcodeClient.state.read).toHaveBeenCalledTimes(1);
-    expect(passcodeClient.state.setTTL).toHaveBeenCalledWith(userID, passcodeTTL);
+    expect(passcodeClient.state.setTTL).toHaveBeenCalledWith(
+      userID,
+      passcodeTTL
+    );
     expect(passcodeClient.state.setActiveID).toHaveBeenCalledWith(
       userID,
       passcodeID
@@ -53,7 +57,9 @@ describe("PasscodeClient.initialize()", () => {
     response.status = 429;
 
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
-    jest.spyOn(response.headers, "get").mockReturnValue(`${passcodeRetryAfter}`);
+    jest
+      .spyOn(response.headers, "get")
+      .mockReturnValue(`${passcodeRetryAfter}`);
     jest.spyOn(passcodeClient.state, "read");
     jest.spyOn(passcodeClient.state, "setResendAfter");
     jest.spyOn(passcodeClient.state, "write");
@@ -121,9 +127,9 @@ describe("PasscodeClient.finalize()", () => {
     jest.spyOn(passcodeClient.state, "getActiveID").mockReturnValue(passcodeID);
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
 
-    await expect(passcodeClient.finalize(userID, passcodeValue)).rejects.toThrow(
-      InvalidPasscodeError
-    );
+    await expect(
+      passcodeClient.finalize(userID, passcodeValue)
+    ).rejects.toThrow(InvalidPasscodeError);
     expect(passcodeClient.state.read).toHaveBeenCalledTimes(1);
     expect(passcodeClient.state.getActiveID).toHaveBeenCalledWith(userID);
   });
@@ -151,8 +157,8 @@ describe("PasscodeClient.finalize()", () => {
     const response = new Response(new XMLHttpRequest());
     passcodeClient.client.post = jest.fn().mockResolvedValue(response);
 
-    const config = passcodeClient.finalize(userID, passcodeValue);
-    await expect(config).rejects.toThrowError(TechnicalError);
+    const finalizeResponse = passcodeClient.finalize(userID, passcodeValue);
+    await expect(finalizeResponse).rejects.toThrowError(TechnicalError);
   });
 
   it("should throw error on API communication failure", async () => {
@@ -160,21 +166,23 @@ describe("PasscodeClient.finalize()", () => {
       .fn()
       .mockRejectedValue(new Error("Test error"));
 
-    const config = passcodeClient.finalize(userID, passcodeValue);
-    await expect(config).rejects.toThrowError("Test error");
+    const finalizeResponse = passcodeClient.finalize(userID, passcodeValue);
+    await expect(finalizeResponse).rejects.toThrowError("Test error");
   });
 });
 
 describe("PasscodeClient.getTTL()", () => {
   it("should return passcode TTL", async () => {
     jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
-    expect(passcodeClient.getTTL(userID)).toEqual(passcodeTTL)
+    expect(passcodeClient.getTTL(userID)).toEqual(passcodeTTL);
   });
 });
 
 describe("PasscodeClient.getResendAfter()", () => {
   it("should return passcode resend after seconds", async () => {
-    jest.spyOn(passcodeClient.state, "getResendAfter").mockReturnValue(passcodeRetryAfter);
-    expect(passcodeClient.getResendAfter(userID)).toEqual(passcodeRetryAfter)
+    jest
+      .spyOn(passcodeClient.state, "getResendAfter")
+      .mockReturnValue(passcodeRetryAfter);
+    expect(passcodeClient.getResendAfter(userID)).toEqual(passcodeRetryAfter);
   });
 });
