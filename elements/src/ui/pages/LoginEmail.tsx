@@ -47,6 +47,8 @@ const LoginEmail = () => {
     useState<boolean>(null);
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>(null);
+  const [initializeWebauthnOnInputFocus, setInitializeWebauthnOnInputFocus] =
+    useState<boolean>(false);
 
   // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
   // currently no resident key support on Android.
@@ -150,6 +152,7 @@ const LoginEmail = () => {
         return;
       })
       .catch((e) => {
+        setInitializeWebauthnOnInputFocus(true);
         setIsPasskeyLoginLoading(false);
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
@@ -170,7 +173,7 @@ const LoginEmail = () => {
     [config.password.enabled, renderPasscode, renderPassword]
   );
 
-  const onEmailFocus = useCallback(() => {
+  const loginViaConditionalUI = useCallback(() => {
     if (!isConditionalMediationSupported) {
       // Browser doesn't support AutoFill-assisted requests.
       return;
@@ -184,8 +187,21 @@ const LoginEmail = () => {
 
         return;
       })
-      .catch(setError);
+      .catch((e) => {
+        setError(e instanceof WebauthnRequestCancelledError ? null : e);
+      });
   }, [emitSuccessEvent, hanko, isConditionalMediationSupported]);
+
+  const onEmailInputFocus = () => {
+    if (initializeWebauthnOnInputFocus) {
+      setInitializeWebauthnOnInputFocus(false);
+      loginViaConditionalUI();
+    }
+  };
+
+  useEffect(() => {
+    loginViaConditionalUI();
+  }, [loginViaConditionalUI]);
 
   useEffect(() => {
     WebauthnSupport.isPlatformAuthenticatorAvailable()
@@ -205,9 +221,9 @@ const LoginEmail = () => {
       <ErrorMessage error={error} />
       <Form onSubmit={onEmailSubmit}>
         <InputText
-          onFocus={onEmailFocus}
           name={"email"}
           type={"email"}
+          onFocus={onEmailInputFocus}
           autoComplete={"username webauthn"}
           autoCorrect={"off"}
           required={true}
