@@ -20,7 +20,7 @@ Hanko is an open-source user authentication system with a focus on moving the lo
 
 Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
 
-![Hanko - Open-source user authentication that can do more than just passwords](https://user-images.githubusercontent.com/20115649/176924402-82869443-4b4a-42e0-aaef-e33d00146450.svg)
+https://user-images.githubusercontent.com/20115649/194661461-8819db77-4db5-4b24-9859-5a8e68be77fe.mp4
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that passkeys were announced and the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
