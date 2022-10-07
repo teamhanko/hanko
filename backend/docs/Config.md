@@ -166,9 +166,9 @@ password:
   #
   # Sets the minimum password length.
   #
-  # Default value: 8
+  # Default value: 10
   #
-  min_password_length: 8
+  min_password_length: 10
 passcode:
   ## ttl ##
   #
