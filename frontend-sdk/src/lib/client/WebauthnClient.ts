@@ -26,6 +26,7 @@ import { Client } from "./Client";
  */
 class WebauthnClient extends Client {
   private state: WebauthnState;
+  controller: AbortController;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout: number) {
@@ -35,6 +36,11 @@ class WebauthnClient extends Client {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
+    /**
+     *  @public
+     *  @type {AbortController}
+     */
+    this.controller = new AbortController();
   }
 
   /**
@@ -71,6 +77,7 @@ class WebauthnClient extends Client {
             challenge.mediation =
               "conditional" as CredentialMediationRequirement;
           }
+          challenge.signal = this.controller.signal;
           return getWebauthnCredential(challenge);
         })
         .catch((e) => {
