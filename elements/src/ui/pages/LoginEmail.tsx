@@ -47,8 +47,6 @@ const LoginEmail = () => {
     useState<boolean>(null);
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>(null);
-  const [initializeWebauthnOnInputFocus, setInitializeWebauthnOnInputFocus] =
-    useState<boolean>(false);
 
   // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
   // currently no resident key support on Android.
@@ -72,7 +70,10 @@ const LoginEmail = () => {
           return renderPasscode(userInfo.id, config.password.enabled, true);
         }
 
-        if (!userInfo.has_webauthn_credential) {
+        if (
+          !userInfo.has_webauthn_credential ||
+          isConditionalMediationSupported
+        ) {
           return renderAlternateLoginMethod(userInfo.id);
         }
 
@@ -152,7 +153,6 @@ const LoginEmail = () => {
         return;
       })
       .catch((e) => {
-        setInitializeWebauthnOnInputFocus(true);
         setIsPasskeyLoginLoading(false);
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
@@ -192,13 +192,6 @@ const LoginEmail = () => {
       });
   }, [emitSuccessEvent, hanko, isConditionalMediationSupported]);
 
-  const onEmailInputFocus = () => {
-    if (initializeWebauthnOnInputFocus) {
-      setInitializeWebauthnOnInputFocus(false);
-      loginViaConditionalUI();
-    }
-  };
-
   useEffect(() => {
     loginViaConditionalUI();
   }, [loginViaConditionalUI]);
@@ -223,7 +216,6 @@ const LoginEmail = () => {
         <InputText
           name={"email"}
           type={"email"}
-          onFocus={onEmailInputFocus}
           autoComplete={"username webauthn"}
           autoCorrect={"off"}
           required={true}
@@ -242,12 +234,18 @@ const LoginEmail = () => {
         <Button
           isLoading={isEmailLoginLoading}
           isSuccess={isEmailLoginSuccess}
-          disabled={isPasskeyLoginLoading || isPasskeyLoginSuccess}
+          disabled={
+            isPasskeyLoginLoading ||
+            isPasskeyLoginSuccess ||
+            isEmailLoginSuccess
+          }
         >
           {t("labels.continue")}
         </Button>
       </Form>
-      {isAuthenticatorSupported && !isAndroidUserAgent ? (
+      {isAuthenticatorSupported &&
+      !isAndroidUserAgent &&
+      !isConditionalMediationSupported ? (
         <Fragment>
           <Divider />
           <Form onSubmit={onPasskeySubmit}>
