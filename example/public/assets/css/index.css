@@ -24,36 +24,37 @@ hanko-auth {
     --border-radius: 5px;
 }
 
-hanko-auth::part(input) {
-    border-color: #BFC2CD;
+.hanko_input {
+    border-color: #BFC2CD !important;
 }
 
-hanko-auth::part(primary-button) {
-    background-color: #CBD4FF;
-    color: black;
-    border-style: none;
-    font-weight: 500;
+.hanko_button.hanko_primary {
+    background-color: #CBD4FF !important;
+    color: black !important;
+    border-style: none !important;
+    font-weight: 500 !important;
 }
 
-hanko-auth::part(primary-button):hover {
-    background-color: #b3beff;
+
+.hanko_button.hanko_primary:hover {
+    background-color: #b3beff !important;
 }
 
-hanko-auth::part(secondary-button) {
-    background-color: #506CF0;
-    color: white;
-    border-style: none;
-    font-weight: 500;
+.hanko_button.hanko_secondary {
+    background-color: #506CF0 !important;
+    color: white !important;
+    border-style: none !important;
+    font-weight: 500 !important;
 }
 
-hanko-auth::part(secondary-button):hover {
-    background-color: #6980f2;
+.hanko_button.hanko_secondary:hover {
+    background-color: #6980f2 !important;
 }
 
-hanko-auth::part(divider) {
-    border-bottom-color: #BFC2CD;
+.hanko_divider {
+    border-bottom-color: #BFC2CD !important;
 }
 
-hanko-auth::part(link) {
-    color: #688293;
+.hanko_link {
+    color: #688293 !important;
 }

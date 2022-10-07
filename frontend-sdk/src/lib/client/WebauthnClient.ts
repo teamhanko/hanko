@@ -26,6 +26,7 @@ import { Client } from "./Client";
  */
 class WebauthnClient extends Client {
   private state: WebauthnState;
+  controller: AbortController;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout: number) {
@@ -35,6 +36,11 @@ class WebauthnClient extends Client {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
+    /**
+     *  @public
+     *  @type {AbortController}
+     */
+    this.controller = new AbortController();
   }
 
   /**
@@ -42,6 +48,7 @@ class WebauthnClient extends Client {
    * allowed credentials and the browser is able to present a list of suitable credentials to the user.
    *
    * @param {string=} userID - The user's UUID.
+   * @param {boolean=} useConditionalMediation - Enables autofill assisted login.
    * @return {Promise<void>}
    * @throws {WebauthnRequestCancelledError}
    * @throws {InvalidWebauthnCredentialError}
@@ -51,7 +58,7 @@ class WebauthnClient extends Client {
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnLoginFinal
    * @see https://www.w3.org/TR/webauthn-2/#authentication-ceremony
    */
-  login(userID?: string): Promise<void> {
+  login(userID?: string, useConditionalMediation?: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.client
         .post("/webauthn/login/initialize", { user_id: userID })
@@ -66,6 +73,11 @@ class WebauthnClient extends Client {
           reject(e);
         })
         .then((challenge: CredentialRequestOptionsJSON) => {
+          if (useConditionalMediation) {
+            challenge.mediation =
+              "conditional" as CredentialMediationRequirement;
+          }
+          challenge.signal = this.controller.signal;
           return getWebauthnCredential(challenge);
         })
         .catch((e) => {
