@@ -1,4 +1,9 @@
-import { ConflictError, NotFoundError, TechnicalError, UserClient } from "../../../src";
+import {
+  ConflictError,
+  NotFoundError,
+  TechnicalError,
+  UserClient,
+} from "../../../src";
 import { Response } from "../../../src/lib/client/HttpClient";
 
 const userID = "test-user-1";

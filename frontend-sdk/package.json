@@ -21,7 +21,7 @@
   "scripts": {
     "lint": "eslint 'src/**/*.ts'",
     "format": "pretty-quick --staged",
-    "build": "microbundle --globals @github/webauthn-json=webauthnJson --tsconfig ./tsconfig.json",
+    "build": "microbundle --globals @github/webauthn-json=webauthnJson --tsconfig ./tsconfig.prod.json",
     "dev": "microbundle watch",
     "docs": "jsdoc -r -c jsdoc.json -d ../docs/static/jsdoc/hanko-frontend-sdk -R README.md --pedantic",
     "test": "jest --coverage"

@@ -243,7 +243,7 @@ describe("webauthnClient.shouldRegister()", () => {
     }) => {
       jest
         .spyOn(WebauthnSupport, "isPlatformAuthenticatorAvailable")
-        .mockResolvedValue(isPlatformAuthenticatorAvailable);
+        .mockResolvedValueOnce(isPlatformAuthenticatorAvailable);
 
       const user: User = {
         id: userID,
@@ -258,11 +258,11 @@ describe("webauthnClient.shouldRegister()", () => {
       if (credentialMatched) {
         jest
           .spyOn(webauthnClient.state, "matchCredentials")
-          .mockReturnValue([{ id: credentialID }]);
+          .mockReturnValueOnce([{ id: credentialID }]);
       } else {
         jest
           .spyOn(webauthnClient.state, "matchCredentials")
-          .mockReturnValue([{ id: "unknown" }]);
+          .mockReturnValueOnce([]);
       }
 
       const shouldRegister = await webauthnClient.shouldRegister(user);
