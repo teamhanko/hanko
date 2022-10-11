@@ -3,14 +3,11 @@ import {
   InvalidWebauthnCredentialError,
   TechnicalError,
   UnauthorizedError,
-  WebauthnRequestCancelledError
+  WebauthnRequestCancelledError,
 } from "../Errors";
 import {
   create as createWebauthnCredential,
   get as getWebauthnCredential,
-  CredentialCreationOptionsJSON,
-  CredentialRequestOptionsJSON,
-  PublicKeyCredentialWithAssertionJSON,
 } from "@github/webauthn-json";
 import { Attestation, User, WebauthnFinalized } from "../Dto";
 import { WebauthnSupport } from "../WebauthnSupport";
@@ -61,56 +58,54 @@ class WebauthnClient extends Client {
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnLoginFinal
    * @see https://www.w3.org/TR/webauthn-2/#authentication-ceremony
    */
-  login(userID?: string, useConditionalMediation?: boolean): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.client
-        .post("/webauthn/login/initialize", { user_id: userID })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          }
+  async login(
+    userID?: string,
+    useConditionalMediation?: boolean
+  ): Promise<void> {
+    const challengeResponse = await this.client.post(
+      "/webauthn/login/initialize",
+      { user_id: userID }
+    );
 
-          throw new TechnicalError();
-        })
-        .catch((e) => {
-          reject(e);
-        })
-        .then((challenge: CredentialRequestOptionsJSON) => {
-          if (useConditionalMediation) {
-            challenge.mediation =
-              "conditional" as CredentialMediationRequirement;
-          }
+    if (!challengeResponse.ok) {
+      throw new TechnicalError();
+    }
 
-          challenge.signal = this.controller.signal;
+    const challenge = challengeResponse.json();
 
-          return this._getCredential(challenge);
-        })
-        .catch((e) => {
-          throw new WebauthnRequestCancelledError(e);
-        })
-        .then((assertion: PublicKeyCredentialWithAssertionJSON) => {
-          return this.client.post("/webauthn/login/finalize", assertion);
-        })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else if (response.status === 400 || response.status === 401) {
-            throw new InvalidWebauthnCredentialError();
-          } else {
-            throw new TechnicalError();
-          }
-        })
-        .catch((e) => {
-          reject(e);
-        })
-        .then((w: WebauthnFinalized) => {
-          this.state.read().addCredential(w.user_id, w.credential_id).write();
-          return resolve();
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    if (useConditionalMediation) {
+      // `CredentialMediationRequirement` doesn't support "conditional" in the current typescript version.
+      challenge.mediation = "conditional" as CredentialMediationRequirement;
+    }
+
+    challenge.signal = this.controller.signal;
+
+    let assertion;
+    try {
+      assertion = await this._getCredential(challenge);
+    } catch (e) {
+      throw new WebauthnRequestCancelledError(e);
+    }
+
+    const assertionResponse = await this.client.post(
+      "/webauthn/login/finalize",
+      assertion
+    );
+
+    if (assertionResponse.status === 400 || assertionResponse.status === 401) {
+      throw new InvalidWebauthnCredentialError();
+    } else if (!assertionResponse.ok) {
+      throw new TechnicalError();
+    }
+
+    const finalizeResponse: WebauthnFinalized = assertionResponse.json();
+
+    this.state
+      .read()
+      .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
+      .write();
+
+    return;
   }
 
   /**
@@ -125,59 +120,52 @@ class WebauthnClient extends Client {
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnRegFinal
    * @see https://www.w3.org/TR/webauthn-2/#sctn-registering-a-new-credential
    */
-  register(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-      this.client
-        .post("/webauthn/registration/initialize")
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else if (response.status >= 400 && response.status <= 499) {
-            throw new UnauthorizedError();
-          }
+  async register(): Promise<void> {
+    const challengeResponse = await this.client.post(
+      "/webauthn/registration/initialize"
+    );
 
-          throw new TechnicalError();
-        })
-        .catch((e) => {
-          reject(e);
-        })
-        .then((challenge: CredentialCreationOptionsJSON) => {
-          return this._createCredential(challenge);
-        })
-        .catch((e) => {
-          reject(new WebauthnRequestCancelledError(e));
-        })
-        .then((attestation: Attestation) => {
-          // The generated PublicKeyCredentialWithAttestationJSON object does not align with the API. The list of
-          // supported transports must be available under a different path.
-          attestation.transports = attestation.response.transports;
+    if (challengeResponse.status >= 400 && challengeResponse.status <= 499) {
+      throw new UnauthorizedError();
+    } else if (!challengeResponse.ok) {
+      throw new TechnicalError();
+    }
 
-          return this.client.post(
-            "/webauthn/registration/finalize",
-            attestation
-          );
-        })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else if (response.status >= 400 && response.status <= 499) {
-            throw new UnauthorizedError();
-          }
+    const challenge = challengeResponse.json();
 
-          throw new TechnicalError();
-        })
-        .catch((e) => {
-          reject(e);
-        })
-        .then((w: WebauthnFinalized) => {
-          this.state.read().addCredential(w.user_id, w.credential_id).write();
+    let attestation;
+    try {
+      attestation = (await this._createCredential(challenge)) as Attestation;
+    } catch (e) {
+      throw new WebauthnRequestCancelledError(e);
+    }
 
-          return resolve();
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    // The generated PublicKeyCredentialWithAttestationJSON object does not align with the API. The list of
+    // supported transports must be available under a different path.
+    attestation.transports = attestation.response.transports;
+
+    const attestationResponse = await this.client.post(
+      "/webauthn/registration/finalize",
+      attestation
+    );
+
+    if (
+      attestationResponse.status >= 400 &&
+      attestationResponse.status <= 499
+    ) {
+      throw new UnauthorizedError();
+    }
+    if (!attestationResponse.ok) {
+      throw new TechnicalError();
+    }
+
+    const finalizeResponse: WebauthnFinalized = attestationResponse.json();
+    this.state
+      .read()
+      .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
+      .write();
+
+    return;
   }
 
   /**
@@ -187,26 +175,19 @@ class WebauthnClient extends Client {
    *
    * @param {User} user - The user object.
    * @return {Promise<boolean>}
-   * @throws {TechnicalError}
    */
-  shouldRegister(user: User): Promise<boolean> {
-    return new Promise<boolean>((resolve, reject) => {
-      WebauthnSupport.isPlatformAuthenticatorAvailable()
-        .then((supported) => {
-          if (!user.webauthn_credentials || !user.webauthn_credentials.length) {
-            return resolve(supported);
-          }
+  async shouldRegister(user: User): Promise<boolean> {
+    const supported = await WebauthnSupport.isPlatformAuthenticatorAvailable();
 
-          const matches = this.state
-            .read()
-            .matchCredentials(user.id, user.webauthn_credentials);
+    if (!user.webauthn_credentials || !user.webauthn_credentials.length) {
+      return supported;
+    }
 
-          return resolve(supported && !matches.length);
-        })
-        .catch((e) => {
-          reject(new TechnicalError(e));
-        });
-    });
+    const matches = this.state
+      .read()
+      .matchCredentials(user.id, user.webauthn_credentials);
+
+    return supported && !matches.length;
   }
 }
 

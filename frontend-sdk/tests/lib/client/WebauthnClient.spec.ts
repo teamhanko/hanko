@@ -1,10 +1,12 @@
-import { WebauthnClient, WebauthnRequestCancelledError } from "../../../src";
+import {
+  User,
+  WebauthnClient,
+  WebauthnRequestCancelledError,
+  WebauthnSupport,
+} from "../../../src";
 import { Response } from "../../../src/lib/client/HttpClient";
 
-import {
-  PublicKeyCredentialWithAttestationJSON,
-  PublicKeyCredentialWithAssertionJSON,
-} from "@github/webauthn-json";
+import { PublicKeyCredentialWithAssertionJSON } from "@github/webauthn-json";
 import { Attestation } from "../../../src/lib/Dto";
 
 const userID = "test-user-1";
@@ -103,7 +105,7 @@ describe("webauthnClient.login()", () => {
     }
   );
 
-  it("should throw ...", async () => {
+  it("should throw an error when the WebAuthn API call fails", async () => {
     const initResponse = new Response(new XMLHttpRequest());
     initResponse.ok = true;
 
@@ -204,6 +206,71 @@ describe("webauthnClient.register()", () => {
 
       const user = webauthnClient.register();
       await expect(user).rejects.toThrow(error);
+    }
+  );
+
+  it("should throw an error when the WebAuthn API call fails", async () => {
+    const initResponse = new Response(new XMLHttpRequest());
+    initResponse.ok = true;
+
+    jest
+      .spyOn(webauthnClient.client, "post")
+      .mockResolvedValueOnce(initResponse);
+
+    webauthnClient._createCredential = jest
+      .fn()
+      .mockRejectedValue(new Error("Test error"));
+
+    const user = webauthnClient.register();
+    await expect(user).rejects.toThrow(WebauthnRequestCancelledError);
+  });
+});
+
+describe("webauthnClient.shouldRegister()", () => {
+  it.each`
+    isPlatformAuthenticatorAvailable | userHasCredential | credentialMatched | expected
+    ${false}                         | ${false}          | ${false}          | ${false}
+    ${true}                          | ${false}          | ${false}          | ${true}
+    ${true}                          | ${true}           | ${false}          | ${true}
+    ${true}                          | ${true}           | ${true}           | ${false}
+  `(
+    "should determine correctly if a WebAuthn credential should be registered",
+    async ({
+      isPlatformAuthenticatorAvailable,
+      userHasCredential,
+      credentialMatched,
+      expected,
+    }) => {
+      jest
+        .spyOn(WebauthnSupport, "isPlatformAuthenticatorAvailable")
+        .mockResolvedValue(isPlatformAuthenticatorAvailable);
+
+      const user: User = {
+        id: userID,
+        email: userID,
+        webauthn_credentials: [],
+      };
+
+      if (userHasCredential) {
+        user.webauthn_credentials.push({ id: credentialID });
+      }
+
+      if (credentialMatched) {
+        jest
+          .spyOn(webauthnClient.state, "matchCredentials")
+          .mockReturnValue([{ id: credentialID }]);
+      } else {
+        jest
+          .spyOn(webauthnClient.state, "matchCredentials")
+          .mockReturnValue([{ id: "unknown" }]);
+      }
+
+      const shouldRegister = await webauthnClient.shouldRegister(user);
+
+      expect(
+        WebauthnSupport.isPlatformAuthenticatorAvailable
+      ).toHaveBeenCalled();
+      expect(shouldRegister).toEqual(expected);
     }
   );
 });

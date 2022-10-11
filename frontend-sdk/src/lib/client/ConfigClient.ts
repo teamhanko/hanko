@@ -6,7 +6,7 @@ import { Client } from "./Client";
  * A class for retrieving configurations from the API.
  *
  * @category SDK
- * @subcategory Clients
+ * @subcategory Clsients
  * @extends {Client}
  */
 class ConfigClient extends Client {
@@ -17,21 +17,14 @@ class ConfigClient extends Client {
    * @throws {TechnicalError}
    * @see https://docs.hanko.io/api/public#tag/.well-known/operation/getConfig
    */
-  get() {
-    return new Promise<Config>((resolve, reject) => {
-      this.client
-        .get("/.well-known/config")
-        .then((response) => {
-          if (response.ok) {
-            return resolve(response.json());
-          }
+  async get(): Promise<Config> {
+    const response = await this.client.get("/.well-known/config");
 
-          throw new TechnicalError();
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+    if (!response.ok) {
+      throw new TechnicalError();
+    }
+
+    return response.json();
   }
 }
 
