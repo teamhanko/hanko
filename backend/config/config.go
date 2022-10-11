@@ -91,6 +91,10 @@ func DefaultConfig() *Config {
 				Secure:   true,
 			},
 		},
+		AuditLog: AuditLog{
+			Enabled: true,
+			Output:  OutputStreamStdOut,
+		},
 	}
 }
 
@@ -323,6 +327,8 @@ func (s *Session) Validate() error {
 }
 
 type AuditLog struct {
+	Enabled            bool            `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Output             OutputStream    `yaml:"output" json:"output" koanf:"output"`
 	Storage            AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
 	LogSensitiveValues bool            `yaml:"log_sensitive_values" json:"log_sensitive_values" koanf:"log_sensitive_values"`
 }
@@ -330,3 +336,10 @@ type AuditLog struct {
 type AuditLogStorage struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
 }
+
+type OutputStream string
+
+var (
+	OutputStreamStdOut OutputStream = "stdout"
+	OutputStreamStdErr OutputStream = "stderr"
+)
