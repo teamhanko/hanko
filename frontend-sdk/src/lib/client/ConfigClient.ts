@@ -6,7 +6,7 @@ import { Client } from "./Client";
  * A class for retrieving configurations from the API.
  *
  * @category SDK
- * @subcategory Clsients
+ * @subcategory Clients
  * @extends {Client}
  */
 class ConfigClient extends Client {

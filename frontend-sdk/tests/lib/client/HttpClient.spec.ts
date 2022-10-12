@@ -13,6 +13,7 @@ beforeEach(() => {
       open: jest.fn(),
       setRequestHeader: jest.fn(),
       getResponseHeader: jest.fn(),
+      getAllResponseHeaders: jest.fn().mockReturnValue(`X-Auth-Token: ${jwt}`),
       send: jest.fn(),
     })),
     configurable: true,
@@ -41,6 +42,7 @@ describe("httpClient._fetch()", () => {
       "application/json"
     );
     expect(xhr.setRequestHeader).toHaveBeenCalledTimes(2);
+    expect(xhr.getAllResponseHeaders).toHaveBeenCalledTimes(1);
     expect(xhr.open).toHaveBeenNthCalledWith(
       1,
       "GET",

@@ -36,7 +36,7 @@ describe("passcodeState.setActiveID()", () => {
 });
 
 describe("passcodeState.reset()", () => {
-  it("should return the id of the currently active passcode", async () => {
+  it("should reset information about the active passcode", async () => {
     const ls = decodedLSContent();
     const state = new PasscodeState();
     const userID = Object.keys(ls.users)[0];

@@ -101,7 +101,6 @@ class Response {
 class HttpClient {
   timeout: number;
   api: string;
-  xhr: XMLHttpRequest;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
@@ -135,7 +134,7 @@ class HttpClient {
           .filter((h) => h.toLowerCase().startsWith("x-auth-token"));
 
         if (headers.length) {
-          const authToken = xhr.getResponseHeader("x-auth-token");
+          const authToken = xhr.getResponseHeader("X-Auth-Token");
 
           if (authToken) {
             const secure = !!api.match("^https://");
