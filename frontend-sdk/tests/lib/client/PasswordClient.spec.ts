@@ -117,7 +117,7 @@ describe("PasswordClient.update()", () => {
   });
 
   describe("PasswordClient.getRetryAfter()", () => {
-    it("should return passcode resend after seconds", async () => {
+    it("should return password resend after seconds", async () => {
       jest
         .spyOn(passwordClient.state, "getRetryAfter")
         .mockReturnValue(passwordRetryAfter);
