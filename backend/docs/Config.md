@@ -149,6 +149,11 @@ session:
     # Default value: true
     #
     secure: true
+  ## enable_auth_token_header ##
+  #
+  # The JWT will be transmitted via the X-Auth-Token header. Enable during cross-domain operations.
+  #
+  enable_auth_token_header: false
 password:
   ## enabled ##
   #

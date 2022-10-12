@@ -18,7 +18,7 @@ class Headers {
   }
 
   /**
-   * Performs a GET request.
+   * Returns the response header with the given name.
    *
    * @param {string} name
    * @return {string}
