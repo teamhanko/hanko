@@ -58,7 +58,7 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.1",
     "sass": "^1.53.0",
-    "sass-loader": "^13.0.0",
+    "sass-loader": "^13.1.0",
     "style-loader": "^3.3.1",
     "ts-jest": "^28.0.8",
     "ts-loader": "^9.4.1",
