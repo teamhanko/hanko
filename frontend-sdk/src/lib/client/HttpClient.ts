@@ -17,6 +17,12 @@ class Headers {
     this._xhr = xhr;
   }
 
+  /**
+   * Returns the response header with the given name.
+   *
+   * @param {string} name
+   * @return {string}
+   */
   get(name: string) {
     return this._xhr.getResponseHeader(name);
   }
@@ -103,6 +109,7 @@ class HttpClient {
     this.timeout = timeout;
   }
 
+  // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
     const api = this.api;
     const url = api + path;
@@ -122,11 +129,18 @@ class HttpClient {
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
-        const authToken = xhr.getResponseHeader("X-Auth-Token");
+        const headers = xhr
+          .getAllResponseHeaders()
+          .split("\r\n")
+          .filter((h) => h.toLowerCase().startsWith("x-auth-token"));
 
-        if (authToken) {
-          const secure = !!api.match("^https://");
-          Cookies.set(cookieName, authToken, { secure });
+        if (headers.length) {
+          const authToken = xhr.getResponseHeader("x-auth-token");
+
+          if (authToken) {
+            const secure = !!api.match("^https://");
+            Cookies.set(cookieName, authToken, { secure });
+          }
         }
 
         resolve(new Response(xhr));
