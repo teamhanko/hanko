@@ -149,9 +149,10 @@ class WebauthnSupport {
    * @return Promise&lt;boolean>
    */
   static async isConditionalMediationAvailable(): Promise&lt;boolean> {
-    // @ts-ignore
     if (
+      // @ts-ignore
       window.PublicKeyCredential &amp;&amp;
+      // @ts-ignore
       window.PublicKeyCredential.isConditionalMediationAvailable
     ) {
       // @ts-ignore
