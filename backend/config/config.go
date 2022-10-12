@@ -183,15 +183,6 @@ type Cors struct {
 	MaxAge           int      `yaml:"max_age" json:"max_age" koanf:"max_age"`
 }
 
-func (c *Cors) AuthTokenHeaderExposed() bool {
-	for _, n := range c.ExposeHeaders {
-		if strings.ToLower(n) == "x-auth-token" {
-			return true
-		}
-	}
-	return false
-}
-
 func (s *ServerSettings) Validate() error {
 	if len(strings.TrimSpace(s.Address)) == 0 {
 		return errors.New("field Address must not be empty")
@@ -317,8 +308,9 @@ func (s *Secrets) Validate() error {
 }
 
 type Session struct {
-	Lifespan string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
-	Cookie   Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
+	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header"`
+	Lifespan              string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
+	Cookie                Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
 }
 
 func (s *Session) Validate() error {

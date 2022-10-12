@@ -158,8 +158,9 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	if h.cfg.Server.Public.Cors.AuthTokenHeaderExposed() {
+	if h.cfg.Session.EnableAuthTokenHeader {
 		c.Response().Header().Set("X-Auth-Token", token)
+		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 	}
 
 	return c.JSON(http.StatusOK, nil)
