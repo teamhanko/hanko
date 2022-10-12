@@ -84,6 +84,11 @@ body:
     id: operating-system-version
     type: textarea
   - attributes:
+      label: Browser Version
+      description: "Which browser and which version are you using?"
+    id: browser-version
+    type: textarea
+  - attributes:
       label: Environment
       description: "In which environment are you deploying/running the application(s)?"
       options:
