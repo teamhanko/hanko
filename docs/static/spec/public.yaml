@@ -138,6 +138,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '408':
+          $ref: '#/components/responses/RequestTimeOut'
         '410':
           $ref: '#/components/responses/Gone'
         '500':
@@ -604,6 +606,15 @@ components:
           example:
             code: 404
             message: Not found
+    RequestTimeOut:
+      description: Request Timeout
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 408
+            message: Request Timeout
     Unauthorized:
       description: Unauthorized
       content:
