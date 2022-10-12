@@ -19,16 +19,15 @@ type Logger interface {
 }
 
 type logger struct {
-	persister          persistence.Persister
-	storageEnabled     bool
-	logSensitiveValues bool
-	logger             zeroLog.Logger
-	enabled            bool
+	persister             persistence.Persister
+	storageEnabled        bool
+	logger                zeroLog.Logger
+	consoleLoggingEnabled bool
 }
 
 func NewLogger(persister persistence.Persister, cfg config.AuditLog) Logger {
 	var loggerOutput *os.File = nil
-	switch cfg.Output {
+	switch cfg.ConsoleOutput.OutputStream {
 	case config.OutputStreamStdOut:
 		loggerOutput = os.Stdout
 	case config.OutputStreamStdErr:
@@ -36,50 +35,29 @@ func NewLogger(persister persistence.Persister, cfg config.AuditLog) Logger {
 	default:
 		loggerOutput = os.Stdout
 	}
+
 	return &logger{
-		persister:          persister,
-		storageEnabled:     cfg.Storage.Enabled,
-		logSensitiveValues: cfg.LogSensitiveValues,
-		logger:             zeroLog.New(loggerOutput),
-		enabled:            cfg.Enabled,
+		persister:             persister,
+		storageEnabled:        cfg.Storage.Enabled,
+		logger:                zeroLog.New(loggerOutput),
+		consoleLoggingEnabled: cfg.ConsoleOutput.Enabled,
 	}
 }
 
 func (c *logger) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
-	if !c.enabled {
-		return nil
-	}
-	var err error = nil
 	if c.storageEnabled {
-		err = c.store(context, auditLogType, user, logError)
+		err := c.store(context, auditLogType, user, logError)
 		if err != nil {
 			return err
 		}
 	}
 
-	now := time.Now()
-	loggerEvent := zeroLogger.Log().
-		//loggerEvent := c.logger.Log().
-		Str("audience", "audit").
-		Str("type", string(auditLogType)).
-		AnErr("error", logError).
-		Str("http_request_id", context.Response().Header().Get(echo.HeaderXRequestID)).
-		Str("source_ip", c.maskSensitiveValue(context.RealIP())).
-		Str("user_agent", c.maskSensitiveValue(context.Request().UserAgent())).
-		Str("time", now.Format(time.RFC3339Nano)).
-		Str("time_unix", strconv.FormatInt(now.Unix(), 10))
-
-	if user != nil {
-		loggerEvent.Str("user_id", c.maskSensitiveValue(user.ID.String())).
-			Str("user_email", c.maskSensitiveValue(user.Email))
+	if c.consoleLoggingEnabled {
+		c.logToConsole(context, auditLogType, user, logError)
 	}
-
-	loggerEvent.Send()
 
 	return nil
 }
-
-// {"audience":"audit","type":"webauthn_authentication_final_succeeded","http_request_id":"AqV2taczMZk6ERSjhv3XARayUEsFwGzZ","source_ip":"1*****1","user_agent":"M*****6","time":"2022-10-11T14:10:20.5859624Z","time_unix":"1665497420","user_id":"6*****9","user_email":"f*****o"}
 
 func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
 	id, err := uuid.NewV4()
@@ -112,16 +90,22 @@ func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, u
 	return c.persister.GetAuditLogPersister().Create(e)
 }
 
-func (c *logger) maskSensitiveValue(value string) string {
-	if c.logSensitiveValues {
-		return value
-	}
-	if value == "" {
-		return ""
+func (c *logger) logToConsole(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) {
+	now := time.Now()
+	loggerEvent := zeroLogger.Log().
+		Str("audience", "audit").
+		Str("type", string(auditLogType)).
+		AnErr("error", logError).
+		Str("http_request_id", context.Response().Header().Get(echo.HeaderXRequestID)).
+		Str("source_ip", context.RealIP()).
+		Str("user_agent", context.Request().UserAgent()).
+		Str("time", now.Format(time.RFC3339Nano)).
+		Str("time_unix", strconv.FormatInt(now.Unix(), 10))
+
+	if user != nil {
+		loggerEvent.Str("user_id", user.ID.String()).
+			Str("user_email", user.Email)
 	}
 
-	firstCharacter := value[:1]
-	lastCharacter := value[len(value)-1:]
-
-	return fmt.Sprintf("%s*****%s", firstCharacter, lastCharacter)
+	loggerEvent.Send()
 }

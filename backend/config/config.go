@@ -92,8 +92,10 @@ func DefaultConfig() *Config {
 			},
 		},
 		AuditLog: AuditLog{
-			Enabled: true,
-			Output:  OutputStreamStdOut,
+			ConsoleOutput: AuditLogConsole{
+				Enabled:      true,
+				OutputStream: OutputStreamStdOut,
+			},
 		},
 	}
 }
@@ -327,14 +329,17 @@ func (s *Session) Validate() error {
 }
 
 type AuditLog struct {
-	Enabled            bool            `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Output             OutputStream    `yaml:"output" json:"output" koanf:"output"`
-	Storage            AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
-	LogSensitiveValues bool            `yaml:"log_sensitive_values" json:"log_sensitive_values" koanf:"log_sensitive_values"`
+	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output" koanf:"console_output"`
+	Storage       AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
 }
 
 type AuditLogStorage struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type AuditLogConsole struct {
+	Enabled      bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output"`
 }
 
 type OutputStream string

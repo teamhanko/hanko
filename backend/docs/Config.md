@@ -252,39 +252,33 @@ webauthn:
 # Configures audit logging
 #
 audit_log:
-  ## enabled ##
-  #
-  # Sets whether the audit logs are enabled or disabled.
-  #
-  # Default: true
-  #
-  enabled: true
-  ## output ##
-  #
-  # The output to which audit logs are sent.
-  #
-  # Possible values:
-  # - stdout
-  # - stderr
-  #
-  # Default: stdout
-  #
-  output: "stdout"
+  console_output:
+    ## enabled ##
+    #
+    # Sets whether the output to console is enabled or disabled.
+    #
+    # Default: true
+    #
+    enabled: true
+    ## output ##
+    #
+    # The output stream which audit logs are sent to.
+    #
+    # Possible values:
+    # - stdout
+    # - stderr
+    #
+    # Default: stdout
+    #
+    output: "stdout"
   storage:
     ## enabled ##
     #
-    # Sets whether the audit logs are persisted in the database or not. Only works if audit logs are enabled.
+    # Sets whether the audit logs are persisted in the database or not.
     #
     # Default: false
     #
     enabled: false
-  ## log_sensitive_values ##
-  #
-  # Sets whether the audit logs contain sensitive information (e.g. email, ip address, ...).
-  #
-  # Default: false
-  #
-  log_sensitive_values: false
 ```
 
 ## Explanation
