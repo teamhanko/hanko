@@ -1,13 +1,26 @@
 const path = require("path");
 
 module.exports = {
-  entry: './src/index.ts',
+  entry: {
+    hankoAuth: {
+      filename: 'element.hanko-auth.js',
+      import: './src/index.ts',
+      library: {
+        name: 'HankoAuth',
+        type: 'umd',
+        umdNamedDefine: true,
+      },
+    }
+  },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.(tsx?)$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: [/node_modules/, /dist/],
+        resolve: {
+          fullySpecified: false
+        },
       },
       {
         test: /\.(sass)$/,
@@ -25,14 +38,17 @@ module.exports = {
           {
             loader: 'css-loader',
             options: {
+              modules: {
+                localIdentName: "hanko_[local]",
+                localIdentContext: path.resolve(__dirname, "src"),
+              },
               importLoaders: 1,
-              modules: true,
             }
           },
           {
             loader: "sass-loader",
             options: {
-               sourceMap: true,
+              sourceMap: true,
             }
           }
         ]
@@ -49,11 +65,7 @@ module.exports = {
     ],
   },
   output: {
+    clean: true,
     path: path.resolve(__dirname, 'dist'),
-    filename: 'element.hanko-auth.js',
-    library: {
-      name: 'Hanko',
-      type: 'var'
-    },
   },
 };

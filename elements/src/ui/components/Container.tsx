@@ -17,8 +17,8 @@ const Container = ({ children, emitSuccessEvent }: Props) => {
       return;
     }
 
-    const event = new Event("success", {
-      bubbles: false,
+    const event = new Event("hankoAuthSuccess", {
+      bubbles: true,
       composed: true,
     });
 

@@ -161,7 +161,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get passcode: %w", err)
 		}
 		if passcode == nil {
-			businessError = dto.NewHTTPError(http.StatusNotFound, "passcode not found")
+			businessError = dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
 			return nil
 		}
 

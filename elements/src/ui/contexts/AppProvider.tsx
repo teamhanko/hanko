@@ -21,13 +21,19 @@ export const AppContext = createContext<Context>(null);
 const AppProvider = ({ api, children }: Props) => {
   const [config, setConfig] = useState<Config>(null);
 
-  const hanko = useMemo(
-    () => new Hanko(api.length ? api : "https://api.hanko.io", 13000),
-    [api]
-  );
+  const hanko = useMemo(() => {
+    if (api.length) {
+      return new Hanko(api, 13000);
+    }
+    return null;
+  }, [api]);
 
   const configInitialize = useCallback(() => {
     return new Promise<Config>((resolve, reject) => {
+      if (!hanko) {
+        return;
+      }
+
       hanko.config
         .get()
         .then((c) => {

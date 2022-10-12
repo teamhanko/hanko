@@ -76,17 +76,28 @@ module.exports = {
 
 ## Import & use custom element
 
-Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
-Doing so registers the `<hanko-auth>` element with the browser's
+Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
 [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the
 element in your component template:
 
 ```js title="HankoAuth.vue" showLineNumbers
 <script setup>
-import "@teamhanko/hanko-elements/hanko-auth";
+import { onMounted } from "vue";
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
 const api = import.meta.env.VITE_HANKO_API;
 const lang = import.meta.env.VITE_HANKO_LANG;
+
+onMounted(() => {
+  // register the component
+  // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+  register({ shadow: true })
+    .catch((error) => {
+      // handle error
+    });
+});
+
 </script>
 
 <template>
@@ -96,29 +107,40 @@ const lang = import.meta.env.VITE_HANKO_LANG;
 
 ## Defining login callbacks
 
-The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
 event in order to, for example, redirect your users to protected pages in your application.
 
 To do so, you can use Vue's [`v-on`](https://vuejs.org/guide/essentials/event-handling.html#listening-to-events)
 directive (shorthand: `@`) and supply a callback directly on the `<hanko-auth>` element:
 
-```js {2,8-12,16} title="HankoAuth.vue" showLineNumbers
+```js {2,18-23,27} title="HankoAuth.vue" showLineNumbers
 <script setup>
 import { useRouter } from "vue-router";
-import "@teamhanko/hanko-elements/hanko-auth";
+import { onMounted } from "vue";
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
 const api = import.meta.env.VITE_HANKO_API;
 const lang = import.meta.env.VITE_HANKO_LANG;
 
+onMounted(() => {
+  // register the component
+  // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+  register({ shadow: true })
+    .catch((error) => {
+      // handle error
+    });
+});
+
 const router = useRouter();
 
-const redirectToProfile = () => {
-  router.push({ path: "/profile" });
+const redirectAfterLogin = () => {
+  // successfully logged in, redirect to a page in your application
+  router.push({ path: "..." });
 };
 </script>
 
 <template>
-  <hanko-auth @success="redirectToProfile" :api="api" :lang="lang" />
+  <hanko-auth @hankoAuthSuccess="redirectAfterLogin" :api="api" :lang="lang" />
 </template>
 ```
 

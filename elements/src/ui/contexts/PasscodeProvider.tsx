@@ -87,7 +87,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
         }
       });
     },
-    [hanko.passcode, passcodeResend]
+    [hanko, passcodeResend]
   );
 
   const passcodeFinalize = useCallback(
@@ -105,7 +105,7 @@ const PasscodeProvider: FunctionalComponent = ({ children }: Props) => {
           });
       });
     },
-    [hanko.passcode]
+    [hanko]
   );
 
   useEffect(() => {

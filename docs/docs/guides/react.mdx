@@ -19,62 +19,76 @@ npm install @teamhanko/hanko-elements
 
 ## Import & use custom element
 
-Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
-Doing so registers the `<hanko-auth>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the element
-in your JSX:
+Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
+Then use the `<hanko-auth>` element in your JSX.
 
-```jsx {1,4-7} title="HankoAuth.jsx" showLineNumbers
-import "@teamhanko/hanko-elements/hanko-auth";
+```jsx title="HankoAuth.jsx" showLineNumbers
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
-function HankoAuth() {
-  return <hanko-auth
-    api={process.env.NEXT_PUBLIC_HANKO_API}
-    lang={process.env.NEXT_PUBLIC_HANKO_LANG}
-  />;
+const api = process.env.REACT_APP_HANKO_API!;
+const lang = process.env.REACT_APP_HANKO_LANG;
+
+export default function HankoAuth() {
+
+  useEffect(() => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  }, []);
+
+  return (
+    <hanko-auth api={api} lang={lang} />
+  );
 }
-
-export default HankoAuth;
 ```
 
 ## Defining login callbacks
 
-The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
 event in order to, for example, redirect your users to protected pages in your application.
 
-To do so, create a [`ref`](https://reactjs.org/docs/hooks-reference.html#useref) to obtain access to the `<hanko-auth>`
-DOM element and apply an event listener with an appropriate redirect callback:
+To do so, apply an event listener with an appropriate redirect callback:
 
-```jsx {1-2,6-18,22} title="HankoAuth.jsx" showLineNumbers
-import React, { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import "@teamhanko/hanko-elements/hanko-auth";
+```jsx {2,9-20} title="HankoAuth.jsx" showLineNumbers
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
-function HankoAuth() {
-  const ref = useRef(null);
-  const navigate = useNavigate();
+const api = process.env.REACT_APP_HANKO_API!;
+const lang = process.env.REACT_APP_HANKO_LANG;
 
-  const redirectToProfile = () => {
-    navigate("/profile", { replace: true });
-  }
+export default function HankoAuth() {
+  const router = useRouter();
+
+  const redirectAfterLogin = useCallback(() => {
+    // successfully logged in, redirect to a page in your application
+    router.replace("...");
+  }, [router]);
 
   useEffect(() => {
-    const { current } = ref;
+    document.addEventListener("hankoAuthSuccess", redirectAfterLogin);
+    return () =>
+      document.removeEventListener("hankoAuthSuccess", redirectAfterLogin);
+  }, [redirectAfterLogin]);
 
-    current?.addEventListener("success", redirectToProfile);
-    return () => current?.removeEventListener("success", redirectToProfile);
+  useEffect(() => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
   }, []);
 
   return (
-    <hanko-auth
-      ref={ref}
-      api={process.env.REACT_APP_HANKO_API}
-      lang={process.env.REACT_APP_HANKO_LANG}
-    />
+    <hanko-auth api={api} lang={lang} />
   );
 }
-
-export default HankoAuth;
 ```
 
 ## UI customization

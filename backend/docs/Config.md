@@ -250,6 +250,8 @@ webauthn:
 
 For most use cases, you just need the domain of your website that Hanko will be used with. Set `id` to the domain and set `origin` to the domain but include the protocol.
 
+> **Important**: If you are hosting your website on a non standard port you have to include this in the origin setting.
+
 #### Examples
 
 When you have a website hosted at `example.com` and you want to add a login to it that will be available
