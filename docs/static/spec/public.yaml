@@ -608,7 +608,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             code: 401
-            message: Not found
+            message: Unauthorized
   schemas:
     HankoConfiguration:
       description: Public backend configuration options
