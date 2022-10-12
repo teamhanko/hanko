@@ -295,7 +295,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PublicKeyCredentialAssertionResponse'
       responses:
-        '204':
+        '200':
           description: 'Successful login'
           headers:
             X-Auth-Token:
