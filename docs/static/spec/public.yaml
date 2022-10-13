@@ -185,10 +185,6 @@ paths:
                 Cookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.cookie`.
               schema:
                 $ref: '#/components/schemas/CookieSession'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Passcode'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
