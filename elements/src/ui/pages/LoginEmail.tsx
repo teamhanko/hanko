@@ -45,6 +45,8 @@ const LoginEmail = () => {
   const [error, setError] = useState<HankoError>(null);
   const [isAuthenticatorSupported, setIsAuthenticatorSupported] =
     useState<boolean>(null);
+  const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
+    useState<boolean>(null);
 
   // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
   // currently no resident key support on Android.
@@ -68,7 +70,10 @@ const LoginEmail = () => {
           return renderPasscode(userInfo.id, config.password.enabled, true);
         }
 
-        if (!userInfo.has_webauthn_credential) {
+        if (
+          !userInfo.has_webauthn_credential ||
+          isConditionalMediationSupported
+        ) {
           return renderAlternateLoginMethod(userInfo.id);
         }
 
@@ -168,11 +173,40 @@ const LoginEmail = () => {
     [config.password.enabled, renderPasscode, renderPassword]
   );
 
+  const loginViaConditionalUI = useCallback(() => {
+    if (!isConditionalMediationSupported) {
+      // Browser doesn't support AutoFill-assisted requests.
+      return;
+    }
+
+    hanko.webauthn
+      .login(null, true)
+      .then(() => {
+        emitSuccessEvent();
+        setIsEmailLoginSuccess(true);
+
+        return;
+      })
+      .catch((e) => {
+        setError(e instanceof WebauthnRequestCancelledError ? null : e);
+      });
+  }, [emitSuccessEvent, hanko, isConditionalMediationSupported]);
+
+  useEffect(() => {
+    loginViaConditionalUI();
+  }, [loginViaConditionalUI]);
+
   useEffect(() => {
     WebauthnSupport.isPlatformAuthenticatorAvailable()
       .then((supported) => setIsAuthenticatorSupported(supported))
       .catch((e) => setError(new TechnicalError(e)));
-  }, [hanko]);
+  }, []);
+
+  useEffect(() => {
+    WebauthnSupport.isConditionalMediationAvailable()
+      .then((supported) => setIsConditionalMediationSupported(supported))
+      .catch((e) => setError(new TechnicalError(e)));
+  }, []);
 
   return (
     <Content>
@@ -182,7 +216,7 @@ const LoginEmail = () => {
         <InputText
           name={"email"}
           type={"email"}
-          autoComplete={"username"}
+          autoComplete={"username webauthn"}
           autoCorrect={"off"}
           required={true}
           onInput={onEmailInput}
@@ -200,12 +234,18 @@ const LoginEmail = () => {
         <Button
           isLoading={isEmailLoginLoading}
           isSuccess={isEmailLoginSuccess}
-          disabled={isPasskeyLoginLoading || isPasskeyLoginSuccess}
+          disabled={
+            isPasskeyLoginLoading ||
+            isPasskeyLoginSuccess ||
+            isEmailLoginSuccess
+          }
         >
           {t("labels.continue")}
         </Button>
       </Form>
-      {isAuthenticatorSupported && !isAndroidUserAgent ? (
+      {isAuthenticatorSupported &&
+      !isAndroidUserAgent &&
+      !isConditionalMediationSupported ? (
         <Fragment>
           <Divider />
           <Form onSubmit={onPasskeySubmit}>

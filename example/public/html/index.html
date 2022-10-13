@@ -25,9 +25,9 @@
 </footer>
 
 <script>
-    const hanko = document.querySelector("hanko-auth");
+    HankoAuth.register({ shadow: false });
 
-    hanko.addEventListener("success", (event) => {
+    document.addEventListener("hankoAuthSuccess", (event) => {
         console.log(event);
         document.location.href = "/secured"
     })

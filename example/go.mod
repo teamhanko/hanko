@@ -3,7 +3,7 @@ module github.com/teamhanko/hanko/example
 go 1.17
 
 require (
-	github.com/labstack/echo/v4 v4.7.2
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/lestrrat-go/jwx/v2 v2.0.2
 )
 

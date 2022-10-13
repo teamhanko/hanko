@@ -49,10 +49,10 @@ export class AppModule { }
 
 ## Import & use custom element
 
-Import `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the Hanko custom element.
-Doing so registers the `<hanko-auth>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the element
-in your component template:
+Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the
+element in your component template:
 
 ```mdx-code-block
 <Tabs>
@@ -68,10 +68,10 @@ in your component template:
 <TabItem value="ts" label="login.component.ts">
 ```
 
-```js {3,11-12} title="login.component.ts" showLineNumbers
+```js title="login.component.ts" showLineNumbers
 import { Component } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import '@teamhanko/hanko-elements/hanko-auth';
+import { register } from '@teamhanko/hanko-elements/hanko-auth';
 
 @Component({
   selector: 'app-login',
@@ -81,6 +81,15 @@ import '@teamhanko/hanko-elements/hanko-auth';
 export class LoginComponent {
   hankoApi = environment.hankoApi;
   hankoLang = environment.hankoLang;
+
+  constructor() {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  }
 }
 ```
 
@@ -89,11 +98,9 @@ export class LoginComponent {
 </Tabs>
 ```
 
-
-
 ## Defining login callbacks
 
-The `<hanko-auth>` element dispatches a custom `success` event on successful login. React to this
+The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
 event in order to, for example, redirect your users to protected pages in your application.
 
 To do so, you can use Angular's event binding mechanism and supply a callback function that is defined in your component
@@ -106,7 +113,7 @@ class directly on the `<hanko-auth>` element:
 
 ```html {2} title="login.component.html" showLineNumbers
 <hanko-auth
-  (success)="redirectToProfile()"
+  (hankoAuthSuccess)="redirectAfterLogin()"
   [api]="hankoApi"
   [lang]="hankoLang">
 </hanko-auth>
@@ -117,11 +124,11 @@ class directly on the `<hanko-auth>` element:
 <TabItem value="ts" label="login.component.ts">
 ```
 
-```js {3,15-19} title="login.component.ts" showLineNumbers
+```js {3,15,24-27} title="login.component.ts" showLineNumbers
 import { Component } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
-import '@teamhanko/hanko-elements/hanko-auth';
+import { register } from '@teamhanko/hanko-elements/hanko-auth';
 
 @Component({
   selector: 'app-login',
@@ -132,10 +139,18 @@ export class LoginComponent {
   hankoApi = environment.hankoApi;
   hankoLang = environment.hankoLang;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  }
 
-  redirectToProfile() {
-    this.router.navigate(['/profile']);
+  redirectAfterLogin() {
+    // successfully logged in, redirect to a page in your application
+    this.router.navigate('...');
   }
 }
 ```

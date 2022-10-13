@@ -1,0 +1,15 @@
+services:
+  todo-backend:
+    build: ../../examples/express
+    ports:
+      - "8002:8002"
+    environment:
+      - HANKO_API_URL=http://hanko:8000
+    networks:
+      - intranet
+  todo-frontend:
+    build: ../../examples/angular
+    ports:
+      - "8888:8888"
+    networks:
+      - intranet

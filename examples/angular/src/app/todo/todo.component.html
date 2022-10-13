@@ -1,0 +1,33 @@
+<nav class="nav">
+  <button (click)="logout()" class="button">Logout</button>
+</nav>
+<div class="content">
+  <h1 class="headline">Todos</h1>
+  <div class="error">{{ error?.message }}</div>
+  <form (submit)="addTodo($event)" class="form">
+    <input
+      required
+      class="input"
+      type="text"
+      value="{{ description }}"
+      (change)="changeDescription($event)"
+    />
+    <button type="submit" class="button">+</button>
+  </form>
+  <div class="list">
+    <div *ngFor="let todo of todos" class="item">
+      <input
+        class="checkbox"
+        id="{{ todo.todoID }}"
+        type="checkbox"
+        value="{{ todo.todoID }}"
+        [checked]="todo.checked"
+        (change)="changeCheckbox($event)"
+      />
+      <label class="description" for="{{ todo.todoID }}">{{
+        todo.description
+      }}</label>
+      <button class="button" (click)="deleteTodo(todo.todoID!)">×</button>
+    </div>
+  </div>
+</div>

@@ -28,16 +28,34 @@ pnpm install @teamhanko/hanko-elements
 
 ### Script
 
-Import as a module:
+The web component needs to be registered first. You can control whether it should be attached to the shadow DOM or not
+using the `shadow` property. It's set to true by default, and you will be able to use the CSS parts
+to change the appearance of the component.
+
+There is currently an issue with Safari browsers, which breaks the autocompletion feature of
+input fields when the component is shadow DOM attached. So if you want to make use of the conditional UI or other
+autocompletion features you must set `shadow` to false. The disadvantage is that the CSS parts are not working anymore, and you must
+style the component by providing your own CSS properties. CSS variables will work in both cases.
+
+Use as a module:
 
 ```typescript
-import "@teamhanko/hanko-elements/hanko-auth"
+import { register } from "@teamhanko/hanko-elements/hanko-auth"
+
+register({
+  shadow: true,      // Set to false if you don't want the web component to be attached to the shadow DOM.
+  injectStyles: true // Set to false if you don't want to inject any default styles.
+})
 ```
 
 With a script tag via CDN:
 
 ```html
-<script type="module" src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/element.hanko-auth.js">
+<script src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/element.hanko-auth.js"/>
+
+<script>
+    HankoAuth.register({ shadow: true, injectStyles: true })
+</script>
 ```
 
 ### Markup
@@ -58,16 +76,13 @@ do is adding the `<hanko-auth>` element to your page.
 
 ## Events
 
-Events are dispatched on the `<hanko-auth>` element. These events do not bubble.
+These events bubble up through the DOM tree.
 
-- `success` - Login or registration completed successfully and a JWT has been issued. You can now take control and
-  redirect the user to protected pages.
+- `hankoAuthSuccess` - Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the user to protected pages.
 
 ```js
-const hanko = document.querySelector('hanko-auth')
-
-hanko.addEventListener('success', () => {
-    hanko.parentElement.innerHTML = 'secured content...'
+document.addEventListener('hankoAuthSuccess', () => {
+    document.body.innerHTML = 'secured content...'
 })
 ```
 
@@ -155,6 +170,49 @@ The following parts are available:
 - `error-text` - the error message
 - `divider` - the horizontal divider on the login page
 - `divider-text` - the divider text
+
+### CSS classes
+
+There is also the possibility to provide your own CSS rules when the web component has not been attached to the shadow
+DOM:
+
+```typescript
+register({ shadow: false })
+```
+
+Please take a look at the [CSS example](https://github.com/teamhanko/hanko/raw/main/elements/example.css) file to see
+which CSS rules can be used. If you only want to change specific properties you can override the predefined ones. For
+example if you like to change the background color, include the following CSS rule:
+
+```css
+.hanko_container {
+  background-color: blue !important;
+}
+```
+
+Also, you can prevent injecting any styles:
+
+```typescript
+register({ shadow: false, injectStyles: false })
+```
+
+so you don't need to override properties but provide the entirety of CSS rules:
+
+```css
+.hanko_container {
+  background-color: blue;
+}
+
+/* more css rules... */
+```
+
+If this is your preferred approach, start with the [CSS example](https://github.com/teamhanko/hanko/raw/main/elements/example.css)
+file, change everything according to your needs and include the CSS in your page.
+
+Keep in mind we made CSS classes available and added light DOM support only because a Safari bug is breaking the
+autocompletion of input elements while the web component is attached to the shadow DOM. You would normally prefer to
+attach the component to the shadow DOM and make use of CSS parts for UI customization when the CSS variables are not
+sufficient.
 
 ### Example
 
