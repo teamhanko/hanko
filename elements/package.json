@@ -48,7 +48,7 @@
   "homepage": "https://hanko.io",
   "devDependencies": {
     "@types/preact-custom-element": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.32.0",
+    "@typescript-eslint/eslint-plugin": "^5.40.0",
     "@typescript-eslint/parser": "^5.40.0",
     "css-loader": "^6.7.1",
     "eslint": "^8.25.0",
