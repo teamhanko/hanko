@@ -12,6 +12,7 @@ require (
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/lestrrat-go/jwx/v2 v2.0.6
 	github.com/nicksnyder/go-i18n/v2 v2.2.0
+	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.0
 	github.com/stretchr/testify v1.8.0
 	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8
@@ -66,8 +67,8 @@ require (
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.0 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
-	github.com/mattn/go-isatty v0.0.14 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.16 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/microcosm-cc/bluemonday v1.0.20 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
@@ -85,7 +86,7 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
 	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
-	golang.org/x/sys v0.0.0-20220728004956-3c1f35247d10 // indirect
+	golang.org/x/sys v0.0.0-20220811171246-fbc7d0a398ab // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
