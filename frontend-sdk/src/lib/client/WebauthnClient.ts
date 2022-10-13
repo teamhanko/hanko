@@ -12,7 +12,6 @@ import {
 import { Attestation, User, WebauthnFinalized } from "../Dto";
 import { WebauthnSupport } from "../WebauthnSupport";
 import { Client } from "./Client";
-import { PublicKeyCredentialWithAssertionJSON } from "@github/webauthn-json/src/webauthn-json/basic/json";
 
 /**
  * A class that handles WebAuthn authentication and registration.
@@ -26,7 +25,6 @@ class WebauthnClient extends Client {
   state: WebauthnState;
 
   _getCredentialController: AbortController;
-  _getCredentialPromise: Promise<PublicKeyCredentialWithAssertionJSON>;
 
   _getCredential = getWebauthnCredential;
   _createCredential = createWebauthnCredential;
@@ -39,6 +37,7 @@ class WebauthnClient extends Client {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
+    this._getCredentialController = new AbortController();
   }
 
   /**
@@ -83,8 +82,7 @@ class WebauthnClient extends Client {
 
     let assertion;
     try {
-      this._getCredentialPromise = this._getCredential(challenge);
-      assertion = await this._getCredentialPromise;
+      assertion = await this._getCredential(challenge);
     } catch (e) {
       throw new WebauthnRequestCancelledError(e);
     }
@@ -195,11 +193,16 @@ class WebauthnClient extends Client {
   }
 
   // eslint-disable-next-line require-jsdoc
-  async _abortPendingGetCredentialRequest() {
-    if (this._getCredentialController) {
-      this._getCredentialController.abort();
-      return this._getCredentialPromise;
-    }
+  _abortPendingGetCredentialRequest() {
+    const controller = this._getCredentialController;
+    return new Promise<void>((resolve) => {
+      if (controller) {
+        controller.signal.addEventListener("abort", () => {
+          resolve();
+        });
+        controller.abort();
+      }
+    });
   }
 }
 
