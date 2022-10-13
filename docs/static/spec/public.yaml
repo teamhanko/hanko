@@ -241,8 +241,8 @@ paths:
         Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use
         with the Webauthn API's `navigator.credentials.get()`.
 
-        Omitting the optional request body results in generation of request options for a login using a
-        [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
+        Omitting the optional request body or using an empty JSON object results in generation of request options for a
+        login using a [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
         (i.e. they will not contain
         [allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).
 
@@ -270,6 +270,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CredentialRequestOptions'
+              examples:
+                non-disco:
+                  summary: Non-Discoverable credentials
+                  value:
+                    publicKey:
+                      challenge: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+                      timeout: 60000
+                      rpId: localhost
+                      allowCredentials:
+                        - type: public-key
+                          id: Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...
+                      userVerification: required
+                disco:
+                  summary: Discoverable credentials
+                  value:
+                    challenge: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+                    timeout: 60000
+                    rpId: localhost
+                    userVerification: required
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
