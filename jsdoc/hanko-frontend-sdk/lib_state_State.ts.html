@@ -107,7 +107,7 @@ interface LocalStorage {
  */
 abstract class State {
   private readonly key: string;
-  protected ls: LocalStorage;
+  ls: LocalStorage;
 
   // eslint-disable-next-line require-jsdoc
   constructor(key = "hanko") {
@@ -117,7 +117,6 @@ abstract class State {
      */
     this.key = key;
     /**
-     *  @protected
      *  @type {LocalStorage}
      */
     this.ls = {};
@@ -126,24 +125,22 @@ abstract class State {
   /**
    * Reads and decodes the locally stored data.
    *
-   * @protected
    * @return {State}
    */
-  protected read(): State {
+  read(): State {
     let store: LocalStorage;
 
     try {
       const data = localStorage.getItem(this.key);
       const decoded = decodeURIComponent(decodeURI(window.atob(data)));
-
       store = JSON.parse(decoded);
-    } catch (_) {
+    } catch (e) {
       this.ls = {};
 
       return this;
     }
 
-    this.ls = store || {};
+    this.ls = store;
 
     return this;
   }
@@ -166,11 +163,10 @@ abstract class State {
    * Converts a timestamp into remaining seconds that you can count down.
    *
    * @static
-   * @protected
    * @param {number} time - Timestamp in seconds (since January 1, 1970 00:00:00 UTC).
    * @return {number}
    */
-  protected static timeToRemainingSeconds(time: number = 0) {
+  static timeToRemainingSeconds(time = 0) {
     return time - Math.floor(Date.now() / 1000);
   }
 
@@ -178,16 +174,16 @@ abstract class State {
    * Converts a number of seconds into a timestamp.
    *
    * @static
-   * @protected
    * @param {number} seconds - Remaining seconds to be converted into a timestamp.
    * @return {number}
    */
-  protected static remainingSecondsToTime(seconds: number = 0) {
+  static remainingSecondsToTime(seconds = 0) {
     return Math.floor(Date.now() / 1000) + seconds;
   }
 }
 
 export { State };
+export type { LocalStorage };
 </code></pre>
         </article>
     </section>
