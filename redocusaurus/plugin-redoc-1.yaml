@@ -104,6 +104,48 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /audit_logs:
+    get:
+      summary: Get a list of audit logs
+      operationId: listAuditLogs
+      tags:
+        - Audit Logs
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: The page which should be returned
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 20
+          description: The number of returned items
+        - in: query
+          name: start_time
+          schema:
+            type: string
+            example: '2022-09-12T12:48:48Z'
+          description: Date and time from which the logs are included
+        - in: query
+          name: end_time
+          schema:
+            type: string
+            example: '2022-09-15T12:48:48Z'
+          description: Date and time to which the logs are included
+      responses:
+        '200':
+          description: Details about audit logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:
@@ -167,6 +209,75 @@ components:
                 type: string
                 format: base64url
                 example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
+    AuditLog:
+      type: object
+      required:
+        - id
+        - type
+        - meta_http_request_id
+        - meta_source_ip
+        - meta_user_agent
+        - created_at
+        - updated_at
+      properties:
+        id:
+          description: The ID of the audit log
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+        type:
+          description: The type of the audit log
+          type: string
+          enum:
+            - user_created
+            - password_set_succeeded
+            - password_set_failed
+            - password_login_succeeded
+            - password_login_failed
+            - passcode_login_init_succeeded
+            - passcode_login_init_failed
+            - passcode_login_final_succeeded
+            - passcode_login_final_failed
+            - webauthn_registration_init_succeeded
+            - webauthn_registration_init_failed
+            - webauthn_registration_final_succeeded
+            - webauthn_registration_final_failed
+            - webauthn_authentication_init_succeeded
+            - webauthn_authentication_init_failed
+            - webauthn_authentication_final_succeeded
+            - webauthn_authentication_final_failed
+        error:
+          description: A more detailed message why something failed
+          type: string
+        meta_http_request_id:
+          description: The ID of the corresponding http request
+          type: string
+          example: 0a2xsrhlhiQv49FIpq8KV8uQVq6ky9Bw
+        meta_source_ip:
+          description: The IP from where the http request came from
+          type: string
+          format: ip-address
+          example: 172.27.0.1
+        meta_user_agent:
+          description: The user agent from where the http request came from
+          type: string
+        actor_user_id:
+          description: The userID from the actor
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+        actor_email:
+          description: The email from the actor
+          type: string
+          format: email
+        created_at:
+          description: Time of creation of the the audit log
+          type: string
+          format: date-time
+          example: '2022-09-14T12:15:09.788784Z'
+        updated_at:
+          description: Time of last update of the audit log
+          type: string
+          format: date-time
+          example: '2022-09-14T12:15:09.788784Z'
     UUID4:
       type: string
       format: uuid4
