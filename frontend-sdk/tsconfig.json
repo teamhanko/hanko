@@ -1,6 +1,7 @@
 {
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "tests/**/*"
   ],
   "compilerOptions": {
     "paths": {
@@ -21,7 +22,7 @@
     "lib":["ES2015", "ES2016", "dom"],
     "sourceMap": true,
     "noImplicitAny": true,
-    "target": "es5",
-    "module": "commonjs"
+    "target": "es6",
+    "module": "commonjs",
   }
 }

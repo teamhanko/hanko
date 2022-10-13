@@ -27,24 +27,16 @@ class UserClient extends Client {
    * @throws {TechnicalError}
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/getUserId
    */
-  getInfo(email: string): Promise<UserInfo> {
-    return new Promise<UserInfo>((resolve, reject) => {
-      this.client
-        .post("/user", { email })
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else if (response.status === 404) {
-            throw new NotFoundError();
-          } else {
-            throw new TechnicalError();
-          }
-        })
-        .then((u: UserInfo) => resolve(u))
-        .catch((e) => {
-          reject(e);
-        });
-    });
+  async getInfo(email: string): Promise<UserInfo> {
+    const response = await this.client.post("/user", { email });
+
+    if (response.status === 404) {
+      throw new NotFoundError();
+    } else if (!response.ok) {
+      throw new TechnicalError();
+    }
+
+    return response.json();
   }
 
   /**
@@ -58,23 +50,16 @@ class UserClient extends Client {
    * @throws {TechnicalError}
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/createUser
    */
-  create(email: string): Promise<User> {
-    return new Promise<User>((resolve, reject) => {
-      this.client
-        .post("/users", { email })
-        .then((response) => {
-          if (response.ok) {
-            return resolve(response.json());
-          } else if (response.status === 409) {
-            throw new ConflictError();
-          } else {
-            throw new TechnicalError();
-          }
-        })
-        .catch((e) => {
-          reject(e);
-        });
-    });
+  async create(email: string): Promise<User> {
+    const response = await this.client.post("/users", { email });
+
+    if (response.status === 409) {
+      throw new ConflictError();
+    } else if (!response.ok) {
+      throw new TechnicalError();
+    }
+
+    return response.json();
   }
 
   /**
@@ -87,43 +72,33 @@ class UserClient extends Client {
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/IsUserAuthorized
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/listUser
    */
-  getCurrent(): Promise<User> {
-    return new Promise<User>((resolve, reject) =>
-      this.client
-        .get("/me")
-        .then((response) => {
-          if (response.ok) {
-            return response.json();
-          } else if (
-            response.status === 400 ||
-            response.status === 401 ||
-            response.status === 404
-          ) {
-            throw new UnauthorizedError();
-          } else {
-            throw new TechnicalError();
-          }
-        })
-        .then((me: Me) => {
-          return this.client.get(`/users/${me.id}`);
-        })
-        .then((response) => {
-          if (response.ok) {
-            return resolve(response.json());
-          } else if (
-            response.status === 400 ||
-            response.status === 401 ||
-            response.status === 404
-          ) {
-            throw new UnauthorizedError();
-          } else {
-            throw new TechnicalError();
-          }
-        })
-        .catch((e) => {
-          reject(e);
-        })
-    );
+  async getCurrent(): Promise<User> {
+    const meResponse = await this.client.get("/me");
+
+    if (
+      meResponse.status === 400 ||
+      meResponse.status === 401 ||
+      meResponse.status === 404
+    ) {
+      throw new UnauthorizedError();
+    } else if (!meResponse.ok) {
+      throw new TechnicalError();
+    }
+
+    const me: Me = meResponse.json();
+    const userResponse = await this.client.get(`/users/${me.id}`);
+
+    if (
+      userResponse.status === 400 ||
+      userResponse.status === 401 ||
+      userResponse.status === 404
+    ) {
+      throw new UnauthorizedError();
+    } else if (!userResponse.ok) {
+      throw new TechnicalError();
+    }
+
+    return userResponse.json();
   }
 }
 

@@ -109,7 +109,7 @@ class HttpClient {
   }
 
   // eslint-disable-next-line require-jsdoc
-  _fetch(path: string, options: RequestInit) {
+  _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
     const api = this.api;
     const url = api + path;
     const timeout = this.timeout;
@@ -117,8 +117,6 @@ class HttpClient {
     const bearerToken = Cookies.get(cookieName);
 
     return new Promise<Response>(function (resolve, reject) {
-      const xhr = new XMLHttpRequest();
-
       xhr.open(options.method, url, true);
       xhr.setRequestHeader("Accept", "application/json");
       xhr.setRequestHeader("Content-Type", "application/json");
@@ -136,7 +134,7 @@ class HttpClient {
           .filter((h) => h.toLowerCase().startsWith("x-auth-token"));
 
         if (headers.length) {
-          const authToken = xhr.getResponseHeader("x-auth-token");
+          const authToken = xhr.getResponseHeader("X-Auth-Token");
 
           if (authToken) {
             const secure = !!api.match("^https://");

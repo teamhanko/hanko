@@ -47,11 +47,10 @@ abstract class UserState extends State {
   /**
    * Gets the state of the specified user.
    *
-   * @protected
    * @param {string} userID - The UUID of the user.
    * @return {LocalStorageUser}
    */
-  protected getUserState(userID: string): LocalStorageUser {
+  getUserState(userID: string): LocalStorageUser {
     this.ls.users ||= {};
 
     if (!Object.prototype.hasOwnProperty.call(this.ls.users, userID)) {
