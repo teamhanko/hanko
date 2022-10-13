@@ -390,8 +390,6 @@ paths:
                       - $ref: '#/components/schemas/UUID4'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /.well-known/jwks.json:
