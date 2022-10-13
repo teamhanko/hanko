@@ -42,11 +42,11 @@
   ],
   "homepage": "https://hanko.io",
   "devDependencies": {
-    "@github/webauthn-json": "^2.0.0",
+    "@github/webauthn-json": "^2.0.1",
     "@types/jest": "^29.0.3",
     "@typescript-eslint/eslint-plugin": "^5.40.0",
     "better-docs": "^2.7.2",
-    "eslint": "^8.11.0",
+    "eslint": "^8.25.0",
     "eslint-config-google": "^0.14.0",
     "eslint-config-preact": "^1.3.0",
     "eslint-config-prettier": "^8.5.0",
@@ -58,7 +58,7 @@
     "microbundle": "^0.15.1",
     "ts-jest": "^29.0.3",
     "ts-loader": "^9.4.1",
-    "typescript": "^4.7.4"
+    "typescript": "^4.8.4"
   },
   "dependencies": {
     "@types/js-cookie": "^3.0.2"

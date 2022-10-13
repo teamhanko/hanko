@@ -40,17 +40,22 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | JWT signing |
 | ✅ | User management API |
 | ✅ | 📢 Hanko Alpha Release |
-| ✅ | Hanko web component |
+| ✅ | `hanko-auth` web component |
 | ✅ | Customizable CSS |
 | ✅ | 📢 Hanko Beta Release |
 | ✅ | JavaScript frontend SDK |
-| ⚙️ | [Passkey Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI) support |
-| ⚙️ | Events API |
-| | 2FA with FIDO Security Keys and TOTP to secure fallback auth methods |
-| | Native app support for Android and iOS apps |
-| | OAuth2 plugin system (Sign in with Google/Apple/GitHub/...) |
-| | SMS passcode delivery |
-| | Session management |
+| ⚙️ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
+| ⚙️ | Audit logs API |
+| | Rate limiting |
+| | `hanko-profile` web component |
+| | SSO plugin system (Sign in with Google/Apple/GitHub/...) |
+| | Support for native Android and iOS apps |
+| | 2FA to secure fallback auth methods |
+
+Additional features that have been requested or that we would like to build but are not yet on the roadmap:
+- SMS passcode delivery
+- Session management
+- WebAuthn server-side API
 
 # Quickstart
 The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
@@ -76,7 +81,8 @@ The Hanko project consists of
 - [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and passwords, as well as user management and JWT token issuing
 - [hanko-elements](/elements/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
 - [hanko-frontend-sdk](/frontend-sdk/README.md) - A client package for using the Hanko API
-- [example](/example) - The quickstart example app, showing off Hanko's strengths and acting as a reference implementation
+- [example](/example) - The quickstart example app, showing off Hanko's login experience and acting as a reference implementation
+- [examples](/examples) - Hanko example implementations for a number of frameworks
 - [docs](/docs) - The Hanko documentation
 
 # Community
