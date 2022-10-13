@@ -22,6 +22,7 @@ type Config struct {
 	Secrets  Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
 	Service  Service          `yaml:"service" json:"service" koanf:"service"`
 	Session  Session          `yaml:"session" json:"session" koanf:"session"`
+	AuditLog AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -88,6 +89,12 @@ func DefaultConfig() *Config {
 				HttpOnly: true,
 				SameSite: "strict",
 				Secure:   true,
+			},
+		},
+		AuditLog: AuditLog{
+			ConsoleOutput: AuditLogConsole{
+				Enabled:      true,
+				OutputStream: OutputStreamStdOut,
 			},
 		},
 	}
@@ -320,3 +327,24 @@ func (s *Session) Validate() error {
 	}
 	return nil
 }
+
+type AuditLog struct {
+	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output" koanf:"console_output"`
+	Storage       AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
+}
+
+type AuditLogStorage struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type AuditLogConsole struct {
+	Enabled      bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output"`
+}
+
+type OutputStream string
+
+var (
+	OutputStreamStdOut OutputStream = "stdout"
+	OutputStreamStdErr OutputStream = "stderr"
+)

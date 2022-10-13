@@ -247,6 +247,38 @@ webauthn:
     # - https://subdomain.example.com
     #
     origin: "http://localhost"
+## audit_log ##
+#
+# Configures audit logging
+#
+audit_log:
+  console_output:
+    ## enabled ##
+    #
+    # Sets whether the output to console is enabled or disabled.
+    #
+    # Default: true
+    #
+    enabled: true
+    ## output ##
+    #
+    # The output stream which audit logs are sent to.
+    #
+    # Possible values:
+    # - stdout
+    # - stderr
+    #
+    # Default: stdout
+    #
+    output: "stdout"
+  storage:
+    ## enabled ##
+    #
+    # Sets whether the audit logs are persisted in the database or not.
+    #
+    # Default: false
+    #
+    enabled: false
 ```
 
 ## Explanation
