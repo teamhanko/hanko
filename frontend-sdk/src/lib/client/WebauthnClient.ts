@@ -12,6 +12,7 @@ import {
 import { Attestation, User, WebauthnFinalized } from "../Dto";
 import { WebauthnSupport } from "../WebauthnSupport";
 import { Client } from "./Client";
+import { PublicKeyCredentialWithAssertionJSON } from "@github/webauthn-json/src/webauthn-json/basic/json";
 
 /**
  * A class that handles WebAuthn authentication and registration.
@@ -23,7 +24,9 @@ import { Client } from "./Client";
  */
 class WebauthnClient extends Client {
   state: WebauthnState;
-  controller: AbortController;
+
+  _getCredentialController: AbortController;
+  _getCredentialPromise: Promise<PublicKeyCredentialWithAssertionJSON>;
 
   _getCredential = getWebauthnCredential;
   _createCredential = createWebauthnCredential;
@@ -36,11 +39,6 @@ class WebauthnClient extends Client {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
-    /**
-     *  @public
-     *  @type {AbortController}
-     */
-    this.controller = new AbortController();
   }
 
   /**
@@ -62,6 +60,8 @@ class WebauthnClient extends Client {
     userID?: string,
     useConditionalMediation?: boolean
   ): Promise<void> {
+    await this._abortPendingGetCredentialRequest();
+
     const challengeResponse = await this.client.post(
       "/webauthn/login/initialize",
       { user_id: userID }
@@ -76,13 +76,15 @@ class WebauthnClient extends Client {
     if (useConditionalMediation) {
       // `CredentialMediationRequirement` doesn't support "conditional" in the current typescript version.
       challenge.mediation = "conditional" as CredentialMediationRequirement;
-    }
 
-    challenge.signal = this.controller.signal;
+      this._getCredentialController = new AbortController();
+      challenge.signal = this._getCredentialController.signal;
+    }
 
     let assertion;
     try {
-      assertion = await this._getCredential(challenge);
+      this._getCredentialPromise = this._getCredential(challenge);
+      assertion = await this._getCredentialPromise;
     } catch (e) {
       throw new WebauthnRequestCancelledError(e);
     }
@@ -121,6 +123,8 @@ class WebauthnClient extends Client {
    * @see https://www.w3.org/TR/webauthn-2/#sctn-registering-a-new-credential
    */
   async register(): Promise<void> {
+    await this._abortPendingGetCredentialRequest();
+
     const challengeResponse = await this.client.post(
       "/webauthn/registration/initialize"
     );
@@ -188,6 +192,14 @@ class WebauthnClient extends Client {
       .matchCredentials(user.id, user.webauthn_credentials);
 
     return supported && !matches.length;
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  async _abortPendingGetCredentialRequest() {
+    if (this._getCredentialController) {
+      this._getCredentialController.abort();
+      return this._getCredentialPromise;
+    }
   }
 }
 
