@@ -348,8 +348,6 @@ paths:
                 $ref: '#/components/schemas/CredentialCreationOptions'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /webauthn/registration/finalize:
