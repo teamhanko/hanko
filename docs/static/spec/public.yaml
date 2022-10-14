@@ -864,9 +864,11 @@ components:
           format: date-time
     Password:
       description: |
-        The actual password, its `minLength` is determined by [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `password.min_password_length`.
+        The actual password, its `minLength` defaults to 8 but
+        can be [configured](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+        through the `password.min_password_length` option.
       type: string
-      minLength: determined by configuration
+      minLength: 8
       maxLength: 72
       example: 9UnCBEx924a45P7p
     PublicKeyCredentialAssertionResponse:
