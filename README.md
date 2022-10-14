@@ -55,7 +55,6 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 Additional features that have been requested or that we would like to build but are not yet on the roadmap:
 - SMS passcode delivery
 - Session management
-- WebAuthn server-side API
 
 # Quickstart
 The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
