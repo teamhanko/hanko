@@ -69,7 +69,7 @@
     "@denysvuika/preact-translate": "^0.4.1",
     "@teamhanko/hanko-frontend-sdk": "^0.0.6-alpha",
     "classnames": "^2.3.2",
-    "preact": "^10.10.1",
+    "preact": "^10.11.1",
     "preact-custom-element": "^4.2.1"
   }
 }
