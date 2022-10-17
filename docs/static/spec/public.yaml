@@ -138,6 +138,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '408':
+          $ref: '#/components/responses/RequestTimeOut'
         '410':
           $ref: '#/components/responses/Gone'
         '500':
@@ -183,10 +185,6 @@ paths:
                 Cookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.cookie`.
               schema:
                 $ref: '#/components/schemas/CookieSession'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Passcode'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -243,8 +241,8 @@ paths:
         Initialize a login with Webauthn. Returns a JSON representation of CredentialRequestOptions for use
         with the Webauthn API's `navigator.credentials.get()`.
 
-        Omitting the optional request body results in generation of request options for a login using a
-        [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
+        Omitting the optional request body or using an empty JSON object results in generation of request options for a
+        login using a [discoverable credential](https://www.w3.org/TR/webauthn-2/#client-side-discoverable-public-key-credential-source)
         (i.e. they will not contain
         [allowCredentials](https://www.w3.org/TR/webauthn-2/#dom-publickeycredentialrequestoptions-allowcredentials)).
 
@@ -272,6 +270,25 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CredentialRequestOptions'
+              examples:
+                non-disco:
+                  summary: Non-Discoverable credentials
+                  value:
+                    publicKey:
+                      challenge: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+                      timeout: 60000
+                      rpId: localhost
+                      allowCredentials:
+                        - type: public-key
+                          id: Mepptysj5ZZrTlg0qiLbsZ068OtQMeGVAikVy2n1hvvG...
+                      userVerification: required
+                disco:
+                  summary: Discoverable credentials
+                  value:
+                    challenge: qgOI+0KpGnl9NOqaT6dfsYvi96R87LgpErnvePeOgSU=
+                    timeout: 60000
+                    rpId: localhost
+                    userVerification: required
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -295,7 +312,7 @@ paths:
             schema:
               $ref: '#/components/schemas/PublicKeyCredentialAssertionResponse'
       responses:
-        '204':
+        '200':
           description: 'Successful login'
           headers:
             X-Auth-Token:
@@ -316,6 +333,8 @@ paths:
                 $ref: '#/components/schemas/WebauthnLoginResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /webauthn/registration/initialize:
@@ -344,8 +363,6 @@ paths:
                 $ref: '#/components/schemas/CredentialCreationOptions'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /webauthn/registration/finalize:
@@ -388,8 +405,6 @@ paths:
                       - $ref: '#/components/schemas/UUID4'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /.well-known/jwks.json:
@@ -486,6 +501,8 @@ paths:
                     description: The id of the current user
                     allOf:
                       - $ref: '#/components/schemas/UUID4'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':
@@ -516,6 +533,8 @@ paths:
                 $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /users/{id}:
@@ -540,6 +559,8 @@ paths:
                 $ref: '#/components/schemas/User'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -600,6 +621,15 @@ components:
           example:
             code: 404
             message: Not found
+    RequestTimeOut:
+      description: Request Timeout
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 408
+            message: Request Timeout
     Unauthorized:
       description: Unauthorized
       content:
@@ -608,7 +638,7 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             code: 401
-            message: Not found
+            message: Unauthorized
   schemas:
     HankoConfiguration:
       description: Public backend configuration options
@@ -834,9 +864,11 @@ components:
           format: date-time
     Password:
       description: |
-        The actual password, its `minLength` is determined by [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `password.min_password_length`.
+        The actual password, its `minLength` defaults to 8 but
+        can be [configured](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+        through the `password.min_password_length` option.
       type: string
-      minLength: determined by configuration
+      minLength: 8
       maxLength: 72
       example: 9UnCBEx924a45P7p
     PublicKeyCredentialAssertionResponse:
