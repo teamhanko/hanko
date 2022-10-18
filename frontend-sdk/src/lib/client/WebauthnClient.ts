@@ -23,8 +23,7 @@ import { Client } from "./Client";
  */
 class WebauthnClient extends Client {
   state: WebauthnState;
-
-  _getCredentialController: AbortController;
+  controller: AbortController;
 
   _getCredential = getWebauthnCredential;
   _createCredential = createWebauthnCredential;
@@ -37,7 +36,6 @@ class WebauthnClient extends Client {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
-    this._getCredentialController = new AbortController();
   }
 
   /**
@@ -59,8 +57,6 @@ class WebauthnClient extends Client {
     userID?: string,
     useConditionalMediation?: boolean
   ): Promise<void> {
-    await this._abortPendingGetCredentialRequest();
-
     const challengeResponse = await this.client.post(
       "/webauthn/login/initialize",
       { user_id: userID }
@@ -75,9 +71,7 @@ class WebauthnClient extends Client {
     if (useConditionalMediation) {
       // `CredentialMediationRequirement` doesn't support "conditional" in the current typescript version.
       challenge.mediation = "conditional" as CredentialMediationRequirement;
-
-      this._getCredentialController = new AbortController();
-      challenge.signal = this._getCredentialController.signal;
+      challenge.signal = this._createAbortSignal();
     }
 
     let assertion;
@@ -121,8 +115,6 @@ class WebauthnClient extends Client {
    * @see https://www.w3.org/TR/webauthn-2/#sctn-registering-a-new-credential
    */
   async register(): Promise<void> {
-    await this._abortPendingGetCredentialRequest();
-
     const challengeResponse = await this.client.post(
       "/webauthn/registration/initialize"
     );
@@ -134,6 +126,7 @@ class WebauthnClient extends Client {
     }
 
     const challenge = challengeResponse.json();
+    challenge.signal = this._createAbortSignal();
 
     let attestation;
     try {
@@ -193,16 +186,13 @@ class WebauthnClient extends Client {
   }
 
   // eslint-disable-next-line require-jsdoc
-  _abortPendingGetCredentialRequest() {
-    const controller = this._getCredentialController;
-    return new Promise<void>((resolve) => {
-      if (controller) {
-        controller.signal.addEventListener("abort", () => {
-          resolve();
-        });
-        controller.abort();
-      }
-    });
+  _createAbortSignal() {
+    if (this.controller) {
+      this.controller.abort();
+    }
+
+    this.controller = new AbortController();
+    return this.controller.signal;
   }
 }
 

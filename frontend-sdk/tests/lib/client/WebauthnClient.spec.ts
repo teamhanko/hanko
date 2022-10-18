@@ -274,17 +274,14 @@ describe("webauthnClient.shouldRegister()", () => {
     }
   );
 
-  describe("webauthnClient._abortPendingGetCredentialRequest()", () => {
-    it("should abort the promise", async () => {
-      const controller = new AbortController();
-      webauthnClient._getCredentialController = controller;
-
-      jest.spyOn(controller, "abort");
-
-      expect(await webauthnClient._abortPendingGetCredentialRequest()).toEqual(
-        undefined
-      );
-      expect(controller.abort).toHaveBeenCalled();
+  describe("webauthnClient._createAbortSignal()", () => {
+    it("should call abort() on the current controller and return a new one", async () => {
+      const signal1 = webauthnClient._createAbortSignal();
+      const abortFn = jest.fn();
+      webauthnClient.controller.abort = abortFn;
+      const signal2 = webauthnClient._createAbortSignal();
+      expect(abortFn).toHaveBeenCalled();
+      expect(signal1).not.toBe(signal2);
     });
   });
 });

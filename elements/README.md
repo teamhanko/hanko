@@ -287,6 +287,10 @@ Result:
 E.g. `:disabled` is currently broken. See:
 [chromium-issue-#1131396](https://bugs.chromium.org/p/chromium/issues/detail?id=1131396),
 [chromium-issue-#953648](https://bugs.chromium.org/p/chromium/issues/detail?id=953648)
+- Safari and autofill assisted requests: On iOS 16 and above, Safari is not able to abort or reject the `Promise`
+returned by `navigator.credentials.get()`. Therefore, you may encounter an issue that the WebAuthn credential
+registration is not working the first time or only after reloading the page, because the initial autofill assisted
+request is still pending and there is only one request allowed at the same time.
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
 
