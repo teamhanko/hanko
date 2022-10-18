@@ -1,0 +1,38 @@
+# Build the hanko binary
+FROM golang:1.17 as builder
+WORKDIR /workspace
+
+# Get Delve
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install github.com/go-delve/delve/cmd/dlv@latest
+
+COPY go.mod go.mod
+COPY go.sum go.sum
+RUN go mod download
+
+# Copy the go source
+COPY ../main.go main.go
+COPY cmd cmd/
+COPY config config/
+COPY persistence persistence/
+COPY server server/
+COPY handler handler/
+COPY crypto crypto/
+COPY dto dto/
+COPY session session/
+COPY mail mail/
+COPY audit_log audit_log/
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags="all=-N -l" -a -o hanko main.go
+
+# Use distroless as minimal base image to package hanko binary
+# See https://github.com/GoogleContainerTools/distroless for details
+FROM gcr.io/distroless/static:nonroot
+WORKDIR /
+COPY --from=builder /go/bin/dlv .
+COPY --from=builder /workspace/hanko .
+USER 65532:65532
+
+EXPOSE 8000 8001 40000
+
+ENTRYPOINT ["/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient", "exec", "/hanko", "--"]
