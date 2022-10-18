@@ -61,7 +61,7 @@ services:
       - "9500:80"
     networks:
       - intranet
-  fontendsdk:
+  frontendsdk:
     build: ../../frontend-sdk
     ports:
       - "9501:80"
