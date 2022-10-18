@@ -67,11 +67,11 @@ class WebauthnClient extends Client {
     }
 
     const challenge = challengeResponse.json();
+    challenge.signal = this._createAbortSignal();
 
     if (useConditionalMediation) {
       // `CredentialMediationRequirement` doesn't support "conditional" in the current typescript version.
       challenge.mediation = "conditional" as CredentialMediationRequirement;
-      challenge.signal = this._createAbortSignal();
     }
 
     let assertion;
