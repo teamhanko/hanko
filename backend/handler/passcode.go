@@ -90,7 +90,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to create passcodeId: %w", err)
 	}
-	now := time.Now()
+	now := time.Now().UTC()
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte(passcode), 12)
 	if err != nil {
 		return fmt.Errorf("failed to hash passcode: %w", err)
@@ -148,7 +148,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 }
 
 func (h *PasscodeHandler) Finish(c echo.Context) error {
-	startTime := time.Now()
+	startTime := time.Now().UTC()
 	var body dto.PasscodeFinishRequest
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return dto.ToHttpError(err)
