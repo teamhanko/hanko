@@ -10,6 +10,7 @@ Thank you for considering contributing to Hanko! Following are the guidelines we
 - [Feature Requests](#feature-requests)
 - [Submitting Code](#submitting-code)
 - [Commit Message Guidelines](#commit-message-guidelines)
+- [Style Guidelines](#style-guidelines)
 
 ## Code of Conduct
 
@@ -84,7 +85,7 @@ To submit your code:
    ```
    git checkout -b <feature-branch-name>
    ```
-5. Make your changes and commit.
+5. Make your changes. Make sure to follow the [Style Guidelines](#style-guidelines). Commit your changes.
    ```
    git add -A
    git commit
@@ -146,3 +147,17 @@ The `<type>` should be one of the following:
 
 The `<scope>` is optional. If present, it should be the name of the (npm) package or directory affected by the changes of
 the commit.
+
+# Style Guidelines
+
+## Go
+
+Go files should be [formatted](https://go.dev/blog/gofmt) according to gofmt's rules.
+
+```
+# single file
+go fmt path/to/changed/file.go
+
+# all files, e.g. in 'backend' directory
+go fmt ./...
+```
