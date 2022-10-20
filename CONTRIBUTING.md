@@ -128,12 +128,12 @@ The commit message should be structured as follows:
 The commit message headline should have the following structure:
 ```
 <type>(<optional scope>): <description>
-│       │             │
-│       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
-│       │
-│       └─⫸ Commit Scope: optional
-│
-└─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
+   │            │               │
+   │            │               └─⫸ Summary in present tense. Not capitalized. No period at the end.
+   │            │
+   │            └─⫸ Commit Scope: optional
+   │
+   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
 ```
 The `<type>` should be one of the following:
 * **build**: Changes that affect the build system or external dependencies
