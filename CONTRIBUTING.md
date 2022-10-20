@@ -9,6 +9,7 @@ Thank you for considering contributing to Hanko! Following are the guidelines we
   - [Bugs](#bugs)
 - [Feature Requests](#feature-requests)
 - [Submitting Code](#submitting-code)
+- [Commit Message Guidelines](#commit-message-guidelines)
 
 ## Code of Conduct
 
@@ -83,12 +84,12 @@ To submit your code:
    ```
    git checkout -b <feature-branch-name>
    ```
-5. Make your changes and commit. There are currently no strict commit guidelines we adhere to but try to follow
-   [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+5. Make your changes and commit.
    ```
    git add -A
-   git commit -m "feat: this is the subject line" -m "This is the body line. Closes #123"
+   git commit
    ```
+   Commit messages should follow the [Commit Message Guidelines](#commit-message-guidelines).
 6. Make sure to update, or add to any tests where appropriate. Try to run tests locally first (`go test ./...` for the
    `backend`, see the [README](./e2e/README.md) for the `e2e`tests on how to run them).
 7. If you added or changed a feature, make sure to document it in the README.md file. If your change
@@ -108,3 +109,40 @@ To submit your code:
 When pull requests fail test checks, authors are expected to update
 their pull requests to address the failures until the tests pass. If you have trouble or questions on how to add to
 existing tests, reach out through our [communication](#communication) channels.
+
+# Commit Message Guidelines
+
+Commit messages should adhere to the
+[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
+The commit message should be structured as follows:
+
+```
+<type>(<optional scope>): <description>
+
+<optional body>
+
+<optional footer(s)>
+```
+
+The commit message headline should have the following structure:
+```
+<type>(<optional scope>): <description>
+│       │             │
+│       │             └─⫸ Summary in present tense. Not capitalized. No period at the end.
+│       │
+│       └─⫸ Commit Scope: optional
+│
+└─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
+```
+The `<type>` should be one of the following:
+* **build**: Changes that affect the build system or external dependencies
+* **ci**: Changes that affect the CI workflows (e.g. changes to `.github` CI configuration files)
+* **docs**: Documentation only changes (this includes both content in the `docs` as well as changes to readmes)
+* **feat**: A new feature
+* **fix**: A bug fix
+* **perf**: A code change that improves performance
+* **refactor**: A code change that neither fixes a bug nor adds a feature
+* **test**: Adding missing tests or correcting existing tests
+
+The `<scope>` is optional. If present, it should be the name of the (npm) package or directory affected by the changes of
+the commit.
