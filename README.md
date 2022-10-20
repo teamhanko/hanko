@@ -48,8 +48,10 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | JavaScript frontend SDK |
 | ⚙️ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
 | ⚙️ | Audit logs API |
-| | Rate limiting |
 | | `hanko-profile` web component |
+| | Rate limiting |
+| | Custom translations for `<hanko-elements>` |
+| | Email templating |
 | | SSO plugin system (Sign in with Google/Apple/GitHub/...) |
 | | Support for native Android and iOS apps |
 | | 2FA to secure fallback auth methods |
