@@ -40,7 +40,7 @@ The tests distinguish between password-based and passwordless scenarios. Each of
 ## Set up services using Docker Compose
 
 To get everything up and running, you can use the existing Docker Compose quickstart in
-the [`deploy/docker-compose`](..deploy/docker-compose) directory. From the root project directory, execute:
+the [`deploy/docker-compose`](../deploy/docker-compose) directory. From the root project directory, execute:
 
 **Passwords disabled**:
 

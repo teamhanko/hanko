@@ -85,8 +85,7 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>/* eslint-disable prettier/prettier */
-/**
+            <pre class="prettyprint source linenums"><code>/**
  * A class to check the browser's WebAuthn support.
  *
  * @hideconstructor
@@ -135,8 +134,7 @@ class WebauthnSupport {
     if (
       window.PublicKeyCredential !== undefined &amp;&amp;
       // @ts-ignore
-      typeof window.PublicKeyCredential.isExternalCTAP2SecurityKeySupported ===
-        "function"
+      window.PublicKeyCredential.isExternalCTAP2SecurityKeySupported
     ) {
       // @ts-ignore
       return window.PublicKeyCredential.isExternalCTAP2SecurityKeySupported();
@@ -151,10 +149,14 @@ class WebauthnSupport {
    * @return Promise&lt;boolean>
    */
   static async isConditionalMediationAvailable(): Promise&lt;boolean> {
-    // @ts-ignore
-    if (window.PublicKeyCredential.isConditionalMediationAvailable) {
+    if (
       // @ts-ignore
-      return window.PublicKeyCredential.isConditionalMediationAvailable()
+      window.PublicKeyCredential &amp;&amp;
+      // @ts-ignore
+      window.PublicKeyCredential.isConditionalMediationAvailable
+    ) {
+      // @ts-ignore
+      return window.PublicKeyCredential.isConditionalMediationAvailable();
     }
 
     return false;

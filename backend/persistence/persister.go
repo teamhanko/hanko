@@ -29,6 +29,8 @@ type Persister interface {
 	GetWebauthnSessionDataPersisterWithConnection(tx *pop.Connection) WebauthnSessionDataPersister
 	GetJwkPersister() JwkPersister
 	GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister
+	GetAuditLogPersister() AuditLogPersister
+	GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister
 }
 
 type Migrator interface {
@@ -143,6 +145,14 @@ func (p *persister) GetJwkPersister() JwkPersister {
 
 func (p *persister) GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister {
 	return NewJwkPersister(tx)
+}
+
+func (p *persister) GetAuditLogPersister() AuditLogPersister {
+	return NewAuditLogPersister(p.DB)
+}
+
+func (p *persister) GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister {
+	return NewAuditLogPersister(tx)
 }
 
 func (p *persister) Transaction(fn func(tx *pop.Connection) error) error {
