@@ -27,7 +27,7 @@ To run the tests you need to have the following software installed:
 Furthermore, you need running instances of:
 
 - the Hanko [backend](../backend)
-- a running frontend application (e.g. our [example](../example)) using the web component provided by
+- a running frontend application (e.g. our [quickstart](../quickstart)) using the web component provided by
   [hanko-elements](../elements)
 - [Mailslurper](https://github.com/mailslurper/mailslurper) as an SMTP server (used to test passcodes through mail
   retrieval via its [API](https://github.com/mailslurper/mailslurper/wiki/API-Guide))

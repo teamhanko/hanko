@@ -1,4 +1,4 @@
-module github.com/teamhanko/hanko/example
+module github.com/teamhanko/hanko/quickstart
 
 go 1.17
 
