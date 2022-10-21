@@ -84,10 +84,9 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 	options, sessionData, err := h.webauthn.BeginRegistration(
 		webauthnUser,
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
-			AuthenticatorAttachment: protocol.Platform,
-			RequireResidentKey:      &t,
-			ResidentKey:             protocol.ResidentKeyRequirementPreferred,
-			UserVerification:        protocol.VerificationRequired,
+			RequireResidentKey: &t,
+			ResidentKey:        protocol.ResidentKeyRequirementRequired,
+			UserVerification:   protocol.VerificationRequired,
 		}),
 		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
 		// don't set the excludeCredentials list, so an already registered device can be re-registered

@@ -164,15 +164,15 @@ class WebauthnClient extends Client {
   }
 
   /**
-   * Determines whether a credential registration ceremony should be performed. Returns 'true' when a platform
-   * authenticator is available and the user's credentials do not intersect with the credentials already known on the
+   * Determines whether a credential registration ceremony should be performed. Returns 'true' when WebAuthn
+   * is supported and the user's credentials do not intersect with the credentials already known on the
    * current browser/device.
    *
    * @param {User} user - The user object.
    * @return {Promise<boolean>}
    */
   async shouldRegister(user: User): Promise<boolean> {
-    const supported = await WebauthnSupport.isPlatformAuthenticatorAvailable();
+    const supported = WebauthnSupport.supported();
 
     if (!user.webauthn_credentials || !user.webauthn_credentials.length) {
       return supported;

@@ -232,22 +232,15 @@ describe("webauthnClient.register()", () => {
 
 describe("webauthnClient.shouldRegister()", () => {
   it.each`
-    isPlatformAuthenticatorAvailable | userHasCredential | credentialMatched | expected
-    ${false}                         | ${false}          | ${false}          | ${false}
-    ${true}                          | ${false}          | ${false}          | ${true}
-    ${true}                          | ${true}           | ${false}          | ${true}
-    ${true}                          | ${true}           | ${true}           | ${false}
+    isSupported | userHasCredential | credentialMatched | expected
+    ${false}    | ${false}          | ${false}          | ${false}
+    ${true}     | ${false}          | ${false}          | ${true}
+    ${true}     | ${true}           | ${false}          | ${true}
+    ${true}     | ${true}           | ${true}           | ${false}
   `(
     "should determine correctly if a WebAuthn credential should be registered",
-    async ({
-      isPlatformAuthenticatorAvailable,
-      userHasCredential,
-      credentialMatched,
-      expected,
-    }) => {
-      jest
-        .spyOn(WebauthnSupport, "isPlatformAuthenticatorAvailable")
-        .mockResolvedValueOnce(isPlatformAuthenticatorAvailable);
+    async ({ isSupported, userHasCredential, credentialMatched, expected }) => {
+      jest.spyOn(WebauthnSupport, "supported").mockReturnValue(isSupported);
 
       const user: User = {
         id: userID,
@@ -271,9 +264,7 @@ describe("webauthnClient.shouldRegister()", () => {
 
       const shouldRegister = await webauthnClient.shouldRegister(user);
 
-      expect(
-        WebauthnSupport.isPlatformAuthenticatorAvailable
-      ).toHaveBeenCalled();
+      expect(WebauthnSupport.supported).toHaveBeenCalled();
       expect(shouldRegister).toEqual(expected);
     }
   );

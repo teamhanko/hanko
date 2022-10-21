@@ -43,8 +43,7 @@ const LoginEmail = () => {
   const [isEmailLoginSuccess, setIsEmailLoginSuccess] =
     useState<boolean>(false);
   const [error, setError] = useState<HankoError>(null);
-  const [isAuthenticatorSupported, setIsAuthenticatorSupported] =
-    useState<boolean>(null);
+  const [isWebAuthnSupported, setIsWebAuthnSupported] = useState<boolean>(null);
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>(null);
 
@@ -126,7 +125,7 @@ const LoginEmail = () => {
     event.preventDefault();
     setIsEmailLoginLoading(true);
 
-    if (isAuthenticatorSupported) {
+    if (isWebAuthnSupported) {
       loginWithEmailAndWebAuthn().catch((e) => {
         setIsEmailLoginLoading(false);
         setError(e);
@@ -197,9 +196,7 @@ const LoginEmail = () => {
   }, [loginViaConditionalUI]);
 
   useEffect(() => {
-    WebauthnSupport.isPlatformAuthenticatorAvailable()
-      .then((supported) => setIsAuthenticatorSupported(supported))
-      .catch((e) => setError(new TechnicalError(e)));
+    setIsWebAuthnSupported(WebauthnSupport.supported());
   }, []);
 
   useEffect(() => {
@@ -243,7 +240,7 @@ const LoginEmail = () => {
           {t("labels.continue")}
         </Button>
       </Form>
-      {isAuthenticatorSupported &&
+      {isWebAuthnSupported &&
       !isAndroidUserAgent &&
       !isConditionalMediationSupported ? (
         <Fragment>
