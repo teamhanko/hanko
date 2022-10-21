@@ -36,11 +36,6 @@ class WebauthnClient extends Client {
      *  @type {WebauthnState}
      */
     this.state = new WebauthnState();
-    /**
-     *  @public
-     *  @type {AbortController}
-     */
-    this.controller = new AbortController();
   }
 
   /**
@@ -72,13 +67,12 @@ class WebauthnClient extends Client {
     }
 
     const challenge = challengeResponse.json();
+    challenge.signal = this._createAbortSignal();
 
     if (useConditionalMediation) {
       // `CredentialMediationRequirement` doesn't support "conditional" in the current typescript version.
       challenge.mediation = "conditional" as CredentialMediationRequirement;
     }
-
-    challenge.signal = this.controller.signal;
 
     let assertion;
     try {
@@ -132,6 +126,7 @@ class WebauthnClient extends Client {
     }
 
     const challenge = challengeResponse.json();
+    challenge.signal = this._createAbortSignal();
 
     let attestation;
     try {
@@ -188,6 +183,16 @@ class WebauthnClient extends Client {
       .matchCredentials(user.id, user.webauthn_credentials);
 
     return supported && !matches.length;
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  _createAbortSignal() {
+    if (this.controller) {
+      this.controller.abort();
+    }
+
+    this.controller = new AbortController();
+    return this.controller.signal;
   }
 }
 

@@ -34,7 +34,6 @@ const RegisterAuthenticator = () => {
 
   const registerWebAuthnCredential = (event: Event) => {
     event.preventDefault();
-    hanko.webauthn.controller.abort();
     setIsLoading(true);
 
     hanko.webauthn

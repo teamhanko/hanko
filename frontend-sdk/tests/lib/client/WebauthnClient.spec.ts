@@ -35,6 +35,7 @@ describe("webauthnClient.login()", () => {
     };
 
     webauthnClient._getCredential = jest.fn().mockResolvedValue(fakeAssertion);
+    webauthnClient._createAbortSignal = jest.fn();
 
     jest
       .spyOn(webauthnClient.client, "post")
@@ -51,6 +52,7 @@ describe("webauthnClient.login()", () => {
       ...fakeRequestOptions,
       mediation: "conditional",
     });
+    expect(webauthnClient._createAbortSignal).toHaveBeenCalledTimes(1);
     expect(webauthnClient.state.read).toHaveBeenCalledTimes(1);
     expect(webauthnClient.state.addCredential).toHaveBeenCalledWith(
       userID,
@@ -141,6 +143,7 @@ describe("webauthnClient.register()", () => {
     webauthnClient._createCredential = jest
       .fn()
       .mockResolvedValue(fakeAttestation);
+    webauthnClient._createAbortSignal = jest.fn();
 
     jest
       .spyOn(webauthnClient.client, "post")
@@ -156,6 +159,7 @@ describe("webauthnClient.register()", () => {
     expect(webauthnClient._createCredential).toHaveBeenCalledWith({
       ...fakeCreationOptions,
     });
+    expect(webauthnClient._createAbortSignal).toHaveBeenCalledTimes(1);
     expect(webauthnClient.state.read).toHaveBeenCalledTimes(1);
     expect(webauthnClient.state.addCredential).toHaveBeenCalledWith(
       userID,
@@ -273,4 +277,15 @@ describe("webauthnClient.shouldRegister()", () => {
       expect(shouldRegister).toEqual(expected);
     }
   );
+
+  describe("webauthnClient._createAbortSignal()", () => {
+    it("should call abort() on the current controller and return a new one", async () => {
+      const signal1 = webauthnClient._createAbortSignal();
+      const abortFn = jest.fn();
+      webauthnClient.controller.abort = abortFn;
+      const signal2 = webauthnClient._createAbortSignal();
+      expect(abortFn).toHaveBeenCalled();
+      expect(signal1).not.toBe(signal2);
+    });
+  });
 });
