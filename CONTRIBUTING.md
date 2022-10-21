@@ -80,10 +80,10 @@ To submit your code:
 1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository) the [repository](https://github.com/teamhanko/hanko).
 2. [Clone](https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository) the forked repository.
 3. [Configure remotes](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository).
-4. Create a feature [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches)
+4. Create a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches)
    off of the `main` branch.
    ```
-   git checkout -b <feature-branch-name>
+   git checkout -b <new-branch-name>
    ```
 5. Make your changes. Make sure to follow the [Style Guidelines](#style-guidelines). Commit your changes.
    ```
