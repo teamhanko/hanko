@@ -31,8 +31,8 @@ jobs:
         include:
           - context: ./backend
             image: ghcr.io/teamhanko/hanko
-          - context: ./example
-            image: ghcr.io/teamhanko/hanko/example
+          - context: ./quickstart
+            image: ghcr.io/teamhanko/hanko/quickstart
           - context: ./elements
             image: ghcr.io/teamhanko/hanko/elements
           - context: ./frontend-sdk

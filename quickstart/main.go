@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/labstack/echo/v4"
 	mw "github.com/labstack/echo/v4/middleware"
-	"github.com/teamhanko/hanko/example/middleware"
+	"github.com/teamhanko/hanko/quickstart/middleware"
 	"html/template"
 	"io"
 	"log"

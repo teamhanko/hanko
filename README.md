@@ -74,7 +74,7 @@ docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart" up
 ```
 > **Note**: Docker (Desktop) needs to be running in order for the command to run.
 
-After the services are up and running, the example login can be opened at `localhost:8888`. To receive emails without your own
+After the services are up and running, the login page can be viewed at `localhost:8888`. To receive emails without your own
 smtp server, we added [mailslurper](https://github.com/mailslurper/mailslurper) which will be available at `localhost:8080`.
 
 > **Note**: Hanko services are not published to a registry yet and will be built locally before the services are started.
@@ -84,7 +84,7 @@ The Hanko project consists of
 - [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and passwords, as well as user management and JWT token issuing
 - [hanko-elements](/elements/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
 - [hanko-frontend-sdk](/frontend-sdk/README.md) - A client package for using the Hanko API
-- [example](/example) - The quickstart example app, showing off Hanko's login experience and acting as a reference implementation
+- [quickstart](/quickstart) - The quickstart example app, showing off Hanko's login experience and acting as a reference implementation
 - [examples](/examples) - Hanko example implementations for a number of frameworks
 - [docs](/docs) - The Hanko documentation
 

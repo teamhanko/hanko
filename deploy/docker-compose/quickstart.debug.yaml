@@ -67,8 +67,8 @@ services:
       - "9501:80"
     networks:
       - intranet
-  example:
-    build: ../../example
+  quickstart:
+    build: ../../quickstart
     ports:
       - "8888:8080"
     environment:
