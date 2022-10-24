@@ -42,23 +42,25 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | JWT signing |
 | ✅ | User management API |
 | ✅ | 📢 Hanko Alpha Release |
-| ✅ | `hanko-auth` web component |
+| ✅ | `<hanko-auth>` web component |
 | ✅ | Customizable CSS |
 | ✅ | 📢 Hanko Beta Release |
 | ✅ | JavaScript frontend SDK |
-| ⚙️ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
-| ⚙️ | Audit logs API |
-| | `hanko-profile` web component |
-| | Rate limiting |
-| | Custom translations for `<hanko-elements>` |
+| ✅ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
+| ✅ | Audit logs API |
+| ⚙️ | `<hanko-profile>` web component |
+| ⚙️ | Sessions |
+| | Rate limiting (application level) |
+| | Custom translations for [hanko-elements](/elements/README.md) |
 | | Email templating |
-| | SSO plugin system (Sign in with Google/Apple/GitHub/...) |
+| | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
 | | Support for native Android and iOS apps |
 | | 2FA to secure fallback auth methods |
 
-Additional features that have been requested or that we would like to build but are not yet on the roadmap:
+Additional features that have been requested or that we would like to build but are not (yet) on the roadmap:
 - SMS passcode delivery
-- Session management
+- SAML support
+- OpenID Connect
 
 # Quickstart
 The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
