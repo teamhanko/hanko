@@ -365,15 +365,11 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", token)
 			c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
-<<<<<<< HEAD
-=======
-
 		}
 
 		err = h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalSucceeded, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
->>>>>>> main
 		}
 
 		return c.JSON(http.StatusOK, map[string]string{"credential_id": base64.RawURLEncoding.EncodeToString(credential.ID), "user_id": webauthnUser.UserId.String()})

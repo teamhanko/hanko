@@ -19,9 +19,11 @@ import (
 	"time"
 )
 
-var defaultRegistrationConfig = config.Registration{
-	EmailVerification: config.EmailVerification{
-		Enabled: true,
+var defaultRegistrationConfig = &config.Config{
+	Registration: config.Registration{
+		EmailVerification: config.EmailVerification{
+			Enabled: true,
+		},
 	},
 }
 
@@ -49,10 +51,6 @@ func TestUserHandler_Create(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
@@ -90,7 +88,7 @@ func TestUserHandler_Create_CaseInsensitive(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Create(c)) {
 		user := models.User{}
@@ -124,13 +122,8 @@ func TestUserHandler_Create_UserExists(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err = handler.Create(c)
 	if assert.Error(t, err) {
@@ -163,7 +156,7 @@ func TestUserHandler_Create_UserExists_CaseInsensitive(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err = handler.Create(c)
 	if assert.Error(t, err) {
@@ -181,13 +174,8 @@ func TestUserHandler_Create_InvalidEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err := handler.Create(c)
 	if assert.Error(t, err) {
@@ -205,13 +193,8 @@ func TestUserHandler_Create_EmailMissing(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err := handler.Create(c)
 	if assert.Error(t, err) {
@@ -246,13 +229,8 @@ func TestUserHandler_Get(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-<<<<<<< HEAD
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Get(c)) {
 		assert.Equal(t, rec.Code, http.StatusOK)
@@ -301,13 +279,8 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-<<<<<<< HEAD
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Get(c)) {
 		assert.Equal(t, rec.Code, http.StatusOK)
@@ -331,13 +304,8 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-<<<<<<< HEAD
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err = handler.Get(c)
 	if assert.Error(t, err) {
@@ -354,13 +322,8 @@ func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
@@ -376,13 +339,8 @@ func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	assert.Error(t, handler.GetUserIdByEmail(c))
 }
@@ -395,13 +353,8 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
@@ -428,13 +381,8 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-<<<<<<< HEAD
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -468,7 +416,7 @@ func TestUserHandler_GetUserIdByEmail_CaseInsensitive(t *testing.T) {
 	c := e.NewContext(req, rec)
 
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -497,13 +445,8 @@ func TestUserHandler_Me(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-<<<<<<< HEAD
-	p := test.NewPersister(users, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(defaultRegistrationConfig, p, sessionManager{})
-=======
 	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
->>>>>>> main
+	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Me(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
