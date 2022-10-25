@@ -1,0 +1,76 @@
+{
+  "name": "@teamhanko/hanko-elements",
+  "version": "0.0.12-alpha",
+  "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "browser": {
+    "./hanko-auth": "./dist/element.hanko-auth.js"
+  },
+  "typesVersions": {
+    "*": {
+      "hanko-auth": [
+        "dist/ui/HankoAuth.d.ts"
+      ]
+    }
+  },
+  "exports": {
+    "./hanko-auth": {
+      "import": "./dist/element.hanko-auth.js",
+      "require": "./dist/element.hanko-auth.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "lint": "eslint 'src/**/*.ts?(x)'",
+    "format": "pretty-quick --staged",
+    "build": "npx webpack --mode=production",
+    "build:dev": "npx webpack --mode=development --config ./webpack.config.dev.cjs"
+  },
+  "description": "The <hanko-auth> element offers a complete user interface that will bring a modern login and registration experience to your users.",
+  "repository": "github:teamhanko/hanko",
+  "author": "Hanko GmbH <developers@hanko.io>",
+  "license": "MIT",
+  "keywords": [
+    "hanko",
+    "passkey",
+    "webauthn",
+    "passcode",
+    "password",
+    "login",
+    "register"
+  ],
+  "homepage": "https://hanko.io",
+  "devDependencies": {
+    "@types/preact-custom-element": "^4.0.1",
+    "@typescript-eslint/eslint-plugin": "^5.40.1",
+    "@typescript-eslint/parser": "^5.40.1",
+    "css-loader": "^6.7.1",
+    "eslint": "^8.25.0",
+    "eslint-config-google": "^0.14.0",
+    "eslint-config-preact": "^1.3.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-promise": "^6.1.1",
+    "sass": "^1.53.0",
+    "sass-loader": "^13.1.0",
+    "source-map-loader": "^4.0.1",
+    "style-loader": "^3.3.1",
+    "ts-jest": "^29.0.3",
+    "ts-loader": "^9.4.1",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.9.2"
+  },
+  "dependencies": {
+    "@denysvuika/preact-translate": "^0.4.1",
+    "@teamhanko/hanko-frontend-sdk": "^0.0.8-alpha",
+    "classnames": "^2.3.2",
+    "preact": "^10.10.1",
+    "preact-custom-element": "^4.2.1"
+  }
+}

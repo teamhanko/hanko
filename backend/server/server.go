@@ -12,8 +12,8 @@ func StartPublic(cfg *config.Config, wg *sync.WaitGroup, persister persistence.P
 	router.Logger.Fatal(router.Start(cfg.Server.Public.Address))
 }
 
-func StartPrivate(cfg *config.Config, wg *sync.WaitGroup, persister persistence.Persister) {
+func StartAdmin(cfg *config.Config, wg *sync.WaitGroup, persister persistence.Persister) {
 	defer wg.Done()
-	router := NewPrivateRouter(persister)
-	router.Logger.Fatal(router.Start(cfg.Server.Private.Address))
+	router := NewAdminRouter(persister)
+	router.Logger.Fatal(router.Start(cfg.Server.Admin.Address))
 }

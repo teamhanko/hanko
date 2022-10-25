@@ -1,0 +1,60 @@
+@import url("common.css");
+
+.main {
+    margin-top: 10%;
+}
+
+.auth-container {
+    background-color: white;
+    max-width: 370px;
+    min-width: 200px;
+    margin: auto;
+    border-radius: 16px;
+    padding: 25px;
+}
+
+@media screen and (max-width: 470px) {
+    .auth-container {
+        padding: 10px;
+    }
+}
+
+hanko-auth {
+    --font-family: "Inter", sans-serif;
+    --border-radius: 5px;
+}
+
+.hanko_input {
+    border-color: #BFC2CD !important;
+}
+
+.hanko_button.hanko_primary {
+    background-color: #CBD4FF !important;
+    color: black !important;
+    border-style: none !important;
+    font-weight: 500 !important;
+}
+
+
+.hanko_button.hanko_primary:hover {
+    background-color: #b3beff !important;
+}
+
+.hanko_button.hanko_secondary {
+    background-color: #506CF0 !important;
+    color: white !important;
+    border-style: none !important;
+    font-weight: 500 !important;
+}
+
+.hanko_button.hanko_secondary:hover {
+    background-color: #6980f2 !important;
+}
+
+.hanko_divider {
+    border-bottom-color: #BFC2CD !important;
+}
+
+.hanko_link {
+    color: #688293 !important;
+}

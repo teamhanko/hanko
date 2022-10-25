@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -49,15 +50,21 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
 
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
+
 	if cfg.Password.Enabled {
-		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg)
+		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := e.Group("/password")
 		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
 		password.POST("/login", passwordHandler.Login)
 	}
 
+<<<<<<< HEAD
 	userHandler := handler.NewUserHandler(cfg, persister, sessionManager)
+=======
+	userHandler := handler.NewUserHandler(persister, auditLogger)
+>>>>>>> main
 
 	e.GET("/me", userHandler.Me, hankoMiddleware.Session(sessionManager))
 
@@ -68,11 +75,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	e.POST("/user", userHandler.GetUserIdByEmail)
 
 	healthHandler := handler.NewHealthHandler()
-	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager)
+	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
-	passcodeHandler, err := handler.NewPasscodeHandler(cfg, persister, sessionManager, mailer)
+	passcodeHandler, err := handler.NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
 	}

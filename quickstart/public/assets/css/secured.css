@@ -1,0 +1,32 @@
+@import url("common.css");
+
+.profile {
+    margin-bottom: 20px;
+}
+
+.placeholder {
+    height: 77px;
+}
+
+.buttonWrapper {
+    flex-shrink: 0;
+}
+
+.passkeys > div {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+}
+
+@media screen and (max-width: 600px) {
+    .buttonWrapper {
+        margin-top: 28px;
+        width: 100%;
+    }
+
+    .passkeys > div {
+        flex-wrap: wrap;
+    }
+}

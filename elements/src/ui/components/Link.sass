@@ -1,0 +1,16 @@
+@use "default"
+
+.link
+  @include default.font
+  color: default.$link-color
+  text-decoration: default.$link-text-decoration
+  cursor: pointer
+
+  &:hover
+    color: default.$link-color-hover
+    text-decoration: default.$link-text-decoration-hover
+
+  &.disabled
+    color: default.$link-color-disabled
+    pointer-events: none
+    cursor: default

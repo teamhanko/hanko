@@ -7,6 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -20,13 +21,14 @@ type UserHandler struct {
 	persister      persistence.Persister
 	sessionManager session.Manager
 	cfg            *config.Config
+	auditLogger    auditlog.Logger
 }
 
-func NewUserHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager) *UserHandler {
+func NewUserHandler(cfg *config.Config, persister persistence.Persister, auditLogger auditlog.Logger) *UserHandler {
 	return &UserHandler{
-		persister:      persister,
-		sessionManager: sessionManager,
-		cfg:            cfg,
+		persister:   persister,
+		cfg:         cfg,
+		auditLogger: auditLogger,
 	}
 }
 
@@ -80,6 +82,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 				c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 			}
 		}
+		_ = h.auditLogger.Create(c, models.AuditLogUserCreated, &newUser, nil) // TODO: what to do on error
 
 		return c.JSON(http.StatusOK, newUser)
 	})

@@ -1,0 +1,129 @@
+---
+title: Next.js + Hanko
+sidebar_label: Next.js
+keywords: [next, nextjs]
+sidebar_custom_props:
+  docCardIconName: nextjs-dark
+---
+
+# Next.js
+
+In this guide you will learn how to add authentication to your Next.js application using the Hanko custom element.
+
+## Install dependencies
+
+Install the `@teamhanko/hanko-elements` package:
+
+```shell npm2yarn
+npm install @teamhanko/hanko-elements
+```
+
+## Import & use custom element
+
+Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
+Then use the `<hanko-auth>` element in your JSX.
+
+```jsx title="HankoAuth.jsx" showLineNumbers
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
+
+const api = process.env.NEXT_PUBLIC_HANKO_API!;
+const lang = process.env.NEXT_PUBLIC_HANKO_LANG;
+
+export default function HankoAuth() {
+
+  useEffect(() => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  }, []);
+
+  return (
+    <hanko-auth api={api} lang={lang} />
+  );
+}
+```
+
+The call to `register` attempts to register the `<hanko-auth>` element with the
+browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry) through a
+call to `window.customElements.define()`.
+Next.js pre-renders pages on the server but the browser `window` is not available during pre-rendering, so the custom
+element registration would fail.
+
+A solution for this is to use Next's [dynamic import](https://nextjs.org/docs/advanced-features/dynamic-import) feature
+to dynamically load the component on the client-side and disable server rendering for it:
+
+```jsx title="index.js" showLineNumbers
+import dynamic from "next/dynamic";
+
+export default function Home() {
+  const HankoAuth = dynamic(
+    // replace with path to your component using the <hanko-auth> element
+    () => import('../components/HankoAuth'),
+    { ssr: false },
+  )
+  return (
+    <Suspense fallback={"Loading ..."}>
+      <HankoAuth/>
+    </Suspense>
+  )
+}
+```
+
+## Defining login callbacks
+
+The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
+event in order to, for example, redirect your users to protected pages in your application.
+
+To do so, apply an event listener with an appropriate redirect callback:
+
+```jsx {2,9-20} title="HankoAuth.jsx" showLineNumbers
+import React, { useEffect } from "react";
+import { useRouter } from "next/router";
+import { register } from "@teamhanko/hanko-elements/hanko-auth";
+
+const api = process.env.NEXT_PUBLIC_HANKO_API!;
+const lang = process.env.NEXT_PUBLIC_HANKO_LANG;
+
+export default function HankoAuth() {
+  const router = useRouter();
+
+  const redirectAfterLogin = useCallback(() => {
+    // successfully logged in, redirect to a page in your application
+    router.replace("...");
+  }, [router]);
+
+  useEffect(() => {
+    document.addEventListener("hankoAuthSuccess", redirectAfterLogin);
+    return () =>
+      document.removeEventListener("hankoAuthSuccess", redirectAfterLogin);
+  }, [redirectAfterLogin]);
+
+  useEffect(() => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  }, []);
+
+  return (
+    <hanko-auth api={api} lang={lang} />
+  );
+}
+```
+
+## UI customization
+
+The styles of the `hanko-auth` element can be customized using CSS variables and parts. See our guide
+on customization [here](https://github.com/teamhanko/hanko/tree/main/elements#ui-customization).
+
+## Backend request authentication
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).
+

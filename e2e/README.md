@@ -27,8 +27,8 @@ To run the tests you need to have the following software installed:
 Furthermore, you need running instances of:
 
 - the Hanko [backend](../backend)
-- a running frontend application (e.g. our [example](../example)) using the web component provided by
-  [hanko-js](../hanko-js)
+- a running frontend application (e.g. our [quickstart](../quickstart)) using the web component provided by
+  [hanko-elements](../elements)
 - [Mailslurper](https://github.com/mailslurper/mailslurper) as an SMTP server (used to test passcodes through mail
   retrieval via its [API](https://github.com/mailslurper/mailslurper/wiki/API-Guide))
 
@@ -40,7 +40,7 @@ The tests distinguish between password-based and passwordless scenarios. Each of
 ## Set up services using Docker Compose
 
 To get everything up and running, you can use the existing Docker Compose quickstart in
-the [`deploy/docker-compose`](..deploy/docker-compose) directory. From the root project directory, execute:
+the [`deploy/docker-compose`](../deploy/docker-compose) directory. From the root project directory, execute:
 
 **Passwords disabled**:
 

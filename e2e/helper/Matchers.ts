@@ -65,12 +65,9 @@ export async function toHaveLocalStorageEntryForUserWithCredential(
     };
   }
 
-  const { userStates } = await received.getDecodedLocalStorageValue(
-    origin,
-    name
-  );
+  const { users } = await received.getDecodedLocalStorageValue(origin, name);
 
-  if (!userStates) {
+  if (!users) {
     return {
       message: () =>
         `credential '${credentialId}' for user '${userId}' present`,
@@ -78,8 +75,8 @@ export async function toHaveLocalStorageEntryForUserWithCredential(
     };
   }
 
-  const userState = userStates[userId];
-  const pass = userState.webAuthnCredentials.includes(credentialId);
+  const userState = users[userId];
+  const pass = userState.webauthn.credentials.includes(credentialId);
 
   if (pass) {
     return {
@@ -110,19 +107,16 @@ export async function toHaveLocalStorageEntryForUserWithPasscode(
     };
   }
 
-  const { userStates } = await received.getDecodedLocalStorageValue(
-    origin,
-    name
-  );
+  const { users } = await received.getDecodedLocalStorageValue(origin, name);
 
-  if (!userStates) {
+  if (!users) {
     return {
       message: () => `local storage value not present`,
       pass: false,
     };
   }
 
-  const userState = userStates[userId];
+  const userState = users[userId];
 
   if (!userState) {
     return {

@@ -42,14 +42,14 @@ server:
       expose_headers:
         - ""
       max_age: 0
-  ## private ##
+  ## admin ##
   #
-  # Configuration for the private API.
+  # Configuration for the admin API.
   #
-  private:
+  admin:
     ## address ##
     #
-    # The address the private API will listen and handle requests on.
+    # The address the admin API will listen and handle requests on.
     #
     address: ":8001"
 ## database ##
@@ -247,6 +247,38 @@ webauthn:
     # - https://subdomain.example.com
     #
     origin: "http://localhost"
+## audit_log ##
+#
+# Configures audit logging
+#
+audit_log:
+  console_output:
+    ## enabled ##
+    #
+    # Sets whether the output to console is enabled or disabled.
+    #
+    # Default: true
+    #
+    enabled: true
+    ## output ##
+    #
+    # The output stream which audit logs are sent to.
+    #
+    # Possible values:
+    # - stdout
+    # - stderr
+    #
+    # Default: stdout
+    #
+    output: "stdout"
+  storage:
+    ## enabled ##
+    #
+    # Sets whether the audit logs are persisted in the database or not.
+    #
+    # Default: false
+    #
+    enabled: false
 ```
 
 ## Explanation
@@ -254,6 +286,8 @@ webauthn:
 ### Web Authentication
 
 For most use cases, you just need the domain of your website that Hanko will be used with. Set `id` to the domain and set `origin` to the domain but include the protocol.
+
+> **Important**: If you are hosting your website on a non standard port you have to include this in the origin setting.
 
 #### Examples
 

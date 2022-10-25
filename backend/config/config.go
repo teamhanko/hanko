@@ -23,6 +23,7 @@ type Config struct {
 	Service      Service          `yaml:"service" json:"service" koanf:"service"`
 	Session      Session          `yaml:"session" json:"session" koanf:"session"`
 	Registration Registration     `yaml:"registration" json:"registration" koanf:"registration"`
+	AuditLog     AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -65,7 +66,7 @@ func DefaultConfig() *Config {
 			Public: ServerSettings{
 				Address: ":8000",
 			},
-			Private: ServerSettings{
+			Admin: ServerSettings{
 				Address: ":8001",
 			},
 		},
@@ -100,6 +101,12 @@ func DefaultConfig() *Config {
 		Registration: Registration{
 			EmailVerification: EmailVerification{
 				Enabled: false,
+			},
+		},
+		AuditLog: AuditLog{
+			ConsoleOutput: AuditLogConsole{
+				Enabled:      true,
+				OutputStream: OutputStreamStdOut,
 			},
 		},
 	}
@@ -137,10 +144,10 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-// Server contains the setting for the public and private server
+// Server contains the setting for the public and admin server
 type Server struct {
-	Public  ServerSettings `yaml:"public" json:"public" koanf:"public"`
-	Private ServerSettings `yaml:"private" json:"private" koanf:"private"`
+	Public ServerSettings `yaml:"public" json:"public" koanf:"public"`
+	Admin  ServerSettings `yaml:"admin" json:"admin" koanf:"admin"`
 }
 
 func (s *Server) Validate() error {
@@ -148,9 +155,9 @@ func (s *Server) Validate() error {
 	if err != nil {
 		return fmt.Errorf("error validating public server settings: %w", err)
 	}
-	err = s.Private.Validate()
+	err = s.Admin.Validate()
 	if err != nil {
-		return fmt.Errorf("error validating private server settings: %w", err)
+		return fmt.Errorf("error validating admin server settings: %w", err)
 	}
 	return nil
 }
@@ -340,3 +347,24 @@ type Registration struct {
 type EmailVerification struct {
 	Enabled bool
 }
+
+type AuditLog struct {
+	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output" koanf:"console_output"`
+	Storage       AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
+}
+
+type AuditLogStorage struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type AuditLogConsole struct {
+	Enabled      bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output"`
+}
+
+type OutputStream string
+
+var (
+	OutputStreamStdOut OutputStream = "stdout"
+	OutputStreamStdErr OutputStream = "stderr"
+)
