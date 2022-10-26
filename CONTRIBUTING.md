@@ -144,6 +144,7 @@ The `<type>` should be one of the following:
 * **perf**: A code change that improves performance
 * **refactor**: A code change that neither fixes a bug nor adds a feature
 * **test**: Adding missing tests or correcting existing tests
+* **chore**: Anything not fitting the other types
 
 The `<scope>` is optional. If present, it should be the name of the (npm) package or directory affected by the changes of
 the commit.
