@@ -66,7 +66,8 @@ const LoginEmail = () => {
     return hanko.user
       .getInfo(email)
       .then((userInfo) => {
-        if (!userInfo.verified && config.email_verification_enabled) {
+        // TODO: removed the check for config.email_verification_enabled here.
+        if (!userInfo.verified) {
           return renderPasscode(userInfo.id, config.password.enabled, true);
         }
 

@@ -60,13 +60,14 @@ const RegisterConfirm = () => {
     if (user === null || config === null) {
       return;
     }
+    //TODO: removed the need for email verification here:
 
-    if (config.email_verification_enabled) {
-      renderPasscode(user.id, config.password.enabled, true).catch((e) => {
-        setIsLoading(false);
-        setError(e);
-      });
-    } else {
+    // if (config.email_verification_enabled) {
+    //   renderPasscode(user.id, config.password.enabled, true).catch((e) => {
+    //     setIsLoading(false);
+    //     setError(e);
+    //   });
+    // } else {
       eventuallyRenderEnrollment(user, false)
         .then((rendered) => {
           if (!rendered) {
@@ -74,7 +75,7 @@ const RegisterConfirm = () => {
             emitSuccessEvent()
           }
         })
-    }
+    // }
   }, [config, renderPasscode, user, eventuallyRenderEnrollment]);
 
   return (
