@@ -9,7 +9,7 @@ on:
   schedule:
     - cron: '41 3 * * *'
   push:
-    branches: [ main , disable-email-verification-at-signup ]
+    branches: [ main , passkeys.io ]
     # Publish semver tags as releases.
     tags: [ 'v*.*.*' ]
   pull_request:
