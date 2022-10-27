@@ -304,7 +304,7 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err = handler.Get(c)
@@ -322,7 +322,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err := handler.GetUserIdByEmail(c)
@@ -339,7 +339,7 @@ func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	assert.Error(t, handler.GetUserIdByEmail(c))
@@ -353,7 +353,7 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandler(defaultRegistrationConfig, p, test.NewAuditLogger())
 
 	err := handler.GetUserIdByEmail(c)
