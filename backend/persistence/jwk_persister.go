@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -25,7 +26,7 @@ func NewJwkPersister(db *pop.Connection) JwkPersister {
 func (p *jwkPersister) Get(id int) (*models.Jwk, error) {
 	jwk := models.Jwk{}
 	err := p.db.Find(&jwk, id)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -37,7 +38,7 @@ func (p *jwkPersister) Get(id int) (*models.Jwk, error) {
 func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
 	jwks := []models.Jwk{}
 	err := p.db.All(&jwks)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -49,7 +50,7 @@ func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
 func (p *jwkPersister) GetLast() (*models.Jwk, error) {
 	jwk := models.Jwk{}
 	err := p.db.Last(&jwk)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {

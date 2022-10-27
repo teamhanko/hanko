@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -39,7 +40,7 @@ func (p *auditLogPersister) Create(auditLog models.AuditLog) error {
 func (p *auditLogPersister) Get(id uuid.UUID) (*models.AuditLog, error) {
 	auditLog := models.AuditLog{}
 	err := p.db.Eager().Find(&auditLog, id)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -61,7 +62,7 @@ func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, en
 	}
 	err := query.Paginate(page, perPage).Order("created_at desc").All(&auditLogs)
 
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return auditLogs, nil
 	}
 	if err != nil {
