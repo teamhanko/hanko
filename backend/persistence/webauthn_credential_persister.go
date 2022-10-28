@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -27,7 +28,7 @@ func NewWebauthnCredentialPersister(db *pop.Connection) WebauthnCredentialPersis
 func (p *webauthnCredentialPersister) Get(id string) (*models.WebauthnCredential, error) {
 	credential := models.WebauthnCredential{}
 	err := p.db.Find(&credential, id)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -88,7 +89,7 @@ func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
 	var credentials []models.WebauthnCredential
 	err := p.db.Eager().Where("user_id = ?", &userId).All(&credentials)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {

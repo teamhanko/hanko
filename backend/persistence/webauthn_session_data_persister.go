@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -27,7 +28,7 @@ func NewWebauthnSessionDataPersister(db *pop.Connection) WebauthnSessionDataPers
 func (p *webauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessionData, error) {
 	sessionData := models.WebauthnSessionData{}
 	err := p.db.Eager().Find(&sessionData, id)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -40,6 +41,9 @@ func (p *webauthnSessionDataPersister) Get(id uuid.UUID) (*models.WebauthnSessio
 func (p *webauthnSessionDataPersister) GetByChallenge(challenge string) (*models.WebauthnSessionData, error) {
 	var sessionData []models.WebauthnSessionData
 	err := p.db.Eager().Where("challenge = ?", challenge).All(&sessionData)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get sessionData: %w", err)
 	}

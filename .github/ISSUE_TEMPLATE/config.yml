@@ -1,6 +1,6 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Hanko Slack Community
-    url: https://hanko.io/community
+  - name: Hanko Discussions
+    url: https://github.com/teamhanko/hanko/discussions/new?category=q-a
     about:
-      If you have general questions or questions on integrating hanko please ask them in our Community Slack.
+      If you have general questions or questions on integrating hanko please open up a new discussion in the category Q&A.
