@@ -59,8 +59,8 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 
 Additional features that have been requested or that we would like to build but are not (yet) on the roadmap:
 - SMS passcode delivery
-- SAML support
 - OpenID Connect
+- SAML support
 
 # Quickstart
 The fastest way to try out Hanko is with [docker-compose](https://www.docker.com/products/docker-desktop/).
@@ -91,7 +91,11 @@ The Hanko project consists of
 - [docs](/docs) - The Hanko documentation
 
 # Community
-Join our [Slack community](https://www.hanko.io/community) if you have any questions about Hanko or just want to chat about passkeys, authentication, identity, or life in general. You can also [follow us on Twitter](https://twitter.com/hanko_io) or just [reach out via email](https://www.hanko.io/contact).
+## Questions, bugs, ideas
+If you have any questions or issues, please check this project's [Q&A section in discussions](https://github.com/teamhanko/hanko/discussions/categories/q-a) and the [open issues](https://github.com/teamhanko/hanko/issues). Feel free to comment on existing issues or create a new issue if you encounter any bugs or have a feature request. For yet unanswered questions, feedback, or new ideas, please open a new discussion.
+
+## Slack community & Twitter
+We invite you to join our growing [Slack community](https://www.hanko.io/community) if you want to get the latest updates on passkeys, WebAuthn, and this project, or if you just want to chat with us. You can also [follow us on Twitter](https://twitter.com/hanko_io).
 
 # Licenses
 [hanko-elements](elements) and [hanko-frontend-sdk](frontend-sdk) are licensed under the [MIT License](elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
