@@ -392,5 +392,9 @@ func (h WebauthnHandler) getWebauthnUser(connection *pop.Connection, userId uuid
 		return nil, nil, fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
 
-	return intern.NewWebauthnUser(*user, credentials), user, nil
+	webauthnUser, err := intern.NewWebauthnUser(*user, credentials)
+	if err != nil {
+		return nil, nil, err
+	}
+	return webauthnUser, user, nil
 }

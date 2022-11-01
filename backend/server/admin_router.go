@@ -28,7 +28,7 @@ func NewAdminRouter(persister persistence.Persister) *echo.Echo {
 
 	user := e.Group("/users")
 	user.DELETE("/:id", userHandler.Delete)
-	user.PATCH("/:id", userHandler.Patch)
+	//user.PATCH("/:id", userHandler.Patch)
 	user.GET("", userHandler.List)
 
 	auditLogHandler := handler.NewAuditLogHandler(persister)

@@ -23,6 +23,7 @@ type Config struct {
 	Service  Service          `yaml:"service" json:"service" koanf:"service"`
 	Session  Session          `yaml:"session" json:"session" koanf:"session"`
 	AuditLog AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	Flow     Flow             `yaml:"flow" json:"flow" koanf:"flow"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -84,7 +85,8 @@ func DefaultConfig() *Config {
 			Database: "hanko",
 		},
 		Session: Session{
-			Lifespan: "1h",
+			Lifespan:           "1h",
+			PrivilegedLifespan: "0",
 			Cookie: Cookie{
 				HttpOnly: true,
 				SameSite: "strict",
@@ -96,6 +98,9 @@ func DefaultConfig() *Config {
 				Enabled:      true,
 				OutputStream: OutputStreamStdOut,
 			},
+		},
+		Flow: Flow{
+			RequireEmailVerification: true,
 		},
 	}
 }
@@ -317,6 +322,7 @@ func (s *Secrets) Validate() error {
 type Session struct {
 	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header"`
 	Lifespan              string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
+	PrivilegedLifespan    string `yaml:"privileged_lifespan" json:"privileged_lifespan" koanf:"privileged_lifespan"`
 	Cookie                Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
 }
 
@@ -348,3 +354,7 @@ var (
 	OutputStreamStdOut OutputStream = "stdout"
 	OutputStreamStdErr OutputStream = "stderr"
 )
+
+type Flow struct {
+	RequireEmailVerification bool `yaml:"require_email_verification" json:"require_email_verification" koanf:"require_email_verification"`
+}

@@ -1,0 +1,2 @@
+drop_column("users", "email")
+drop_column("users", "verified")

@@ -60,7 +60,8 @@ paths:
       summary: 'Initialize passcode login'
       description: |
         Initialize a passcode login for the user identified by `user_id`. Sends an email
-        containing the actual passcode to the user. Returns a representation of the passcode.
+        containing the actual passcode to the user's primary email address or to the address specified
+        through `email_id`. Returns a representation of the passcode.
       operationId: passcodeInit
       tags:
         - Passcode
@@ -74,6 +75,11 @@ paths:
                   description: The ID of the user
                   allOf:
                     - $ref: '#/components/schemas/UUID4'
+                email_id:
+                  description: The ID of the email address
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
+                  required: false
       responses:
         '200':
           description: 'Successful passcode login initialization'
@@ -565,6 +571,84 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /emails:
+    get:
+      summary: 'Get a list of emails'
+      operationId: listEmail
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      responses:
+        '200':
+          description: 'A list of emails assigned to the current user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Emails'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /emails/{id}:
+    patch:
+      summary: 'Update an email address'
+      operationId: updateEmail
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          description: ID of the email address
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                is_primary:
+                  type: boolean
+                  required: false
+      responses:
+        '201':
+          description: 'Email has been updated'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: 'Delete an email address'
+      operationId: updateEmail
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          description: ID of the email address
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      responses:
+        '201':
+          description: 'Email has been deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
   responses:
     BadRequest:
@@ -647,6 +731,13 @@ components:
         description: Hanko Configuration
         url: https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md
       properties:
+        flow:
+          description: sdsa
+          type: object
+          properties:
+            require_email_verification:
+              description:
+              type: boolean
         password:
           description: Configuration options concerning passwords
           type: object
@@ -946,10 +1037,6 @@ components:
           description: The ID of the user
           allOf:
             - $ref: '#/components/schemas/UUID4'
-        email:
-          description: The email address of the user
-          type: string
-          format: email
         created_at:
           description: Time of creation of the the user
           type: string
@@ -958,9 +1045,6 @@ components:
           description: Time of last update of the user
           type: string
           format: date-time
-        verified:
-          description: Indicates whether the user's email address was verified
-          type: boolean
         webauthn_credentials:
           description: List of registered Webauthn credentials
           type: array
@@ -972,6 +1056,30 @@ components:
                 type: string
                 format: base64url
                 example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
+    Emails:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            description: The ID of the email address
+            allOf:
+              - $ref: '#/components/schemas/UUID4'
+          address:
+            type: string
+            format: email
+          verified:
+            type: boolean
+          is_primary:
+            type: boolean
+          created_at:
+            type: string
+      example:
+        - id: 5333cc5b-c7c4-48cf-8248-9c184ac72b65
+          address: john.doe@example.com
+          verified: true
+          is_primary: false
+          created_at:
     WebauthnLoginResponse:
       description: 'Response after a successful login with webauthn'
       type: object

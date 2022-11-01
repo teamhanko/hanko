@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
@@ -81,6 +82,43 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 	}
 
+	// Determine where to send the passcode
+	var emailId uuid.UUID
+
+	if body.EmailId != nil {
+		emailId, err = uuid.FromString(*body.EmailId)
+		if err != nil {
+			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+		}
+	}
+
+	var email *models.Email
+
+	if !emailId.IsNil() {
+		// Send the passcode to a specific email
+		email = user.GetEmailById(emailId)
+		if email == nil {
+			return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+		}
+	} else {
+		// Send the email to the address marked as primary email
+		email = user.GetPrimaryEmail()
+		if email == nil {
+			return errors.New("no primary email available")
+		}
+	}
+
+	if h.cfg.Flow.RequireEmailVerification {
+		if !email.Verified && !email.IsPrimary() {
+			sessionToken, ok := c.Get("session").(jwt.Token)
+			if !ok || sessionToken == nil {
+				// If email verification is required the passcode can only be sent to a verified email address unless a
+				// valid session token exists.
+				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("email address must be verified"))
+			}
+		}
+	}
+
 	passcode, err := h.passcodeGenerator.Generate()
 	if err != nil {
 		return fmt.Errorf("failed to generate passcode: %w", err)
@@ -98,6 +136,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
 		UserId:    userId,
+		EmailId:   email.ID,
 		Ttl:       h.TTL,
 		Code:      string(hashedPasscode),
 		CreatedAt: now,
@@ -123,7 +162,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	message := gomail.NewMessage()
-	message.SetAddressHeader("To", user.Email, "")
+	message.SetAddressHeader("To", email.Address, "")
 	message.SetAddressHeader("From", h.emailConfig.FromAddress, h.emailConfig.FromName)
 
 	message.SetHeader("Subject", h.renderer.Translate(lang, "email_subject_login", data))
@@ -168,6 +207,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	transactionError := h.persister.Transaction(func(tx *pop.Connection) error {
 		passcodePersister := h.persister.GetPasscodePersisterWithConnection(tx)
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
+		emailPersister := h.persister.GetEmailPersisterWithConnection(tx)
 		passcode, err := passcodePersister.Get(passcodeId)
 		if err != nil {
 			return fmt.Errorf("failed to get passcode: %w", err)
@@ -231,11 +271,18 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to delete passcode: %w", err)
 		}
 
-		if !user.Verified {
-			user.Verified = true
-			err = userPersister.Update(*user)
+		// Update email verified status
+		email := user.GetEmailById(passcode.EmailId)
+		if email == nil {
+			return errors.New("email address not available anymore")
+		}
+
+		if !email.Verified {
+			email.Verified = true
+
+			err = emailPersister.Update(*email)
 			if err != nil {
-				return fmt.Errorf("failed to update user: %w", err)
+				return fmt.Errorf("failed to update the email verified status: %w", err)
 			}
 		}
 

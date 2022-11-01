@@ -1,0 +1,22 @@
+add_column("users", "email", "string", { "null": true })
+add_column("users", "verified", "bool", { "null": true })
+
+sql("
+UPDATE users u
+SET email = (
+  SELECT e.address
+  FROM emails e
+  JOIN primary_emails pe
+    ON e.id = pe.email_id AND e.user_id = u.id
+  LIMIT 1
+),
+  verified = (
+    SELECT e.verified
+    FROM emails e
+    JOIN primary_emails pe
+      ON e.id = pe.email_id AND e.user_id = u.id
+    LIMIT 1
+)")
+
+change_column("users", "email", "string", { "null": false, "unique": true })
+change_column("users", "verified", "bool", { "null": false })

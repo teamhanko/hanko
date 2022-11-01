@@ -1,17 +1,23 @@
 package intern
 
 import (
+	"errors"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewWebauthnUser(user models.User, credentials []models.WebauthnCredential) *WebauthnUser {
+func NewWebauthnUser(user models.User, credentials []models.WebauthnCredential) (*WebauthnUser, error) {
+	primaryEmail := user.GetPrimaryEmail()
+	if primaryEmail == nil {
+		return nil, errors.New("primary email unavailable")
+	}
+
 	return &WebauthnUser{
 		UserId:              user.ID,
-		Email:               user.Email,
+		Email:               primaryEmail.Address,
 		WebauthnCredentials: credentials,
-	}
+	}, nil
 }
 
 type WebauthnUser struct {

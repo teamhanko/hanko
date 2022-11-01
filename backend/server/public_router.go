@@ -50,17 +50,21 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
 
+	privilegedSession, err := hankoMiddleware.NewPrivilegedSession(cfg.Session)
+	if err != nil {
+		panic(fmt.Errorf("failed to create privilegedSession middleware: %w", err))
+	}
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	if cfg.Password.Enabled {
 		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := e.Group("/password")
-		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
+		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager), privilegedSession.Middleware)
 		password.POST("/login", passwordHandler.Login)
 	}
 
-	userHandler := handler.NewUserHandler(persister, auditLogger)
+	userHandler := handler.NewUserHandler(cfg, persister, sessionManager, auditLogger)
 
 	e.GET("/me", userHandler.Me, hankoMiddleware.Session(sessionManager))
 
@@ -93,7 +97,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
 	webauthn := e.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
+	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager), privilegedSession.Middleware)
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
@@ -103,8 +107,21 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 
 	passcode := e.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
+	passcodeLogin.POST("/initialize_verification", passcodeHandler.Init, hankoMiddleware.Session(sessionManager))
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+
+	emailHandler, err := handler.NewEmailHandler(cfg, persister, sessionManager, auditLogger)
+	if err != nil {
+		panic(fmt.Errorf("failed to create public email handler: %w", err))
+	}
+
+	email := e.Group("/emails")
+	email.Use(hankoMiddleware.Session(sessionManager))
+	email.GET("/", emailHandler.List)
+	email.POST("/", emailHandler.Create, privilegedSession.Middleware)
+	email.DELETE("/:id", emailHandler.Delete, privilegedSession.Middleware)
+	email.PATCH("/:id", emailHandler.Update, privilegedSession.Middleware)
 
 	return e
 }

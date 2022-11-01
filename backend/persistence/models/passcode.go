@@ -12,6 +12,7 @@ import (
 type Passcode struct {
 	ID        uuid.UUID `db:"id"`
 	UserId    uuid.UUID `db:"user_id"`
+	EmailId   uuid.UUID `db:"email_id"`
 	Ttl       int       `db:"ttl"` // in seconds
 	Code      string    `db:"code"`
 	TryCount  int       `db:"try_count"`

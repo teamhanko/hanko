@@ -1,0 +1,2 @@
+drop_table("primary_emails")
+drop_table("emails")
