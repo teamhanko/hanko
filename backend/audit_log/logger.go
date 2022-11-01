@@ -68,7 +68,9 @@ func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, u
 	var userEmail *string = nil
 	if user != nil {
 		userId = &user.ID
-		userEmail = &user.Email
+		if e := user.Emails.GetPrimary(); e != nil {
+			userEmail = &e.Address
+		}
 	}
 	var errString *string = nil
 	if logError != nil {
@@ -103,8 +105,10 @@ func (c *logger) logToConsole(context echo.Context, auditLogType models.AuditLog
 		Str("time_unix", strconv.FormatInt(now.Unix(), 10))
 
 	if user != nil {
-		loggerEvent.Str("user_id", user.ID.String()).
-			Str("user_email", user.Email)
+		loggerEvent.Str("user_id", user.ID.String())
+		if e := user.Emails.GetPrimary(); e != nil {
+			loggerEvent.Str("user_email", e.Address)
+		}
 	}
 
 	loggerEvent.Send()

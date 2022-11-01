@@ -1,6 +1,6 @@
-# &lt;hanko-auth&gt; element
+# Hanko elements
 
-The `<hanko-auth>` element offers a complete user interface that will bring a modern login and registration experience
+Provides web components that will bring a modern login and registration experience
 to your users. It integrates the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md), a backend
 that provides the underlying functionalities.
 
@@ -9,6 +9,7 @@ that provides the underlying functionalities.
 * Registration and login flows with and without passwords
 * Passkey authentication
 * Passcodes, a convenient way to recover passwords and verify email addresses
+* Email, Password and Passkey management
 * Customizable UI
 
 ## Installation
@@ -28,14 +29,9 @@ pnpm install @teamhanko/hanko-elements
 
 ### Script
 
-The web component needs to be registered first. You can control whether it should be attached to the shadow DOM or not
-using the `shadow` property. It's set to true by default, and you will be able to use the CSS parts
-to change the appearance of the component.
-
-There is currently an issue with Safari browsers, which breaks the autocompletion feature of
-input fields when the component is shadow DOM attached. So if you want to make use of the conditional UI or other
-autocompletion features you must set `shadow` to false. The disadvantage is that the CSS parts are not working anymore, and you must
-style the component by providing your own CSS properties. CSS variables will work in both cases.
+The web components need to be registered first. You can control whether they should be attached to the shadow DOM or not
+using the `shadow` property. It's set to true by default, and it's possible to make use of the [CSS shadow parts](#css-shadow-parts)
+to change the appearance of the component. [CSS variables](#css-variables) will work in both cases.
 
 Use as a module:
 
@@ -51,31 +47,30 @@ register({
 With a script tag via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/element.hanko-auth.js"/>
+<script src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"/>
 
 <script>
-    HankoAuth.register({ shadow: true, injectStyles: true })
+  Elements.register({shadow: true, injectStyles: true})
 </script>
 ```
 
-### Markup
+### &lt;hanko-auth&gt;
+
+A web component that handles user login and user registration.
+
+#### Markup
 
 ```html
 <hanko-auth api="https://hanko.yourdomain.com" lang="en"/>
 ```
 
-Please take a look at the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) to see how to spin up the backend.
-
-Note that we're working on Hanko Cloud, so that you don't need to run the Hanko API by yourself and all you need is to
-do is adding the `<hanko-auth>` element to your page.
-
-## Attributes
+#### Attributes
 
 - `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 - `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
-## Events
+#### Events
 
 These events bubble up through the DOM tree.
 
@@ -87,66 +82,78 @@ document.addEventListener('hankoAuthSuccess', () => {
 })
 ```
 
-## Demo
+### &lt;hanko-profile&gt;
 
-The animation below demonstrates how user registration with passwords enabled looks like. You can set up the flow you
-like using the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) configuration file. The registration flow also includes email
-verification via passcodes and the registration of a passkey so that the user can log in without passwords or passcodes.
+A web component that allows to manage emails, passwords and passkeys.
 
-<img src="https://github.com/teamhanko/hanko/raw/main/frontend/elements/demo.gif" width="410"/>
+#### Markup
+
+```html
+<hanko-auth api="https://hanko.yourdomain.com" lang="en"/>
+```
+
+#### Attributes
+
+- `api` the location where the Hanko API is running.
+- `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 
 ## UI Customization
 
 ### CSS Variables
 
-CSS variables can be used to style the `hanko-auth` element to your needs. Based on preset values and provided CSS
-variables, individual elements will be styled, including color shading for different UI states (e.g. hover, focus,..).
-
-Note that colors must be provided as individual HSL values. We'll have to be patient, unfortunately, until
-broader browser support for relative colors arrives, which would allow native CSS colors to be used.
-
-A list of all CSS variables including default values can be found below:
+CSS variables can be used to style the `hanko-auth` and  `hanko-profile` elements to your needs. A list of all CSS
+variables including default values can be found below:
 
 ```css
-hanko-auth {
-  --background-color-h: 0;
-  --background-color-s: 0%;
-  --background-color-l: 100%;
+hanko-auth, hanko-profile {
+  // Color Scheme
+  --color: #171717
+  --color-shade-1: #8f9095
+  --color-shade-2: #e5e6ef
 
-  --border-radius: 3px;
-  --border-style: solid;
-  --border-width: 1.5px;
+  --brand-color: #506cf0
+  --brand-color-shade-1: #6b84fb
+  --brand-contrast-color: white
 
-  --brand-color-h: 351;
-  --brand-color-s: 100%;
-  --brand-color-l: 59%;
+  --background-color: white
+  --error-color: #e82020
+  --link-color: #506cf0
 
-  --color-h: 0;
-  --color-s: 0%;
-  --color-l: 0%;
+  // Font Styles
+  --font-weight: 400
+  --font-size: 14px
+  --font-family: sans-serif
 
-  --container-padding: 20px;
-  --container-max-width: 600px;
+  // Border Styles
+  --border-radius: 4px
+  --border-style: solid
+  --border-width: 1px
 
-  --error-color-h: 351;
-  --error-color-s: 100%;
-  --error-color-l: 59%;
+  // Item Styles
+  --item-height: 34px
+  --item-margin: .5rem 0
 
-  --font-family: sans-serif;
-  --font-size: 16px;
-  --font-weight: 400;
+  // Container Styles
+  --container-padding: 0
+  --container-max-width: 600px
 
-  --headline-font-size: 30px;
-  --headline-font-weight: 700;
+  // Headline Styles
+  --headline1-font-size: 24px
+  --headline1-font-weight: 600
+  --headline1-margin: 0 0 .5rem
 
-  --input-height: 50px;
+  --headline2-font-size: 14px
+  --headline2-font-weight: 600
+  --headline2-margin: 1rem 0 .25rem
 
-  --item-margin: 15px 0;
+  // Divider Styles
+  --divider-padding: 0 42px
+  --divider-display: block
+  --divider-visibility: visible
 
-  --lightness-adjust-dark: -30%;
-  --lightness-adjust-dark-light: -10%;
-  --lightness-adjust-light: 10%;
-  --lightness-adjust-light-dark: 30%;
+  // Link Styles
+  --link-text-decoration: none
+  --link-text-decoration-hover: underline
 }
 ```
 
@@ -215,66 +222,6 @@ autocompletion of input elements while the web component is attached to the shad
 attach the component to the shadow DOM and make use of CSS parts for UI customization when the CSS variables are not
 sufficient.
 
-### Example
-
-The example below shows how you can use CSS variables in combination with styled shadow DOM parts:
-
-```css
-hanko-auth {
-  --color-h: 188;
-  --color-s: 99%;
-  --color-l: 38%;
-
-  --brand-color-h: 315;
-  --brand-color-s: 100%;
-  --brand-color-l: 59%;
-
-  --background-color-h: 196;
-  --background-color-s: 10%;
-  --background-color-l: 21%;
-
-  --border-width: 1px;
-  --border-radius: 5px;
-
-  --font-weight: 400;
-  --font-size: 16px;
-  --font-family: Helvetica;
-
-  --input-height: 45px;
-  --item-margin: 10px;
-
-  --container-max-width: 450px;
-  --container-padding: 10px 20px;
-
-  --headline-font-weight: 800;
-  --headline-font-size: 24px;
-
-  --lightness-adjust-dark: 30%;
-  --lightness-adjust-dark-light: 10%;
-  --lightness-adjust-light: -10%;
-  --lightness-adjust-light-dark: 30%;
-}
-
-hanko-auth::part(headline),
-hanko-auth::part(input),
-hanko-auth::part(link) {
-  color: hsl(33, 93%, 55%);
-}
-
-hanko-auth::part(link):hover {
-  text-decoration: underline;
-}
-
-hanko-auth::part(button):hover,
-hanko-auth::part(input):focus {
-  border-width: 2px;
-}
-```
-
-Result:
-
-<img src="https://github.com/teamhanko/hanko/raw/main/frontend/elements/demo-ui.png" width="450"/>
-
 ## Experimental Features
 
 ### Conditional Mediation / Autofill assisted Requests
@@ -301,7 +248,7 @@ cause the following issues:
 
 ## Frontend framework integrations
 
-To learn more about how to integrate the `<hanko-auth>` element into frontend frameworks, see our
+To learn more about how to integrate the Hanko elements into frontend frameworks, see our
 [guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
 [example applications](../../examples/README.md).
 

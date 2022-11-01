@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.0.17-alpha",
+  "version": "0.1.0-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -13,19 +13,19 @@
     "dist"
   ],
   "browser": {
-    "./hanko-auth": "./dist/element.hanko-auth.js"
+    "./elements": "./dist/elements.js"
   },
   "typesVersions": {
     "*": {
-      "hanko-auth": [
-        "dist/ui/HankoAuth.d.ts"
+      "elements": [
+        "dist/ui/Elements.d.ts"
       ]
     }
   },
   "exports": {
-    "./hanko-auth": {
-      "import": "./dist/element.hanko-auth.js",
-      "require": "./dist/element.hanko-auth.js",
+    "./elements": {
+      "import": "./dist/elements.js",
+      "require": "./dist/elements.js",
       "types": "./dist/index.d.ts"
     }
   },

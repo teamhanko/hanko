@@ -1,3 +1,212 @@
+.hanko_container {
+    background-color: var(--background-color, white);
+    padding: var(--container-padding, 0);
+    max-width: var(--container-max-width, 600px);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+    box-sizing: border-box
+}
+
+.hanko_content {
+    box-sizing: border-box;
+    flex: 0 1 auto;
+    width: 100%;
+    height: 100%
+}
+
+.hanko_footer {
+    padding: var(--item-margin, 0.5rem 0);
+    box-sizing: border-box;
+    width: 100%
+}
+
+.hanko_footer :nth-child(1) {
+    float: left
+}
+
+.hanko_footer :nth-child(2) {
+    float: right
+}
+
+.hanko_form .hanko_ul {
+    padding-inline-start: 0;
+    list-style-type: none;
+    margin: 0
+}
+
+@media screen and (min-width: 450px) {
+    .hanko_form .hanko_ul {
+        display: flex
+    }
+}
+
+.hanko_form .hanko_li {
+    display: flex
+}
+
+@media screen and (min-width: 450px) {
+    .hanko_form .hanko_li {
+        display: inline-flex
+    }
+
+    .hanko_form .hanko_li:first-child {
+        flex-grow: 1
+    }
+
+    .hanko_form .hanko_li:last-child {
+        margin: 0 0 0 1rem;
+        flex-grow: 0;
+        min-width: 125px
+    }
+
+    .hanko_form .hanko_li:only-child {
+        margin: 0;
+        flex-grow: 1
+    }
+}
+
+.hanko_button {
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 14px);
+    font-family: var(--font-family, sans-serif);
+    border-radius: var(--border-radius, 4px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    height: var(--item-height, 34px);
+    margin: var(--item-margin, 0.5rem 0);
+    flex-grow: 1;
+    outline: none;
+    cursor: pointer;
+    transition: .1s ease-out
+}
+
+.hanko_button:disabled {
+    cursor: default
+}
+
+.hanko_button.hanko_primary {
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color, #506cf0);
+    border-color: var(--brand-color, #506cf0)
+}
+
+.hanko_button.hanko_primary:hover {
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color-shade-1, #6b84fb);
+    border-color: var(--brand-color, #506cf0)
+}
+
+.hanko_button.hanko_primary:focus {
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color, #506cf0);
+    border-color: var(--color, #171717)
+}
+
+.hanko_button.hanko_primary:disabled {
+    color: var(--color-shade-1, #8f9095);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color-shade-2, #e5e6ef)
+}
+
+.hanko_button.hanko_secondary {
+    color: var(--color, #171717);
+    background: var(--background-color, white);
+    border-color: var(--color, #171717)
+}
+
+.hanko_button.hanko_secondary:hover {
+    color: var(--color, #171717);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color, #171717)
+}
+
+.hanko_button.hanko_secondary:focus {
+    color: var(--color, #171717);
+    background: var(--background-color, white);
+    border-color: var(--brand-color, #506cf0)
+}
+
+.hanko_button.hanko_secondary:disabled {
+    color: var(--color-shade-1, #8f9095);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color-shade-1, #8f9095)
+}
+
+.hanko_inputWrapper {
+    position: relative;
+    margin: var(--item-margin, 0.5rem 0);
+    display: flex;
+    flex-grow: 1
+}
+
+.hanko_input {
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 14px);
+    font-family: var(--font-family, sans-serif);
+    border-radius: var(--border-radius, 4px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    height: var(--item-height, 34px);
+    color: var(--color, #171717);
+    border-color: var(--color-shade-1, #8f9095);
+    background: var(--background-color, white);
+    padding: 0 .5rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: .1s ease-out
+}
+
+.hanko_input:-webkit-autofill,
+.hanko_input:-webkit-autofill:hover,
+.hanko_input:-webkit-autofill:focus {
+    -webkit-text-fill-color: var(--color, #171717);
+    -webkit-box-shadow: 0 0 0 50px var(--background-color, white) inset
+}
+
+.hanko_input::-ms-reveal,
+.hanko_input::-ms-clear {
+    display: none
+}
+
+.hanko_input::placeholder {
+    color: var(--color-shade-1, #8f9095)
+}
+
+.hanko_input:focus {
+    color: var(--color, #171717);
+    border-color: var(--color, #171717)
+}
+
+.hanko_input:disabled {
+    color: var(--color-shade-1, #8f9095);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color-shade-1, #8f9095)
+}
+
+.hanko_passcodeInputWrapper {
+    display: flex;
+    justify-content: space-between;
+    margin: var(--item-margin, 0.5rem 0)
+}
+
+.hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper {
+    flex-grow: 1;
+    margin: 0 .5rem 0 0
+}
+
+.hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper:last-child {
+    margin: 0
+}
+
+.hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper .hanko_input {
+    text-align: center
+}
+
 .hanko_checkmark {
     display: inline-block;
     width: 16px;
@@ -10,7 +219,7 @@
     display: inline-block;
     border-width: 2px;
     border-style: solid;
-    border-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
+    border-color: var(--brand-color, #506cf0);
     position: absolute;
     width: 16px;
     height: 16px;
@@ -20,33 +229,33 @@
 }
 
 .hanko_checkmark .hanko_circle.hanko_secondary {
-    border-color: hsl(var(---background-color-h, 0), var(---background-color-s, 0%), calc(var(---background-color-l, 100%) + 0%))
+    border-color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_checkmark .hanko_stem {
     position: absolute;
     width: 2px;
     height: 7px;
-    background-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
+    background-color: var(--brand-color, #506cf0);
     left: 8px;
     top: 3px
 }
 
 .hanko_checkmark .hanko_stem.hanko_secondary {
-    background-color: hsl(var(---background-color-h, 0), var(---background-color-s, 0%), calc(var(---background-color-l, 100%) + 0%))
+    background-color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_checkmark .hanko_kick {
     position: absolute;
     width: 5px;
     height: 2px;
-    background-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
+    background-color: var(--brand-color, #506cf0);
     left: 5px;
     top: 10px
 }
 
 .hanko_checkmark .hanko_kick.hanko_secondary {
-    background-color: hsl(var(---background-color-h, 0), var(---background-color-s, 0%), calc(var(---background-color-l, 100%) + 0%))
+    background-color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_checkmark.hanko_fadeOut {
@@ -63,291 +272,17 @@
     }
 }
 
-.hanko_loadingWheel {
-    box-sizing: border-box;
-    display: inline-block;
-    border-width: 2px;
-    border-style: solid;
-    border-color: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    border-top: 2px solid hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    animation: hanko_spin 500ms ease-in-out infinite
-}
-
-@keyframes hanko_spin {
-    0% {
-        transform: rotate(0deg)
-    }
-
-    100% {
-        transform: rotate(360deg)
-    }
-}
-
-.hanko_loadingIndicator {
-    display: inline-block;
-    margin: 0 5px
-}
-
-.hanko_button {
-    flex-grow: 1;
-    outline: none;
-    cursor: pointer;
-    transition: .1s ease-out
-}
-
-.hanko_button:disabled {
-    cursor: default
-}
-
-.hanko_button.hanko_primary {
-    font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
-    font-family: var(--font-family, sans-serif);
-    color: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 0%) + 0%));
-    background: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
-    border-radius: var(--border-radius, 3px);
-    height: var(--input-height, 50px);
-    margin: var(--item-margin, 15px 0)
-}
-
-.hanko_button.hanko_primary:hover {
-    color: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 0%) + 0%));
-    background: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + var(--lightness-adjust-light-dark, 2%)));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%))
-}
-
-.hanko_button.hanko_primary:focus {
-    color: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 0%) + var(--lightness-adjust-light-dark, 2%)));
-    background: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + 0%));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + var(--lightness-adjust-light-dark, 2%)))
-}
-
-.hanko_button.hanko_primary:disabled {
-    color: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 0%) + var(--lightness-adjust-light-dark, 2%)));
-    background: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + var(--lightness-adjust-light, 5%)));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--brand-color-h, 230), var(--brand-color-s, 100%), calc(var(--brand-color-l, 90%) + var(--lightness-adjust-light, 5%)))
-}
-
-.hanko_button.hanko_secondary {
-    font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
-    font-family: var(--font-family, sans-serif);
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    border-radius: var(--border-radius, 3px);
-    height: var(--input-height, 50px);
-    margin: var(--item-margin, 15px 0)
-}
-
-.hanko_button.hanko_secondary:hover {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + var(--lightness-adjust-dark-light, -10%)));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%))
-}
-
-.hanko_button.hanko_secondary:focus {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light-dark, 2%)))
-}
-
-.hanko_button.hanko_secondary:disabled {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light-dark, 2%)));
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + var(--lightness-adjust-light-dark, 2%)));
-    border-width: var(--border-width, 1.5px);
-    border-style: var(--border-style, solid);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)))
-}
-
-.hanko_inputWrapper {
-    position: relative;
-    margin: var(--item-margin, 15px 0);
-    display: flex;
-    flex-grow: 1
-}
-
-.hanko_label {
-    font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
-    font-family: var(--font-family, sans-serif);
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    left: 0;
-    top: 50%;
-    position: absolute;
-    transform: translateY(-50%);
-    padding: 0 .3rem;
-    margin: 0 .5rem;
-    transition: .1s ease;
-    transform-origin: left top;
-    pointer-events: none
-}
-
-.hanko_input {
-    font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
-    font-family: var(--font-family, sans-serif);
-    height: var(--input-height, 50px);
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    border-style: var(--border-style, solid);
-    border-width: var(--border-width, 1.5px);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    border-radius: var(--border-radius, 3px);
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    padding: 0 .7rem;
-    width: 100%;
-    outline: none;
-    box-sizing: border-box;
-    transition: .1s ease-out
-}
-
-.hanko_input:focus+.hanko_label {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    top: 0;
-    transform: translateY(-50%) scale(0.9) !important;
-    opacity: 1;
-    transition: opacity 1s;
-    -webkit-transition: opacity 1s
-}
-
-.hanko_input:not(:placeholder-shown)+.hanko_label {
-    top: 0;
-    transform: translateY(-50%) scale(0.9) !important
-}
-
-.hanko_input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 50px hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%)) inset
-}
-
-.hanko_input:-webkit-autofill::first-line {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%))
-}
-
-.hanko_input::-ms-reveal,
-.hanko_input::-ms-clear {
-    display: none
-}
-
-.hanko_input:focus {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    border-style: var(--border-style, solid);
-    border-width: var(--border-width, 1.5px);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%))
-}
-
-.hanko_input:disabled {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-dark, -30%)));
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + var(--lightness-adjust-dark-light, -10%)));
-    border-style: var(--border-style, solid);
-    border-width: var(--border-width, 1.5px);
-    border-color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-dark, -30%)))
-}
-
-.hanko_passcodeInputWrapper {
-    display: flex;
-    justify-content: space-between;
-    margin: var(--item-margin, 15px 0)
-}
-
-.hanko_passcodeDigitWrapper {
-    flex-grow: 1;
-    margin: 0 10px 0 0
-}
-
-.hanko_passcodeDigitWrapper:last-child {
-    margin: 0
-}
-
-.hanko_passcodeDigitWrapper input {
-    text-align: center
-}
-
-.hanko_title {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    font-family: var(--font-family, sans-serif);
-    font-size: var(--headline-font-size, 30px);
-    font-weight: var(--headline-font-weight, 700);
-    display: block;
-    margin: var(--item-margin, 15px 0);
-    text-align: left;
-    letter-spacing: 0;
-    font-style: normal
-}
-
-.hanko_content {
-    box-sizing: border-box;
-    flex: 0 1 auto;
-    width: 100%;
-    height: 100%
-}
-
-.hanko_ul {
-    padding-inline-start: 0;
-    list-style-type: none;
-    margin: 0
-}
-
-.hanko_li {
-    display: flex
-}
-
-.hanko_dividerWrapper {
-    font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
-    font-family: var(--font-family, sans-serif);
-    display: block;
-    visibility: visible;
-    margin: var(--item-margin, 15px 0);
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)))
-}
-
-.hanko_divider {
-    border-bottom: var(--border-width, 1.5px) var(--border-style, solid) hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    color: inherit;
-    font: inherit;
-    width: 100%;
-    text-align: center;
-    line-height: .1em;
-    margin: 0 auto
-}
-
-.hanko_divider span {
-    font: inherit;
-    color: inherit;
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    padding: 0 42px
-}
-
 .hanko_exclamationMark {
     width: 16px;
     height: 16px;
     position: relative;
-    margin: 10px
+    margin: 5px
 }
 
 .hanko_exclamationMark .hanko_circle {
     box-sizing: border-box;
     display: inline-block;
-    background-color: hsl(var(--error-color-h, 351), var(--error-color-s, 100%), calc(var(--error-color-l, 59%) + 0%));
+    background-color: var(--error-color, #e82020);
     position: absolute;
     width: 16px;
     height: 16px;
@@ -360,7 +295,7 @@
     position: absolute;
     width: 2px;
     height: 6px;
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
+    background: var(--background-color, white);
     left: 7px;
     top: 3px
 }
@@ -369,21 +304,77 @@
     position: absolute;
     width: 2px;
     height: 2px;
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
+    background: var(--background-color, white);
     left: 7px;
     top: 10px
 }
 
+.hanko_loadingSpinnerWrapper {
+    display: inline-block;
+    margin: 0 5px
+}
+
+.hanko_loadingSpinnerWrapper .hanko_loadingSpinner {
+    box-sizing: border-box;
+    display: inline-block;
+    border-width: 2px;
+    border-style: solid;
+    border-color: var(--background-color, white);
+    border-top: 2px solid var(--brand-color, #506cf0);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    animation: hanko_spin 500ms ease-in-out infinite
+}
+
+.hanko_loadingSpinnerWrapper .hanko_loadingSpinner.hanko_secondary {
+    border-color: var(--color-shade-1, #8f9095);
+    border-top: 2px solid var(--color-shade-2, #e5e6ef)
+}
+
+@keyframes hanko_spin {
+    0% {
+        transform: rotate(0deg)
+    }
+
+    100% {
+        transform: rotate(360deg)
+    }
+}
+
+.hanko_headline {
+    color: var(--color, #171717);
+    font-family: var(--font-family, sans-serif);
+    text-align: left;
+    letter-spacing: 0;
+    font-style: normal;
+    line-height: 1.1
+}
+
+.hanko_headline.hanko_grade1 {
+    font-size: var(--headline1-font-size, 24px);
+    font-weight: var(--headline1-font-weight, 600);
+    margin: var(--headline1-margin, 0 0 0.5rem)
+}
+
+.hanko_headline.hanko_grade2 {
+    font-size: var(--headline2-font-size, 14px);
+    font-weight: var(--headline2-font-weight, 600);
+    margin: var(--headline2-margin, 1rem 0 0.25rem)
+}
+
 .hanko_errorMessage {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
+    font-size: var(--font-size, 14px);
     font-family: var(--font-family, sans-serif);
-    color: hsl(var(--error-color-h, 351), var(--error-color-s, 100%), calc(var(--error-color-l, 59%) + 0%));
-    background: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    border: var(--border-width, 1.5px) var(--border-style, solid) hsl(var(--error-color-h, 351), var(--error-color-s, 100%), calc(var(--error-color-l, 59%) + 0%));
-    border-radius: var(--border-radius, 3px);
-    padding: 5px;
-    margin: var(--item-margin, 15px 0);
+    border-radius: var(--border-radius, 4px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    color: var(--error-color, #e82020);
+    background: var(--background-color, white);
+    padding: .25rem;
+    margin: var(--item-margin, 0.5rem 0);
+    min-height: var(--item-height, 34px);
     display: flex;
     align-items: center;
     box-sizing: border-box
@@ -393,50 +384,163 @@
     display: none
 }
 
-.hanko_footer {
-    padding: var(--item-margin, 15px 0);
-    box-sizing: border-box;
-    width: 100%
-}
-
-.hanko_footer :nth-child(1) {
-    float: left
-}
-
-.hanko_footer :nth-child(2) {
-    float: right
-}
-
 .hanko_paragraph {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
+    font-size: var(--font-size, 14px);
     font-family: var(--font-family, sans-serif);
+    color: var(--color, #171717);
+    margin: var(--item-margin, 0.5rem 0);
     text-align: left;
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    margin: var(--item-margin, 15px 0)
+    word-break: break-word
+}
+
+.hanko_accordion {
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 14px);
+    font-family: var(--font-family, sans-serif);
+    width: 100%;
+    overflow: hidden
+}
+
+.hanko_accordion .hanko_accordionItem {
+    color: var(--color, #171717);
+    margin: .25rem 0;
+    overflow: hidden
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label {
+    border-radius: var(--border-radius, 4px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    border-color: var(--background-color, white);
+    height: var(--item-height, 34px);
+    background: var(--background-color, white);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    margin: 0;
+    cursor: pointer;
+    transition: all .35s
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label .hanko_labelText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label .hanko_labelText .hanko_description {
+    color: var(--color-shade-1, #8f9095)
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label.hanko_dropdown {
+    color: var(--link-color, #506cf0);
+    justify-content: flex-start;
+    width: fit-content
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label:hover {
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color-shade-1, #6b84fb)
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label:hover .hanko_description {
+    color: var(--brand-contrast-color, white)
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label:hover.hanko_dropdown {
+    color: var(--link-color, #506cf0);
+    border-color: var(--background-color, white);
+    background: none
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label:not(.hanko_dropdown)::after {
+    content: "❯";
+    width: 1rem;
+    text-align: center;
+    transition: all .35s
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_label.hanko_dropdown::before {
+    content: "+";
+    width: 1em;
+    text-align: center;
+    transition: all .35s
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput {
+    position: absolute;
+    opacity: 0;
+    z-index: -1
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label {
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color, #506cf0)
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label .hanko_description {
+    color: var(--brand-contrast-color, white)
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label.hanko_dropdown {
+    color: var(--link-color, #506cf0);
+    border-color: var(--background-color, white);
+    background: none
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label:not(.hanko_dropdown)::after {
+    transform: rotate(90deg)
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label.hanko_dropdown::before {
+    content: "-"
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label~.hanko_accordionContent {
+    margin: .25rem 1rem;
+    opacity: 1;
+    max-height: 100vh
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionContent {
+    max-height: 0;
+    margin: 0 1rem;
+    opacity: 0;
+    overflow: hidden;
+    transition: all .35s
+}
+
+.hanko_accordion .hanko_accordionItem .hanko_accordionContent.hanko_dropdownContent {
+    border-style: none
 }
 
 .hanko_link {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 16px);
+    font-size: var(--font-size, 14px);
     font-family: var(--font-family, sans-serif);
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light, 5%)));
-    text-decoration: none;
-    cursor: pointer
+    color: var(--link-color, #506cf0);
+    text-decoration: var(--link-text-decoration, none);
+    cursor: pointer;
+    background: none !important;
+    border: none;
+    padding: 0 !important
 }
 
 .hanko_link:hover {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + 0%));
-    text-decoration: underline
+    color: var(--link-color, #506cf0);
+    text-decoration: var(--link-text-decoration-hover, underline)
 }
 
 .hanko_link.hanko_disabled {
-    color: hsl(var(--color-h, 0), var(--color-s, 0%), calc(var(--color-l, 0%) + var(--lightness-adjust-light-dark, 2%)));
+    color: var(--color, #171717);
     pointer-events: none;
     cursor: default
 }
 
-.hanko_linkWithLoadingIndicator {
+.hanko_linkWrapper {
     display: inline-flex;
     flex-direction: row;
     justify-content: space-between;
@@ -444,19 +548,34 @@
     height: 20px
 }
 
-.hanko_linkWithLoadingIndicator.hanko_swap {
+.hanko_linkWrapper.hanko_reverse {
     flex-direction: row-reverse
 }
 
-.hanko_container {
-    background-color: hsl(var(--background-color-h, 0), var(--background-color-s, 0%), calc(var(--background-color-l, 100%) + 0%));
-    padding: var(--container-padding, 0 15px);
-    max-width: var(--container-max-width, 600px);
-    display: flex;
-    flex-direction: column;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center;
-    align-content: flex-start;
-    box-sizing: border-box
+.hanko_dividerWrapper {
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 14px);
+    font-family: var(--font-family, sans-serif);
+    display: var(--divider-display, block);
+    visibility: var(--divider-visibility, visible);
+    color: var(--color-shade-1, #8f9095);
+    margin: var(--item-margin, 0.5rem 0)
+}
+
+.hanko_divider {
+    border-bottom-style: var(--border-style, solid);
+    border-bottom-width: var(--border-width, 1px);
+    color: inherit;
+    font: inherit;
+    width: 100%;
+    text-align: center;
+    line-height: .1em;
+    margin: 0 auto
+}
+
+.hanko_divider .hanko_text {
+    font: inherit;
+    color: inherit;
+    background: var(--background-color, white);
+    padding: var(--divider-padding, 0 42px)
 }

@@ -50,43 +50,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /users/{id}:
-    patch:
-      summary: 'Update a user by ID'
-      operationId: updateUser
-      tags:
-        - User Management
-      parameters:
-        - name: id
-          in: path
-          description: ID of the user
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID4'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                status:
-                  type: string
-                  enum: [active, inactive]
-      responses:
-        '200':
-          description: 'Updated user details'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
     delete:
       summary: 'Delete a user by ID'
       operationId: deleteUser

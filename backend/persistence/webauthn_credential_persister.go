@@ -88,9 +88,9 @@ func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 
 func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
 	var credentials []models.WebauthnCredential
-	err := p.db.Eager().Where("user_id = ?", &userId).All(&credentials)
+	err := p.db.Eager().Where("user_id = ?", &userId).Order("created_at asc").All(&credentials)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
+		return credentials, nil
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get credentials: %w", err)

@@ -3,10 +3,10 @@ const path = require("path");
 module.exports = {
   entry: {
     hankoAuth: {
-      filename: 'element.hanko-auth.js',
+      filename: 'elements.js',
       import: './src/index.ts',
       library: {
-        name: 'HankoAuth',
+        name: 'Elements',
         type: 'umd',
         umdNamedDefine: true,
       },

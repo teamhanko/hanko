@@ -1,0 +1,22 @@
+@use '../../variables'
+@use '../../mixins'
+
+
+
+.headline
+  color: variables.$color
+  font-family: variables.$font-family
+  text-align: left
+  letter-spacing: 0
+  font-style: normal
+  line-height: 1.1
+
+  &.grade1
+    font-size: variables.$headline1-font-size
+    font-weight: variables.$headline1-font-weight
+    margin: variables.$headline1-margin
+
+  &.grade2
+    font-size: variables.$headline2-font-size
+    font-weight: variables.$headline2-font-weight
+    margin: variables.$headline2-margin

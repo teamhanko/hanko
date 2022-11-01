@@ -1,0 +1,32 @@
+@use "../../variables"
+@use "../../mixins"
+
+.link
+  @include mixins.font
+
+  color: variables.$link-color
+  text-decoration: variables.$link-text-decoration
+  cursor: pointer
+  background: none!important
+  border: none
+  padding: 0!important
+
+  &:hover
+    color: variables.$link-color
+    text-decoration: variables.$link-text-decoration-hover
+
+  &.disabled
+    color: variables.$color
+    pointer-events: none
+    cursor: default
+
+.linkWrapper
+  display: inline-flex
+  flex-direction: row
+  justify-content: space-between
+  align-items: center
+  height: 20px
+
+  &.reverse
+    flex-direction: row-reverse
+

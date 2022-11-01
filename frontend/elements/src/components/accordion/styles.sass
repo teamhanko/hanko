@@ -1,0 +1,106 @@
+@use '../../variables'
+@use '../../mixins'
+
+.accordion
+  @include mixins.font
+
+  width: 100%
+  overflow: hidden
+
+  .accordionItem
+    color: variables.$color
+
+    margin: .25rem 0
+    overflow: hidden
+
+    .label
+      @include mixins.border
+
+      border-color: variables.$background-color
+      height: variables.$item-height
+      background: variables.$background-color
+
+      box-sizing: border-box
+      display: flex
+      align-items: center
+      justify-content: space-between
+      padding: 0 1rem
+      margin: 0
+      cursor: pointer
+      transition: all .35s
+
+      .labelText
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
+
+        .description
+          color: variables.$color-shade-1
+
+      &.dropdown
+        color: variables.$link-color
+        justify-content: flex-start
+        width: fit-content
+
+      &:hover
+        color: variables.$brand-contrast-color
+        background: variables.$brand-color-shade-1
+
+        .description
+           color: variables.$brand-contrast-color
+
+        &.dropdown
+          color: variables.$link-color
+          border-color: variables.$background-color
+          background: none
+
+      &:not(.dropdown)::after
+        content: "\276F"
+        width: 1rem
+        text-align: center
+        transition: all .35s
+
+      &.dropdown::before
+        content: "\002B"
+        width: 1em
+        text-align: center
+        transition: all .35s
+
+    .accordionInput
+      position: absolute
+      opacity: 0
+      z-index: -1
+
+      &:checked
+        + .label
+          color: variables.$brand-contrast-color
+          background: variables.$brand-color
+
+          .description
+            color: variables.$brand-contrast-color
+
+          &.dropdown
+            color: variables.$link-color
+            border-color: variables.$background-color
+            background: none
+
+          &:not(.dropdown)::after
+            transform: rotate(90deg)
+
+          &.dropdown::before
+            content: "\002D"
+
+          ~ .accordionContent
+            margin: .25rem 1rem
+            opacity: 1
+            max-height: 100vh
+
+    .accordionContent
+      max-height: 0
+      margin: 0 1rem
+      opacity: 0
+      overflow: hidden
+      transition: all .35s
+
+      &.dropdownContent
+        border-style: none

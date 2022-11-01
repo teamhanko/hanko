@@ -1,0 +1,27 @@
+create_table("emails") {
+	t.Column("id", "uuid")
+	t.Column("user_id", "uuid", { "null": true })
+	t.Column("address", "string")
+	t.Column("verified", "bool")
+	t.PrimaryKey("id")
+	t.Index("address", { "unique": true })
+	t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}
+
+create_table("primary_emails") {
+    t.Column("id", "uuid")
+    t.Column("email_id", "uuid")
+    t.Column("user_id", "uuid")
+    t.PrimaryKey("id")
+    t.Index("email_id", { "unique": true })
+    t.Index("user_id", { "unique": true })
+    t.ForeignKey("email_id", {"emails": ["id"]}, {"on_delete": "restrict", "on_update": "cascade"})
+    t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}
+
+sql("INSERT INTO emails (id, user_id, address, verified, created_at, updated_at)
+SELECT id, id, email, verified, created_at, updated_at
+FROM users")
+
+sql("INSERT INTO primary_emails (id, email_id, user_id, created_at, updated_at)
+SELECT id, id, user_id, created_at, updated_at FROM emails")

@@ -392,6 +392,124 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 	})
 }
 
+func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(userId)
+	if err != nil {
+		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+	}
+
+	response := make([]*dto.WebauthnCredentialResponse, len(credentials))
+
+	for i, credential := range credentials {
+		response[i] = dto.FromWebauthnCredentialModel(&credential)
+	}
+
+	return c.JSON(http.StatusOK, response)
+}
+
+func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	credentialID := c.Param("id")
+
+	var body dto.WebauthnCredentialUpdateRequest
+
+	err = (&echo.DefaultBinder{}).BindBody(c, &body)
+	if err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	credential, err := h.persister.GetWebauthnCredentialPersister().Get(credentialID)
+	if err != nil {
+		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+	}
+
+	if credential == nil || credential.UserId.String() != user.ID.String() {
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn with the specified credentialId"))
+	}
+
+	if body.Name != nil {
+		credential.Name = body.Name
+	}
+
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Update(*credential)
+		if err != nil {
+			return fmt.Errorf("failed to update webauthn credential: %w", err)
+		}
+		err = h.auditLogger.Create(c, models.AuditLogWebAuthnCredentialUpdated, user, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create audit log: %w", err)
+		}
+		return nil
+	})
+}
+
+func (h *WebauthnHandler) DeleteCredential(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return fmt.Errorf("failed to fetch user from db: %w", err)
+	}
+
+	credentialId := c.Param("id")
+
+	credential, err := h.persister.GetWebauthnCredentialPersister().Get(credentialId)
+	if err != nil {
+		return fmt.Errorf("failed to get webauthn credential: %w", err)
+	}
+
+	if credential == nil || credential.UserId.String() != user.ID.String() {
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("webauthn credential not found"))
+	}
+
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Delete(*credential)
+		if err != nil {
+			return fmt.Errorf("failed to delete credential from db: %w", err)
+		}
+
+		err = h.auditLogger.Create(c, models.AuditLogWebAuthnCredentialDeleted, user, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create audit log: %w", err)
+		}
+
+		return c.NoContent(http.StatusNoContent)
+	})
+}
+
 func (h WebauthnHandler) getWebauthnUser(connection *pop.Connection, userId uuid.UUID) (*intern.WebauthnUser, *models.User, error) {
 	user, err := h.persister.GetUserPersisterWithConnection(connection).Get(userId)
 	if err != nil {
@@ -407,5 +525,9 @@ func (h WebauthnHandler) getWebauthnUser(connection *pop.Connection, userId uuid
 		return nil, nil, fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
 
-	return intern.NewWebauthnUser(*user, credentials), user, nil
+	webauthnUser, err := intern.NewWebauthnUser(*user, credentials)
+	if err != nil {
+		return nil, nil, err
+	}
+	return webauthnUser, user, nil
 }

@@ -157,6 +157,28 @@ describe("httpClient.put()", () => {
   });
 });
 
+describe("httpClient.patch()", () => {
+  it("should call patch with correct args", async () => {
+    httpClient._fetch = jest.fn();
+    await httpClient.patch("/test");
+
+    expect(httpClient._fetch).toHaveBeenCalledWith("/test", {
+      method: "PATCH",
+    });
+  });
+});
+
+describe("httpClient.delete()", () => {
+  it("should call delete with correct args", async () => {
+    httpClient._fetch = jest.fn();
+    await httpClient.delete("/test");
+
+    expect(httpClient._fetch).toHaveBeenCalledWith("/test", {
+      method: "DELETE",
+    });
+  });
+});
+
 describe("headers.get()", () => {
   it("should return headers", async () => {
     const header = new Headers(xhr);

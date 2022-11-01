@@ -5,9 +5,23 @@ import { PublicKeyCredentialWithAttestationJSON } from "@github/webauthn-json";
  * @category SDK
  * @subcategory DTO
  * @property {boolean} enabled - Indicates passwords are enabled, so the API accepts login attempts using passwords.
+ * @property {number} min_password_length - The minimum length of a password. To be used for password validation.
  */
 interface PasswordConfig {
   enabled: boolean;
+  min_password_length: number;
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {boolean} require_verification - Indicates that email addresses must be verified.
+ * @property {number} max_num_of_addresses - The maximum number of email addresses a user can have.
+ */
+interface EmailConfig {
+  require_verification: boolean;
+  max_num_of_addresses: number;
 }
 
 /**
@@ -18,6 +32,7 @@ interface PasswordConfig {
  */
 interface Config {
   password: PasswordConfig;
+  emails: EmailConfig;
 }
 
 /**
@@ -38,11 +53,13 @@ interface WebauthnFinalized {
  * @subcategory DTO
  * @property {string} id - The UUID of the user.
  * @property {boolean} verified - Indicates whether the user's email address is verified.
+ * @property {string} email_id - The UUID of the email address.
  * @property {boolean} has_webauthn_credential - Indicates that the user has registered a WebAuthn credential in the past.
  */
 interface UserInfo {
   id: string;
   verified: boolean;
+  email_id: string;
   has_webauthn_credential: boolean;
 }
 
@@ -77,7 +94,7 @@ interface Credential {
  */
 interface User {
   id: string;
-  email: string;
+  email_id: string;
   webauthn_credentials: Credential[];
 }
 
@@ -97,12 +114,74 @@ interface Passcode {
  * @interface
  * @category SDK
  * @subcategory DTO
- * @property {string[]} transports - A list of WebAuthn AuthenticatorTransport, e.g.: "usb", "internal",...
+ * @property {string[]} - Transports which may be used by the authenticator. E.g. "internal", "ble",...
+ */
+interface WebauthnTransports extends Array<string> {}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {WebauthnTransports} transports
  * @ignore
  */
 interface Attestation extends PublicKeyCredentialWithAttestationJSON {
-  transports: string[];
+  transports: WebauthnTransports;
 }
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {string} id - The UUID of the email address.
+ * @property {string} address - The email address.
+ * @property {boolean} is_verified - Indicates whether the email address is verified.
+ * @property {boolean} is_primary - Indicates it's the primary email address.
+ */
+interface Email {
+  id: string;
+  address: string;
+  is_verified: boolean;
+  is_primary: boolean;
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {Email[]} - A list of emails assigned to the current user.
+ */
+interface Emails extends Array<Email> {}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {string} id - The credential id.
+ * @property {string=} name - The credential name.
+ * @property {string} public_key - The public key.
+ * @property {string} attestation_type - The attestation type.
+ * @property {string} aaguid - The AAGUID of the authenticator.
+ * @property {string} created_at - Time of credential creation.
+ * @property {WebauthnTransports} transports
+ */
+interface WebauthnCredential {
+  id: string;
+  name?: string;
+  public_key: string;
+  attestation_type: string;
+  aaguid: string;
+  created_at: string;
+  transports: WebauthnTransports;
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {WebauthnCredential[]} - A list of WebAuthn credential assigned to the current user.
+ */
+interface WebauthnCredentials extends Array<WebauthnCredential> {}
 
 export type {
   PasswordConfig,
@@ -112,6 +191,10 @@ export type {
   UserInfo,
   Me,
   User,
+  Email,
+  Emails,
   Passcode,
   Attestation,
+  WebauthnCredential,
+  WebauthnCredentials,
 };

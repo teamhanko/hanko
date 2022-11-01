@@ -1,0 +1,20 @@
+@use '../../variables'
+@use '../../mixins'
+
+.errorMessage
+  @include mixins.font
+  @include mixins.border
+
+  color: variables.$error-color
+  background: variables.$background-color
+
+  padding: .25rem
+  margin: variables.$item-margin
+  min-height: variables.$item-height
+
+  display: flex
+  align-items: center
+  box-sizing: border-box
+
+  &[hidden]
+    display: none

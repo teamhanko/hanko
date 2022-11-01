@@ -31,6 +31,10 @@ type Persister interface {
 	GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister
 	GetAuditLogPersister() AuditLogPersister
 	GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister
+	GetEmailPersister() EmailPersister
+	GetEmailPersisterWithConnection(tx *pop.Connection) EmailPersister
+	GetPrimaryEmailPersister() PrimaryEmailPersister
+	GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) PrimaryEmailPersister
 }
 
 type Migrator interface {
@@ -153,6 +157,22 @@ func (p *persister) GetAuditLogPersister() AuditLogPersister {
 
 func (p *persister) GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister {
 	return NewAuditLogPersister(tx)
+}
+
+func (p *persister) GetEmailPersister() EmailPersister {
+	return NewEmailPersister(p.DB)
+}
+
+func (p *persister) GetEmailPersisterWithConnection(tx *pop.Connection) EmailPersister {
+	return NewEmailPersister(tx)
+}
+
+func (p *persister) GetPrimaryEmailPersister() PrimaryEmailPersister {
+	return NewPrimaryEmailPersister(p.DB)
+}
+
+func (p *persister) GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) PrimaryEmailPersister {
+	return NewPrimaryEmailPersister(tx)
 }
 
 func (p *persister) Transaction(fn func(tx *pop.Connection) error) error {

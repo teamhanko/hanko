@@ -1,4 +1,14 @@
+import {
+  create as createWebauthnCredential,
+  get as getWebauthnCredential,
+} from "@github/webauthn-json";
+
+import { WebauthnSupport } from "../WebauthnSupport";
+import { Client } from "./Client";
+import { PasscodeState } from "../state/PasscodeState";
+
 import { WebauthnState } from "../state/WebauthnState";
+
 import {
   InvalidWebauthnCredentialError,
   TechnicalError,
@@ -6,13 +16,13 @@ import {
   WebauthnRequestCancelledError,
   UserVerificationError,
 } from "../Errors";
+
 import {
-  create as createWebauthnCredential,
-  get as getWebauthnCredential,
-} from "@github/webauthn-json";
-import { Attestation, User, WebauthnFinalized } from "../Dto";
-import { WebauthnSupport } from "../WebauthnSupport";
-import { Client } from "./Client";
+  Attestation,
+  User,
+  WebauthnFinalized,
+  WebauthnCredentials,
+} from "../Dto";
 
 /**
  * A class that handles WebAuthn authentication and registration.
@@ -23,7 +33,8 @@ import { Client } from "./Client";
  * @extends {Client}
  */
 class WebauthnClient extends Client {
-  state: WebauthnState;
+  webauthnState: WebauthnState;
+  passcodeState: PasscodeState;
   controller: AbortController;
 
   _getCredential = getWebauthnCredential;
@@ -36,7 +47,12 @@ class WebauthnClient extends Client {
      *  @public
      *  @type {WebauthnState}
      */
-    this.state = new WebauthnState();
+    this.webauthnState = new WebauthnState();
+    /**
+     *  @public
+     *  @type {PasscodeState}
+     */
+    this.passcodeState = new PasscodeState();
   }
 
   /**
@@ -95,10 +111,12 @@ class WebauthnClient extends Client {
 
     const finalizeResponse: WebauthnFinalized = assertionResponse.json();
 
-    this.state
+    this.webauthnState
       .read()
       .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
       .write();
+
+    this.passcodeState.read().reset(userID).write();
 
     return;
   }
@@ -160,10 +178,85 @@ class WebauthnClient extends Client {
     }
 
     const finalizeResponse: WebauthnFinalized = attestationResponse.json();
-    this.state
+    this.webauthnState
       .read()
       .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
       .write();
+
+    return;
+  }
+
+  /**
+   * Returns a list of all WebAuthn credentials assigned to the current user.
+   *
+   * @return {Promise<WebauthnCredentials>}
+   * @throws {UnauthorizedError}
+   * @throws {RequestTimeoutError}
+   * @throws {TechnicalError}
+   * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/listCredentials
+   */
+  async listCredentials(): Promise<WebauthnCredentials> {
+    const response = await this.client.get("/webauthn/credentials");
+
+    if (response.status === 401) {
+      throw new UnauthorizedError();
+    } else if (!response.ok) {
+      throw new TechnicalError();
+    }
+
+    return response.json();
+  }
+
+  /**
+   * Updates the WebAuthn credential.
+   *
+   * @param {string=} credentialID - The credential's UUID.
+   * @param {string} name - The new credential name.
+   * @return {Promise<void>}
+   * @throws {NotFoundError}
+   * @throws {UnauthorizedError}
+   * @throws {RequestTimeoutError}
+   * @throws {TechnicalError}
+   * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/updateCredential
+   */
+  async updateCredential(credentialID: string, name: string): Promise<void> {
+    const response = await this.client.patch(
+      `/webauthn/credentials/${credentialID}`,
+      {
+        name,
+      }
+    );
+
+    if (response.status === 401) {
+      throw new UnauthorizedError();
+    } else if (!response.ok) {
+      throw new TechnicalError();
+    }
+
+    return;
+  }
+
+  /**
+   * Deletes the WebAuthn credential.
+   *
+   * @param {string=} credentialID - The credential's UUID.
+   * @return {Promise<void>}
+   * @throws {NotFoundError}
+   * @throws {UnauthorizedError}
+   * @throws {RequestTimeoutError}
+   * @throws {TechnicalError}
+   * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/deleteCredential
+   */
+  async deleteCredential(credentialID: string): Promise<void> {
+    const response = await this.client.delete(
+      `/webauthn/credentials/${credentialID}`
+    );
+
+    if (response.status === 401) {
+      throw new UnauthorizedError();
+    } else if (!response.ok) {
+      throw new TechnicalError();
+    }
 
     return;
   }
@@ -183,7 +276,7 @@ class WebauthnClient extends Client {
       return supported;
     }
 
-    const matches = this.state
+    const matches = this.webauthnState
       .read()
       .matchCredentials(user.id, user.webauthn_credentials);
 
