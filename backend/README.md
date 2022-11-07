@@ -321,7 +321,6 @@ go build -a -o hanko main.go
 ```
 
 Then run:
-x
 ```shell
 ./hanko serve public --config <PATH-TO-CONFIG-FILE>
 ```
