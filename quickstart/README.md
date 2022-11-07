@@ -2,7 +2,7 @@
 
 This directory contains an example application that showcases
 
-- integration of web component(s) provided through the`@teamhanko/hanko-elements` package (see [elements](../elements)).
+- integration of web component(s) provided through the `@teamhanko/hanko-elements` package (see [elements](../elements)).
 - server-side validation of JWTs issued by the Hanko [API](../backend) for securing a custom backend/API
 
 The example is used on https://example.hanko.io/.
