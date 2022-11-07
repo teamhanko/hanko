@@ -351,7 +351,7 @@ serve all
 
 ### Enabling password authentication
 
-Password-based authentication is disabled per default. You can activate set the minimum password
+Password-based authentication is disabled per default. You can activate it and set the minimum password
 length in your configuration file:
 
 ```yaml
