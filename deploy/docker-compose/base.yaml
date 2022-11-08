@@ -47,15 +47,9 @@ services:
     networks:
       - intranet
   elements:
-    build: ../../elements
+    build: ../../frontend
     ports:
       - "9500:80"
-    networks:
-      - intranet
-  frontendsdk:
-    build: ../../frontend-sdk
-    ports:
-      - "9501:80"
     networks:
       - intranet
   mailslurper:
