@@ -23,6 +23,6 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "target": "es6",
-    "module": "commonjs",
+    "module": "commonjs"
   }
 }
