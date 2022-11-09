@@ -11,7 +11,7 @@ updates:
       interval: "daily"
 
   - package-ecosystem: "npm"
-    directory: "/frontend-sdk"
+    directory: "/frontend/frontend-sdk"
     schedule:
       interval: "daily"
     # Always increase the version requirement
@@ -19,7 +19,7 @@ updates:
     versioning-strategy: increase
 
   - package-ecosystem: "npm"
-    directory: "/elements"
+    directory: "/frontend/elements"
     schedule:
       interval: "daily"
     # Always increase the version requirement
