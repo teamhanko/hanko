@@ -4,12 +4,12 @@ WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
 # frontend-sdk
-COPY frontend-sdk/package.json frontend-sdk/
-COPY frontend-sdk/package-lock.json frontend-sdk/
-
 WORKDIR /app/frontend-sdk
+COPY frontend-sdk/package.json ./
+COPY frontend-sdk/package-lock.json ./
+
 RUN npm ci --silent
-COPY frontend-sdk/ ./
+COPY ./frontend-sdk ./
 RUN npm run build
 
 
@@ -18,7 +18,7 @@ WORKDIR /app/elements
 COPY elements/package.json ./
 COPY elements/package-lock.json ./
 
-RUN npm ci
+RUN npm ci --silent
 COPY ./elements ./
 RUN npm run build:dev
 
