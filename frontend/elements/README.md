@@ -285,7 +285,7 @@ Result:
 
 To learn more about how to integrate the `<hanko-auth>` element into frontend frameworks, see our
 [guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
-[example applications](../examples/README.md).
+[example applications](../../examples/README.md).
 
 ## Bugs
 

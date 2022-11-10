@@ -34,8 +34,8 @@ With most devices now shipping with passkey support and biometric sensors like T
 # Architecture
 The main building blocks of the Hanko project are
 - [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and passwords, as well as user management and JWT token issuing
-- [hanko-elements](/elements/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
-- [hanko-frontend-sdk](/frontend-sdk/README.md) - A client package for using the Hanko API
+- [hanko-elements](/frontend/elements/README.md) - A slick web component made for Hanko backend that features a polished onboarding and login experience and is highly customizable
+- [hanko-frontend-sdk](/frontend/frontend-sdk/README.md) - A client package for using the Hanko API
 
 The remainder of the repository contents consist of:
 - [quickstart](/quickstart) - The quickstart example app, showing off Hanko's login experience and acting as a reference implementation
@@ -50,12 +50,12 @@ The remainder of the repository contents consist of:
 - **I need an authentication API for my project, but I do not want to build it myself**: head over to our
   [backend](/backend/README.md) to learn how to get it up and running.
 - **I also need a registration/login UI in my frontend, but I do not want to build it myself**:
-  [hanko-elements](/elements/README.md) provides the custom element/web component that powers
+  [hanko-elements](/frontend/elements/README.md) provides the custom element/web component that powers
   the [live example](https://example.hanko.io) and our companion page [passkeys.io](https://passkeys.io).
   We also provide [guides](https://docs.hanko.io/guides/frontend) in the official documentation on how to integrate the
   web component(s) with your favourite frontend framework as well as [example](/examples/README.md) applications.
 - **I want to use the Hanko backend API but prefer to build my own UI**: you can still make
-  use of the [hanko-frontend-sdk](/frontend-sdk/README.md). It forms the basis of our web components. The client it
+  use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components. The client it
   provides handles communication with the Hanko backend API and saves you the time of rolling your own.
 
 # Roadmap
@@ -78,7 +78,7 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ⚙️ | `<hanko-profile>` web component |
 | ⚙️ | Sessions |
 | | Rate limiting (application level) |
-| | Custom translations for [hanko-elements](/elements/README.md) |
+| | Custom translations for [hanko-elements](/frontend/elements/README.md) |
 | | Email templating |
 | | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
 | | Support for native Android and iOS apps |
@@ -97,4 +97,4 @@ If you have any questions or issues, please check this project's [Q&A section in
 We invite you to join our growing [Slack community](https://www.hanko.io/community) if you want to get the latest updates on passkeys, WebAuthn, and this project, or if you just want to chat with us. You can also [follow us on Twitter](https://twitter.com/hanko_io).
 
 # Licenses
-[hanko-elements](elements) and [hanko-frontend-sdk](frontend-sdk) are licensed under the [MIT License](elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
+[hanko-elements](frontend/elements) and [hanko-frontend-sdk](frontend/frontend-sdk) are licensed under the [MIT License](frontend/elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).

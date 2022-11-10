@@ -18,13 +18,13 @@ jobs:
           node-version: 16.15.1
 
       - name: Install dependencies
-        working-directory: ./frontend-sdk
+        working-directory: ./frontend/frontend-sdk
         run: npm ci
 
       - name: Build
-        working-directory: ./frontend-sdk
+        working-directory: ./frontend/frontend-sdk
         run: npm run build
 
       - name: Run tests
-        working-directory: ./frontend-sdk
+        working-directory: ./frontend/frontend-sdk
         run: npm test
