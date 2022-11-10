@@ -11,7 +11,7 @@ require (
 	github.com/knadh/koanf v1.4.4
 	github.com/labstack/echo/v4 v4.9.1
 	github.com/lestrrat-go/jwx/v2 v2.0.6
-	github.com/nicksnyder/go-i18n/v2 v2.2.0
+	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/rs/zerolog v1.28.0
 	github.com/spf13/cobra v1.6.1
 	github.com/stretchr/testify v1.8.1
