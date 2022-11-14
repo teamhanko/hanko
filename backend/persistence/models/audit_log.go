@@ -43,4 +43,8 @@ var (
 	AuditLogWebAuthnAuthenticationInitFailed     AuditLogType = "webauthn_authentication_init_failed"
 	AuditLogWebAuthnAuthenticationFinalSucceeded AuditLogType = "webauthn_authentication_final_succeeded"
 	AuditLogWebAuthnAuthenticationFinalFailed    AuditLogType = "webauthn_authentication_final_failed"
+
+	AuditLogEmailCreateSucceeded AuditLogType = "email_create_succeeded"
+	AuditLogEmailUpdateSucceeded AuditLogType = "email_update_succeeded"
+	AuditLogEmailDeleteSucceeded AuditLogType = "email_delete_succeeded"
 )

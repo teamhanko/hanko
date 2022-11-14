@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -85,12 +86,19 @@ func (h *EmailHandler) Create(c echo.Context) error {
 
 	email := models.NewEmail(userId, body.Address)
 
-	err = h.persister.GetEmailPersister().Create(*email)
-	if err != nil {
-		return errors.New("failed to store email to db")
-	}
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		err = h.persister.GetEmailPersisterWithConnection(tx).Create(*email)
+		if err != nil {
+			return errors.New("failed to store email to db")
+		}
 
-	return c.JSON(http.StatusCreated, nil)
+		err = h.auditLogger.Create(c, models.AuditLogEmailCreateSucceeded, email.User, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create audit log: %w", err)
+		}
+
+		return c.JSON(http.StatusCreated, nil)
+	})
 }
 
 func (h *EmailHandler) Update(c echo.Context) error {
@@ -127,27 +135,36 @@ func (h *EmailHandler) Update(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have an email with the specified emailId"))
 	}
 
-	if body.IsPrimary != nil && *body.IsPrimary != email.IsPrimary() {
-		primaryEmail := user.GetPrimaryEmail()
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		if body.IsPrimary != nil && *body.IsPrimary != email.IsPrimary() {
+			// Update primary email status
 
-		if primaryEmail == nil {
-			return errors.New("user has no primary email")
+			primaryEmail := user.GetPrimaryEmail()
+
+			if primaryEmail == nil {
+				return errors.New("user has no primary email")
+			}
+
+			if h.cfg.Flow.RequireEmailVerification && !primaryEmail.Verified {
+				return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New("email address must be verified to be set as primary email"))
+			}
+
+			// Mark email address with specified emailId as primary email address
+			primaryEmail.PrimaryEmail.EmailID = emailId
+
+			err = h.persister.GetPrimaryEmailPersister().Update(*primaryEmail.PrimaryEmail)
+			if err != nil {
+				return fmt.Errorf("failed to store updated primary email to db: %w", err)
+			}
 		}
 
-		if h.cfg.Flow.RequireEmailVerification && !primaryEmail.Verified {
-			return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New("email address must be verified to be set as primary email"))
-		}
-
-		// Mark email address with specified emailId as primary email address
-		primaryEmail.PrimaryEmail.EmailID = emailId
-
-		err = h.persister.GetPrimaryEmailPersister().Update(*primaryEmail.PrimaryEmail)
+		err = h.auditLogger.Create(c, models.AuditLogEmailUpdateSucceeded, email.User, nil)
 		if err != nil {
-			return fmt.Errorf("failed to store updated primary email to db: %w", err)
+			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-	}
 
-	return c.JSON(http.StatusNoContent, nil)
+		return c.JSON(http.StatusNoContent, nil)
+	})
 }
 
 func (h *EmailHandler) Delete(c echo.Context) error {
@@ -177,10 +194,17 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New("primary email can't be deleted"))
 	}
 
-	err = h.persister.GetEmailPersister().Delete(*emailToBeDeleted)
-	if err != nil {
-		return fmt.Errorf("failed to delete email from db: %w", err)
-	}
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		err = h.persister.GetEmailPersister().Delete(*emailToBeDeleted)
+		if err != nil {
+			return fmt.Errorf("failed to delete email from db: %w", err)
+		}
 
-	return c.JSON(http.StatusNoContent, nil)
+		err = h.auditLogger.Create(c, models.AuditLogEmailDeleteSucceeded, user, nil)
+		if err != nil {
+			return fmt.Errorf("failed to create audit log: %w", err)
+		}
+
+		return c.JSON(http.StatusNoContent, nil)
+	})
 }
