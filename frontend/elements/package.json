@@ -5,6 +5,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "bundledDependencies": [
+    "@teamhanko/hanko-frontend-sdk"
+  ],
   "types": "dist/index.d.ts",
   "files": [
     "dist"
@@ -30,7 +33,7 @@
     "lint": "eslint 'src/**/*.ts?(x)'",
     "format": "pretty-quick --staged",
     "build": "npx webpack --mode=production",
-    "build:dev": "npx webpack --mode=development --config ./webpack.config.dev.cjs"
+    "build:dev": "npx webpack --mode=development --config webpack.config.dev.cjs"
   },
   "description": "The <hanko-auth> element offers a complete user interface that will bring a modern login and registration experience to your users.",
   "repository": "github:teamhanko/hanko",
@@ -48,27 +51,27 @@
   "homepage": "https://hanko.io",
   "devDependencies": {
     "@types/preact-custom-element": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.40.1",
-    "@typescript-eslint/parser": "^5.40.1",
+    "@typescript-eslint/eslint-plugin": "^5.42.1",
+    "@typescript-eslint/parser": "^5.42.1",
     "css-loader": "^6.7.1",
-    "eslint": "^8.25.0",
+    "eslint": "^8.27.0",
     "eslint-config-google": "^0.14.0",
     "eslint-config-preact": "^1.3.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.1.1",
-    "sass": "^1.53.0",
+    "sass": "^1.56.1",
     "sass-loader": "^13.1.0",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.1",
     "ts-jest": "^29.0.3",
     "ts-loader": "^9.4.1",
-    "webpack": "^5.74.0",
+    "webpack": "^5.75.0",
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.4.1",
-    "@teamhanko/hanko-frontend-sdk": "^0.0.9-alpha",
+    "@teamhanko/hanko-frontend-sdk": "file:../frontend-sdk",
     "classnames": "^2.3.2",
     "preact": "^10.10.1",
     "preact-custom-element": "^4.2.1"

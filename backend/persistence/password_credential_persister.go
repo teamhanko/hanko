@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -39,7 +40,7 @@ func (p *passwordCredentialPersister) GetByUserID(userId uuid.UUID) (*models.Pas
 	pw := models.PasswordCredential{}
 	query := p.db.Where("user_id = (?)", userId.String())
 	err := query.First(&pw)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {

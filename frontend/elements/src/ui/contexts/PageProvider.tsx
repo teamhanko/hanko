@@ -16,14 +16,14 @@ import { PasscodeContext } from "./PasscodeProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Initialize from "../pages/Initialize";
-import LoginEmail from "./../pages/LoginEmail";
-import LoginPasscode from "./../pages/LoginPasscode";
-import LoginPassword from "./../pages/LoginPassword";
-import LoginFinished from "./../pages/LoginFinished";
-import RegisterConfirm from "./../pages/RegisterConfirm";
-import RegisterPassword from "./../pages/RegisterPassword";
-import RegisterAuthenticator from "./../pages/RegisterAuthenticator";
-import Error from "./../pages/Error";
+import LoginEmail from "../pages/LoginEmail";
+import LoginPasscode from "../pages/LoginPasscode";
+import LoginPassword from "../pages/LoginPassword";
+import LoginFinished from "../pages/LoginFinished";
+import RegisterConfirm from "../pages/RegisterConfirm";
+import RegisterPassword from "../pages/RegisterPassword";
+import RegisterAuthenticator from "../pages/RegisterAuthenticator";
+import Error from "../pages/Error";
 import Container from "../components/Container";
 
 interface Props {

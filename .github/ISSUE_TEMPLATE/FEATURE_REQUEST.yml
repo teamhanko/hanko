@@ -39,14 +39,14 @@ body:
     id: solution
     type: textarea
     validations:
-      required: true
+      required: false
   - attributes:
       label: Workarounds or alternatives
       description: "Describe alternatives you've considered"
     id: alternatives
     type: textarea
     validations:
-      required: true
+      required: false
   - attributes:
       label: Hanko Version
       description: "What version of our software are you running?"

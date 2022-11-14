@@ -28,7 +28,7 @@ Furthermore, you need running instances of:
 
 - the Hanko [backend](../backend)
 - a running frontend application (e.g. our [quickstart](../quickstart)) using the web component provided by
-  [hanko-elements](../elements)
+  [hanko-elements](../frontend/elements)
 - [Mailslurper](https://github.com/mailslurper/mailslurper) as an SMTP server (used to test passcodes through mail
   retrieval via its [API](https://github.com/mailslurper/mailslurper/wiki/API-Guide))
 

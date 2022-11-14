@@ -281,6 +281,12 @@ Result:
 - Opera
 - Chromium-based browsers (Chrome, Edge, Brave,...)
 
+## Frontend framework integrations
+
+To learn more about how to integrate the `<hanko-auth>` element into frontend frameworks, see our
+[guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
+[example applications](../../examples/README.md).
+
 ## Bugs
 
 - Customizable UI: In Chrome the `::part` selector is not working in combination with some pseudo classes.
