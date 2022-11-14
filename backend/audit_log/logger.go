@@ -68,7 +68,10 @@ func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, u
 	var userEmail *string = nil
 	if user != nil {
 		userId = &user.ID
-		userEmail = &user.GetPrimaryEmail().Address
+
+		if primaryEmail := user.GetPrimaryEmail(); primaryEmail != nil {
+			userEmail = &primaryEmail.Address
+		}
 	}
 	var errString *string = nil
 	if logError != nil {

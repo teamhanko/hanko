@@ -24,17 +24,11 @@ type EmailUpdateRequest struct {
 
 // FromEmailModel Converts the DB model to a DTO object
 func FromEmailModel(email *models.Email) *EmailResponse {
-	isPrimary := false
-
-	if email.PrimaryEmail != nil {
-		isPrimary = true
-	}
-
 	return &EmailResponse{
 		ID:        email.ID,
 		Address:   email.Address,
 		Verified:  email.Verified,
-		IsPrimary: isPrimary,
+		IsPrimary: email.IsPrimary(),
 		CreatedAt: time.Time{},
 	}
 }
