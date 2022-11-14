@@ -1,5 +1,12 @@
-email:
-  from_address: no-reply@hanko.io
+database:
+  user: hanko
+  password: hanko
+  host: localhost
+  port: 5432
+  dialect: postgres
+passcode:
+  email:
+    from_address: no-reply@hanko.io
   smtp:
     host: smtp.example.com
     user: example
