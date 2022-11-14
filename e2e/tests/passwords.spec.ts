@@ -73,7 +73,7 @@ test.describe("@pw", () => {
       });
 
       await test.step("And when I skip WebAuthn credential registration", async () => {
-        await registerAuthenticatorPage.continue();
+        await registerAuthenticatorPage.skip();
       });
 
       await test.step("The SecuredContent page should be shown", async () => {
@@ -127,6 +127,7 @@ test.describe("@pw", () => {
       loginPasscodePage,
       loginPasswordPage,
       registerPasswordPage,
+      registerAuthenticatorPage,
       securedContentPage,
     }) => {
       const email = faker.internet.email();
@@ -134,7 +135,7 @@ test.describe("@pw", () => {
 
       await test.step("When I visit the baseURL, the LoginEmail page should be shown", async () => {
         await expect(loginEmailPage.headline).toBeVisible();
-        await expect(loginEmailPage.signInPasskeyButton).toBeHidden();
+        await expect(loginEmailPage.signInPasskeyButton).toBeVisible();
       });
 
       await test.step("And when I submit an email address", async () => {
@@ -172,6 +173,14 @@ test.describe("@pw", () => {
 
       await test.step("And when I set up a password", async () => {
         await registerPasswordPage.submitPassword(password);
+      });
+
+      await test.step("The RegisterAuthenticator page should be shown", async () => {
+        await expect(registerAuthenticatorPage.headline).toBeVisible();
+      });
+
+      await test.step("And when I skip WebAuthn credential registration", async () => {
+        await registerAuthenticatorPage.skip();
       });
 
       await test.step("The SecuredContent page should be shown", async () => {
@@ -229,6 +238,14 @@ test.describe("@pw", () => {
         await registerPasswordPage.submitPassword(newPassword);
       });
 
+      await test.step("The RegisterAuthenticator page should be shown", async () => {
+        await expect(registerAuthenticatorPage.headline).toBeVisible();
+      });
+
+      await test.step("And when I skip WebAuthn credential registration", async () => {
+        await registerAuthenticatorPage.skip();
+      });
+
       await test.step("The SecuredContent page should be shown", async () => {
         await expect(securedContentPage.logoutLink).toBeVisible();
       });
@@ -247,6 +264,14 @@ test.describe("@pw", () => {
 
       await test.step("And when I log in with the new password", async () => {
         await loginPasswordPage.submitPassword(newPassword);
+      });
+
+      await test.step("The RegisterAuthenticator page should be shown", async () => {
+        await expect(registerAuthenticatorPage.headline).toBeVisible();
+      });
+
+      await test.step("And when I skip WebAuthn credential registration", async () => {
+        await registerAuthenticatorPage.skip();
       });
 
       await test.step("The SecuredContent page should be shown", async () => {
