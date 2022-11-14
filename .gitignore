@@ -20,12 +20,12 @@
 hanko
 
 # Dependency directories (remove the comment below to include it)
-elements/dist/
-elements/node_modules/
+frontend/elements/dist/
+frontend/elements/node_modules/
 e2e/node_modules/
 e2e/test-results/
 e2e/playwright-report/
 e2e/playwright/.cache/
-frontend-sdk/dist/
-frontend-sdk/node_modules/
-frontend-sdk/coverage
+frontend/frontend-sdk/dist/
+frontend/frontend-sdk/node_modules/
+frontend/frontend-sdk/coverage

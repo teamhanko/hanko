@@ -47,15 +47,9 @@ services:
     networks:
       - intranet
   elements:
-    build: ../../elements
+    build: ../../frontend
     ports:
       - "9500:80"
-    networks:
-      - intranet
-  frontendsdk:
-    build: ../../frontend-sdk
-    ports:
-      - "9501:80"
     networks:
       - intranet
   quickstart:
@@ -66,7 +60,7 @@ services:
       - HANKO_URL=http://localhost:8000
       - HANKO_URL_INTERNAL=http://hanko:8000
       - HANKO_ELEMENT_URL=http://localhost:9500/element.hanko-auth.js
-      - HANKO_FRONTEND_SDK_URL=http://localhost:9501/sdk.umd.js
+      - HANKO_FRONTEND_SDK_URL=http://localhost:9500/sdk.umd.js
     networks:
       - intranet
   mailslurper:

@@ -2,7 +2,7 @@
 
 This directory contains examples that show
 
-- integration of web component(s) provided through the`@teamhanko/hanko-elements` package (see [elements](../elements)).
+- integration of web component(s) provided through the`@teamhanko/hanko-elements` package (see [elements](../frontend/elements)).
 - how to validate JSON Web Tokens (JWT) issued by the Hanko [API](../backend) in a custom backend
 
 It contains:

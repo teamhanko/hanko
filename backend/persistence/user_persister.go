@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -26,8 +27,9 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
+
 	err := p.db.Eager("Emails.PrimaryEmail", "WebauthnCredentials").Find(&user, id)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 	if err != nil {
@@ -76,6 +78,9 @@ func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
 	users := []models.User{}
 
 	err := p.db.Q().Paginate(page, perPage).All(&users)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return users, nil
+	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
