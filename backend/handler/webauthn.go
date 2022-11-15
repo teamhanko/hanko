@@ -18,6 +18,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
+	"strings"
 )
 
 type WebauthnHandler struct {
@@ -162,11 +163,25 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 
 		credential, err := h.webauthn.CreateCredential(webauthnUser, *intern.WebauthnSessionDataFromModel(sessionData), request)
 		if err != nil {
-			err = h.auditLogger.Create(c, models.AuditLogWebAuthnRegistrationFinalFailed, user, fmt.Errorf("attestation validation failed"))
+			errorMessage := "failed to validate attestation"
+			errorStatus := http.StatusBadRequest
+			// Safari currently (v. 16.2) does not provide a UI in case of a (registration) ceremony
+			// being performed with an authenticator NOT protected by e.g. a PIN. While Chromium based browsers do offer
+			// a UI guiding through the setup of a PIN, Safari simply performs the ceremony without then setting the UV
+			// flag even if it is required. In order to provide an appropriate error message to the frontend/user, we
+			// need to return an error response distinguishable from other error cases. We use a dedicated/separate HTTP
+			// status code because it seemed a bit more robust than forcing the frontend to check on a matching
+			// (sub-)string in the error message in order to properly display the error.
+			if err, ok := err.(*protocol.Error); ok && err.Type == protocol.ErrVerification.Type && strings.Contains(err.DevInfo, "User verification") {
+				errorMessage = fmt.Sprintf("%s: %s: %s", errorMessage, err.Details, err.DevInfo)
+				errorStatus = http.StatusUnprocessableEntity
+			}
+			err = h.auditLogger.Create(c, models.AuditLogWebAuthnRegistrationFinalFailed, user, errors.New(errorMessage))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusBadRequest, "Failed to validate attestation").SetInternal(err)
+
+			return dto.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
 		}
 
 		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId)

@@ -5,6 +5,7 @@ import { useContext, useState } from "preact/compat";
 import {
   HankoError,
   UnauthorizedError,
+  UserVerificationError,
   WebauthnRequestCancelledError,
 } from "@teamhanko/hanko-frontend-sdk";
 
@@ -46,7 +47,11 @@ const RegisterAuthenticator = () => {
         return;
       })
       .catch((e) => {
-        if (e instanceof UnauthorizedError) {
+        console.error(e);
+        if (
+          e instanceof UnauthorizedError ||
+          e instanceof UserVerificationError
+        ) {
           renderError(e);
           return;
         }

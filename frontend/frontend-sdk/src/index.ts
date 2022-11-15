@@ -64,6 +64,7 @@ import {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
+  UserVerificationError
 } from "./lib/Errors";
 
 export {
@@ -80,4 +81,5 @@ export {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
+  UserVerificationError,
 };

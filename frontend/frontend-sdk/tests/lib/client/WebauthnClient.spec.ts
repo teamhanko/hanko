@@ -182,6 +182,7 @@ describe("webauthnClient.register()", () => {
     ${400}     | ${200}      | ${"Unauthorized error"}
     ${500}     | ${200}      | ${"Technical error"}
     ${200}     | ${400}      | ${"Unauthorized error"}
+    ${200}     | ${422}      | ${"User verification error"}
     ${200}     | ${500}      | ${"Technical error"}
   `(
     "should throw error if API returns an error status",

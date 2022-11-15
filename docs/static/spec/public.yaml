@@ -363,6 +363,8 @@ paths:
                 $ref: '#/components/schemas/CredentialCreationOptions'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/Unprocessable Entity'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /webauthn/registration/finalize:
@@ -639,6 +641,15 @@ components:
           example:
             code: 401
             message: Unauthorized
+    Unprocessable Entity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 422
+            message: Unprocessable Entity
   schemas:
     HankoConfiguration:
       description: Public backend configuration options

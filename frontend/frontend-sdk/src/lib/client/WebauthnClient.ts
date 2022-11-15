@@ -4,6 +4,7 @@ import {
   TechnicalError,
   UnauthorizedError,
   WebauthnRequestCancelledError,
+  UserVerificationError,
 } from "../Errors";
 import {
   create as createWebauthnCredential,
@@ -110,6 +111,7 @@ class WebauthnClient extends Client {
    * @throws {RequestTimeoutError}
    * @throws {UnauthorizedError}
    * @throws {TechnicalError}
+   * @throws {UserVerificationError}
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnRegInit
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnRegFinal
    * @see https://www.w3.org/TR/webauthn-2/#sctn-registering-a-new-credential
@@ -148,6 +150,9 @@ class WebauthnClient extends Client {
       attestationResponse.status >= 400 &&
       attestationResponse.status <= 499
     ) {
+      if (attestationResponse.status === 422) {
+        throw new UserVerificationError();
+      }
       throw new UnauthorizedError();
     }
     if (!attestationResponse.ok) {
