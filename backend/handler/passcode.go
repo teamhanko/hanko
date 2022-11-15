@@ -109,11 +109,15 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	if h.cfg.Flow.RequireEmailVerification {
+		// Check if the user is authorized to send a passcode to the specified email address.
 		if !email.Verified && !email.IsPrimary() {
-			sessionToken, ok := c.Get("session").(jwt.Token)
-			if !ok || sessionToken == nil {
-				// If email verification is required the passcode can only be sent to a verified email address unless a
-				// valid session token exists.
+			// When the email is verified or primary, a passcode can be sent without a valid JWT, e.g. on sign in (or
+			// password recovery) or after account registration. Otherwise, we need to check a valid JWT is present,
+			// e.g. when verifying another email address, added to the account after account registration. Please note
+			// that the primary email can only be changed to another verified email address (as long as
+			// `flow.require_email_verification` is turned on) and that the user needs to verify the primary email
+			// address provided during account registration, in order to be logged in the first time.
+			if sessionToken, ok := c.Get("session").(jwt.Token); !ok || sessionToken == nil {
 				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("email address must be verified"))
 			}
 		}

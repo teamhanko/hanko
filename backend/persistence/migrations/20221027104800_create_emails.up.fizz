@@ -20,8 +20,8 @@ create_table("primary_emails") {
 }
 
 sql("INSERT INTO emails (id, user_id, address, verified, created_at, updated_at)
-SELECT gen_random_uuid(), id, email, verified, created_at, updated_at
+SELECT id, id, email, verified, created_at, updated_at
 FROM users")
 
 sql("INSERT INTO primary_emails (id, email_id, user_id, created_at, updated_at)
-SELECT gen_random_uuid(), id, user_id, created_at, updated_at FROM emails")
+SELECT id, id, user_id, created_at, updated_at FROM emails")

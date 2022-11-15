@@ -107,9 +107,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 
 	passcode := e.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
-	passcodeLogin.POST("/initialize_verification", passcodeHandler.Init, hankoMiddleware.Session(sessionManager))
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+
+	passcodeVerification := passcode.Group("/verification", hankoMiddleware.Session(sessionManager), privilegedSession.Middleware)
+	passcodeVerification.POST("/initialize", passcodeHandler.Init)
 
 	emailHandler, err := handler.NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 	if err != nil {

@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -28,7 +29,7 @@ func (e *emailPersister) FindByUserId(userId uuid.UUID) ([]models.Email, error) 
 	var emails []models.Email
 
 	err := e.db.Where("user_id = ?", userId.String()).Order("created_at desc").All(&emails)
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return emails, nil
 	}
 
@@ -45,7 +46,7 @@ func (e *emailPersister) FindByAddress(address string) (*models.Email, error) {
 	query := e.db.EagerPreload().Where("address = ?", address)
 	err := query.First(&email)
 
-	if err != nil && err == sql.ErrNoRows {
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
 
