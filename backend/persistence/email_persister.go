@@ -84,7 +84,7 @@ func (e *emailPersister) Update(email models.Email) error {
 }
 
 func (e *emailPersister) Delete(email models.Email) error {
-	err := e.db.Eager().Destroy(&email)
+	err := e.db.Destroy(&email)
 	if err != nil {
 		return fmt.Errorf("failed to delete email: %w", err)
 	}

@@ -14,9 +14,15 @@ type primaryEmailPersister struct {
 }
 
 func (p *primaryEmailPersister) Create(primaryEmail models.PrimaryEmail) error {
+	p.primaryEmails = append(p.primaryEmails, primaryEmail)
 	return nil
 }
 
 func (p *primaryEmailPersister) Update(primaryEmail models.PrimaryEmail) error {
+	for i, data := range p.primaryEmails {
+		if data.ID == primaryEmail.ID {
+			p.primaryEmails[i] = primaryEmail
+		}
+	}
 	return nil
 }
