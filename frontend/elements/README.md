@@ -180,7 +180,7 @@ DOM:
 register({ shadow: false })
 ```
 
-Please take a look at the [CSS example](https://github.com/teamhanko/hanko/raw/main/elements/example.css) file to see
+Please take a look at the [CSS example](https://github.com/teamhanko/hanko/raw/main/frontend/elements/example.css) file to see
 which CSS rules can be used. If you only want to change specific properties you can override the predefined ones. For
 example if you like to change the background color, include the following CSS rule:
 
@@ -206,7 +206,7 @@ so you don't need to override properties but provide the entirety of CSS rules:
 /* more css rules... */
 ```
 
-If this is your preferred approach, start with the [CSS example](https://github.com/teamhanko/hanko/raw/main/elements/example.css)
+If this is your preferred approach, start with the [CSS example](https://github.com/teamhanko/hanko/raw/main/frontend/elements/example.css)
 file, change everything according to your needs and include the CSS in your page.
 
 Keep in mind we made CSS classes available and added light DOM support only because a Safari bug is breaking the
