@@ -272,7 +272,7 @@ hanko-auth::part(input):focus {
 
 Result:
 
-<img src="https://github.com/teamhanko/hanko/raw/main/elements/demo-ui.png" width="450"/>
+<img src="https://github.com/teamhanko/hanko/raw/main/frontend/elements/demo-ui.png" width="450"/>
 
 ## Browser support
 
