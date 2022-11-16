@@ -732,11 +732,11 @@ components:
         url: https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md
       properties:
         flow:
-          description: sdsa
+          description: Controls flows during various operations, like account registration, login or profile management.
           type: object
           properties:
             require_email_verification:
-              description:
+              description: Require email verification after account registration and prevent sign in with unverified email addresses. Also, email addresses can only be marked as primary when verified.
               type: boolean
         password:
           description: Configuration options concerning passwords
