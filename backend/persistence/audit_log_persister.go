@@ -15,6 +15,7 @@ type AuditLogPersister interface {
 	Get(id uuid.UUID) (*models.AuditLog, error)
 	List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error)
 	Delete(auditLog models.AuditLog) error
+	Count(startTime *time.Time, endTime *time.Time) (int, error)
 }
 
 type auditLogPersister struct {
@@ -79,4 +80,20 @@ func (p *auditLogPersister) Delete(auditLog models.AuditLog) error {
 	}
 
 	return nil
+}
+
+func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time) (int, error) {
+	query := p.db.Q()
+	if startTime != nil {
+		query = query.Where("created_at > ?", startTime)
+	}
+	if endTime != nil {
+		query = query.Where("created_at < ?", endTime)
+	}
+	count, err := query.Count(&models.AuditLog{})
+	if err != nil {
+		return 0, fmt.Errorf("failed to get auditLog count: %w", err)
+	}
+
+	return count, nil
 }

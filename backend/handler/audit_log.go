@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/pagination"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"net/http"
+	"net/url"
+	"strconv"
 	"time"
 )
 
@@ -33,10 +36,28 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	if request.Page == 0 {
+		request.Page = 1
+	}
+
+	if request.PerPage == 0 {
+		request.PerPage = 20
+	}
+
 	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime)
 	if err != nil {
 		return fmt.Errorf("failed to get list of audit logs: %w", err)
 	}
+
+	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime)
+	if err != nil {
+		return fmt.Errorf("failed to get total count of audit logs: %w", err)
+	}
+
+	u, _ := url.Parse(fmt.Sprintf("%s://%s%s", c.Scheme(), c.Request().Host, c.Request().RequestURI))
+
+	c.Response().Header().Set("Link", pagination.CreateHeader(u, logCount, request.Page, request.PerPage))
+	c.Response().Header().Set("X-Total-Count", strconv.FormatInt(int64(logCount), 10))
 
 	return c.JSON(http.StatusOK, auditLogs)
 }
