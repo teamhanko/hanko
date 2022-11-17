@@ -75,3 +75,7 @@ func (p *auditLogPersister) Delete(auditLog models.AuditLog) error {
 
 	return nil
 }
+
+func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time) (int, error) {
+	return len(p.logs), nil
+}

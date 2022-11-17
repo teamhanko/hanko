@@ -91,3 +91,7 @@ func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
 	}
 	return result[page-1], nil
 }
+
+func (p *userPersister) Count() (int, error) {
+	return len(p.users), nil
+}

@@ -103,8 +103,6 @@ type UserListRequest struct {
 }
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
-	// TODO: return 'X-Total-Count' header, which includes the all users count
-	// TODO; return 'Link' header, which includes links to next, previous, current(???), first, last page (example https://docs.github.com/en/rest/guides/traversing-with-pagination)
 	var request UserListRequest
 	err := (&echo.DefaultBinder{}).BindQueryParams(c, &request)
 	if err != nil {

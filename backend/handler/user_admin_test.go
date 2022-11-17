@@ -280,6 +280,7 @@ func TestUserHandlerAdmin_List(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &users)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(users))
+		assert.Equal(t, "2", rec.Header().Get("X-Total-Count"))
 	}
 }
 
@@ -323,6 +324,7 @@ func TestUserHandlerAdmin_List_Pagination(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(got))
+		assert.Equal(t, "2", rec.Header().Get("X-Total-Count"))
 	}
 }
 
@@ -345,6 +347,7 @@ func TestUserHandlerAdmin_List_NoUsers(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(got))
+		assert.Equal(t, "0", rec.Header().Get("X-Total-Count"))
 	}
 }
 
