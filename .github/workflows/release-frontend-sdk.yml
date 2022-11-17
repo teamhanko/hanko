@@ -1,0 +1,58 @@
+name: Release @teamhanko/frontend-sdk
+
+on:
+  push:
+    tags:
+      - '@teamhanko/frontend-sdk@*'
+
+defaults:
+  run:
+    working-directory: frontend/frontend-sdk
+
+jobs:
+  check-matching-versions:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@main
+        with:
+          path: frontend/frontend-sdk
+      - run: |
+          version=$(echo $GITHUB_REF | cut -f3 -d'@')
+          echo "git_tag_version=$version" >> $GITHUB_OUTPUT
+        id: tag-version
+      - run: echo ${{ steps.tag-version.outputs.git_tag_version }}
+      - name: Version correctly set check
+        if: steps.package-version.outputs.current-version != steps.tag-version.outputs.git_tag_version
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('version in package.json is not equal to git tag version!')
+
+  build:
+    needs: check-matching-versions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm test
+
+  publish-npm:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: https://registry.npmjs.org/
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISHING_SECRET }}
+
