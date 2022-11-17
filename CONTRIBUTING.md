@@ -133,10 +133,10 @@ The commit message headline should have the following structure:
    │            │
    │            └─⫸ Commit Scope: optional
    │
-   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test
+   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test|chore
 ```
 The `<type>` should be one of the following:
-* **build**: Changes that affect the build system or external dependencies
+* **build**: Changes that affect the build system
 * **ci**: Changes that affect the CI workflows (e.g. changes to `.github` CI configuration files)
 * **docs**: Documentation only changes (this includes both content in the `docs` as well as changes to readmes)
 * **feat**: A new feature
@@ -144,6 +144,7 @@ The `<type>` should be one of the following:
 * **perf**: A code change that improves performance
 * **refactor**: A code change that neither fixes a bug nor adds a feature
 * **test**: Adding missing tests or correcting existing tests
+* **chore**: Anything that cannot be categorized properly using the above prefixes (e.g. increasing versions)
 
 The `<scope>` is optional. If present, it should be the name of the (npm) package or directory affected by the changes of
 the commit.
