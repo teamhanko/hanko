@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/go-playground/validator/v10 v10.11.1
 	github.com/go-webauthn/webauthn v0.5.0
-	github.com/gobuffalo/pop/v6 v6.0.8
+	github.com/gobuffalo/pop/v6 v6.1.0
 	github.com/gobuffalo/validate/v3 v3.3.3
 	github.com/gofrs/uuid v4.3.1+incompatible
 	github.com/knadh/koanf v1.4.4
@@ -86,7 +86,7 @@ require (
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/net v0.2.0 // indirect
-	golang.org/x/sync v0.0.0-20220929204114-8fcdb60fdcc0 // indirect
+	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.2.0 // indirect
 	golang.org/x/time v0.0.0-20210220033141-f8bda1e9f3ba // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
