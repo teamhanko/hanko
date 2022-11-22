@@ -280,6 +280,8 @@ func TestUserHandlerAdmin_List(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &users)
 		assert.NoError(t, err)
 		assert.Equal(t, 2, len(users))
+		assert.Equal(t, "2", rec.Header().Get("X-Total-Count"))
+		assert.Equal(t, "<http://example.com/users?page=1&per_page=20>; rel=\"first\"", rec.Header().Get("Link"))
 	}
 }
 
@@ -323,6 +325,8 @@ func TestUserHandlerAdmin_List_Pagination(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, 1, len(got))
+		assert.Equal(t, "2", rec.Header().Get("X-Total-Count"))
+		assert.Equal(t, "<http://example.com/users?page=1&per_page=1>; rel=\"first\",<http://example.com/users?page=1&per_page=1>; rel=\"prev\"", rec.Header().Get("Link"))
 	}
 }
 
@@ -345,6 +349,8 @@ func TestUserHandlerAdmin_List_NoUsers(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &got)
 		assert.NoError(t, err)
 		assert.Equal(t, 0, len(got))
+		assert.Equal(t, "0", rec.Header().Get("X-Total-Count"))
+		assert.Equal(t, "<http://example.com/users?page=1&per_page=1>; rel=\"first\"", rec.Header().Get("Link"))
 	}
 }
 

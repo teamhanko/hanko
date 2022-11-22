@@ -16,6 +16,7 @@ type UserPersister interface {
 	Update(models.User) error
 	Delete(models.User) error
 	List(page int, perPage int) ([]models.User, error)
+	Count() (int, error)
 }
 
 type userPersister struct {
@@ -100,4 +101,13 @@ func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
 	}
 
 	return users, nil
+}
+
+func (p *userPersister) Count() (int, error) {
+	count, err := p.db.Count(&models.User{})
+	if err != nil {
+		return 0, fmt.Errorf("failed to get user count: %w", err)
+	}
+
+	return count, nil
 }

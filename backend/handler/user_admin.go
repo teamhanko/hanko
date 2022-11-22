@@ -5,8 +5,11 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/pagination"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 )
 
@@ -100,18 +103,34 @@ type UserListRequest struct {
 }
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
-	// TODO: return 'X-Total-Count' header, which includes the all users count
-	// TODO; return 'Link' header, which includes links to next, previous, current(???), first, last page (example https://docs.github.com/en/rest/guides/traversing-with-pagination)
 	var request UserListRequest
 	err := (&echo.DefaultBinder{}).BindQueryParams(c, &request)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
 
+	if request.Page == 0 {
+		request.Page = 1
+	}
+
+	if request.PerPage == 0 {
+		request.PerPage = 20
+	}
+
 	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage)
 	if err != nil {
-		return fmt.Errorf("failed to get lsist of users: %w", err)
+		return fmt.Errorf("failed to get list of users: %w", err)
 	}
+
+	userCount, err := h.persister.GetUserPersister().Count()
+	if err != nil {
+		return fmt.Errorf("failed to get total count of users: %w", err)
+	}
+
+	u, _ := url.Parse(fmt.Sprintf("%s://%s%s", c.Scheme(), c.Request().Host, c.Request().RequestURI))
+
+	c.Response().Header().Set("Link", pagination.CreateHeader(u, userCount, request.Page, request.PerPage))
+	c.Response().Header().Set("X-Total-Count", strconv.FormatInt(int64(userCount), 10))
 
 	return c.JSON(http.StatusOK, users)
 }

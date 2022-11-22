@@ -18,6 +18,7 @@ COPY dto dto/
 COPY session session/
 COPY mail mail/
 COPY audit_log audit_log/
+COPY pagination pagination/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o hanko main.go
