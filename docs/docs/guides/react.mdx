@@ -27,7 +27,7 @@ Then use the `<hanko-auth>` element in your JSX.
 ```jsx title="HankoAuth.jsx" showLineNumbers
 import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
-const api = process.env.REACT_APP_HANKO_API!;
+const api = process.env.REACT_APP_HANKO_API;
 const lang = process.env.REACT_APP_HANKO_LANG;
 
 export default function HankoAuth() {
@@ -55,20 +55,19 @@ event in order to, for example, redirect your users to protected pages in your a
 To do so, apply an event listener with an appropriate redirect callback:
 
 ```jsx {2,9-20} title="HankoAuth.jsx" showLineNumbers
-import React, { useEffect } from "react";
-import { useRouter } from "next/router";
+import React, { useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
-const api = process.env.REACT_APP_HANKO_API!;
+const api = process.env.REACT_APP_HANKO_API;
 const lang = process.env.REACT_APP_HANKO_LANG;
 
 export default function HankoAuth() {
-  const router = useRouter();
+  const navigate = useNavigate();
 
   const redirectAfterLogin = useCallback(() => {
-    // successfully logged in, redirect to a page in your application
-    router.replace("...");
-  }, [router]);
+    navigate("...", { replace: true });
+  }, [navigate]);
 
   useEffect(() => {
     document.addEventListener("hankoAuthSuccess", redirectAfterLogin);
