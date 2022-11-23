@@ -52,7 +52,15 @@ export class AppModule { }
 Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
 Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
 [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the
-element in your component template:
+element in your component template.
+
+:::info
+
+When adding the `<hanko-auth>` element to your template you must provide the URL of the Hanko API via the `api`
+attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
 
 ```mdx-code-block
 <Tabs>

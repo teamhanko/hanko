@@ -7,7 +7,7 @@ title: Introduction
 Hanko is a lightweight, open source user authentication solution that takes you on the journey beyond passwords. For better security, increased conversion rates, and happier users.
 
 ## Get started with Hanko
-To get started with Hanko, visit the [Hanko project](https://github.com/teamhanko/hanko) on GitHub and follow the instructions to get Hanko up and running locally.
+[Start a project](https://cloud.hanko.io) with Hanko Cloud or learn how to [host Hanko](https://github.com/teamhanko/hanko) yourself.
 
 ## Integrate Hanko
 To integrate Hanko into your project, we are providing [guides](/guides/frontend) for popular frontend frameworks.
