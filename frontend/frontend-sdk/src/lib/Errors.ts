@@ -221,6 +221,22 @@ class UnauthorizedError extends HankoError {
   }
 }
 
+/**
+ * A 'UserVerificationError' occurs when the user verification requirements
+ * for a WebAuthn ceremony are not met.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class UserVerificationError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("User verification error", "userVerification", cause);
+    Object.setPrototypeOf(this, UserVerificationError.prototype);
+  }
+}
+
 export {
   HankoError,
   TechnicalError,
@@ -235,4 +251,5 @@ export {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
+  UserVerificationError
 };

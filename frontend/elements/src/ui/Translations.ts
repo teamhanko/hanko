@@ -47,6 +47,8 @@ export const translations = {
       unauthorized: "Your session has expired. Please log in again.",
       invalidWebauthnCredential: "Invalid WebAuthn credentials.",
       passcodeExpired: "The passcode has expired. Please request a new one.",
+      userVerification:
+        "User verification required. Please ensure your authenticator device is protected with a PIN or biometric.",
     },
   },
   de: {
@@ -100,6 +102,8 @@ export const translations = {
       invalidWebauthnCredential: "Ungültiger Berechtigungsnachweis",
       passcodeExpired:
         "Der Passcode ist abgelaufen. Bitte fordern Sie einen neuen Code an.",
+      userVerification:
+        "Nutzer-Verifikation erforderlich. Bitte stellen Sie sicher, dass Ihr Gerät durch eine PIN oder Biometrie abgesichert ist.",
     },
   },
 };

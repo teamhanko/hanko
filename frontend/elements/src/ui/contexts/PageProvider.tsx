@@ -47,6 +47,7 @@ interface Context {
   renderLoginFinished: () => void;
   renderRegisterConfirm: () => void;
   renderRegisterAuthenticator: () => void;
+  renderInitialize: () => void;
 }
 
 export const RenderContext = createContext<Context>(null);
@@ -93,6 +94,7 @@ const PageProvider = ({ lang }: Props) => {
       registerAuthenticator: () => setPage(<RegisterAuthenticator />),
       loginFinished: () => setPage(<LoginFinished />),
       error: (error: HankoError) => setPage(<Error initialError={error} />),
+      initialize: () => setPage(<Initialize />),
     }),
     []
   );
@@ -169,6 +171,10 @@ const PageProvider = ({ lang }: Props) => {
     [pages]
   );
 
+  const renderInitialize = useCallback(() => {
+    pages.initialize();
+  }, [pages]);
+
   useEffect(() => {
     setLang(lang);
   }, [lang, setLang]);
@@ -185,6 +191,7 @@ const PageProvider = ({ lang }: Props) => {
         renderRegisterConfirm,
         renderRegisterAuthenticator,
         renderError,
+        renderInitialize,
       }}
     >
       <Container emitSuccessEvent={loginFinished}>{page}</Container>

@@ -1,10 +1,8 @@
 import * as preact from "preact";
-import { useContext, useEffect, useState } from "preact/compat";
+import { useContext, useState } from "preact/compat";
 
-import { HankoError, UnauthorizedError } from "@teamhanko/hanko-frontend-sdk";
+import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 
-import { AppContext } from "../contexts/AppProvider";
-import { UserContext } from "../contexts/UserProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { RenderContext } from "../contexts/PageProvider";
 
@@ -20,68 +18,22 @@ interface Props {
 
 const Error = ({ initialError }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { config, configInitialize } = useContext(AppContext);
-  const { userInitialize } = useContext(UserContext);
-  const {
-    eventuallyRenderEnrollment,
-    renderLoginEmail,
-    emitSuccessEvent,
-    renderError,
-  } = useContext(RenderContext);
+  const { renderInitialize } = useContext(RenderContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
-  const [error, setError] = useState<HankoError>(initialError);
 
   const onContinueClick = (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
-
-    configInitialize().catch((e) => {
-      setIsLoading(false);
-      renderError(e);
-    });
+    renderInitialize();
   };
-
-  useEffect(() => {
-    if (config === null) {
-      return;
-    }
-
-    userInitialize()
-      .then((u) => eventuallyRenderEnrollment(u, false))
-      .then((rendered) => {
-        if (!rendered) {
-          setIsSuccess(true);
-          emitSuccessEvent();
-        }
-
-        return;
-      })
-      .catch((e) => {
-        if (e instanceof UnauthorizedError) {
-          renderLoginEmail();
-        } else {
-          setIsLoading(false);
-          setError(e);
-        }
-      });
-  }, [
-    config,
-    emitSuccessEvent,
-    eventuallyRenderEnrollment,
-    renderLoginEmail,
-    userInitialize,
-  ]);
 
   return (
     <Content>
       <Headline>{t("headlines.error")}</Headline>
-      <ErrorMessage error={error} />
+      <ErrorMessage error={initialError} />
       <Form onSubmit={onContinueClick}>
-        <Button isLoading={isLoading} isSuccess={isSuccess}>
-          Continue
-        </Button>
+        <Button isLoading={isLoading}>Continue</Button>
       </Form>
     </Content>
   );

@@ -5,7 +5,7 @@ import { expect } from "../fixtures/Pages.js";
 
 export class RegisterAuthenticator extends BasePage {
   readonly setUpPasskeyButton: Locator;
-  readonly continueLink: Locator;
+  readonly skipLink: Locator;
   readonly headline: Locator;
 
   constructor(page: Page) {
@@ -13,7 +13,7 @@ export class RegisterAuthenticator extends BasePage {
     this.setUpPasskeyButton = page.locator("button[type=submit]", {
       hasText: "Save a passkey",
     });
-    this.continueLink = page.locator("a", {
+    this.skipLink = page.locator("a", {
       hasText: "Skip",
     });
     this.headline = page.locator("h1", { hasText: "Save a passkey" });
@@ -38,7 +38,7 @@ export class RegisterAuthenticator extends BasePage {
     return [initResponseJson, finalResponseJson];
   }
 
-  async continue() {
-    await this.continueLink.click();
+  async skip() {
+    await this.skipLink.click();
   }
 }
