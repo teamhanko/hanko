@@ -25,6 +25,14 @@ Hanko custom element. Call `register` to register the `<hanko-auth>` element wit
 [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
 Then use the `<hanko-auth>` element in your JSX.
 
+:::info
+
+When adding the `<hanko-auth>` element to your JSX you must provide the URL of the Hanko API via the `api`
+attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
+
 ```jsx title="HankoAuth.jsx" showLineNumbers
 import { register } from "@teamhanko/hanko-elements/hanko-auth";
 
