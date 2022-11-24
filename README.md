@@ -12,10 +12,10 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-frontend-sdk?label=hanko-frontend-sdk)](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk)
 
 # About Hanko
-Hanko is an open-source user authentication and management system with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
+Hanko is an open-source user authentication system with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
 - Built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
-- Hanko login box and user profile that integrate in minutes
+- Hanko login box that integrates in minutes
 - API-first, small footprint, cloud-native
 
 Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
@@ -31,7 +31,7 @@ With most devices now shipping with passkey support and biometric sensors like T
 
 # Architecture
 The main building blocks of the Hanko project are
-- [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and (optional) passwords, as well as user management and JWT token issuing
+- [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and (optional) passwords, as well as user management and JWT issuing
 - [hanko-elements](/frontend/elements/README.md) - A set of web components made for Hanko backend that provides onboarding and login functionality and is highly customizable with CSS
 - [hanko-frontend-sdk](/frontend/frontend-sdk/README.md) - A client package for using the Hanko API
 
@@ -64,9 +64,12 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | JavaScript frontend SDK |
 | ✅ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
 | ✅ | Audit logs API |
+| ✅ | Security Key support |
 | ⚙️ | `<hanko-profile>` web component |
-| ⚙️ | Sessions |
-| | Support for native Android and iOS apps |
+| ⚙️ | Priviledged sessions & step-up authentication |
+| ⚙️ | Android example app |
+| | iOS example app |
+| | Session management |
 | | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
 | | Custom translations for [hanko-elements](/frontend/elements/README.md) |
 | | Email templating |
