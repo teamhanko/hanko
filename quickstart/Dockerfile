@@ -1,10 +1,12 @@
 # Build the quickstart binary
-FROM golang:1.17 as builder
+FROM --platform=$BUILDPLATFORM golang:1.19 as builder
+
+ARG TARGETARCH
 
 WORKDIR /workspace
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o quickstart main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -o quickstart main.go
 
 # Use distroless as minimal base image to package quickstart binary
 # See https://github.com/GoogleContainerTools/distroless for details
