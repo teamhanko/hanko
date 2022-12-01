@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.0.13-alpha",
+  "version": "0.0.14-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -50,9 +50,8 @@
   ],
   "homepage": "https://hanko.io",
   "devDependencies": {
-    "@types/preact-custom-element": "^4.0.1",
-    "@typescript-eslint/eslint-plugin": "^5.45.0",
-    "@typescript-eslint/parser": "^5.45.0",
+    "@typescript-eslint/eslint-plugin": "^5.43.0",
+    "@typescript-eslint/parser": "^5.43.0",
     "css-loader": "^6.7.2",
     "eslint": "^8.28.0",
     "eslint-config-google": "^0.14.0",
@@ -72,8 +71,8 @@
   "dependencies": {
     "@denysvuika/preact-translate": "^0.4.1",
     "@teamhanko/hanko-frontend-sdk": "file:../frontend-sdk",
+    "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
-    "preact": "^10.10.1",
-    "preact-custom-element": "^4.2.1"
+    "preact": "^10.10.1"
   }
 }
