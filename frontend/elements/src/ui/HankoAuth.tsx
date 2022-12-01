@@ -1,5 +1,5 @@
 import * as preact from "preact";
-import registerCustomElement from "preact-custom-element";
+import registerCustomElement from "@teamhanko/preact-custom-element";
 import { Fragment } from "preact";
 
 import { TranslateProvider } from "@denysvuika/preact-translate";
