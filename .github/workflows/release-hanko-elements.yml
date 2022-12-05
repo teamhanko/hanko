@@ -31,6 +31,20 @@ jobs:
           script: |
             core.setFailed('version in package.json is not equal to git tag version!')
 
+  build-frontendsdk:
+    needs: check-matching-versions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend/frontend-sdk
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm ci
+      - run: npm run build
+
   build:
     needs: check-matching-versions
     runs-on: ubuntu-latest
