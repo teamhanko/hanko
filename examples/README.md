@@ -13,6 +13,7 @@ It contains:
   - [Next.js](nextjs)
   - [React](react)
   - [Vue](vue)
+  - [Svelte](svelte)
 
 ## How to run
 ### Manual
@@ -37,4 +38,8 @@ docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-
 #### Vue
 ```
 docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-vue.yaml -p "hanko-todo-vue" up --build
+```
+#### Svelte
+```
+docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-svelte.yaml -p "hanko-todo-svelte" up --build
 ```

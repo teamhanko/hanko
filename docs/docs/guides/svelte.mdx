@@ -1,0 +1,110 @@
+---
+title: Svelte + Hanko
+sidebar_label: Svelte
+keywords:
+  - hanko
+  - svelte
+  - integration
+sidebar_custom_props:
+  docCardIconName: svelte
+---
+
+# Svelte
+
+In this guide you will learn how to add authentication to your Svelte application using the Hanko custom element.
+
+## Install dependencies
+Install the `@teamhanko/hanko-elements` package:
+
+```shell npm2yarn
+npm install @teamhanko/hanko-elements
+```
+
+## Import & use custom element
+
+Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
+Then use the `<hanko-auth>` element in your component template.
+
+:::info
+
+When adding the `<hanko-auth>` element to your JSX you must provide the URL of the Hanko API via the `api`
+attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
+
+```js title="Login.svelte" showLineNumbers
+<script>
+  import { onMount } from "svelte";
+  import { register } from '@teamhanko/hanko-elements/hanko-auth';
+
+  const api = import.meta.env.VITE_HANKO_API;
+  const lang = import.meta.env.VITE_HANKO_LANG;
+
+  onMount(async () => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
+    register({ shadow: true }).catch((e) => {
+      console.error(e)
+    });
+  });
+</script>
+
+<div class="content">
+  <hanko-auth {api} {lang}/>
+</div>
+```
+
+## Defining login callbacks
+
+The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
+event in order to, for example, redirect your users to protected pages in your application.
+
+To do so, apply an event listener with an appropriate redirect callback:
+
+```js {2-3,9-14,23,26-28,32} title="Login.svelte" showLineNumbers
+<script>
+  import { onDestroy, onMount } from "svelte";
+  import { useNavigate } from "svelte-navigator";
+  import { register } from '@teamhanko/hanko-elements/hanko-auth';
+
+  const api = import.meta.env.VITE_HANKO_API;
+  const lang = import.meta.env.VITE_HANKO_LANG;
+
+  const navigate = useNavigate();
+  let element;
+
+  const redirectToTodos = () => {
+    navigate('/todo');
+  };
+
+  onMount(async () => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
+    register({ shadow: true }).catch((e) => {
+      console.error(e)
+    });
+
+    element.addEventListener('hankoAuthSuccess', redirectToTodos);
+  });
+
+  onDestroy(() => {
+    element.removeEventListener('hankoAuthSuccess', redirectToTodos);
+  });
+</script>
+
+<div class="content">
+  <hanko-auth bind:this={element} {api} {lang}/>
+</div>
+```
+
+## UI customization
+
+The styles of the `hanko-auth` element can be customized using CSS variables and parts. See our guide
+on customization [here](https://github.com/teamhanko/hanko/tree/main/frontend/elements#ui-customization).
+
+## Backend request authentication
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).
