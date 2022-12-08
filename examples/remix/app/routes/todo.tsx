@@ -4,7 +4,6 @@ import { json } from "@remix-run/node";
 import { TodoClient } from "~/lib/todo.server";
 import { Form, useLoaderData } from "@remix-run/react";
 import { extractHankoCookie, requireValidJwt } from "~/lib/auth.server";
-import { useRef } from "react";
 import { badRequest } from "remix-utils";
 
 import type { Todos } from "~/lib/todo.server";
@@ -65,37 +64,26 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function Todo() {
-  const checkboxForm = useRef<HTMLFormElement>(null);
   const { todos } = useLoaderData<typeof loader>();
 
   return (
     <>
-      <nav className={"nav"}>
+      <nav className="nav">
         <Form action="/_api/logout" method="post">
-          <button className={"button"}>Logout</button>
+          <button className="button">Logout</button>
         </Form>
       </nav>
-      <div className={"content"}>
-        <h1 className={"headline"}>Todos</h1>
-        <Form method="post" className={"form"}>
-          <input
-            required
-            className={"input"}
-            type={"text"}
-            name={"description"}
-          />
-          <button type={"submit"} className={"button"}>
+      <div className="content">
+        <h1 className="headline">Todos</h1>
+        <Form method="post" className="form">
+          <input required className="input" type="text" name="description" />
+          <button type="submit" className="button">
             +
           </button>
         </Form>
-        <div className={"list"}>
+        <div className="list">
           {todos.map((todo, index) => (
-            <Form
-              ref={checkboxForm}
-              className={"item"}
-              key={index}
-              method="put"
-            >
+            <Form className="item" key={index} method="put">
               <button
                 type="submit"
                 name="action"
@@ -103,19 +91,19 @@ export default function Todo() {
                 style={{ all: "unset", cursor: "pointer" }}
               >
                 <input
-                  className={"checkbox"}
+                  className="checkbox"
                   id={todo.todoID}
-                  type={"checkbox"}
-                  name={"checked"}
+                  type="checkbox"
+                  name="checked"
                   defaultChecked={todo.checked}
                 />
               </button>
               <input type="hidden" name="todoID" value={todo.todoID} />
-              <label className={"description"}>{todo.description}</label>
+              <label className="description">{todo.description}</label>
               <button
                 type="submit"
                 name="action"
-                className={"button"}
+                className="button"
                 value="delete"
               >
                 ×
