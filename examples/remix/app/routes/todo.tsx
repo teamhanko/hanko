@@ -82,8 +82,8 @@ export default function Todo() {
           </button>
         </Form>
         <div className="list">
-          {todos.map((todo, index) => (
-            <Form className="item" key={index} method="put">
+          {todos.map((todo) => (
+            <Form className="item" key={todo.todoID} method="put">
               <button
                 type="submit"
                 name="action"
