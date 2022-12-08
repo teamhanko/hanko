@@ -14,7 +14,9 @@
     "@remix-run/serve": "^1.8.2",
     "@teamhanko/hanko-elements": "0.0.15-alpha",
     "@teamhanko/hanko-frontend-sdk": "0.0.9-alpha",
+    "cookie": "0.5.0",
     "isbot": "^3.6.5",
+    "jsonwebtoken": "8.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "remix-utils": "4.3.0"
@@ -22,6 +24,7 @@
   "devDependencies": {
     "@remix-run/dev": "^1.8.2",
     "@remix-run/eslint-config": "^1.8.2",
+    "@types/jsonwebtoken": "8.5.9",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
     "eslint": "^8.27.0",
