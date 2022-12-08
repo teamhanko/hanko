@@ -1,17 +1,19 @@
 import styles from "~/styles/todo.css";
-import type { LinksFunction, LoaderArgs } from "@remix-run/node";
+import type { ActionArgs, LinksFunction, LoaderArgs } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import type { Todos } from "~/lib/todo.server";
 import { TodoClient } from "~/lib/todo.server";
 import { Form, useLoaderData } from "@remix-run/react";
-import { extractHankoCookie, requireHankoId } from "~/lib/auth.server";
+import { extractHankoCookie, requireValidJwt } from "~/lib/auth.server";
+import { useRef } from "react";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: styles }];
 };
 
 export const loader = async ({ request }: LoaderArgs) => {
-  await requireHankoId(request);
+  await requireValidJwt(request);
   const hankoCookie = extractHankoCookie(request);
   const todoClient = new TodoClient(
     process.env.REMIX_APP_TODO_API!,
@@ -22,7 +24,46 @@ export const loader = async ({ request }: LoaderArgs) => {
   return json({ todos });
 };
 
+export const action = async ({ request }: ActionArgs) => {
+  const hankoCookie = extractHankoCookie(request);
+  const todoClient = new TodoClient(
+    process.env.REMIX_APP_TODO_API!,
+    hankoCookie
+  );
+  const formData = await request.formData();
+  if (request.method === "POST") {
+    const todo = {
+      checked: false,
+      description: formData.get("description") as string,
+    };
+    try {
+      await todoClient.addTodo(todo);
+    } catch (e) {
+      return json({ error: e }, { status: 400 });
+    }
+  } else {
+    const action = formData.get("action") as string;
+    const todoID = formData.get("todoID") as string;
+    if (action === "delete") {
+      try {
+        await todoClient.deleteTodo(todoID);
+      } catch (e) {
+        return json({ error: e }, { status: 400 });
+      }
+    } else if (action === "update") {
+      const checked = formData.get("checked") === "on";
+      try {
+        await todoClient.patchTodo(todoID, checked);
+      } catch (e) {
+        return json({ error: e }, { status: 400 });
+      }
+    }
+  }
+  return redirect(`/todo`);
+};
+
 export default function Todo() {
+  const checkboxForm = useRef<HTMLFormElement>(null);
   const { todos } = useLoaderData<typeof loader>();
 
   return (
@@ -34,43 +75,50 @@ export default function Todo() {
       </nav>
       <div className={"content"}>
         <h1 className={"headline"}>Todos</h1>
-        {/* <div className={'error'}>{error?.message}</div> */}
-        <form
-          // onSubmit={addTodo}
-          className={"form"}
-        >
+        <Form method="post" className={"form"}>
           <input
             required
             className={"input"}
             type={"text"}
-            // value={description}
-            // onChange={changeDescription}
+            name={"description"}
           />
           <button type={"submit"} className={"button"}>
             +
           </button>
-        </form>
+        </Form>
         <div className={"list"}>
           {todos.map((todo, index) => (
-            <div className={"item"} key={index}>
-              <input
-                className={"checkbox"}
-                id={todo.todoID}
-                type={"checkbox"}
-                value={todo.todoID}
-                checked={todo.checked}
-                // onChange={changeCheckbox}
-              />
-              <label className={"description"} htmlFor={todo.todoID}>
-                {todo.description}
-              </label>
+            <Form
+              ref={checkboxForm}
+              className={"item"}
+              key={index}
+              method="put"
+            >
               <button
+                type="submit"
+                name="action"
+                value="update"
+                style={{ all: "unset", cursor: "pointer" }}
+              >
+                <input
+                  className={"checkbox"}
+                  id={todo.todoID}
+                  type={"checkbox"}
+                  name={"checked"}
+                  defaultChecked={todo.checked}
+                />
+              </button>
+              <input type="hidden" name="todoID" value={todo.todoID} />
+              <label className={"description"}>{todo.description}</label>
+              <button
+                type="submit"
+                name="action"
                 className={"button"}
-                // onClick={() => deleteTodo(todo.todoID!)}
+                value="delete"
               >
                 ×
               </button>
-            </div>
+            </Form>
           ))}
         </div>
       </div>
