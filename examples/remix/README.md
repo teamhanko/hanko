@@ -15,10 +15,11 @@ App](https://www.npmjs.com/package/create-remix).
 
 In the `.env` file set up the correct environment variables:
 
-- `HANKO_API`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be
-  customized using the `server.public.address` option in the [configuration
-  file](../../backend/docs/Config.md))
-- `TODO_API`: this is the URL of the [express](../express) backend (default: `http://localhost:8002`)
+- `REMIX_APP_HANKO_API`: this is the URL of the Hanko API (default:
+  `http://localhost:8000`, can be customized using the `server.public.address` option in
+  the [configuration file](../../backend/docs/Config.md))
+- `REMIX_APP_TODO_API`: this is the URL of the [express](../express) backend (default:
+  `http://localhost:8002`)
 
 ### Run development server
 

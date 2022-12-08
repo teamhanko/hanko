@@ -1,9 +1,10 @@
 {
+  "name": "example-remix",
   "private": true,
   "sideEffects": false,
   "scripts": {
     "build": "remix build",
-    "dev": "remix dev",
+    "dev": "remix dev --port 8888",
     "start": "remix-serve build",
     "typecheck": "tsc -b"
   },
