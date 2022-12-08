@@ -11,7 +11,6 @@ export const links: LinksFunction = () => {
 };
 
 export const loader = async ({ request }: LoaderArgs) => {
-  // ensures the user is logged in
   await requireHankoId(request);
   const hankoCookie = extractHankoCookie(request);
   const todoClient = new TodoClient(

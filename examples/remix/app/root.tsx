@@ -43,6 +43,8 @@ export default function App() {
         <Outlet />
         <ScrollRestoration />
         <Scripts />
+        {/* Add the URL of the Hanko API instance to the window object so that
+        it can be accessed in `useEffect` etc */}
         <script
           dangerouslySetInnerHTML={{
             __html: `window.ENV = ${JSON.stringify(ENV)}`,
@@ -54,6 +56,8 @@ export default function App() {
   );
 }
 
+// Add typings to the window object so that TypeScript knows about the ENV variable we
+// added
 declare global {
   interface Window {
     ENV: {

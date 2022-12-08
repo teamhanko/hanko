@@ -9,6 +9,7 @@ export const extractHankoCookie = (request: Request) => {
 };
 
 
+// ensures the user has a hanko cookie but does not check if it is valid
 export async function requireHankoId(request: Request) {
     const hankoCookie = extractHankoCookie(request);
     const decoded = decode(hankoCookie);

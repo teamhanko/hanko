@@ -35,6 +35,7 @@ export default function Index() {
 
   return (
     <div className="content">
+      {/* Ensures that the component is only rendered on the frontend */}
       <ClientOnly fallback={"Loading..."}>
         {() => <hanko-auth lang="en" api={window.ENV.HANKO_URL} />}
       </ClientOnly>

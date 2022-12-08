@@ -4,6 +4,8 @@ import { serialize } from "cookie";
 import { extractHankoCookie } from "~/lib/auth.server";
 import { TodoClient } from "~/lib/todo.server";
 
+// This will first log you out of the express backend and then remove the hanko cookie from
+// the browser.
 export const action = async ({ request }: DataFunctionArgs) => {
   const hankoCookie = extractHankoCookie(request);
   const todoClient = new TodoClient(
