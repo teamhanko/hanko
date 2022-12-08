@@ -13,6 +13,7 @@
     "@remix-run/react": "^1.8.2",
     "@remix-run/serve": "^1.8.2",
     "@teamhanko/hanko-elements": "0.0.15-alpha",
+    "@teamhanko/hanko-frontend-sdk": "0.0.9-alpha",
     "isbot": "^3.6.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
