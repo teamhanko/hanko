@@ -1,12 +1,14 @@
 import styles from "~/styles/todo.css";
-import type { ActionArgs, LinksFunction, LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import type { Todos } from "~/lib/todo.server";
 import { TodoClient } from "~/lib/todo.server";
 import { Form, useLoaderData } from "@remix-run/react";
 import { extractHankoCookie, requireValidJwt } from "~/lib/auth.server";
 import { useRef } from "react";
+import { badRequest } from "remix-utils";
+
+import type { Todos } from "~/lib/todo.server";
+import type { ActionArgs, LinksFunction, LoaderArgs } from "@remix-run/node";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: styles }];
@@ -39,7 +41,7 @@ export const action = async ({ request }: ActionArgs) => {
     try {
       await todoClient.addTodo(todo);
     } catch (e) {
-      return json({ error: e }, { status: 400 });
+      return badRequest({ error: e });
     }
   } else {
     const action = formData.get("action") as string;
@@ -48,14 +50,14 @@ export const action = async ({ request }: ActionArgs) => {
       try {
         await todoClient.deleteTodo(todoID);
       } catch (e) {
-        return json({ error: e }, { status: 400 });
+        return badRequest({ error: e });
       }
     } else if (action === "update") {
       const checked = formData.get("checked") === "on";
       try {
         await todoClient.patchTodo(todoID, checked);
       } catch (e) {
-        return json({ error: e }, { status: 400 });
+        return badRequest({ error: e });
       }
     }
   }
