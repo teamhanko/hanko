@@ -15,6 +15,7 @@ import { translations } from "./Translations";
 interface Props {
   api: string;
   lang?: string;
+  experimental?: string;
 }
 
 declare interface HankoAuthElement
@@ -31,10 +32,14 @@ declare global {
   }
 }
 
-export const HankoAuth = ({ api = "", lang = "en" }: Props) => {
+export const HankoAuth = ({
+  api = "",
+  lang = "en",
+  experimental = "",
+}: Props) => {
   return (
     <Fragment>
-      <AppProvider api={api}>
+      <AppProvider api={api} experimental={experimental}>
         <TranslateProvider translations={translations} fallbackLang={"en"}>
           <UserProvider>
             <PasswordProvider>
@@ -62,9 +67,14 @@ export const register = ({
 
   return new Promise<void>((resolve, reject) => {
     if (!customElements.get(tagName)) {
-      registerCustomElement(HankoAuth, tagName, ["api", "lang"], {
-        shadow,
-      });
+      registerCustomElement(
+        HankoAuth,
+        tagName,
+        ["api", "lang", "experimental"],
+        {
+          shadow,
+        }
+      );
     }
 
     if (injectStyles) {

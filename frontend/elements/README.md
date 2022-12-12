@@ -73,6 +73,7 @@ do is adding the `<hanko-auth>` element to your page.
 
 - `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+- `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
 ## Events
 
@@ -92,7 +93,7 @@ The animation below demonstrates how user registration with passwords enabled lo
 like using the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) configuration file. The registration flow also includes email
 verification via passcodes and the registration of a passkey so that the user can log in without passwords or passcodes.
 
-<img src="https://github.com/teamhanko/hanko/raw/main/elements/demo.gif" width="410"/>
+<img src="https://github.com/teamhanko/hanko/raw/main/frontend/elements/demo.gif" width="410"/>
 
 ## UI Customization
 
@@ -274,6 +275,23 @@ Result:
 
 <img src="https://github.com/teamhanko/hanko/raw/main/frontend/elements/demo-ui.png" width="450"/>
 
+## Experimental Features
+
+### Conditional Mediation / Autofill assisted Requests
+
+```html
+<hanko-auth [...] experimental="conditionalMediation"/>
+```
+
+If the browser supports autofill assisted requests, it will hide the "Sign in with passkey" button on the login page and
+instead present the available passkeys via the email input's autocompletion menu. Enabling this feature will currently
+cause the following issues:
+
+- On iOS 16/Safari you may encounter an issue that WebAuthn credential registration is not working the first time you
+  press the button or only after reloading the page.
+
+- Microsoft Edge v. 108 sometimes crashes or is not able to display the credential name properly.
+
 ## Browser support
 
 - Safari
@@ -293,10 +311,6 @@ To learn more about how to integrate the `<hanko-auth>` element into frontend fr
 E.g. `:disabled` is currently broken. See:
 [chromium-issue-#1131396](https://bugs.chromium.org/p/chromium/issues/detail?id=1131396),
 [chromium-issue-#953648](https://bugs.chromium.org/p/chromium/issues/detail?id=953648)
-- Safari and autofill assisted requests: On iOS 16 and above, Safari is not able to abort or reject the `Promise`
-returned by `navigator.credentials.get()`. Therefore, you may encounter an issue that the WebAuthn credential
-registration is not working the first time or only after reloading the page, because the initial autofill assisted
-request is still pending and there is only one request allowed at the same time.
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
 
