@@ -4,21 +4,26 @@ import { useCallback, useMemo, useState } from "preact/compat";
 
 import { Hanko, Config } from "@teamhanko/hanko-frontend-sdk";
 
+type ExperimentalFeature = "conditionalMediation";
+type ExperimentalFeatures = ExperimentalFeature[];
+
 interface Props {
   api?: string;
   lang?: string;
+  experimental?: string;
   children: ComponentChildren;
 }
 
 interface Context {
   config: Config;
+  experimentalFeatures?: ExperimentalFeatures;
   configInitialize: () => Promise<Config>;
   hanko: Hanko;
 }
 
 export const AppContext = createContext<Context>(null);
 
-const AppProvider = ({ api, children }: Props) => {
+const AppProvider = ({ api, children, experimental = "" }: Props) => {
   const [config, setConfig] = useState<Config>(null);
 
   const hanko = useMemo(() => {
@@ -27,6 +32,15 @@ const AppProvider = ({ api, children }: Props) => {
     }
     return null;
   }, [api]);
+
+  const experimentalFeatures = useMemo(
+    () =>
+      experimental
+        .split(" ")
+        .filter((feature) => feature.length)
+        .map((feature) => feature as ExperimentalFeature),
+    [experimental]
+  );
 
   const configInitialize = useCallback(() => {
     return new Promise<Config>((resolve, reject) => {
@@ -46,7 +60,14 @@ const AppProvider = ({ api, children }: Props) => {
   }, [hanko]);
 
   return (
-    <AppContext.Provider value={{ config, configInitialize, hanko }}>
+    <AppContext.Provider
+      value={{
+        config,
+        configInitialize,
+        hanko,
+        experimentalFeatures,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

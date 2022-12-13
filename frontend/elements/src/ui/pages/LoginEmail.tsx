@@ -1,5 +1,11 @@
 import * as preact from "preact";
-import { useCallback, useContext, useEffect, useState } from "preact/compat";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/compat";
 import { Fragment } from "preact";
 
 import {
@@ -26,7 +32,7 @@ import ErrorMessage from "../components/ErrorMessage";
 const LoginEmail = () => {
   const { t } = useContext(TranslateContext);
   const { email, setEmail } = useContext(UserContext);
-  const { hanko, config } = useContext(AppContext);
+  const { hanko, config, experimentalFeatures } = useContext(AppContext);
   const {
     renderPassword,
     renderPasscode,
@@ -47,11 +53,6 @@ const LoginEmail = () => {
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>(null);
 
-  // isAndroidUserAgent is used to determine whether the "Login with Passkey" button should be visible, as there is
-  // currently no resident key support on Android.
-  const isAndroidUserAgent =
-    window.navigator.userAgent.indexOf("Android") !== -1;
-
   const onEmailInput = (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
       setEmail(event.target.value);
@@ -69,10 +70,7 @@ const LoginEmail = () => {
           return renderPasscode(userInfo.id, config.password.enabled, true);
         }
 
-        if (
-          !userInfo.has_webauthn_credential ||
-          isConditionalMediationSupported
-        ) {
+        if (!userInfo.has_webauthn_credential || conditionalMediationEnabled) {
           return renderAlternateLoginMethod(userInfo.id);
         }
 
@@ -157,6 +155,13 @@ const LoginEmail = () => {
       });
   };
 
+  const conditionalMediationEnabled = useMemo(
+    () =>
+      experimentalFeatures.includes("conditionalMediation") &&
+      isConditionalMediationSupported,
+    [experimentalFeatures, isConditionalMediationSupported]
+  );
+
   const renderAlternateLoginMethod = useCallback(
     (userID: string) => {
       if (config.password.enabled) {
@@ -173,8 +178,8 @@ const LoginEmail = () => {
   );
 
   const loginViaConditionalUI = useCallback(() => {
-    if (!isConditionalMediationSupported) {
-      // Browser doesn't support AutoFill-assisted requests.
+    if (!conditionalMediationEnabled) {
+      // Browser doesn't support AutoFill-assisted requests or the experimental conditional mediation feature is not enabled.
       return;
     }
 
@@ -189,7 +194,7 @@ const LoginEmail = () => {
       .catch((e) => {
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
-  }, [emitSuccessEvent, hanko, isConditionalMediationSupported]);
+  }, [conditionalMediationEnabled, emitSuccessEvent, hanko.webauthn]);
 
   useEffect(() => {
     loginViaConditionalUI();
@@ -240,9 +245,7 @@ const LoginEmail = () => {
           {t("labels.continue")}
         </Button>
       </Form>
-      {isWebAuthnSupported &&
-      !isAndroidUserAgent &&
-      !isConditionalMediationSupported ? (
+      {isWebAuthnSupported && !conditionalMediationEnabled ? (
         <Fragment>
           <Divider />
           <Form onSubmit={onPasskeySubmit}>
