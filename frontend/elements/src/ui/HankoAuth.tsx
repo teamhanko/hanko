@@ -14,7 +14,6 @@ import { translations } from "./Translations";
 
 interface Props {
   api: string;
-  lang?: string;
   experimental?: string;
 }
 
@@ -35,8 +34,8 @@ declare global {
 export const HankoAuth = ({
   api = "",
   lang = "en",
-  experimental = "",
-}: Props) => {
+  experimental = ""
+}: HankoAuthElement) => {
   return (
     <Fragment>
       <AppProvider api={api} experimental={experimental}>
