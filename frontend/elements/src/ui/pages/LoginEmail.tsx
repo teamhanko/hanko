@@ -7,6 +7,7 @@ import {
   TechnicalError,
   NotFoundError,
   WebauthnRequestCancelledError,
+  InvalidWebauthnCredentialError,
   WebauthnSupport,
 } from "@teamhanko/hanko-frontend-sdk";
 
@@ -145,6 +146,7 @@ const LoginEmail = () => {
     hanko.webauthn
       .login()
       .then(() => {
+        setError(null);
         setIsPasskeyLoginLoading(false);
         setIsPasskeyLoginSuccess(true);
         emitSuccessEvent();
@@ -181,12 +183,18 @@ const LoginEmail = () => {
     hanko.webauthn
       .login(null, true)
       .then(() => {
+        setError(null);
         emitSuccessEvent();
         setIsEmailLoginSuccess(true);
 
         return;
       })
       .catch((e) => {
+        if (e instanceof InvalidWebauthnCredentialError) {
+          // An invalid WebAuthn credential has been used. Retry the login procedure, so another credential can be
+          // chosen by the user via conditional UI.
+          loginViaConditionalUI();
+        }
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
   }, [emitSuccessEvent, hanko, isConditionalMediationSupported]);
