@@ -238,6 +238,8 @@ webauthn:
     display_name: ""
     ## origin ##
     #
+    # DEPRECATED: use "origins" instead
+    #
     # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
     # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
     #
@@ -247,6 +249,20 @@ webauthn:
     # - https://subdomain.example.com
     #
     origin: "http://localhost"
+    ## origins ##
+    #
+    # A list of origins for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
+    # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
+    #
+    # For an Android app the origin must be the base64 url encoded SHA256 fingerprint of the signing certificate.
+    #
+    # Example:
+    # - android:apk-key-hash:nLSu7wVTbnMOxLgC52f2faTnvCbXQrUn_wF9aCrr-l0
+    # - https://login.example.com
+    #
+    origins:
+      - "android:apk-key-hash:nLSu7wVTbnMOxLgC52f2faTnv..."
+      - "https://login.example.com"
 ## audit_log ##
 #
 # Configures audit logging
