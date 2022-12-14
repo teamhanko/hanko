@@ -246,7 +246,6 @@ hanko-auth {
   --container-max-width: 450px;
   --container-padding: 10px 20px;
 
-  --headline-font-weight: 800;
   --headline-font-size: 24px;
 
   --lightness-adjust-dark: 30%;
@@ -256,13 +255,16 @@ hanko-auth {
 }
 
 hanko-auth::part(headline),
-hanko-auth::part(input),
-hanko-auth::part(link) {
+hanko-auth::part(input) {
   color: hsl(33, 93%, 55%);
 }
 
-hanko-auth::part(link):hover {
-  text-decoration: underline;
+hanko-auth::part(primary-button) {
+  color: hsl(196, 10%, 21%);
+}
+
+hanko-auth::part(primary-button):disabled {
+  color: hsl(196, 10%, 61%);
 }
 
 hanko-auth::part(button):hover,
