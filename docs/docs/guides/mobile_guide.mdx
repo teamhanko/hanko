@@ -6,19 +6,13 @@ description: "Learn how to use the Hanko backend with your mobile apps."
 
 # Mobile guide
 
-Currently, we do not provide an SDK that makes the integration as easy as the [Hanko element web component](/guides/frontend).
-In this guide you will learn what you need to do in order to use the [Hanko backend](https://github.com/teamhanko/hanko/backend) in your app.
+Currently, we do not provide SDKs that make the integration for mobile apps as easy as the [Hanko element web component](/guides/frontend).
+In this guide you will learn what you need to do in order to use the [Hanko backend](https://github.com/teamhanko/hanko/backend) with your native app.
 
 ## Overview
 
 This section shows a high level overview of the steps you need to perform in your app in order to have the same flow as in our web component.
 In the [Steps](#steps) section we provide more details about each step.
-
-:::info
-
-This guides focuses on the passwordless flow, so passwords will be ignored.
-
-:::
 
 1. [Check if the user exists](#check-if-the-user-exists)
 2. [If the user does not exist, create the user](#create-user)
@@ -28,7 +22,13 @@ This guides focuses on the passwordless flow, so passwords will be ignored.
 
 :::info
 
-Passkeys are only supported from iOS 16 and above and from Android 9 and above.
+This guide focuses on the passwordless flow, so passwords will be ignored.
+
+:::
+
+:::info
+
+Passkeys are only supported on iOS 16+ and Android 9+.
 
 :::
 
@@ -36,36 +36,36 @@ Passkeys are only supported from iOS 16 and above and from Android 9 and above.
 
 ### Check if the user exists
 
-After an email input was shown and the user provided his email, you should check if the user already exists.
-You can do this by using the [Get user details by email](/api/public#tag/User-Management/operation/getUserId) endpoint.
+After an email input was shown and the user provided their email, you should check if the user already exists.
+You can do that by using the [Get user details by email](/api/public#tag/User-Management/operation/getUserId) endpoint.
 
-You will either get an HTTP status code of `200` or `404`. If you got a `200`, remember the `id` returned in the response object and go to step [Send a passcode](#send-a-passcode).
-If you got a `404` go to the [next step](#create-user).
+You will either get an HTTP status code of `200` or `404`. If you get `200`, remember the `id` returned in the response object and go to step [Send a passcode](#send-a-passcode).
+If you get `404`, go to the [next step](#create-user).
 
 ### Create user
 
 When the user does not already exist, you will need to create the user before you can verify the email. The user can be created using the [Create a user](/api/public#tag/User-Management/operation/createUser) endpoint.
 
-You will either get an HTTP status code of `200` or `409`. If you got a `409`, then the user already exists, and you can obtain the users `id` from the success response of the endpoint mentioned in the [previous step](#check-if-user-exist).
-If you got a `200` remember the `id` returned in the response object.
+You will either get an HTTP status code of `200` or `409`. If you get `409`, then the user already exists, and you can obtain the users `id` from the success response of the endpoint mentioned in the [previous step](#check-if-user-exist).
+If you get `200`, remember the `id` returned in the response object.
 
 ### Send a passcode
 
-To verify an email address or to log in the user, you need to send a passcode to the provided email and verify that the user has access to the emails. To send a passcode just use the [Initialize passcode login](/api/public#tag/Passcode/operation/passcodeInit) endpoint.
-You need to provide the user's `id` you obtained in one of the previous steps. If sending the passcode was successful, you will get an `id` for the passcode in the response object. Remember this `id`, because you will need it to finalize the passcode.
+To verify an email address or to log in the user, you need to send a passcode to the provided email address and verify that the user has access to it. To send a passcode just use the [Initialize passcode login](/api/public#tag/Passcode/operation/passcodeInit) endpoint.
+You need to provide the user's `id` you obtained in one of the previous steps. If sending the passcode was successful, you will get an `id` for the passcode in the response object. Remember this `id`, because you will need it to finalize the passcode flow.
 
 When the user entered the passcode, send it together with the passcode `id` from the [Init endpoint](/api/public#tag/Passcode/operation/passcodeInit) to the [Finalize passcode login](/api/public#tag/Passcode/operation/passcodeFinal) endpoint.
 When the passcode is correct you will get a JWT either as a cookie or in the `X-Auth-Token` header (depends on the configuration of the Hanko backend) .
 
-
 The user is now logged in. To verify (in your backend) that the JWT is valid, see our [Backend guide](/guides/backend).
-Optionally you can offer the user to register a passkey, to login faster the next time. See the next step on how to do it.
+
+Optionally you can offer the user to register a passkey now, enabling a faster login flow the next time. See the next step on how to do it.
 
 ### Create a passkey (optional)
 
-To create a passkey you will need to use the native APIs, that [Google](https://developers.google.com/identity/fido/android/native-apps)
+To create a passkey you will need to use the native APIs that [Google](https://developers.google.com/identity/fido/android/native-apps)
 and [Apple](https://developer.apple.com/documentation/authenticationservices/asauthorizationplatformpublickeycredentialprovider)
-provide for their systems. Find out how to use them [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
+provide for their platforms. Find out how to use them [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
 (Apple) and [here](https://codelabs.developers.google.com/codelabs/fido2-for-android#0) (Android).
 
 For both you will need `PublicKeyCredentialAttestationOptions` which you can get from the [Initialize WebAuthn registration](/api/public#tag/WebAuthn/operation/webauthnRegInit) endpoint.
@@ -82,7 +82,7 @@ The two endpoints ([Initialize WebAuthn registration](/api/public#tag/WebAuthn/o
 ### Login with a passkey (optional)
 
 In order to use a passkey for login, add a button ("Sign in with a passkey") under your email input. After interaction with the button, call the native APIs that [Google](https://developers.google.com/identity/fido/android/native-apps)
-and [Apple](https://developer.apple.com/documentation/authenticationservices/asauthorizationplatformpublickeycredentialprovider)
+and [Apple](https://developer.apple.com/documentation/authenticationservices/asauthorizationplatformpublickeycredentialprovider).
 Find out how to use them [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
 (Apple) and [here](https://codelabs.developers.google.com/codelabs/fido2-for-android#0) (Android).
 
