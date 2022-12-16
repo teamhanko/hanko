@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-frontend-sdk",
-  "version": "0.1.1-alpha",
+  "version": "0.1.2-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -55,7 +55,7 @@
     "jest": "^29.4.2",
     "jest-environment-jsdom": "^29.4.2",
     "js-cookie": "^3.0.1",
-    "jsdoc": "^4.0.0",
+    "jsdoc": "3.6.11",
     "microbundle": "^0.15.1",
     "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",

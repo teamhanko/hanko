@@ -12,6 +12,7 @@ import { PasswordClient } from "./lib/client/PasswordClient";
 import { UserClient } from "./lib/client/UserClient";
 import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
+import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 
 export {
   ConfigClient,
@@ -20,6 +21,7 @@ export {
   PasswordClient,
   PasscodeClient,
   EmailClient,
+  ThirdPartyClient,
 };
 
 // Utils
@@ -42,6 +44,7 @@ import {
   WebauthnCredential,
   WebauthnCredentials,
   Passcode,
+  Identity,
 } from "./lib/Dto";
 
 export type {
@@ -56,6 +59,7 @@ export type {
   WebauthnCredential,
   WebauthnCredentials,
   Passcode,
+  Identity
 };
 
 // Errors

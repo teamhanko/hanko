@@ -43,11 +43,16 @@ var (
 	AuditLogWebAuthnAuthenticationInitFailed     AuditLogType = "webauthn_authentication_init_failed"
 	AuditLogWebAuthnAuthenticationFinalSucceeded AuditLogType = "webauthn_authentication_final_succeeded"
 	AuditLogWebAuthnAuthenticationFinalFailed    AuditLogType = "webauthn_authentication_final_failed"
-	AuditLogWebAuthnCredentialUpdated            AuditLogType = "webauthn_credential_updated"
-	AuditLogWebAuthnCredentialDeleted            AuditLogType = "webauthn_credential_deleted"
+
+	AuditLogWebAuthnCredentialUpdated AuditLogType = "webauthn_credential_updated"
+	AuditLogWebAuthnCredentialDeleted AuditLogType = "webauthn_credential_deleted"
 
 	AuditLogEmailCreated        AuditLogType = "email_created"
 	AuditLogEmailDeleted        AuditLogType = "email_deleted"
 	AuditLogEmailVerified       AuditLogType = "email_verified"
 	AuditLogPrimaryEmailChanged AuditLogType = "primary_email_changed"
+
+	AuditLogThirdPartySignUpSucceeded    AuditLogType = "thirdparty_signup_succeeded"
+	AuditLogThirdPartySignInSucceeded    AuditLogType = "thirdparty_signin_succeeded"
+	AuditLogThirdPartySignInSignUpFailed AuditLogType = "thirdparty_signin_signup_failed"
 )

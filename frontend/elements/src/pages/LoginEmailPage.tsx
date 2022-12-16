@@ -85,6 +85,13 @@ const LoginEmailPage = (props: Props) => {
     }
   };
 
+  const onThirdPartyAuth = (event: Event, provider: string) => {
+    event.preventDefault();
+    hanko.thirdParty
+      .auth(provider, window.location.href)
+      .catch((error) => setPage(<ErrorPage initialError={error} />));
+  };
+
   const onBackHandler = useCallback(() => {
     setPage(<LoginEmailPage emailAddress={emailAddress} />);
   }, [emailAddress, setPage]);
@@ -390,6 +397,22 @@ const LoginEmailPage = (props: Props) => {
               {t("labels.signInPasskey")}
             </Button>
           </Form>
+          {config.providers.map((provider: string) => {
+            return (
+              <Form key={provider}>
+                <Button
+                  secondary
+                  onClick={(e) => {
+                    onThirdPartyAuth(e, provider);
+                  }}
+                >
+                  {t("labels.signInWith", {
+                    provider,
+                  })}
+                </Button>
+              </Form>
+            );
+          })}
         </Fragment>
       ) : null}
     </Content>

@@ -32,7 +32,16 @@ const sidebars = {
       items: ['guides/angular', "guides/next", "guides/react", "guides/svelte", "guides/vue"]
     },
     'guides/backend',
-    'guides/mobile_guide'
+    'guides/mobile_guide',
+    {
+      type: 'category',
+      label: 'Social Login',
+      link: {
+        type: 'doc',
+        id: 'guides/social/index'
+      },
+      items: ['guides/social/google', "guides/social/github"]
+    },
   ],
 };
 

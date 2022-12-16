@@ -35,6 +35,14 @@ const InitPage = () => {
   );
 
   const initHankoAuth = useCallback(() => {
+    const thirdPartyError = hanko.thirdParty.getError();
+    if (thirdPartyError) {
+      window.history.replaceState(null, null, window.location.pathname);
+      return new Promise((resolve) =>
+        resolve(<ErrorPage initialError={thirdPartyError} />)
+      );
+    }
+
     let _user: User;
     return Promise.allSettled([
       hanko.config.get().then(setConfig),

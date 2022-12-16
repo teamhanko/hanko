@@ -122,5 +122,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	email.DELETE("/:id", emailHandler.Delete)
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
+	thirdPartyHandler := handler.NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger, jwkManager)
+	thirdparty := e.Group("thirdparty")
+	thirdparty.GET("/auth", thirdPartyHandler.Auth)
+	thirdparty.GET("/callback", thirdPartyHandler.Callback)
+
 	return e
 }

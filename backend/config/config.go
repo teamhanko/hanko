@@ -3,6 +3,8 @@ package config
 import (
 	"errors"
 	"fmt"
+	"github.com/fatih/structs"
+	"github.com/gobwas/glob"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
@@ -26,6 +28,7 @@ type Config struct {
 	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
 	Emails      Emails           `yaml:"emails" json:"emails" koanf:"emails"`
 	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
+	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party" koanf:"third_party"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -51,6 +54,11 @@ func Load(cfgFile *string) (*Config, error) {
 	err = k.Unmarshal("", c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	err = c.PostProcess()
+	if err != nil {
+		return nil, fmt.Errorf("failed to post process config: %w", err)
 	}
 
 	return c, nil
@@ -163,6 +171,10 @@ func (c *Config) Validate() error {
 	err = c.RateLimiter.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate rate-limiter settings: %w", err)
+	}
+	err = c.ThirdParty.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate third_party settings: %w", err)
 	}
 	return nil
 }
@@ -438,4 +450,124 @@ type RedisConfig struct {
 	//Address of redis in the form of host[:port][/database]
 	Address  string `yaml:"address" json:"address" koanf:"address"`
 	Password string `yaml:"password" json:"password" koanf:"password"`
+}
+
+type ThirdParty struct {
+	Providers             ThirdPartyProviders `yaml:"providers" json:"providers" koanf:"providers"`
+	RedirectURL           string              `yaml:"redirect_url" json:"redirect_url" koanf:"redirect_url"`
+	ErrorRedirectURL      string              `yaml:"error_redirect_url" json:"error_redirect_url" koanf:"error_redirect_url"`
+	AllowedRedirectURLs   []string            `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls"`
+	AllowedRedirectURLMap map[string]glob.Glob
+}
+
+func (t *ThirdParty) Validate() error {
+	if t.Providers.HasEnabled() {
+		if t.RedirectURL == "" {
+			return errors.New("redirect_url must be set")
+		}
+
+		if t.ErrorRedirectURL == "" {
+			return errors.New("error_redirect_url must be set")
+		}
+
+		if len(t.AllowedRedirectURLs) <= 0 {
+			return errors.New("at least one allowed redirect url must be set")
+		}
+
+		urls := append(t.AllowedRedirectURLs, t.ErrorRedirectURL)
+		for _, u := range urls {
+			if strings.HasSuffix(u, "/") {
+				return fmt.Errorf("redirect url %s must not have trailing slash", u)
+			}
+		}
+	}
+
+	err := t.Providers.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate third party providers: %w", err)
+	}
+
+	return nil
+}
+
+func (t *ThirdParty) PostProcess() error {
+	t.AllowedRedirectURLMap = make(map[string]glob.Glob)
+	urls := append(t.AllowedRedirectURLs, t.ErrorRedirectURL)
+	for _, url := range urls {
+		g, err := glob.Compile(url, '.', '/')
+		if err != nil {
+			return fmt.Errorf("failed compile allowed redirect url glob: %w", err)
+		}
+		t.AllowedRedirectURLMap[url] = g
+	}
+
+	return nil
+}
+
+type ThirdPartyProvider struct {
+	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id"`
+	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+}
+
+func (p *ThirdPartyProvider) Validate() error {
+	if p.Enabled {
+		if p.ClientID == "" {
+			return errors.New("missing client ID")
+		}
+		if p.Secret == "" {
+			return errors.New("missing client secret")
+		}
+	}
+	return nil
+}
+
+type ThirdPartyProviders struct {
+	Google ThirdPartyProvider `yaml:"google" json:"google" koanf:"google"`
+	GitHub ThirdPartyProvider `yaml:"github" json:"github" koanf:"github"`
+}
+
+func (p *ThirdPartyProviders) Validate() error {
+	s := structs.New(p)
+	for _, field := range s.Fields() {
+		provider := field.Value().(ThirdPartyProvider)
+		err := provider.Validate()
+		if err != nil {
+			return fmt.Errorf("%s: %w", strings.ToLower(field.Name()), err)
+		}
+	}
+	return nil
+}
+
+func (p *ThirdPartyProviders) HasEnabled() bool {
+	s := structs.New(p)
+	for _, field := range s.Fields() {
+		provider := field.Value().(ThirdPartyProvider)
+		if provider.Enabled {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *ThirdPartyProviders) Get(provider string) *ThirdPartyProvider {
+	s := structs.New(p)
+	for _, field := range s.Fields() {
+		if strings.ToLower(field.Name()) == strings.ToLower(provider) {
+			p := field.Value().(ThirdPartyProvider)
+			return &p
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) PostProcess() error {
+	err := c.ThirdParty.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process third party settings: %w", err)
+	}
+
+	return nil
 }

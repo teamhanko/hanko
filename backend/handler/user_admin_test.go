@@ -33,7 +33,7 @@ func TestUserHandlerAdmin_Delete(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues(userId.String())
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	if assert.NoError(t, handler.Delete(c)) {
@@ -50,7 +50,7 @@ func TestUserHandlerAdmin_Delete_InvalidUserId(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues("invalidId")
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	err := handler.Delete(c)
@@ -70,7 +70,7 @@ func TestUserHandlerAdmin_Delete_UnknownUserId(t *testing.T) {
 	c.SetParamNames("id")
 	c.SetParamValues(userId.String())
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	err := handler.Delete(c)
@@ -106,7 +106,7 @@ func TestUserHandlerAdmin_List(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	if assert.NoError(t, handler.List(c)) {
@@ -149,7 +149,7 @@ func TestUserHandlerAdmin_List_Pagination(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	if assert.NoError(t, handler.List(c)) {
@@ -173,7 +173,7 @@ func TestUserHandlerAdmin_List_NoUsers(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	if assert.NoError(t, handler.List(c)) {
@@ -196,7 +196,7 @@ func TestUserHandlerAdmin_List_InvalidPaginationParam(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewUserHandlerAdmin(p)
 
 	err := handler.List(c)

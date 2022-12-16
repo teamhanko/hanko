@@ -20,6 +20,7 @@ export const translations = {
       renamePasskey: "Rename passkey",
       deletePasskey: "Delete passkey",
       createdAt: "Created at",
+      connectedAccounts: "Connected accounts",
     },
     texts: {
       enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -41,6 +42,8 @@ export const translations = {
       emailUnverified: "This email address has not been verified.",
       emailDelete:
         "If you delete this email address, it can no longer be used for signing in to your account. Passkeys that may have been created with this email address will remain intact.",
+      emailDeleteThirdPartyConnection:
+        "If you delete this email address, it can no longer be used for signing in. You can also no longer sign in with or reconnect your {provider} account. Passkeys that may have been created with this email address will remain intact.",
       emailDeletePrimary:
         "The primary email address cannot be deleted. Add another email address first and make it your primary email address.",
       renamePasskey:
@@ -79,6 +82,7 @@ export const translations = {
       changePassword: "Change password",
       addPasskey: "Add passkey",
       webauthnUnsupported: "Passkeys are not supported by your browser",
+      signInWith: "Sign in with {provider}",
     },
     errors: {
       somethingWentWrong:
@@ -97,6 +101,12 @@ export const translations = {
         "User verification required. Please ensure your authenticator device is protected with a PIN or biometric.",
       emailAddressAlreadyExistsError: "The email address already exists.",
       maxNumOfEmailAddressesReached: "No further email addresses can be added.",
+      thirdPartyAccessDenied:
+        "Access denied. The request was cancelled by the user or the provider has denied access for other reasons.",
+      thirdPartyMultipleAccounts:
+        "Cannot identify account. The email address is used by multiple accounts.",
+      thirdPartyUnverifiedEmail:
+        "Email verification required. Please verify the used email address with your provider.",
     },
   },
   de: {
@@ -120,6 +130,7 @@ export const translations = {
       renamePasskey: "Passkey umbenennen",
       deletePasskey: "Passkey löschen",
       createdAt: "Erstellt am",
+      connectedAccounts: "Verbundene Konten",
     },
     texts: {
       enterPasscode:
@@ -143,6 +154,8 @@ export const translations = {
       emailUnverified: "Diese E-Mail-Adresse wurde noch nicht verifiziert.",
       emailDelete:
         "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
+      emailDeleteThirdPartyConnection:
+        "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Sie können das verbundene {provider}-Konto ebenfalls nicht mehr zu Anmeldung nutzen oder dieses neu verbinden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
       emailDeletePrimary:
         "Die primäre E-Mail-Adresse kann nicht gelöscht werden. Fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie diese als primär fest.",
       renamePasskey:
@@ -182,6 +195,7 @@ export const translations = {
       addPasskey: "Passkey hinzufügen",
       webauthnUnsupported:
         "Passkeys werden von ihrem Browser nicht unterrstützt",
+      signInWith: "Anmelden mit {provider}",
     },
     errors: {
       somethingWentWrong:
@@ -204,6 +218,12 @@ export const translations = {
       emailAddressAlreadyExistsError: "Die E-Mail-Adresse existiert bereits.",
       maxNumOfEmailAddressesReached:
         "Es können keine weiteren E-Mail-Adressen hinzugefügt werden.",
+      thirdPartyAccessDenied:
+        "Zugriff verweigert. Die Anfrage wurde durch den Nutzer abgebrochen oder der Provider hat den Zugriff aus anderen Gründen verweigert.",
+      thirdPartyMultipleAccounts:
+        "Konto kann nicht eindeutig identifiziert werden. Die genutzte E-Mail-Adresse wird von mehreren Konten verwendet.",
+      thirdPartyUnverifiedEmail:
+        "Verifizierung der E-Mail-Adresse erforderlich. Bitte verifizieren sie die genutzte E-Mail-Adresse bei ihrem Provider.",
     },
   },
 };

@@ -10,6 +10,7 @@ type EmailResponse struct {
 	Address    string    `json:"address"`
 	IsVerified bool      `json:"is_verified"`
 	IsPrimary  bool      `json:"is_primary"`
+	Identity   *Identity `json:"identity"`
 }
 
 type EmailCreateRequest struct {
@@ -27,5 +28,6 @@ func FromEmailModel(email *models.Email) *EmailResponse {
 		Address:    email.Address,
 		IsVerified: email.Verified,
 		IsPrimary:  email.IsPrimary(),
+		Identity:   FromIdentityModel(email.Identity),
 	}
 }

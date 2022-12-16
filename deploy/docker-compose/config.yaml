@@ -28,3 +28,20 @@ webauthn:
 session:
   cookie:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
+third_party:
+  error_redirect_url: http://localhost:8888
+  redirect_url: http://localhost:8000/thirdparty/callback
+  allowed_redirect_urls:
+    - http://localhost:8888
+  providers:
+    google:
+      enabled: true
+      client_id: 1074536667584-s0ve42b4qm6j3uk4143uku213mab15ug.apps.googleusercontent.com
+      secret: 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
+    github:
+      enabled: true
+      client_id: 2bea2122332a76f1dae5
+      secret: 21cfcb679b9ca2a84094b40524bedf47837ddf36
+audit_log:
+  storage:
+    enabled: true

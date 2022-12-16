@@ -22,6 +22,7 @@ COPY mail mail/
 COPY audit_log audit_log/
 COPY pagination pagination/
 COPY rate_limiter rate_limiter/
+COPY thirdparty thirdparty/
 
 # Build
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -o hanko main.go

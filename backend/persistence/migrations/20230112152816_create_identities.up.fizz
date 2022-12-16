@@ -1,0 +1,11 @@
+create_table("identities") {
+    t.Column("id", "uuid", {})
+    t.Column("provider_id", "string", {})
+    t.Column("provider_name", "string", {})
+    t.Column("data", "text", {"null": true})
+    t.Column("email_id", "uuid", {})
+    t.Timestamps()
+    t.PrimaryKey("id")
+    t.ForeignKey("email_id", {"emails": ["id"]}, {"on_delete": "cascade"})
+    t.Index(["provider_id", "provider_name"], {"unique": true})
+}
