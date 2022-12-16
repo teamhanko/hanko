@@ -6,13 +6,13 @@ description: "Learn how to use the Hanko backend with your mobile apps."
 
 # Mobile guide
 
-Currently, we have no SDK which wil makes the integration as easy as the [Hanko element web component](/guides/frontend).
+Currently, we do not provide an SDK that makes the integration as easy as the [Hanko element web component](/guides/frontend).
 In this guide you will learn what you need to do in order to use the [Hanko backend](https://github.com/teamhanko/hanko/backend) in your app.
 
 ## Overview
 
-This section shows the steps you need to do in your app on a high level view in order to have the same flow as in our web component.
-In the [Steps](#steps) section we get deeper into each step.
+This section shows a high level overview of the steps you need to perform in your app in order to have the same flow as in our web component.
+In the [Steps](#steps) section we provide more details about each step.
 
 :::info
 
@@ -20,11 +20,11 @@ This guides focuses on the passwordless flow, so passwords will be ignored.
 
 :::
 
-1. [Check if the user exists](#check-if-users-exist)
+1. [Check if the user exists](#check-if-the-user-exists)
 2. [If the user does not exist, create the user](#create-user)
-3. [send a passcode to the user](#send-a-passcode)
-4. [(optional) offer to create a passkey](#create-a-passkey-optional)
-5. [(optional) login with a passkey](#login-with-a-passkey-optional)
+3. [Send a passcode to the user](#send-a-passcode)
+4. [(optional) Offer to create a passkey](#create-a-passkey-optional)
+5. [(optional) Login with a passkey](#login-with-a-passkey-optional)
 
 :::info
 
@@ -34,7 +34,7 @@ Passkeys are only supported from iOS 16 and above and from Android 9 and above.
 
 ## Steps
 
-### Check if user exist
+### Check if the user exists
 
 After an email input was shown and the user provided his email, you should check if the user already exists.
 You can do this by using the [Get user details by email](/api/public#tag/User-Management/operation/getUserId) endpoint.
@@ -46,16 +46,16 @@ If you got a `404` go to the [next step](#create-user).
 
 When the user does not already exist, you will need to create the user before you can verify the email. The user can be created using the [Create a user](/api/public#tag/User-Management/operation/createUser) endpoint.
 
-You will either get an HTTP status code of `200` or `409`. If you got a `409`, then the user already exists, and you can obtain the userId using the endpoint mention in the [previous step](#check-if-user-exist).
+You will either get an HTTP status code of `200` or `409`. If you got a `409`, then the user already exists, and you can obtain the users `id` from the success response of the endpoint mentioned in the [previous step](#check-if-user-exist).
 If you got a `200` remember the `id` returned in the response object.
 
 ### Send a passcode
 
 To verify an email address or to log in the user, you need to send a passcode to the provided email and verify that the user has access to the emails. To send a passcode just use the [Initialize passcode login](/api/public#tag/Passcode/operation/passcodeInit) endpoint.
-You need to provide the userId you obtained in one of the previous steps. If sending the passcode was successful, you will get an `id` in the response object. Remember this id, because you will need it to finalize the passcode.
+You need to provide the user's `id` you obtained in one of the previous steps. If sending the passcode was successful, you will get an `id` for the passcode in the response object. Remember this `id`, because you will need it to finalize the passcode.
 
-When the user entered the passcode, send it together with the `id` from the [Init endpoint](/api/public#tag/Passcode/operation/passcodeInit) to the [Finalize passcode login](/api/public#tag/Passcode/operation/passcodeFinal) endpoint.
-When the passcode as correct you will get a JWT (depends on the configuration of the Hanko backend) either as a cookie or in the `X-Auth-Token` header.
+When the user entered the passcode, send it together with the passcode `id` from the [Init endpoint](/api/public#tag/Passcode/operation/passcodeInit) to the [Finalize passcode login](/api/public#tag/Passcode/operation/passcodeFinal) endpoint.
+When the passcode is correct you will get a JWT either as a cookie or in the `X-Auth-Token` header (depends on the configuration of the Hanko backend) .
 
 
 The user is now logged in. To verify (in your backend) that the JWT is valid, see our [Backend guide](/guides/backend).
@@ -65,12 +65,12 @@ Optionally you can offer the user to register a passkey, to login faster the nex
 
 To create a passkey you will need to use the native APIs, that [Google](https://developers.google.com/identity/fido/android/native-apps)
 and [Apple](https://developer.apple.com/documentation/authenticationservices/asauthorizationplatformpublickeycredentialprovider)
-provide for their systems. How to use them look [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
-for Apple and [here](https://codelabs.developers.google.com/codelabs/fido2-for-android#0) for Android.
+provide for their systems. Find out how to use them [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
+(Apple) and [here](https://codelabs.developers.google.com/codelabs/fido2-for-android#0) (Android).
 
-For both you will need PublicKeyCredentialAttestationOptions which you can get from the [Initialize WebAuthn registration](/api/public#tag/WebAuthn/operation/webauthnRegInit) endpoint.
+For both you will need `PublicKeyCredentialAttestationOptions` which you can get from the [Initialize WebAuthn registration](/api/public#tag/WebAuthn/operation/webauthnRegInit) endpoint.
 
-After the native system APIs were called with the options you will get a PublicKeyCredentialAttestationResponse back. Send the response to the [Finalize WebAuthn registration](/api/public#tag/WebAuthn/operation/webauthnRegFinal) endpoint.
+After the native system APIs were called with the options you will receive a `PublicKeyCredentialAttestationResponse`. Send the response to the [Finalize WebAuthn registration](/api/public#tag/WebAuthn/operation/webauthnRegFinal) endpoint.
 If successful, the user can use the created passkey to login faster the next time.
 
 :::info
@@ -81,14 +81,14 @@ The two endpoints ([Initialize WebAuthn registration](/api/public#tag/WebAuthn/o
 
 ### Login with a passkey (optional)
 
-So that a user can use a passkey you should add a button("Sign in with a passkey") under your email input. The you must call the native APIs that [Google](https://developers.google.com/identity/fido/android/native-apps)
+In order to use a passkey for login, add a button ("Sign in with a passkey") under your email input. After interaction with the button, call the native APIs that [Google](https://developers.google.com/identity/fido/android/native-apps)
 and [Apple](https://developer.apple.com/documentation/authenticationservices/asauthorizationplatformpublickeycredentialprovider)
-provide for their systems. How to use them look [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
-for Apple and [here](https://codelabs.developers.google.com/codelabs/fido2-for-android#0) for Android.
+Find out how to use them [here](https://developer.apple.com/documentation/authenticationservices/public-private_key_authentication/supporting_passkeys)
+(Apple) and [here](https://codelabs.developers.google.com/codelabs/fido2-for-android#0) (Android).
 
-For both you will need PublicKeyCredentialAssertionOptions which you can get from the [Initialize WebAuthn login](/api/public#tag/WebAuthn/operation/webauthnLoginInit) endpoint.
+For both you will need `PublicKeyCredentialAssertionOptions` which you can get from the [Initialize WebAuthn login](/api/public#tag/WebAuthn/operation/webauthnLoginInit) endpoint.
 
-After the native system APIs were called with the options you will get a PublicKeyCredentialAssertionResponse back. Send the response to the [Finalize WebAuthn login](/api/public#tag/WebAuthn/operation/webauthnLoginFinal) endpoint.
-If successful you will get back a JWT (depends on the configuration of the Hanko backend) either as a cookie or in the `X-Auth-Token` header.
+After the native system APIs were called with the options you will receive a `PublicKeyCredentialAssertionResponse`. Send the response to the [Finalize WebAuthn login](/api/public#tag/WebAuthn/operation/webauthnLoginFinal) endpoint.
+If successful you will get back a JWT either as a cookie or in the `X-Auth-Token` header (depends on the configuration of the Hanko backend).
 
 The user is now logged in. To verify (in your backend) that the JWT is valid, see our [Backend guide](/guides/backend).
