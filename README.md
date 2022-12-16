@@ -65,15 +65,14 @@ We are currently in **Beta** and may still have critical bugs. Watch our release
 | ✅ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
 | ✅ | Audit logs API |
 | ✅ | Security Key support |
+| ✅ | Mobile app support |
 | ⚙️ | `<hanko-profile>` web component |
 | ⚙️ | Priviledged sessions & step-up authentication |
-| ⚙️ | Android example app |
-| | iOS example app |
+| ⚙️ | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
+| | Rate limiting (application level) |
 | | Session management |
-| | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
 | | Custom translations for [hanko-elements](/frontend/elements/README.md) |
 | | Email templating |
-| | Rate limiting (application level) |
 
 Additional features that have been requested or that we would like to build but are not (yet) on the roadmap:
 - SMS passcode delivery
