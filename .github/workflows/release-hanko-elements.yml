@@ -31,33 +31,8 @@ jobs:
           script: |
             core.setFailed('version in package.json is not equal to git tag version!')
 
-  build-frontendsdk:
+  build-and-publish:
     needs: check-matching-versions
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend/frontend-sdk
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: npm ci
-      - run: npm run build
-
-  build:
-    needs: build-frontendsdk
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-node@v3
-        with:
-          node-version: 16
-      - run: npm ci
-      - run: npm run build
-
-  publish-npm:
-    needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -65,7 +40,16 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
-      - run: npm publish
+      - name: build-frontend-sdk
+        run: |
+          npm ci
+          npm run build
+        working-directory: frontend/frontend-sdk
+      - name: build-elements
+        run: |
+          npm ci
+          npm run build
+      - name: publish-elements
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISHING_SECRET }}
-
