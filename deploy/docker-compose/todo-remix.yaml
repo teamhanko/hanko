@@ -10,7 +10,12 @@ services:
 
   todo-frontend:
     build: ../../examples/remix
+    environment:
+      - PORT=8888
+      - REMIX_APP_HANKO_API=http://localhost:8000
+      - REMIX_APP_TODO_API=http://localhost:8002
     ports:
       - "8888:8888"
+      - "8008:8008"
     networks:
       - intranet
