@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.0.17-alpha",
+  "version": "0.0.18-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"

@@ -1,5 +1,5 @@
 import * as preact from "preact";
-import { useContext, useState } from "preact/compat";
+import { useContext, useMemo, useState } from "preact/compat";
 
 import {
   User,
@@ -26,7 +26,7 @@ type Props = {
 
 const RegisterPassword = ({ user, registerAuthenticator }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko } = useContext(AppContext);
+  const { hanko, config } = useContext(AppContext);
   const { renderError, emitSuccessEvent, renderRegisterAuthenticator } =
     useContext(RenderContext);
 
@@ -71,6 +71,14 @@ const RegisterPassword = ({ user, registerAuthenticator }: Props) => {
       });
   };
 
+  const passwordLength = useMemo(
+    () => ({
+      minLength: config.password.min_password_length,
+      maxLength: 72,
+    }),
+    [config.password.min_password_length]
+  );
+
   return (
     <Content>
       <Headline>{t("headlines.registerPassword")}</Headline>
@@ -84,11 +92,10 @@ const RegisterPassword = ({ user, registerAuthenticator }: Props) => {
           label={t("labels.password")}
           onInput={onPasswordInput}
           disabled={isSuccess || isLoading}
-          minLength={10}
-          maxLength={32}
           autofocus
+          {...passwordLength}
         />
-        <Paragraph>{t("texts.passwordFormatHint")}</Paragraph>
+        <Paragraph>{t("texts.passwordFormatHint", passwordLength)}</Paragraph>
         <Button isSuccess={isSuccess} isLoading={isLoading}>
           {t("labels.continue")}
         </Button>

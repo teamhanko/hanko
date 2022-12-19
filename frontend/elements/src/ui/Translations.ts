@@ -16,7 +16,8 @@ export const translations = {
         "Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.",
       createAccount:
         'No account exists for "{email}". Do you want to create a new account?',
-      passwordFormatHint: "Must be at least 10 characters long.",
+      passwordFormatHint:
+        "Must be between {minLength} and {maxLength} characters long.",
     },
     labels: {
       or: "or",
@@ -69,7 +70,8 @@ export const translations = {
         "Ihr Gerät unterstützt die sichere Anmeldung mit Passkeys. Hinweis: Ihre biometrischen Daten verbleiben sicher auf Ihrem Gerät und werden niemals an unseren Server gesendet.",
       createAccount:
         'Es existiert kein Konto für "{email}". Möchten Sie ein neues Konto erstellen?',
-      passwordFormatHint: "mindestens 10 Zeichen",
+      passwordFormatHint:
+        "Das Passwort muss zwischen {minLength} und {maxLength} Zeichen lang sein.",
     },
     labels: {
       or: "oder",

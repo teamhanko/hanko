@@ -5,9 +5,11 @@ import { PublicKeyCredentialWithAttestationJSON } from "@github/webauthn-json";
  * @category SDK
  * @subcategory DTO
  * @property {boolean} enabled - Indicates passwords are enabled, so the API accepts login attempts using passwords.
+ * @property {number} min_password_length - The minimum length of a password. Can be used for password validation.
  */
 interface PasswordConfig {
   enabled: boolean;
+  min_password_length: number;
 }
 
 /**
