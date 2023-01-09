@@ -43,18 +43,24 @@ type Storage interface {
 	Persister
 }
 
-//New return a new Persister Object with given configuration
+// New return a new Persister Object with given configuration
 func New(config config.Database) (Storage, error) {
-	DB, err := pop.NewConnection(&pop.ConnectionDetails{
-		Dialect:  config.Dialect,
-		Database: config.Database,
-		Host:     config.Host,
-		Port:     config.Port,
-		User:     config.User,
-		Password: config.Password,
+	connectionDetails := &pop.ConnectionDetails{
 		Pool:     5,
 		IdlePool: 0,
-	})
+	}
+	if len(config.Url) > 0 {
+		connectionDetails.URL = config.Url
+	} else {
+		connectionDetails.Dialect = config.Dialect
+		connectionDetails.Database = config.Database
+		connectionDetails.Host = config.Host
+		connectionDetails.Port = config.Port
+		connectionDetails.User = config.User
+		connectionDetails.Password = config.Password
+	}
+
+	DB, err := pop.NewConnection(connectionDetails)
 
 	if err != nil {
 		return nil, err
