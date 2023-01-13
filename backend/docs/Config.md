@@ -80,7 +80,7 @@ database:
   ## url ##
   #
   # Instead of using the individual fields above this field can be used.
-  # When this field is set, it will be used and the fields above have no affect.
+  # When this field is set, it will be used and the fields above have no effect.
   #
   # Url schema: `dialect://username:password@host:port/database`
   #
