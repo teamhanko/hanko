@@ -274,9 +274,13 @@ type Database struct {
 	Host     string `yaml:"host" json:"host" koanf:"host"`
 	Port     string `yaml:"port" json:"port" koanf:"port"`
 	Dialect  string `yaml:"dialect" json:"dialect" koanf:"dialect"`
+	Url      string `yaml:"url" json:"url" koanf:"url"`
 }
 
 func (d *Database) Validate() error {
+	if len(strings.TrimSpace(d.Url)) > 0 {
+		return nil
+	}
 	if len(strings.TrimSpace(d.Database)) == 0 {
 		return errors.New("database must not be empty")
 	}
