@@ -44,7 +44,7 @@
   "devDependencies": {
     "@github/webauthn-json": "^2.0.1",
     "@types/jest": "^29.2.3",
-    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
     "better-docs": "^2.7.2",
     "eslint": "^8.28.0",
     "eslint-config-google": "^0.14.0",
