@@ -34,7 +34,7 @@ func (p *auditLogPersister) Get(id uuid.UUID) (*models.AuditLog, error) {
 	return found, nil
 }
 
-func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error) {
+func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) ([]models.AuditLog, error) {
 	if len(p.logs) == 0 {
 		return p.logs, nil
 	}
@@ -76,6 +76,6 @@ func (p *auditLogPersister) Delete(auditLog models.AuditLog) error {
 	return nil
 }
 
-func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time) (int, error) {
+func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) (int, error) {
 	return len(p.logs), nil
 }
