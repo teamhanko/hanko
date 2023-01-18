@@ -116,8 +116,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
-	email := e.Group("/emails")
-	email.Use(hankoMiddleware.Session(sessionManager))
+	email := e.Group("/emails", hankoMiddleware.Session(sessionManager))
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)

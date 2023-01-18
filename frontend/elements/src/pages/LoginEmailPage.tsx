@@ -97,7 +97,6 @@ const LoginEmailPage = (props: Props) => {
         .then((resp) => setUser((_user = resp)))
         .then(() => hanko.webauthn.shouldRegister(_user))
         .then((shouldRegisterPasskey) => {
-          console.log("shouldRegisterPasskey", shouldRegisterPasskey);
           const onSuccessHandler = () => {
             if (shouldRegisterPasskey) {
               setPage(<RegisterPasskeyPage />);
