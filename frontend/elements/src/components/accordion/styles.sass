@@ -14,9 +14,9 @@
     overflow: hidden
 
     .label
-      @include mixins.border
+      border-radius: variables.$border-radius
+      border-style: none
 
-      border-color: variables.$background-color
       height: variables.$item-height
       background: variables.$background-color
 
@@ -51,7 +51,6 @@
 
         &.dropdown
           color: variables.$link-color
-          border-color: variables.$background-color
           background: none
 
       &:not(.dropdown)::after
@@ -81,7 +80,6 @@
 
           &.dropdown
             color: variables.$link-color
-            border-color: variables.$background-color
             background: none
 
           &:not(.dropdown)::after
