@@ -120,6 +120,16 @@ func (h *UserHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to write audit log: %w", err)
 		}
 
+		// this cookie is a workaround for older hanko element versions,
+		// because else the backend would not know where to send the first passcode
+		c.SetCookie(&http.Cookie{
+			Name:     "hanko_email_id",
+			Value:    email.ID.String(),
+			Domain:   h.cfg.Session.Cookie.Domain,
+			Secure:   h.cfg.Session.Cookie.Secure,
+			HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+		})
+
 		return c.JSON(http.StatusOK, dto.CreateUserResponse{
 			ID:      newUser.ID,
 			UserID:  newUser.ID,
