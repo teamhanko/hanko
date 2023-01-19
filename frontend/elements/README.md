@@ -157,6 +157,9 @@ hanko-auth, hanko-profile {
 
   /* Input Styles */
   --input-min-width: 12em
+
+  /* Button Styles */
+  --button-min-width: max-content
 }
 ```
 
