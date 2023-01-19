@@ -98,9 +98,26 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 			return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 		}
 	} else if e := user.Emails.GetPrimary(); e == nil {
-		// Send the passcode to the primary email addrese
-		return dto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+		// if user has no primary email, check if a cookie with an email id is present
+		emailIdCookie, err := c.Cookie("hanko_email_id")
+		if err != nil {
+			return fmt.Errorf("failed to get email id cookie: %w", err)
+		}
+
+		if emailIdCookie != nil && emailIdCookie.Value != "" {
+			emailId, err = uuid.FromString(emailIdCookie.Value)
+			if err != nil {
+				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+			}
+			email, err = h.persister.GetEmailPersister().Get(emailId)
+			if email == nil {
+				return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+			}
+		} else {
+			return dto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+		}
 	} else {
+		// Send the passcode to the primary email address
 		email = e
 	}
 
