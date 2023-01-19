@@ -101,6 +101,7 @@ const ListPasskeysAccordion = ({
         {t("texts.deletePasskey")}
         <br />
         <Link
+          dangerous
           isLoading={isLoading}
           onClick={(event) => deletePasskey(event, credential)}
           loadingSpinnerPosition={"right"}

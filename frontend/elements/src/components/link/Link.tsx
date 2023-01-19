@@ -14,16 +14,24 @@ type LoadingSpinnerPosition = "left" | "right";
 export interface Props
   extends LoadingSpinnerProps,
     h.JSX.HTMLAttributes<HTMLButtonElement> {
+  dangerous?: boolean;
   loadingSpinnerPosition?: LoadingSpinnerPosition;
 }
 
-const Link = ({ loadingSpinnerPosition, ...props }: Props) => {
+const Link = ({
+  loadingSpinnerPosition,
+  dangerous = false,
+  ...props
+}: Props) => {
   const renderLink = () => (
     <button
       {...props}
       // @ts-ignore
       part={"link"}
-      className={cx(styles.link, props.disabled ? styles.disabled : null)}
+      className={cx(
+        styles.link,
+        props.disabled ? styles.disabled : dangerous ? styles.danger : null
+      )}
     >
       {props.children}
     </button>

@@ -12,13 +12,15 @@
   padding: 0!important
 
   &:hover
-    color: variables.$link-color
     text-decoration: variables.$link-text-decoration-hover
 
   &.disabled
     color: variables.$color
     pointer-events: none
     cursor: default
+
+  &.danger
+    color: variables.$error-color!important
 
 .linkWrapper
   display: inline-flex

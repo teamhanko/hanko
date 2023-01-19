@@ -207,6 +207,7 @@ const ListEmailsAccordion = ({
             {t("texts.emailDelete")}
             <br />
             <Link
+              dangerous
               isLoading={isDeletionLoading}
               disabled={isDisabled}
               onClick={(event) => deleteEmail(event, email)}
