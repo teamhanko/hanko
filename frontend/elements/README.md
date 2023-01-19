@@ -154,6 +154,9 @@ hanko-auth, hanko-profile {
   /* Link Styles */
   --link-text-decoration: none
   --link-text-decoration-hover: underline
+
+  /* Input Styles */
+  --input-min-width: 12em
 }
 ```
 

@@ -3,42 +3,36 @@
 
 // Form Styles
 .form
+  display: flex
+  flex-grow: 1
+
   .ul
+    flex-grow: 1
+    margin: variables.$item-margin
     padding-inline-start: 0
     list-style-type: none
-    margin: 0
-
-    @media screen and (min-width: variables.$desktop-min-width)
-      display: flex
+    display: flex
+    flex-wrap: wrap
+    gap: 1em
 
   .li
     display: flex
-
-    @media screen and (min-width: variables.$desktop-min-width)
-      display: inline-flex
-
-      &:first-child
-        flex-grow: 1
-      &:last-child
-        margin: 0 0 0 1rem
-        flex-grow: 0
-        min-width: 125px
-      &:only-child
-        margin: 0
-        flex-grow: 1
+    min-width: 125px
+    max-width: 100%
+    flex-grow: 1
 
 // Button Styles
-
 .button
   @include mixins.font
   @include mixins.border
 
+  width: 4em
   height: variables.$item-height
-  margin: variables.$item-margin
-  flex-grow: 1
   outline: none
   cursor: pointer
   transition: 0.1s ease-out
+  flex-grow: 1
+  flex-shrink: 1
 
   &:disabled
     cursor: default
@@ -86,10 +80,11 @@
 // Input Styles
 
 .inputWrapper
-  position: relative
-  margin: variables.$item-margin
-  display: flex
   flex-grow: 1
+  position: relative
+  display: flex
+  min-width: variables.$input-min-width
+  max-width: 100%
 
 .input
   @include mixins.font
@@ -127,9 +122,12 @@
     border-color: variables.$color-shade-1
 
 .passcodeInputWrapper
+  flex-grow: 1
+  min-width: variables.$input-min-width
+  max-width: fit-content
+  position: relative
   display: flex
   justify-content: space-between
-  margin: variables.$item-margin
 
   .passcodeDigitWrapper
     flex-grow: 1
