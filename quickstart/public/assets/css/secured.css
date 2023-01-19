@@ -13,5 +13,12 @@
 }
 
 hanko-profile {
-    --headline1-margin: 2em 0 1rem;
+    --headline1-margin: 2em 0 1em;
+    --input-min-width: 20em;
+}
+
+@media screen and (max-width: 420px) {
+    hanko-profile {
+        --input-min-width: 14em;
+    }
 }

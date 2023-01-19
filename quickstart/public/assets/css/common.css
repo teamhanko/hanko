@@ -86,9 +86,13 @@ hanko-auth, hanko-profile {
 
     /* Item Styles */
     --item-height: 40px;
+    --item-margin: .75em 0;
 
     /* Input Styles */
-    --input-min-width: 14em;
+    --input-min-width: 16em;
+
+    /* Button Styles */
+    --button-min-width: 6em;
 
     /* Container Styles */
     --container-padding: 0;
