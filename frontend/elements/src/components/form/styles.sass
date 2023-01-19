@@ -17,16 +17,17 @@
 
   .li
     display: flex
-    min-width: 125px
     max-width: 100%
     flex-grow: 1
+    flex-basis: min-content
 
 // Button Styles
 .button
   @include mixins.font
   @include mixins.border
 
-  width: 4em
+  white-space: nowrap
+  min-width: max-content
   height: variables.$item-height
   outline: none
   cursor: pointer
