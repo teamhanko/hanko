@@ -115,6 +115,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 				return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 			}
 		} else {
+			// Can't determine email address to which the passcode should be sent to
 			return dto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 		}
 	} else {
