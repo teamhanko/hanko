@@ -492,7 +492,7 @@ func (h *WebauthnHandler) DeleteCredential(c echo.Context) error {
 	}
 
 	if credential == nil || credential.UserId.String() != user.ID.String() {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("webauthn credential not found"))
+		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
