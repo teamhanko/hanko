@@ -189,7 +189,7 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 
 	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(*email.UserID)
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
+		return fmt.Errorf("failed to get webauthn credentials: %w", err)
 	}
 
 	return c.JSON(http.StatusOK, dto.UserInfoResponse{
