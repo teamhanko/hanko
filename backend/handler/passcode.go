@@ -98,9 +98,10 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 			return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 		}
 	} else if e := user.Emails.GetPrimary(); e == nil {
-		// Send the passcode to the primary email addrese
+		// Can't determine email address to which the passcode should be send to
 		return dto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 	} else {
+	        // Send the passcode to the primary email address
 		email = e
 	}
 
