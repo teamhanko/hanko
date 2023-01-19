@@ -6,27 +6,7 @@ body {
     color: white;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: url("../img/bg.jpg") no-repeat center center fixed;
-    background-size: cover;
-}
-
-.button {
-    font-size: 14px;
-    height: 52px;
-    width: 100%;
-    border-radius: 5px;
-    padding: 8px 30px 8px 30px;
-    background: #506CF0;
-    border: none;
-    color: white;
-}
-
-.button:hover {
-    background: #8093f4;
-}
-
-.button:disabled {
-    background: #CBD4FF;
+    background-color: #05304D;
 }
 
 .nav__itemList {
@@ -62,9 +42,9 @@ body {
     max-width: 1200px;
 }
 
-@media screen and (max-width: 470px) {
+@media screen and (max-width: 700px) {
     .content {
-        padding: 0 20px;
+        padding: 0;
     }
 }
 
@@ -78,4 +58,46 @@ body {
 
 .footer img {
     padding-bottom: 2rem;
+}
+
+hanko-auth, hanko-profile {
+    /* Color Scheme */
+    --color: white;
+    --color-shade-1: #A6B6C0;
+    --color-shade-2: #355970;
+
+    --brand-color: #B3CDFF;
+    --brand-color-shade-1: #8EADDA;
+    --brand-contrast-color: #011726;
+
+    --background-color: #05304D;
+    --error-color: #FF6068;
+    --link-color: #B3CDFF;
+
+    /* Font Styles */
+    --font-weight: 400;
+    --font-size: 16px;
+    --font-family: "Inter", sans-serif;
+
+    /* Border Styles */
+    --border-radius: 5px;
+    --border-style: solid;
+    --border-width: 1px;
+
+    /* Item Styles */
+    --item-height: 40px;
+
+    /* Input Styles */
+    --input-min-width: 14em;
+
+    /* Container Styles */
+    --container-padding: 0;
+    --container-max-width: 800px;
+
+    /* Headline Styles */
+    --headline1-font-size: 24px;
+    --headline1-margin: 0 0 1rem;
+
+    --headline2-font-size: 18px;
+    --headline2-margin: 1rem 0 .5rem;
 }

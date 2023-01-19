@@ -13,7 +13,7 @@
     "dist"
   ],
   "browser": {
-    "./elements": "./dist/elements.js"
+    "./": "./dist/elements.js"
   },
   "typesVersions": {
     "*": {
@@ -23,7 +23,7 @@
     }
   },
   "exports": {
-    "./elements": {
+    ".": {
       "import": "./dist/elements.js",
       "require": "./dist/elements.js",
       "types": "./dist/index.d.ts"
