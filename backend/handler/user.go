@@ -58,7 +58,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 
 		email, err := h.persister.GetEmailPersisterWithConnection(tx).FindByAddress(body.Email)
 		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
+			return fmt.Errorf("failed to get email: %w", err)
 		}
 
 		if email != nil {
