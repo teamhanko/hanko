@@ -98,7 +98,8 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 			return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 		}
 	} else if e := user.Emails.GetPrimary(); e == nil {
-		// if user has no primary email, check if a cookie with an email id is present
+		// Workaround to support hanko element versions before v0.1.0-alpha:
+		// If user has no primary email, check if a cookie with an email id is present
 		emailIdCookie, err := c.Cookie("hanko_email_id")
 		if err != nil {
 			return fmt.Errorf("failed to get email id cookie: %w", err)
