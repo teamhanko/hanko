@@ -72,7 +72,7 @@ const ListPasskeysAccordion = ({
     if (credential.name) {
       return credential.name;
     }
-    const alphanumeric = credential.public_key.replace(/[\W_]/, "");
+    const alphanumeric = credential.public_key.replace(/[\W_]/g, "");
     return `Passkey-${alphanumeric.substring(
       alphanumeric.length - 7,
       alphanumeric.length
