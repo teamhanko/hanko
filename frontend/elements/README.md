@@ -36,7 +36,7 @@ to change the appearance of the component. [CSS variables](#css-variables) will 
 Use as a module:
 
 ```typescript
-import { register } from "@teamhanko/hanko-elements/hanko-auth"
+import { register } from "@teamhanko/hanko-elements"
 
 register({
   shadow: true,      // Set to false if you don't want the web component to be attached to the shadow DOM.
