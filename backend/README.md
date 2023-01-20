@@ -389,6 +389,7 @@ To persist audit logs in the database, set `audit_log.storage.enabled` to `true`
 
 ### Rate Limiting
 
+// TODO
 Currently, Hanko backend does not implement rate limiting in any way. In production systems, you may want to hide the
 Hanko service behind a proxy or gateway (e.g. Kong, Traefik) that provides rate limiting.
 

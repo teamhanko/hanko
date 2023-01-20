@@ -1,0 +1,76 @@
+package config
+
+import (
+	"testing"
+	"time"
+)
+
+func TestDefaultConfigNotEnoughForValidation(t *testing.T) {
+	cfg := DefaultConfig()
+	if err := cfg.Validate(); err == nil {
+		t.Error("The default config is missing mandatory parameters. This should not validate without error.")
+	}
+}
+
+func TestParseValidConfig(t *testing.T) {
+	configPath := "./config.yaml"
+	cfg, err := Load(&configPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestMinimalConfigValidates(t *testing.T) {
+	configPath := "./minimal-config.yaml"
+	cfg, err := Load(&configPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+}
+
+func TestRateLimiterConfig(t *testing.T) {
+	configPath := "./minimal-config.yaml"
+	cfg, err := Load(&configPath)
+
+	if err != nil {
+		t.Error(err)
+	}
+	var five uint64 = 5
+	aMinute := 1 * time.Minute
+	cfg.RateLimiter.Enabled = true
+	cfg.RateLimiter.Backend = "in_memory"
+	
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+
+	cfg.RateLimiter.Tokens = &five
+	cfg.RateLimiter.Interval = &aMinute
+
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+
+	cfg.RateLimiter.Backend = "redis"
+	if err := cfg.Validate(); err == nil {
+		t.Error("when specifying redis, the redis config should also be specified")
+	}
+	cfg.RateLimiter.Redis = &RedisConfig{
+		Address:  "127.0.0.1:9876",
+		Password: "password",
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+
+	cfg.RateLimiter.Backend = "notvalid"
+	if err := cfg.Validate(); err == nil {
+		t.Error("notvalid is not a valid backend")
+	}
+}

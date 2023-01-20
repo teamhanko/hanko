@@ -46,7 +46,7 @@ class PasscodeClient extends Client {
 
     if (response.status === 429) {
       const retryAfter = parseInt(
-        response.headers.get("X-Retry-After") || "0",
+        response.headers.get("Retry-After") || "0",
         10
       );
 

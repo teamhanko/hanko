@@ -14,16 +14,30 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server   Server           `yaml:"server" json:"server" koanf:"server"`
-	Webauthn WebauthnSettings `yaml:"webauthn" json:"webauthn" koanf:"webauthn"`
-	Passcode Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
-	Password Password         `yaml:"password" json:"password" koanf:"password"`
-	Database Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets  Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service  Service          `yaml:"service" json:"service" koanf:"service"`
-	Session  Session          `yaml:"session" json:"session" koanf:"session"`
-	AuditLog AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	Server      Server           `yaml:"server" json:"server" koanf:"server"`
+	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn" koanf:"webauthn"`
+	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password    Password         `yaml:"password" json:"password" koanf:"password"`
+	Database    Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets     Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service     Service          `yaml:"service" json:"service" koanf:"service"`
+	Session     Session          `yaml:"session" json:"session" koanf:"session"`
+	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
 }
+
+const (
+	// HeaderRateLimitLimit, HeaderRateLimitRemaining, and HeaderRateLimitReset
+	// are the recommended return header values from IETF on rate limiting. Reset
+	// is in UTC time.
+	HeaderRateLimitLimit     = "X-RateLimit-Limit"
+	HeaderRateLimitRemaining = "X-RateLimit-Remaining"
+	HeaderRateLimitReset     = "X-RateLimit-Reset"
+
+	// HeaderRetryAfter is the header used to indicate when a client should retry
+	// requests (when the rate limit expires), in UTC time.
+	HeaderRetryAfter = "Retry-After"
+)
 
 func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
@@ -58,6 +72,14 @@ func DefaultConfig() *Config {
 		Server: Server{
 			Public: ServerSettings{
 				Address: ":8000",
+				Cors: Cors{
+					ExposeHeaders: []string{
+						HeaderRateLimitLimit,
+						HeaderRateLimitRemaining,
+						HeaderRateLimitReset,
+						HeaderRetryAfter,
+					},
+				},
 			},
 			Admin: ServerSettings{
 				Address: ":8001",
@@ -67,7 +89,7 @@ func DefaultConfig() *Config {
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
 				DisplayName: "Hanko Authentication Service",
-				Origin:      "http://localhost",
+				Origins:     []string{"http://localhost"},
 			},
 			Timeout: 60000,
 		},
@@ -76,6 +98,10 @@ func DefaultConfig() *Config {
 				Port: "465",
 			},
 			TTL: 300,
+			Email: Email{
+				FromAddress: "passcode@hanko.io",
+				FromName:    "Hanko",
+			},
 		},
 		Password: Password{
 			MinPasswordLength: 8,
@@ -96,6 +122,9 @@ func DefaultConfig() *Config {
 				Enabled:      true,
 				OutputStream: OutputStreamStdOut,
 			},
+		},
+		RateLimiter: RateLimiter{
+			Enabled: false,
 		},
 	}
 }
@@ -128,6 +157,10 @@ func (c *Config) Validate() error {
 	err = c.Session.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate session settings: %w", err)
+	}
+	err = c.RateLimiter.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate rate-limiter settings: %w", err)
 	}
 	return nil
 }
@@ -354,3 +387,42 @@ var (
 	OutputStreamStdOut OutputStream = "stdout"
 	OutputStreamStdErr OutputStream = "stderr"
 )
+
+type RateLimiter struct {
+	Enabled  bool                   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Backend  RateLimiterBackendType `yaml:"backend" json:"backend" koanf:"backend"`
+	Redis    *RedisConfig           `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
+	Tokens   *uint64                `yaml:"tokens" json:"tokens" koanf:"tokens"`
+	Interval *time.Duration         `yaml:"interval" json:"interval" koanf:"interval"`
+}
+
+type RateLimiterBackendType string
+
+const (
+	RATE_LIMITER_BACKEND_IN_MEMORY RateLimiterBackendType = "in_memory"
+	RATE_LIMITER_BACKEND_REDIS                            = "redis"
+)
+
+func (r *RateLimiter) Validate() error {
+	if r.Enabled {
+		switch r.Backend {
+		case RATE_LIMITER_BACKEND_REDIS:
+			if r.Redis == nil {
+				return errors.New("when enabling the redis backend you have to specify the redis config")
+			}
+		case RATE_LIMITER_BACKEND_IN_MEMORY:
+			break
+		default:
+			return errors.New(string(r.Backend) + " is not a valid rate limiter backend.")
+		}
+		if r.Tokens == nil || r.Interval == nil {
+			return errors.New("Please specify tokens and interval")
+		}
+	}
+	return nil
+}
+
+type RedisConfig struct {
+	Address  string `yaml:"address" json:"address" koanf:"address"`
+	Password string `yaml:"password" json:"password" koanf:"password"`
+}
