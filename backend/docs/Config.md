@@ -193,12 +193,16 @@ passcode:
     #
     # The sender of emails sent to users.
     #
-    from_address: "CHANGE-ME"
+    # Default value: passcode@hanko.io
+    #
+    from_address: passcode@hanko.io"
     ## from_name ##
     #
     # The sender name of emails sent to users.
     #
-    from_name: "CHANGE-ME"
+    # Default value: Hanko
+    #
+    from_name: "Hanko"
   ## smtp ##
   #
   # SMTP server config to send emails.
@@ -206,8 +210,6 @@ passcode:
   smtp:
     host: "CHANGE-ME"
     ## port ##
-    #
-    # TODO:
     #
     # Default: 465
     #
@@ -306,4 +308,70 @@ audit_log:
     # Default: false
     #
     enabled: false
+rate_limiter:
+  ## enabled ##
+  #
+  # Sets whether the rate limiting is enabled or disabled
+  #
+  # Default: true
+  #
+  enabled: true
+  ## backend ##
+  #
+  # either in_memory or redis
+  #
+  # Default: in_memory
+  #
+  backend: "in_memory"
+  ## password_limits
+  #
+  # rate limits specific to the password/login endpoint
+  #
+  password_limits:
+    ## tokens
+    #
+    # How many operations can occur in the given interval?
+    #
+    # Default: 5
+    tokens: 5
+    ## interval
+    #
+    # When to reset the token interval?
+    #
+    # Default: 1m
+    #
+    interval: 1m
+  ## password_limits
+  #
+  # rate limits specific to the passcode/init endpoint
+  #
+  passcode_limits:
+    ## tokens
+    #
+    # How many operations can occur in the given interval?
+    #
+    # Default: 3
+    tokens: 3
+    ## interval
+    #
+    # When to reset the token interval?
+    #
+    # Default: 1m
+    #
+    interval: 1m
+  ## redis_config
+  #
+  # If you specify redis as backend you have to specify these values
+  #
+  redis_config:
+    ## address
+    #
+    # Address of redis in the form of host[:port][/database]
+    #
+    address: "CHANGE-ME"
+    ## password
+    #
+    # The password of the redis instance
+    #
+    password: "CHANGE_ME"
 ```

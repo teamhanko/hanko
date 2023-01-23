@@ -2,7 +2,6 @@ package config
 
 import (
 	"testing"
-	"time"
 )
 
 func TestDefaultConfigNotEnoughForValidation(t *testing.T) {
@@ -41,17 +40,8 @@ func TestRateLimiterConfig(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	var five uint64 = 5
-	aMinute := 1 * time.Minute
 	cfg.RateLimiter.Enabled = true
 	cfg.RateLimiter.Backend = "in_memory"
-
-	if err := cfg.Validate(); err == nil {
-		t.Error("When enabling the Rate Limiter also Tokens and Interval must be specified.")
-	}
-
-	cfg.RateLimiter.Tokens = &five
-	cfg.RateLimiter.Interval = &aMinute
 
 	if err := cfg.Validate(); err != nil {
 		t.Error(err)

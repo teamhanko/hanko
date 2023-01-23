@@ -9,17 +9,16 @@ import (
 )
 
 func TestNewRateLimiter(t *testing.T) {
-	aMinute := 1 * time.Minute
-	var five uint64 = 5
 	cfg := config.RateLimiter{
-		Enabled:  true,
-		Backend:  config.RATE_LIMITER_BACKEND_IN_MEMORY,
-		Redis:    nil,
-		Tokens:   &five,
-		Interval: &aMinute,
+		Enabled: true,
+		Backend: config.RATE_LIMITER_BACKEND_IN_MEMORY,
+		Redis:   nil,
 	}
 
-	rl := NewRateLimiter(cfg)
+	rl := NewRateLimiter(cfg, config.RateLimits{
+		Tokens:   5,
+		Interval: 1 * time.Minute,
+	})
 	// Take 5 tokens: should be good.
 	for i := 0; i < 5; i++ {
 		tokens, remaining, reset, ok, e := rl.Take(context.Background(), "some-key")

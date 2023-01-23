@@ -45,7 +45,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 	}
 	var rateLimiter limiter.Store
 	if cfg.RateLimiter.Enabled {
-		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter)
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
 	}
 	return &PasscodeHandler{
 		mailer:            mailer,

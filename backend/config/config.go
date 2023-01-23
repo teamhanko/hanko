@@ -125,6 +125,15 @@ func DefaultConfig() *Config {
 		},
 		RateLimiter: RateLimiter{
 			Enabled: false,
+			Backend: RATE_LIMITER_BACKEND_IN_MEMORY,
+			PasswordLimits: RateLimits{
+				Tokens:   5,
+				Interval: 1 * time.Minute,
+			},
+			PasscodeLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
 		},
 	}
 }
@@ -389,11 +398,16 @@ var (
 )
 
 type RateLimiter struct {
-	Enabled  bool                   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Backend  RateLimiterBackendType `yaml:"backend" json:"backend" koanf:"backend"`
-	Redis    *RedisConfig           `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
-	Tokens   *uint64                `yaml:"tokens" json:"tokens" koanf:"tokens"`
-	Interval *time.Duration         `yaml:"interval" json:"interval" koanf:"interval"`
+	Enabled        bool                   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Backend        RateLimiterBackendType `yaml:"backend" json:"backend" koanf:"backend"`
+	Redis          *RedisConfig           `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
+	PasscodeLimits RateLimits             `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits"`
+	PasswordLimits RateLimits             `yaml:"password_limits" json:"password_limits" koanf:"password_limits"`
+}
+
+type RateLimits struct {
+	Tokens   uint64        `yaml:"tokens" json:"tokens" koanf:"tokens"`
+	Interval time.Duration `yaml:"interval" json:"interval" koanf:"interval"`
 }
 
 type RateLimiterBackendType string
@@ -415,14 +429,12 @@ func (r *RateLimiter) Validate() error {
 		default:
 			return errors.New(string(r.Backend) + " is not a valid rate limiter backend.")
 		}
-		if r.Tokens == nil || r.Interval == nil {
-			return errors.New("Please specify tokens and interval")
-		}
 	}
 	return nil
 }
 
 type RedisConfig struct {
+	//Address of redis in the form of host[:port][/database]
 	Address  string `yaml:"address" json:"address" koanf:"address"`
 	Password string `yaml:"password" json:"password" koanf:"password"`
 }

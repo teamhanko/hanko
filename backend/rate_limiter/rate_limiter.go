@@ -17,12 +17,12 @@ import (
 	"time"
 )
 
-func NewRateLimiter(cfg config.RateLimiter) limiter.Store {
+func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.Store {
 	if cfg.Backend == config.RATE_LIMITER_BACKEND_REDIS {
 		//ctx := context.Background()
 		store, err := redisstore.New(&redisstore.Config{
-			Tokens:   *cfg.Tokens,
-			Interval: *cfg.Interval,
+			Tokens:   limits.Tokens,
+			Interval: limits.Interval,
 			Dial: func() (redis.Conn, error) {
 				return redis.Dial("tcp", cfg.Redis.Address,
 					redis.DialPassword(cfg.Redis.Password))
@@ -37,10 +37,10 @@ func NewRateLimiter(cfg config.RateLimiter) limiter.Store {
 	// else return in_memory
 	store, err := memorystore.New(&memorystore.Config{
 		// Number of tokens allowed per interval.
-		Tokens: *cfg.Tokens,
+		Tokens: limits.Tokens,
 
 		// Interval until tokens reset.
-		Interval: *cfg.Interval,
+		Interval: limits.Interval,
 	})
 	if err != nil {
 		log.Fatal(err)

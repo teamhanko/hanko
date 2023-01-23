@@ -31,7 +31,7 @@ type PasswordHandler struct {
 func NewPasswordHandler(persister persistence.Persister, sessionManager session.Manager, cfg *config.Config, auditLogger auditlog.Logger) *PasswordHandler {
 	var rateLimiter limiter.Store
 	if cfg.RateLimiter.Enabled {
-		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter)
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
 	}
 	return &PasswordHandler{
 		persister:      persister,

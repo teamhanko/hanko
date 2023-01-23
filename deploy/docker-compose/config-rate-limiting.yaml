@@ -30,8 +30,5 @@ session:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
 rate_limiter:
   enabled: true
-  backend: "in_memory"
-  tokens: 2
-  interval: 1m
 password:
   enabled: true
