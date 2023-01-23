@@ -294,17 +294,24 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update the email verified status: %w", err)
 			}
 
-			err = h.auditLogger.Create(c, models.AuditLogEmailVerified, user, nil)
-			if err != nil {
-				return fmt.Errorf("failed to create audit log: %w", err)
-			}
-
 			if user.Emails.GetPrimary() == nil {
 				primaryEmail := models.NewPrimaryEmail(passcode.Email.ID, user.ID)
 				err = primaryEmailPersister.Create(*primaryEmail)
 				if err != nil {
 					return fmt.Errorf("failed to create primary email: %w", err)
 				}
+
+				user.Emails = models.Emails{passcode.Email}
+				user.Emails.SetPrimary(primaryEmail)
+				err = h.auditLogger.Create(c, models.AuditLogPrimaryEmailChanged, user, nil)
+				if err != nil {
+					return fmt.Errorf("failed to create audit log: %w", err)
+				}
+			}
+
+			err = h.auditLogger.Create(c, models.AuditLogEmailVerified, user, nil)
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
 			}
 		}
 

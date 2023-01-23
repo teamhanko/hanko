@@ -62,6 +62,16 @@ func (emails Emails) GetPrimary() *Email {
 	return nil
 }
 
+func (emails Emails) SetPrimary(primary *PrimaryEmail) {
+	for i := range emails {
+		if emails[i].ID.String() == primary.EmailID.String() {
+			emails[i].PrimaryEmail = primary
+			return
+		}
+	}
+	return
+}
+
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (email *Email) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
