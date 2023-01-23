@@ -33,3 +33,5 @@ rate_limiter:
   backend: "in_memory"
   tokens: 2
   interval: 1m
+password:
+  enabled: true

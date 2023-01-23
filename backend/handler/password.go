@@ -7,11 +7,13 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -23,14 +25,20 @@ type PasswordHandler struct {
 	sessionManager session.Manager
 	cfg            *config.Config
 	auditLogger    auditlog.Logger
+	rateLimiter    limiter.Store
 }
 
 func NewPasswordHandler(persister persistence.Persister, sessionManager session.Manager, cfg *config.Config, auditLogger auditlog.Logger) *PasswordHandler {
+	var rateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter)
+	}
 	return &PasswordHandler{
 		persister:      persister,
 		sessionManager: sessionManager,
 		cfg:            cfg,
 		auditLogger:    auditLogger,
+		rateLimiter:    rateLimiter,
 	}
 }
 
@@ -159,6 +167,13 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
 		return dto.NewHTTPError(http.StatusBadRequest, "user_id is not a uuid").SetInternal(err)
+	}
+
+	if h.rateLimiter != nil {
+		err := rate_limiter.Limit(h.rateLimiter, userId, c)
+		if err != nil {
+			return err
+		}
 	}
 
 	user, err := h.persister.GetUserPersister().Get(userId)
