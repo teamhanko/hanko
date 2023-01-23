@@ -410,8 +410,8 @@ func (h *WebauthnHandler) ListCredentials(c echo.Context) error {
 
 	response := make([]*dto.WebauthnCredentialResponse, len(credentials))
 
-	for i, credential := range credentials {
-		response[i] = dto.FromWebauthnCredentialModel(&credential)
+	for i := range credentials {
+		response[i] = dto.FromWebauthnCredentialModel(&credentials[i])
 	}
 
 	return c.JSON(http.StatusOK, response)
