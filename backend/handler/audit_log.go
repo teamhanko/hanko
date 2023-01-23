@@ -23,10 +23,15 @@ func NewAuditLogHandler(persister persistence.Persister) *AuditLogHandler {
 }
 
 type AuditLogListRequest struct {
-	Page      int        `query:"page"`
-	PerPage   int        `query:"per_page"`
-	StartTime *time.Time `query:"start_time"`
-	EndTime   *time.Time `query:"end_time"`
+	Page         int        `query:"page"`
+	PerPage      int        `query:"per_page"`
+	StartTime    *time.Time `query:"start_time"`
+	EndTime      *time.Time `query:"end_time"`
+	Types        []string   `query:"type"`
+	UserId       string     `query:"actor_user_id"`
+	Email        string     `query:"actor_email"`
+	IP           string     `query:"meta_source_ip"`
+	SearchString string     `query:"q"`
 }
 
 func (h AuditLogHandler) List(c echo.Context) error {
@@ -44,12 +49,12 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		request.PerPage = 20
 	}
 
-	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime)
+	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString)
 	if err != nil {
 		return fmt.Errorf("failed to get list of audit logs: %w", err)
 	}
 
-	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime)
+	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of audit logs: %w", err)
 	}

@@ -7,15 +7,16 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"strings"
 	"time"
 )
 
 type AuditLogPersister interface {
 	Create(auditLog models.AuditLog) error
 	Get(id uuid.UUID) (*models.AuditLog, error)
-	List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error)
+	List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) ([]models.AuditLog, error)
 	Delete(auditLog models.AuditLog) error
-	Count(startTime *time.Time, endTime *time.Time) (int, error)
+	Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) (int, error)
 }
 
 type auditLogPersister struct {
@@ -51,16 +52,11 @@ func (p *auditLogPersister) Get(id uuid.UUID) (*models.AuditLog, error) {
 	return &auditLog, nil
 }
 
-func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time) ([]models.AuditLog, error) {
+func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) ([]models.AuditLog, error) {
 	auditLogs := []models.AuditLog{}
 
 	query := p.db.Q()
-	if startTime != nil {
-		query = query.Where("created_at > ?", startTime)
-	}
-	if endTime != nil {
-		query = query.Where("created_at < ?", endTime)
-	}
+	query = p.addQueryParamsToSqlQuery(query, startTime, endTime, types, userId, email, ip, searchString)
 	err := query.Paginate(page, perPage).Order("created_at desc").All(&auditLogs)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
@@ -82,18 +78,57 @@ func (p *auditLogPersister) Delete(auditLog models.AuditLog) error {
 	return nil
 }
 
-func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time) (int, error) {
+func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) (int, error) {
 	query := p.db.Q()
-	if startTime != nil {
-		query = query.Where("created_at > ?", startTime)
-	}
-	if endTime != nil {
-		query = query.Where("created_at < ?", endTime)
-	}
+	query = p.addQueryParamsToSqlQuery(query, startTime, endTime, types, userId, email, ip, searchString)
 	count, err := query.Count(&models.AuditLog{})
 	if err != nil {
 		return 0, fmt.Errorf("failed to get auditLog count: %w", err)
 	}
 
 	return count, nil
+}
+
+func (p *auditLogPersister) addQueryParamsToSqlQuery(query *pop.Query, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) *pop.Query {
+	if startTime != nil {
+		query = query.Where("created_at > ?", startTime)
+	}
+	if endTime != nil {
+		query = query.Where("created_at < ?", endTime)
+	}
+
+	if len(types) > 0 {
+		joined := "'" + strings.Join(types, "','") + "'"
+		query = query.Where(fmt.Sprintf("type IN (%s)", joined))
+	}
+
+	if len(userId) > 0 {
+		switch p.db.Dialect.Name() {
+		case "postgres", "cockroach":
+			query = query.Where("actor_user_id::text LIKE ?", "%"+userId+"%")
+		case "mysql", "mariadb":
+			query = query.Where("actor_user_id LIKE ?", "%"+userId+"%")
+		}
+	}
+
+	if len(email) > 0 {
+		query = query.Where("actor_email LIKE ?", "%"+email+"%")
+	}
+
+	if len(ip) > 0 {
+		query = query.Where("meta_source_ip LIKE ?", "%"+ip+"%")
+	}
+
+	if len(searchString) > 0 {
+		switch p.db.Dialect.Name() {
+		case "postgres", "cockroach":
+			arg := "%" + searchString + "%"
+			query = query.Where("(actor_email LIKE ? OR meta_source_ip LIKE ? OR actor_user_id::text LIKE ?)", arg, arg, arg)
+		case "mysql", "mariadb":
+			arg := "%" + searchString + "%"
+			query = query.Where("(actor_email LIKE ? OR meta_source_ip LIKE ? OR actor_user_id LIKE ?)", arg, arg, arg)
+		}
+	}
+
+	return query
 }

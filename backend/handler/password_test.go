@@ -398,8 +398,7 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	}
 }
 
-// TestMaxPasswordLength is only for documentation purposes, because it is nowhere documented, that the bcrypt
-// implementation of golang truncates the password silent to 72 bytes.
+// TestMaxPasswordLength bcrypt since version 0.5.0 only accepts passwords at least 72 bytes long. This test documents this behaviour.
 func TestMaxPasswordLength(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -409,14 +408,14 @@ func TestMaxPasswordLength(t *testing.T) {
 	}{
 		{
 			name:             "login password 72 bytes long",
-			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901",
 			loginPassword:    "012345678901234567890123456789012345678901234567890123456789012345678901",
 			wantErr:          false,
 		},
 		{
-			name:             "login password 71 bytes long",
-			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-			loginPassword:    "01234567890123456789012345678901234567890123456789012345678901234567890",
+			name:             "login password over 72 bytes long",
+			creationPassword: "0123456789012345678901234567890123456789012345678901234567890123456789012",
+			loginPassword:    "0123456789012345678901234567890123456789012345678901234567890123456789012",
 			wantErr:          true,
 		},
 	}
@@ -424,7 +423,11 @@ func TestMaxPasswordLength(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			hash, err := bcrypt.GenerateFromPassword([]byte(test.creationPassword), 12)
-			assert.NoError(t, err)
+			if test.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 
 			err = bcrypt.CompareHashAndPassword(hash, []byte(test.loginPassword))
 			if test.wantErr {
