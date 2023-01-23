@@ -45,7 +45,7 @@ func TestRateLimiterConfig(t *testing.T) {
 	aMinute := 1 * time.Minute
 	cfg.RateLimiter.Enabled = true
 	cfg.RateLimiter.Backend = "in_memory"
-	
+
 	if err := cfg.Validate(); err != nil {
 		t.Error(err)
 	}
@@ -53,8 +53,8 @@ func TestRateLimiterConfig(t *testing.T) {
 	cfg.RateLimiter.Tokens = &five
 	cfg.RateLimiter.Interval = &aMinute
 
-	if err := cfg.Validate(); err != nil {
-		t.Error(err)
+	if err := cfg.Validate(); err == nil {
+		t.Error("When enabling the Rate Limiter also Tokens and Interval must be specified.")
 	}
 
 	cfg.RateLimiter.Backend = "redis"
