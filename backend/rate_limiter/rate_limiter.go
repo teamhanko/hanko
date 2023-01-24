@@ -57,7 +57,6 @@ func Limit(store limiter.Store, userId uuid.UUID, c echo.Context) error {
 		return err
 	}
 
-	//resetTime := time.Unix(0, int64(reset)).UTC().Format(time.RFC1123)
 	resetTime := int(math.Floor(time.Unix(0, int64(reset)).UTC().Sub(time.Now().UTC()).Seconds()))
 	log.Println(resetTime)
 
