@@ -366,7 +366,7 @@ rate_limiter:
   redis_config:
     ## address
     #
-    # Address of redis in the form of host[:port][/database]
+    # Address of your redis instance in the form of host[:port][/database]
     #
     address: "CHANGE-ME"
     ## password
