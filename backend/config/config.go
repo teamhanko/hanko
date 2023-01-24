@@ -7,6 +7,7 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"log"
 	"strings"
 	"time"
@@ -25,19 +26,6 @@ type Config struct {
 	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
 	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
 }
-
-const (
-	// HeaderRateLimitLimit, HeaderRateLimitRemaining, and HeaderRateLimitReset
-	// are the recommended return header values from IETF on rate limiting. Reset
-	// is in UTC time.
-	HeaderRateLimitLimit     = "X-RateLimit-Limit"
-	HeaderRateLimitRemaining = "X-RateLimit-Remaining"
-	HeaderRateLimitReset     = "X-RateLimit-Reset"
-
-	// HeaderRetryAfter is the header used to indicate when a client should retry
-	// requests (when the rate limit expires), in UTC time.
-	HeaderRetryAfter = "Retry-After"
-)
 
 func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
@@ -74,10 +62,10 @@ func DefaultConfig() *Config {
 				Address: ":8000",
 				Cors: Cors{
 					ExposeHeaders: []string{
-						HeaderRateLimitLimit,
-						HeaderRateLimitRemaining,
-						HeaderRateLimitReset,
-						HeaderRetryAfter,
+						httplimit.HeaderRateLimitLimit,
+						httplimit.HeaderRateLimitRemaining,
+						httplimit.HeaderRateLimitReset,
+						httplimit.HeaderRetryAfter,
 					},
 				},
 			},

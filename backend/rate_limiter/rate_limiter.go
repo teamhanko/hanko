@@ -6,6 +6,7 @@ import (
 	"github.com/gomodule/redigo/redis"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-limiter"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/sethvargo/go-limiter/memorystore"
 	"github.com/sethvargo/go-redisstore"
 	"github.com/teamhanko/hanko/backend/config"
@@ -59,13 +60,13 @@ func Limit(store limiter.Store, userId uuid.UUID, c echo.Context) error {
 	log.Println(resetTime)
 
 	// Set headers (we do this regardless of whether the request is permitted).
-	c.Response().Header().Set(config.HeaderRateLimitLimit, strconv.FormatUint(limit, 10))
-	c.Response().Header().Set(config.HeaderRateLimitRemaining, strconv.FormatUint(remaining, 10))
-	c.Response().Header().Set(config.HeaderRateLimitReset, strconv.Itoa(resetTime))
+	c.Response().Header().Set(httplimit.HeaderRateLimitLimit, strconv.FormatUint(limit, 10))
+	c.Response().Header().Set(httplimit.HeaderRateLimitRemaining, strconv.FormatUint(remaining, 10))
+	c.Response().Header().Set(httplimit.HeaderRateLimitReset, strconv.Itoa(resetTime))
 
 	// Fail if there were no tokens remaining.
 	if !ok {
-		c.Response().Header().Set(config.HeaderRetryAfter, strconv.Itoa(resetTime))
+		c.Response().Header().Set(httplimit.HeaderRetryAfter, strconv.Itoa(resetTime))
 		return dto.NewHTTPError(http.StatusTooManyRequests)
 	}
 	return nil
