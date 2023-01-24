@@ -341,7 +341,7 @@ rate_limiter:
     tokens: 5
     ## interval
     #
-    # When to reset the token interval?
+    # When to reset the token interval
     #
     # Default: 1m
     #
