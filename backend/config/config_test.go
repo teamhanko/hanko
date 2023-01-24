@@ -41,13 +41,13 @@ func TestRateLimiterConfig(t *testing.T) {
 		t.Error(err)
 	}
 	cfg.RateLimiter.Enabled = true
-	cfg.RateLimiter.Backend = "in_memory"
+	cfg.RateLimiter.Store = "in_memory"
 
 	if err := cfg.Validate(); err != nil {
 		t.Error(err)
 	}
 
-	cfg.RateLimiter.Backend = "redis"
+	cfg.RateLimiter.Store = "redis"
 	if err := cfg.Validate(); err == nil {
 		t.Error("when specifying redis, the redis config should also be specified")
 	}
@@ -59,7 +59,7 @@ func TestRateLimiterConfig(t *testing.T) {
 		t.Error(err)
 	}
 
-	cfg.RateLimiter.Backend = "notvalid"
+	cfg.RateLimiter.Store = "notvalid"
 	if err := cfg.Validate(); err == nil {
 		t.Error("notvalid is not a valid backend")
 	}

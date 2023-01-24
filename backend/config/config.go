@@ -113,7 +113,7 @@ func DefaultConfig() *Config {
 		},
 		RateLimiter: RateLimiter{
 			Enabled: true,
-			Backend: RATE_LIMITER_BACKEND_IN_MEMORY,
+			Store:   RATE_LIMITER_STORE_IN_MEMORY,
 			PasswordLimits: RateLimits{
 				Tokens:   5,
 				Interval: 1 * time.Minute,
@@ -386,11 +386,11 @@ var (
 )
 
 type RateLimiter struct {
-	Enabled        bool                   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Backend        RateLimiterBackendType `yaml:"backend" json:"backend" koanf:"backend"`
-	Redis          *RedisConfig           `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
-	PasscodeLimits RateLimits             `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits"`
-	PasswordLimits RateLimits             `yaml:"password_limits" json:"password_limits" koanf:"password_limits"`
+	Enabled        bool                 `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Store          RateLimiterStoreType `yaml:"store" json:"store" koanf:"store"`
+	Redis          *RedisConfig         `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
+	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits"`
+	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits" koanf:"password_limits"`
 }
 
 type RateLimits struct {
@@ -398,24 +398,24 @@ type RateLimits struct {
 	Interval time.Duration `yaml:"interval" json:"interval" koanf:"interval"`
 }
 
-type RateLimiterBackendType string
+type RateLimiterStoreType string
 
 const (
-	RATE_LIMITER_BACKEND_IN_MEMORY RateLimiterBackendType = "in_memory"
-	RATE_LIMITER_BACKEND_REDIS                            = "redis"
+	RATE_LIMITER_STORE_IN_MEMORY RateLimiterStoreType = "in_memory"
+	RATE_LIMITER_STORE_REDIS                          = "redis"
 )
 
 func (r *RateLimiter) Validate() error {
 	if r.Enabled {
-		switch r.Backend {
-		case RATE_LIMITER_BACKEND_REDIS:
+		switch r.Store {
+		case RATE_LIMITER_STORE_REDIS:
 			if r.Redis == nil {
-				return errors.New("when enabling the redis backend you have to specify the redis config")
+				return errors.New("when enabling the redis store you have to specify the redis config")
 			}
-		case RATE_LIMITER_BACKEND_IN_MEMORY:
+		case RATE_LIMITER_STORE_IN_MEMORY:
 			break
 		default:
-			return errors.New(string(r.Backend) + " is not a valid rate limiter backend.")
+			return errors.New(string(r.Store) + " is not a valid rate limiter store.")
 		}
 	}
 	return nil

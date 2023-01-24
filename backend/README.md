@@ -390,7 +390,7 @@ To persist audit logs in the database, set `audit_log.storage.enabled` to `true`
 ### Rate Limiting
 
 Hanko implements basic fixed-window rate limiting for the passcode/init and password/login endpoints to mitigate brute-force attacks.
-It uses a combination of user-id/IP to mitigate DoS attacks on user accounts.
+It uses a combination of user-id/IP to mitigate DoS attacks on user accounts. You can choose between an in-memory and a redis store.
 
 In production systems, you may want to hide the
 Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide additional network-based rate limiting.

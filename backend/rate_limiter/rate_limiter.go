@@ -19,7 +19,7 @@ import (
 )
 
 func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.Store {
-	if cfg.Backend == config.RATE_LIMITER_BACKEND_REDIS {
+	if cfg.Store == config.RATE_LIMITER_STORE_REDIS {
 		store, err := redisstore.New(&redisstore.Config{
 			Tokens:   limits.Tokens,
 			Interval: limits.Interval,

@@ -316,7 +316,7 @@ rate_limiter:
   # Default: true
   #
   enabled: true
-  ## backend ##
+  ## store ##
   #
   # Sets the store for the rate limiter. When you have multiple instances of Hanko running, it is recommended to use 
   # the "redis" store else your instances have their own states.
@@ -327,7 +327,7 @@ rate_limiter:
   #
   # Default: in_memory
   #
-  backend: "in_memory"
+  store: "in_memory"
   ## password_limits
   #
   # rate limits specific to the password/login endpoint
