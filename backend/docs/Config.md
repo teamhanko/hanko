@@ -335,7 +335,7 @@ rate_limiter:
   password_limits:
     ## tokens
     #
-    # How many operations can occur in the given interval?
+    # How many operations can occur in the given interval
     #
     # Default: 5
     tokens: 5
