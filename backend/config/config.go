@@ -412,6 +412,9 @@ func (r *RateLimiter) Validate() error {
 			if r.Redis == nil {
 				return errors.New("when enabling the redis store you have to specify the redis config")
 			}
+			if r.Redis.Address == "" {
+				return errors.New("when enabling the redis store you have to specify the address where hanko can reach the redis instance")
+			}
 		case RATE_LIMITER_STORE_IN_MEMORY:
 			break
 		default:
