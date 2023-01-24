@@ -124,7 +124,7 @@ func DefaultConfig() *Config {
 			},
 		},
 		RateLimiter: RateLimiter{
-			Enabled: false,
+			Enabled: true,
 			Backend: RATE_LIMITER_BACKEND_IN_MEMORY,
 			PasswordLimits: RateLimits{
 				Tokens:   5,
