@@ -30,7 +30,6 @@ func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.St
 		if err != nil {
 			log.Fatal(err)
 		}
-		//defer store.Close(ctx)
 		return store
 	}
 	// else return in_memory
