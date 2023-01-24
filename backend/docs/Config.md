@@ -353,7 +353,7 @@ rate_limiter:
   passcode_limits:
     ## tokens
     #
-    # How many operations can occur in the given interval?
+    # How many operations can occur in the given interval
     #
     # Default: 3
     tokens: 3
