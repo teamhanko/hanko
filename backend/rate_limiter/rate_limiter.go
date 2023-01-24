@@ -35,10 +35,7 @@ func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.St
 	}
 	// else return in_memory
 	store, err := memorystore.New(&memorystore.Config{
-		// Number of tokens allowed per interval.
-		Tokens: limits.Tokens,
-
-		// Interval until tokens reset.
+		Tokens:   limits.Tokens,
 		Interval: limits.Interval,
 	})
 	if err != nil {
@@ -48,7 +45,7 @@ func NewRateLimiter(cfg config.RateLimiter, limits config.RateLimits) limiter.St
 }
 
 func Limit(store limiter.Store, userId uuid.UUID, c echo.Context) error {
-	key := userId.String() + "/" + c.RealIP()
+	key := c.Path() + "/" + userId.String() + "/" + c.RealIP()
 	// Take from the store.
 	limit, remaining, reset, ok, err := store.Take(context.Background(), key)
 

@@ -30,5 +30,8 @@ session:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
 rate_limiter:
   enabled: true
+  store: "redis"
+  redis_config:
+    address: "redis:6379"
 password:
   enabled: true
