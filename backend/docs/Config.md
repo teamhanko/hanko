@@ -318,7 +318,12 @@ rate_limiter:
   enabled: true
   ## backend ##
   #
-  # either in_memory or redis
+  # Sets the store for the rate limiter. When you have multiple instances of Hanko running, it is recommended to use 
+  # the "redis" store else your instances have their own states.
+  #
+  # One of:
+  # - in_memory
+  # - redis
   #
   # Default: in_memory
   #
