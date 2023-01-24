@@ -11,7 +11,7 @@ import (
 func TestNewRateLimiter(t *testing.T) {
 	cfg := config.RateLimiter{
 		Enabled: true,
-		Backend: config.RATE_LIMITER_STORE_IN_MEMORY,
+		Store:   config.RATE_LIMITER_STORE_IN_MEMORY,
 		Redis:   nil,
 	}
 
