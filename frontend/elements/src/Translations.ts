@@ -91,7 +91,7 @@ export const translations = {
       tooManyRequests:
         "Too many requests have been made. Please wait to repeat the requested operation.",
       unauthorized: "Your session has expired. Please log in again.",
-      invalidWebauthnCredential: "Invalid WebAuthn credentials.",
+      invalidWebauthnCredential: "This passkey cannot be used anymore.",
       passcodeExpired: "The passcode has expired. Please request a new one.",
       userVerification:
         "User verification required. Please ensure your authenticator device is protected with a PIN or biometric.",
@@ -195,7 +195,8 @@ export const translations = {
         "Es wurden zu viele Anfragen gestellt. Bitte warten Sie, um den gewünschten Vorgang zu wiederholen.",
       unauthorized:
         "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
-      invalidWebauthnCredential: "Ungültiger Berechtigungsnachweis",
+      invalidWebauthnCredential:
+        "Dieser Passkey kann nicht mehr verwendet werden.",
       passcodeExpired:
         "Der Passcode ist abgelaufen. Bitte fordern Sie einen neuen Code an.",
       userVerification:
