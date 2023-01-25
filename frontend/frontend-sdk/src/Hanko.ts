@@ -3,6 +3,7 @@ import { PasscodeClient } from "./lib/client/PasscodeClient";
 import { PasswordClient } from "./lib/client/PasswordClient";
 import { UserClient } from "./lib/client/UserClient";
 import { WebauthnClient } from "./lib/client/WebauthnClient";
+import { EmailClient } from "./lib/client/EmailClient";
 
 /**
  * A class that bundles all available SDK functions.
@@ -16,6 +17,7 @@ class Hanko {
   webauthn: WebauthnClient;
   password: PasswordClient;
   passcode: PasscodeClient;
+  email: EmailClient;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
@@ -44,6 +46,11 @@ class Hanko {
      *  @type {PasscodeClient}
      */
     this.passcode = new PasscodeClient(api, timeout);
+    /**
+     *  @public
+     *  @type {EmailClient}
+     */
+    this.email = new EmailClient(api, timeout);
   }
 }
 

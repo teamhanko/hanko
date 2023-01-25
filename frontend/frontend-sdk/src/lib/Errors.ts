@@ -237,6 +237,45 @@ class UserVerificationError extends HankoError {
   }
 }
 
+/**
+ * A 'MaxNumOfEmailAddressesReachedError' occurs when the user tries to add a new email address while the maximum number
+ * of email addresses (see backend configuration) equals the number of email addresses already registered.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class MaxNumOfEmailAddressesReachedError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super(
+      "Maximum number of email addresses reached error",
+      "maxNumOfEmailAddressesReached",
+      cause
+    );
+    Object.setPrototypeOf(this, MaxNumOfEmailAddressesReachedError.prototype);
+  }
+}
+
+/**
+ * An 'EmailAddressAlreadyExistsError' occurs when the user tries to add a new email address which already exists.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class EmailAddressAlreadyExistsError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super(
+      "The email address already exists",
+      "emailAddressAlreadyExistsError",
+      cause
+    );
+    Object.setPrototypeOf(this, EmailAddressAlreadyExistsError.prototype);
+  }
+}
+
 export {
   HankoError,
   TechnicalError,
@@ -251,5 +290,7 @@ export {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
-  UserVerificationError
+  UserVerificationError,
+  MaxNumOfEmailAddressesReachedError,
+  EmailAddressAlreadyExistsError,
 };

@@ -1,2 +1,2 @@
-import { HankoAuth, register } from "./ui/HankoAuth";
-export { HankoAuth, register };
+import { HankoAuth, HankoProfile, register } from "./Elements";
+export { HankoAuth, HankoProfile, register };

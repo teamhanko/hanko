@@ -25,17 +25,6 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	return found, nil
 }
 
-func (p *userPersister) GetByEmail(email string) (*models.User, error) {
-	var found *models.User
-	for _, data := range p.users {
-		if data.Email == email {
-			d := data
-			found = &d
-		}
-	}
-	return found, nil
-}
-
 func (p *userPersister) Create(user models.User) error {
 	p.users = append(p.users, user)
 	return nil

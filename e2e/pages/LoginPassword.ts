@@ -15,8 +15,8 @@ export class LoginPassword extends BasePage {
     this.signInButton = page.locator("button[type=submit]", {
       hasText: "Sign in",
     });
-    this.backLink = page.locator("a", { hasText: "Back" });
-    this.forgotPasswordLink = page.locator("a", {
+    this.backLink = page.locator("button", { hasText: "Back" });
+    this.forgotPasswordLink = page.locator("button", {
       hasText: "Forgot your password?",
     });
     this.headline = page.locator("h1", { hasText: "Enter password" });

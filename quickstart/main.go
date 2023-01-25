@@ -57,6 +57,7 @@ func main() {
 		return c.Render(http.StatusOK, "secured.html", map[string]interface{}{
 			"HankoFrontendSdkUrl": hankoFrontendSdkUrl,
 			"HankoUrl":            hankoUrl,
+			"HankoElementUrl":     hankoElementUrl,
 		})
 	}, middleware.SessionMiddleware(hankoUrlInternal))
 

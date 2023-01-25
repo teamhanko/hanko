@@ -8,11 +8,13 @@ import { UserState } from "./UserState";
  * @property {string=} id - The UUID of the active passcode.
  * @property {number=} ttl - Timestamp until when the passcode is valid in seconds (since January 1, 1970 00:00:00 UTC).
  * @property {number=} resendAfter - Seconds until a passcode can be resent.
+ * @property {emailID=} emailID - The email address ID.
  */
 export interface LocalStoragePasscode {
   id?: string;
   ttl?: number;
   resendAfter?: number;
+  emailID?: string;
 }
 
 /**
@@ -70,6 +72,29 @@ class PasscodeState extends UserState {
   }
 
   /**
+   * Gets the UUID of the email address.
+   *
+   * @param {string} userID - The UUID of the user.
+   * @return {string}
+   */
+  getEmailID(userID: string): string {
+    return this.getState(userID).emailID;
+  }
+
+  /**
+   * Sets the UUID of the email address.
+   *
+   * @param {string} userID - The UUID of the user.
+   * @param {string} emailID - The UUID of the email address.
+   * @return {PasscodeState}
+   */
+  setEmailID(userID: string, emailID: string): PasscodeState {
+    this.getState(userID).emailID = emailID;
+
+    return this;
+  }
+
+  /**
    * Removes the active passcode.
    *
    * @param {string} userID - The UUID of the user.
@@ -81,6 +106,7 @@ class PasscodeState extends UserState {
     delete passcode.id;
     delete passcode.ttl;
     delete passcode.resendAfter;
+    delete passcode.emailID;
 
     return this;
   }

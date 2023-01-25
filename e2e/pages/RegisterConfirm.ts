@@ -10,7 +10,7 @@ export class RegisterConfirm extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.backLink = page.locator("a", { hasText: "Back" });
+    this.backLink = page.locator("button", { hasText: "Back" });
     this.signUpButton = page.locator("button[type=submit]", {
       hasText: "Sign up",
     });
