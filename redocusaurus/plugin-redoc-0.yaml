@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.3.0
+  version: 0.4.0
   title: Hanko Public API
   description: >
     ## Introduction
@@ -91,8 +91,10 @@ paths:
         Initialize a passcode login for the user identified by `user_id`. Sends
         an email
 
-        containing the actual passcode to the user. Returns a representation of
-        the passcode.
+        containing the actual passcode to the user's primary email address or to
+        the address specified
+
+        through `email_id`. Returns a representation of the passcode.
       operationId: passcodeInit
       tags:
         - Passcode
@@ -106,6 +108,11 @@ paths:
                   description: The ID of the user
                   allOf:
                     - $ref: '#/components/schemas/UUID4'
+                email_id:
+                  description: The ID of the email address
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
+                  required: false
       responses:
         '200':
           description: Successful passcode login initialization
@@ -183,6 +190,8 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '401':
           $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '408':
           $ref: '#/components/responses/RequestTimeOut'
         '410':
@@ -526,6 +535,98 @@ paths:
           $ref: '#/components/responses/BadRequest'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /webauthn/credentials:
+    get:
+      summary: Get a list of WebAuthn credentials
+      description: |
+        Returns a list of WebAuthn credentials assigned to the current user.
+      operationId: listCredentials
+      tags:
+        - WebAuthn
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      responses:
+        '200':
+          description: A list of WebAuthn credentials assigned to the current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebauthnCredentials'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /webauthn/credentials/{id}:
+    patch:
+      summary: Updates a WebAuthn credential
+      description: >
+        Updates the specified WebAuthn credential. Only credentials assigned to
+        the current user can be updated.
+      operationId: updateCredential
+      tags:
+        - WebAuthn
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the WebAuthn credential
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  description: >-
+                    A new credential name. Has no technical meaning, only serves
+                    as an identification aid for the user.
+                  type: string
+                  required: false
+      responses:
+        '201':
+          description: Credential updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Deletes a WebAuthn credential
+      description: |
+        Deletes the specified WebAuthn credential.
+      operationId: deleteCredential
+      tags:
+        - WebAuthn
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the WebAuthn credential
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      responses:
+        '201':
+          description: Credential updated successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /.well-known/jwks.json:
     get:
       summary: Get JSON Web Key Set
@@ -595,6 +696,8 @@ paths:
                 properties:
                   id:
                     $ref: '#/components/schemas/UUID4'
+                  email_id:
+                    $ref: '#/components/schemas/UUID4'
                   verified:
                     type: boolean
                   has_webauthn_credential:
@@ -656,7 +759,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/CreateUserResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
         '409':
@@ -689,6 +792,104 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /emails:
+    get:
+      summary: Get a list of emails of the current user.
+      operationId: listEmails
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      responses:
+        '200':
+          description: A list of emails assigned to the current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Emails'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Add a new email address to the current user.
+      operationId: createEmail
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                address:
+                  type: string
+                  format: email
+              required:
+                - address
+      responses:
+        '201':
+          description: Email successfully added
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /emails/{id}/set_primary:
+    post:
+      summary: Marks the email address as primary email
+      operationId: setPrimaryEmail
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the email address
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      responses:
+        '201':
+          description: Email has been set as primary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /emails/{id}:
+    delete:
+      summary: Delete an email address
+      operationId: deleteEmail
+      tags:
+        - Email Management
+      security:
+        - CookieAuth: []
+        - BearerTokenAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: ID of the email address
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      responses:
+        '201':
+          description: Email has been deleted
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
 components:
@@ -782,6 +983,17 @@ components:
         description: Hanko Configuration
         url: https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md
       properties:
+        emails:
+          description: Controls the behavior regarding email addresses.
+          type: object
+          properties:
+            require_verification:
+              description: >-
+                Require email verification after account registration and
+                prevent signing in with unverified email addresses. Also, email
+                addresses can only be marked as primary when they have been
+                verified before.
+              type: boolean
         password:
           description: Configuration options concerning passwords
           type: object
@@ -1079,7 +1291,7 @@ components:
                 - ble
                 - internal
               example: internal
-    User:
+    GetUserResponse:
       type: object
       properties:
         id:
@@ -1112,6 +1324,114 @@ components:
                 type: string
                 format: base64url
                 example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
+    CreateUserResponse:
+      type: object
+      properties:
+        user_id:
+          description: The ID of the newly created user
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+        email_id:
+          description: The ID of the newly created email address
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+    User:
+      type: object
+      properties:
+        id:
+          description: The ID of the user
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+        email:
+          description: The email address of the user
+          type: string
+          format: email
+        created_at:
+          description: Time of creation of the the user
+          type: string
+          format: date-time
+        updated_at:
+          description: Time of last update of the user
+          type: string
+          format: date-time
+        webauthn_credentials:
+          description: List of registered Webauthn credentials
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                description: The ID of the Webauthn credential
+                type: string
+                format: base64url
+                example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
+    Emails:
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            description: The ID of the email address
+            allOf:
+              - $ref: '#/components/schemas/UUID4'
+          address:
+            description: The email address
+            type: string
+            format: email
+          is_verified:
+            description: Indicated the email has been verified.
+            type: boolean
+          is_primary:
+            description: Indicates it's the primary email address.
+            type: boolean
+      example:
+        - id: 5333cc5b-c7c4-48cf-8248-9c184ac72b65
+          address: john.doe@example.com
+          is_verified: true
+          is_primary: false
+    WebauthnCredentials:
+      description: A list of WebAuthn credentials
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            description: The ID of the Webauthn credential
+            type: string
+            format: base64url
+            example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
+          name:
+            description: The name of the credential. Can be updated by the user.
+            type: string
+            required: false
+          public_key:
+            description: The public key assigned to the credential.
+            type: boolean
+          aaguid:
+            description: The AAGUID of the authenticator.
+            type: boolean
+          transports:
+            description: Transports which may be used by the authenticator.
+            type: array
+            items:
+              type: string
+              enum:
+                - usb
+                - nfc
+                - ble
+                - internal
+          created_at:
+            description: Time of creation of the credential
+            type: string
+            format: date-time
+      example:
+        - id: 5333cc5b-c7c4-48cf-8248-9c184ac72b65
+          name: iCloud
+          public_key: pQECYyagASFYIBblARCP_at3cmprjzQN1lJ...
+          aaguid: adce0002-35bc-c60a-648b-0b25f1f05503
+          transports:
+            - internal
+          created_at: 022-12-06T21:26:06.535106Z
     WebauthnLoginResponse:
       description: Response after a successful login with webauthn
       type: object
