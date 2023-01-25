@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
@@ -13,6 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
@@ -31,6 +33,7 @@ type PasscodeHandler struct {
 	sessionManager    session.Manager
 	cfg               *config.Config
 	auditLogger       auditlog.Logger
+	rateLimiter       limiter.Store
 }
 
 var maxPasscodeTries = 3
@@ -39,6 +42,10 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new renderer: %w", err)
+	}
+	var rateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
 	}
 	return &PasscodeHandler{
 		mailer:            mailer,
@@ -51,6 +58,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 		sessionManager:    sessionManager,
 		cfg:               cfg,
 		auditLogger:       auditLogger,
+		rateLimiter:       rateLimiter,
 	}, nil
 }
 
@@ -79,6 +87,13 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
+	}
+
+	if h.rateLimiter != nil {
+		err := rate_limiter.Limit(h.rateLimiter, userId, c)
+		if err != nil {
+			return err
+		}
 	}
 
 	var emailId uuid.UUID
