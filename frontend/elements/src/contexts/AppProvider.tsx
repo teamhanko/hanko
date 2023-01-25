@@ -25,6 +25,8 @@ import { translations } from "../Translations";
 import Container from "../components/wrapper/Container";
 
 import InitPage from "../pages/InitPage";
+import { JSXInternal } from "preact/src/jsx";
+import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -32,7 +34,7 @@ type ComponentName = "auth" | "profile";
 
 interface Props {
   api?: string;
-  lang?: string;
+  lang?: string | SignalLike<string>;
   fallbackLang?: string;
   experimental?: string;
   componentName: ComponentName;
@@ -137,7 +139,7 @@ const AppProvider = ({
     >
       <TranslateProvider
         translations={translations}
-        lang={lang}
+        lang={lang.toString()}
         fallbackLang={fallbackLang}
       >
         <Container ref={ref}>{page}</Container>
