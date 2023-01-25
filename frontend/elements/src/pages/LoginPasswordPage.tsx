@@ -86,6 +86,15 @@ const LoginPasswordPage = ({ onSuccess, onRecovery, onBack }: Props) => {
     }
   }, [error, passwordRetryAfter]);
 
+  // Count down the retry after countdown
+  useEffect(() => {
+    const timer =
+      passwordRetryAfter > 0 &&
+      setInterval(() => setPasswordRetryAfter(passwordRetryAfter - 1), 1000);
+
+    return () => clearInterval(timer);
+  }, [passwordRetryAfter]);
+
   return (
     <Fragment>
       <Content>

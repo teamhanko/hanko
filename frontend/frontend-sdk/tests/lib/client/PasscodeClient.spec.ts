@@ -124,7 +124,7 @@ describe("PasscodeClient.initialize()", () => {
       passcodeRetryAfter
     );
     expect(passcodeClient.state.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.get).toHaveBeenCalledWith("X-Retry-After");
+    expect(response.headers.get).toHaveBeenCalledWith("Retry-After");
   });
 
   it.each`

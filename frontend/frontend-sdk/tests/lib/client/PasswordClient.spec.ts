@@ -68,7 +68,7 @@ describe("PasswordClient.login()", () => {
       passwordRetryAfter
     );
     expect(passwordClient.passwordState.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.get).toHaveBeenCalledWith("X-Retry-After");
+    expect(response.headers.get).toHaveBeenCalledWith("Retry-After");
   });
 
   it("should throw error when API response is not ok", async () => {

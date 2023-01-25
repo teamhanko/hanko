@@ -92,12 +92,12 @@ class Response {
   }
 
   /**
-   * Returns the value for X-Retry-After contained in the response header.
+   * Returns the value for Retry-After contained in the response header.
    *
    * @return {number}
    */
   parseXRetryAfterHeader(): number {
-    return parseInt(this.headers.get("X-Retry-After") || "0", 10);
+    return parseInt(this.headers.get("Retry-After") || "0", 10);
   }
 }
 
