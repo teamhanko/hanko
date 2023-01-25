@@ -51,28 +51,28 @@ If you want to use the Hanko backend API but prefer to build your own UI, you ca
 We are currently in **Beta** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
 
 | Status | Feature |
-| :---: | :--- |
-| ✅ | Passkeys |
-| ✅ | Email passcodes |
-| ✅ | Passwords |
-| ✅ | JWT signing |
-| ✅ | User management API |
-| ✅ | 📢 Hanko Alpha Release |
-| ✅ | `<hanko-auth>` web component |
-| ✅ | Customizable CSS |
-| ✅ | 📢 Hanko Beta Release |
-| ✅ | JavaScript frontend SDK |
-| ✅ | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
-| ✅ | Audit logs API |
-| ✅ | Security Key support |
-| ✅ | Mobile app support |
-| ⚙️ | `<hanko-profile>` web component |
-| ⚙️ | Priviledged sessions & step-up authentication |
-| ⚙️ | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
-| | Rate limiting (application level) |
-| | Session management |
-| | Custom translations for [hanko-elements](/frontend/elements/README.md) |
-| | Email templating |
+|:------:| :--- |
+|   ✅    | Passkeys |
+|   ✅    | Email passcodes |
+|   ✅    | Passwords |
+|   ✅    | JWT signing |
+|   ✅    | User management API |
+|   ✅    | 📢 Hanko Alpha Release |
+|   ✅    | `<hanko-auth>` web component |
+|   ✅    | Customizable CSS |
+|   ✅    | 📢 Hanko Beta Release |
+|   ✅    | JavaScript frontend SDK |
+|   ✅    | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
+|   ✅    | Audit logs API |
+|   ✅    | Security Key support |
+|   ✅    | Mobile app support |
+|   ✅    | `<hanko-profile>` web component |
+|   ✅    | Rate limiting (application level) |
+|   ⚙️   | Priviledged sessions & step-up authentication |
+|   ⚙️   | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
+|        | Session management |
+|        | Custom translations for [hanko-elements](/frontend/elements/README.md) |
+|        | Email templating |
 
 Additional features that have been requested or that we would like to build but are not (yet) on the roadmap:
 - SMS passcode delivery
