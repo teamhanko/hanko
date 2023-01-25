@@ -1,0 +1,11 @@
+@use "../../variables"
+@use "../../mixins"
+
+.paragraph
+  @include mixins.font
+
+  color: variables.$color
+  margin: variables.$item-margin
+
+  text-align: left
+  word-break: break-word

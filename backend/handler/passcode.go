@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
@@ -13,6 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
@@ -31,6 +33,7 @@ type PasscodeHandler struct {
 	sessionManager    session.Manager
 	cfg               *config.Config
 	auditLogger       auditlog.Logger
+	rateLimiter       limiter.Store
 }
 
 var maxPasscodeTries = 3
@@ -39,6 +42,10 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create new renderer: %w", err)
+	}
+	var rateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
 	}
 	return &PasscodeHandler{
 		mailer:            mailer,
@@ -51,6 +58,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 		sessionManager:    sessionManager,
 		cfg:               cfg,
 		auditLogger:       auditLogger,
+		rateLimiter:       rateLimiter,
 	}, nil
 }
 
@@ -81,6 +89,59 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 	}
 
+	if h.rateLimiter != nil {
+		err := rate_limiter.Limit(h.rateLimiter, userId, c)
+		if err != nil {
+			return err
+		}
+	}
+
+	var emailId uuid.UUID
+	if body.EmailId != nil {
+		emailId, err = uuid.FromString(*body.EmailId)
+		if err != nil {
+			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+		}
+	}
+
+	// Determine where to send the passcode
+	var email *models.Email
+	if !emailId.IsNil() {
+		// Send the passcode to the specified email address
+		email, err = h.persister.GetEmailPersister().Get(emailId)
+		if email == nil {
+			return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+		}
+	} else if e := user.Emails.GetPrimary(); e == nil {
+		// Workaround to support hanko element versions before v0.1.0-alpha:
+		// If user has no primary email, check if a cookie with an email id is present
+		emailIdCookie, err := c.Cookie("hanko_email_id")
+		if err != nil {
+			return fmt.Errorf("failed to get email id cookie: %w", err)
+		}
+
+		if emailIdCookie != nil && emailIdCookie.Value != "" {
+			emailId, err = uuid.FromString(emailIdCookie.Value)
+			if err != nil {
+				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+			}
+			email, err = h.persister.GetEmailPersister().Get(emailId)
+			if email == nil {
+				return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+			}
+		} else {
+			// Can't determine email address to which the passcode should be sent to
+			return dto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+		}
+	} else {
+		// Send the passcode to the primary email address
+		email = e
+	}
+
+	if email.User != nil && email.User.ID.String() != user.ID.String() {
+		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address is assigned to another user"))
+	}
+
 	passcode, err := h.passcodeGenerator.Generate()
 	if err != nil {
 		return fmt.Errorf("failed to generate passcode: %w", err)
@@ -98,6 +159,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
 		UserId:    userId,
+		EmailID:   email.ID,
 		Ttl:       h.TTL,
 		Code:      string(hashedPasscode),
 		CreatedAt: now,
@@ -123,7 +185,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	message := gomail.NewMessage()
-	message.SetAddressHeader("To", user.Email, "")
+	message.SetAddressHeader("To", email.Address, "")
 	message.SetAddressHeader("From", h.emailConfig.FromAddress, h.emailConfig.FromName)
 
 	message.SetHeader("Subject", h.renderer.Translate(lang, "email_subject_login", data))
@@ -168,6 +230,8 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	transactionError := h.persister.Transaction(func(tx *pop.Connection) error {
 		passcodePersister := h.persister.GetPasscodePersisterWithConnection(tx)
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
+		emailPersister := h.persister.GetEmailPersisterWithConnection(tx)
+		primaryEmailPersister := h.persister.GetPrimaryEmailPersisterWithConnection(tx)
 		passcode, err := passcodePersister.Get(passcodeId)
 		if err != nil {
 			return fmt.Errorf("failed to get passcode: %w", err)
@@ -231,11 +295,38 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to delete passcode: %w", err)
 		}
 
-		if !user.Verified {
-			user.Verified = true
-			err = userPersister.Update(*user)
+		if passcode.Email.User != nil && passcode.Email.User.ID.String() != user.ID.String() {
+			return dto.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
+		}
+
+		if !passcode.Email.Verified {
+			// Update email verified status and assign the email address to the user.
+			passcode.Email.Verified = true
+			passcode.Email.UserID = &user.ID
+
+			err = emailPersister.Update(passcode.Email)
 			if err != nil {
-				return fmt.Errorf("failed to update user: %w", err)
+				return fmt.Errorf("failed to update the email verified status: %w", err)
+			}
+
+			if user.Emails.GetPrimary() == nil {
+				primaryEmail := models.NewPrimaryEmail(passcode.Email.ID, user.ID)
+				err = primaryEmailPersister.Create(*primaryEmail)
+				if err != nil {
+					return fmt.Errorf("failed to create primary email: %w", err)
+				}
+
+				user.Emails = models.Emails{passcode.Email}
+				user.Emails.SetPrimary(primaryEmail)
+				err = h.auditLogger.Create(c, models.AuditLogPrimaryEmailChanged, user, nil)
+				if err != nil {
+					return fmt.Errorf("failed to create audit log: %w", err)
+				}
+			}
+
+			err = h.auditLogger.Create(c, models.AuditLogEmailVerified, user, nil)
+			if err != nil {
+				return fmt.Errorf("failed to create audit log: %w", err)
 			}
 		}
 

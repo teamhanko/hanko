@@ -8,22 +8,28 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
 	"strings"
 )
 
 type UserHandler struct {
-	persister   persistence.Persister
-	auditLogger auditlog.Logger
+	persister      persistence.Persister
+	sessionManager session.Manager
+	auditLogger    auditlog.Logger
+	cfg            *config.Config
 }
 
-func NewUserHandler(persister persistence.Persister, auditLogger auditlog.Logger) *UserHandler {
+func NewUserHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *UserHandler {
 	return &UserHandler{
-		persister:   persister,
-		auditLogger: auditLogger,
+		persister:      persister,
+		auditLogger:    auditLogger,
+		sessionManager: sessionManager,
+		cfg:            cfg,
 	}
 }
 
@@ -44,24 +50,91 @@ func (h *UserHandler) Create(c echo.Context) error {
 	body.Email = strings.ToLower(body.Email)
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
-		user, err := h.persister.GetUserPersisterWithConnection(tx).GetByEmail(body.Email)
-		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
-		}
-
-		if user != nil {
-			return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New(fmt.Sprintf("user with email %s already exists", user.Email)))
-		}
-
-		newUser := models.NewUser(body.Email)
-		err = h.persister.GetUserPersisterWithConnection(tx).Create(newUser)
+		newUser := models.NewUser()
+		err := h.persister.GetUserPersisterWithConnection(tx).Create(newUser)
 		if err != nil {
 			return fmt.Errorf("failed to store user: %w", err)
 		}
 
-		_ = h.auditLogger.Create(c, models.AuditLogUserCreated, &newUser, nil) // TODO: what to do on error
+		email, err := h.persister.GetEmailPersisterWithConnection(tx).FindByAddress(body.Email)
+		if err != nil {
+			return fmt.Errorf("failed to get email: %w", err)
+		}
 
-		return c.JSON(http.StatusOK, newUser)
+		if email != nil {
+			if email.UserID != nil {
+				// The email already exists and is assigned already.
+				return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New(fmt.Sprintf("user with email %s already exists", body.Email)))
+			}
+
+			if !h.cfg.Emails.RequireVerification {
+				// Assign the email address to the user because it's currently unassigned and email verification is turned off.
+				email.UserID = &newUser.ID
+				err = h.persister.GetEmailPersisterWithConnection(tx).Update(*email)
+				if err != nil {
+					return fmt.Errorf("failed to update email address: %w", err)
+				}
+			}
+		} else {
+			// The email address does not exist, create a new one.
+			if h.cfg.Emails.RequireVerification {
+				// The email can only be assigned to the user via passcode verification.
+				email = models.NewEmail(nil, body.Email)
+			} else {
+				email = models.NewEmail(&newUser.ID, body.Email)
+			}
+
+			err = h.persister.GetEmailPersisterWithConnection(tx).Create(*email)
+			if err != nil {
+				return fmt.Errorf("failed to store user: %w", err)
+			}
+		}
+
+		if !h.cfg.Emails.RequireVerification {
+			primaryEmail := models.NewPrimaryEmail(email.ID, newUser.ID)
+			err = h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
+			if err != nil {
+				return fmt.Errorf("failed to store primary email: %w", err)
+			}
+
+			token, err := h.sessionManager.GenerateJWT(newUser.ID)
+			if err != nil {
+				return fmt.Errorf("failed to generate jwt: %w", err)
+			}
+
+			cookie, err := h.sessionManager.GenerateCookie(token)
+			if err != nil {
+				return fmt.Errorf("failed to create session token: %w", err)
+			}
+
+			c.SetCookie(cookie)
+
+			if h.cfg.Session.EnableAuthTokenHeader {
+				c.Response().Header().Set("X-Auth-Token", token)
+				c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
+			}
+		}
+
+		err = h.auditLogger.Create(c, models.AuditLogUserCreated, &newUser, nil)
+		if err != nil {
+			return fmt.Errorf("failed to write audit log: %w", err)
+		}
+
+		// This cookie is a workaround for hanko element versions before 0.1.0-alpha,
+		// because else the backend would not know where to send the first passcode.
+		c.SetCookie(&http.Cookie{
+			Name:     "hanko_email_id",
+			Value:    email.ID.String(),
+			Domain:   h.cfg.Session.Cookie.Domain,
+			Secure:   h.cfg.Session.Cookie.Secure,
+			HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+		})
+
+		return c.JSON(http.StatusOK, dto.CreateUserResponse{
+			ID:      newUser.ID,
+			UserID:  newUser.ID,
+			EmailID: email.ID,
+		})
 	})
 }
 
@@ -86,7 +159,18 @@ func (h *UserHandler) Get(c echo.Context) error {
 		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
-	return c.JSON(http.StatusOK, user)
+	var emailAddress *string
+	if e := user.Emails.GetPrimary(); e != nil {
+		emailAddress = &e.Address
+	}
+
+	return c.JSON(http.StatusOK, dto.GetUserResponse{
+		ID:                  user.ID,
+		WebauthnCredentials: user.WebauthnCredentials,
+		Email:               emailAddress,
+		CreatedAt:           user.CreatedAt,
+		UpdatedAt:           user.UpdatedAt,
+	})
 }
 
 type UserGetByEmailBody struct {
@@ -103,23 +187,26 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
-	user, err := h.persister.GetUserPersister().GetByEmail(strings.ToLower(request.Email))
+	emailAddress := strings.ToLower(request.Email)
+	email, err := h.persister.GetEmailPersister().FindByAddress(emailAddress)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
 
-	if user == nil {
+	if email == nil || email.UserID == nil {
 		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
-	return c.JSON(http.StatusOK, struct {
-		UserId                string `json:"id"`
-		Verified              bool   `json:"verified"`
-		HasWebauthnCredential bool   `json:"has_webauthn_credential"`
-	}{
-		UserId:                user.ID.String(),
-		Verified:              user.Verified,
-		HasWebauthnCredential: len(user.WebauthnCredentials) > 0,
+	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(*email.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to get webauthn credentials: %w", err)
+	}
+
+	return c.JSON(http.StatusOK, dto.UserInfoResponse{
+		ID:                    *email.UserID,
+		Verified:              email.Verified,
+		EmailID:               email.ID,
+		HasWebauthnCredential: len(credentials) > 0,
 	})
 }
 

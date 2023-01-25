@@ -26,7 +26,7 @@ func NewPasscodePersister(db *pop.Connection) PasscodePersister {
 
 func (p *passcodePersister) Get(id uuid.UUID) (*models.Passcode, error) {
 	passcode := models.Passcode{}
-	err := p.db.Find(&passcode, id)
+	err := p.db.EagerPreload().Find(&passcode, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

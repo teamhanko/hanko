@@ -11,29 +11,34 @@ import (
 // User is used by pop to map your users database table to your go code.
 type User struct {
 	ID                  uuid.UUID            `db:"id" json:"id"`
-	Email               string               `db:"email" json:"email"`
-	Verified            bool                 `db:"verified" json:"verified"`
 	WebauthnCredentials []WebauthnCredential `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
+	Emails              Emails               `has_many:"emails" json:"-"`
 	CreatedAt           time.Time            `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time            `db:"updated_at" json:"updated_at"`
 }
 
-func NewUser(email string) User {
+func NewUser() User {
 	id, _ := uuid.NewV4()
 	return User{
 		ID:        id,
-		Email:     email,
-		Verified:  false,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+}
+
+func (user *User) GetEmailById(emailId uuid.UUID) *Email {
+	for _, email := range user.Emails {
+		if email.ID.String() == emailId.String() {
+			return &email
+		}
+	}
+	return nil
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (user *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: user.ID},
-		&validators.EmailLike{Name: "Email", Field: user.Email},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: user.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: user.CreatedAt},
 	), nil

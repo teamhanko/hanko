@@ -26,7 +26,6 @@ func TestPasswordHandler_Set_Create(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -47,7 +46,7 @@ func TestPasswordHandler_Set_Create(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Set(c)) {
@@ -61,7 +60,6 @@ func TestPasswordHandler_Set_Create_PasswordTooShort(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -82,7 +80,7 @@ func TestPasswordHandler_Set_Create_PasswordTooShort(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{Password: config.Password{MinPasswordLength: 8}}, test.NewAuditLogger())
 
 	err = handler.Set(c)
@@ -98,7 +96,6 @@ func TestPasswordHandler_Set_Create_PasswordTooLong(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -119,7 +116,7 @@ func TestPasswordHandler_Set_Create_PasswordTooLong(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{Password: config.Password{MinPasswordLength: 8}}, test.NewAuditLogger())
 
 	err = handler.Set(c)
@@ -135,7 +132,6 @@ func TestPasswordHandler_Set_Update(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -172,7 +168,7 @@ func TestPasswordHandler_Set_Update(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Set(c)) {
@@ -197,7 +193,7 @@ func TestPasswordHandler_Set_UserNotFound(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{}, nil)
+	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	err = handler.Set(c)
@@ -213,7 +209,6 @@ func TestPasswordHandler_Set_TokenHasWrongSubject(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -250,7 +245,7 @@ func TestPasswordHandler_Set_TokenHasWrongSubject(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	err = handler.Set(c)
@@ -275,7 +270,7 @@ func TestPasswordHandler_Set_BadRequestBody(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	err = handler.Set(c)
@@ -291,7 +286,6 @@ func TestPasswordHandler_Login(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -322,7 +316,7 @@ func TestPasswordHandler_Login(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Login(c)) {
@@ -344,7 +338,6 @@ func TestPasswordHandler_Login_WrongPassword(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -375,7 +368,7 @@ func TestPasswordHandler_Login_WrongPassword(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil)
+	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	err = handler.Login(c)
@@ -395,7 +388,7 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{}, nil)
+	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil)
 	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
 
 	err := handler.Login(c)
@@ -405,8 +398,7 @@ func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
 	}
 }
 
-// TestMaxPasswordLength is only for documentation purposes, because it is nowhere documented, that the bcrypt
-// implementation of golang truncates the password silent to 72 bytes.
+// TestMaxPasswordLength bcrypt since version 0.5.0 only accepts passwords at least 72 bytes long. This test documents this behaviour.
 func TestMaxPasswordLength(t *testing.T) {
 	tests := []struct {
 		name             string
@@ -416,14 +408,14 @@ func TestMaxPasswordLength(t *testing.T) {
 	}{
 		{
 			name:             "login password 72 bytes long",
-			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
+			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901",
 			loginPassword:    "012345678901234567890123456789012345678901234567890123456789012345678901",
 			wantErr:          false,
 		},
 		{
-			name:             "login password 71 bytes long",
-			creationPassword: "012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890",
-			loginPassword:    "01234567890123456789012345678901234567890123456789012345678901234567890",
+			name:             "login password over 72 bytes long",
+			creationPassword: "0123456789012345678901234567890123456789012345678901234567890123456789012",
+			loginPassword:    "0123456789012345678901234567890123456789012345678901234567890123456789012",
 			wantErr:          true,
 		},
 	}
@@ -431,7 +423,11 @@ func TestMaxPasswordLength(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			hash, err := bcrypt.GenerateFromPassword([]byte(test.creationPassword), 12)
-			assert.NoError(t, err)
+			if test.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
 
 			err = bcrypt.CompareHashAndPassword(hash, []byte(test.loginPassword))
 			if test.wantErr {

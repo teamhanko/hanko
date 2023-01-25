@@ -20,13 +20,11 @@
 </main>
 
 <footer class="footer">
-    <img alt="Example app" src="static/img/exampleApp.svg"/>
     <img alt="Powered by Hanko" src="static/img/poweredBy.svg"/>
 </footer>
 
 <script>
-    HankoAuth.register({ shadow: false });
-
+    Elements.register({ shadow: false });
     document.addEventListener("hankoAuthSuccess", (event) => {
         console.log(event);
         document.location.href = "/secured"

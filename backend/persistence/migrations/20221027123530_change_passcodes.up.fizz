@@ -1,0 +1,5 @@
+add_column("passcodes", "email_id", "uuid", { "null": true })
+add_foreign_key("passcodes", "email_id", {"emails": ["id"]}, {
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})
