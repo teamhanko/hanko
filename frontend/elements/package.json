@@ -73,6 +73,6 @@
     "@teamhanko/hanko-frontend-sdk": "file:../frontend-sdk",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
-    "preact": "^10.10.1"
+    "preact": "^10.11.3"
   }
 }
