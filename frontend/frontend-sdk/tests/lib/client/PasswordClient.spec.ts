@@ -20,10 +20,15 @@ describe("PasswordClient.login()", () => {
     const response = new Response(new XMLHttpRequest());
     response.ok = true;
     jest.spyOn(passwordClient.client, "post").mockResolvedValue(response);
+    jest.spyOn(passwordClient.passcodeState, "read");
+    jest.spyOn(passwordClient.passcodeState, "reset");
+    jest.spyOn(passwordClient.passcodeState, "write");
 
     const loginResponse = passwordClient.login(userID, password);
     await expect(loginResponse).resolves.toBeUndefined();
-
+    expect(passwordClient.passcodeState.read).toHaveBeenCalledTimes(1);
+    expect(passwordClient.passcodeState.reset).toHaveBeenCalledWith(userID);
+    expect(passwordClient.passcodeState.write).toHaveBeenCalledTimes(1);
     expect(passwordClient.client.post).toHaveBeenCalledWith("/password/login", {
       user_id: userID,
       password,
@@ -49,21 +54,21 @@ describe("PasswordClient.login()", () => {
     jest
       .spyOn(response.headers, "get")
       .mockReturnValue(`${passwordRetryAfter}`);
-    jest.spyOn(passwordClient.state, "read");
-    jest.spyOn(passwordClient.state, "setRetryAfter");
-    jest.spyOn(passwordClient.state, "write");
+    jest.spyOn(passwordClient.passwordState, "read");
+    jest.spyOn(passwordClient.passwordState, "setRetryAfter");
+    jest.spyOn(passwordClient.passwordState, "write");
 
     await expect(passwordClient.login(userID, password)).rejects.toThrowError(
       TooManyRequestsError
     );
 
-    expect(passwordClient.state.read).toHaveBeenCalledTimes(1);
-    expect(passwordClient.state.setRetryAfter).toHaveBeenCalledWith(
+    expect(passwordClient.passwordState.read).toHaveBeenCalledTimes(1);
+    expect(passwordClient.passwordState.setRetryAfter).toHaveBeenCalledWith(
       userID,
       passwordRetryAfter
     );
-    expect(passwordClient.state.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.get).toHaveBeenCalledWith("Retry-After");
+    expect(passwordClient.passwordState.write).toHaveBeenCalledTimes(1);
+    expect(response.headers.get).toHaveBeenCalledWith("X-Retry-After");
   });
 
   it("should throw error when API response is not ok", async () => {
@@ -99,13 +104,22 @@ describe("PasswordClient.update()", () => {
     });
   });
 
-  it("should throw error when API response is not ok", async () => {
-    const response = new Response(new XMLHttpRequest());
-    passwordClient.client.put = jest.fn().mockResolvedValue(response);
+  it.each`
+    status | error
+    ${401} | ${"Unauthorized error"}
+    ${500} | ${"Technical error"}
+  `(
+    "should throw error when API response is not ok",
+    async ({ status, error }) => {
+      const response = new Response(new XMLHttpRequest());
+      response.ok = status >= 200 && status <= 299;
+      response.status = status;
+      passwordClient.client.put = jest.fn().mockResolvedValue(response);
 
-    const config = passwordClient.update(userID, password);
-    await expect(config).rejects.toThrowError(TechnicalError);
-  });
+      const config = passwordClient.update(userID, password);
+      await expect(config).rejects.toThrowError(error);
+    }
+  );
 
   it("should throw error on API communication failure", async () => {
     passwordClient.client.put = jest
@@ -119,7 +133,7 @@ describe("PasswordClient.update()", () => {
   describe("PasswordClient.getRetryAfter()", () => {
     it("should return password resend after seconds", async () => {
       jest
-        .spyOn(passwordClient.state, "getRetryAfter")
+        .spyOn(passwordClient.passwordState, "getRetryAfter")
         .mockReturnValue(passwordRetryAfter);
       expect(passwordClient.getRetryAfter(userID)).toEqual(passwordRetryAfter);
     });

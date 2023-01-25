@@ -1,8 +1,10 @@
 import { PasswordState } from "../state/PasswordState";
+import { PasscodeState } from "../state/PasscodeState";
 import {
   InvalidPasswordError,
   TechnicalError,
   TooManyRequestsError,
+  UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
 
@@ -15,7 +17,8 @@ import { Client } from "./Client";
  * @extends {Client}
  */
 class PasswordClient extends Client {
-  state: PasswordState;
+  passwordState: PasswordState;
+  passcodeState: PasscodeState;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
@@ -24,7 +27,12 @@ class PasswordClient extends Client {
      *  @public
      *  @type {PasswordState}
      */
-    this.state = new PasswordState();
+    this.passwordState = new PasswordState();
+    /**
+     *  @public
+     *  @type {PasscodeState}
+     */
+    this.passcodeState = new PasscodeState();
   }
 
   /**
@@ -47,17 +55,14 @@ class PasswordClient extends Client {
     if (response.status === 401) {
       throw new InvalidPasswordError();
     } else if (response.status === 429) {
-      const retryAfter = parseInt(
-        response.headers.get("Retry-After") || "0",
-        10
-      );
-
-      this.state.read().setRetryAfter(userID, retryAfter).write();
-
+      const retryAfter = response.parseXRetryAfterHeader();
+      this.passwordState.read().setRetryAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
     } else if (!response.ok) {
       throw new TechnicalError();
     }
+
+    this.passcodeState.read().reset(userID).write();
 
     return;
   }
@@ -79,7 +84,9 @@ class PasswordClient extends Client {
       password,
     });
 
-    if (!response.ok) {
+    if (response.status === 401) {
+      throw new UnauthorizedError();
+    } else if (!response.ok) {
       throw new TechnicalError();
     }
 
@@ -93,7 +100,7 @@ class PasswordClient extends Client {
    * @return {number}
    */
   getRetryAfter(userID: string) {
-    return this.state.read().getRetryAfter(userID);
+    return this.passwordState.read().getRetryAfter(userID);
   }
 }
 

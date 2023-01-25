@@ -3,11 +3,11 @@ const path = require("path");
 module.exports = {
   devtool: 'eval-source-map',
   entry: {
-    hankoAuth: {
-      filename: 'element.hanko-auth.js',
+    elements: {
+      filename: 'elements.js',
       import: './src/index.ts',
       library: {
-        name: 'HankoAuth',
+        name: 'Elements',
         type: 'umd',
         umdNamedDefine: true,
       },

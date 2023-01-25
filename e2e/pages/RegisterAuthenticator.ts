@@ -13,7 +13,7 @@ export class RegisterAuthenticator extends BasePage {
     this.setUpPasskeyButton = page.locator("button[type=submit]", {
       hasText: "Save a passkey",
     });
-    this.skipLink = page.locator("a", {
+    this.skipLink = page.locator("button", {
       hasText: "Skip",
     });
     this.headline = page.locator("h1", { hasText: "Save a passkey" });

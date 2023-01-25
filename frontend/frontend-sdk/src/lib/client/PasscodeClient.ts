@@ -3,8 +3,10 @@ import { Passcode } from "../Dto";
 import {
   InvalidPasscodeError,
   MaxNumOfPasscodeAttemptsReachedError,
+  PasscodeExpiredError,
   TechnicalError,
   TooManyRequestsError,
+  UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
 
@@ -33,36 +35,65 @@ class PasscodeClient extends Client {
    * Causes the API to send a new passcode to the user's email address.
    *
    * @param {string} userID - The UUID of the user.
+   * @param {string=} emailID - The UUID of the email address. If unspecified, the email will be sent to the primary email address.
+   * @param {boolean=} force - Indicates the passcode should be sent, even if there is another active passcode.
    * @return {Promise<Passcode>}
    * @throws {TooManyRequestsError}
    * @throws {RequestTimeoutError}
+   * @throws {UnauthorizedError}
    * @throws {TechnicalError}
    * @see https://docs.hanko.io/api/public#tag/Passcode/operation/passcodeInit
    */
-  async initialize(userID: string): Promise<Passcode> {
-    const response = await this.client.post("/passcode/login/initialize", {
-      user_id: userID,
-    });
+  async initialize(
+    userID: string,
+    emailID?: string,
+    force?: boolean
+  ): Promise<Passcode> {
+    this.state.read();
+
+    const lastPasscodeTTL = this.state.getTTL(userID);
+    const lastPasscodeID = this.state.getActiveID(userID);
+    const lastEmailID = this.state.getEmailID(userID);
+    let retryAfter = this.state.getResendAfter(userID);
+
+    if (!force && lastPasscodeTTL > 0 && emailID === lastEmailID) {
+      return {
+        id: lastPasscodeID,
+        ttl: lastPasscodeTTL,
+      };
+    }
+
+    if (retryAfter > 0) {
+      throw new TooManyRequestsError(retryAfter);
+    }
+
+    const body: any = { user_id: userID };
+
+    if (emailID) {
+      body.email_id = emailID;
+    }
+
+    const response = await this.client.post(`/passcode/login/initialize`, body);
 
     if (response.status === 429) {
-      const retryAfter = parseInt(
-        response.headers.get("Retry-After") || "0",
-        10
-      );
-
-      this.state.read().setResendAfter(userID, retryAfter).write();
+      retryAfter = response.parseXRetryAfterHeader();
+      this.state.setResendAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
+    } else if (response.status === 401) {
+      throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
     }
 
-    const passcode = response.json();
+    const passcode: Passcode = response.json();
 
-    this.state
-      .read()
-      .setActiveID(userID, passcode.id)
-      .setTTL(userID, passcode.ttl)
-      .write();
+    this.state.setActiveID(userID, passcode.id).setTTL(userID, passcode.ttl);
+
+    if (emailID) {
+      this.state.setEmailID(userID, emailID);
+    }
+
+    this.state.write();
 
     return passcode;
   }
@@ -81,6 +112,12 @@ class PasscodeClient extends Client {
    */
   async finalize(userID: string, code: string): Promise<void> {
     const passcodeID = this.state.read().getActiveID(userID);
+    const ttl = this.state.getTTL(userID);
+
+    if (ttl <= 0) {
+      throw new PasscodeExpiredError();
+    }
+
     const response = await this.client.post("/passcode/login/finalize", {
       id: passcodeID,
       code,

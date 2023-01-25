@@ -24,6 +24,7 @@ type Config struct {
 	Service     Service          `yaml:"service" json:"service" koanf:"service"`
 	Session     Session          `yaml:"session" json:"session" koanf:"session"`
 	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	Emails      Emails           `yaml:"emails" json:"emails" koanf:"emails"`
 	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
 }
 
@@ -110,6 +111,10 @@ func DefaultConfig() *Config {
 				Enabled:      true,
 				OutputStream: OutputStreamStdOut,
 			},
+		},
+		Emails: Emails{
+			RequireVerification: true,
+			MaxNumOfAddresses:   5,
 		},
 		RateLimiter: RateLimiter{
 			Enabled: true,
@@ -376,6 +381,11 @@ type AuditLogStorage struct {
 type AuditLogConsole struct {
 	Enabled      bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
 	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output"`
+}
+
+type Emails struct {
+	RequireVerification bool `yaml:"require_verification" json:"require_verification" koanf:"require_verification"`
+	MaxNumOfAddresses   int  `yaml:"max_num_of_addresses" json:"max_num_of_addresses" koanf:"max_num_of_addresses"`
 }
 
 type OutputStream string

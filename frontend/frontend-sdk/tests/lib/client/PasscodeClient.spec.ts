@@ -2,6 +2,7 @@ import {
   InvalidPasscodeError,
   MaxNumOfPasscodeAttemptsReachedError,
   PasscodeClient,
+  PasscodeExpiredError,
   TechnicalError,
   TooManyRequestsError,
 } from "../../../src";
@@ -9,6 +10,7 @@ import { Response } from "../../../src/lib/client/HttpClient";
 
 const userID = "test-user-1";
 const passcodeID = "test-passcode-1";
+const emailID = "test-email-1";
 const passcodeTTL = 180;
 const passcodeRetryAfter = 180;
 const passcodeValue = "123456";
@@ -50,6 +52,54 @@ describe("PasscodeClient.initialize()", () => {
     );
   });
 
+  it("should initialize a passcode with specified email id", async () => {
+    const response = new Response(new XMLHttpRequest());
+    response.ok = true;
+
+    jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
+    jest.spyOn(passcodeClient.state, "setEmailID");
+
+    await passcodeClient.initialize(userID, emailID, true);
+
+    expect(passcodeClient.state.setEmailID).toHaveBeenCalledWith(
+      userID,
+      emailID
+    );
+    expect(passcodeClient.client.post).toHaveBeenCalledWith(
+      "/passcode/login/initialize",
+      { user_id: userID, email_id: emailID }
+    );
+  });
+
+  it("should restore the previous passcode", async () => {
+    jest.spyOn(passcodeClient.state, "read");
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
+    jest.spyOn(passcodeClient.state, "getActiveID").mockReturnValue(passcodeID);
+    jest.spyOn(passcodeClient.state, "getEmailID").mockReturnValue(emailID);
+
+    await expect(passcodeClient.initialize(userID, emailID)).resolves.toEqual({
+      id: passcodeID,
+      ttl: passcodeTTL,
+    });
+
+    expect(passcodeClient.state.read).toHaveBeenCalledTimes(1);
+    expect(passcodeClient.state.getTTL).toHaveBeenCalledWith(userID);
+    expect(passcodeClient.state.getActiveID).toHaveBeenCalledWith(userID);
+    expect(passcodeClient.state.getEmailID).toHaveBeenCalledWith(userID);
+  });
+
+  it("should throw an error as long as email backoff is active", async () => {
+    jest
+      .spyOn(passcodeClient.state, "getResendAfter")
+      .mockReturnValue(passcodeRetryAfter);
+
+    await expect(passcodeClient.initialize(userID, emailID)).rejects.toThrow(
+      TooManyRequestsError
+    );
+
+    expect(passcodeClient.state.getResendAfter).toHaveBeenCalledWith(userID);
+  });
+
   it("should throw error and set retry after in state on too many request response from API", async () => {
     const xhr = new XMLHttpRequest();
     const response = new Response(xhr);
@@ -77,21 +127,31 @@ describe("PasscodeClient.initialize()", () => {
     expect(response.headers.get).toHaveBeenCalledWith("Retry-After");
   });
 
-  it("should throw error when API response is not ok", async () => {
-    const response = new Response(new XMLHttpRequest());
-    passcodeClient.client.post = jest.fn().mockResolvedValue(response);
+  it.each`
+    status | error
+    ${401} | ${"Unauthorized error"}
+    ${500} | ${"Technical error"}
+  `(
+    "should throw error when API response is not ok",
+    async ({ status, error }) => {
+      const response = new Response(new XMLHttpRequest());
+      response.status = status;
+      response.ok = status >= 200 && status <= 299;
 
-    const config = passcodeClient.initialize("test-user-1");
-    await expect(config).rejects.toThrowError(TechnicalError);
-  });
+      passcodeClient.client.post = jest.fn().mockResolvedValue(response);
+
+      const passcode = passcodeClient.initialize("test-user-1");
+      await expect(passcode).rejects.toThrowError(error);
+    }
+  );
 
   it("should throw error on API communication failure", async () => {
     passcodeClient.client.post = jest
       .fn()
       .mockRejectedValue(new Error("Test error"));
 
-    const config = passcodeClient.initialize("test-user-1");
-    await expect(config).rejects.toThrowError("Test error");
+    const passcode = passcodeClient.initialize("test-user-1");
+    await expect(passcode).rejects.toThrowError("Test error");
   });
 });
 
@@ -104,6 +164,7 @@ describe("PasscodeClient.finalize()", () => {
     jest.spyOn(passcodeClient.state, "reset");
     jest.spyOn(passcodeClient.state, "write");
     jest.spyOn(passcodeClient.state, "getActiveID").mockReturnValue(passcodeID);
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
 
     await expect(
@@ -125,6 +186,7 @@ describe("PasscodeClient.finalize()", () => {
 
     jest.spyOn(passcodeClient.state, "read");
     jest.spyOn(passcodeClient.state, "getActiveID").mockReturnValue(passcodeID);
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
 
     await expect(
@@ -142,6 +204,7 @@ describe("PasscodeClient.finalize()", () => {
     jest.spyOn(passcodeClient.state, "reset");
     jest.spyOn(passcodeClient.state, "write");
     jest.spyOn(passcodeClient.state, "getActiveID").mockReturnValue(passcodeID);
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
 
     await expect(
@@ -153,9 +216,16 @@ describe("PasscodeClient.finalize()", () => {
     expect(passcodeClient.state.getActiveID).toHaveBeenCalledWith(userID);
   });
 
+  it("should throw error when the passcode has expired", async () => {
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(0);
+    const finalizeResponse = passcodeClient.finalize(userID, passcodeValue);
+    await expect(finalizeResponse).rejects.toThrowError(PasscodeExpiredError);
+  });
+
   it("should throw error when API response is not ok", async () => {
     const response = new Response(new XMLHttpRequest());
     passcodeClient.client.post = jest.fn().mockResolvedValue(response);
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
 
     const finalizeResponse = passcodeClient.finalize(userID, passcodeValue);
     await expect(finalizeResponse).rejects.toThrowError(TechnicalError);
@@ -165,6 +235,7 @@ describe("PasscodeClient.finalize()", () => {
     passcodeClient.client.post = jest
       .fn()
       .mockRejectedValue(new Error("Test error"));
+    jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
 
     const finalizeResponse = passcodeClient.finalize(userID, passcodeValue);
     await expect(finalizeResponse).rejects.toThrowError("Test error");

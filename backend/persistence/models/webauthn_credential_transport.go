@@ -15,6 +15,16 @@ type WebauthnCredentialTransport struct {
 	WebauthnCredential   *WebauthnCredential `belongs_to:"webauthn_credential"`
 }
 
+type Transports []WebauthnCredentialTransport
+
+func (transports Transports) GetNames() []string {
+	names := make([]string, len(transports))
+	for i, t := range transports {
+		names[i] = t.Name
+	}
+	return names
+}
+
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (transport *WebauthnCredentialTransport) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
