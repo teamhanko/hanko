@@ -1,8 +1,8 @@
 package middleware
 
 import (
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
@@ -10,22 +10,21 @@ import (
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification
 func Session(generator session.Manager) echo.MiddlewareFunc {
-	c := middleware.JWTConfig{
+	c := echojwt.Config{
 		ContextKey:     "session",
-		TokenLookup:    "header:Authorization,cookie:hanko",
-		AuthScheme:     "Bearer",
+		TokenLookup:    "header:Authorization:Bearer,cookie:hanko",
 		ParseTokenFunc: parseToken(generator),
-		ErrorHandler: func(err error) error {
+		ErrorHandler: func(c echo.Context, err error) error {
 			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 		},
 	}
-	return middleware.JWTWithConfig(c)
+	return echojwt.WithConfig(c)
 }
 
-type ParseTokenFunc = func(auth string, c echo.Context) (interface{}, error)
+type ParseTokenFunc = func(c echo.Context, auth string) (interface{}, error)
 
 func parseToken(generator session.Manager) ParseTokenFunc {
-	return func(auth string, c echo.Context) (interface{}, error) {
+	return func(c echo.Context, auth string) (interface{}, error) {
 		return generator.Verify(auth)
 	}
 }
