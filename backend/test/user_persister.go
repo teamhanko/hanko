@@ -53,7 +53,7 @@ func (p *userPersister) Delete(user models.User) error {
 	return nil
 }
 
-func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
+func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error) {
 	if len(p.users) == 0 {
 		return p.users, nil
 	}
@@ -81,6 +81,6 @@ func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
 	return result[page-1], nil
 }
 
-func (p *userPersister) Count() (int, error) {
+func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
 	return len(p.users), nil
 }

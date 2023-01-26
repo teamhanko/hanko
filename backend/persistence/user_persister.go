@@ -14,8 +14,8 @@ type UserPersister interface {
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
-	List(page int, perPage int) ([]models.User, error)
-	Count() (int, error)
+	List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error)
+	Count(userId uuid.UUID, email string) (int, error)
 }
 
 type userPersister struct {
@@ -87,10 +87,18 @@ func (p *userPersister) Delete(user models.User) error {
 	return nil
 }
 
-func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
+func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error) {
 	users := []models.User{}
 
-	err := p.db.Q().Paginate(page, perPage).All(&users)
+	query := p.db.
+		Q().
+		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").
+		LeftJoin("emails", "emails.user_id = users.id")
+	query = p.addQueryParamsToSqlQuery(query, userId, email)
+	err := query.GroupBy("users.id").
+		Paginate(page, perPage).
+		All(&users)
+
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}
@@ -101,11 +109,27 @@ func (p *userPersister) List(page int, perPage int) ([]models.User, error) {
 	return users, nil
 }
 
-func (p *userPersister) Count() (int, error) {
-	count, err := p.db.Count(&models.User{})
+func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
+	query := p.db.
+		Q().
+		LeftJoin("emails", "emails.user_id = users.id")
+	query = p.addQueryParamsToSqlQuery(query, userId, email)
+	count, err := query.GroupBy("users.id").
+		Count(&models.User{})
 	if err != nil {
 		return 0, fmt.Errorf("failed to get user count: %w", err)
 	}
 
 	return count, nil
+}
+
+func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userId uuid.UUID, email string) *pop.Query {
+	if email != "" {
+		query = query.Where("emails.address LIKE ?", "%"+email+"%")
+	}
+	if !userId.IsNil() {
+		query = query.Where("users.id = ?", userId)
+	}
+
+	return query
 }
