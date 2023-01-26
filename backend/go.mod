@@ -14,7 +14,7 @@ require (
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/lestrrat-go/jwx/v2 v2.0.8
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.29.0
 	github.com/sethvargo/go-limiter v0.7.2
 	github.com/sethvargo/go-redisstore v0.3.0
 	github.com/spf13/cobra v1.6.1
