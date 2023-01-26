@@ -49,7 +49,6 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 type UserListRequest struct {
 	PerPage int    `query:"per_page"`
 	Page    int    `query:"page"`
-	Q       string `query:"q"`
 	Email   string `query:"email"`
 	UserId  string `query:"user_id"`
 }
@@ -78,14 +77,13 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	}
 
 	email := strings.ToLower(request.Email)
-	q := strings.ToLower(request.Q)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, q, userId, email)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}
 
-	userCount, err := h.persister.GetUserPersister().Count(q, userId, email)
+	userCount, err := h.persister.GetUserPersister().Count(userId, email)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of users: %w", err)
 	}

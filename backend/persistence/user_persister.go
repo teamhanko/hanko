@@ -14,8 +14,8 @@ type UserPersister interface {
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
-	List(page int, perPage int, q string, userId uuid.UUID, email string) ([]models.User, error)
-	Count(q string, userId uuid.UUID, email string) (int, error)
+	List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error)
+	Count(userId uuid.UUID, email string) (int, error)
 }
 
 type userPersister struct {
@@ -87,14 +87,14 @@ func (p *userPersister) Delete(user models.User) error {
 	return nil
 }
 
-func (p *userPersister) List(page int, perPage int, q string, userId uuid.UUID, email string) ([]models.User, error) {
+func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error) {
 	users := []models.User{}
 
 	query := p.db.
 		Q().
 		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").
 		LeftJoin("emails", "emails.user_id = users.id")
-	query = p.addQueryParamsToSqlQuery(query, q, userId, email)
+	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	err := query.GroupBy("users.id").
 		Paginate(page, perPage).
 		All(&users)
@@ -109,11 +109,11 @@ func (p *userPersister) List(page int, perPage int, q string, userId uuid.UUID, 
 	return users, nil
 }
 
-func (p *userPersister) Count(q string, userId uuid.UUID, email string) (int, error) {
+func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
 	query := p.db.
 		Q().
 		LeftJoin("emails", "emails.user_id = users.id")
-	query = p.addQueryParamsToSqlQuery(query, q, userId, email)
+	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	count, err := query.GroupBy("users.id").
 		Count(&models.User{})
 	if err != nil {
@@ -123,17 +123,9 @@ func (p *userPersister) Count(q string, userId uuid.UUID, email string) (int, er
 	return count, nil
 }
 
-func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, q string, userId uuid.UUID, email string) *pop.Query {
-	if q != "" {
-		switch p.db.Dialect.Name() {
-		case "postgres", "cockroach":
-			query = query.Where("emails.address LIKE ? OR users.id::text LIKE ?", "%"+q+"%", "%"+q+"%")
-		case "mysql", "mariadb":
-			query = query.Where("emails.address LIKE ? OR users.id LIKE ?", "%"+q+"%", "%"+q+"%")
-		}
-	}
+func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userId uuid.UUID, email string) *pop.Query {
 	if email != "" {
-		query = query.Where("emails.address = ?", email)
+		query = query.Where("emails.address LIKE ?", "%"+email+"%")
 	}
 	if !userId.IsNil() {
 		query = query.Where("users.id = ?", userId)
