@@ -199,6 +199,7 @@ describe("response.parseRetryAfterHeader()", () => {
     ${""}        | ${0}
     ${"0"}       | ${0}
     ${"3"}       | ${3}
+    ${"-3"}      | ${-3}
     ${"invalid"} | ${0}
   `("should parse retry-after header", async ({ headerValue, expected }) => {
     const response = new Response(xhr);
