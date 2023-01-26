@@ -388,6 +388,8 @@ emails:
   # skipped by hanko-elements), so the user can create an account without email verification and further email addresses
   # can be added directly.
   #
+  # Default: true
+  #
   require_verification: true
   ## max_num_of_addresses
   #
