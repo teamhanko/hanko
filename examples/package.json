@@ -1,0 +1,12 @@
+{
+  "name": "examples",
+  "workspaces": [
+    "angular",
+    "express",
+    "nextjs",
+    "react",
+    "svelte",
+    "vue",
+    "../frontend"
+  ]
+}
