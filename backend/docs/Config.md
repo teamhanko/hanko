@@ -395,5 +395,7 @@ emails:
   #
   # How many email addresses can be added to a user account
   #
+  # Default: 5
+  #
   max_num_of_addresses: 5
 ```
