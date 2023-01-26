@@ -8,8 +8,9 @@ require (
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobuffalo/validate/v3 v3.3.3
 	github.com/gofrs/uuid v4.3.1+incompatible
-	github.com/gomodule/redigo v1.8.2
+	github.com/gomodule/redigo v1.8.9
 	github.com/knadh/koanf v1.5.0
+	github.com/labstack/echo-jwt/v4 v4.0.1
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/lestrrat-go/jwx/v2 v2.0.8
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
@@ -63,7 +64,6 @@ require (
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/joho/godotenv v1.4.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
-	github.com/labstack/echo-jwt/v4 v4.0.1 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
