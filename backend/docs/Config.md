@@ -318,7 +318,7 @@ rate_limiter:
   enabled: true
   ## store ##
   #
-  # Sets the store for the rate limiter. When you have multiple instances of Hanko running, it is recommended to use 
+  # Sets the store for the rate limiter. When you have multiple instances of Hanko running, it is recommended to use
   # the "redis" store else your instances have their own states.
   #
   # One of:
@@ -379,4 +379,23 @@ rate_limiter:
     # The password of the redis instance
     #
     password: "CHANGE_ME"
+emails:
+  ## require_verification
+  #
+  # If turned on (true), email addresses must be verified to be assigned to a user. During account creation the user has
+  # to verify the email address before a JWT can be issued and further email addresses can only be added after they have
+  # been verified. If require_verification is turned off, the mentioned verification steps aren't necessary (and will be
+  # skipped by hanko-elements), so the user can create an account without email verification and further email addresses
+  # can be added directly.
+  #
+  # Default: true
+  #
+  require_verification: true
+  ## max_num_of_addresses
+  #
+  # How many email addresses can be added to a user account
+  #
+  # Default: 5
+  #
+  max_num_of_addresses: 5
 ```
