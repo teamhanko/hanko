@@ -50,43 +50,6 @@ paths:
         '500':
           $ref: '#/components/responses/InternalServerError'
   /users/{id}:
-    patch:
-      summary: 'Update a user by ID'
-      operationId: updateUser
-      tags:
-        - User Management
-      parameters:
-        - name: id
-          in: path
-          description: ID of the user
-          required: true
-          schema:
-            $ref: '#/components/schemas/UUID4'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                status:
-                  type: string
-                  enum: [active, inactive]
-      responses:
-        '200':
-          description: 'Updated user details'
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
     delete:
       summary: 'Delete a user by ID'
       operationId: deleteUser
@@ -137,6 +100,47 @@ paths:
             type: string
             example: 2022-09-15T12:48:48Z
           description: Date and time to which the logs are included
+        - in: query
+          name: actor_user_id
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/UUID4'
+            example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
+          description: Only audit logs with the specified user_id are included
+        - in: query
+          name: actor_email
+          schema:
+            type: string
+            format: email
+            example: example@example.com
+          description: Only audit logs with the specified email are included
+        - in: query
+          name: meta_source_ip
+          schema:
+            allOf:
+              - type: string
+                format: ipv4
+              - type: string
+                format: ipv6
+            example: 127.0.0.1
+          description: Only audit logs with the specified ip address are included
+        - in: query
+          name: q
+          schema:
+            type: string
+            example: example.com
+          description: Only audit logs are included when the search string matches values in meta_source_ip or actor_user_id or actor_email
+        - in: query
+          name: type
+          schema:
+            type: array
+            items:
+              allOf:
+                - $ref: '#/components/schemas/AuditLogTypes'
+            example: user_created
+          style: form
+          explode: true
+          description: Only audit logs with the specified type are included
       responses:
         '200':
           description: 'Details about audit logs'
@@ -234,26 +238,8 @@ components:
           allOf:
             - $ref: '#/components/schemas/UUID4'
         type:
-          description: The type of the audit log
-          type: string
-          enum:
-            - user_created
-            - password_set_succeeded
-            - password_set_failed
-            - password_login_succeeded
-            - password_login_failed
-            - passcode_login_init_succeeded
-            - passcode_login_init_failed
-            - passcode_login_final_succeeded
-            - passcode_login_final_failed
-            - webauthn_registration_init_succeeded
-            - webauthn_registration_init_failed
-            - webauthn_registration_final_succeeded
-            - webauthn_registration_final_failed
-            - webauthn_authentication_init_succeeded
-            - webauthn_authentication_init_failed
-            - webauthn_authentication_final_succeeded
-            - webauthn_authentication_final_failed
+          allOf:
+            - $ref: '#/components/schemas/AuditLogTypes'
         error:
           description: A more detailed message why something failed
           type: string
@@ -302,6 +288,27 @@ components:
           format: int32
         message:
           type: string
+    AuditLogTypes:
+      description: The type of the audit log
+      type: string
+      enum:
+        - user_created
+        - password_set_succeeded
+        - password_set_failed
+        - password_login_succeeded
+        - password_login_failed
+        - passcode_login_init_succeeded
+        - passcode_login_init_failed
+        - passcode_login_final_succeeded
+        - passcode_login_final_failed
+        - webauthn_registration_init_succeeded
+        - webauthn_registration_init_failed
+        - webauthn_registration_final_succeeded
+        - webauthn_registration_final_failed
+        - webauthn_authentication_init_succeeded
+        - webauthn_authentication_init_failed
+        - webauthn_authentication_final_succeeded
+        - webauthn_authentication_final_failed
   headers:
     X-Total-Count:
       schema:

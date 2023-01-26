@@ -60,7 +60,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 		password.POST("/login", passwordHandler.Login)
 	}
 
-	userHandler := handler.NewUserHandler(persister, auditLogger)
+	userHandler := handler.NewUserHandler(cfg, persister, sessionManager, auditLogger)
 
 	e.GET("/me", userHandler.Me, hankoMiddleware.Session(sessionManager))
 
@@ -92,6 +92,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
+	emailHandler, err := handler.NewEmailHandler(cfg, persister, sessionManager, auditLogger)
+	if err != nil {
+		panic(fmt.Errorf("failed to create public email handler: %w", err))
+	}
+
 	webauthn := e.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
@@ -101,10 +106,21 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
 
+	webauthnCredentials := webauthn.Group("/credentials", hankoMiddleware.Session(sessionManager))
+	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
+	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
+	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+
 	passcode := e.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+
+	email := e.Group("/emails", hankoMiddleware.Session(sessionManager))
+	email.GET("", emailHandler.List)
+	email.POST("", emailHandler.Create)
+	email.DELETE("/:id", emailHandler.Delete)
+	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
 	return e
 }

@@ -16,7 +16,7 @@ describe("configClient.get()", () => {
     jest.spyOn(configClient.client, "get").mockResolvedValue(response);
     const config = await configClient.get();
     expect(configClient.client.get).toHaveBeenCalledWith("/.well-known/config");
-    expect(config).toEqual({ password: { enabled: true } });
+    expect(config).toEqual(response._decodedJSON);
   });
 
   it("should throw technical error when API response is not ok", async () => {

@@ -24,7 +24,6 @@ func TestUserHandler_Create(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -42,15 +41,14 @@ func TestUserHandler_Create(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Create(c)) {
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		assert.NoError(t, err)
 		assert.False(t, user.ID.IsNil())
-		assert.Equal(t, body.Email, user.Email)
 	}
 }
 
@@ -60,7 +58,6 @@ func TestUserHandler_Create_CaseInsensitive(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -78,15 +75,14 @@ func TestUserHandler_Create_CaseInsensitive(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Create(c)) {
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		assert.NoError(t, err)
 		assert.False(t, user.ID.IsNil())
-		assert.Equal(t, strings.ToLower(body.Email), user.Email)
 	}
 }
 
@@ -96,12 +92,16 @@ func TestUserHandler_Create_UserExists(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
 		}(),
 	}
+	emails := []models.Email{{
+		ID:      uuid.UUID{},
+		Address: "john.doe@example.com",
+		UserID:  &userId,
+	}}
 
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
@@ -113,8 +113,8 @@ func TestUserHandler_Create_UserExists(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err = handler.Create(c)
 	if assert.Error(t, err) {
@@ -129,12 +129,16 @@ func TestUserHandler_Create_UserExists_CaseInsensitive(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
 		}(),
 	}
+	emails := []models.Email{{
+		ID:      uuid.UUID{},
+		Address: "john.doe@example.com",
+		UserID:  &userId,
+	}}
 
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
@@ -146,8 +150,8 @@ func TestUserHandler_Create_UserExists_CaseInsensitive(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err = handler.Create(c)
 	if assert.Error(t, err) {
@@ -165,8 +169,8 @@ func TestUserHandler_Create_InvalidEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err := handler.Create(c)
 	if assert.Error(t, err) {
@@ -184,8 +188,8 @@ func TestUserHandler_Create_EmailMissing(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err := handler.Create(c)
 	if assert.Error(t, err) {
@@ -200,7 +204,6 @@ func TestUserHandler_Get(t *testing.T) {
 		func() models.User {
 			return models.User{
 				ID:        userId,
-				Email:     "john.doe@example.com",
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
 			}
@@ -220,8 +223,8 @@ func TestUserHandler_Get(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Get(c)) {
 		assert.Equal(t, rec.Code, http.StatusOK)
@@ -239,7 +242,6 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 	users := []models.User{
 		{
 			ID:        userId,
-			Email:     "john.doe@example.com",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
 			WebauthnCredentials: []models.WebauthnCredential{
@@ -270,8 +272,8 @@ func TestUserHandler_GetUserWithWebAuthnCredential(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Get(c)) {
 		assert.Equal(t, rec.Code, http.StatusOK)
@@ -295,8 +297,8 @@ func TestUserHandler_Get_InvalidUserId(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err = handler.Get(c)
 	if assert.Error(t, err) {
@@ -313,8 +315,8 @@ func TestUserHandler_GetUserIdByEmail_InvalidEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
@@ -330,8 +332,8 @@ func TestUserHandler_GetUserIdByEmail_InvalidJson(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	assert.Error(t, handler.GetUserIdByEmail(c))
 }
@@ -344,8 +346,8 @@ func TestUserHandler_GetUserIdByEmail_UserNotFound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	err := handler.GetUserIdByEmail(c)
 	if assert.Error(t, err) {
@@ -359,10 +361,15 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	users := []models.User{
 		{
 			ID:        userId,
-			Email:     "john.doe@example.com",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-			Verified:  true,
+		},
+	}
+	emails := []models.Email{
+		{
+			UserID:  &userId,
+			Address: "john.doe@example.com",
+			User:    &users[0],
 		},
 	}
 	e := echo.New()
@@ -372,8 +379,8 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -384,7 +391,7 @@ func TestUserHandler_GetUserIdByEmail(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, users[0].ID.String(), response.UserId)
-		assert.Equal(t, users[0].Verified, response.Verified)
+		assert.Equal(t, emails[0].Verified, response.Verified)
 	}
 }
 
@@ -393,10 +400,16 @@ func TestUserHandler_GetUserIdByEmail_CaseInsensitive(t *testing.T) {
 	users := []models.User{
 		{
 			ID:        userId,
-			Email:     "john.doe@example.com",
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
-			Verified:  true,
+		},
+	}
+	emails := []models.Email{
+		{
+			UserID:   &userId,
+			Address:  "john.doe@example.com",
+			User:     &users[0],
+			Verified: true,
 		},
 	}
 	e := echo.New()
@@ -406,8 +419,8 @@ func TestUserHandler_GetUserIdByEmail_CaseInsensitive(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.GetUserIdByEmail(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -418,7 +431,7 @@ func TestUserHandler_GetUserIdByEmail_CaseInsensitive(t *testing.T) {
 		err := json.Unmarshal(rec.Body.Bytes(), &response)
 		assert.NoError(t, err)
 		assert.Equal(t, users[0].ID.String(), response.UserId)
-		assert.Equal(t, users[0].Verified, response.Verified)
+		assert.Equal(t, emails[0].Verified, response.Verified)
 	}
 }
 
@@ -436,8 +449,8 @@ func TestUserHandler_Me(t *testing.T) {
 	require.NoError(t, err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(p, test.NewAuditLogger())
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
 
 	if assert.NoError(t, handler.Me(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)

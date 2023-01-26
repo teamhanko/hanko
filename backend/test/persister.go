@@ -6,7 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog) persistence.Persister {
+func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog, emails []models.Email, primaryEmails []models.PrimaryEmail) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
@@ -15,6 +15,8 @@ func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models
 		webauthnSessionDataPersister: NewWebauthnSessionDataPersister(sessionData),
 		passwordCredentialPersister:  NewPasswordCredentialPersister(passwords),
 		auditLogPersister:            NewAuditLogPersister(auditLogs),
+		emailPersister:               NewEmailPersister(emails),
+		primaryEmailPersister:        NewPrimaryEmailPersister(primaryEmails),
 	}
 }
 
@@ -26,6 +28,8 @@ type persister struct {
 	webauthnSessionDataPersister persistence.WebauthnSessionDataPersister
 	passwordCredentialPersister  persistence.PasswordCredentialPersister
 	auditLogPersister            persistence.AuditLogPersister
+	emailPersister               persistence.EmailPersister
+	primaryEmailPersister        persistence.PrimaryEmailPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -90,4 +94,20 @@ func (p *persister) GetAuditLogPersister() persistence.AuditLogPersister {
 
 func (p *persister) GetAuditLogPersisterWithConnection(tx *pop.Connection) persistence.AuditLogPersister {
 	return p.auditLogPersister
+}
+
+func (p *persister) GetEmailPersister() persistence.EmailPersister {
+	return p.emailPersister
+}
+
+func (p *persister) GetEmailPersisterWithConnection(tx *pop.Connection) persistence.EmailPersister {
+	return p.emailPersister
+}
+
+func (p *persister) GetPrimaryEmailPersister() persistence.PrimaryEmailPersister {
+	return p.primaryEmailPersister
+}
+
+func (p *persister) GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) persistence.PrimaryEmailPersister {
+	return p.primaryEmailPersister
 }

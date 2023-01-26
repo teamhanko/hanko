@@ -4,29 +4,21 @@
     margin-bottom: 20px;
 }
 
-.placeholder {
-    height: 77px;
+.profile-container {
+    max-width: 700px;
+    min-width: 200px;
+    margin: auto;
+    border-radius: 16px;
+    padding: 25px;
 }
 
-.buttonWrapper {
-    flex-shrink: 0;
+hanko-profile {
+    --headline1-margin: 2em 0 1em;
+    --input-min-width: 20em;
 }
 
-.passkeys > div {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-}
-
-@media screen and (max-width: 600px) {
-    .buttonWrapper {
-        margin-top: 28px;
-        width: 100%;
-    }
-
-    .passkeys > div {
-        flex-wrap: wrap;
+@media screen and (max-width: 420px) {
+    hanko-profile {
+        --input-min-width: 14em;
     }
 }

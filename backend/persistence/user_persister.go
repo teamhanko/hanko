@@ -11,7 +11,6 @@ import (
 
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
-	GetByEmail(email string) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
@@ -29,7 +28,7 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
-	err := p.db.Eager().Find(&user, id)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").Find(&user, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -42,8 +41,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 
 func (p *userPersister) GetByEmail(email string) (*models.User, error) {
 	user := models.User{}
-	query := p.db.Eager().Where("email = (?)", email)
-	err := query.First(&user)
+	err := p.db.Eager().Where("email = (?)", email).First(&user)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

@@ -67,6 +67,8 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 - `Credential`
 - `UserInfo`
 - `User`
+- `Email`
+- `Emails`
 - `Passcode`
 
 ### Errors

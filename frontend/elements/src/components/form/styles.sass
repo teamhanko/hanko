@@ -1,0 +1,142 @@
+@use '../../variables'
+@use '../../mixins'
+
+// Form Styles
+.form
+  display: flex
+  flex-grow: 1
+
+  .ul
+    flex-grow: 1
+    margin: variables.$item-margin
+    padding-inline-start: 0
+    list-style-type: none
+    display: flex
+    flex-wrap: wrap
+    gap: 1em
+
+  .li
+    display: flex
+    max-width: 100%
+    flex-grow: 1
+    flex-basis: min-content
+
+// Button Styles
+.button
+  @include mixins.font
+  @include mixins.border
+
+  white-space: nowrap
+  width: 100%
+  min-width: variables.$button-min-width
+  height: variables.$item-height
+  outline: none
+  cursor: pointer
+  transition: 0.1s ease-out
+  flex-grow: 1
+  flex-shrink: 1
+
+  &:disabled
+    cursor: default
+
+  &.primary
+    color: variables.$brand-contrast-color
+    background: variables.$brand-color
+    border-color: variables.$brand-color
+
+  &.primary:hover
+    color: variables.$brand-contrast-color
+    background: variables.$brand-color-shade-1
+    border-color: variables.$brand-color
+
+  &.primary:focus
+    color: variables.$brand-contrast-color
+    background: variables.$brand-color
+    border-color: variables.$color
+
+  &.primary:disabled
+    color: variables.$color-shade-1
+    background: variables.$color-shade-2
+    border-color: variables.$color-shade-2
+
+  &.secondary
+    color: variables.$color
+    background: variables.$background-color
+    border-color: variables.$color
+
+  &.secondary:hover
+    color: variables.$color
+    background: variables.$color-shade-2
+    border-color: variables.$color
+
+  &.secondary:focus
+    color: variables.$color
+    background: variables.$background-color
+    border-color: variables.$brand-color
+
+  &.secondary:disabled
+    color: variables.$color-shade-1
+    background: variables.$color-shade-2
+    border-color: variables.$color-shade-1
+
+// Input Styles
+
+.inputWrapper
+  flex-grow: 1
+  position: relative
+  display: flex
+  min-width: variables.$input-min-width
+  max-width: 100%
+
+.input
+  @include mixins.font
+  @include mixins.border
+
+  height: variables.$item-height
+  color: variables.$color
+  border-color: variables.$color-shade-1
+  background: variables.$background-color
+
+  padding: 0 .5rem
+  outline: none
+  width: 100%
+  box-sizing: border-box
+  transition: 0.1s ease-out
+
+  &:-webkit-autofill, &:-webkit-autofill:hover, &:-webkit-autofill:focus
+    -webkit-text-fill-color: variables.$color
+    -webkit-box-shadow: 0 0 0 50px variables.$background-color inset
+
+  // Removes native "clear text" and "password reveal" buttons from Edge
+  &::-ms-reveal, &::-ms-clear
+    display: none
+
+  &::placeholder
+    color: variables.$color-shade-1
+
+  &:focus
+    color: variables.$color
+    border-color: variables.$color
+
+  &:disabled
+    color: variables.$color-shade-1
+    background: variables.$color-shade-2
+    border-color: variables.$color-shade-1
+
+.passcodeInputWrapper
+  flex-grow: 1
+  min-width: variables.$input-min-width
+  max-width: fit-content
+  position: relative
+  display: flex
+  justify-content: space-between
+
+  .passcodeDigitWrapper
+    flex-grow: 1
+    margin: 0 .5rem 0 0
+
+    &:last-child
+      margin: 0
+
+    .input
+      text-align: center

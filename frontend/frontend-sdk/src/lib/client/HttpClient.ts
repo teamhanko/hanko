@@ -43,6 +43,7 @@ class Response {
   statusText: string;
   url: string;
   _decodedJSON: any;
+  private xhr: XMLHttpRequest;
 
   // eslint-disable-next-line require-jsdoc
   constructor(xhr: XMLHttpRequest) {
@@ -71,7 +72,11 @@ class Response {
      *  @type {string}
      */
     this.url = xhr.responseURL;
-    this._decodedJSON = JSON.parse(xhr.response);
+    /**
+     *  @private
+     *  @type {XMLHttpRequest}
+     */
+    this.xhr = xhr;
   }
 
   /**
@@ -80,7 +85,19 @@ class Response {
    * @return {any}
    */
   json() {
+    if (!this._decodedJSON) {
+      this._decodedJSON = JSON.parse(this.xhr.response);
+    }
     return this._decodedJSON;
+  }
+
+  /**
+   * Returns the value for Retry-After contained in the response header.
+   *
+   * @return {number}
+   */
+  parseXRetryAfterHeader(): number {
+    return parseInt(this.headers.get("Retry-After") || "0", 10);
   }
 }
 
@@ -198,6 +215,37 @@ class HttpClient {
     return this._fetch(path, {
       method: "PUT",
       body: JSON.stringify(body),
+    });
+  }
+
+  /**
+   * Performs a PATCH request.
+   *
+   * @param {string} path - The path to the requested resource.
+   * @param {any=} body - The request body.
+   * @return {Promise<Response>}
+   * @throws {RequestTimeoutError}
+   * @throws {TechnicalError}
+   */
+  patch(path: string, body?: any) {
+    return this._fetch(path, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  }
+
+  /**
+   * Performs a DELETE request.
+   *
+   * @param {string} path - The path to the requested resource.
+   * @param {any=} body - The request body.
+   * @return {Promise<Response>}
+   * @throws {RequestTimeoutError}
+   * @throws {TechnicalError}
+   */
+  delete(path: string) {
+    return this._fetch(path, {
+      method: "DELETE",
     });
   }
 }

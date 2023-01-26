@@ -17,7 +17,7 @@ export class LoginPasscode extends BasePage {
     this.signInButton = page.locator("button[type=submit]", {
       hasText: "Sign in",
     });
-    this.sendNewCodeLink = page.locator("a", {
+    this.sendNewCodeLink = page.locator("button", {
       hasText: "Send new code",
     });
     this.headline = page.locator("h1", { hasText: "Enter passcode" });

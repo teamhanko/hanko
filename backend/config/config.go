@@ -7,6 +7,7 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"log"
 	"strings"
 	"time"
@@ -14,15 +15,17 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server   Server           `yaml:"server" json:"server" koanf:"server"`
-	Webauthn WebauthnSettings `yaml:"webauthn" json:"webauthn" koanf:"webauthn"`
-	Passcode Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
-	Password Password         `yaml:"password" json:"password" koanf:"password"`
-	Database Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets  Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service  Service          `yaml:"service" json:"service" koanf:"service"`
-	Session  Session          `yaml:"session" json:"session" koanf:"session"`
-	AuditLog AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	Server      Server           `yaml:"server" json:"server" koanf:"server"`
+	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn" koanf:"webauthn"`
+	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password    Password         `yaml:"password" json:"password" koanf:"password"`
+	Database    Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets     Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service     Service          `yaml:"service" json:"service" koanf:"service"`
+	Session     Session          `yaml:"session" json:"session" koanf:"session"`
+	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	Emails      Emails           `yaml:"emails" json:"emails" koanf:"emails"`
+	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -58,6 +61,14 @@ func DefaultConfig() *Config {
 		Server: Server{
 			Public: ServerSettings{
 				Address: ":8000",
+				Cors: Cors{
+					ExposeHeaders: []string{
+						httplimit.HeaderRateLimitLimit,
+						httplimit.HeaderRateLimitRemaining,
+						httplimit.HeaderRateLimitReset,
+						httplimit.HeaderRetryAfter,
+					},
+				},
 			},
 			Admin: ServerSettings{
 				Address: ":8001",
@@ -67,7 +78,7 @@ func DefaultConfig() *Config {
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
 				DisplayName: "Hanko Authentication Service",
-				Origin:      "http://localhost",
+				Origins:     []string{"http://localhost"},
 			},
 			Timeout: 60000,
 		},
@@ -76,6 +87,10 @@ func DefaultConfig() *Config {
 				Port: "465",
 			},
 			TTL: 300,
+			Email: Email{
+				FromAddress: "passcode@hanko.io",
+				FromName:    "Hanko",
+			},
 		},
 		Password: Password{
 			MinPasswordLength: 8,
@@ -95,6 +110,22 @@ func DefaultConfig() *Config {
 			ConsoleOutput: AuditLogConsole{
 				Enabled:      true,
 				OutputStream: OutputStreamStdOut,
+			},
+		},
+		Emails: Emails{
+			RequireVerification: true,
+			MaxNumOfAddresses:   5,
+		},
+		RateLimiter: RateLimiter{
+			Enabled: true,
+			Store:   RATE_LIMITER_STORE_IN_MEMORY,
+			PasswordLimits: RateLimits{
+				Tokens:   5,
+				Interval: 1 * time.Minute,
+			},
+			PasscodeLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
 			},
 		},
 	}
@@ -128,6 +159,10 @@ func (c *Config) Validate() error {
 	err = c.Session.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate session settings: %w", err)
+	}
+	err = c.RateLimiter.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate rate-limiter settings: %w", err)
 	}
 	return nil
 }
@@ -274,9 +309,13 @@ type Database struct {
 	Host     string `yaml:"host" json:"host" koanf:"host"`
 	Port     string `yaml:"port" json:"port" koanf:"port"`
 	Dialect  string `yaml:"dialect" json:"dialect" koanf:"dialect"`
+	Url      string `yaml:"url" json:"url" koanf:"url"`
 }
 
 func (d *Database) Validate() error {
+	if len(strings.TrimSpace(d.Url)) > 0 {
+		return nil
+	}
 	if len(strings.TrimSpace(d.Database)) == 0 {
 		return errors.New("database must not be empty")
 	}
@@ -344,9 +383,59 @@ type AuditLogConsole struct {
 	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output"`
 }
 
+type Emails struct {
+	RequireVerification bool `yaml:"require_verification" json:"require_verification" koanf:"require_verification"`
+	MaxNumOfAddresses   int  `yaml:"max_num_of_addresses" json:"max_num_of_addresses" koanf:"max_num_of_addresses"`
+}
+
 type OutputStream string
 
 var (
 	OutputStreamStdOut OutputStream = "stdout"
 	OutputStreamStdErr OutputStream = "stderr"
 )
+
+type RateLimiter struct {
+	Enabled        bool                 `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Store          RateLimiterStoreType `yaml:"store" json:"store" koanf:"store"`
+	Redis          *RedisConfig         `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
+	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits"`
+	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits" koanf:"password_limits"`
+}
+
+type RateLimits struct {
+	Tokens   uint64        `yaml:"tokens" json:"tokens" koanf:"tokens"`
+	Interval time.Duration `yaml:"interval" json:"interval" koanf:"interval"`
+}
+
+type RateLimiterStoreType string
+
+const (
+	RATE_LIMITER_STORE_IN_MEMORY RateLimiterStoreType = "in_memory"
+	RATE_LIMITER_STORE_REDIS                          = "redis"
+)
+
+func (r *RateLimiter) Validate() error {
+	if r.Enabled {
+		switch r.Store {
+		case RATE_LIMITER_STORE_REDIS:
+			if r.Redis == nil {
+				return errors.New("when enabling the redis store you have to specify the redis config")
+			}
+			if r.Redis.Address == "" {
+				return errors.New("when enabling the redis store you have to specify the address where hanko can reach the redis instance")
+			}
+		case RATE_LIMITER_STORE_IN_MEMORY:
+			break
+		default:
+			return errors.New(string(r.Store) + " is not a valid rate limiter store.")
+		}
+	}
+	return nil
+}
+
+type RedisConfig struct {
+	//Address of redis in the form of host[:port][/database]
+	Address  string `yaml:"address" json:"address" koanf:"address"`
+	Password string `yaml:"password" json:"password" koanf:"password"`
+}
