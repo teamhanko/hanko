@@ -59,7 +59,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.1.1",
-    "sass": "^1.56.1",
+    "sass": "^1.57.1",
     "sass-loader": "^13.2.0",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.1",
