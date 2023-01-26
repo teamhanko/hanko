@@ -106,7 +106,7 @@ paths:
         - name: id
           in: path
           description: ID of the user
-          required: false
+          required: true
           schema:
             $ref: '#/components/schemas/UUID4'
       responses:
