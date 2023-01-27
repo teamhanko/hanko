@@ -1,4 +1,8 @@
-import { Headers, HttpClient } from "../../../src/lib/client/HttpClient";
+import {
+  Headers,
+  Response,
+  HttpClient,
+} from "../../../src/lib/client/HttpClient";
 import { RequestTimeoutError, TechnicalError } from "../../../src";
 import Cookies from "js-cookie";
 
@@ -186,5 +190,22 @@ describe("headers.get()", () => {
     jest.spyOn(xhr, "getResponseHeader").mockReturnValue("bar");
 
     expect(header.get("foo")).toEqual("bar");
+  });
+});
+
+describe("response.parseRetryAfterHeader()", () => {
+  it.each`
+    headerValue  | expected
+    ${""}        | ${0}
+    ${"0"}       | ${0}
+    ${"3"}       | ${3}
+    ${"-3"}      | ${-3}
+    ${"invalid"} | ${0}
+  `("should parse retry-after header", async ({ headerValue, expected }) => {
+    const response = new Response(xhr);
+    jest.spyOn(xhr, "getResponseHeader").mockReturnValue(headerValue);
+    const result = response.parseRetryAfterHeader();
+    expect(xhr.getResponseHeader).toHaveBeenCalledWith("Retry-After");
+    expect(result).toBe(expected);
   });
 });

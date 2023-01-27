@@ -76,7 +76,7 @@ class PasscodeClient extends Client {
     const response = await this.client.post(`/passcode/login/initialize`, body);
 
     if (response.status === 429) {
-      retryAfter = response.parseXRetryAfterHeader();
+      retryAfter = response.parseRetryAfterHeader();
       this.state.setResendAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
     } else if (response.status === 401) {
