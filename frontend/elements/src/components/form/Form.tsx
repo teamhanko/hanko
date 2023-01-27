@@ -13,7 +13,7 @@ const Form = ({ onSubmit, children }: Props) => {
     <form onSubmit={onSubmit} className={styles.form} selected={true}>
       <ul className={styles.ul}>
         {toChildArray(children).map((child, index) => (
-          <li className={styles.li} key={index}>
+          <li part={"form-item"} className={styles.li} key={index}>
             {child}
           </li>
         ))}
