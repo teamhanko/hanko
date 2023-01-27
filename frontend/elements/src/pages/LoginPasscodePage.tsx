@@ -40,7 +40,7 @@ const LoginPasscodePage = ({
   onSuccess,
   onBack,
   numberOfDigits = 6,
-  ...props
+  initialError = null,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const { hanko, setUser, passcode, setPasscode } = useContext(AppContext);
@@ -53,7 +53,7 @@ const LoginPasscodePage = ({
   const [maxAttemptsReached, setMaxAttemptsReached] = useState<boolean>();
   const [resendAfter, setResendAfter] = useState<number>();
   const [passcodeDigits, setPasscodeDigits] = useState<string[]>([]);
-  const [error, setError] = useState<HankoError>(props.initialError || null);
+  const [error, setError] = useState<HankoError>(initialError);
 
   const onPasscodeInput = (digits: string[]) => {
     // Automatically submit the Passcode when every input contains a digit.
