@@ -245,18 +245,22 @@ cause the following issues:
 
 - Microsoft Edge v. 108 sometimes crashes or is not able to display the credential name properly.
 
+## Demo
+
+Take a look at our [live demo](https://example.hanko.io).
+
+## Frontend framework integrations
+
+To learn more about how to integrate the Hanko elements into frontend frameworks, see our
+[guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
+[example applications](https://github.com/teamhanko/hanko/blob/main/examples/README.md).
+
 ## Browser support
 
 - Safari
 - Firefox
 - Opera
 - Chromium-based browsers (Chrome, Edge, Brave,...)
-
-## Frontend framework integrations
-
-To learn more about how to integrate the Hanko elements into frontend frameworks, see our
-[guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
-[example applications](../../examples/README.md).
 
 ## Bugs
 
