@@ -4,23 +4,19 @@ WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
 # frontend-sdk
-WORKDIR /app/frontend-sdk
-COPY frontend-sdk/package.json ./
-COPY frontend-sdk/package-lock.json ./
+WORKDIR /app/
+COPY package.json ./
+COPY package-lock.json ./
+COPY frontend-sdk/package.json ./frontend-sdk/package.json
+COPY elements/package.json elements/package.json
 
 RUN npm ci --silent
-COPY ./frontend-sdk ./
-RUN npm run build
+COPY ./frontend-sdk ./frontend-sdk
+RUN ls
+RUN npm run build --workspace frontend-sdk
 
-
-# elements
-WORKDIR /app/elements
-COPY elements/package.json ./
-COPY elements/package-lock.json ./
-
-RUN npm ci --silent
-COPY ./elements ./
-RUN npm run build
+COPY ./elements ./elements
+RUN npm run build --workspace elements
 
 FROM nginx:stable-alpine
 COPY --from=build /app/elements/dist/elements.js /usr/share/nginx/html
