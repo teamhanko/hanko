@@ -134,6 +134,7 @@ const LoginPasscodePage = ({
   }, [isSuccess, ttl]);
 
   useEffect(() => {
+    if (!passcode) return;
     setTtl(passcode.ttl);
   }, [passcode]);
 

@@ -32,7 +32,9 @@ const LoginPasswordPage = ({ onSuccess, onRecovery, onBack }: Props) => {
   const { hanko, userInfo } = useContext(AppContext);
 
   const [password, setPassword] = useState<string>();
-  const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>();
+  const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>(
+    hanko.password.getRetryAfter(userInfo.id)
+  );
   const [isPasswordLoading, setIsPasswordLoading] = useState<boolean>();
   const [isPasscodeLoading, setIsPasscodeLoading] = useState<boolean>();
   const [isSuccess, setIsSuccess] = useState<boolean>();
