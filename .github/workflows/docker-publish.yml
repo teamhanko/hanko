@@ -35,8 +35,6 @@ jobs:
             image: ghcr.io/teamhanko/hanko/quickstart
           - context: ./frontend
             image: ghcr.io/teamhanko/hanko/elements
-          - context: ./frontend/frontend-sdk
-            image: ghcr.io/teamhanko/hanko/frontend-sdk
     permissions:
       contents: read
       packages: write
