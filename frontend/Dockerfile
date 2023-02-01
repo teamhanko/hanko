@@ -3,16 +3,14 @@ FROM --platform=$BUILDPLATFORM node:16.16-alpine as build
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
-# frontend-sdk
 WORKDIR /app/
 COPY package.json ./
 COPY package-lock.json ./
 COPY frontend-sdk/package.json ./frontend-sdk/package.json
 COPY elements/package.json elements/package.json
-
 RUN npm ci --silent
+
 COPY ./frontend-sdk ./frontend-sdk
-RUN ls
 RUN npm run build --workspace frontend-sdk
 
 COPY ./elements ./elements
