@@ -3,18 +3,18 @@ module github.com/teamhanko/hanko/backend
 go 1.17
 
 require (
-	github.com/go-playground/validator/v10 v10.11.1
+	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-webauthn/webauthn v0.5.0
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobuffalo/validate/v3 v3.3.3
-	github.com/gofrs/uuid v4.3.1+incompatible
+	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.8.9
 	github.com/knadh/koanf v1.5.0
-	github.com/labstack/echo-jwt/v4 v4.0.1
+	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/lestrrat-go/jwx/v2 v2.0.8
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
-	github.com/rs/zerolog v1.28.0
+	github.com/rs/zerolog v1.29.0
 	github.com/sethvargo/go-limiter v0.7.2
 	github.com/sethvargo/go-redisstore v0.3.0
 	github.com/spf13/cobra v1.6.1
@@ -34,8 +34,8 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
-	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-playground/universal-translator v0.18.0 // indirect
+	github.com/go-playground/locales v0.14.1 // indirect
+	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/go-webauthn/revoke v0.1.6 // indirect
 	github.com/gobuffalo/envy v1.10.2 // indirect
