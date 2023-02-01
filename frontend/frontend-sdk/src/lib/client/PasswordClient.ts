@@ -55,7 +55,7 @@ class PasswordClient extends Client {
     if (response.status === 401) {
       throw new InvalidPasswordError();
     } else if (response.status === 429) {
-      const retryAfter = response.parseXRetryAfterHeader();
+      const retryAfter = response.parseRetryAfterHeader();
       this.passwordState.read().setRetryAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
     } else if (!response.ok) {

@@ -1,4 +1,3 @@
-
 openapi: 3.0.0
 info:
   version: '0.3.0'
@@ -31,6 +30,33 @@ paths:
       operationId: listUsers
       tags:
         - User Management
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+          description: The page which should be returned
+        - in: query
+          name: per_page
+          schema:
+            type: integer
+            default: 20
+          description: The number of returned items
+        - in: query
+          name: user_id
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/UUID4'
+            example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
+          description: Only users with the specified user_id are included
+        - in: query
+          name: email
+          schema:
+            type: string
+            format: email
+            example: example@example.com
+          description: Only users with the specified email are included
       responses:
         '200':
           description: 'Details about users'
@@ -49,6 +75,8 @@ paths:
                 $ref: '#/components/headers/Link'
         '500':
           $ref: '#/components/responses/InternalServerError'
+        '400':
+          $ref: '#/components/responses/BadRequest'
   /users/{id}:
     delete:
       summary: 'Delete a user by ID'
@@ -65,6 +93,31 @@ paths:
       responses:
         '204':
           description: 'Deleted'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    get:
+      summary: 'Get a user by ID'
+      operationId: getUser
+      tags:
+        - User Management
+      parameters:
+        - name: id
+          in: path
+          description: ID of the user
+          required: true
+          schema:
+            $ref: '#/components/schemas/UUID4'
+      responses:
+        '200':
+          description: 'Details about the user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '404':
           $ref: '#/components/responses/NotFound'
         '500':
@@ -191,15 +244,15 @@ components:
   schemas:
     User:
       type: object
+      required:
+        - id
+        - created_at
+        - updated_at
       properties:
         id:
           description: The ID of the user
           allOf:
             - $ref: '#/components/schemas/UUID4'
-        email:
-          description: The email address of the user
-          type: string
-          format: email
         created_at:
           description: Time of creation of the the user
           type: string
@@ -208,20 +261,82 @@ components:
           description: Time of last update of the user
           type: string
           format: date-time
-        verified:
-          description: Indicates whether the user's email address was verified
-          type: boolean
         webauthn_credentials:
           description: List of registered Webauthn credentials
           type: array
           items:
-            type: object
-            properties:
-              id:
-                description: The ID of the Webauthn credential
-                type: string
-                format: base64url
-                example: Meprtysj5ZZrTlg0qiLbsZ168OtQMeGVAikVy2n1hvvG...
+            $ref: '#/components/schemas/WebAuthnCredential'
+        emails:
+          description: List of emails associated to the user
+          type: array
+          items:
+            $ref: '#/components/schemas/Email'
+    WebAuthnCredential:
+      type: object
+      required:
+        - id
+        - public_key
+        - attestation_type
+        - aaguid
+        - created_at
+      properties:
+        id:
+          description: The ID of the credential
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+        name:
+          description: A name that the user choose
+          type: string
+        public_key:
+          description: The public key of the credential
+          type: string
+        attestation_type:
+          description: The attestation type the credential was registered with
+          type: string
+        aaguid:
+          description: The AAGUID of the authenticator the credentials was created on
+          type: string
+        transports:
+          description: The ways the authenticator is connected
+          type: array
+          items:
+            type: string
+        created_at:
+          description: Time of creation of the credential
+          type: string
+          format: date-time
+    Email:
+      type: object
+      required:
+        - id
+        - address
+        - is_verified
+        - is_primary
+        - created_at
+        - updated_at
+      properties:
+        id:
+          description: The ID of the email
+          allOf:
+            - $ref: '#/components/schemas/UUID4'
+        address:
+          description: The email address
+          type: string
+          format: email
+        is_verified:
+          description: Indicated the email has been verified.
+          type: boolean
+        is_primary:
+          description: Indicates it's the primary email address.
+          type: boolean
+        created_at:
+          description: Time of creation of the email
+          type: string
+          format: date-time
+        updated_at:
+          description: Time of last update of the email
+          type: string
+          format: date-time
     AuditLog:
       type: object
       required:

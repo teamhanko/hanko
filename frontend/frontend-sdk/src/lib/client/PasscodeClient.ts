@@ -56,15 +56,15 @@ class PasscodeClient extends Client {
     const lastEmailID = this.state.getEmailID(userID);
     let retryAfter = this.state.getResendAfter(userID);
 
+    if (retryAfter > 0) {
+      throw new TooManyRequestsError(retryAfter);
+    }
+
     if (!force && lastPasscodeTTL > 0 && emailID === lastEmailID) {
       return {
         id: lastPasscodeID,
         ttl: lastPasscodeTTL,
       };
-    }
-
-    if (retryAfter > 0) {
-      throw new TooManyRequestsError(retryAfter);
     }
 
     const body: any = { user_id: userID };
@@ -76,7 +76,7 @@ class PasscodeClient extends Client {
     const response = await this.client.post(`/passcode/login/initialize`, body);
 
     if (response.status === 429) {
-      retryAfter = response.parseXRetryAfterHeader();
+      retryAfter = response.parseRetryAfterHeader();
       this.state.setResendAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
     } else if (response.status === 401) {

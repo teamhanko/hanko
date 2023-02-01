@@ -13,6 +13,7 @@ func NewAdminRouter(persister persistence.Persister) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 
+	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
@@ -27,8 +28,9 @@ func NewAdminRouter(persister persistence.Persister) *echo.Echo {
 	userHandler := handler.NewUserHandlerAdmin(persister)
 
 	user := e.Group("/users")
-	user.DELETE("/:id", userHandler.Delete)
 	user.GET("", userHandler.List)
+	user.GET("/:id", userHandler.Get)
+	user.DELETE("/:id", userHandler.Delete)
 
 	auditLogHandler := handler.NewAuditLogHandler(persister)
 

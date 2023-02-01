@@ -96,8 +96,9 @@ class Response {
    *
    * @return {number}
    */
-  parseXRetryAfterHeader(): number {
-    return parseInt(this.headers.get("Retry-After") || "0", 10);
+  parseRetryAfterHeader(): number {
+    const result = parseInt(this.headers.get("Retry-After"), 10);
+    return isNaN(result) ? 0 : result;
   }
 }
 
@@ -238,7 +239,6 @@ class HttpClient {
    * Performs a DELETE request.
    *
    * @param {string} path - The path to the requested resource.
-   * @param {any=} body - The request body.
    * @return {Promise<Response>}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
