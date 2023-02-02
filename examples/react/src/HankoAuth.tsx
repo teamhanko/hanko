@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { register } from "@teamhanko/hanko-elements/hanko-auth";
+import { register } from "@teamhanko/hanko-elements";
 import styles from "./Todo.module.css";
 
 const api = process.env.REACT_APP_HANKO_API!;
@@ -21,7 +21,7 @@ function HankoAuth() {
 
   return (
     <div className={styles.content}>
-      <hanko-auth api={api} />
+      <hanko-auth api={api} lang="de"/>
     </div>
   );
 }

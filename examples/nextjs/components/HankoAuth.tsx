@@ -1,4 +1,4 @@
-import { register } from "@teamhanko/hanko-elements/hanko-auth";
+import { register } from "@teamhanko/hanko-elements";
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 
@@ -21,7 +21,7 @@ function HankoAuth() {
       document.removeEventListener("hankoAuthSuccess", redirectToTodos);
   }, [redirectToTodos]);
 
-  return <hanko-auth api={api} />;
+  return <hanko-auth api={api} lang="en"/>;
 }
 
 export default HankoAuth;
