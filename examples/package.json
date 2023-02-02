@@ -7,6 +7,6 @@
     "react",
     "svelte",
     "vue",
-    "../frontend"
+    "../frontend/elements"
   ]
 }
