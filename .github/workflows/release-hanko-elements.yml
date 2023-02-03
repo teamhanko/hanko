@@ -7,7 +7,7 @@ on:
 
 defaults:
   run:
-    working-directory: frontend/elements
+    working-directory: frontend
 
 jobs:
   check-matching-versions:
@@ -40,16 +40,11 @@ jobs:
         with:
           node-version: 16
           registry-url: https://registry.npmjs.org/
-      - name: build-frontend-sdk
-        run: |
-          npm ci
-          npm run build
-        working-directory: frontend/frontend-sdk
       - name: build-elements
         run: |
           npm ci
-          npm run build
+          npm run build --workspace elements
       - name: publish-elements
-        run: npm publish
+        run: npm publish --workspace elements
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_PUBLISHING_SECRET }}
