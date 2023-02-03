@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.1.1-alpha",
+  "version": "0.1.2-alpha",
   "private": false,
   "type": "module",
   "publishConfig": {
@@ -72,8 +72,5 @@
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
     "preact": "^10.11.3"
-  },
-  "bundleDependencies": [
-    "@teamhanko/hanko-frontend-sdk"
-  ]
+  }
 }

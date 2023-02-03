@@ -6,7 +6,6 @@
     "nextjs",
     "react",
     "svelte",
-    "vue",
-    "../frontend/elements"
+    "vue"
   ]
 }
