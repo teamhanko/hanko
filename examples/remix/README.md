@@ -23,6 +23,5 @@ In the `.env` file set up the correct environment variables:
 
 ### Run development server
 
-Run `npm install` to install dependencies, then run `npm run dev` for a development
-server. Navigate to `http://localhost:3000/`. The application will automatically reload if
-you change any of the source files.
+The entire process is automated with docker. You can find the instructions in the
+[examples/README.md](../README.md#remix) file.
