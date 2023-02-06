@@ -51,6 +51,7 @@ type UserListRequest struct {
 	Page    int    `query:"page"`
 	Email   string `query:"email"`
 	UserId  string `query:"user_id"`
+	Order   string `query:"order"`
 }
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
@@ -76,9 +77,19 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 		}
 	}
 
+	if request.Order == "" {
+		request.Order = "desc"
+	}
+
+	switch request.Order {
+	case "desc", "asc":
+	default:
+		return dto.NewHTTPError(http.StatusBadRequest, "order must be desc or asc")
+	}
+
 	email := strings.ToLower(request.Email)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email, request.Order)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}
