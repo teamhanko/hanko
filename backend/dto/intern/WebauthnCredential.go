@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID) *models.WebauthnCredential {
+func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible bool, backupState bool) *models.WebauthnCredential {
 	now := time.Now().UTC()
 	aaguid, _ := uuid.FromBytes(credential.Authenticator.AAGUID)
 	credentialID := base64.RawURLEncoding.EncodeToString(credential.ID)
@@ -23,6 +23,8 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 		SignCount:       int(credential.Authenticator.SignCount),
 		CreatedAt:       now,
 		UpdatedAt:       now,
+		BackupEligible:  backupEligible,
+		BackupState:     backupState,
 	}
 
 	for _, name := range credential.Transport {
