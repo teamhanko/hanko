@@ -185,7 +185,9 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			return dto.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
 		}
 
-		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId)
+		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
+		backupState := request.Response.AttestationObject.AuthData.Flags.HasBackupState()
+		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState)
 		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*model)
 		if err != nil {
 			return fmt.Errorf("failed to store webauthn credential: %w", err)
@@ -360,6 +362,23 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			}
 		}
 
+		var dbCred *models.WebauthnCredential
+		for i := range webauthnUser.WebauthnCredentials {
+			if webauthnUser.WebauthnCredentials[i].ID == base64.RawURLEncoding.EncodeToString(credential.ID) {
+				dbCred = &webauthnUser.WebauthnCredentials[i]
+				break
+			}
+		}
+		if dbCred != nil && (dbCred.BackupEligible != request.Response.AuthenticatorData.Flags.HasBackupEligible() || dbCred.BackupState != request.Response.AuthenticatorData.Flags.HasBackupState()) {
+			dbCred.BackupState = request.Response.AuthenticatorData.Flags.HasBackupState()
+			dbCred.BackupEligible = request.Response.AuthenticatorData.Flags.HasBackupEligible()
+
+			err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Update(*dbCred)
+			if err != nil {
+				return fmt.Errorf("failed to update webauthn credential: %w", err)
+			}
+		}
+
 		err = sessionDataPersister.Delete(*sessionData)
 		if err != nil {
 			return fmt.Errorf("failed to delete assertion session data: %w", err)
@@ -380,7 +399,6 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", token)
 			c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
-
 		}
 
 		err = h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalSucceeded, user, nil)

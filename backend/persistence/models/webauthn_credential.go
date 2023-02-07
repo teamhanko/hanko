@@ -20,6 +20,8 @@ type WebauthnCredential struct {
 	CreatedAt       time.Time  `db:"created_at" json:"-"`
 	UpdatedAt       time.Time  `db:"updated_at" json:"-"`
 	Transports      Transports `has_many:"webauthn_credential_transports" json:"-"`
+	BackupEligible  bool       `db:"backup_eligible" json:"-"`
+	BackupState     bool       `db:"backup_state" json:"-"`
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
