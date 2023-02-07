@@ -47,11 +47,11 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 }
 
 type UserListRequest struct {
-	PerPage int    `query:"per_page"`
-	Page    int    `query:"page"`
-	Email   string `query:"email"`
-	UserId  string `query:"user_id"`
-	Order   string `query:"order"`
+	PerPage       int    `query:"per_page"`
+	Page          int    `query:"page"`
+	Email         string `query:"email"`
+	UserId        string `query:"user_id"`
+	SortDirection string `query:"sort_direction"`
 }
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
@@ -77,11 +77,11 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 		}
 	}
 
-	if request.Order == "" {
-		request.Order = "desc"
+	if request.SortDirection == "" {
+		request.SortDirection = "desc"
 	}
 
-	switch request.Order {
+	switch request.SortDirection {
 	case "desc", "asc":
 	default:
 		return dto.NewHTTPError(http.StatusBadRequest, "order must be desc or asc")
@@ -89,7 +89,7 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 
 	email := strings.ToLower(request.Email)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email, request.Order)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email, request.SortDirection)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}

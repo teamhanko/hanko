@@ -58,13 +58,13 @@ paths:
             example: example@example.com
           description: Only users with the specified email are included
         - in: query
-          name: order
+          name: sort_direction
           schema:
             type: string
             enum:
               - asc
               - desc
-          description: The order direction of the returned list (always order by created_at)
+          description: The sort direction of the returned list (always sorted by created_at)
       responses:
         '200':
           description: 'Details about users'
