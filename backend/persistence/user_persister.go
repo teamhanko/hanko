@@ -14,7 +14,7 @@ type UserPersister interface {
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
-	List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error)
+	List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error)
 	Count(userId uuid.UUID, email string) (int, error)
 }
 
@@ -87,7 +87,7 @@ func (p *userPersister) Delete(user models.User) error {
 	return nil
 }
 
-func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string) ([]models.User, error) {
+func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error) {
 	users := []models.User{}
 
 	query := p.db.
@@ -96,6 +96,7 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 		LeftJoin("emails", "emails.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	err := query.GroupBy("users.id").
+		Order(fmt.Sprintf("users.created_at %s", sortDirection)).
 		Paginate(page, perPage).
 		All(&users)
 
