@@ -84,7 +84,7 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	switch request.SortDirection {
 	case "desc", "asc":
 	default:
-		return dto.NewHTTPError(http.StatusBadRequest, "order must be desc or asc")
+		return dto.NewHTTPError(http.StatusBadRequest, "sort_direction must be desc or asc")
 	}
 
 	email := strings.ToLower(request.Email)
