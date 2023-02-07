@@ -363,9 +363,9 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		var dbCred *models.WebauthnCredential
-		for _, webauthnCredential := range webauthnUser.WebauthnCredentials {
-			if webauthnCredential.ID == base64.RawURLEncoding.EncodeToString(credential.ID) {
-				dbCred = &webauthnCredential
+		for i := range webauthnUser.WebauthnCredentials {
+			if webauthnUser.WebauthnCredentials[i].ID == base64.RawURLEncoding.EncodeToString(credential.ID) {
+				dbCred = &webauthnUser.WebauthnCredentials[i]
 				break
 			}
 		}
