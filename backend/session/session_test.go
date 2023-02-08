@@ -90,6 +90,19 @@ func TestGenerator_Verify_Error(t *testing.T) {
 	}
 }
 
+func TestGenerator_DeleteCookie(t *testing.T) {
+	manager := jwkManager{}
+	cfg := config.Session{}
+	sessionGenerator, err := NewManager(&manager, cfg)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	cookie, err := sessionGenerator.DeleteCookie()
+	assert.NoError(t, err)
+	assert.Equal(t, -1, cookie.MaxAge)
+	assert.Equal(t, "hanko", cookie.Name)
+}
+
 var privateKey = `{
   "alg": "RS256",
   "d": "hsVXyJ1VjNFjiRqLE6bNZrAJDlnE33ptT4XpbPylfhlLfLB_OOB_YC5e4cBBoXlWaIJzYQ-qX0eSD2OdNg1JC0TgyQvwOqc9y6EKGyGu2asyHsJxLy8IiaqoqdqgiV0N_DsCYzt5Ew2nJq1P3XYqO5TJBpISixO47BEHaBgQeQBwSfmV3hmGYYTzJz6bwDNDhrBtg-2WiTfaq-3trorxo5Ww17-icr69Yad47Y4EIjKNL8SLPnWCt4NZTuT6Qs6QeUn-wOYPMaLh11DyZBNOuqiNWKjs_xPoi6C8jS1Jua0loTJXblDuMTDRL6-k82SByi7q8Yywr2TAdrotYbXF8kmaMmzW2gdQhkJs3xeNm3RyoIZOiU-7uzykSG8EkC0bx3mhIGVW_IOpzD2Xo2abbweR-PyX5z07qn9F1BHScdXViDmMNq2FU25D9K4FrRUqg8k5jpzkFrhcyPuw_hwB_BheNZgxulBbKy686qC6vTT41kZceD34PdBlMpzPctsK60GQWow8qs_OTQjD5ff_sTrNk4wzFpzo74ctcHOCZavW3gnZjhrMO9yHKGUBvgQJCiQ3C9nAkEP4pSOtk3nYgNLaWFftUYS_JKf36PcpM-YJYZEO33ayrcK19fp0aZbP11W1RpCs3jOaVWGwsS3xFE-4w_0xTbWoJACBgRENy_k",

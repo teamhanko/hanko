@@ -218,3 +218,19 @@ func (h *UserHandler) Me(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]string{"id": sessionToken.Subject()})
 }
+
+func (h *UserHandler) Logout(c echo.Context) error {
+	_, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("failed to cast session object")
+	}
+
+	cookie, err := h.sessionManager.DeleteCookie()
+	if err != nil {
+		return fmt.Errorf("failed to create session token: %w", err)
+	}
+	
+	c.SetCookie(cookie)
+
+	return c.JSON(http.StatusOK, struct{}{})
+}
