@@ -128,6 +128,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			Domain:   h.cfg.Session.Cookie.Domain,
 			Secure:   h.cfg.Session.Cookie.Secure,
 			HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+			SameSite: http.SameSiteNoneMode,
 		})
 
 		return c.JSON(http.StatusOK, dto.CreateUserResponse{
