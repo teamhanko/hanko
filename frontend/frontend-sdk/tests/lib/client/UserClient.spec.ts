@@ -179,3 +179,27 @@ describe("UserClient.create()", () => {
     await expect(user).rejects.toThrowError("Test error");
   });
 });
+
+describe("UserClient.logout()", () => {
+  it("should return true if logout is successful", async () => {
+    const response = new Response(new XMLHttpRequest());
+    response.status = 200;
+
+    jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
+    const logoutResponse = userClient.logout();
+    await expect(logoutResponse).resolves.toBe(true);
+
+    expect(userClient.client.post).toHaveBeenCalledWith("/logout");
+  });
+
+  it("should return false if logout is not successful", async () => {
+    const response = new Response(new XMLHttpRequest());
+    response.status = 403;
+    jest.spyOn(userClient.client, "post").mockResolvedValue(response);
+
+    const logoutResponse = userClient.logout();
+    await expect(logoutResponse).resolves.toBe(false);
+
+    expect(userClient.client.post).toHaveBeenCalledWith("/logout");
+  });
+});

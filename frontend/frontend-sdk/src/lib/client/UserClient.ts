@@ -100,6 +100,12 @@ class UserClient extends Client {
 
     return userResponse.json();
   }
+
+  async logout(): Promise<boolean> {
+    const logoutResponse = await this.client.post('/logout');
+
+    return logoutResponse.status === 200;
+  }
 }
 
 export { UserClient };
