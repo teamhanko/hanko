@@ -14,7 +14,8 @@ const LogoutButton = (props: Props) => {
     const { t } = useContext(TranslateContext);
     const {
         hanko,
-        emitLogoutEvent,
+        emitLogoutSuccessEvent,
+        emitLogoutFailureEvent,
       } = useContext(AppContext);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -29,12 +30,12 @@ const LogoutButton = (props: Props) => {
                 setIsLoading(false);
 
                 if (resp) {
-                    // TODO: This is not working. How can I navigate back to the home screen?
-                    // setPage(<LoginEmailPage />);
                     setIsSuccess(true);
-                    emitLogoutEvent();
+                    emitLogoutSuccessEvent();
                     return;
                 }
+
+                emitLogoutFailureEvent();
             });
     }
 

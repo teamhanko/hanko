@@ -44,6 +44,9 @@
     document.addEventListener("hankoLogoutSuccess", (event) => {
         document.location.href = "/";
     })
+    document.addEventListener("hankoLogoutFailure", (event) => {
+        alert('An error occurred logging out. Please try again');
+    })
 </script>
 
 </body>

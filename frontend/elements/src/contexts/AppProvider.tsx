@@ -63,7 +63,8 @@ interface Context extends States {
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
   emitSuccessEvent: () => void;
-  emitLogoutEvent: () => void;
+  emitLogoutSuccessEvent: () => void;
+  emitLogoutFailureEvent: () => void;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -106,8 +107,21 @@ const AppProvider = ({
     return () => clearTimeout(fn);
   }, []);
 
-  const emitLogoutEvent = useCallback(() => {
+  const emitLogoutSuccessEvent = useCallback(() => {
     const event = new Event("hankoLogoutSuccess", {
+      bubbles: true,
+      composed: true,
+    });
+
+    const fn = setTimeout(() => {
+      ref.current.dispatchEvent(event);
+    }, 500);
+
+    return () => clearTimeout(fn);
+  }, []);
+
+  const emitLogoutFailureEvent = useCallback(() => {
+    const event = new Event("hankoLogoutFailure", {
       bubbles: true,
       composed: true,
     });
@@ -135,7 +149,8 @@ const AppProvider = ({
         componentName,
         experimentalFeatures,
         emitSuccessEvent,
-        emitLogoutEvent,
+        emitLogoutSuccessEvent,
+        emitLogoutFailureEvent,
         config,
         setConfig,
         userInfo,
