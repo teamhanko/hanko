@@ -462,3 +462,23 @@ func TestUserHandler_Me(t *testing.T) {
 		assert.Equal(t, userId.String(), response.UserId)
 	}
 }
+
+func TestUserHandler_Logout(t *testing.T) {
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodGet, "/me", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
+	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
+
+	if assert.NoError(t, handler.Logout(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		cookie := rec.Header().Get("Set-Cookie")
+		assert.NotEmpty(t, cookie)
+
+		split := strings.Split(cookie, ";")
+		assert.Equal(t, "Max-Age=0", strings.TrimSpace(split[1]))
+	}
+}
