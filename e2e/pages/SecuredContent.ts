@@ -8,7 +8,7 @@ export class SecuredContent extends BasePage {
 
   constructor(page: Page) {
     super(page);
-    this.logoutLink = page.locator("a", { hasText: "Logout" });
+    this.logoutLink = page.locator("button", { hasText: "Log out" });
   }
 
   async logout() {
