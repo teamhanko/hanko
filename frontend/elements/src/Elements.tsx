@@ -13,6 +13,8 @@ export interface HankoAuthAdditionalProps extends AdditionalProps {
 
 export interface HankoProfileAdditionalProps extends AdditionalProps {}
 
+export interface HankoLogoutAdditionalProps extends AdditionalProps {}
+
 declare interface HankoAuthElementProps
   extends preact.JSX.HTMLAttributes<HTMLElement>,
     HankoAuthAdditionalProps {}
@@ -21,6 +23,10 @@ declare interface HankoProfileElementProps
   extends preact.JSX.HTMLAttributes<HTMLElement>,
     HankoProfileAdditionalProps {}
 
+declare interface HankoLogoutElementProps
+  extends preact.JSX.HTMLAttributes<HTMLElement>,
+    HankoLogoutAdditionalProps {}
+
 declare global {
   // eslint-disable-next-line no-unused-vars
   namespace JSX {
@@ -28,6 +34,7 @@ declare global {
     interface IntrinsicElements {
       "hanko-auth": HankoAuthElementProps;
       "hanko-profile": HankoProfileElementProps;
+      "hanko-logout": HankoLogoutElementProps;
     }
   }
 }
@@ -39,6 +46,10 @@ export const HankoAuth = (props: HankoAuthElementProps) => (
 export const HankoProfile = (props: HankoProfileElementProps) => (
   <AppProvider componentName={"profile"} {...props} />
 );
+
+export const HankoLogout = (props: HankoLogoutElementProps) => (
+  <AppProvider componentName={"logout"} {...props} />
+)
 
 export interface RegisterOptions {
   shadow?: boolean;
@@ -57,6 +68,12 @@ export const register = async (options: RegisterOptions) =>
       ...options,
       tagName: "hanko-profile",
       entryComponent: HankoProfile,
+      observedAttributes: ["api", "lang"],
+    }),
+    _register({
+      ...options,
+      tagName: "hanko-logout",
+      entryComponent: HankoLogout,
       observedAttributes: ["api", "lang"],
     }),
   ]);

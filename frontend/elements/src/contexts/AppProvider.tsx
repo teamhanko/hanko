@@ -30,7 +30,7 @@ import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
-type ComponentName = "auth" | "profile";
+type ComponentName = "auth" | "profile" | "logout";
 
 interface Props {
   api?: string;
@@ -63,6 +63,7 @@ interface Context extends States {
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
   emitSuccessEvent: () => void;
+  emitLogoutEvent: () => void;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -105,6 +106,19 @@ const AppProvider = ({
     return () => clearTimeout(fn);
   }, []);
 
+  const emitLogoutEvent = useCallback(() => {
+    const event = new Event("hankoLogoutSuccess", {
+      bubbles: true,
+      composed: true,
+    });
+
+    const fn = setTimeout(() => {
+      ref.current.dispatchEvent(event);
+    }, 500);
+
+    return () => clearTimeout(fn);
+  }, []);
+
   const [config, setConfig] = useState<Config>();
   const [userInfo, setUserInfo] = useState<UserInfo>(null);
   const [passcode, setPasscode] = useState<Passcode>();
@@ -121,6 +135,7 @@ const AppProvider = ({
         componentName,
         experimentalFeatures,
         emitSuccessEvent,
+        emitLogoutEvent,
         config,
         setConfig,
         userInfo,

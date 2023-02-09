@@ -16,7 +16,7 @@
     <nav class="nav">
         <ul class="nav__itemList">
             <li class="nav__listItem">
-                <a class="nav__link" href="/logout">Logout</a>
+                <hanko-logout lang="en" api="{{.HankoUrl}}"></hanko-logout>
             </li>
         </ul>
     </nav>
@@ -41,6 +41,9 @@
 
 <script>
     Elements.register({ shadow: false });
+    document.addEventListener("hankoLogoutSuccess", (event) => {
+        document.location.href = "/";
+    })
 </script>
 
 </body>
