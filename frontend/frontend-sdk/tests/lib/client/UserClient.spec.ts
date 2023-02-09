@@ -184,22 +184,34 @@ describe("UserClient.logout()", () => {
   it("should return true if logout is successful", async () => {
     const response = new Response(new XMLHttpRequest());
     response.status = 200;
+    response.ok = true;
 
     jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
-    const logoutResponse = userClient.logout();
-    await expect(logoutResponse).resolves.toBe(true);
+    await expect(userClient.logout()).resolves.not.toThrow();
 
     expect(userClient.client.post).toHaveBeenCalledWith("/logout");
   });
 
-  it("should return false if logout is not successful", async () => {
-    const response = new Response(new XMLHttpRequest());
-    response.status = 403;
-    jest.spyOn(userClient.client, "post").mockResolvedValue(response);
+  it.each`
+    status | error
+    ${400} | ${"Unauthorized error"}
+    ${401} | ${"Unauthorized error"}
+    ${404} | ${"Unauthorized error"}
+    ${500} | ${"Technical error"}
+  `(
+    "should throw error if API returns an error status",
+    async ({ status, error }) => {
+      const response = new Response(new XMLHttpRequest());
+      response.status = status;
+      response.ok = status >= 200 && status <= 299;
 
-    const logoutResponse = userClient.logout();
-    await expect(logoutResponse).resolves.toBe(false);
+      jest
+        .spyOn(userClient.client, "post")
+        .mockResolvedValueOnce(response)
 
-    expect(userClient.client.post).toHaveBeenCalledWith("/logout");
-  });
+      await expect(userClient.logout()).rejects.toThrow(error);
+
+      expect(userClient.client.post).toHaveBeenCalledWith("/logout");
+    }
+  );
 });

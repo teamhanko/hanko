@@ -26,15 +26,12 @@ const LogoutButton = (props: Props) => {
         setIsLoading(true);
 
         hanko.user.logout()
-            .then((resp: boolean) => {
+            .then(() => {
                 setIsLoading(false);
-
-                if (resp) {
-                    setIsSuccess(true);
-                    emitLogoutSuccessEvent();
-                    return;
-                }
-
+                setIsSuccess(true);
+                emitLogoutSuccessEvent();
+            }).catch(() => {
+                setIsLoading(false);
                 emitLogoutFailureEvent();
             });
     }

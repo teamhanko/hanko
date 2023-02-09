@@ -101,10 +101,25 @@ class UserClient extends Client {
     return userResponse.json();
   }
 
-  async logout(): Promise<boolean> {
+  /**
+   * Logs out the current user and expires the existing session cookie. A valid session cookie is required to call the logout endpoint.
+   *
+   * @return {Promise<void>}
+   * @throws {UnauthorizedError}
+   * @throws {TechnicalError}
+   */
+  async logout(): Promise<void> {
     const logoutResponse = await this.client.post('/logout');
 
-    return logoutResponse.status === 200;
+    if (
+      logoutResponse.status === 400 ||
+      logoutResponse.status === 401 ||
+      logoutResponse.status === 404
+    ) {
+      throw new UnauthorizedError();
+    } else if (!logoutResponse.ok) {
+      throw new TechnicalError();
+    }
   }
 }
 
