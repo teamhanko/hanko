@@ -466,7 +466,7 @@ func TestUserHandler_Me(t *testing.T) {
 func TestUserHandler_Logout(t *testing.T) {
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodGet, "/me", nil)
+	req := httptest.NewRequest(http.MethodPost, "/logout", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
