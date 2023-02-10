@@ -18,6 +18,8 @@ type WebauthnCredentialResponse struct {
 	AAGUID          uuid.UUID `json:"aaguid"`
 	CreatedAt       time.Time `json:"created_at"`
 	Transports      []string  `json:"transports"`
+	BackupEligible  bool      `json:"backup_eligible"`
+	BackupState     bool      `json:"backup_state"`
 }
 
 // FromWebauthnCredentialModel Converts the DB model to a DTO object
@@ -30,5 +32,7 @@ func FromWebauthnCredentialModel(c *models.WebauthnCredential) *WebauthnCredenti
 		AAGUID:          c.AAGUID,
 		CreatedAt:       c.CreatedAt,
 		Transports:      c.Transports.GetNames(),
+		BackupEligible:  c.BackupEligible,
+		BackupState:     c.BackupState,
 	}
 }
