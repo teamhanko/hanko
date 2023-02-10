@@ -60,7 +60,7 @@ body {
     padding-bottom: 2rem;
 }
 
-hanko-auth, hanko-profile {
+hanko-auth, hanko-profile, hanko-logout {
     /* Color Scheme */
     --color: white;
     --color-shade-1: #A6B6C0;
