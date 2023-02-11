@@ -50,8 +50,8 @@
   ],
   "homepage": "https://hanko.io",
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.50.0",
-    "@typescript-eslint/parser": "^5.50.0",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
     "css-loader": "^6.7.3",
     "eslint": "^8.33.0",
     "eslint-config-google": "^0.14.0",
@@ -73,6 +73,6 @@
     "@teamhanko/hanko-frontend-sdk": "file:../frontend-sdk",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
-    "preact": "^10.11.3"
+    "preact": "^10.12.0"
   }
 }

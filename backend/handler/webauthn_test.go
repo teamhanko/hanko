@@ -48,7 +48,7 @@ func TestWebauthnHandler_BeginRegistration(t *testing.T) {
 		err = json.Unmarshal(rec.Body.Bytes(), &creationOptions)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, creationOptions.Response.Challenge)
-		assert.Equal(t, userIdBytes, creationOptions.Response.User.ID)
+		assert.Equal(t, userIdBytes, []byte(creationOptions.Response.User.ID))
 		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
 		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
