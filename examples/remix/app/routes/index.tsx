@@ -23,7 +23,7 @@ export default function Index() {
   const handler = async () => {
     const hanko = new Hanko(window.ENV.HANKO_URL);
     const user = await hanko.user.getCurrent();
-    const data = { hankoId: user.id, email: user.email };
+    const data = { hankoId: user.id, emailId: user.email_id };
     fetcher.submit(data, { method: "post" });
   };
 

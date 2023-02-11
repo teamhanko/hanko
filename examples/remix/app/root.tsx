@@ -9,6 +9,7 @@ import {
   ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
+import { createHead } from 'remix-island';
 import styles from "~/styles/index.css";
 
 export const links: LinksFunction = () => {
@@ -20,6 +21,13 @@ export const meta: MetaFunction = () => ({
   title: "New Remix App",
   viewport: "width=device-width,initial-scale=1",
 });
+
+export const Head = createHead(() => (
+  <>
+    <Meta />
+    <Links />
+  </>
+));
 
 export async function loader() {
   return json({
@@ -34,25 +42,20 @@ export default function App() {
   const { ENV } = useLoaderData<typeof loader>();
 
   return (
-    <html lang="en">
-      <head>
-        <Meta />
-        <Links />
-      </head>
-      <body>
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
-        {/* Add the URL of the Hanko API instance to the window object so that
+    <>
+      <Head />
+      <Outlet />
+      <ScrollRestoration />
+      <Scripts />
+      {/* Add the URL of the Hanko API instance to the window object so that
         it can be accessed in `useEffect` etc */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.ENV = ${JSON.stringify(ENV)}`,
-          }}
-        />
-        <LiveReload />
-      </body>
-    </html>
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `window.ENV = ${JSON.stringify(ENV)}`,
+        }}
+      />
+      <LiveReload />
+    </>
   );
 }
 

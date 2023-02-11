@@ -9,26 +9,28 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
-    "@remix-run/node": "^1.11.1",
-    "@remix-run/react": "^1.11.1",
-    "@remix-run/serve": "^1.11.1",
-    "@teamhanko/hanko-elements": "0.0.17-alpha",
-    "@teamhanko/hanko-frontend-sdk": "0.0.9-alpha",
+    "@github/webauthn-json": "^2.1.1",
+    "@remix-run/node": "^1.12.0",
+    "@remix-run/react": "^1.12.0",
+    "@remix-run/serve": "^1.12.0",
+    "@teamhanko/hanko-elements": "0.1.1-alpha",
+    "@teamhanko/hanko-frontend-sdk": "0.1.1-alpha",
     "cookie": "0.5.0",
     "isbot": "^3.6.5",
-    "jsonwebtoken": "8.5.1",
+    "jsonwebtoken": "9.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remix-utils": "4.3.0"
+    "remix-island": "^0.1.2",
+    "remix-utils": "6.0.0"
   },
   "devDependencies": {
-    "@remix-run/dev": "^1.11.1",
-    "@remix-run/eslint-config": "^1.11.1",
-    "@types/jsonwebtoken": "8.5.9",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.8",
-    "eslint": "^8.27.0",
-    "typescript": "^4.8.4"
+    "@remix-run/dev": "^1.12.0",
+    "@remix-run/eslint-config": "^1.12.0",
+    "@types/jsonwebtoken": "9.0.1",
+    "@types/react": "^18.0.27",
+    "@types/react-dom": "^18.0.10",
+    "eslint": "^8.34.0",
+    "typescript": "4.8"
   },
   "engines": {
     "node": ">=14"
