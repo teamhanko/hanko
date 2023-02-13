@@ -398,4 +398,12 @@ emails:
   # Default: 5
   #
   max_num_of_addresses: 5
+log:
+  ## log_health_and_metrics
+  #
+  # If turned on (true) also logs invocations of the /health and /metrics endpoints
+  #
+  # Default: false
+  #
+  log_health_and_metrics: false
 ```
