@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/go-playground/validator/v10 v10.11.2
-	github.com/go-webauthn/webauthn v0.7.0
+	github.com/go-webauthn/webauthn v0.7.1
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobuffalo/validate/v3 v3.3.3
 	github.com/gofrs/uuid v4.4.0+incompatible
@@ -37,7 +37,7 @@ require (
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-sql-driver/mysql v1.7.0 // indirect
-	github.com/go-webauthn/revoke v0.1.6 // indirect
+	github.com/go-webauthn/revoke v0.1.9 // indirect
 	github.com/gobuffalo/envy v1.10.2 // indirect
 	github.com/gobuffalo/fizz v1.14.4 // indirect
 	github.com/gobuffalo/flect v1.0.0 // indirect
