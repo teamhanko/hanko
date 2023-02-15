@@ -397,7 +397,7 @@ const LoginEmailPage = (props: Props) => {
               {t("labels.signInPasskey")}
             </Button>
           </Form>
-          {config.providers.map((provider: string) => {
+          {config.providers?.map((provider: string) => {
             return (
               <Form key={provider}>
                 <Button
