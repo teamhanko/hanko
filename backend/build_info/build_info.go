@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-//go:generate sh -c "git describe --tags --always --match backend/* > version.txt"
+//go:generate sh -c "git describe --tags --always --match backend/* | sed -e s#^backend/## > version.txt"
 //go:embed version.txt
 var Version string
 

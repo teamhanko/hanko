@@ -317,6 +317,7 @@ the `server.public.address` option.
 ##### From source
 
 ```shell
+go generate ./...
 go build -a -o hanko main.go
 ```
 
