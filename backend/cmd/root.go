@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 Hanko GmbH <developers@hanko.io>
-
 */
 package cmd
 
@@ -10,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/cmd/jwt"
 	"github.com/teamhanko/hanko/backend/cmd/migrate"
 	"github.com/teamhanko/hanko/backend/cmd/serve"
+	"github.com/teamhanko/hanko/backend/cmd/version"
 	"github.com/teamhanko/hanko/backend/config"
 	"log"
 )
@@ -29,6 +29,7 @@ func NewRootCmd() *cobra.Command {
 	serve.RegisterCommands(cmd, &cfg)
 	jwk.RegisterCommands(cmd)
 	jwt.RegisterCommands(cmd, &cfg)
+	version.RegisterCommands(cmd)
 
 	return cmd
 }

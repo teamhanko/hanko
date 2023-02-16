@@ -2,7 +2,6 @@ package build_info
 
 import (
 	_ "embed"
-	"log"
 	"runtime/debug"
 	"strings"
 )
@@ -12,25 +11,6 @@ import (
 var version string
 var realVersion *string
 var isDirty *bool
-
-func PrintBuildInfo() {
-	bi, ok := debug.ReadBuildInfo()
-	ActualVersion := strings.TrimSpace(version)
-	if ok {
-		modified := false
-		for _, v := range bi.Settings {
-			if v.Key == "vcs.modified" {
-				if v.Value == "true" {
-					modified = true
-				}
-			}
-		}
-		if modified {
-			ActualVersion += "-dirty"
-		}
-	}
-	log.Println(ActualVersion)
-}
 
 func GetVersion() string {
 	if realVersion == nil {
