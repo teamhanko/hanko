@@ -1,6 +1,6 @@
 module github.com/teamhanko/hanko/backend
 
-go 1.17
+go 1.18
 
 require (
 	github.com/go-playground/validator/v10 v10.11.2
