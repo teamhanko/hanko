@@ -6,9 +6,11 @@ package main
 import (
 	"github.com/teamhanko/hanko/backend/build_info"
 	"github.com/teamhanko/hanko/backend/cmd"
+	"log"
 )
 
 func main() {
-	build_info.PrintBuildInfo()
+	log.Println(build_info.GetVersion())
+	log.Println(build_info.GetVersion())
 	cmd.Execute()
 }
