@@ -29,5 +29,4 @@ e2e/playwright/.cache/
 frontend/frontend-sdk/dist/
 frontend/frontend-sdk/node_modules/
 frontend/frontend-sdk/coverage
-/backend/version.txt
 /backend/build_info/version.txt
