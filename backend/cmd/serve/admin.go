@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 Hanko GmbH <developers@hanko.io>
-
 */
 package serve
 
@@ -26,7 +25,7 @@ func NewServeAdminCommand(config *config.Config) *cobra.Command {
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			go server.StartAdmin(config, &wg, persister)
+			go server.StartAdmin(config, &wg, persister, nil)
 
 			wg.Wait()
 		},

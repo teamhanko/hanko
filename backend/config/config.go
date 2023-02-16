@@ -26,6 +26,7 @@ type Config struct {
 	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
 	Emails      Emails           `yaml:"emails" json:"emails" koanf:"emails"`
 	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
+	Log         LoggerConfig     `yaml:"log" json:"log" koanf:"log"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -438,4 +439,8 @@ type RedisConfig struct {
 	//Address of redis in the form of host[:port][/database]
 	Address  string `yaml:"address" json:"address" koanf:"address"`
 	Password string `yaml:"password" json:"password" koanf:"password"`
+}
+
+type LoggerConfig struct {
+	LogHealthAndMetrics bool `yaml:"log_health_and_metrics" json:"log_health_and_metrics" koanf:"log_health_and_metrics"`
 }
