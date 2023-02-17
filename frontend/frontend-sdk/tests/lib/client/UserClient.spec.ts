@@ -181,10 +181,14 @@ describe("UserClient.create()", () => {
 });
 
 describe("UserClient.logout()", () => {
-  it("should return true if logout is successful", async () => {
+  it.each`
+    status
+    ${200}
+    ${401}
+  `("should return true if logout is successful", async ({ status }) => {
     const response = new Response(new XMLHttpRequest());
-    response.status = 200;
-    response.ok = true;
+    response.status = status;
+    response.ok = status >= 200 && status <= 299;
 
     jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
     await expect(userClient.logout()).resolves.not.toThrow();
@@ -195,7 +199,6 @@ describe("UserClient.logout()", () => {
   it.each`
     status | error
     ${400} | ${"Unauthorized error"}
-    ${401} | ${"Unauthorized error"}
     ${404} | ${"Unauthorized error"}
     ${500} | ${"Technical error"}
   `(

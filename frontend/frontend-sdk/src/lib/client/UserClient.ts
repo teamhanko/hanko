@@ -117,12 +117,10 @@ class UserClient extends Client {
     // the cookie must also be removed client-side in that case.
     this.client.removeAuthCookie();
 
-    if (
-      logoutResponse.status === 400 ||
-      logoutResponse.status === 401 ||
-      logoutResponse.status === 404
-    ) {
+    if (logoutResponse.status === 400 || logoutResponse.status === 404) {
       throw new UnauthorizedError();
+    } else if (logoutResponse.status === 401) {
+      return; // user is logged out already
     } else if (!logoutResponse.ok) {
       throw new TechnicalError();
     }
