@@ -245,5 +245,5 @@ func (h *UserHandler) Logout(c echo.Context) error {
 
 	c.SetCookie(cookie)
 
-	return c.JSON(http.StatusOK, struct{}{})
+	return c.NoContent(http.StatusNoContent)
 }

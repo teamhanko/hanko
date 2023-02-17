@@ -198,8 +198,8 @@ describe("UserClient.logout()", () => {
 
   it.each`
     status | error
-    ${400} | ${"Unauthorized error"}
-    ${404} | ${"Unauthorized error"}
+    ${400} | ${"Technical error"}
+    ${404} | ${"Technical error"}
     ${500} | ${"Technical error"}
   `(
     "should throw error if API returns an error status",

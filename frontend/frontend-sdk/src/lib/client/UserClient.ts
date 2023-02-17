@@ -106,7 +106,6 @@ class UserClient extends Client {
    * Logs out the current user and expires the existing session cookie. A valid session cookie is required to call the logout endpoint.
    *
    * @return {Promise<void>}
-   * @throws {UnauthorizedError}
    * @throws {TechnicalError}
    */
   async logout(): Promise<void> {
@@ -117,10 +116,8 @@ class UserClient extends Client {
     // the cookie must also be removed client-side in that case.
     this.client.removeAuthCookie();
 
-    if (logoutResponse.status === 400 || logoutResponse.status === 404) {
-      throw new UnauthorizedError();
-    } else if (logoutResponse.status === 401) {
-      return; // user is logged out already
+    if (logoutResponse.status === 401) {
+      return; // The user is logged out already
     } else if (!logoutResponse.ok) {
       throw new TechnicalError();
     }
