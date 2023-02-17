@@ -21,7 +21,8 @@ type AuditLog struct {
 type AuditLogType string
 
 var (
-	AuditLogUserCreated AuditLogType = "user_created"
+	AuditLogUserCreated   AuditLogType = "user_created"
+	AuditLogUserLoggedOut AuditLogType = "user_logged_out"
 
 	AuditLogPasswordSetSucceeded AuditLogType = "password_set_succeeded"
 	AuditLogPasswordSetFailed    AuditLogType = "password_set_failed"
