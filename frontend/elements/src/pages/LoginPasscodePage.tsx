@@ -176,7 +176,7 @@ const LoginPasscodePage = ({
             isLoading={isLoading}
             isSuccess={isSuccess}
           >
-            {t("labels.signIn")}
+            {t("labels.continue")}
           </Button>
         </Form>
       </Content>
