@@ -394,8 +394,8 @@ github.com/labstack/echo-contrib v0.13.1 h1:9TktDom9FJKhkKO45YvV4klW8IedtSUp/k85
 github.com/labstack/echo-contrib v0.13.1/go.mod h1:LdM7aOHAYLOPmAAGXXG9TuN4h5sh6dPEu4pb6W2HKuU=
 github.com/labstack/echo-jwt/v4 v4.1.0 h1:eYGBxauPkyzBM78KJbR5OSz5uhKMDkhJZhTTIuoH6Pg=
 github.com/labstack/echo-jwt/v4 v4.1.0/go.mod h1:DHSSaL6cTgczdPXjf8qrTHRbrau2flcddV7CPMs2U/Y=
-github.com/labstack/echo/v4 v4.10.0 h1:5CiyngihEO4HXsz3vVsJn7f8xAlWwRr3aY6Ih280ZKA=
-github.com/labstack/echo/v4 v4.10.0/go.mod h1:S/T/5fy/GigaXnHTkh0ZGe4LpkkQysvRjFMSUTkDRNQ=
+github.com/labstack/echo/v4 v4.10.1 h1:rB+D8In9PWjsp1OpHaqK+t04nQv/SBD1IoIcXCg0lpY=
+github.com/labstack/echo/v4 v4.10.1/go.mod h1:OEyqf2//K1DFdE57vw2DRgWY0M7s65IVQO2FzvI4J5k=
 github.com/labstack/gommon v0.4.0 h1:y7cvthEAEbU0yHOf4axH8ZG2NH8knB9iNSoTO8dyIk8=
 github.com/labstack/gommon v0.4.0/go.mod h1:uW6kP17uPlLJsD3ijUYn3/M5bAxtlZhMI6m3MFxTMTM=
 github.com/leodido/go-urn v1.2.1 h1:BqpAaACuzVSgi/VLzGZIobT2z4v53pjosyNd9Yv6n/w=
