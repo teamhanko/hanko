@@ -220,6 +220,20 @@ paths:
                 $ref: '#/components/headers/Link'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /metrics:
+    get:
+      summary: 'Get Prometheus metrics.'
+      operationId: getMetrics
+      tags:
+        - Metrics
+      responses:
+        '200':
+          description: 'Prometheus Metrics for details about the format see: https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 'go_gc_duration_seconds{quantile="0"} 2.5875e-05'
 components:
   responses:
     BadRequest:

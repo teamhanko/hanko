@@ -123,10 +123,11 @@ docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.
 
 #### From source
 
-First build the Hanko backend. The only prerequisite is to have Go (v1.17+) [installed](https://go.dev/doc/install)
+First build the Hanko backend. The only prerequisite is to have Go (v1.18+) [installed](https://go.dev/doc/install)
 on your computer.
 
 ```shell
+go generate ./...
 go build -a -o hanko main.go
 ```
 
@@ -318,6 +319,7 @@ the `server.public.address` option.
 ##### From source
 
 ```shell
+go generate ./...
 go build -a -o hanko main.go
 ```
 

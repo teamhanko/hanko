@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/audit_log"
@@ -15,7 +16,7 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus *prometheus.Prometheus) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 
@@ -32,6 +33,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister) *echo.
 			AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
 			MaxAge:           cfg.Server.Public.Cors.MaxAge,
 		}))
+	}
+	
+	if prometheus != nil {
+		e.Use(prometheus.HandlerFunc)
 	}
 
 	e.Validator = dto.NewCustomValidator()

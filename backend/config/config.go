@@ -29,6 +29,7 @@ type Config struct {
 	Emails      Emails           `yaml:"emails" json:"emails" koanf:"emails"`
 	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
 	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party" koanf:"third_party"`
+	Log         LoggerConfig     `yaml:"log" json:"log" koanf:"log"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -570,4 +571,9 @@ func (c *Config) PostProcess() error {
 	}
 
 	return nil
+
+}
+
+type LoggerConfig struct {
+	LogHealthAndMetrics bool `yaml:"log_health_and_metrics" json:"log_health_and_metrics" koanf:"log_health_and_metrics"`
 }

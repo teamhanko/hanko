@@ -1,6 +1,5 @@
 /*
 Copyright © 2022 Hanko GmbH <developers@hanko.io>
-
 */
 package serve
 
@@ -26,7 +25,7 @@ func NewServePublicCommand(config *config.Config) *cobra.Command {
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			go server.StartPublic(config, &wg, persister)
+			go server.StartPublic(config, &wg, persister, nil)
 
 			wg.Wait()
 		},

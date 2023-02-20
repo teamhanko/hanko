@@ -496,4 +496,12 @@ third_party:
       # Required. The secret of your GitHub OAuth credentials
       #
       secret: "CHANGE_ME"
+log:
+  ## log_health_and_metrics
+  #
+  # If turned on (true) also logs invocations of the /health and /metrics endpoints
+  #
+  # Default: false
+  #
+  log_health_and_metrics: false
 ```
