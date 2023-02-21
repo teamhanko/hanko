@@ -4,7 +4,7 @@ import { BasePage } from "./BasePage.js";
 import Endpoints from "../helper/Endpoints.js";
 
 export class LoginPasscode extends BasePage {
-  readonly signInButton: Locator;
+  readonly continueButton: Locator;
   readonly sendNewCodeLink: Locator;
   readonly headline: Locator;
   readonly mailSlurperClient: MailSlurper;
@@ -14,8 +14,8 @@ export class LoginPasscode extends BasePage {
     super(page);
     this.passcodeInputs = page.locator("input[name*='passcode']");
     this.mailSlurperClient = mailSlurperClient;
-    this.signInButton = page.locator("button[type=submit]", {
-      hasText: "Sign in",
+    this.continueButton = page.locator("button[type=submit]", {
+      hasText: "Continue",
     });
     this.sendNewCodeLink = page.locator("button", {
       hasText: "Send new code",
