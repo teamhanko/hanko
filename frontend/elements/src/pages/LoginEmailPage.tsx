@@ -399,13 +399,13 @@ const LoginEmailPage = (props: Props) => {
           </Form>
           {config.providers?.map((provider: string) => {
             return (
-              <Form key={provider}>
-                <Button
-                  secondary
-                  onClick={(e) => {
-                    onThirdPartyAuth(e, provider);
-                  }}
-                >
+              <Form
+                key={provider}
+                onSubmit={(e) => {
+                  onThirdPartyAuth(e, provider);
+                }}
+              >
+                <Button secondary>
                   {t("labels.signInWith", {
                     provider,
                   })}
