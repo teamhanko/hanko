@@ -608,6 +608,23 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /logout:
+    post:
+      summary: "Log out the current user"
+      description: "Logs out the user by removing the authorization cookie."
+      operationId: logout
+      tags:
+        - User Management
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      responses:
+        '204':
+          description: 'The user has been logged out'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /users:
     post:
       summary: 'Create a user'
