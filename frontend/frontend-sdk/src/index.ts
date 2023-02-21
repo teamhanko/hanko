@@ -59,7 +59,7 @@ export type {
   WebauthnCredential,
   WebauthnCredentials,
   Passcode,
-  Identity
+  Identity,
 };
 
 // Errors

@@ -155,7 +155,7 @@ export const translations = {
       emailDelete:
         "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
       emailDeleteThirdPartyConnection:
-        "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Sie können das verbundene {provider}-Konto ebenfalls nicht mehr zu Anmeldung nutzen oder dieses neu verbinden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
+        "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Sie können das verbundene {provider}-Konto ebenfalls nicht mehr zur Anmeldung nutzen oder dieses neu verbinden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
       emailDeletePrimary:
         "Die primäre E-Mail-Adresse kann nicht gelöscht werden. Fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie diese als primär fest.",
       renamePasskey:

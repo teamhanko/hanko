@@ -196,8 +196,8 @@ interface WebauthnCredentials extends Array<WebauthnCredential> {}
  * @property {provider} - The third party provider name.
  */
 interface Identity {
-  id: string,
-  provider: string
+  id: string;
+  provider: string;
 }
 
 export type {
