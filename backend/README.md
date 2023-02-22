@@ -126,6 +126,7 @@ First build the Hanko backend. The only prerequisite is to have Go (v1.18+) [ins
 on your computer.
 
 ```shell
+go generate ./...
 go build -a -o hanko main.go
 ```
 
@@ -317,6 +318,7 @@ the `server.public.address` option.
 ##### From source
 
 ```shell
+go generate ./...
 go build -a -o hanko main.go
 ```
 

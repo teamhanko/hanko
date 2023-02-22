@@ -139,7 +139,7 @@ const AppProvider = ({
     >
       <TranslateProvider
         translations={translations}
-        lang={lang.toString()}
+        lang={lang?.toString()}
         fallbackLang={fallbackLang}
       >
         <Container ref={ref}>{page}</Container>

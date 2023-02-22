@@ -88,7 +88,7 @@ test.describe("@common", () => {
       });
 
       await test.step("And input elements should be disabled", async () => {
-        await expect(loginPasscodePage.signInButton).toBeDisabled();
+        await expect(loginPasscodePage.continueButton).toBeDisabled();
         for (let i = 0; i < 6; ++i)
           await expect(
             loginPasscodePage.page.locator(`input[name=passcode${i}]`)
@@ -104,7 +104,7 @@ test.describe("@common", () => {
       });
 
       await test.step("And input elements should be enabled", async () => {
-        await expect(loginPasscodePage.signInButton).toBeEnabled();
+        await expect(loginPasscodePage.continueButton).toBeEnabled();
         for (let i = 0; i < 6; ++i)
           await expect(
             loginPasscodePage.page.locator(`input[name=passcode${i}]`)
