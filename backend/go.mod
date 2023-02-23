@@ -6,7 +6,7 @@ require (
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-testfixtures/testfixtures/v3 v3.8.1
-	github.com/go-webauthn/webauthn v0.7.1
+	github.com/go-webauthn/webauthn v0.8.1
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobuffalo/validate/v3 v3.3.3
 	github.com/gobwas/glob v0.2.3
