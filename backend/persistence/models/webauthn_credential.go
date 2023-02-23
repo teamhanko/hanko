@@ -17,6 +17,7 @@ type WebauthnCredential struct {
 	AttestationType string     `db:"attestation_type" json:"-"`
 	AAGUID          uuid.UUID  `db:"aaguid" json:"-"`
 	SignCount       int        `db:"sign_count" json:"-"`
+	LastUsedAt      *time.Time `db:"last_used_at" json:"-"`
 	CreatedAt       time.Time  `db:"created_at" json:"-"`
 	UpdatedAt       time.Time  `db:"updated_at" json:"-"`
 	Transports      Transports `has_many:"webauthn_credential_transports" json:"-"`
