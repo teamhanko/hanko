@@ -16,6 +16,7 @@ type Props = {
   isSuccess?: boolean;
   disabled?: boolean;
   autofocus?: boolean;
+  onClick?: (event: Event) => void;
 };
 
 const Button = ({
@@ -26,6 +27,7 @@ const Button = ({
   isLoading,
   isSuccess,
   autofocus,
+  onClick,
 }: Props) => {
   const ref = useRef(null);
 
@@ -44,6 +46,7 @@ const Button = ({
       ref={ref}
       type={"submit"}
       disabled={disabled || isLoading || isSuccess}
+      onClick={onClick}
       className={cx(
         styles.button,
         secondary ? styles.secondary : styles.primary

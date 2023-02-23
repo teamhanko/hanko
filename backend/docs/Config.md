@@ -398,6 +398,104 @@ emails:
   # Default: 5
   #
   max_num_of_addresses: 5
+## third_party ##
+#
+# Configures third party providers
+#
+third_party:
+  ## redirect_url
+  #
+  # Required if any providers are enabled.
+  # The URL the third party provider redirects to with an authorization code. Must consist of the base URL of
+  # your running hanko backend instance and the callback endpoint, i.e. <YOUR_BACKEND_INSTANCE>/thirdparty/callback.
+  #
+  redirect_url: "CHANGE_ME"
+  ## allowed_redirect_urls
+  #
+  # Required if any providers are enabled.
+  # List of URLS the backend is allowed to redirect to after third party sign-in was successful.
+  # (see also the 'redirect_to' parameter for the third party auth initialization endpoint
+  # - https://docs.hanko.io/api/public#tag/Third-Party/operation/thirdPartyAuth)
+  #
+  # Supports wildcard matching through globbing. e.g. https://*.example.com will allow https://foo.example.com and https://bar.example.com to be accepted.
+  # Globbing is also supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1 and https://foo.example.com/page2.
+  # More on globbing: https://pkg.go.dev/github.com/gobwas/glob#Compile
+  #
+  # NOTE: URLs in the list MUST NOT have trailing slash
+  #
+  # Examples:
+  # - http://localhost:8888
+  #
+  allowed_redirect_urls:
+    - "CHANGE_ME"
+  ##
+  #
+  # Required if any providers are enabled. URL the backend redirects to if an error occurs during third party sign-in. Errors are provided
+  # as 'error' and 'error_description' query params in the redirect location URL.
+  #
+  # When using the Hanko web components it should be the URL of the page that embeds the web component such that
+  # errors can be processed properly by the web component.
+  #
+  # You do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when validating
+  # redirect URLs.
+  #
+  # NOTE: MUST NOT have trailing slash
+  #
+  # Example:
+  # - http://localhost:8888/error
+  #
+  error_redirect_url: "CHANGE_ME"
+  ##
+  #
+  # The third party provider configurations. Unknown providers will be ignored.
+  #
+  providers:
+    ##
+    #
+    # The Google provider configuration
+    #
+    google:
+      ##
+      #
+      # Enable or disable the Google provider
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # Required. The client ID of your Google OAuth credentials.
+      # See: https://developers.google.com/identity/protocols/oauth2
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # Required. The secret of your Google OAuth credentials
+      #
+      secret: "CHANGE_ME"
+    ##
+    #
+    # The GitHub provider configuration
+    #
+    github:
+      ##
+      #
+      # Enable or disable the GitHub provider
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # Required. The client ID of your GitHub OAuth credentials.
+      # See: https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # Required. The secret of your GitHub OAuth credentials
+      #
+      secret: "CHANGE_ME"
 log:
   ## log_health_and_metrics
   #

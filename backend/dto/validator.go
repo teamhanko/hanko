@@ -43,11 +43,12 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					vErrs[i] = fmt.Sprintf("%s must be a valid email address", err.Field())
 				case "uuid4":
 					vErrs[i] = fmt.Sprintf("%s must be a valid uuid4", err.Field())
+				case "url":
+					vErrs[i] = fmt.Sprintf("%s must be a valid URL", err.Field())
 				default:
 					vErrs[i] = fmt.Sprintf("something wrong on %s; %s", err.Field(), err.Tag())
 				}
 			}
-
 
 			return NewHTTPError(http.StatusBadRequest, strings.Join(vErrs, " and "))
 		}

@@ -16,6 +16,7 @@ easily integrated into any web app with as little as two lines of code.
   - [Cross-domain communication](#cross-domain-communication)
   - [Audit logs](#audit-logs)
   - [Rate Limiting](#rate-limiting)
+  - [Social logins](#social-logins)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -396,6 +397,12 @@ It uses a combination of user-id/IP to mitigate DoS attacks on user accounts. Yo
 
 In production systems, you may want to hide the
 Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide additional network-based rate limiting.
+
+### Social Logins
+
+Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
+party provider logins. Please view the official [docs](https://docs.hanko.io/guides/social) for a list of supported
+providers and guides.
 
 ## API specification
 

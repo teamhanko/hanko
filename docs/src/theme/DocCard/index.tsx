@@ -89,7 +89,7 @@ function CardCategory({
         },
         {count: item.items.length},
       )}
-      showDescription={!!item.customProps.docCardShowDescription}
+      showDescription={!!item.customProps?.docCardShowDescription}
     />
   );
 }
@@ -104,7 +104,7 @@ function CardLink({item}: {item: PropSidebarItemLink}): JSX.Element {
       icon={icon}
       title={item.label}
       description={doc?.description}
-      showDescription={!!item.customProps.docCardShowDescription}
+      showDescription={!!item.customProps?.docCardShowDescription}
     />
   );
 }

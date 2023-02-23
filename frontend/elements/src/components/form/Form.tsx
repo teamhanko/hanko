@@ -4,7 +4,7 @@ import { ComponentChildren, toChildArray } from "preact";
 import styles from "./styles.sass";
 
 type Props = {
-  onSubmit: (event: Event) => void;
+  onSubmit?: (event: Event) => void;
   children: ComponentChildren;
 };
 

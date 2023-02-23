@@ -64,18 +64,22 @@ const LoginEmailPage = (props: Props) => {
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>();
   const [isEmailLoginSuccess, setIsEmailLoginSuccess] = useState<boolean>();
+  const [isThirdPartyLoginLoading, setIsThirdPartyLoginLoading] =
+    useState<string>("");
 
   const disabled = useMemo(
     () =>
       isEmailLoginLoading ||
       isEmailLoginSuccess ||
       isPasskeyLoginLoading ||
-      isPasskeyLoginSuccess,
+      isPasskeyLoginSuccess ||
+      !!isThirdPartyLoginLoading,
     [
       isEmailLoginLoading,
       isEmailLoginSuccess,
       isPasskeyLoginLoading,
       isPasskeyLoginSuccess,
+      isThirdPartyLoginLoading,
     ]
   );
 
@@ -83,6 +87,11 @@ const LoginEmailPage = (props: Props) => {
     if (event.target instanceof HTMLInputElement) {
       setEmailAddress(event.target.value);
     }
+  };
+
+  const onThirdPartyAuth = (event: Event, provider: string) => {
+    event.preventDefault();
+    setIsThirdPartyLoginLoading(provider);
   };
 
   const onBackHandler = useCallback(() => {
@@ -351,6 +360,16 @@ const LoginEmailPage = (props: Props) => {
       .catch((e) => setError(new TechnicalError(e)));
   }, []);
 
+  useEffect(() => {
+    if (isThirdPartyLoginLoading) {
+      hanko.thirdParty
+        .auth(isThirdPartyLoginLoading, window.location.href)
+        .catch((error) => {
+          setPage(<ErrorPage initialError={error} />);
+        });
+    }
+  }, [hanko, setPage, isThirdPartyLoginLoading]);
+
   return (
     <Content>
       <Headline1>{t("headlines.loginEmail")}</Headline1>
@@ -390,6 +409,26 @@ const LoginEmailPage = (props: Props) => {
               {t("labels.signInPasskey")}
             </Button>
           </Form>
+          {config.providers?.map((provider: string) => {
+            return (
+              <Form
+                key={provider}
+                onSubmit={(e) => {
+                  onThirdPartyAuth(e, provider);
+                }}
+              >
+                <Button
+                  secondary
+                  isLoading={isThirdPartyLoginLoading === provider}
+                  disabled={disabled}
+                >
+                  {t("labels.signInWith", {
+                    provider,
+                  })}
+                </Button>
+              </Form>
+            );
+          })}
         </Fragment>
       ) : null}
     </Content>

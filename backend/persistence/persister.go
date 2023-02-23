@@ -17,6 +17,8 @@ type persister struct {
 type Persister interface {
 	GetConnection() *pop.Connection
 	Transaction(func(tx *pop.Connection) error) error
+	GetIdentityPersister() IdentityPersister
+	GetIdentityPersisterWithConnection(tx *pop.Connection) IdentityPersister
 	GetUserPersister() UserPersister
 	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
 	GetPasscodePersister() PasscodePersister
@@ -107,6 +109,14 @@ func (p *persister) MigrateDown(steps int) error {
 
 func (p *persister) GetConnection() *pop.Connection {
 	return p.DB
+}
+
+func (p *persister) GetIdentityPersister() IdentityPersister {
+	return NewIdentityPersister(p.DB)
+}
+
+func (p *persister) GetIdentityPersisterWithConnection(tx *pop.Connection) IdentityPersister {
+	return NewIdentityPersister(tx)
 }
 
 func (p *persister) GetUserPersister() UserPersister {
