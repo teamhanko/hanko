@@ -55,7 +55,7 @@
     "jest": "^29.4.3",
     "jest-environment-jsdom": "^29.4.3",
     "js-cookie": "^3.0.1",
-    "jsdoc": "3.6.11",
+    "jsdoc": "4.0.2",
     "microbundle": "^0.15.1",
     "ts-jest": "^29.0.5",
     "ts-loader": "^9.4.2",
