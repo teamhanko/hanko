@@ -20,7 +20,7 @@ npm install @teamhanko/hanko-elements
 
 ## Import & use custom element
 
-Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Import the `register` function from `@teamhanko/hanko-elements` in the component where you want to use the
 Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
 [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
 Then use the `<hanko-auth>` element in your JSX.
@@ -34,7 +34,7 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 :::
 
 ```jsx title="HankoAuth.jsx" showLineNumbers
-import { register } from "@teamhanko/hanko-elements/hanko-auth";
+import { register } from "@teamhanko/hanko-elements";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
 const lang = process.env.NEXT_PUBLIC_HANKO_LANG;
@@ -92,7 +92,7 @@ To do so, apply an event listener with an appropriate redirect callback:
 ```jsx {2,9-20} title="HankoAuth.jsx" showLineNumbers
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { register } from "@teamhanko/hanko-elements/hanko-auth";
+import { register } from "@teamhanko/hanko-elements";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
 const lang = process.env.NEXT_PUBLIC_HANKO_LANG;

@@ -49,7 +49,7 @@ export class AppModule { }
 
 ## Import & use custom element
 
-Import the `register` function from `@teamhanko/hanko-elements/hanko-auth` in the component where you want to use the
+Import the `register` function from `@teamhanko/hanko-elements` in the component where you want to use the
 Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
 [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the
 element in your component template.
@@ -79,7 +79,7 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 ```js title="login.component.ts" showLineNumbers
 import { Component } from '@angular/core';
 import { environment } from '../../../environments/environment';
-import { register } from '@teamhanko/hanko-elements/hanko-auth';
+import { register } from '@teamhanko/hanko-elements';
 
 @Component({
   selector: 'app-login',
@@ -136,7 +136,7 @@ class directly on the `<hanko-auth>` element:
 import { Component } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
-import { register } from '@teamhanko/hanko-elements/hanko-auth';
+import { register } from '@teamhanko/hanko-elements';
 
 @Component({
   selector: 'app-login',
