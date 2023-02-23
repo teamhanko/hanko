@@ -542,6 +542,111 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/HankoConfiguration'
+  /thirdparty/auth:
+    get:
+      summary: 'Initialize third party login'
+      description: |
+        Initialize an OAuth-backed (authorization code grant type) login with a third party provider by redirecting to
+        the specified provider login URL to retrieve an authorization code.
+      operationId: thirdPartyAuth
+      tags:
+        - Third Party
+      parameters:
+        - in: query
+          name: provider
+          required: true
+          schema:
+            type: string
+            enum:
+              - google
+              - github
+          description: |
+            The name of the third party provider to log in with. Only providers enabled in the
+            [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+            via the `thirdparty.providers` option can be used. Requesting an unsupported provider results in a
+            redirect with error details in the location query.
+        - in: query
+          name: redirect_to
+          required: true
+          schema:
+            type: string
+            format: base64url
+          description: |
+            Base64url encoded string representing the URL the
+            [`/callback`](#tag/Third-Party/operation/thirdPartyCallback) eventually redirects to after successful login
+            with the third party provider. It must match one of the allowed redirect URLs set in the backend
+            [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+            through the `third_party.allowed_redirect_urls`.
+      responses:
+        '307':
+          description: 'Redirect to third party provider'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: |
+                Redirect to the third party provider on success. On error, redirects to the `Referer`. If `Referer` is
+                not present, redirects to the `third_party.error_redirect_url` set in the backend
+                [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config).
+                Error details are provided in the location URL in the form of `error` and `error_description`
+                query params.
+  /thirdparty/callback:
+    get:
+      summary: 'Third party provider callback'
+      description: Callback endpoint called by the third party provider after successful login.
+      operationId: thirdPartyCallback
+      tags:
+        - Third Party
+      parameters:
+        - in: query
+          name: code
+          schema:
+            type: string
+          description: |
+            The authorization code that can be exchanged for an access token and to retrieve user provider data
+        - in: query
+          name: state
+          required: true
+          schema:
+            type: string
+          description: The state
+        - in: query
+          name: error
+          schema:
+            type: string
+          description: |
+            An error returned from the third party provider
+        - in: query
+          name: error_description
+          schema:
+            type: string
+          description: The description of the error that occurred (if any)
+      responses:
+        '307':
+          description: 'Redirect to requested redirect URL or to configured site redirect URL'
+          headers:
+            Location:
+              schema:
+                type: string
+              description: |
+                Redirect to the URL requested via `redirect_to` query parameter during third party
+                provider login via [`/auth`](#tag/Third-Party/operation/thirdPartyAuth) endpoint on success. On error,
+                redirect to the `third_party.error_redirect_url` set in the backend
+                [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config).
+                Error details are provided in the location URL in the form of `error` and `error_description`
+                query params.
+            X-Auth-Token:
+              description: |
+                Present only on successful callback and when enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.enable_auth_token_header`
+                for purposes of cross-domain communication between client and Hanko API.
+              schema:
+                $ref: '#/components/schemas/X-Auth-Token'
+            Set-Cookie:
+              description: |
+                Present only on successful callback. Contains the JSON Web Token (JWT) that must be provided to protected endpoints.
+                Cookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.cookie`.
+              schema:
+                $ref: '#/components/schemas/CookieSession'
   /user:
     post:
       summary: 'Get user details by email'

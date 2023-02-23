@@ -456,6 +456,8 @@ components:
         - webauthn_authentication_init_failed
         - webauthn_authentication_final_succeeded
         - webauthn_authentication_final_failed
+        - thirdparty_signup_succeeded
+        - thirdparty_signin_succeeded
   headers:
     X-Total-Count:
       schema:
