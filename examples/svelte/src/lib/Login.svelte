@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
-  import { register } from '@teamhanko/hanko-elements/hanko-auth';
+  import { register } from '@teamhanko/hanko-elements';
 
   const api = import.meta.env.VITE_HANKO_API;
 

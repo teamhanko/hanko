@@ -1,4 +1,4 @@
-import { register } from "@teamhanko/hanko-elements/hanko-auth";
+import { register } from "@teamhanko/hanko-elements";
 import { useCallback, useEffect } from "react";
 import { useRouter } from "next/router";
 
