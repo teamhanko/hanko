@@ -103,6 +103,10 @@ function Todo() {
       });
   };
 
+  const profile = () => {
+    navigate("/profile");
+  }
+
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(event.currentTarget.value);
   };
@@ -121,6 +125,9 @@ function Todo() {
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
+        </button>
+        <button onClick={profile} className={styles.button}>
+          Profile
         </button>
       </nav>
       <div className={styles.content}>
