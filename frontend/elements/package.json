@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.1.2-alpha",
+  "version": "0.1.3-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -18,15 +18,15 @@
   "typesVersions": {
     "*": {
       "elements": [
-        "dist/ui/Elements.d.ts"
+        "dist/Elements.d.ts"
       ]
     }
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/elements.js",
-      "require": "./dist/elements.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/elements.js"
     }
   },
   "scripts": {

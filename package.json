@@ -1,0 +1,18 @@
+{
+  "name": "hanko-monorepo",
+  "version": "1.0.0",
+  "description": "hanko-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend/frontend-sdk",
+    "frontend/elements",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "dependencies": {
+    "turbo": "^1.8.2"
+  }
+}
