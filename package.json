@@ -14,5 +14,8 @@
   },
   "dependencies": {
     "turbo": "^1.8.2"
+  },
+  "devDependencies": {
+    "typescript": "^4.8.4"
   }
 }
