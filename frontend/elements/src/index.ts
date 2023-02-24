@@ -1,2 +1,3 @@
 import { HankoAuth, HankoProfile, register } from "./Elements";
-export { HankoAuth, HankoProfile, register };
+const testString = "Hanko Elements!"
+export { HankoAuth, HankoProfile, register, testString };
