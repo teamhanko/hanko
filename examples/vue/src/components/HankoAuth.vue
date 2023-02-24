@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { register } from "@teamhanko/hanko-elements";
+import { register, testString } from "@teamhanko/hanko-elements";
 import { onMounted } from "vue";
 
 onMounted(() => {
@@ -17,5 +17,6 @@ const redirectToTodo = () => {
 </script>
 
 <template>
+  <h1>Hello from { testString }</h1>
   <hanko-auth @hankoAuthSuccess="redirectToTodo" :api="api" />
 </template>

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
-  import { register } from '@teamhanko/hanko-elements';
+  import { register, testString } from '@teamhanko/hanko-elements';
 
   const api = import.meta.env.VITE_HANKO_API;
 
@@ -26,6 +26,7 @@
 </script>
 
 <div class="content">
+  <h1>Hello from {testString}</h1>
   <hanko-auth bind:this={element} {api}/>
 </div>
 
