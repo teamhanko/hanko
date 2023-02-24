@@ -10,7 +10,7 @@
     "dist"
   ],
   "browser": {
-    "./": "./dist/elements.js"
+    ".": "./dist/elements.js"
   },
   "typesVersions": {
     "*": {
