@@ -1568,6 +1568,11 @@ components:
                 - nfc
                 - ble
                 - internal
+          last_used_at:
+            description: The time when the credential was used last
+            type: string
+            required: false
+            format: date-time
           created_at:
             description: Time of creation of the credential
             type: string
