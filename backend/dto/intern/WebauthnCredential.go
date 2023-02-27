@@ -21,6 +21,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 		AttestationType: credential.AttestationType,
 		AAGUID:          aaguid,
 		SignCount:       int(credential.Authenticator.SignCount),
+		LastUsedAt:      &now,
 		CreatedAt:       now,
 		UpdatedAt:       now,
 		BackupEligible:  backupEligible,

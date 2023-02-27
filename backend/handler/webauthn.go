@@ -19,6 +19,7 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
 	"strings"
+	"time"
 )
 
 type WebauthnHandler struct {
@@ -369,9 +370,14 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				break
 			}
 		}
-		if dbCred != nil && (dbCred.BackupEligible != request.Response.AuthenticatorData.Flags.HasBackupEligible() || dbCred.BackupState != request.Response.AuthenticatorData.Flags.HasBackupState()) {
-			dbCred.BackupState = request.Response.AuthenticatorData.Flags.HasBackupState()
-			dbCred.BackupEligible = request.Response.AuthenticatorData.Flags.HasBackupEligible()
+		if dbCred != nil {
+			if dbCred.BackupEligible != request.Response.AuthenticatorData.Flags.HasBackupEligible() || dbCred.BackupState != request.Response.AuthenticatorData.Flags.HasBackupState() {
+				dbCred.BackupState = request.Response.AuthenticatorData.Flags.HasBackupState()
+				dbCred.BackupEligible = request.Response.AuthenticatorData.Flags.HasBackupEligible()
+			}
+
+			now := time.Now().UTC()
+			dbCred.LastUsedAt = &now
 
 			err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Update(*dbCred)
 			if err != nil {
