@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
+	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
-	"github.com/knadh/koanf/providers/env"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"log"
@@ -25,10 +25,10 @@ type Config struct {
 	Secrets     Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
 	Service     Service          `yaml:"service" json:"service" koanf:"service"`
 	Session     Session          `yaml:"session" json:"session" koanf:"session"`
-	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log"`
+	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log" koanf:"audit_log" split_words:"true"`
 	Emails      Emails           `yaml:"emails" json:"emails" koanf:"emails"`
-	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter"`
-	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party" koanf:"third_party"`
+	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter" split_words:"true"`
+	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party" koanf:"third_party" split_words:"true"`
 	Log         LoggerConfig     `yaml:"log" json:"log" koanf:"log"`
 }
 
@@ -44,17 +44,14 @@ func Load(cfgFile *string) (*Config, error) {
 		log.Println("Using config file:", *cfgFile)
 	}
 
-	err = k.Load(env.Provider("", ".", func(s string) string {
-		return strings.Replace(strings.ToLower(s), "_", ".", -1)
-	}), nil)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
-	}
-
 	c := DefaultConfig()
 	err = k.Unmarshal("", c)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	if err := envconfig.Process("hanko", c); err != nil {
+		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 
 	err = c.PostProcess()
@@ -211,13 +208,13 @@ func (s *Service) Validate() error {
 
 type Password struct {
 	Enabled           bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	MinPasswordLength int  `yaml:"min_password_length" json:"min_password_length" koanf:"min_password_length"`
+	MinPasswordLength int  `yaml:"min_password_length" json:"min_password_length" koanf:"min_password_length" split_words:"true"`
 }
 
 type Cookie struct {
 	Domain   string `yaml:"domain" json:"domain" koanf:"domain"`
-	HttpOnly bool   `yaml:"http_only" json:"http_only" koanf:"http_only"`
-	SameSite string `yaml:"same_site" json:"same_site" koanf:"same_site"`
+	HttpOnly bool   `yaml:"http_only" json:"http_only" koanf:"http_only" split_words:"true"`
+	SameSite string `yaml:"same_site" json:"same_site" koanf:"same_site" split_words:"true"`
 	Secure   bool   `yaml:"secure" json:"secure" koanf:"secure"`
 }
 
@@ -230,12 +227,12 @@ type ServerSettings struct {
 
 type Cors struct {
 	Enabled          bool     `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	AllowCredentials bool     `yaml:"allow_credentials" json:"allow_credentials" koanf:"allow_credentials"`
-	AllowOrigins     []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins"`
-	AllowMethods     []string `yaml:"allow_methods" json:"allow_methods" koanf:"allow_methods"`
-	AllowHeaders     []string `yaml:"allow_headers" json:"allow_headers" koanf:"allow_headers"`
-	ExposeHeaders    []string `yaml:"expose_headers" json:"expose_headers" koanf:"expose_headers"`
-	MaxAge           int      `yaml:"max_age" json:"max_age" koanf:"max_age"`
+	AllowCredentials bool     `yaml:"allow_credentials" json:"allow_credentials" koanf:"allow_credentials" split_words:"true"`
+	AllowOrigins     []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins" split_words:"true"`
+	AllowMethods     []string `yaml:"allow_methods" json:"allow_methods" koanf:"allow_methods" split_words:"true"`
+	AllowHeaders     []string `yaml:"allow_headers" json:"allow_headers" koanf:"allow_headers" split_words:"true"`
+	ExposeHeaders    []string `yaml:"expose_headers" json:"expose_headers" koanf:"expose_headers" split_words:"true"`
+	MaxAge           int      `yaml:"max_age" json:"max_age" koanf:"max_age" split_words:"true"`
 }
 
 func (s *ServerSettings) Validate() error {
@@ -247,7 +244,7 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty RelyingParty `yaml:"relying_party" json:"relying_party" koanf:"relying_party"`
+	RelyingParty RelyingParty `yaml:"relying_party" json:"relying_party" koanf:"relying_party" split_words:"true"`
 	Timeout      int          `yaml:"timeout" json:"timeout" koanf:"timeout"`
 }
 
@@ -259,7 +256,7 @@ func (r *WebauthnSettings) Validate() error {
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
 	Id          string `yaml:"id" json:"id" koanf:"id"`
-	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
 	Icon        string `yaml:"icon" json:"icon" koanf:"icon"`
 	// Deprecated: Use Origins instead
 	Origin  string   `yaml:"origin" json:"origin" koanf:"origin"`
@@ -285,8 +282,8 @@ func (s *SMTP) Validate() error {
 }
 
 type Email struct {
-	FromAddress string `yaml:"from_address" json:"from_address" koanf:"from_address"`
-	FromName    string `yaml:"from_name" json:"from_name" koanf:"from_name"`
+	FromAddress string `yaml:"from_address" json:"from_address" koanf:"from_address" split_words:"true"`
+	FromName    string `yaml:"from_name" json:"from_name" koanf:"from_name" split_words:"true"`
 }
 
 func (e *Email) Validate() error {
@@ -369,7 +366,7 @@ func (s *Secrets) Validate() error {
 }
 
 type Session struct {
-	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header"`
+	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header" split_words:"true"`
 	Lifespan              string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
 	Cookie                Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
 }
@@ -383,7 +380,7 @@ func (s *Session) Validate() error {
 }
 
 type AuditLog struct {
-	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output" koanf:"console_output"`
+	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output" koanf:"console_output" split_words:"true"`
 	Storage       AuditLogStorage `yaml:"storage" json:"storage" koanf:"storage"`
 }
 
@@ -393,12 +390,12 @@ type AuditLogStorage struct {
 
 type AuditLogConsole struct {
 	Enabled      bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output"`
+	OutputStream OutputStream `yaml:"output" json:"output" koanf:"output" split_words:"true"`
 }
 
 type Emails struct {
-	RequireVerification bool `yaml:"require_verification" json:"require_verification" koanf:"require_verification"`
-	MaxNumOfAddresses   int  `yaml:"max_num_of_addresses" json:"max_num_of_addresses" koanf:"max_num_of_addresses"`
+	RequireVerification bool `yaml:"require_verification" json:"require_verification" koanf:"require_verification" split_words:"true"`
+	MaxNumOfAddresses   int  `yaml:"max_num_of_addresses" json:"max_num_of_addresses" koanf:"max_num_of_addresses" split_words:"true"`
 }
 
 type OutputStream string
@@ -412,8 +409,8 @@ type RateLimiter struct {
 	Enabled        bool                 `yaml:"enabled" json:"enabled" koanf:"enabled"`
 	Store          RateLimiterStoreType `yaml:"store" json:"store" koanf:"store"`
 	Redis          *RedisConfig         `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
-	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits"`
-	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits" koanf:"password_limits"`
+	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits" split_words:"true"`
+	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits" koanf:"password_limits" split_words:"true"`
 }
 
 type RateLimits struct {
@@ -455,9 +452,9 @@ type RedisConfig struct {
 
 type ThirdParty struct {
 	Providers             ThirdPartyProviders `yaml:"providers" json:"providers" koanf:"providers"`
-	RedirectURL           string              `yaml:"redirect_url" json:"redirect_url" koanf:"redirect_url"`
-	ErrorRedirectURL      string              `yaml:"error_redirect_url" json:"error_redirect_url" koanf:"error_redirect_url"`
-	AllowedRedirectURLs   []string            `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls"`
+	RedirectURL           string              `yaml:"redirect_url" json:"redirect_url" koanf:"redirect_url" split_words:"true"`
+	ErrorRedirectURL      string              `yaml:"error_redirect_url" json:"error_redirect_url" koanf:"error_redirect_url" split_words:"true"`
+	AllowedRedirectURLS   []string            `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls" koanf:"allowed_redirect_urls" split_words:"true"`
 	AllowedRedirectURLMap map[string]glob.Glob
 }
 
@@ -471,11 +468,11 @@ func (t *ThirdParty) Validate() error {
 			return errors.New("error_redirect_url must be set")
 		}
 
-		if len(t.AllowedRedirectURLs) <= 0 {
+		if len(t.AllowedRedirectURLS) <= 0 {
 			return errors.New("at least one allowed redirect url must be set")
 		}
 
-		urls := append(t.AllowedRedirectURLs, t.ErrorRedirectURL)
+		urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
 		for _, u := range urls {
 			if strings.HasSuffix(u, "/") {
 				return fmt.Errorf("redirect url %s must not have trailing slash", u)
@@ -493,7 +490,7 @@ func (t *ThirdParty) Validate() error {
 
 func (t *ThirdParty) PostProcess() error {
 	t.AllowedRedirectURLMap = make(map[string]glob.Glob)
-	urls := append(t.AllowedRedirectURLs, t.ErrorRedirectURL)
+	urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
 	for _, url := range urls {
 		g, err := glob.Compile(url, '.', '/')
 		if err != nil {

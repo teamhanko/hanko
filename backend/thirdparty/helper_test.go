@@ -47,7 +47,7 @@ func TestIsValidRedirectTo(t *testing.T) {
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
 			cfg := config.ThirdParty{
-				AllowedRedirectURLs: testData.allowedRedirectURLs,
+				AllowedRedirectURLS: testData.allowedRedirectURLs,
 			}
 
 			if testData.errorRedirectURL != "" {

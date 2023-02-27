@@ -1,7 +1,17 @@
 # Hanko backend config
 
-All config parameters with their defaults and allowed values are documented here. For some parameters there is an extra
-section with more detailed instructions below.
+The Hanko backend can be configured using a `yaml` configuration file or using environment variables.
+Environment variables have higher precedence than configuration via file (i.e. if provided, they overwrite the values
+given in the file - multivalued options, like arrays, are also _not_ merged but overwritten entirely).
+
+The schema for the configuration file is given below. To set equivalent environment variables, join keys by `_`
+(underscore) uppercase the keys and prefix the variable with `HANKO`, i.e. for `server.public.cors.allow_methods`
+use:
+
+```shell
+export HANKO_SERVER_PUBLIC_CORS_ALLOW_METHODS="GET,PUT,POST,DELETE"
+```
+
 
 ## All available config options
 
