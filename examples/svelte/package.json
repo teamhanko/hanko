@@ -1,5 +1,5 @@
 {
-  "name": "svelte",
+  "name": "example-svelte",
   "private": true,
   "type": "module",
   "scripts": {

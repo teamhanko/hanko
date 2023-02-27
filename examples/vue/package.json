@@ -1,5 +1,5 @@
 {
-  "name": "vue",
+  "name": "example-vue",
   "scripts": {
     "start": "vite --port 8888 --host"
   },
