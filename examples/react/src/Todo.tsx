@@ -129,6 +129,9 @@ function Todo() {
         <button onClick={profile} className={styles.button}>
           Profile
         </button>
+        <button disabled className={styles.button}>
+          Todos
+        </button>
       </nav>
       <div className={styles.content}>
         <h1 className={styles.headline}>Todos</h1>
