@@ -37,6 +37,7 @@ import LoginPasswordPage from "./LoginPasswordPage";
 import RegisterPasskeyPage from "./RegisterPasskeyPage";
 import RegisterPasswordPage from "./RegisterPasswordPage";
 import ErrorPage from "./ErrorPage";
+import { IconName } from "../components/icons/Icon";
 
 interface Props {
   emailAddress?: string;
@@ -405,6 +406,7 @@ const LoginEmailPage = (props: Props) => {
               isLoading={isPasskeyLoginLoading}
               isSuccess={isPasskeyLoginSuccess}
               disabled={disabled}
+              icon={"passkey"}
             >
               {t("labels.signInPasskey")}
             </Button>
@@ -421,6 +423,7 @@ const LoginEmailPage = (props: Props) => {
                   secondary
                   isLoading={isThirdPartyLoginLoading === provider}
                   disabled={disabled}
+                  icon={provider.toLowerCase() as IconName}
                 >
                   {t("labels.signInWith", {
                     provider,

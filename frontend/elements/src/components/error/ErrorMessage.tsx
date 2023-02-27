@@ -5,9 +5,8 @@ import { TranslateContext } from "@denysvuika/preact-translate";
 
 import { HankoError, TechnicalError } from "@teamhanko/hanko-frontend-sdk";
 
-import ExclamationMark from "../icons/ExclamationMark";
-
 import styles from "./styles.sass";
+import Icon from "../icons/Icon";
 
 type Props = {
   error?: Error;
@@ -28,7 +27,7 @@ const ErrorMessage = ({ error = defaultError }: Props) => {
       hidden={!error}
     >
       <span>
-        <ExclamationMark />
+        <Icon name={"exclamation"} style={"padding-right: 5px"} />
       </span>
       <span
         id="errorMessage"
