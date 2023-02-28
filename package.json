@@ -10,7 +10,8 @@
   ],
   "scripts": {
     "build": "turbo run build",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "test": "turbo run test"
   },
   "dependencies": {
     "turbo": "^1.8.2"
