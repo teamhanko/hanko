@@ -5,7 +5,7 @@ import { Todos, TodoService } from '../services/todo.service';
 @Component({
   selector: 'app-todo',
   templateUrl: './todo.component.html',
-  styleUrls: ['./todo.component.css'],
+  styleUrls: ['../app.component.css', './todo.component.css'],
 })
 export class TodoComponent implements OnInit {
   todos: Todos = [];
@@ -14,7 +14,6 @@ export class TodoComponent implements OnInit {
 
   changeDescription(event: any) {
     this.description = event.target.value;
-    console.log(this.description);
   }
 
   changeCheckbox(event: any) {
@@ -114,8 +113,10 @@ export class TodoComponent implements OnInit {
         this.router.navigate(['/']).catch((e) => (this.error = e));
         return;
       })
-      .catch((e) => {
-        console.error(e);
-      });
+      .catch((e) => this.error = e);
+  }
+
+  profile() {
+    this.router.navigate(['/profile']).catch((e) => (this.error = e));
   }
 }
