@@ -1,14 +1,15 @@
 const path = require("path");
 
 module.exports = {
+  experiments: {
+    outputModule: true,
+  },
   entry: {
-    hankoAuth: {
+    hankoElements: {
       filename: 'elements.js',
       import: './src/index.ts',
       library: {
-        name: 'Elements',
-        type: 'umd',
-        umdNamedDefine: true,
+        type: 'module'
       },
     }
   },
