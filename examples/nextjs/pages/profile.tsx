@@ -6,98 +6,15 @@ import styles from "../styles/Todo.module.css";
 import dynamic from "next/dynamic";
 
 const todoApi = process.env.NEXT_PUBLIC_TODO_API!;
-const hankoApi = process.env.NEXT_PUBLIC_HANKO_API!;
 
-const HankoProfile = dynamic(() => import("../components/HankoAuth"), {
+const HankoProfile = dynamic(() => import("../components/HankoProfile"), {
   ssr: false,
 });
 
 const Todo: NextPage = () => {
-  const client = useMemo(() => new TodoClient(api), []);
   const router = useRouter();
-
-  const [todos, setTodos] = useState<Todos>([]);
-  const [description, setDescription] = useState<string>("");
+  const client = useMemo(() => new TodoClient(todoApi), []);
   const [error, setError] = useState<Error | null>(null);
-
-  const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const todo = { description, checked: false };
-
-    client
-      .addTodo(todo)
-      .then((res) => {
-        if (res.status === 401) {
-          router.replace("/").catch((e) => setError(e));
-          return;
-        }
-
-        setDescription("");
-        listTodos();
-
-        return;
-      })
-      .catch((e) => {
-        setError(e);
-      });
-  };
-
-  const listTodos = useCallback(() => {
-    client
-      .listTodos()
-      .then((res) => {
-        if (res.status === 401) {
-          router.push("/").catch((e) => setError(e));
-          return;
-        }
-
-        return res.json();
-      })
-      .then((todo) => {
-        if (todo) {
-          setTodos(todo);
-        }
-      })
-      .catch((e) => {
-        setError(e);
-      });
-  }, [client, router]);
-
-  const patchTodo = (id: string, checked: boolean) => {
-    client
-      .patchTodo(id, checked)
-      .then((res) => {
-        if (res.status === 401) {
-          router.push("/").catch((e) => setError(e));
-          return;
-        }
-
-        listTodos();
-
-        return;
-      })
-      .catch((e) => {
-        setError(e);
-      });
-  };
-
-  const deleteTodo = (id: string) => {
-    client
-      .deleteTodo(id)
-      .then((res) => {
-        if (res.status === 401) {
-          router.push("/").catch((e) => setError(e));
-          return;
-        }
-
-        listTodos();
-
-        return;
-      })
-      .catch((e) => {
-        setError(e);
-      });
-  };
 
   const logout = () => {
     client
@@ -111,18 +28,9 @@ const Todo: NextPage = () => {
       });
   };
 
-  const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setDescription(event.currentTarget.value);
+  const todos = () => {
+    router.push("/todo").catch((e) => setError(e));
   };
-
-  const changeCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { currentTarget } = event;
-    patchTodo(currentTarget.value, currentTarget.checked);
-  };
-
-  useEffect(() => {
-    listTodos();
-  }, [listTodos]);
 
   return (
     <>
@@ -130,42 +38,17 @@ const Todo: NextPage = () => {
         <button onClick={logout} className={styles.button}>
           Logout
         </button>
+        <button disabled className={styles.button}>
+          Profile
+        </button>
+        <button onClick={todos} className={styles.button}>
+          Todos
+        </button>
       </nav>
       <div className={styles.content}>
-        <h1 className={styles.headline}>Todos</h1>
+        <h1 className={styles.headline}>Profile</h1>
         <div className={styles.error}>{error?.message}</div>
-        <form onSubmit={addTodo} className={styles.form}>
-          <input
-            required
-            className={styles.input}
-            type={"text"}
-            value={description}
-            onChange={changeDescription}
-          />
-          <button type={"submit"} className={styles.button}>
-            +
-          </button>
-        </form>
-        <div className={styles.list}>
-          {todos.map((todo, index) => (
-            <div className={styles.item} key={index}>
-              <input
-                className={styles.checkbox}
-                id={todo.todoID}
-                type={"checkbox"}
-                value={todo.todoID}
-                checked={todo.checked}
-                onChange={changeCheckbox}
-              />
-              <label className={styles.description} htmlFor={todo.todoID}>
-                {todo.description}
-              </label>
-              <button className={styles.button} onClick={() => deleteTodo(todo.todoID!)}>
-                ×
-              </button>
-            </div>
-          ))}
-        </div>
+        <HankoProfile setError={setError} />
       </div>
     </>
   );

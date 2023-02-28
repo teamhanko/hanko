@@ -105,6 +105,10 @@ const Todo: NextPage = () => {
       });
   };
 
+  const profile = () => {
+    router.push("/profile").catch(setError)
+  }
+
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(event.currentTarget.value);
   };
@@ -123,6 +127,12 @@ const Todo: NextPage = () => {
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
+        </button>
+        <button onClick={profile} className={styles.button}>
+          Profile
+        </button>
+        <button disabled className={styles.button}>
+          Todos
         </button>
       </nav>
       <div className={styles.content}>

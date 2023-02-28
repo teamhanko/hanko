@@ -4,16 +4,20 @@ import { useRouter } from "next/router";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
 
-function HankoAuth() {
+interface Props {
+  setError(error: Error): void;
+}
+
+function HankoAuth({ setError }: Props) {
   const router = useRouter();
 
   const redirectToTodos = useCallback(() => {
-    router.replace("/todo");
-  }, [router]);
+    router.replace("/todo").catch(setError);
+  }, [router, setError]);
 
   useEffect(() => {
-    register({ shadow: true }).catch((e) => console.error(e));
-  }, []);
+    register({ shadow: true }).catch(setError);
+  }, [setError]);
 
   useEffect(() => {
     document.addEventListener("hankoAuthSuccess", redirectToTodos);
