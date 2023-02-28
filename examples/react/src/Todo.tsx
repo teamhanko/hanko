@@ -29,9 +29,7 @@ function Todo() {
 
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const listTodos = useCallback(() => {
@@ -50,9 +48,7 @@ function Todo() {
           setTodos(todo);
         }
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   }, [client, navigate]);
 
   const patchTodo = (id: string, checked: boolean) => {
@@ -68,9 +64,7 @@ function Todo() {
 
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const deleteTodo = (id: string) => {
@@ -86,9 +80,7 @@ function Todo() {
 
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const logout = () => {
@@ -98,9 +90,7 @@ function Todo() {
         navigate("/");
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const profile = () => {

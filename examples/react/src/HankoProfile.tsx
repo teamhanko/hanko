@@ -19,9 +19,7 @@ function HankoProfile() {
         navigate("/");
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const todo = () => {
@@ -29,7 +27,7 @@ function HankoProfile() {
   }
 
   useEffect(() => {
-    register({ shadow: true }).catch(console.error);
+    register({ shadow: true }).catch(setError);
   }, []);
 
   return (
