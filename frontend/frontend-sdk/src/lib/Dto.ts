@@ -167,6 +167,7 @@ interface Emails extends Array<Email> {}
  * @property {string} public_key - The public key.
  * @property {string} attestation_type - The attestation type.
  * @property {string} aaguid - The AAGUID of the authenticator.
+ * @property {string} last_used_at - The time when the credential was used last.
  * @property {string} created_at - Time of credential creation.
  * @property {WebauthnTransports} transports
  */
@@ -176,6 +177,7 @@ interface WebauthnCredential {
   public_key: string;
   attestation_type: string;
   aaguid: string;
+  last_used_at: string;
   created_at: string;
   transports: WebauthnTransports;
 }
