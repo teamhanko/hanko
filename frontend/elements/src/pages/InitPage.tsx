@@ -31,7 +31,7 @@ const InitPage = () => {
         .then((shouldRegister) =>
           shouldRegister ? <RegisterPasskeyPage /> : <LoginFinishedPage />
         ),
-    [hanko.webauthn]
+    [hanko]
   );
 
   const initHankoAuth = useCallback(() => {
@@ -56,7 +56,7 @@ const InitPage = () => {
       }
       return <LoginEmailPage />;
     });
-  }, [afterLogin, hanko.config, hanko.user, setConfig, setUser]);
+  }, [afterLogin, hanko, setConfig, setUser]);
 
   const initHankoProfile = useCallback(
     () =>
@@ -81,13 +81,14 @@ const InitPage = () => {
   }, [componentName, initHankoAuth, initHankoProfile]);
 
   useEffect(() => {
+    if (!hanko) return;
     const initializer = getInitializer();
     if (initializer) {
       initializer()
         .then(setPage)
         .catch((e) => setPage(<ErrorPage initialError={e} />));
     }
-  }, [getInitializer, setPage]);
+  }, [hanko, getInitializer, setPage]);
 
   return <LoadingSpinner isLoading />;
 };
