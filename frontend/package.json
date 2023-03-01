@@ -1,0 +1,14 @@
+{
+  "name": "hanko-frontend",
+  "description": "hanko frontend parts",
+  "private": true,
+  "workspaces": [
+    "frontend-sdk",
+    "elements"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test"
+  }
+}

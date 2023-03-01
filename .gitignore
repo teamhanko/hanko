@@ -19,6 +19,8 @@
 
 hanko
 
+.turbo
+
 # Dependency directories (remove the comment below to include it)
 frontend/elements/dist/
 frontend/elements/node_modules/
