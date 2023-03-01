@@ -30,6 +30,7 @@ import Form from "../components/form/Form";
 import Divider from "../components/divider/Divider";
 import ErrorMessage from "../components/error/ErrorMessage";
 import Headline1 from "../components/headline/Headline1";
+import { IconName } from "../components/icons/Icon";
 
 import LoginPasscodePage from "./LoginPasscodePage";
 import RegisterConfirmPage from "./RegisterConfirmPage";
@@ -37,7 +38,6 @@ import LoginPasswordPage from "./LoginPasswordPage";
 import RegisterPasskeyPage from "./RegisterPasskeyPage";
 import RegisterPasswordPage from "./RegisterPasswordPage";
 import ErrorPage from "./ErrorPage";
-import { IconName } from "../components/icons/Icon";
 
 interface Props {
   emailAddress?: string;

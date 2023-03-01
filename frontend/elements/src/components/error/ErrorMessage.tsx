@@ -27,7 +27,7 @@ const ErrorMessage = ({ error = defaultError }: Props) => {
       hidden={!error}
     >
       <span>
-        <Icon name={"exclamation"} style={"padding-right: 5px"} />
+        <Icon name={"exclamation"} />
       </span>
       <span
         id="errorMessage"

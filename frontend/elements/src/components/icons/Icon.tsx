@@ -8,7 +8,6 @@ export type IconProps = {
   fadeOut?: boolean;
   disabled?: boolean;
   size?: number;
-  style?: string;
 };
 
 type Props = IconProps & {
@@ -20,7 +19,6 @@ const Icon = ({
   secondary,
   size = 18,
   fadeOut,
-  style,
   disabled,
 }: Props) => {
   const Ico = icons[name];
@@ -30,7 +28,6 @@ const Icon = ({
       size={size}
       secondary={secondary}
       fadeOut={fadeOut}
-      style={style}
       disabled={disabled}
     />
   );
