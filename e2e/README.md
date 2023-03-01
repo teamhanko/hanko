@@ -57,10 +57,10 @@ docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-nop
 
 ```shell
 # compose v1
-PASSWORD_ENABLED=true docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw" up --build
+HANKO_PASSWORD_ENABLED=true docker-compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw" up --build
 
 # compose v2
-PASSWORD_ENABLED=true docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw" up --build
+HANKO_PASSWORD_ENABLED=true docker compose -f deploy/docker-compose/quickstart.yaml -p "hanko-quickstart-pw" up --build
 
 ```
 
