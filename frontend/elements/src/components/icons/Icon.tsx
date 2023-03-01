@@ -1,11 +1,7 @@
 import * as preact from "preact";
 import * as icons from "./icons";
 
-type IconsType = {
-  [name: string]: keyof typeof icons;
-};
-
-export type IconName = IconsType["name"];
+export type IconName = keyof typeof icons;
 
 export type IconProps = {
   secondary?: boolean;
