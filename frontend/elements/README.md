@@ -47,10 +47,10 @@ register({
 With a script tag via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"/>
+<script type="module">
+  import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"
 
-<script>
-  Elements.register({shadow: true, injectStyles: true})
+  register({shadow: true, injectStyles: true})
 </script>
 ```
 
