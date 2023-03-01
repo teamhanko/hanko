@@ -50,7 +50,7 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	if err := envconfig.Process("hanko", c); err != nil {
+	if err := envconfig.Process("", c); err != nil {
 		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 

@@ -39,7 +39,7 @@ jobs:
         working-directory: ./deploy/docker-compose
         run: docker compose -f "quickstart.yaml" up -d --build
         env:
-          HANKO_PASSWORD_ENABLED: true
+          PASSWORD_ENABLED: true
 
       - name: Install dependencies
         working-directory: ./e2e

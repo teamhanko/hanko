@@ -30,7 +30,7 @@ services:
     networks:
       - intranet
     environment:
-      - HANKO_PASSWORD_ENABLED
+      - PASSWORD_ENABLED
   postgresd:
     image: postgres:12-alpine
     ports:

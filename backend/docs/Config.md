@@ -5,11 +5,11 @@ Environment variables have higher precedence than configuration via file (i.e. i
 given in the file - multivalued options, like arrays, are also _not_ merged but overwritten entirely).
 
 The schema for the configuration file is given below. To set equivalent environment variables, join keys by `_`
-(underscore) uppercase the keys and prefix the variable with `HANKO`, i.e. for `server.public.cors.allow_methods`
+(underscore) uppercase the keys, i.e. for `server.public.cors.allow_methods`
 use:
 
 ```shell
-export HANKO_SERVER_PUBLIC_CORS_ALLOW_METHODS="GET,PUT,POST,DELETE"
+export SERVER_PUBLIC_CORS_ALLOW_METHODS="GET,PUT,POST,DELETE"
 ```
 
 
