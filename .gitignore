@@ -22,13 +22,9 @@ hanko
 .turbo
 
 # Dependency directories (remove the comment below to include it)
-frontend/elements/dist/
-frontend/elements/node_modules/
-e2e/node_modules/
+node_modules
+dist
 e2e/test-results/
 e2e/playwright-report/
 e2e/playwright/.cache/
-frontend/frontend-sdk/dist/
-frontend/frontend-sdk/node_modules/
-frontend/frontend-sdk/coverage
 /backend/build_info/version.txt
