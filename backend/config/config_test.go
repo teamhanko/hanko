@@ -70,10 +70,10 @@ func TestRateLimiterConfig(t *testing.T) {
 }
 
 func TestEnvironmentVariables(t *testing.T) {
-	err := os.Setenv("HANKO_PASSCODE_SMTP_HOST", "valueFromEnvVars")
+	err := os.Setenv("PASSCODE_SMTP_HOST", "valueFromEnvVars")
 	require.NoError(t, err)
 
-	err = os.Setenv("HANKO_SERVER_PUBLIC_CORS_ALLOW_METHODS", "GET,PUT,POST,DELETE")
+	err = os.Setenv("SERVER_PUBLIC_CORS_ALLOW_METHODS", "GET,PUT,POST,DELETE")
 	require.NoError(t, err)
 
 	configPath := "./minimal-config.yaml"
