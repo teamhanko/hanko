@@ -452,7 +452,7 @@ func (s *userSuite) TestUserHandler_Me() {
 	}
 }
 
-func TestUserHandler_Logout(t *testing.T) {
+func (s *userSuite) TestUserHandler_Logout() {
 	userId, _ := uuid.NewV4()
 
 	e := echo.New()
@@ -463,18 +463,17 @@ func TestUserHandler_Logout(t *testing.T) {
 
 	token := jwt.New()
 	err := token.Set(jwt.SubjectKey, userId.String())
-	require.NoError(t, err)
+	s.NoError(err)
 	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, nil, nil, nil, nil)
-	handler := NewUserHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
+	handler := NewUserHandler(&defaultConfig, s.storage, sessionManager{}, test.NewAuditLogger())
 
-	if assert.NoError(t, handler.Logout(c)) {
-		assert.Equal(t, http.StatusNoContent, rec.Code)
+	if s.NoError(handler.Logout(c)) {
+		s.Equal(http.StatusNoContent, rec.Code)
 		cookie := rec.Header().Get("Set-Cookie")
-		assert.NotEmpty(t, cookie)
+		s.NotEmpty(cookie)
 
 		split := strings.Split(cookie, ";")
-		assert.Equal(t, "Max-Age=0", strings.TrimSpace(split[1]))
+		s.Equal("Max-Age=0", strings.TrimSpace(split[1]))
 	}
 }
