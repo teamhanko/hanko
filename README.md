@@ -14,8 +14,8 @@
 # About Hanko
 Hanko is an open-source user authentication system with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
-- Built around latest [passkey](https://www.passkeys.io) technology as introduced by Apple, Google, and Microsoft
-- Hanko login box that integrates in minutes
+- Built around [passkeys](https://www.passkeys.io) as introduced by Apple, Google, and Microsoft
+- Hanko login box and profile elements that integrate in minutes
 - API-first, small footprint, cloud-native
 
 Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
@@ -27,7 +27,7 @@ https://user-images.githubusercontent.com/20115649/194661461-8819db77-4db5-4b24-
 
 With most devices now shipping with passkey support and biometric sensors like Touch ID, Face ID, and Windows Hello, a truly fascinating login experience is enabled that has the potential to replace passwords for good. Hanko is built for that shift.
 
-**Build your passkey login in just 5 minutes – with a few lines of code – and never look back.**
+**Build your passkey-powered auth stack with a few lines of code – and never look back.**
 
 # Architecture
 The main building blocks of the Hanko project are
@@ -41,44 +41,46 @@ The remainder of the repository contents consist of:
 - [docs](/docs) - The Hanko documentation
 
 # Getting started
-1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://passkeys.io) or use the [quickstart](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
-2. Head over to the [backend](/backend/README.md) to learn how to get it up and running for your own project. You can also use [Hanko Cloud](https://cloud.hanko.io) for a hosted backend.
+1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://passkeys.io) or use the [quickstart app](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
+2. Head over to the [backend](/backend/README.md) to learn how to get it up and running for your own project. Use [Hanko Cloud](https://cloud.hanko.io) for a hosted backend.
 3. Then, integrate [hanko-elements](/frontend/elements/README.md) – we provide [example applications](/examples/README.md) and [guides](https://docs.hanko.io/guides/frontend) for your favourite frontend framework in the official documentation
 
 If you want to use the Hanko backend API but prefer to build your own UI, you can still make use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components. The client it provides handles communication with the Hanko backend API and saves you the time of rolling your own.
 
 # Roadmap
-We are currently in **Beta** and may still have critical bugs. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of the current roadmap:
+We are currently in **Beta** and may introduce breaking changes. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our roadmap:
 
 | Status | Feature |
 |:------:| :--- |
-|   ✅    | Passkeys |
-|   ✅    | Email passcodes |
-|   ✅    | Passwords |
-|   ✅    | JWT signing |
-|   ✅    | User management API |
-|   ✅    | 📢 Hanko Alpha Release |
-|   ✅    | `<hanko-auth>` web component |
-|   ✅    | Customizable CSS |
-|   ✅    | 📢 Hanko Beta Release |
-|   ✅    | JavaScript frontend SDK |
-|   ✅    | Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
-|   ✅    | Audit logs API |
-|   ✅    | Security Key support |
-|   ✅    | Mobile app support |
-|   ✅    | `<hanko-profile>` web component |
-|   ✅    | Rate limiting (application level) |
-|   ⚙️   | Priviledged sessions & step-up authentication |
-|   ⚙️   | OAuth plugin system (Sign in with Google/Apple/GitHub/...) |
-|        | Session management |
-|        | Custom translations for [hanko-elements](/frontend/elements/README.md) |
-|        | Email templating |
+|✅| Passkeys |
+|✅| Email passcodes |
+|✅| Passwords |
+|✅| JWT signing |
+|✅| User management API |
+|✅| 📢 Hanko Alpha Release |
+|✅| `<hanko-auth>` web component |
+|✅| Customizable CSS |
+|✅| 📢 Hanko Beta Release |
+|✅| JavaScript frontend SDK |
+|✅| Passkey autofill ([Conditional UI](https://github.com/w3c/webauthn/wiki/Explainer:-WebAuthn-Conditional-UI)) |
+|✅| Audit logs API |
+|✅| Security Key support |
+|✅| Mobile app support |
+|✅| `<hanko-profile>` web component |
+|✅| Rate limiting |
+|✅| OAuth logins (Sign in with Google/GitHub/...) |
+|⚙️| Session management |
+|⚙️| Integration tests |
+| | i18n & custom translations for [hanko-elements](/frontend/elements/README.md) |
+| | 📢 Hanko v1.0 Release |
 
-Additional features that have been requested or that we would like to build but are not (yet) on the roadmap:
+Additional features that have been requested or that we would like to build but are currently not on the roadmap:
 - SMS passcode delivery
-- OpenID Connect
+- 2FA options to secure fallback auth methods
+- Priviledged sessions & step-up authentication
+- Email templating
+- Hosted auth pages and OpenID Connect
 - SAML support
-- 2FA to secure fallback auth methods
 
 # Community
 ## Questions, bugs, ideas
