@@ -1,6 +1,10 @@
 package config
 
 import (
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"os"
+	"reflect"
 	"testing"
 )
 
@@ -63,4 +67,19 @@ func TestRateLimiterConfig(t *testing.T) {
 	if err := cfg.Validate(); err == nil {
 		t.Error("notvalid is not a valid backend")
 	}
+}
+
+func TestEnvironmentVariables(t *testing.T) {
+	err := os.Setenv("PASSCODE_SMTP_HOST", "valueFromEnvVars")
+	require.NoError(t, err)
+
+	err = os.Setenv("SERVER_PUBLIC_CORS_ALLOW_METHODS", "GET,PUT,POST,DELETE")
+	require.NoError(t, err)
+
+	configPath := "./minimal-config.yaml"
+	cfg, err := Load(&configPath)
+	require.NoError(t, err)
+
+	assert.Equal(t, "valueFromEnvVars", cfg.Passcode.Smtp.Host)
+	assert.True(t, reflect.DeepEqual([]string{"GET", "PUT", "POST", "DELETE"}, cfg.Server.Public.Cors.AllowMethods))
 }

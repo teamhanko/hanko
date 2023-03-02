@@ -187,7 +187,7 @@ func setUpConfig(t *testing.T, enabledProviders []string, allowedRedirectURLs []
 			}},
 		ErrorRedirectURL:    "https://error.test.example",
 		RedirectURL:         "https://api.test.example/callback",
-		AllowedRedirectURLs: allowedRedirectURLs,
+		AllowedRedirectURLS: allowedRedirectURLs,
 	}}
 
 	for _, provider := range enabledProviders {
