@@ -110,6 +110,10 @@ const ListPasskeysAccordion = ({
         </Link>
       </Paragraph>
       <Paragraph>
+        <Headline2>{t("headlines.lastUsedAt")}</Headline2>
+        {credential.last_used_at ? convertTime(credential.last_used_at) : "-"}
+      </Paragraph>
+      <Paragraph>
         <Headline2>{t("headlines.createdAt")}</Headline2>
         {convertTime(credential.created_at)}
       </Paragraph>

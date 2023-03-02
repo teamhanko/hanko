@@ -28,7 +28,7 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").Find(&user, id)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identity", "WebauthnCredentials").Find(&user, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

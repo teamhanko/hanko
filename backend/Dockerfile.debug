@@ -23,6 +23,7 @@ COPY mail mail/
 COPY audit_log audit_log/
 COPY pagination pagination/
 COPY rate_limiter rate_limiter/
+COPY thirdparty thirdparty/
 COPY build_info build_info/
 
 # Build

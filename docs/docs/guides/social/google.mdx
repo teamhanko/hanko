@@ -1,0 +1,165 @@
+---
+title: Login with Google
+sidebar_label: Google
+keywords:
+  - social login
+  - google
+sidebar_custom_props:
+  docCardIconName: google
+---
+
+# Login With Google
+
+To enable Google login for your project, you need to
+
+- Create and configure a Google Project on the Google Cloud Platform Console.
+- Create and add your Google OAuth credentials to your Hanko backend configuration.
+- Add the Hanko `auth` web component or add the required code to your JS Client App using the `hanko-frontend-sdk`.
+
+## Access your Google Cloud Platform account
+
+- Go to [console.cloud.google.com](https://console.cloud.google.com).
+- Click on 'Sign in' at the top right to log in. If you do not have an account yet, create one.
+
+## Create a Google Cloud Platform project
+
+- Click on 'Select a Project' at the top left.
+- Click 'New Project' at the top right.
+- Provide a 'Project name'.
+- If you want the project to be part of an organization, assign it using the 'Location' input.
+- Click Create. On success, you should now view the dashboard for your new project.
+
+## Set up OAuth consent screen
+
+On your project's dashboard:
+
+- In the search bar at the top labeled 'Search for resources, docs, products, and more' type 'oauth'.
+- Click on 'OAuth consent screen' from the list of results.
+- On the OAuth consent screen page select:
+    - 'External' if you want the project to be available to anyone with a Google Account.
+    - 'Internal' if the project is associated with an organization, and you want to restrict access to members of the
+      organization.
+- Click Create.
+
+## Edit app registration
+
+- Provide 'App information', 'App logo', and 'App domain' data. You do not need to add an 'Authorised domain' at this
+  point. An entry will be added automatically once you set up your credentials. Click 'Save and continue'.
+- On the 'Scopes' view, click 'Add or remove scopes' and select the 'userinfo.email' scope. Click 'Update', then
+  'Save and continue'.
+- On the 'Test users' view, click 'Add users' to set up test users as long as your project is unpublished. Click
+  'Save and continue'.
+- Review your data in the 'Summary' view, then click 'Back to dashboard'.
+
+## Get your callback URL
+
+- Before creating your OAuth app, you need to be aware of the provider callback URL. This is where the third party
+provider redirects after a successful login. The callback URL consists of the base URL of your running
+Hanko backend instance and the `/thirdparty/callback` endpoint:
+
+```https://<your_hanko_backend_instance>/thirdparty/callback```
+
+## Create your Google credentials
+
+On your project's dashboard:
+
+- In the search bar at the top labeled 'Search for resources, docs, products, and more' type 'oauth'.
+- Click 'Credentials' in the search results.
+- Click 'Create Credentials' at the top, select 'OAuth client ID'
+- On the Create OAuth client ID page, select your application type. Select 'Web application'.
+- Enter your app name.
+- Under 'Authorized redirect URIs' click 'Add URI' and add your callback URL in the input.
+- Click 'Create'.
+
+## Configure Google credentials with your Hanko backend
+
+
+Open up your backend [configuration file](https://github.com/teamhanko/hanko/blob/main/backend/config/config.yaml) add
+the following:
+
+```yaml
+third_party:
+  # URL the backend redirects to if an error occurs during third party sign-in. Errors are provided
+  # as 'error' and 'error_description' query params in the redirect location URL.
+  #
+  # When using the Hanko web components it should be the URL of the page that embeds the web component
+  # such that errors can be processed properly by the web component.
+  #
+  # You do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when
+  # validating redirect URLs.
+  #
+  # NOTE: MUST NOT have trailing slash
+  error_redirect_url: <your_error_redirect_url>
+  # List of URLS the backend is allowed to redirect to after third party sign-in was successful.
+  #
+  # When using the Hanko web components it should be the URL of the page that embeds the
+  # web component.
+  #
+  # Supports wildcard matching through globbing. e.g. https://*.example.com will allow
+  # https://foo.example.com and https://bar.example.com to be accepted. Globbing is also
+  # supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1
+  # and https://foo.example.com/page2.
+  #
+  # More on globbing: https://pkg.go.dev/github.com/gobwas/glob#Compile
+  #
+  # NOTE: URLs in the list MUST NOT have trailing slash
+  allowed_redirect_urls:
+      - <your_redirect_url>
+  redirect_url: https://<your_hanko_backend_instance>/thirdparty/callback
+  providers:
+    google:
+      enabled: true
+      client_id: <your_google_client_id>
+      secret: <your_google_client_secret>
+```
+
+## Enable login in your frontend app
+
+### With Hanko Elements
+
+Depending on what framework your frontend uses, integrate the `auth` web component from the `hanko-elements` package
+according to one of our [frontend guides](/guides/frontend). If everything was successful, the component should now
+render a button to login with GitHub on the login view.
+
+:::note
+
+Make sure to configure the page the web component is embedded on as both your `error_redirect_url` as well
+as an `allowed_redirect_url` in your `third_party` settings.
+
+:::
+
+On successful authentication with the third party provider, the backend issues a JWT (as a cookie or - if enabled
+via backend [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md) option
+`session.enable_auth_token_header` - via `X-Auth-Token` header). The web component recognizes this and continues the
+usual component flow on success or displays errors that occurred during third party
+provider authentication accordingly.
+
+### With Hanko Frontend SDK
+
+When building your own UI, you can use the `@teamhanko/hanko-frontend-sdk` to initialize third party sign in.
+Call `hanko.thirdParty.auth` with `google` as your provider and the target URL in your app you want to redirect to
+after successful third party authentication (must be configured as an allowed redirect url via
+`third_party.allowed_redirect_urls`).
+
+```js showLineNumbers
+import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+
+const hanko = new Hanko("<your_hanko_backend_instance>")
+
+async function signInWithGoogle() {
+    try {
+       await hanko.thirdParty.auth("google", "<your_redirect_url>");
+    } catch (error) {
+      // handle error
+    }
+}
+```
+
+On successful authentication with the third party provider, the backend issues a JWT (as a cookie or - if enabled
+via backend [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md) option
+`session.enable_auth_token_header` - via `X-Auth-Token` header) and redirects to the
+target URL provided in the `hanko.thirdParty.auth` call.
+
+
+
+

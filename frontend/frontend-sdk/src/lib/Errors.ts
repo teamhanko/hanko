@@ -276,6 +276,22 @@ class EmailAddressAlreadyExistsError extends HankoError {
   }
 }
 
+/**
+ * A `ThirdPartyError` may occur during a sign in/sign up with a third party
+ * provider.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class ThirdPartyError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(code: string, cause?: Error) {
+    super("An error occurred during third party sign up/sign in", code, cause);
+    Object.setPrototypeOf(this, ThirdPartyError.prototype);
+  }
+}
+
 export {
   HankoError,
   TechnicalError,
@@ -293,4 +309,5 @@ export {
   UserVerificationError,
   MaxNumOfEmailAddressesReachedError,
   EmailAddressAlreadyExistsError,
+  ThirdPartyError,
 };

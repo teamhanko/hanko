@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { Router } from '@angular/router';
-import { register } from '@teamhanko/hanko-elements/hanko-auth';
+import { register } from '@teamhanko/hanko-elements';
 
 @Component({
   selector: 'app-login',

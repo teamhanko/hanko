@@ -204,7 +204,11 @@ const ListEmailsAccordion = ({
         <Fragment>
           <Paragraph>
             <Headline2>{t("headlines.emailDelete")}</Headline2>
-            {t("texts.emailDelete")}
+            {email.identity
+              ? `${t("texts.emailDeleteThirdPartyConnection", {
+                  provider: email.identity.provider,
+                })}`
+              : t("texts.emailDelete")}
             <br />
             <Link
               dangerous
@@ -225,6 +229,14 @@ const ListEmailsAccordion = ({
           </Paragraph>
         </Fragment>
       )}
+      {email.identity ? (
+        <Fragment>
+          <Paragraph>
+            <Headline2>{t("headlines.connectedAccounts")}</Headline2>
+            {email.identity.provider}
+          </Paragraph>
+        </Fragment>
+      ) : null}
     </Fragment>
   );
   return (

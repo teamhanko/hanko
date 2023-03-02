@@ -1,18 +1,17 @@
 package session
 
 import (
-	"errors"
 	"github.com/gofrs/uuid"
-	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/test"
 	"testing"
 	"time"
 )
 
 func TestNewGenerator(t *testing.T) {
-	manager := jwkManager{}
+	manager := test.JwkManager{}
 	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
@@ -20,7 +19,7 @@ func TestNewGenerator(t *testing.T) {
 }
 
 func TestGenerator_Generate(t *testing.T) {
-	manager := jwkManager{}
+	manager := test.JwkManager{}
 	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
@@ -36,7 +35,7 @@ func TestGenerator_Generate(t *testing.T) {
 
 func TestGenerator_Verify(t *testing.T) {
 	sessionLifespan := "5m"
-	manager := jwkManager{}
+	manager := test.JwkManager{}
 	cfg := config.Session{Lifespan: sessionLifespan}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
@@ -61,7 +60,7 @@ func TestGenerator_Verify(t *testing.T) {
 }
 
 func TestGenerator_Verify_Error(t *testing.T) {
-	manager := jwkManager{}
+	manager := test.JwkManager{}
 	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
@@ -91,7 +90,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 }
 
 func TestGenerator_DeleteCookie(t *testing.T) {
-	manager := jwkManager{}
+	manager := test.JwkManager{}
 	cfg := config.Session{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
@@ -101,49 +100,4 @@ func TestGenerator_DeleteCookie(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, -1, cookie.MaxAge)
 	assert.Equal(t, "hanko", cookie.Name)
-}
-
-var privateKey = `{
-  "alg": "RS256",
-  "d": "hsVXyJ1VjNFjiRqLE6bNZrAJDlnE33ptT4XpbPylfhlLfLB_OOB_YC5e4cBBoXlWaIJzYQ-qX0eSD2OdNg1JC0TgyQvwOqc9y6EKGyGu2asyHsJxLy8IiaqoqdqgiV0N_DsCYzt5Ew2nJq1P3XYqO5TJBpISixO47BEHaBgQeQBwSfmV3hmGYYTzJz6bwDNDhrBtg-2WiTfaq-3trorxo5Ww17-icr69Yad47Y4EIjKNL8SLPnWCt4NZTuT6Qs6QeUn-wOYPMaLh11DyZBNOuqiNWKjs_xPoi6C8jS1Jua0loTJXblDuMTDRL6-k82SByi7q8Yywr2TAdrotYbXF8kmaMmzW2gdQhkJs3xeNm3RyoIZOiU-7uzykSG8EkC0bx3mhIGVW_IOpzD2Xo2abbweR-PyX5z07qn9F1BHScdXViDmMNq2FU25D9K4FrRUqg8k5jpzkFrhcyPuw_hwB_BheNZgxulBbKy686qC6vTT41kZceD34PdBlMpzPctsK60GQWow8qs_OTQjD5ff_sTrNk4wzFpzo74ctcHOCZavW3gnZjhrMO9yHKGUBvgQJCiQ3C9nAkEP4pSOtk3nYgNLaWFftUYS_JKf36PcpM-YJYZEO33ayrcK19fp0aZbP11W1RpCs3jOaVWGwsS3xFE-4w_0xTbWoJACBgRENy_k",
-  "dp": "qtwBo39K7eDKXoyXn1YUwk8hzaNwhDqfhWPMGHiPjS9W5PLdEpfaxkoMK38oiYkb0ohmEe_z54fmMTAD037lYAbQpW-Al8z1J0qfFEmSgmCVHL80u8Tvq6OtCJojJUDDMEBL-s67FGepXekjNCyS7S1zXJ_CFx619VQv5hadLga2p5TL8pYBjNBfS9FKFeZmaIF6tkz_fNEwud9kOXW1gOcpbgTmBZgDxlHbCiQcL44q7vdKjwHY1a6bi9cf9uvuJ7E_3ysWycTKaH3q0lveTe8I1ovZy2QbuvzEKuF9P_9B8rZiWYbPx6H9bPzd1TisEH9the3R86ILLkqZwGZhZQ",
-  "dq": "zJ8N9S677F1s5YNYJ0LyzvL9bVcjaAwA-xUjDIxRhOMJWL_I-spBKfsOSwuFtr_KRSFj1ui25gIo8KJxsC1-1PBvjsM0OzjlvmaTqzsK1SFA6yt9Wh5VQ8BvqfH25g3JqHcAOqqYsymMFyq9c2ycaq9uYG-sxXiOYP3XCoZn_KsTnMZi0LLAL6A6BQoHSDDhnUHdPMrcZ8ePFjXowFKFlBWCOj0wWugpHc21TQFIeN9mfWAuyfEqyQP0G3FS60e3JW2B2NNZiui_o6lmSLnacLz51htpe23lgsUcJHkernow7-nOsWhvBdR90j69YUzowitL6WyJ_DEc1AehGYpOUw",
-  "e": "AQAB",
-  "kid": "key1",
-  "kty": "RSA",
-  "n": "2zNqGZKiogCjODBpzyRvwFlZ6hYaxJ4ZwYeFoN24eq_yHJB5OtEtgbUZ71lPkSqawLa-5qTtm1nBWY3ZAFVh9XC4fJsHWSIrwR7Mk9PLKWyAGFLyyGJy8srwdoxSUDbWa2CMeRsUaP_Syr_iytx1Kn9S9RRMrdC7PkMWaKx1KWQmIplrJx6qAiFlsTRvDFT0Ysfm0Vkti6xqTVYSc_bnObjLfiQ6UCKqF9fQDUJNFGLAeBAhkIRcBxp5G7PEiB5QOoRTrb4aqBIdxdjMWqjjfHTmm3EPqtIWsOjWRV1FsGyPkvolcBZXaNX-jf0oY1_7AryFujAFDslzGxg071yXRF9T_Brd1DW8paULQ2Vwkhc1d2c6Ioi-0D6255jlBKAVl-h3yedKWzYe5eyCijHZRs2jV1a3NX7ixzorcXH8GHB7PgM5lyZB5Rpf9-49MgW9Vo_b7nBCvEsN8uTc8jRyeG1zPTddAQ-tsMEmhsSa55EbQT6wk_nOu7xV-7eUAW8jwijJiDPOgDPmsOHtjoYx6BgcxCOYZ71s5g6qaKiCMecFpl7S1fxoIXcgjBNvv2Gzs6plRW74R6cVcohOfGVA7e0ULv1KOqJw6H-TjRmHBXQnw_K1biwYsL0SnE1Gu-iZC1_ktVuI8vf9k6m53HC_3_xrx0zqsad0fvIjpjRj2-E",
-  "p": "_9QXKH2TREzUqChGiRrSrKeURTuufWRr8dePBurE5xbqd3Edc360J3jifwfxW9jGRUwehVEQFMAPToPQP3aVLwlroVg5CHFmt6BOChZJ1ZpYfNxvwIQDyxmcGtpGKHkMZMJj_C3XhYULz94ham8w9t3Ps5A2CTLs8erDtm_22zXw8nB7AeUMu0_QEJEtXrG12tMcsVUiG94QFx1udu2d_XortXQlEoFz4KMGQhYBQultOe1o7awgwBHhh9XdSzPifyYArk9qBQEKx-mPZsFFJ46e3IaF-pVfP15J5x4NOhTDRC_NX2ZlXIyiNw_X3cmpMBvgEuA9lY15dQtD0_iqGw",
-  "q": "21kJj4Xvm2jX1-c8HIl4TAhPKI5470cPEx-8eViGO9KEsfc45T54a3shE3dP-YY6jQkpZritNzBnuSGaxSCJFhF63XZGYdh3p2GG73voO8dLqZNTFlitKaRA4UA_4byoimKdPaDR01Bhe9XCzIJCJfYqDGlTD2tIWcsytKwK0O9QkUqg-1ROlK02CMS4tBa8fzEXCYSnsB9iJUNOiLrHb6JdUUcOnCWvmnYFHIwhbH891Dhg9CMcCOwNWL1LGiCYilW-reM1pRHHB3H5b0_gwbg3DQ6dv4VmOCmzfNM0aTSvwkYQkfMQIF_SM8QWF6r9RSunMsoz_AKIjZ3yNj1xsw",
-  "qi": "gQh-bEfYunCcUKXuaBNuyesAAI8F6tWgwMtXqr6X_Np_GvtDdjho2YP14Jtx2_kxDDZPSnP_h003kM6OdJdF469-s-AuRXeqX99yHMfWDYEkXxkp4WsmsKQgg5mQNsBr4d4zHyzsqc1ZKf2mL9zxb5dnVgQjVKrYGgsnBlfZeP-Cz_6c1CZ1YkoxiH52dNdQPfPJUTSUlIgRs2BgCbszQHOO6a1qwkQOjhhUX3-_KF6G4agT2NmZrb_O67GHzIoqXpWZykn93cJm5119BF9dAQbQx4vl0daMuPrh8UwMYx7GO3iNL5tl_wBc77Z4bZu8fn-XzHL4bb3mSjg5DqntKQ"
-}`
-
-type jwkManager struct{}
-
-func (m *jwkManager) GenerateKey() (jwk.Key, error) {
-	return nil, errors.New("not implemented")
-}
-
-func (m *jwkManager) GetPublicKeys() (jwk.Set, error) {
-	key, err := getJwk()
-	if err != nil {
-		return nil, err
-	}
-	publicKey, err := jwk.PublicKeyOf(key)
-	if err != nil {
-		return nil, err
-	}
-	set := jwk.NewSet()
-	err = set.AddKey(publicKey)
-	if err != nil {
-		return nil, err
-	}
-	return set, nil
-}
-
-func (m *jwkManager) GetSigningKey() (jwk.Key, error) {
-	return getJwk()
-}
-
-func getJwk() (jwk.Key, error) {
-	return jwk.ParseKey([]byte(privateKey))
 }

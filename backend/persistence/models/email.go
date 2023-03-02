@@ -16,6 +16,7 @@ type Email struct {
 	Verified     bool          `db:"verified" json:"verified"`
 	PrimaryEmail *PrimaryEmail `has_one:"primary_emails" json:"primary_emails,omitempty"`
 	User         *User         `belongs_to:"user" json:"user,omitempty"`
+	Identity     *Identity     `has_one:"identities" json:"identity,omitempty"`
 	CreatedAt    time.Time     `db:"created_at" json:"created_at"`
 	UpdatedAt    time.Time     `db:"updated_at" json:"updated_at"`
 }
