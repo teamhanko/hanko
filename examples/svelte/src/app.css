@@ -13,3 +13,7 @@ body {
 * {
     box-sizing: border-box;
 }
+
+hanko-auth::part(form-item) {
+    min-width: 100%; /* input fields and buttons are on top of each other  */
+}
