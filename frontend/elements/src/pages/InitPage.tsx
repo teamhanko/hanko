@@ -10,7 +10,6 @@ import ProfilePage from "./ProfilePage";
 import LoginEmailPage from "./LoginEmailPage";
 import LoginFinishedPage from "./LoginFinishedPage";
 import RegisterPasskeyPage from "./RegisterPasskeyPage";
-import LogoutButton from "./LogoutButton";
 
 import LoadingSpinner from "../components/icons/LoadingSpinner";
 
@@ -70,25 +69,16 @@ const InitPage = () => {
     [hanko, setConfig, setEmails, setUser, setWebauthnCredentials]
   );
 
-  const initHankoLogout = useCallback(
-    () => 
-      Promise.all([
-      ]).then(() => <LogoutButton />),
-      [hanko]
-  );
-
   const getInitializer = useCallback(() => {
     switch (componentName) {
       case "auth":
         return initHankoAuth;
       case "profile":
         return initHankoProfile;
-      case "logout":
-        return initHankoLogout;
       default:
         return;
     }
-  }, [componentName, initHankoAuth, initHankoProfile, initHankoLogout]);
+  }, [componentName, initHankoAuth, initHankoProfile]);
 
   useEffect(() => {
     const initializer = getInitializer();

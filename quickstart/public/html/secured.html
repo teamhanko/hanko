@@ -16,7 +16,7 @@
     <nav class="nav">
         <ul class="nav__itemList">
             <li class="nav__listItem">
-                <hanko-logout lang="en" api="{{.HankoUrl}}"></hanko-logout>
+                <a class="nav__link" id="logout-link">Logout</a>
             </li>
         </ul>
     </nav>
@@ -40,13 +40,17 @@
 </footer>
 
 <script>
+    const hanko = new hankoFrontendSdk.Hanko("{{.HankoUrl}}")
+    
     Elements.register({ shadow: false });
-    document.addEventListener("hankoLogoutSuccess", (event) => {
-        document.location.href = "/";
-    })
-    document.addEventListener("hankoLogoutFailure", (event) => {
-        alert('An error occurred logging out. Please try again');
-    })
+
+    document.getElementById("logout-link")
+        .addEventListener("click", (event) => {
+          event.preventDefault();
+          hanko.user.logout()
+            .then(() => { window.location.href = "/" })
+            .catch(console.error);
+    });
 </script>
 
 </body>
