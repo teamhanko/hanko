@@ -6,7 +6,7 @@ This is a [React](https://reactjs.org/) project bootstrapped with [Create React 
 
 ### Prerequisites
 
-- a running Hanko API (see the instructions on how to run the API [in Docker](../backend/README.md#Docker) or [from Source](../backend/README.md#from-source))
+- a running Hanko API (see the instructions on how to run the API [in Docker](../../backend/README.md#Docker) or [from Source](../../backend/README.md#from-source))
 - a running express backend (see the [README](../express) for the express backend)
 
 ### Set up environment variables
