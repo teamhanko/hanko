@@ -82,6 +82,7 @@ const RegisterPasskeyPage = () => {
             isSuccess={isSuccess}
             isLoading={isPasskeyLoading}
             disabled={disabled}
+            icon={"passkey"}
           >
             {t("labels.registerAuthenticator")}
           </Button>

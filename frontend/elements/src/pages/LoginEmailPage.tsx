@@ -30,6 +30,7 @@ import Form from "../components/form/Form";
 import Divider from "../components/divider/Divider";
 import ErrorMessage from "../components/error/ErrorMessage";
 import Headline1 from "../components/headline/Headline1";
+import { IconName } from "../components/icons/Icon";
 
 import LoginPasscodePage from "./LoginPasscodePage";
 import RegisterConfirmPage from "./RegisterConfirmPage";
@@ -405,6 +406,7 @@ const LoginEmailPage = (props: Props) => {
               isLoading={isPasskeyLoginLoading}
               isSuccess={isPasskeyLoginSuccess}
               disabled={disabled}
+              icon={"passkey"}
             >
               {t("labels.signInPasskey")}
             </Button>
@@ -421,6 +423,7 @@ const LoginEmailPage = (props: Props) => {
                   secondary
                   isLoading={isThirdPartyLoginLoading === provider}
                   disabled={disabled}
+                  icon={provider.toLowerCase() as IconName}
                 >
                   {t("labels.signInWith", {
                     provider,

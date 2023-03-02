@@ -7,9 +7,10 @@ import cx from "classnames";
 import styles from "./styles.sass";
 
 import LoadingSpinner from "../icons/LoadingSpinner";
+import Icon, { IconName } from "../icons/Icon";
 
 type Props = {
-  title?: string
+  title?: string;
   children: ComponentChildren;
   secondary?: boolean;
   isLoading?: boolean;
@@ -17,6 +18,7 @@ type Props = {
   disabled?: boolean;
   autofocus?: boolean;
   onClick?: (event: Event) => void;
+  icon?: IconName;
 };
 
 const Button = ({
@@ -28,6 +30,7 @@ const Button = ({
   isSuccess,
   autofocus,
   onClick,
+  icon,
 }: Props) => {
   const ref = useRef(null);
 
@@ -56,7 +59,15 @@ const Button = ({
         isLoading={isLoading}
         isSuccess={isSuccess}
         secondary={true}
+        hasIcon={!!icon}
       >
+        {icon ? (
+          <Icon
+            name={icon}
+            secondary={secondary}
+            disabled={disabled || isLoading || isSuccess}
+          />
+        ) : null}
         {children}
       </LoadingSpinner>
     </button>
