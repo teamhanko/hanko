@@ -30,7 +30,7 @@ import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
-type ComponentName = "auth" | "profile" | "logout";
+type ComponentName = "auth" | "profile";
 
 interface Props {
   api?: string;
@@ -63,8 +63,6 @@ interface Context extends States {
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
   emitSuccessEvent: () => void;
-  emitLogoutSuccessEvent: () => void;
-  emitLogoutFailureEvent: () => void;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -107,32 +105,6 @@ const AppProvider = ({
     return () => clearTimeout(fn);
   }, []);
 
-  const emitLogoutSuccessEvent = useCallback(() => {
-    const event = new Event("hankoLogoutSuccess", {
-      bubbles: true,
-      composed: true,
-    });
-
-    const fn = setTimeout(() => {
-      ref.current.dispatchEvent(event);
-    }, 500);
-
-    return () => clearTimeout(fn);
-  }, []);
-
-  const emitLogoutFailureEvent = useCallback(() => {
-    const event = new Event("hankoLogoutFailure", {
-      bubbles: true,
-      composed: true,
-    });
-
-    const fn = setTimeout(() => {
-      ref.current.dispatchEvent(event);
-    }, 500);
-
-    return () => clearTimeout(fn);
-  }, []);
-
   const [config, setConfig] = useState<Config>();
   const [userInfo, setUserInfo] = useState<UserInfo>(null);
   const [passcode, setPasscode] = useState<Passcode>();
@@ -149,8 +121,6 @@ const AppProvider = ({
         componentName,
         experimentalFeatures,
         emitSuccessEvent,
-        emitLogoutSuccessEvent,
-        emitLogoutFailureEvent,
         config,
         setConfig,
         userInfo,
