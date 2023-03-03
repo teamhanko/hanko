@@ -119,6 +119,7 @@ class Response {
 class HttpClient {
   timeout: number;
   api: string;
+  authCookieName = "hanko";
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
@@ -128,11 +129,10 @@ class HttpClient {
 
   // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
-    const api = this.api;
-    const url = api + path;
+    const self = this;
+    const url = this.api + path;
     const timeout = this.timeout;
-    const cookieName = "hanko";
-    const bearerToken = Cookies.get(cookieName);
+    const bearerToken = this._getAuthCookie();
 
     return new Promise<Response>(function (resolve, reject) {
       xhr.open(options.method, url, true);
@@ -153,11 +153,7 @@ class HttpClient {
 
         if (headers.length) {
           const authToken = xhr.getResponseHeader("X-Auth-Token");
-
-          if (authToken) {
-            const secure = !!api.match("^https://");
-            Cookies.set(cookieName, authToken, { secure });
-          }
+          if (authToken) self._setAuthCookie(authToken);
         }
 
         resolve(new Response(xhr));
@@ -173,6 +169,35 @@ class HttpClient {
 
       xhr.send(options.body ? options.body.toString() : null);
     });
+  }
+
+  /**
+   * Returns the authentication token that was stored in the cookie.
+   *
+   * @return {string}
+   * @return {string}
+   */
+  _getAuthCookie(): string {
+    return Cookies.get(this.authCookieName);
+  }
+
+  /**
+   * Stores the authentication token to the cookie.
+   *
+   * @param {string} token - The authentication token to be stored.
+   */
+  _setAuthCookie(token: string) {
+    const secure = !!this.api.match("^https://");
+    Cookies.set(this.authCookieName, token, { secure });
+  }
+
+  /**
+   * Removes the cookie used for authentication.
+   *
+   * @param {string} token - The authorization token to be stored.
+   */
+  removeAuthCookie() {
+    Cookies.remove(this.authCookieName);
   }
 
   /**

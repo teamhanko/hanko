@@ -6,6 +6,7 @@ import {
   UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
+import Cookies from "js-cookie";
 
 /**
  * A class to manage user information.
@@ -99,6 +100,27 @@ class UserClient extends Client {
     }
 
     return userResponse.json();
+  }
+
+  /**
+   * Logs out the current user and expires the existing session cookie. A valid session cookie is required to call the logout endpoint.
+   *
+   * @return {Promise<void>}
+   * @throws {TechnicalError}
+   */
+  async logout(): Promise<void> {
+    const logoutResponse = await this.client.post("/logout");
+
+    // For cross-domain operations, the frontend SDK creates the cookie by reading the "X-Auth-Token" header, and
+    // "Set-Cookie" headers sent by the backend have no effect due to the browser's security policy, which means that
+    // the cookie must also be removed client-side in that case.
+    this.client.removeAuthCookie();
+
+    if (logoutResponse.status === 401) {
+      return; // The user is logged out already
+    } else if (!logoutResponse.ok) {
+      throw new TechnicalError();
+    }
   }
 }
 

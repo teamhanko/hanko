@@ -74,6 +74,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	user.GET("/:id", userHandler.Get, hankoMiddleware.Session(sessionManager))
 
 	e.POST("/user", userHandler.GetUserIdByEmail)
+	e.POST("/logout", userHandler.Logout, hankoMiddleware.Session(sessionManager))
 
 	healthHandler := handler.NewHealthHandler()
 	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
