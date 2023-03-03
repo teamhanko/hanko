@@ -1,6 +1,6 @@
 <script setup>
 import { useRouter } from "vue-router";
-import { register, testString } from "@teamhanko/hanko-elements";
+import { register } from "@teamhanko/hanko-elements";
 import { onMounted } from "vue";
 
 onMounted(() => {
