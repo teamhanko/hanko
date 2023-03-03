@@ -70,7 +70,6 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| Rate limiting |
 |✅| OAuth logins (Sign in with Google/GitHub/...) |
 |⚙️| Session management |
-|⚙️| Integration tests |
 | | i18n & custom translations for [hanko-elements](/frontend/elements/README.md) |
 | | 📢 Hanko v1.0 Release |
 
