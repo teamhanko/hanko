@@ -1,7 +1,7 @@
 # Hanko Express Example
 
 This directory contains an [express](https://expressjs.com) application that serves as the backend for the example
-frontend applications contained in the [examples](../../examples) directory. It is a simple API for creating, listing and
+frontend applications contained in the [examples](../../frontend/examples) directory. It is a simple API for creating, listing and
 updating "todos".
 
 ## Starting the app

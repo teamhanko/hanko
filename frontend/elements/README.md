@@ -254,7 +254,7 @@ Take a look at our [live demo](https://example.hanko.io).
 
 To learn more about how to integrate the Hanko elements into frontend frameworks, see our
 [guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
-[example applications](https://github.com/teamhanko/hanko/blob/main/examples/README.md).
+[example applications](https://github.com/teamhanko/hanko/blob/main/frontend/examples/README.md).
 
 ## Browser support
 

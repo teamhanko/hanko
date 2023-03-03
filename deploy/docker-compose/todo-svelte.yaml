@@ -1,6 +1,6 @@
 services:
   todo-backend:
-    build: ../../examples/express
+    build: ../../frontend/examples/express
     ports:
       - "8002:8002"
     environment:
@@ -8,7 +8,7 @@ services:
     networks:
       - intranet
   todo-frontend:
-    build: ../../examples/svelte
+    build: ../../frontend/examples/svelte
     ports:
       - "8888:8888"
     networks:
