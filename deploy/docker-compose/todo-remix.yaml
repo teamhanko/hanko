@@ -1,0 +1,19 @@
+services:
+  todo-backend:
+    build: ../../examples/express
+    environment:
+      - HANKO_API_URL=http://hanko:8000
+    networks:
+      - intranet
+
+  todo-frontend:
+    build: ../../examples/remix
+    environment:
+      - PORT=8888
+      - REMIX_APP_HANKO_API=http://localhost:8000
+      - REMIX_APP_TODO_API=http://todo-backend:8002
+    ports:
+      - "8888:8888"
+      - "8008:8008"
+    networks:
+      - intranet
