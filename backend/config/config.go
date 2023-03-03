@@ -9,7 +9,6 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
-	"github.com/sethvargo/go-limiter/httplimit"
 	"log"
 	"strings"
 	"time"
@@ -67,14 +66,6 @@ func DefaultConfig() *Config {
 		Server: Server{
 			Public: ServerSettings{
 				Address: ":8000",
-				Cors: Cors{
-					ExposeHeaders: []string{
-						httplimit.HeaderRateLimitLimit,
-						httplimit.HeaderRateLimitRemaining,
-						httplimit.HeaderRateLimitReset,
-						httplimit.HeaderRetryAfter,
-					},
-				},
 			},
 			Admin: ServerSettings{
 				Address: ":8001",
@@ -222,7 +213,6 @@ type ServerSettings struct {
 	// The Address to listen on in the form of host:port
 	// See net.Dial for details of the address format.
 	Address string `yaml:"address" json:"address" koanf:"address"`
-	Cors    Cors   `yaml:"cors" json:"cors" koanf:"cors"`
 }
 
 type Cors struct {

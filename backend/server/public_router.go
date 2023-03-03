@@ -14,6 +14,8 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/server/middleware"
 	"github.com/teamhanko/hanko/backend/session"
+	"net/url"
+	"strings"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus *prometheus.Prometheus) *echo.Echo {
@@ -24,17 +26,29 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
-	if cfg.Server.Public.Cors.Enabled {
-		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     cfg.Server.Public.Cors.AllowOrigins,
-			AllowMethods:     cfg.Server.Public.Cors.AllowMethods,
-			AllowHeaders:     cfg.Server.Public.Cors.AllowHeaders,
-			ExposeHeaders:    cfg.Server.Public.Cors.ExposeHeaders,
-			AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
-			MaxAge:           cfg.Server.Public.Cors.MaxAge,
-		}))
+	allowedOrigins := []string{}
+	isLocalhost := false
+	for _, v := range cfg.Webauthn.RelyingParty.Origins {
+		origin, _ := url.Parse(v)
+		if strings.HasPrefix(origin.Host, "localhost") {
+			allowedOrigins = []string{"*"}
+			isLocalhost = true
+			break
+		}
+		allowedOrigins = append(allowedOrigins, v)
 	}
-	
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: allowedOrigins,
+		// only on localhost this is allowed.
+		UnsafeWildcardOriginWithAllowCredentials: isLocalhost,
+		// Needed for cross-domain
+		ExposeHeaders: []string{"X-Auth-Token"},
+		// Needed for cross-domain
+		AllowCredentials: true,
+		//  Chromium (starting in v76) caps at 2 hours (7200 seconds).
+		MaxAge: 7200,
+	}))
+
 	if prometheus != nil {
 		e.Use(prometheus.HandlerFunc)
 	}

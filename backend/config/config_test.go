@@ -73,7 +73,7 @@ func TestEnvironmentVariables(t *testing.T) {
 	err := os.Setenv("PASSCODE_SMTP_HOST", "valueFromEnvVars")
 	require.NoError(t, err)
 
-	err = os.Setenv("SERVER_PUBLIC_CORS_ALLOW_METHODS", "GET,PUT,POST,DELETE")
+	err = os.Setenv("WEBAUTHN_RELYING_PARTY_ORIGINS", "https://hanko.io,https://auth.hanko.io")
 	require.NoError(t, err)
 
 	configPath := "./minimal-config.yaml"
@@ -81,5 +81,5 @@ func TestEnvironmentVariables(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, "valueFromEnvVars", cfg.Passcode.Smtp.Host)
-	assert.True(t, reflect.DeepEqual([]string{"GET", "PUT", "POST", "DELETE"}, cfg.Server.Public.Cors.AllowMethods))
+	assert.True(t, reflect.DeepEqual([]string{"https://hanko.io", "https://auth.hanko.io"}, cfg.Webauthn.RelyingParty.Origins))
 }
