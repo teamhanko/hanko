@@ -16,7 +16,7 @@
     <nav class="nav">
         <ul class="nav__itemList">
             <li class="nav__listItem">
-                <a class="nav__link" id="logout-link">Logout</a>
+                <a href="#" class="nav__link" id="logout-link">Logout</a>
             </li>
         </ul>
     </nav>
@@ -41,7 +41,7 @@
 
 <script>
     const hanko = new hankoFrontendSdk.Hanko("{{.HankoUrl}}")
-    
+
     Elements.register({ shadow: false });
 
     document.getElementById("logout-link")
