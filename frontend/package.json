@@ -4,7 +4,8 @@
   "private": true,
   "workspaces": [
     "frontend-sdk",
-    "elements"
+    "elements",
+    "examples/*"
   ],
   "scripts": {
     "build": "turbo run build",

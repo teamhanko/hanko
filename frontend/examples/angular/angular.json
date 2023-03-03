@@ -25,10 +25,7 @@
             "styles": [
               "src/styles.css"
             ],
-            "scripts": [],
-            "allowedCommonJsDependencies": [
-              "@teamhanko/hanko-elements"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
