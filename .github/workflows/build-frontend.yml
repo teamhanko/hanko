@@ -8,7 +8,6 @@ on:
 
 jobs:
   tests:
-    working-directory: ./frontend
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,10 +18,13 @@ jobs:
           node-version: v18.14.2
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm ci
 
       - name: Build
+        working-directory: ./frontend
         run: npm run build
 
       - name: Run tests
+        working-directory: ./frontend
         run: npm test
