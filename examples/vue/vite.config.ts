@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [
     vue({
       template: {
-        compilerOptions: { isCustomElement: (tag) => tag === "hanko-auth" },
+        compilerOptions: { isCustomElement: (tag) => tag.startsWith("hanko-") },
       },
     }),
   ],

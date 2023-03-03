@@ -1,0 +1,9 @@
+<nav class="nav">
+  <button (click)="logout()" class="button">Logout</button>
+  <button disabled class="button">Profile</button>
+  <button (click)="todos()" class="button">Todos</button>
+</nav>
+<div class="content">
+  <div class="error">{{ error?.message }}</div>
+  <hanko-profile [api]="api"></hanko-profile>
+</div>

@@ -27,7 +27,7 @@
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "@teamhanko/hanko-elements/hanko-auth"
+              "@teamhanko/hanko-elements"
             ]
           },
           "configurations": {

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
-  import { TodoClient } from "./TodoClient";
   import type { Todos } from "./TodoClient"
+  import { TodoClient } from "./TodoClient";
 
   const api = import.meta.env.VITE_TODO_API;
   const todoClient = new TodoClient(api);
@@ -115,10 +115,16 @@
         console.error(e);
       });
   }
+
+  const profile = () => {
+    navigate("/profile");
+  }
 </script>
 
 <nav class="nav">
-  <button class="button" on:click={logout}>Logout</button>
+  <button class="button" on:click|preventDefault={logout}>Logout</button>
+  <button class="button" on:click|preventDefault={profile}>Profile</button>
+  <button class="button" disabled>Todos</button>
 </nav>
 <div class="content">
   <h1 class="headline">Todos</h1>
@@ -155,47 +161,6 @@
 
 
 <style>
-  .nav {
-      width: 100%;
-      position: fixed;
-      top: 0;
-      padding: 10px;
-      opacity: 0.9;
-  }
-
-  .button {
-      font-size: 1rem;
-      border: none;
-      background: none;
-      cursor: pointer;
-  }
-
-  .nav .button:hover {
-      text-decoration: underline;
-  }
-
-  .nav .button {
-      color: white;
-      float: right;
-  }
-
-  .content {
-      padding: 24px;
-      border-radius: 17px;
-      color: black;
-      background-color: white;
-      width: 500px;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-  }
-
-  .headline {
-      text-align: center;
-      margin-top: 0;
-  }
-
   .form {
       display: flex;
       margin-bottom: 17px;
@@ -226,11 +191,6 @@
   .description {
       flex-grow: 1;
       cursor: pointer;
-  }
-
-  .error {
-      color: red;
-      padding: 0 0 10px;
   }
 
   .input {
