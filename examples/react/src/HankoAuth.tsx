@@ -21,7 +21,6 @@ function HankoAuth() {
 
   return (
     <div className={styles.content}>
-      <h1>Hello from {testString}</h1>
       <hanko-auth api={api} />
     </div>
   );
