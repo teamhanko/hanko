@@ -15,7 +15,7 @@ COPY ./elements/package.json ./elements/package.json
 RUN npm ci --silent
 
 COPY . .
-RUN npm run build
+RUN npm run build:elements
 
 FROM nginx:stable-alpine
 COPY --from=build /app/elements/dist/elements.js /usr/share/nginx/html

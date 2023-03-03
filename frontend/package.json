@@ -10,6 +10,7 @@
   "scripts": {
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "test": "turbo run test"
+    "test": "turbo run test",
+    "build:elements": "turbo build --filter=./frontend-sdk --filter=./elements"
   }
 }
