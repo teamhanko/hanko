@@ -1,8 +1,8 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { register } from "@teamhanko/hanko-elements";
 import styles from "./Todo.module.css";
-import {useNavigate} from "react-router-dom";
-import {TodoClient} from "./TodoClient";
+import { useNavigate } from "react-router-dom";
+import { TodoClient } from "./TodoClient";
 
 const hankoApi = process.env.REACT_APP_HANKO_API!
 const todoApi = process.env.REACT_APP_TODO_API!

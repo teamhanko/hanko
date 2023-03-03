@@ -13,7 +13,7 @@ export class LoginComponent {
   error: Error | undefined;
 
   constructor(private router: Router) {
-    register({ shadow: true }).catch((e) => this.error = e);
+    register({shadow: true}).catch((e) => this.error = e);
   }
 
   redirectToTodo() {

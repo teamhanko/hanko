@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { TodoClient, Todos } from "../util/TodoClient";
+import { TodoClient } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
 import dynamic from "next/dynamic";
 

@@ -1,6 +1,5 @@
 import { register } from "@teamhanko/hanko-elements";
-import { useCallback, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useEffect } from "react";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
 

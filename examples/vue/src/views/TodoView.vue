@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { TodoClient } from "@/utils/TodoClient";
 import type { Todos } from "@/utils/TodoClient";
+import { TodoClient } from "@/utils/TodoClient";
 import { useRouter } from "vue-router";
-import { onMounted, ref } from "vue";
 import type { Ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const router = useRouter();
 

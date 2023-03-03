@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import HankoAuth from "@/components/HankoAuth.vue";
-import { ref } from "vue";
 import type { Ref } from "vue";
+import { ref } from "vue";
 
 const error: Ref<Error | null> = ref(null);
 

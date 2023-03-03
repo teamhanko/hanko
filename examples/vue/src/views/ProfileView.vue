@@ -3,8 +3,8 @@ import HankoProfile from "@/components/HankoProfile.vue";
 
 import { useRouter } from "vue-router";
 import { TodoClient } from "@/utils/TodoClient";
-import { ref } from "vue";
 import type { Ref } from "vue";
+import { ref } from "vue";
 
 const router = useRouter();
 const api = import.meta.env.VITE_TODO_API;

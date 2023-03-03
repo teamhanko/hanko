@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
-  import { TodoClient } from "./TodoClient";
   import type { Todos } from "./TodoClient"
+  import { TodoClient } from "./TodoClient";
 
   const api = import.meta.env.VITE_TODO_API;
   const todoClient = new TodoClient(api);
