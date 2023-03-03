@@ -20,7 +20,6 @@
 hanko
 
 .turbo
-.angular
 
 # Dependency directories (remove the comment below to include it)
 node_modules
