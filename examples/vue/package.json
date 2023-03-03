@@ -6,8 +6,8 @@
   },
   "dependencies": {
     "@teamhanko/hanko-elements": "^0.2.0-alpha",
-    "vue": "^3.2.38",
-    "vue-router": "^4.1.5"
+    "vue": "^3.2.47",
+    "vue-router": "^4.1.6"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.4",

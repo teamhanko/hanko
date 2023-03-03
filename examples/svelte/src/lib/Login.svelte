@@ -12,11 +12,10 @@
     navigate('/todo');
   };
 
-  onMount(async () => {
-    register({ shadow: true }).catch((e) => {
-      console.error(e)
-    });
+  let error: Error | null = null;
 
+  onMount(async () => {
+    register({ shadow: true }).catch((e) => error = e);
     element?.addEventListener('hankoAuthSuccess', redirectToTodos);
   });
 
@@ -26,19 +25,9 @@
 </script>
 
 <div class="content">
+  {#if error}
+    <div class="error">{ error?.message }</div>
+  {/if}
   <hanko-auth bind:this={element} {api}/>
 </div>
 
-<style>
-  .content {
-      padding: 24px;
-      border-radius: 17px;
-      color: black;
-      background-color: white;
-      width: 500px;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-  }
-</style>

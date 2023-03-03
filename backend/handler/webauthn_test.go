@@ -195,6 +195,17 @@ func (s sessionManager) GenerateCookie(token string) (*http.Cookie, error) {
 	}, nil
 }
 
+func (s sessionManager) DeleteCookie() (*http.Cookie, error) {
+	return &http.Cookie{
+		Name:     "hanko",
+		Value:    "",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	}, nil
+}
+
 func (s sessionManager) Verify(token string) (jwt.Token, error) {
 	return nil, nil
 }

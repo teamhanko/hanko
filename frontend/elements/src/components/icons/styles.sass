@@ -1,50 +1,24 @@
 @use '../../variables'
 
+.icon
+  display: inline-block
+  fill: variables.$brand-contrast-color
+  width: 18px
+
+  &.secondary
+    fill: variables.$color
+
+  &.disabled
+    fill: variables.$color-shade-1
+
 // Checkmark Styles
 
 .checkmark
-  display: inline-block
-  width: 16px
-  height: 16px
-  transform: rotate(45deg)
+  @extend .icon
+  fill: variables.$brand-color
 
-  .circle
-    box-sizing: border-box
-    display: inline-block
-    border-width: 2px
-    border-style: solid
-    border-color: variables.$brand-color
-    position: absolute
-    width: 16px
-    height: 16px
-    border-radius: 11px
-    left: 0
-    top: 0
-
-    &.secondary
-      border-color: variables.$color-shade-1
-
-  .stem
-    position: absolute
-    width: 2px
-    height: 7px
-    background-color: variables.$brand-color
-    left: 8px
-    top: 3px
-
-    &.secondary
-      background-color: variables.$color-shade-1
-
-  .kick
-    position: absolute
-    width: 5px
-    height: 2px
-    background-color: variables.$brand-color
-    left: 5px
-    top: 10px
-
-    &.secondary
-      background-color: variables.$color-shade-1
+  &.secondary
+    fill: variables.$color-shade-1
 
   &.fadeOut
     animation: fadeOut ease-out 1.5s forwards !important
@@ -59,59 +33,32 @@
 // ExclamationMark Styles
 
 .exclamationMark
-  width: 16px
-  height: 16px
-  position: relative
-  margin: 5px
-
-  .circle
-    box-sizing: border-box
-    display: inline-block
-    background-color: variables.$error-color
-    position: absolute
-    width: 16px
-    height: 16px
-    border-radius: 11px
-    left: 0
-    top: 0
-
-  .stem
-    position: absolute
-    width: 2px
-    height: 6px
-    background: variables.$background-color
-    left: 7px
-    top: 3px
-
-  .dot
-    position: absolute
-    width: 2px
-    height: 2px
-    background: variables.$background-color
-    left: 7px
-    top: 10px
+  @extend .icon
+  fill: variables.$error-color
+  padding-right: 5px
 
 // Loading Spinner Styles
 
+.loadingSpinnerWrapperIcon
+  @extend .loadingSpinnerWrapper
+  justify-content: flex-start
+  width: 100%
+  column-gap: 10px
+  margin-left: 10px
+
 .loadingSpinnerWrapper
-  display: inline-block
+  display: inline-flex
+  align-items: center
+  height: 100%
   margin: 0 5px
 
   .loadingSpinner
-    box-sizing: border-box
-    display: inline-block
-    border-width: 2px
-    border-style: solid
-    border-color: variables.$background-color
-    border-top: 2px solid variables.$brand-color
-    border-radius: 50%
-    width: 16px
-    height: 16px
+    @extend .icon
+    fill: variables.$brand-color
     animation: spin 500ms ease-in-out infinite
 
-    &.secondary
-      border-color: variables.$color-shade-1
-      border-top: 2px solid variables.$color-shade-2
+  &.secondary
+    fill: variables.$color-shade-1
 
 @keyframes spin
   0%
@@ -119,3 +66,18 @@
 
   100%
     transform: rotate(360deg)
+
+// Google Styles
+
+.googleIcon
+  &.disabled
+    fill: variables.$color-shade-1
+
+  &.blue
+    fill: #4285F4
+  &.green
+    fill: #34A853
+  &.yellow
+    fill: #FBBC05
+  &.red
+    fill: #EA4335

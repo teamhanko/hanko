@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { TodoClient } from "@/utils/TodoClient";
 import type { Todos } from "@/utils/TodoClient";
+import { TodoClient } from "@/utils/TodoClient";
 import { useRouter } from "vue-router";
-import { onMounted, ref } from "vue";
 import type { Ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const router = useRouter();
 
@@ -105,6 +105,10 @@ const deleteTodo = (id: string) => {
     });
 };
 
+function profile() {
+  router.push("/profile");
+}
+
 function logout() {
   client
     .logout()
@@ -120,7 +124,9 @@ function logout() {
 
 <template>
   <nav class="nav">
-    <button @click="logout" class="button">Logout</button>
+    <button @click.prevent="logout" class="button">Logout</button>
+    <button @click.prevent="profile" class="button">Profile</button>
+    <button disabled class="button">Todos</button>
   </nav>
   <div class="content">
     <h1 class="headline">Todos</h1>
@@ -157,8 +163,6 @@ function logout() {
 <style scoped>
 .nav {
   width: 100%;
-  position: fixed;
-  top: 0;
   padding: 10px;
   opacity: 0.9;
 }
@@ -168,6 +172,12 @@ function logout() {
   border: none;
   background: none;
   cursor: pointer;
+}
+
+.button:disabled {
+  color: grey !important;
+  cursor: default;
+  text-decoration: none !important;
 }
 
 .nav .button:hover {
@@ -184,11 +194,10 @@ function logout() {
   border-radius: 17px;
   color: black;
   background-color: white;
-  width: 500px;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 100%;
+  max-width: 500px;
+  min-width: 330px;
+  margin: 10vh auto;
 }
 
 .headline {

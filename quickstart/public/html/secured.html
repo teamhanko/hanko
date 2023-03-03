@@ -14,7 +14,7 @@
     <nav class="nav">
         <ul class="nav__itemList">
             <li class="nav__listItem">
-                <a class="nav__link" href="/logout">Logout</a>
+                <a href="#" class="nav__link" id="logout-link">Logout</a>
             </li>
         </ul>
     </nav>
@@ -37,9 +37,22 @@
     <img alt="Powered by Hanko" src="static/img/poweredBy.svg"/>
 </footer>
 
+
 <script type="module">
     import {register} from "{{.HankoElementUrl}}";
     register({ shadow: false });
+
+    // TODO: Does this still work?
+    const hanko = new hankoFrontendSdk.Hanko("{{.HankoUrl}}")
+
+
+    document.getElementById("logout-link")
+        .addEventListener("click", (event) => {
+          event.preventDefault();
+          hanko.user.logout()
+            .then(() => { window.location.href = "/" })
+            .catch(console.error);
+    });
 </script>
 
 </body>

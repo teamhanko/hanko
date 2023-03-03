@@ -1,11 +1,7 @@
 import * as preact from "preact";
-import { ComponentChildren } from "preact";
-
-import cx from "classnames";
-
-import Checkmark from "./Checkmark";
-
+import { ComponentChildren, Fragment } from "preact";
 import styles from "./styles.sass";
+import Icon from "./Icon";
 
 export type Props = {
   children?: ComponentChildren;
@@ -13,6 +9,7 @@ export type Props = {
   isSuccess?: boolean;
   fadeOut?: boolean;
   secondary?: boolean;
+  hasIcon?: boolean;
 };
 
 const LoadingSpinner = ({
@@ -21,19 +18,30 @@ const LoadingSpinner = ({
   isSuccess,
   fadeOut,
   secondary,
+  hasIcon,
 }: Props) => {
   return (
-    <div className={styles.loadingSpinnerWrapper}>
+    <Fragment>
       {isLoading ? (
-        <div
-          className={cx(styles.loadingSpinner, secondary && styles.secondary)}
-        />
+        <div className={styles.loadingSpinnerWrapper}>
+          <Icon name={"spinner"} secondary={secondary} />
+        </div>
       ) : isSuccess ? (
-        <Checkmark fadeOut={fadeOut} secondary={secondary} />
+        <div className={styles.loadingSpinnerWrapper}>
+          <Icon name={"checkmark"} secondary={secondary} fadeOut={fadeOut} />
+        </div>
       ) : (
-        children
+        <div
+          className={
+            hasIcon
+              ? styles.loadingSpinnerWrapperIcon
+              : styles.loadingSpinnerWrapper
+          }
+        >
+          {children}
+        </div>
       )}
-    </div>
+    </Fragment>
   );
 };
 

@@ -13,15 +13,15 @@ import {
   InvalidWebauthnCredentialError,
   TechnicalError,
   UnauthorizedError,
-  WebauthnRequestCancelledError,
   UserVerificationError,
+  WebauthnRequestCancelledError,
 } from "../Errors";
 
 import {
   Attestation,
   User,
-  WebauthnFinalized,
   WebauthnCredentials,
+  WebauthnFinalized,
 } from "../Dto";
 
 /**

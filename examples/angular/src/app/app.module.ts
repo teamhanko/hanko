@@ -1,4 +1,4 @@
-import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { CUSTOM_ELEMENTS_SCHEMA, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -6,9 +6,10 @@ import { AppComponent } from './app.component';
 
 import { LoginComponent } from './login/login.component';
 import { TodoComponent } from './todo/todo.component';
+import { ProfileComponent } from "./profile/profile.component";
 
 @NgModule({
-  declarations: [AppComponent, LoginComponent, TodoComponent],
+  declarations: [AppComponent, LoginComponent, TodoComponent, ProfileComponent],
   imports: [BrowserModule, AppRoutingModule],
   providers: [],
   bootstrap: [AppComponent],

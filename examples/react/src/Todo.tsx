@@ -29,9 +29,7 @@ function Todo() {
 
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const listTodos = useCallback(() => {
@@ -50,9 +48,7 @@ function Todo() {
           setTodos(todo);
         }
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   }, [client, navigate]);
 
   const patchTodo = (id: string, checked: boolean) => {
@@ -68,9 +64,7 @@ function Todo() {
 
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const deleteTodo = (id: string) => {
@@ -86,9 +80,7 @@ function Todo() {
 
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
 
   const logout = () => {
@@ -98,10 +90,12 @@ function Todo() {
         navigate("/");
         return;
       })
-      .catch((e) => {
-        setError(e);
-      });
+      .catch(setError);
   };
+
+  const profile = () => {
+    navigate("/profile");
+  }
 
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(event.currentTarget.value);
@@ -121,6 +115,12 @@ function Todo() {
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
+        </button>
+        <button onClick={profile} className={styles.button}>
+          Profile
+        </button>
+        <button disabled className={styles.button}>
+          Todos
         </button>
       </nav>
       <div className={styles.content}>

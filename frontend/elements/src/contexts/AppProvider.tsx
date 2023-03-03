@@ -77,7 +77,7 @@ const AppProvider = ({
   const ref = useRef<HTMLElement>(null);
 
   const hanko = useMemo(() => {
-    if (api.length) {
+    if (api) {
       return new Hanko(api, 13000);
     }
     return null;

@@ -88,3 +88,16 @@ func TestGenerator_Verify_Error(t *testing.T) {
 		})
 	}
 }
+
+func TestGenerator_DeleteCookie(t *testing.T) {
+	manager := test.JwkManager{}
+	cfg := config.Session{}
+	sessionGenerator, err := NewManager(&manager, cfg)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	cookie, err := sessionGenerator.DeleteCookie()
+	assert.NoError(t, err)
+	assert.Equal(t, -1, cookie.MaxAge)
+	assert.Equal(t, "hanko", cookie.Name)
+}

@@ -11,7 +11,9 @@ import TabItem from '@theme/TabItem';
 
 # Angular
 
-In this guide you will learn how to add authentication to your Angular application using the Hanko custom element.
+In this guide you will learn how to use the
+[hanko-elements](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md) web components to
+add authentication and a user profile to your Angular application.
 
 ## Install dependencies
 
@@ -21,7 +23,7 @@ Install the `@teamhanko/hanko-elements` package:
 npm install @teamhanko/hanko-elements
 ```
 
-## Register custom element with Angular
+## Define custom elements schema
 
 Angular requires you to explicitly declare that you are using custom elements inside your Angular modules, otherwise
 it will fail during build complaining about unknown elements. To do so, import the
@@ -46,13 +48,12 @@ import { AppComponent } from './app.component';
 })
 export class AppModule { }
 ```
+## Add `<hanko-auth>` component
 
-## Import & use custom element
-
-Import the `register` function from `@teamhanko/hanko-elements` in the component where you want to use the
-Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use the
-element in your component template.
+To provide a login interface in your app, use the `<hanko-auth>` web component. To do so, first import the `register` function
+from `@teamhanko/hanko-elements` in your Angular component. Then call `register` to register the `<hanko-auth>` element with
+the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry) and use
+the element in your component template.
 
 :::info
 
@@ -67,8 +68,8 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 <TabItem value="html" label="login.component.html">
 ```
 
-```html title="login.component.html" showLineNumbers
-<hanko-auth [api]="hankoApi" [lang]="hankoLang"></hanko-auth>
+```html showLineNumbers
+<hanko-auth [api]="hankoApi" />
 ```
 
 ```mdx-code-block
@@ -76,9 +77,8 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 <TabItem value="ts" label="login.component.ts">
 ```
 
-```js title="login.component.ts" showLineNumbers
+```js showLineNumbers
 import { Component } from '@angular/core';
-import { environment } from '../../../environments/environment';
 import { register } from '@teamhanko/hanko-elements';
 
 @Component({
@@ -87,8 +87,7 @@ import { register } from '@teamhanko/hanko-elements';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent {
-  hankoApi = environment.hankoApi;
-  hankoLang = environment.hankoLang;
+  hankoApi = "<YOUR_API_URL>";
 
   constructor() {
     // register the component
@@ -106,12 +105,12 @@ export class LoginComponent {
 </Tabs>
 ```
 
-## Defining login callbacks
+### Define login callbacks
 
 The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
-event in order to, for example, redirect your users to protected pages in your application.
+event to redirect your users to protected pages in your application, e.g. a [user profile page](#hanko-profile).
 
-To do so, you can use Angular's event binding mechanism and supply a callback function that is defined in your component
+You can use Angular's event binding mechanism and supply a callback function that is defined in your component
 class directly on the `<hanko-auth>` element:
 
 ```mdx-code-block
@@ -119,12 +118,10 @@ class directly on the `<hanko-auth>` element:
   <TabItem value="html" label="login.component.html">
 ```
 
-```html {2} title="login.component.html" showLineNumbers
+```html {2} showLineNumbers
 <hanko-auth
   (hankoAuthSuccess)="redirectAfterLogin()"
-  [api]="hankoApi"
-  [lang]="hankoLang">
-</hanko-auth>
+  [api]="hankoApi" />
 ```
 
 ```mdx-code-block
@@ -132,9 +129,8 @@ class directly on the `<hanko-auth>` element:
 <TabItem value="ts" label="login.component.ts">
 ```
 
-```js {3,15,24-27} title="login.component.ts" showLineNumbers
+```js {2,13,22-25} showLineNumbers
 import { Component } from '@angular/core';
-import { environment } from '../../../environments/environment';
 import { Router } from '@angular/router';
 import { register } from '@teamhanko/hanko-elements';
 
@@ -144,8 +140,7 @@ import { register } from '@teamhanko/hanko-elements';
   styleUrls: ['./login.component.css'],
 })
 export class LoginComponent {
-  hankoApi = environment.hankoApi;
-  hankoLang = environment.hankoLang;
+  hankoApi = "<YOUR_API_URL>";
 
   constructor(private router: Router) {
     // register the component
@@ -153,7 +148,7 @@ export class LoginComponent {
     register({ shadow: true })
       .catch((error) => {
         // handle error
-      });
+      })
   }
 
   redirectAfterLogin() {
@@ -168,11 +163,70 @@ export class LoginComponent {
 </Tabs>
 ```
 
-## UI customization
+## Add `<hanko-profile>` component {#hanko-profile}
 
-The styles of the `hanko-auth` element can be customized using CSS variables and parts. See our guide
-on customization [here](https://github.com/teamhanko/hanko/tree/main/frontend/elements#ui-customization).
+To provide a page where users can manage their email addresses, password and passkeys, use the `<hanko-profile>` web
+component. Just as with the `<hanko-auth>` component, import the `register` function from `@teamhanko/hanko-elements` in
+your Angular component. Then call `register` to register the `<hanko-profile>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry) and use
+the element in your component template.
 
-## Backend request authentication
+
+:::info
+
+When adding the `<hanko-profile>` element to your template you must provide the URL of the Hanko API via the `api`
+attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
+
+```mdx-code-block
+<Tabs>
+<TabItem value="html" label="profile.component.html">
+```
+
+```html showLineNumbers
+  <hanko-profile [api]="hankoApi" />
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="ts" label="profile.component.ts">
+```
+
+```js showLineNumbers
+import { Component } from '@angular/core';
+import { register } from '@teamhanko/hanko-elements';
+
+@Component({
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
+})
+export class ProfileComponent {
+  hankoApi = "<YOUR_API_URL>";
+
+  constructor() {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  }
+}
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+## Customize component styles
+
+The styles of the `hanko-auth` and `hanko-profile` elements can be customized using CSS variables and parts. See our
+guide on customization [here](https://github.com/teamhanko/hanko/tree/main/frontend/elements#ui-customization).
+
+## Authenticate backend requests
 
 If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).
