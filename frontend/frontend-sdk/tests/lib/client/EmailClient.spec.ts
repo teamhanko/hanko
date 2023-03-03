@@ -28,7 +28,6 @@ describe("EmailClient.list()", () => {
     expect(emailClient.client.get).toHaveBeenCalledWith("/emails");
     expect(list).toEqual(response._decodedJSON);
   });
-
   it.each`
     status | error
     ${401} | ${"Unauthorized error"}
