@@ -26,7 +26,6 @@
 </script>
 
 <div class="content">
-  <h1>Hello from {testString}</h1>
   <hanko-auth bind:this={element} {api}/>
 </div>
 
