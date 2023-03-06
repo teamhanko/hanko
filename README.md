@@ -15,37 +15,37 @@
 Hanko is an open-source user authentication system with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
 
 - Built around [passkeys](https://www.passkeys.io) as introduced by Apple, Google, and Microsoft
-- Hanko login box and profile elements that integrate in minutes
+- Login box and user profile components for fast integration
 - API-first, small footprint, cloud-native
 
-Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in many different applications and platforms.
+Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in different applications and platforms.
 
 https://user-images.githubusercontent.com/20115649/194661461-8819db77-4db5-4b24-9859-5a8e68be77fe.mp4
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that passkeys were announced and the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
 
-With most devices now shipping with passkey support and biometric sensors like Touch ID, Face ID, and Windows Hello, a truly fascinating login experience is enabled that has the potential to replace passwords for good. Hanko is built for that shift.
+With most devices now shipping with passkey support and convenient built-in authentication technology like Touch ID, Face ID, and Windows Hello, a much better login experience is enabled that will replace passwords for good. Hanko is built for that shift.
 
 **Build your passkey-powered auth stack with a few lines of code – and never look back.**
 
 # Architecture
 The main building blocks of the Hanko project are
-- [backend](/backend/README.md) - An authentication API powering passkeys, passcodes, and (optional) passwords, as well as user management and JWT issuing
-- [hanko-elements](/frontend/elements/README.md) - A set of web components made for Hanko backend that provides onboarding and login functionality and is highly customizable with CSS
+- [backend](/backend/README.md) - An authentication API for passkeys, passcodes, and (optional) passwords, as well as user management and JWT issuing
+- [hanko-elements](/frontend/elements/README.md) - Web components made for Hanko backend that provide onboarding and login functionality and are customizable with CSS
 - [hanko-frontend-sdk](/frontend/frontend-sdk/README.md) - A client package for using the Hanko API
 
-The remainder of the repository contents consist of:
-- [quickstart](/quickstart) - The quickstart example app, showing off Hanko's login experience and acting as a reference implementation
-- [examples](/examples) - Hanko example implementations for a number of frameworks
-- [docs](/docs) - The Hanko documentation
+The remainder of the repository consists of:
+- [quickstart](/quickstart) - A quickstart example app, showing off Hanko's login experience and acting as a reference implementation
+- [examples](/examples) - Example implementations for a number of frameworks
+- [docs](/docs) - The Hanko documentation ([docs.hanko.io](https://docs.hanko.io))
 
 # Getting started
 1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://passkeys.io) or use the [quickstart app](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
 2. Head over to the [backend](/backend/README.md) to learn how to get it up and running for your own project. Use [Hanko Cloud](https://cloud.hanko.io) for a hosted backend.
 3. Then, integrate [hanko-elements](/frontend/elements/README.md) – we provide [example applications](/examples/README.md) and [guides](https://docs.hanko.io/guides/frontend) for your favourite frontend framework in the official documentation
 
-If you want to use the Hanko backend API but prefer to build your own UI, you can still make use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components. The client it provides handles communication with the Hanko backend API and saves you the time of rolling your own.
+If you want to use the Hanko backend API but prefer to build your own UI, you can still make use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components and the client it provides handles communication with the Hanko backend API and saves you the time of rolling your own.
 
 # Roadmap
 We are currently in **Beta** and may introduce breaking changes. Watch our releases, leave a star, join our [Slack community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our roadmap:
@@ -70,14 +70,14 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| Rate limiting |
 |✅| OAuth logins (Sign in with Google/GitHub/...) |
 |⚙️| Session management |
-| | i18n & custom translations for [hanko-elements](/frontend/elements/README.md) |
+| | i18n & custom translations |
 | | 📢 Hanko v1.0 Release |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
-- SMS passcode delivery
 - 2FA options to secure fallback auth methods
 - Priviledged sessions & step-up authentication
-- Email templating
+- HTML emails & templating
+- SMS passcode delivery
 - Hosted auth pages and OpenID Connect
 - SAML support
 
