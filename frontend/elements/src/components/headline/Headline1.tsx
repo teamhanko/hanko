@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren } from "preact";
 
 import cx from "classnames";

@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren, toChildArray } from "preact";
 
 import styles from "./styles.sass";

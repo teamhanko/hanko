@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren, h } from "preact";
 import { forwardRef } from "preact/compat";
 
