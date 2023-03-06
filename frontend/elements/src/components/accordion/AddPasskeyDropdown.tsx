@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { StateUpdater, useContext, useState } from "preact/compat";
 
 import {

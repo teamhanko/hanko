@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { h } from "preact";
 import { useEffect, useMemo, useRef, useState } from "preact/compat";
 

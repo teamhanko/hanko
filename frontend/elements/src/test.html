@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
-    <script src="../dist/elements.js"></script>
     <style>
         body {
             background-color: #01a7c1;
@@ -32,8 +31,11 @@
 <body>
 <hanko-auth id="auth" lang="en" api="http://localhost:8000"></hanko-auth>
 <hanko-profile id="profile" hidden="true" lang="en" api="http://localhost:8000"></hanko-profile>
-<script>
-    Elements.register({ shadow: true });
+<script type="module">
+    import { register } from "../dist/elements.js";
+
+    register({ shadow: true });
+
     document.addEventListener("hankoAuthSuccess", (event) => {
         document.getElementById("auth").hidden = true;
         document.getElementById("profile").hidden = false;

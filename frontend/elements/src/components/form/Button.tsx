@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren } from "preact";
 import { useEffect, useRef } from "preact/compat";
 

@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { h } from "preact";
 import { StateUpdater } from "preact/compat";
 
@@ -31,7 +30,6 @@ const Accordion = function <T>({
     if (!(event.target instanceof HTMLInputElement)) return;
     const itemIndex = parseInt(event.target.value, 10);
     setCheckedItemIndex(itemIndex === checkedItemIndex ? null : itemIndex);
-    event.preventDefault();
   };
 
   return (

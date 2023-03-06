@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren, Fragment } from "preact";
 import styles from "./styles.sass";
 import Icon from "./Icon";

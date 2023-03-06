@@ -1,32 +1,29 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.2.1-alpha",
+  "version": "0.2.2-alpha",
   "private": false,
   "publishConfig": {
     "access": "public"
   },
-  "bundledDependencies": [
-    "@teamhanko/hanko-frontend-sdk"
-  ],
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "browser": {
-    "./": "./dist/elements.js"
+    ".": "./dist/elements.js"
   },
   "typesVersions": {
     "*": {
       "elements": [
-        "dist/ui/Elements.d.ts"
+        "dist/Elements.d.ts"
       ]
     }
   },
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/elements.js",
-      "require": "./dist/elements.js",
-      "types": "./dist/index.d.ts"
+      "require": "./dist/elements.js"
     }
   },
   "scripts": {
@@ -70,7 +67,7 @@
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.4.1",
-    "@teamhanko/hanko-frontend-sdk": "file:../frontend-sdk",
+    "@teamhanko/hanko-frontend-sdk": "^0.2.0-alpha",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
     "preact": "^10.12.0"

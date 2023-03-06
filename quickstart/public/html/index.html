@@ -7,7 +7,6 @@
     <meta name="theme-color" content="#042F4B">
     <title>Hanko Web Component Example</title>
     <link rel="stylesheet" href="static/css/index.css">
-    <script type="text/javascript" src="{{.HankoElementUrl}}"></script>
     <link href="../static/img/Favicon_32x32.png" rel="shortcut icon" type="image/x-icon">
     <link href="../static/img/Favicon_256x256.png" rel="apple-touch-icon">
 </head>
@@ -23,8 +22,10 @@
     <img alt="Powered by Hanko" src="static/img/poweredBy.svg"/>
 </footer>
 
-<script>
-    Elements.register({ shadow: false });
+<script type="module">
+    import { register } from "{{.HankoElementUrl}}";
+
+    register({ shadow: false });
     document.addEventListener("hankoAuthSuccess", (event) => {
         console.log(event);
         document.location.href = "/secured"
