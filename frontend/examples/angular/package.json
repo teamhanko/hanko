@@ -19,7 +19,7 @@
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.12.0",
-    "@teamhanko/hanko-elements": "^0.2.1-alpha"
+    "@teamhanko/hanko-elements": "^0.2.2-alpha"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^15.2.0",
