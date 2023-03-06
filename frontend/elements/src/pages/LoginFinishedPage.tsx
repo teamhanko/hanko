@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { useContext, useState } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";

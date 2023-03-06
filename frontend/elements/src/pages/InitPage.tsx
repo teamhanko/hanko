@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { useCallback, useContext, useEffect } from "preact/compat";
 
 import { User } from "@teamhanko/hanko-frontend-sdk";

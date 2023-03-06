@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import styles from "./styles.sass";
 import { IconProps } from "./Icon";
 import cx from "classnames";

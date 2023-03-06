@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { Fragment, h } from "preact";
 
 import cx from "classnames";

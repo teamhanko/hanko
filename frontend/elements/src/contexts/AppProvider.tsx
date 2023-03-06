@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren, createContext, h } from "preact";
 import { TranslateProvider } from "@denysvuika/preact-translate";
 
