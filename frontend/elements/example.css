@@ -32,41 +32,26 @@
     float: right
 }
 
-.hanko_form .hanko_ul {
-    padding-inline-start: 0;
-    list-style-type: none;
-    margin: 0
+.hanko_form {
+    display: flex;
+    flex-grow: 1
 }
 
-@media screen and (min-width: 450px) {
-    .hanko_form .hanko_ul {
-        display: flex
-    }
+.hanko_form .hanko_ul {
+    flex-grow: 1;
+    margin: var(--item-margin, 0.5rem 0);
+    padding-inline-start: 0;
+    list-style-type: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em
 }
 
 .hanko_form .hanko_li {
-    display: flex
-}
-
-@media screen and (min-width: 450px) {
-    .hanko_form .hanko_li {
-        display: inline-flex
-    }
-
-    .hanko_form .hanko_li:first-child {
-        flex-grow: 1
-    }
-
-    .hanko_form .hanko_li:last-child {
-        margin: 0 0 0 1rem;
-        flex-grow: 0;
-        min-width: 125px
-    }
-
-    .hanko_form .hanko_li:only-child {
-        margin: 0;
-        flex-grow: 1
-    }
+    display: flex;
+    max-width: 100%;
+    flex-grow: 1;
+    flex-basis: min-content
 }
 
 .hanko_button {
@@ -76,12 +61,15 @@
     border-radius: var(--border-radius, 4px);
     border-style: var(--border-style, solid);
     border-width: var(--border-width, 1px);
+    white-space: nowrap;
+    width: 100%;
+    min-width: var(--button-min-width, 7em);
     height: var(--item-height, 34px);
-    margin: var(--item-margin, 0.5rem 0);
-    flex-grow: 1;
     outline: none;
     cursor: pointer;
-    transition: .1s ease-out
+    transition: .1s ease-out;
+    flex-grow: 1;
+    flex-shrink: 1
 }
 
 .hanko_button:disabled {
@@ -137,10 +125,11 @@
 }
 
 .hanko_inputWrapper {
+    flex-grow: 1;
     position: relative;
-    margin: var(--item-margin, 0.5rem 0);
     display: flex;
-    flex-grow: 1
+    min-width: var(--input-min-width, 14em);
+    max-width: 100%
 }
 
 .hanko_input {
@@ -189,9 +178,12 @@
 }
 
 .hanko_passcodeInputWrapper {
+    flex-grow: 1;
+    min-width: var(--input-min-width, 14em);
+    max-width: fit-content;
+    position: relative;
     display: flex;
-    justify-content: space-between;
-    margin: var(--item-margin, 0.5rem 0)
+    justify-content: space-between
 }
 
 .hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper {
@@ -207,55 +199,38 @@
     text-align: center
 }
 
+.hanko_icon,
+.hanko_loadingSpinnerWrapper .hanko_loadingSpinner,
+.hanko_loadingSpinnerWrapperIcon .hanko_loadingSpinner,
+.hanko_exclamationMark,
 .hanko_checkmark {
     display: inline-block;
-    width: 16px;
-    height: 16px;
-    transform: rotate(45deg)
+    fill: var(--brand-contrast-color, white);
+    width: 18px
 }
 
-.hanko_checkmark .hanko_circle {
-    box-sizing: border-box;
-    display: inline-block;
-    border-width: 2px;
-    border-style: solid;
-    border-color: var(--brand-color, #506cf0);
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 11px;
-    left: 0;
-    top: 0
+.hanko_icon.hanko_secondary,
+.hanko_loadingSpinnerWrapper .hanko_secondary.hanko_loadingSpinner,
+.hanko_loadingSpinnerWrapperIcon .hanko_secondary.hanko_loadingSpinner,
+.hanko_secondary.hanko_exclamationMark,
+.hanko_secondary.hanko_checkmark {
+    fill: var(--color, #171717)
 }
 
-.hanko_checkmark .hanko_circle.hanko_secondary {
-    border-color: var(--color-shade-1, #8f9095)
+.hanko_icon.hanko_disabled,
+.hanko_loadingSpinnerWrapper .hanko_disabled.hanko_loadingSpinner,
+.hanko_loadingSpinnerWrapperIcon .hanko_disabled.hanko_loadingSpinner,
+.hanko_disabled.hanko_exclamationMark,
+.hanko_disabled.hanko_checkmark {
+    fill: var(--color-shade-1, #8f9095)
 }
 
-.hanko_checkmark .hanko_stem {
-    position: absolute;
-    width: 2px;
-    height: 7px;
-    background-color: var(--brand-color, #506cf0);
-    left: 8px;
-    top: 3px
+.hanko_checkmark {
+    fill: var(--brand-color, #506cf0)
 }
 
-.hanko_checkmark .hanko_stem.hanko_secondary {
-    background-color: var(--color-shade-1, #8f9095)
-}
-
-.hanko_checkmark .hanko_kick {
-    position: absolute;
-    width: 5px;
-    height: 2px;
-    background-color: var(--brand-color, #506cf0);
-    left: 5px;
-    top: 10px
-}
-
-.hanko_checkmark .hanko_kick.hanko_secondary {
-    background-color: var(--color-shade-1, #8f9095)
+.hanko_checkmark.hanko_secondary {
+    fill: var(--color-shade-1, #8f9095)
 }
 
 .hanko_checkmark.hanko_fadeOut {
@@ -273,63 +248,34 @@
 }
 
 .hanko_exclamationMark {
-    width: 16px;
-    height: 16px;
-    position: relative;
-    margin: 5px
+    fill: var(--error-color, #e82020);
+    padding-right: 5px
 }
 
-.hanko_exclamationMark .hanko_circle {
-    box-sizing: border-box;
-    display: inline-block;
-    background-color: var(--error-color, #e82020);
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    border-radius: 11px;
-    left: 0;
-    top: 0
+.hanko_loadingSpinnerWrapperIcon {
+    justify-content: flex-start;
+    width: 100%;
+    column-gap: 10px;
+    margin-left: 10px
 }
 
-.hanko_exclamationMark .hanko_stem {
-    position: absolute;
-    width: 2px;
-    height: 6px;
-    background: var(--background-color, white);
-    left: 7px;
-    top: 3px
-}
-
-.hanko_exclamationMark .hanko_dot {
-    position: absolute;
-    width: 2px;
-    height: 2px;
-    background: var(--background-color, white);
-    left: 7px;
-    top: 10px
-}
-
-.hanko_loadingSpinnerWrapper {
-    display: inline-block;
+.hanko_loadingSpinnerWrapper,
+.hanko_loadingSpinnerWrapperIcon {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
     margin: 0 5px
 }
 
-.hanko_loadingSpinnerWrapper .hanko_loadingSpinner {
-    box-sizing: border-box;
-    display: inline-block;
-    border-width: 2px;
-    border-style: solid;
-    border-color: var(--background-color, white);
-    border-top: 2px solid var(--brand-color, #506cf0);
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
+.hanko_loadingSpinnerWrapper .hanko_loadingSpinner,
+.hanko_loadingSpinnerWrapperIcon .hanko_loadingSpinner {
+    fill: var(--brand-color, #506cf0);
     animation: hanko_spin 500ms ease-in-out infinite
 }
 
-.hanko_loadingSpinnerWrapper .hanko_loadingSpinner.hanko_secondary {
-    border-color: var(--color-shade-1, #8f9095);
-    border-top: 2px solid var(--color-shade-2, #e5e6ef)
+.hanko_loadingSpinnerWrapper.hanko_secondary,
+.hanko_secondary.hanko_loadingSpinnerWrapperIcon {
+    fill: var(--color-shade-1, #8f9095)
 }
 
 @keyframes hanko_spin {
@@ -340,6 +286,26 @@
     100% {
         transform: rotate(360deg)
     }
+}
+
+.hanko_googleIcon.hanko_disabled {
+    fill: var(--color-shade-1, #8f9095)
+}
+
+.hanko_googleIcon.hanko_blue {
+    fill: #4285f4
+}
+
+.hanko_googleIcon.hanko_green {
+    fill: #34a853
+}
+
+.hanko_googleIcon.hanko_yellow {
+    fill: #fbbc05
+}
+
+.hanko_googleIcon.hanko_red {
+    fill: #ea4335
 }
 
 .hanko_headline {
@@ -380,6 +346,10 @@
     box-sizing: border-box
 }
 
+.hanko_errorMessage>span:first-child {
+    display: inline-flex
+}
+
 .hanko_errorMessage[hidden] {
     display: none
 }
@@ -410,9 +380,7 @@
 
 .hanko_accordion .hanko_accordionItem .hanko_label {
     border-radius: var(--border-radius, 4px);
-    border-style: var(--border-style, solid);
-    border-width: var(--border-width, 1px);
-    border-color: var(--background-color, white);
+    border-style: none;
     height: var(--item-height, 34px);
     background: var(--background-color, white);
     box-sizing: border-box;
@@ -452,7 +420,6 @@
 
 .hanko_accordion .hanko_accordionItem .hanko_label:hover.hanko_dropdown {
     color: var(--link-color, #506cf0);
-    border-color: var(--background-color, white);
     background: none
 }
 
@@ -487,7 +454,6 @@
 
 .hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label.hanko_dropdown {
     color: var(--link-color, #506cf0);
-    border-color: var(--background-color, white);
     background: none
 }
 
@@ -530,7 +496,6 @@
 }
 
 .hanko_link:hover {
-    color: var(--link-color, #506cf0);
     text-decoration: var(--link-text-decoration-hover, underline)
 }
 
@@ -538,6 +503,10 @@
     color: var(--color, #171717);
     pointer-events: none;
     cursor: default
+}
+
+.hanko_link.hanko_danger {
+    color: var(--error-color, #e82020) !important
 }
 
 .hanko_linkWrapper {
@@ -552,30 +521,28 @@
     flex-direction: row-reverse
 }
 
-.hanko_dividerWrapper {
+.hanko_divider {
     font-weight: var(--font-weight, 400);
     font-size: var(--font-size, 14px);
     font-family: var(--font-family, sans-serif);
-    display: var(--divider-display, block);
+    display: var(--divider-display, flex);
     visibility: var(--divider-visibility, visible);
     color: var(--color-shade-1, #8f9095);
     margin: var(--item-margin, 0.5rem 0)
 }
 
-.hanko_divider {
+.hanko_divider .hanko_line {
     border-bottom-style: var(--border-style, solid);
     border-bottom-width: var(--border-width, 1px);
     color: inherit;
     font: inherit;
-    width: 100%;
-    text-align: center;
-    line-height: .1em;
-    margin: 0 auto
+    width: 100%
 }
 
 .hanko_divider .hanko_text {
     font: inherit;
     color: inherit;
     background: var(--background-color, white);
-    padding: var(--divider-padding, 0 42px)
+    padding: var(--divider-padding, 0 42px);
+    line-height: .1em
 }

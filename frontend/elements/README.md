@@ -184,6 +184,7 @@ The following parts are available:
 - `error-text` - the error message
 - `divider` - the horizontal divider on the login page
 - `divider-text` - the divider text
+- `divider-line` - the line before and after the `divider-text`
 - `form-item` - the container of a form item, e.g. an input field or a button
 
 ### CSS classes

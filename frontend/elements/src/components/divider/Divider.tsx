@@ -7,20 +7,12 @@ import styles from "./styles.sass";
 const Divider = () => {
   const { t } = useContext(TranslateContext);
   return (
-    <section className={styles.dividerWrapper}>
-      <div
-        // @ts-ignore
-        part={"divider"}
-        className={styles.divider}
-      >
-        <span
-          // @ts-ignore
-          part={"divider-text"}
-          class={styles.text}
-        >
-          {t("or")}
-        </span>
+    <section part={"divider"} className={styles.divider}>
+      <div part={"divider-line"} className={styles.line} />
+      <div part={"divider-text"} class={styles.text}>
+        {t("or")}
       </div>
+      <div part={"divider-line"} className={styles.line} />
     </section>
   );
 };
