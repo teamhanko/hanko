@@ -1,4 +1,4 @@
-import * as preact from "preact";
+import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
 
 import AppProvider from "./contexts/AppProvider";
@@ -14,11 +14,11 @@ export interface HankoAuthAdditionalProps extends AdditionalProps {
 export interface HankoProfileAdditionalProps extends AdditionalProps {}
 
 declare interface HankoAuthElementProps
-  extends preact.JSX.HTMLAttributes<HTMLElement>,
+  extends JSX.HTMLAttributes<HTMLElement>,
     HankoAuthAdditionalProps {}
 
 declare interface HankoProfileElementProps
-  extends preact.JSX.HTMLAttributes<HTMLElement>,
+  extends JSX.HTMLAttributes<HTMLElement>,
     HankoProfileAdditionalProps {}
 
 declare global {
@@ -63,7 +63,7 @@ export const register = async (options: RegisterOptions) =>
 
 interface InternalRegisterOptions extends RegisterOptions {
   tagName: string;
-  entryComponent: preact.FunctionalComponent<HankoAuthAdditionalProps>;
+  entryComponent: FunctionalComponent<HankoAuthAdditionalProps>;
   observedAttributes: string[];
 }
 

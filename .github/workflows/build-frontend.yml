@@ -1,4 +1,4 @@
-name: frontend-sdk
+name: build-frontend
 
 on:
   push:
@@ -15,16 +15,16 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v3
         with:
-          node-version: 16.15.1
+          node-version: v18.14.2
 
       - name: Install dependencies
-        working-directory: ./frontend/frontend-sdk
+        working-directory: ./frontend
         run: npm ci
 
       - name: Build
-        working-directory: ./frontend/frontend-sdk
+        working-directory: ./frontend
         run: npm run build
 
       - name: Run tests
-        working-directory: ./frontend/frontend-sdk
+        working-directory: ./frontend
         run: npm test

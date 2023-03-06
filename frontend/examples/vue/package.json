@@ -1,10 +1,11 @@
 {
   "name": "example-vue",
   "scripts": {
-    "start": "vite --port 8888 --host"
+    "start": "vite --port 8888 --host",
+    "build": "vite build"
   },
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.2.0-alpha",
+    "@teamhanko/hanko-elements": "^0.2.2-alpha",
     "vue": "^3.2.47",
     "vue-router": "^4.1.6"
   },

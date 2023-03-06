@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
 

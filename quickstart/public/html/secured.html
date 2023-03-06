@@ -8,8 +8,6 @@
     <link rel="stylesheet" href="static/css/secured.css"/>
     <link href="../static/img/Favicon_32x32.png" rel="shortcut icon" type="image/x-icon">
     <link href="../static/img/Favicon_256x256.png" rel="apple-touch-icon">
-    <script type="text/javascript" src="{{.HankoElementUrl}}"></script>
-    <script type="text/javascript" src="{{.HankoFrontendSdkUrl}}"></script>
 </head>
 <body>
 <header>
@@ -39,18 +37,21 @@
     <img alt="Powered by Hanko" src="static/img/poweredBy.svg"/>
 </footer>
 
-<script>
-    const hanko = new hankoFrontendSdk.Hanko("{{.HankoUrl}}")
+<script type="module">
+    import { register } from "{{.HankoElementUrl}}";
+    import { Hanko } from "{{.HankoFrontendSdkUrl}}";
 
-    Elements.register({ shadow: false });
+    register({ shadow: false });
+
+    const hanko = new Hanko("{{.HankoUrl}}")
 
     document.getElementById("logout-link")
         .addEventListener("click", (event) => {
-          event.preventDefault();
-          hanko.user.logout()
-            .then(() => { window.location.href = "/" })
-            .catch(console.error);
-    });
+            event.preventDefault();
+            hanko.user.logout()
+                .then(() => { window.location.href = "/" })
+                .catch(console.error);
+        });
 </script>
 
 </body>

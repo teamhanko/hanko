@@ -1,26 +1,21 @@
-FROM --platform=$BUILDPLATFORM node:16.16-alpine as build
+FROM --platform=$BUILDPLATFORM node:18.14-alpine as build
+RUN apk add --no-cache libc6-compat
+RUN apk update
+
+RUN npm install turbo --global
 
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH=/app/node_modules/.bin:$PATH
 
-# frontend-sdk
-WORKDIR /app/frontend-sdk
-COPY frontend-sdk/package.json ./
-COPY frontend-sdk/package-lock.json ./
-
-RUN npm ci --silent
-COPY ./frontend-sdk ./
-RUN npm run build
-
-
-# elements
-WORKDIR /app/elements
-COPY elements/package.json ./
-COPY elements/package-lock.json ./
+COPY package.json ./
+COPY package-lock.json ./
+COPY ./frontend-sdk/package.json ./frontend-sdk/package.json
+COPY ./elements/package.json ./elements/package.json
 
 RUN npm ci --silent
-COPY ./elements ./
-RUN npm run build
+
+COPY . .
+RUN npm run build:elements
 
 FROM nginx:stable-alpine
 COPY --from=build /app/elements/dist/elements.js /usr/share/nginx/html
