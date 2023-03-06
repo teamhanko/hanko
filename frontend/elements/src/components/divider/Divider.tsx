@@ -12,15 +12,19 @@ const Divider = () => {
         // @ts-ignore
         part={"divider"}
         className={styles.divider}
+      />
+      <span
+        // @ts-ignore
+        part={"divider-text"}
+        class={styles.text}
       >
-        <span
-          // @ts-ignore
-          part={"divider-text"}
-          class={styles.text}
-        >
-          {t("or")}
-        </span>
-      </div>
+        {t("or")}
+      </span>
+      <div
+        // @ts-ignore
+        part={"divider"}
+        className={styles.divider}
+      />
     </section>
   );
 };
