@@ -6,7 +6,6 @@ import {
   UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
-import Cookies from "js-cookie";
 
 /**
  * A class to manage user information.
