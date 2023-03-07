@@ -37,7 +37,7 @@ The main building blocks of the Hanko project are
 
 The remainder of the repository consists of:
 - [quickstart](/quickstart) - A quickstart example app, showing off Hanko's login experience and acting as a reference implementation
-- [examples](/examples) - Example implementations for a number of frameworks
+- [examples](frontend/examples) - Example implementations for a number of frameworks
 - [docs](/docs) - The Hanko documentation ([docs.hanko.io](https://docs.hanko.io))
 
 # Getting started
