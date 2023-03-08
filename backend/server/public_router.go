@@ -14,8 +14,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/server/middleware"
 	"github.com/teamhanko/hanko/backend/session"
-	"net/url"
-	"strings"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus *prometheus.Prometheus) *echo.Echo {
@@ -26,21 +24,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
-	allowedOrigins := []string{}
-	isLocalhost := false
-	for _, v := range cfg.Webauthn.RelyingParty.Origins {
-		origin, _ := url.Parse(v)
-		if strings.HasPrefix(origin.Host, "localhost") {
-			allowedOrigins = []string{"*"}
-			isLocalhost = true
-			break
-		}
-		allowedOrigins = append(allowedOrigins, v)
-	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: allowedOrigins,
-		// only on localhost this is allowed.
-		UnsafeWildcardOriginWithAllowCredentials: isLocalhost,
+		AllowOrigins: cfg.Webauthn.RelyingParty.Origins,
 		// Needed for cross-domain
 		ExposeHeaders: []string{"X-Auth-Token"},
 		// Needed for cross-domain
