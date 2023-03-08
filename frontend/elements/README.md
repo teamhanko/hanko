@@ -47,10 +47,10 @@ register({
 With a script tag via CDN:
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"/>
+<script type="module">
+  import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"
 
-<script>
-  Elements.register({shadow: true, injectStyles: true})
+  register({shadow: true, injectStyles: true})
 </script>
 ```
 
@@ -184,6 +184,7 @@ The following parts are available:
 - `error-text` - the error message
 - `divider` - the horizontal divider on the login page
 - `divider-text` - the divider text
+- `divider-line` - the line before and after the `divider-text`
 - `form-item` - the container of a form item, e.g. an input field or a button
 
 ### CSS classes
@@ -254,7 +255,7 @@ Take a look at our [live demo](https://example.hanko.io).
 
 To learn more about how to integrate the Hanko elements into frontend frameworks, see our
 [guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
-[example applications](https://github.com/teamhanko/hanko/blob/main/examples/README.md).
+[example applications](https://github.com/teamhanko/hanko/blob/main/frontend/examples/README.md).
 
 ## Browser support
 

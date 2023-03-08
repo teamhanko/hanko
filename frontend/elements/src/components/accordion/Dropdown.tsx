@@ -1,4 +1,3 @@
-import * as preact from "preact";
 import { ComponentChildren, Fragment, h } from "preact";
 import { StateUpdater } from "preact/compat";
 

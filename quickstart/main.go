@@ -20,12 +20,8 @@ func main() {
 	hankoElementUrl := getEnv("HANKO_ELEMENT_URL")
 	hankoFrontendSdkUrl := getEnv("HANKO_FRONTEND_SDK_URL")
 	hankoUrlInternal := hankoUrl
-	domain := ""
 	if value, ok := os.LookupEnv("HANKO_URL_INTERNAL"); ok {
 		hankoUrlInternal = value
-	}
-	if value, ok := os.LookupEnv("DOMAIN"); ok {
-		domain = value
 	}
 
 	e := echo.New()
@@ -60,18 +56,6 @@ func main() {
 			"HankoElementUrl":     hankoElementUrl,
 		})
 	}, middleware.SessionMiddleware(hankoUrlInternal))
-
-	e.GET("/logout", func(c echo.Context) error {
-		cookie := &http.Cookie{
-			Name:     "hanko",
-			Value:    "",
-			MaxAge:   -1,
-			HttpOnly: true,
-			Domain:   domain,
-		}
-		c.SetCookie(cookie)
-		return c.Redirect(http.StatusTemporaryRedirect, "/")
-	})
 
 	if err := e.Start(":8080"); err != nil {
 		log.Fatal(err)

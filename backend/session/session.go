@@ -15,6 +15,7 @@ type Manager interface {
 	GenerateJWT(uuid.UUID) (string, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
+	DeleteCookie() (*http.Cookie, error)
 }
 
 // Manager is used to create and verify session JWTs
@@ -109,5 +110,19 @@ func (g *manager) GenerateCookie(token string) (*http.Cookie, error) {
 		Secure:   g.cookieConfig.Secure,
 		HttpOnly: g.cookieConfig.HttpOnly,
 		SameSite: g.cookieConfig.SameSite,
+	}, nil
+}
+
+// DeleteCookie returns a cookie that will expire the cookie on the frontend
+func (g *manager) DeleteCookie() (*http.Cookie, error) {
+	return &http.Cookie{
+		Name:     "hanko",
+		Value:    "",
+		Domain:   g.cookieConfig.Domain,
+		Path:     "/",
+		Secure:   g.cookieConfig.Secure,
+		HttpOnly: g.cookieConfig.HttpOnly,
+		SameSite: g.cookieConfig.SameSite,
+		MaxAge:   -1,
 	}, nil
 }

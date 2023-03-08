@@ -41,7 +41,7 @@ The remainder of the repository consists of:
 - [docs](/docs) - The Hanko documentation ([docs.hanko.io](https://docs.hanko.io))
 
 # Getting started
-1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://passkeys.io) or use the [quickstart app](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
+1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://www.passkeys.io) or use the [quickstart app](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
 2. Head over to the [backend](/backend/README.md) to learn how to get it up and running for your own project. Use [Hanko Cloud](https://cloud.hanko.io) for a hosted backend.
 3. Then, integrate [hanko-elements](/frontend/elements/README.md) – we provide [example applications](frontend/examples/README.md) and [guides](https://docs.hanko.io/guides/frontend) for your favourite frontend framework in the official documentation
 

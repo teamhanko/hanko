@@ -11,7 +11,9 @@ sidebar_custom_props:
 
 # Svelte
 
-In this guide you will learn how to add authentication to your Svelte application using the Hanko custom element.
+In this guide you will learn how to use the
+[hanko-elements](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md) web components to
+add authentication and a user profile to your Svelte application.
 
 ## Install dependencies
 Install the `@teamhanko/hanko-elements` package:
@@ -20,12 +22,12 @@ Install the `@teamhanko/hanko-elements` package:
 npm install @teamhanko/hanko-elements
 ```
 
-## Import & use custom element
+## Add `<hanko-auth>` component
 
-Import the `register` function from `@teamhanko/hanko-elements` in the component where you want to use the
-Hanko custom element. Call `register` to register the `<hanko-auth>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
-Then use the `<hanko-auth>` element in your component template.
+To provide a login interface in your app, use the `<hanko-auth>` web component. To do so, first import the `register`
+function from `@teamhanko/hanko-elements` in your Svelte component. Then call `register` to register the `<hanko-auth>`
+element with the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry)
+and use the `<hanko-auth>` element in your component.
 
 :::info
 
@@ -35,56 +37,55 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 
 :::
 
-```js title="Login.svelte" showLineNumbers
+```js title="HankoAuth.svelte" showLineNumbers
 <script>
   import { onMount } from "svelte";
   import { register } from '@teamhanko/hanko-elements';
 
-  const api = import.meta.env.VITE_HANKO_API;
-  const lang = import.meta.env.VITE_HANKO_LANG;
+  const hankoApi = "<YOUR_API_URL>";
 
   onMount(async () => {
     // register the component
     // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-    register({ shadow: true }).catch((e) => {
-      console.error(e)
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
     });
   });
 </script>
 
-<div class="content">
-  <hanko-auth {api} {lang}/>
-</div>
+<hanko-auth api={hankoApi} />
 ```
 
-## Defining login callbacks
+### Define login callbacks
 
 The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
-event in order to, for example, redirect your users to protected pages in your application.
+event in order to, for example, redirect your users to protected pages in your application,
+e.g. a [user profile page](#hanko-profile).
 
 To do so, apply an event listener with an appropriate redirect callback:
 
-```js {2-3,9-14,23,26-28,32} title="Login.svelte" showLineNumbers
+```js {2-3,7-13,23,26-28,31} title="HankoAuth.svelte" showLineNumbers
 <script>
   import { onDestroy, onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
   import { register } from '@teamhanko/hanko-elements';
 
-  const api = import.meta.env.VITE_HANKO_API;
-  const lang = import.meta.env.VITE_HANKO_LANG;
-
+  const hankoApi = "<YOUR_API_URL>";
   const navigate = useNavigate();
   let element;
 
-  const redirectToTodos = () => {
-    navigate('/todo');
+  const redirectAfterLogin = () => {
+    // successfully logged in, redirect to a page in your application
+    navigate('...');
   };
 
   onMount(async () => {
     // register the component
     // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-    register({ shadow: true }).catch((e) => {
-      console.error(e)
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
     });
 
     element.addEventListener('hankoAuthSuccess', redirectToTodos);
@@ -95,16 +96,49 @@ To do so, apply an event listener with an appropriate redirect callback:
   });
 </script>
 
-<div class="content">
-  <hanko-auth bind:this={element} {api} {lang}/>
-</div>
+<hanko-auth bind:this={element} api={hankoApi} />
 ```
 
-## UI customization
+## Add `<hanko-profile>` component {#hanko-profile}
 
-The styles of the `hanko-auth` element can be customized using CSS variables and parts. See our guide
+To provide a page where users can manage their email addresses, password and passkeys, use the `<hanko-profile>` web
+component. Just as with the `<hanko-auth>` component, import the `register` function from `@teamhanko/hanko-elements` in
+your Svelte component. Then call `register` to register the `<hanko-profile>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry) and use
+the element in your component.
+
+:::info
+
+When adding the `<hanko-profile>` element to your template you must provide the URL of the Hanko API via the `api`
+attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
+
+```js title="HankoProfile.svelte" showLineNumbers
+<script>
+  import { register } from "@teamhanko/hanko-elements";
+
+  const hankoApi = "<YOUR_API_URL>";
+
+  onMount(async () => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
+    register({ shadow: true })
+      .catch((error) => {
+        // handle error
+      });
+  });
+</script>
+
+<hanko-profile api={hankoApi}/>
+```
+
+## Customize component styles
+
+The styles of the `hanko-auth` and `hanko-profile` elements can be customized using CSS variables and parts. See our guide
 on customization [here](https://github.com/teamhanko/hanko/tree/main/frontend/elements#ui-customization).
 
-## Backend request authentication
+## Authenticate backend requests
 
 If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).

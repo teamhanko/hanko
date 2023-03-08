@@ -451,3 +451,29 @@ func (s *userSuite) TestUserHandler_Me() {
 		s.Equal(userId, response.UserId)
 	}
 }
+
+func (s *userSuite) TestUserHandler_Logout() {
+	userId, _ := uuid.NewV4()
+
+	e := echo.New()
+	e.Validator = dto.NewCustomValidator()
+	req := httptest.NewRequest(http.MethodPost, "/logout", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	token := jwt.New()
+	err := token.Set(jwt.SubjectKey, userId.String())
+	s.NoError(err)
+	c.Set("session", token)
+
+	handler := NewUserHandler(&defaultConfig, s.storage, sessionManager{}, test.NewAuditLogger())
+
+	if s.NoError(handler.Logout(c)) {
+		s.Equal(http.StatusNoContent, rec.Code)
+		cookie := rec.Header().Get("Set-Cookie")
+		s.NotEmpty(cookie)
+
+		split := strings.Split(cookie, ";")
+		s.Equal("Max-Age=0", strings.TrimSpace(split[1]))
+	}
+}

@@ -1,0 +1,19 @@
+{
+  "name": "hanko-frontend",
+  "description": "hanko frontend parts",
+  "private": true,
+  "workspaces": [
+    "frontend-sdk",
+    "elements",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "build:elements": "turbo build --filter=./frontend-sdk --filter=./elements"
+  },
+  "devDependencies": {
+    "turbo": "^1.8.3"
+  }
+}

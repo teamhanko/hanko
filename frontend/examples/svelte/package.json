@@ -1,0 +1,23 @@
+{
+  "name": "example-svelte",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "vite --port 8888 --host",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^1.0.2",
+    "@tsconfig/svelte": "^3.0.0",
+    "svelte": "^3.55.1",
+    "svelte-check": "^2.8.1",
+    "svelte-preprocess": "^4.10.7",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4",
+    "vite": "^3.2.5"
+  },
+  "dependencies": {
+    "@teamhanko/hanko-elements": "^0.2.2-alpha",
+    "svelte-navigator": "^3.2.2"
+  }
+}

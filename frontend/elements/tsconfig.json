@@ -14,8 +14,8 @@
     "allowSyntheticDefaultImports": true,
     "isolatedModules": true,
     "resolveJsonModule": true,
-    "jsx": "react",
-    "jsxFactory": "preact.h",
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
     "noResolve": false,
     "declaration": true,
     "diagnostics": true,
@@ -24,6 +24,6 @@
     "sourceMap": true,
     "noImplicitAny": true,
     "target": "es6",
-    "module": "commonjs"
+    "module": "es2020"
   }
 }

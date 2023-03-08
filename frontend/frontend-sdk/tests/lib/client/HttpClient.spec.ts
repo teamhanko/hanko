@@ -62,7 +62,7 @@ describe("httpClient._fetch()", () => {
       this.onload();
     });
 
-    Cookies.get = jest.fn().mockReturnValue(jwt);
+    jest.spyOn(httpClient, "_getAuthCookie").mockReturnValue(jwt);
 
     await httpClient._fetch("/test", { method: "GET" }, xhr);
 
@@ -84,31 +84,12 @@ describe("httpClient._fetch()", () => {
     });
 
     jest.spyOn(xhr, "getResponseHeader").mockReturnValue(jwt);
-
-    Cookies.set = jest.fn();
+    jest.spyOn(client, "_setAuthCookie");
 
     await client._fetch("/test", { method: "GET" }, xhr);
 
     expect(xhr.getResponseHeader).toHaveBeenCalledWith("X-Auth-Token");
-    expect(Cookies.set).toHaveBeenCalledWith("hanko", jwt, { secure: false });
-  });
-
-  it("should set a secure cookie if x-auth-token response header is available and https is used", async () => {
-    httpClient = new HttpClient("https://test.api");
-
-    jest.spyOn(xhr, "send").mockImplementation(function () {
-      // eslint-disable-next-line no-invalid-this
-      this.onload();
-    });
-
-    jest.spyOn(xhr, "getResponseHeader").mockReturnValue(jwt);
-
-    Cookies.set = jest.fn();
-
-    await httpClient._fetch("/test", { method: "GET" }, xhr);
-
-    expect(xhr.getResponseHeader).toHaveBeenCalledWith("X-Auth-Token");
-    expect(Cookies.set).toHaveBeenCalledWith("hanko", jwt, { secure: true });
+    expect(client._setAuthCookie).toHaveBeenCalledWith(jwt);
   });
 
   it("should handle onerror", async () => {
@@ -131,6 +112,49 @@ describe("httpClient._fetch()", () => {
     const response = httpClient._fetch("/test", { method: "GET" }, xhr);
 
     await expect(response).rejects.toThrow(RequestTimeoutError);
+  });
+});
+
+describe("httpClient._setAuthCookie()", () => {
+  it("should set a new cookie", async () => {
+    httpClient = new HttpClient("http://test.api");
+    jest.spyOn(Cookies, "set");
+    httpClient._setAuthCookie("test-token");
+
+    expect(Cookies.set).toHaveBeenCalledWith("hanko", "test-token", {
+      secure: false,
+    });
+  });
+
+  it("should set a new secure cookie", async () => {
+    httpClient = new HttpClient("https://test.api");
+    jest.spyOn(Cookies, "set");
+    httpClient._setAuthCookie("test-token");
+
+    expect(Cookies.set).toHaveBeenCalledWith("hanko", "test-token", {
+      secure: true,
+    });
+  });
+});
+
+describe("httpClient._getAuthCookie()", () => {
+  it("should return the contents of the authorization cookie", async () => {
+    httpClient = new HttpClient("https://test.api");
+    Cookies.get = jest.fn().mockReturnValue("test-token");
+    const token = httpClient._getAuthCookie();
+
+    expect(Cookies.get).toHaveBeenCalledWith("hanko");
+    expect(token).toBe("test-token");
+  });
+});
+
+describe("httpClient._removeAuthCookie()", () => {
+  it("should return the contents of the authorization cookie", async () => {
+    httpClient = new HttpClient("https://test.api");
+    jest.spyOn(Cookies, "remove");
+    httpClient.removeAuthCookie();
+
+    expect(Cookies.remove).toHaveBeenCalledWith("hanko");
   });
 });
 
