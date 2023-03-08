@@ -75,7 +75,7 @@ func DefaultConfig() *Config {
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
 				DisplayName: "Hanko Authentication Service",
-				Origins:     []string{"http://localhost"},
+				Origins:     []string{"http://localhost:8888"},
 			},
 			Timeout: 60000,
 		},
@@ -245,12 +245,10 @@ func (r *WebauthnSettings) Validate() error {
 
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
-	Id          string `yaml:"id" json:"id" koanf:"id"`
-	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
-	Icon        string `yaml:"icon" json:"icon" koanf:"icon"`
-	// Deprecated: Use Origins instead
-	Origin  string   `yaml:"origin" json:"origin" koanf:"origin"`
-	Origins []string `yaml:"origins" json:"origins" koanf:"origins"`
+	Id          string   `yaml:"id" json:"id" koanf:"id"`
+	DisplayName string   `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
+	Icon        string   `yaml:"icon" json:"icon" koanf:"icon"`
+	Origins     []string `yaml:"origins" json:"origins" koanf:"origins"`
 }
 
 // SMTP Server Settings for sending passcodes
