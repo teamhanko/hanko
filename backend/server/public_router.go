@@ -24,13 +24,17 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
+	exposeHeader := []string{}
+	if cfg.Session.EnableAuthTokenHeader {
+		exposeHeader = []string{"X-Auth-Token"}
+	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: cfg.Webauthn.RelyingParty.Origins,
-		// Needed for cross-domain
-		ExposeHeaders: []string{"X-Auth-Token"},
-		// Needed for cross-domain
+		// Rationale: It does not make sense to have different settings for webauthn Origin and Cors Origins.
+		// We wan't to have both in sync.
+		AllowOrigins:     cfg.Webauthn.RelyingParty.Origins,
+		ExposeHeaders:    exposeHeader,
 		AllowCredentials: true,
-		//  Chromium (starting in v76) caps at 2 hours (7200 seconds).
+		// Based on: Chromium (starting in v76) caps at 2 hours (7200 seconds).
 		MaxAge: 7200,
 	}))
 
