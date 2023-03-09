@@ -128,7 +128,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 
 	if h.cfg.Session.EnableAuthTokenHeader {
 		c.Response().Header().Set("X-Auth-Token", jwt)
-		c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
+		//c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 	}
 
 	err = h.auditLogger.Create(c, linkingResult.Type, linkingResult.User, nil)
