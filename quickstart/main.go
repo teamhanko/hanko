@@ -24,6 +24,8 @@ func main() {
 		hankoUrlInternal = value
 	}
 
+	_, conditionalUi := os.LookupEnv("HANKO_ENABLE_CONDITIONAL_UI")
+
 	e := echo.New()
 	e.Renderer = t
 
@@ -42,6 +44,7 @@ func main() {
 		indexData := IndexData{
 			HankoUrl:        hankoUrl,
 			HankoElementUrl: hankoElementUrl,
+			ConditionalUi:   conditionalUi,
 		}
 		return c.Render(http.StatusOK, "index.html", &indexData)
 	})
@@ -65,6 +68,7 @@ func main() {
 type IndexData struct {
 	HankoUrl        string
 	HankoElementUrl string
+	ConditionalUi   bool
 }
 
 type Template struct {
