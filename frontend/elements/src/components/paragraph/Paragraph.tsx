@@ -3,7 +3,7 @@ import { ComponentChildren } from "preact";
 import styles from "./styles.sass";
 
 type Props = {
-  children: ComponentChildren;
+  children?: ComponentChildren;
 };
 
 const Paragraph = ({ children }: Props) => {
@@ -13,7 +13,7 @@ const Paragraph = ({ children }: Props) => {
       part={"paragraph"}
       className={styles.paragraph}
     >
-      {children}
+      {children || "&nbsp;"}
     </p>
   );
 };

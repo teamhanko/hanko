@@ -15,10 +15,16 @@ import ListPasskeysAccordion from "../components/accordion/ListPasskeysAccordion
 import AddEmailDropdown from "../components/accordion/AddEmailDropdown";
 import ChangePasswordDropdown from "../components/accordion/ChangePasswordDropdown";
 import AddPasskeyDropdown from "../components/accordion/AddPasskeyDropdown";
+import Divider from "../components/spacer/Divider";
+import Button from "../components/form/Button";
+import Form from "../components/form/Form";
+import DeleteAccountPage from "./DeleteAccountPage";
+import Spacer from "../components/spacer/Spacer";
 
 const ProfilePage = () => {
   const { t } = useContext(TranslateContext);
-  const { config, webauthnCredentials, emails } = useContext(AppContext);
+  const { config, webauthnCredentials, emails, setPage } =
+    useContext(AppContext);
 
   const [emailError, setEmailError] = useState<HankoError>(null);
   const [passwordError, setPasswordError] = useState<HankoError>(null);
@@ -34,6 +40,11 @@ const ProfilePage = () => {
     useState<number>(null);
   const [checkedItemIndexAddPasskey, setCheckedItemIndexAddPasskey] =
     useState<number>(null);
+
+  const deleteUser = (event: Event) => {
+    event.preventDefault();
+    setPage(<DeleteAccountPage onBack={() => setPage(<ProfilePage />)} />);
+  };
 
   useEffect(() => {
     if (checkedItemIndexEmails !== null) {
@@ -150,6 +161,19 @@ const ProfilePage = () => {
           setCheckedItemIndex={setCheckedItemIndexAddPasskey}
         />
       </Paragraph>
+      {config.account.allow_deletion ? (
+        <Fragment>
+          <Spacer />
+          <Paragraph>
+            <Divider />
+          </Paragraph>
+          <Paragraph>
+            <Form onSubmit={deleteUser}>
+              <Button dangerous>{t("headlines.deleteAccount")}</Button>
+            </Form>
+          </Paragraph>
+        </Fragment>
+      ) : null}
     </Content>
   );
 };

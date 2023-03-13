@@ -34,7 +34,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 			MaxAge:           cfg.Server.Public.Cors.MaxAge,
 		}))
 	}
-	
+
 	if prometheus != nil {
 		e.Use(prometheus.HandlerFunc)
 	}
@@ -75,6 +75,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.POST("/user", userHandler.GetUserIdByEmail)
 	e.POST("/logout", userHandler.Logout, hankoMiddleware.Session(sessionManager))
+
+	if cfg.Account.AllowDeletion {
+		e.DELETE("/user", userHandler.Delete, hankoMiddleware.Session(sessionManager))
+	}
 
 	healthHandler := handler.NewHealthHandler()
 	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)

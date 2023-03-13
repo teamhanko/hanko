@@ -79,6 +79,13 @@
     background: variables.$color-shade-2
     border-color: variables.$color-shade-1
 
+  &.dangerous
+    color: variables.$error-color
+    background: variables.$background-color
+    border-color: variables.$error-color
+    flex-grow: 0
+    width: auto
+
 // Input Styles
 
 .inputWrapper
@@ -140,3 +147,54 @@
 
     .input
       text-align: center
+
+// Checkmark Styles
+
+.checkboxWrapper
+  @include mixins.font
+
+  color: variables.$color
+  align-items: center
+  display: flex
+
+  .label
+    color: inherit
+    padding-left: .5rem
+    cursor: pointer
+
+    &.disabled
+      cursor: default
+      color: variables.$color-shade-1
+
+  .checkbox
+    border: currentColor solid 1px
+    border-radius: 0.15em
+    appearance: none
+    -webkit-appearance: none
+    width: 1.1rem
+    height: 1.1rem
+    margin: 0
+    color: currentColor
+    background-color: variables.$background-color
+    font: inherit
+    box-shadow: none
+    display: inline-flex
+    place-content: center
+    cursor: pointer
+
+    &:checked
+      background-color: variables.$color
+
+    &:disabled
+      cursor: default
+      background-color: variables.$color-shade-2
+      border-color: variables.$color-shade-1
+
+    &:checked:after
+      content: '\2713'
+      color: variables.$background-color
+      position: absolute
+      line-height: 1.1rem
+
+    &:disabled:after
+      color: variables.$color-shade-1

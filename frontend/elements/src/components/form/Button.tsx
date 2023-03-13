@@ -12,6 +12,7 @@ type Props = {
   title?: string;
   children: ComponentChildren;
   secondary?: boolean;
+  dangerous?: boolean;
   isLoading?: boolean;
   isSuccess?: boolean;
   disabled?: boolean;
@@ -24,6 +25,7 @@ const Button = ({
   title,
   children,
   secondary,
+  dangerous,
   disabled,
   isLoading,
   isSuccess,
@@ -43,7 +45,13 @@ const Button = ({
   return (
     <button
       // @ts-ignore
-      part={secondary ? "button secondary-button" : "button primary-button"}
+      part={
+        dangerous
+          ? "button dangerous-button"
+          : secondary
+          ? "button secondary-button"
+          : "button primary-button"
+      }
       title={title}
       ref={ref}
       type={"submit"}
@@ -51,7 +59,11 @@ const Button = ({
       onClick={onClick}
       className={cx(
         styles.button,
-        secondary ? styles.secondary : styles.primary
+        dangerous
+          ? styles.dangerous
+          : secondary
+          ? styles.secondary
+          : styles.primary
       )}
     >
       <LoadingSpinner

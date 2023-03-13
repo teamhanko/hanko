@@ -22,6 +22,7 @@ export const translations = {
       lastUsedAt: "Last used at",
       createdAt: "Created at",
       connectedAccounts: "Connected accounts",
+      deleteAccount: "Delete account",
     },
     texts: {
       enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -51,6 +52,8 @@ export const translations = {
         "Set a name for the passkey that helps you identify where it is stored.",
       deletePasskey:
         "Delete this passkey from your account. Note that the passkey will still exist on your devices and needs to be deleted there as well.",
+      deleteAccount:
+        "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
     },
     labels: {
       or: "or",
@@ -84,6 +87,7 @@ export const translations = {
       addPasskey: "Add passkey",
       webauthnUnsupported: "Passkeys are not supported by your browser",
       signInWith: "Sign in with {provider}",
+      deleteAccount: "Yes, delete this account.",
     },
     errors: {
       somethingWentWrong:
@@ -133,6 +137,7 @@ export const translations = {
       lastUsedAt: "Zuletzt benutzt am",
       createdAt: "Erstellt am",
       connectedAccounts: "Verbundene Konten",
+      deleteAccount: "Konto löschen",
     },
     texts: {
       enterPasscode:
@@ -164,6 +169,8 @@ export const translations = {
         "Legen Sie einen Namen für den Passkey fest, anhand dessen Sie erkennen können, wo er gespeichert ist.",
       deletePasskey:
         "Löschen Sie diesen Passkey aus Ihrem Konto. Beachten Sie, dass der Passkey noch auf Ihren Geräten vorhanden ist und auch dort gelöscht werden muss.",
+      deleteAccount:
+        "Sind Sie sicher, dass Sie Ihr Konto löschen wollen? Alle Daten werden sofort gelöscht und können nicht wiederhergestellt werden.",
     },
     labels: {
       or: "oder",
@@ -198,6 +205,7 @@ export const translations = {
       webauthnUnsupported:
         "Passkeys werden von ihrem Browser nicht unterrstützt",
       signInWith: "Anmelden mit {provider}",
+      deleteAccount: "Ja, dieses Konto löschen.",
     },
     errors: {
       somethingWentWrong:
