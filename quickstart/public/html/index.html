@@ -14,7 +14,7 @@
 
 <main class="main">
     <div class="auth-container">
-        <hanko-auth lang="en" api="{{.HankoUrl}}"></hanko-auth>
+        <hanko-auth lang="en" api="{{.HankoUrl}}" {{if .ConditionalUi}}experimental="conditionalMediation"{{end}}></hanko-auth>
     </div>
 </main>
 
