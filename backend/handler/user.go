@@ -248,7 +248,7 @@ func (h *UserHandler) Delete(c echo.Context) error {
 
 		err = h.persister.GetUserPersisterWithConnection(tx).Delete(*user)
 		if err != nil {
-			return fmt.Errorf("failed to get user: %w", err)
+			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
 		cookie, err := h.sessionManager.DeleteCookie()
