@@ -240,15 +240,15 @@ func (h *UserHandler) Delete(c echo.Context) error {
 		if user == nil {
 			return fmt.Errorf("unknown user")
 		}
+		
+		err = h.persister.GetUserPersisterWithConnection(tx).Delete(*user)
+		if err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
+		}
 
 		err = h.auditLogger.Create(c, models.AuditLogUserDeleted, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to write audit log: %w", err)
-		}
-
-		err = h.persister.GetUserPersisterWithConnection(tx).Delete(*user)
-		if err != nil {
-			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
 		cookie, err := h.sessionManager.DeleteCookie()
