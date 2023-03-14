@@ -24,6 +24,7 @@ func main() {
 		hankoUrlInternal = value
 	}
 
+	// This is handled as a "flag" if set to any value, conditional UI is enabled.
 	_, conditionalUi := os.LookupEnv("HANKO_ENABLE_CONDITIONAL_UI")
 
 	e := echo.New()
