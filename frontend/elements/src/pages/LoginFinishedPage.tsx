@@ -10,13 +10,13 @@ import Form from "../components/form/Form";
 
 const LoginFinishedPage = () => {
   const { t } = useContext(TranslateContext);
-  const { emitSuccessEvent } = useContext(AppContext);
+  const { emitEvent } = useContext(AppContext);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
   const onContinue = (event: Event) => {
     event.preventDefault();
     setIsSuccess(true);
-    emitSuccessEvent();
+    emitEvent("hankoAuthSuccess");
   };
 
   return (

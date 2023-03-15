@@ -47,7 +47,7 @@ const LoginEmailPage = (props: Props) => {
   const {
     hanko,
     experimentalFeatures,
-    emitSuccessEvent,
+    emitEvent,
     config,
     setPage,
     setPasscode,
@@ -111,7 +111,7 @@ const LoginEmailPage = (props: Props) => {
               setPage(<RegisterPasskeyPage />);
               return;
             }
-            emitSuccessEvent();
+            emitEvent("hankoAuthSuccess");
           };
 
           if (recoverPassword) {
@@ -124,7 +124,7 @@ const LoginEmailPage = (props: Props) => {
         })
         .catch((e) => setPage(<ErrorPage initialError={e} />));
     },
-    [emitSuccessEvent, hanko.user, hanko.webauthn, setPage, setUser]
+    [emitEvent, hanko.user, hanko.webauthn, setPage, setUser]
   );
 
   const renderPasscode = useCallback(
@@ -209,7 +209,7 @@ const LoginEmailPage = (props: Props) => {
         if (webauthnLoginInitiated) {
           setIsEmailLoginLoading(false);
           setIsEmailLoginSuccess(true);
-          emitSuccessEvent();
+          emitEvent("hankoAuthSuccess");
         }
 
         return;
@@ -277,7 +277,7 @@ const LoginEmailPage = (props: Props) => {
         setError(null);
         setIsPasskeyLoginLoading(false);
         setIsPasskeyLoginSuccess(true);
-        emitSuccessEvent();
+        emitEvent("hankoAuthSuccess");
 
         return;
       })
@@ -331,7 +331,7 @@ const LoginEmailPage = (props: Props) => {
       .login(null, true)
       .then(() => {
         setError(null);
-        emitSuccessEvent();
+        emitEvent("hankoAuthSuccess");
         setIsEmailLoginSuccess(true);
 
         return;
@@ -344,7 +344,7 @@ const LoginEmailPage = (props: Props) => {
         }
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
-  }, [conditionalMediationEnabled, emitSuccessEvent, hanko.webauthn]);
+  }, [conditionalMediationEnabled, emitEvent, hanko.webauthn]);
 
   useEffect(() => {
     loginViaConditionalUI();

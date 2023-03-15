@@ -70,18 +70,6 @@ A web component that handles user login and user registration.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 - `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
-#### Events
-
-These events bubble up through the DOM tree.
-
-- `hankoAuthSuccess` - Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the user to protected pages.
-
-```js
-document.addEventListener('hankoAuthSuccess', () => {
-    document.body.innerHTML = 'secured content...'
-})
-```
-
 ### &lt;hanko-profile&gt;
 
 A web component that allows to manage emails, passwords and passkeys.
@@ -96,6 +84,26 @@ A web component that allows to manage emails, passwords and passkeys.
 
 - `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+
+## Events
+
+These events bubble up through the DOM tree.
+
+- `hankoAuthSuccess` - Will be emitted by `<hanko-auth>` after login or registration completed successfully and a JWT has been issued. You can now take control and redirect the user to protected pages.
+
+```js
+document.addEventListener('hankoAuthSuccess', () => {
+    document.body.innerHTML = 'secured content...'
+})
+```
+
+- `hankoProfileUserDeleted` - Will be emitted by `<hanko-profile>` after the user account has been deleted.
+
+```js
+document.addEventListener('hankoProfileUserDeleted', () => {
+    document.body.innerHTML = 'see you soon...'
+})
+```
 
 ## UI Customization
 

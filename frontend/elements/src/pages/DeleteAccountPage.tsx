@@ -22,7 +22,7 @@ interface Props {
 
 const DeleteAccountPage = ({ onBack }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko } = useContext(AppContext);
+  const { hanko, emitEvent } = useContext(AppContext);
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -36,6 +36,7 @@ const DeleteAccountPage = ({ onBack }: Props) => {
       .then(() => {
         setIsLoading(false);
         setIsSuccess(true);
+        emitEvent("hankoProfileUserDeleted");
         return;
       })
       .catch(setError);

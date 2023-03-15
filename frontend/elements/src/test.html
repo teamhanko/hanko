@@ -40,6 +40,11 @@
         document.getElementById("auth").hidden = true;
         document.getElementById("profile").hidden = false;
     })
+
+    document.addEventListener("hankoProfileUserDeleted", (event) => {
+        document.getElementById("auth").hidden = false;
+        document.getElementById("profile").hidden = true;
+    })
 </script>
 </body>
 </html>

@@ -7,6 +7,7 @@ import {
   useCallback,
   useMemo,
   useRef,
+  useEffect,
 } from "preact/compat";
 
 import {
@@ -30,6 +31,7 @@ import SignalLike = JSXInternal.SignalLike;
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
 type ComponentName = "auth" | "profile";
+type EventName = "hankoAuthSuccess" | "hankoProfileUserDeleted";
 
 interface Props {
   api?: string;
@@ -61,7 +63,8 @@ interface Context extends States {
   hanko: Hanko;
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
-  emitSuccessEvent: () => void;
+
+  emitEvent(eventName: EventName): void;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -74,6 +77,8 @@ const AppProvider = ({
   experimental = "",
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
+
+  const initComponent = useMemo(() => <InitPage />, []);
 
   const hanko = useMemo(() => {
     if (api) {
@@ -91,8 +96,8 @@ const AppProvider = ({
     [experimental]
   );
 
-  const emitSuccessEvent = useCallback(() => {
-    const event = new Event("hankoAuthSuccess", {
+  const emitEvent = useCallback((eventName: EventName) => {
+    const event = new Event(eventName, {
       bubbles: true,
       composed: true,
     });
@@ -111,7 +116,20 @@ const AppProvider = ({
   const [emails, setEmails] = useState<Emails>();
   const [webauthnCredentials, setWebauthnCredentials] =
     useState<WebauthnCredentials>();
-  const [page, setPage] = useState<h.JSX.Element>(<InitPage />);
+  const [page, setPage] = useState<h.JSX.Element>(initComponent);
+
+  const listenEvent = useCallback((eventName: EventName, fn: () => void) => {
+    document.addEventListener(eventName, fn);
+    return () => document.removeEventListener(eventName, fn);
+  }, []);
+
+  const init = useCallback(() => {
+    setPage(initComponent);
+  }, [initComponent]);
+
+  useEffect(() => {
+    return listenEvent("hankoProfileUserDeleted", init);
+  }, [init, listenEvent]);
 
   return (
     <AppContext.Provider
@@ -119,7 +137,7 @@ const AppProvider = ({
         hanko,
         componentName,
         experimentalFeatures,
-        emitSuccessEvent,
+        emitEvent,
         config,
         setConfig,
         userInfo,
