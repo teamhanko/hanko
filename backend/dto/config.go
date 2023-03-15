@@ -10,6 +10,7 @@ type PublicConfig struct {
 	Password  config.Password `json:"password"`
 	Emails    config.Emails   `json:"emails"`
 	Providers []string        `json:"providers"`
+	Account   config.Account  `json:"account"`
 }
 
 // FromConfig Returns a PublicConfig from the Application configuration
@@ -18,6 +19,7 @@ func FromConfig(config config.Config) PublicConfig {
 		Password:  config.Password,
 		Emails:    config.Emails,
 		Providers: GetEnabledProviders(config.ThirdParty.Providers),
+		Account:   config.Account,
 	}
 }
 

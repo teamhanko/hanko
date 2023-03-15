@@ -30,6 +30,7 @@ type Config struct {
 	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter" koanf:"rate_limiter" split_words:"true"`
 	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party" koanf:"third_party" split_words:"true"`
 	Log         LoggerConfig     `yaml:"log" json:"log" koanf:"log"`
+	Account     Account          `yaml:"account" json:"account" koanf:"account"`
 }
 
 func Load(cfgFile *string) (*Config, error) {
@@ -573,4 +574,8 @@ func (c *Config) PostProcess() error {
 
 type LoggerConfig struct {
 	LogHealthAndMetrics bool `yaml:"log_health_and_metrics" json:"log_health_and_metrics" koanf:"log_health_and_metrics"`
+}
+
+type Account struct {
+	AllowDeletion bool `yaml:"allow_deletion" json:"allow_deletion" koanf:"allow_deletion"`
 }

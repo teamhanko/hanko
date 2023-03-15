@@ -220,6 +220,48 @@ func (h *UserHandler) Me(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"id": sessionToken.Subject()})
 }
 
+func (h *UserHandler) Delete(c echo.Context) error {
+	sessionToken, ok := c.Get("session").(jwt.Token)
+	if !ok {
+		return errors.New("missing or malformed jwt")
+	}
+
+	userId, err := uuid.FromString(sessionToken.Subject())
+	if err != nil {
+		return fmt.Errorf("failed to parse subject as uuid: %w", err)
+	}
+
+	return h.persister.Transaction(func(tx *pop.Connection) error {
+		user, err := h.persister.GetUserPersisterWithConnection(tx).Get(userId)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
+
+		if user == nil {
+			return fmt.Errorf("unknown user")
+		}
+		
+		err = h.persister.GetUserPersisterWithConnection(tx).Delete(*user)
+		if err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
+		}
+
+		err = h.auditLogger.Create(c, models.AuditLogUserDeleted, user, nil)
+		if err != nil {
+			return fmt.Errorf("failed to write audit log: %w", err)
+		}
+
+		cookie, err := h.sessionManager.DeleteCookie()
+		if err != nil {
+			return fmt.Errorf("failed to create session token: %w", err)
+		}
+
+		c.SetCookie(cookie)
+
+		return c.NoContent(http.StatusNoContent)
+	})
+}
+
 func (h *UserHandler) Logout(c echo.Context) error {
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {

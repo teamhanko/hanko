@@ -713,6 +713,22 @@ paths:
           $ref: '#/components/responses/Unauthorized'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: 'Deletes the current user'
+      description: Used to delete the current user. Note that `config.account.allow_deletion` must be set to true.
+      operationId: IsUserAuthorized
+      tags:
+        - User Management
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      responses:
+        '204':
+          description: 'The user has been deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /logout:
     post:
       summary: "Log out the current user"
@@ -995,6 +1011,13 @@ components:
               description: Describes the minimum password length
               type: number
               example: 8
+        account:
+          description: Controls the behavior regarding user account.
+          type: object
+          properties:
+            allow_deletion:
+              description: Indicates the user account can be deleted by the current user.
+              type: boolean
     CookieSession:
       type: string
       description: Value `<JWT>` is a [JSON Web Token](https://www.rfc-editor.org/rfc/rfc7519.html)
