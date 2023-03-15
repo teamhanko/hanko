@@ -128,8 +128,9 @@ const AppProvider = ({
   }, [initComponent]);
 
   useEffect(() => {
+    if (componentName !== "auth") return;
     return listenEvent("hankoProfileUserDeleted", init);
-  }, [init, listenEvent]);
+  }, [componentName, init, listenEvent]);
 
   return (
     <AppContext.Provider
