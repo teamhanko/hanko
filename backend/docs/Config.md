@@ -30,28 +30,6 @@ server:
     # The address the public API will listen and handle requests on.
     #
     address: ":8000"
-    ## cors ##
-    #
-    # Cross Origin Resource Sharing for public endpoints.
-    #
-    cors:
-      ## enabled ##
-      #
-      # Sets whether cors is enabled or not.
-      #
-      # Default value: false
-      #
-      enabled: false
-      allow_credentials: false
-      allow_origins:
-        - "*"
-      allow_methods:
-        - ""
-      allow_headers:
-        - ""
-      expose_headers:
-        - ""
-      max_age: 0
   ## admin ##
   #
   # Configuration for the admin API.
@@ -259,23 +237,11 @@ webauthn:
     # - Acme, Inc.
     #
     display_name: ""
-    ## origin ##
-    #
-    # DEPRECATED: use "origins" instead
-    #
-    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
-    # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
-    #
-    # Example:
-    # - http://localhost
-    # - https://example.com
-    # - https://subdomain.example.com
-    #
-    origin: "http://localhost"
     ## origins ##
     #
     # A list of origins for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
     # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
+    # Ip Addresses will not work.
     #
     # For an Android app the origin must be the base64 url encoded SHA256 fingerprint of the signing certificate.
     #
