@@ -28,14 +28,26 @@ interface EmailConfig {
  * @interface
  * @category SDK
  * @subcategory DTO
+ * @property {boolean} allow_deletion - Indicates the current user is allowed to delete the account.
+ */
+interface AccountConfig {
+  allow_deletion: boolean;
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
  * @property {PasswordConfig} password - The password configuration.
  * @property {EmailConfig} emails - The email configuration.
  * @property {string[]} providers - The enabled third party providers.
+ * @property {AccountConfig} account - Controls the behaviour regarding user accounts.
  */
 interface Config {
   password: PasswordConfig;
   emails: EmailConfig;
   providers: string[];
+  account: AccountConfig;
 }
 
 /**

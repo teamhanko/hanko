@@ -218,3 +218,38 @@ describe("UserClient.logout()", () => {
     }
   );
 });
+
+describe("UserClient.delete()", () => {
+  it("should return true if deletion is successful", async () => {
+    const response = new Response(new XMLHttpRequest());
+    response.status = 204;
+    response.ok = true;
+
+    jest.spyOn(userClient.client, "delete").mockResolvedValueOnce(response);
+
+    await expect(userClient.delete()).resolves.not.toThrow();
+    expect(userClient.client.delete).toHaveBeenCalledWith("/user");
+  });
+
+  it.each`
+    status | error
+    ${401} | ${"Unauthorized error"}
+    ${404} | ${"Technical error"}
+    ${500} | ${"Technical error"}
+  `(
+    "should throw error if API returns an error status",
+    async ({ status, error }) => {
+      const response = new Response(new XMLHttpRequest());
+      response.status = status;
+      response.ok = status >= 200 && status <= 299;
+
+      jest
+        .spyOn(userClient.client, "delete")
+        .mockResolvedValueOnce(response)
+
+      await expect(userClient.delete()).rejects.toThrow(error);
+
+      expect(userClient.client.delete).toHaveBeenCalledWith("/user");
+    }
+  );
+});

@@ -23,6 +23,7 @@ type AuditLogType string
 var (
 	AuditLogUserCreated   AuditLogType = "user_created"
 	AuditLogUserLoggedOut AuditLogType = "user_logged_out"
+	AuditLogUserDeleted   AuditLogType = "user_deleted"
 
 	AuditLogPasswordSetSucceeded AuditLogType = "password_set_succeeded"
 	AuditLogPasswordSetFailed    AuditLogType = "password_set_failed"

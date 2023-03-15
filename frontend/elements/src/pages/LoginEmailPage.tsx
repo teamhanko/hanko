@@ -26,7 +26,7 @@ import Button from "../components/form/Button";
 import Input from "../components/form/Input";
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
-import Divider from "../components/divider/Divider";
+import Divider from "../components/spacer/Divider";
 import ErrorMessage from "../components/error/ErrorMessage";
 import Headline1 from "../components/headline/Headline1";
 import { IconName } from "../components/icons/Icon";
@@ -398,7 +398,7 @@ const LoginEmailPage = (props: Props) => {
       </Form>
       {isWebAuthnSupported && !conditionalMediationEnabled ? (
         <Fragment>
-          <Divider />
+          <Divider>{t("labels.or")}</Divider>
           <Form onSubmit={onPasskeySubmit}>
             <Button
               secondary

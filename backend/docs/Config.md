@@ -480,4 +480,13 @@ log:
   # Default: false
   #
   log_health_and_metrics: false
+account:
+  ## allow_deletion
+  #
+  # The user account can be deleted by the current user when turned on, otherwise the corresponding API route will not
+  # be available.
+  #
+  # Default: false
+  #
+  allow_deletion: false
 ```
