@@ -66,7 +66,7 @@
     "webpack-cli": "^5.0.1"
   },
   "dependencies": {
-    "@denysvuika/preact-translate": "^0.4.1",
+    "@denysvuika/preact-translate": "^0.5.0",
     "@teamhanko/hanko-frontend-sdk": "^0.3.0-alpha",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
