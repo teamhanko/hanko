@@ -48,8 +48,7 @@ To get the Hanko backend up and running you need to:
 4. [Run and configure an SMTP server](#run-and-configure-an-smtp-server)
 5. [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
 6. [Configure WebAuthn](#configure-webauthn)
-8. [Configure CORS](#configure-cors)
-9. [Start the backend](#run-the-backend)
+7. [Start the backend](#run-the-backend)
 
 ### Run a database
 
@@ -279,22 +278,6 @@ webauthn:
 ```
 
 > **Note**: Currently, only a single origin is supported. We plan to add support for a list of origins at some point.
-
-### Configure CORS
-
-Because the backend and your application(s) consuming backend API most likely have different origins, i.e.
-scheme (protocol), hostname (domain), and port part of the URL are different, you need to configure
-Cross-Origin Resource Sharing (CORS) and specify your application(s) as allowed origins:
-
-```yaml
-server:
-  public:
-    cors:
-      enabled: true
-      allow_credentials: true
-      allow_origins:
-        - "https://example.com"
-```
 
 ### Start the backend
 

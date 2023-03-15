@@ -36,12 +36,6 @@ info:
 
     The JWT must be provided in an HTTP Authorization header with bearer type: `Authorization: Bearer <JWT>`.
 
-    ## Cross-Origin Resource Sharing
-
-    Cross-Origin Resource Sharing (CORS) can be currently
-    [configured](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#all-available-config-options)
-    for public endpoints via the `server.public.cors` options.
-
     ---
 
   contact:
