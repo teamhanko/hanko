@@ -31,7 +31,7 @@ import SignalLike = JSXInternal.SignalLike;
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
 type ComponentName = "auth" | "profile";
-type EventName = "hankoAuthSuccess" | "hankoProfileUserDeleted";
+type EventName = "hankoAuthSuccess" | "hankoUserDeleted";
 
 interface Props {
   api?: string;
@@ -128,8 +128,12 @@ const AppProvider = ({
   }, [initComponent]);
 
   useEffect(() => {
-    if (componentName !== "auth") return;
-    return listenEvent("hankoProfileUserDeleted", init);
+    switch (componentName) {
+      case "auth":
+        return listenEvent("hankoUserDeleted", init);
+      case "profile":
+        return listenEvent("hankoAuthSuccess", init);
+    }
   }, [componentName, init, listenEvent]);
 
   return (

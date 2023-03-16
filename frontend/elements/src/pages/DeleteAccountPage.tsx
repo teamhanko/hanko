@@ -36,7 +36,7 @@ const DeleteAccountPage = ({ onBack }: Props) => {
       .then(() => {
         setIsLoading(false);
         setIsSuccess(true);
-        emitEvent("hankoProfileUserDeleted");
+        emitEvent("hankoUserDeleted");
         return;
       })
       .catch(setError);

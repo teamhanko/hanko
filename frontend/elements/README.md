@@ -97,10 +97,10 @@ document.addEventListener('hankoAuthSuccess', () => {
 })
 ```
 
-- `hankoProfileUserDeleted` - Will be emitted by `<hanko-profile>` after the user account has been deleted.
+- `hankoUserDeleted` - Will be emitted by `<hanko-profile>` after the user account has been deleted.
 
 ```js
-document.addEventListener('hankoProfileUserDeleted', () => {
+document.addEventListener('hankoUserDeleted', () => {
     document.body.innerHTML = 'see you soon...'
 })
 ```
