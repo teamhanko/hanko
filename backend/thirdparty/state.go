@@ -1,68 +1,81 @@
 package thirdparty
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/session"
-	"strings"
+	"github.com/teamhanko/hanko/backend/crypto"
+	"github.com/teamhanko/hanko/backend/crypto/aes_gcm"
 	"time"
 )
 
-func GenerateState(config config.ThirdParty, jwkManager jwk.Manager, provider string, redirectTo string) ([]byte, error) {
+func GenerateState(config *config.Config, provider string, redirectTo string) ([]byte, error) {
 	if provider == "" {
 		return nil, errors.New("provider must be present")
 	}
 
 	if redirectTo == "" {
-		redirectTo = config.ErrorRedirectURL
+		redirectTo = config.ThirdParty.ErrorRedirectURL
+	}
+
+	nonce, err := crypto.GenerateRandomStringURLSafe(32)
+	if err != nil {
+		return nil, fmt.Errorf("could not generate nonce: %w", err)
 	}
 
 	now := time.Now().UTC()
-	state, err := jwt.NewBuilder().
-		IssuedAt(now).
-		Expiration(now.Add(time.Minute*5)).
-		Claim("provider", strings.ToLower(strings.TrimSpace(provider))).
-		Claim("redirect_to", strings.TrimSpace(redirectTo)).
-		Build()
-	if err != nil {
-		return nil, fmt.Errorf("could not generate token: %s", err)
-	}
-	signingKey, err := jwkManager.GetSigningKey()
-	if err != nil {
-		return nil, fmt.Errorf("could not get signing key: %s", err)
-	}
-	signedState, err := jwt.Sign(state, jwt.WithKey(jwa.RS256, signingKey))
-	if err != nil {
-		return nil, fmt.Errorf("could not sign token: %s", err)
+	state := State{
+		Provider:   provider,
+		RedirectTo: redirectTo,
+		IssuedAt:   now,
+		Expiration: now.Add(time.Minute * 5),
+		Nonce:      nonce,
 	}
 
-	return signedState, nil
+	stateJson, err := json.Marshal(state)
+
+	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
+	if err != nil {
+		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
+	}
+
+	encryptedState, err := aes.Encrypt(stateJson)
+	if err != nil {
+		return nil, fmt.Errorf("could not encrypt state: %w", err)
+	}
+
+	return []byte(encryptedState), nil
 }
 
 type State struct {
-	Provider   string
-	RedirectTo string
+	Provider   string    `json:"provider"`
+	RedirectTo string    `json:"redirect_to"`
+	IssuedAt   time.Time `json:"issued_at"`
+	Expiration time.Time `json:"expiration"`
+	Nonce      string    `json:"nonce"`
 }
 
-func VerifyState(sessionManager session.Manager, state string) (*State, error) {
-	verifiedToken, err := sessionManager.Verify(state)
+func VerifyState(config *config.Config, state string) (*State, error) {
+	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
 	}
 
-	provider := verifiedToken.PrivateClaims()["provider"].(string)
-	if provider == "" {
-		return nil, errors.New("provider missing from state")
+	decryptedState, err := aes.Decrypt(state)
+	if err != nil {
+		return nil, fmt.Errorf("could not decrypt state: %w", err)
 	}
 
-	redirectTo := verifiedToken.PrivateClaims()["redirect_to"].(string)
+	var unmarshalledState State
+	err = json.Unmarshal(decryptedState, &unmarshalledState)
+	if err != nil {
+		return nil, fmt.Errorf("could not unmarshal state: %w", err)
+	}
 
-	return &State{
-		Provider:   provider,
-		RedirectTo: redirectTo,
-	}, nil
+	if time.Now().UTC().After(unmarshalledState.Expiration) {
+		return nil, errors.New("state is expired")
+	}
+
+	return &unmarshalledState, nil
 }

@@ -5,7 +5,6 @@ import (
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -20,16 +19,14 @@ type ThirdPartyHandler struct {
 	cfg            *config.Config
 	persister      persistence.Persister
 	sessionManager session.Manager
-	jwkManager     jwk.Manager
 }
 
-func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger, jwkManager jwk.Manager) *ThirdPartyHandler {
+func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *ThirdPartyHandler {
 	return &ThirdPartyHandler{
 		auditLogger:    auditLogger,
 		cfg:            cfg,
 		persister:      persister,
 		sessionManager: sessionManager,
-		jwkManager:     jwkManager,
 	}
 }
 
@@ -59,7 +56,7 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	state, err := thirdparty.GenerateState(h.cfg.ThirdParty, h.jwkManager, provider.Name(), request.RedirectTo)
+	state, err := thirdparty.GenerateState(h.cfg, provider.Name(), request.RedirectTo)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
@@ -81,7 +78,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}
 
-	state, err := thirdparty.VerifyState(h.sessionManager, callback.State)
+	state, err := thirdparty.VerifyState(h.cfg, callback.State)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}

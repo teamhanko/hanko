@@ -134,7 +134,7 @@ func TestThirdPartyHandler_Auth(t *testing.T) {
 			sessionMgr, err := session.NewManager(jwkManager, cfg.Session)
 			require.NoError(t, err)
 
-			handler := NewThirdPartyHandler(cfg, p, sessionMgr, test.NewAuditLogger(), jwkManager)
+			handler := NewThirdPartyHandler(cfg, p, sessionMgr, test.NewAuditLogger())
 
 			err = handler.Auth(c)
 			require.NoError(t, err)
@@ -158,7 +158,7 @@ func TestThirdPartyHandler_Auth(t *testing.T) {
 				assert.Equal(t, cfg.ThirdParty.Providers.Get(testData.requestedProvider).ClientID, q.Get("client_id"))
 				assert.Equal(t, "code", q.Get("response_type"))
 
-				state, err := thirdparty.VerifyState(sessionMgr, q.Get("state"))
+				state, err := thirdparty.VerifyState(cfg, q.Get("state"))
 				require.NoError(t, err)
 
 				assert.Equal(t, strings.ToLower(testData.requestedProvider), state.Provider)
@@ -188,7 +188,7 @@ func setUpConfig(t *testing.T, enabledProviders []string, allowedRedirectURLs []
 		ErrorRedirectURL:    "https://error.test.example",
 		RedirectURL:         "https://api.test.example/callback",
 		AllowedRedirectURLS: allowedRedirectURLs,
-	}}
+	}, Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}}}
 
 	for _, provider := range enabledProviders {
 		switch provider {
