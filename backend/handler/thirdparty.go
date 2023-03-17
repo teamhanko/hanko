@@ -63,6 +63,17 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 
 	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
 
+	c.SetCookie(&http.Cookie{
+		Name:     "hanko_thirdparty",
+		Value:    string(state),
+		Path:     "/",
+		Domain:   h.cfg.Session.Cookie.Domain,
+		MaxAge:   300,
+		Secure:   h.cfg.Session.Cookie.Secure,
+		HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
 }
 
@@ -78,7 +89,12 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}
 
-	state, err := thirdparty.VerifyState(h.cfg, callback.State)
+	expectedState, err := c.Cookie("hanko_thirdparty")
+	if err != nil {
+		return h.redirectError(c, thirdparty.ErrorInvalidRequest("thirdparty state cookie is missing"), h.cfg.ThirdParty.ErrorRedirectURL)
+	}
+
+	state, err := thirdparty.VerifyState(h.cfg, callback.State, expectedState.Value)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}
@@ -132,6 +148,17 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}
+
+	c.SetCookie(&http.Cookie{
+		Name:     "hanko_thirdparty",
+		Value:    "",
+		Path:     "/",
+		Domain:   h.cfg.Session.Cookie.Domain,
+		MaxAge:   -1,
+		Secure:   h.cfg.Session.Cookie.Secure,
+		HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+		SameSite: http.SameSiteLaxMode,
+	})
 
 	return c.Redirect(http.StatusTemporaryRedirect, state.RedirectTo)
 }

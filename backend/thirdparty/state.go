@@ -29,7 +29,7 @@ func GenerateState(config *config.Config, provider string, redirectTo string) ([
 		Provider:   provider,
 		RedirectTo: redirectTo,
 		IssuedAt:   now,
-		Expiration: now.Add(time.Minute * 5),
+		ExpiresAt:  now.Add(time.Minute * 5),
 		Nonce:      nonce,
 	}
 
@@ -52,11 +52,33 @@ type State struct {
 	Provider   string    `json:"provider"`
 	RedirectTo string    `json:"redirect_to"`
 	IssuedAt   time.Time `json:"issued_at"`
-	Expiration time.Time `json:"expiration"`
+	ExpiresAt  time.Time `json:"expires_at"`
 	Nonce      string    `json:"nonce"`
 }
 
-func VerifyState(config *config.Config, state string) (*State, error) {
+func VerifyState(config *config.Config, state string, expectedState string) (*State, error) {
+	decodedState, err := decodeState(config, state)
+	if err != nil {
+		return nil, fmt.Errorf("could not decode state: %w", err)
+	}
+
+	decodedExpectedState, err := decodeState(config, expectedState)
+	if err != nil {
+		return nil, fmt.Errorf("could not decode expectedState: %w", err)
+	}
+
+	if decodedState.Nonce != decodedExpectedState.Nonce {
+		return nil, errors.New("could not verify state")
+	}
+
+	if time.Now().UTC().After(decodedState.ExpiresAt) {
+		return nil, errors.New("state is expired")
+	}
+
+	return decodedState, nil
+}
+
+func decodeState(config *config.Config, state string) (*State, error) {
 	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
@@ -72,10 +94,5 @@ func VerifyState(config *config.Config, state string) (*State, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not unmarshal state: %w", err)
 	}
-
-	if time.Now().UTC().After(unmarshalledState.Expiration) {
-		return nil, errors.New("state is expired")
-	}
-
 	return &unmarshalledState, nil
 }

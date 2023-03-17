@@ -158,7 +158,8 @@ func TestThirdPartyHandler_Auth(t *testing.T) {
 				assert.Equal(t, cfg.ThirdParty.Providers.Get(testData.requestedProvider).ClientID, q.Get("client_id"))
 				assert.Equal(t, "code", q.Get("response_type"))
 
-				state, err := thirdparty.VerifyState(cfg, q.Get("state"))
+				expectedState := rec.Result().Cookies()[0].Value
+				state, err := thirdparty.VerifyState(cfg, q.Get("state"), expectedState)
 				require.NoError(t, err)
 
 				assert.Equal(t, strings.ToLower(testData.requestedProvider), state.Provider)
