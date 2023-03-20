@@ -128,7 +128,7 @@ func TestThirdPartyHandler_Auth(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			c := e.NewContext(req, rec)
-			p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+			p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 			jwkManager := test.JwkManager{}
 			sessionMgr, err := session.NewManager(jwkManager, cfg.Session)
