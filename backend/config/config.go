@@ -134,6 +134,10 @@ func DefaultConfig() *Config {
 				Tokens:   3,
 				Interval: 1 * time.Minute,
 			},
+			TokenLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
 		},
 	}
 }
@@ -412,6 +416,7 @@ type RateLimiter struct {
 	Redis          *RedisConfig         `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
 	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits" split_words:"true"`
 	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits" koanf:"password_limits" split_words:"true"`
+	TokenLimits    RateLimits           `yaml:"token_limits" json:"token_limits" koanf:"token_limits" split_words:"true"`
 }
 
 type RateLimits struct {

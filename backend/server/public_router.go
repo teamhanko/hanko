@@ -137,5 +137,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
 	thirdparty.GET("/callback", thirdPartyHandler.Callback)
 
+	tokenHandler := handler.NewTokenHandler(cfg, persister, sessionManager, auditLogger)
+	e.POST("/token", tokenHandler.Validate)
+
 	return e
 }
