@@ -7,18 +7,18 @@ import (
 )
 
 type ImportEmail struct {
-	Address    string `json:"address"`
-	IsPrimary  bool   `json:"is_primary"`
-	IsVerified bool   `json:"is_verified"`
+	Address    string `json:"address" yaml:"address"`
+	IsPrimary  bool   `json:"is_primary" yaml:"is_primary"`
+	IsVerified bool   `json:"is_verified" yaml:"is_verified"`
 }
 
 type Emails []ImportEmail
 
 type ImportEntry struct {
-	UserID    string     `json:"user_id"`
-	Emails    Emails     `json:"emails"`
-	CreatedAt *time.Time `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
+	UserID    string     `json:"user_id" yaml:"user_id"`
+	Emails    Emails     `json:"emails" yaml:"emails"`
+	CreatedAt *time.Time `json:"created_at" yaml:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at" yaml:"updated_at"`
 }
 
 func validate(entries []ImportEntry) error {
