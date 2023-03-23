@@ -29,14 +29,24 @@ func NewImportCommand(config *config.Config) *cobra.Command {
 			user, err := loadFile()
 			if err != nil {
 				log.Println(err)
+				os.Exit(1)
 			}
 			//Validate Input
 			err = validate(user)
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
 			//Import Users
 			persister, err := persistence.New(config.Database)
+			if err != nil {
+				log.Println(err)
+				os.Exit(1)
+			}
 			err = addToDatabase(user, persister)
 			if err != nil {
 				log.Println(err)
+				os.Exit(1)
 			}
 		},
 	}
@@ -98,7 +108,7 @@ func addToDatabase(entries []ImportEntry, persister persistence.Persister) error
 
 			err := tx.Create(&u)
 			if err != nil {
-				return err
+				return fmt.Errorf("Failed to create user with id: %v : %w", u.ID.String(), err)
 			}
 
 			for _, e := range v.Emails {
@@ -114,7 +124,7 @@ func addToDatabase(entries []ImportEntry, persister persistence.Persister) error
 				}
 				err := tx.Create(&mail)
 				if err != nil {
-					return err
+					return fmt.Errorf("Failed to create email %v for user %v : %w", e.Address, userId.String(), err)
 				}
 
 				if e.IsPrimary {
@@ -124,7 +134,7 @@ func addToDatabase(entries []ImportEntry, persister persistence.Persister) error
 					}
 					err = tx.Create(primary)
 					if err != nil {
-						return err
+						return fmt.Errorf("Failed to set email %v as  primary for user %v : %w", e.Address, userId.String(), err)
 					}
 				}
 			}
