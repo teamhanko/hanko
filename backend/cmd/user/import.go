@@ -54,7 +54,7 @@ func NewImportCommand(config *config.Config) *cobra.Command {
 	cmd.Flags().StringVarP(&inputFile, "inputFile", "i", "", "The json file where the users should be imported from.")
 	err := cmd.MarkFlagRequired("inputFile")
 	if err != nil {
-		return nil
+		log.Println(err)
 	}
 	return cmd
 }

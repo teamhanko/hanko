@@ -3,6 +3,7 @@ module github.com/teamhanko/hanko/backend
 go 1.18
 
 require (
+	github.com/brianvoe/gofakeit/v6 v6.20.2
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.11.2
 	github.com/go-testfixtures/testfixtures/v3 v3.8.1

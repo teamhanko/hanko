@@ -17,4 +17,5 @@ func RegisterCommands(parent *cobra.Command, cfg *config.Config) {
 	command := NewUserCommand()
 	parent.AddCommand(command)
 	command.AddCommand(NewImportCommand(cfg))
+	command.AddCommand(NewGenerateCommand(cfg))
 }
