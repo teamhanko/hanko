@@ -13,8 +13,13 @@ func NewIsReadyCommand() *cobra.Command {
 		Short: "Health check a service",
 		Long: `Checks if the specified service is healthy. Possible values are "admin" and "public".`,
 		Run: func(cmd *cobra.Command, args []string) {
-			// log the args
-			fmt.Println(args)
+			// check that there is only one argument
+			if len(args) != 1 {
+				fmt.Println("Please specify a service to check")
+				return
+			}
+			service := args[0]
+			fmt.Printf("Service %s is ready", service)
 		},
 	}
 }
