@@ -28,7 +28,7 @@ func NewRootCmd() *cobra.Command {
 	cmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file")
 	migrate.RegisterCommands(cmd, &cfg)
 	serve.RegisterCommands(cmd, &cfg)
-	isready.RegisterCommands(cmd)
+	isready.RegisterCommands(cmd, &cfg)
 	jwk.RegisterCommands(cmd)
 	jwt.RegisterCommands(cmd, &cfg)
 	version.RegisterCommands(cmd)
