@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
+	"log"
 	"net/http"
-	"os"
 )
 
 func NewIsReadyCommand(config *config.Config) *cobra.Command {
@@ -19,8 +19,7 @@ Uses the "/health/ready" endpoint to check if the service is ready to serve requ
 		`,
 		Run: func(cmd *cobra.Command, args []string) {
 			if len(args) != 1 {
-				fmt.Println("Please specify a service to check")
-				os.Exit(1)
+				log.Fatalf("Please specify a service to check")
 			}
 			service := args[0]
 			address := ""
@@ -36,12 +35,10 @@ Uses the "/health/ready" endpoint to check if the service is ready to serve requ
 			address = "http://" + address
 			res, err := http.Get(address + "/health/ready")
 			if err != nil {
-				fmt.Printf("Service %s is not ready", service)
-				os.Exit(1)
+				log.Fatalf("Service %s is not ready", service)
 			} else {
 				if res.StatusCode != 200 {
-					fmt.Printf("Service %s is not ready", service)
-					os.Exit(1)
+					log.Fatalf("Service %s is not ready", service)
 				} else {
 					fmt.Printf("Service %s is ready", service)
 				}
