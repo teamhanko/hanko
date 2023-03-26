@@ -14,9 +14,10 @@ func NewIsReadyCommand(config *config.Config) *cobra.Command {
 		Args: cobra.OnlyValidArgs,
 		ValidArgs: []string{"admin", "public"},
 		Short: "Health check a service",
-		Long: `Checks if the specified service is healthy. Possible values are "admin" and "public".`,
+		Long: `Checks if the specified service is healthy. Possible values are "admin" and "public".
+Uses the "/health/ready" endpoint to check if the service is ready to serve requests.
+		`,
 		Run: func(cmd *cobra.Command, args []string) {
-			// check that there is only one argument
 			if len(args) != 1 {
 				fmt.Println("Please specify a service to check")
 				os.Exit(1)
