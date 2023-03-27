@@ -30,7 +30,7 @@ Uses the "/health/ready" endpoint to check if the service is ready to serve requ
 				address = config.Server.Public.Address
 			}
 			if address[0] == ':' {
-				address = "0.0.0.0" + address
+				address = "localhost" + address
 			}
 			address = "http://" + address
 			res, err := http.Get(address + "/health/ready")
