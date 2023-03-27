@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
 	"log"
+	"net"
 	"net/http"
 )
 
@@ -29,18 +30,22 @@ Uses the "/health/ready" endpoint to check if the service is ready to serve requ
 			if service == "public" {
 				address = config.Server.Public.Address
 			}
-			if address[0] == ':' {
-				address = "localhost" + address
+			host, port, err := net.SplitHostPort(address)
+			if err != nil {
+				log.Fatalf("Could not parse address %s", address)
 			}
-			address = "http://" + address
-			res, err := http.Get(address + "/health/ready")
+			if host == "" {
+				host = "localhost"
+			}
+			requestUrl := fmt.Sprintf("http://%s:%s/health/ready", host, port)
+			res, err := http.Get(requestUrl)
 			if err != nil {
 				log.Fatalf("Service %s is not ready", service)
 			} else {
 				if res.StatusCode != 200 {
 					log.Fatalf("Service %s is not ready", service)
 				} else {
-					fmt.Printf("Service %s is ready", service)
+					log.Println(fmt.Sprintf("Service %s is ready", service))
 				}
 			}
 		},
