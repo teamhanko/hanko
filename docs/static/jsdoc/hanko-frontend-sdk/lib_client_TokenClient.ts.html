@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> lib/client/ThirdPartyClient.ts</title>
+  <title> lib/client/TokenClient.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -76,7 +76,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>lib/client/ThirdPartyClient.ts</h1>
+                    <h1>lib/client/TokenClient.ts</h1>
                 </header>
                 
 
@@ -86,86 +86,42 @@
     <section>
         <article>
             <pre class="prettyprint source linenums"><code>import { Client } from "./Client";
-import { ThirdPartyError } from "../Errors";
+import { TechnicalError } from "../Errors";
 
 /**
- * A class that handles communication with the Hanko API for the purposes
- * of authenticating through a third party provider.
+ * Client responsible for exchanging one time tokens for session JWTs.
  *
  * @constructor
  * @category SDK
  * @subcategory Clients
  * @extends {Client}
  */
-export class ThirdPartyClient extends Client {
+export class TokenClient extends Client {
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
     super(api, timeout);
   }
 
   /**
-   * Performs a request to the Hanko API that redirects to the given
-   * third party provider.
+   * Validate a one time token to retrieve a session JWT. Does nothing
+   * if the current window location does not contain a 'hanko_token' in the
+   * search query.
    *
-   * @param {string} provider - The name of the third party provider
-   * @param {string} redirectTo - The URL to redirect to after a successful third party authentication
-   * @throws {ThirdPartyError}
-   * @see http://docs.hanko.io/api/public#tag/Third-Party/operation/thirdPartyAuth
+   * @return {Promise&lt;void>}
+   * @throws {TechnicalError}
+   * https://docs.hanko.io/api/api/public#tag/Token/operation/token
    */
-  async auth(provider: string, redirectTo: string): Promise&lt;void> {
-    const url = new URL("/thirdparty/auth", this.client.api);
-
-    if (!provider) {
-      throw new ThirdPartyError(
-        "somethingWentWrong",
-        new Error("provider missing from request")
-      );
-    }
-
-    if (!redirectTo) {
-      throw new ThirdPartyError(
-        "somethingWentWrong",
-        new Error("redirectTo missing from request")
-      );
-    }
-
-    url.searchParams.append("provider", provider);
-    url.searchParams.append("redirect_to", redirectTo);
-
-    window.location.assign(url.href);
-  }
-
-  /**
-   * Get a third party error from the current location's query params.
-   * @returns {(ThirdPartyError|undefined)} The ThirdPartyError.
-   */
-  getError() {
+  async validate(): Promise&lt;void> {
     const params = new URLSearchParams(window.location.search);
-    const error = params.get("error");
-    const errorDescription = params.get("error_description");
-    if (error) {
-      let code = "";
-      switch (error) {
-        case "access_denied":
-          code = "thirdPartyAccessDenied";
-          break;
-        case "user_conflict":
-          code = "emailAddressAlreadyExistsError";
-          break;
-        case "multiple_accounts":
-          code = "thirdPartyMultipleAccounts";
-          break;
-        case "unverified_email":
-          code = "thirdPartyUnverifiedEmail";
-          break;
-        case "email_maxnum":
-          code = "maxNumOfEmailAddressesReached";
-          break;
-        default:
-          code = "somethingWentWrong";
-      }
+    const token = params.get("hanko_token");
 
-      return new ThirdPartyError(code, new Error(errorDescription));
+    if (!token) return;
+
+    window.history.replaceState(null, null, window.location.pathname);
+
+    const response = await this.client.post("/token", { value: token });
+    if (!response.ok) {
+      throw new TechnicalError();
     }
   }
 }
