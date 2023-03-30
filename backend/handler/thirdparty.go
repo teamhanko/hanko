@@ -84,6 +84,14 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
 }
 
+func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
+	q, err := c.FormParams()
+	if err != nil {
+		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), h.cfg.ThirdParty.ErrorRedirectURL)
+	}
+	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/thirdparty/callback?%s", q.Encode()))
+}
+
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	var successRedirectTo *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
