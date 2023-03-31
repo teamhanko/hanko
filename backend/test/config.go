@@ -19,4 +19,10 @@ var DefaultConfig = config.Config{
 		Host: "localhost",
 		Port: "2500",
 	}},
+	Session: config.Session{
+		Lifespan: "1h",
+		Cookie: config.Cookie{
+			SameSite: "none",
+		},
+	},
 }

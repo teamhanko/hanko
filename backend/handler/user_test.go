@@ -5,8 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/lestrrat-go/jwx/v2/jwt"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
@@ -44,7 +42,7 @@ func (s *userSuite) TestUserHandler_Create() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusOK, rec.Result().StatusCode) {
+	if s.Equal(http.StatusOK, rec.Code) {
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
@@ -76,7 +74,7 @@ func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusOK, rec.Result().StatusCode) {
+	if s.Equal(http.StatusOK, rec.Code) {
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
@@ -111,7 +109,7 @@ func (s *userSuite) TestUserHandler_Create_UserExists() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusConflict, rec.Result().StatusCode) {
+	if s.Equal(http.StatusConflict, rec.Code) {
 		httpError := dto.HTTPError{}
 		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
 		s.NoError(err)
@@ -138,7 +136,7 @@ func (s *userSuite) TestUserHandler_Create_UserExists_CaseInsensitive() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusConflict, rec.Result().StatusCode) {
+	if s.Equal(http.StatusConflict, rec.Code) {
 		httpError := dto.HTTPError{}
 		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
 		s.NoError(err)
@@ -158,7 +156,7 @@ func (s *userSuite) TestUserHandler_Create_InvalidEmail() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusBadRequest, rec.Result().StatusCode) {
+	if s.Equal(http.StatusBadRequest, rec.Code) {
 		httpError := dto.HTTPError{}
 		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
 		s.NoError(err)
@@ -178,7 +176,7 @@ func (s *userSuite) TestUserHandler_Create_EmailMissing() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusBadRequest, rec.Result().StatusCode) {
+	if s.Equal(http.StatusBadRequest, rec.Code) {
 		httpError := dto.HTTPError{}
 		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
 		s.NoError(err)
@@ -216,7 +214,7 @@ func (s *userSuite) TestUserHandler_Get() {
 
 	e.ServeHTTP(rec, req)
 
-	if s.Equal(http.StatusOK, rec.Result().StatusCode) {
+	if s.Equal(http.StatusOK, rec.Code) {
 		s.Equal(rec.Code, http.StatusOK)
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
@@ -235,22 +233,28 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/users/:id")
-	c.SetParamNames("id")
-	c.SetParamValues(userId)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId)
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
 	s.Require().NoError(err)
-	c.Set("session", token)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
 
-	handler := NewUserHandler(&defaultConfig, s.Storage, sessionManager{}, test.NewAuditLogger())
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
+	rec := httptest.NewRecorder()
+	req.AddCookie(cookie)
 
-	if s.NoError(handler.Get(c)) {
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusOK, rec.Code) {
 		s.Equal(rec.Code, http.StatusOK)
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
@@ -261,73 +265,89 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 }
 
 func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
-	e := echo.New()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
+	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
 	req := httptest.NewRequest(http.MethodGet, "/users/invalidUserId", nil)
 	req.Header.Set("Content-Type", "application/json")
+	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	token := jwt.New()
-	err := token.Set(jwt.SubjectKey, "completelyDifferentUserId")
-	s.Require().NoError(err)
-	c.Set("session", token)
+	e.ServeHTTP(rec, req)
 
-	handler := NewUserHandler(&defaultConfig, nil, sessionManager{}, test.NewAuditLogger())
-
-	err = handler.Get(c)
-	if s.Error(err) {
-		httpError := dto.ToHttpError(err)
+	if s.Equal(http.StatusForbidden, rec.Code) {
+		httpError := dto.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.Require().NoError(err)
 		s.Equal(http.StatusForbidden, httpError.Code)
 	}
 }
 
 func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidEmail() {
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "123"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	handler := NewUserHandler(&defaultConfig, nil, nil, nil)
+	e.ServeHTTP(rec, req)
 
-	err := handler.GetUserIdByEmail(c)
-	if s.Error(err) {
-		httpError := dto.ToHttpError(err)
+	if s.Equal(http.StatusBadRequest, rec.Code) {
+		httpError := dto.HTTPError{}
+		err := json.Unmarshal(rec.Body.Bytes(), &httpError)
+		s.Require().NoError(err)
 		s.Equal(http.StatusBadRequest, httpError.Code)
 	}
 }
 
 func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidJson() {
-	e := echo.New()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`"email": "123}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	handler := NewUserHandler(&defaultConfig, nil, nil, nil)
+	e.ServeHTTP(rec, req)
 
-	s.Error(handler.GetUserIdByEmail(c))
+	s.Equal(http.StatusBadRequest, rec.Code)
 }
 
 func (s *userSuite) TestUserHandler_GetUserIdByEmail_UserNotFound() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	handler := NewUserHandler(&defaultConfig, s.Storage, sessionManager{}, test.NewAuditLogger())
+	e.ServeHTTP(rec, req)
 
-	err := handler.GetUserIdByEmail(c)
-	if s.Error(err) {
-		httpError := dto.ToHttpError(err)
-		s.Equal(http.StatusNotFound, httpError.Code)
-	}
+	s.Equal(http.StatusNotFound, rec.Code)
 }
 
 func (s *userSuite) TestUserHandler_GetUserIdByEmail() {
@@ -339,17 +359,15 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	handler := NewUserHandler(&defaultConfig, s.Storage, sessionManager{}, test.NewAuditLogger())
+	e.ServeHTTP(rec, req)
 
-	if s.NoError(handler.GetUserIdByEmail(c)) {
-		s.Equal(http.StatusOK, rec.Code)
+	if s.Equal(http.StatusOK, rec.Code) {
 		response := struct {
 			UserId   string `json:"id"`
 			Verified bool   `json:"verified"`
@@ -370,17 +388,15 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail_CaseInsensitive() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "JOHN.DOE@EXAMPLE.COM"}`))
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	handler := NewUserHandler(&defaultConfig, s.Storage, sessionManager{}, test.NewAuditLogger())
+	e.ServeHTTP(rec, req)
 
-	if s.NoError(handler.GetUserIdByEmail(c)) {
-		s.Equal(http.StatusOK, rec.Code)
+	if s.Equal(http.StatusOK, rec.Code) {
 		response := struct {
 			UserId   string `json:"id"`
 			Verified bool   `json:"verified"`
@@ -401,21 +417,29 @@ func (s *userSuite) TestUserHandler_Me() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodGet, "/me", nil)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId)
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
 	s.Require().NoError(err)
-	c.Set("session", token)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
 
-	handler := NewUserHandler(&defaultConfig, s.Storage, sessionManager{}, test.NewAuditLogger())
+	req := httptest.NewRequest(http.MethodGet, "/me", nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
 
-	if s.NoError(handler.Me(c)) {
-		s.Equal(http.StatusOK, rec.Code)
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusOK, rec.Code) {
+
 		response := struct {
 			UserId string `json:"id"`
 		}{}
@@ -426,23 +450,32 @@ func (s *userSuite) TestUserHandler_Me() {
 }
 
 func (s *userSuite) TestUserHandler_Logout() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
 	userId, _ := uuid.NewV4()
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+	token, err := sessionManager.GenerateJWT(userId)
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
 	req := httptest.NewRequest(http.MethodPost, "/logout", nil)
+	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	token := jwt.New()
-	err := token.Set(jwt.SubjectKey, userId.String())
-	s.NoError(err)
-	c.Set("session", token)
+	e.ServeHTTP(rec, req)
 
-	handler := NewUserHandler(&defaultConfig, s.Storage, sessionManager{}, test.NewAuditLogger())
-
-	if s.NoError(handler.Logout(c)) {
-		s.Equal(http.StatusNoContent, rec.Code)
+	if s.Equal(http.StatusNoContent, rec.Code) {
 		cookie := rec.Header().Get("Set-Cookie")
 		s.NotEmpty(cookie)
 
