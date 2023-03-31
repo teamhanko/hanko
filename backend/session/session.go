@@ -110,6 +110,7 @@ func (g *manager) GenerateCookie(token string) (*http.Cookie, error) {
 		Secure:   g.cookieConfig.Secure,
 		HttpOnly: g.cookieConfig.HttpOnly,
 		SameSite: g.cookieConfig.SameSite,
+		MaxAge:   int(g.sessionLength.Seconds()),
 	}, nil
 }
 

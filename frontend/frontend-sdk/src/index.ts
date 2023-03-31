@@ -105,3 +105,23 @@ export {
   UserVerificationError,
   WebauthnRequestCancelledError,
 };
+
+// Events
+
+import {
+  SessionCreatedEventDetail,
+  AuthFlowCompletedEventDetail,
+  authFlowCompletedType,
+  sessionCreatedType,
+  sessionRemovedType,
+  userDeletedType,
+} from "./lib/events/CustomEvents";
+
+export type { SessionCreatedEventDetail, AuthFlowCompletedEventDetail };
+
+export {
+  authFlowCompletedType,
+  sessionCreatedType,
+  sessionRemovedType,
+  userDeletedType,
+};

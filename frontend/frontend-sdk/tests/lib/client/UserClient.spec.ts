@@ -136,6 +136,19 @@ describe("UserClient.getCurrent()", () => {
 
 describe("UserClient.create()", () => {
   it("should create a user", async () => {
+    Object.defineProperty(global, "XMLHttpRequest", {
+      value: jest.fn().mockImplementation(() => ({
+        response: JSON.stringify({ foo: "bar" }),
+        open: jest.fn(),
+        setRequestHeader: jest.fn(),
+        getResponseHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue(""),
+        send: jest.fn(),
+      })),
+      configurable: true,
+      writable: true,
+    });
+
     const response = new Response(new XMLHttpRequest());
     response.ok = true;
     response._decodedJSON = {
@@ -208,9 +221,7 @@ describe("UserClient.logout()", () => {
       response.status = status;
       response.ok = status >= 200 && status <= 299;
 
-      jest
-        .spyOn(userClient.client, "post")
-        .mockResolvedValueOnce(response)
+      jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
 
       await expect(userClient.logout()).rejects.toThrow(error);
 
@@ -243,9 +254,7 @@ describe("UserClient.delete()", () => {
       response.status = status;
       response.ok = status >= 200 && status <= 299;
 
-      jest
-        .spyOn(userClient.client, "delete")
-        .mockResolvedValueOnce(response)
+      jest.spyOn(userClient.client, "delete").mockResolvedValueOnce(response);
 
       await expect(userClient.delete()).rejects.toThrow(error);
 
