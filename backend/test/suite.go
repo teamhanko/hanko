@@ -23,8 +23,8 @@ func (s *Suite) SetupSuite() {
 	if testing.Short() {
 		return
 	}
-	//pop.SetLogger(testLogger)
-	pop.Debug = true
+	pop.SetLogger(testLogger)
+	//pop.Debug = true
 	if s.Name == "" {
 		var err error
 		s.Name, err = GenerateRandomStringURLSafe(5)
@@ -71,6 +71,7 @@ func (s *Suite) LoadFixtures(path string) error {
 		testfixtures.Database(s.DB.DbCon),
 		testfixtures.Dialect(s.DB.Dialect),
 		testfixtures.Directory(path),
+		testfixtures.SkipResetSequences(),
 	)
 	if err != nil {
 		return fmt.Errorf("could not create testfixtures: %w", err)
