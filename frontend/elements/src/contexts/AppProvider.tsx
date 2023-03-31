@@ -61,7 +61,7 @@ interface Context extends States {
   hanko: Hanko;
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
-  emitSuccessEvent: () => void;
+  emitSuccessEvent: (userID: string) => void;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -91,19 +91,7 @@ const AppProvider = ({
     [experimental]
   );
 
-  const emitSuccessEvent = useCallback(() => {
-    const event = new Event("hankoAuthSuccess", {
-      bubbles: true,
-      composed: true,
-    });
-
-    const fn = setTimeout(() => {
-      ref.current.dispatchEvent(event);
-    }, 500);
-
-    return () => clearTimeout(fn);
-  }, []);
-
+  const initComponent = useMemo(() => <InitPage />, []);
   const [config, setConfig] = useState<Config>();
   const [userInfo, setUserInfo] = useState<UserInfo>(null);
   const [passcode, setPasscode] = useState<Passcode>();
@@ -111,7 +99,40 @@ const AppProvider = ({
   const [emails, setEmails] = useState<Emails>();
   const [webauthnCredentials, setWebauthnCredentials] =
     useState<WebauthnCredentials>();
-  const [page, setPage] = useState<h.JSX.Element>(<InitPage />);
+  const [page, setPage] = useState<h.JSX.Element>(initComponent);
+
+  const init = useCallback(() => {
+    setPage(initComponent);
+  }, [initComponent]);
+
+  const emitSuccessEvent = useCallback(
+    (userID: string) => {
+      const event = new Event("hankoAuthSuccess", {
+        bubbles: true,
+        composed: true,
+      });
+      const fn = setTimeout(() => {
+        hanko.relay.dispatchAuthFlowCompletedEvent({ userID });
+        ref.current.dispatchEvent(event);
+      }, 500);
+
+      return () => clearTimeout(fn);
+    },
+    [hanko]
+  );
+
+  useMemo(() => {
+    switch (componentName) {
+      case "auth":
+        hanko.onSessionRemoved(init);
+        hanko.onUserDeleted(init);
+        break;
+      case "profile":
+        hanko.onSessionCreated(init);
+        hanko.onSessionRemoved(init);
+        break;
+    }
+  }, [componentName, hanko, init]);
 
   return (
     <AppContext.Provider

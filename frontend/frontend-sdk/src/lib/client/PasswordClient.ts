@@ -1,5 +1,5 @@
-import { PasswordState } from "../state/PasswordState";
-import { PasscodeState } from "../state/PasscodeState";
+import { PasswordState } from "../state/users/PasswordState";
+import { PasscodeState } from "../state/users/PasscodeState";
 import {
   InvalidPasswordError,
   TechnicalError,
@@ -55,15 +55,14 @@ class PasswordClient extends Client {
     if (response.status === 401) {
       throw new InvalidPasswordError();
     } else if (response.status === 429) {
-      const retryAfter = response.parseRetryAfterHeader();
+      const retryAfter = response.parseNumericHeader("Retry-After");
       this.passwordState.read().setRetryAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
     } else if (!response.ok) {
       throw new TechnicalError();
     }
 
-    this.passcodeState.read().reset(userID).write();
-
+    this.client.processResponseHeadersOnLogin(userID, response);
     return;
   }
 

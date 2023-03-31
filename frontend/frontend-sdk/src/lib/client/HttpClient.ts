@@ -1,5 +1,8 @@
 import Cookies from "js-cookie";
 import { RequestTimeoutError, TechnicalError } from "../Errors";
+import { SessionState } from "../state/session/SessionState";
+import { PasscodeState } from "../state/users/PasscodeState";
+import { Dispatcher } from "../events/Dispatcher";
 
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
@@ -23,7 +26,7 @@ class Headers {
    * @param {string} name
    * @return {string}
    */
-  get(name: string) {
+  getResponseHeader(name: string) {
     return this._xhr.getResponseHeader(name);
   }
 }
@@ -43,7 +46,7 @@ class Response {
   statusText: string;
   url: string;
   _decodedJSON: any;
-  private xhr: XMLHttpRequest;
+  xhr: XMLHttpRequest;
 
   // eslint-disable-next-line require-jsdoc
   constructor(xhr: XMLHttpRequest) {
@@ -94,10 +97,11 @@ class Response {
   /**
    * Returns the value for Retry-After contained in the response header.
    *
+   * @param {string} name - The name of the header field
    * @return {number}
    */
-  parseRetryAfterHeader(): number {
-    const result = parseInt(this.headers.get("Retry-After"), 10);
+  parseNumericHeader(name: string): number {
+    const result = parseInt(this.headers.getResponseHeader(name), 10);
     return isNaN(result) ? 0 : result;
   }
 }
@@ -120,19 +124,24 @@ class HttpClient {
   timeout: number;
   api: string;
   authCookieName = "hanko";
+  sessionState: SessionState;
+  passcodeState: PasscodeState;
+  dispatcher: Dispatcher;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
     this.api = api;
     this.timeout = timeout;
+    this.sessionState = new SessionState();
+    this.passcodeState = new PasscodeState();
+    this.dispatcher = new Dispatcher();
   }
 
   // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
-    const self = this;
     const url = this.api + path;
     const timeout = this.timeout;
-    const bearerToken = this._getAuthCookie();
+    const bearerToken = this.getAuthCookie();
 
     return new Promise<Response>(function (resolve, reject) {
       xhr.open(options.method, url, true);
@@ -146,17 +155,8 @@ class HttpClient {
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
-        const headers = xhr
-          .getAllResponseHeaders()
-          .split("\r\n")
-          .filter((h) => h.toLowerCase().startsWith("x-auth-token"));
-
-        if (headers.length) {
-          const authToken = xhr.getResponseHeader("X-Auth-Token");
-          if (authToken) self._setAuthCookie(authToken);
-        }
-
-        resolve(new Response(xhr));
+        const response = new Response(xhr);
+        resolve(response);
       };
 
       xhr.onerror = () => {
@@ -177,7 +177,7 @@ class HttpClient {
    * @return {string}
    * @return {string}
    */
-  _getAuthCookie(): string {
+  getAuthCookie(): string {
     return Cookies.get(this.authCookieName);
   }
 
@@ -193,11 +193,54 @@ class HttpClient {
 
   /**
    * Removes the cookie used for authentication.
-   *
-   * @param {string} token - The authorization token to be stored.
    */
   removeAuthCookie() {
     Cookies.remove(this.authCookieName);
+  }
+
+  processResponseHeadersOnLogin(userID: string, response: Response) {
+    let jwt = "";
+    let expirationSeconds = 0;
+
+    response.xhr
+      .getAllResponseHeaders()
+      .split("\r\n")
+      .forEach((h) => {
+        const header = h.toLowerCase();
+        if (header.startsWith("x-auth-token")) {
+          jwt = response.headers.getResponseHeader("X-Auth-Token");
+        } else if (header.startsWith("x-session-lifetime")) {
+          expirationSeconds = parseInt(
+            response.headers.getResponseHeader("X-Session-Lifetime"),
+            10
+          );
+        }
+      });
+
+    this.passcodeState.read().reset(userID).write();
+
+    if (expirationSeconds > 0) {
+      this.sessionState.read();
+
+      if (jwt) {
+        this._setAuthCookie(jwt);
+        this.sessionState.setJWT(jwt);
+      }
+
+      this.sessionState.setExpirationSeconds(expirationSeconds);
+      this.sessionState.setUserID(userID);
+      this.sessionState.write();
+      this.dispatcher.dispatchSessionCreatedEvent({
+        jwt,
+        userID,
+        expirationSeconds,
+      });
+    }
+    return {
+      jwt,
+      userID,
+      expirationSeconds,
+    };
   }
 
   /**

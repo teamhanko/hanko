@@ -4,7 +4,7 @@ import { decodedLSContent, encodedLSContent } from "../../setup";
 describe("state.read()", () => {
   it("should read when local storage contents are initialized", async () => {
     const ls = decodedLSContent();
-    const state = new (class extends State {})();
+    const state = new (class extends State {})("hanko");
 
     jest.spyOn(localStorage, "getItem").mockReturnValueOnce(encodedLSContent());
 
@@ -15,7 +15,7 @@ describe("state.read()", () => {
   });
 
   it("should read when local storage contents are corrupted", async () => {
-    const state = new (class extends State {})();
+    const state = new (class extends State {})("hanko");
 
     jest.spyOn(localStorage, "getItem").mockReturnValueOnce("junk");
 
@@ -27,7 +27,7 @@ describe("state.read()", () => {
 describe("state.write()", () => {
   it("should write local storage contents", async () => {
     const ls = decodedLSContent();
-    const state = new (class extends State {})();
+    const state = new (class extends State {})("hanko");
 
     state.ls = ls;
     jest.spyOn(localStorage, "setItem");

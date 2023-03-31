@@ -5,9 +5,8 @@ import {
 
 import { WebauthnSupport } from "../WebauthnSupport";
 import { Client } from "./Client";
-import { PasscodeState } from "../state/PasscodeState";
-
-import { WebauthnState } from "../state/WebauthnState";
+import { PasscodeState } from "../state/users/PasscodeState";
+import { WebauthnState } from "../state/users/WebauthnState";
 
 import {
   InvalidWebauthnCredentialError,
@@ -36,7 +35,6 @@ class WebauthnClient extends Client {
   webauthnState: WebauthnState;
   passcodeState: PasscodeState;
   controller: AbortController;
-
   _getCredential = getWebauthnCredential;
   _createCredential = createWebauthnCredential;
 
@@ -69,11 +67,12 @@ class WebauthnClient extends Client {
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnLoginInit
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnLoginFinal
    * @see https://www.w3.org/TR/webauthn-2/#authentication-ceremony
+   * @return {WebauthnFinalized}
    */
   async login(
     userID?: string,
     useConditionalMediation?: boolean
-  ): Promise<void> {
+  ): Promise<WebauthnFinalized> {
     const challengeResponse = await this.client.post(
       "/webauthn/login/initialize",
       { user_id: userID }
@@ -116,9 +115,9 @@ class WebauthnClient extends Client {
       .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
       .write();
 
-    this.passcodeState.read().reset(userID).write();
+    this.client.processResponseHeadersOnLogin(userID, assertionResponse);
 
-    return;
+    return finalizeResponse;
   }
 
   /**

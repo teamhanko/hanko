@@ -1,5 +1,5 @@
 import { decodedLSContent } from "../../setup";
-import { UserState } from "../../../src/lib/state/UserState";
+import { UserState } from "../../../src/lib/state/users/UserState";
 
 describe("userState.getUserState()", () => {
   it("should return the user state when local storage is initialized", async () => {

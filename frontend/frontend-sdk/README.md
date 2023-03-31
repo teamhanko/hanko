@@ -47,7 +47,7 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 
 - `Hanko` - A class that bundles all functionalities.
 
-### Clients
+### Client Classes
 
 - `ConfigClient` - A class to fetch configurations.
 - `UserClient` - A class to manage users.
@@ -57,11 +57,11 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 - `ThirdPartyClient` - A class to handle social logins.
 - `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
 
-### Utilities
+### Utility Classes
 
 - `WebauthnSupport` - A class to check the browser's WebAuthn support.
 
-### DTOs
+### DTO Interfaces
 
 - `Config`
 - `PasswordConfig`
@@ -73,7 +73,12 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 - `Emails`
 - `Passcode`
 
-### Errors
+### Event Detail Interfaces
+
+- `SessionCreatedEventDetail`
+- `AuthFlowCompletedEventDetail`
+
+### Error Classes
 
 - `HankoError`
 - `TechnicalError`
@@ -100,7 +105,7 @@ not logged in:
 ```typescript
 import { Hanko, UnauthorizedError } from "@teamhanko/hanko-frontend-sdk"
 
-const hanko = new Hanko("http://localhost:3000")
+const hanko = new Hanko("https://[HANKO_API_URL]")
 
 try {
     const user = await hanko.user.getCurrent()
@@ -124,7 +129,7 @@ with a desktop computer:
 ```typescript
 import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from "@teamhanko/hanko-frontend-sdk"
 
-const hanko = new Hanko("http://localhost:3000")
+const hanko = new Hanko("https://[HANKO_API_URL]")
 
 // By passing the user object (see example above) to `hanko.webauthn.shouldRegister(user)` you get an indication of
 // whether a WebAuthn credential registration should be performed on the current browser. This is useful if the user has
@@ -144,6 +149,42 @@ try {
     }
 }
 ```
+
+### Events
+
+To build dynamic websites or handle the JWT by your own, you may want to utilize available events as follows:
+
+```typescript
+import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+
+const hanko = new Hanko("https://[HANKO_API_URL]")
+
+hanko.onSessionCreated((detail) => {
+    // Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
+    // work across browser windows and you can obtain the JWT from the detail object, if you need to manage it by your
+    // own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
+    console.log(`User signed in (userID: ${detail.userID}, jwt: ${detail.jwt})`);
+})
+
+hanko.onAuthFlowCompleted((detail) => {
+    // Login or registration has been finished through the `<hanko-auth>` element. You can now redirect the user to a
+    // secured page or fetch secured content in use of the previously issued JWT.
+    console.log(`Authentication flow completed (userID: ${detail.userID})`);
+})
+
+hanko.onSessionRemoved(() => {
+    // Executes across all browser windows after the session has expired. The user can now be redirected back to a
+    // login page.
+    console.log("User logged out or session has expired");
+})
+
+hanko.onUserDeleted(() => {
+    // Executes after the user deleted the account. The user can be redirected to a "goodbye" or back to a login page.
+    console.log("User deleted");
+})
+```
+
+Take a look into the docs for more details.
 
 ## Bugs
 

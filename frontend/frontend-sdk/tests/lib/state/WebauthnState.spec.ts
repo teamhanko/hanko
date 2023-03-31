@@ -1,5 +1,5 @@
 import { decodedLSContent } from "../../setup";
-import { WebauthnState } from "../../../src/lib/state/WebauthnState";
+import { WebauthnState } from "../../../src/lib/state/users/WebauthnState";
 import { Credential } from "../../../src";
 
 describe("webauthnState.read()", () => {

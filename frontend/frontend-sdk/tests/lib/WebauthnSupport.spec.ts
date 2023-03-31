@@ -1,4 +1,4 @@
-import { WebauthnSupport } from "../../src/lib/WebauthnSupport";
+import { WebauthnSupport } from "../../src";
 import { fakePublicKeyCredential } from "../setup";
 
 describe("WebauthnSupport.supported()", () => {

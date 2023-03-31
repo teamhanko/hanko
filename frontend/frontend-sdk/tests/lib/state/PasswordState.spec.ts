@@ -1,5 +1,5 @@
 import { decodedLSContent } from "../../setup";
-import { PasswordState } from "../../../src/lib/state/PasswordState";
+import { PasswordState } from "../../../src/lib/state/users/PasswordState";
 
 describe("passwordState.read()", () => {
   it("should read the password state", async () => {
