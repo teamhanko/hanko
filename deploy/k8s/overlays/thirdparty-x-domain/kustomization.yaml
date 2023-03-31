@@ -1,4 +1,4 @@
-namespace: hanko-quickstart
+namespace: hanko-thirdparty-x-domain
 resources:
   - ../../base/postgres
   - ../../base/hanko

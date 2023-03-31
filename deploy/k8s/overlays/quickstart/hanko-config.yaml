@@ -1,4 +1,0 @@
-database:
-  user: hanko
-  password: hanko
-  host: postgres.hanko

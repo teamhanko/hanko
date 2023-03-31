@@ -1,0 +1,33 @@
+apiVersion: skaffold/v2beta29
+kind: Config
+metadata:
+  name: hanko-tenant
+build:
+  artifacts:
+  - image: ghcr.io/teamhanko/hanko
+    context: backend
+    docker:
+      dockerfile: Dockerfile
+  - image: ghcr.io/teamhanko/hanko/quickstart
+    context: quickstart
+    docker:
+      dockerfile: Dockerfile
+  - image: ghcr.io/teamhanko/hanko/elements
+    context: frontend
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  kustomize:
+    paths:
+    - deploy/k8s/overlays/quickstart
+profiles:
+- name: quickstart
+  deploy:
+    kustomize:
+      paths:
+      - deploy/k8s/overlays/quickstart
+- name: thirdparty
+  deploy:
+    kustomize:
+      paths:
+        - deploy/k8s/overlays/thirdparty
