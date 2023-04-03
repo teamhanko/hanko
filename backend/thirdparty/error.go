@@ -15,7 +15,7 @@ func (e *ThirdPartyError) Query() string {
 	q := url.Values{}
 	q.Add("error", e.Code)
 
-	if e.Code == ThirdPartyErrorCodeServerError {
+	if e.Code == ErrorCodeServerError {
 		q.Add("error_description", "an internal error has occurred")
 	} else if e.Description != "" {
 		q.Add("error_description", e.Description)
@@ -51,34 +51,34 @@ func NewThirdPartyError(code string, description string) *ThirdPartyError {
 }
 
 func ErrorInvalidRequest(desc string) *ThirdPartyError {
-	return &ThirdPartyError{Code: ThirdPartyErrorCodeInvalidRequest, Description: desc}
+	return &ThirdPartyError{Code: ErrorCodeInvalidRequest, Description: desc}
 }
 
 func ErrorServer(desc string) *ThirdPartyError {
-	return &ThirdPartyError{Code: ThirdPartyErrorCodeServerError, Description: desc}
+	return &ThirdPartyError{Code: ErrorCodeServerError, Description: desc}
 }
 
 func ErrorUserConflict(desc string) *ThirdPartyError {
-	return &ThirdPartyError{Code: ThirdPartyErrorCodeUserConflict, Description: desc}
+	return &ThirdPartyError{Code: ErrorCodeUserConflict, Description: desc}
 }
 
 func ErrorMultipleAccounts(desc string) *ThirdPartyError {
-	return &ThirdPartyError{Code: ThirdPartyErrorCodeMultipleAccounts, Description: desc}
+	return &ThirdPartyError{Code: ErrorCodeMultipleAccounts, Description: desc}
 }
 
 func ErrorUnverifiedProviderEmail(desc string) *ThirdPartyError {
-	return &ThirdPartyError{Code: ThirdPartyErrorUnverifiedProviderEmail, Description: desc}
+	return &ThirdPartyError{Code: ErrorCodeUnverifiedProviderEmail, Description: desc}
 }
 
 func ErrorMaxNumberOfAddresses(desc string) *ThirdPartyError {
-	return &ThirdPartyError{Code: ThirdPartyErrorMaxNumberOfAddresses, Description: desc}
+	return &ThirdPartyError{Code: ErrorCodeMaxNumberOfAddresses, Description: desc}
 }
 
 const (
-	ThirdPartyErrorCodeInvalidRequest      = "invalid_request"
-	ThirdPartyErrorCodeServerError         = "server_error"
-	ThirdPartyErrorCodeUserConflict        = "user_conflict"
-	ThirdPartyErrorCodeMultipleAccounts    = "multiple_accounts"
-	ThirdPartyErrorUnverifiedProviderEmail = "unverified_email"
-	ThirdPartyErrorMaxNumberOfAddresses    = "email_maxnum"
+	ErrorCodeInvalidRequest          = "invalid_request"
+	ErrorCodeServerError             = "server_error"
+	ErrorCodeUserConflict            = "user_conflict"
+	ErrorCodeMultipleAccounts        = "multiple_accounts"
+	ErrorCodeUnverifiedProviderEmail = "unverified_email"
+	ErrorCodeMaxNumberOfAddresses    = "email_maxnum"
 )

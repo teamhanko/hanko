@@ -51,7 +51,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignUpUserConflic
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeUserConflict, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeUserConflict, location.Query().Get("error"))
 		s.Equal("third party account linking for existing user with same email disallowed", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -102,7 +102,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeMultipleAccounts, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeMultipleAccounts, location.Query().Get("error"))
 		s.Equal(fmt.Sprintf("cannot identify associated user: '%s' is used by multiple accounts", "provider-primary-email-changed@example.com"), location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -128,7 +128,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoState() {
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeInvalidRequest, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("State is a required field", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -164,7 +164,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeInvalidRequest, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("could not verify state", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -193,7 +193,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoThirdPartyCooki
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeInvalidRequest, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("thirdparty state cookie is missing", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -259,7 +259,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeInvalidRequest, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("google provider is disabled", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -292,7 +292,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeInvalidRequest, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("auth code missing from request", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -331,7 +331,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorCodeInvalidRequest, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("could not exchange authorization code for access token", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
@@ -379,7 +379,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		location, err := rec.Result().Location()
 		s.NoError(err)
 
-		s.Equal(thirdparty.ThirdPartyErrorUnverifiedProviderEmail, location.Query().Get("error"))
+		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
 		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")

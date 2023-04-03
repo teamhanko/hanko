@@ -212,7 +212,7 @@ func (h *ThirdPartyHandler) auditError(c echo.Context, err error) error {
 	e, ok := err.(*thirdparty.ThirdPartyError)
 
 	var auditLogError error
-	if ok && e.Code != thirdparty.ThirdPartyErrorCodeServerError {
+	if ok && e.Code != thirdparty.ErrorCodeServerError {
 		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err)
 	}
 	return auditLogError
