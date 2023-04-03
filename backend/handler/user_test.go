@@ -480,6 +480,6 @@ func (s *userSuite) TestUserHandler_Logout() {
 		s.NotEmpty(cookie)
 
 		split := strings.Split(cookie, ";")
-		s.Equal("Max-Age=0", strings.TrimSpace(split[1]))
+		s.Equal("Max-Age=0", strings.TrimSpace(split[2]))
 	}
 }
