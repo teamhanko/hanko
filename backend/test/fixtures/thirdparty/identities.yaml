@@ -12,3 +12,10 @@
   email_id: 80939e4c-0028-4b67-aeee-98c617a20b6b
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: 09b084b7-36af-41c5-b4b6-db9b8ed8385b
+  provider_id: "apple_abcde"
+  provider_name: "apple"
+  data: '{"email":"test-with-apple-identity@example.com","email_verified":true,"iss":"https://appleid.apple.com","sub":"apple_abcde"}'
+  email_id: 05ab6e1f-8dfb-4329-ae04-22571a68d96b
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

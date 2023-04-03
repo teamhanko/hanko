@@ -2,6 +2,9 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
@@ -12,7 +15,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"strconv"
 	"testing"
+	"time"
 )
 
 func TestThirdPartySuite(t *testing.T) {
@@ -48,6 +53,11 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 	cfg := &config.Config{
 		ThirdParty: config.ThirdParty{
 			Providers: config.ThirdPartyProviders{
+				Apple: config.ThirdPartyProvider{
+					Enabled:  false,
+					ClientID: "fakeClientID",
+					Secret:   "fakeClientSecret",
+				},
 				Google: config.ThirdPartyProvider{
 					Enabled:  false,
 					ClientID: "fakeClientID",
@@ -74,6 +84,8 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 
 	for _, provider := range enabledProviders {
 		switch provider {
+		case "apple":
+			cfg.ThirdParty.Providers.Apple.Enabled = true
 		case "google":
 			cfg.ThirdParty.Providers.Google.Enabled = true
 		case "github":
@@ -85,6 +97,32 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 	s.Require().NoError(err)
 
 	return cfg
+}
+
+func (s *thirdPartySuite) setUpFakeJwkSet() jwk2.Set {
+	generator := test.JwkManager{}
+	keySet, err := generator.GetPublicKeys()
+	s.Require().NoError(err)
+	return keySet
+}
+
+func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerified bool) string {
+	token := jwt.New()
+	_ = token.Set(jwt.SubjectKey, sub)
+	_ = token.Set(jwt.IssuedAtKey, time.Now().UTC())
+	_ = token.Set(jwt.IssuerKey, "https://appleid.apple.com")
+	_ = token.Set(jwt.AudienceKey, aud)
+	_ = token.Set("email_verified", strconv.FormatBool(emailVerified))
+	_ = token.Set("email", email)
+
+	generator := test.JwkManager{}
+	signingKey, err := generator.GetSigningKey()
+	s.Require().NoError(err)
+
+	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, signingKey))
+	s.Require().NoError(err)
+
+	return string(signedToken)
 }
 
 func (s *thirdPartySuite) assertLocationHeaderHasToken(rec *httptest.ResponseRecorder) {

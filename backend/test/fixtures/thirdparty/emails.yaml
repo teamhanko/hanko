@@ -18,6 +18,12 @@
   verified: true
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: 05ab6e1f-8dfb-4329-ae04-22571a68d96b
+  user_id: b3537e49-de92-4e16-8981-ae4beb44c447
+  address: test-with-apple-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 - id: 527afce8-3b7b-41b6-b1ed-33d408c5a7bb
   user_id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
   address: test-no-identity@example.com

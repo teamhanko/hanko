@@ -39,6 +39,15 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			expectedBaseURL:     "https://" + thirdparty.GithubAuthBase + thirdparty.GithubOauthAuthEndpoint,
 		},
 		{
+			name:                "successful redirect to apple",
+			referer:             "https://login.test.example",
+			enabledProviders:    []string{"apple"},
+			allowedRedirectURLs: []string{"https://*.test.example"},
+			requestedProvider:   "apple",
+			requestedRedirectTo: "https://app.test.example",
+			expectedBaseURL:     "https://" + thirdparty.AppleAPIBase + thirdparty.AppleAuthEndpoint,
+		},
+		{
 			name:                     "error redirect on missing provider",
 			referer:                  "https://login.test.example",
 			requestedRedirectTo:      "https://app.test.example",

@@ -6,6 +6,10 @@
 - id: 1d6a4824-d935-4980-8f18-8ee5d6efe2fc
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+# user with email and apple identity
+- id: b3537e49-de92-4e16-8981-ae4beb44c447
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 # user with email, no identity
 - id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
   created_at: 2020-12-31 23:59:59
