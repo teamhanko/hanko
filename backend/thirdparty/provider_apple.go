@@ -13,10 +13,10 @@ import (
 )
 
 const (
-	AppleAPIBase        = "appleid.apple.com"
-	AppleAuthEndpoint   = "/auth/authorize"
-	AppleTokenEndpoint  = "/auth/token"
-	AppleIdKeysEndpoint = "/auth/keys"
+	AppleAPIBase       = "https://appleid.apple.com"
+	AppleAuthEndpoint  = AppleAPIBase + "/auth/authorize"
+	AppleTokenEndpoint = AppleAPIBase + "/auth/token"
+	AppleKeysEndpoint  = AppleAPIBase + "/auth/keys"
 )
 
 var DefaultAppleScopes = []string{
@@ -38,8 +38,8 @@ func NewAppleProvider(config config.ThirdPartyProvider, redirectURL string) (OAu
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "https://" + AppleAPIBase + AppleAuthEndpoint,
-				TokenURL: "https://" + AppleAPIBase + AppleTokenEndpoint,
+				AuthURL:  AppleAuthEndpoint,
+				TokenURL: AppleTokenEndpoint,
 			},
 			RedirectURL: redirectURL,
 			Scopes:      DefaultAppleScopes,
@@ -66,7 +66,7 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		return nil, errors.New("id_token missing")
 	}
 
-	set, err := jwk.Fetch(context.Background(), "https://"+AppleAPIBase+AppleIdKeysEndpoint)
+	set, err := jwk.Fetch(context.Background(), AppleKeysEndpoint)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	parsedIDToken, err := jwt.Parse(
 		[]byte(rawIDToken),
 		jwt.WithKeySet(set),
-		jwt.WithIssuer("https://"+AppleAPIBase),
+		jwt.WithIssuer(AppleAPIBase),
 		jwt.WithAudience(a.Config.ClientID),
 	)
 

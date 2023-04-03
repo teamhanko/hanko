@@ -27,7 +27,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			allowedRedirectURLs: []string{"https://*.test.example"},
 			requestedProvider:   "google",
 			requestedRedirectTo: "https://app.test.example",
-			expectedBaseURL:     "https://" + thirdparty.GoogleAuthBase + thirdparty.GoogleOauthAuthEndpoint,
+			expectedBaseURL:     thirdparty.GoogleOauthAuthEndpoint,
 		},
 		{
 			name:                "successful redirect to github",
@@ -36,7 +36,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			allowedRedirectURLs: []string{"https://*.test.example"},
 			requestedProvider:   "github",
 			requestedRedirectTo: "https://app.test.example",
-			expectedBaseURL:     "https://" + thirdparty.GithubAuthBase + thirdparty.GithubOauthAuthEndpoint,
+			expectedBaseURL:     thirdparty.GithubOauthAuthEndpoint,
 		},
 		{
 			name:                "successful redirect to apple",
@@ -45,7 +45,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			allowedRedirectURLs: []string{"https://*.test.example"},
 			requestedProvider:   "apple",
 			requestedRedirectTo: "https://app.test.example",
-			expectedBaseURL:     "https://" + thirdparty.AppleAPIBase + thirdparty.AppleAuthEndpoint,
+			expectedBaseURL:     thirdparty.AppleAuthEndpoint,
 		},
 		{
 			name:                     "error redirect on missing provider",

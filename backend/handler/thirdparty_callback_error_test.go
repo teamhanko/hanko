@@ -18,13 +18,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignUpUserConflic
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_email_already_exists",
@@ -69,13 +69,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",
@@ -307,8 +307,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(400).
 		JSON(map[string]string{"error": "incorrect_client_credentials"})
 
@@ -345,13 +345,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",
