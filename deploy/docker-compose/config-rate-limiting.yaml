@@ -29,3 +29,7 @@ rate_limiter:
     address: "redis:6379"
 password:
   enabled: true
+server:
+  cors:
+    allow_origins:
+      - "http://localhost:8888"
