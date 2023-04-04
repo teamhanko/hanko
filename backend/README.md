@@ -48,7 +48,8 @@ To get the Hanko backend up and running you need to:
 4. [Run and configure an SMTP server](#run-and-configure-an-smtp-server)
 5. [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
 6. [Configure WebAuthn](#configure-webauthn)
-7. [Start the backend](#run-the-backend)
+7. [Configure CORS](#configure-cors)
+8. [Start the backend](#run-the-backend)
 
 ### Run a database
 
@@ -236,7 +237,8 @@ webauthn:
   relying_party:
     id: "localhost"
     display_name: "Hanko Authentication Service"
-    origin: "http://localhost"
+    origins:
+      - "http://localhost"
 ```
 
 so no further configuration changes need to be made to your configuration file.
@@ -251,7 +253,8 @@ webauthn:
   relying_party:
     id: "example.com"
     display_name: "Example Project"
-    origin: "https://example.com"
+    origins:
+      - "https://example.com"
 ```
 
 If the login should be available at `https://login.example.com` instead, then the WebAuthn config would look like this:
@@ -261,7 +264,8 @@ webauthn:
   relying_party:
     id: "login.example.com"
     display_name: "Example Project"
-    origin: "https://login.example.com"
+    origins:
+      - "https://login.example.com"
 ```
 
 Given the above scenario, you still may want to bind your users WebAuthn credentials to `example.com` if you plan to
@@ -274,10 +278,39 @@ webauthn:
   relying_party:
     id: "example.com"
     display_name: "Example Project"
-    origin: "https://login.example.com"
+    origin:
+      - "https://login.example.com"
 ```
 
-> **Note**: Currently, only a single origin is supported. We plan to add support for a list of origins at some point.
+### Configure CORS
+
+Because the backend and your application(s) consuming backend API most likely have different origins, i.e.
+scheme (protocol), hostname (domain), and port part of the URL are different, you need to configure
+Cross-Origin Resource Sharing (CORS) and specify your application(s) as allowed origins:
+
+```yaml
+server:
+  public:
+    cors:
+      allow_origins:
+        - https://example.com
+```
+
+When you include a wildcard `*` origin you need to set `unsafe_wildcard_origin_allowed: true`:
+
+```yaml
+server:
+  public:
+    cors:
+      allow_origins:
+        - "*"
+      unsafe_wildcard_origin_allowed: true
+```
+
+Wildcard `*` origins can lead to cross-site attacks and when you include a `*` wildcard origin,
+we want to make sure, that you understand what you are doing, hence this flag.
+
+> Note: In most cases, the `allow_origins` list here should contain the same entries as the `webauthn.relying_party.origins` list.
 
 ### Start the backend
 

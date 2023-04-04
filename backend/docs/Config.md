@@ -30,6 +30,24 @@ server:
     # The address the public API will listen and handle requests on.
     #
     address: ":8000"
+    ## cors ##
+    #
+    # Cross Origin Resource Sharing for public endpoints.
+    #
+    cors:
+      ## allow_origins ##
+      #
+      # A list of allowed origins that may access the public endpoints.
+      #
+      allow_origins:
+        - "https://hanko.io"
+        - "https://exmaple.com"
+      ## unsafe_wildcard_origin_allowed ##
+      #
+      # If allow_origins contains a wildcard '*' origin, this flag must explicitly be set to 'true'.
+      # Using wildcard '*' origins is insecure and potentially leads to cross-origin attacks.
+      #
+      unsafe_wildcard_origin_allowed: false
   ## admin ##
   #
   # Configuration for the admin API.

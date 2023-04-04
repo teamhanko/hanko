@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
@@ -24,16 +25,22 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
-	exposeHeader := []string{}
+	exposeHeader := []string{
+		httplimit.HeaderRetryAfter,
+		httplimit.HeaderRateLimitLimit,
+		httplimit.HeaderRateLimitRemaining,
+		httplimit.HeaderRateLimitReset,
+	}
 	if cfg.Session.EnableAuthTokenHeader {
-		exposeHeader = []string{"X-Auth-Token"}
+		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		// Rationale: It does not make sense to have different settings for webauthn Origin and Cors Origins.
 		// We wan't to have both in sync.
-		AllowOrigins:     cfg.Webauthn.RelyingParty.Origins,
-		ExposeHeaders:    exposeHeader,
-		AllowCredentials: true,
+		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
+		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
+		ExposeHeaders:                            exposeHeader,
+		AllowCredentials:                         true,
 		// Based on: Chromium (starting in v76) caps at 2 hours (7200 seconds).
 		MaxAge: 7200,
 	}))
