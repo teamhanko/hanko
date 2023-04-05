@@ -12,7 +12,11 @@ import (
 	"log"
 )
 
-func NewCreateCommand(config *config.Config) *cobra.Command {
+func NewCreateCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "create [user_id]",
 		Short: "generate a JSON Web Token for a given user_id",
@@ -27,18 +31,22 @@ func NewCreateCommand(config *config.Config) *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			persister, err := persistence.New(config.Database)
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
 			jwkPersister := persister.GetJwkPersister()
-			jwkManager, err := jwk.NewDefaultManager(config.Secrets.Keys, jwkPersister)
+			jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, jwkPersister)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager, config.Session)
+			sessionManager, err := session.NewManager(jwkManager, cfg.Session)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return
@@ -53,5 +61,8 @@ func NewCreateCommand(config *config.Config) *cobra.Command {
 			fmt.Printf("token: %s", token)
 		},
 	}
+
+	cmd.Flags().StringVar(&configFile, "config", "", "config file")
+
 	return cmd
 }

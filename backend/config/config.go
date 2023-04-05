@@ -33,6 +33,10 @@ type Config struct {
 	Account     Account          `yaml:"account" json:"account" koanf:"account"`
 }
 
+var (
+	DefaultConfigFilePath = "./config/config.yaml"
+)
+
 func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
 	var err error
@@ -58,6 +62,10 @@ func Load(cfgFile *string) (*Config, error) {
 	err = c.PostProcess()
 	if err != nil {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
+	}
+
+	if err = c.Validate(); err != nil {
+		log.Fatalf("failed to validate config: %s", err)
 	}
 
 	return c, nil
