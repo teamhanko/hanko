@@ -65,7 +65,7 @@ func Load(cfgFile *string) (*Config, error) {
 	}
 
 	if err = c.Validate(); err != nil {
-		log.Fatalf("failed to validate config: %s", err)
+		return nil, fmt.Errorf("failed to validate config: %s", err)
 	}
 
 	return c, nil
