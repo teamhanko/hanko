@@ -79,6 +79,18 @@ The two endpoints ([Initialize WebAuthn registration](/api/public#tag/WebAuthn/o
 
 :::
 
+:::info
+
+In order for **Android** to work with the [Hanko backend](https://github.com/teamhanko/hanko) you will need to add an "APK Key Hash" to either `webauthn.relying_party.origins` or in the advanced page in the settings at [Hanko Cloud](https://cloud.hanko.io).
+Use this command to create the "APK Key Hash":
+```shell
+echo 'android:apk-key-hash:'"$(keytool -exportcert -alias key-name -keystore path-to-keystore | openssl sha256 -binary | openssl base64 | tr -- '+/' '-_' | tr -d '=')"
+```
+
+Change `-alias` and `-keystore` flag values to your personal values.
+
+:::
+
 ### Login with a passkey (optional)
 
 In order to use a passkey for login, add a button ("Sign in with a passkey") under your email input. After interaction with the button, call the native APIs that [Google](https://developers.google.com/identity/fido/android/native-apps)
