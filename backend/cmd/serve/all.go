@@ -13,13 +13,22 @@ import (
 	"sync"
 )
 
-func NewServeAllCommand(config *config.Config) *cobra.Command {
-	return &cobra.Command{
+func NewServeAllCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
+	cmd := &cobra.Command{
 		Use:   "all",
 		Short: "Start the public and admin portion of the hanko server",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			persister, err := persistence.New(config.Database)
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -28,10 +37,14 @@ func NewServeAllCommand(config *config.Config) *cobra.Command {
 
 			prom := prometheus.NewPrometheus("hanko", nil)
 
-			go server.StartPublic(config, &wg, persister, prom)
-			go server.StartAdmin(config, &wg, persister, prom)
+			go server.StartPublic(cfg, &wg, persister, prom)
+			go server.StartAdmin(cfg, &wg, persister, prom)
 
 			wg.Wait()
 		},
 	}
+
+	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+
+	return cmd
 }

@@ -11,7 +11,11 @@ import (
 
 var steps int
 
-func NewMigrateDownCommand(config *config.Config) *cobra.Command {
+func NewMigrateDownCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "down",
 		Short: "migrate the database down - given the number of steps",
@@ -25,7 +29,13 @@ func NewMigrateDownCommand(config *config.Config) *cobra.Command {
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("migrate down called")
-			persister, err := persistence.New(config.Database)
+
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -35,5 +45,8 @@ func NewMigrateDownCommand(config *config.Config) *cobra.Command {
 			}
 		},
 	}
+
+	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+
 	return cmd
 }

@@ -9,12 +9,16 @@ import (
 	"net/http"
 )
 
-func NewIsReadyCommand(config *config.Config) *cobra.Command {
-	return &cobra.Command{
-		Use:   "isready",
-		Args: cobra.OnlyValidArgs,
+func NewIsReadyCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
+	cmd := &cobra.Command{
+		Use:       "isready",
+		Args:      cobra.OnlyValidArgs,
 		ValidArgs: []string{"admin", "public"},
-		Short: "Health check a service",
+		Short:     "Health check a service",
 		Long: `Checks if the specified service is healthy. Possible values are "admin" and "public".
 Uses the "/health/ready" endpoint to check if the service is ready to serve requests.
 		`,
@@ -23,12 +27,18 @@ Uses the "/health/ready" endpoint to check if the service is ready to serve requ
 				log.Fatalf("Please specify a service to check")
 			}
 			service := args[0]
+
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			address := ""
 			if service == "admin" {
-				address = config.Server.Admin.Address
+				address = cfg.Server.Admin.Address
 			}
 			if service == "public" {
-				address = config.Server.Public.Address
+				address = cfg.Server.Public.Address
 			}
 			host, port, err := net.SplitHostPort(address)
 			if err != nil {
@@ -50,9 +60,13 @@ Uses the "/health/ready" endpoint to check if the service is ready to serve requ
 			}
 		},
 	}
+
+	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+
+	return cmd
 }
 
-func RegisterCommands(parent *cobra.Command, config *config.Config) {
-	cmd := NewIsReadyCommand(config)
+func RegisterCommands(parent *cobra.Command) {
+	cmd := NewIsReadyCommand()
 	parent.AddCommand(cmd)
 }
