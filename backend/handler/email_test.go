@@ -18,7 +18,7 @@ import (
 )
 
 func TestNewEmailHandler(t *testing.T) {
-	emailHandler, err := NewEmailHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, test.NewAuditLogger())
+	emailHandler, err := NewEmailHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, test.NewAuditLogger())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, emailHandler)
 }
@@ -82,7 +82,7 @@ func TestEmailHandler_List(t *testing.T) {
 			err := token.Set(jwt.SubjectKey, currentTest.userId.String())
 			require.NoError(t, err)
 			c.Set("session", token)
-			p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, currentTest.data, nil, nil)
+			p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, currentTest.data, nil, nil, nil)
 			handler, err := NewEmailHandler(&config.Config{}, p, sessionManager{}, test.NewAuditLogger())
 			assert.NoError(t, err)
 
@@ -130,7 +130,7 @@ func TestEmailHandler_SetPrimaryEmail(t *testing.T) {
 	err := token.Set(jwt.SubjectKey, uId.String())
 	require.NoError(t, err)
 	c.Set("session", token)
-	p := test.NewPersister(testData, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(testData, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler, err := NewEmailHandler(&config.Config{}, p, sessionManager{}, test.NewAuditLogger())
 
 	assert.NoError(t, err)
@@ -173,7 +173,7 @@ func TestEmailHandler_Delete(t *testing.T) {
 	err := token.Set(jwt.SubjectKey, uId.String())
 	require.NoError(t, err)
 	c.Set("session", token)
-	p := test.NewPersister(testData, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	p := test.NewPersister(testData, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	handler, err := NewEmailHandler(&config.Config{}, p, sessionManager{}, test.NewAuditLogger())
 
 	assert.NoError(t, err)

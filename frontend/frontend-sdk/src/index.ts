@@ -13,6 +13,7 @@ import { UserClient } from "./lib/client/UserClient";
 import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
+import { TokenClient } from "./lib/client/TokenClient";
 
 export {
   ConfigClient,
@@ -22,6 +23,7 @@ export {
   PasscodeClient,
   EmailClient,
   ThirdPartyClient,
+  TokenClient,
 };
 
 // Utils

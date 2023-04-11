@@ -42,19 +42,24 @@ const InitPage = () => {
       );
     }
 
-    let _user: User;
-    return Promise.allSettled([
-      hanko.config.get().then(setConfig),
-      hanko.user.getCurrent().then((resp) => setUser((_user = resp))),
-    ]).then(([configResult, userResult]) => {
-      if (configResult.status === "rejected") {
-        return <ErrorPage initialError={configResult.reason} />;
-      }
-      if (userResult.status === "fulfilled") {
-        return afterLogin(_user);
-      }
-      return <LoginEmailPage />;
-    });
+    return hanko.token
+      .validate()
+      .then(() => {
+        let _user: User;
+        return Promise.allSettled([
+          hanko.config.get().then(setConfig),
+          hanko.user.getCurrent().then((resp) => setUser((_user = resp))),
+        ]).then(([configResult, userResult]) => {
+          if (configResult.status === "rejected") {
+            return <ErrorPage initialError={configResult.reason} />;
+          }
+          if (userResult.status === "fulfilled") {
+            return afterLogin(_user);
+          }
+          return <LoginEmailPage />;
+        });
+      })
+      .catch((validateError) => <ErrorPage initialError={validateError} />);
   }, [afterLogin, hanko, setConfig, setUser]);
 
   const initHankoProfile = useCallback(

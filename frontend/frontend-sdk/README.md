@@ -54,6 +54,8 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 - `WebauthnClient` - A class to handle WebAuthn-related functionalities.
 - `PasswordClient` - A class to manage passwords and password logins.
 - `PasscodeClient` - A class to handle passcode logins.
+- `ThirdPartyClient` - A class to handle social logins.
+- `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
 
 ### Utilities
 
