@@ -12,9 +12,38 @@ Social Login allows using existing credentials from a third party provider (like
 Google or GitHub) to sign in to a third party website instead of explicitly creating a new account and new credentials
 on that website. This simplifies registrations and logins for end users.
 
-Social logins currently mainly target classic web applications (as opposed to, e.g. native mobile apps) and use
-the OAuth [authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1).
+## Before you get started
+
+- If you plan on using Hanko Cloud, you need a [Hanko Cloud Console](https://cloud.hanko.io) account.
+  - Once signed in, create an `Organization`.
+  - In your organization, create a new `Project`. All third party provider settings are done on the project level.
+- If you plan on self-hosting, you need to have a running instance of the [Hanko API](https://github.com/teamhanko/hanko/tree/main/backend#hanko-backend).
+- If you prefer a prebuilt UI, then the easiest way to integrate Hanko social logins in your frontend app is to use the
+[`@teamhanko/hanko-elements`](https://www.npmjs.com/package/@teamhanko/hanko-elements)
+web components. If you want to build your own UI, you can use the
+[`@teamhanko/hanko-frontend-sdk`](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk). Learn more about frontend
+app integration in the provider specific guides below.
+
+
+## Available providers
 
 Get started with your favourite third party provider:
 
 <DocCardList/>
+
+:::info
+
+We're working on adding support for more providers, stay tuned!
+
+:::
+
+## Limitations
+
+- Social logins currently mainly target classic web applications (as opposed to, e.g. native mobile apps) and use
+the OAuth [authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1).
+- Sign up with a third party provider is only allowed if the email address used with the provider is not also
+used by an existing Hanko user.
+- Only one third party provider can be linked to a Hanko user.
+- Requesting additional OAuth scopes with a provider is not possible.
+
+
