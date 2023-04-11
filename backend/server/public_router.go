@@ -35,7 +35,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		// Rationale: It does not make sense to have different settings for webauthn Origin and Cors Origins.
 		// We wan't to have both in sync.
 		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
 		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
