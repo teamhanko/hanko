@@ -1,0 +1,39 @@
+database:
+  user: hanko
+  password: hanko
+  host: postgres
+  port: 5432
+  dialect: postgres
+passcode:
+  email:
+    from_address: no-reply@hanko.io
+  smtp:
+    host: "mailslurper"
+    port: "2500"
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
+session:
+  enable_auth_token_header: true
+server:
+  public:
+    cors:
+      enabled: true
+      allow_credentials: true
+      allow_origins:
+        - 'https://app.domain-app.grocery'
+webauthn:
+  relying_party:
+    origin: "https://app.domain-app.grocery"
+third_party:
+  error_redirect_url: https://app.domain-app.grocery
+  allowed_redirect_urls:
+    - https://app.domain-app.grocery**
+  redirect_url: https://hanko.domain-hanko.grocery/thirdparty/callback
+  providers:
+    google:
+      enabled: true
+    github:
+      enabled: true

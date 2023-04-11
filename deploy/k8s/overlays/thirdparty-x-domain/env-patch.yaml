@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hanko-quickstart
+  namespace: hanko-tenant
+spec:
+  template:
+    spec:
+      containers:
+        - name: hanko-quickstart
+          env:
+            - name: HANKO_URL
+              value: https://hanko.domain-hanko.grocery
+            - name: HANKO_URL_INTERNAL
+              value: http://hanko-public
+            - name: HANKO_ELEMENT_URL
+              value: https://elements.domain-app.grocery/elements.js
+            - name: HANKO_FRONTEND_SDK_URL
+              value: https://elements.domain-app.grocery/sdk.modern.js
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hanko
+  namespace: hanko-tenant
+spec:
+  template:
+    spec:
+      containers:
+        - name: hanko
+          env:
+            - name: THIRD_PARTY_PROVIDERS_GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: google
+            - name: THIRD_PARTY_PROVIDERS_GOOGLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: google
+            - name: THIRD_PARTY_PROVIDERS_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: github
+            - name: THIRD_PARTY_PROVIDERS_GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: github
+      initContainers:
+        - name: hanko-migrate
+          env:
+            - name: THIRD_PARTY_PROVIDERS_GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: google
+            - name: THIRD_PARTY_PROVIDERS_GOOGLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: google
+            - name: THIRD_PARTY_PROVIDERS_GITHUB_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: github
+            - name: THIRD_PARTY_PROVIDERS_GITHUB_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: github

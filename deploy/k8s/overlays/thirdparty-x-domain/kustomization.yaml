@@ -4,3 +4,18 @@ resources:
   - ../../base/hanko
   - ../../base/elements
   - ../../base/quickstart
+patchesStrategicMerge:
+  - ingress-patch.yaml
+  - env-patch.yaml
+configMapGenerator:
+  - files:
+      - config.yaml
+    name: hanko
+    behavior: replace
+secretGenerator:
+  - name: github
+    envs:
+      - github.env
+  - name: google
+    envs:
+      - google.env

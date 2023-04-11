@@ -8,13 +8,15 @@ metadata:
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  labels:
+    fqdn: elements.quickstart.test
 spec:
   tls:
     - hosts:
-        - elements.quickstart.test
+        - $(ELEMENTS_FQDN)
       secretName: elements-tls
   rules:
-    - host: elements.quickstart.test
+    - host: $(ELEMENTS_FQDN)
       http:
         paths:
           - path: /

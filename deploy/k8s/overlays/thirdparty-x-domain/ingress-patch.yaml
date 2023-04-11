@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hanko
+  namespace: hanko-tenant
+  labels:
+    fqdn: hanko.domain-hanko.grocery
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hanko-elements
+  namespace: hanko-tenant
+  labels:
+    fqdn: elements.domain-app.grocery
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hanko-quickstart
+  namespace: hanko-tenant
+  labels:
+    fqdn: app.domain-app.grocery

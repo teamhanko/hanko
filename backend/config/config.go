@@ -510,7 +510,7 @@ func (t *ThirdParty) PostProcess() error {
 
 type ThirdPartyProvider struct {
 	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id"`
+	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
 	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
 }
 

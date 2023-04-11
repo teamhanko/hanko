@@ -26,8 +26,8 @@ profiles:
     kustomize:
       paths:
       - deploy/k8s/overlays/quickstart
-- name: thirdparty
+- name: thirdparty-x-domain
   deploy:
     kustomize:
       paths:
-        - deploy/k8s/overlays/thirdparty
+        - deploy/k8s/overlays/thirdparty-x-domain
