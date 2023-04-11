@@ -41,7 +41,7 @@ server:
       #
       allow_origins:
         - "https://hanko.io"
-        - "https://exmaple.com"
+        - "https://example.com"
       ## unsafe_wildcard_origin_allowed ##
       #
       # If allow_origins contains a wildcard '*' origin, this flag must explicitly be set to 'true'.
