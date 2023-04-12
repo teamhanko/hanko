@@ -7,6 +7,7 @@ import (
 	"github.com/gobuffalo/pop/v6/logging"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"strings"
 	"testing"
@@ -27,7 +28,7 @@ func (s *Suite) SetupSuite() {
 	//pop.Debug = true
 	if s.Name == "" {
 		var err error
-		s.Name, err = GenerateRandomStringURLSafe(5)
+		s.Name, err = crypto.GenerateRandomStringURLSafe(5)
 		s.Name = strings.ReplaceAll(s.Name, "=", "")
 		if err != nil {
 			s.Fail("failed to generate database container name")

@@ -9,7 +9,6 @@ import (
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
 	"net/http"
@@ -23,45 +22,7 @@ func TestTokenSuite(t *testing.T) {
 }
 
 type tokenSuite struct {
-	suite.Suite
-	storage persistence.Storage
-	db      *test.TestDB
-}
-
-func (s *tokenSuite) SetupSuite() {
-	if testing.Short() {
-		return
-	}
-	dialect := "postgres"
-	db, err := test.StartDB("token_test", dialect)
-	s.NoError(err)
-	storage, err := persistence.New(config.Database{
-		Url: db.DatabaseUrl,
-	})
-	s.NoError(err)
-
-	s.storage = storage
-	s.db = db
-}
-
-func (s *tokenSuite) SetupTest() {
-	if s.db != nil {
-		err := s.storage.MigrateUp()
-		s.NoError(err)
-	}
-}
-
-func (s *tokenSuite) TearDownTest() {
-	if s.db != nil {
-		err := s.storage.MigrateDown(-1)
-		s.NoError(err)
-	}
-}
-
-func (s *tokenSuite) TearDownSuite() {
-	if s.db != nil {
-		s.NoError(test.PurgeDB(s.db))
-	}
+	test.Suite
 }
 
 func (s *tokenSuite) TestToken_Validate() {
@@ -69,7 +30,7 @@ func (s *tokenSuite) TestToken_Validate() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/token")
+	err := s.LoadFixtures("../test/fixtures/token")
 
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
@@ -79,7 +40,7 @@ func (s *tokenSuite) TestToken_Validate() {
 	uId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 	token, err := models.NewToken(uId)
 	s.NoError(err)
-	err = s.storage.GetTokenPersister().Create(*token)
+	err = s.Storage.GetTokenPersister().Create(*token)
 	s.NoError(err)
 
 	body := TokenValidationBody{Value: token.Value}
@@ -92,10 +53,10 @@ func (s *tokenSuite) TestToken_Validate() {
 	c := e.NewContext(req, rec)
 
 	cfg := s.setupConfig()
-	auditLogger := auditlog.NewLogger(s.storage, cfg.AuditLog)
-	handler := NewTokenHandler(cfg, s.storage, sessionManager{}, auditLogger)
+	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
+	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	if s.NoError(handler.Validate(c)) {
-		t, err := s.storage.GetTokenPersister().GetByValue(token.Value)
+		t, err := s.Storage.GetTokenPersister().GetByValue(token.Value)
 		s.NoError(err)
 		s.Nil(t)
 
@@ -105,7 +66,7 @@ func (s *tokenSuite) TestToken_Validate() {
 		tokenHeader := rec.Header().Get("X-Auth-Token")
 		s.NotEmpty(tokenHeader)
 
-		logs, err := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_succeeded"}, "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5", "", "", "")
+		logs, err := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_succeeded"}, "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5", "", "", "")
 		s.Len(logs, 1)
 	}
 }
@@ -115,7 +76,7 @@ func (s *tokenSuite) TestToken_Validate_ExpiredToken() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/token")
+	err := s.LoadFixtures("../test/fixtures/token")
 
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
@@ -131,8 +92,8 @@ func (s *tokenSuite) TestToken_Validate_ExpiredToken() {
 	c := e.NewContext(req, rec)
 
 	cfg := s.setupConfig()
-	auditLogger := auditlog.NewLogger(s.storage, cfg.AuditLog)
-	handler := NewTokenHandler(cfg, s.storage, sessionManager{}, auditLogger)
+	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
+	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err = handler.Validate(c)
 	if s.Error(err) {
 		herr, ok := err.(*dto.HTTPError)
@@ -140,7 +101,7 @@ func (s *tokenSuite) TestToken_Validate_ExpiredToken() {
 		s.Equal(http.StatusUnprocessableEntity, herr.Code)
 		s.Equal("token has expired", herr.Message)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -160,8 +121,8 @@ func (s *tokenSuite) TestToken_Validate_MissingTokenFromRequest() {
 	c := e.NewContext(req, rec)
 
 	cfg := s.setupConfig()
-	auditLogger := auditlog.NewLogger(s.storage, cfg.AuditLog)
-	handler := NewTokenHandler(cfg, s.storage, sessionManager{}, auditLogger)
+	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
+	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err := handler.Validate(c)
 	if s.Error(err) {
 		herr, ok := err.(*dto.HTTPError)
@@ -169,7 +130,7 @@ func (s *tokenSuite) TestToken_Validate_MissingTokenFromRequest() {
 		s.Equal(http.StatusBadRequest, herr.Code)
 		s.Contains("value is a required field", herr.Message)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -188,15 +149,15 @@ func (s *tokenSuite) TestToken_Validate_InvalidJson() {
 	c := e.NewContext(req, rec)
 
 	cfg := s.setupConfig()
-	auditLogger := auditlog.NewLogger(s.storage, cfg.AuditLog)
-	handler := NewTokenHandler(cfg, s.storage, sessionManager{}, auditLogger)
+	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
+	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err := handler.Validate(c)
 	if s.Error(err) {
 		herr, ok := err.(*dto.HTTPError)
 		s.True(ok)
 		s.Equal(http.StatusBadRequest, herr.Code)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -224,8 +185,8 @@ func (s *tokenSuite) TestToken_Validate_TokenNotFound() {
 	c := e.NewContext(req, rec)
 
 	cfg := s.setupConfig()
-	auditLogger := auditlog.NewLogger(s.storage, cfg.AuditLog)
-	handler := NewTokenHandler(cfg, s.storage, sessionManager{}, auditLogger)
+	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
+	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err = handler.Validate(c)
 	if s.Error(err) {
 		herr, ok := err.(*dto.HTTPError)
@@ -233,7 +194,7 @@ func (s *tokenSuite) TestToken_Validate_TokenNotFound() {
 		s.Equal(http.StatusNotFound, herr.Code)
 		s.Equal("token not found", herr.Message)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"token_exchange_failed"}, "", "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}

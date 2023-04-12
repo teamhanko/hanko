@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/test"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"net/http"
 	"net/http/httptest"
@@ -50,12 +49,12 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("test-google-signup@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-google-signup@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 		s.True(email.IsPrimary())
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -64,7 +63,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 		s.Equal("google", identity.ProviderName)
 		s.Equal("google_abcde", identity.ProviderID)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -76,7 +75,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/thirdparty")
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
 	gock.New("https://" + thirdparty.GoogleAuthBase).
@@ -113,12 +112,12 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("test-with-google-identity@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-google-identity@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 		s.True(email.IsPrimary())
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -127,7 +126,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 		s.Equal("google", identity.ProviderName)
 		s.Equal("google_abcde", identity.ProviderID)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -183,12 +182,12 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("test-github-signup@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-github-signup@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 		s.True(email.IsPrimary())
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -197,7 +196,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 		s.Equal("github", identity.ProviderName)
 		s.Equal("1234", identity.ProviderID)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -209,7 +208,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/thirdparty")
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
 	gock.New("https://" + thirdparty.GithubAuthBase).
@@ -256,12 +255,12 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("test-with-github-identity@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-github-identity@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 		s.True(email.IsPrimary())
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -270,7 +269,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 		s.Equal("github", identity.ProviderName)
 		s.Equal("1234", identity.ProviderID)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -282,7 +281,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/thirdparty")
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
 	gock.New("https://" + thirdparty.GoogleAuthBase).
@@ -319,12 +318,12 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("unclaimed-email@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("unclaimed-email@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 		s.True(email.IsPrimary())
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -333,7 +332,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 		s.Equal("google", identity.ProviderName)
 		s.Equal("google_unclaimed_email", identity.ProviderID)
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -345,7 +344,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/thirdparty")
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
 	gock.New("https://" + thirdparty.GoogleAuthBase).
@@ -382,11 +381,11 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("test-with-google-identity-changed@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-google-identity-changed@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -396,7 +395,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.Equal("google_abcde", identity.ProviderID)
 		s.Equal("test-with-google-identity-changed@example.com", identity.Data["email"])
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -408,7 +407,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/thirdparty")
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
 	gock.New("https://" + thirdparty.GoogleAuthBase).
@@ -445,11 +444,11 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("unclaimed-email@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("unclaimed-email@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 
@@ -459,7 +458,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.Equal("google_abcde", identity.ProviderID)
 		s.Equal("unclaimed-email@example.com", identity.Data["email"])
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -471,7 +470,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	err := test.LoadFixtures(s.db.DbCon, s.db.Dialect, "../test/fixtures/thirdparty")
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
 	gock.New("https://" + thirdparty.GoogleAuthBase).
@@ -508,11 +507,11 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.assertLocationHeaderHasToken(rec)
 		s.assertStateCookieRemoved(rec)
 
-		email, err := s.storage.GetEmailPersister().FindByAddress("non-existent-email@example.com")
+		email, err := s.Storage.GetEmailPersister().FindByAddress("non-existent-email@example.com")
 		s.NoError(err)
 		s.NotNil(email)
 
-		user, err := s.storage.GetUserPersister().Get(*email.UserID)
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
 		s.NoError(err)
 		s.NotNil(user)
 		s.Len(user.Emails, 3)
@@ -523,7 +522,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.Equal("google_abcde", identity.ProviderID)
 		s.Equal("non-existent-email@example.com", identity.Data["email"])
 
-		logs, lerr := s.storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
