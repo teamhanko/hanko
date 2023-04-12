@@ -5,6 +5,7 @@ import (
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
@@ -23,16 +24,23 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
-	if cfg.Server.Public.Cors.Enabled {
-		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     cfg.Server.Public.Cors.AllowOrigins,
-			AllowMethods:     cfg.Server.Public.Cors.AllowMethods,
-			AllowHeaders:     cfg.Server.Public.Cors.AllowHeaders,
-			ExposeHeaders:    cfg.Server.Public.Cors.ExposeHeaders,
-			AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
-			MaxAge:           cfg.Server.Public.Cors.MaxAge,
-		}))
+	exposeHeader := []string{
+		httplimit.HeaderRetryAfter,
+		httplimit.HeaderRateLimitLimit,
+		httplimit.HeaderRateLimitRemaining,
+		httplimit.HeaderRateLimitReset,
 	}
+	if cfg.Session.EnableAuthTokenHeader {
+		exposeHeader = append(exposeHeader, "X-Auth-Token")
+	}
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
+		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
+		ExposeHeaders:                            exposeHeader,
+		AllowCredentials:                         true,
+		// Based on: Chromium (starting in v76) caps at 2 hours (7200 seconds).
+		MaxAge: 7200,
+	}))
 
 	if prometheus != nil {
 		e.Use(prometheus.HandlerFunc)

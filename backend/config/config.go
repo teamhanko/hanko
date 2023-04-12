@@ -9,7 +9,6 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
-	"github.com/sethvargo/go-limiter/httplimit"
 	"log"
 	"strings"
 	"time"
@@ -76,14 +75,6 @@ func DefaultConfig() *Config {
 		Server: Server{
 			Public: ServerSettings{
 				Address: ":8000",
-				Cors: Cors{
-					ExposeHeaders: []string{
-						httplimit.HeaderRateLimitLimit,
-						httplimit.HeaderRateLimitRemaining,
-						httplimit.HeaderRateLimitReset,
-						httplimit.HeaderRetryAfter,
-					},
-				},
 			},
 			Admin: ServerSettings{
 				Address: ":8001",
@@ -93,7 +84,7 @@ func DefaultConfig() *Config {
 			RelyingParty: RelyingParty{
 				Id:          "localhost",
 				DisplayName: "Hanko Authentication Service",
-				Origins:     []string{"http://localhost"},
+				Origins:     []string{"http://localhost:8888"},
 			},
 			Timeout: 60000,
 		},
@@ -239,18 +230,38 @@ type ServerSettings struct {
 }
 
 type Cors struct {
-	Enabled          bool     `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	AllowCredentials bool     `yaml:"allow_credentials" json:"allow_credentials" koanf:"allow_credentials" split_words:"true"`
-	AllowOrigins     []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins" split_words:"true"`
-	AllowMethods     []string `yaml:"allow_methods" json:"allow_methods" koanf:"allow_methods" split_words:"true"`
-	AllowHeaders     []string `yaml:"allow_headers" json:"allow_headers" koanf:"allow_headers" split_words:"true"`
-	ExposeHeaders    []string `yaml:"expose_headers" json:"expose_headers" koanf:"expose_headers" split_words:"true"`
-	MaxAge           int      `yaml:"max_age" json:"max_age" koanf:"max_age" split_words:"true"`
+	// AllowOrigins determines the value of the Access-Control-Allow-Origin
+	// response header. This header defines a list of origins that may access the
+	// resource.  The wildcard characters '*' and '?' are supported and are
+	// converted to regex fragments '.*' and '.' accordingly.
+	AllowOrigins []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins" split_words:"true"`
+
+	// UnsafeWildcardOriginWithAllowCredentials UNSAFE/INSECURE: allows wildcard '*' origin to be used with AllowCredentials
+	// flag. In that case we consider any origin allowed and send it back to the client with `Access-Control-Allow-Origin` header.
+	//
+	// This is INSECURE and potentially leads to [cross-origin](https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)
+	// attacks. See: https://github.com/labstack/echo/issues/2400 for discussion on the subject.
+	//
+	// Optional. Default value is false.
+	UnsafeWildcardOriginAllowed bool `yaml:"unsafe_wildcard_origin_allowed" json:"unsafe_wildcard_origin_allowed" koanf:"unsafe_wildcard_origin_allowed" split_words:"true"`
+}
+
+func (cors *Cors) Validate() error {
+	for _, origin := range cors.AllowOrigins {
+		if origin == "*" && !cors.UnsafeWildcardOriginAllowed {
+			return fmt.Errorf("found wildcard '*' origin in server.public.cors.allow_origins, if this is intentional set server.public.cors.unsafe_wildcard_origin_allowed to true")
+		}
+	}
+
+	return nil
 }
 
 func (s *ServerSettings) Validate() error {
 	if len(strings.TrimSpace(s.Address)) == 0 {
 		return errors.New("field Address must not be empty")
+	}
+	if err := s.Cors.Validate(); err != nil {
+		return err
 	}
 	return nil
 }
@@ -268,12 +279,10 @@ func (r *WebauthnSettings) Validate() error {
 
 // RelyingParty webauthn settings for your application using hanko.
 type RelyingParty struct {
-	Id          string `yaml:"id" json:"id" koanf:"id"`
-	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
-	Icon        string `yaml:"icon" json:"icon" koanf:"icon"`
-	// Deprecated: Use Origins instead
-	Origin  string   `yaml:"origin" json:"origin" koanf:"origin"`
-	Origins []string `yaml:"origins" json:"origins" koanf:"origins"`
+	Id          string   `yaml:"id" json:"id" koanf:"id"`
+	DisplayName string   `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
+	Icon        string   `yaml:"icon" json:"icon" koanf:"icon"`
+	Origins     []string `yaml:"origins" json:"origins" koanf:"origins"`
 }
 
 // SMTP Server Settings for sending passcodes
