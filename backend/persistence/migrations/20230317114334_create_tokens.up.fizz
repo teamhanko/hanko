@@ -1,0 +1,10 @@
+create_table("tokens") {
+    t.Column("id", "uuid", {})
+    t.Column("user_id", "uuid", {})
+    t.Column("value", "string", {})
+    t.Column("expires_at", "timestamp", {})
+    t.Timestamps()
+    t.PrimaryKey("id")
+    t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade"})
+    t.Index("value", {"unique": true})
+}

@@ -1,0 +1,7 @@
+# Expired token
+- id: c125c6b5-37bf-446b-a1c7-6ee24eecd63e
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  created_at: 2022-03-20T15:13:10.168902Z
+  updated_at: 2022-03-20T15:12:01.639187Z
+  expires_at: 2022-03-20T15:18:10.168902Z
+  value: "Trkauhl3q7XVxw5JcDH80lTe1KxzydIw0OcizH7umWk="

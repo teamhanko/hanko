@@ -647,6 +647,48 @@ paths:
                 Cookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.cookie`.
               schema:
                 $ref: '#/components/schemas/CookieSession'
+  /token:
+    post:
+      summary: 'Exchange one time token for session'
+      description: |
+        Provide a one time token (e.g. obtained through the [thirdparty callback](#tag/Third-Party/operation/thirdPartyCallback)) to retrieve a session JWT as cookie
+        and/or via `X-Auth-Token` header.
+      operationId: token
+      tags:
+        - Token
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                  format: base64url
+      responses:
+        '204':
+          description: Successful token exchange
+          headers:
+            X-Auth-Token:
+              description: |
+                Present only on successful exchange and when enabled via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.enable_auth_token_header`
+                for purposes of cross-domain communication between client and Hanko API.
+              schema:
+                $ref: '#/components/schemas/X-Auth-Token'
+            Set-Cookie:
+              description: |
+                Present only on successful exchange. Contains the JSON Web Token (JWT) that must be provided to protected endpoints.
+                Cookie attributes (e.g. domain) can be set via [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config) option `session.cookie`.
+              schema:
+                $ref: '#/components/schemas/CookieSession'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/Unprocessable Entity'
+        '429':
+          $ref: '#/components/responses/TooManyRequests'
   /user:
     post:
       summary: 'Get user details by email'
@@ -967,6 +1009,15 @@ components:
           example:
             code: 408
             message: Request Timeout
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 429
+            message: Too Many Requests
     Unauthorized:
       description: Unauthorized
       content:

@@ -26,7 +26,7 @@ type githubProvider struct {
 	APIPath string
 }
 
-type githubUser struct {
+type GithubUser struct {
 	ID        int    `json:"id"`
 	UserName  string `json:"login"`
 	Email     string `json:"email"`
@@ -34,7 +34,7 @@ type githubUser struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
-type githubUserEmail struct {
+type GithubUserEmail struct {
 	Email    string `json:"email"`
 	Primary  bool   `json:"primary"`
 	Verified bool   `json:"verified"`
@@ -67,7 +67,7 @@ func (g githubProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 }
 
 func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
-	var user githubUser
+	var user GithubUser
 
 	// https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user
 	if err := makeRequest(token, g.Config, g.APIPath+GithubUserInfoEndpoint, &user); err != nil {
@@ -84,7 +84,7 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		},
 	}
 
-	var emails []*githubUserEmail
+	var emails []*GithubUserEmail
 	// The user data 'email' value is the user's publicly visible email address. It is possible that the user
 	// chose to not make this email public, hence the dedicated call to the 'emails' endpoint.
 	// https://docs.github.com/en/rest/users/emails?apiVersion=2022-11-28#list-email-addresses-for-the-authenticated-user

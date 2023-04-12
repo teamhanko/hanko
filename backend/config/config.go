@@ -33,6 +33,10 @@ type Config struct {
 	Account     Account          `yaml:"account" json:"account" koanf:"account"`
 }
 
+var (
+	DefaultConfigFilePath = "./config/config.yaml"
+)
+
 func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
 	var err error
@@ -58,6 +62,10 @@ func Load(cfgFile *string) (*Config, error) {
 	err = c.PostProcess()
 	if err != nil {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
+	}
+
+	if err = c.Validate(); err != nil {
+		return nil, fmt.Errorf("failed to validate config: %s", err)
 	}
 
 	return c, nil
@@ -131,6 +139,10 @@ func DefaultConfig() *Config {
 				Interval: 1 * time.Minute,
 			},
 			PasscodeLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
+			TokenLimits: RateLimits{
 				Tokens:   3,
 				Interval: 1 * time.Minute,
 			},
@@ -412,6 +424,7 @@ type RateLimiter struct {
 	Redis          *RedisConfig         `yaml:"redis_config" json:"redis_config" koanf:"redis_config"`
 	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits" koanf:"passcode_limits" split_words:"true"`
 	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits" koanf:"password_limits" split_words:"true"`
+	TokenLimits    RateLimits           `yaml:"token_limits" json:"token_limits" koanf:"token_limits" split_words:"true"`
 }
 
 type RateLimits struct {

@@ -138,8 +138,10 @@ provider authentication accordingly.
 
 When building your own UI, you can use the `@teamhanko/hanko-frontend-sdk` to initialize third party sign in.
 Call `hanko.thirdParty.auth` with `google` as your provider and the target URL in your app you want to redirect to
-after successful third party authentication (must be configured as an allowed redirect url via
-`third_party.allowed_redirect_urls`).
+after successful third party authentication (must be
+[configured](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md) as an allowed redirect url via
+`third_party.allowed_redirect_urls`). Doing so redirects you to the third party provider, where you then will be prompted
+to authenticate and provide consent for the API to access your data.
 
 ```js showLineNumbers
 import { Hanko } from "@teamhanko/hanko-frontend-sdk"
@@ -155,10 +157,31 @@ async function signInWithGoogle() {
 }
 ```
 
-On successful authentication with the third party provider, the backend issues a JWT (as a cookie or - if enabled
-via backend [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md) option
-`session.enable_auth_token_header` - via `X-Auth-Token` header) and redirects to the
-target URL provided in the `hanko.thirdParty.auth` call.
+On successful authentication with the third party provider, the API redirects you to the given redirect URL. The
+URL query includes a one time token that must be exchanged for a JWT. Use the `hanko.token.validate`
+method to validate the token:
+
+```js showLineNumbers
+import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+
+const hanko = new Hanko("<your_hanko_backend_instance>")
+
+async function onLoad() {
+    try {
+       await hanko.token.validate();
+    } catch (error) {
+      // handle error
+    }
+
+    // you should now have a JWT cookie set
+}
+```
+
+On success, the API issues a JWT which is then set by the SDK as a cookie (`hanko`). All other SDK methods can now
+use the cookie to make authenticated requests to the API (if your frontend runs on a different domain, make sure to
+include your frontend domain in the `server.public.cors.allowed_origins` in your
+[configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md)).
+
 
 
 
