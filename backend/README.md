@@ -278,7 +278,7 @@ webauthn:
   relying_party:
     id: "example.com"
     display_name: "Example Project"
-    origin:
+    origins:
       - "https://login.example.com"
 ```
 
