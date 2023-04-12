@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hanko-public
+  namespace: hanko-tenant
+spec:
+  selector:
+    app: hanko
+  ports:
+    - port: 80
+      targetPort: http-public
+      protocol: TCP
+      name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hanko-admin
+  namespace: hanko-tenant
+spec:
+  selector:
+    app: hanko
+  ports:
+    - port: 80
+      targetPort: http-admin
+      protocol: TCP
+      name: http
