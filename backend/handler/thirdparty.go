@@ -2,10 +2,10 @@ package handler
 
 import (
 	"fmt"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -13,6 +13,12 @@ import (
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"golang.org/x/oauth2"
 	"net/http"
+	"net/url"
+)
+
+const (
+	HankoThirdpartyStateCookie = "hanko_thirdparty_state"
+	HankoTokenQuery            = "hanko_token"
 )
 
 type ThirdPartyHandler struct {
@@ -20,16 +26,14 @@ type ThirdPartyHandler struct {
 	cfg            *config.Config
 	persister      persistence.Persister
 	sessionManager session.Manager
-	jwkManager     jwk.Manager
 }
 
-func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger, jwkManager jwk.Manager) *ThirdPartyHandler {
+func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *ThirdPartyHandler {
 	return &ThirdPartyHandler{
 		auditLogger:    auditLogger,
 		cfg:            cfg,
 		persister:      persister,
 		sessionManager: sessionManager,
-		jwkManager:     jwkManager,
 	}
 }
 
@@ -59,83 +63,126 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	state, err := thirdparty.GenerateState(h.cfg.ThirdParty, h.jwkManager, provider.Name(), request.RedirectTo)
+	state, err := thirdparty.GenerateState(h.cfg, provider.Name(), request.RedirectTo)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
 
 	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
 
+	c.SetCookie(&http.Cookie{
+		Name:     HankoThirdpartyStateCookie,
+		Value:    string(state),
+		Path:     "/",
+		Domain:   h.cfg.Session.Cookie.Domain,
+		MaxAge:   300,
+		Secure:   h.cfg.Session.Cookie.Secure,
+		HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+		SameSite: http.SameSiteLaxMode,
+	})
+
 	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
-	var callback dto.ThirdPartyAuthCallback
-	err := c.Bind(&callback)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not decode request payload").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+	var successRedirectTo *url.URL
+	var accountLinkingResult *thirdparty.AccountLinkingResult
+	err := h.persister.Transaction(func(tx *pop.Connection) error {
+		var callback dto.ThirdPartyAuthCallback
+		terr := c.Bind(&callback)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not decode request payload").WithCause(terr)
+		}
 
-	err = c.Validate(callback)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		terr = c.Validate(callback)
+		if terr != nil {
+			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+		}
 
-	state, err := thirdparty.VerifyState(h.sessionManager, callback.State)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		expectedState, terr := c.Cookie(HankoThirdpartyStateCookie)
+		if terr != nil {
+			return thirdparty.ErrorInvalidRequest("thirdparty state cookie is missing")
+		}
 
-	if callback.HasError() {
-		return h.redirectError(c, thirdparty.NewThirdPartyError(callback.Error, callback.ErrorDescription), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		state, terr := thirdparty.VerifyState(h.cfg, callback.State, expectedState.Value)
+		if terr != nil {
+			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+		}
 
-	provider, err := thirdparty.GetProvider(h.cfg.ThirdParty, state.Provider)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		if callback.HasError() {
+			return thirdparty.NewThirdPartyError(callback.Error, callback.ErrorDescription)
+		}
 
-	if callback.AuthCode == "" {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest("auth code missing from request"), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		provider, terr := thirdparty.GetProvider(h.cfg.ThirdParty, state.Provider)
+		if terr != nil {
+			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+		}
 
-	token, err := provider.GetOAuthToken(callback.AuthCode)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		if callback.AuthCode == "" {
+			return thirdparty.ErrorInvalidRequest("auth code missing from request")
+		}
 
-	userData, err := provider.GetUserData(token)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode)
+		if terr != nil {
+			return thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(terr)
+		}
 
-	linkingResult, err := thirdparty.LinkAccount(h.cfg, h.persister, userData, provider.Name())
+		userData, terr := provider.GetUserData(oAuthToken)
+		if terr != nil {
+			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
+		}
+
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.Name())
+		if terr != nil {
+			return terr
+		}
+		accountLinkingResult = linkingResult
+
+		token, terr := models.NewToken(linkingResult.User.ID)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not create token").WithCause(terr)
+		}
+
+		terr = h.persister.GetTokenPersisterWithConnection(tx).Create(*token)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not save token to db").WithCause(terr)
+		}
+
+		redirectTo, terr := url.Parse(state.RedirectTo)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
+		}
+
+		query := redirectTo.Query()
+		query.Add(HankoTokenQuery, token.Value)
+		redirectTo.RawQuery = query.Encode()
+		successRedirectTo = redirectTo
+
+		c.SetCookie(&http.Cookie{
+			Name:     HankoThirdpartyStateCookie,
+			Value:    "",
+			Path:     "/",
+			Domain:   h.cfg.Session.Cookie.Domain,
+			MaxAge:   -1,
+			Secure:   h.cfg.Session.Cookie.Secure,
+			HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+			SameSite: http.SameSiteLaxMode,
+		})
+
+		return nil
+	})
+
 	if err != nil {
 		return h.redirectError(c, err, h.cfg.ThirdParty.ErrorRedirectURL)
 	}
 
-	jwt, err := h.sessionManager.GenerateJWT(linkingResult.User.ID)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not generate jwt").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
+	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
 
-	cookie, err := h.sessionManager.GenerateCookie(jwt)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not create session cookie").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
-	}
-
-	c.SetCookie(cookie)
-
-	if h.cfg.Session.EnableAuthTokenHeader {
-		c.Response().Header().Set("X-Auth-Token", jwt)
-	}
-
-	err = h.auditLogger.Create(c, linkingResult.Type, linkingResult.User, nil)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, state.RedirectTo)
+	return c.Redirect(http.StatusTemporaryRedirect, successRedirectTo.String())
 }
 
 func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string) error {

@@ -24,7 +24,7 @@ type googleProvider struct {
 	APIPath string
 }
 
-type googleUser struct {
+type GoogleUser struct {
 	ID            string `json:"sub"`
 	Name          string `json:"name"`
 	AvatarURL     string `json:"picture"`
@@ -58,7 +58,7 @@ func (g googleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 }
 
 func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
-	var user googleUser
+	var user GoogleUser
 	if err := makeRequest(token, g.Config, g.APIPath+GoogleUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
