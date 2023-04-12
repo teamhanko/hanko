@@ -19,7 +19,6 @@ webauthn:
   relying_party:
     origins:
       - "http://localhost:8888"
-      - "android:apk-key-hash:nLSu7wVTbnMOxLgC52f2faTnvCbXQrUn_wF9aCrr-h0"
 session:
   cookie:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
