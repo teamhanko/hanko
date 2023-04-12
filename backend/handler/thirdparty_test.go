@@ -7,7 +7,6 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"net/http"
@@ -21,45 +20,7 @@ func TestThirdPartySuite(t *testing.T) {
 }
 
 type thirdPartySuite struct {
-	suite.Suite
-	storage persistence.Storage
-	db      *test.TestDB
-}
-
-func (s *thirdPartySuite) SetupSuite() {
-	if testing.Short() {
-		return
-	}
-	dialect := "postgres"
-	db, err := test.StartDB("thirdparty_test", dialect)
-	s.NoError(err)
-	storage, err := persistence.New(config.Database{
-		Url: db.DatabaseUrl,
-	})
-	s.NoError(err)
-
-	s.storage = storage
-	s.db = db
-}
-
-func (s *thirdPartySuite) SetupTest() {
-	if s.db != nil {
-		err := s.storage.MigrateUp()
-		s.NoError(err)
-	}
-}
-
-func (s *thirdPartySuite) TearDownTest() {
-	if s.db != nil {
-		err := s.storage.MigrateDown(-1)
-		s.NoError(err)
-	}
-}
-
-func (s *thirdPartySuite) TearDownSuite() {
-	if s.db != nil {
-		s.NoError(test.PurgeDB(s.db))
-	}
+	test.Suite
 }
 
 func (s *thirdPartySuite) setUpContext(request *http.Request) (echo.Context, *httptest.ResponseRecorder) {
@@ -71,15 +32,15 @@ func (s *thirdPartySuite) setUpContext(request *http.Request) (echo.Context, *ht
 }
 
 func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
-	auditLogger := auditlog.NewLogger(s.storage, cfg.AuditLog)
+	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
 
-	jwkMngr, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.storage.GetJwkPersister())
+	jwkMngr, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
 
 	sessionMngr, err := session.NewManager(jwkMngr, cfg.Session)
 	s.Require().NoError(err)
 
-	handler := NewThirdPartyHandler(cfg, s.storage, sessionMngr, auditLogger)
+	handler := NewThirdPartyHandler(cfg, s.Storage, sessionMngr, auditLogger)
 	return handler
 }
 

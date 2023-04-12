@@ -176,6 +176,13 @@ var defaultConfig = config.Config{
 		},
 		Timeout: 60000,
 	},
+	Secrets: config.Secrets{
+		Keys: []string{"abcdefghijklmnop"},
+	},
+	Passcode: config.Passcode{Smtp: config.SMTP{
+		Host: "localhost",
+		Port: "2500",
+	}},
 }
 
 type sessionManager struct {
