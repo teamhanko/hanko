@@ -310,7 +310,7 @@ server:
 Wildcard `*` origins can lead to cross-site attacks and when you include a `*` wildcard origin,
 we want to make sure, that you understand what you are doing, hence this flag.
 
-> Note: In most cases, the `allow_origins` list here should contain the same entries as the `webauthn.relying_party.origins` list.
+> **Note** In most cases, the `allow_origins` list here should contain the same entries as the `webauthn.relying_party.origins` list. Only when you have an Android app you will have an extra entry (`android:apk-key-hash:...`) in the `webauthn.relying_party.origins` list.
 
 ### Start the backend
 
