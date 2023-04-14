@@ -73,7 +73,9 @@ describe("webauthnClient.login()", () => {
       credentialID
     );
     expect(webauthnClient.webauthnState.write).toHaveBeenCalledTimes(1);
-    expect(webauthnClient.client.processResponseHeadersOnLogin).toHaveBeenCalledTimes(1);
+    expect(
+      webauthnClient.client.processResponseHeadersOnLogin
+    ).toHaveBeenCalledTimes(1);
     expect(webauthnClient.client.post).toHaveBeenNthCalledWith(
       1,
       "/webauthn/login/initialize",
