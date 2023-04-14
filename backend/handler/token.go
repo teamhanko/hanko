@@ -93,6 +93,7 @@ func (h TokenHandler) Validate(c echo.Context) error {
 		}
 
 		c.SetCookie(cookie)
+		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", jwtToken)
@@ -120,5 +121,7 @@ func (h TokenHandler) Validate(c echo.Context) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.NoContent(http.StatusNoContent)
+	// return c.NoContent(http.StatusNoContent)
+	return c.JSON(http.StatusOK, map[string]string{"user_id": userID.String()})
+
 }
