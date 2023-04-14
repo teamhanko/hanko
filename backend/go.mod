@@ -19,7 +19,7 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/lestrrat-go/jwx/v2 v2.0.9
-	github.com/lib/pq v1.10.7
+	github.com/lib/pq v1.10.8
 	github.com/nicksnyder/go-i18n/v2 v2.2.1
 	github.com/ory/dockertest/v3 v3.9.1
 	github.com/pkg/errors v0.9.1
