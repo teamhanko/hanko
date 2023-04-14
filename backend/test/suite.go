@@ -5,11 +5,10 @@ import (
 	"github.com/go-testfixtures/testfixtures/v3"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/pop/v6/logging"
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"strings"
 	"testing"
 )
 
@@ -28,11 +27,11 @@ func (s *Suite) SetupSuite() {
 	//pop.Debug = true
 	if s.Name == "" {
 		var err error
-		s.Name, err = crypto.GenerateRandomStringURLSafe(5)
-		s.Name = strings.ReplaceAll(s.Name, "=", "")
+		id, err := uuid.NewV4()
 		if err != nil {
 			s.Fail("failed to generate database container name")
 		}
+		s.Name = id.String()
 	}
 	dialect := "postgres"
 	db, err := StartDB(s.Name, dialect)
