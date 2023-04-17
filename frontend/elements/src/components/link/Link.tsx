@@ -51,9 +51,8 @@ const Link = ({
       <Fragment>
         {confirmationActive ? (
           <Fragment>
-            <Link onClick={onConfirmation}>✓ yes</Link>&nbsp;
-            <Link onClick={onCancel}>✗ no</Link>
-            &nbsp;
+            <Link onClick={onConfirmation}>yes</Link>&nbsp;/&nbsp;
+            <Link onClick={onCancel}>no</Link>
           </Fragment>
         ) : null}
         <button
