@@ -7,7 +7,8 @@ import LoadingSpinner, {
 } from "../icons/LoadingSpinner";
 
 import styles from "./styles.sass";
-import { useCallback, useState } from "preact/compat";
+import { useCallback, useContext, useState } from "preact/compat";
+import { TranslateContext } from "@denysvuika/preact-translate";
 
 type LoadingSpinnerPosition = "left" | "right";
 
@@ -25,8 +26,9 @@ const Link = ({
   onClick,
   ...props
 }: Props) => {
+  const { t } = useContext(TranslateContext);
   const [confirmationActive, setConfirmationActive] = useState<boolean>();
-
+  let timeoutID: number;
   const dangerousOnClick = (event: Event) => {
     event.preventDefault();
     setConfirmationActive(true);
@@ -51,8 +53,9 @@ const Link = ({
       <Fragment>
         {confirmationActive ? (
           <Fragment>
-            <Link onClick={onConfirmation}>yes</Link>&nbsp;/&nbsp;
-            <Link onClick={onCancel}>no</Link>
+            <Link onClick={onConfirmation}>{t("labels.yes")}</Link>&nbsp;/&nbsp;
+            <Link onClick={onCancel}>{t("labels.no")}</Link>
+            &nbsp;
           </Fragment>
         ) : null}
         <button
@@ -67,8 +70,18 @@ const Link = ({
         </button>
       </Fragment>
     ),
-    [confirmationActive, dangerous, onClick, onConfirmation, props]
+    [confirmationActive, dangerous, onClick, onConfirmation, props, t]
   );
+
+  const handleOnMouseEnter = () => {
+    if (timeoutID) window.clearTimeout(timeoutID);
+  };
+
+  const handleOnMouseLeave = () => {
+    timeoutID = window.setTimeout(() => {
+      setConfirmationActive(false);
+    }, 1000);
+  };
 
   return (
     <Fragment>
@@ -78,6 +91,8 @@ const Link = ({
           loadingSpinnerPosition === "right" ? styles.reverse : null
         )}
         hidden={props.hidden}
+        onMouseEnter={handleOnMouseEnter}
+        onMouseLeave={handleOnMouseLeave}
       >
         {loadingSpinnerPosition && (props.isLoading || props.isSuccess) ? (
           <Fragment>
