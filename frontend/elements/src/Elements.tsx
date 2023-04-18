@@ -2,10 +2,9 @@ import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
 
 import AppProvider from "./contexts/AppProvider";
+import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 
-interface AdditionalProps {
-  api: string;
-}
+interface AdditionalProps {}
 
 export interface HankoAuthAdditionalProps extends AdditionalProps {
   experimental?: string;
@@ -33,38 +32,29 @@ declare global {
 }
 
 export const HankoAuth = (props: HankoAuthElementProps) => (
-  <AppProvider componentName={"auth"} {...props} />
+  <AppProvider componentName={"auth"} {...props} hanko={hanko} />
 );
 
 export const HankoProfile = (props: HankoProfileElementProps) => (
-  <AppProvider componentName={"profile"} {...props} />
+  <AppProvider componentName={"profile"} {...props} hanko={hanko} />
 );
 
 export interface RegisterOptions {
+  api: string;
   shadow?: boolean;
   injectStyles?: boolean;
 }
-
-export const register = async (options: RegisterOptions) =>
-  await Promise.all([
-    _register({
-      ...options,
-      tagName: "hanko-auth",
-      entryComponent: HankoAuth,
-      observedAttributes: ["api", "lang", "experimental"],
-    }),
-    _register({
-      ...options,
-      tagName: "hanko-profile",
-      entryComponent: HankoProfile,
-      observedAttributes: ["api", "lang"],
-    }),
-  ]);
 
 interface InternalRegisterOptions extends RegisterOptions {
   tagName: string;
   entryComponent: FunctionalComponent<HankoAuthAdditionalProps>;
   observedAttributes: string[];
+}
+
+let hanko: Hanko;
+
+interface ElementsRegisterReturn {
+  hanko: Hanko;
 }
 
 const _register = async ({
@@ -94,4 +84,27 @@ const _register = async ({
       }
     });
   }
+};
+
+export const register = async (
+  options: RegisterOptions
+): Promise<ElementsRegisterReturn> => {
+  if (!hanko) hanko = new Hanko(options.api);
+
+  await Promise.all([
+    _register({
+      ...options,
+      tagName: "hanko-auth",
+      entryComponent: HankoAuth,
+      observedAttributes: ["api", "lang", "experimental"],
+    }),
+    _register({
+      ...options,
+      tagName: "hanko-profile",
+      entryComponent: HankoProfile,
+      observedAttributes: ["api", "lang"],
+    }),
+  ]);
+
+  return { hanko };
 };

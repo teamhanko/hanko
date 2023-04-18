@@ -31,16 +31,19 @@ pnpm install @teamhanko/hanko-elements
 
 The web components need to be registered first. You can control whether they should be attached to the shadow DOM or not
 using the `shadow` property. It's set to true by default, and it's possible to make use of the [CSS shadow parts](#css-shadow-parts)
-to change the appearance of the component. [CSS variables](#css-variables) will work in both cases.
+to change the appearance of the component. [CSS variables](#css-variables) will work in both cases. The `register`
+function returns an instance of the `hanko-frontend-sdk`, that enables you e.g. to fetch user information, or bind event
+listeners.
 
 Use as a module:
 
 ```typescript
 import { register } from "@teamhanko/hanko-elements"
 
-register({
-  shadow: true,      // Set to false if you don't want the web component to be attached to the shadow DOM.
-  injectStyles: true // Set to false if you don't want to inject any default styles.
+const { hanko } = await register({
+  api: "https://hanko.yourdomain.com", // The location where the Hanko API is running.
+  shadow: true,                        // Set to false if you don't want the web component to be attached to the shadow DOM.
+  injectStyles: true                   // Set to false if you don't want to inject any default styles.
 })
 ```
 
@@ -50,7 +53,7 @@ With a script tag via CDN:
 <script type="module">
   import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"
 
-  register({shadow: true, injectStyles: true})
+  const { hanko } = await register({ api: "https://hanko.yourdomain.com", shadow: true, injectStyles: true })
 </script>
 ```
 
@@ -61,26 +64,13 @@ A web component that handles user login and user registration.
 #### Markup
 
 ```html
-<hanko-auth api="https://hanko.yourdomain.com" lang="en"/>
+<hanko-auth lang="en"></hanko-auth>
 ```
 
 #### Attributes
 
-- `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 - `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
-
-#### Events
-
-These events bubble up through the DOM tree.
-
-- `hankoAuthSuccess` - Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the user to protected pages.
-
-```js
-document.addEventListener('hankoAuthSuccess', () => {
-    document.body.innerHTML = 'secured content...'
-})
-```
 
 ### &lt;hanko-profile&gt;
 
@@ -89,13 +79,58 @@ A web component that allows to manage emails, passwords and passkeys.
 #### Markup
 
 ```html
-<hanko-profile api="https://hanko.yourdomain.com" lang="en"/>
+<hanko-profile lang="en"></hanko-profile>
 ```
 
 #### Attributes
 
-- `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+
+### SDK Overview
+
+Common use-cases for the `hanko-frontend-sdk` instance returned by the `register` function.
+
+Please take a look into the [docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/) for more information.
+
+#### Events:
+
+```js
+hanko.onSessionCreated((sessionCreatedDetail) => {
+  // Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
+  // work across browser windows and you can obtain the JWT from the detail object, if you need to manage it by your
+  // own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
+  console.log(`User signed in (userID: ${sessionCreatedDetail.userID}, jwt: ${sessionCreatedDetail.jwt})`);
+})
+
+hanko.onAuthFlowCompleted((onAuthFlowCompletedDetail) => {
+  // Login or registration has been finished through the `<hanko-auth>` element. You can now redirect the user to a
+  // secured page or fetch secured content in use of the previously issued JWT.
+  console.log(`Authentication flow completed (userID: ${onAuthFlowCompletedDetail.userID})`);
+})
+
+hanko.onSessionRemoved(() => {
+  // Executes across all browser windows after the session has expired. The user can now be redirected back to a
+  // login page.
+  console.log("User logged out or session has expired");
+})
+
+hanko.onUserDeleted(() => {
+  // Executes after the user deleted the account. The user can be redirected to a "goodbye" or back to a login page.
+  console.log("User deleted");
+})
+```
+
+#### User Actions:
+
+```js
+// Get the current user
+const user = await hanko.user.getCurrent();
+console.info(`id: ${user.id}, email: ${user.email}`)
+
+// Logout the current user
+await hanko.user.logout();
+
+```
 
 ## UI Customization
 
