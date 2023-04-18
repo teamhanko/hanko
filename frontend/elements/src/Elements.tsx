@@ -89,7 +89,7 @@ const _register = async ({
 export const register = async (
   options: RegisterOptions
 ): Promise<ElementsRegisterReturn> => {
-  if (!hanko) hanko = new Hanko(options.api);
+  createHankoClient(options.api);
 
   await Promise.all([
     _register({
@@ -107,4 +107,11 @@ export const register = async (
   ]);
 
   return { hanko };
+};
+
+export const createHankoClient = (api: string) => {
+  if (!hanko || hanko.api !== api) {
+    hanko = new Hanko(api);
+  }
+  return hanko;
 };
