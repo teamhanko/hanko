@@ -413,6 +413,8 @@ third_party:
   #
   # Supports wildcard matching through globbing. e.g. https://*.example.com will allow https://foo.example.com and https://bar.example.com to be accepted.
   # Globbing is also supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1 and https://foo.example.com/page2.
+  # A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+  #
   # More on globbing: https://pkg.go.dev/github.com/gobwas/glob#Compile
   #
   # NOTE: URLs in the list MUST NOT have trailing slash
