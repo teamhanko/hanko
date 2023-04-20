@@ -8,7 +8,6 @@ import { State } from "../State";
  */
 export interface LocalStorageSession {
   expiry: number;
-  jwt: string;
   userID: string;
 }
 
@@ -44,7 +43,7 @@ class SessionState extends State {
    * @return {LocalStorageSession}
    */
   getState(): LocalStorageSession {
-    this.ls.session ||= { expiry: 0, jwt: "", userID: "" };
+    this.ls.session ||= { expiry: 0, userID: "" };
     return this.ls.session;
   }
 
@@ -87,24 +86,6 @@ class SessionState extends State {
   }
 
   /**
-   * Gets the JWT.
-   */
-  getJWT(): string {
-    return this.getState().jwt;
-  }
-
-  /**
-   * Sets the JWT.
-   *
-   * @param {string} jwt - The JWT
-   * @return {SessionState}
-   */
-  setJWT(jwt: string): SessionState {
-    this.getState().jwt = jwt;
-    return this;
-  }
-
-  /**
    * Removes the session details.
    *
    * @return {SessionState}
@@ -113,7 +94,6 @@ class SessionState extends State {
     const session = this.getState();
 
     delete session.expiry;
-    delete session.jwt;
     delete session.userID;
 
     return this;

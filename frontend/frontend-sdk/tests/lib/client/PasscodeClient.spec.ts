@@ -124,7 +124,9 @@ describe("PasscodeClient.initialize()", () => {
       passcodeRetryAfter
     );
     expect(passcodeClient.state.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.getResponseHeader).toHaveBeenCalledWith("Retry-After");
+    expect(response.headers.getResponseHeader).toHaveBeenCalledWith(
+      "Retry-After"
+    );
   });
 
   it.each`
@@ -183,7 +185,9 @@ describe("PasscodeClient.finalize()", () => {
       passcodeClient.finalize(userID, passcodeValue)
     ).resolves.toBeUndefined();
     expect(passcodeClient.state.read).toHaveBeenCalledTimes(1);
-    expect(passcodeClient.client.processResponseHeadersOnLogin).toHaveBeenCalledTimes(1);
+    expect(
+      passcodeClient.client.processResponseHeadersOnLogin
+    ).toHaveBeenCalledTimes(1);
     expect(passcodeClient.state.getActiveID).toHaveBeenCalledWith(userID);
     expect(passcodeClient.client.post).toHaveBeenCalledWith(
       "/passcode/login/finalize",

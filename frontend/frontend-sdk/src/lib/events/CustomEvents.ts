@@ -36,7 +36,7 @@ export const authFlowCompletedType: "hanko-auth-flow-completed-type" =
  * @category SDK
  * @subcategory Events
  * @property {string=} jwt - The JSON web token associated with the session. Only present when the Hanko-API allows the JWT to be accessible client-side.
- * @property {number} expirationSeconds - The UNIX timestamp when the session expires.
+ * @property {number} expirationSeconds - The number of seconds until the JWT expires.
  * @property {string} userID - The user associated with the session.
  */
 export interface SessionCreatedEventDetail {

@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Client</title>
+  <title> Cookie</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Class</p>
-                    <h1>Client</h1>
+                    <h1>Cookie</h1>
                 </header>
                 
 
@@ -85,9 +85,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature">(abstract) </span></span>Client<span class="signature">(api, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Cookie<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">A class to be extended by the other client classes.</div>
+            <div class="class-description">A class to manage cookies.</div>
         
     
 </header>
@@ -106,16 +106,12 @@
 
 
     
-    <h4 class="name" id="Client">
-        <a class="href-link" href="#Client">#</a>
-        
-            
-                <span class='tag'>abstract</span>
-            
+    <h4 class="name" id="Cookie">
+        <a class="href-link" href="#Cookie">#</a>
         
         <span class="code-name">
             
-                new Client<span class="signature">(api, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+                new Cookie<span class="signature">()</span><span class="type-signature"></span>
             
         </span>
     </h4>
@@ -131,102 +127,6 @@
 
 
 
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>api</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">string</code>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last">The URL of your Hanko API instance</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>timeout</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last">The request timeout in milliseconds</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
 
 
 
@@ -265,9 +165,9 @@
 
     
         <p class="tag-source">
-            <a href="lib_client_Client.ts.html" class="button">View Source</a>
+            <a href="lib_Cookie.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_client_Client.ts.html">lib/client/Client.ts</a>, <a href="lib_client_Client.ts.html#line12">line 12</a>
+                <a href="lib_Cookie.ts.html">lib/Cookie.ts</a>, <a href="lib_Cookie.ts.html#line9">line 9</a>
             </span>
         </p>
     
@@ -314,28 +214,38 @@
     
 
     
+
+    
         <div class='vertical-section'>
-            <h1>Members</h1>
+            <h1>Methods</h1>
             <div class="members">
             
                 <div class="member">
 
-    <span class="method-parameter is-pulled-right">
-        <label>Type:</label>
+
+    
+    <h4 class="name" id="getAuthCookie">
+        <a class="href-link" href="#getAuthCookie">#</a>
         
-<code class="param-type"><a href="HttpClient.html">HttpClient</a></code>
-
-
-    </span>
-
-<h4 class="name" id="client">
-    <a class="href-link" href="#client">#</a>
+        <span class="code-name">
+            
+                getAuthCookie<span class="signature">()</span><span class="type-signature"> &rarr; {string}</span>
+            
+        </span>
+    </h4>
     
-    <span class="code-name">
-        client
-    </span>
+
     
-</h4>
+    
+    <div class="description">
+        Returns the authentication token that was stored in the cookie.
+    </div>
+    
+
+
+
+
+
 
 
 
@@ -377,9 +287,9 @@
 
     
         <p class="tag-source">
-            <a href="lib_client_Client.ts.html" class="button">View Source</a>
+            <a href="lib_Cookie.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_client_Client.ts.html">lib/client/Client.ts</a>, <a href="lib_client_Client.ts.html#line20">line 20</a>
+                <a href="lib_Cookie.ts.html">lib/Cookie.ts</a>, <a href="lib_Cookie.ts.html#line44">line 44</a>
             </span>
         </p>
     
@@ -389,12 +299,339 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<code class="param-type">string</code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="removeAuthCookie">
+        <a class="href-link" href="#removeAuthCookie">#</a>
+        
+        <span class="code-name">
+            
+                removeAuthCookie<span class="signature">()</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        Removes the cookie used for authentication.
+    </div>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_Cookie.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_Cookie.ts.html">lib/Cookie.ts</a>, <a href="lib_Cookie.ts.html#line57">line 57</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="setAuthCookie">
+        <a class="href-link" href="#setAuthCookie">#</a>
+        
+        <span class="code-name">
+            
+                setAuthCookie<span class="signature">(token, secure<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        Stores the authentication token to the cookie.
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>token</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">string</code>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last">The authentication token to be stored.</td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>secure</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">boolean</code>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+
+  <td class="description last">Indicates a secure cookie should be set. Default is `true`.</td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_Cookie.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_Cookie.ts.html">lib/Cookie.ts</a>, <a href="lib_Cookie.ts.html#line52">line 52</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </div>
             
             </div>
         </div>
-    
-
     
 
     
