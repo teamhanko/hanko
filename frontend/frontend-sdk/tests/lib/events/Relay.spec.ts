@@ -29,13 +29,14 @@ describe("Relay", () => {
       jest
         .spyOn(relay._sessionState, "getExpirationSeconds")
         .mockReturnValueOnce(0);
-      jest.spyOn(relay._sessionState, "getJWT").mockReturnValueOnce("");
+      jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValueOnce("");
       jest
         .spyOn(relay._sessionState, "getUserID")
         .mockReturnValueOnce("fake_user");
 
       relay.dispatchInitialEvents();
       expect(dispatcherSpy).not.toHaveBeenCalled();
+      expect(relay._cookie.getAuthCookie).toHaveBeenCalled();
     });
 
     it("should dispatch initial 'hanko-session-created' event when session is active", () => {
@@ -45,7 +46,7 @@ describe("Relay", () => {
       jest
         .spyOn(relay._sessionState, "getExpirationSeconds")
         .mockReturnValueOnce(1);
-      jest.spyOn(relay._sessionState, "getJWT").mockReturnValueOnce("");
+      jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValueOnce("");
       jest
         .spyOn(relay._sessionState, "getUserID")
         .mockReturnValueOnce("fake_user");
@@ -180,7 +181,7 @@ describe("Relay", () => {
 
   it("should listen to 'storage' events and dispatch 'hanko-session-removed' if the session is expired", () => {
     jest.spyOn(relay._sessionState, "getUserID").mockReturnValue("");
-    jest.spyOn(relay._sessionState, "getJWT").mockReturnValue("");
+    jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValue("");
     jest.spyOn(relay._sessionState, "getExpirationSeconds").mockReturnValue(0);
 
     window.dispatchEvent(
@@ -195,7 +196,7 @@ describe("Relay", () => {
 
   it("should listen to 'storage' events and dispatch 'hanko-session-created' if session is active", () => {
     jest.spyOn(relay._sessionState, "getUserID").mockReturnValue("test-user");
-    jest.spyOn(relay._sessionState, "getJWT").mockReturnValue("test-jwt");
+    jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValue("test-jwt");
     jest.spyOn(relay._sessionState, "getExpirationSeconds").mockReturnValue(10);
 
     window.dispatchEvent(

@@ -1,9 +1,8 @@
-import Cookies from "js-cookie";
 import { RequestTimeoutError, TechnicalError } from "../Errors";
 import { SessionState } from "../state/session/SessionState";
 import { PasscodeState } from "../state/users/PasscodeState";
 import { Dispatcher } from "../events/Dispatcher";
-
+import { Cookie } from "../Cookie";
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
  *
@@ -123,10 +122,10 @@ class Response {
 class HttpClient {
   timeout: number;
   api: string;
-  authCookieName = "hanko";
   sessionState: SessionState;
   passcodeState: PasscodeState;
   dispatcher: Dispatcher;
+  cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
@@ -135,13 +134,14 @@ class HttpClient {
     this.sessionState = new SessionState();
     this.passcodeState = new PasscodeState();
     this.dispatcher = new Dispatcher();
+    this.cookie = new Cookie();
   }
 
   // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
     const url = this.api + path;
     const timeout = this.timeout;
-    const bearerToken = this.getAuthCookie();
+    const bearerToken = this.cookie.getAuthCookie();
 
     return new Promise<Response>(function (resolve, reject) {
       xhr.open(options.method, url, true);
@@ -172,32 +172,12 @@ class HttpClient {
   }
 
   /**
-   * Returns the authentication token that was stored in the cookie.
+   * Processes the response headers on login and extracts the JWT and expiration time. Also, the passcode state will be
+   * removed, the session state updated und a `hanko-session-created` event will be dispatched.
    *
-   * @return {string}
-   * @return {string}
+   * @param {string} userID - The user ID.
+   * @param {Response} response - The HTTP response object.
    */
-  getAuthCookie(): string {
-    return Cookies.get(this.authCookieName);
-  }
-
-  /**
-   * Stores the authentication token to the cookie.
-   *
-   * @param {string} token - The authentication token to be stored.
-   */
-  _setAuthCookie(token: string) {
-    const secure = !!this.api.match("^https://");
-    Cookies.set(this.authCookieName, token, { secure });
-  }
-
-  /**
-   * Removes the cookie used for authentication.
-   */
-  removeAuthCookie() {
-    Cookies.remove(this.authCookieName);
-  }
-
   processResponseHeadersOnLogin(userID: string, response: Response) {
     let jwt = "";
     let expirationSeconds = 0;
@@ -223,8 +203,8 @@ class HttpClient {
       this.sessionState.read();
 
       if (jwt) {
-        this._setAuthCookie(jwt);
-        this.sessionState.setJWT(jwt);
+        const secure = !!this.api.match("^https://");
+        this.cookie.setAuthCookie(jwt, secure);
       }
 
       this.sessionState.setExpirationSeconds(expirationSeconds);
@@ -236,11 +216,6 @@ class HttpClient {
         expirationSeconds,
       });
     }
-    return {
-      jwt,
-      userID,
-      expirationSeconds,
-    };
   }
 
   /**

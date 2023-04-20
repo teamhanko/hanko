@@ -150,41 +150,60 @@ try {
 }
 ```
 
-### Events
+### Custom Events
 
-To build dynamic websites or handle the JWT by your own, you may want to utilize available events as follows:
+You can bind callback functions to different custom events. The callback function will be called when the event happens
+and an object will be passed in, containing event details. The event binding works as follows:
 
 ```typescript
-import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+// Controls the optional `once` parameter. When set to `true` the callback function will be called only once.
+const once = false;
 
-const hanko = new Hanko("https://[HANKO_API_URL]")
+const cleanupFunc = hanko.onSessionCreated((eventDetail) => {
+    // Your code...
+}, once);
 
-hanko.onSessionCreated((detail) => {
-    // Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
-    // work across browser windows and you can obtain the JWT from the detail object, if you need to manage it by your
-    // own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
-    console.log(`User signed in (userID: ${detail.userID}, jwt: ${detail.jwt})`);
+// Removes the event listener, the callback function will not be called anymore.
+cleanupFunc();
+```
+
+The following events are available:
+
+- "hanko-session-created": Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
+  work across browser windows and you can obtain the JWT from the detail object, if you need to manage it by your
+  own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
+
+```typescript
+hanko.onSessionCreated((sessionCreatedDetail) => {
+  // `sessionCreatedDetail.userID` - The user id assigned to the session.
+  // `sessionCreatedDetail.jwt` - The JSON web token. Can only be present when it is accessible.
 })
+````
+- "hanko-auth-flow-completed": Login or registration has been finished through the `<hanko-auth>` element. You can now redirect the user to a secured page or fetch secured content in use of the previously issued JWT.
 
-hanko.onAuthFlowCompleted((detail) => {
-    // Login or registration has been finished through the `<hanko-auth>` element. You can now redirect the user to a
-    // secured page or fetch secured content in use of the previously issued JWT.
-    console.log(`Authentication flow completed (userID: ${detail.userID})`);
-})
-
-hanko.onSessionRemoved(() => {
-    // Executes across all browser windows after the session has expired. The user can now be redirected back to a
-    // login page.
-    console.log("User logged out or session has expired");
-})
-
-hanko.onUserDeleted(() => {
-    // Executes after the user deleted the account. The user can be redirected to a "goodbye" or back to a login page.
-    console.log("User deleted");
+```typescript
+hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
+  // `authFlowCompletedDetail.userID` - The user id of the current user.
 })
 ```
 
-Take a look into the docs for more details.
+- "hanko-session-removed": Executes across all browser windows after the session has expired. The user can now be redirected back to a login page.
+
+```typescript
+hanko.onSessionRemoved(() => {
+    // User logged out or the session been removed.
+})
+```
+
+- "hanko-user-deleted": Executes after the user deleted the account. The user can be redirected to a "goodbye" or back to a login page.
+
+```typescript
+hanko.onUserDeleted(() => {
+    // User deleted.
+})
+```
+
+Please Take a look into the docs for more details.
 
 ## Bugs
 

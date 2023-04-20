@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Client</title>
+  <title> lib/Cookie.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,336 +75,55 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>Client</h1>
+                    <p>Source</p>
+                    <h1>lib/Cookie.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2><span class="attribs"><span class="type-signature">(abstract) </span></span>Client<span class="signature">(api, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description">A class to be extended by the other client classes.</div>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
-
-
-    
-    <h4 class="name" id="Client">
-        <a class="href-link" href="#Client">#</a>
-        
-            
-                <span class='tag'>abstract</span>
-            
-        
-        <span class="code-name">
-            
-                new Client<span class="signature">(api, timeout<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-            <th>Attributes</th>
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>api</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">string</code>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last">The URL of your Hanko API instance</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>timeout</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-      <td class="attributes">
-      
-          &lt;optional><br>
-      
-
-      
-
-      
-      </td>
-  
-
-  
-
-  <td class="description last">The request timeout in milliseconds</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_client_Client.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_client_Client.ts.html">lib/client/Client.ts</a>, <a href="lib_client_Client.ts.html#line12">line 12</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <div class='vertical-section'>
-            <h1>Members</h1>
-            <div class="members">
-            
-                <div class="member">
-
-    <span class="method-parameter is-pulled-right">
-        <label>Type:</label>
-        
-<code class="param-type"><a href="HttpClient.html">HttpClient</a></code>
-
-
-    </span>
-
-<h4 class="name" id="client">
-    <a class="href-link" href="#client">#</a>
-    
-    <span class="code-name">
-        client
-    </span>
-    
-</h4>
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_client_Client.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_client_Client.ts.html">lib/client/Client.ts</a>, <a href="lib_client_Client.ts.html#line20">line 20</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-</div>
-            
-            </div>
-        </div>
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import JSCookie from "js-cookie";
+
+/**
+ * A class to manage cookies.
+ *
+ * @category SDK
+ * @subcategory Internal
+ */
+export class Cookie {
+  authCookieName = "hanko";
+  /**
+   * Returns the authentication token that was stored in the cookie.
+   *
+   * @return {string}
+   */
+  getAuthCookie(): string {
+    return JSCookie.get(this.authCookieName);
+  }
+
+  /**
+   * Stores the authentication token to the cookie.
+   *
+   * @param {string} token - The authentication token to be stored.
+   * @param {boolean=} secure - Indicates a secure cookie should be set. Default is `true`.
+   */
+  setAuthCookie(token: string, secure = true) {
+    JSCookie.set(this.authCookieName, token, { secure });
+  }
+
+  /**
+   * Removes the cookie used for authentication.
+   */
+  removeAuthCookie() {
+    JSCookie.remove(this.authCookieName);
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

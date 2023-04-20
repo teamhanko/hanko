@@ -2,7 +2,6 @@ import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
 
 import AppProvider from "./contexts/AppProvider";
-import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 
 interface AdditionalProps {
   api: string;
@@ -67,8 +66,6 @@ interface InternalRegisterOptions extends RegisterOptions {
   entryComponent: FunctionalComponent<HankoAuthAdditionalProps>;
   observedAttributes: string[];
 }
-
-let hanko: Hanko;
 
 const _register = async ({
   tagName,

@@ -4,7 +4,6 @@ import {
   HttpClient,
 } from "../../../src/lib/client/HttpClient";
 import { RequestTimeoutError, TechnicalError } from "../../../src";
-import Cookies from "js-cookie";
 
 const jwt = "test-token";
 let httpClient: HttpClient;
@@ -61,7 +60,7 @@ describe("httpClient._fetch()", () => {
       this.onload();
     });
 
-    jest.spyOn(httpClient, "getAuthCookie").mockReturnValue(jwt);
+    jest.spyOn(httpClient.cookie, "getAuthCookie").mockReturnValue(jwt);
 
     await httpClient._fetch("/test", { method: "GET" }, xhr);
 
@@ -92,49 +91,6 @@ describe("httpClient._fetch()", () => {
     const response = httpClient._fetch("/test", { method: "GET" }, xhr);
 
     await expect(response).rejects.toThrow(RequestTimeoutError);
-  });
-});
-
-describe("httpClient._setAuthCookie()", () => {
-  it("should set a new cookie", async () => {
-    httpClient = new HttpClient("http://test.api");
-    jest.spyOn(Cookies, "set");
-    httpClient._setAuthCookie("test-token");
-
-    expect(Cookies.set).toHaveBeenCalledWith("hanko", "test-token", {
-      secure: false,
-    });
-  });
-
-  it("should set a new secure cookie", async () => {
-    httpClient = new HttpClient("https://test.api");
-    jest.spyOn(Cookies, "set");
-    httpClient._setAuthCookie("test-token");
-
-    expect(Cookies.set).toHaveBeenCalledWith("hanko", "test-token", {
-      secure: true,
-    });
-  });
-});
-
-describe("httpClient._getAuthCookie()", () => {
-  it("should return the contents of the authorization cookie", async () => {
-    httpClient = new HttpClient("https://test.api");
-    Cookies.get = jest.fn().mockReturnValue("test-token");
-    const token = httpClient.getAuthCookie();
-
-    expect(Cookies.get).toHaveBeenCalledWith("hanko");
-    expect(token).toBe("test-token");
-  });
-});
-
-describe("httpClient._removeAuthCookie()", () => {
-  it("should return the contents of the authorization cookie", async () => {
-    httpClient = new HttpClient("https://test.api");
-    jest.spyOn(Cookies, "remove");
-    httpClient.removeAuthCookie();
-
-    expect(Cookies.remove).toHaveBeenCalledWith("hanko");
   });
 });
 
@@ -198,10 +154,11 @@ describe("headers.get()", () => {
 });
 
 describe("httpClient.processResponseHeadersOnLogin()", () => {
-  it("should set a cookie if x-auth-token response header is available", async () => {
-    const jwt = "test-jwt";
-    const expirationSeconds = 7;
-    const userID = "test-user";
+  const jwt = "test-jwt";
+  const expirationSeconds = 7;
+  const userID = "test-user";
+
+  beforeEach(() => {
     Object.defineProperty(global, "XMLHttpRequest", {
       value: jest.fn().mockImplementation(() => ({
         response: JSON.stringify({ foo: "bar" }),
@@ -224,7 +181,9 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
       configurable: true,
       writable: true,
     });
+  });
 
+  it("should set a cookie if x-auth-token response header is available", async () => {
     const client = new HttpClient("http://test.api");
     const xhr = new XMLHttpRequest();
     const response = new Response(xhr);
@@ -234,11 +193,10 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
     jest.spyOn(client.passcodeState, "reset");
     jest.spyOn(client.passcodeState, "write");
     jest.spyOn(client.sessionState, "read");
-    jest.spyOn(client.sessionState, "setJWT");
+    jest.spyOn(client.cookie, "setAuthCookie");
     jest.spyOn(client.sessionState, "setExpirationSeconds");
     jest.spyOn(client.sessionState, "setUserID");
     jest.spyOn(client.sessionState, "write");
-    jest.spyOn(client, "_setAuthCookie");
 
     client.processResponseHeadersOnLogin(userID, response);
 
@@ -247,20 +205,31 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
     expect(client.passcodeState.reset).toBeCalledTimes(1);
     expect(client.passcodeState.write).toBeCalledTimes(1);
 
+    expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
     expect(client.sessionState.read).toHaveBeenCalledTimes(1);
-    expect(client.sessionState.setJWT).toHaveBeenCalledTimes(1);
     expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledTimes(1);
     expect(client.sessionState.setUserID).toHaveBeenCalledTimes(1);
     expect(client.sessionState.write).toHaveBeenCalledTimes(1);
 
-    expect(client.sessionState.setJWT).toHaveBeenCalledWith(jwt);
     expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledWith(
       expirationSeconds
     );
     expect(client.sessionState.setUserID).toHaveBeenCalledWith(userID);
 
-    expect(client._setAuthCookie).toBeCalledTimes(1);
-    expect(client._setAuthCookie).toHaveBeenCalledWith(jwt);
+    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, false);
+    expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
+  });
+
+  it("should set a secure cookie if x-auth-token response header is available and https is being used", async () => {
+    const client = new HttpClient("https://test.api");
+    const xhr = new XMLHttpRequest();
+    const response = new Response(xhr);
+
+    jest.spyOn(client.cookie, "setAuthCookie");
+    client.processResponseHeadersOnLogin(userID, response);
+
+    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, true);
+    expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
   });
 });
 

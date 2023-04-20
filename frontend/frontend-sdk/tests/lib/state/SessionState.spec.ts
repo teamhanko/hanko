@@ -42,7 +42,6 @@ describe("sessionState.reset()", () => {
 
     expect(state.reset()).toEqual(state);
     expect(state.ls.session.userID).toBeUndefined();
-    expect(state.ls.session.jwt).toBeUndefined();
     expect(state.ls.session.expiry).toBeUndefined();
   });
 });
@@ -67,26 +66,5 @@ describe("sessionState.setExpirationSeconds()", () => {
     expect(state.ls.session.expiry).toEqual(
       Math.floor(Date.now() / 1000) + seconds
     );
-  });
-});
-
-describe("sessionState.getJWT()", () => {
-  it("should return the JWT", async () => {
-    const ls = decodedLSContent();
-    const state = new SessionState();
-
-    state.ls = ls;
-
-    expect(state.getJWT()).toEqual(ls.session.jwt);
-  });
-});
-
-describe("sessionState.setJWT()", () => {
-  it("should set the JWT", async () => {
-    const state = new SessionState();
-    const jwt = "new-jwt";
-
-    expect(state.setJWT(jwt)).toEqual(state);
-    expect(state.ls.session.jwt).toEqual(jwt);
   });
 });
