@@ -105,10 +105,10 @@ const hanko = createHankoClient("https://hanko.yourdomain.com")
 
 #### Events
 
-It is possible to bind callback functions to different custom events. The callback function will be called when the
-event happens and an object will be passed in, containing event details.
+It is possible to bind callbacks to different custom events in use of the SDKs event listener functions.
+The callback function will be called when the event happens and an object will be passed in, containing event details.
 
-- "hanko-auth-flow-completed": Will be triggered in combination with `&lt;hanko-auth&gt;` after a session has been
+- "hanko-auth-flow-completed": Will be triggered in combination with `<hanko-auth>` after a session has been
 created and the user has completed possible additional steps (e.g. passkey registration or password recovery).
 
 ```js
