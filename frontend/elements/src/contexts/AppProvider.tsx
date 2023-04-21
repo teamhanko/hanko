@@ -7,7 +7,6 @@ import {
   useCallback,
   useMemo,
   useRef,
-  useEffect,
 } from "preact/compat";
 
 import {
@@ -114,8 +113,6 @@ const AppProvider = ({
     },
     [hanko]
   );
-
-  useEffect(() => hanko.relay.dispatchInitialEvents(), [hanko.relay]);
 
   useMemo(() => {
     switch (componentName) {
