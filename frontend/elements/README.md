@@ -92,7 +92,7 @@ A web component that allows to manage emails, passwords and passkeys.
 
 ### Frontend-SDK Examples
 
-The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by the `register`
+The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by the `register()`
 function, but please take a look into the [frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/) for details.
 
 Note that you can create a `hanko-frontend-sdk` instance without having to register the web components as follows:
@@ -128,6 +128,9 @@ hanko.onSessionRemoved(() => {
 })
 ```
 
+To learn what else you can do, check out the [custom-events](https://github.com/teamhanko/hanko/tree/update-registration-interface/frontend/frontend-sdk#custom-events)
+README.
+
 #### User Client
 
 The SDK contains several client classes to make the communication with the Hanko-API easier. Here some examples of
@@ -144,7 +147,7 @@ console.info(`id: ${user.id}, email: ${user.email}`)
 await hanko.user.logout();
 ```
 
-To learn how error handling works and what else you can do with SDK, take a look into the [docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
+To learn how error handling works and what else you can do with SDK, take a look into the [frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
 
 ## UI Customization
 
