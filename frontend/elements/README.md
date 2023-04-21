@@ -38,22 +38,26 @@ listeners.
 Use as a module:
 
 ```typescript
-import { register } from "@teamhanko/hanko-elements"
+import { register } from "@teamhanko/hanko-elements";
 
 const { hanko } = await register({
   api: "https://hanko.yourdomain.com", // The location where the Hanko API is running.
   shadow: true,                        // Set to false if you don't want the web component to be attached to the shadow DOM.
   injectStyles: true                   // Set to false if you don't want to inject any default styles.
-})
+});
 ```
 
 With a script tag via CDN:
 
 ```html
 <script type="module">
-  import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"
+  import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
 
-  const { hanko } = await register({ api: "https://hanko.yourdomain.com", shadow: true, injectStyles: true })
+  const { hanko } = await register({
+    api: "https://hanko.yourdomain.com",
+    shadow: true,
+    injectStyles: true
+  });
 </script>
 ```
 
@@ -86,51 +90,61 @@ A web component that allows to manage emails, passwords and passkeys.
 
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 
-### SDK Overview
+### Frontend-SDK Examples
 
-Common use-cases for the `hanko-frontend-sdk` instance returned by the `register` function.
+The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by the `register`
+function, but please take a look into the [frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/) for details.
 
-Please take a look into the [docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/) for more information.
+Note that you can create a `hanko-frontend-sdk` instance without having to register the web components as follows:
+
+```js
+import { createHankoClient } from "@teamhanko/hanko-elements";
+
+const hanko = createHankoClient("https://hanko.yourdomain.com")
+```
 
 #### Events:
 
+It is possible to bind callback functions to different custom events. The callback function will be called when the
+event happens and an object will be passed in, containing event details.
+
+- "hanko-auth-flow-completed": Will be triggered in combination with `&lt;hanko-auth&gt;` after a session has been
+created and the user has completed possible additional steps (e.g. passkey registration or password recovery).
+
 ```js
-hanko.onSessionCreated((sessionCreatedDetail) => {
-  // Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
-  // work across browser windows and you can obtain the JWT from the detail object, if you need to manage it by your
-  // own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
-  console.log(`User signed in (userID: ${sessionCreatedDetail.userID}, jwt: ${sessionCreatedDetail.jwt})`);
-})
-
-hanko.onAuthFlowCompleted((onAuthFlowCompletedDetail) => {
-  // Login or registration has been finished through the `<hanko-auth>` element. You can now redirect the user to a
-  // secured page or fetch secured content in use of the previously issued JWT.
-  console.log(`Authentication flow completed (userID: ${onAuthFlowCompletedDetail.userID})`);
-})
-
-hanko.onSessionRemoved(() => {
-  // Executes across all browser windows after the session has expired. The user can now be redirected back to a
-  // login page.
-  console.log("User logged out or session has expired");
-})
-
-hanko.onUserDeleted(() => {
-  // Executes after the user deleted the account. The user can be redirected to a "goodbye" or back to a login page.
-  console.log("User deleted");
+hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
+  // Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the
+  // user to protected pages.
+  console.info(`User signed in (user-id: "${authFlowCompletedDetail.userID}")`);
 })
 ```
 
-#### User Actions:
+- "hanko-session-removed": Will be triggered across all browser windows, when the session expires or the user logs out.
 
 ```js
-// Get the current user
+hanko.onSessionRemoved(() => {
+  // The user can now be redirected back to a login page.
+  console.info("User logged out");
+})
+```
+
+#### User Client:
+
+The SDK contains several client classes to make the communication with the Hanko-API easier. Here some examples of
+things you might want to do:
+
+- Getting the current user:
+```js
 const user = await hanko.user.getCurrent();
 console.info(`id: ${user.id}, email: ${user.email}`)
-
-// Logout the current user
-await hanko.user.logout();
-
 ```
+
+- Log out a user:
+```js
+await hanko.user.logout();
+```
+
+To learn how error handling works and what else you can do with SDK, take a look into the [docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
 
 ## UI Customization
 
