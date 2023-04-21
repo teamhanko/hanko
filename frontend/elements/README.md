@@ -103,7 +103,7 @@ import { createHankoClient } from "@teamhanko/hanko-elements";
 const hanko = createHankoClient("https://hanko.yourdomain.com")
 ```
 
-#### Events:
+#### Events
 
 It is possible to bind callback functions to different custom events. The callback function will be called when the
 event happens and an object will be passed in, containing event details.
@@ -128,7 +128,7 @@ hanko.onSessionRemoved(() => {
 })
 ```
 
-#### User Client:
+#### User Client
 
 The SDK contains several client classes to make the communication with the Hanko-API easier. Here some examples of
 things you might want to do:
