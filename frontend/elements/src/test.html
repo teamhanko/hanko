@@ -34,7 +34,7 @@
 <script type="module">
     import { register } from "../dist/elements.js";
 
-    const { hanko } = await register("http://localhost:8000");
+    const { hanko } = await register("http://localhost:8000", {translations: { de: { headlines: { loginEmail: "Schinken für alle!"}}}});
 
     function showLogin() {
         document.getElementById("auth").hidden = false;

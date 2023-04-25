@@ -3,6 +3,7 @@ import registerCustomElement from "@teamhanko/preact-custom-element";
 
 import AppProvider from "./contexts/AppProvider";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
+import { defaultTranslations, Translations } from "./Translations";
 
 export interface HankoAuthAdditionalProps {
   experimental?: string;
@@ -36,6 +37,7 @@ const HankoAuth = (props: HankoAuthElementProps) => (
     {...props}
     hanko={hanko}
     injectStyles={injectStyles}
+    translations={translations}
   />
 );
 
@@ -44,6 +46,7 @@ const HankoProfile = (props: HankoProfileElementProps) => (
     componentName={"profile"}
     {...props}
     hanko={hanko}
+    translations={translations}
     injectStyles={injectStyles}
   />
 );
@@ -53,14 +56,15 @@ const HankoEvents = (props: HankoProfileElementProps) => (
     componentName={"events"}
     {...props}
     hanko={hanko}
-    translations={translations}
     injectStyles={false}
+    translations={null}
   />
 );
 
 export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
+  translations?: Partial<Translations>;
 }
 
 export interface RegisterResult {
@@ -75,6 +79,7 @@ interface InternalRegisterOptions extends RegisterOptions {
 
 let hanko: Hanko;
 let injectStyles: boolean;
+let translations: Translations;
 
 const _register = async ({
   tagName,
@@ -125,3 +130,38 @@ export const register = async (
 
   return { hanko };
 };
+
+function deepMerge<T>(obj1: T, obj2: Partial<T>): T {
+  const mergedObject = {} as T;
+
+  for (const key in obj1) {
+    if (Object.prototype.hasOwnProperty.call(obj1, key)) {
+      const value1 = obj1[key];
+      const value2 = obj2[key];
+
+      if (
+        typeof value1 === "object" &&
+        value1 !== null &&
+        typeof value2 === "object" &&
+        value2 !== null
+      ) {
+        mergedObject[key] = deepMerge(value1, value2);
+      } else {
+        mergedObject[key] = value1;
+      }
+    }
+  }
+
+  for (const key in obj2) {
+    if (Object.prototype.hasOwnProperty.call(obj2, key)) {
+      const value1 = obj1[key];
+      const value2 = obj2[key];
+
+      if (typeof value1 === "undefined") {
+        mergedObject[key] = value2;
+      }
+    }
+  }
+
+  return mergedObject;
+}
