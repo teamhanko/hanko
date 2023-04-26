@@ -1,0 +1,432 @@
+---
+title: Login with Apple
+sidebar_label: Apple
+keywords:
+  - social login
+  - apple
+  - siwa
+sidebar_custom_props:
+  docCardIconName: apple-dark
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Login with Apple
+
+To enable Apple login for your project, you need to
+- Create a `Sign In With Apple`-capable application with Apple.
+- Create and your Apple credentials and configure them with Hanko.
+- Add the Hanko `<hanko-auth>` web component or add the required code to your frontend using the `hanko-frontend-sdk`.
+
+## Access your Apple Developer account
+
+- To get started you need an [Apple developer account](https://developer.apple.com/help/account/get-started/about-your-developer-account).
+- Once you have an account [sign in](https://developer.apple.com/help/account/get-started/sign-in-to-your-developer-account).
+
+## Register an App ID
+
+Next, you need to [register an App ID](https://developer.apple.com/help/account/manage-identifiers/register-an-app-id):
+
+- In [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Identifiers` in the
+sidebar, then click the add button (`+`) on the top left.
+- Select `App IDs` from the list of options and click `Continue`.
+- Select `App` as the type and click `Continue`.
+- Provide your app information:
+  - App `Description`.
+  - `Bundle ID` (Apple recommends using a reverse-domain name style string i.e., `com.domainname.appname`).
+- In the `Capabilities` tab below, check `Sign in with Apple`.
+- Click `Continue`, then review the registration information, then click `Register`.
+
+## Register a Services ID {#register-service}
+
+You also need to register a `Services ID`.
+
+- Go to [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Identifiers` in the
+sidebar, then click the add button (`+`) on the top.
+- Select `Services IDs` from the list of options and click `Continue`.
+- Provide your app information:
+  - App `Description`.
+  - `Bundle ID` (must be different from the Bundle ID you chose when [registering the App ID](#register-an-app-id)).
+- Click `Continue`, then click `Register`.
+
+You need the `Services ID` later when [configuring your credentials with Hanko](#config-hanko).
+
+## Get your provider redirect URL {#redirect-url}
+
+When configuring your Services ID you need to provide a redirect URL that determines where the third party
+provider redirects after a successful login. This redirect URL consists of the base URL of the Hanko API and the
+[`/thirdparty/callback`](http://docs.hanko.io/api/public#tag/Third-Party/operation/thirdPartyCallback) endpoint.
+Your Hanko API base URL, and therefore your redirect URL, depends on whether you use Hanko Cloud or chose to self-host
+the Hanko API:
+
+```mdx-code-block
+<Tabs groupId="environment">
+<TabItem value="cloud" label="Hanko Cloud">
+```
+
+When using Hanko Cloud you can obtain your redirect URL from the Hanko Cloud Console:
+
+- Sign in to [cloud.hanko.io](https://cloud.hanko.io).
+- Select your `Organization`.
+- Select your `Project`.
+- In the left sidebar, click `Settings`, then select `Identity providers`.
+- Find your redirect URL in the `Redirect URL` input.
+
+You need the redirect URL for [configuring your Services ID](#configure-service) in the next step.
+
+```mdx-code-block
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted">
+```
+
+When self-hosting your redirect URL depends on where you chose to host your Hanko API instance, i.e.
+it looks like: `<your_hanko_api_url>/thirdparty/callback`.
+
+You need this redirect URL for [configuring your Services ID](#configure-service) and when
+[configuring your Apple credentials with Hanko](#config-hanko).
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+## Configure your Services ID {#configure-service}
+
+- On [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Identifiers` in the
+  sidebar, then select `Services IDs` in the dropdown in the right.
+- Select the `Services ID` you created in the previous step.
+- Enable `Sign In With Apple` for the `Services ID` by clicking the checkbox next to it.
+- Click `Configure`.
+- Select your [previously registered](#register-an-app-id) `App ID` as your `Primary App ID`.
+- In the shown modal, click the add button (`+`) next to `Website URLs`.
+- Add the _domain_ of your [redirect URL](#redirect-url) to the `Domains and Subdomains` input (do not add a scheme,
+  e.g. `https://`, or path information).
+- In the `Return URLs` input, enter the complete [redirect URL](#redirect-url) of your app which you found in the
+  previous step.
+- Click `Next` at the bottom right.
+- Click `Done` at the bottom to close the modal.
+- Back on the `Edit your Services ID Configuration` view, click `Continue` at the top right, then click `Save`.
+
+## Create Key and download Key file
+
+Next, you need to create a `Key` and download a `Key` file. You need this file to
+generate your client secret in the [next step](#generate-secret).
+
+- On [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Keys` in the sidebar,
+  then click the add button (`+`) next to the `Keys` heading.
+- Enter a `Key Name`.
+- In the options table below the `Key Name` input, check `Sign in with Apple`.
+- In the same table row, click `Configure` to the right.
+- In the `Configure Key` view, select your [previously registered](#register-an-app-id) `App ID` in the`Primary App ID` dropdown.
+- Click `Save` on the top right.
+- Back on the `Register a New Key` view, click `Continue`, then click `Register` on the top right.
+- On the `Download Your Key` view, click `Download` on the top right to save the key file.
+- Click `Done` on the top right.
+
+## Generate a client secret {#generate-secret}
+
+Sign in with Apple requires a client secret to authorize API requests. The secret must be a JSON Web
+Token (JWT) signed with the Elliptic Curve Digital Signature Algorithm (ECDSA) with the P-256 curve and the SHA-256
+hash algorithm.
+
+To make secret generation as easy as possible, we provide a script that can be executed using
+[Docker](https://docker.com). If you do not have Docker installed, see the
+[official installation instructions](https://docs.docker.com/get-docker/).
+
+The script requires the following information:
+
+- `private_key`: This is the path to the key file you downloaded in the [previous step](#create-key-and-download-key-file).
+  Per default the key file name should look like this: `AuthKey_XXXXXXXXXX.p8`. Because we use Docker in this case, we
+  will use the path to the key file on your filesystem to mount the file into the Docker container (we'll get to this,
+  see the command below).
+- `team_id`: This is the Team ID your Apple Developer account is associated with.
+  - See [Locate your Team ID](https://developer.apple.com/help/account/manage-your-team/locate-your-team-id/#:~:text=In%20the%20top%20navigation%20of,to%20view%20your%20Team%20ID.)
+    in the official Apple documentation.
+- `services_id`: This is `Services ID` you created in the [Register a Services ID](#register-a-services-id) step. You
+  can always review this ID in the Apple Developer console:
+  - On [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Identifiers` in the sidebar,
+  then select `Services IDs` in the dropdown in the right.
+  - Find the relevant entry in the list (the required value is the value in the `Identifier` column).
+- `key_id`: This is the ID of the private key from the [previous step](#create-key-and-download-key-file).
+  The `XXXXXXXXXX` part of the default `AuthKey_XXXXXXXXXX.p8` filename is the key ID. You can
+  also review this ID in the Apple Developer console:
+  - On [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Keys` in the sidebar,
+  then select `Services IDs`.
+  - Select your key in the list.
+  - The ID can be found under `View Key Details` > `Key ID`
+
+As previously mentioned, we will mount the `private_key` to the container by mapping the path on your filesystem to
+a path on the container filesystem, e.g. `~/Downloads/AuthKey_XXXXXXXXXX.p8:/tmp/AuthKey_XXXXXXXXXX.p8`.
+From the command line, run (replace `<...>` placeholders with your data):
+
+```shell
+docker run -v <key_file_on_host>:<key_file_in_container> ghcr.io/teamhanko/hanko siwa \
+--private_key <key_file_in_container>  \
+--team_id <your_team_id> \
+--services_id <your_services_id> \
+--key_id <your_key_id> > client_secret.txt
+```
+
+The command will save the client secret in a file `client_secret.txt`.
+
+:::caution
+
+Secrets expire after 6 months and must be regenerated before the expiration.
+
+:::
+
+
+## Configure Apple credentials with Hanko {#config-hanko}
+
+Next, you need to configure your Apple credentials with Hanko. Configuration differs depending on whether you
+use Hanko Cloud or self-host the Hanko API:
+
+```mdx-code-block
+<Tabs groupId="environment">
+<TabItem value="cloud" label="Hanko Cloud">
+```
+
+When using Hanko Cloud, configure third party settings using the Hanko Cloud Console:
+
+- Sign in to [cloud.hanko.io](https://cloud.hanko.io).
+- Select your `Organization`.
+- Select your `Project`.
+- In the left sidebar, click `Settings`, then select `Identity providers`.
+- Under `Identity provider settings` configure the following:
+  - `Error redirect URL`: This is a URL in your frontend the Hanko API redirects to if an error occurs during third
+    party sign-in. When [using the `hanko-elements` web components](#frontend-integration) it should be the URL of the
+    page that embeds the web component such that errors can be processed properly by the web component.
+  - `Allowed redirect URL`: This is a URL in your frontend the Hanko API is allowed to redirect to after third party
+    authentication was successful. When [using the `hanko-elements` web components](#frontend-integration), it should be
+    the URL of the page that embeds the web component.
+      - _**Note**_: supports wildcard matching through globbing:
+        - `https://*.example.com` will allow `https://foo.example.com` and `https://bar.example.com` to be accepted.
+        - `https://foo.example.com/*` will match `https://foo.example.com/page1`
+          and `https://foo.example.com/page2`.
+        - `**` acts as a "super"-wildcard/match-all.
+- Find and expand the `Apple` provider panel in the `Providers` list.
+- Enable the provider by clicking the toggle switch.
+- Enter your [`Services ID`](#register-service) and client [`Secret`](#generate-secret).
+- Click `Save`.
+
+```mdx-code-block
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted">
+```
+
+When self-hosting you need to adjust your backend
+[configuration file](https://github.com/teamhanko/hanko/blob/main/backend/config/config.yaml). You must provide
+the following data:
+  - your provider [`redirect_url`](#redirect-url)
+  - your `client ID`, which in this case is your [`Services ID`](#configure-service)
+  - your client [`secret`](#generate-secret)
+  - an`error_redirect_url`: This is a URL in your frontend the Hanko API redirects to if an error occurs during third
+    party sign-in. When [using the `hanko-elements` web components](#frontend-integration), it should be the URL of the
+    page that embeds the web component such that errors can be processed properly by the web component.
+  - an `allowed_redirect_url`: This is a URL in your frontend the Hanko API is allowed to redirect to after third
+    party sign-in was successful. When [using the `hanko-elements` web components](#frontend-integration), it should be
+    the URL of the page that embeds the web component.
+      - _**Note**_: supports wildcard matching through globbing:
+        - `https://*.example.com` will allow `https://foo.example.com` and `https://bar.example.com` to be accepted.
+        - `https://foo.example.com/*` will match `https://foo.example.com/page1`
+          and `https://foo.example.com/page2`.
+        - `**` acts as a "super"-wildcard/match-all.
+
+Open up your configuration file and add the following:
+
+```yaml title=config.yaml
+third_party:
+  # You do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when
+  # validating redirect URLs.
+  #
+  # NOTE: URLs MUST NOT have trailing slash
+  error_redirect_url: <your_error_redirect_url>
+  # NOTE: URLs in the list MUST NOT have trailing slash
+  allowed_redirect_urls:
+      - <your_allowed_redirect_url>
+  redirect_url: <your_provider_redirect_url>
+  providers:
+    apple:
+      enabled: true
+      # this is your Apple Services ID
+      client_id: <your_apple_client_id>
+      secret: <your_apple_client_secret>
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+## Enable login in your frontend app
+
+Frontend integration depends on whether you intend to use a pre-built UI as provided by the
+[`@teamhanko/hanko-elements`](https://www.npmjs.com/package/@teamhanko/hanko-elements) package or prefer building
+a custom UI using the [`@teamhanko/hanko-frontend-sdk`](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk).
+
+```mdx-code-block
+<Tabs>
+<TabItem value="elements" label="Hanko Elements">
+```
+
+Depending on what framework your frontend uses, integrate the `<hanko-auth>` web component from the `hanko-elements`
+package according to one of our [frontend guides](/guides/frontend). If everything was successful, the component should
+now render a button to log in with `GitHub` on the login view.
+
+:::info
+
+Make sure to [configure](#config-hanko) the page the web component is embedded on as your error redirect URL
+as well as an allowed redirect URL.
+
+:::
+
+On successful authentication with the third party provider, the backend issues a session cookie and the web component
+continues the usual component flow on success. Errors that occur during third party
+provider authentication are also picked up and displayed in the web component accordingly.
+
+```mdx-code-block
+</TabItem>
+<TabItem value="sdk" label="Hanko Frontend SDK">
+```
+
+When building your own UI, you can use the `@teamhanko/hanko-frontend-sdk` to initialize third party sign in.
+Create a [`Hanko` client](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/Hanko.html) instance and call `thirdParty.auth`
+with `apple` as your provider and the target URL in your frontend you want to redirect to
+after successful third party authentication (must be [configured](#config-hanko) as an allowed redirect URL).
+Doing so first redirects you to the third party provider, where you then will be prompted
+to authenticate and provide consent for the API to access your data.
+
+```js showLineNumbers
+import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+
+const hanko = new Hanko("<your_hanko_api_url>")
+
+async function signInWithApple() {
+    try {
+       await hanko.thirdParty.auth("apple", "<your_redirect_url>");
+    } catch (error) {
+      // handle error
+    }
+}
+```
+
+On successful authentication with the third party provider, the API redirects you to the given redirect URL. The
+URL query includes a one time token that must be exchanged for a JWT. Use the `token.validate`
+method on your client to validate the token:
+
+```js showLineNumbers
+import { Hanko } from "@teamhanko/hanko-frontend-sdk"
+
+const hanko = new Hanko("<your_hanko_api_url>")
+
+async function onLoad() {
+    try {
+       await hanko.token.validate();
+    } catch (error) {
+      // handle error
+    }
+
+    // you should now have a JWT cookie set
+}
+```
+
+On success, the API issues a JWT which is then set by the SDK as a cookie (`hanko`). All other SDK methods can now
+use the cookie to make authenticated requests to the API.
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+:::info
+
+If you are self-hosting and your frontend application runs on a different domain than the Hanko API, make sure to
+- enable session token propagation via header manually by setting `session.enable_auth_token_header` to `true` in your
+configuration, so that session cookies can be set client-side.
+- include your frontend domain in the `server.public.cors.allowed_origins` in your
+[configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md).
+
+:::
+
+## On using Apple's private email relay service
+
+Sign in with Apple gives allows users to
+[hide their original email address](https://developer.apple.com/documentation/sign_in_with_apple/sign_in_with_apple_js/communicating_using_the_private_email_relay_service#overview)
+when authorizing your app during the authentication flow and instead use an anonymous, automatically generated
+email address. Emails are then routed through Apples private relay email service. In order to
+[send email messages through the relay service](https://developer.apple.com/help/account/configure-app-capabilities/configure-private-email-relay-service)
+to the users' personal inboxes (Hanko sends out passcodes for email verification and account
+recovery), you'll need to register your outbound email domains. All registered domains must create Sender Policy
+Framework (SPF) DNS TXT records in order to transit Apple's private mail relay.
+
+
+:::info
+
+If a user signs up using `Sign in with Apple` and chooses to hide their real email address, then the
+private relay address will become the primary email for the user. Should a user then choose to sign in with an email
+address (and not via `Sign in with Apple`), then the private relay email address must be used, _not_ the real email
+address associated with her Apple account.
+
+:::
+
+### Register domains with Apple {#register-domains}
+
+- On [Certificates, Identifiers & Profiles](https://developer.apple.com/account/resources), click `Services` in the
+  left sidebar.
+- In the `Sign in with Apple for Email Communication` panel, click `Configure`.
+- Next to the `Email Sources` heading, click the add (`+`) button.
+- In the `Register your email sources` modal, enter your `Domains and Subdomains` and/or specific `Email Addresses`.
+  - If you use Hanko Cloud and do _not_ want to use a custom SMTP server, enter `hanko.io` in
+    the `Domains and Subdomains` input. You do not need to provide an SPF DNS record by yourself.
+  - If you use Hanko Cloud and _do_ want to use a [custom SMTP server](?environment=cloud#configure-smtp), enter your
+    custom domain in the `Domains and Subdomains` input. Remember to provide an SPF DNS record for your domain in order
+    to pass Apple's SPF check.
+- Click `Next`, then click `Register`.
+- Your domains should be listed in the `Email Sources` table. Emails are only relayed if the SPF check (see the `Status`
+  column) was successful.
+
+### Configure SMTP with Hanko {#configure-smtp}
+
+```mdx-code-block
+<Tabs groupId="environment" queryString>
+<TabItem value="cloud" label="Hanko Cloud">
+```
+
+If you use Hanko Cloud and are on a paid subscription tier you can configure your own SMTP server.
+
+- Sign in to [cloud.hanko.io](https://cloud.hanko.io).
+- Select your `Organization`.
+- Select your `Project`.
+- In the left sidebar, click `Settings`, then select `SMTP`.
+- Enter your SMTP credentials and sender data.
+  - The domain of your `Sender email address` should be registered as an email source in the Apple developer
+    console to allow communication through Apple's private relay service (see the [previous step](#register-domains)).
+- Click `Save`.
+
+```mdx-code-block
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted">
+```
+
+If you are self-hosting, you need to edit your [configuration file](https://github.com/teamhanko/hanko/blob/main/backend/config/config.yaml).
+Open the file and add the following (replace `<...>` placeholders with your data):
+
+```yaml title=config.yaml
+passcode:
+  email:
+    # The sender of emails sent to users.
+    from_address: <your_from_address>
+    # The sender name of emails sent to users.
+    from_name: <your_from_name>
+  smtp:
+    host: <your_smtp_host>
+    port: <your_smtp_port> # Default: 465
+    user: <your_smtp_user>
+    password: <your_smtp_password>
+```
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```

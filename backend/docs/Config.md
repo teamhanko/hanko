@@ -448,25 +448,60 @@ third_party:
   providers:
     ##
     #
-    # The Google provider configuration
+    # The Apple provider configuration
     #
-    google:
+    apple:
       ##
       #
-      # Enable or disable the Google provider
+      # Enable or disable the Google provider.
       #
       # Default: false
       #
       enabled: false
       ##
       #
-      # Required. The client ID of your Google OAuth credentials.
-      # See: https://developers.google.com/identity/protocols/oauth2
+      # The client ID (Services ID) of your Apple credentials.
+      # See: https://docs.hanko.io/guides/social/apple
+      #
+      # Required if provider is enabled.
+      #
       #
       client_id: "CHANGE_ME"
       ##
       #
-      # Required. The secret of your Google OAuth credentials
+      # The generated secret of your Apple credentials.
+      # Valid for max. 6 months. Must be regenerated before expiration.
+      # https://docs.hanko.io/guides/social/apple
+      #
+      # Required if provider is enabled.
+      #
+      secret: "CHANGE_ME"
+    ##
+    #
+    # The Google provider configuration
+    #
+    google:
+      ##
+      #
+      # Enable or disable the Google provider.
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # The client ID of your Google OAuth credentials.
+      # See: https://docs.hanko.io/guides/social/google
+      #
+      # Required if provider is enabled.
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # The secret of your Google OAuth credentials
+      # See: https://docs.hanko.io/guides/social/google
+      #
+      # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
     ##
@@ -476,20 +511,25 @@ third_party:
     github:
       ##
       #
-      # Enable or disable the GitHub provider
+      # Enable or disable the GitHub provider.
       #
       # Default: false
       #
       enabled: false
       ##
       #
-      # Required. The client ID of your GitHub OAuth credentials.
-      # See: https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
+      # The client ID of your GitHub OAuth credentials.
+      # See: https://docs.hanko.io/guides/social/github
+      #
+      # Required if provider is enabled.
       #
       client_id: "CHANGE_ME"
       ##
       #
-      # Required. The secret of your GitHub OAuth credentials
+      # The secret of your GitHub OAuth credentials.
+      # See: https://docs.hanko.io/guides/social/github
+      #
+      # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
 log:

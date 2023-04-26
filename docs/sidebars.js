@@ -40,7 +40,7 @@ const sidebars = {
         type: 'doc',
         id: 'guides/social/index'
       },
-      items: ['guides/social/github', "guides/social/google"]
+      items: ['guides/social/apple', 'guides/social/github', 'guides/social/google']
     },
   ],
 };
