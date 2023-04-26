@@ -170,13 +170,17 @@ cleanupFunc();
 The following events are available:
 
 - "hanko-session-created": Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
-  work across browser windows and you can obtain the JWT from the detail object, if you need to manage it on your
-  own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
+  work across browser windows, and you can obtain the JWT from the detail object, if you need to manage it on your
+  own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT. When using
+  Hanko-Cloud the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the backend only, as long as
+  your backend runs under the same domain as your frontend. To do so, make sure the config parameter "session.enable_auth_token_header" is turned off
+  via the Hanko-API configuration. If you want the JWT to be contained in the event details, you need to turn on "session.enable_auth_token_header"
+  when using a cross-domain setup. When it's a same-domain setup you need to turn off "session.cookie.http_only" to make the JWT accessible to the frontend.
 
 ```typescript
 hanko.onSessionCreated((sessionCreatedDetail) => {
   // `sessionCreatedDetail.userID` - The user id assigned to the session.
-  // `sessionCreatedDetail.jwt` - The JSON web token. Can only be present when it is accessible.
+  // `sessionCreatedDetail.jwt` - The JSON web token. Available, depending on the Hanko-API configuration.
 })
 ````
 - "hanko-auth-flow-completed": Login or registration has been finished through the `<hanko-auth>` element. You can now redirect the user to a secured page or fetch secured content in use of the previously issued JWT.
@@ -203,7 +207,7 @@ hanko.onUserDeleted(() => {
 })
 ```
 
-Please Take a look into the docs for more details.
+Please Take a look into the [docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/Hanko.html) for more details.
 
 ## Bugs
 
