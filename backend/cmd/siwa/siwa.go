@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"log"
+	"path/filepath"
 	"time"
 )
 
@@ -29,7 +30,8 @@ then signs it with the private key obtained from the Apple Developer console.
 
 See: https://developer.apple.com/documentation/sign_in_with_apple/generate_and_validate_tokens#3262048`,
 		Run: func(cmd *cobra.Command, args []string) {
-			bytes, err := ioutil.ReadFile(privateKey)
+			path := filepath.Clean(privateKey)
+			bytes, err := ioutil.ReadFile(path)
 			if err != nil {
 				log.Fatal(err)
 			}
