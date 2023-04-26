@@ -1,5 +1,6 @@
 import { Dispatcher } from "../../../src/lib/events/Dispatcher";
 import {
+  AuthFlowCompletedEventDetail,
   CustomEventWithDetail,
   SessionCreatedEventDetail,
 } from "../../../src/lib/events/CustomEvents";
@@ -44,7 +45,7 @@ describe("Dispatcher", () => {
         new CustomEventWithDetail("hanko-session-removed", null)
       );
       const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+        .calls[0][0] as CustomEventWithDetail<null>;
       expect(event.type).toEqual("hanko-session-removed");
     });
   });
@@ -60,7 +61,7 @@ describe("Dispatcher", () => {
         new CustomEventWithDetail("hanko-user-deleted", null)
       );
       const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+        .calls[0][0] as CustomEventWithDetail<null>;
       expect(event.type).toEqual("hanko-user-deleted");
     });
   });
@@ -77,7 +78,7 @@ describe("Dispatcher", () => {
         new CustomEventWithDetail("hanko-auth-flow-completed", detail)
       );
       const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+        .calls[0][0] as CustomEventWithDetail<AuthFlowCompletedEventDetail>;
       expect(event.type).toEqual("hanko-auth-flow-completed");
       expect(event.detail).toBe(detail);
     });
