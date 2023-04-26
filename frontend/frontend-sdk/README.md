@@ -170,7 +170,7 @@ cleanupFunc();
 The following events are available:
 
 - "hanko-session-created": Executes when there already is a session, after the user signs in, or when the JWT has been updated. It will
-  work across browser windows and you can obtain the JWT from the detail object, if you need to manage it by your
+  work across browser windows and you can obtain the JWT from the detail object, if you need to manage it on your
   own. Please note, that the JWT is only available, when the Hanko API configuration allows to obtain the JWT.
 
 ```typescript
