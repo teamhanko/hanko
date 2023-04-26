@@ -1,5 +1,8 @@
 import { Dispatcher } from "../../../src/lib/events/Dispatcher";
-import { CustomEventWithDetail } from "../../../src/lib/events/CustomEvents";
+import {
+  CustomEventWithDetail,
+  SessionCreatedEventDetail,
+} from "../../../src/lib/events/CustomEvents";
 
 describe("Dispatcher", () => {
   let dispatcher: Dispatcher;
@@ -23,6 +26,10 @@ describe("Dispatcher", () => {
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         new CustomEventWithDetail("hanko-session-created", detail)
       );
+      const event = dispatchEventSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+      expect(event.type).toEqual("hanko-session-created");
+      expect(event.detail).toBe(detail);
     });
   });
 
@@ -36,6 +43,9 @@ describe("Dispatcher", () => {
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         new CustomEventWithDetail("hanko-session-removed", null)
       );
+      const event = dispatchEventSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+      expect(event.type).toEqual("hanko-session-removed");
     });
   });
 
@@ -49,6 +59,9 @@ describe("Dispatcher", () => {
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         new CustomEventWithDetail("hanko-user-deleted", null)
       );
+      const event = dispatchEventSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+      expect(event.type).toEqual("hanko-user-deleted");
     });
   });
 
@@ -63,6 +76,10 @@ describe("Dispatcher", () => {
       expect(dispatchEventSpy).toHaveBeenCalledWith(
         new CustomEventWithDetail("hanko-auth-flow-completed", detail)
       );
+      const event = dispatchEventSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+      expect(event.type).toEqual("hanko-auth-flow-completed");
+      expect(event.detail).toBe(detail);
     });
   });
 });
