@@ -73,3 +73,36 @@ func TestRenderer_Render(t *testing.T) {
 		})
 	}
 }
+
+func TestRenderer_Translate(t *testing.T) {
+	renderer, err := NewRenderer()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, renderer)
+
+	tests := []struct {
+		Name      string
+		MessageID string
+		Lang      string
+		Data      map[string]interface{}
+		Expected  string
+	}{
+		{
+			Name:      "Translate email_subject_login",
+			MessageID: "email_subject_login",
+			Lang:      "en",
+			Data: map[string]interface{}{
+				"ServiceName": "Test Service",
+				"Code":        "123456",
+			},
+			Expected: "Use passcode 123456 to sign in to Test Service",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			result := renderer.Translate(test.Lang, test.MessageID, test.Data)
+			assert.Equal(t, test.Expected, result)
+		})
+	}
+}
