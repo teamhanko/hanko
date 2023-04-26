@@ -11,6 +11,27 @@ module.exports = {
       library: {
         type: 'module'
       },
+    },
+    de: {
+      filename: 'translations/de.js',
+      import: './src/translations/de.ts',
+      library: {
+        type: 'module'
+      },
+    },
+    en: {
+      filename: 'translations/en.js',
+      import: './src/translations/en.ts',
+      library: {
+        type: 'module'
+      },
+    },
+    all: {
+      filename: 'translations/all.js',
+      import: './src/translations/all.ts',
+      library: {
+        type: 'module'
+      },
     }
   },
   module: {
@@ -63,7 +84,7 @@ module.exports = {
       '.js',
       '.sass',
       "declarations.d.ts"
-    ],
+    ]
   },
   output: {
     clean: true,

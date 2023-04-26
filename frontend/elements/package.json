@@ -14,9 +14,10 @@
   },
   "typesVersions": {
     "*": {
-      "elements": [
-        "dist/Elements.d.ts"
-      ]
+      "elements": ["dist/Elements.d.ts"],
+      "lang/de": ["dist/translations/de.d.ts"],
+      "lang/en": ["dist/translations/en.d.ts"],
+      "lang/all": ["dist/translations/all.d.ts"]
     }
   },
   "exports": {
@@ -24,6 +25,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/elements.js",
       "require": "./dist/elements.js"
+    },
+    "./lang/de": {
+      "types": "./dist/translations/de.d.ts",
+      "import": "./dist/translations/de.js",
+      "require": "./dist/translations/de.js"
+    },
+    "./lang/en": {
+      "types": "./dist/translations/en.d.ts",
+      "import": "./dist/translations/en.js",
+      "require": "./dist/translations/en.js"
+    },
+    "./lang/all": {
+      "types": "./dist/translations/all.d.ts",
+      "import": "./dist/translations/all.js",
+      "require": "./dist/translations/all.js"
     }
   },
   "scripts": {
