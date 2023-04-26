@@ -181,7 +181,8 @@ class Response {
   }
 
   /**
-   * Returns the value for Retry-After contained in the response header.
+   * Returns the response header value with the given `name` as a number. When the value is not a number the return
+   * value will be 0.
    *
    * @param {string} name - The name of the header field
    * @return {number}
