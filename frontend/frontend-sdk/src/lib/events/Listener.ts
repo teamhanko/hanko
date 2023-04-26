@@ -209,8 +209,7 @@ export class Listener {
   }
 
   /**
-   * Adds an event listener for hanko-auth-flow-completed events. Will be triggered in combination with
-   * &lt;hanko-auth&gt; after the login or registration flow has been completed.
+   * Adds an event listener for hanko-auth-flow-completed events. Will be triggered after the login or registration flow has been completed.
    *
    * @param {CallbackFunc<AuthFlowCompletedEventDetail>} callback - The function to be called when the event is triggered.
    * @param {boolean=} once - Whether the event listener should be removed after being called once.
