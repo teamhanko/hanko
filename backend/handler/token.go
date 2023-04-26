@@ -121,7 +121,6 @@ func (h TokenHandler) Validate(c echo.Context) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	// return c.NoContent(http.StatusNoContent)
 	return c.JSON(http.StatusOK, map[string]string{"user_id": userID.String()})
 
 }
