@@ -4,21 +4,16 @@ import registerCustomElement from "@teamhanko/preact-custom-element";
 import AppProvider from "./contexts/AppProvider";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 
-interface AdditionalProps {}
-
-export interface HankoAuthAdditionalProps extends AdditionalProps {
+export interface HankoAuthAdditionalProps {
   experimental?: string;
 }
-
-export interface HankoProfileAdditionalProps extends AdditionalProps {}
 
 declare interface HankoAuthElementProps
   extends JSX.HTMLAttributes<HTMLElement>,
     HankoAuthAdditionalProps {}
 
 declare interface HankoProfileElementProps
-  extends JSX.HTMLAttributes<HTMLElement>,
-    HankoProfileAdditionalProps {}
+  extends JSX.HTMLAttributes<HTMLElement> {}
 
 declare global {
   // eslint-disable-next-line no-unused-vars
