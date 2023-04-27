@@ -7,14 +7,24 @@ import (
 	"log"
 )
 
-func NewMigrateUpCommand(config *config.Config) *cobra.Command {
+func NewMigrateUpCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "up",
 		Short: "migrate the database up",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			log.Println("migrate up")
-			persister, err := persistence.New(config.Database)
+
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -24,5 +34,8 @@ func NewMigrateUpCommand(config *config.Config) *cobra.Command {
 			}
 		},
 	}
+
+	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+
 	return cmd
 }

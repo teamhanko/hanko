@@ -6,7 +6,6 @@ package serve
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
 )
 
 func NewServeCommand() *cobra.Command {
@@ -17,10 +16,10 @@ func NewServeCommand() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, config *config.Config) {
+func RegisterCommands(parent *cobra.Command) {
 	cmd := NewServeCommand()
 	parent.AddCommand(cmd)
-	cmd.AddCommand(NewServePublicCommand(config))
-	cmd.AddCommand(NewServeAdminCommand(config))
-	cmd.AddCommand(NewServeAllCommand(config))
+	cmd.AddCommand(NewServePublicCommand())
+	cmd.AddCommand(NewServeAdminCommand())
+	cmd.AddCommand(NewServeAllCommand())
 }

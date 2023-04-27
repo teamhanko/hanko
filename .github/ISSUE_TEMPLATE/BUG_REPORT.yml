@@ -69,6 +69,21 @@ body:
     validations:
       required: true
   - attributes:
+      label: OS Hanko Backend
+      description: "On which operating system is your hanko backend running?"
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - Other
+    id: operating-system-hanko
+    type: dropdown
+  - attributes:
+      label: OS Version Hanko Backend
+      description: "Which operating system version are you running the hanko backend on?"
+    id: operating-system-version-hanko
+    type: textarea
+  - attributes:
       label: OS
       description: "On which operating system are you observing this issue?"
       options:
@@ -76,12 +91,12 @@ body:
         - Linux
         - Windows
         - Other
-    id: operating-system
+    id: operating-system-client
     type: dropdown
   - attributes:
       label: OS Version
       description: "Which operating system version are you using?"
-    id: operating-system-version
+    id: operating-system-version-client
     type: textarea
   - attributes:
       label: Browser Version

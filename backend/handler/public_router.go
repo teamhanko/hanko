@@ -1,18 +1,18 @@
-package server
+package handler
 
 import (
 	"fmt"
 	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/handler"
 	"github.com/teamhanko/hanko/backend/mail"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
-	hankoMiddleware "github.com/teamhanko/hanko/backend/server/middleware"
 	"github.com/teamhanko/hanko/backend/session"
 )
 
@@ -24,16 +24,23 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.Use(middleware.RequestID())
 	e.Use(hankoMiddleware.GetLoggerMiddleware())
 
-	if cfg.Server.Public.Cors.Enabled {
-		e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     cfg.Server.Public.Cors.AllowOrigins,
-			AllowMethods:     cfg.Server.Public.Cors.AllowMethods,
-			AllowHeaders:     cfg.Server.Public.Cors.AllowHeaders,
-			ExposeHeaders:    cfg.Server.Public.Cors.ExposeHeaders,
-			AllowCredentials: cfg.Server.Public.Cors.AllowCredentials,
-			MaxAge:           cfg.Server.Public.Cors.MaxAge,
-		}))
+	exposeHeader := []string{
+		httplimit.HeaderRetryAfter,
+		httplimit.HeaderRateLimitLimit,
+		httplimit.HeaderRateLimitRemaining,
+		httplimit.HeaderRateLimitReset,
 	}
+	if cfg.Session.EnableAuthTokenHeader {
+		exposeHeader = append(exposeHeader, "X-Auth-Token")
+	}
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
+		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
+		ExposeHeaders:                            exposeHeader,
+		AllowCredentials:                         true,
+		// Based on: Chromium (starting in v76) caps at 2 hours (7200 seconds).
+		MaxAge: 7200,
+	}))
 
 	if prometheus != nil {
 		e.Use(prometheus.HandlerFunc)
@@ -58,14 +65,14 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	if cfg.Password.Enabled {
-		passwordHandler := handler.NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
+		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := e.Group("/password")
 		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
 		password.POST("/login", passwordHandler.Login)
 	}
 
-	userHandler := handler.NewUserHandler(cfg, persister, sessionManager, auditLogger)
+	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
 
 	e.GET("/me", userHandler.Me, hankoMiddleware.Session(sessionManager))
 
@@ -80,12 +87,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		e.DELETE("/user", userHandler.Delete, hankoMiddleware.Session(sessionManager))
 	}
 
-	healthHandler := handler.NewHealthHandler()
-	webauthnHandler, err := handler.NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
+	healthHandler := NewHealthHandler()
+	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
-	passcodeHandler, err := handler.NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
+	passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
 	}
@@ -94,7 +101,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
-	wellKnownHandler, err := handler.NewWellKnownHandler(*cfg, jwkManager)
+	wellKnownHandler, err := NewWellKnownHandler(*cfg, jwkManager)
 	if err != nil {
 		panic(fmt.Errorf("failed to create well-known handler: %w", err))
 	}
@@ -102,7 +109,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler, err := handler.NewEmailHandler(cfg, persister, sessionManager, auditLogger)
+	emailHandler, err := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public email handler: %w", err))
 	}
@@ -132,12 +139,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	email.DELETE("/:id", emailHandler.Delete)
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
-	thirdPartyHandler := handler.NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
+	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
 	thirdparty := e.Group("thirdparty")
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
 	thirdparty.GET("/callback", thirdPartyHandler.Callback)
 
-	tokenHandler := handler.NewTokenHandler(cfg, persister, sessionManager, auditLogger)
+	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	e.POST("/token", tokenHandler.Validate)
 
 	return e

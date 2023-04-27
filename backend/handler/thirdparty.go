@@ -177,6 +177,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	}
 
 	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
+
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
 	}

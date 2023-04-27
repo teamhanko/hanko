@@ -6,4 +6,4 @@ ttl_text:
   other: "The passcode is valid for {{ .TTL }} minutes."
 email_subject_login:
   description: ""
-  other: "Login to {{ .ServiceName }}"
+  other: "Use passcode {{ .Code }} to sign in to {{ .ServiceName }}"
