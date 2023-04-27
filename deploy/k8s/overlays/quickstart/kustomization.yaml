@@ -4,3 +4,4 @@ resources:
   - ../../base/hanko
   - ../../base/elements
   - ../../base/quickstart
+  - ../../base/mailhog

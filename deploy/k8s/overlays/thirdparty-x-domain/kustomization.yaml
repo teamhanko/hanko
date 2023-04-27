@@ -4,6 +4,7 @@ resources:
   - ../../base/hanko
   - ../../base/elements
   - ../../base/quickstart
+  - ../../base/mailhog
 patchesStrategicMerge:
   - ingress-patch.yaml
   - env-patch.yaml
