@@ -32,7 +32,7 @@ type ExperimentalFeatures = ExperimentalFeature[];
 type ComponentName = "auth" | "profile";
 
 interface Props {
-  api?: string;
+  hanko?: Hanko;
   lang?: string | SignalLike<string>;
   fallbackLang?: string;
   experimental?: string;
@@ -67,20 +67,13 @@ interface Context extends States {
 export const AppContext = createContext<Context>(null);
 
 const AppProvider = ({
-  api,
+  hanko,
   lang,
   fallbackLang = "en",
   componentName,
   experimental = "",
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
-
-  const hanko = useMemo(() => {
-    if (api) {
-      return new Hanko(api, 13000);
-    }
-    return null;
-  }, [api]);
 
   const experimentalFeatures = useMemo(
     () =>

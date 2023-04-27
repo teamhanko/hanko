@@ -29,15 +29,12 @@
     </style>
 </head>
 <body>
-<hanko-auth id="auth" lang="en" api="http://localhost:8000"></hanko-auth>
-<hanko-profile id="profile" hidden="true" lang="en" api="http://localhost:8000"></hanko-profile>
+<hanko-auth id="auth" lang="en"></hanko-auth>
+<hanko-profile id="profile" hidden="true" lang="en"></hanko-profile>
 <script type="module">
     import { register } from "../dist/elements.js";
-    import { Hanko } from "../../frontend-sdk/dist/sdk.modern.js";
 
-    register({ shadow: true });
-
-    const hanko = new Hanko("http://localhost:8000");
+    const { hanko } = await register("http://localhost:8000", { shadow: true });
 
     function showLogin() {
         document.getElementById("auth").hidden = false;

@@ -27,7 +27,7 @@
                 <div>
                     <h1>My Profile</h1>
                 </div>
-                <hanko-profile lang="en" api="{{.HankoUrl}}"></hanko-profile>
+                <hanko-profile lang="en"></hanko-profile>
             </div>
         </div>
     </div>
@@ -39,11 +39,8 @@
 
 <script type="module">
     import { register } from "{{.HankoElementUrl}}";
-    import { Hanko } from "{{.HankoFrontendSdkUrl}}";
 
-    register({ shadow: false });
-
-    const hanko = new Hanko("{{.HankoUrl}}")
+    const { hanko } = await register("{{.HankoUrl}}", { shadow: false });
 
     document.getElementById("logout-link")
         .addEventListener("click", (event) => {

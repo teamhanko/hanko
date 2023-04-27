@@ -1,2 +1,7 @@
-import { HankoAuth, HankoProfile, register } from "./Elements";
-export { HankoAuth, HankoProfile, register };
+import {
+  HankoAuth,
+  HankoProfile,
+  register,
+  createHankoClient,
+} from "./Elements";
+export { HankoAuth, HankoProfile, register, createHankoClient };
