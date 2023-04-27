@@ -96,7 +96,7 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 		LeftJoin("emails", "emails.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	err := query.GroupBy("users.id").
-		Having("count(emails) > 0").
+		Having("count(emails.id) > 0").
 		Order(fmt.Sprintf("users.created_at %s", sortDirection)).
 		Paginate(page, perPage).
 		All(&users)
@@ -117,7 +117,7 @@ func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
 		LeftJoin("emails", "emails.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	count, err := query.GroupBy("users.id").
-		Having("count(emails) > 0").
+		Having("count(emails.id) > 0").
 		Count(&models.User{})
 	if err != nil {
 		return 0, fmt.Errorf("failed to get user count: %w", err)
