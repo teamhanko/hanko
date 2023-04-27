@@ -13,7 +13,7 @@ import (
 
 var database_user = "hanko"
 var database_password = "hanko"
-var database_name = "hankotest"
+var database_name = "hanko_test"
 
 type TestDB struct {
 	pool        *dockertest.Pool
