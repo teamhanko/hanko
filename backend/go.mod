@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.12.0
+	github.com/go-sql-driver/mysql v1.7.0
 	github.com/go-testfixtures/testfixtures/v3 v3.8.1
 	github.com/go-webauthn/webauthn v0.7.1
 	github.com/gobuffalo/pop/v6 v6.1.1
@@ -56,7 +57,6 @@ require (
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-sql-driver/mysql v1.7.0 // indirect
 	github.com/go-webauthn/revoke v0.1.9 // indirect
 	github.com/gobuffalo/envy v1.10.2 // indirect
 	github.com/gobuffalo/fizz v1.14.4 // indirect
