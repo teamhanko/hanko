@@ -40,7 +40,6 @@ export const HankoProfile = (props: HankoProfileElementProps) => (
 );
 
 export interface RegisterOptions {
-  api: string;
   shadow?: boolean;
   injectStyles?: boolean;
 }
@@ -87,9 +86,10 @@ const _register = async ({
 };
 
 export const register = async (
+  api: string,
   options: RegisterOptions
 ): Promise<ElementsRegisterReturn> => {
-  createHankoClient(options.api);
+  createHankoClient(api);
 
   await Promise.all([
     _register({

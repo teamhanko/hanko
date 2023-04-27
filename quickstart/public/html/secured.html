@@ -40,7 +40,7 @@
 <script type="module">
     import { register } from "{{.HankoElementUrl}}";
 
-    const { hanko } = await register({ api: "{{.HankoUrl}}", shadow: false });
+    const { hanko } = await register("{{.HankoUrl}}", { shadow: false });
 
     document.getElementById("logout-link")
         .addEventListener("click", (event) => {
