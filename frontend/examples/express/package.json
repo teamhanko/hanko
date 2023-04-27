@@ -10,6 +10,6 @@
     "dotenv": "^16.0.2",
     "express": "^4.18.1",
     "express-jwt": "^8.3.0",
-    "jwks-rsa": "^2.1.4"
+    "jwks-rsa": "^3.0.1"
   }
 }
