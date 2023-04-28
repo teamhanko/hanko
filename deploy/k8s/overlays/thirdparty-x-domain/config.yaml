@@ -8,7 +8,7 @@ passcode:
   email:
     from_address: no-reply@hanko.io
   smtp:
-    host: "mailslurper"
+    host: "mailhog"
     port: "2500"
 secrets:
   keys:
