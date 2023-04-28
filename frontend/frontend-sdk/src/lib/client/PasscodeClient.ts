@@ -1,4 +1,4 @@
-import { PasscodeState } from "../state/PasscodeState";
+import { PasscodeState } from "../state/users/PasscodeState";
 import { Passcode } from "../Dto";
 import {
   InvalidPasscodeError,
@@ -76,7 +76,7 @@ class PasscodeClient extends Client {
     const response = await this.client.post(`/passcode/login/initialize`, body);
 
     if (response.status === 429) {
-      retryAfter = response.parseRetryAfterHeader();
+      retryAfter = response.parseNumericHeader("Retry-After");
       this.state.setResendAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
     } else if (response.status === 401) {
@@ -132,7 +132,7 @@ class PasscodeClient extends Client {
       throw new TechnicalError();
     }
 
-    this.state.reset(userID).write();
+    this.client.processResponseHeadersOnLogin(userID, response);
 
     return;
   }

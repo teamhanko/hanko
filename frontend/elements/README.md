@@ -31,26 +31,31 @@ pnpm install @teamhanko/hanko-elements
 
 The web components need to be registered first. You can control whether they should be attached to the shadow DOM or not
 using the `shadow` property. It's set to true by default, and it's possible to make use of the [CSS shadow parts](#css-shadow-parts)
-to change the appearance of the component. [CSS variables](#css-variables) will work in both cases.
+to change the appearance of the component. [CSS variables](#css-variables) will work in both cases. The `register`
+function returns an instance of the `hanko-frontend-sdk`, that enables you e.g. to fetch user information, or bind event
+listeners.
 
 Use as a module:
 
 ```typescript
-import { register } from "@teamhanko/hanko-elements"
+import { register } from "@teamhanko/hanko-elements";
 
-register({
-  shadow: true,      // Set to false if you don't want the web component to be attached to the shadow DOM.
-  injectStyles: true // Set to false if you don't want to inject any default styles.
-})
+const { hanko } = await register("https://hanko.yourdomain.com", {
+  shadow: true,       // Set to false if you don't want the web component to be attached to the shadow DOM.
+  injectStyles: true  // Set to false if you don't want to inject any default styles.
+});
 ```
 
 With a script tag via CDN:
 
 ```html
 <script type="module">
-  import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js"
+  import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
 
-  register({shadow: true, injectStyles: true})
+  const { hanko } = await register("https://hanko.yourdomain.com", {
+    shadow: true,       // Set to false if you don't want the web component to be attached to the shadow DOM.
+    injectStyles: true  // Set to false if you don't want to inject any default styles.
+  });
 </script>
 ```
 
@@ -61,26 +66,13 @@ A web component that handles user login and user registration.
 #### Markup
 
 ```html
-<hanko-auth api="https://hanko.yourdomain.com" lang="en"/>
+<hanko-auth lang="en"></hanko-auth>
 ```
 
 #### Attributes
 
-- `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 - `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
-
-#### Events
-
-These events bubble up through the DOM tree.
-
-- `hankoAuthSuccess` - Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the user to protected pages.
-
-```js
-document.addEventListener('hankoAuthSuccess', () => {
-    document.body.innerHTML = 'secured content...'
-})
-```
 
 ### &lt;hanko-profile&gt;
 
@@ -89,13 +81,71 @@ A web component that allows to manage emails, passwords and passkeys.
 #### Markup
 
 ```html
-<hanko-profile api="https://hanko.yourdomain.com" lang="en"/>
+<hanko-profile lang="en"></hanko-profile>
 ```
 
 #### Attributes
 
-- `api` the location where the Hanko API is running.
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+
+### Frontend-SDK Examples
+
+The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by the `register()`
+function, but please take a look into the [frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/) for details.
+
+Note that you can create a `hanko-frontend-sdk` instance without having to register the web components as follows:
+
+```js
+import { createHankoClient } from "@teamhanko/hanko-elements";
+
+const hanko = createHankoClient("https://hanko.yourdomain.com")
+```
+
+#### Events
+
+It is possible to bind callbacks to different custom events in use of the SDKs event listener functions.
+The callback function will be called when the event happens and an object will be passed in, containing event details.
+
+- "hanko-auth-flow-completed": Will be triggered in combination with `<hanko-auth>` after a session has been
+created and the user has completed possible additional steps (e.g. passkey registration or password recovery).
+
+```js
+hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
+  // Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the
+  // user to protected pages.
+  console.info(`User signed in (user-id: "${authFlowCompletedDetail.userID}")`);
+})
+```
+
+- "hanko-session-removed": Will be triggered across all browser windows, when the session expires or the user logs out.
+
+```js
+hanko.onSessionRemoved(() => {
+  // The user can now be redirected back to a login page.
+  console.info("User logged out");
+})
+```
+
+To learn what else you can do, check out the [custom-events](https://github.com/teamhanko/hanko/tree/update-registration-interface/frontend/frontend-sdk#custom-events)
+README.
+
+#### User Client
+
+The SDK contains several client classes to make the communication with the Hanko-API easier. Here some examples of
+things you might want to do:
+
+- Getting the current user:
+```js
+const user = await hanko.user.getCurrent();
+console.info(`id: ${user.id}, email: ${user.email}`)
+```
+
+- Log out a user:
+```js
+await hanko.user.logout();
+```
+
+To learn how error handling works and what else you can do with SDK, take a look into the [frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
 
 ## UI Customization
 

@@ -4,7 +4,7 @@
  * @subcategory Internal
  * @property {Object.<string, LocalStorageUser>} - A dictionary for mapping users to their states.
  */
-import { State } from "./State";
+import { State } from "../State";
 
 import { LocalStorageWebauthn } from "./WebauthnState";
 import { LocalStoragePasscode } from "./PasscodeState";
@@ -44,6 +44,10 @@ export interface LocalStorageUsers {
  * @subcategory Internal
  */
 abstract class UserState extends State {
+  constructor() {
+    super("hanko");
+  }
+
   /**
    * Gets the state of the specified user.
    *

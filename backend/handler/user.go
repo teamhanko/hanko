@@ -108,6 +108,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			}
 
 			c.SetCookie(cookie)
+			c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 			if h.cfg.Session.EnableAuthTokenHeader {
 				c.Response().Header().Set("X-Auth-Token", token)
@@ -239,7 +240,7 @@ func (h *UserHandler) Delete(c echo.Context) error {
 		if user == nil {
 			return fmt.Errorf("unknown user")
 		}
-		
+
 		err = h.persister.GetUserPersisterWithConnection(tx).Delete(*user)
 		if err != nil {
 			return fmt.Errorf("failed to delete user: %w", err)

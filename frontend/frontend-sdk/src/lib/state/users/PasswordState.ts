@@ -1,4 +1,4 @@
-import { State } from "./State";
+import { State } from "../State";
 import { UserState } from "./UserState";
 
 /**

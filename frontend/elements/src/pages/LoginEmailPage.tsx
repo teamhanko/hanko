@@ -17,6 +17,7 @@ import {
   WebauthnSupport,
   UserInfo,
   User,
+  WebauthnFinalized,
 } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
@@ -111,7 +112,7 @@ const LoginEmailPage = (props: Props) => {
               setPage(<RegisterPasskeyPage />);
               return;
             }
-            emitSuccessEvent();
+            emitSuccessEvent(_user.id);
           };
 
           if (recoverPassword) {
@@ -124,7 +125,7 @@ const LoginEmailPage = (props: Props) => {
         })
         .catch((e) => setPage(<ErrorPage initialError={e} />));
     },
-    [emitSuccessEvent, hanko.user, hanko.webauthn, setPage, setUser]
+    [emitSuccessEvent, hanko, setPage, setUser]
   );
 
   const renderPasscode = useCallback(
@@ -188,12 +189,13 @@ const LoginEmailPage = (props: Props) => {
 
   const loginWithEmailAndWebAuthn = () => {
     let _userInfo: UserInfo;
+    let _webauthnFinalizedResponse: WebauthnFinalized;
     let webauthnLoginInitiated: boolean;
 
     return hanko.user
       .getInfo(emailAddress)
       .then((resp) => setUserInfo((_userInfo = resp)))
-      .then(() => {
+      .then((): Promise<void | WebauthnFinalized> => {
         if (!_userInfo.verified && config.emails.require_verification) {
           return renderPasscode(_userInfo.id, _userInfo.email_id);
         }
@@ -205,11 +207,18 @@ const LoginEmailPage = (props: Props) => {
         webauthnLoginInitiated = true;
         return hanko.webauthn.login(_userInfo.id);
       })
+      .then((resp: void | WebauthnFinalized) => {
+        if (resp instanceof Object) {
+          _webauthnFinalizedResponse = resp;
+        }
+        return;
+      })
       .then(() => {
         if (webauthnLoginInitiated) {
+          setError(null);
           setIsEmailLoginLoading(false);
           setIsEmailLoginSuccess(true);
-          emitSuccessEvent();
+          emitSuccessEvent(_webauthnFinalizedResponse.user_id);
         }
 
         return;
@@ -273,11 +282,11 @@ const LoginEmailPage = (props: Props) => {
 
     hanko.webauthn
       .login()
-      .then(() => {
+      .then((resp) => {
         setError(null);
         setIsPasskeyLoginLoading(false);
         setIsPasskeyLoginSuccess(true);
-        emitSuccessEvent();
+        emitSuccessEvent(resp.user_id);
 
         return;
       })
@@ -329,11 +338,10 @@ const LoginEmailPage = (props: Props) => {
 
     hanko.webauthn
       .login(null, true)
-      .then(() => {
+      .then((resp) => {
         setError(null);
-        emitSuccessEvent();
+        emitSuccessEvent(resp.user_id);
         setIsEmailLoginSuccess(true);
-
         return;
       })
       .catch((e) => {
@@ -344,7 +352,7 @@ const LoginEmailPage = (props: Props) => {
         }
         setError(e instanceof WebauthnRequestCancelledError ? null : e);
       });
-  }, [conditionalMediationEnabled, emitSuccessEvent, hanko.webauthn]);
+  }, [conditionalMediationEnabled, emitSuccessEvent, hanko]);
 
   useEffect(() => {
     loginViaConditionalUI();

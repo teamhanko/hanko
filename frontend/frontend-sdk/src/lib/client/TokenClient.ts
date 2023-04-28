@@ -1,5 +1,6 @@
 import { Client } from "./Client";
 import { TechnicalError } from "../Errors";
+import { TokenFinalized } from "../Dto";
 
 /**
  * Client responsible for exchanging one time tokens for session JWTs.
@@ -36,5 +37,8 @@ export class TokenClient extends Client {
     if (!response.ok) {
       throw new TechnicalError();
     }
+
+    const tokenResponse: TokenFinalized = response.json();
+    this.client.processResponseHeadersOnLogin(tokenResponse.user_id, response);
   }
 }

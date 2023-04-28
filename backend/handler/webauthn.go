@@ -400,6 +400,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 		}
 
 		c.SetCookie(cookie)
+		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", token)

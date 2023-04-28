@@ -1,5 +1,5 @@
 import { UserState } from "./UserState";
-import { Credential } from "../Dto";
+import { Credential } from "../../Dto";
 
 /**
  * @interface

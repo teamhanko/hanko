@@ -23,6 +23,19 @@ describe("webauthnClient.login()", () => {
   const fakeAssertion = {} as PublicKeyCredentialWithAssertionJSON;
 
   it("should perform a webauthn login", async () => {
+    Object.defineProperty(global, "XMLHttpRequest", {
+      value: jest.fn().mockImplementation(() => ({
+        response: JSON.stringify({ foo: "bar" }),
+        open: jest.fn(),
+        setRequestHeader: jest.fn(),
+        getResponseHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue(""),
+        send: jest.fn(),
+      })),
+      configurable: true,
+      writable: true,
+    });
+
     const initResponse = new Response(new XMLHttpRequest());
     initResponse.ok = true;
     initResponse._decodedJSON = fakeRequestOptions;
@@ -45,9 +58,7 @@ describe("webauthnClient.login()", () => {
     jest.spyOn(webauthnClient.webauthnState, "read");
     jest.spyOn(webauthnClient.webauthnState, "addCredential");
     jest.spyOn(webauthnClient.webauthnState, "write");
-    jest.spyOn(webauthnClient.passcodeState, "read");
-    jest.spyOn(webauthnClient.passcodeState, "reset");
-    jest.spyOn(webauthnClient.passcodeState, "write");
+    jest.spyOn(webauthnClient.client, "processResponseHeadersOnLogin");
 
     await webauthnClient.login(userID, true);
 
@@ -62,9 +73,9 @@ describe("webauthnClient.login()", () => {
       credentialID
     );
     expect(webauthnClient.webauthnState.write).toHaveBeenCalledTimes(1);
-    expect(webauthnClient.passcodeState.read).toHaveBeenCalledTimes(1);
-    expect(webauthnClient.passcodeState.reset).toHaveBeenCalledWith(userID);
-    expect(webauthnClient.passcodeState.write).toHaveBeenCalledTimes(1);
+    expect(
+      webauthnClient.client.processResponseHeadersOnLogin
+    ).toHaveBeenCalledTimes(1);
     expect(webauthnClient.client.post).toHaveBeenNthCalledWith(
       1,
       "/webauthn/login/initialize",
