@@ -52,6 +52,19 @@ describe("tokenClient.validate()", () => {
       window.location.search = "?hanko_token=valid_token";
       window.location.pathname = "/callback";
 
+      Object.defineProperty(global, "XMLHttpRequest", {
+        value: jest.fn().mockImplementation(() => ({
+          response: JSON.stringify({ foo: "bar" }),
+          open: jest.fn(),
+          setRequestHeader: jest.fn(),
+          getResponseHeader: jest.fn(),
+          getAllResponseHeaders: jest.fn().mockReturnValue(""),
+          send: jest.fn(),
+        })),
+        configurable: true,
+        writable: true,
+      });
+
       const response = new Response(new XMLHttpRequest());
       response.status = 200;
       response.ok = true;

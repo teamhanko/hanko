@@ -66,6 +66,16 @@ interface WebauthnFinalized {
  * @interface
  * @category SDK
  * @subcategory DTO
+ * @property {string} user_id - The ID of the user associated with the token.
+ */
+interface TokenFinalized {
+  user_id: string;
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
  * @property {string} id - The UUID of the user.
  * @property {boolean} verified - Indicates whether the user's email address is verified.
  * @property {string} email_id - The UUID of the email address.
@@ -218,6 +228,7 @@ export type {
   PasswordConfig,
   Config,
   WebauthnFinalized,
+  TokenFinalized,
   Credential,
   UserInfo,
   Me,

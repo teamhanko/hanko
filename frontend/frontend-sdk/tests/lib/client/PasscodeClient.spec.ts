@@ -108,7 +108,7 @@ describe("PasscodeClient.initialize()", () => {
 
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
     jest
-      .spyOn(response.headers, "get")
+      .spyOn(response.headers, "getResponseHeader")
       .mockReturnValue(`${passcodeRetryAfter}`);
     jest.spyOn(passcodeClient.state, "read");
     jest.spyOn(passcodeClient.state, "setResendAfter");
@@ -124,7 +124,9 @@ describe("PasscodeClient.initialize()", () => {
       passcodeRetryAfter
     );
     expect(passcodeClient.state.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.get).toHaveBeenCalledWith("Retry-After");
+    expect(response.headers.getResponseHeader).toHaveBeenCalledWith(
+      "Retry-After"
+    );
   });
 
   it.each`
@@ -157,12 +159,24 @@ describe("PasscodeClient.initialize()", () => {
 
 describe("PasscodeClient.finalize()", () => {
   it("should finalize a passcode login", async () => {
+    Object.defineProperty(global, "XMLHttpRequest", {
+      value: jest.fn().mockImplementation(() => ({
+        response: JSON.stringify({ foo: "bar" }),
+        open: jest.fn(),
+        setRequestHeader: jest.fn(),
+        getResponseHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue(""),
+        send: jest.fn(),
+      })),
+      configurable: true,
+      writable: true,
+    });
+
     const response = new Response(new XMLHttpRequest());
     response.ok = true;
 
     jest.spyOn(passcodeClient.state, "read");
-    jest.spyOn(passcodeClient.state, "reset");
-    jest.spyOn(passcodeClient.state, "write");
+    jest.spyOn(passcodeClient.client, "processResponseHeadersOnLogin");
     jest.spyOn(passcodeClient.state, "getActiveID").mockReturnValue(passcodeID);
     jest.spyOn(passcodeClient.state, "getTTL").mockReturnValue(passcodeTTL);
     jest.spyOn(passcodeClient.client, "post").mockResolvedValue(response);
@@ -171,8 +185,9 @@ describe("PasscodeClient.finalize()", () => {
       passcodeClient.finalize(userID, passcodeValue)
     ).resolves.toBeUndefined();
     expect(passcodeClient.state.read).toHaveBeenCalledTimes(1);
-    expect(passcodeClient.state.reset).toHaveBeenCalledTimes(1);
-    expect(passcodeClient.state.write).toHaveBeenCalledTimes(1);
+    expect(
+      passcodeClient.client.processResponseHeadersOnLogin
+    ).toHaveBeenCalledTimes(1);
     expect(passcodeClient.state.getActiveID).toHaveBeenCalledWith(userID);
     expect(passcodeClient.client.post).toHaveBeenCalledWith(
       "/passcode/login/finalize",

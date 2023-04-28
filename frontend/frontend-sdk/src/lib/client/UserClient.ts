@@ -59,7 +59,11 @@ class UserClient extends Client {
       throw new TechnicalError();
     }
 
-    return response.json();
+    const user: User = response.json();
+    if (user && user.id) {
+      this.client.processResponseHeadersOnLogin(user.id, response);
+    }
+    return user;
   }
 
   /**
@@ -111,7 +115,9 @@ class UserClient extends Client {
     const response = await this.client.delete("/user");
 
     if (response.ok) {
-      this.client.removeAuthCookie();
+      this.client.cookie.removeAuthCookie();
+      this.client.sessionState.reset().write();
+      this.client.dispatcher.dispatchUserDeletedEvent();
       return;
     } else if (response.status === 401) {
       throw new UnauthorizedError();
@@ -132,10 +138,13 @@ class UserClient extends Client {
     // For cross-domain operations, the frontend SDK creates the cookie by reading the "X-Auth-Token" header, and
     // "Set-Cookie" headers sent by the backend have no effect due to the browser's security policy, which means that
     // the cookie must also be removed client-side in that case.
-    this.client.removeAuthCookie();
+    this.client.cookie.removeAuthCookie();
+    this.client.sessionState.reset().write();
+    this.client.dispatcher.dispatchSessionRemovedEvent();
 
     if (logoutResponse.status === 401) {
-      return; // The user is logged out already
+      // The user is logged out already
+      return;
     } else if (!logoutResponse.ok) {
       throw new TechnicalError();
     }

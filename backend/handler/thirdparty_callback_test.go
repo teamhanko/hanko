@@ -15,13 +15,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",
@@ -78,13 +78,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",
@@ -138,21 +138,21 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	gock.New("https://" + thirdparty.GithubAuthBase).
-		Post(thirdparty.GithubOauthTokenEndpoint).
+	gock.New(thirdparty.GithubOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GithubAuthBase).
-		Get(thirdparty.GithubUserInfoEndpoint).
+	gock.New(thirdparty.GithubUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GithubUser{
 			ID:   1234,
 			Name: "John Doe",
 		})
 
-	gock.New("https://" + thirdparty.GithubAPIBase).
-		Get(thirdparty.GitHubEmailsEndpoint).
+	gock.New(thirdparty.GitHubEmailsEndpoint).
+		Get("/").
 		Reply(200).
 		JSON([]*thirdparty.GithubUserEmail{
 			{
@@ -211,21 +211,21 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GithubAuthBase).
-		Post(thirdparty.GithubOauthTokenEndpoint).
+	gock.New(thirdparty.GithubOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GithubAuthBase).
-		Get(thirdparty.GithubUserInfoEndpoint).
+	gock.New(thirdparty.GithubUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GithubUser{
 			ID:   1234,
 			Name: "John Doe",
 		})
 
-	gock.New("https://" + thirdparty.GithubAPIBase).
-		Get(thirdparty.GitHubEmailsEndpoint).
+	gock.New(thirdparty.GitHubEmailsEndpoint).
+		Get("/").
 		Reply(200).
 		JSON([]*thirdparty.GithubUserEmail{
 			{
@@ -275,6 +275,125 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 	}
 }
 
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-apple-signup@example.com", true)
+	gock.New(thirdparty.AppleTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken", "id_token": fakeIdToken})
+
+	fakeJwkSet := s.setUpFakeJwkSet()
+	gock.New(thirdparty.AppleKeysEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(fakeJwkSet)
+
+	cfg := s.setUpConfig([]string{"apple"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "apple", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-apple-signup@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identity
+		s.NotNil(identity)
+		s.Equal("apple", identity.ProviderName)
+		s.Equal("apple_abcde", identity.ProviderID)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-with-apple-identity@example.com", true)
+	gock.New(thirdparty.AppleTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken", "id_token": fakeIdToken})
+
+	fakeJwkSet := s.setUpFakeJwkSet()
+	gock.New(thirdparty.AppleKeysEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(fakeJwkSet)
+
+	cfg := s.setUpConfig([]string{"apple"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "apple", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-apple-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identity
+		s.NotNil(identity)
+		s.Equal("apple", identity.ProviderName)
+		s.Equal("apple_abcde", identity.ProviderID)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEmail() {
 	defer gock.Off()
 	if testing.Short() {
@@ -284,13 +403,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_unclaimed_email",
@@ -347,13 +466,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",
@@ -410,13 +529,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",
@@ -473,13 +592,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	gock.New("https://" + thirdparty.GoogleAuthBase).
-		Post(thirdparty.GoogleOauthTokenEndpoint).
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
 		Reply(200).
 		JSON(map[string]string{"access_token": "fakeAccessToken"})
 
-	gock.New("https://" + thirdparty.GoogleAPIBase).
-		Get(thirdparty.GoogleUserInfoEndpoint).
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
 		Reply(200).
 		JSON(&thirdparty.GoogleUser{
 			ID:            "google_abcde",

@@ -29,17 +29,27 @@
     </style>
 </head>
 <body>
-<hanko-auth id="auth" lang="en" api="http://localhost:8000"></hanko-auth>
-<hanko-profile id="profile" hidden="true" lang="en" api="http://localhost:8000"></hanko-profile>
+<hanko-auth id="auth" lang="en"></hanko-auth>
+<hanko-profile id="profile" hidden="true" lang="en"></hanko-profile>
 <script type="module">
     import { register } from "../dist/elements.js";
 
-    register({ shadow: true });
+    const { hanko } = await register("http://localhost:8000", { shadow: true });
 
-    document.addEventListener("hankoAuthSuccess", (event) => {
+    function showLogin() {
+        document.getElementById("auth").hidden = false;
+        document.getElementById("profile").hidden = true;
+    }
+
+    function showProfile() {
         document.getElementById("auth").hidden = true;
         document.getElementById("profile").hidden = false;
-    })
+    }
+
+    hanko.onSessionCreated(console.info);
+    hanko.onAuthFlowCompleted(showProfile);
+    hanko.onSessionRemoved(showLogin);
+    hanko.onUserDeleted(showLogin);
 </script>
 </body>
 </html>

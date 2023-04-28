@@ -14,7 +14,7 @@
 
 <main class="main">
     <div class="auth-container">
-        <hanko-auth lang="en" api="{{.HankoUrl}}" {{if .ConditionalUi}}experimental="conditionalMediation"{{end}}></hanko-auth>
+        <hanko-auth lang="en" {{if .ConditionalUi}}experimental="conditionalMediation"{{end}}></hanko-auth>
     </div>
 </main>
 
@@ -25,9 +25,9 @@
 <script type="module">
     import { register } from "{{.HankoElementUrl}}";
 
-    register({ shadow: false });
-    document.addEventListener("hankoAuthSuccess", (event) => {
-        console.log(event);
+    const { hanko } = await register("{{.HankoUrl}}", { shadow: false });
+
+    hanko.onAuthFlowCompleted(() => {
         document.location.href = "/secured"
     })
 </script>

@@ -24,7 +24,7 @@ import ErrorPage from "./ErrorPage";
 
 const RegisterPasskeyPage = () => {
   const { t } = useContext(TranslateContext);
-  const { hanko, emitSuccessEvent, setPage } = useContext(AppContext);
+  const { hanko, emitSuccessEvent, setPage, user } = useContext(AppContext);
 
   const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
@@ -40,7 +40,7 @@ const RegisterPasskeyPage = () => {
       .then(() => {
         setIsSuccess(true);
         setIsPasskeyLoading(false);
-        emitSuccessEvent();
+        emitSuccessEvent(user.id);
 
         return;
       })
@@ -61,7 +61,7 @@ const RegisterPasskeyPage = () => {
   const onSkipClick = (event: Event) => {
     event.preventDefault();
     setSkipIsLoading(true);
-    emitSuccessEvent();
+    emitSuccessEvent(user.id);
   };
 
   const disabled = useMemo(
