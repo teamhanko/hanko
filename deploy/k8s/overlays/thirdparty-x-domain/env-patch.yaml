@@ -49,6 +49,16 @@ spec:
                 secretKeyRef:
                   key: client_secret
                   name: github
+            - name: THIRD_PARTY_PROVIDERS_APPLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: apple
+            - name: THIRD_PARTY_PROVIDERS_APPLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: apple
       initContainers:
         - name: hanko-migrate
           env:
@@ -72,3 +82,13 @@ spec:
                 secretKeyRef:
                   key: client_secret
                   name: github
+            - name: THIRD_PARTY_PROVIDERS_APPLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: apple
+            - name: THIRD_PARTY_PROVIDERS_APPLE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: apple

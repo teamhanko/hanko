@@ -20,3 +20,6 @@ secretGenerator:
   - name: google
     envs:
       - google.env
+  - name: apple
+    envs:
+      - apple.env
