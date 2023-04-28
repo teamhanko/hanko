@@ -27,7 +27,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			allowedRedirectURLs: []string{"https://*.test.example"},
 			requestedProvider:   "google",
 			requestedRedirectTo: "https://app.test.example",
-			expectedBaseURL:     "https://" + thirdparty.GoogleAuthBase + thirdparty.GoogleOauthAuthEndpoint,
+			expectedBaseURL:     thirdparty.GoogleOauthAuthEndpoint,
 		},
 		{
 			name:                "successful redirect to github",
@@ -36,14 +36,23 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			allowedRedirectURLs: []string{"https://*.test.example"},
 			requestedProvider:   "github",
 			requestedRedirectTo: "https://app.test.example",
-			expectedBaseURL:     "https://" + thirdparty.GithubAuthBase + thirdparty.GithubOauthAuthEndpoint,
+			expectedBaseURL:     thirdparty.GithubOauthAuthEndpoint,
+		},
+		{
+			name:                "successful redirect to apple",
+			referer:             "https://login.test.example",
+			enabledProviders:    []string{"apple"},
+			allowedRedirectURLs: []string{"https://*.test.example"},
+			requestedProvider:   "apple",
+			requestedRedirectTo: "https://app.test.example",
+			expectedBaseURL:     thirdparty.AppleAuthEndpoint,
 		},
 		{
 			name:                     "error redirect on missing provider",
 			referer:                  "https://login.test.example",
 			requestedRedirectTo:      "https://app.test.example",
 			expectedBaseURL:          "https://login.test.example",
-			expectedError:            thirdparty.ThirdPartyErrorCodeInvalidRequest,
+			expectedError:            thirdparty.ErrorCodeInvalidRequest,
 			expectedErrorDescription: "is a required field",
 		},
 		{
@@ -51,7 +60,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			referer:                  "https://login.test.example",
 			requestedProvider:        "google",
 			expectedBaseURL:          "https://login.test.example",
-			expectedError:            thirdparty.ThirdPartyErrorCodeInvalidRequest,
+			expectedError:            thirdparty.ErrorCodeInvalidRequest,
 			expectedErrorDescription: "is a required field",
 		},
 		{
@@ -62,7 +71,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedProvider:        "google",
 			requestedRedirectTo:      "https://app.test.example",
 			expectedBaseURL:          "https://login.test.example",
-			expectedError:            thirdparty.ThirdPartyErrorCodeInvalidRequest,
+			expectedError:            thirdparty.ErrorCodeInvalidRequest,
 			expectedErrorDescription: "provider is disabled",
 		},
 		{
@@ -72,7 +81,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedProvider:        "unknownProvider",
 			requestedRedirectTo:      "https://app.test.example",
 			expectedBaseURL:          "https://login.test.example",
-			expectedError:            thirdparty.ThirdPartyErrorCodeInvalidRequest,
+			expectedError:            thirdparty.ErrorCodeInvalidRequest,
 			expectedErrorDescription: "is not supported",
 		},
 		{
@@ -83,7 +92,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedProvider:        "google",
 			requestedRedirectTo:      "https://app.test.wrong",
 			expectedBaseURL:          "https://login.test.example",
-			expectedError:            thirdparty.ThirdPartyErrorCodeInvalidRequest,
+			expectedError:            thirdparty.ErrorCodeInvalidRequest,
 			expectedErrorDescription: "redirect to 'https://app.test.wrong' not allowed",
 		},
 		{
@@ -92,7 +101,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedProvider:        "unknownProvider",
 			requestedRedirectTo:      "https://app.test.example",
 			expectedBaseURL:          "https://error.test.example",
-			expectedError:            thirdparty.ThirdPartyErrorCodeInvalidRequest,
+			expectedError:            thirdparty.ErrorCodeInvalidRequest,
 			expectedErrorDescription: "is not supported",
 		},
 	}
