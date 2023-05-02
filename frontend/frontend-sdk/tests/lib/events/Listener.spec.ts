@@ -389,6 +389,7 @@ describe("Listener()", () => {
       );
 
       expect(mockThrottleFunc).toBeCalledTimes(0);
+      expect(listener._cleanupFunctions.length).toEqual(1);
 
       const mockEvent = new CustomEvent(userDeletedType, {});
 
