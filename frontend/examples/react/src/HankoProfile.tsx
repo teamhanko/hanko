@@ -1,34 +1,36 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { register } from "@teamhanko/hanko-elements";
+import React, { useCallback, useEffect, useState } from "react";
+import { createHankoClient, register } from "@teamhanko/hanko-elements";
 import styles from "./Todo.module.css";
 import { useNavigate } from "react-router-dom";
-import { TodoClient } from "./TodoClient";
 
-const hankoApi = process.env.REACT_APP_HANKO_API!
-const todoApi = process.env.REACT_APP_TODO_API!
+const api = process.env.REACT_APP_HANKO_API!
 
 function HankoProfile() {
   const navigate = useNavigate();
-  const client = useMemo(() => new TodoClient(todoApi), []);
+  const hankoClient = createHankoClient(api);
   const [error, setError] = useState<Error | null>(null);
 
   const logout = () => {
-    client
+    hankoClient.user
       .logout()
-      .then(() => {
-        navigate("/");
-        return;
-      })
       .catch(setError);
   };
 
-  const todo = () => {
+  const redirectToTodo = () => {
     navigate("/todo");
   }
 
+  const redirectToLogin = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
   useEffect(() => {
-    register({ shadow: true }).catch(setError);
+    register(api).catch(setError);
   }, []);
+
+  useEffect(() => hankoClient.onSessionRemoved(() => {
+    redirectToLogin();
+  }), [hankoClient, redirectToLogin])
 
   return (
     <>
@@ -39,14 +41,14 @@ function HankoProfile() {
         <button disabled className={styles.button}>
           Profile
         </button>
-        <button onClick={todo} className={styles.button}>
+        <button onClick={redirectToTodo} className={styles.button}>
           Todos
         </button>
       </nav>
       <div className={styles.content}>
         <h1 className={styles.headline}>Profile</h1>
         <div className={styles.error}>{error?.message}</div>
-        <hanko-profile api={hankoApi} />
+        <hanko-profile />
       </div>
     </>
   );

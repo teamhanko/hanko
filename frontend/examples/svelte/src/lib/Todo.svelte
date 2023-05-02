@@ -1,11 +1,15 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onDestroy, onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
   import type { Todos } from "./TodoClient"
   import { TodoClient } from "./TodoClient";
+  import { createHankoClient } from "@teamhanko/hanko-elements";
 
-  const api = import.meta.env.VITE_TODO_API;
-  const todoClient = new TodoClient(api);
+  const todoAPI = import.meta.env.VITE_TODO_API;
+  const todoClient = new TodoClient(todoAPI);
+
+  const hankoAPI = import.meta.env.VITE_HANKO_API;
+  const hankoClient = createHankoClient(hankoAPI);
 
   const navigate = useNavigate();
 
@@ -13,8 +17,13 @@
   let error: Error | null = null;
   let todos: Todos = [];
 
-  onMount(async () => {
+  onMount(() => {
     listTodos();
+    hankoClient.onSessionRemoved(() => redirectToLogin());
+  });
+
+  onDestroy(() => {
+    hankoClient.removeEventListeners();
   });
 
   const changeDescription = (event: any) => {
@@ -33,7 +42,7 @@
       .addTodo(entry)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -52,7 +61,7 @@
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -73,7 +82,7 @@
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -91,7 +100,7 @@
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -105,25 +114,25 @@
   };
 
   const logout = () => {
-    todoClient
+    hankoClient.user
       .logout()
-      .then(() => {
-        navigate("/");
-        return;
-      })
       .catch((e) => {
-        console.error(e);
+        error = e;
       });
   }
 
-  const profile = () => {
+  const redirectToLogin = () => {
+    navigate("/");
+  }
+
+  const redirectToProfile = () => {
     navigate("/profile");
   }
 </script>
 
 <nav class="nav">
   <button class="button" on:click|preventDefault={logout}>Logout</button>
-  <button class="button" on:click|preventDefault={profile}>Profile</button>
+  <button class="button" on:click|preventDefault={redirectToProfile}>Profile</button>
   <button class="button" disabled>Todos</button>
 </nav>
 <div class="content">

@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Todos, TodoService } from '../services/todo.service';
+import { HankoService } from "../services/hanko.services";
 
 @Component({
   selector: 'app-todo',
   templateUrl: './todo.component.html',
   styleUrls: ['../app.component.css', './todo.component.css'],
 })
-export class TodoComponent implements OnInit {
+export class TodoComponent implements OnInit, OnDestroy {
   todos: Todos = [];
   error: Error | undefined;
   description = '';
@@ -21,10 +22,17 @@ export class TodoComponent implements OnInit {
     this.patchTodo(currentTarget.value, currentTarget.checked);
   }
 
-  constructor(private todoService: TodoService, private router: Router) {}
+  constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
 
   ngOnInit(): void {
     this.listTodos();
+    this.hankoService.client.onSessionRemoved(() => {
+      this.redirectToLogin();
+    });
+  }
+
+  ngOnDestroy() {
+    this.hankoService.client.removeEventListeners();
   }
 
   addTodo(event: any) {
@@ -35,7 +43,7 @@ export class TodoComponent implements OnInit {
       .addTodo(entry)
       .then((res) => {
         if (res.status === 401) {
-          this.router.navigate(['/']).catch((e) => (this.error = e));
+          this.redirectToLogin();
           return;
         }
 
@@ -54,7 +62,7 @@ export class TodoComponent implements OnInit {
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          this.router.navigate(['/']).catch((e) => (this.error = e));
+          this.redirectToLogin();
           return;
         }
 
@@ -72,7 +80,7 @@ export class TodoComponent implements OnInit {
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          this.router.navigate(['/']).catch((e) => (this.error = e));
+          this.redirectToLogin();
           return;
         }
 
@@ -93,7 +101,7 @@ export class TodoComponent implements OnInit {
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          this.router.navigate(['/']).catch((e) => (this.error = e));
+          this.redirectToLogin();
           return;
         }
 
@@ -107,16 +115,16 @@ export class TodoComponent implements OnInit {
   }
 
   logout() {
-    this.todoService
+    this.hankoService.client.user
       .logout()
-      .then(() => {
-        this.router.navigate(['/']).catch((e) => (this.error = e));
-        return;
-      })
       .catch((e) => this.error = e);
   }
 
-  profile() {
+  redirectToLogin() {
+    this.router.navigate(['/']).catch((e) => (this.error = e));
+  }
+
+  redirectToProfile() {
     this.router.navigate(['/profile']).catch((e) => (this.error = e));
   }
 }

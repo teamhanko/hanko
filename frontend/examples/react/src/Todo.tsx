@@ -2,25 +2,36 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { TodoClient, Todos } from "./TodoClient";
 import styles from "./Todo.module.css";
+import { createHankoClient } from "@teamhanko/hanko-elements";
 
-const api = process.env.REACT_APP_TODO_API!;
+const todoAPI = process.env.REACT_APP_TODO_API!;
+const hankoAPI = process.env.REACT_APP_HANKO_API!;
 
 function Todo() {
   const navigate = useNavigate();
+  const hankoClient = createHankoClient(hankoAPI);
   const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
-  const client = useMemo(() => new TodoClient(api), []);
+  const todoClient = useMemo(() => new TodoClient(todoAPI), []);
+
+  const redirectToLogin = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  const redirectToProfile = () => {
+    navigate("/profile");
+  }
 
   const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const todo = { description, checked: false };
 
-    client
+    todoClient
       .addTodo(todo)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -33,11 +44,11 @@ function Todo() {
   };
 
   const listTodos = useCallback(() => {
-    client
+    todoClient
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -49,14 +60,14 @@ function Todo() {
         }
       })
       .catch(setError);
-  }, [client, navigate]);
+  }, [todoClient, redirectToLogin]);
 
   const patchTodo = (id: string, checked: boolean) => {
-    client
+    todoClient
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -68,11 +79,11 @@ function Todo() {
   };
 
   const deleteTodo = (id: string) => {
-    client
+    todoClient
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          redirectToLogin();
           return;
         }
 
@@ -84,18 +95,10 @@ function Todo() {
   };
 
   const logout = () => {
-    client
+    hankoClient.user
       .logout()
-      .then(() => {
-        navigate("/");
-        return;
-      })
       .catch(setError);
   };
-
-  const profile = () => {
-    navigate("/profile");
-  }
 
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(event.currentTarget.value);
@@ -110,13 +113,15 @@ function Todo() {
     listTodos();
   }, [listTodos]);
 
+  useEffect(() => hankoClient.onSessionRemoved(() => navigate("/")), [hankoClient, navigate])
+
   return (
     <>
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
         </button>
-        <button onClick={profile} className={styles.button}>
+        <button onClick={redirectToProfile} className={styles.button}>
           Profile
         </button>
         <button disabled className={styles.button}>

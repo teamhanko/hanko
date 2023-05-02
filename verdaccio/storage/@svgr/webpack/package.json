@@ -1,0 +1,4322 @@
+{
+	"name": "@svgr/webpack",
+	"versions": {
+		"2.0.0-alpha.26fa501a": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.0.0-alpha.26fa501a",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0-beta.49",
+				"@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.49",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.49",
+				"@babel/preset-env": "^7.0.0-beta.49",
+				"@babel/preset-react": "^7.0.0-beta.49",
+				"@svgr/core": "^2.0.0-alpha.26fa501a",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.0-beta.3",
+				"memory-fs": "^0.4.1",
+				"webpack": "^4.12.0"
+			},
+			"_id": "@svgr/webpack@2.0.0-alpha.26fa501a",
+			"dist": {
+				"shasum": "5efac1a3facc075e71d7fffca5dd1281ad80539d",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.0.0-alpha.26fa501a.tgz",
+				"fileCount": 5,
+				"unpackedSize": 5939,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbH9SFCRA9TVsSAnZWagAAmEEP/iL8i0vfFew1SKK4ck5H\nrmtmPPn3QYzadVz2lL6CipOh1Ml7Z/5bTFp4XYzzx4LKTy/l7ArmtUjedCwD\n+nEb1Fls+sdrR0LkAq4jQIAYJ0yicYdpFJ+DZez4ytv2fmtQDn6fzbS1lcCN\nUHiUhNHm2QzWKe4BX42kS5W+1N8ErIglA9jgoJK8OnN95mfXAIU0JpLU6Bxj\ngh7cEzYXfNoxVeho1PugynT6PmXMgoAFMISjL+dOj7stodYFCKZlqRMIuS9M\n8bsqKsYFE4N7hgyX3LuzqLlaqvb9dZdR+waF7vXJEq0JiH86mk0GE7/6EzO3\nUeac8DYQZT4G0qcjGKEAZVTsRzOfZ7mEHimIIaQas54Ppw+eXUVFXWz7qKzd\n1fVBGmcKP2l3Z6s92JON5HDQXNNYKJ+MEJYpuP8BnKTdlhTJ3Kkww66RyxY7\ntZfJvzC5l1C09BpAA+qzFMa1f7ANNgQYKbZp6vLhKGpLG5ymi28GXdZGCQEM\n+P2o5nlAJlPYIPOdTN5Gk3QIWnnXABGUnsCssZa95DB1fIKArQTaesB5cUR3\npcKhWBD6xSvZYn1wsS7jn+CcLZb7tmdZpNOXkvVEV6Gea2UzuFAEHT7KOGw2\n2duwffgMGgRdFSPVWYX9/eCZ+4cvfNAiIcDFuiFsr3GKEru/dD2tWx7xgHXO\nDpjy\r\n=1dAv\r\n-----END PGP SIGNATURE-----\r\n",
+				"integrity": "sha512-H4Ivq4x+JcQyzK/yZkw4lls+CyVZ39N7zsr8b5dqyiac/5AlIAx7s1gC/TaWuT3oHA/cLfU0d0XbV3oNrI6tJw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDfcOiGBy3DzLSZgBsqa9uw6nLaA36M6BrbHn+0HTNGnAIgYhah+WALL7Ri4RbOoP76+HcQHaDvs79HHeG8ezV2Pvo="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.0.0-alpha.26fa501a_1528812676841_0.8884996298952277"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.0.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.0.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0-beta.49",
+				"@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.49",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.49",
+				"@babel/preset-env": "^7.0.0-beta.49",
+				"@babel/preset-react": "^7.0.0-beta.49",
+				"@svgr/core": "^2.0.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.0-beta.3",
+				"memory-fs": "^0.4.1",
+				"webpack": "^4.12.0"
+			},
+			"_id": "@svgr/webpack@2.0.0",
+			"dist": {
+				"shasum": "dc8a5fbda18b7c1ea08431ff995f7a5df80a4fb5",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.0.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 5860,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbH+xyCRA9TVsSAnZWagAABpkQAJjnIUR7t3D7jpkjTm2+\nrWZeF/fKeHhBvgTXGRCBzd2yyedCh89v5HFoBsHcK7Gyp18IdxVQT6DQ4Sds\nCUR4OBjDcImi/DfwkiOWN8/N9OSjJc3GnvSu3F5Rkv6+GDA5s40fKMv2/MZM\nKmUtAfakwLhkU5XzYX/Z1VR16t+mDcNgOKS/HnVB6tq8IpoFXWmZFtarpSkk\nIy2Y0wmh2IdBMTsub9Dq2V9pPcbbg+C4fX7LYqqSksXgO/uSmahJkJDpna9q\nXpvwEmHlRiuMNJfqh5MZxo6UreXC79NC7uFdoEKp0A9RskWD7YGJpxAuhQL3\nJ6aUokOmP0c81aAyf6w68/PY7mGrZJbd/J4Qw4KtPgMdWVXlHV2azfObi5jb\n/ZL06q9Vo7Tuqp4049OTDnLPMp++nojaiWVZEtIDq5e5k+9V8rXk2jmSfA/s\nE30pEpnfRWMgDJ7Ytd2Z2oebbuvXwCn+0iAO/o/KouvTiAuZLF777Sy9/fhS\nCwyOx0C3PSUrRbqoY1hFhfOFqABIcuOGWCWgBn75dhehzUnt2XqEApZhz28A\nDdORy7En6ARsX7zKZsS5arhXAahTmv58GVsswz3kXcXRIpr7kMp+Wkx3m0xr\nCGwJin07KrsEKsIq8niftyYvbwxjeLCBucAYHCwREUV1cBkbHgZ6Pw4srLNI\nt/P1\r\n=faQt\r\n-----END PGP SIGNATURE-----\r\n",
+				"integrity": "sha512-t6tqRSuvXcffsSSBIKKFraVRzh5K5Zf3cB1MEpHhEeUY0qaF+ZDfJ20W0+0dd0CdoFDh8nULROFnuqAKdpZpbg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIFpRoJWBEMk1nCYADNwZ4FmlIr0XwJ/BSU+Bfa+KtgZ9AiBVZkbYuWclSp6SZjWGnAz/fimL/Fgzs2hkI3TcA79cOg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.0.0_1528818801724_0.6114197856281343"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.1.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.1.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0-beta.52",
+				"@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.52",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.52",
+				"@babel/preset-env": "^7.0.0-beta.52",
+				"@babel/preset-react": "^7.0.0-beta.52",
+				"@svgr/core": "^2.1.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.0-beta.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.0.1",
+				"webpack": "^4.15.1"
+			},
+			"_id": "@svgr/webpack@2.1.0",
+			"dist": {
+				"shasum": "5ab9ebd374dacbee782a161ef7557ea7e9272e37",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.1.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 6218,
+				"integrity": "sha512-m3DBSMiAGGCw/g/PD3g3BEKPRVtN+V49+PPMocJYZBpLNSxCfJsULWNlShjGG/FlD9G4YkM4Zp/6Ba0wcAHQ1Q==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDSbwI72Dg4AhVP9nqZoEjMH/7d1mEPYPZZCDTJV0G7xQIhAKKNENb+fwhv8+fAZjlM9MpLDY056Z9EB7pd8ivBd+pz"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.1.0_1531085448492_0.7780900289695953"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.1.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.1.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0-beta.52",
+				"@babel/plugin-proposal-object-rest-spread": "^7.0.0-beta.52",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0-beta.52",
+				"@babel/preset-env": "^7.0.0-beta.52",
+				"@babel/preset-react": "^7.0.0-beta.52",
+				"@svgr/core": "^2.1.1",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.0-beta.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.0.1",
+				"webpack": "^4.15.1"
+			},
+			"_id": "@svgr/webpack@2.1.1",
+			"dist": {
+				"shasum": "ab70286a0ad0ae79a446c580152eb184b68f1aa5",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.1.1.tgz",
+				"fileCount": 6,
+				"unpackedSize": 6383,
+				"integrity": "sha512-LDZr7dpR0mIa/b54vd/23JgulFengOnQup/4htiWlyEIMRyh9dtcyoWsYU5VW4ONpD6f0sHCET/NgdDNc9MDqQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIEHAuZikpF6uuQ0UbJlBVqO7/RhgxJHJAdPDDAmcI0EFAiABVLoLsSH8v5P8iPS2RG4L9kUQOg0OvQcSoWVKc3Fa+g=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.1.1_1531323512269_0.14853865612992911"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.2.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.2.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git+ssh://git@github.com/smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0-rc.1",
+				"@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0-rc.1",
+				"@babel/preset-env": "^7.0.0-rc.1",
+				"@babel/preset-react": "^7.0.0-rc.1",
+				"@svgr/core": "^2.2.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.0-beta.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.0.1",
+				"webpack": "^4.16.5"
+			},
+			"gitHead": "c7ab92b534b0e099670bb9c826e2ffe611a8926c",
+			"_resolved": "",
+			"_integrity": "",
+			"_from": "file:svgr-webpack-2.2.0.tgz",
+			"bugs": {
+				"url": "https://github.com/smooth-code/svgr/issues"
+			},
+			"homepage": "https://github.com/smooth-code/svgr#readme",
+			"_id": "@svgr/webpack@2.2.0",
+			"_npmVersion": "6.3.0",
+			"_nodeVersion": "9.11.1",
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-bKih9NZ1fxW5hSkvtkv93sIriSxHM2t15+qw1QmOEb8AufV30gWSL4WYOKNryksmEvRgEsKXAQ+IyG3QQoHUpg==",
+				"shasum": "f7fb61f8d358db3122dd65995710e9dcd597d896",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.2.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 8062,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbcbJECRA9TVsSAnZWagAAV4kP/1DwKGF13S1HfdP7z3AX\nd8+oVaXCI4Tx0dHgLeJbeV5b6XZSABm9Gxa/yoUzB4E/FV7tybUWsDbsnP4v\n3YdYQn4xbMTdc0gLIcu23mLa0k+vgCy6rO7s/FCLX1k4wrvLvdamRDUG4EO0\ntHqyyGDSg/RUQxTDpjITWXaj4ZIs7naDrnqWS1ufW49keqPD4wmQkHATsGF3\nZw+b1POZ4Ru07BpXOknHeLd/AH+GKAau0xSR8OyIXHDlyzz80ufxl9V+QTnE\nemKKTBApyqpAzr10zKw0ZcXO0KQmD+U6sQTPVOjdLvwaTZHYnnsLXL9pFHdv\nDdqU3qY+WVklF5F6lre/Q3hMFYhbVICj5YizszeeWWAVVRhro9EZWwYwnC/h\n7MDFH3BAgK9s2fawb1NWiNQFe7Aq6yz47DY3W22EhIH7kZd1vzDzNPg5iKjl\nuX9dHq6n6gKwQ/I9hIseVOMM6Xw8r5/s2+rWUM8K2764B7sGYZaiKo9r+bgo\nZUbfNFJFCXky60xt9LUjMyOEGvK5pBL8yaqE3+Xd90MSgVhiPj3vZVr6suQz\ne057XJnLZ06Pqf9h/emNYvkmXMJAESRt4W7lzK+ZBQFqse6KKybrg+ojRGck\ncmBmueoGE+4nddcia5ZlPaIPOp+/ZSsmvP/j7aQe9PYApLo1jhq6DwPgtNDr\ng1ry\r\n=dvI/\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCDbQvuesoCPMz+l7SZQSrSrnJqi799yXBBUkXJlQ+qlgIhAIjtY/9glE1husw/LkFJS2fkbqYRBFPE+866Dgt2lHbO"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.2.0_1534177859941_0.15485347738138122"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.2.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.2.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0-rc.1",
+				"@babel/plugin-proposal-object-rest-spread": "^7.0.0-rc.1",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0-rc.1",
+				"@babel/preset-env": "^7.0.0-rc.1",
+				"@babel/preset-react": "^7.0.0-rc.1",
+				"@svgr/core": "^2.2.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.0-beta.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.0",
+				"webpack": "^4.16.5"
+			},
+			"gitHead": "9a99610f99c592d48060f75d463f7c2dafc96894",
+			"_id": "@svgr/webpack@2.2.1",
+			"dist": {
+				"shasum": "c2426674bf4d3110b157a10a4b06cb26b18b1db1",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.2.1.tgz",
+				"integrity": "sha512-1fcf+1ouWf560bFUXPOFS2KF177v6SqtkVpoq0+64niedN/WIeRnZUY4ghmOVUcH2QA9g3ratILNqw2dahO/Vg==",
+				"fileCount": 5,
+				"unpackedSize": 8228,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbdUMFCRA9TVsSAnZWagAABgAP/RL0y23XzAcLy9fnxfo1\nWKKu7v+eLw/6+B7jQVwkMkwlBuPirk1xGtJkXMg7P2f0E0VNnyNKCzyQUin6\neNKf6qp8rOT0irrr3hqKXS5U7pjdAZwjI6aNmBQbjGBKwV29FaF8hyf6Vuib\ncD8Hw0GHhpo3W080TUg+CUrbYm6wcpN5Z/Ol/lFgFwTmJKJAkUztDgwb4/9F\nm/N/4xO4ATTKc3DnuaEwGIjUVsRHIjxlF1OmG5T2l5ItKfgr94lcyJsmYTRO\nXIrnFkAZnQnX6nTx7MBlDLSzAWDUfX0769ajaQ1PAn0Hgb7EEMAdndHQ7kmU\n8no/gy62edXMeIA5V/qCtPHXzOa+GKr4Hn/lpr++JlhrIaxlgP3QA0WV5iBL\n2PWBQJB0B/BqiKQpmuN/gNeLB6hoL+9/E/xc89WGivuxrJdQHIF8Wht+BD0U\nj6fe6bk8MK6KmLUGDoDc/MKA/vgus+2YNAv8ktka77yJvz3qLH498z3MkpAk\njpThj7nmGCYxnZ1GcRsKie81z+Ngold7EO5Y1LDjl8caMkVmUw8TvS2nPrd2\n379XAVx6Fd3MT9mtfvK/BYui4PLsDb9X0uU43nBY95FIu3zgASTyef5Phf1q\nJoJ3ZdJp+ITDa2ye8FUC8jCO5HU72ICSwPCJjsjDDgx03RJlVYCD4h+UcVSF\npjjT\r\n=O/CL\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIE7AyEcPgXTQsKot8mINkmjvN9E+1OFONwKEuPvtkVXAAiEA+47wI2kbp8T9pXlgsHG0EFdazB2lYn6TXLZTvZVuUq0="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.2.1_1534411525273_0.6770000605995519"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.3.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.3.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.0",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.0.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^2.2.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.2",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.1",
+				"webpack": "^4.17.1"
+			},
+			"gitHead": "d1ae730fab2aa391f2f5da41ce01233257aee074",
+			"_id": "@svgr/webpack@2.3.0",
+			"dist": {
+				"shasum": "3b688cbdf8a57cbed2e3bb4bd90abbafbbcb7e34",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.3.0.tgz",
+				"integrity": "sha512-e9YIh7jpdJI5cuY+R/8M++m/CXzVl1DNH3AYObY9CbszxShJxvYtjicgaf/1JhvKFHOFXdYOanKQDiXxBzt10w==",
+				"fileCount": 5,
+				"unpackedSize": 7815,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbjQ48CRA9TVsSAnZWagAA7DEP/03qtwmtnxu8KSK2af9t\no75hTpPScF+SAT2ndbvJOfWjb7erhIkdnJM7Fyr98Ozd76vEJaCUSDfZJohd\nVGd2jjTI4vTAZ/3uGssaxdtqu90x5ed76JfnQOB3iF1gygM/wjAzUf3Wo+6y\njQZFsZx11XRn8YrKxmDTarAQGTrAK0ydfjT0Q4hIT5c2yccIjidNhH2v2VI3\nYOEm3R8qWSxE5aVz7H/movdEdYsX5DSjjtS2qKaJsAq3Ebh+/vc25TMI824c\n+7ymVve3dWAaKqycnMpj47Tw9bdV1K7bqQofccy49OpzMms4VRBgPheeOMUT\n2ZSfFtje9Np8HtyakFnAdHJn+55eZUuyQ/Bpap3kwCzVfhb3f3i/ptj8OF47\nFhk82GMXj6wRjWzGLNcvv03w/+UcHRFFi8gyqBezFqHkbK8PBaY3yN1kn7I2\nsWTSgHpo1FhZJ1wFZDg6etF4HALT8ycNp3rPFWE/WXg9iCQmuthDw1Ebo6OD\n/zBCe13DMBAENN56E+KZLG/XJhv7NceQrKD/Y/JNltWTU4LNJ6dqUAIWDm1Y\nPvrzdrE9mS0hvkp+gtSdCwezjKBbCicDgbm9eSqo5DQnbtkFD6TYmw1szcgW\nDbZtv2bYmcGvoATVovb9YV9Vh6kh+fM3lvPctMNoEj6RV+g7xXNlOoB2pb0j\nsA/V\r\n=syFD\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIFqj5HAhf+B7f8yfvKvt059CqmOB9r20F8gpA5rPp6yOAiEA1eOa68yY7vjFH9hVa9dKbFckY2LHMBvLf6POLaLkvKE="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.3.0_1535970875814_0.3085775214401485"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.4.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.4.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.1",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.0.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^2.4.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.2",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.1",
+				"webpack": "^4.19.0"
+			},
+			"gitHead": "d84e80fe460f194653e79504bf9a4e733364fc26",
+			"_id": "@svgr/webpack@2.4.0",
+			"dist": {
+				"shasum": "8ab2e71f27fdc60f0416357aeeb74fcc13eef10f",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.4.0.tgz",
+				"integrity": "sha512-P3rOfnMUx5XMiYfbdX6KdIdQEZzU/y5MFjASwGGNmWfDOmfJXLgtopqX0Q+ZDV2+zMuF7Gqz1OYMkeYDXC0Qlw==",
+				"fileCount": 5,
+				"unpackedSize": 8054,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbnnhBCRA9TVsSAnZWagAAl00P/0jvTfVtDKw8sN3kGmks\nZ7CLg/LpQ8xGXStndNg2peTx/IXmCroxsRLD3AfQUKWceHM/Rt+mEAHBydaW\n2oQamnWbg2+yX4B1pf1Zypq4dJsMeDqkLPZhAhBV7szbmtKE/4Za5uSFHTok\ngnmt/61AMxGqqULu2fx898GlfGrnBtfsJUrZj/pb0u3ovUszVFfntNqYkuH4\nmsVRXmWPIuVbDxqacTuDNEezDZJO0B4AP2AtyrzjxmaIYPuI11CSY4ZJjk3R\nCuBhb3LUnX6qGukEE0GbMPAQuZMjCVUEKS59leNIDPDFX247bn2i4gol5RTr\n29goIJ2CYgbeuYitC759kLKfOx4Vn+cbtDzcZis9qopRT66RnOl7ntn9qpQD\nFoSxUhdY2q02EDI5t5+npIxMfjsoGSANGMmWd4Iy0b4LReMqKncAnS/R3S19\nnvX46VmepQ0lZtJTNCCvYKfjxfLJXA+thL3XN9K4tpR1Y7Ln1v9qxBV852PS\ncvAf5jpBMbLyTqiArReljrb0ZfyzR/wiwOE8kHQkrjx/97elUvdvSKri0qqp\n13Ovt5nwdKjwaZkQhAwrkxb9O/S1/KS/L22sD7nA26QFMyR/MjG4Rlmx47wA\nsUSWb0R7ehk3UN5S7Cg4qBmyv781eRL00KGOleeLVeScWgO2E++yTzfCcQqY\nL8iW\r\n=b0en\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDIpq3ypbsWF2p0sDt0sVOpwcG8+TU1qoem0Df65eWg4AiEA2VKByYu1t68YTF8tomdDhiTuN9bXxvm1fuBJULjnLjk="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.4.0_1537112129143_0.5909996162386224"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.4.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "2.4.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.0.1",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.0.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^2.4.1",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.2",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.1",
+				"webpack": "^4.19.0"
+			},
+			"gitHead": "8683967eba69079e1ce0fde9de340a6bb16cf433",
+			"_id": "@svgr/webpack@2.4.1",
+			"dist": {
+				"shasum": "68bc581ecb4c09fadeb7936bd1afaceb9da960d2",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.4.1.tgz",
+				"integrity": "sha512-sMHYq0zbMtSHcc9kVfkYI2zrl88u4mKGyQLgKt7r+ul5nITcncm/EPBhzEUrJY5izdlaU6EvyH8zOhZnfaSmOA==",
+				"fileCount": 5,
+				"unpackedSize": 8220,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbntN1CRA9TVsSAnZWagAAABQQAI47Swh+sCfn5LW+SSXb\nDYtBkR9UWOFF7EAI6mtqNs04iRKqQdmyxyMrxrAzoxMaRZx0C+Lq3QMZ5O9b\n8FZK5grPnNUyV6Yn5ejuTPxdYk+yl95qu8mPDqSRuxu7QyRsr7VAn5rg1K1M\ndP2ZHBAUb6vvoDs/4rUbvLZqJ5RbHSpQbRo47KzJq4eeB5XzHlRXGQI0+6Z2\ni4U5Qft8TNrq87ypUwR+pJUOUgsc1kNCJ04CGjSdOr+/F4AMq0AU46X8zsU/\ng2vxrhaPwR2P72ejoucKdOV2ZBcfsHHwMp6KoiIaHRqUd0ukq+nTz1/OuqYp\n/tp9bUbRxEM4vRzxlpO/cpVIlG7aYL02vA8cm82aFcHrpDy5TMPcT5egqFy2\nJiJymF4UxPZtPbSzRAm5ewtGyBecKvfYrp8xwCd06ywAn21G9GhN5dYlPu1z\nyqy/iam43BTSn3eTrt3nNdb+n4q/Ej0VNrI3Jd7WRDmXVdsDrFKf6MiYO8lH\nqW7ZRiUhbKMiX7yR0SKJ7mT/skSE2hEuy7ChMIV+VPSBzz/JrF3r3Oft6CJ8\nXTd+SySdCnPIYNZclGJlTVzk7OZmr54NuCzcukPBLda2Ni5/o6xZ4UxqNg06\nnv346nnBrgbNUVfC4li6WpzvOP0Y5kIACkceuKX9n7Tc4x1sgakAQwtZvtEu\n9Vug\r\n=BCWl\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIHpkPT19nR29jKfW4KEWBGu38NOPPop9c8V2FdHS5sBLAiBVKnJ9W70+rMSuc1A5frh/Xw+tu+FZCwqdfb/ScG/BgQ=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_2.4.1_1537135476719_0.9215289360764529"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.0.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "3.0.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.2",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^3.0.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.1",
+				"webpack": "^4.20.2"
+			},
+			"gitHead": "a4e63f058e8e0e19b1802cef0015d97723721a3d",
+			"_id": "@svgr/webpack@3.0.0",
+			"dist": {
+				"shasum": "edfa25cc2f0d1d689f6008d9d3b2d5a9f69ff28c",
+				"integrity": "sha512-W5Ih/Nb3nkmABLPxd8SbJ0vg5mJ1MrRnjpnCBBULLIb5a6VLAPx40hGukLszdrS556OxsOSTNUPhJFpa9EcZbw==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-3.0.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 8894,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbsmH0CRA9TVsSAnZWagAAPQYP/0UyYAapChfwhB/l9Y2A\nm2xC2L/Vw4DPLxwSl985kmjMe0gMdxScSK5+WR1DkbBV5xKtnnAh0RE4ZU9M\nUazC7HzqBAtuRqnXaIBw3S1X1oPF65uMRbUL7LLJlQohqzBdkDFU8vauu7d8\n7oKPR6xgB7fArbPzq8rBtbEhw1BGAdDD+bj8B3BqwCZwQOhtBNLzAnEtfkbl\nFrN5Jyf/5YlM0KMkDwE+0s9pASrj+VfJXmqSGXmIOkvcg7TUz0c9n/6znRlY\nwFPRWMuju1Yzca6pHG7p5b+//Do37MEofoMSSi2E4HcvEKjncv4yWFsg7EER\n1CKbX1OX3pQtD3kj4jL7mIiIl9ZETs8UZ+hiproy50h4jK45H5yE7NLULGze\nccV4gsxBoRm6lEoqtDvdUiNQfV1TfJRfdyKfMmSOSHoYdRXh+yxp0LKoNYUN\nbNGoxvkVs3nlAmWiWy6sFBXZ6MgDutsKf1IU1WZmQkBoXrhCwc6151cGbtvz\ntP+0UFYDs5CTn1jQFxQqp4uwtSATAGUiQNc25bCIu6sSagstrNCluC3ILoqv\nLzbnPbhpTz5E73Pd+efeqqn3ed2n1CfL6sIuEVpmZAZ/fmLS7tPGpJ66Qc+G\n/vFdLI5XjF/gY+95F94iKzI091OQ0Pb7B5TZZXxj6dtTNLWSd3trUByg3GnW\nOjr8\r\n=pWxe\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIERjNsdY6YmbmEy27/p+pZKN1k981bzAXdsE5bC6uA4BAiEA1/RHMfxdfVvsbENGuiVVesxKB+TXXIp84mhQln15mII="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_3.0.0_1538417139527_0.6729711795143929"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.1.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "3.1.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.2",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^3.1.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.1",
+				"webpack": "^4.20.2"
+			},
+			"gitHead": "62c78151dcd9c0b73196f6d3f859e96c5a25c9a4",
+			"_id": "@svgr/webpack@3.1.0",
+			"dist": {
+				"shasum": "030f22ac2eaeb88bf788a43998ea2faa6a7f6fce",
+				"integrity": "sha512-vTJdMmXaq6pCcsGhdeI64QZ0MxiXBJHQ1cfZrLDFFSsg2Vo/usiT+ly1rdfX74pG4qufTc7in68lJi8SRHjUAg==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-3.1.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 9038,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbt7gECRA9TVsSAnZWagAAhqMQAKKzUDmqGll+fjxmmCp9\nFvxWUyJJRp40cNdibibjdjxM261pECqM8hJum8SvGvM/ryIT4qiYzmo8H+tF\nkdRgt0P+RlgWjtt/SmAAmh57qNyDeXuJtD8BsLJFUVjKa9Lb/S/hJWgvXwoO\n+hxrwL520ZX9eb4a+A3ayQmJj7HOn/PCRQcPblvKSxfL331mDL5uzOA7pP38\nKFnCcCiv5HABi/M3cullCbbPSWMa+HvikvaNu2RvhKJzgS0Pir/8Js2ah7kq\nQ4egdjtfMyw8TW69gGvPfzJr/S+13SGeNucUA+swrnOhpMeZnZzqOsHLBZR/\nywsASKa9Y17cVOx1XswEMFSkulUPgIbkotjol9kpz+D0gpAVVEy8kY0OfK04\ne0wvl6Xg3e5uHewADkpS9/1V/BqNwjk6IuNiAgYLwLhmlCRaJxkSSz1NfCDI\niRbZ9EKXdTp/O/kb75pyPMbjsVLxx+412/XXco8y5u5uHRTy2eZYduw/OToB\ngTUaRSohXQl3TT+rRvyW/WSIFgJtMhSHOSm58zm1JfDR60JuMigrgtuIlrVb\nUrGfBFhCeUY5PZWVqtZ4RPTYCAv4L/Vo9BPYeuoYC8T/+rb6+Ezk71EZy+LE\nbRg+fKJwRbs8Q7OW3TC9RAVbH/V64Ffapkw5zOg1owOUcHCBhPpFumCw9NtD\nGF4f\r\n=TRtd\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCID1J6lscp50nf81bc0yeuf55Kn0m3foTyN5UeAEPhikeAiAETKZOdkxQ2dh7HUgDhMzTbpxU/dwctazTno87OVvZ1Q=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_3.1.0_1538766851358_0.4601915444014195"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.0.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.0.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.2",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.0.0",
+				"@svgr/plugin-jsx": "^4.0.0",
+				"@svgr/plugin-svgo": "^4.0.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.24.0"
+			},
+			"gitHead": "d6beadaa9943157b59c085f03a45813897cc337c",
+			"_id": "@svgr/webpack@4.0.0",
+			"dist": {
+				"shasum": "52b8f2ef0b95bbf3a4941f019529c613606cca1a",
+				"integrity": "sha512-o0W96OR617vIaTb/+x7c5Ju6pIuwHwn13C24MfJAP2Rtbpzq36i+Kau1H+vsZIwpIT4Whe+tC9z7H/wRcS4xlA==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 10089,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb3w2pCRA9TVsSAnZWagAA9TQQAJfe1TILdeVEPr9xGyDR\nQf7sjFJKGbH0v//Cya9uG1kXH04kQ10vzO7GokRcwPLb5GK3Ea9QN20YOdcZ\nCnVWV24GO7/oU9jr6kxqzKOp/zpC/CJnIGARr6C7mh+l/TpwT4axnT3uP5Ww\nKyCA8BlmeAP5qEncYpr2JGkRjW1Q1Gca87f5KQChVOHudAVLzjt4HmP+2xoG\n993yxvg6OjMny6hQxW3BMOFnNzQRKkjj2FD1C+QgwuB5A1/Uo692d+lqUFs3\ntk88DnAUWGBby81Nd8NHJIJwXkqHyONsZ8YV0U/oxZj6cela5Zyrmz57r68+\njL28NAAnv0mbUZWIoLKd3qwC2xpIkZQmSqIb+2YnzuTokP24GCAEZWNozI3M\nTb7lakQ8Q3J79VwIwRdcaMcQNZb18M1T3guwW59BPCvo6/4Xxv2GXLpwPEzw\nJKmW/tZmuWM4AuHF0tCGw5y47LQRUde328YT+iH8qL7M/f+Trj0sZTsSGKFs\nDaqgCqcqKmMvpUL2TWPyl3Bvs1F/M54DBSBRjdoVkVQI+EjqYex8KJ+Nf7ht\nOU5Hz0HrUXIj7qv7D7vrN/3lRqf5uGgNBlUfn6fOvQE/Cc32y2NMXreUXrXV\n9r9weeqiR08HrjuvA01+VhiKaqI4vV7mzbUt+ooRBMZW9ucndmc3ncL08yz6\nedX+\r\n=wvD1\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIAu3oy+bvzOQ1HslZjP9JOhJsWF+qrTijVmHQu4xETjSAiAnOY2hxXQCGwgHhzQ1vzdEPFueTZy+FfUk3vcgQWDUmA=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.0.0_1541344680415_0.5862228972865229"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.0.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.0.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.2",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.0.1",
+				"@svgr/plugin-jsx": "^4.0.1",
+				"@svgr/plugin-svgo": "^4.0.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.24.0"
+			},
+			"gitHead": "fb2511c8d1a3da712442fc01b33534ede6c2a857",
+			"_id": "@svgr/webpack@4.0.1",
+			"dist": {
+				"shasum": "19a1b5b865c6cc25883debf7ccfc5b94fdac85e3",
+				"integrity": "sha512-JV2y28S1r9rdY+S76dxV4DcLRFlgQTvoCt2QsyIV/Jmso/KNCDwcg3u1gnmJxcEZZofXfwxZkGz7a053wz698Q==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.1.tgz",
+				"fileCount": 5,
+				"unpackedSize": 10234,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb5ES3CRA9TVsSAnZWagAA+MgP/1kp4rr9R8Oi5hPuKfZ+\neZPnkA6CzZhyOFIRFoA0bNqDURj62f028ZQvFXEF8GTdXGCTuYgN57pk0pOl\n7cwG10MiNhciYrAVzWnxGdOAvIuOT8liW7WPW44gv7AmS6nDPA+qVhryg9FB\nHdlPqmaeOsZoDxr4J0zpfY9zBNCaUrxko3ahYloyda2EnbaPhWA441KRZLo6\npCLoy2LmF46ZHzgMecGUEB/Dp/WD1GCWKLQsQANI45mab9GEquEv+gOkTcNd\nrC9ILhYv6IfdikTe3niagW653Q17pGDGNBCm/fpTiBASnZbmmVHsrNXZEwct\nG39hE9+bV+lVlZSotBtl96AflVJKm/1Mk70jsqNdAyM2jShTJJ6MMKZqTUy5\nlCciuZsvIwaDVC34j/ofHdGrCu6fy5fI6id7/v/6+lQxWz8Y6VeAm6+9bAoR\ntT2PgbXwP/aYvvO+3S2HaHO9+7nPOgm35LsTiLb1YPbYgalWyLQhhnAhNWfa\nqYjSoMMoJblG3LbpNAGCDP6qBnLBhZjnwcM9EqvmMEIqAVgXq93RbfJQ3vQ+\n5MYgNHfQN4Ry3gkgaSDWljJfBD+OH78duoNMQtqSOVxdwSYGbA/byJeiodFG\nlGF9GgNfjdiy0mkii12Po6qhH8Jjq/QzsnmnzwsFjf+LdgfYK3fVXpz2xxOQ\nbaG0\r\n=PLM0\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIHPPuXOzrHDVVO+RiUT+PGSuKQi3re5tz5tDvNqlMsj3AiEA3HPYIY9WzZg2FUo1DO1KGxaJT1Ei8/QgQsSYy3VhgOo="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.0.1_1541686454951_0.23227556606442268"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.0.2": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.0.2",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.2",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.0",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.0.2",
+				"@svgr/plugin-jsx": "^4.0.2",
+				"@svgr/plugin-svgo": "^4.0.0",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.24.0"
+			},
+			"gitHead": "fb7ed11b2885c2c86546c9fa10c8aa2d3f4b13e0",
+			"_id": "@svgr/webpack@4.0.2",
+			"dist": {
+				"shasum": "a052f37b2ac25897b0ac445f4e7ea3ebda4b977f",
+				"integrity": "sha512-oKZr+3AkD/9MjPxvf3gCZKUR/BSozc/tEaJEEEsTrwOP7bohwQeY2+aBdvm1v/TMqYonR2KmNL9FWKwiTSU72A==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.2.tgz",
+				"fileCount": 5,
+				"unpackedSize": 10379,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb5JBxCRA9TVsSAnZWagAA6NkP+wcTVp5VFjgPoFSZKJh4\nkOoSxT2YAOyNzFDdmu8M75eVII9+u8hHBxVWohI5oj2SQq2ZETLIlb0Y6ZBF\nBeL7skAgejDhnUGtkfGbJZM2G5xg9h8WBMn9LnOMzzaDcs66QImDxCLjEjF2\nBo5aM9o3ljg8UfHQfpyqGSJppAJKLXzL7Zj14kczkqGEXtz3jzuZSkre/dVT\nfdn4AFgi9XRIE5K6EJX/EHsQTrbHWF5Gvm4gg4VG0HntppKOAxF03fHJSqmO\nFR+/3zGs8xbJzAgHUrhJR8GeK0cgDBF2e1xRxOww3s8ioB27y1PAaZOtx+Lx\nE+VBELXdVlfK7vEliiA5XJ+JWEMvNffMTTiIJpIIMz7PmmZIj4t3AGvvRPId\nqplJyBWc0JxJlFEO0k7Kp9S9CEDmxbF9EWH9BVxNyI9ZDP+cSf+ToEyHk/qn\nHLfLk0FEodK2Q9FJuqFVzEA3BjheNfOg5zXVb9E8HeVYYKX2OeGU7sYywSSC\nonNS+YtMmruWQuEtA8o0XfiPdzw0q9RJJb6IiEy6JJEJZGQO6wieHtgBf4i4\nHD0AcH214nGaT+bsW7U3sIDUR9HuWBW8PX2NxGlYfZUW/IZEoLTRm6yvM0RU\nwh3A24c7LLqAZLdzZ3YlBpG/dp0Ua3E9qI4lJB9+kLr9sMMoizU1y7R+L1xY\nPVbQ\r\n=Kppr\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDabXxJqb2mX9Dsd8ZfJN6GA1A7dN7v8uf2pMRQ0P2FPAiEAqtVGVxUKj+YHPYMYU05zY9OdD5A1J1bnIJK5SQ3CK3M="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.0.2_1541705841007_0.43824685995480595"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.0.3": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.0.3",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.0.3",
+				"@svgr/plugin-jsx": "^4.0.3",
+				"@svgr/plugin-svgo": "^4.0.3",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.24.0"
+			},
+			"gitHead": "3c7d6caafb687bf8532f040bdfe8eb0a12a1da94",
+			"_id": "@svgr/webpack@4.0.3",
+			"dist": {
+				"shasum": "318907269dd93d4f911541236948e885df7f058d",
+				"integrity": "sha512-UziJTvIYp/pznM6bjkeruXr2VgSZt6VuXQvSM2xCBXKu5Roh6+jVU/Ughnl3xO8RM6ZTNoNDthO2y/9+4OrIBQ==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.3.tgz",
+				"fileCount": 5,
+				"unpackedSize": 10573,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb6praCRA9TVsSAnZWagAAzpwP/11BCM6I78OYVAqvAjuN\ncAz+1Z4K7cgRR1kVqg/excxOGwUFMZkMNpIRw5HtITmWG2bWpoX9ug/J4H14\nnlmmGvN4exQlubI+NtuyZ37FxHtO7HcZb9cWbaRNOG6ep84uwwcadyLzUG1m\nLBGqkPGBPs3fs+ytZVCG5MmK+yinve0uJPDFMX3NQEuYvM5wPeQj9iKX1HFJ\nFw6/SzcL23YcBtsJI8VGqy9IMbLI3WZ48ZoO6y/Sxo3dYprHlTP2zBV8P4PS\nFMcKjgvfuL2pMgtZSI4TCx+N454403+jHR9WDwrKXeFHaoGjUTqEu7zGqGOL\nSAGNWrOEN32om/tILF/AM3wYImUYmo8QkFAm8kiHGVxnCGMWfcZ1GX91wLah\nc8nicjNWTUNz1lnY/LeqcP1WcdLAKrrFEfgQPCtj+MrPmJMuslHbXCLqZlhF\n9AhFJhWhSzg5DinaK2mMVNQYB6Qk9wQaaFl93Pnf1tjKZc7vaSZgI+UEXTCN\nFqd/+55T039dUIBI5ZyXLFwiTLeoOaFzGSn5CKPVwl6jABf6umOB2xSLMNQG\nfETr7DKvhMPKX9SBw7KqJ9JS01COYg5brWQqb7YrRILoShzb9M2pzw9lAKWq\n2Msu5buwbBFN4jqBZvmzAVLb4CLEpTHFWHG8QswdNSBxltY1Dyi9aWazq+9/\nD0eg\r\n=Rqa6\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDWTux6yrAE1Ohc+91pKq4tSv3CRLBEufphcDW+eqfQpwIhAKC80ebc27jlJCk5A65hAd26u9kFQP8k5SfTFzIkJRqr"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.0.3_1542101722154_0.6494792038560819"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.0.4": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.0.4",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.0.3",
+				"@svgr/plugin-jsx": "^4.0.3",
+				"@svgr/plugin-svgo": "^4.0.3",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.24.0"
+			},
+			"gitHead": "e66faf05b10e17e93b0fe9d361e69910c406034a",
+			"_id": "@svgr/webpack@4.0.4",
+			"dist": {
+				"shasum": "d77b04841b6e73277aec3b0cc7e0e4e95111fed9",
+				"integrity": "sha512-Olez7r/PrW2VQtsnq+Xe1Ykm+mb2oqSne8HvIVgXB9sfR6jlk4DP0C3Y6HZe4JiF5qGcsJmPPH4AHNaxIoi76g==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.4.tgz",
+				"fileCount": 5,
+				"unpackedSize": 11150,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb+QPFCRA9TVsSAnZWagAAiYoP/Rx58F6gbGGGIvcdqWDm\nU9952KxVsOTFinWtE71i6VnQ6UI62cb2cB5Dl7UvHRQyBDZovYMMoCpt9+7W\ng5YQf6eKhmbxgrweXdaT0mUzvrAaH+DDhT0I6F9UbzF1pKIXEf+WlqXSrBil\njyo53tVPlHdB/kVVSZTQykF/TXDKtpAbb93Kws63zy+VnIcXqTxL2BCopzrQ\ntXz8zNVrpXdpOlsH/HeQWMcIeta5ufHrJ98L0eZlB5G1bh5GfyHWtkOvHhak\nvcMXYPVkLo58y7lYp+ekyrUfnQrxjcAV9Ur1z74YeMPEhNvxaIYjGGNpYeCh\nG9YVfYd2tBi24YFYE+e4Kj1yvEhpUkRzqT5IPRClTLNxF5eujPBkZ0YxXYpa\nJmyVfI9JrfuG9zstOJJB/ORlBXOefzo9xipG1iUmivQYVv5qGJAZq5YgbfDJ\nTxzgQwBn0BTIue/2h5mN/TxLXBD5PQ/+h0qqexY26PlVFAYaaclXXhfcEa3H\ng9evWIb14lcC4bAYK+4LYbpQBdVVyyAXo20iMkF7S1iPh3W+Do17TlaUFWto\n+/BQLJnFZR7mItf/tI3+2o4TpjEGo5DvxnatlKoGUH4YNurHCFrHUf/rgOTt\nVnkV/qOKJyvYhhXaGJgodc6UQ42NUCeAGODfYXGRFz0mD4i8V1dWJBrppAJy\nO9tr\r\n=/soB\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIA3Gw8gdO8Uerm/Vstff+fCA5TVaC9uj3bbDZNANwuVWAiAdvtOLHSkI2Bd2qiz+5j9lBB2MBApfCzfUXDpOlh079w=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.0.4_1543046084531_0.03346874766172392"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.1.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.1.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git@github.com:smooth-code/svgr.git"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.1.6",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.1.6",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.1.0",
+				"@svgr/plugin-jsx": "^4.1.0",
+				"@svgr/plugin-svgo": "^4.0.3",
+				"loader-utils": "^1.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.4",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.26.0"
+			},
+			"gitHead": "36a43e2d45469d6ff9aae6d4de004487fc649f03",
+			"_id": "@svgr/webpack@4.1.0",
+			"dist": {
+				"shasum": "20c88f32f731c7b1d4711045b2b993887d731c28",
+				"integrity": "sha512-d09ehQWqLMywP/PT/5JvXwPskPK9QCXUjiSkAHehreB381qExXf5JFCBWhfEyNonRbkIneCeYM99w+Ud48YIQQ==",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.1.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 11338,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJb+W5bCRA9TVsSAnZWagAAeXwP/ilUiT0o9Fcdgxa0zgCr\nvoevVenXx8CxpX42y4hSLlTsSzKrTH8eXIFLKmZ2otx0NUjq/CS+mD3VxIbI\n53XWuieyyTtj/1gzS4ekvh63LceOeJ1/B4QWDbH/L/GJ1IKdd13bFpbt1jiz\nBND7UTl7GTy+URiUsIsLpgWKsu3vDrpVmizytlWqLkWpQqbNe3nx6ASLIIMg\nuV6b+5K9P4hRw89KnT4/yPAzIngkA/HwVtDf3s3QO5P6XUSGXgG3KtHeRUH5\nZwMZFjG5Ez2mrO74887Yr4QL0FNGqNIt3G8v1qQwBGTJEKS1pZ1F6ORwJtpf\nYKYqmgqoeAcZzBjyNC5tZ7BXTOsfNJqbIdrzOdgQrnppIRnTpQn+oHT3o7X5\n4SX93OzAsxYTsos1F+RIYRvZiXpd2aKYonWqV+nzfHyi6YRlKEiW506ln5it\naD2uJnQLCkVGRb7moEqKAhAjZS0wL+gmMOe2UO2juefoNRNJmE+p1Ovexxbh\n7s0TKTgXFemAx+KZ5vyRbe82dVslTrnnhSvNh67YLsfUV8aALIVafLhu9JUY\n4y3gnO/Nh9ZqcbAEpdov7Wr3qVPvQYgPDQdyFmMXISbZa0PCHVvlRWOAKxxi\nyXOVK+VrqQpudNE46/SPp9UnsSb2euCjZsj0tCqwNN5krkRG6yjW5F2FxC6B\npp15\r\n=uqHJ\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIHQ34JRGIxNRPcPHP0hGZMChlcPUEY2q47sDiA+0JEgpAiBMYrW7/ynDbmyo4lv1IEGTYD0uqkgJ8RCq61IF+XgBwg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.1.0_1543073370700_0.793695508614084"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.2.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.2.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/smooth-code/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.3",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.3",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.2.0",
+				"@svgr/plugin-jsx": "^4.2.0",
+				"@svgr/plugin-svgo": "^4.2.0",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.5",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.29.6"
+			},
+			"gitHead": "35d3f4d446e5402902ee922a3f9984000bb74920",
+			"_id": "@svgr/webpack@4.2.0",
+			"_nodeVersion": "10.14.2",
+			"_npmVersion": "lerna/3.13.2/node@v10.14.2+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-sm3UUJHmRlqEg8w8bjUT+FAMf5lkgCydxotEapinpd10kzrpQP++Qd+bmuepE3hsIUU68BO24vgQALQ92qBZEw==",
+				"shasum": "b7cdef42ae671a27ed4cfe118a0f2da7f4e9ebed",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.2.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 11540,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcruZuCRA9TVsSAnZWagAAf4AP/AowGDcul0DM3sytSWaE\nco8weDmehnZivdPvELgrQ7ctJDqoX0fBo25+r7HzIg6/aQZt1NORdK5o/skP\nXKpFCzwVVbw6X4TIj49QUt8PiaBtfbsQcGb313Tl4i86XKIaWvWFvtfQqdx1\nq7cJm5GkrCRov4NNPfHcQoYvfuWhtyzs0btU8qp5OwwxayAWpQ9dscBPV+qK\n92LJ3ZiHYbDPQJLtnEzaMUS4qT0hqUbm2SNTydxEJiL2IaIv4NnhKkDoislv\n6PQynmDT5gytL1RLXxwAAm3v2O1vPPfQ8rr1RzH3cGBqkxnPdYlYl3vu7D9V\nAX81MkW7I9OGanawT4lILfI2F5L4Lg3djmSGocAODJN0gnDm7o5rZNQYRymw\nlz96H9rSfBMa7exNjLhP71vbpmAvxtR5dIgZWwhlrZi/51AK6PnTcV3eNat7\nNC34BWeEHByTJCd3S2gK6K4oZn8P1CJC0ZQb48SZnKIittlzvVQYGX71UrGq\ncHrdA1j9dYNHnmW8UVgP+6aqOFrIOPqHWjVKGV8yldTO9ZqjfHvi5Bn0ojI2\nTvLPoYV4+OPlZWzdMaLaVNK+tjASReJzdyyi8WExhVGih8SCAsSWpC1rO+R8\nAZvqfR7IIVZMowPvYX/YonWCfWQY73sHrNgsS+hYqIOyqnNALxtWrF1w0uMX\nsUE3\r\n=KeTq\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDGX/GKsXt2dMzDUESLfCrpdg4TOw2MTXGpUCP5F7F8jQIgGZJmrLzZTk7Ces8e1JdPaao8Y0SPeHg2RaCVLYm3wh8="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.2.0_1554966126229_0.9729870956398443"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.3.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.3.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/smooth-code/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.3",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.3",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.3.0",
+				"@svgr/plugin-jsx": "^4.3.0",
+				"@svgr/plugin-svgo": "^4.2.0",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.5",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^1.1.2",
+				"webpack": "^4.29.6"
+			},
+			"gitHead": "79069edba617457cc0255fdf48425e8d877a0b52",
+			"_id": "@svgr/webpack@4.3.0",
+			"_nodeVersion": "10.14.2",
+			"_npmVersion": "lerna/3.13.2/node@v10.14.2+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-rYcwi1pUnaZoOUEa8xhrX10FHnONvube1WBoJ5PQf/Cbl0GuiUUSdXSVaFgxWdeyv6jCG0vWH1mrCHhspaJv1Q==",
+				"shasum": "4462e05070d91c04806b99c30a703fb2b50b2bb9",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 11713,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJc7UlCCRA9TVsSAnZWagAAJc8QAIf3vyowlr+dIoQaAq46\n0FJeEaS7jPV4ZlTSffhVMwQ7QnknabSOhG/sRKAd11+jb6m5QWChERFNL0Bd\nx/tpIyu7JAaSKPZLXj62Kp6PEIGyrqHpgPvzzY10UI1v9tS/dG9rYTdIoclm\nKJaopogCxHR24byHZvjmiMr/xZ1yOJPSWCum2xwUJL28tt+92Ck4a6lsisQk\nYyVxXU6NeX+4gn/xUPcyk7yFnBdZpFZStWtYnjq6GvV4FbwsA30wnsAuwGci\ndrD+8nVU5vQgqWwtvXgVVwhu1W4m1S34bo01kXH8DUB69zS85XqZAGwU0WFa\niNVNLAdpf379s8uB3y5fZOTolP38QIfaOQKj1SuZkJYd2In1sYTpmzsCEka5\n76YE3BLLZlX28p3s4pE6I+bb9xrG7dc86AO0a873FZBcwELGnSFTrsI35e/g\nUlstrM7HgrKa0QfS4RAhC2Y6rwwC5wJIG5NNeKkGINsDnE70Sd4RvM+HBSpD\n7y+UUwvJc6NCTamBQ+jSmcvVWQQTFhoStv5DtZx+b5oKxcKxfXhsmVEHUtZG\ns3YRGiranSr7jbYvZs078BumlWdXWY0gWWBSp8EHfNaWlZKmvyDSTZXgSHME\nlBL8yAib4yvZ3mZFr1/l2OktkUiGbo2BkhaGXpm9ZGLlD3/mT9Mt7xOHYzeD\nuhfq\r\n=ZMPA\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIGiwu2zN+ocw/HbdoxY3XEJvSeIeYvyvIJzhtQhZzl+0AiB2Tcxjv4DIW/zo04dbARxUVELc2wsE/066W01tqhnQHQ=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.3.0_1559054657630_0.7565589601847551"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.3.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.3.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/smooth-code/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.3.1",
+				"@svgr/plugin-jsx": "^4.3.1",
+				"@svgr/plugin-svgo": "^4.3.1",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^2.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "06e1e996a92289183fca0aabe4ba286e3a227f1b",
+			"_id": "@svgr/webpack@4.3.1",
+			"_nodeVersion": "10.14.2",
+			"_npmVersion": "lerna/3.14.1/node@v10.14.2+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-yU7AB+VKayqLQZl+MrxI6kpuqzXDLJr8JdYvSONBwQ5VMT31PYXofenS+1n8XuCSnY9p8IAJQ0qeLTYIieMKVQ==",
+				"shasum": "cf6214853935cab8ba817b825e2483aa36c6b2e0",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.1.tgz",
+				"fileCount": 5,
+				"unpackedSize": 11887,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdGcrNCRA9TVsSAnZWagAAs7cP/j9pjtPXvoZsjUp8V/O/\nWoWDcIdQfKj0Ol8hv9P7eff5x3QwIWIIyQnwxXotEXSdeTs2ZVU9il7aHIwF\ntGm9Q048/iwcOvnFN4c5Z1LYpxtLuCbCBm9fiI3t7NJdNeMeDmFnplHvl0/8\nGtzZ1UmGWlzooHODFqeXsYT6FL8YV/PDnaFIs4JeAxKSMnByM5uQT6bSG0N6\njH+SbkDDwaBK0JBEGXnHlFe8ggqwKxEIMpegDIap9M+Js48icUvH+y1K5Lvy\ntSG3djoL9n4ZOqVtJFTGHUkZYMPCJq+WBahNj4y6cs2lIWrkKOD5hJDadPaK\nX9M+6oLzloiREa+giNfULiykZ/p+8C+kXhEsHOdGpMd4C+2Zo4UX52LFi8LV\nHaKcNcZ87Fy/HqMU4B9KFPBsx528OQan7WD5uFogydUkLYmLq12PA5UCNggi\nRQmMUxVF8YZFSjCpG8LvX46Y53ASoJ3v66+DD/40pb9DlP457/htwO47yOE/\nlHOW8Mnf2/OR/g7p0npxoal1fWA/9DGLvXMyLgxnh3GRNl47xxKdSzhdKMUg\n3M8l3/hrIPUmWyH3LfGo1je8KuTXI6GHPhaxjCAOXTAHdOa06owdSFESVn/K\nXU57CZB8gPovSaeIqUgyRMnyOVGtYqBR5hGIIOwWcmcgPJzJtztADoMqttU4\nRS7D\r\n=/F1m\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIDDiI/uhRzK2BrWy9MOEIZhuEg/0HAVk231dPheyPZWEAiAuRki+jhBSxIMX7qmFCbNQrGZOtfWF+T4vqt41OsdEJQ=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.3.1_1561971404967_0.8281881662195361"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.3.2": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.3.2",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/smooth-code/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.3.2",
+				"@svgr/plugin-jsx": "^4.3.2",
+				"@svgr/plugin-svgo": "^4.3.1",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^2.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "85446119414d768be3ab660ed4a20930a59f8eb5",
+			"_id": "@svgr/webpack@4.3.2",
+			"_nodeVersion": "10.14.2",
+			"_npmVersion": "lerna/3.15.0/node@v10.14.2+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-F3VE5OvyOWBEd2bF7BdtFRyI6E9it3mN7teDw0JQTlVtc4HZEYiiLSl+Uf9Uub6IYHVGc+qIrxxDyeedkQru2w==",
+				"shasum": "319d4471c8f3d5c3af35059274834d9b5b8fb956",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.2.tgz",
+				"fileCount": 5,
+				"unpackedSize": 12061,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdLD+hCRA9TVsSAnZWagAAGrcP/1CEO4b1idDfe4hUj5yO\nxqGILXcvDxF9VZxwYSKWdD8+ttQW2nYXhg7101of1lqh1BghMr7NRzd3XoaM\n26rj4aNqOoNiS0wlNFIftc2+Xva/VSoWajDbqGGVN8hFrm47lk05b6twHJjk\nNkoGFNMmAUpH6YzB80MzfpBPLlxvAEAovmln/wGr2RaCrRSzO2XuECYDuJQd\nn+J+SwuhnMxsY83tf1Hkii8xof4SP/G/em7+0116+WUIEZ9MPBBRJ+Wgjvzg\nSwWkFaxTPPAY2VeW52ZglyQDV5S8BNSL48bG4uaBxfl2qF265Qy8HrFMfQcd\n969w1dev3n6ySWgmYJF5VpmuhFXYyQgTYNnn0lwNC25LIK8TdGY7g8EvCVh6\nEqlxsRYEL1mwIUjnIqC3FOjsz6pio8uixviSPoLd/8OdJ11yYJUQ9z4hkebA\nQuNsPNxfA5RqZpZhkmOzUTg9Zb44/Sgm4xcwqqGRz0y5w2pAhARGD4OXKSMv\nGG2U3xSxHjcUfLvGsZYUfgkKCVKrBzYDjKa5T6vS73/etnrEhmp1zSPU/ffn\nEJzAMfbPqwJ2i0f686mauo/p7hhBCE3jlan4lotDBaWPomX79K2a4rh7NXH0\nv7yUffQ360rMQZ32a5Atk4s3IBTvcSUyh0uhMtkTyD8UiHzEgZVgSL7zavRt\nE3Ll\r\n=kPjb\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCICf3vH/un2jUVYhe3nbQ8b4UBaMVVvnO+H33b4WJIOfcAiEAp3CJH2wIcMF/Z/s7RbA4LimayhUMkf4sRhoRgcYUXfk="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.3.2_1563180960711_0.5828758897561723"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.3.3": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "4.3.3",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/smooth-code/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^4.3.3",
+				"@svgr/plugin-jsx": "^4.3.3",
+				"@svgr/plugin-svgo": "^4.3.1",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.4.1",
+				"url-loader": "^2.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "14a26644e7bda24c2ff97524f3d8841801a6442f",
+			"_id": "@svgr/webpack@4.3.3",
+			"_nodeVersion": "12.9.1",
+			"_npmVersion": "lerna/3.15.0/node@v12.9.1+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-bjnWolZ6KVsHhgyCoYRFmbd26p8XVbulCzSG53BDQqAr+JOAderYK7CuYrB3bDjHJuF6LJ7Wrr42+goLRV9qIg==",
+				"shasum": "13cc2423bf3dff2d494f16b17eb7eacb86895017",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.3.tgz",
+				"fileCount": 5,
+				"unpackedSize": 12235,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdicj5CRA9TVsSAnZWagAAGe4P/jHqQl9WRVDaomFJPNF6\n2y1amBmu8lBDjH4pAr0M1iIq0h50NaHyddqjoE49HLTZxiAVnoH5333GgXPO\nOUVx887NDiMAptFd6yBHLfUjCCtjt7s6n2damT+V6opJXeryYXF1dXWvgKf6\nJZX2ruRSGlM50saz2hyeXJJilvtv8sBwATq96ik6jA9BjWd8/8owwcKrPr3J\nNGEOPx3zucGhTJH2lX1KovlObQ7ZacxaIwTX1ToiXOCzGoy9xd1/K1zze24Y\n2f5OBt7LD1b0Madqzw/f6ICOFmQ39HiKa2ydeMuDnIE5XYCrx2pMN5mpl5kC\n7MRDJ7tyOJ7rZaYbvscdELH5yf1G63/6mpp0+dvHbd2xpIxvep8sOTcKqlsZ\ny9HBZytGvDZBbeO18PqxZJlTMugCM8rQplIyv7git9CusHwSOexc1Aj1FVFD\nz7FzLtyWqlWh1+1HmtrLD4t4Hxe7TBip8Zt3SgZ7L9fFKlRpGHLGD7VA5SLl\nsGJS54ACtIG6ILiI641V3bVWaOtfjWgS2W1nMn6gLAesHAgvaNZkoKEK/uEI\nqoGiTJkVqB05NX0RNtVGFMw7QnAAG8DpBU2n131Hum0W3uxozHihqaDhfLBr\nIEk+8Z3IiQ+Je8ilyWwvVs5JnxmR0iOkDhWmCVLYiLh1QAHlgYRszKO/Xy2r\nbZbC\r\n=c9VE\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIFPrgjIiuNOdryoE0B2yexaWgU7KIMllVXk4qoIxHRGrAiEA3HuQZenoET/DarpCijgLEseKgwA0x/Ng7TO3VmclJQY="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_4.3.3_1569310968877_0.43688925217180063"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.0.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.0.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/smooth-code/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=8"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^5.0.0",
+				"@svgr/plugin-jsx": "^5.0.0",
+				"@svgr/plugin-svgo": "^5.0.0",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^3.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "cfc0fc2786024820ea476739eda6cca342cf4230",
+			"_id": "@svgr/webpack@5.0.0",
+			"_nodeVersion": "12.14.0",
+			"_npmVersion": "lerna/3.19.0/node@v12.14.0+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-+A+uMVCHIzigOB6f7bOFDmq3B+KGnEOUaqPQL5gPbNyJb6YARATyUoRmnn0MinohnjoI+qfYtk77bFrmiC93Cw==",
+				"shasum": "e2ee458f8ede95649ca10fd5bcf40611c3461ad7",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.0.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 12363,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeAMoPCRA9TVsSAnZWagAA+GsP/0j6bYbPy41Jt5ymkkFn\n9WPUzUaL7cjKF+O+V7UZiAKcyGgZn9u/QRKjcmZTrkwDVOYOs3D6WqgnP5BW\nRlczzri13M6Uni58SQJacIStuTh3C+kBLRA/9tWQLDOghgedfBqqfqKpzeVi\nHJPzsP6mzIIouzkA9uD1QIyeWhEUZ0H51ChXSSfHmO026iviRup6kePoaLnp\n+EyR2xpcFJog3oSVQPA6QjKd+/JrGERGq79MgjI2EegNHTLSe9Ok6vYnc65K\njUsTF3vqZDV23vMJRe5Khv2xwdEzplofpnFQDFHzGTWvFx2ANcK95ndB7rPy\n0qBzcvvQ9/lgnnZuQSoHYh012d6MvOobsEhBDoOQUMA8kMq/J4Qh8hF84L8P\nYzRBoiS3s0qlE+nhyuY1Gch5nW7FOzqSrGSobjX8TwE5PCgCVPooT593H2b6\ngzM/kaJEQKVmFItRo1R+RmKcUz2llE0xDaWtRBxxiobzpVpFRGL67FBg3Ot3\nMaXWQqvt0l0hFxSUecrTEL5RxX/V2rQTEb3syJsTg2mo9l0Gh5F3pLwt/mCy\nfwWuZ4wKAqfVVh3hELaCDI6pJcKEVwTtDeiOWeK8RSxm89M/JiNPJuX1DRB2\nZUFoZVccXzW7CXYbl41AFDT3OnSDf7IIWvYRUU28XxHah+hhfI18ylHXS+wN\nenEp\r\n=Segd\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDpvNYOQ4HfbLGRCcgBKJR0geORsmFPOIcq0ItH2t2ZeQIhAOta4xSvmSW8AbWHY7i8YQeJWda3hDzi4UJz7ihmwUcS"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.0.0_1577110030957_0.07853976033286769"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.0.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.0.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^5.0.1",
+				"@svgr/plugin-jsx": "^5.0.1",
+				"@svgr/plugin-svgo": "^5.0.1",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^3.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "2c0863b6821ef6b86bd7ad1a0267ba7e07b163ff",
+			"_id": "@svgr/webpack@5.0.1",
+			"_nodeVersion": "12.14.0",
+			"_npmVersion": "lerna/3.19.0/node@v12.14.0+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-mqVVHee+AVV+Sj/IOvTmUvIktb/xTIsI14Y3dR0e9obuJInvEdI1/sP8abRYn4vHS/hIorR9rm3DlMKBMYp75w==",
+				"shasum": "d53765aa5a813017d015eaa744bdf506fb503689",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.0.1.tgz",
+				"fileCount": 5,
+				"unpackedSize": 12693,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeCHIqCRA9TVsSAnZWagAAZL8QAKMj+TuaItja+QOi5Sih\nVBc/+rNlF2mhttAf3DDVdv7Y7IwIJclnHXz2ZQiqS5/Ci/ADrwngJhUOozHX\nDA81ysY6O0DPhZFQLBKhwpDZRXHN1kimpwRVonw7eFcECwYkbZw5Qumjbuef\nIe5ufF4WMfOlFek/muxvbWwznJfIUaC52vjREGc0mh/O0xGXkMDYvb4RSW8n\nQvriqwMYRkO/2rmTT9h3qSLFDlq183KYef1oQLTmG61HCs+NyMFQ2si3Oynw\nZEfXJd5FtQ6XTXTOLaeYoU3ZR1IB9u9nhsnsrIuShOe7aE3l0QVlXHnP9QrB\nYEHyvfzqAOCVBHurlI9wofr6q9fHhMTKwSDNGrNSvsFIk5t35FUfE1orFY7r\n+IyPHvZKUeBIea05EIzpXZvGUYez82kssZASPW42L+PqtEXmesj0uULaUnxO\nheAzuDYNt2zmdoQbBb1sD7pIG4bRwKE5sK51KuDoN2uBKdqSVWBME0b5GzsF\npE/eCUtAXd6lt80MdBOfgWXOOqCQm2IWrowTxTQU+biqI4e6fCjITCG/MHFu\n1R9yR8i9fZWvAhdwOtKs/aHUpiaYbJfKvgO3dLgRs8kYl97X6I4dvvbkmzzv\n0F8vh89NlURtnqcO96UNUGEWCvrgj3gha+XF6e1Tdx7dqJwLkT7caJw/uI/S\npNKS\r\n=Lzcy\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCGlkVTm9ueM7D3VTzNsaqTPYwE47JnRCGy/8cqPdYSMAIgVX2gYGzUx0sQ6SezMjq/Ky4fpstqRrrWi61Qn+9TB50="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.0.1_1577611818139_0.5791565802163021"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.1.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.1.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^5.0.1",
+				"@svgr/plugin-jsx": "^5.0.1",
+				"@svgr/plugin-svgo": "^5.1.0",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^3.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "1700dba8a6e0c4e30cdfdb109cf01509bcfef4bc",
+			"_id": "@svgr/webpack@5.1.0",
+			"_nodeVersion": "12.14.0",
+			"_npmVersion": "lerna/3.19.0/node@v12.14.0+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-Ww7PHynN6oHtdKbVB5WcgMV44v8INGVK78ydToB3JFW8ZhIyLxc7gnUq4UQjvsvqC4bTbUV0kZt0Wh30BwhSrA==",
+				"shasum": "1a417739656829b42b830e9b9d4548ca9b202553",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.1.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 12864,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeJchmCRA9TVsSAnZWagAANXEP/1RNq6lK4I2262wQ9M1D\no7sRis3GX1w8XDPbKoLeIzm4A2uwXT7H678/F5rV/lN7pRVWNexm9nkAg2Lc\ne+dhWOOSwsB356Tu+UBWN34uFHGQqjI1pyYyoMAd3bTf4fsAGlIpAVle/teh\nJZGL84fPigwl6K5KRWggMxsIsZBfpH+Oy/Tyk47EAMngZnX7lxKH9NVAtr3u\nQlZbnK5eNQT7WzM5RJzvn+yHqnqHzO/4RFTtzeQq3zBvkKJACq/PYMlQxiUP\n4PUU0CU/xSpaqDNDd7p5E3F5bydeIH+rH+XiZ4Fc+5yz2ga5InthuF42sRmJ\nWpaQmDcIXLt2b3QRoIZ2z6AnYj/QycmPL9Shy9FHhVRaGATOMGala76wihpC\n0wiGPqXdkMTu+KB00DUGRUFCRsqytpg4aie7O/DU3iak8RpgboUCsLq9F904\niPitv99CRhxG6W+LwTzpQWtXaJol1VhGfp/+CR05VR3W8mqErFeNauabQUPP\nNlmnZHOJMXh2UL43Hi7lmkuoAIldLbkwL3UKKzWIEXqVaAOzxiCASJStR2IE\nHQwJGvwILULc66QdRBjkehe9A4v+A9O60/tY9q8QtukRRM2tLhKH0VECKwIk\nvWGJtDYuvoiQD/+cceTg3+bXigOXqfWVzyIJxrJMVjgcwBUev+pjap9Pl/qG\ngwyD\r\n=YrON\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDjCvz3SJ2x3B5qsHUO4CUl9EQ5oIQlJXrw0D3horNrgAiEAuur1q5O8aFsSx5kHQS04a2NJ10IVy2tQh+OsPnHcthQ="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.1.0_1579534438139_0.25047623265845154"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.2.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.2.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.4.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.0.0",
+				"@babel/preset-env": "^7.4.5",
+				"@babel/preset-react": "^7.0.0",
+				"@svgr/core": "^5.2.0",
+				"@svgr/plugin-jsx": "^5.2.0",
+				"@svgr/plugin-svgo": "^5.2.0",
+				"loader-utils": "^1.2.3"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^3.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "8b2129b5628778a9384048512298305b3c02b6f0",
+			"_id": "@svgr/webpack@5.2.0",
+			"_nodeVersion": "12.15.0",
+			"_npmVersion": "lerna/3.19.0/node@v12.15.0+x64 (darwin)",
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-y9tMjTtqrvC998aCOgsEP8pb+bdg2RR1v8i+sjT31m4Xb8HGd905K7/GdSwEMM2nlTFbxSUQPZRRvfaJwAvghA==",
+				"shasum": "80fda19af0caf79b715ae916d780bd8aa4c9b9d2",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.2.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 13035,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeUtriCRA9TVsSAnZWagAA8YcQAJRvZF1mqglB14FGQDOE\n6UqyZ2r5TXjD3LS0BO2JtE5kp3kc9oEz7iSisvNyXfyal48XlLStdiVvMgOf\n8qyU1jub0mK9cjhVgBIBhB6+OMldtY0vXxLCJazZlZh/9aJIqHGykxF4dj5z\nyxBohlGJjv7EhB3vujZGChuQVaZFQBqlheZ7W6+jt2h3lg6rXBCU8Gcd+Vbr\nUFaD8JF9YnWeRjKgcUh9sWAQ5QIRWJq69d1N2HpalGDScABy43234A92qGyA\nRy8NQROui/pjJXN5RI4m1LHJluqloi5gP9dsWIH03PEsMzmWMCRFVUkR5Fr7\nkVSJwlxS/sqzewQxj/UhHHBjZ8JBXeLJFQXbPq3N5LysCpfC/jKyf+Ddw3jv\ngEcFQPUJGBwROJ2x3tA55HgZnd5X8/gF7m7yogWPkgCsFZjSugOmRg1lF5Yu\nNsiy4i3k7yU8DI1ZaWTdCQWgAvDFyZZ+XNrEgDgSKVEqpzFUqxhHLxNS6c7O\nRHVMwdL94veos8cVlAP580MkCzy8YZn1MeTDW6ObdYHqQv/agOp9jqJsxcGv\n8+ftEhVV8pMeZpcP9EUxf75CZ5Gk6nGQRbqCVYoEC3esQ/iFrtGg/ms+M9vW\nlK5IxJ02cz1f6XF5CkGaPoSGOIE1Bk0MBnwakN+AshvdRt8pw9rW2jcPfjDF\nsxc6\r\n=+and\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIHbuguFqR8sp5cyerGCwTRM62xAf/+EMDzAMaXcoLNKlAiB3VZzInI1IMkL2bJiiGN61xmsI3XfiSARhjEGFwL0Psg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.2.0_1582488290607_0.2249261197367045"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.3.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.3.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.9.0",
+				"@babel/plugin-transform-react-constant-elements": "^7.9.0",
+				"@babel/preset-env": "^7.9.0",
+				"@babel/preset-react": "^7.9.1",
+				"@svgr/core": "^5.3.0",
+				"@svgr/plugin-jsx": "^5.3.0",
+				"@svgr/plugin-svgo": "^5.3.0",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.0.0",
+				"webpack": "^4.33.0"
+			},
+			"gitHead": "f02acb4a55cb201e1aea1639900f8b9aff70b7ae",
+			"_id": "@svgr/webpack@5.3.0",
+			"_nodeVersion": "10.15.0",
+			"_npmVersion": "lerna/3.20.2/node@v10.15.0+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-sOuTGg/Hy+YrVaWRlU2iHnIPxr9jCybuPBbfAFFOuoEJgAlWj9UdWLqeFXJdgwae3FNtHsCsPCzEM9PmLtdFvA==",
+				"shasum": "172890fbd159bba0c756fb3ade9d9943755236ca",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.3.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 13206,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJed4aJCRA9TVsSAnZWagAAywQP/1dmsQZ3VUchJSWeJ8CA\nlvkzXHA++jmQ4kbCg4bSJd75cyIg7nVgn61ytVn+oZ5hXpnXDyMjEGzE7EPl\n8wjiCVEp8KTWDX1+qTAVBWs9fXi1zQKIcXves0C1LF4SH8wUqN5Io5kJOu6u\ntDXjrgb12wnTvgcS7Qs+LM4uNYaQNYgLP0ZJnkF+hk9bMCP/18la164CZbY3\nJipEPPGRh+Yo5DlPn1AnhWFyJ7mey0P+cXgwP6sFuTK0TK9VCCW7RMf5xk0H\n3fQZu6tvHnI9NGz7Yech5ba1UoMV0CKr2evhc0lAjMGIyuT5atBJ0CwXPizR\nX2v6pS9gEiFEZa+nF313dWhMeLi9ck1TnJJ8X4AmvUTu59cPUTSONksQPkZa\nbgKV/wt+XaczdrAi/kjTtVYGbArY5ozKSNUTVpYoLqhSA+RMfubxsOXiDLUe\ntvDWUAvoTW/qvat7JWOvE0EgisEjLXQdpUA3POpYw+rGMmP2ZUBW+usBEEGb\nhhBHkIbQPYx8sfy8aTC7oFgPXjEL/fHf6ZqniYOxitXgCd22X4ohg2A2XrLe\njj0ADNqTVx/79noHG428FeM+x6kcb/y7GQn0Mgw9ANQ5gfAfzplrFF1fBCwU\nYBWRdmQzQHHAhE2wXIiYrrpk51FgZCVY7ypisMJBfFbOwj6snjQtXyoYGt+r\nitJQ\r\n=j48m\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCBtuDiCM9yaCqqOI7+05Iw/Mv5NWotxTSMjxrVOl0fFgIgfifYilTAXXkMDcULKiY/KD4fbKe5n4oLjuXUwhwPkoo="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.3.0_1584891528627_0.5809394605494604"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.3.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.3.1",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.9.0",
+				"@babel/plugin-transform-react-constant-elements": "^7.9.0",
+				"@babel/preset-env": "^7.9.0",
+				"@babel/preset-react": "^7.9.4",
+				"@svgr/core": "^5.3.1",
+				"@svgr/plugin-jsx": "^5.3.1",
+				"@svgr/plugin-svgo": "^5.3.0",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.0.0",
+				"webpack": "^4.42.1"
+			},
+			"gitHead": "f30bb859254770c3507b55e53ed85607ed879ef6",
+			"_id": "@svgr/webpack@5.3.1",
+			"_nodeVersion": "10.15.0",
+			"_npmVersion": "lerna/3.20.2/node@v10.15.0+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-0IrfVMS3BlZ2mli5QqFw1ZGieBgTqmgVzvxejOap7CACTv3t+iBBynx3Ak+x5Sbqeat43ZJ0lXODiHZyts6hQA==",
+				"shasum": "6d185a5407c213b7111c3854a485254de0b1697c",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.3.1.tgz",
+				"fileCount": 5,
+				"unpackedSize": 13378,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJeiY/4CRA9TVsSAnZWagAAeSIP/jfJ4aX/D2Z5GwPA1y87\noxVr7jpQey2QZqNEswngSxWpwAFTD5EY8kzB4nOTUjLdyv2ri8tzQ65RKsoy\nBkUKRZWlgEujbuvb2ZZffxUnLMmMDZ4zzo+LcuTC9iyU82SzW897Y8+7HW0i\nv8dnfmN/Q+XbwZEhtAIhbvGzvO/fTRiGme/Rrv+7rlkW1Rk4XREso9qehbRq\nbdg1NxeGmUHE6RuRrkUh1h1+suiHH22hDodnvQxz+Ca1zmHKYtPAZRLOfioP\nvNHa1WgQ8bECpeiSIjp0RIDOrVDPMDs2ABm6OG6ILrXCj4SdZTedrRhGDQxQ\nLzP6DdIB9z62zNgFnoH9uMCceNGtP2lhe7ZyYvbbaCUnV0zcGpZKRxULR2g9\ng0JWWvL7j+R3vNZeZ2esRNkFS5AIL+Pg34aylg+f3FgTXdRu0ioO8f0BUbNs\n+vObFc08QQhqXf1Z5WVmr81WNiD9+J6bMFoIKsjnZaQXRSqqKg6q51p1q8Wp\nKdxicNUv91/crSIf3wOuuTBy6j5dxU6S3eN+4eqZdyZK7jb3kDCgkTDtmchu\nsliF2D9oCq1RB0YgiVyBqBQ0FBLb7k5kVymT+rcoMfhrCQYNOA954ont4Z2p\nqbJotdLEW+tvazcHIA6STnseHVTxgbIm201nE777IENhb/HughQaJp9UApYi\noDpv\r\n=pIg5\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCmVUG2hAo6+YPy1jSTg1HV+JcmtmqUB+qgkzaRQZLhAAIgdRu5SKIbfkBfuKXK78GsTaKk1GS6S+0wEpW/A1VlyLY="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.3.1_1586073592373_0.7172536541034094"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.4.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.4.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.9.0",
+				"@babel/plugin-transform-react-constant-elements": "^7.9.0",
+				"@babel/preset-env": "^7.9.5",
+				"@babel/preset-react": "^7.9.4",
+				"@svgr/core": "^5.4.0",
+				"@svgr/plugin-jsx": "^5.4.0",
+				"@svgr/plugin-svgo": "^5.4.0",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.0.6",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.0",
+				"webpack": "^4.43.0"
+			},
+			"gitHead": "e9c9d2fbfbce7a6879c90cd8522101caf2406d42",
+			"_id": "@svgr/webpack@5.4.0",
+			"_nodeVersion": "10.15.0",
+			"_npmVersion": "lerna/3.20.2/node@v10.15.0+x64 (darwin)",
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-LjepnS/BSAvelnOnnzr6Gg0GcpLmnZ9ThGFK5WJtm1xOqdBE/1IACZU7MMdVzjyUkfFqGz87eRE4hFaSLiUwYg==",
+				"shasum": "b68bc86e29cf007292b96ced65f80971175632e0",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.4.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 13549,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJepz6SCRA9TVsSAnZWagAAy6EP/2l6ss1XeBMkPIwr/jgf\nmPRf6KVoGJdobdg5ALBkMNqYeunLXjyJ7RXtgGhnPvrsh/995hEOPzk2Sz2B\nMbb+09TPViluLIuJgUfgaeYaGOJadKPOhsXt09M5Bmz17qRrScAkWtUGcveA\nbp6sL4m/RGE8m7Gx25O2tv+XzCkp2uwJu6adXOsr1f2J/dgT/fe5ZUgNvnEB\n4woFQ2r4/2q3q2VxJywQSfeEt8hqTCrcYx7SmhcB+RS2gYJr6iIMRiNlOR3x\nwW/mRZiXu9eadm6FLaLof5jl4PHI4aAeCUFcnOCFslc7dxYLBRZhplbZ9OIL\nkN7vUWycfQgGBaEFBYmWXSxNlsZ1zzc1WRAFlCUKUL2IInRqdhj//4uqe7aG\n8ZkraICAHI/KM54K+7KnVAmrICmcs8Cv7/4/Rg9QP4ccDOXKA4Ncs3HTYJRU\nyIrWzx0JHcoNhv6AJtZ3QBDoK/EzUK095xBkFqxocp0yDYGAEhFhJjfjpzcq\n98pSz0lKs3z5Qgviuc1xDmlC6CrY2QkvNkTqKoomkxF2TtfI8tZITQjiM5LL\nCO2yiGzLiNJ6oPSrp1pSqgY33ek1QF5uv7AKlAb6gBM9xMmCgdJD7gh0rp2K\n5eEYjzAWXQ7XcRmot2yYCAZPLXTpQXRVuhE/esoUzvL844yAYbJp2sDILHbi\nP/2V\r\n=MWzj\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCICbHYYj/UzSOdrt9WreaCmuluULCChWuNxnLHjm3R3PXAiBqPQqQpMIiI1EIdELdKr0Kdzz9cYhbK6cBEhNrNWkQ6g=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.4.0_1588018834275_0.5752874666693351"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.5.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "5.5.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/gregberge/svgr/tree/master/packages/webpack"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.12.3",
+				"@babel/plugin-transform-react-constant-elements": "^7.12.1",
+				"@babel/preset-env": "^7.12.1",
+				"@babel/preset-react": "^7.12.5",
+				"@svgr/core": "^5.5.0",
+				"@svgr/plugin-jsx": "^5.5.0",
+				"@svgr/plugin-svgo": "^5.5.0",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.1",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.4.0"
+			},
+			"gitHead": "b5920550bd966f876cb65c5e23af180461e5aa23",
+			"_id": "@svgr/webpack@5.5.0",
+			"_nodeVersion": "14.4.0",
+			"_npmVersion": "lerna/3.22.1/node@v14.4.0+x64 (darwin)",
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-DOBOK255wfQxguUta2INKkzPj6AIS6iafZYiYmHn6W3pHlycSRRlvWKCfLDG10fXfLWqE3DJHgRUOyJYmARa7g==",
+				"shasum": "aae858ee579f5fa8ce6c3166ef56c6a1b381b640",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.5.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 14046,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfsQGkCRA9TVsSAnZWagAAKQAP/0hBmEP001r/9GNQVyK6\nuxjhAfiEoWy5+Fkl3za9mSJAxbtfrwSw4xa4B1tJe+NNxbdqzan0a2zCrwFk\nQNSeWkwZgLXpJnLiWfUc/d1oKQRuCxHTn2rJ5p5qKXjkhGdyn7l5VKzo2Y/t\n+DYunW8pZa4dleM8nOeSeCt1eL5djLeiQW+O6XcIkZFm++v14HF+Uz3t0261\nlT0HEr0Fd5PzeJqSKlyD158Aiqvc9pXc5RlGHadBs8WHG2GizUPG3Knl50jn\n2IXOMmSHYvRSyCEAOlKz0AUzX2OZreKd80Jj4P4Z/KRLPFm5ObQJHf8Albdl\nfjBIbyH/47lh2XocTzm24ied2eEf8knSwyqTqQ1ZJwXP4WR5NjvBlP2HzZ/M\nee73yeYRR9L+ij96aPMqGM5buia9CVIAzj9QHGKl4KnO0vs/IsQ4EKUQhrpL\n2VKyrJHAbfc9wZQZmgpNSf37ZNimbPbPIGld3DtvukaE4chRwb3fsnqEr32G\nZJ9H6zUsh5B0XYdR2Mwxj6LLoqSAl+g7d3A8LSSH3viT0cuCXkSS1oAn6dSs\nIAgomelJgyUuGs2MqzDtJ+izHDKy4TdZGv8+o4rpGgHS963Q9bVgE2lEWC3j\n3nxMDyv6ptJw4LIhYthYmoKJZRwBruKji3xlUaETPoVaIj+pM15sxBXD4IA8\nKfgM\r\n=ectz\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEMCH06cEBfWu6qGrfFhPaRcTGgJ4Gm7TWq6bmdEv5g9YTsCIHkSLvYOGR3V8V79V2LzEQtZosHCYhAg7eszdzQvGNDE"
+					}
+				]
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_5.5.0_1605435812207_0.17506334066503815"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.0.0-alpha.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.0.0-alpha.0",
+			"main": "lib/index.js",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"prebuild": "rm -rf lib/",
+				"build": "babel --config-file ../../babel.config.js -d lib --ignore \"**/*.test.js\" src",
+				"prepublishOnly": "yarn run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.0.0-alpha.0",
+				"@svgr/plugin-jsx": "^6.0.0-alpha.0",
+				"@svgr/plugin-svgo": "^6.0.0-alpha.0",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "4ab46a3a4f7b9aa589e991c98058473b8bd48af6",
+			"readmeFilename": "README.md",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.0.0-alpha.0",
+			"_nodeVersion": "14.17.6",
+			"_npmVersion": "lerna/4.0.0/node@v14.17.6+x64 (darwin)",
+			"dist": {
+				"integrity": "sha512-ddwyHVc1yizvm3Vy3ahQLpxbc3urNtO8mHNV+cQXEB6j0HNWxYUGJi9Pwlpe/q61UcUV+pqKIDET7zhKb6BsWg==",
+				"shasum": "2676848f7935c430cf7214b3b442887ca28c6a81",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.0.tgz",
+				"fileCount": 5,
+				"unpackedSize": 15010,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDac65cvNymsHvZMm67xk0HBX3X9xEpu7Gn4f7kGzf44AIhALwGBG0TwtYUKFRI/p77ACzKKkbWqU6pDVHNMSbznVpM"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.0.0-alpha.0_1632520494710_0.047589641671929694"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.0.0-alpha.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.0.0-alpha.1",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.0.0-alpha.1",
+				"@svgr/plugin-jsx": "^6.0.0-alpha.1",
+				"@svgr/plugin-svgo": "^6.0.0-alpha.1",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/loader-utils": "^2.0.3",
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "22e2736665552263fff88683e1551b8ad852b150",
+			"readmeFilename": "README.md",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.0.0-alpha.1",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-np52+pFXfU04cCcOdP3CqnuFxPGQdQw747anGh326b+IHRHj/Pyd9w/pZ1s5KcZFkno4JDiN9E0DXvtW6pEAVQ==",
+				"shasum": "e3611cd1ea3be905b744d90b12d9a5f5e2462949",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.1.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14457,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIGTb2D5LTKTRTzcefYOJjX8PIy0qjUwTYHhsYTBeMZ85AiB50rB8+Czq/VVaUJec24nYGiMlswvNpPi+1mRv6Qqsyg=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.0.0-alpha.1_1635670720409_0.35603427157335754"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.0.0-alpha.2": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.0.0-alpha.2",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.0.0-alpha.2",
+				"@svgr/plugin-jsx": "^6.0.0-alpha.2",
+				"@svgr/plugin-svgo": "^6.0.0-alpha.1",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/loader-utils": "^2.0.3",
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "f729efaad6e2ec22a27972b025737f41cf661045",
+			"readmeFilename": "README.md",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.0.0-alpha.2",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-qK+RwShDa3IigqV7DtHg1QSHY2N/RrUS6XR1SArqFeczDOv+jmnznHvvOq9QpSrwGjHC+gr2JfzHEwEqsB5avA==",
+				"shasum": "b0acb6a0edfa67407031f9ad2f7a2e8039521916",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.2.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14457,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCID5Vq708tTRd4L44ogS12XGtjCBlhQAM0Q593MAjgBD1AiB84RBcA4IpL0zhyKmmCpDJTW5Z78S5M9x2X0z6MBEGsw=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.0.0-alpha.2_1635757831657_0.6363652062438325"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.0.0-alpha.3": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.0.0-alpha.3",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.0.0-alpha.3",
+				"@svgr/plugin-jsx": "^6.0.0-alpha.3",
+				"@svgr/plugin-svgo": "^6.0.0-alpha.1",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/loader-utils": "^2.0.3",
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "261e1b545cb4af74991af236306ecce502318245",
+			"readmeFilename": "README.md",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.0.0-alpha.3",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-FoxRl3ufVl2DQQ9jfZvkY5J514Mq9HnPZRohEeyAIrKTnZ2ydIoIqpvyH0IJdBCWcVbHpG1vG5Dx4mAnFP8M9A==",
+				"shasum": "da5dec76a89ad379ed3d2d4f53c23d2e9e866677",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.3.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14826,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDWqfTZfyIm9KofhBAjLwAoRU5T6cyf40DuEq2yXb6U1gIhAODrHL1qbYjCd/yooj3ppZu6zMB6MDa+R2E2ZVDP0scu"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.0.0-alpha.3_1636706636400_0.4420550891704711"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.0.0-alpha.4": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.0.0-alpha.4",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.0.0-alpha.4",
+				"@svgr/plugin-jsx": "^6.0.0-alpha.4",
+				"@svgr/plugin-svgo": "^6.0.0-alpha.1",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/loader-utils": "^2.0.3",
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "a5effba17307c1ab1c04da3c1b8cee79c060cd46",
+			"readmeFilename": "README.md",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.0.0-alpha.4",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-9dP7cP55asRG5xNZwhheKv0ECu2fJmu1rtG1+/yOo1nNm5XCApXq9JEbP3V1L2MJYjDGEb7nt9NaRthxoeUR5Q==",
+				"shasum": "69b51d33f7ea8834608c257de6d4f7b4ceaaefca",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.4.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14826,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDFS4fg8iaLU3tZcSjitYkD5FRWlYUcaj4HQHUVjxgBcAIhAJDETJhXQ+zPcz10e3tTVoARXYOU+Exi3kMmpOnzx4Dg"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.0.0-alpha.4_1636792863487_0.4159545356774563"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.0.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.0.0",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.0.0",
+				"@svgr/plugin-jsx": "^6.0.0",
+				"@svgr/plugin-svgo": "^6.0.0",
+				"loader-utils": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/loader-utils": "^2.0.3",
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "af9a6cbd4387180c7d6683713330a7ffcfb600e9",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.0.0",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-F5OgF2WiaACDG0JNr09Z7ar6VNeA5HtbFUzZwh/CFYKNese3sQOky0/2taQIniMtPytJ+Jc4NL1en3crBtRz8g==",
+				"shasum": "c1f21b8967cd1dd25ddcc550aad026d29e4b19b4",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14794,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJho//SCRA9TVsSAnZWagAAAiUP/3afP0TV3wSiYcSg911J\nuZmahXGWHdUtf2DrMO6Tq8YpE2YB0CFaRPfi8gptgLgiJYbN0svFktbOMx+A\nkVab60ZJK20MFpoPZq216s6J41P5hP+0uUbYHD85z/KBKgmdHk3zMWPkVwBV\n+6lhif9+l+Yr8RJTtVt1EOz58iiEqTWl1N8gSeF4UBUhpNafp270kI0cM8cN\nbmTiS76g3jK+BYIfu5nHNIi6jxJ3t/Q+oDQFBc1wU2x3bBmGNyrrCSvQ+0Nn\nHw7aWraXQBFSYqtFI79rjifhAt83EtrCFXYnh/tYik2FRKAEg8PErLOvhzWW\nXDnCKjYM6CTCcKVbWUv5cXa3zXkCUuZM/i4eLN0h41VCgbh6dDfRAvsGqJtC\nyg94txYz/drJ42iQB3IzMuRthsGdjuTv46uN3JUv08SG4g/SbXEP3vlV2N4w\nNkTeJ4OOsepm+Qv4lx4wUVyl7OH4vTvLO1eOaCvMhcPj3uQrnJ+ec8Ep9L/w\n8X+CjnINAj/E3HZOp4Iu12fJ1ZdgDepqC2lgJF/riX7HJvyfaj/WHymM9mRV\n+0M5O5nuV8ht+4VJHMoJ7e3KChIxo26LaIXv1v2vbQJZl1zPlhkFBXy5adlH\nK84CamOCYz6Q7hZ6mW0SYIVdYwMEGCssOI5X0qZS7/0Sf1WsGIMf6m5XNxqs\nvJuM\r\n=Gdmi\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIHfJU5xI5iVZSwrbz+Kh9DReU3WYbIs/b7dAvqhRO2vQAiAwBHGD9Yv6BH7gTEy5hTqK2UdBXInC4jiHT1pde5ng7w=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.0.0_1638137809836_0.12838758059049948"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.1.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.1.0",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.1.0",
+				"@svgr/plugin-jsx": "^6.1.0",
+				"@svgr/plugin-svgo": "^6.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "2536e19ecadf3aa0e6860e253092c96366d41a09",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.1.0",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-FbKlTotDOTAetk7i9CumiAfAX5Np8NauZQ3jcXlxvMRm90KsVHHY8KfBogRZoDWyEyhHBfDT7Cv1XoZJI5BHjA==",
+				"shasum": "6461b930add8988afa58e2e52cd6344c05cafdc3",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.1.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14727,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJhp+4wCRA9TVsSAnZWagAADJAP/jAly03idWZZQ2U7I2Gd\n/6HPyfWiVOfJSnydIL2vJFzTF2FI1L1bWv54c02XrDlY7s9fgjluah0s3AcN\njrc/BcRIX5pZCIssO3VpC3+kMrLrZuyR9CysksAt+Q0aDHsg8uhkJDrWKBnp\nbtXpt0Tu7FUsbv5BrwokVI4xODl98HFSpn6jcIhzllGmm01C5GdDoeHW3jPt\nrarKZIZY2l6QqDWGulTTiBbc20ydSYaZ52ClpwGh8nyWegPKrULbVdvRLoZ5\nSuDKyP3OkuOge+UTOtXV6V7OcP+pyXi9r51O2QvsNOXY4G5pyL+N6Df6GYxA\nGOs+4M6whmmf8ODpthGGd1Lfrg2bS8JQiA618SWtbkdz72/r3f28fzzmCYYl\nFsZhFIuCTx1pnygeRSNT9N2N9LZ4xaLjD9kos+Gk7t7cCKEuOAJtoaK4D1sr\nmZYRsAas9q108p8Kqd7F3YcOJljvLudImmJHvk743xg/VurRrJkIc5Y8/H2/\ndkXX0AJpGjK5OTA7nU4TslLTHimoi4e3FhqaA+EORkzkRHy0TI2Tc3bn/lQY\nKCIkVoGaGokciUZd8CMkrm+3mIn+kJWZpGK80kfIWZD6aAqAeMekKSDATJE6\n+zpdi2oiz8tbpHf347yNkvwHaaMmhAojasqcV6O5ZMqOnxdDiaT6UH47RlQ9\ndx2h\r\n=W6uU\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIFWh1L7DJg/gA2xG4kcVQP2RlmNP9mmLIcIhrNfleDXMAiEA2C+Oiw15cL94XOgay+eL2iue8o9iIe2LDfY7RIe79EU="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.1.0_1638395440454_0.20620214412946813"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.1.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.1.1",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.1.1",
+				"@svgr/plugin-jsx": "^6.1.0",
+				"@svgr/plugin-svgo": "^6.1.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "214564c66d243ea89d823de2cded74a712d78c43",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.1.1",
+			"_nodeVersion": "16.13.0",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-22Ba6/9u/7UHnnwWQBDEIy3GrKbacMHUfS1+0XO1sjiEwQFV+eoJnnwnNX5PVS3pEx0srIKhaCCs9RtUrsM8+w==",
+				"shasum": "73b64f545f1f36644106694c72eb46f305d46305",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.1.1.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14664,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJhq9bICRA9TVsSAnZWagAAro0P/RxMYQvkoopJXKWQMcVT\nah2cj/bNI0yfqf1OO8BJ8Sh/XeqeizlNC49RsVmK1q9jYopiaOkB52lvLHDS\nOj02XdnLwfg5L5f1bRp7Dj03PZaswnoLfKMON/0EnltUItpp7cz2AHRKL1g8\nwqzT9YY3/iFkqRC7qnwxHOEfpIm9erBwtSsirpffpSgmgWvsks4Y42j3/TvE\nDg4/XuerrH9K/U1S8zKdVCZhFFdeutaTwSlTYCJG/lzPrlrIBxhJqHJKIJY5\nWvV2WE7OjI8lBxVPSYxBHa1ailB82TShNAm1B/MxfGbUuv1VRl6ly87dpt9k\n3kV8/HN2QNFp24W9Ehf+Ddz9ZJnYEq2QGB7IK3zS12icvwWCpDoFC3tJIHB/\nGVanPK4U+fUt/bD8HSUc/ez0+rSiVjDrmf2sW0DmqHKut6BTIGdCCLSRxdfU\nkdOVBQzz4BJYsVjPkPOZlgFLJ9brWIVhSdSsmfpO3e+6w7ZTHjc3lqUsZl9+\n3wwLM5a1akpRppRXPBJ+REJ5M2A4mPybT5uWWoDRg+sx4JBur+iTyDoLCN/b\ngtmg0FEvOh1uXm/N+gGhaajJ/2CgM5WQGGiOYxJFhhRcGA0vHg0NL6SKwVF2\ncRvZMQJbAgyMCKDmoF+d7TYtLp6pRAQGsaJga29mI45OcO4eJclc4ZwDIORK\nZ0Y7\r\n=YgSg\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQD6mM9aUdyfZoSSil2DWYJzvt3GWbMiQjGdWrnqSDqb3gIgQY7YHFtq8CaMerhWrQYNujyzaWZZA0JjkkH92ZpG4OQ="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.1.1_1638651592350_0.926777668544001"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.1.2": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.1.2",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.1.2",
+				"@svgr/plugin-jsx": "^6.1.2",
+				"@svgr/plugin-svgo": "^6.1.2"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "39913892ef19bc4224812e69856aa0daf71d5f23",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.1.2",
+			"_nodeVersion": "16.13.1",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.1+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-5RzzWxFquywENwvnsiGjZ7IED+0l2lnICR3OKQ6OUyGgxlu+ac73NmDSXp6EPBz/ZTArpMZtug7jiPMUkXxnlg==",
+				"shasum": "23fd605e9163deb7ef3feef52545ff11dc9989bf",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.1.2.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14664,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJhtgbZCRA9TVsSAnZWagAA33sP/2QZHjUTfGIsSsZNPziX\nlMfxLy5L7wyTenji8uGymrYMZb2mTWPBgJqIk5RsCCcq9VPZX+qS3rlNJXhp\n0/kOLnD7fuSkF1XI3yFMEUEDaIOp4JBFmHpWrwb+008lIkAzHohdfl5Db6/i\nTscHTfLO7JASpcssHCS6zPrC/3BD61gOXvXLq0gDm6LRsTqmFe6EVOOjjQ/o\nN6zrNMo1jH7Q/PbFHHTVIXzFB6igE1dMPnjq4aYVywzxkQjvt3uekKtekeO3\nM9roIKlLF0lx8x7sdXrCCuYzZNU530gXJH7dfQYr7SRcZWb/oMG4L2dwGaTb\nJ4ovo9agHIQYtbVyaXVSbQXFF6KrJEOxVguzqynieE3eK9/MbuDINRLMt3HV\nBzCq7aHVSGBaF5WU46T5vVR0O7SQ3h6DQ7jt5oRVW6b3aDoOAfweQRrDodtl\nuAkM7i+wCF6YUQi3bg+DYQi/Aea+WA3vKj8SaAJV1jJ2kQpYrq15WZDDjZBy\nACHJlgUuTuxJuTN8nvOaJp3DBg9dWCO9br5DTu29eiV2YHR+S/Diw+TkTAbV\nxXIEXstZsnlKdptyYMT2t927jcBrzrjdySCeaQaa98t4ogtHGU8RuMl9QQZu\na3DLx3iDAMbI9DBZvv3VAIdyMbH9ZCnMxebyB9jo2kDBFwAei7tHOypB/qUz\n4qvE\r\n=x7s5\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQC5+CBcrpp8+VJuEwoSYMGc4EKIOQWrQhIvgNqrW2nujwIhANmUVc52tZcNidcyE9BH4ZBpzY6KRiomRse3yVcjdIaW"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.1.2_1639319257381_0.803543258889216"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.2.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.2.0",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.2.0",
+				"@svgr/plugin-jsx": "^6.2.0",
+				"@svgr/plugin-svgo": "^6.2.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "ba84ff56c2ec8487235cabf2f841b72d04cba95b",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.2.0",
+			"_nodeVersion": "16.13.1",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.1+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-KlLdGe93A8GDs19g8kjEmHwArgMAP6cUfegr2Nx+yDAYY32IPtjzm3SoqNP+I+cnOF1CToJu1clWTPEmdd8dXg==",
+				"shasum": "00fafd32e1d59add7b554c40aa2e97e83f975686",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.2.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 14662,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJh2+t9CRA9TVsSAnZWagAAHp8P/3wG41i57z6M3XMczc8D\nySBNaN2A7S/TPkCVQVS2cWXT7/W+2VdWuv76KfLiwUKImDlQh03CRUf5EieW\n5OexSCT9v7BJaZ8MQDJmEOABySusarzU8MlkakYSiqPo5tlONU6SovYvqSqE\nn3bp6lalv4MAjDreHUBM+dG6Za+28s8D6v5FKj3wsXIcr9rd9AnjkN/wtMuQ\nTXMBxanuPb9N2v7TDRnZGisMoXyF6wND1aHqXAwH35x+/OEIsg3P3FvhoAje\n0AVJRyk3BZmsSBOXPX+nuVGIMLhKBXu5Y+TYwWBF1Ab4WTJRkGDtbqhzMq64\n0NMAwEiPD7AU/hXhaeI4s1nEd80Hm3Bqys5NculpvyAZX6S4s/wwNgkrAN7Y\nP3l5EEmWrhSbQ876i3vArcHzlXQPK5YCjKE2Ij+HJDEdWf7tISWgbR36EL8w\nuvWfeDSpvV2vM1dbM20Iwb58AUGrH6BNcmJtT0l1t6MT1ZIH+CxAJbchEljJ\n+EOLVXg0JfLaDxBu6l90DaNENVpgB2rkHQ7CvuawJkp9Yr8nJbIskGdhEN/K\nl75ELOfd89PbAoyWEG/kRTztG0DzaLCrHli5sDM754JCyg2vL55y885XJG8k\nhTRAf4qc4L7HMT5H7GXtoK059A4hS92wzv9pNJFZqrlNHEFmbHPzjPUr9w+w\nVAJ3\r\n=tfgI\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCwRV5n+u1H78TjEocyGjc5q5RlwoBInjjJEostK5x1VwIhAJr+kXRdcNRaSmq+IycAHH5Mrk9UA9zC0TBgtHdhORXO"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.2.0_1641802621353_0.2418589469260748"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.2.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.2.1",
+			"main": "./dist/index.js",
+			"exports": "./dist/index.js",
+			"typings": "./dist/index.d.ts",
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.15.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.14.5",
+				"@babel/preset-env": "^7.15.6",
+				"@babel/preset-react": "^7.14.5",
+				"@babel/preset-typescript": "^7.15.0",
+				"@svgr/core": "^6.2.1",
+				"@svgr/plugin-jsx": "^6.2.1",
+				"@svgr/plugin-svgo": "^6.2.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.2",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.52.1"
+			},
+			"gitHead": "6158fe7027da781425d544d942f0996a973689c5",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.2.1",
+			"_nodeVersion": "16.13.1",
+			"_npmVersion": "lerna/4.0.0/node@v16.13.1+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-h09ngMNd13hnePwgXa+Y5CgOjzlCvfWLHg+MBnydEedAnuLRzUHUJmGS3o2OsrhxTOOqEsPOFt5v/f6C5Qulcw==",
+				"shasum": "ef5d51c1b6be4e7537fb9f76b3f2b2e22b63c58d",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.2.1.tgz",
+				"fileCount": 6,
+				"unpackedSize": 17625,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJh9m2/CRA9TVsSAnZWagAA80cP/2bapDGaJrferHtep2BF\nUn98vTVmU+hZHM95bA8ykSyXktvdaODcUNWvWtk6gBPF3yW0gdnrzewuQX5/\n0WGlN+lPuvjocgpaU5yewNZIbbYs4LYX3l4KWLSSSSlT494NRCoJOdVsQIHJ\nkXA6lXODpFFAZc1Eilu2M0wCfw4j6U1Ujn4YS1kx264vqcBo2DkTCZvoxk+L\nEf+liLmQOcNfaUno01yMSoMI/kOSv2oX8bCqISk27t1Cczqiw99xkfePFWMz\nzCi8Z6gFZPooIF0B2fn4LgPV94xmUe2PNw9gkEIQhU5q4OXaSo7t+mP0ezV5\nVrEYTV7DRhbHh64UJoO4Nuw9cYU7Lp/An8pooBLy6ohwqZvRIutmLnTXhy4u\n7Ao0yzNb5DOL/FSq0GfMYpXQFfwQrpDrYFqyVPWxW2BSsfXOJPSEVMWcMkw5\n0GLAOF92rt6MNbeq3V8zYJuAc4PreutzVBYT10HIlVjsmq9F7tdijJj2Oo9R\nf+ypF8t5Sm75MaVXswEaa1UwNBZnRnhT7D9b6Gh7C11wZWZAtkY8R90VJBn/\niDiqaGgtwgL/0Xoojbro9NtGt6AfBqAbEuxJDmg16xEawmeBNV9Yl/24wL/0\n7X/xpA24F3/6JXv0jfxWtnOkkRIkh8JX4CYXrNOMNSVTDPmjaWhcr289YlbG\nHSC+\r\n=O4vF\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDoe0rgVmSznXCWXaYBskQzM/3xSdvHzlSRWydXHG6xBAIgFHrftkFMvZV2Mc05fGrhmEVjoXAc7cLlNl8Va4WjK48="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.2.1_1643539903374_0.3710531695696546"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.3.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.3.0",
+			"main": "./dist/index.js",
+			"types": "./dist/index.d.ts",
+			"exports": {
+				".": {
+					"require": "./dist/index.js",
+					"types": "./dist/index.d.ts"
+				},
+				"./package.json": "./package.json"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.18.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.17.12",
+				"@babel/preset-env": "^7.18.2",
+				"@babel/preset-react": "^7.17.12",
+				"@babel/preset-typescript": "^7.17.12",
+				"@svgr/core": "^6.3.0",
+				"@svgr/plugin-jsx": "^6.3.0",
+				"@svgr/plugin-svgo": "^6.3.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.5",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.73.0"
+			},
+			"gitHead": "d29884e118288a36fb68bd939983824b0d81fc8a",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.3.0",
+			"_nodeVersion": "16.16.0",
+			"_npmVersion": "lerna/5.1.4/node@v16.16.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-mtIQaV492zUu2Fq1BZRlrFf3PO1ONzfHZCki7h7ZDHWPuPi6hx32X4lNhN+tT4phPw/Sb8xPj7JNHn5Eobm/WQ==",
+				"shasum": "62d3681e6999c170f67edf7f77dcb95c63bafe42",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.3.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 17743,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDPkhpSbNOvu0GskotHifDOkHLqNsAmRCg4cmAzf8niiQIhAO77LuqiwgD3K3DVulIJaFQf04fH56NJBFJ7AZjFoOPp"
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJi1d9HACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2Vmr+TxAAmx5pH38yW8YfV7IMhfXCXdr5EPGuPwttueJzv6TbTjQjWZts\r\n2RdUJ2nE/m5PI/r9dK513TvJZ0MMV9Gad+lecZ0f2sfFxEBqISKd91FubUj4\r\nChQh3Lp9vY5LOq4BUbhahHR7St6JeriO8r7UweorqEWjKBMZ536SItZZmhfU\r\nPbV/l9U42iKPTmByR8foYtGTEXa2E4CGerGrZC6eCrTcz3h1zi9DA/VBne5i\r\nreqzFDv2o0T5HEtU36+Y1Zu4KRpynkf22DUlfZ5GyNDXehGd+9WefoQng9H+\r\nxCWEgXg47Z1DlRofIsB11JUs2bE9fK3eOKffl37xYARwpOPoanyENC6gyGo+\r\nImzSwmkMYsY/FHFQ+myFpHjnxve86sBeWgQZKs0yRZvxgdiDAxG7moD/Hk1I\r\nphEVbzO5G1NdqDcSTEMzAQOY0Zi2SeKnDRY4j3bEgxA0L9nOQKYfGLz2fqXw\r\n5wbSxqoDPRL5VYvYzaZ8ingV/In5lHXJZXVUaRH0UrmwFh+RvdrEYTYk8E1v\r\nIlERxfWV7se3AvWbZoX9YIG2dDUrZIez1bYQcaXO8Kl53dwXcAZ7bp/DUuRP\r\neBb9MprxylI9LJpYJyAthFj0bn3gTYsqhl0oUCtZztUUnJI4Zxm0PF3GC8iM\r\nlNzBefJmB9MpMjjZvwI2cYiCiEarih0e0yI=\r\n=EGBr\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.3.0_1658183495376_0.8011000146170553"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.3.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.3.1",
+			"main": "./dist/index.js",
+			"types": "./dist/index.d.ts",
+			"exports": {
+				".": {
+					"types": "./dist/index.d.ts",
+					"default": "./dist/index.js"
+				},
+				"./package.json": "./package.json"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.18.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.17.12",
+				"@babel/preset-env": "^7.18.2",
+				"@babel/preset-react": "^7.17.12",
+				"@babel/preset-typescript": "^7.17.12",
+				"@svgr/core": "^6.3.1",
+				"@svgr/plugin-jsx": "^6.3.1",
+				"@svgr/plugin-svgo": "^6.3.1"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.5",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.73.0"
+			},
+			"gitHead": "1dbc3e2c2027253b3b81b92fd4eb09a4aa8ae25e",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.3.1",
+			"_nodeVersion": "18.6.0",
+			"_npmVersion": "lerna/5.1.4/node@v18.6.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-eODxwIUShLxSMaRjzJtrj9wg89D75JLczvWg9SaB5W+OtVTkiC1vdGd8+t+pf5fTlBOy4RRXAq7x1E3DUl3D0A==",
+				"shasum": "001d03236ebb03bf47c0a4b92d5423e05095ebe6",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.3.1.tgz",
+				"fileCount": 6,
+				"unpackedSize": 17743,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDEcUtWn/ZP14XjZ5AuXfy1h5QNrWjrRy/FPERUY5V0lAIgaA3zwmMNsUdhhU6jdxum0CUbvhGk0mcLtrbftLnJ9qY="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJi2rxgACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmqQLBAAjysPEdeoeje5g/9j68hz1+1AH+95B5meHz84G1bIk9mqk+AO\r\nPGoN6r4nHRolH5lKZlQbcvw4r1c4EXOcWubVdRZ1YFTwmcfi88fwKvkdli1H\r\nWNP+0R6PyWCvgy7H6jqGlQvdhfo/yh3gDHDt3rRoAfbl+0cbjsBzqmcCEHfL\r\nUulY22B6wXZq8YHsE3V2EpAspWPqEhU01hOLTPhrhrCi17TtYabuvbHk2yAU\r\nqqTdRnGJ/iyrkiZ0kz6BUA5JWYv5U4Fa6RAHeiy0Gh4i359Zr94eAUuuq76R\r\nOjyxbr2idfaMVU3OcALCYB4ab/JxR9SIA4cUGnPDyUMy5R+4XRBiY5EFJ+sr\r\nhup3Rc818ON8apgn7BeZl9CTmFHV2oCprhMCytxxog7Ayy4k55EzIBj9zDSl\r\nwbK16jaCPrYGHtfGwyoVmSzAfK4Ap6xw154ldcbZOYUR1GoQS251L3puDMt5\r\n7YDmbctqe7x8ahVhnhUnaE94s7lEo6xaOFwZNAUeSeRWNP+FonHbzWgc3YyB\r\n7NLOrtgOw3kVcnlyrs7uz9okvZaUJ1eI15eVAiqLs7Mt0IsJshnA92khzKDb\r\nCdTiK58k9+jyS/Yr4O6QvfYfUEYK4dBSmJU3UTntwtRnRC4m1s33ZpQt27TR\r\naKDk6s25gK14zaGKM5/g+W8y4w8ew6+/idA=\r\n=lJPY\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.3.1_1658502239964_0.9344047660634325"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.4.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.4.0",
+			"main": "./dist/index.js",
+			"types": "./dist/index.d.ts",
+			"exports": {
+				".": {
+					"types": "./dist/index.d.ts",
+					"default": "./dist/index.js"
+				},
+				"./package.json": "./package.json"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#master"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.18.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.17.12",
+				"@babel/preset-env": "^7.18.2",
+				"@babel/preset-react": "^7.17.12",
+				"@babel/preset-typescript": "^7.17.12",
+				"@svgr/core": "^6.4.0",
+				"@svgr/plugin-jsx": "^6.4.0",
+				"@svgr/plugin-svgo": "^6.3.1"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.5",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.73.0"
+			},
+			"gitHead": "fd423ae712087c34ba044ecb9016e862ca32eac1",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.4.0",
+			"_nodeVersion": "16.17.0",
+			"_npmVersion": "lerna/5.1.4/node@v16.17.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-ejt2JdVX6k0XzUjVObMcTzTgsaCadEVCHBvOt3J0Vcp3eFirf0nqsjQCUD+ogFep25+ICDMZa1nLlotbXxKDXw==",
+				"shasum": "6db74282ecd753c4a279c9c595a511e43aa89570",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.4.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 17743,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCir873q+a9jPm8/JrQyPO4bV+TL1g9P6nqXoi24MK5hwIhAMtmGEbh8DJYdmNYWN7yQQXwwmURueMATz2S17swgIM1"
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJjN+2PACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmqSDg/+OcH5N6K7oKdDkA0qyOEjwxA7i6Zoym1tSXNQlnxoxdTf/xNJ\r\neopPcBEvT7c00kxSOWFherTmgJ78UF1qRQtXbU/ttkSTOeH9iUwkI4aUi1YE\r\nW/Pkpj+qbcskjAS8tOwOb4Zs6bI4/fTgSdFKnbhLwHAc4dGE3yX3EncSpsAl\r\nCqF+nHmCPZDoAC0bF7oovxr0vAbzazIwZFJsqzam1F2fK1QBEnjxw9esML8s\r\nGBwrmj9xVcQldHEfmE6A8GX1P/P1E+8u8dbW3myI6Ik67ukDEfpoZfJsgFyz\r\nhX5nRKeXKJDv9dl6b6n3pCOI1JOJvqSrm5zCl1vO/m4ZoGb3FXNm8EnU+2xP\r\nzw32gT9AduVDzNJccWyqYmbo73DfRkHZYInW2OjPk2y6hXrUiUgKfPL6lmwl\r\nC3KEiOon/FvGAt13tQS2Ee8yZ2sWcrE5FgLJ0icAo9eFxB8OmhYUROupBUzU\r\n8SYbt4q1KT3ISGQFHlvbZpc0sOv3Sj3K8aH7luYG03CPgDLdT6BTGzrhbUef\r\njv9C3lmPkGHnUBu3uhk5kvMoaY5bUlBo9+pP6OE9KtRvMxSZTcxzUfCmtgqW\r\n3Mc4kNNRFZcXWnDKmf0browhPCxWBzu9MnSBQz1II+HPsQ5CJl2Ie5j/9Wde\r\n07vE0UGqT45XNJ6HmUb5jSzoU633qJl899I=\r\n=uvrt\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.4.0_1664609679738_0.9502412058496947"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.5.0": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.5.0",
+			"main": "./dist/index.js",
+			"types": "./dist/index.d.ts",
+			"exports": {
+				".": {
+					"types": "./dist/index.d.ts",
+					"default": "./dist/index.js"
+				},
+				"./package.json": "./package.json"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#main"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.18.5",
+				"@babel/plugin-transform-react-constant-elements": "^7.17.12",
+				"@babel/preset-env": "^7.18.2",
+				"@babel/preset-react": "^7.17.12",
+				"@babel/preset-typescript": "^7.17.12",
+				"@svgr/core": "^6.5.0",
+				"@svgr/plugin-jsx": "^6.5.0",
+				"@svgr/plugin-svgo": "^6.5.0"
+			},
+			"devDependencies": {
+				"babel-loader": "^8.2.5",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.73.0"
+			},
+			"gitHead": "b385279d27e51d34e4684dda326aa4216a485572",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.5.0",
+			"_nodeVersion": "16.17.0",
+			"_npmVersion": "lerna/5.1.4/node@v16.17.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-rM/Z4pwMhqvAXEHoHIlE4SeTb0ToQNmJuBdiHwhP2ZtywyX6XqrgCv2WX7K/UCgNYJgYbekuylgyjnuLUHTcZQ==",
+				"shasum": "663407b826cb96a3c3394cfe1f9bd107e693770a",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.5.0.tgz",
+				"fileCount": 6,
+				"unpackedSize": 17741,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCID3/2pHX6f+OC3aWTScfAL8wodxXEJKmIa5s+Ibhoh2kAiEA8XSgNDeVEumY1xSYFX9TQ7QLhNI7RdxTG3IMFRfq8+g="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJjSWv7ACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmpcaxAAjzHFiQGCMnd40VBsYbQQuzBnEsk94zLCaGVrp2q/V2R4XmaH\r\nwq6OayEAiRQVoqIUQs2W1eOb5mVoJK/19T1nNoS0i3v347ogd4ry4wSSLIEZ\r\naZG/siLUG/iMfSBXZe/IPD9JYtJYy07LhtFdWbfiw9sftZHAKpKVx47AIeRp\r\nnETac62Z8hbNoSsdXWqQyC5f1jPjJk4ppGmvDfVn+0elArVZraAirYG1IFfe\r\nSrd5euImYwVTSPZRyYu4HUTmkovQ/NdQFLWA4K2uFppYXX0Wnzk7gAbJ3X3w\r\nihhB5jibMLtDZ6e8dS5aBZyPx1Gucvfag47jrrgnigTfMBxUBzlylwfiXovD\r\n98wh4myqH3RaYESHuGsoinatsn+5gX1cWAghqcCcG/Nq+wjUq4J6X2HpRkaC\r\nPPVhJTmo0TDDrVu3MTNmGA8/lqE8Lc4aq9t0oCo+EHyEe9LahFPdr0guY+3X\r\nBWjU0NtA6shUCl57Lh9xUL2+SYAtKSkBwOLBQSIuFWt/QN64L9TuGFxoXmSV\r\nQ61YRNNkAfM42ACZGulON4bC01Vk2OhXFuRfnsN4S9kKb3awhcqwwbGIxQHd\r\nMzLP4aiRcH5dJ6y8yo9jhzOueloafgFzljfK79DPG1JsR84lggxWM5q7ywA5\r\nQV6ht6E9qkDwD6cr/QkmlbUUd4oY/3sR/ko=\r\n=zyD3\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.5.0_1665756154936_0.3320014133683744"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"6.5.1": {
+			"name": "@svgr/webpack",
+			"description": "SVGR webpack loader.",
+			"version": "6.5.1",
+			"main": "./dist/index.js",
+			"types": "./dist/index.d.ts",
+			"exports": {
+				".": {
+					"types": "./dist/index.d.ts",
+					"default": "./dist/index.js"
+				},
+				"./package.json": "./package.json"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/gregberge/svgr.git#main"
+			},
+			"author": {
+				"name": "Greg Bergé",
+				"email": "berge.greg@gmail.com"
+			},
+			"publishConfig": {
+				"access": "public"
+			},
+			"keywords": [
+				"svgr",
+				"svg",
+				"react",
+				"webpack",
+				"webpack-loader"
+			],
+			"engines": {
+				"node": ">=10"
+			},
+			"homepage": "https://react-svgr.com",
+			"funding": {
+				"type": "github",
+				"url": "https://github.com/sponsors/gregberge"
+			},
+			"license": "MIT",
+			"scripts": {
+				"reset": "rm -rf dist",
+				"build": "rollup -c ../../build/rollup.config.js",
+				"prepublishOnly": "npm run reset && npm run build"
+			},
+			"dependencies": {
+				"@babel/core": "^7.19.6",
+				"@babel/plugin-transform-react-constant-elements": "^7.18.12",
+				"@babel/preset-env": "^7.19.4",
+				"@babel/preset-react": "^7.18.6",
+				"@babel/preset-typescript": "^7.18.6",
+				"@svgr/core": "^6.5.1",
+				"@svgr/plugin-jsx": "^6.5.1",
+				"@svgr/plugin-svgo": "^6.5.1"
+			},
+			"devDependencies": {
+				"babel-loader": "^9.0.0",
+				"memory-fs": "^0.5.0",
+				"url-loader": "^4.1.1",
+				"webpack": "^5.74.0"
+			},
+			"gitHead": "d5efedd372999692f84d30072e502b5a6b8fe734",
+			"bugs": {
+				"url": "https://github.com/gregberge/svgr/issues"
+			},
+			"_id": "@svgr/webpack@6.5.1",
+			"_nodeVersion": "18.12.0",
+			"_npmVersion": "lerna/6.0.1/node@v18.12.0+arm64 (darwin)",
+			"dist": {
+				"integrity": "sha512-cQ/AsnBkXPkEK8cLbv4Dm7JGXq2XrumKnL1dRpJD9rIO2fTIlJI9a1uCciYG1F2aUsox/hJQyNGbt3soDxSRkA==",
+				"shasum": "ecf027814fc1cb2decc29dc92f39c3cf691e40e8",
+				"tarball": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.5.1.tgz",
+				"fileCount": 6,
+				"unpackedSize": 16006,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDNlNKQUxOIPiIBBc62XsiKgbNm2wJTFIapxAav0/NDbAIgD59LHl30muvXLNQYqIhOjW7vmHkuOhV1HXoVJoNhipE="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJjWvx4ACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmoudBAAkRUAoAU31WKdLB2QTIy4riJQ03gHGw/0VR9FCPuT9zUdfBIX\r\nrstrb3sb0O0WZ+0ox1uNwfD2tT+baDcerkfYHcc3L6thz26awhHs4CtJblh7\r\nBj4ggvOVkNHH/J2tnTOAALAH2ijClY3nZ38/hxkgj06QjSsJtOP8gnZ3j312\r\npRzTff8ywQeTnCpcwAyHyY6Jyg6IzaXyvnHaugPQGUSTjsK/FQopgy8YJBLm\r\nq6Lyy0DhIkAzQEuzkvxbrPaqtgM1fNBNz/eoSy8yVFzcdWLFF6kIIKFAVP7+\r\nDkVLxiAq5o/q5mIpAYCKVgcqCiFRhC0UUF767yGBa9ZGmc5oylS3BfVaMd4M\r\nxYDOMvZMactd0sZWlOHIDUv8DNkIJvpD/efVbh/gkNWfvpcqv8gc2p3zx2KX\r\nZriDJ6tiXld5MX5KzSYgVOvnG9ZOcONXmXut8BdP0JzZysdyAEZm2Wc8RkNT\r\nSl+P6OLLHk6M2Jl7vdyUPhA/RkfnGBrgLz9Cg/VXZEx5G4koIyanohRC3DKp\r\n37HZjI6wc1s9dyzLVm33N9Rq8SD/K1dAf3Bd9sdWwymsBs1YKYdnK2U8w8s8\r\nfM70xHXYyluWmwU+j/veoqZX25MnFjWv66SJlpoAhuLTDzU8vgRvfax+wuWZ\r\nLLZHTa8kmShsfw1RpvyypBg2HfDns5Ohdds=\r\n=HASz\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "neoziro",
+				"email": "berge.greg@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "neoziro",
+					"email": "berge.greg@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/webpack_6.5.1_1666907255895_0.8593984318085002"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		}
+	},
+	"time": {
+		"created": "2018-06-12T14:11:16.742Z",
+		"2.0.0-alpha.26fa501a": "2018-06-12T14:11:16.985Z",
+		"modified": "2022-10-27T21:47:36.152Z",
+		"2.0.0": "2018-06-12T15:53:21.786Z",
+		"2.1.0": "2018-07-08T21:30:48.575Z",
+		"2.1.1": "2018-07-11T15:38:40.425Z",
+		"2.2.0": "2018-08-13T16:31:00.053Z",
+		"2.2.1": "2018-08-16T09:25:25.355Z",
+		"2.3.0": "2018-09-03T10:34:35.938Z",
+		"2.4.0": "2018-09-16T15:35:29.305Z",
+		"2.4.1": "2018-09-16T22:04:37.013Z",
+		"3.0.0": "2018-10-01T18:05:39.680Z",
+		"3.1.0": "2018-10-05T19:14:11.514Z",
+		"4.0.0": "2018-11-04T15:18:00.565Z",
+		"4.0.1": "2018-11-08T14:14:15.215Z",
+		"4.0.2": "2018-11-08T19:37:21.122Z",
+		"4.0.3": "2018-11-13T09:35:22.269Z",
+		"4.0.4": "2018-11-24T07:54:44.695Z",
+		"4.1.0": "2018-11-24T15:29:30.848Z",
+		"4.2.0": "2019-04-11T07:02:06.381Z",
+		"4.3.0": "2019-05-28T14:44:17.915Z",
+		"4.3.1": "2019-07-01T08:56:45.084Z",
+		"4.3.2": "2019-07-15T08:56:00.838Z",
+		"4.3.3": "2019-09-24T07:42:49.002Z",
+		"5.0.0": "2019-12-23T14:07:11.137Z",
+		"5.0.1": "2019-12-29T09:30:18.304Z",
+		"5.1.0": "2020-01-20T15:33:58.285Z",
+		"5.2.0": "2020-02-23T20:04:50.727Z",
+		"5.3.0": "2020-03-22T15:38:48.746Z",
+		"5.3.1": "2020-04-05T07:59:52.486Z",
+		"5.4.0": "2020-04-27T20:20:34.385Z",
+		"5.5.0": "2020-11-15T10:23:32.340Z",
+		"6.0.0-alpha.0": "2021-09-24T21:54:54.829Z",
+		"6.0.0-alpha.1": "2021-10-31T08:58:40.530Z",
+		"6.0.0-alpha.2": "2021-11-01T09:10:31.779Z",
+		"6.0.0-alpha.3": "2021-11-12T08:43:56.531Z",
+		"6.0.0-alpha.4": "2021-11-13T08:41:03.642Z",
+		"6.0.0": "2021-11-28T22:16:50.019Z",
+		"6.1.0": "2021-12-01T21:50:40.645Z",
+		"6.1.1": "2021-12-04T20:59:52.508Z",
+		"6.1.2": "2021-12-12T14:27:37.525Z",
+		"6.2.0": "2022-01-10T08:17:01.523Z",
+		"6.2.1": "2022-01-30T10:51:43.510Z",
+		"6.3.0": "2022-07-18T22:31:35.562Z",
+		"6.3.1": "2022-07-22T15:04:00.175Z",
+		"6.4.0": "2022-10-01T07:34:39.868Z",
+		"6.5.0": "2022-10-14T14:02:35.132Z",
+		"6.5.1": "2022-10-27T21:47:36.061Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"canary": "2.0.0-alpha.26fa501a",
+		"latest": "6.5.1",
+		"next": "6.0.0-alpha.4"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"3da87fe1f10314a46a98df455b50b95e\"",
+			"fetched": 1674058160778
+		}
+	},
+	"_distfiles": {
+		"webpack-2.0.0-alpha.26fa501a.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.0.0-alpha.26fa501a.tgz",
+			"sha": "5efac1a3facc075e71d7fffca5dd1281ad80539d",
+			"registry": "npmjs"
+		},
+		"webpack-2.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.0.0.tgz",
+			"sha": "dc8a5fbda18b7c1ea08431ff995f7a5df80a4fb5",
+			"registry": "npmjs"
+		},
+		"webpack-2.1.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.1.0.tgz",
+			"sha": "5ab9ebd374dacbee782a161ef7557ea7e9272e37",
+			"registry": "npmjs"
+		},
+		"webpack-2.1.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.1.1.tgz",
+			"sha": "ab70286a0ad0ae79a446c580152eb184b68f1aa5",
+			"registry": "npmjs"
+		},
+		"webpack-2.2.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.2.0.tgz",
+			"sha": "f7fb61f8d358db3122dd65995710e9dcd597d896",
+			"registry": "npmjs"
+		},
+		"webpack-2.2.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.2.1.tgz",
+			"sha": "c2426674bf4d3110b157a10a4b06cb26b18b1db1",
+			"registry": "npmjs"
+		},
+		"webpack-2.3.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.3.0.tgz",
+			"sha": "3b688cbdf8a57cbed2e3bb4bd90abbafbbcb7e34",
+			"registry": "npmjs"
+		},
+		"webpack-2.4.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.4.0.tgz",
+			"sha": "8ab2e71f27fdc60f0416357aeeb74fcc13eef10f",
+			"registry": "npmjs"
+		},
+		"webpack-2.4.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-2.4.1.tgz",
+			"sha": "68bc581ecb4c09fadeb7936bd1afaceb9da960d2",
+			"registry": "npmjs"
+		},
+		"webpack-3.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-3.0.0.tgz",
+			"sha": "edfa25cc2f0d1d689f6008d9d3b2d5a9f69ff28c",
+			"registry": "npmjs"
+		},
+		"webpack-3.1.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-3.1.0.tgz",
+			"sha": "030f22ac2eaeb88bf788a43998ea2faa6a7f6fce",
+			"registry": "npmjs"
+		},
+		"webpack-4.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.0.tgz",
+			"sha": "52b8f2ef0b95bbf3a4941f019529c613606cca1a",
+			"registry": "npmjs"
+		},
+		"webpack-4.0.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.1.tgz",
+			"sha": "19a1b5b865c6cc25883debf7ccfc5b94fdac85e3",
+			"registry": "npmjs"
+		},
+		"webpack-4.0.2.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.2.tgz",
+			"sha": "a052f37b2ac25897b0ac445f4e7ea3ebda4b977f",
+			"registry": "npmjs"
+		},
+		"webpack-4.0.3.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.3.tgz",
+			"sha": "318907269dd93d4f911541236948e885df7f058d",
+			"registry": "npmjs"
+		},
+		"webpack-4.0.4.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.0.4.tgz",
+			"sha": "d77b04841b6e73277aec3b0cc7e0e4e95111fed9",
+			"registry": "npmjs"
+		},
+		"webpack-4.1.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.1.0.tgz",
+			"sha": "20c88f32f731c7b1d4711045b2b993887d731c28",
+			"registry": "npmjs"
+		},
+		"webpack-4.2.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.2.0.tgz",
+			"sha": "b7cdef42ae671a27ed4cfe118a0f2da7f4e9ebed",
+			"registry": "npmjs"
+		},
+		"webpack-4.3.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.0.tgz",
+			"sha": "4462e05070d91c04806b99c30a703fb2b50b2bb9",
+			"registry": "npmjs"
+		},
+		"webpack-4.3.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.1.tgz",
+			"sha": "cf6214853935cab8ba817b825e2483aa36c6b2e0",
+			"registry": "npmjs"
+		},
+		"webpack-4.3.2.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.2.tgz",
+			"sha": "319d4471c8f3d5c3af35059274834d9b5b8fb956",
+			"registry": "npmjs"
+		},
+		"webpack-4.3.3.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-4.3.3.tgz",
+			"sha": "13cc2423bf3dff2d494f16b17eb7eacb86895017",
+			"registry": "npmjs"
+		},
+		"webpack-5.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.0.0.tgz",
+			"sha": "e2ee458f8ede95649ca10fd5bcf40611c3461ad7",
+			"registry": "npmjs"
+		},
+		"webpack-5.0.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.0.1.tgz",
+			"sha": "d53765aa5a813017d015eaa744bdf506fb503689",
+			"registry": "npmjs"
+		},
+		"webpack-5.1.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.1.0.tgz",
+			"sha": "1a417739656829b42b830e9b9d4548ca9b202553",
+			"registry": "npmjs"
+		},
+		"webpack-5.2.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.2.0.tgz",
+			"sha": "80fda19af0caf79b715ae916d780bd8aa4c9b9d2",
+			"registry": "npmjs"
+		},
+		"webpack-5.3.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.3.0.tgz",
+			"sha": "172890fbd159bba0c756fb3ade9d9943755236ca",
+			"registry": "npmjs"
+		},
+		"webpack-5.3.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.3.1.tgz",
+			"sha": "6d185a5407c213b7111c3854a485254de0b1697c",
+			"registry": "npmjs"
+		},
+		"webpack-5.4.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.4.0.tgz",
+			"sha": "b68bc86e29cf007292b96ced65f80971175632e0",
+			"registry": "npmjs"
+		},
+		"webpack-5.5.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-5.5.0.tgz",
+			"sha": "aae858ee579f5fa8ce6c3166ef56c6a1b381b640",
+			"registry": "npmjs"
+		},
+		"webpack-6.0.0-alpha.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.0.tgz",
+			"sha": "2676848f7935c430cf7214b3b442887ca28c6a81",
+			"registry": "npmjs"
+		},
+		"webpack-6.0.0-alpha.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.1.tgz",
+			"sha": "e3611cd1ea3be905b744d90b12d9a5f5e2462949",
+			"registry": "npmjs"
+		},
+		"webpack-6.0.0-alpha.2.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.2.tgz",
+			"sha": "b0acb6a0edfa67407031f9ad2f7a2e8039521916",
+			"registry": "npmjs"
+		},
+		"webpack-6.0.0-alpha.3.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.3.tgz",
+			"sha": "da5dec76a89ad379ed3d2d4f53c23d2e9e866677",
+			"registry": "npmjs"
+		},
+		"webpack-6.0.0-alpha.4.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0-alpha.4.tgz",
+			"sha": "69b51d33f7ea8834608c257de6d4f7b4ceaaefca",
+			"registry": "npmjs"
+		},
+		"webpack-6.0.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.0.0.tgz",
+			"sha": "c1f21b8967cd1dd25ddcc550aad026d29e4b19b4",
+			"registry": "npmjs"
+		},
+		"webpack-6.1.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.1.0.tgz",
+			"sha": "6461b930add8988afa58e2e52cd6344c05cafdc3",
+			"registry": "npmjs"
+		},
+		"webpack-6.1.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.1.1.tgz",
+			"sha": "73b64f545f1f36644106694c72eb46f305d46305",
+			"registry": "npmjs"
+		},
+		"webpack-6.1.2.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.1.2.tgz",
+			"sha": "23fd605e9163deb7ef3feef52545ff11dc9989bf",
+			"registry": "npmjs"
+		},
+		"webpack-6.2.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.2.0.tgz",
+			"sha": "00fafd32e1d59add7b554c40aa2e97e83f975686",
+			"registry": "npmjs"
+		},
+		"webpack-6.2.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.2.1.tgz",
+			"sha": "ef5d51c1b6be4e7537fb9f76b3f2b2e22b63c58d",
+			"registry": "npmjs"
+		},
+		"webpack-6.3.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.3.0.tgz",
+			"sha": "62d3681e6999c170f67edf7f77dcb95c63bafe42",
+			"registry": "npmjs"
+		},
+		"webpack-6.3.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.3.1.tgz",
+			"sha": "001d03236ebb03bf47c0a4b92d5423e05095ebe6",
+			"registry": "npmjs"
+		},
+		"webpack-6.4.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.4.0.tgz",
+			"sha": "6db74282ecd753c4a279c9c595a511e43aa89570",
+			"registry": "npmjs"
+		},
+		"webpack-6.5.0.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.5.0.tgz",
+			"sha": "663407b826cb96a3c3394cfe1f9bd107e693770a",
+			"registry": "npmjs"
+		},
+		"webpack-6.5.1.tgz": {
+			"url": "https://registry.npmjs.org/@svgr/webpack/-/webpack-6.5.1.tgz",
+			"sha": "ecf027814fc1cb2decc29dc92f39c3cf691e40e8",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "1-fd4f860d8b90ad3f",
+	"_id": "@svgr/webpack",
+	"readme": "# @svgr/webpack\n\n[![Build Status](https://img.shields.io/travis/gregberge/svgr.svg)](https://travis-ci.org/gregberge/svgr)\n[![Version](https://img.shields.io/npm/v/@svgr/webpack.svg)](https://www.npmjs.com/package/@svgr/webpack)\n[![MIT License](https://img.shields.io/npm/l/@svgr/webpack.svg)](https://github.com/gregberge/svgr/blob/master/LICENSE)\n\nWebpack loader for SVGR.\n\n```\nnpm install @svgr/webpack --save-dev\n```\n\n## Usage\n\nIn your `webpack.config.js`:\n\n```js\n{\n  test: /\\.svg$/,\n  use: ['@svgr/webpack'],\n}\n```\n\nIn your code:\n\n```js\nimport Star from './star.svg'\n\nconst App = () => (\n  <div>\n    <Star />\n  </div>\n)\n```\n\n### Passing options\n\n```js\n{\n  test: /\\.svg$/,\n  use: [\n    {\n      loader: '@svgr/webpack',\n      options: {\n        native: true,\n      },\n    },\n  ],\n}\n```\n\n### Using with `url-loader` or `file-loader`\n\nIt is possible to use it with [`url-loader`](https://github.com/webpack-contrib/url-loader) or [`file-loader`](https://github.com/webpack-contrib/file-loader).\n\nIn your `webpack.config.js`:\n\n```js\n{\n  test: /\\.svg$/,\n  use: ['@svgr/webpack', 'url-loader'],\n}\n```\n\nIn your code:\n\n```js\nimport starUrl, { ReactComponent as Star } from './star.svg'\n\nconst App = () => (\n  <div>\n    <img src={starUrl} alt=\"star\" />\n    <Star />\n  </div>\n)\n```\n\nThe named export defaults to `ReactComponent`, but can be customized with the `namedExport` option.\n\nPlease note that by default, `@svgr/webpack` will try to export the React Component via default export if there is no other loader handling svg files with default export. When there is already any other loader using default export for svg files, `@svgr/webpack` will always export the React component via named export.\n\nIf you prefer named export in any case, you may set the `exportType` option to `named`.\n\n### Use your own Babel configuration\n\nBy default, `@svgr/webpack` includes a `babel-loader` with [an optimized configuration](https://github.com/gregberge/svgr/blob/main/packages/webpack/src/index.ts). In some case you may want to apply a custom one (if you are using Preact for an example). You can turn off Babel transformation by specifying `babel: false` in options.\n\n```js\n// Example using preact\n{\n  test: /\\.svg$/,\n  use: [\n    {\n      loader: 'babel-loader',\n      options: {\n        presets: ['preact', 'env'],\n      },\n    },\n    {\n      loader: '@svgr/webpack',\n      options: { babel: false },\n    }\n  ],\n}\n```\n\n### Handle SVG in CSS, Sass or Less\n\nIt is possible to detect the module that requires your SVG using [`Rule.issuer`](https://webpack.js.org/configuration/module/#ruleissuer) in Webpack 5. Using it you can specify two different configurations for JavaScript and the rest of your files.\n\n```js\n;[\n  {\n    test: /\\.svg(\\?v=\\d+\\.\\d+\\.\\d+)?$/,\n    issuer: /\\.[jt]sx?$/,\n    use: ['babel-loader', '@svgr/webpack', 'url-loader'],\n  },\n  {\n    test: /\\.svg(\\?v=\\d+\\.\\d+\\.\\d+)?$/,\n    loader: 'url-loader',\n  },\n]\n```\n\n_[Rule.issuer](https://v4.webpack.js.org/configuration/module/#ruleissuer) in Webpack 4 has additional conditions which are not available in Webpack 5._\n\n## License\n\nMIT"
+}

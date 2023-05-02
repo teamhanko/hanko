@@ -6,10 +6,10 @@ const api = import.meta.env.VITE_HANKO_API;
 const emit = defineEmits(["on-error"]);
 
 onMounted(() => {
-  register({ shadow: true }).catch((e) => emit("on-error", e));
+  register(api).catch((e) => emit("on-error", e));
 });
 </script>
 
 <template>
-  <hanko-profile :api="api" />
+  <hanko-profile />
 </template>

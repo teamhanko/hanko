@@ -3,26 +3,37 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { TodoClient, Todos } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
+import { createHankoClient } from "@teamhanko/hanko-elements";
 
-const api = process.env.NEXT_PUBLIC_TODO_API!;
+const hankoAPI = process.env.NEXT_PUBLIC_HANKO_API!;
+const todoAPI = process.env.NEXT_PUBLIC_TODO_API!;
 
 const Todo: NextPage = () => {
-  const client = useMemo(() => new TodoClient(api), []);
+  const hankoClient = useMemo(() => createHankoClient(hankoAPI), []);
+  const todoClient = useMemo(() => new TodoClient(todoAPI), []);
   const router = useRouter();
 
   const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
 
+  const redirectToProfile = () => {
+    router.push("/profile").catch(setError)
+  }
+
+  const redirectToLogin = useCallback(() => {
+    router.push("/").catch(setError)
+  }, [router]);
+
   const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const todo = { description, checked: false };
 
-    client
+    todoClient
       .addTodo(todo)
       .then((res) => {
         if (res.status === 401) {
-          router.replace("/").catch((e) => setError(e));
+          redirectToLogin();
           return;
         }
 
@@ -37,11 +48,11 @@ const Todo: NextPage = () => {
   };
 
   const listTodos = useCallback(() => {
-    client
+    todoClient
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          router.push("/").catch((e) => setError(e));
+          redirectToLogin();
           return;
         }
 
@@ -55,14 +66,14 @@ const Todo: NextPage = () => {
       .catch((e) => {
         setError(e);
       });
-  }, [client, router]);
+  }, [todoClient, redirectToLogin]);
 
   const patchTodo = (id: string, checked: boolean) => {
-    client
+    todoClient
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          router.push("/").catch((e) => setError(e));
+          redirectToLogin();
           return;
         }
 
@@ -76,11 +87,11 @@ const Todo: NextPage = () => {
   };
 
   const deleteTodo = (id: string) => {
-    client
+    todoClient
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          router.push("/").catch((e) => setError(e));
+          redirectToLogin();
           return;
         }
 
@@ -94,20 +105,12 @@ const Todo: NextPage = () => {
   };
 
   const logout = () => {
-    client
+    hankoClient.user
       .logout()
-      .then(() => {
-        router.push("/").catch((e) => setError(e));
-        return;
-      })
       .catch((e) => {
         setError(e);
       });
   };
-
-  const profile = () => {
-    router.push("/profile").catch(setError)
-  }
 
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(event.currentTarget.value);
@@ -117,6 +120,10 @@ const Todo: NextPage = () => {
     const { currentTarget } = event;
     patchTodo(currentTarget.value, currentTarget.checked);
   };
+
+  useEffect(() => hankoClient.onSessionRemoved(() => {
+    redirectToLogin();
+  }), [hankoClient, redirectToLogin]);
 
   useEffect(() => {
     listTodos();
@@ -128,7 +135,7 @@ const Todo: NextPage = () => {
         <button onClick={logout} className={styles.button}>
           Logout
         </button>
-        <button onClick={profile} className={styles.button}>
+        <button onClick={redirectToProfile} className={styles.button}>
           Profile
         </button>
         <button disabled className={styles.button}>

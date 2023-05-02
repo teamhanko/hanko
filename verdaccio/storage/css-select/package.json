@@ -1,0 +1,2938 @@
+{
+	"name": "css-select",
+	"versions": {
+		"1.0.0": {
+			"name": "css-select",
+			"version": "1.0.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"dependencies": {
+				"css-what": "1.0",
+				"domutils": "1.4",
+				"boolbase": "~1.0.0",
+				"nth-check": "~1.0.0"
+			},
+			"devDependencies": {
+				"htmlparser2": "*",
+				"cheerio-soupselect": "*",
+				"mocha": "*",
+				"mocha-lcov-reporter": "*",
+				"coveralls": "*",
+				"istanbul": "*",
+				"expect.js": "*",
+				"jshint": "2"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "jshint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-like",
+			"jshintConfig": {
+				"eqeqeq": true,
+				"freeze": true,
+				"latedef": "nofunc",
+				"noarg": true,
+				"nonbsp": true,
+				"quotmark": "double",
+				"undef": true,
+				"unused": true,
+				"trailing": true,
+				"eqnull": true,
+				"proto": true,
+				"smarttabs": true,
+				"node": true,
+				"globals": {
+					"describe": true,
+					"it": true
+				}
+			},
+			"gitHead": "c73512d9b5b4dc3f537702283143c9463b4f7d7d",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select",
+			"_id": "css-select@1.0.0",
+			"_shasum": "b1121ca51848dd264e2244d058cee254deeb44b0",
+			"_from": ".",
+			"_npmVersion": "2.4.1",
+			"_nodeVersion": "1.0.4",
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				}
+			],
+			"dist": {
+				"shasum": "b1121ca51848dd264e2244d058cee254deeb44b0",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-1.0.0.tgz",
+				"integrity": "sha512-/xPlD7betkfd7ChGkLGGWx5HWyiHDOSn7aACLzdH0nwucPvB0EAm8hMBm7Xn7vGfAeRRN7KZ8wumGm8NoNcMRw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQC7H5tm+KsPwGnsCRHu/8BrL59syqwrqvPIw8HjGphAlQIhAOmoEp3c9nD0kQpq1SneMu6tSIa5c99xhUJi6S4RU1XJ"
+					}
+				]
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"1.1.0": {
+			"name": "css-select",
+			"version": "1.1.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"dependencies": {
+				"css-what": "2.0",
+				"domutils": "1.4",
+				"boolbase": "~1.0.0",
+				"nth-check": "~1.0.0"
+			},
+			"devDependencies": {
+				"htmlparser2": "*",
+				"cheerio-soupselect": "*",
+				"mocha": "*",
+				"mocha-lcov-reporter": "*",
+				"coveralls": "*",
+				"istanbul": "*",
+				"expect.js": "*",
+				"jshint": "2"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "jshint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-like",
+			"jshintConfig": {
+				"eqeqeq": true,
+				"freeze": true,
+				"latedef": "nofunc",
+				"noarg": true,
+				"nonbsp": true,
+				"quotmark": "double",
+				"undef": true,
+				"unused": true,
+				"trailing": true,
+				"eqnull": true,
+				"proto": true,
+				"smarttabs": true,
+				"node": true,
+				"globals": {
+					"describe": true,
+					"it": true
+				}
+			},
+			"gitHead": "e38c2ca1a2eb56a3cf856d517cce0075ffc137d1",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select",
+			"_id": "css-select@1.1.0",
+			"_shasum": "b51ec9c7d0ab50b9fcd61e529504387b1202d6c4",
+			"_from": ".",
+			"_npmVersion": "2.6.1",
+			"_nodeVersion": "1.4.2",
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				}
+			],
+			"dist": {
+				"shasum": "b51ec9c7d0ab50b9fcd61e529504387b1202d6c4",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-1.1.0.tgz",
+				"integrity": "sha512-Y6m6VdI+mb9Uxv9dOnh6orJmLNZCtdktQGszDHipNg0m8zu3aaa8oVeigFZHWDtoAUb0eT6Zc9Z7nPQJCSAEyw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDzXfl5bfTzHSRkLdVEf+0XVmUKZRV/FSLx5ISFFQNjZQIhALA6LbJML99KqkO+rxirfwTuxS25s3wapKfzVZvLb54K"
+					}
+				]
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"1.2.0": {
+			"name": "css-select",
+			"version": "1.2.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"dependencies": {
+				"css-what": "2.1",
+				"domutils": "1.5.1",
+				"boolbase": "~1.0.0",
+				"nth-check": "~1.0.1"
+			},
+			"devDependencies": {
+				"htmlparser2": "*",
+				"cheerio-soupselect": "*",
+				"mocha": "*",
+				"mocha-lcov-reporter": "*",
+				"coveralls": "*",
+				"istanbul": "*",
+				"expect.js": "*",
+				"jshint": "2"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "jshint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-like",
+			"jshintConfig": {
+				"eqeqeq": true,
+				"freeze": true,
+				"latedef": "nofunc",
+				"noarg": true,
+				"nonbsp": true,
+				"quotmark": "double",
+				"undef": true,
+				"unused": true,
+				"trailing": true,
+				"eqnull": true,
+				"proto": true,
+				"smarttabs": true,
+				"node": true,
+				"globals": {
+					"describe": true,
+					"it": true
+				}
+			},
+			"gitHead": "09c405d8296bd97a660256604d8cdfb23fca47b6",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@1.2.0",
+			"_shasum": "2b3a110539c5355f1cd8d314623e870b121ec858",
+			"_from": ".",
+			"_npmVersion": "3.3.9",
+			"_nodeVersion": "5.0.0",
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				}
+			],
+			"dist": {
+				"shasum": "2b3a110539c5355f1cd8d314623e870b121ec858",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-1.2.0.tgz",
+				"integrity": "sha512-dUQOBoqdR7QwV90WysXPLXG5LO7nhYBgiWVfxF80DKPF8zx1t/pUd2FYy73emg3zrjtM6dzmYgbHKfV2rxiHQA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIFfIaW9zJ9f2aX+93hzD/4THO/LnoeUvOhzPhJ4SSzpuAiBIyGipQtsaCkz6tj3RnHA+MSwfKOZcE3gngqXwQGpReg=="
+					}
+				]
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"1.3.0-rc0": {
+			"name": "css-select",
+			"version": "1.3.0-rc0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "2.1",
+				"domutils": "1.5.1",
+				"nth-check": "^1.0.1"
+			},
+			"devDependencies": {
+				"cheerio-soupselect": "*",
+				"coveralls": "*",
+				"eslint": "^3.0.0",
+				"expect.js": "*",
+				"htmlparser2": "*",
+				"istanbul": "*",
+				"mocha": "*",
+				"mocha-lcov-reporter": "*"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "eslint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-like",
+			"gitHead": "e3aac04569197a9ee770a8aeadc3563f1eb85132",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@1.3.0-rc0",
+			"_shasum": "6f93196aaae737666ea1036a8cb14a8fcb7a9231",
+			"_from": ".",
+			"_npmVersion": "4.1.1",
+			"_nodeVersion": "7.4.0",
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"dist": {
+				"shasum": "6f93196aaae737666ea1036a8cb14a8fcb7a9231",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-1.3.0-rc0.tgz",
+				"integrity": "sha512-sPFsHUnX17suh/D+JnvAg9CP8cXRYp6GqpTvXjBLGnNfSoRwRW+yZ89ABL/+Ea6Ey+53/B/xwbt26qNDxd7HBw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCICSqWIKUhcoCHRWD1UNZ78r5O+WWUl7Xd4qpyJJmFWzbAiAb/AXHiXNv3aw56m1UPw+mTY4/7tyfWVGQjdlO1xJJVg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/css-select-1.3.0-rc0.tgz_1484823707337_0.3359173599164933"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.0": {
+			"name": "css-select",
+			"version": "2.0.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"files": [
+				"index.js",
+				"index.d.ts",
+				"lib"
+			],
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "2.1",
+				"domutils": "^1.7.0",
+				"nth-check": "^1.0.1"
+			},
+			"devDependencies": {
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.0",
+				"eslint": "^4.18.2",
+				"expect.js": "^0.3.1",
+				"htmlparser2": "^3.9.2",
+				"istanbul": "^0.4.5",
+				"mocha": "^5.0.4",
+				"mocha-lcov-reporter": "^1.3.0"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "eslint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-like",
+			"types": "index.d.ts",
+			"gitHead": "f292b0bbc61fb85987706d8e86a909869cbcadb4",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@2.0.0",
+			"_npmVersion": "5.7.1",
+			"_nodeVersion": "9.7.1",
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"dist": {
+				"integrity": "sha512-MGhoq1S9EyPgZIGnts8Yz5WwUOyHmPMdlqeifsYs/xFX7AAm3hY0RJe1dqVlXtYPI66Nsk39R/sa5/ree6L2qg==",
+				"shasum": "7aa2921392114831f68db175c0b6a555df74bbd5",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-2.0.0.tgz",
+				"fileCount": 11,
+				"unpackedSize": 46285,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIHQC7ngzXB7+KzAA85Y6M7Z/2ShgBaZK+BtDV9ojIHn1AiEA75Tm3NYXkokgOdhcawDxdfaV28SsY8j4LkYyzr+iHQw="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "chris@eppsteins.net",
+					"name": "chriseppstein"
+				},
+				{
+					"email": "me@feedic.com",
+					"name": "feedic"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_2.0.0_1520601857520_0.17582115572587353"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.0.2": {
+			"name": "css-select",
+			"version": "2.0.2",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^2.1.2",
+				"domutils": "^1.7.0",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^5.7.0",
+				"expect.js": "^0.3.1",
+				"htmlparser2": "^3.10.0",
+				"istanbul": "^0.4.5",
+				"mocha": "^5.2.0",
+				"mocha-lcov-reporter": "^1.3.0"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "eslint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-2-Clause",
+			"types": "index.d.ts",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"gitHead": "c94b698bcbf8a552b05c2bb826b12358ae1dfba7",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@2.0.2",
+			"_npmVersion": "6.4.1",
+			"_nodeVersion": "10.11.0",
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"dist": {
+				"integrity": "sha512-dSpYaDVoWaELjvZ3mS6IKZM/y2PMPa/XYoEfYNZePL4U/XgyxZNroHEHReDx/d+VgXh9VbCTtFqLkFbmeqeaRQ==",
+				"shasum": "ab4386cec9e1f668855564b17c3733b43b2a5ede",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-2.0.2.tgz",
+				"fileCount": 11,
+				"unpackedSize": 51557,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJbzQKHCRA9TVsSAnZWagAAZIcP/3CbPe9cbZBCwQul3WnK\nVZKVlN61pUHy9FAaSP4oQtxa1EWwEgeCz3lxFbpWaYyx9wy/pdm+en8VgQP4\nw6MELT9jY61/n5p0PKzr9U+sbXxAJMh8eyjWaLLYvJhTZm845gUTqF7l/wRM\nW0X+bsDfLBLgfFXxLWO6EC+ZPhm0oz+KW/gtAAGBmk3phTo4tcu/WWCZns4l\nQJ1etRXDFXV217G7hVOXC2eSzeFfnQGRVHHNoc4Ci1g01o8KMEra873+Za0D\ni9S2ynYVGJlxDkLli09FbLN80VBYHHOXUzGoI6kFq0mLXLdcQCIRc3/bvwWr\ncvFtIYDobkZ70/CWA4ytD7oiu83AmQHidDpJQXXN0jcrd8iHs3IT9d33pc4S\ns1gs3GwyDoM3C6iXR3ENtnZNoEeGXM8DkCaBjgNTnXMyhBcHbhXsZY4M8+Rf\nh9wyw1PMvcq70CScp0n3N2T5XBk+QE+KStxDpf/bAagFQWYjaDMx8qwI1Fm1\n3AlNYxXaarc0SHMxZXOxL+gRhF8px0hPt2KML5ZynqYh+kLAw52tRBxLju/g\nkSlcScamOKDzp7U5RtpifMbXgTe1+Xypdj0buR+YU0vDMzBi4DvtUWLk7oTv\ndbJqSJkdMzTqSGLBWNSmiKqlfXowUXM+sFQ0Tw+D4GHAfPk0pGadZ7JYnxCg\nyv4V\r\n=HMRf\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIElEBcRDDGSXo7R7on297qY0emJQIsuXQX68ex/t+EVaAiBPIqeBk7WqgBvIp1bCXlB741VgpZs885mSnzRTztZAhg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "chris@eppsteins.net",
+					"name": "chriseppstein"
+				},
+				{
+					"email": "me@feedic.com",
+					"name": "feedic"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_2.0.2_1540162183001_0.265523704639671"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.1.0": {
+			"name": "css-select",
+			"version": "2.1.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.2.1",
+				"domutils": "^1.7.0",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^6.0.0",
+				"expect.js": "^0.3.1",
+				"htmlparser2": "^4.0.0",
+				"istanbul": "^0.4.5",
+				"mocha": "^6.0.0",
+				"mocha-lcov-reporter": "^1.3.0"
+			},
+			"scripts": {
+				"test": "mocha && npm run lint",
+				"lint": "eslint index.js lib/*.js test/*.js",
+				"lcov": "istanbul cover _mocha --report lcovonly -- -R spec",
+				"coveralls": "npm run lint && npm run lcov && (cat coverage/lcov.info | coveralls || exit 0)"
+			},
+			"license": "BSD-2-Clause",
+			"types": "index.d.ts",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"gitHead": "9c6c239bfd821556f85dba6cbb27c5cfd1b0a4c2",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@2.1.0",
+			"_nodeVersion": "12.4.0",
+			"_npmVersion": "6.13.0",
+			"dist": {
+				"integrity": "sha512-Dqk7LQKpwLoH3VovzZnkzegqNSuAziQyNZUcrdDM401iY+R5NkGBXGmtO05/yaXQziALuPogeG0b7UAgjnTJTQ==",
+				"shasum": "6a34653356635934a81baca68d0255432105dbef",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-2.1.0.tgz",
+				"fileCount": 11,
+				"unpackedSize": 53685,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJdx0h2CRA9TVsSAnZWagAA9JIP/jhzllnRmbqMaQ0rPDig\ncgJfBg+60SjBiX/KAXKnkENqFEVGNE8C5FQeQ1C5ic6TlWEpVUWXu4q49rMF\n06eyA6UellZajWVpDTcNyZ7tvyeftEC74XsqPJrdJg7dG+Ow8EUzod5p/Acu\nvTgEHXJWxGPh6AhBo8uIAyuu0YAIGntlYelMc9ERym8oTAtcq2/5QrZT1UZ5\nm513RBRUk4UV4a39DPYe4D8yEHQ6cEwy7D4QuYc7pHRkTR1VOSr6fQ3ZXsYl\nvbs5y7yQgMxUQJZbgpkqy957CmV24FMVbjIwedopJW59Jnrzm6cSU1HML1/5\ntUiJEx8jDICdH2lYCvBjvXAz+wbsJ6cAOFYB49vBBr1SRq71ujhJedFODEnJ\nzgwK7jacmiaJyCBrSI5bNBAeq+OrLa+F3f93MPHUA+2yYQ4nY6yRw0QdNuFV\nkkTkGYm+7oXOcO71WbtqclRZFMeNibg5Pn2l34HEi5AkLYTjprIEtTrkCO75\nSt1jNDz+FFuLBblCOtfdCJCK2NpQ1QZeDZEb5A1Iw4DJvRVYj6oLTNSgOIh1\numVnOsjIbCXyJRfunTrF4cIkzrX9XXaSaJT/cjdUrddJiRZwy5I8lfwiMaRT\ngUuHxaT/DHqjHlsx+41GQwKJHgVRq3bkNjlqB+ylFO4eL8mDmOn0ASSdBI5K\nxoer\r\n=BT/9\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDW4Dp+WhrXLh1SsTLeCMYQYpwmYzEaivHgv2DBubJYfAiEAvTaERJ8DFDeLCiGLGWjUkEGDWFOF5/7xYM5+6nvObMw="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"email": "chris@eppsteins.net",
+					"name": "chriseppstein"
+				},
+				{
+					"email": "me@feedic.com",
+					"name": "feedic"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_2.1.0_1573341302288_0.03374772745030108"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.0.0": {
+			"name": "css-select",
+			"version": "3.0.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.3.0",
+				"domutils": "^2.4.0",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^6.0.0",
+				"expect.js": "^0.3.1",
+				"htmlparser2": "^4.0.0",
+				"mocha": "^8.0.1",
+				"nyc": "^15.1.0",
+				"prettier": "^2.1.2",
+				"ts-node": "^9.0.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "mocha --parallel && npm run lint",
+				"lint": "eslint .",
+				"lcov": "nyc mocha",
+				"coveralls": "(nyc report --reporter=text-lcov | coveralls)",
+				"build": "tsc"
+			},
+			"license": "BSD-2-Clause",
+			"types": "index.d.ts",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"gitHead": "fe9c2b95bb1d07689f1b4f02e54f0877bdd58f31",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.0.0",
+			"_nodeVersion": "14.11.0",
+			"_npmVersion": "6.14.8",
+			"dist": {
+				"integrity": "sha512-T432xuZlBtvAIaaRJyB5DVknczqr4bIEhfr09uC3L0DW0FQAK4+Yp/AAhTALNGoE7nZ/hGq2v11M8FOZ8amsUA==",
+				"shasum": "7533e0e600f6a234c7cf151e3c94671a04fe9624",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.0.0.tgz",
+				"fileCount": 3,
+				"unpackedSize": 13200,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfa7dUCRA9TVsSAnZWagAAcrYP/i0xjGkzfX+fA5DOIJAv\nSpEocpusI77P/z2Nv8Zp8Z6+EqzjP0cYkAtrZr1F24md9QcTIvJHFa9sqaA0\nvhQs9bDai3N8v40mV8Whnl5GmKPxYzpMESdPX5HQU1o37UYobOCp5lYiK3Ds\n7L+OggIwiaHVlBj+5jwopSh+3Z4WVJ2Y8SRPwuyH0ec4IrdlckWvavwPktJY\nDprCjSXpmXUbWL8huoJCm2K06p0pzTmMvZ7chJxwF/XEsn4J+VM9ejIJ2kyX\nMCtxLVx0PqhTY0wvWvLaKpQC29jHtswBSNU2SnhYKYcIcK9moeQJZ7hA42po\n92u2iPdrBMOU5LJGzkdw2FxJHjh9AHajoySZb7gKMhzpgq2LtLn7aQUaTePj\njVcBb1NFbhwXWVA2HhyIWgMW/8BrQnYQXm6gpWlaf2zsYMvIWz/TTcQimAhu\nXQ2wt6mwArAmeapoU4jidcC1OLMRbCCT0BUglDpD5YxzeUExzVK2RiIhExyL\n8fOLQZQRWyRI7hlWNdNDvgndR/ViMGCKUNXIZ+gGdk2X/2DigWEMY0QbsmUX\nadeMXUtM1kcLcKJ2mKMdDkCeHRzn7BOqo0nY4qU3gzo9sS6Zkph1b5YUL2tI\nAtqxJui7SUS+tOhWz2iIduKJbR6TPG8iLCOym+9lYLwCDhExg9cV5eksnJYK\n8GOB\r\n=bP9A\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIBPHYXXddMCHTn5/UcM3hDxpoMZfX2q2VCBln51JY8xyAiEA3APXcBSJ7ZN9uwDIt6qBN4LmznWTJzuHXgifEUtVd6c="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.0.0_1600894803553_0.5996888756110541"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.0.1": {
+			"name": "css-select",
+			"version": "3.0.1",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.3.0",
+				"domutils": "^2.4.0",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^6.0.0",
+				"expect.js": "^0.3.1",
+				"htmlparser2": "^4.0.0",
+				"mocha": "^8.0.1",
+				"nyc": "^15.1.0",
+				"prettier": "^2.1.2",
+				"ts-node": "^9.0.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "mocha --parallel && npm run lint",
+				"lint": "eslint .",
+				"lcov": "nyc mocha",
+				"coveralls": "(nyc report --reporter=text-lcov | coveralls)",
+				"build": "tsc"
+			},
+			"license": "BSD-2-Clause",
+			"types": "index.d.ts",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"gitHead": "ac61b0343e847198e70923296a336543a65152cc",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.0.1",
+			"_nodeVersion": "14.11.0",
+			"_npmVersion": "6.14.8",
+			"dist": {
+				"integrity": "sha512-nzgvzFgkhKeoM0P69AFMgVjlt9b3wxbi1Cai1EAK4S/897edtKcPVgbdWPjP75JanlIZPIccd0y++ROysnXaYg==",
+				"shasum": "98bfdf4d43756f4b8db7b897bde61aa7572d59b8",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.0.1.tgz",
+				"fileCount": 3,
+				"unpackedSize": 13200,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfa9xoCRA9TVsSAnZWagAApFoP/jD5/PQrkAppJlfsTCp3\ncX9bsWeYCsn0NIO8XDfCehf4SvqeBmCoR3Mr6S8KexCdF/gI3tmHOQidfPzJ\nmKyZYTJtKHK2L7c9R2Ddb8jxE0H+EaR3//tUPn8LblIA2jfWwyWSm1sNC/xq\nuvXi9PdMZTa2gr7CX3/Fp3G8pf9C19P1mzXJ1LUAaKNpXAKsyj8BlWVXyXHI\nPC5+r/MdzVld0KKkR7VSMdyzHXnyf3C8XB8jAJ7MYn9EJW1HrCMPRAVxSrKG\n+BBys1NwFTvc4jTE+BAKncgwVhqCkPOrDoakmSOOlwjtun80LsyodDfecub0\nteo1cuWAO2fE2YJ5pApaSq9bRPtsrGNQw5tioj9FoZoG23hFARBP2vvRfUvS\nBL4IY/MD5dT/Q0y2eWaKlVFTKZj7os80ypatIvybHTtLEGTeffulDyYRzQnq\ncQh4SXadWA+lFbkPQ5qSPDktInxpzLZhas5MUXFwnZdgreerHH2JtYldOmKJ\nVglUyhZrJ/Qx368xgfg0kQ4WSfBjpoGeuXPfXZ9NXFc2q7IvHiKkAGUOSoA4\n/nfv8G+9EQpgjIRgULADiTTD0GxPdNVtmjS4x9cdd0+EzlxIye6tANWonN11\nZ1l9Fv2e2zV+jmVcws8lEti4nkq16jfhdP8wuBdqjJH3zYI4poYAl6i8UJK7\nvlEQ\r\n=WMOE\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIEl/BB62YmrptGPidSJa6gTigu1fapgdRC8QANOY//aYAiBGdIcm+/4rAeMlI9iKGotZAOX9RLE0Ggb4F+dwIim6dg=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.0.1_1600904296523_0.9236419566819103"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.0.2": {
+			"name": "css-select",
+			"version": "3.0.2",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.3.0",
+				"domutils": "^2.4.0",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^6.0.0",
+				"htmlparser2": "^4.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "eslint src",
+				"format": "prettier --write '**/*.{ts,md,json}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"types": "index.d.ts",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "ca8a59f09c71c88b2275d74e574dcadbac181b74",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.0.2",
+			"_nodeVersion": "14.11.0",
+			"_npmVersion": "6.14.8",
+			"dist": {
+				"integrity": "sha512-nShlQ1A4mK+cjRJM1WCiKdPqJR3ldnqG2I3lGUy2nuQ3n7GBxCCnpHteQKM45ExGM8gwxdV/pxhXFUJVQ5XK2g==",
+				"shasum": "ab1d484228a77e135e12423c2ecb679321457c3d",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.0.2.tgz",
+				"fileCount": 36,
+				"unpackedSize": 78629,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfcOoGCRA9TVsSAnZWagAA7okP/iblgAidO/PR5kYloKNv\nttfBgF0vNmxbRPnYm5ghgP+U51sNh+dN09L9eeGdsBmVssUIs/QaXls+9v3s\n9eImViF8SEtMca9ecS+cqY5CP9q3cNuAAdyR3zuF8jF3A122MCyY2T7RYLmW\npfW2chzTlXqCq7zvRoebStEIpL232hLNfK/7VpgnLWwj4WOMh9u2AFsBdZqB\nwdj9S1jjZ+lirxlTpWe4kjq81h/UWyiZT0+DYQwWIq7uCT5DQIhVrm0jHgq8\nF4HjdxuTXH+mv5UoGQNPDbBMqFmBHgvfcezWKzoAll9UhSqM55lYD/SRDZwl\ns+t/LLznyWdaHG1uhttnukHZZ+urhJ1RQxCedWylaTsdTMu7rCFzt5d0HfFJ\nMaPvxzNc/TgNjpKNGCzN43+nGLHE7wnvkToyQIcy7FEC9NpWgWun9G99raSY\npUPKVGc9cKQ1tIWRV4nuwfONvtEjnFXME5D909r49gOQcFOwlELqHHW6v+HD\n4L9kUq1FybLImEr9CfPNUThjIFw9oZbp8ckPUM1f9Vuu6QRwYMTYZQGM7hTi\nIuMfkQ8ASCVRPmk0V/YSQ33ll939i3/gV5hReXPqW6j3DqcjRIC1nKbGkBnj\nzXlAn3UraTfN4EdpBL9hFHWagMbm/BzG0tziaqa1J19GAU5OwpkUpbNzluFJ\nwctI\r\n=gMNy\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQChPgh/mPRofC/hMWvZEPmrHoRfAjABEohknSUPkjpNywIgIL6e0yUQ02AuWcypiDuvnAuxb5lo/RQbexKPdQ2nh0s="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.0.2_1601235462412_0.504091598691236"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.0.3": {
+			"name": "css-select",
+			"version": "3.0.3",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.3.0",
+				"domutils": "^2.4.0",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^6.0.0",
+				"htmlparser2": "^4.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "eslint src",
+				"format": "prettier --write '**/*.{ts,md,json}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "9970c23fc6184ef53982305d6965bf3247ba66c4",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.0.3",
+			"_nodeVersion": "14.11.0",
+			"_npmVersion": "6.14.8",
+			"dist": {
+				"integrity": "sha512-RYXdGOA9iODBH7dDt62I/Gj6Hgj6IRo8CzlzsKeKk5H7I1P4BAXeD3ayIH0SnQkEfX0UWnDrI4Ws6+z8s10UXA==",
+				"shasum": "bd4a1ace5953d6c9525251bde45b88ababcb639c",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.0.3.tgz",
+				"fileCount": 36,
+				"unpackedSize": 78633,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfcUo4CRA9TVsSAnZWagAAHXkP/jZfMzGbRIZ8anCv2wM2\nXs8HRbX79QgdVq6B8fuGQtvM8t3MGoZRS1yPIOK0VEB5OSdZQXXELKKPiInV\nQgxKn8tDgABtTfVJNAAipfa/Q3CwLLVt7utMYnw/YjHeCnBWs3G9K3bh3efg\nrRFPg85aYmlLz0QmZn27ZQygc9hcO8FTnofoLGNAs/QLhPoLq1DSWaTPILx4\neShyWy0g9yYir1/h9q2b9db6H2FQ0ct/gfq0T/tAbAmfHRfTD3Q8n9a9JNwP\nWDrF91HKmcOahGqtD/h4BFZ5o3IugJSiqgyJvJTA/36CtDrEuwc7uVrWTl2h\nJ3KFgFec+r4H+yvIUvvx1tsuu5GjrWPinK/vHUUs0VXwbeWTr1W2iQRpth9P\nuC6WL4H9bTzUKhaq0PgryRHVx/gk4jVF1UfWhxHl8HSvalA9t1odz+uMWnb2\n6MYng9tB5cHCnvBsFC1ieiPxbOxKsbFr7dC3bv7X9WRx6xxZX2hXQ5UUbXyr\nCdBeOw1OLOV5NCryAR0FDd2OAzuo1nxPx3egblkzAFtdxkLmYrWC6wKpr9m0\n1AuEAgq8kSxB5lGpwQ7eibHcgEaQz70G6mhfkXXaoSp3329Npp9PKR/zSDsk\nqGmHDuMp8iLcm7dS3RzLNFf1duJkYmCvtt+qnSmgJscSVb/vCLDo+JfAUBLm\nR0F/\r\n=z7bm\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCrYdh7AmSLRb4Dj87Pio1m5hOWT0QpQVQgKAkSWIhFBwIgTsXcFoZS6fvzN0OGl2GwEGl+7ZNfT4CyB5aaUgiiPTM="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.0.3_1601260088133_0.0228683908923919"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.0.4": {
+			"name": "css-select",
+			"version": "3.0.4",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": "https://github.com/sponsors/fb55",
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.4.1",
+				"domhandler": "^3.2.0",
+				"domutils": "^2.4.1",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^6.0.0",
+				"htmlparser2": "^4.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "4a96d40f3840faf5b1a8607e3c5c31e6b84cb83b",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.0.4",
+			"_nodeVersion": "14.11.0",
+			"_npmVersion": "6.14.8",
+			"dist": {
+				"integrity": "sha512-8Teebc01Oz+oMRo1Fsvvh9QjMGgeGEc8KN4o3VqBwpzHlU3iW9+ucJsfQOfdRY1j3R8r8rtEbHF8KAKKC+NlPw==",
+				"shasum": "642fac470515cafd1cf40e3e69808afe00838902",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.0.4.tgz",
+				"fileCount": 36,
+				"unpackedSize": 79006,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfdkHhCRA9TVsSAnZWagAAbC4P+QFYfPsZ7kh9EeAeA9s2\n2xJMIgq2rmDIq6WtqExL5foNCDPGqE1ZLRMoP6EamurNnp87+gz2HOiUaKca\nlOdNtovkgLv9uF+Jd4XJu9bNtH0DLsOR1KGszYiTfiQAuHELN+JZtBZTStaW\n7+LtIsTo7EByKZqxO4gzHyZhfrUWUTaxWHU3dJLcS3SLQgtj8JQqhq03NQOc\n2POVpWmEIztZD9jK/NCftj1NAj3JdzKBLRyNZyl6Zj2CDLknkUKNDJ40akTV\nzqi03ZL9s6XAObIC2NEYQtlJGyx3XRMiSxL1zOtiNlA0tzYK4+iEQDkn4hcg\nlxdEjoDyMm0o75FXwiFqTXXiOlOSONA8GjcDKzUSoN18hC4744S7DJphJgz+\nlZlPijwwEV1UU8ExeipFaxu2YRlLDc2mh8vdqNMTe7b2NuwjK5bIHZigBYZZ\nBORntwn16otlVJtBT7S1vJ3zGHoRzQeDCpNMm/jx4/U/vi/30O9TBvfLV49/\nC5dAkSGCnKbvFPatiCsUJ0P2iuoCuYyPe2DtnTv4T79w0Z8cDofQCE6mlobe\nqwgPsm++FAkJJ42VxdQvXCyAvmWEZQKY9+dYdWizggr4LD4Ze0C11ql358hr\nJY8PtJPK6o3tpUOl8NBSYISYOjo3a1pn7RmZN6/DBQTQFBnnDF0IG5Ooxy6X\nswDb\r\n=W8p5\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCID5OOuCD5qS5hU2RDFWORvULGGTzzo1asz2xiONHzZPvAiEAsjurU1G/jo8PkSyhmG0zDWx2K9Zy63Bs45NBPYvVOic="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.0.4_1601585631248_0.2619263598447872"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.1.0": {
+			"name": "css-select",
+			"version": "3.1.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": "https://github.com/sponsors/fb55",
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^3.4.1",
+				"domhandler": "^3.2.0",
+				"domutils": "^2.4.1",
+				"nth-check": "^1.0.2"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^6.0.0",
+				"htmlparser2": "^4.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "73e0283635f979becc0fd5a4507723ef9769e1b5",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.1.0",
+			"_nodeVersion": "14.11.0",
+			"_npmVersion": "6.14.8",
+			"dist": {
+				"integrity": "sha512-tVdCXyNpLLvy23s6E82sYq6+wOlaRyrkT9Ff9XLW7cl+xwZXS6h23qfEeDHna4U/W/IKe+X55tJ9BUnh6RwOGg==",
+				"shasum": "7e684316f184e5307d9e04d80a0d626333a9de8a",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.1.0.tgz",
+				"fileCount": 36,
+				"unpackedSize": 80019,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJfd1xVCRA9TVsSAnZWagAAm+AP/0UiRFrqPE60UG37jkLh\nTOPMOMy7789hyyWPQFBBe7Zu8Q4uB53dpcFVe92IybBMw49m/2rV6JLq/NzA\nG46B6x/7LzQInQpnmy4Vkr/i/hrEMwxfn87OXFFPf/71YgvL74WsWW23NPXh\nQRhnk4zd2ZV0/PXnSksiRcVNvR2OyLxEVJJw7V1CrMhd263AQFPb7MilTs8v\n6x1Y4UrGWs9E85EZHlSYiv/2/I7LNenwCqGyca7QaOwxIgRV7dr2PBPPnJpN\nnW3Gy6ixhGpGQK/bBl94eazWnA/978AAr4xuTjIb7Uy7UNi43XCIrS5f5eBe\nPBe/LNIuZBLlrt2GBWYNfCj199/EXqyWUWqV7zglpXn8SMDiixK9ym2pLe2b\nG4kvKviLwIlK1ARssa79IV/G4G1KM6gD7ym2JkIlhWwXQBRpKJYKQK812SWP\ncPcN9dlpJf9E7YURFIBsMzKu1hhUGOyg4NQTRDOAvS0IygL1V/Y59LucjNeb\n7ppGEKLSQTQ1jBgqZN4JvQpq7ZxLWNi8KuEa80ed54jeiq6yU7e4f6J7Rx5r\nqNLpRoT9l5DAmgZeMokc2zO+UHYUzxNUtNd5Q/r89s+nNroA5zjC+/hWJRUy\n8RQtHSiqvAMqpSEgqVbuk6hV2bMXfuMnU/YYZRPQ5P5QWizY5WHTXrx7YeYf\n5QKY\r\n=TEjr\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCTZDEpibpthQeBzP7jxTzBtVVfs7ozssfFkxc+3srrLwIhAKHoGqWBigjEUfkcmXpjbSfTa8G9+RSiShpFRIVvYrQs"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.1.0_1601657940736_0.901738585908092"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.1.1": {
+			"name": "css-select",
+			"version": "3.1.1",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^4.0.0",
+				"domhandler": "^4.0.0",
+				"domutils": "^2.4.3",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^7.0.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "ebacd731df799a27af368d4d4ab7bc90a3270220",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.1.1",
+			"_nodeVersion": "15.3.0",
+			"_npmVersion": "6.14.9",
+			"dist": {
+				"integrity": "sha512-6h3ECMuVhTcISNgmavw2YqWiuPY0jurQYWdob5au8z0H84xkFE23Sv6ML+Y42fMNqXsaUB69+3MTpX4uFEMY+g==",
+				"shasum": "38aef130c85a803e5a2c2cf25a59edecb4e6130d",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.1.1.tgz",
+				"fileCount": 36,
+				"unpackedSize": 80155,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJf0AvbCRA9TVsSAnZWagAADQgP/RzpgwJsG7s2AUsVJ8Gl\nME5f+vjt+AV6sWSbff5J1/YX05ShoUCyOSpIs4xCi5yP0Vgr4RGh2SmTYGRq\n9cBbQG07JLxj1I7CJLGSTxfxujG7Rs/8DFSrAW3MeOD1l/oCyxzOoTzpN9rh\nobFZltQRdHEkVm/wQ5g8wqbBSWotQIcxUcmnWxiRcrECt5XAHrvgyTHnmjZM\n6mH30w2DqkaCHOukESzon2b7lc2MupRdw1RyThvub8dakox7Rr4wMV+5Rq7N\nPUEUmBp7+6edC8UPIei6RT0QnmMO/HHh8SI5YCHUOuv5R48voGdyGSeqCrCP\nQhjQVVAMTIlgOdhMw2gJKoUTFNW0gzAVgYbpyXRoFYytBg/uWNcKohy7vUOU\n8Vh52l9nrAeylAOcXmrbiGL4IqjC9zLASuQAq1VRON9xY7kQG8ifePWUUS3/\n11gGTctkJLc4ogWAb03U2r/5rgdPAfDa8gG1BVlhECh5UEOJtmURjqjH2FHB\nrcqqEgPO4CH2BA7/bTL3U+Fgaku4x6SUtrn5z9rd/SERuUB1ZgEtClzQcXJl\nfWzgkRSJKB0FN5RjsF84dJh7EJixOwSvjoxhAS2kBCMgVX74H5KqvIzyqHXa\nL3vCHuIL/Amvx1MRAYJkWvrPtTlvhPIb3OVYQ6o9AgRtoF8ijTbwLNU56ytI\nKuJB\r\n=7Gtn\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQC9du0tXLfbDKcSMsVH3Dd3U2oeaVPYm8OMk3ThkrYEfgIhAMr14KqX7Uj+AoYmdj1xqstul521oBu3CckT1Oyk947g"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.1.1_1607470042897_0.2930297061379932"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"3.1.2": {
+			"name": "css-select",
+			"version": "3.1.2",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^4.0.0",
+				"domhandler": "^4.0.0",
+				"domutils": "^2.4.3",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^7.0.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "0c53fe766039467acccc5f4c23344ca81b2a01a3",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@3.1.2",
+			"_nodeVersion": "15.3.0",
+			"_npmVersion": "6.14.9",
+			"dist": {
+				"integrity": "sha512-qmss1EihSuBNWNNhHjxzxSfJoFBM/lERB/Q4EnsJQQC62R2evJDW481091oAdOr9uh46/0n4nrg0It5cAnj1RA==",
+				"shasum": "d52cbdc6fee379fba97fb0d3925abbd18af2d9d8",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-3.1.2.tgz",
+				"fileCount": 36,
+				"unpackedSize": 80486,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJf0osRCRA9TVsSAnZWagAACo4P/AiU7o/9d90Nd1cWHx3T\n4bB6AUrWBKYpymMKw6fU0p5CeuFiXuSadyeHo8LhZjadBszEANg5K8Kkx92G\nTvuw/P7mu4fklwguLNOT2DKfrPfoO5uc5b4O8EXIBojGwtErw5YGRBhKAVMw\n+V1VCziQ8mpMKNjetAc2iwYzEkSXBDajMlkPeAoO9gZROItEJ05Nra4k6FzW\nsjpFJ2imDzcCBkkTqVkm1p17/K3dG420rNW/jcc+q3yLWF2DBQGD8mtnYWJy\nU5RyB9fvTwwuw3IQePuI7g0FLoC9wvxUPK/hZmc5DLuobm6e7osujfqS/uaI\n94uoSrfBOYdIdsIlPDRg/SfV0BeGGdHhnbMHglRU04Z9W0JG99PJ+80Hc4J7\n2/kRgrd61ZSjBM7bb0eyJkw3vg7chT+TBdJZ0XIpMM+TiIO/pTVf3Y4+60XX\nAk/r4QSb9tvZlUAmpMfZGTwsjIkJ6I1bWKQ27Jw2GWtFcRmqLioOogJw2+G7\ndP02c23aOv6Ru8K3zGUrFvLkhnqwk6N5A6K12lnlNHCvGrZQDcYEj9JT6I6s\nrBeq8Px1/5N7AG0oNttlMqwd0RthMgWCf5x2bT1z+eI07eAlGW17LnphE2RY\nuRrSUoxDudOosQ7OTBpLUNqaSEW2qA+dwCGokahhWImhn36xP7NQ65t02/Y3\nXouG\r\n=79yU\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIAdjZHfqXHXnz+GbNxhH2UVAE4V7hiP533Me81z1UvFZAiAzPUJ0yXgyXcbfOGEkjzoiZGWh0VinOH1nzgjilz4sjw=="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_3.1.2_1607633680958_0.4331337036077778"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.0.0": {
+			"name": "css-select",
+			"version": "4.0.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.0.0",
+				"domhandler": "^4.1.0",
+				"domutils": "^2.5.1",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.0.5",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.4.0",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "8a7ebe9841001bd7c032bd13f952edee7db41f01",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.0.0",
+			"_nodeVersion": "15.11.0",
+			"_npmVersion": "7.7.6",
+			"dist": {
+				"integrity": "sha512-I7favumBlDP/nuHBKLfL5RqvlvRdn/W29evvWJ+TaoGPm7QD+xSIN5eY2dyGjtkUmemh02TZrqJb4B8DWo6PoQ==",
+				"shasum": "9b7b53bd82e4b348a6e0924ce37645e5db43af8e",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.0.0.tgz",
+				"fileCount": 39,
+				"unpackedSize": 77467,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgaCCcCRA9TVsSAnZWagAABwIP/0fRPCtrw1zpR/h9qHon\nEaR4qcYh0E6DTusZlvqde4kHzQjC3f9KiX6d9VqI5mZgdLeKtrAhDIWxQZoi\nVutnvbtjzfULg5CQfZSwtPZDBPrO94y2BeWDhqhKI0Q/lUp3O/cjkv2ClwzY\nJ9cXGoYZcSuijkcfKe/wB9sbdvosvZV8cgk7fPXLS9JXCNfDiCKoz+zZi2IU\n/Pl/8FfcNQbK6qyhUgI9CAUm+47QH6AzXO4qHXs4HQnSeKeiwybHfJTYKIYC\neQF2LKANNVv/L1Z5NI9bcTzMsk7sk6vBBwAuole6yugPCHCXvJGWkTcwb/l9\n+A6JQewk0sHsVt0ome1sOC1Ri5hYOb3a/9bBQByCi0EUhWqVlZHreeXGHijH\nMX1ma7AS5cmevjKWhjzN4THtW3IslQV4bAZVh13VRCeFTKWWlGy8oHRO7MFe\nQSf+rJF4ZKRrdjUP5tmJqLIx9c+D0mrencRrrXlN6SFvsj3e+rYuOjI6SbVa\n9knJa/wmKWRiDFjQklB5szw4iPnBV4fEBvX6/Xib5mKwKAikD1ss1AXvOM+N\nQBx/J3jjfUHjhnAHNklmFMWUaAmcyJ5m1sp2P7wfkqh98s8Aur5C4T4d4xZ1\nJPWrcV4neWL33XLRKqW8FRWrIAYHREX1ruUBtWcHEXxLX0YQpPTAXvK4VgzH\nSL5d\r\n=+UAK\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCC3o8efFty08+D+h3ON5NFw+M9nvaSHCk2kmRKTMY7eAIhAO351yUSNg84WRRHivp+HKpJMll8JvRu63uhMujEA4B2"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.0.0_1617436827923_0.4368269682087851"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.1.0": {
+			"name": "css-select",
+			"version": "4.1.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.0.0",
+				"domhandler": "^4.2.0",
+				"domutils": "^2.6.0",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.14.41",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.5.5",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "eb071129b091ea4749db77539d794c1d501f1e9d",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.1.0",
+			"_nodeVersion": "15.11.0",
+			"_npmVersion": "7.9.0",
+			"dist": {
+				"integrity": "sha512-hcu+hvJvtYBjfI15n7/9T2FFGiF7V/92jLhrfTLLq3aBTCZ6S/QTwlUNALUAhQLRANdwWaE0eQ7x3a9IMs7iAg==",
+				"shasum": "895d5167fdaba20a2cebfe8c4de35de90a833c40",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.1.0.tgz",
+				"fileCount": 39,
+				"unpackedSize": 77643,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgeVdbCRA9TVsSAnZWagAAacUQAKCbQIXm1eXbbgJfqAyf\nblIHWuYvfMOu1Sa7zdwrjw0ffl+qsAeUhYwz+6lrfa27n5imhRkZfWaB9dSY\nH5F/ZEr8Dm07Tloz7lmBM5Nive1jJmEmcfA1yY6bV3TV7zUSDlH7G+pUt9fC\nUxASaHJeLr4QPBaVnT3cfsK2vydQ/QUMxVipWRlNHeFZkZ1hlQk1eRYdMSSP\nHIMEl4Qlyg8N6xB+lrsKdfDbg4RksZQKn7T+mNvX/t9Ufc1kv+C7GbFXBuOs\nKCdklG3COhzXE6ny4vveuVfat3KJBI7ivbz0j/PGv2BreE+UgqPkj256Y74b\nNRscfYZ1rL2/raqXOxpB3QOYZmmgHISH86paPMjOvubFm3Fr86GmQtn55iIZ\nbhVtq0wjmC0H3yA2Sn2GCmzEurQgMfGuC8cPFs37C2PYjv4rXVjmjnsp1dwQ\n+vtSlN/T0GBfeDF1q4pBnZEHPQzIqyCWIlveFj3bXTNYmrGs1L0z0aav3zQt\nvKhJKOtbHlbr9GiWWdS0RjdphEdV6AXKiUpd1+yFR3bumCvMdg6utGYymrg+\nnxmDrmTTqKTaUherUoSb7v+4D1douWh7DvJxRGn27JDEaZAhmtNgrQMHuu+G\nO4A9mSN3kT+U209NfTsVMy/E1lIPF/wUNvDIy3rnF44bqVMlrX62Hqj9/93y\nwowu\r\n=Nbi1\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIAK+GndDSCyX52g24V9yUwWFJVZ66TUf9HCk2qCzhEXvAiEAs0Fl3J83o7GdnofH0/UqYCVJ+jA+fk7fLAAY5HJ5lN8="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.1.0_1618564954524_0.45425107360631967"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.1.1": {
+			"name": "css-select",
+			"version": "4.1.1",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.0.0",
+				"domhandler": "^4.2.0",
+				"domutils": "^2.6.0",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.14.41",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.5.5",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "600a774af4d3a3e92909d6df976dedd468e133b5",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.1.1",
+			"_nodeVersion": "15.11.0",
+			"_npmVersion": "7.9.0",
+			"dist": {
+				"integrity": "sha512-VUozdFh6znMkBlbJSsXYaFhUeVTuP3/NoXmLOQPah11rCWPbCI2RKJ8TUena+y3W6pWuXBDe7tBJeVJlYwWezw==",
+				"shasum": "71e7f9136d39540d4414d1f69c7fa752eab56e69",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.1.1.tgz",
+				"fileCount": 39,
+				"unpackedSize": 77643,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgeVowCRA9TVsSAnZWagAA/yEP/R79lnxFi4/lDv3+rfcj\nZ++SnFoQKD8k9ooauK1gF8AVv4K+UAIdzNMCjQhXP5oPP1a5V2vMruH8Rmnt\n6322kMwCo/AiQyiS+KdokAbFUpZlutOSI3XkpTq6VV/Xye+JFB9GiCD2oGik\n4YlHn1NxeVn1ixEOkxzY0iKq+wgpRxYoGaMNL3BCdIhAk/vJxZJnTYPVauMo\nF3QZnQaGq7LXyh5rMLHn9BmdQ4AKFjaEG0QCw5kSch7l5B7Mj3JVXEyVrhj5\np22sh2af1+q0XF/9+MPx9OFlPR8V2xLH1MwbpXuNjZrl7nmiVrIFp9mfW+U0\nC11xCS0vYeDKs4sbfCM7ueTExGyrUxar/n6bxAhLC4kQWRUBjWeDklku+xq9\nQFvBjZTaFvXGV1MBjFgv++X/x05Bp0B/Y9knCzxV6RBtQ01j7XKyQWYYx8W8\nmGyVhTePiiy8qfDOGRNhnddqwp3tPmFU/YG9TAA8H5jD59CH9fxY9M3vlcRs\n6NZCT+lVgizaZyed2yemzbnpthnOT4p/z7IsGyKXT9GNEYqV86KEk2PY+pRk\n+2kgrFSpD0+I3su7MXNwRUHd4fxMLlfVuX18apAmN/JTtd4OtO3tRYD1t0WL\nbBzoZj5j4zsZUTCFvqbTAxMqrqBR6dT3a9LF5DTQHQ613YWxGLNvV+MHKfUd\ncofm\r\n=G5qm\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIE5cCTepQNeyncJBQepCNZmuJ3xWeLj+W2Vz6PwjNiKYAiEAyC6TFpgsuRkUTy9gWgJ7wOk1USo6tvmoKkaoZxY/dt8="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.1.1_1618565680430_0.17377897062936953"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.1.2": {
+			"name": "css-select",
+			"version": "4.1.2",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.0.0",
+				"domhandler": "^4.2.0",
+				"domutils": "^2.6.0",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/jest": "^26.0.14",
+				"@types/node": "^14.14.41",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^26.4.2",
+				"prettier": "^2.1.2",
+				"ts-jest": "^26.5.5",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "a757a4ae43f17e249eb7a01a27c63a1669accd3d",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.1.2",
+			"_nodeVersion": "15.11.0",
+			"_npmVersion": "7.9.0",
+			"dist": {
+				"integrity": "sha512-nu5ye2Hg/4ISq4XqdLY2bEatAcLIdt3OYGFc9Tm9n7VSlFBcfRv0gBNksHRgSdUDQGtN3XrZ94ztW+NfzkFSUw==",
+				"shasum": "8b52b6714ed3a80d8221ec971c543f3b12653286",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.1.2.tgz",
+				"fileCount": 39,
+				"unpackedSize": 77674,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgeVwNCRA9TVsSAnZWagAAnvgP/j1ueZKCY+X6TdSjtqvO\nPMMgHUm1WxxBiNUxwJ+swKuEw2usamgLHKGMHFrJV/P6ZqIBv1Lh7bDr92Km\nyCJ6HuxaVs641qxTTxv9s+E6zkMqF0yhBFoeejeiLUQjAriP1h4pmcMD2wtr\n35RrscWbfxnhp4t9pbpQzsOUw+rj2PkV4YkPL8K1DnzOQPkzCyNiingP6KeZ\ntt846pHIMefW74rVYp3fs84k26YI6CqydUG+paKZmvfCZzs6PydDlI1+8jln\nSeiQfhxj9CK11QdU72dzBdaf0H9XTEjcQI69VibC3i8quAZ3Bar0Z5CUqLk7\nOt0r9d+c8grvQ1mocI4vki+3dvk9UeqlV8N4mshKHnPGkD4Q/3hL1zhNskZ/\nrH4yvPRq2Ns9v9/egMSeDO4tMZl/XMm03Rc5Y3+Bwofo44dw6+3l7drWEHzZ\nRylh0MsB0XKkxGskdbqlsMGa31vpDSP2NPVzX3fCMsKKsyZXBamsHxFZqfFa\nyOmFAVNZ1j7/Qsx/q8tZfMtFXNpd399xZCdhqPEahCoxbcfCsZrfk9s8JgHY\nhnVjUm+MbTipMjRYCcJSZ6KQHWZ9HM2i0Fk6DVrzUQnGeT0SvCq6HwmMsTLY\nniGQDtaxF+EFn0w7vWzV9Gfe44nWThZGTosv8N/LKn8nG54Zpqv1NJydv55J\nFF4j\r\n=Yq0s\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIAtbVT5gaq8kBqusnYdmnR2VPkfpbIfWzDCI2o+6569+AiEAxBo4LejePHHFxQ6gbWOl2C0DQV7UQEe2IRSNv2YvTGU="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.1.2_1618566157299_0.8800224745998946"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.1.3": {
+			"name": "css-select",
+			"version": "4.1.3",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.0.0",
+				"domhandler": "^4.2.0",
+				"domutils": "^2.6.0",
+				"nth-check": "^2.0.0"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.0",
+				"@types/jest": "^26.0.14",
+				"@types/node": "^15.0.2",
+				"@typescript-eslint/eslint-plugin": "^4.1.0",
+				"@typescript-eslint/parser": "^4.1.0",
+				"cheerio-soupselect": "^0.1.1",
+				"coveralls": "^3.0.2",
+				"eslint": "^7.9.0",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^6.0.0",
+				"jest": "^27.0.3",
+				"prettier": "^2.1.2",
+				"ts-jest": "^27.0.1",
+				"typescript": "^4.0.2"
+			},
+			"scripts": {
+				"test": "jest --coverage && npm run lint",
+				"coverage": "cat coverage/lcov.info | coveralls",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "0fbf44ac47bf1c2d86bea1445e6c0345fcc98ed2",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.1.3",
+			"_nodeVersion": "16.2.0",
+			"_npmVersion": "7.13.0",
+			"dist": {
+				"integrity": "sha512-gT3wBNd9Nj49rAbmtFHj1cljIAOLYSX1nZ8CB7TBO3INYckygm5B7LISU/szY//YmdiSLbJvDLOx9VnMVpMBxA==",
+				"shasum": "a70440f70317f2669118ad74ff105e65849c7067",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.1.3.tgz",
+				"fileCount": 39,
+				"unpackedSize": 77706,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJgvO0pCRA9TVsSAnZWagAAgQgP/REfKXeE0Ij8iUhE6mpU\nSUWccjqT3mU8vJghsg2pegL9P+pgIiQg4QkU+DMsOhambj7eM35Lc8jKXu9v\nafGMS6BdEaJeN3KKDAFBxYXd1OwkmCbPVSn/nHxttgZXHjDZHf39fY9ayKO+\nnoB8rS4O9WHZpbomvXCUtxDZsKluJGiRwedCyY8XdWmnD0Fq2sAfvxMuJQXE\nQwSV1XizsI4lvPj9xXuc8nbEpnYLJpannXYGt3LZzP3ckbhssOgtaMJt/DSY\nTB1Xh9rFt5uYCPGDy2eulOiXR1GlZ7KkVuAkr/VFijU6W+yFqGtWBR96aqe3\nzyGlk7P3HEWeGzNFtBGtTNYtogzElh+uhBVvNjMASRbFYoSe9NfuOXCze6yI\nbzncylIUT+UO1rvvjQwL+b/z3VpRo0It0gsNsYj/EyVjBI06XfeIi4GjQv0i\n8vxzU2fBZkSuQ/DfCbJU/zfTywBfulNqfeENEyR1bPYxC0/1Zn+vFmdZWsLe\ntG2npfkmFI5r6rTvuMG3uc/ORaiBONaKOqqlVhkxJx+AbuTvGUvt6ld9kWQd\nPHlW9TwljG0dNoymYh8Pmb46J/WUoD0xGdt22oYSoA9oH7xeZo4hPWn9k4Ld\nkSd+gG+z8gzwekP+Gz2keJzj9VwhrhjVzjdf2hF3tVxa3VbtLHcLTl1wk5od\nJUMY\r\n=0T9m\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDD3hLAbrNO5+6UGvmzafJhsoXVzDrBRtaIqsTR5Azw+QIgOqWBwijBpECFhTQlJMmkRhLIyyKmpXLt1wl93C2K11s="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.1.3_1622994216880_0.2792558378163952"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.2.0": {
+			"name": "css-select",
+			"version": "4.2.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.1.0",
+				"domhandler": "^4.3.0",
+				"domutils": "^2.8.0",
+				"nth-check": "^2.0.1"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.0",
+				"@types/jest": "^27.0.3",
+				"@types/node": "^16.11.12",
+				"@typescript-eslint/eslint-plugin": "^5.7.0",
+				"@typescript-eslint/parser": "^5.7.0",
+				"cheerio-soupselect": "^0.1.1",
+				"eslint": "^8.4.1",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^7.2.0",
+				"jest": "^27.4.5",
+				"prettier": "^2.5.1",
+				"ts-jest": "^27.1.1",
+				"typescript": "^4.5.4"
+			},
+			"scripts": {
+				"test": "npm run test:jest && npm run lint",
+				"test:jest": "jest",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "e5beac6da4ce471d145e4e1303e41c3e6d78f37b",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.2.0",
+			"_nodeVersion": "17.2.0",
+			"_npmVersion": "8.1.4",
+			"dist": {
+				"integrity": "sha512-6YVG6hsH9yIb/si3Th/is8Pex7qnVHO6t7q7U6TIUnkQASGbS8tnUDBftnPynLNnuUl/r2+PTd0ekiiq7R0zJw==",
+				"shasum": "ab28276d3afb00cc05e818bd33eb030f14f57895",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.2.0.tgz",
+				"fileCount": 39,
+				"unpackedSize": 77986,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJhuL/lCRA9TVsSAnZWagAArSgP+wfTxLWt0OmnODSJFM2Q\nGLZOSc6XmiMMEgrOO+tpXjqrEFi6YhOcwg5CNZveKxI5OQxAjReAPVaWdrCo\n0ckWzautNQ2kn52yOv/9gvv48wtU8CymTxC9I9NcDUqoRWSN6zS0AqxNmLOR\nR5yZjBfGjZO5lpuxh2crYRms2E0s+QbZbJF4c5DtR3KSqrgwt5/acNfX8neq\nftQy9AdeFHDDbWUNw+oHtznxdc+/DiKcXeKzRNHaxHyIAr+qZr9DPVsRGP3T\nirudVsYsey2ud6ZOIC6cniA9tC3ByB9nuGf6MGWTiEi+SvZwU8TzA4xda55B\nB3QYupC1BPD5bDlL55vPnOPc3wEdvDtOhZ0osABibT4dSpNR8zJ4aEGrhGaY\nYP/mfaF3BJu5phwfiUwt4srhzqEnCYZfp4rQqGsGY/7p/ByArtRWu4sLOlvI\nJY5FH+Hx8kScFBeG2EJKlEK2n0mqhtt5yWT1ntC1OdhPppKjU4NwKU4oO8mQ\nb+HVHsXlaRUzst1q4QGrX/Ef/z3htGnlqKKrqYOQg2MiQJQVPXrYXmHWRH27\nN9ooSmpGQm11Wth/2+nIXMfeoHavycpB0XU+iToDQ3usPEe8wIuKzVCp0bvz\nvW6lbAIyI8dZEyJeFvbRDgQlo5VMpkfwWwkZH1p6thVPPcxtxMvCHKe4kCtE\nadTb\r\n=J5PK\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCkATNGjf9TgSojxsJIotsJq3Bn7tBJGvztULIhx/gfRwIhAJ6yXrI0EW4MKZzJoFvEtRVw7ml/4cZB1JExpo43ok11"
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.2.0_1639497700850_0.42914014226502606"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.2.1": {
+			"name": "css-select",
+			"version": "4.2.1",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^5.1.0",
+				"domhandler": "^4.3.0",
+				"domutils": "^2.8.0",
+				"nth-check": "^2.0.1"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.1",
+				"@types/jest": "^27.0.3",
+				"@types/node": "^17.0.4",
+				"@typescript-eslint/eslint-plugin": "^5.8.0",
+				"@typescript-eslint/parser": "^5.8.0",
+				"cheerio-soupselect": "^0.1.1",
+				"eslint": "^8.5.0",
+				"eslint-config-prettier": "^8.1.0",
+				"htmlparser2": "^7.2.0",
+				"jest": "^27.4.5",
+				"prettier": "^2.5.1",
+				"ts-jest": "^27.1.2",
+				"typescript": "^4.5.4"
+			},
+			"scripts": {
+				"test": "npm run test:jest && npm run lint",
+				"test:jest": "jest",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "7cd9d3a1e20cf75f4d8bad6b9c3ef2e8c1b7f175",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.2.1",
+			"_nodeVersion": "17.2.0",
+			"_npmVersion": "8.1.4",
+			"dist": {
+				"integrity": "sha512-/aUslKhzkTNCQUB2qTX84lVmfia9NyjP3WpDGtj/WxhwBzWBYUV3DgUpurHTme8UTPcPlAD1DJ+b0nN/t50zDQ==",
+				"shasum": "9e665d6ae4c7f9d65dbe69d0316e3221fb274cdd",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.2.1.tgz",
+				"fileCount": 39,
+				"unpackedSize": 78491,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.13\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJhyFRECRA9TVsSAnZWagAARCwP/3HYP+HWfWNVmSpGMzSd\nIPaAU4MhkEE0DXvxU7G52MKmknLICxNDvnoTrL+BSdI2uxxjKglWq1sAngRP\n6mxwNYxPawpRVI+ucyl2EWUnL4KCZZgPSdR2equVGTCh6OxTgF1Cpgid2q4r\nXgJfmw4ESaSTsyvlhNsUaoe9oid6bn9+5j8JzQa7A1HvGqkTHbQLNai4U7e9\nT/Edqw0My5KiZ/RMSuOHBrRnameBthpWX1Yag1agmqDV//bcnc8mynQ3l9lo\n1An3DVJmbS+dTTyKw8Ofj6Fvh6paffmcsseJr/1kigkOmwC62f2bpE79PpOB\nwDyae+xDRtJSbQ4UKZKvmdzobTjgBO0ZlJE3OgBH3h5SjIemf/mkycaap5fB\nfW6NkaQnzEBBldmzsEDp4ShT+/LHKNUvmfDV6y7zIwR99c0Tvz4zgWxjZ4AS\noGEZZAPQGRRPNmRndprZUS0KD0hStyyYxy19yGZHLwTupEoytVDngfXW5MIr\nkyiy7vfLyItmy6JMmSeMjlOYOpkLuYYdW+2wivxnrrEKuU5TSEI9ScReHgWY\nRSD1oPSpkUzvD+9nNbS6n/zaK/CamWeFHcyYdgBJlWyqilkuGsyf94aeNFUx\nZHdbXor5QDjs1DX4wS9Kb9n+uvK8XM/GxkBpngAvZDYeGBEU2BbxpYXFpClD\neuRr\r\n=GXEI\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDTY95a8l0/qskuSEpDXAQnKpZnEtT0/z4VgDrW+n0WuQIgTEguM7Y/jF0sr9HKZuwvsFiEJ+HJzAqFOklVgE0eZrk="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.2.1_1640518724239_0.11666988397727973"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"4.3.0": {
+			"name": "css-select",
+			"version": "4.3.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^6.0.1",
+				"domhandler": "^4.3.1",
+				"domutils": "^2.8.0",
+				"nth-check": "^2.0.1"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.1",
+				"@types/jest": "^27.4.1",
+				"@types/node": "^17.0.23",
+				"@typescript-eslint/eslint-plugin": "^5.16.0",
+				"@typescript-eslint/parser": "^5.16.0",
+				"cheerio-soupselect": "^0.1.1",
+				"eslint": "^8.12.0",
+				"eslint-config-prettier": "^8.5.0",
+				"htmlparser2": "^7.2.0",
+				"jest": "^27.5.1",
+				"prettier": "^2.6.1",
+				"ts-jest": "^27.1.4",
+				"typescript": "^4.6.3"
+			},
+			"scripts": {
+				"test": "npm run test:jest && npm run lint",
+				"test:jest": "jest",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "tsc",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "e74c487da1a944950600f7790bd05163dd46af5e",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@4.3.0",
+			"_nodeVersion": "17.8.0",
+			"_npmVersion": "8.5.5",
+			"dist": {
+				"integrity": "sha512-wPpOYtnsVontu2mODhA19JrqWxNsfdatRKd64kmpRbQgh1KtItko5sTnEpPdpSaJszTOhEMlF/RPz28qj4HqhQ==",
+				"shasum": "db7129b2846662fd8628cfc496abb2b59e41529b",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-4.3.0.tgz",
+				"fileCount": 39,
+				"unpackedSize": 82444,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJiQb62ACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmqW+w/+IbhfaB8fuAW7LgaV/0Jdrfoi9DeWisJxJFrW9iYkvLvg3XjF\r\ntBOK5ZI/beq9XjXsdDPJFKjKkMTQwvZox/i74YUGrdHc0IDfeBfApjZ1LbKH\r\ndYez0ZdDDswXQWJ2xrHZXyav8mdLeSBUCWtNenbQ9HyRd7boaI2JjliI540w\r\nEg6GhIrjIi6vojlMu1SicoBHYFsESyE1K8elpFpne/Y5DCIIco38FadiKfT2\r\nvWn3eCBi125nJlrzS5eXz/jR4juvyE/KepLYG3EoJewBOdrMWnkduj8En/mP\r\nffUeppiziDP9KQ60xCznH8k+v0KbAOA3xOoRxARL0g+gi8+3rvvgwDQIYGY8\r\n/4zSUEuBD+9L3CiMZX/hl1AZvjTIs5NDA8NxY9hAhaoNLnDeF/wEDmAXT0gE\r\nI8rDUZ2CCuVR8q2aqDSIYCtDFQfu6GKFuqPGO00GiTAWiCOJcInQje6Bs0gt\r\nqNZZTO+BTQiX+8kq0XjB061cv+g2LIqjGxNgZsMrnzi3oeT//MBFcP8yUwp2\r\ntA0Z7JNm9sEYG/zhE/PhhTMiwfWOELrdHMo0Uz6Aibh3JvTdRWoNRJ8FJEX3\r\nJ/0zZsNzQa3MJXthEUHDuN+HIvMSrJQoSPFJ5CkpuZAHt3Rb6tt/XBMPStK+\r\nor7ZP+n0YEUirejoa5yrat43oWa+qkFBRgk=\r\n=uYki\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIHxQTHH5yr4xYv+NhcntvVjSVFjRIrdRJWSF9+kTgogLAiEA1rlLKxWpgqQP+xfJ24gI8/JyXEIpOXKuYPoiOIcX1wQ="
+					}
+				]
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_4.3.0_1648475830318_0.6253479863448947"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.0.0": {
+			"name": "css-select",
+			"version": "5.0.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"module": "lib/esm/index.js",
+			"exports": {
+				"require": "./lib/index.js",
+				"import": "./lib/esm/index.js"
+			},
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^6.1.0",
+				"domhandler": "^5.0.2",
+				"domutils": "^3.0.1",
+				"nth-check": "^2.0.1"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.1",
+				"@types/jest": "^27.4.1",
+				"@types/node": "^17.0.25",
+				"@typescript-eslint/eslint-plugin": "^5.20.0",
+				"@typescript-eslint/parser": "^5.20.0",
+				"cheerio-soupselect": "^0.1.1",
+				"eslint": "^8.13.0",
+				"eslint-config-prettier": "^8.5.0",
+				"htmlparser2": "^8.0.0",
+				"jest": "^27.5.1",
+				"prettier": "^2.6.2",
+				"ts-jest": "^27.1.4",
+				"typescript": "^4.6.3"
+			},
+			"scripts": {
+				"test": "npm run test:jest && npm run lint",
+				"test:jest": "jest",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "npm run build:cjs && npm run build:esm",
+				"build:cjs": "tsc --sourceRoot https://raw.githubusercontent.com/fb55/css-select/$(git rev-parse HEAD)/src/",
+				"build:esm": "npm run build:cjs -- --module esnext --target es2019 --outDir lib/esm && echo '{\"type\":\"module\"}' > lib/esm/package.json",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"coverageProvider": "v8",
+				"moduleNameMapper": {
+					"^(.*)\\.js$": "$1"
+				},
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "7d7ff08554bca7843668a684d3de8cce078e5b67",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@5.0.0",
+			"_nodeVersion": "17.9.0",
+			"_npmVersion": "8.5.5",
+			"dist": {
+				"integrity": "sha512-3/vdFG8XSUWknhxAZ6WkQbyIw+kFY1kS0nVU9TBhtkEb+ba7HWzxzyfZhConzUie+CV4lZH51/4/hLPVs7HX/A==",
+				"shasum": "3528a9bf67f0830cdc95eee67f759c239240f588",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-5.0.0.tgz",
+				"fileCount": 92,
+				"unpackedSize": 220591,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCnq9ovxW1yexe76RCmt89bhx75ghhCFENnYVu/bEgz7AIhAOmlqVVG9P2m0zXPge4/tB1ZfbglxxQS5rIfS5y7MI98"
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJiZZZ3ACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmpdbQ//bHS/InDj5lI4oGt/D7Afp0Li5lyQLNNNV6+vDv2QzLqznUJF\r\nu59N4CRQLoCRF3vg+lrpITRtkWl/2oPDus7QkYkPbSB+Ippje82pY1fS7dBL\r\n+vTq4fOtME1be2NzlqYCtoaGa7+77pVT3G2Zc2zkMvCBLbclufKwFGGh945C\r\nKASOx3o1B1PqeTLjosxw/AV8osiWoQH96aMzGAL1Cq3Sn0Hfxnt2T2PqWaAK\r\nceGSLQWpVN6XXOaNGXYAEqjhdb3qIBY/GlkYEDY/pRMo+Vmw6XomIABXEI4Y\r\n+zonNuxhzg1wtsCwdnkjNkqhvUoSKtmtZ+cTLNRVNJa1jY2wMqmNQADV/XoK\r\nDqgaOXcCOZ1a9GHtfkXpAYWqsS2WVvZtgpikRkaC84jtoAcJbJVGoIY6+wIK\r\nGQGsWOQxZyPobIkePo5t/jx570irI5VdwENqlYXZwqVoIjLzdPC/eeTbLkxz\r\nI+76ZOMDsI7rkIY6u0sAmJUG3Y4LxgXJ/i1MnvGz3UIwhbufUdJR7ehA7XR/\r\nCShqYW3lcECQ82imrKYXFBHAfJeQb6S82xGtOBuDU9DkmaAPCHQss5+X6rlj\r\nVvIj3JxIP9Yhc9ocNIlBynafMMNU21S0QKrj3kWYyBaB7CZ2YN6k2j5zisK9\r\nbtayXf9dd3NghuR0J8pY2ADfS66zgy/exzE=\r\n=UOL2\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_5.0.0_1650824822907_0.14261428591583258"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.0.1": {
+			"name": "css-select",
+			"version": "5.0.1",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"module": "lib/esm/index.js",
+			"exports": {
+				"require": "./lib/index.js",
+				"import": "./lib/esm/index.js"
+			},
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^6.1.0",
+				"domhandler": "^5.0.2",
+				"domutils": "^3.0.1",
+				"nth-check": "^2.0.1"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.1",
+				"@types/jest": "^27.4.1",
+				"@types/node": "^17.0.25",
+				"@typescript-eslint/eslint-plugin": "^5.20.0",
+				"@typescript-eslint/parser": "^5.20.0",
+				"cheerio-soupselect": "^0.1.1",
+				"eslint": "^8.13.0",
+				"eslint-config-prettier": "^8.5.0",
+				"htmlparser2": "^8.0.0",
+				"jest": "^27.5.1",
+				"prettier": "^2.6.2",
+				"ts-jest": "^27.1.4",
+				"typescript": "^4.6.3"
+			},
+			"scripts": {
+				"test": "npm run test:jest && npm run lint",
+				"test:jest": "jest",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "npm run build:cjs && npm run build:esm",
+				"build:cjs": "tsc --sourceRoot https://raw.githubusercontent.com/fb55/css-select/$(git rev-parse HEAD)/src/",
+				"build:esm": "npm run build:cjs -- --module esnext --target es2019 --outDir lib/esm && echo '{\"type\":\"module\"}' > lib/esm/package.json",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"coverageProvider": "v8",
+				"moduleNameMapper": {
+					"^(.*)\\.js$": "$1"
+				},
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "7cbf1cd67c5b55c1eaf4e9668f04cd19dfed4b10",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@5.0.1",
+			"_nodeVersion": "17.9.0",
+			"_npmVersion": "8.5.5",
+			"dist": {
+				"integrity": "sha512-0QQZQta641EzzHl+6+iyeKDVXvqvmhvwnZrX58Yf7mlmiilb3bbTtb86DYiCtxhUp+h9g4lULyIXMnOVPBhGhg==",
+				"shasum": "32202b44ae905e06537c7e7b44c3cf7cb9baeef9",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-5.0.1.tgz",
+				"fileCount": 92,
+				"unpackedSize": 221521,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIAFe/vEkcn+IOWXNO2KhWD/VspJi5ORuNYHX5/1FRaRMAiEA+n2ytLS9PTMt5XjDvTudkSsMcbktD2BdfruhISGcOJg="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJiZoysACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmqBIg//X9ZkouZ9/1GsbCNun3xCDOtA3Rb9dJIXx7jw0mor4oRbeoad\r\nTOIHklIRHpgqccgl2JxuzxEj0txfZijlcOZ5CQhW/Tjbx+h5a7hp1FKHiuQ8\r\nhVIxERuUoGt2tqIOx+VZlXMGSVVSSMASH2MTbwvvWqy/646GnhQ+4m7mwAe7\r\nPEtkI1daHNY8Lyzqit8FT3zeuc2YSXk+lhySisTaTSZV+PDovRfnbjxLp7tp\r\n1xawJ6/bXsKpjFv1g9BPmOka820WUR6h+Uvxvo7AfC/VGUpjUeZeUhMLXlqc\r\n4XwXC+bNiSWZQA/NJKHoPGiY40wLNa05ui80ajPYyRlTgg11aB4oIT1FAnGe\r\napArACAEK02DSXhQzr7fVJvKflIaUI+e5xMKjlOUqOVnhfLOUAW2UA1nm9Qs\r\nd/NO0PlNSch/8cpRlUmSG+BdLU80Es2JBmKHodbVfX4Tq+tQ1qnmQkJLyxj8\r\nIhRjtiBP1xK685fswIoz/LZgvnPBXulACfb/4X6ChGlR5vLjIxwezhy7YDp8\r\nhnZlyibjppGyHZRUDhFj975MTLgIWliE+1VRhgsiP3Ml236YHgfyQMDNOV7p\r\nFnH/UBpMzsNhJ13T7HTWBbMLdibDJaincWZsM1T2QwRB/bj3N2RKDSVzxVfw\r\nPUq3i79D+meOIsfpaD7ZPOfkld3ErTZbPdQ=\r\n=qZs+\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_5.0.1_1650887852259_0.822434877614489"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"5.1.0": {
+			"name": "css-select",
+			"version": "5.1.0",
+			"description": "a CSS selector compiler/engine",
+			"author": {
+				"name": "Felix Boehm",
+				"email": "me@feedic.com"
+			},
+			"funding": {
+				"url": "https://github.com/sponsors/fb55"
+			},
+			"keywords": [
+				"css",
+				"selector",
+				"sizzle"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/fb55/css-select.git"
+			},
+			"main": "lib/index.js",
+			"types": "lib/index.d.ts",
+			"module": "lib/esm/index.js",
+			"exports": {
+				"require": "./lib/index.js",
+				"import": "./lib/esm/index.js"
+			},
+			"dependencies": {
+				"boolbase": "^1.0.0",
+				"css-what": "^6.1.0",
+				"domhandler": "^5.0.2",
+				"domutils": "^3.0.1",
+				"nth-check": "^2.0.1"
+			},
+			"devDependencies": {
+				"@types/boolbase": "^1.0.1",
+				"@types/jest": "^27.4.1",
+				"@types/node": "^17.0.29",
+				"@typescript-eslint/eslint-plugin": "^5.21.0",
+				"@typescript-eslint/parser": "^5.21.0",
+				"cheerio-soupselect": "^0.1.1",
+				"eslint": "^8.14.0",
+				"eslint-config-prettier": "^8.5.0",
+				"htmlparser2": "^8.0.0",
+				"jest": "^27.5.1",
+				"prettier": "^2.6.2",
+				"ts-jest": "^27.1.4",
+				"typescript": "^4.6.3"
+			},
+			"scripts": {
+				"test": "npm run test:jest && npm run lint",
+				"test:jest": "jest",
+				"lint": "npm run lint:es && npm run lint:prettier",
+				"lint:es": "eslint src",
+				"lint:prettier": "npm run prettier -- --check",
+				"format": "npm run format:es && npm run format:prettier",
+				"format:es": "npm run lint:es -- --fix",
+				"format:prettier": "npm run prettier -- --write",
+				"prettier": "prettier '**/*.{ts,md,json,yml}'",
+				"build": "npm run build:cjs && npm run build:esm",
+				"build:cjs": "tsc --sourceRoot https://raw.githubusercontent.com/fb55/css-select/$(git rev-parse HEAD)/src/",
+				"build:esm": "npm run build:cjs -- --module esnext --target es2019 --outDir lib/esm && echo '{\"type\":\"module\"}' > lib/esm/package.json",
+				"prepare": "npm run build"
+			},
+			"license": "BSD-2-Clause",
+			"prettier": {
+				"tabWidth": 4,
+				"proseWrap": "always"
+			},
+			"jest": {
+				"preset": "ts-jest",
+				"testEnvironment": "node",
+				"coverageProvider": "v8",
+				"moduleNameMapper": {
+					"^(.*)\\.js$": "$1"
+				},
+				"testMatch": [
+					"<rootDir>/test/*.ts"
+				]
+			},
+			"gitHead": "0f0725a9dfeddd2fdb54eda9656cdbab5bbf6be6",
+			"bugs": {
+				"url": "https://github.com/fb55/css-select/issues"
+			},
+			"homepage": "https://github.com/fb55/css-select#readme",
+			"_id": "css-select@5.1.0",
+			"_nodeVersion": "17.9.0",
+			"_npmVersion": "8.5.5",
+			"dist": {
+				"integrity": "sha512-nwoRF1rvRRnnCqqY7updORDsuqKzqYJ28+oSMaJMMgOauh3fvwHqMS7EZpIPqK8GL+g9mKxF1vP/ZjSeNjEVHg==",
+				"shasum": "b8ebd6554c3637ccc76688804ad3f6a6fdaea8a6",
+				"tarball": "https://registry.npmjs.org/css-select/-/css-select-5.1.0.tgz",
+				"fileCount": 92,
+				"unpackedSize": 224084,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCjzGYuLVctiCVeaz6NEAjem4z1RMECXEBb5ZS5qAQgSwIhAI+v/79Yd7lqrbh6YuRntgI9CyTP51jIr3vD7e8kk3Y2"
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJiaYuRACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmqX0BAAl5u7Nnsjk88dm80aR1prAuZipAite/DewumQ4EFiporxMfxD\r\nIThszDtyhvx1uQh/Ewd5yIj4fClSgGmPsc99xlBdlwaK2VoI6CDzTtIau0h0\r\nCzRqn2J8o+MohiddzNXMQSRKG8dyRtxNaeJEjlFniiQGiWDZ6whVfU4qCFg3\r\niVWHOhr2DFw6K8hDZE6B9n+U5bGKp7c7Sey4PjK2GEISiUJ3v1nVsPaHViRG\r\nAcID/NMu5cEKWWz7Sk75/8OcQYOQ8ZJ2RGf/bvzG9ZBlUgWn+miZPGp+lSdM\r\nfrkiitZV4yfJYrfMEzlKECIS8wkx9IK2XG9vQN1tM4HkPfSFHCDss7ypH+Si\r\nvtvD4ZYBGWU1k+3dTU/a60lYge3FjzjtHiOKWs3iQtncafuXzcgdzvAKYNcN\r\nHQe/CmI8iuNBgXXvDTDHBYDbgGldpPPEQus47kYRQ7MUvcpwTuCbDC46lV9R\r\nIvMWLsrsb/BbKy+pFuUj//nzbn7px8Nrr7whDZE05oaEbAu2GzVNMQlRQSUd\r\n5jJEGaj+2hJS84RIq02y3ZYVKhOvi+xLa1SNYVXZ3wh/TiAU/sJfd63OX5/y\r\nqi0TdY4g6LztTWhsUj9r4RvUBwmnCSoM7Ru3fvfntaou5AQeExYJ7UFV/E9K\r\na5ZEJ1OOyu/145LWHQ0bVYCgkZPXJ/IWuYY=\r\n=WdK/\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "feedic",
+				"email": "me@feedic.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "feedic",
+					"email": "me@feedic.com"
+				},
+				{
+					"name": "chriseppstein",
+					"email": "chris@eppsteins.net"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/css-select_5.1.0_1651084176984_0.08106102811070848"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		}
+	},
+	"time": {
+		"modified": "2022-12-16T10:36:34.309Z",
+		"created": "2015-02-03T22:19:31.872Z",
+		"1.0.0": "2015-02-03T22:19:31.872Z",
+		"1.1.0": "2015-03-06T09:56:07.297Z",
+		"1.2.0": "2015-11-24T00:18:41.364Z",
+		"1.3.0-rc0": "2017-01-19T11:01:49.162Z",
+		"2.0.0": "2018-03-09T13:24:17.585Z",
+		"2.0.2": "2018-10-21T22:49:43.146Z",
+		"2.1.0": "2019-11-09T23:15:02.442Z",
+		"3.0.0": "2020-09-23T21:00:03.773Z",
+		"3.0.1": "2020-09-23T23:38:16.650Z",
+		"3.0.2": "2020-09-27T19:37:42.559Z",
+		"3.0.3": "2020-09-28T02:28:08.241Z",
+		"3.0.4": "2020-10-01T20:53:51.493Z",
+		"3.1.0": "2020-10-02T16:59:00.899Z",
+		"3.1.1": "2020-12-08T23:27:23.037Z",
+		"3.1.2": "2020-12-10T20:54:41.127Z",
+		"4.0.0": "2021-04-03T08:00:28.226Z",
+		"4.1.0": "2021-04-16T09:22:34.648Z",
+		"4.1.1": "2021-04-16T09:34:40.542Z",
+		"4.1.2": "2021-04-16T09:42:37.437Z",
+		"4.1.3": "2021-06-06T15:43:37.009Z",
+		"4.2.0": "2021-12-14T16:01:41.038Z",
+		"4.2.1": "2021-12-26T11:38:44.447Z",
+		"4.3.0": "2022-03-28T13:57:10.490Z",
+		"5.0.0": "2022-04-24T18:27:03.139Z",
+		"5.0.1": "2022-04-25T11:57:32.440Z",
+		"5.1.0": "2022-04-27T18:29:37.203Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "5.1.0"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"f2b691e1e94d720195e40f64f7d7a550\"",
+			"fetched": 1674058160413
+		}
+	},
+	"_distfiles": {
+		"css-select-1.0.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-1.0.0.tgz",
+			"sha": "b1121ca51848dd264e2244d058cee254deeb44b0",
+			"registry": "npmjs"
+		},
+		"css-select-1.1.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-1.1.0.tgz",
+			"sha": "b51ec9c7d0ab50b9fcd61e529504387b1202d6c4",
+			"registry": "npmjs"
+		},
+		"css-select-1.2.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-1.2.0.tgz",
+			"sha": "2b3a110539c5355f1cd8d314623e870b121ec858",
+			"registry": "npmjs"
+		},
+		"css-select-1.3.0-rc0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-1.3.0-rc0.tgz",
+			"sha": "6f93196aaae737666ea1036a8cb14a8fcb7a9231",
+			"registry": "npmjs"
+		},
+		"css-select-2.0.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-2.0.0.tgz",
+			"sha": "7aa2921392114831f68db175c0b6a555df74bbd5",
+			"registry": "npmjs"
+		},
+		"css-select-2.0.2.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-2.0.2.tgz",
+			"sha": "ab4386cec9e1f668855564b17c3733b43b2a5ede",
+			"registry": "npmjs"
+		},
+		"css-select-2.1.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-2.1.0.tgz",
+			"sha": "6a34653356635934a81baca68d0255432105dbef",
+			"registry": "npmjs"
+		},
+		"css-select-3.0.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.0.0.tgz",
+			"sha": "7533e0e600f6a234c7cf151e3c94671a04fe9624",
+			"registry": "npmjs"
+		},
+		"css-select-3.0.1.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.0.1.tgz",
+			"sha": "98bfdf4d43756f4b8db7b897bde61aa7572d59b8",
+			"registry": "npmjs"
+		},
+		"css-select-3.0.2.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.0.2.tgz",
+			"sha": "ab1d484228a77e135e12423c2ecb679321457c3d",
+			"registry": "npmjs"
+		},
+		"css-select-3.0.3.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.0.3.tgz",
+			"sha": "bd4a1ace5953d6c9525251bde45b88ababcb639c",
+			"registry": "npmjs"
+		},
+		"css-select-3.0.4.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.0.4.tgz",
+			"sha": "642fac470515cafd1cf40e3e69808afe00838902",
+			"registry": "npmjs"
+		},
+		"css-select-3.1.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.1.0.tgz",
+			"sha": "7e684316f184e5307d9e04d80a0d626333a9de8a",
+			"registry": "npmjs"
+		},
+		"css-select-3.1.1.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.1.1.tgz",
+			"sha": "38aef130c85a803e5a2c2cf25a59edecb4e6130d",
+			"registry": "npmjs"
+		},
+		"css-select-3.1.2.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-3.1.2.tgz",
+			"sha": "d52cbdc6fee379fba97fb0d3925abbd18af2d9d8",
+			"registry": "npmjs"
+		},
+		"css-select-4.0.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.0.0.tgz",
+			"sha": "9b7b53bd82e4b348a6e0924ce37645e5db43af8e",
+			"registry": "npmjs"
+		},
+		"css-select-4.1.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.1.0.tgz",
+			"sha": "895d5167fdaba20a2cebfe8c4de35de90a833c40",
+			"registry": "npmjs"
+		},
+		"css-select-4.1.1.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.1.1.tgz",
+			"sha": "71e7f9136d39540d4414d1f69c7fa752eab56e69",
+			"registry": "npmjs"
+		},
+		"css-select-4.1.2.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.1.2.tgz",
+			"sha": "8b52b6714ed3a80d8221ec971c543f3b12653286",
+			"registry": "npmjs"
+		},
+		"css-select-4.1.3.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.1.3.tgz",
+			"sha": "a70440f70317f2669118ad74ff105e65849c7067",
+			"registry": "npmjs"
+		},
+		"css-select-4.2.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.2.0.tgz",
+			"sha": "ab28276d3afb00cc05e818bd33eb030f14f57895",
+			"registry": "npmjs"
+		},
+		"css-select-4.2.1.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.2.1.tgz",
+			"sha": "9e665d6ae4c7f9d65dbe69d0316e3221fb274cdd",
+			"registry": "npmjs"
+		},
+		"css-select-4.3.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-4.3.0.tgz",
+			"sha": "db7129b2846662fd8628cfc496abb2b59e41529b",
+			"registry": "npmjs"
+		},
+		"css-select-5.0.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-5.0.0.tgz",
+			"sha": "3528a9bf67f0830cdc95eee67f759c239240f588",
+			"registry": "npmjs"
+		},
+		"css-select-5.0.1.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-5.0.1.tgz",
+			"sha": "32202b44ae905e06537c7e7b44c3cf7cb9baeef9",
+			"registry": "npmjs"
+		},
+		"css-select-5.1.0.tgz": {
+			"url": "https://registry.npmjs.org/css-select/-/css-select-5.1.0.tgz",
+			"sha": "b8ebd6554c3637ccc76688804ad3f6a6fdaea8a6",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "1-e577cab7315f2da6",
+	"_id": "css-select",
+	"readme": "# css-select [![NPM version](http://img.shields.io/npm/v/css-select.svg)](https://npmjs.org/package/css-select) [![Build Status](https://travis-ci.com/fb55/css-select.svg?branch=master)](http://travis-ci.com/fb55/css-select) [![Downloads](https://img.shields.io/npm/dm/css-select.svg)](https://npmjs.org/package/css-select) [![Coverage](https://coveralls.io/repos/fb55/css-select/badge.svg?branch=master)](https://coveralls.io/r/fb55/css-select)\n\nA CSS selector compiler and engine\n\n## What?\n\nAs a **compiler**, css-select turns CSS selectors into functions that tests if\nelements match them.\n\nAs an **engine**, css-select looks through a DOM tree, searching for elements.\nElements are tested \"from the top\", similar to how browsers execute CSS\nselectors.\n\nIn its default configuration, css-select queries the DOM structure of the\n[`domhandler`](https://github.com/fb55/domhandler) module (also known as\nhtmlparser2 DOM). To query alternative DOM structures, see [`Options`](#options)\nbelow.\n\n**Features:**\n\n-   🔬 Full implementation of CSS3 selectors, as well as most CSS4 selectors\n-   🧪 Partial implementation of jQuery/Sizzle extensions (see\n    [cheerio-select](https://github.com/cheeriojs/cheerio-select) for the\n    remaining selectors)\n-   🧑‍🔬 High test coverage, including the full test suites from\n    [`Sizzle`](https://github.com/jquery/sizzle),\n    [`Qwery`](https://github.com/ded/qwery) and\n    [`NWMatcher`](https://github.com/dperini/nwmatcher/) and .\n-   🥼 Reliably great performance\n\n## Why?\n\nMost CSS engines written in JavaScript execute selectors left-to-right. That\nmeans thet execute every component of the selector in order, from left to right.\nAs an example: For the selector `a b`, these engines will first query for `a`\nelements, then search these for `b` elements. (That's the approach of eg.\n[`Sizzle`](https://github.com/jquery/sizzle),\n[`Qwery`](https://github.com/ded/qwery) and\n[`NWMatcher`](https://github.com/dperini/nwmatcher/).)\n\nWhile this works, it has some downsides: Children of `a`s will be checked\nmultiple times; first, to check if they are also `a`s, then, for every superior\n`a` once, if they are `b`s. Using\n[Big O notation](http://en.wikipedia.org/wiki/Big_O_notation), that would be\n`O(n^(k+1))`, where `k` is the number of descendant selectors (that's the space\nin the example above).\n\nThe far more efficient approach is to first look for `b` elements, then check if\nthey have superior `a` elements: Using big O notation again, that would be\n`O(n)`. That's called right-to-left execution.\n\nAnd that's what css-select does – and why it's quite performant.\n\n## How does it work?\n\nBy building a stack of functions.\n\n_Wait, what?_\n\nOkay, so let's suppose we want to compile the selector `a b`, for right-to-left\nexecution. We start by _parsing_ the selector. This turns the selector into an\narray of the building blocks. That's what the\n[`css-what`](https://github.com/fb55/css-what) module is for, if you want to\nhave a look.\n\nAnyway, after parsing, we end up with an array like this one:\n\n```js\n[\n    { type: \"tag\", name: \"a\" },\n    { type: \"descendant\" },\n    { type: \"tag\", name: \"b\" },\n];\n```\n\n(Actually, this array is wrapped in another array, but that's another story,\ninvolving commas in selectors.)\n\nNow that we know the meaning of every part of the selector, we can compile it.\nThat is where things become interesting.\n\nThe basic idea is to turn every part of the selector into a function, which\ntakes an element as its only argument. The function checks whether a passed\nelement matches its part of the selector: If it does, the element is passed to\nthe next function representing the next part of the selector. That function does\nthe same. If an element is accepted by all parts of the selector, it _matches_\nthe selector and double rainbow ALL THE WAY.\n\nAs said before, we want to do right-to-left execution with all the big O\nimprovements. That means elements are passed from the rightmost part of the\nselector (`b` in our example) to the leftmost (~~which would be `c`~~ of course\n`a`).\n\nFor traversals, such as the _descendant_ operating the space between `a` and\n`b`, we walk up the DOM tree, starting from the element passed as argument.\n\n_//TODO: More in-depth description. Implementation details. Build a spaceship._\n\n## API\n\n```js\nconst CSSselect = require(\"css-select\");\n```\n\n**Note:** css-select throws errors when invalid selectors are passed to it. This\nis done to aid with writing css selectors, but can be unexpected when processing\narbitrary strings.\n\n#### `CSSselect.selectAll(query, elems, options)`\n\nQueries `elems`, returns an array containing all matches.\n\n-   `query` can be either a CSS selector or a function.\n-   `elems` can be either an array of elements, or a single element. If it is an\n    element, its children will be queried.\n-   `options` is described below.\n\nAliases: `default` export, `CSSselect.iterate(query, elems)`.\n\n#### `CSSselect.compile(query, options)`\n\nCompiles the query, returns a function.\n\n#### `CSSselect.is(elem, query, options)`\n\nTests whether or not an element is matched by `query`. `query` can be either a\nCSS selector or a function.\n\n#### `CSSselect.selectOne(query, elems, options)`\n\nArguments are the same as for `CSSselect.selectAll(query, elems)`. Only returns\nthe first match, or `null` if there was no match.\n\n### Options\n\nAll options are optional.\n\n-   `xmlMode`: When enabled, tag names will be case-sensitive. Default: `false`.\n-   `rootFunc`: The last function in the stack, will be called with the last\n    element that's looked at.\n-   `adapter`: The adapter to use when interacting with the backing DOM\n    structure. By default it uses the `domutils` module.\n-   `context`: The context of the current query. Used to limit the scope of\n    searches. Can be matched directly using the `:scope` pseudo-class.\n-   `relativeSelector`: By default, selectors are relative to the `context`,\n    which means that no parent elements of the context will be matched. (Eg.\n    `a b c` with context `b` will never give any results.) If `relativeSelector`\n    is set to `false`, selectors won't be\n    [absolutized](http://www.w3.org/TR/selectors4/#absolutizing) and selectors\n    can test for parent elements outside of the `context`.\n-   `cacheResults`: Allow css-select to cache results for some selectors,\n    sometimes greatly improving querying performance. Disable this if your\n    document can change in between queries with the same compiled selector.\n    Default: `true`.\n-   `pseudos`: A map of pseudo-class names to functions or strings.\n\n#### Custom Adapters\n\nA custom adapter must match the interface described\n[here](https://github.com/fb55/css-select/blob/1aa44bdd64aaf2ebdfd7f338e2e76bed36521957/src/types.ts#L6-L96).\n\nYou may want to have a look at [`domutils`](https://github.com/fb55/domutils) to\nsee the default implementation, or at\n[`css-select-browser-adapter`](https://github.com/nrkn/css-select-browser-adapter/blob/master/index.js)\nfor an implementation backed by the DOM.\n\n## Supported selectors\n\n_As defined by CSS 4 and / or jQuery._\n\n-   [Selector lists](https://developer.mozilla.org/en-US/docs/Web/CSS/Selector_list)\n    (`,`)\n-   [Universal](https://developer.mozilla.org/en-US/docs/Web/CSS/Universal_selectors)\n    (`*`)\n-   [Type](https://developer.mozilla.org/en-US/docs/Web/CSS/Type_selectors)\n    (`<tagname>`)\n-   [Descendant](https://developer.mozilla.org/en-US/docs/Web/CSS/Descendant_combinator)\n    (` `)\n-   [Child](https://developer.mozilla.org/en-US/docs/Web/CSS/Child_combinator)\n    (`>`)\n-   Parent (`<`)\n-   [Adjacent sibling](https://developer.mozilla.org/en-US/docs/Web/CSS/Adjacent_sibling_combinator)\n    (`+`)\n-   [General sibling](https://developer.mozilla.org/en-US/docs/Web/CSS/General_sibling_combinator)\n    (`~`)\n-   [Attribute](https://developer.mozilla.org/en-US/docs/Web/CSS/Attribute_selectors)\n    (`[attr=foo]`), with supported comparisons:\n    -   `[attr]` (existential)\n    -   `=`\n    -   `~=`\n    -   `|=`\n    -   `*=`\n    -   `^=`\n    -   `$=`\n    -   `!=`\n    -   `i` and `s` can be added after the comparison to make the comparison\n        case-insensitive or case-sensitive (eg. `[attr=foo i]`). If neither is\n        supplied, css-select will follow the HTML spec's\n        [case-sensitivity rules](https://html.spec.whatwg.org/multipage/semantics-other.html#case-sensitivity-of-selectors).\n-   Pseudos:\n    -   [`:not`](https://developer.mozilla.org/en-US/docs/Web/CSS/:not)\n    -   [`:contains`](https://api.jquery.com/contains-selector)\n    -   `:icontains` (case-insensitive version of `:contains`)\n    -   [`:has`](https://developer.mozilla.org/en-US/docs/Web/CSS/:has)\n    -   [`:root`](https://developer.mozilla.org/en-US/docs/Web/CSS/:root)\n    -   [`:empty`](https://developer.mozilla.org/en-US/docs/Web/CSS/:empty)\n    -   [`:parent`](https://api.jquery.com/parent-selector)\n    -   [`:first-child`](https://developer.mozilla.org/en-US/docs/Web/CSS/:first-child),\n        [`:last-child`](https://developer.mozilla.org/en-US/docs/Web/CSS/:last-child),\n        [`:first-of-type`](https://developer.mozilla.org/en-US/docs/Web/CSS/:first-of-type),\n        [`:last-of-type`](https://developer.mozilla.org/en-US/docs/Web/CSS/:last-of-type)\n    -   [`:only-of-type`](https://developer.mozilla.org/en-US/docs/Web/CSS/:only-of-type),\n        [`:only-child`](https://developer.mozilla.org/en-US/docs/Web/CSS/:only-child)\n    -   [`:nth-child`](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-child),\n        [`:nth-last-child`](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-child),\n        [`:nth-of-type`](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-of-type),\n        [`:nth-last-of-type`](https://developer.mozilla.org/en-US/docs/Web/CSS/:nth-last-of-type),\n    -   [`:link`](https://developer.mozilla.org/en-US/docs/Web/CSS/:link),\n        [`:any-link`](https://developer.mozilla.org/en-US/docs/Web/CSS/:any-link)\n    -   [`:visited`](https://developer.mozilla.org/en-US/docs/Web/CSS/:visited),\n        [`:hover`](https://developer.mozilla.org/en-US/docs/Web/CSS/:hover),\n        [`:active`](https://developer.mozilla.org/en-US/docs/Web/CSS/:active)\n        (these depend on optional `Adapter` methods, so these will only match\n        elements if implemented in `Adapter`)\n    -   [`:selected`](https://api.jquery.com/selected-selector),\n        [`:checked`](https://developer.mozilla.org/en-US/docs/Web/CSS/:checked)\n    -   [`:enabled`](https://developer.mozilla.org/en-US/docs/Web/CSS/:enabled),\n        [`:disabled`](https://developer.mozilla.org/en-US/docs/Web/CSS/:disabled)\n    -   [`:required`](https://developer.mozilla.org/en-US/docs/Web/CSS/:required),\n        [`:optional`](https://developer.mozilla.org/en-US/docs/Web/CSS/:optional)\n    -   [`:header`](https://api.jquery.com/header-selector),\n        [`:button`](https://api.jquery.com/button-selector),\n        [`:input`](https://api.jquery.com/input-selector),\n        [`:text`](https://api.jquery.com/text-selector),\n        [`:checkbox`](https://api.jquery.com/checkbox-selector),\n        [`:file`](https://api.jquery.com/file-selector),\n        [`:password`](https://api.jquery.com/password-selector),\n        [`:reset`](https://api.jquery.com/reset-selector),\n        [`:radio`](https://api.jquery.com/radio-selector) etc.\n    -   [`:is`](https://developer.mozilla.org/en-US/docs/Web/CSS/:is), plus its\n        legacy alias `:matches`\n    -   [`:scope`](https://developer.mozilla.org/en-US/docs/Web/CSS/:scope)\n        (uses the context from the passed options)\n\n---\n\nLicense: BSD-2-Clause\n\n## Security contact information\n\nTo report a security vulnerability, please use the\n[Tidelift security contact](https://tidelift.com/security). Tidelift will\ncoordinate the fix and disclosure.\n\n## `css-select` for enterprise\n\nAvailable as part of the Tidelift Subscription\n\nThe maintainers of `css-select` and thousands of other packages are working with\nTidelift to deliver commercial support and maintenance for the open source\ndependencies you use to build your applications. Save time, reduce risk, and\nimprove code health, while paying the maintainers of the exact dependencies you\nuse.\n[Learn more.](https://tidelift.com/subscription/pkg/npm-css-select?utm_source=npm-css-select&utm_medium=referral&utm_campaign=enterprise&utm_term=repo)"
+}

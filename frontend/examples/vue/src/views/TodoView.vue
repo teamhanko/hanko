@@ -3,12 +3,16 @@ import type { Todos } from "@/utils/TodoClient";
 import { TodoClient } from "@/utils/TodoClient";
 import { useRouter } from "vue-router";
 import type { Ref } from "vue";
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
+import { createHankoClient } from "@teamhanko/hanko-elements";
 
 const router = useRouter();
 
-const api = import.meta.env.VITE_TODO_API;
-const client = new TodoClient(api);
+const todoAPI = import.meta.env.VITE_TODO_API;
+const todoClient = new TodoClient(todoAPI);
+
+const hankoAPI = import.meta.env.VITE_TODO_API;
+const hankoClient = createHankoClient(hankoAPI);
 
 const error: Ref<Error | null> = ref(null);
 const todos: Ref<Todos> = ref([]);
@@ -16,6 +20,11 @@ const description = ref("");
 
 onMounted(() => {
   listTodos();
+  hankoClient.onSessionRemoved(() => redirectToLogin());
+});
+
+onBeforeUnmount(() => {
+  hankoClient.removeEventListeners();
 });
 
 function changeDescription(event: any) {
@@ -30,11 +39,11 @@ const changeCheckbox = (event: any) => {
 function addTodo() {
   const todo = { description: description.value, checked: false };
 
-  client
+  todoClient
     .addTodo(todo)
     .then((res) => {
       if (res.status === 401) {
-        router.push("/");
+        redirectToLogin();
         return;
       }
 
@@ -49,11 +58,11 @@ function addTodo() {
 }
 
 function listTodos() {
-  client
+  todoClient
     .listTodos()
     .then((res) => {
       if (res.status === 401) {
-        router.push("/");
+        redirectToLogin();
         return;
       }
 
@@ -70,11 +79,11 @@ function listTodos() {
 }
 
 const patchTodo = (id: string, checked: boolean) => {
-  client
+  todoClient
     .patchTodo(id, checked)
     .then((res) => {
       if (res.status === 401) {
-        router.push("/");
+        redirectToLogin();
         return;
       }
 
@@ -88,11 +97,11 @@ const patchTodo = (id: string, checked: boolean) => {
 };
 
 const deleteTodo = (id: string) => {
-  client
+  todoClient
     .deleteTodo(id)
     .then((res) => {
       if (res.status === 401) {
-        router.push("/");
+        redirectToLogin();
         return;
       }
 
@@ -105,27 +114,25 @@ const deleteTodo = (id: string) => {
     });
 };
 
-function profile() {
+const redirectToLogin = () => {
+  router.push({ path: "/" });
+};
+
+function redirectToProfile() {
   router.push("/profile");
 }
 
 function logout() {
-  client
-    .logout()
-    .then(() => {
-      router.push("/");
-      return;
-    })
-    .catch((e) => {
-      error.value = e;
-    });
+  hankoClient.user.logout().catch((e) => {
+    error.value = e;
+  });
 }
 </script>
 
 <template>
   <nav class="nav">
     <button @click.prevent="logout" class="button">Logout</button>
-    <button @click.prevent="profile" class="button">Profile</button>
+    <button @click.prevent="redirectToProfile" class="button">Profile</button>
     <button disabled class="button">Todos</button>
   </nav>
   <div class="content">

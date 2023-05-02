@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { TodoClient } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
 import dynamic from "next/dynamic";
+import { createHankoClient } from "@teamhanko/hanko-elements";
 
-const todoApi = process.env.NEXT_PUBLIC_TODO_API!;
+const hankoAPI = process.env.NEXT_PUBLIC_HANKO_API!;
 
 const HankoProfile = dynamic(() => import("../components/HankoProfile"), {
   ssr: false,
@@ -13,22 +13,19 @@ const HankoProfile = dynamic(() => import("../components/HankoProfile"), {
 
 const Todo: NextPage = () => {
   const router = useRouter();
-  const client = useMemo(() => new TodoClient(todoApi), []);
+  const hankoClient = useMemo(() => createHankoClient(hankoAPI), []);
+
   const [error, setError] = useState<Error | null>(null);
 
   const logout = () => {
-    client
+    hankoClient.user
       .logout()
-      .then(() => {
-        router.push("/").catch((e) => setError(e));
-        return;
-      })
       .catch((e) => {
         setError(e);
       });
   };
 
-  const todos = () => {
+  const redirectToTodos = () => {
     router.push("/todo").catch((e) => setError(e));
   };
 
@@ -41,7 +38,7 @@ const Todo: NextPage = () => {
         <button disabled className={styles.button}>
           Profile
         </button>
-        <button onClick={todos} className={styles.button}>
+        <button onClick={redirectToTodos} className={styles.button}>
           Todos
         </button>
       </nav>

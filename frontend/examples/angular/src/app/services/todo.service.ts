@@ -53,10 +53,4 @@ export class TodoService {
       credentials: 'include',
     });
   }
-
-  logout() {
-    return fetch(`${this.api}/logout`, {
-      credentials: 'include',
-    });
-  }
 }

@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { HankoService } from "./services/hanko.services";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-root',

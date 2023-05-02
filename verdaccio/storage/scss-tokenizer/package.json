@@ -1,0 +1,1095 @@
+{
+	"name": "scss-tokenizer",
+	"versions": {
+		"0.0.1": {
+			"name": "scss-tokenizer",
+			"version": "0.0.1",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "git submodule update --init && node test/sass-spec.js"
+			},
+			"repository": {
+				"type": "git",
+				"url": "https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"babel-core": "^5.4.3",
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"glob": "^5.0.10",
+				"tripwire": "^0.10.0"
+			},
+			"gitHead": "39c9783d86fb8b9cb471254f0ac9328248e9394a",
+			"_id": "scss-tokenizer@0.0.1",
+			"_shasum": "133c1977503b1aa8232d8669bc2da64e0b32d1f8",
+			"_from": ".",
+			"_npmVersion": "2.6.1",
+			"_nodeVersion": "0.10.29",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"dist": {
+				"shasum": "133c1977503b1aa8232d8669bc2da64e0b32d1f8",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.0.1.tgz",
+				"integrity": "sha512-iq64F23lRqmXVEMC2Zk50pwjckKMqYXmGfsa/0Jj25kDrFHb8PmZdMGIeGT8vkCFFFvTUpOmJtL4YcfjDvS5pQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCICMQz4wNhOpi2+NGuNztKk48f2qqn5Lx5xsEOHqMc+U4AiAqnKr1CSDpBxPnkg235Ac/61V/D9JToeGOAmLjIhvcbA=="
+					}
+				]
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.1.0": {
+			"name": "scss-tokenizer",
+			"version": "0.1.0",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"babel-core": "^5.4.3",
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "080a4ca8ce25da96b1e78b84e98020c8261a5152",
+			"_id": "scss-tokenizer@0.1.0",
+			"_shasum": "ba680ac624823f60be6e28a900a8fbfffa209e27",
+			"_from": ".",
+			"_npmVersion": "3.10.10",
+			"_nodeVersion": "7.2.1",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "ba680ac624823f60be6e28a900a8fbfffa209e27",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.1.0.tgz",
+				"integrity": "sha512-aQQSZhNgFNQYbEfDsuUoRQJXMHzgEmwpYkphFzHjFIig9P6KbHGqp+oz+abdccQ5GVuS54I7cpib7eceKU8bAw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDUDPTs7hlFR3hgxYcxPCGCixrUvE7svfIsiU4Rdu5sEAIgPrC9o5mrWGMK3Gi/ujuVs3kgiimK3qTMfQHj2ccLXLM="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.1.0.tgz_1485666444121_0.7492678030394018"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.1.1": {
+			"name": "scss-tokenizer",
+			"version": "0.1.1",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"babel-core": "^5.4.3",
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "e426e9688df39851deea55a9c2dfc8ae85793308",
+			"_id": "scss-tokenizer@0.1.1",
+			"_shasum": "d737d5d2d9da0fb147a93a8591129e22b17bb97b",
+			"_from": ".",
+			"_npmVersion": "3.10.10",
+			"_nodeVersion": "7.2.1",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "d737d5d2d9da0fb147a93a8591129e22b17bb97b",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.1.1.tgz",
+				"integrity": "sha512-i7iig8YaD+qR1hYl3GfI3Z8ehwuj1TsE9Vw+Mcaybrp4dXzIwbOA51tfiOMHmF012ld+x2/3uDRqN43h1hQ+EA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQD0OcTmTdDtquQPHyYBW2mj5kVzcRRVGlbAO7Gx2Zw6EAIhANIyIrxgeivPDb3qcAAF4+NWvYVpmO1qt00UShnT3QIW"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.1.1.tgz_1485669337147_0.4569332511164248"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.1.2": {
+			"name": "scss-tokenizer",
+			"version": "0.1.2",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"babel-core": "^5.4.3",
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "73c8fe985e1cd70c019b456c75f2b4bc46b7af63",
+			"_id": "scss-tokenizer@0.1.2",
+			"_shasum": "c5e3c705d8d8cf96f94a58dc64410f0f2d9889ce",
+			"_from": ".",
+			"_npmVersion": "3.10.10",
+			"_nodeVersion": "7.2.1",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "c5e3c705d8d8cf96f94a58dc64410f0f2d9889ce",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.1.2.tgz",
+				"integrity": "sha512-UO6BOWE7BMDGWJcp4fAfK9tdrqlILukRJlhWPXuSRruu2UITIER177HW92qiCaOfJzL3OeDqsqz9zZc66+k1hQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIBnTS9liu42ioGjqL0WfVgQx5V0QhX4r7abSbdGvIgSHAiEAxOgCynd8jOm2PJP8IzpCNXnVhU7Hp+0hw/7izlCpD4A="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.1.2.tgz_1485674886772_0.35944091132842004"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.2.0": {
+			"name": "scss-tokenizer",
+			"version": "0.2.0",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib",
+				"prepublishOnly": "npm run build"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.24.1",
+				"babel-preset-es2015": "^6.24.1",
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "10b93ff0e42ad0b8035998bf20e303b92e6e59e6",
+			"_id": "scss-tokenizer@0.2.0",
+			"_shasum": "3fb3a22494c9facca7776e5ea27c15a0b0681970",
+			"_from": ".",
+			"_npmVersion": "3.10.10",
+			"_nodeVersion": "7.2.1",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "3fb3a22494c9facca7776e5ea27c15a0b0681970",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.0.tgz",
+				"integrity": "sha512-dpty/sBXglBY48ouAI78/zvs301P070d8sfkb8p/aX7a6J5N34ecWwtTaMZSaGTB6kXZ0PtwTGUkVLclLbjyIw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIASQW+NM/etglJTsnX/Z9wx2pkMrfk/6Y1QrZWnGZhQuAiEA4OkwxjV614Uay+nszOcUWLKH78A/qKgQbYggbzxfQhU="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.2.0.tgz_1493430860485_0.18989505828358233"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.2.1": {
+			"name": "scss-tokenizer",
+			"version": "0.2.1",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib",
+				"prepublishOnly": "npm run build"
+			},
+			"files": [
+				"lib"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.24.1",
+				"babel-preset-es2015": "^6.24.1",
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "c4e8ec0ebcd6769d33659752616ca654bb7e23c1",
+			"_id": "scss-tokenizer@0.2.1",
+			"_shasum": "07c0cc577bb7ab4d08fd900185adbf4bc844141d",
+			"_from": ".",
+			"_npmVersion": "3.10.10",
+			"_nodeVersion": "7.2.1",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "07c0cc577bb7ab4d08fd900185adbf4bc844141d",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.1.tgz",
+				"integrity": "sha512-w9K78IJTmoVnAlY3L8EEXebRo+2vc3sMl5xk1Z09RD9RPz38IDmfff6A89KXjyw+wG6OA/cNOZYQ8lkYYTDeKg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDa3LAlJYHTNlpC1tbQS1oI0G7ujMfl39gR0Uyar1lUSQIhAJgC5KLRkQdZyvnL1XPWoPWzx4WM3PcUE54/ZigRWSew"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.2.1.tgz_1493432124758_0.4050206234678626"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.2.2": {
+			"name": "scss-tokenizer",
+			"version": "0.2.2",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib",
+				"prepublishOnly": "npm run build"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.24.1",
+				"babel-preset-es2015": "^6.24.1",
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "5ede9bffc7f1b24dfcb6ab4bf811f8a1e3a2636a",
+			"_id": "scss-tokenizer@0.2.2",
+			"_shasum": "a500d3a9f68927699df7803eb9d675b03a47f164",
+			"_from": ".",
+			"_npmVersion": "4.1.2",
+			"_nodeVersion": "7.6.0",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "a500d3a9f68927699df7803eb9d675b03a47f164",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.2.tgz",
+				"integrity": "sha512-HaM3FolsX6qg0x/9dd4poKXbYqBLF3zsi0Uyyu1GM6q3K4Z9TuLOooZbaJKA5I1bMRLsAgWX5SfuwQuvOKvyBQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCMrJWp107yXnKjJ3NirEqmTqHdxXEVHTS3zy4fvGRPtQIgOARPbagEYqWhVEkgknXJswdVQ9TxUf5fki+41Ed8ZeM="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.2.2.tgz_1494600113701_0.93822256103158"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.2.3": {
+			"name": "scss-tokenizer",
+			"version": "0.2.3",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "mocha",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.1.8",
+				"source-map": "^0.4.2"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.24.1",
+				"babel-preset-es2015": "^6.24.1",
+				"chai": "^3.5.0",
+				"glob": "^5.0.10",
+				"mocha": "^3.2.0",
+				"sass-spec": "^3.5.0-1"
+			},
+			"gitHead": "69a031e614fd948233c0583a29a3e764c2f90bc9",
+			"_id": "scss-tokenizer@0.2.3",
+			"_shasum": "8eb06db9a9723333824d3f5530641149847ce5d1",
+			"_from": ".",
+			"_npmVersion": "4.1.2",
+			"_nodeVersion": "7.6.0",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"shasum": "8eb06db9a9723333824d3f5530641149847ce5d1",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.3.tgz",
+				"integrity": "sha512-dYE8LhncfBUar6POCxMTm0Ln+erjeczqEvCJib5/7XNkdw1FkUGgwMPY360FY0FgPWQxHWCx29Jl3oejyGLM9Q==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQDDZuKcMdoe81oQ7KiyFkDVDZusy+gi93QkeXFuRWnd/wIgPbNgjnZAxTRDN1++Qp4qzY/zdzjDpO4rTrKlWUPNYaM="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/scss-tokenizer-0.2.3.tgz_1494600519250_0.10013756598345935"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"0.3.0": {
+			"name": "scss-tokenizer",
+			"version": "0.3.0",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "jest",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib"
+			},
+			"files": [
+				"index.js",
+				"lib"
+			],
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.4.3",
+				"source-map": "^0.7.1"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.26.0",
+				"babel-core": "^6.26.0",
+				"babel-jest": "^22.4.3",
+				"babel-preset-es2015": "^6.24.1",
+				"glob": "^7.1.2",
+				"jest": "^22.4.3",
+				"sass-spec": "^3.5.1"
+			},
+			"gitHead": "97063c82fd350bbcc3cc0cca5efa35b69bf38006",
+			"_id": "scss-tokenizer@0.3.0",
+			"_npmVersion": "5.7.1",
+			"_nodeVersion": "9.8.0",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-14Zl9GcbBvOT9057ZKjpz5yPOyUWG2ojd9D5io28wHRYsOrs7U95Q+KNL87+32p8rc+LvDpbu/i9ZYjM9Q+FsQ==",
+				"shasum": "ef7edc3bc438b25cd6ffacf1aa5b9ad5813bf260",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.3.0.tgz",
+				"fileCount": 12,
+				"unpackedSize": 37446,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJa1LpJCRA9TVsSAnZWagAALx4P/3wBgGXFKzY8K+WerJIo\nw3lk9r5TrFSXqf4iPnmA1eEP2B7HhrEtff8I+C4i0Ec+meSwfe+6jFdAOl6A\n0Un7U9k/bFycofbVZIlmS87JD5OhSs9Yr0zzgdxyTQXNPsiaI19RZ8WJ/Dt9\n0+PU5BNp7HsTX7uHlg+qcHOofN6iNeYOvrKM/jPOKFLy/6NZEso6tQDuB4dG\nhx4hnsKWwz8p8KPuThTMBDGb8ZB8I/sZpdLgNLcKKTsF05JmifSfY+V6qHeq\nhExTOPoh1R4w4mAx0qCATwkVCiYJCEY8U/GWWI5KR/8Kzscb0a16g91Py55/\n4e4P1AfYTwfyzQugwnxUebQ/mf6Ml0I0ith5+7rfuLufQvJm6DzVKys81Gou\ntsF8TbYXgRQGTXlR5ww7hBNypdXMe1xtjnNAWmIN+VBr4vwM2bWLNXVLVdFG\n3M6vDMnCYwMgeVhAcJh8ONsk7y3FA+3tIK0K22ef0OKZCmWXG2f5VlPaAsuQ\nC4O3Hl2rqboZafX60vLFs1G7NRMla4fVaWfZVYbZJP+oDDNSLzYYMvrKmRIy\nxLDauLo5WFuFLD56UVoj2S55Uu+HPVNzKUg9zd3zbso1wZQvGbiUUCAZVsU8\n4Pvq9CePb2614QU92XrR9p30eWoE2uoKdw3Oa8M9vhDB6kYK/z/7IttZVEl8\nyXyG\r\n=rFWy\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIDX73OFUHSTqDCa1qAG82nVuulaQhIl+/AjnMO0pxGXvAiEAs3CtajSWKbExZUiLdOosC0um4trAp5hlO50WVHRpKQQ="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scss-tokenizer_0.3.0_1523890753201_0.5179436807697921"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"0.4.0": {
+			"name": "scss-tokenizer",
+			"version": "0.4.0",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "jest",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.4.9",
+				"source-map": "^0.7.3"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.26.0",
+				"babel-core": "^6.26.3",
+				"babel-jest": "^23.6.0",
+				"babel-preset-env": "^1.7.0",
+				"glob": "^7.1.3",
+				"jest": "^23.6.0",
+				"sass-spec": "3.5.1"
+			},
+			"gitHead": "07c191732c621047a302c68b6718fd6bf0bd90d4",
+			"_id": "scss-tokenizer@0.4.0",
+			"_npmVersion": "6.4.1",
+			"_nodeVersion": "11.1.0",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-ZlxpP0ItvCH+ZMpGbalWVQKHmzT+Ff6Sa/0h72eFAloVIp7Z74rNLIPic+T8DSY/ig3k9zbcnMb0FilfWJ0QUQ==",
+				"shasum": "fbe6e631522f8fbddb6756bb6c50a78987e44c3a",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.0.tgz",
+				"fileCount": 12,
+				"unpackedSize": 40031,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcBQqzCRA9TVsSAnZWagAAeeoP+wWll+/DgUExE8VsnqRv\nXJsm9cx+7GD7iV+Em/TBuUM6SjrjAj8KGzIXIkechNlDPh2T5CV6X52yD6bO\nbypycEk5ZinZ9Ga+OehkLaWHiIkGHk0Ajn5H1m3PT/SVYhAt7Prn5XaRtbBf\n+f9xYEMNsPp4VBLioZIRRMYvJJh8TuNWTMwBoQKkYYVoZ5+mS+0sAJbXZjSm\nTeTfW/NHUfE3PSs/kaAK3VeJ2uxwoEDv5ckr53n0prMLFtK6/ohjdm4YD10b\nbaUrGN+QyoVd6k8wja6f6Cj+L5DbzHqhhzl4qqbAd0pkoSsZVVSi2WA+hb+B\nEZNc/pDe4WpEtR7JRtwu8kySPUoqzDK+KCiiAmZH8NftDPZROLAoI99JKVA7\nOeBagSijna8v3Tlze3ZINhiPMqxQGob9BFxoc6boeVwppGw/HWs4HCJT2NYM\nMW5eAFE1iTBtWBFNRZQcgd2sT5F+uxoeICv4WWrK2B9TYpIv9Cj2mMZRfyXB\nCxzUYE3CJeBeTTnkzk01NcHrLJRGlu4S5TP5gogmA6U278JZOMciTXpFsYDs\nOiqEwFdWfjZyZ1WiZWKkGWYmI+ojyF3M69K0r88JJvwmpF1J+/yfGuNdW3cp\nu65hIJGqVaBrV8mheWxUj94dQAciAwPSG+N829Hd++LFBvNzalg2ltt4O39d\np6TI\r\n=Z09R\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIC9M8wHIQXHFKZcNMUY36FJtGGfsBpKh7WWinjuaEqkMAiBhoBb2aq8GBjNjr1Bry0kk//QIl6YQ2Mr9za6Wb7W5yA=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scss-tokenizer_0.4.0_1543834289893_0.4136027233220376"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"0.4.1": {
+			"name": "scss-tokenizer",
+			"version": "0.4.1",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "jest",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.4.9",
+				"source-map": "^0.7.3"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.26.0",
+				"babel-core": "^6.26.3",
+				"babel-jest": "^23.6.0",
+				"babel-preset-env": "^1.7.0",
+				"glob": "^7.1.3",
+				"jest": "^23.6.0",
+				"sass-spec": "3.5.1"
+			},
+			"gitHead": "32a65d8d8d757f2e0cca0b2e71ec69840466dded",
+			"_id": "scss-tokenizer@0.4.1",
+			"_npmVersion": "6.4.1",
+			"_nodeVersion": "11.1.0",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-9XO7CpBH+zuNZSxiXxoS3PLgUHw0qBxLg2WVBY+5z/QxPZmQtXJLqpLQ2vYxIs0L7k6TlD5Le1rhAz4HJaWXYQ==",
+				"shasum": "6af17a4112ff0c4f71773a3bedd5728a51dad26c",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.1.tgz",
+				"fileCount": 12,
+				"unpackedSize": 40426,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcBRA8CRA9TVsSAnZWagAAc8QP/2tfv/2vVCrga0Lim9JG\nB+rabueHZqQ2WGJI+/EgK1/mrb1t7XZ7Bb81k823FW5IqNlJWvAuktQMmLha\nEbjmzwZnH1coVnops1esUt5/hzJfz+Ufr359e8QGoTBvPCZmvN3W1vyYQcgR\nvuMk8Sibuw1nn++WEva/sfZiTLIs2RXe5OHyBJfmcMQ1MSHdzWVu14oY3EFv\nad5Ov2iWNpfNEm6zkd8r3ukN/s83gI5nA7vefk9/oQxD4IsFGBXzXzry1HRx\ntunkf0NrLtsrQFYs/cHGauenCB5JQSFo0HoNhZAhp9CbJafCDecqc1ajLV14\nsFisxcy/SOPZIMcZxGz72vs6kvyh52kZQGirs1ZKFjYmpLBU62X7lw/1ppjf\nX1vHcwlx7D15a7lilQgUB2lsXC2kKXdVoWe8fBaSrlG634w6kfrc8hIxrRt0\niUbiw/Y95go+sQDhUddsvAnl9xmcy4C3FYlEobjqKrAZ5/D4rRuBztRHfDT4\nCcN0gK8/jEa6E8PGYtNUpYrRNz6bLzdtcJnmeMQREW8DWOzPWVTAOmZNZIKm\nP6lrpfXq8h9k7Meu9uYIg2vDZ00sitqxkMjOCLWjKtkrNE/Shb/7Yjvb7gKW\ngAGp+dO/eJ+RFdGTG6Xw2uF+PNvxhORcPtkLItc0dmPDTXxbxZsAKjJvFjGT\nRWPb\r\n=rve7\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCaw2aj79Wd+U+Tk2G8FSxWqzCfD0jig6P0NR9V/hwYjgIhAL2X0RSJrEOjepuY3OIRKeF4iL///aBN2oqaS6nfQ7A9"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scss-tokenizer_0.4.1_1543835707630_0.5116812761791931"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"0.4.2": {
+			"name": "scss-tokenizer",
+			"version": "0.4.2",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "jest",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib",
+				"prepublishOnly": "npm run build"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.4.9",
+				"source-map": "^0.7.3"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.26.0",
+				"babel-core": "^6.26.3",
+				"babel-jest": "^23.6.0",
+				"babel-preset-env": "^1.7.0",
+				"glob": "^7.1.3",
+				"jest": "^23.6.0",
+				"sass-spec": "3.5.1"
+			},
+			"gitHead": "db9b196df81b399fa104928e8361c5c6f3efde10",
+			"_id": "scss-tokenizer@0.4.2",
+			"_npmVersion": "6.4.1",
+			"_nodeVersion": "11.1.0",
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-+0We4djEJnZYxBas35tiZWqTHX/c5OZnNE3w+xQinC8agATTRgBWZoIWSmUo4Axm70//AooS63zQXsLhQuCH0A==",
+				"shasum": "1cc1cca2f2acc4643907e950dbe59d6e1cd2615e",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.2.tgz",
+				"fileCount": 12,
+				"unpackedSize": 40465,
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcBRFBCRA9TVsSAnZWagAA2XsP/37NQ1TvJw5yzNJPhPQL\nUR2/KjhFiQSVRbdp2y5z+I2wcRtfEMrHhxGciv7u04x7c7mMZs7TeR7QBcVY\nCSKezXJo31dRrVn76hetP4FhGS4WfPjRHBKMKze86reAzsHp60UHYdDGO7mv\nfkwSU6oWS4WBmBEppUQsJt83OkHa3M938GFbTHS+66IV3jL24OJUi1lSzcIh\nKSbxiZga2YrJaQVMy26pK6BYsroL1bcKPwgwYswTIzkHj+j3ZmJ3ZkCAL4RL\n3USoEo8UouEWmcYLM7lUUbnzt7e/LqUPJr/lNFyWZT2aWC4PonnTdI+HSlS+\nWAuwafCDxsrcz3J+vmL/lkdqY9fop9DX0XLpWGJc7GrmQFewv+pgaD1WxKZv\nAwyxufz3tZcQ7sjAy8Z9FVcKssQOgx4/wNzx0T/+nRp3EBUIZV1A2lzs44b2\nTH7AlDXzFFktm0rd+m91kjTFa8q0hsfoRf1CjuVhZjKG6Vx9HfQL7vLS97aR\nSp87RAuasZzNxywbvdgQrI/I91WTK91PASAvXS/1+AZsQLi6pksvwsmDc52E\nPRANrCwZ5wqBD5KIHxOZSO2wzftQlcYUESCA712ZoTjE84qSSk2mByUZw89S\nSQwh1F1QPmeOUmTewwkmtSmMiyTo37GTIu9O9izRw1E5UQ3QTxEYZ4EMntos\nNOaq\r\n=qrAm\r\n-----END PGP SIGNATURE-----\r\n",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIBRPz+MoPsggpyKyT1fsZydBxhAxdOdPkQEXTed+oFFeAiANPF3aNz6fhm/4L49IpmHbfvUMpWpkHnWiWs8YqXeJbw=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scss-tokenizer_0.4.2_1543835968263_0.588439318772646"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"0.4.3": {
+			"name": "scss-tokenizer",
+			"version": "0.4.3",
+			"description": "A tokenzier for Sass' SCSS syntax",
+			"main": "index.js",
+			"scripts": {
+				"test": "jest",
+				"clean": "rm lib/*",
+				"build": "npm run clean; babel src/ --out-dir lib",
+				"prepublishOnly": "npm run build"
+			},
+			"repository": {
+				"type": "git",
+				"url": "git+https://github.com/sasstools/scss-tokenizer.git"
+			},
+			"keywords": [
+				"parser",
+				"tokenizer",
+				"sass",
+				"scss",
+				"libsass"
+			],
+			"author": {
+				"name": "xzyfer"
+			},
+			"license": "MIT",
+			"bugs": {
+				"url": "https://github.com/sasstools/scss-tokenizer/issues"
+			},
+			"homepage": "https://github.com/sasstools/scss-tokenizer",
+			"dependencies": {
+				"js-base64": "^2.4.9",
+				"source-map": "^0.7.3"
+			},
+			"devDependencies": {
+				"babel-cli": "^6.26.0",
+				"babel-core": "^6.26.3",
+				"babel-jest": "^23.6.0",
+				"babel-preset-env": "^1.7.0",
+				"glob": "^7.1.3",
+				"jest": "^23.6.0",
+				"sass-spec": "3.5.1"
+			},
+			"gitHead": "3e518d908cea22d0ca1bdf927ef752b7539f0533",
+			"_id": "scss-tokenizer@0.4.3",
+			"_nodeVersion": "16.13.1",
+			"_npmVersion": "8.1.2",
+			"dist": {
+				"integrity": "sha512-raKLgf1LI5QMQnG+RxHz6oK0sL3x3I4FN2UDLqgLOGO8hodECNnNh5BXn7fAyBxrA8zVzdQizQ6XjNJQ+uBwMw==",
+				"shasum": "1058400ee7d814d71049c29923d2b25e61dc026c",
+				"tarball": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.3.tgz",
+				"fileCount": 11,
+				"unpackedSize": 40015,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQCOw3Eh7UYzGHvqp8WV04g9eu8IoIruxtLHW1+c/p6XUgIgZ7WDLvqFT2YcTRvwDVD33KXSJ0X54gArw9ruM2NUJaQ="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJi8wn/ACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmptVQ//SDugxLPA5qWUNSc9L51vZFzI1Iv2FSATlD681aiJ2oT2oape\r\negs18RLhbFtHtoLuSm6j3Vq6JfdviB0cOHdTOFnpGe4CO+fE2FDMTgUMsTLi\r\nAdOCv79dnNYpERog2llr1wEbsA/YgSuH0pV6VzwtNwU0iiZgLZFpyoZ7LCR4\r\nWAq6b4tFXAl5j597JUFfufmxEXUin5ZGqvGW+EIoMIqbGtOcCe5o16jMBVP6\r\nBewpYuzd3y8dqDA9By7gqcc36CVlVXRxTUeTMK5AfP4wmR6iNOQPT1FPE7N2\r\nkq0yuq5+kjViLtyHQkUxvfroB5MIiFJp0bJ/4kYM8p4GXu3n4+AMJuHI+TvE\r\nWAQkYaieRbrook/yLcurGwKDVur7HMzchKgEWzgniSlgiSE8wBaNI/2S3EaX\r\nEwWZHMUs7oRM//Dc7oRH8pPQdWJW88i23b+BhhPg7sHo5jGc33qkvuC5QOOW\r\nIa9yp8Pq97ORCJbiACIpHnu32DXcexHhnCBFfY7GgygDpxLTnChmu/lVsfQR\r\nWByau7bzYStti2PW4yixg2H86g2cATOUxjofUY1b9CQ/uP9HgEFwdjMpJOI5\r\nXceT4kLBFkBG92SAUSd001m7/FTyEV1A1ZV3Xu8kBBpu9BJUaRdgKrBh8edi\r\nTySg7VNQK68bMVmOjQxyZGrCHx4+BDyvjX4=\r\n=Pk/a\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "xzyfer",
+				"email": "xzyfer@gmail.com"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "xzyfer",
+					"email": "xzyfer@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/scss-tokenizer_0.4.3_1660094975429_0.8502206096719296"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		}
+	},
+	"time": {
+		"modified": "2022-08-10T01:29:35.676Z",
+		"created": "2015-06-09T17:37:03.235Z",
+		"0.0.1": "2015-06-09T17:37:03.235Z",
+		"0.1.0": "2017-01-29T05:07:25.902Z",
+		"0.1.1": "2017-01-29T05:55:39.162Z",
+		"0.1.2": "2017-01-29T07:28:07.014Z",
+		"0.2.0": "2017-04-29T01:54:22.475Z",
+		"0.2.1": "2017-04-29T02:15:26.704Z",
+		"0.2.2": "2017-05-12T14:41:54.982Z",
+		"0.2.3": "2017-05-12T14:48:41.175Z",
+		"0.3.0": "2018-04-16T14:59:13.338Z",
+		"0.4.0": "2018-12-03T10:51:30.026Z",
+		"0.4.1": "2018-12-03T11:15:07.846Z",
+		"0.4.2": "2018-12-03T11:19:28.388Z",
+		"0.4.3": "2022-08-10T01:29:35.609Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "0.4.3"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"aded4dd7ab12dd404b18b15366d7d790\"",
+			"fetched": 1665139727278
+		}
+	},
+	"_distfiles": {
+		"scss-tokenizer-0.0.1.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.0.1.tgz",
+			"sha": "133c1977503b1aa8232d8669bc2da64e0b32d1f8",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.1.0.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.1.0.tgz",
+			"sha": "ba680ac624823f60be6e28a900a8fbfffa209e27",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.1.1.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.1.1.tgz",
+			"sha": "d737d5d2d9da0fb147a93a8591129e22b17bb97b",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.1.2.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.1.2.tgz",
+			"sha": "c5e3c705d8d8cf96f94a58dc64410f0f2d9889ce",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.2.0.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.0.tgz",
+			"sha": "3fb3a22494c9facca7776e5ea27c15a0b0681970",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.2.1.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.1.tgz",
+			"sha": "07c0cc577bb7ab4d08fd900185adbf4bc844141d",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.2.2.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.2.tgz",
+			"sha": "a500d3a9f68927699df7803eb9d675b03a47f164",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.2.3.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.2.3.tgz",
+			"sha": "8eb06db9a9723333824d3f5530641149847ce5d1",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.3.0.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.3.0.tgz",
+			"sha": "ef7edc3bc438b25cd6ffacf1aa5b9ad5813bf260",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.4.0.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.0.tgz",
+			"sha": "fbe6e631522f8fbddb6756bb6c50a78987e44c3a",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.4.1.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.1.tgz",
+			"sha": "6af17a4112ff0c4f71773a3bedd5728a51dad26c",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.4.2.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.2.tgz",
+			"sha": "1cc1cca2f2acc4643907e950dbe59d6e1cd2615e",
+			"registry": "npmjs"
+		},
+		"scss-tokenizer-0.4.3.tgz": {
+			"url": "https://registry.npmjs.org/scss-tokenizer/-/scss-tokenizer-0.4.3.tgz",
+			"sha": "1058400ee7d814d71049c29923d2b25e61dc026c",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "12-f7edc17ad69af932",
+	"_id": "scss-tokenizer",
+	"readme": "# scss-tokenizer\nA tokenizer for Sass' SCSS syntax\n\n![https://travis-ci.org/sasstools/scss-tokenizer.svg?branch=master](https://img.shields.io/travis/sasstools/scss-tokenizer.svg)\n![https://www.npmjs.com/package/scss-tokenizer](https://img.shields.io/npm/v/scss-tokenizer.svg)\n![https://github.com/sasstools/scss-tokenizer/issues](https://img.shields.io/github/issues/sasstools/scss-tokenizer.svg)\n![](https://img.shields.io/github/license/sasstools/scss-tokenizer.svg)\n\n# Install\n\n```\nnpm install scss-tokenizer\n```\n\n# Usage\n\n```js\nvar scss = require('scss-tokenizer');\nscss.tokenize(css);\n```\n\n# API\n\n### `tokenize`\n\nTokenizes source `css` and returns an ordered array of tokens with positional\ndata.\n\n```js\nvar tokenizer = require('scss-tokenizer');\nvar tokens = tokenize.tokenize(css);\n```\n\nArguments:\n\n* `css (string|#toString)`: String with input CSS or any object\n  with `toString()` method, like file stream.\n* `opts (object) optional`: options:\n  * `from`: the path to the source CSS file. You should always set `from`,\n    because it is used in map generation and in syntax error messages.\n\n# Test\n\n```\nnpm test\n```\n\n## Attribution\n\nThis project started as a fork of the [PostCSS](https://github.com/postcss/postcss) tokenizer."
+}

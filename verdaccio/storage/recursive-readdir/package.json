@@ -1,0 +1,1152 @@
+{
+	"name": "recursive-readdir",
+	"versions": {
+		"0.0.1": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"version": "0.0.1",
+			"repository": {
+				"type": "git",
+				"url": ""
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "vows"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": "~0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"vows": "0.6.1"
+			},
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"_id": "recursive-readdir@0.0.1",
+			"_engineSupported": true,
+			"_npmVersion": "1.0.106",
+			"_nodeVersion": "v0.6.6",
+			"_defaultsLoaded": true,
+			"dist": {
+				"shasum": "2f21fa82565f746e3918e258b692c6098828522e",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-0.0.1.tgz",
+				"integrity": "sha512-OTCcPw+GG394IxyxnSbDJysgeA/ppVMwfKyqLu3ieXt2SKaI0jboNZrG7tqBKJF6+wRxhiR3XhnUjF959tQSiQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIGHnXNrP0+05fvRQpodjuuB/9PoYN836J0DKbedVA7wpAiBQx1EC6VrXbsUztuL++7M01Tc6VLHJZeBpolQG0gWHGA=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"0.0.2": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"version": "0.0.2",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"_id": "recursive-readdir@0.0.2",
+			"dist": {
+				"shasum": "0bc47dc4838e646dccfba0507b5e57ffbff35f7c",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-0.0.2.tgz",
+				"integrity": "sha512-h/GBQZmT5LPqJvuTRDJKruc0SLd/ZvCgwUgwA3XdFQ6tT0J7O2Au5IbwxB+a2Cl22atdxLiG4KrKgOrMc+eZDQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIG1ww71lx2vXJA6b8n5r55GS9ANU+ZJsYtS0lRL+UDjqAiEA5K4XPznS/pgwsG0nAYKirbcf5My8AkQhw4Qx5gnbhKM="
+					}
+				]
+			},
+			"_from": ".",
+			"_npmVersion": "1.3.7",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"1.0.0": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.0.0",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.0.0",
+			"dist": {
+				"shasum": "61dae2ad7ef6ccfd13c05334965aca761ad06ad0",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.0.0.tgz",
+				"integrity": "sha512-scgW20GZRhcXrfBVLxfAFer4BrFWuu7SYAIwJ4RyPcX1cNfsOfKqQwfcUyfn4Uzs8iYGsm+pNjot9s3/xHyhjg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIE1YN5i5ZFm0a8JBFfAaEwacGZIldlWKAoisaFjke8O5AiEAzSO/LgFk1DIBcNSqAwP/QQ+xCRg/R03Xw9MvPBa8IY0="
+					}
+				]
+			},
+			"_from": ".",
+			"_npmVersion": "1.3.14",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"1.1.0": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.1.0",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.1.0",
+			"dist": {
+				"shasum": "4900495b6343e61718b5dff687a51f0f495cb065",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.0.tgz",
+				"integrity": "sha512-9evmQYWzU7l1jyp0UdMCg90GygdwelJ0EZCZ3vaJfUg/DhDB6/W3udbWDjywPNDkR4fGKy4CZ8fkeCsvxcjJcw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIHd63njasd6RksdP6mAPWOl4GBb0asuXkZEbdpBp4r5FAiEA7Q+9kUyg6SJQDI+DPZ1R/Iq6OyPlZXF2kWON3zpgdS0="
+					}
+				]
+			},
+			"_from": ".",
+			"_npmVersion": "1.3.14",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"1.1.1": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.1.1",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.1.1",
+			"dist": {
+				"shasum": "3551a663576a6e91ed2a9af1bad0cec109ad0cc3",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.1.tgz",
+				"integrity": "sha512-ki/1aYi1vP9PwEj6ua45Gbh5hWadYr286OnHZYqKWpw3DdlDXS2tKNAiuJe6rCPanEAYfG5C3jEhmwESBOvhHg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCDwRwOMOJxkyYqxo9f+Hs05M5q/tTCuSRajz4tUSfmYQIhAMwawPCYReimOi1HUmbbk9powiBmnVs0YQStppmjsOLj"
+					}
+				]
+			},
+			"_from": ".",
+			"_npmVersion": "1.3.14",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"1.1.2": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.1.2",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.1.2",
+			"dist": {
+				"shasum": "b7ba725384641751c4a092109fa47919c0a0ce04",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.2.tgz",
+				"integrity": "sha512-RSjZh5KEOBZ1iDFOISSLnkUXEiIYY3uKCO0pDg+kwN8dTfv6OeYxLHYmp6b9kNnXh79oWWKUQtkPCL2Nrkvo1A==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIHs5Qa1Hz4S8oXyLsAA6LKoK0PxN3C/abRevWUQc1e17AiEAt9j/vCdMIbxuGNuQnBgZh1C3dW5IfjamtMHYuLqCFSg="
+					}
+				]
+			},
+			"_from": ".",
+			"_npmVersion": "1.3.14",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"1.1.3": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.1.3",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.1.3",
+			"dist": {
+				"shasum": "a1737cba4c552606c7845ff11ad4c1f69f93d5dc",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.3.tgz",
+				"integrity": "sha512-+Qzsyzg9TziZ6HeDFfT/QEqbkcck5QcdxAfE7KgojEdUhoFZ/AbTx7ephsDnd82Zjbz+JJaSRlhHRuwg12/Kcg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIBxtxlPbPPVhKOC3+VVsml2cnu0nqw0JH6fKCGHtFYhdAiEAm3kSYMTxd1s4lOAGi9Qm/RFjlfcfZqjIwrP3z3Z2ymU="
+					}
+				]
+			},
+			"_from": ".",
+			"_npmVersion": "1.3.14",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"1.2.0": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.2.0",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {
+				"minimatch": "~0.3.0"
+			},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"gitHead": "2a673c272d85f3217cd1a4682dc33eca7a33e58d",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.2.0",
+			"_shasum": "9696a8ace3ccf5658e571c2ffee0abc3a94aa546",
+			"_from": ".",
+			"_npmVersion": "1.4.23",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"dist": {
+				"shasum": "9696a8ace3ccf5658e571c2ffee0abc3a94aa546",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.2.0.tgz",
+				"integrity": "sha512-5VNIVKI5+a9eovDVd5hWeVHtNCN5VuMvBpwv/ouZbiDK+JunfUR9lffR3FqF24Fmq3Ggj4aE8LKL8v/+72UmJQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCcuPrcZVc+QIMrMNCJUwCdpBeYUANfk8mtVAKwuPA9EwIhAJO6NEAVGaJc9o9FgukSEF01rUNURh7YEA4WtKKbVcJJ"
+					}
+				]
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"1.2.1": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.2.1",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {
+				"minimatch": "~0.3.0"
+			},
+			"devDependencies": {
+				"mocha": "~1.14.0"
+			},
+			"gitHead": "3916668833e2ecb5ecc66673ab84ee4d8ccffa76",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir",
+			"_id": "recursive-readdir@1.2.1",
+			"_shasum": "497c6d06223852732d471d2da263de00a627952c",
+			"_from": ".",
+			"_npmVersion": "2.1.17",
+			"_nodeVersion": "0.11.14",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"dist": {
+				"shasum": "497c6d06223852732d471d2da263de00a627952c",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.2.1.tgz",
+				"integrity": "sha512-GhLTxn3eg+M4IN+PlQX1oXyb6bqgNux/P0s6X5FU8d3gxgymWOkLywBHeoziRDcUKhIIj4z8tOg/Ew0Zf913Jw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCd6aMWslS47XuZ3OfzT4a5jvh9XzrKcaZeF+16A07gowIhAI6IHsuTtwYe9JHo7h9OOgwSBJO+ScOpnZFWLPF29ofK"
+					}
+				]
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"1.3.0": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "1.3.0",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {
+				"minimatch": "0.3.0"
+			},
+			"devDependencies": {
+				"mocha": "1.14.0"
+			},
+			"gitHead": "fcd1c8d8c07abef1dd27cda5046ec66d12c0a06d",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@1.3.0",
+			"_shasum": "c6e66c9ae473f4928f8e6c67a05d80e7a56528ef",
+			"_from": ".",
+			"_npmVersion": "2.13.2",
+			"_nodeVersion": "0.12.4",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"dist": {
+				"shasum": "c6e66c9ae473f4928f8e6c67a05d80e7a56528ef",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.3.0.tgz",
+				"integrity": "sha512-xPLahSmi5cp0id46BHffsrWDpU1z0zt2Hl1B8Qn/GQhOv9UGE2u/qQQHwdg+H/Nk3Emx5JYN4fKbmc3XvQA2Lw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQD40gvad3XOA3jmN+oozGyHqXdq+yFnmkT+3u3BeljW/gIgJQmatzZMHNXbNEf8tEFxb+NR9xw12rL+a6B6RRig4T0="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"contributors": []
+		},
+		"2.0.0": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "2.0.0",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.6.6"
+			},
+			"dependencies": {
+				"minimatch": "0.3.0"
+			},
+			"devDependencies": {
+				"mocha": "1.14.0"
+			},
+			"gitHead": "577b411df1c8ab118c11dc9431d865f25e87024b",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@2.0.0",
+			"_shasum": "8c46db7946cbaf3d4ebade1873f33d8cd973131a",
+			"_from": ".",
+			"_npmVersion": "3.6.0",
+			"_nodeVersion": "4.2.6",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"dist": {
+				"shasum": "8c46db7946cbaf3d4ebade1873f33d8cd973131a",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.0.0.tgz",
+				"integrity": "sha512-DIP+92XovhkM6KCCvqXcn7/9rwlG1sMdYGMCTnNYlWKlpVZ2VuWsSmhTpi8SUDoQRrgdrh7jO84zKh3VHv29uA==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQCZ9lFh2QqmxXVwPRGqUx+2fGlMl4cd7tjVhG2QbtpOMQIhAINLV/6j0kFSjieZjo8ewOcIjUgjt5bmJllGox//2AfS"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/recursive-readdir-2.0.0.tgz_1459917069405_0.9277486486826092"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.1.0": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "2.1.0",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.10.0"
+			},
+			"dependencies": {
+				"minimatch": "3.0.2"
+			},
+			"devDependencies": {
+				"mocha": "1.14.0"
+			},
+			"gitHead": "63f93b42f622f5d0d0ae18a303acf63a4d57fa49",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@2.1.0",
+			"_shasum": "78b7bfd79582d3d7596b8ff1bd29fbd50229f6aa",
+			"_from": ".",
+			"_npmVersion": "3.10.3",
+			"_nodeVersion": "6.6.0",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"dist": {
+				"shasum": "78b7bfd79582d3d7596b8ff1bd29fbd50229f6aa",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.1.0.tgz",
+				"integrity": "sha512-EwzjcOHqcJBoay8y0xGDTYjmFvJmlfvygBqPiCsRq5v8x2ReG81y1v176RpizXr9BrZIOJq6BCmjOnZzDplDhw==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIQC+oDHHMhUjW0geIRveVgmIu4Vj7UoXa9H6HcFRXdeGYwIgbnniw8HJOjmYYtyZ/Mjtwg5j2odkv1NEHFQF6YOsVXo="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-16-east.internal.npmjs.com",
+				"tmp": "tmp/recursive-readdir-2.1.0.tgz_1474322128418_0.45919444505125284"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.1.1": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "2.1.1",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.10.0"
+			},
+			"dependencies": {
+				"minimatch": "3.0.3"
+			},
+			"devDependencies": {
+				"mocha": "1.14.0"
+			},
+			"gitHead": "1e7954e8b3f3716beab429d2b889abb42f79781d",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@2.1.1",
+			"_shasum": "a01cfc7f7f38a53ec096a096f63a50489c3e297c",
+			"_from": ".",
+			"_npmVersion": "4.0.5",
+			"_nodeVersion": "7.4.0",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"dist": {
+				"shasum": "a01cfc7f7f38a53ec096a096f63a50489c3e297c",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.1.1.tgz",
+				"integrity": "sha512-OyzB6IxeviT41aQdgaounV5kzoj6PRBBAzGlAV2YwrYFOrFwCRg0kAQJN/jI/EMoS5zqAf+/uxUEeZ2OzEbqGg==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEUCIAmRFCY4ATxZURi+zQw0xxEwESN/ELIfzaJd+Buzr2V8AiEA+RLFEyrymUTGNSGNHztcIaz9Q19C+0ewdVY3zvLd8fk="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-12-west.internal.npmjs.com",
+				"tmp": "tmp/recursive-readdir-2.1.1.tgz_1487130078506_0.790333661949262"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.2.1": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "2.2.1",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.10.0"
+			},
+			"dependencies": {
+				"minimatch": "3.0.3"
+			},
+			"devDependencies": {
+				"mocha": "1.14.0"
+			},
+			"gitHead": "bbd426243481c9ab9d2743b51b5dd9b637a2a699",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@2.2.1",
+			"_shasum": "90ef231d0778c5ce093c9a48d74e5c5422d13a99",
+			"_from": ".",
+			"_npmVersion": "4.2.0",
+			"_nodeVersion": "7.9.0",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"dist": {
+				"shasum": "90ef231d0778c5ce093c9a48d74e5c5422d13a99",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.1.tgz",
+				"integrity": "sha512-BKWLxPZb4B07G/4LzyzsHaw24fC41/tL7LrECr1//X9ykRhmxlYgyl7G7X+6A7nvJyOGE/ED7refqmSGORVYqQ==",
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEYCIQDB1781Wx+vXXYjiOX+HwwCSZxLdh8XDbX62l3RhK0swQIhAKtYyiVAD5vTiP1asJU+woFRln89IAUMF2wgvJUlBmOR"
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "packages-18-east.internal.npmjs.com",
+				"tmp": "tmp/recursive-readdir-2.2.1.tgz_1494884573528_0.8871655883267522"
+			},
+			"directories": {},
+			"contributors": []
+		},
+		"2.2.2": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamisondance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "2.2.2",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=0.10.0"
+			},
+			"dependencies": {
+				"minimatch": "3.0.4"
+			},
+			"devDependencies": {
+				"mocha": "1.14.0"
+			},
+			"gitHead": "854399da2ce671cd201bc4ec5098bb6b3f4a9112",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@2.2.2",
+			"_npmVersion": "5.6.0",
+			"_nodeVersion": "8.9.4",
+			"_npmUser": {
+				"name": "jergason",
+				"email": "jergason@gmail.com"
+			},
+			"dist": {
+				"integrity": "sha512-nRCcW9Sj7NuZwa2XvH9co8NPeXUBhZP7CRKJtU+cS6PW9FpCIFoI5ib0NT1ZrbNuPoRy0ylyCaUL8Gih4LSyFg==",
+				"shasum": "9946fb3274e1628de6e36b2f6714953b4845094f",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.2.tgz",
+				"fileCount": 17,
+				"unpackedSize": 17090,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIDgDZexOyB2AHInIFZp3uMgr1ghHjLzkOm+FjiPp9JCLAiADNeDnfl8txevvGbTCMQj4+r6pPlcHdrsoOvfluxsOLA=="
+					}
+				]
+			},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				}
+			],
+			"directories": {},
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/recursive-readdir_2.2.2_1519249577881_0.16596057409948162"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		},
+		"2.2.3": {
+			"author": {
+				"name": "Jamison Dance",
+				"email": "jergason@gmail.com",
+				"url": "http://jamison.dance.com/"
+			},
+			"name": "recursive-readdir",
+			"description": "Get an array of all files in a directory and subdirectories.",
+			"license": "MIT",
+			"version": "2.2.3",
+			"repository": {
+				"type": "git",
+				"url": "git://github.com/jergason/recursive-readdir.git"
+			},
+			"main": "./index.js",
+			"scripts": {
+				"test": "mocha test/"
+			},
+			"keywords": [
+				"directory",
+				"lister"
+			],
+			"engines": {
+				"node": ">=6.0.0"
+			},
+			"dependencies": {
+				"minimatch": "^3.0.5"
+			},
+			"devDependencies": {
+				"mocha": "6.1.4"
+			},
+			"gitHead": "959484b1cfe2110c38b8e3013d85c86c5ed53b83",
+			"bugs": {
+				"url": "https://github.com/jergason/recursive-readdir/issues"
+			},
+			"homepage": "https://github.com/jergason/recursive-readdir#readme",
+			"_id": "recursive-readdir@2.2.3",
+			"_nodeVersion": "18.6.0",
+			"_npmVersion": "8.13.2",
+			"dist": {
+				"integrity": "sha512-8HrF5ZsXk5FAH9dgsx3BlUer73nIhuj+9OrQwEbLTPOBzGkL1lsFCR01am+v+0m2Cmbs1nP12hLDl5FA7EszKA==",
+				"shasum": "e726f328c0d69153bcabd5c322d3195252379372",
+				"tarball": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.3.tgz",
+				"fileCount": 4,
+				"unpackedSize": 5824,
+				"signatures": [
+					{
+						"keyid": "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA",
+						"sig": "MEQCIE4f1AYuZTZAHHL1Kb0kHcsxC5l8hf44+bWvn09F18VRAiAi/x2YHZFVPgReRMES5jMMsoJipR5bAM84Bzae8OQu7Q=="
+					}
+				],
+				"npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v4.10.10\r\nComment: https://openpgpjs.org\r\n\r\nwsFzBAEBCAAGBQJjWBTKACEJED1NWxICdlZqFiEECWMYAoorWMhJKdjhPU1b\r\nEgJ2VmqdnA//XEde4cKm4wZrLj0t/iKLI+U2K51eC0+ZEj6VNiriAxcp7//B\r\n241DoTtg3ru/ksLg/O5WYjtzatSAYN717kHvKFEJ4P2AuHPrIgOXdOuOtibZ\r\nVCuhV6Q+5u7NStNMApZmyGVj5q5OalJX+0NjhVXlUSCIeh1WynndFqjrEdx3\r\nFthY/vdjVOUCqCY5sVTaB1EYhquHdS/5n7ga2yzkdejTQC/NVa6GoMTGrkBu\r\niQPcYYa7qIiGbMo52X7HKMcONsmfTsAyzzpNmBXw+uvkLsCt6okHwMlzWsD0\r\nk5ciJzg5E1z4B/pmmpsDa0c/GWhEjswfnuMADXlP4GRMbWyHXTADe/qMC74p\r\nEhMGpjV25hYIpNeRFB4jVYHIuNzjYJ63lPnvgJqxbdLqDnFHr384oPzeNBox\r\nkFA55GgnMkmt0NekCX3bUqY8ZW/8CLCOgRQbx1HWfkLIIHCH7TlazRrjoBbW\r\nbrEXNyE0jlpGQle5LUqDqZD/x4Eye45U1Prm4ckzxIQHuu52cCpzuVlLGByI\r\nzpPlyVERvmxkTyTH83Ms/V/E0hCBtCk95qLZrNyt8Xw7vBo/gSY3Y8h3XGXh\r\nMuVGC44XM3tLlmA9Bs10WVj4PygNOs8Baq3nb+TQqcXnbTJ6P/HF4l1m6+S4\r\nbeeIm2NQJygysPmBzzsGslDXghsyvabd+ns=\r\n=DHU/\r\n-----END PGP SIGNATURE-----\r\n"
+			},
+			"_npmUser": {
+				"name": "bnb",
+				"email": "hello@bnb.im"
+			},
+			"directories": {},
+			"maintainers": [
+				{
+					"name": "jergason",
+					"email": "jergason@gmail.com"
+				},
+				{
+					"name": "bnb",
+					"email": "hello@bnb.im"
+				}
+			],
+			"_npmOperationalInternal": {
+				"host": "s3://npm-registry-packages",
+				"tmp": "tmp/recursive-readdir_2.2.3_1666716874519_0.2920208813570542"
+			},
+			"_hasShrinkwrap": false,
+			"contributors": []
+		}
+	},
+	"time": {
+		"modified": "2022-10-25T16:54:34.835Z",
+		"created": "2012-01-07T00:07:13.894Z",
+		"0.0.1": "2012-01-07T00:07:15.010Z",
+		"0.0.2": "2013-11-09T00:40:25.564Z",
+		"1.0.0": "2014-03-15T18:43:01.740Z",
+		"1.1.0": "2014-05-02T15:54:53.633Z",
+		"1.1.1": "2014-05-20T17:03:49.359Z",
+		"1.1.2": "2014-06-27T14:31:12.689Z",
+		"1.1.3": "2014-07-16T15:26:28.076Z",
+		"1.2.0": "2014-08-17T01:33:13.136Z",
+		"1.2.1": "2015-01-14T16:52:30.807Z",
+		"1.3.0": "2015-10-28T14:23:27.018Z",
+		"2.0.0": "2016-04-06T04:31:11.589Z",
+		"2.1.0": "2016-09-19T21:55:30.469Z",
+		"2.1.1": "2017-02-15T03:41:18.958Z",
+		"2.2.0": "2017-05-15T21:06:38.662Z",
+		"2.2.1": "2017-05-15T21:42:54.319Z",
+		"2.2.2": "2018-02-21T21:46:17.956Z",
+		"2.2.3": "2022-10-25T16:54:34.747Z"
+	},
+	"users": {},
+	"dist-tags": {
+		"latest": "2.2.3"
+	},
+	"_uplinks": {
+		"npmjs": {
+			"etag": "W/\"41a7d3558ee854dd1b2cbd19d6ae715e\"",
+			"fetched": 1674058158841
+		}
+	},
+	"_distfiles": {
+		"recursive-readdir-0.0.1.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-0.0.1.tgz",
+			"sha": "2f21fa82565f746e3918e258b692c6098828522e",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-0.0.2.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-0.0.2.tgz",
+			"sha": "0bc47dc4838e646dccfba0507b5e57ffbff35f7c",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.0.0.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.0.0.tgz",
+			"sha": "61dae2ad7ef6ccfd13c05334965aca761ad06ad0",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.1.0.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.0.tgz",
+			"sha": "4900495b6343e61718b5dff687a51f0f495cb065",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.1.1.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.1.tgz",
+			"sha": "3551a663576a6e91ed2a9af1bad0cec109ad0cc3",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.1.2.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.2.tgz",
+			"sha": "b7ba725384641751c4a092109fa47919c0a0ce04",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.1.3.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.1.3.tgz",
+			"sha": "a1737cba4c552606c7845ff11ad4c1f69f93d5dc",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.2.0.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.2.0.tgz",
+			"sha": "9696a8ace3ccf5658e571c2ffee0abc3a94aa546",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.2.1.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.2.1.tgz",
+			"sha": "497c6d06223852732d471d2da263de00a627952c",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-1.3.0.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-1.3.0.tgz",
+			"sha": "c6e66c9ae473f4928f8e6c67a05d80e7a56528ef",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-2.0.0.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.0.0.tgz",
+			"sha": "8c46db7946cbaf3d4ebade1873f33d8cd973131a",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-2.1.0.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.1.0.tgz",
+			"sha": "78b7bfd79582d3d7596b8ff1bd29fbd50229f6aa",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-2.1.1.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.1.1.tgz",
+			"sha": "a01cfc7f7f38a53ec096a096f63a50489c3e297c",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-2.2.1.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.1.tgz",
+			"sha": "90ef231d0778c5ce093c9a48d74e5c5422d13a99",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-2.2.2.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.2.tgz",
+			"sha": "9946fb3274e1628de6e36b2f6714953b4845094f",
+			"registry": "npmjs"
+		},
+		"recursive-readdir-2.2.3.tgz": {
+			"url": "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.3.tgz",
+			"sha": "e726f328c0d69153bcabd5c322d3195252379372",
+			"registry": "npmjs"
+		}
+	},
+	"_attachments": {},
+	"_rev": "1-bcf970183acc4a4d",
+	"_id": "recursive-readdir",
+	"readme": "# recursive-readdir\n\n[![Build Status](https://travis-ci.org/jergason/recursive-readdir.svg?branch=master)](https://travis-ci.org/jergason/recursive-readdir)\n\nRecursively list all files in a directory and its subdirectories. It does not list the directories themselves.\n\nBecause it uses fs.readdir, which calls [readdir](http://linux.die.net/man/3/readdir) under the hood\non OS X and Linux, the order of files inside directories is [not guaranteed](http://stackoverflow.com/questions/8977441/does-readdir-guarantee-an-order).\n\n## Installation\n\n    npm install recursive-readdir\n\n## Usage\n\n```javascript\nvar recursive = require(\"recursive-readdir\");\n\nrecursive(\"some/path\", function (err, files) {\n  // `files` is an array of file paths\n  console.log(files);\n});\n```\n\nIt can also take a list of files to ignore.\n\n```javascript\nvar recursive = require(\"recursive-readdir\");\n\n// ignore files named \"foo.cs\" or files that end in \".html\".\nrecursive(\"some/path\", [\"foo.cs\", \"*.html\"], function (err, files) {\n  console.log(files);\n});\n```\n\nYou can also pass functions which are called to determine whether or not to\nignore a file:\n\n```javascript\nvar recursive = require(\"recursive-readdir\");\n\nfunction ignoreFunc(file, stats) {\n  // `file` is the path to the file, and `stats` is an `fs.Stats`\n  // object returned from `fs.lstat()`.\n  return stats.isDirectory() && path.basename(file) == \"test\";\n}\n\n// Ignore files named \"foo.cs\" and descendants of directories named test\nrecursive(\"some/path\", [\"foo.cs\", ignoreFunc], function (err, files) {\n  console.log(files);\n});\n```\n\n## Promises\nYou can omit the callback and return a promise instead.\n\n```javascript\nvar recursive = require(\"recursive-readdir\");\n\nrecursive(\"some/path\").then(\n  function(files) {\n    console.log(\"files are\", files);\n  },\n  function(error) {\n    console.error(\"something exploded\", error);\n  }\n);\n```\n\nThe ignore strings support Glob syntax via\n[minimatch](https://github.com/isaacs/minimatch)."
+}
