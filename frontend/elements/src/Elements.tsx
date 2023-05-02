@@ -82,7 +82,7 @@ const _register = async ({
 
 export const register = async (
   api: string,
-  options: RegisterOptions
+  options: RegisterOptions = { shadow: true, injectStyles: true }
 ): Promise<ElementsRegisterReturn> => {
   createHankoClient(api);
 

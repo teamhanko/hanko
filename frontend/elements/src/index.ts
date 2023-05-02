@@ -4,4 +4,7 @@ import {
   register,
   createHankoClient,
 } from "./Elements";
-export { HankoAuth, HankoProfile, register, createHankoClient };
+
+import { Hanko } from "@teamhanko/hanko-frontend-sdk";
+
+export { HankoAuth, HankoProfile, register, createHankoClient, Hanko };
