@@ -35,11 +35,11 @@ func (s *Suite) SetupSuite() {
 	}
 	dialect := "postgres"
 	db, err := StartDB(s.Name, dialect)
-	s.NoError(err)
+	s.Require().NoError(err)
 	storage, err := persistence.New(config.Database{
 		Url: db.DatabaseUrl,
 	})
-	s.NoError(err)
+	s.Require().NoError(err)
 
 	s.Storage = storage
 	s.DB = db
