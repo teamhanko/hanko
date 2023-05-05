@@ -235,8 +235,7 @@ export class Listener {
   }
 
   /**
-   * Adds an event listener for hanko-user-deleted events. The event triggers, when the user has deleted the account in
-   * the browser window where the deletion happened.
+   * Adds an event listener for hanko-user-deleted events. The event triggers, when the user has deleted the account.
    *
    * @param {CallbackFunc<null>} callback - The function to be called when the event is triggered.
    * @param {boolean=} once - Whether the event listener should be removed after being called once.

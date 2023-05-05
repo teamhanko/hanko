@@ -89,7 +89,7 @@ describe("Dispatcher", () => {
   });
 
   describe("dispatchUserLoggedOutEvent()", () => {
-    it("dispatches a custom event with the 'hanko-user-deleted' type and null detail", () => {
+    it("dispatches a custom event with the 'hanko-user-logged-out' type and null detail", () => {
       const dispatchEventSpy = jest.spyOn(dispatcher, "_dispatchEvent");
 
       dispatcher.dispatchUserLoggedOutEvent();
