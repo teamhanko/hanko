@@ -7,7 +7,7 @@
     "build": "vite build"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.2",
+    "@sveltejs/vite-plugin-svelte": "^2.2.0",
     "@tsconfig/svelte": "^3.0.0",
     "svelte": "^3.58.0",
     "svelte-check": "^3.2.0",
