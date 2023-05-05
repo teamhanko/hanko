@@ -47,8 +47,10 @@
     }
 
     hanko.onSessionCreated(console.info);
+    hanko.onSessionResumed(console.info);
     hanko.onAuthFlowCompleted(showProfile);
-    hanko.onSessionRemoved(showLogin);
+    hanko.onSessionExpired(showLogin);
+    hanko.onUserLoggedOut(showLogin);
     hanko.onUserDeleted(showLogin);
 </script>
 </body>
