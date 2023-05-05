@@ -3,8 +3,11 @@ import { SessionState } from "../../../src/lib/state/session/SessionState";
 import {
   CustomEventWithDetail,
   sessionCreatedType,
-  sessionRemovedType,
+  SessionEventDetail,
+  sessionExpiredType,
+  sessionResumedType,
   userDeletedType,
+  userLoggedOutType,
 } from "../../../src/lib/events/CustomEvents";
 
 describe("Relay", () => {
@@ -21,8 +24,8 @@ describe("Relay", () => {
     jest.clearAllTimers();
   });
 
-  describe("dispatchInitialSessionCreatedEvent", () => {
-    it("should not dispatch initial 'hanko-session-created' event when no session is active", () => {
+  describe("dispatchInitialSessionResumedEvent", () => {
+    it("should dispatch the initial 'hanko-user-logged-out' event when no session is active", () => {
       jest
         .spyOn(relay._sessionState, "read")
         .mockReturnValueOnce(new SessionState());
@@ -35,11 +38,14 @@ describe("Relay", () => {
         .mockReturnValueOnce("fake_user");
 
       relay.dispatchInitialEvents();
-      expect(dispatcherSpy).not.toHaveBeenCalled();
+      const event = dispatcherSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
+      expect(event.type).toEqual(userLoggedOutType);
+      expect(dispatcherSpy).toHaveBeenCalled();
       expect(relay._cookie.getAuthCookie).toHaveBeenCalled();
     });
 
-    it("should dispatch initial 'hanko-session-created' event when session is active", () => {
+    it("should dispatch initial 'hanko-session-resumed' event when session is active", () => {
       jest
         .spyOn(relay._sessionState, "read")
         .mockReturnValueOnce(new SessionState());
@@ -52,6 +58,9 @@ describe("Relay", () => {
         .mockReturnValueOnce("fake_user");
 
       relay.dispatchInitialEvents();
+      const event = dispatcherSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
+      expect(event.type).toEqual(sessionResumedType);
       expect(dispatcherSpy).toHaveBeenCalled();
     });
 
@@ -88,7 +97,7 @@ describe("Relay", () => {
         {
           func: expect.any(Function),
           timeoutID: expect.any(Number),
-          type: sessionRemovedType,
+          type: sessionExpiredType,
         },
       ]);
 
@@ -104,7 +113,7 @@ describe("Relay", () => {
         {
           func: expect.any(Function),
           timeoutID: expect.any(Number),
-          type: sessionRemovedType,
+          type: sessionExpiredType,
         },
       ]);
 
@@ -116,7 +125,7 @@ describe("Relay", () => {
       jest.advanceTimersByTime(3000);
 
       expect(dispatcherSpy).toHaveBeenCalled();
-      expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionRemovedType);
+      expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionExpiredType);
     });
   });
 
@@ -131,7 +140,7 @@ describe("Relay", () => {
       mockSessionCreatedDetail
     );
     const sessionRemovedEventMock = new CustomEventWithDetail(
-      sessionRemovedType,
+      sessionExpiredType,
       null
     );
 
@@ -141,7 +150,7 @@ describe("Relay", () => {
       {
         func: expect.any(Function),
         timeoutID: expect.any(Number),
-        type: sessionRemovedType,
+        type: sessionExpiredType,
       },
     ]);
 
@@ -150,8 +159,9 @@ describe("Relay", () => {
     expect(relay._scheduler._tasks).toStrictEqual([]);
 
     jest.advanceTimersByTime(7000);
-
-    expect(dispatcherSpy).not.toHaveBeenCalled();
+    const event = dispatcherSpy.mock.calls[0][0] as CustomEventWithDetail<null>;
+    expect(dispatcherSpy).toBeCalledTimes(1);
+    expect(event.type).not.toEqual(sessionExpiredType);
   });
 
   it("should listen to 'hanko-user-deleted' and remove scheduled events", () => {
@@ -176,7 +186,8 @@ describe("Relay", () => {
 
     jest.advanceTimersByTime(7000);
 
-    expect(dispatcherSpy).not.toHaveBeenCalled();
+    expect(dispatcherSpy.mock.calls[0][0].type).not.toEqual(sessionExpiredType);
+    expect(dispatcherSpy).toBeCalledTimes(1);
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-removed' if the session is expired", () => {
@@ -191,7 +202,7 @@ describe("Relay", () => {
     );
 
     expect(dispatcherSpy).toHaveBeenCalled();
-    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionRemovedType);
+    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionExpiredType);
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-created' if session is active", () => {

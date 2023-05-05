@@ -1,11 +1,11 @@
 import {
-  SessionCreatedEventDetail,
+  SessionEventDetail,
   CustomEventWithDetail,
   AuthFlowCompletedEventDetail,
   sessionCreatedType,
-  sessionRemovedType,
+  sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType,
+  authFlowCompletedType, sessionResumedType, userLoggedOutType,
 } from "./CustomEvents";
 
 /**
@@ -29,19 +29,35 @@ export class Dispatcher {
   }
 
   /**
+   * Dispatches a "hanko-session-resumed" event to the document with the specified detail.
+   *
+   * @param {SessionEventDetail} detail - The event detail.
+   */
+  public dispatchSessionResumedEvent(detail: SessionEventDetail) {
+    this.dispatch(sessionResumedType, detail);
+  }
+
+  /**
    * Dispatches a "hanko-session-created" event to the document with the specified detail.
    *
-   * @param {SessionCreatedEventDetail} detail - The event detail.
+   * @param {SessionEventDetail} detail - The event detail.
    */
-  public dispatchSessionCreatedEvent(detail: SessionCreatedEventDetail) {
+  public dispatchSessionCreatedEvent(detail: SessionEventDetail) {
     this.dispatch(sessionCreatedType, detail);
   }
 
   /**
-   * Dispatches a "hanko-session-removed" event to the document.
+   * Dispatches a "hanko-session-expired" event to the document.
    */
-  public dispatchSessionRemovedEvent() {
-    this.dispatch(sessionRemovedType, null);
+  public dispatchSessionExpiredEvent() {
+    this.dispatch(sessionExpiredType, null);
+  }
+
+  /**
+   * Dispatches a "hanko-user-logged-out" event to the document.
+   */
+  public dispatchUserLoggedOutEvent() {
+    this.dispatch(userLoggedOutType, null);
   }
 
   /**

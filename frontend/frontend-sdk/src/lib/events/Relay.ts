@@ -1,4 +1,4 @@
-import { SessionCreatedEventDetail, sessionRemovedType } from "./CustomEvents";
+import { SessionEventDetail, sessionExpiredType } from "./CustomEvents";
 import { Listener } from "./Listener";
 import { SessionState } from "../state/session/SessionState";
 import { Scheduler } from "./Scheduler";
@@ -29,44 +29,34 @@ export class Relay extends Dispatcher {
    * ensure the "hanko-session-removed" event won't be triggered too early.
    *
    * @private
-   * @param {SessionCreatedEventDetail} detail - The event detail.
+   * @param {SessionEventDetail} detail - The event detail.
    */
-  private handleSessionCreatedEvent = (detail: SessionCreatedEventDetail) => {
-    this._scheduler.removeTasksWithType(sessionRemovedType);
+  private scheduleSessionExpiredEvent = (detail: SessionEventDetail) => {
+    this._scheduler.removeTasksWithType(sessionExpiredType);
     this._scheduler.scheduleTask(
-      sessionRemovedType,
-      () => this.dispatchSessionRemovedEvent(),
+      sessionExpiredType,
+      () => this.dispatchSessionExpiredEvent(),
       detail.expirationSeconds
     );
   };
 
   /**
-   * Handles the "hanko-session-removed" event by removing scheduled "hanko-session-removed" events, to prevent it from
-   * being triggered again (e.g. when there are multiple SDK instances).
+   * Cancels scheduled "hanko-session-expired" events, to prevent it from being triggered again (e.g. when there are
+   * multiple SDK instances).
    *
    * @private
    */
-  private handleSessionRemovedEvent = () => {
-    this._scheduler.removeTasksWithType(sessionRemovedType);
-  };
-
-  /**
-   * Handles the "hanko-user-deleted" event by removing the scheduled "hanko-session-removed" events, because user
-   * deletion implies that the session has also been removed.
-   *
-   * @private
-   */
-  private handleUserDeletedEvent = () => {
-    this._scheduler.removeTasksWithType(sessionRemovedType);
+  private cancelSessionExpiredEvent = () => {
+    this._scheduler.removeTasksWithType(sessionExpiredType);
   };
 
   /**
    * Returns the session detail currently stored in the local storage.
    *
    * @private
-   * @returns {SessionCreatedEventDetail}
+   * @returns {SessionEventDetail}
    */
-  private getSessionDetail(): SessionCreatedEventDetail {
+  private getSessionDetail(): SessionEventDetail {
     this._sessionState.read();
 
     const userID = this._sessionState.getUserID();
@@ -94,7 +84,7 @@ export class Relay extends Dispatcher {
     const detail = this.getSessionDetail();
 
     if (detail.expirationSeconds <= 0) {
-      this.dispatchSessionRemovedEvent();
+      this.dispatchSessionExpiredEvent();
       return;
     }
 
@@ -124,9 +114,10 @@ export class Relay extends Dispatcher {
    * @private
    */
   private listenEventDependencies() {
-    this._listener.onSessionCreated(this.handleSessionCreatedEvent);
-    this._listener.onSessionRemoved(this.handleSessionRemovedEvent);
-    this._listener.onUserDeleted(this.handleUserDeletedEvent);
+    this._listener.onSessionCreated(this.scheduleSessionExpiredEvent);
+    this._listener.onSessionResumed(this.scheduleSessionExpiredEvent);
+    this._listener.onSessionExpired(this.cancelSessionExpiredEvent);
+    this._listener.onUserDeleted(this.cancelSessionExpiredEvent);
 
     // Handle cases, where the session has been changed by another window.
     window.addEventListener("storage", this.handleStorageEvent);
@@ -145,7 +136,9 @@ export class Relay extends Dispatcher {
     const detail = this.getSessionDetail();
 
     if (detail.userID && detail.expirationSeconds > 0) {
-      this.dispatchSessionCreatedEvent(detail);
+      this.dispatchSessionResumedEvent(detail);
+    } else {
+      this.dispatchUserLoggedOutEvent();
     }
   }
 }

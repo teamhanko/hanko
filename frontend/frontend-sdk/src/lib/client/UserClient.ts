@@ -140,7 +140,7 @@ class UserClient extends Client {
     // the cookie must also be removed client-side in that case.
     this.client.cookie.removeAuthCookie();
     this.client.sessionState.reset().write();
-    this.client.dispatcher.dispatchSessionRemovedEvent();
+    this.client.dispatcher.dispatchUserLoggedOutEvent();
 
     if (logoutResponse.status === 401) {
       // The user is logged out already

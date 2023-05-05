@@ -117,12 +117,12 @@ const AppProvider = ({
   useMemo(() => {
     switch (componentName) {
       case "auth":
-        hanko.onSessionRemoved(init);
+        hanko.onUserLoggedOut(init);
+        hanko.onSessionExpired(init);
         hanko.onUserDeleted(init);
         break;
       case "profile":
         hanko.onSessionCreated(init);
-        hanko.onSessionRemoved(init);
         break;
     }
   }, [componentName, hanko, init]);

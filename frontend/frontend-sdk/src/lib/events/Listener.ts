@@ -1,12 +1,12 @@
 import { Throttle } from "../Throttle";
 import {
   CustomEventWithDetail,
-  SessionCreatedEventDetail,
+  SessionEventDetail,
   AuthFlowCompletedEventDetail,
   sessionCreatedType,
-  sessionRemovedType,
+  sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType,
+  authFlowCompletedType, userLoggedOutType, sessionResumedType,
 } from "./CustomEvents";
 
 /**
@@ -69,6 +69,7 @@ interface EventListenerWithTypeParams<T> extends EventListenerParams<T> {
  */
 export class Listener {
   public throttleLimit = 1000;
+  _cleanupFunctions: CleanupFunc[] = [];
   _addEventListener = document.addEventListener.bind(document);
   _removeEventListener = document.removeEventListener.bind(document);
   _throttle = Throttle.throttle;
@@ -117,7 +118,17 @@ export class Listener {
   }: EventListenerWithTypeParams<T>): CleanupFunc {
     const wrappedCallback = this.wrapCallback(callback, throttle);
     this._addEventListener(type, wrappedCallback, { once });
-    return () => this._removeEventListener(type, wrappedCallback);
+    const cleanupFunc = () => this._removeEventListener(type, wrappedCallback);
+    this._cleanupFunctions.push(cleanupFunc);
+    return cleanupFunc;
+  }
+
+  /**
+   * Removes all currently installed event listeners.
+   */
+  public removeEventListeners() {
+    this._cleanupFunctions.forEach((cleanupFunc) => cleanupFunc());
+    this._cleanupFunctions = [];
   }
 
   /**
@@ -163,22 +174,37 @@ export class Listener {
   }
 
   /**
-   * Adds an event listener for session created events. Will be triggered across all browser windows, when the user
+   * Adds an event listener for "hanko-session-created" events. Will be triggered across all browser windows, when the user
    * logs in, or when the page has been loaded or refreshed and there is a valid session.
    *
-   * @param {CallbackFunc<SessionCreatedEventDetail>} callback - The function to be called when the event is triggered.
+   * @param {CallbackFunc<SessionEventDetail>} callback - The function to be called when the event is triggered.
    * @param {boolean=} once - Whether the event listener should be removed after being called once.
    * @returns {CleanupFunc} This function can be called to remove the event listener.
    */
   public onSessionCreated(
-    callback: CallbackFunc<SessionCreatedEventDetail>,
+    callback: CallbackFunc<SessionEventDetail>,
     once?: boolean
   ): CleanupFunc {
     return this.addEventListener(sessionCreatedType, { callback, once }, true);
   }
 
   /**
-   * Adds an event listener for hanko-session-removed events. The event will be triggered across all browser windows
+   * Adds an event listener for "hanko-session-resumed" events. Will be triggered, after the page has been loaded and
+   * the user has an active session.
+   *
+   * @param {CallbackFunc<SessionEventDetail>} callback - The function to be called when the event is triggered.
+   * @param {boolean=} once - Whether the event listener should be removed after being called once.
+   * @returns {CleanupFunc} This function can be called to remove the event listener.
+   */
+  public onSessionResumed(
+    callback: CallbackFunc<SessionEventDetail>,
+    once?: boolean
+  ): CleanupFunc {
+    return this.addEventListener(sessionResumedType, { callback, once }, true);
+  }
+
+  /**
+   * Adds an event listener for "hanko-session-expired" events. The event will be triggered across all browser windows
    * as soon as the current JWT expires or the user logs out. It also triggers, when the user deletes the account in
    * another window.
    *
@@ -186,11 +212,26 @@ export class Listener {
    * @param {boolean=} once - Whether the event listener should be removed after being called once.
    * @returns {CleanupFunc} This function can be called to remove the event listener.
    */
-  public onSessionRemoved(
+  public onSessionExpired(
     callback: CallbackFunc<null>,
     once?: boolean
   ): CleanupFunc {
-    return this.addEventListener(sessionRemovedType, { callback, once }, true);
+    return this.addEventListener(sessionExpiredType, { callback, once }, true);
+  }
+
+  /**
+   * Adds an event listener for hanko-user-deleted events. The event triggers, when the user has deleted the account in
+   * the browser window where the deletion happened.
+   *
+   * @param {CallbackFunc<null>} callback - The function to be called when the event is triggered.
+   * @param {boolean=} once - Whether the event listener should be removed after being called once.
+   * @returns {CleanupFunc} This function can be called to remove the event listener.
+   */
+  public onUserLoggedOut(
+    callback: CallbackFunc<null>,
+    once?: boolean
+  ): CleanupFunc {
+    return this.addEventListener(userLoggedOutType, { callback, once });
   }
 
   /**
