@@ -157,14 +157,22 @@ describe("Relay", () => {
     );
 
     document.dispatchEvent(sessionCreatedEventMock);
+
+    expect(relay._scheduler._tasks).toStrictEqual([
+      {
+        func: expect.any(Function),
+        timeoutID: expect.any(Number),
+        type: sessionExpiredType,
+      },
+    ]);
+
     document.dispatchEvent(userDeletedEventMock);
 
     expect(relay._scheduler._tasks).toStrictEqual([]);
 
     jest.advanceTimersByTime(7000);
 
-    expect(dispatcherSpy.mock.calls[0][0].type).not.toEqual(sessionExpiredType);
-    expect(dispatcherSpy).toBeCalledTimes(1);
+    expect(dispatcherSpy).toBeCalledTimes(0);
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-removed' if the session is expired", () => {
