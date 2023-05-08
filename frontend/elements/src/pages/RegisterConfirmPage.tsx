@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useContext, useEffect, useState } from "preact/compat";
 
-import { User, HankoError } from "@teamhanko/hanko-frontend-sdk";
+import { UserCreated, HankoError } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -31,7 +31,7 @@ const RegisterConfirmPage = ({
   const { t } = useContext(TranslateContext);
   const { hanko, config } = useContext(AppContext);
 
-  const [user, setUser] = useState<User>(null);
+  const [userCreated, setUserCreated] = useState<UserCreated>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [error, setError] = useState<HankoError>(null);
@@ -39,7 +39,7 @@ const RegisterConfirmPage = ({
   const onConfirmSubmit = (event: Event) => {
     event.preventDefault();
     setIsLoading(true);
-    hanko.user.create(emailAddress).then(setUser).catch(setError);
+    hanko.user.create(emailAddress).then(setUserCreated).catch(setError);
   };
 
   const onBackClick = (event: Event) => {
@@ -48,11 +48,11 @@ const RegisterConfirmPage = ({
   };
 
   useEffect(() => {
-    if (!user || !config) return;
+    if (!userCreated || !config) return;
 
     // User has been created
     if (config.emails.require_verification) {
-      onPasscode(user.id, user.email_id).catch((e) => {
+      onPasscode(userCreated.user_id, userCreated.email_id).catch((e) => {
         setIsLoading(false);
         setError(e);
       });
@@ -61,7 +61,7 @@ const RegisterConfirmPage = ({
       setIsLoading(false);
       onSuccess();
     }
-  }, [config, onPasscode, onSuccess, user]);
+  }, [config, onPasscode, onSuccess, userCreated]);
 
   return (
     <Fragment>
