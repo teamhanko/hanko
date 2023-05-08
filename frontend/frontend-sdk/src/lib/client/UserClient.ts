@@ -1,4 +1,4 @@
-import { Me, User, UserInfo } from "../Dto";
+import { Me, User, UserInfo, UserCreated } from "../Dto";
 import {
   ConflictError,
   NotFoundError,
@@ -44,13 +44,13 @@ class UserClient extends Client {
    * occurred, you may want to prompt the user to log in.
    *
    * @param {string} email - The email address of the user to be created.
-   * @return {Promise<User>}
+   * @return {Promise<UserCreated>}
    * @throws {ConflictError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/createUser
    */
-  async create(email: string): Promise<User> {
+  async create(email: string): Promise<UserCreated> {
     const response = await this.client.post("/users", { email });
 
     if (response.status === 409) {
@@ -59,11 +59,11 @@ class UserClient extends Client {
       throw new TechnicalError();
     }
 
-    const user: User = response.json();
-    if (user && user.id) {
-      this.client.processResponseHeadersOnLogin(user.id, response);
+    const createUser: UserCreated = response.json();
+    if (createUser && createUser.user_id) {
+      this.client.processResponseHeadersOnLogin(createUser.user_id, response);
     }
-    return user;
+    return createUser;
   }
 
   /**

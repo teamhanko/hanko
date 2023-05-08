@@ -119,8 +119,20 @@ interface Credential {
  */
 interface User {
   id: string;
-  email_id: string;
+  email: string;
   webauthn_credentials: Credential[];
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {string} user_id - The user's UUID.
+ * @property {string} email_id - The ID of the new email.
+ */
+interface UserCreated {
+  user_id: string;
+  email_id: string;
 }
 
 /**
@@ -232,6 +244,7 @@ export type {
   Credential,
   UserInfo,
   Me,
+  UserCreated,
   User,
   Email,
   Emails,

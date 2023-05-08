@@ -262,7 +262,7 @@ describe("webauthnClient.shouldRegister()", () => {
 
       const user: User = {
         id: userID,
-        email_id: "",
+        email: "",
         webauthn_credentials: [],
       };
 
