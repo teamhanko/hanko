@@ -7,7 +7,6 @@ import {
   sessionExpiredType,
   sessionResumedType,
   userDeletedType,
-  userLoggedOutType,
 } from "../../../src/lib/events/CustomEvents";
 
 describe("Relay", () => {
@@ -45,7 +44,7 @@ describe("Relay", () => {
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip("should listen to 'hanko-session-created' events and dispatch 'hanko-session-removed' events", () => {
+    it.skip("should listen to 'hanko-session-created' events and dispatch 'hanko-session-expired' events", () => {
       const mockSessionCreatedDetail = {
         userID: "test-user",
         jwt: "test-token",
@@ -61,12 +60,12 @@ describe("Relay", () => {
         {
           func: () => {},
           timeoutID: 1,
-          type: "hanko-session-removed",
+          type: sessionExpiredType,
         },
         {
           func: () => {},
           timeoutID: 2,
-          type: "hanko-session-removed",
+          type: sessionExpiredType,
         },
       ];
 
@@ -109,7 +108,7 @@ describe("Relay", () => {
     });
   });
 
-  it("should listen to 'hanko-session-removed' and remove scheduled events", () => {
+  it("should listen to 'hanko-session-created' events and remove scheduled events", () => {
     const mockSessionCreatedDetail = {
       userID: "test-user",
       jwt: "test-token",
@@ -119,7 +118,7 @@ describe("Relay", () => {
       sessionCreatedType,
       mockSessionCreatedDetail
     );
-    const sessionRemovedEventMock = new CustomEventWithDetail(
+    const sessionExpiredEventMock = new CustomEventWithDetail(
       sessionExpiredType,
       null
     );
@@ -134,14 +133,12 @@ describe("Relay", () => {
       },
     ]);
 
-    document.dispatchEvent(sessionRemovedEventMock);
+    document.dispatchEvent(sessionExpiredEventMock);
 
     expect(relay._scheduler._tasks).toStrictEqual([]);
 
     jest.advanceTimersByTime(7000);
-    const event = dispatcherSpy.mock.calls[0][0] as CustomEventWithDetail<null>;
-    expect(dispatcherSpy).toBeCalledTimes(1);
-    expect(event.type).not.toEqual(sessionExpiredType);
+    expect(dispatcherSpy).toBeCalledTimes(0);
   });
 
   it("should listen to 'hanko-user-deleted' and remove scheduled events", () => {
