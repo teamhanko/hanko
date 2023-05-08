@@ -222,7 +222,7 @@ hanko.onSessionExpired(() => {
 ```
 
 - "hanko-user-logged-out": Will be triggered, when the user actively logs out. In other browser windows, a "hanko-session-expired" event
-  will be triggered at the same time. The "hanko-user-logged-out" event will also be triggered after the page has been loaded and the user is logged out.
+  will be triggered at the same time.
 
 ```js
 hanko.onUserLoggedOut(() => {

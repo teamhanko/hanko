@@ -137,8 +137,6 @@ export class Relay extends Dispatcher {
 
     if (detail.userID && detail.expirationSeconds > 0) {
       this.dispatchSessionResumedEvent(detail);
-    } else {
-      this.dispatchUserLoggedOutEvent();
     }
   }
 }

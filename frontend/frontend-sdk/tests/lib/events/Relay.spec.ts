@@ -24,27 +24,7 @@ describe("Relay", () => {
     jest.clearAllTimers();
   });
 
-  describe("dispatchInitialSessionResumedEvent", () => {
-    it("should dispatch the initial 'hanko-user-logged-out' event when no session is active", () => {
-      jest
-        .spyOn(relay._sessionState, "read")
-        .mockReturnValueOnce(new SessionState());
-      jest
-        .spyOn(relay._sessionState, "getExpirationSeconds")
-        .mockReturnValueOnce(0);
-      jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValueOnce("");
-      jest
-        .spyOn(relay._sessionState, "getUserID")
-        .mockReturnValueOnce("fake_user");
-
-      relay.dispatchInitialEvents();
-      const event = dispatcherSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
-      expect(event.type).toEqual(userLoggedOutType);
-      expect(dispatcherSpy).toHaveBeenCalled();
-      expect(relay._cookie.getAuthCookie).toHaveBeenCalled();
-    });
-
+  describe("dispatchInitialEvents()", () => {
     it("should dispatch initial 'hanko-session-resumed' event when session is active", () => {
       jest
         .spyOn(relay._sessionState, "read")

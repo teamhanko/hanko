@@ -292,7 +292,7 @@ another browser window, because the user has logged out, or deleted the account.
 </code></pre>
 <ul>
 <li>&quot;hanko-user-logged-out&quot;: Will be triggered, when the user actively logs out. In other browser windows, a &quot;hanko-session-expired&quot; event
-will be triggered at the same time. The &quot;hanko-user-logged-out&quot; event will also be triggered after the page has been loaded and the user is logged out.</li>
+will be triggered at the same time.</li>
 </ul>
 <pre class="prettyprint source lang-js"><code>hanko.onUserLoggedOut(() => {
   // You can redirect the user to a login page or show the `&lt;hanko-auth>` element.
