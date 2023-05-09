@@ -7,6 +7,7 @@ import {
 import { Response } from "../../../src/lib/client/HttpClient";
 
 const userID = "test-user-1";
+const emailID = "test-email-1";
 const email = "test-email-1@test";
 const credentials = [{ id: "test-credential-1" }];
 
@@ -152,9 +153,8 @@ describe("UserClient.create()", () => {
     const response = new Response(new XMLHttpRequest());
     response.ok = true;
     response._decodedJSON = {
-      id: userID,
-      email,
-      webauthn_credentials: credentials,
+      user_id: userID,
+      email_id: emailID,
     };
 
     jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);

@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnCredential</title>
+  <title> UserCreated</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Interface</p>
-                    <h1>WebauthnCredential</h1>
+                    <h1>UserCreated</h1>
                 </header>
                 
 
@@ -85,7 +85,7 @@
 
 <header>
     
-        <h2>WebauthnCredential</h2>
+        <h2>UserCreated</h2>
         
     
 </header>
@@ -112,8 +112,6 @@
             <th>Type</th>
 
             
-            <th>Attributes</th>
-            
 
             
 
@@ -126,7 +124,7 @@
             
 <tr class="deep-level-0">
     
-        <td class="name"><code>id</code></td>
+        <td class="name"><code>user_id</code></td>
     
 
     <td class="type">
@@ -139,23 +137,17 @@
     </td>
 
     
-        <td class="attributes">
-        
-
-        
-        </td>
-    
 
     
 
-    <td class="description last">The credential id.</td>
+    <td class="description last">The user's UUID.</td>
 </tr>
 
         
             
 <tr class="deep-level-0">
     
-        <td class="name"><code>name</code></td>
+        <td class="name"><code>email_id</code></td>
     
 
     <td class="type">
@@ -168,192 +160,10 @@
     </td>
 
     
-        <td class="attributes">
-        
-            &lt;optional><br>
-        
-
-        
-        </td>
-    
 
     
 
-    <td class="description last">The credential name.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>public_key</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last">The public key.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>attestation_type</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last">The attestation type.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>aaguid</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last">The AAGUID of the authenticator.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>last_used_at</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last">The time when the credential was used last.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>created_at</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last">Time of credential creation.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>transports</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type"><a href="WebauthnTransports.html">WebauthnTransports</a></code>
-
-
-    
-    </td>
-
-    
-        <td class="attributes">
-        
-
-        
-        </td>
-    
-
-    
-
-    <td class="description last"></td>
+    <td class="description last">The ID of the new email.</td>
 </tr>
 
         
@@ -398,7 +208,7 @@
         <p class="tag-source">
             <a href="lib_Dto.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line136">line 136</a>
+                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line87">line 87</a>
             </span>
         </p>
     

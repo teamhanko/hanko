@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -54,13 +55,13 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 	}
 
 	hostAndPort := resource.GetHostPort(getPortID(dialect))
-	databaseUrl := fmt.Sprintf("%s://%s:%s@%s/%s?sslmode=disable", dialect, database_user, database_password, hostAndPort, database_name)
+	dsn := getDsn(dialect, hostAndPort)
 
 	_ = resource.Expire(120)
 
 	pool.MaxWait = 120 * time.Second
 	if err = pool.Retry(func() error {
-		db, err := sql.Open(dialect, databaseUrl)
+		db, err := sql.Open(dialect, dsn)
 		if err != nil {
 			return err
 		}
@@ -69,15 +70,23 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 		return nil, fmt.Errorf("could not connect to docker: %w", err)
 	}
 
-	db, err := sql.Open(dialect, databaseUrl)
+	db, err := sql.Open(dialect, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to database: %w", err)
+	}
+
+	dbUrl := ""
+	switch dialect {
+	case "mysql":
+		dbUrl = fmt.Sprintf("mysql://%s", dsn)
+	default:
+		dbUrl = dsn
 	}
 
 	return &TestDB{
 		pool:        pool,
 		resource:    resource,
-		DatabaseUrl: databaseUrl,
+		DatabaseUrl: dbUrl,
 		DbCon:       db,
 		Dialect:     dialect,
 	}, nil
@@ -132,6 +141,17 @@ func getPortID(dialect string) string {
 		return "5432/tcp"
 	case "mysql":
 		return "3306/tcp"
+	default:
+		return ""
+	}
+}
+
+func getDsn(dialect string, hostAndPort string) string {
+	switch dialect {
+	case "postgres":
+		return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", database_user, database_password, hostAndPort, database_name)
+	case "mysql":
+		return fmt.Sprintf("%s:%s@(%s)/%s?parseTime=true&multiStatements=true&readTimeout=5s&collation=utf8mb4_general_ci", database_user, database_password, hostAndPort, database_name)
 	default:
 		return ""
 	}
