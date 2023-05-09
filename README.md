@@ -12,20 +12,20 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-frontend-sdk?label=hanko-frontend-sdk)](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk)
 
 # About Hanko
-Hanko is an open-source user authentication system with a focus on moving the login beyond passwords, while being 100% deployable today – without compromise.
+Hanko is an open-source authentication and user management solution with a focus on moving the login beyond passwords, while being 100% deployable today.
 
 - Built around [passkeys](https://www.passkeys.io) as introduced by Apple, Google, and Microsoft
-- Login box and user profile components for fast integration
+- Fast integration with Hanko Elements web components (login box and user profile)
 - API-first, small footprint, cloud-native
 
-Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in different applications and platforms.
+Available for self-hosting and on [Hanko Cloud](https://www.hanko.io).
 
-https://user-images.githubusercontent.com/20115649/194661461-8819db77-4db5-4b24-9859-5a8e68be77fe.mp4
+Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in different applications and platforms.
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that passkeys were announced and the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
 
-With most devices now shipping with passkey support and convenient built-in authentication technology like Touch ID, Face ID, and Windows Hello, a much better login experience is enabled that will replace passwords for good. Hanko is built for that shift.
+With most devices and browsers now shipping with passkey support and convenient built-in authentication technology like Touch ID, Face ID, and Windows Hello, a much better login experience is enabled that will replace passwords for good. Hanko is built for that shift.
 
 **Build your passkey-powered auth stack with a few lines of code – and never look back.**
 
@@ -68,17 +68,16 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| Mobile app support |
 |✅| `<hanko-profile>` web component |
 |✅| Rate limiting |
-|✅| OAuth logins (Sign in with Google/GitHub/...) |
+|✅| OAuth logins (Sign in with Apple/Google/GitHub) |
 |⚙️| Session management |
 | | i18n & custom translations |
+| | 2FA
 | | 📢 Hanko v1.0 Release |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
-- 2FA options to secure fallback auth methods
 - Priviledged sessions & step-up authentication
 - HTML emails & templating
 - SMS passcode delivery
-- Hosted auth pages and OpenID Connect
 - SAML support
 
 # Community
