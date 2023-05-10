@@ -23,6 +23,7 @@ type manager struct {
 	jwtGenerator  hankoJwt.Generator
 	sessionLength time.Duration
 	cookieConfig  cookieConfig
+	issuer        string
 }
 
 type cookieConfig struct {
@@ -62,6 +63,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Session) (Manager, er
 	return &manager{
 		jwtGenerator:  g,
 		sessionLength: duration,
+		issuer:        config.Issuer,
 		cookieConfig: cookieConfig{
 			Domain:   config.Cookie.Domain,
 			HttpOnly: config.Cookie.HttpOnly,
@@ -80,7 +82,9 @@ func (g *manager) GenerateJWT(userId uuid.UUID) (string, error) {
 	_ = token.Set(jwt.SubjectKey, userId.String())
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
-	//_ = token.Set(jwt.AudienceKey, []string{"http://localhost"})
+	if g.issuer != "" {
+		_ = token.Set(jwt.IssuerKey, g.issuer)
+	}
 
 	signed, err := g.jwtGenerator.Sign(token)
 	if err != nil {
