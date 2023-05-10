@@ -23,7 +23,7 @@ func TestValidate(t *testing.T) {
 			},
 		},
 	}
-	err := validate(moreThanOnePrimary)
+	err := validateEntries(moreThanOnePrimary)
 	log.Println(err)
 	assert.Error(t, err)
 	noEmails := []ImportEntry{
@@ -32,7 +32,7 @@ func TestValidate(t *testing.T) {
 			Emails: Emails{},
 		},
 	}
-	err = validate(noEmails)
+	err = validateEntries(noEmails)
 	log.Println(err)
 	assert.Error(t, err)
 }

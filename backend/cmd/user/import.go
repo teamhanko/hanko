@@ -26,13 +26,13 @@ func NewImportCommand(config *config.Config) *cobra.Command {
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
 			//Load File
-			user, err := loadFile()
+			users, err := loadFile()
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)
 			}
 			//Validate Input
-			err = validate(user)
+			err = validateEntries(users)
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)
@@ -43,7 +43,7 @@ func NewImportCommand(config *config.Config) *cobra.Command {
 				log.Println(err)
 				os.Exit(1)
 			}
-			err = addToDatabase(user, persister)
+			err = addToDatabase(users, persister)
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)

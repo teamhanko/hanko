@@ -21,20 +21,27 @@ type ImportEntry struct {
 	UpdatedAt *time.Time `json:"updated_at" yaml:"updated_at"`
 }
 
-func validate(entries []ImportEntry) error {
+func validateEntries(entries []ImportEntry) error {
 	for i, e := range entries {
-		if len(e.Emails) == 0 {
-			return errors.New(fmt.Sprintf("Entry %v with id %v has got no Emails.", i, e.UserID))
+		if err := e.validate(); err != nil {
+			return errors.Join(errors.New(fmt.Sprintf("Error with entry %v", i)), err)
 		}
-		primaryMails := 0
-		for _, email := range e.Emails {
-			if email.IsPrimary {
-				primaryMails++
-			}
+	}
+	return nil
+}
+
+func (entry *ImportEntry) validate() error {
+	if len(entry.Emails) == 0 {
+		return errors.New(fmt.Sprintf("Entry with id: %v has got no Emails.", entry.UserID))
+	}
+	primaryMails := 0
+	for _, email := range entry.Emails {
+		if email.IsPrimary {
+			primaryMails++
 		}
-		if primaryMails != 1 {
-			return errors.New(fmt.Sprintf("Need exactly one primary email, got %v", primaryMails))
-		}
+	}
+	if primaryMails != 1 {
+		return errors.New(fmt.Sprintf("Need exactly one primary email, got %v", primaryMails))
 	}
 	return nil
 }
