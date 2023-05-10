@@ -391,7 +391,8 @@ type Session struct {
 	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header" split_words:"true"`
 	Lifespan              string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
 	Cookie                Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
-	Issuer                string `yaml:"issuer" json:"issuer" koanf:"issuer"`
+	// Issuer optional String to be used in the jwts iss claim. Can be a uri or string
+	Issuer string `yaml:"issuer" json:"issuer" koanf:"issuer"`
 }
 
 func (s *Session) Validate() error {
