@@ -57,6 +57,8 @@ export const translations = {
     },
     labels: {
       or: "or",
+      yes: "yes",
+      no: "no",
       email: "Email",
       continue: "Continue",
       skip: "Skip",
@@ -174,6 +176,8 @@ export const translations = {
     },
     labels: {
       or: "oder",
+      yes: "ja",
+      no: "nein",
       email: "E-Mail",
       continue: "Weiter",
       skip: "Überspringen",
