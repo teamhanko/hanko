@@ -95,6 +95,7 @@ const AddEmailDropdown = ({
   };
 
   const addEmailWithoutVerification = () => {
+    setIsLoading(true);
     hanko.email
       .create(newEmail)
       .then(() => hanko.email.list())
@@ -110,6 +111,9 @@ const AddEmailDropdown = ({
           }, 500);
         }, 1000);
         return;
+      })
+      .finally(() => {
+        setIsLoading(false);
       })
       .catch(setError);
   };
