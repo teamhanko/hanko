@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.13.0
-	github.com/go-sql-driver/mysql v1.7.0
+	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-testfixtures/testfixtures/v3 v3.8.1
 	github.com/go-webauthn/webauthn v0.7.1
 	github.com/gobuffalo/pop/v6 v6.1.1
