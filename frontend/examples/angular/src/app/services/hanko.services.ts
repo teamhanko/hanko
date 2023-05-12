@@ -1,12 +1,15 @@
 import { Injectable } from "@angular/core";
 import { environment } from "../../environments/environment";
-import { createHankoClient, Hanko, register } from "@teamhanko/hanko-elements";
+import { Hanko, register } from "@teamhanko/hanko-elements";
 
 @Injectable({
   providedIn: 'root',
 })
 export class HankoService {
   api = environment.hankoApi
-  client: Hanko = createHankoClient(this.api)
-  register = () => register(this.api);
+  client = new Hanko(this.api)
+
+  constructor() {
+    register(this.api).catch(console.error);
+  }
 }

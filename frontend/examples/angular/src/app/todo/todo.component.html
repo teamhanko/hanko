@@ -1,3 +1,5 @@
+<app-session-expired-modal></app-session-expired-modal>
+<hanko-events (onSessionNotPresent)="redirectToLogin()" (onUserLoggedOut)="redirectToLogin()"></hanko-events>
 <nav class="nav">
   <button (click)="logout()" class="button">Logout</button>
   <button (click)="redirectToProfile()" class="button">Profile</button>

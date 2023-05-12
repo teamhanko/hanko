@@ -1,3 +1,4 @@
+<app-session-expired-modal></app-session-expired-modal>
 <nav class="nav">
   <button (click)="logout()" class="button">Logout</button>
   <button disabled class="button">Profile</button>
@@ -5,5 +6,5 @@
 </nav>
 <div class="content">
   <div class="error">{{ error?.message }}</div>
-  <hanko-profile></hanko-profile>
+  <hanko-profile (onSessionNotPresent)="redirectToLogin()" (onUserLoggedOut)="redirectToLogin()"></hanko-profile>
 </div>

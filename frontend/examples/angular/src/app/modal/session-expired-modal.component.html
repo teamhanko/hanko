@@ -1,4 +1,6 @@
+<hanko-events (onSessionExpired)="openSessionExpiredModal()"></hanko-events>
 <dialog id="session-expired-modal">
+  <div class="error">{{ error?.message }}</div>
   Please login again.<br><br>
   <button (click)="redirectToLogin()">Login</button>
 </dialog>

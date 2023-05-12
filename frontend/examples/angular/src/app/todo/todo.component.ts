@@ -1,17 +1,27 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { Todos, TodoService } from '../services/todo.service';
 import { HankoService } from "../services/hanko.services";
+import { SessionExpiredModalComponent } from "../modal/session-expired-modal.component";
 
 @Component({
   selector: 'app-todo',
   templateUrl: './todo.component.html',
   styleUrls: ['../app.component.css', './todo.component.css'],
 })
-export class TodoComponent implements OnInit, OnDestroy {
+export class TodoComponent implements OnInit {
   todos: Todos = [];
   error: Error | undefined;
   description = '';
+
+  constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
+
+  @ViewChild(SessionExpiredModalComponent)
+  private sessionExpiredModalComponent!: SessionExpiredModalComponent;
+
+  ngOnInit(): void {
+    this.listTodos();
+  }
 
   changeDescription(event: any) {
     this.description = event.target.value;
@@ -22,19 +32,6 @@ export class TodoComponent implements OnInit, OnDestroy {
     this.patchTodo(currentTarget.value, currentTarget.checked);
   }
 
-  constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
-
-  ngOnInit(): void {
-    this.listTodos();
-    this.hankoService.client.onSessionRemoved(() => {
-      this.redirectToLogin();
-    });
-  }
-
-  ngOnDestroy() {
-    this.hankoService.client.removeEventListeners();
-  }
-
   addTodo(event: any) {
     event.preventDefault();
     const entry = { description: this.description, checked: false };
@@ -43,7 +40,7 @@ export class TodoComponent implements OnInit, OnDestroy {
       .addTodo(entry)
       .then((res) => {
         if (res.status === 401) {
-          this.redirectToLogin();
+          this.sessionExpiredModalComponent.openSessionExpiredModal();
           return;
         }
 
@@ -62,7 +59,7 @@ export class TodoComponent implements OnInit, OnDestroy {
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          this.redirectToLogin();
+          this.sessionExpiredModalComponent.openSessionExpiredModal();
           return;
         }
 
@@ -80,7 +77,7 @@ export class TodoComponent implements OnInit, OnDestroy {
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          this.redirectToLogin();
+          this.sessionExpiredModalComponent.openSessionExpiredModal();
           return;
         }
 
@@ -101,7 +98,7 @@ export class TodoComponent implements OnInit, OnDestroy {
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          this.redirectToLogin();
+          this.sessionExpiredModalComponent.openSessionExpiredModal();
           return;
         }
 
@@ -115,13 +112,11 @@ export class TodoComponent implements OnInit, OnDestroy {
   }
 
   logout() {
-    this.hankoService.client.user
-      .logout()
-      .catch((e) => this.error = e);
+    this.hankoService.client.user.logout().catch((e) => this.error = e);
   }
 
   redirectToLogin() {
-    this.router.navigate(['/']).catch((e) => (this.error = e));
+    this.router.navigate(['/']).catch(console.error);
   }
 
   redirectToProfile() {

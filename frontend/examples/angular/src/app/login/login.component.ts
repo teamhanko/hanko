@@ -1,27 +1,18 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { HankoService } from "../services/hanko.services";
+import { Router } from "@angular/router";
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['../app.component.css']
 })
-export class LoginComponent implements OnInit, OnDestroy {
+export class LoginComponent {
   error: Error | undefined;
 
   constructor(private hankoService: HankoService, private router: Router) {}
 
-  ngOnInit() {
-    this.hankoService.register().catch((e) => this.error = e);
-    this.hankoService.client.onAuthFlowCompleted(() => this.redirectToTodo())
-  }
-
-  ngOnDestroy() {
-    this.hankoService.client.removeEventListeners();
-  }
-
-  redirectToTodo() {
-    this.router.navigate(['/todo']).catch((e) => this.error = e);
+  redirectToTodos() {
+    this.router.navigate(['/todo']).catch(console.error);
   }
 }
