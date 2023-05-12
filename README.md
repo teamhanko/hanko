@@ -69,14 +69,18 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| `<hanko-profile>` web component |
 |✅| Rate limiting |
 |✅| OAuth logins (Sign in with Apple/Google/GitHub) |
-|⚙️| Session management |
-| | i18n & custom translations |
-| | 2FA
-| | 📢 Hanko v1.0 Release |
+|⚙️| User import / export |
+|⚙️| i18n & custom translations |
+|⚙️| Mobile SDKs |
+| | Sign in with Microsoft |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
+- Basic email templating
+- Refresh tokens / sessions
+- 2FA for securing passcodes & passwords
+- Webhooks
 - Priviledged sessions & step-up authentication
-- HTML emails & templating
+- Bot protection / Captcha
 - SMS passcode delivery
 - SAML support
 
