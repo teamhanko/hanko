@@ -22,16 +22,31 @@ declare global {
     interface IntrinsicElements {
       "hanko-auth": HankoAuthElementProps;
       "hanko-profile": HankoProfileElementProps;
+      "hanko-events": HankoProfileElementProps;
     }
   }
 }
 
 export const HankoAuth = (props: HankoAuthElementProps) => (
-  <AppProvider componentName={"auth"} {...props} hanko={hanko} />
+  <AppProvider
+    componentName={"auth"}
+    {...props}
+    hanko={hanko}
+    injectStyles={injectStyles}
+  />
 );
 
 export const HankoProfile = (props: HankoProfileElementProps) => (
-  <AppProvider componentName={"profile"} {...props} hanko={hanko} />
+  <AppProvider
+    componentName={"profile"}
+    {...props}
+    hanko={hanko}
+    injectStyles={injectStyles}
+  />
+);
+
+export const HankoEvents = (props: HankoProfileElementProps) => (
+  <AppProvider componentName={"events"} {...props} hanko={hanko} />
 );
 
 export interface RegisterOptions {
@@ -46,6 +61,7 @@ interface InternalRegisterOptions extends RegisterOptions {
 }
 
 let hanko: Hanko;
+let injectStyles: boolean;
 
 interface ElementsRegisterReturn {
   hanko: Hanko;
@@ -55,27 +71,11 @@ const _register = async ({
   tagName,
   entryComponent,
   shadow = true,
-  injectStyles = true,
   observedAttributes,
 }: InternalRegisterOptions) => {
   if (!customElements.get(tagName)) {
     registerCustomElement(entryComponent, tagName, observedAttributes, {
       shadow,
-    });
-  }
-
-  if (injectStyles) {
-    await customElements.whenDefined(tagName);
-    const elements = document.getElementsByTagName(tagName);
-    const styles = window._hankoStyle;
-
-    Array.from(elements).forEach((element) => {
-      if (shadow) {
-        const clonedStyles = styles.cloneNode(true);
-        element.shadowRoot.appendChild(clonedStyles);
-      } else {
-        element.appendChild(styles);
-      }
     });
   }
 };
@@ -84,8 +84,8 @@ export const register = async (
   api: string,
   options: RegisterOptions = { shadow: true, injectStyles: true }
 ): Promise<ElementsRegisterReturn> => {
-  createHankoClient(api);
-
+  hanko = new Hanko(api);
+  injectStyles = options.injectStyles;
   await Promise.all([
     _register({
       ...options,
@@ -99,14 +99,13 @@ export const register = async (
       entryComponent: HankoProfile,
       observedAttributes: ["api", "lang"],
     }),
+    _register({
+      ...options,
+      tagName: "hanko-events",
+      entryComponent: HankoEvents,
+      observedAttributes: [],
+    }),
   ]);
 
   return { hanko };
-};
-
-export const createHankoClient = (api: string) => {
-  if (!hanko || hanko.api !== api) {
-    hanko = new Hanko(api);
-  }
-  return hanko;
 };
