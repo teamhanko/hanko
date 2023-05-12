@@ -45,6 +45,9 @@ export const userDeletedType: "hanko-user-deleted" = "hanko-user-deleted";
 export const authFlowCompletedType: "hanko-auth-flow-completed" =
   "hanko-auth-flow-completed";
 
+export const sessionNotPresentType: "hanko-session-not-present" =
+  "hanko-session-not-present";
+
 /**
  * The data passed in the `hanko-session-created` or `hanko-session-resumed` event.
  *

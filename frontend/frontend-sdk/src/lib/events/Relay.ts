@@ -53,21 +53,22 @@ export class Relay extends Dispatcher {
   /**
    * Returns the session detail currently stored in the local storage.
    *
-   * @private
    * @returns {SessionEventDetail}
    */
-  private getSessionDetail(): SessionEventDetail {
+  public getSessionDetail(): SessionEventDetail {
     this._sessionState.read();
 
     const userID = this._sessionState.getUserID();
     const expirationSeconds = this._sessionState.getExpirationSeconds();
     const jwt = this._cookie.getAuthCookie();
 
-    return {
-      userID,
-      expirationSeconds,
-      jwt,
-    };
+    return expirationSeconds > 0 && userID.length
+      ? {
+          userID,
+          expirationSeconds,
+          jwt,
+        }
+      : null;
   }
 
   /**
@@ -81,14 +82,14 @@ export class Relay extends Dispatcher {
   private handleStorageEvent = (event: StorageEvent) => {
     if (event.key !== "hanko_session") return;
 
-    const detail = this.getSessionDetail();
+    const sessionDetail = this.getSessionDetail();
 
-    if (detail.expirationSeconds <= 0) {
+    if (!sessionDetail) {
       this.dispatchSessionExpiredEvent();
       return;
     }
 
-    this.dispatchSessionCreatedEvent(detail);
+    this.dispatchSessionCreatedEvent(sessionDetail);
   };
 
   /**
@@ -133,10 +134,12 @@ export class Relay extends Dispatcher {
   public dispatchInitialEvents() {
     this._sessionState.read();
 
-    const detail = this.getSessionDetail();
+    const sessionDetail = this.getSessionDetail();
 
-    if (detail.userID && detail.expirationSeconds > 0) {
-      this.dispatchSessionResumedEvent(detail);
+    if (sessionDetail) {
+      this.dispatchSessionResumedEvent(sessionDetail);
+    } else {
+      this.dispatchSessionNotPresent();
     }
   }
 }

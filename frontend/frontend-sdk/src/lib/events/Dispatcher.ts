@@ -5,7 +5,7 @@ import {
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType, sessionResumedType, userLoggedOutType,
+  authFlowCompletedType, sessionResumedType, userLoggedOutType, sessionNotPresentType,
 } from "./CustomEvents";
 
 /**
@@ -74,5 +74,9 @@ export class Dispatcher {
    */
   public dispatchAuthFlowCompletedEvent(detail: AuthFlowCompletedEventDetail) {
     this.dispatch(authFlowCompletedType, detail);
+  }
+
+  public dispatchSessionNotPresent() {
+    this.dispatch(sessionNotPresentType, null);
   }
 }

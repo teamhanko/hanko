@@ -6,7 +6,10 @@ import {
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType, userLoggedOutType, sessionResumedType,
+  authFlowCompletedType,
+  userLoggedOutType,
+  sessionResumedType,
+  sessionNotPresentType,
 } from "./CustomEvents";
 
 /**
@@ -260,5 +263,12 @@ export class Listener {
     once?: boolean
   ): CleanupFunc {
     return this.addEventListener(authFlowCompletedType, { callback, once });
+  }
+
+  public onSessionNotPresent(
+    callback: CallbackFunc<null>,
+    once?: boolean
+  ): CleanupFunc {
+    return this.addEventListener(sessionNotPresentType, { callback, once }, true);
   }
 }
