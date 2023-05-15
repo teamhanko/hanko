@@ -2,10 +2,13 @@
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import OnSessionExpiredModal from "@/components/SessionExpiredModal.vue";
-import { useHanko } from "@/composables/useHanko";
+import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 
 const router = useRouter();
-const { hankoClient } = useHanko();
+
+const hankoAPI = import.meta.env.VITE_HANKO_API;
+const hankoClient = new Hanko(hankoAPI);
+
 const error = ref<Error>();
 
 const redirectToLogin = () => {

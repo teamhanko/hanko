@@ -2,13 +2,17 @@
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
 import SessionExpiredModal from "@/components/SessionExpiredModal.vue";
-import { useHanko } from "@/composables/useHanko";
-import { useTodo } from "@/composables/useTodo";
 import type { Todos } from "@/utils/TodoClient";
+import { Hanko } from "@teamhanko/hanko-frontend-sdk";
+import { TodoClient } from "@/utils/TodoClient";
 
 const router = useRouter();
-const { todoClient } = useTodo();
-const { hankoClient } = useHanko();
+
+const todoAPI = import.meta.env.VITE_TODO_API;
+const todoClient = new TodoClient(todoAPI);
+
+const hankoAPI = import.meta.env.VITE_HANKO_API;
+const hankoClient = new Hanko(hankoAPI);
 
 const modal = ref<typeof SessionExpiredModal>();
 const error = ref<Error>();
