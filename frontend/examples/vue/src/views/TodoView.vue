@@ -1,49 +1,42 @@
 <script setup lang="ts">
-import type { Todos } from "@/utils/TodoClient";
-import { TodoClient } from "@/utils/TodoClient";
 import { useRouter } from "vue-router";
 import type { Ref } from "vue";
-import { onBeforeUnmount, onMounted, ref } from "vue";
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import { onMounted, ref } from "vue";
+import SessionExpiredModal from "@/components/SessionExpiredModal.vue";
+import { useHanko } from "@/composables/useHanko";
+import { useTodo } from "@/composables/useTodo";
+import type { Todos } from "@/utils/TodoClient";
 
 const router = useRouter();
+const { todoClient } = useTodo();
+const { hankoClient } = useHanko();
 
-const todoAPI = import.meta.env.VITE_TODO_API;
-const todoClient = new TodoClient(todoAPI);
-
-const hankoAPI = import.meta.env.VITE_TODO_API;
-const hankoClient = createHankoClient(hankoAPI);
-
+const modal: Ref<InstanceType<typeof SessionExpiredModal> | null> = ref(null);
 const error: Ref<Error | null> = ref(null);
 const todos: Ref<Todos> = ref([]);
 const description = ref("");
 
 onMounted(() => {
   listTodos();
-  hankoClient.onSessionRemoved(() => redirectToLogin());
 });
 
-onBeforeUnmount(() => {
-  hankoClient.removeEventListeners();
-});
-
-function changeDescription(event: any) {
+const changeDescription = (event: any) => {
   description.value = event.currentTarget.value;
-}
+};
 
 const changeCheckbox = (event: any) => {
   const { currentTarget } = event;
   patchTodo(currentTarget.value, currentTarget.checked);
 };
 
-function addTodo() {
+const addTodo = () => {
   const todo = { description: description.value, checked: false };
 
   todoClient
     .addTodo(todo)
     .then((res) => {
       if (res.status === 401) {
-        redirectToLogin();
+        modal.value?.show();
         return;
       }
 
@@ -52,17 +45,15 @@ function addTodo() {
 
       return;
     })
-    .catch((e) => {
-      error.value = e;
-    });
-}
+    .catch((e) => (error.value = e));
+};
 
-function listTodos() {
+const listTodos = () => {
   todoClient
     .listTodos()
     .then((res) => {
       if (res.status === 401) {
-        redirectToLogin();
+        modal.value?.show();
         return;
       }
 
@@ -73,17 +64,15 @@ function listTodos() {
         todos.value = todo;
       }
     })
-    .catch((e) => {
-      error.value = e;
-    });
-}
+    .catch((e) => (error.value = e));
+};
 
 const patchTodo = (id: string, checked: boolean) => {
   todoClient
     .patchTodo(id, checked)
     .then((res) => {
       if (res.status === 401) {
-        redirectToLogin();
+        modal.value?.show();
         return;
       }
 
@@ -91,9 +80,7 @@ const patchTodo = (id: string, checked: boolean) => {
 
       return;
     })
-    .catch((e) => {
-      error.value = e;
-    });
+    .catch((e) => (error.value = e));
 };
 
 const deleteTodo = (id: string) => {
@@ -101,7 +88,7 @@ const deleteTodo = (id: string) => {
     .deleteTodo(id)
     .then((res) => {
       if (res.status === 401) {
-        redirectToLogin();
+        modal.value?.show();
         return;
       }
 
@@ -109,27 +96,29 @@ const deleteTodo = (id: string) => {
 
       return;
     })
-    .catch((e) => {
-      error.value = e;
-    });
+    .catch((e) => (error.value = e));
 };
 
 const redirectToLogin = () => {
-  router.push({ path: "/" });
+  router.push({ path: "/" }).catch((e) => (error.value = e));
 };
 
-function redirectToProfile() {
-  router.push("/profile");
-}
+const redirectToProfile = () => {
+  router.push("/profile").catch((e) => (error.value = e));
+};
 
-function logout() {
-  hankoClient.user.logout().catch((e) => {
-    error.value = e;
-  });
-}
+const logout = () => {
+  hankoClient.user.logout().catch((e) => (error.value = e));
+};
 </script>
 
 <template>
+  <hanko-events
+    @onSessionNotPresent="redirectToLogin"
+    @onUserLoggedOut="redirectToLogin"
+  >
+  </hanko-events>
+  <on-session-expired-modal ref="modal"></on-session-expired-modal>
   <nav class="nav">
     <button @click.prevent="logout" class="button">Logout</button>
     <button @click.prevent="redirectToProfile" class="button">Profile</button>
@@ -161,7 +150,9 @@ function logout() {
         <label class="description" :for="todo.todoID">{{
           todo.description
         }}</label>
-        <button class="button" @click="() => deleteTodo(todo.todoID)">×</button>
+        <button class="button" @click="() => deleteTodo(todo.todoID!)">
+          ×
+        </button>
       </div>
     </div>
   </div>

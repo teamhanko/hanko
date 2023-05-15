@@ -1,45 +1,29 @@
 <script setup lang="ts">
-import HankoProfile from "@/components/HankoProfile.vue";
-
 import { useRouter } from "vue-router";
 import type { Ref } from "vue";
-import { onBeforeUnmount, onMounted, ref } from "vue";
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import { ref } from "vue";
+import OnSessionExpiredModal from "@/components/SessionExpiredModal.vue";
+import { useHanko } from "@/composables/useHanko";
 
 const router = useRouter();
-const hankoAPI = import.meta.env.VITE_HANKO_API;
-const hankoClient = createHankoClient(hankoAPI);
+const { hankoClient } = useHanko();
 const error: Ref<Error | null> = ref(null);
 
-onMounted(() => {
-  hankoClient.onSessionRemoved(() => redirectToLogin());
-});
+const redirectToLogin = () => {
+  router.push("/").catch((e) => (error.value = e));
+};
 
-onBeforeUnmount(() => {
-  hankoClient.removeEventListeners();
-});
+const redirectToTodos = () => {
+  router.push("/todo").catch((e) => (error.value = e));
+};
 
-function setError(e: Error) {
-  error.value = e;
-}
-
-function redirectToLogin() {
-  console.log("profile redirectToLogin");
-  router.push("/");
-}
-
-function redirectToTodos() {
-  router.push("/todo");
-}
-
-function logout() {
-  hankoClient.user.logout().catch((e) => {
-    error.value = e;
-  });
-}
+const logout = () => {
+  hankoClient.user.logout().catch((e) => (error.value = e));
+};
 </script>
 
 <template>
+  <on-session-expired-modal></on-session-expired-modal>
   <nav class="nav">
     <button @click.prevent="logout" class="button">Logout</button>
     <button disabled class="button">Profile</button>
@@ -47,6 +31,9 @@ function logout() {
   </nav>
   <main class="content">
     <div class="error">{{ error?.message }}</div>
-    <HankoProfile @on-error="setError" />
+    <hanko-profile
+      @onSessionNotPresent="redirectToLogin"
+      @onUserLoggedOut="redirectToLogin"
+    />
   </main>
 </template>
