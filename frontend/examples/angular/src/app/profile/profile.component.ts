@@ -9,7 +9,7 @@ import { HankoService } from "../services/hanko.services";
   styleUrls: ['../app.component.css'],
 })
 export class ProfileComponent {
-  error: Error | undefined;
+  error?: Error;
 
   constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
 
@@ -18,7 +18,7 @@ export class ProfileComponent {
   }
 
   redirectToLogin() {
-    this.router.navigate(['/']).catch(console.error);
+    this.router.navigate(['/']).catch((e) => (this.error = e));
   }
 
   redirectToTodos() {

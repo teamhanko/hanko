@@ -11,7 +11,7 @@ import { SessionExpiredModalComponent } from "../modal/session-expired-modal.com
 })
 export class TodoComponent implements OnInit {
   todos: Todos = [];
-  error: Error | undefined;
+  error?: Error;
   description = '';
 
   constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
@@ -40,7 +40,7 @@ export class TodoComponent implements OnInit {
       .addTodo(entry)
       .then((res) => {
         if (res.status === 401) {
-          this.sessionExpiredModalComponent.openSessionExpiredModal();
+          this.sessionExpiredModalComponent.show();
           return;
         }
 
@@ -49,9 +49,7 @@ export class TodoComponent implements OnInit {
 
         return;
       })
-      .catch((e) => {
-        this.error = e;
-      });
+      .catch((e) => (this.error = e));
   }
 
   patchTodo(id: string, checked: boolean) {
@@ -59,7 +57,7 @@ export class TodoComponent implements OnInit {
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          this.sessionExpiredModalComponent.openSessionExpiredModal();
+          this.sessionExpiredModalComponent.show();
           return;
         }
 
@@ -67,9 +65,7 @@ export class TodoComponent implements OnInit {
 
         return;
       })
-      .catch((e) => {
-        this.error = e;
-      });
+      .catch((e) => (this.error = e));
   }
 
   listTodos() {
@@ -77,7 +73,7 @@ export class TodoComponent implements OnInit {
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          this.sessionExpiredModalComponent.openSessionExpiredModal();
+          this.sessionExpiredModalComponent.show();
           return;
         }
 
@@ -88,9 +84,7 @@ export class TodoComponent implements OnInit {
           this.todos = todo;
         }
       })
-      .catch((e) => {
-        this.error = e;
-      });
+      .catch((e) => (this.error = e));
   }
 
   deleteTodo(id: string) {
@@ -98,7 +92,7 @@ export class TodoComponent implements OnInit {
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          this.sessionExpiredModalComponent.openSessionExpiredModal();
+          this.sessionExpiredModalComponent.show();
           return;
         }
 
@@ -106,17 +100,15 @@ export class TodoComponent implements OnInit {
 
         return;
       })
-      .catch((e) => {
-        this.error = e;
-      });
+      .catch((e) => (this.error = e));
   }
 
   logout() {
-    this.hankoService.client.user.logout().catch((e) => this.error = e);
+    this.hankoService.client.user.logout().catch((e) => (this.error = e));
   }
 
   redirectToLogin() {
-    this.router.navigate(['/']).catch(console.error);
+    this.router.navigate(['/']).catch((e) => (this.error = e));
   }
 
   redirectToProfile() {

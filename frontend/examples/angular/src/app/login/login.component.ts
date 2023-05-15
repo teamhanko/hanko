@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { HankoService } from "../services/hanko.services";
 import { Router } from "@angular/router";
 
@@ -8,11 +8,11 @@ import { Router } from "@angular/router";
   styleUrls: ['../app.component.css']
 })
 export class LoginComponent {
-  error: Error | undefined;
+  error?: Error;
 
   constructor(private hankoService: HankoService, private router: Router) {}
 
   redirectToTodos() {
-    this.router.navigate(['/todo']).catch(console.error);
+    this.router.navigate(['/todo']).catch((e) => (this.error = e));
   }
 }
