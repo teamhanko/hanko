@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import type { Ref } from "vue";
 import { ref } from "vue";
 import OnSessionExpiredModal from "@/components/SessionExpiredModal.vue";
 import { useHanko } from "@/composables/useHanko";
 
 const router = useRouter();
 const { hankoClient } = useHanko();
-const error: Ref<Error | null> = ref(null);
+const error = ref<Error>();
 
 const redirectToLogin = () => {
   router.push("/").catch((e) => (error.value = e));

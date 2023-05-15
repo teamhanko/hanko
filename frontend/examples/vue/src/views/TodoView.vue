@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import type { Ref } from "vue";
 import { onMounted, ref } from "vue";
 import SessionExpiredModal from "@/components/SessionExpiredModal.vue";
 import { useHanko } from "@/composables/useHanko";
@@ -11,9 +10,9 @@ const router = useRouter();
 const { todoClient } = useTodo();
 const { hankoClient } = useHanko();
 
-const modal: Ref<InstanceType<typeof SessionExpiredModal> | null> = ref(null);
-const error: Ref<Error | null> = ref(null);
-const todos: Ref<Todos> = ref([]);
+const modal = ref<typeof SessionExpiredModal>();
+const error = ref<Error>();
+const todos = ref<Todos>([]);
 const description = ref("");
 
 onMounted(() => {

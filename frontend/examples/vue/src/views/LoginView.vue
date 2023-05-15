@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from "vue";
 import { ref } from "vue";
 import router from "@/router";
 
-const error: Ref<Error | null> = ref(null);
+const error = ref<Error>();
 
 const redirectToTodos = () => {
   router.push("/todo").catch((e) => (error.value = e));

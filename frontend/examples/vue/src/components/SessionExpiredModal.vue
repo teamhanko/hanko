@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import type { Ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const modal = ref<HTMLDialogElement | null>(null);
-const error: Ref<Error | null> = ref(null);
+const modal = ref<HTMLDialogElement>();
+const error = ref<Error>();
 
 const show = () => {
   modal.value?.showModal();
