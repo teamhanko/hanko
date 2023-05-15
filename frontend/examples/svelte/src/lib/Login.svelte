@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { onDestroy, onMount } from "svelte";
   import { useNavigate } from "svelte-navigator";
-  import { createHankoClient, register } from '@teamhanko/hanko-elements';
+  import { Hanko } from '@teamhanko/hanko-elements';
 
-  const api = import.meta.env.VITE_HANKO_API;
-  const hankoClient = createHankoClient(api);
+  const hankoAPI = import.meta.env.VITE_HANKO_API;
+  const hankoClient = new Hanko(hankoAPI);
 
   const navigate = useNavigate();
 
@@ -13,21 +12,12 @@
   };
 
   let error: Error | null = null;
-
-  onMount(() => {
-    register(api).catch((e) => error = e);
-    hankoClient.onAuthFlowCompleted(redirectToTodos);
-  });
-
-  onDestroy(() => {
-    hankoClient.removeEventListeners();
-  });
 </script>
 
 <div class="content">
   {#if error}
     <div class="error">{ error?.message }</div>
   {/if}
-  <hanko-auth />
+  <hanko-auth on:onAuthFlowCompleted={redirectToTodos}></hanko-auth>
 </div>
 

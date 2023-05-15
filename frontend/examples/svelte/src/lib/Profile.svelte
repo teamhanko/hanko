@@ -1,23 +1,15 @@
 <script lang="ts">
-    import { onDestroy, onMount } from "svelte";
     import { useNavigate } from "svelte-navigator";
-    import { createHankoClient, register } from "@teamhanko/hanko-elements";
+    import { Hanko } from "@teamhanko/hanko-elements";
+    import SessionExpiredModal from "./SessionExpiredModal.svelte";
 
     const hankoAPI = import.meta.env.VITE_HANKO_API;
-    const hankoClient = createHankoClient(hankoAPI);
+    const hankoClient = new Hanko(hankoAPI);
 
     const navigate = useNavigate();
 
+    let showModal = false;
     let error: Error | null = null;
-
-    onMount(() => {
-        register(hankoAPI).catch((e) => error = e);
-        hankoClient.onSessionRemoved(redirectToLogin);
-    });
-
-    onDestroy(() => {
-        hankoClient.removeEventListeners();
-    });
 
     const logout = () => {
         hankoClient.user
@@ -34,6 +26,7 @@
     }
 </script>
 
+<SessionExpiredModal bind:showModal></SessionExpiredModal>
 <nav class="nav">
     <button class="button" on:click|preventDefault={logout}>Logout</button>
     <button class="button" disabled>Profile</button>
@@ -44,5 +37,5 @@
     {#if error}
         <div class="error">{ error?.message }</div>
     {/if}
-    <hanko-profile />
+    <hanko-profile on:onSessionNotPresent={redirectToLogin} on:onUserLoggedOut={redirectToLogin}></hanko-profile>
 </div>
