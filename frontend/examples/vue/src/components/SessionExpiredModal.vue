@@ -22,7 +22,7 @@ defineExpose({
 
 <template>
   <hanko-events @onSessionExpired="show()"></hanko-events>
-  <dialog ref="modal" id="session-expired-modal">
+  <dialog ref="modal">
     <div class="error">{{ error?.message }}</div>
     Please login again.<br /><br />
     <button @click="redirectToLogin()">Login</button>
