@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import styles from "../styles/Todo.module.css";
 import dynamic from "next/dynamic";
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import styles from "../styles/Todo.module.css";
+import { Hanko } from "@teamhanko/hanko-elements";
+import { SessionExpiredModal } from "../components/SessionExpiredModal";
 
 const hankoAPI = process.env.NEXT_PUBLIC_HANKO_API!;
 
@@ -13,8 +14,8 @@ const HankoProfile = dynamic(() => import("../components/HankoProfile"), {
 
 const Todo: NextPage = () => {
   const router = useRouter();
-  const hankoClient = useMemo(() => createHankoClient(hankoAPI), []);
-
+  const hankoClient = useMemo(() => new Hanko(hankoAPI), []);
+  const modalRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<Error | null>(null);
 
   const logout = () => {
@@ -29,8 +30,25 @@ const Todo: NextPage = () => {
     router.push("/todo").catch((e) => setError(e));
   };
 
+  const redirectToLogin = useCallback(() => {
+    router.push("/").catch(setError)
+  }, [router]);
+
+  useEffect(() => hankoClient.onUserLoggedOut(() => {
+    redirectToLogin();
+  }), [hankoClient, redirectToLogin]);
+
+  useEffect(() => hankoClient.onSessionNotPresent(() => {
+    redirectToLogin();
+  }), [hankoClient, redirectToLogin]);
+
+  useEffect(() => hankoClient.onSessionExpired(() => {
+    modalRef.current?.showModal();
+  }), [hankoClient]);
+
   return (
     <>
+      <SessionExpiredModal ref={modalRef} />
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout

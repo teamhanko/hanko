@@ -1,6 +1,5 @@
-import { createHankoClient, register } from "@teamhanko/hanko-elements";
-import { useCallback, useEffect, useMemo } from "react";
-import { router } from "next/client";
+import { register } from "@teamhanko/hanko-elements";
+import { useEffect } from "react";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
 
@@ -9,19 +8,9 @@ interface Props {
 }
 
 function HankoProfile({ setError }: Props) {
-  const hankoClient = useMemo(() => createHankoClient(api), []);
-
-  const redirectToLogin = useCallback(() => {
-    router.replace("/").catch(setError);
-  }, [setError]);
-
   useEffect(() => {
     register(api).catch(setError);
   }, [setError]);
-
-  useEffect(() => hankoClient.onSessionRemoved(() => {
-    redirectToLogin();
-  }))
 
   return <hanko-profile />;
 }

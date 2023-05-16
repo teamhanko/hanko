@@ -1,4 +1,4 @@
-import { createHankoClient, register } from "@teamhanko/hanko-elements";
+import { Hanko, register } from "@teamhanko/hanko-elements";
 import { useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 
@@ -10,7 +10,7 @@ interface Props {
 
 function HankoAuth({ setError }: Props) {
   const router = useRouter();
-  const hankoClient = useMemo(() => createHankoClient(api), []);
+  const hankoClient = useMemo(() => new Hanko(api), []);
 
   const redirectToTodos = useCallback(() => {
     router.replace("/todo").catch(setError);

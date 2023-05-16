@@ -1,21 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { TodoClient, Todos } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import { Hanko } from "@teamhanko/hanko-elements";
+import { SessionExpiredModal } from "../components/SessionExpiredModal";
 
 const hankoAPI = process.env.NEXT_PUBLIC_HANKO_API!;
 const todoAPI = process.env.NEXT_PUBLIC_TODO_API!;
 
 const Todo: NextPage = () => {
-  const hankoClient = useMemo(() => createHankoClient(hankoAPI), []);
+  const hankoClient = useMemo(() => new Hanko(hankoAPI), []);
   const todoClient = useMemo(() => new TodoClient(todoAPI), []);
   const router = useRouter();
 
   const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   const redirectToProfile = () => {
     router.push("/profile").catch(setError)
@@ -33,7 +35,7 @@ const Todo: NextPage = () => {
       .addTodo(todo)
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -52,7 +54,7 @@ const Todo: NextPage = () => {
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -66,14 +68,14 @@ const Todo: NextPage = () => {
       .catch((e) => {
         setError(e);
       });
-  }, [todoClient, redirectToLogin]);
+  }, [todoClient]);
 
   const patchTodo = (id: string, checked: boolean) => {
     todoClient
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -91,7 +93,7 @@ const Todo: NextPage = () => {
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -121,16 +123,23 @@ const Todo: NextPage = () => {
     patchTodo(currentTarget.value, currentTarget.checked);
   };
 
-  useEffect(() => hankoClient.onSessionRemoved(() => {
+  useEffect(() => listTodos(), [listTodos]);
+
+  useEffect(() => hankoClient.onUserLoggedOut(() => {
     redirectToLogin();
   }), [hankoClient, redirectToLogin]);
 
-  useEffect(() => {
-    listTodos();
-  }, [listTodos]);
+  useEffect(() => hankoClient.onSessionNotPresent(() => {
+    redirectToLogin();
+  }), [hankoClient, redirectToLogin]);
+
+  useEffect(() => hankoClient.onSessionExpired(() => {
+    modalRef.current?.showModal();
+  }), [hankoClient]);
 
   return (
     <>
+      <SessionExpiredModal ref={modalRef} />
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
