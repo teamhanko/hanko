@@ -1,19 +1,27 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { TodoClient, Todos } from "./TodoClient";
 import styles from "./Todo.module.css";
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import { Hanko } from "@teamhanko/hanko-elements";
+import { SessionExpiredModal } from "./SessionExpiredModal";
 
 const todoAPI = process.env.REACT_APP_TODO_API!;
 const hankoAPI = process.env.REACT_APP_HANKO_API!;
 
 function Todo() {
   const navigate = useNavigate();
-  const hankoClient = createHankoClient(hankoAPI);
+  const hankoClient = useMemo(() => new Hanko(hankoAPI), []);
   const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
   const todoClient = useMemo(() => new TodoClient(todoAPI), []);
+  const modalRef = useRef<HTMLDialogElement | null>(null);
 
   const redirectToLogin = useCallback(() => {
     navigate("/");
@@ -21,7 +29,7 @@ function Todo() {
 
   const redirectToProfile = () => {
     navigate("/profile");
-  }
+  };
 
   const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -31,7 +39,7 @@ function Todo() {
       .addTodo(todo)
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -48,7 +56,7 @@ function Todo() {
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -60,14 +68,14 @@ function Todo() {
         }
       })
       .catch(setError);
-  }, [todoClient, redirectToLogin]);
+  }, [todoClient]);
 
   const patchTodo = (id: string, checked: boolean) => {
     todoClient
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -83,7 +91,7 @@ function Todo() {
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          redirectToLogin();
+          modalRef.current?.showModal();
           return;
         }
 
@@ -95,9 +103,7 @@ function Todo() {
   };
 
   const logout = () => {
-    hankoClient.user
-      .logout()
-      .catch(setError);
+    hankoClient.user.logout().catch(setError);
   };
 
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -113,10 +119,23 @@ function Todo() {
     listTodos();
   }, [listTodos]);
 
-  useEffect(() => hankoClient.onSessionRemoved(() => navigate("/")), [hankoClient, navigate])
+  useEffect(() => {
+    hankoClient.onSessionNotPresent(() => redirectToLogin());
+  }, [hankoClient, redirectToLogin]);
+
+  useEffect(
+    () => hankoClient.onUserLoggedOut(() => redirectToLogin()),
+    [hankoClient, redirectToLogin]
+  );
+
+  useEffect(
+    () => hankoClient.onSessionExpired(() => modalRef.current?.showModal()),
+    [hankoClient]
+  );
 
   return (
     <>
+      <SessionExpiredModal ref={modalRef} />
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
@@ -157,7 +176,10 @@ function Todo() {
               <label className={styles.description} htmlFor={todo.todoID}>
                 {todo.description}
               </label>
-              <button className={styles.button} onClick={() => deleteTodo(todo.todoID!)}>
+              <button
+                className={styles.button}
+                onClick={() => deleteTodo(todo.todoID!)}
+              >
                 ×
               </button>
             </div>
