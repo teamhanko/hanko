@@ -22,15 +22,15 @@ npm install @teamhanko/hanko-elements
 
 ## Add `<hanko-auth>` component
 
-To provide a login interface in your app, use the `<hanko-auth>` web component. To do so, first import the `register`
-function from `@teamhanko/hanko-elements` in your Next.js component. Then call `register` to register the `<hanko-auth>`
-element with the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry)
-and use the `<hanko-auth>` element in your JSX.
+To provide a login interface in your app, use the `<hanko-auth>` web component. To do so, first import the `register` function
+from `@teamhanko/hanko-elements` in your Next.js component. Call it with the URL of the Hanko API as an argument to register
+the `<hanko-auth>` element with
+the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
+Then use the element in your JSX.
 
 :::info
 
-When adding the `<hanko-auth>` element to your JSX you must provide the URL of the Hanko API via the `api`
-attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
 If you are self-hosting you need to provide the URL of your running Hanko backend.
 
 :::
@@ -44,14 +44,14 @@ export default function HankoAuth() {
   useEffect(() => {
     // register the component
     // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-    register({ shadow: true })
+    register(hankoApi)
       .catch((error) => {
         // handle error
       });
   }, []);
 
   return (
-    <hanko-auth api={hankoApi} />
+    <hanko-auth />
   );
 }
 ```
@@ -82,46 +82,47 @@ export default function Home() {
 }
 ```
 
-### Define login callbacks
+## Define event callbacks
 
-The `<hanko-auth>` element dispatches a custom `hankoAuthSuccess` event on successful login. React to this
-event in order to, for example, redirect your users to protected pages in your application,
-e.g. a [user profile page](#hanko-profile).
+Use the Hanko client provided by `@teamhanko/hanko-elements` to subscribe to
+[events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events).
 
-To do so, apply an event listener with an appropriate redirect callback:
-
-```jsx {2,10-19} title="HankoAuth.jsx" showLineNumbers
+```jsx title="HankoAuth.jsx" showLineNumbers
 import React, { useEffect, useCallback } from "react";
+// highlight-next-line
 import { useRouter } from "next/router";
-import { register } from "@teamhanko/hanko-elements";
+import { register, Hanko } from "@teamhanko/hanko-elements";
 
+// highlight-next-line
 const hankoApi = "<YOUR_API_URL>";
 
 export default function HankoAuth() {
+  // highlight-next-line
   const router = useRouter();
+  const hanko = useMemo(() => new Hanko(hankoApi), []);
 
   const redirectAfterLogin = useCallback(() => {
     // successfully logged in, redirect to a page in your application
     router.replace("...");
   }, [router]);
 
-  useEffect(() => {
-    document.addEventListener("hankoAuthSuccess", redirectAfterLogin);
-    return () =>
-      document.removeEventListener("hankoAuthSuccess", redirectAfterLogin);
-  }, [redirectAfterLogin]);
+  // highlight-start
+  useEffect(() => hanko.onAuthFlowCompleted(() => {
+    redirectAfterLogin();
+  }), [hanko, redirectAfterLogin]);
+  // highlight-end
 
   useEffect(() => {
     // register the component
     // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-    register({ shadow: true })
+    register(hankoApi)
       .catch((error) => {
         // handle error
       });
   }, []);
 
   return (
-    <hanko-auth api={hankoApi} />
+    <hanko-auth />
   );
 }
 ```
@@ -129,19 +130,11 @@ export default function HankoAuth() {
 ## Add `<hanko-profile>` component {#hanko-profile}
 
 To provide a page where users can manage their email addresses, password and passkeys, use the `<hanko-profile>` web
-component. Just as with the `<hanko-auth>` component, import the `register` function from `@teamhanko/hanko-elements` in
-your Next.js component. Then call `register` to register the `<hanko-profile>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry) and use
-the element in your JSX.
-
-
-:::info
-
-When adding the `<hanko-profile>` element to your template you must provide the URL of the Hanko API via the `api`
-attribute. If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
-If you are self-hosting you need to provide the URL of your running Hanko backend.
-
-:::
+component. Import the `register` function from `@teamhanko/hanko-elements` in
+your Next.js component.  Call it with the
+URL of the Hanko API as an argument to register the `<hanko-profile>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
+Then use the element in your JSX.
 
 ```jsx title="HankoProfile.jsx" showLineNumbers
 import { useEffect } from "react";
@@ -153,14 +146,74 @@ export default function HankoProfile() {
   useEffect(() => {
     // register the component
     // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-    register({ shadow: true })
+    register(hankoApi)
       .catch((error) => {
         // handle error
       });
   }, []);
 
   return (
-    <hanko-profile api={hankoApi} />
+    <hanko-profile />
+  );
+};
+```
+
+## Implement logout
+
+Use the Hanko client provided by `@teamhanko/hanko-elements` to log out users. On logout a custom event is
+dispatched that you can subscribe to:
+
+```jsx title="HankoProfile.jsx" showLineNumbers
+// highlight-start
+import { useEffect, useMemo } from "react";
+import { useRouter } from "next/router";
+import { register, Hanko } from "@teamhanko/hanko-elements";
+// highlight-end
+
+const hankoApi = "<YOUR_API_URL>";
+
+export default function HankoProfile() {
+  // highlight-start
+  const router = useRouter();
+  const hanko = useMemo(() => new Hanko(hankoApi), []);
+  // highlight-end
+
+  // highlight-start
+  const logout = () => {
+    hanko.user.logout().catch((error) => {
+      // handle error
+    })
+  }
+  // highlight-end
+
+  // highlight-start
+  const redirectAfterLogout = () => {
+    // successfully logged out, redirect to a login page in your application
+    router.replace("...");
+  };
+  // highlight-end
+
+  useEffect(() => {
+    // register the component
+    // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
+    register(hankoApi)
+      .catch((error) => {
+        // handle error
+      });
+  }, []);
+
+  // highlight-start
+  useEffect(() => hanko.onUserLoggedOut(() => {
+    redirectAfterLogout();
+  }), [hanko, redirectAfterLogout]);
+  // highlight-end
+
+  return (
+    <>
+      // highlight-next-line
+      <button onClick={logout}>Logout</button>
+      <hanko-profile />
+    </>
   );
 };
 ```
