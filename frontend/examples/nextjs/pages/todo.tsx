@@ -3,21 +3,26 @@ import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { TodoClient, Todos } from "../util/TodoClient";
 import styles from "../styles/Todo.module.css";
-import { Hanko } from "@teamhanko/hanko-elements";
 import { SessionExpiredModal } from "../components/SessionExpiredModal";
+import { Hanko } from "@teamhanko/hanko-elements";
 
 const hankoAPI = process.env.NEXT_PUBLIC_HANKO_API!;
 const todoAPI = process.env.NEXT_PUBLIC_TODO_API!;
 
 const Todo: NextPage = () => {
-  const hankoClient = useMemo(() => new Hanko(hankoAPI), []);
-  const todoClient = useMemo(() => new TodoClient(todoAPI), []);
   const router = useRouter();
+  const todoClient = useMemo(() => new TodoClient(todoAPI), []);
+  const [hankoClient, setHankoClient] = useState<Hanko>();
 
   const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
+
   const modalRef = useRef<HTMLDialogElement>(null);
+
+  useEffect(() => {
+    import("@teamhanko/hanko-elements").then(({ Hanko }) => setHankoClient(new Hanko(hankoAPI)));
+  }, []);
 
   const redirectToProfile = () => {
     router.push("/profile").catch(setError)
@@ -29,7 +34,7 @@ const Todo: NextPage = () => {
 
   const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const todo = { description, checked: false };
+    const todo = {description, checked: false};
 
     todoClient
       .addTodo(todo)
@@ -107,7 +112,7 @@ const Todo: NextPage = () => {
   };
 
   const logout = () => {
-    hankoClient.user
+    hankoClient?.user
       .logout()
       .catch((e) => {
         setError(e);
@@ -119,27 +124,27 @@ const Todo: NextPage = () => {
   };
 
   const changeCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { currentTarget } = event;
+    const {currentTarget} = event;
     patchTodo(currentTarget.value, currentTarget.checked);
   };
 
   useEffect(() => listTodos(), [listTodos]);
 
-  useEffect(() => hankoClient.onUserLoggedOut(() => {
+  useEffect(() => hankoClient?.onUserLoggedOut(() => {
     redirectToLogin();
   }), [hankoClient, redirectToLogin]);
 
-  useEffect(() => hankoClient.onSessionNotPresent(() => {
+  useEffect(() => hankoClient?.onSessionNotPresent(() => {
     redirectToLogin();
   }), [hankoClient, redirectToLogin]);
 
-  useEffect(() => hankoClient.onSessionExpired(() => {
+  useEffect(() => hankoClient?.onSessionExpired(() => {
     modalRef.current?.showModal();
   }), [hankoClient]);
 
   return (
     <>
-      <SessionExpiredModal ref={modalRef} />
+      <SessionExpiredModal ref={modalRef}/>
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
