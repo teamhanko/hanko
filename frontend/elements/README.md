@@ -96,9 +96,9 @@ function, but please take a look into the [frontend-sdk docs](https://docs.hanko
 Note that you can create a `hanko-frontend-sdk` instance without having to register the web components as follows:
 
 ```js
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import { Hanko } from "@teamhanko/hanko-elements";
 
-const hanko = createHankoClient("https://hanko.yourdomain.com")
+const hanko = new Hanko("https://hanko.yourdomain.com")
 ```
 
 #### Events

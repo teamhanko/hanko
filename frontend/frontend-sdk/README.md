@@ -159,12 +159,12 @@ and an object will be passed in, containing event details. The event binding wor
 // Controls the optional `once` parameter. When set to `true` the callback function will be called only once.
 const once = false;
 
-const cleanupFunc = hanko.onSessionCreated((eventDetail) => {
+const removeEventListener = hanko.onSessionCreated((eventDetail) => {
     // Your code...
 }, once);
 
 // Removes the event listener, the callback function will not be called anymore.
-cleanupFunc();
+removeEventListener();
 
 // Removes all event listeners.
 hanko.removeEventListeners();
