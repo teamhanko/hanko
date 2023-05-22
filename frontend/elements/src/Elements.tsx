@@ -57,6 +57,10 @@ export interface RegisterOptions {
   injectStyles?: boolean;
 }
 
+export interface RegisterResult {
+  hanko: Hanko;
+}
+
 interface InternalRegisterOptions extends RegisterOptions {
   tagName: string;
   entryComponent: FunctionalComponent<HankoAuthAdditionalProps>;
@@ -65,10 +69,6 @@ interface InternalRegisterOptions extends RegisterOptions {
 
 let hanko: Hanko;
 let injectStyles: boolean;
-
-export interface ElementsRegisterResult {
-  hanko: Hanko;
-}
 
 const _register = async ({
   tagName,
@@ -86,7 +86,7 @@ const _register = async ({
 export const register = async (
   api: string,
   options: RegisterOptions = { shadow: true, injectStyles: true }
-): Promise<ElementsRegisterResult> => {
+): Promise<RegisterResult> => {
   hanko = new Hanko(api);
   injectStyles = options.injectStyles;
   await Promise.all([

@@ -384,7 +384,7 @@ declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-fro
 ### Interfaces
 
 - `RegisterOptions` represents the options of the `register()` function.
-- `ElementsRegisterResult` represents the return value of the `register()` function.
+- `RegisterResult` represents the return value of the `register()` function.
 - `HankoAuthElementProps` - represents the `<hanko-auth />` element properties.
 - `HankoProfileElementProps` - represents the `<hanko-profile />` element properties.
 - `HankoEventsElementProps` - represents the `<hanko-events />` element properties.
