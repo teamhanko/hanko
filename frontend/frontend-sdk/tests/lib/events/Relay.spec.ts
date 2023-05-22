@@ -5,6 +5,7 @@ import {
   sessionCreatedType,
   SessionEventDetail,
   sessionExpiredType,
+  sessionNotPresentType,
   sessionResumedType,
   userDeletedType,
 } from "../../../src/lib/events/CustomEvents";
@@ -44,7 +45,7 @@ describe("Relay", () => {
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip("should listen to 'hanko-session-created' events and dispatch 'hanko-session-expired' events", () => {
+    it("should listen to 'hanko-session-created' events and dispatch 'hanko-session-expired' events", () => {
       const mockSessionCreatedDetail = {
         userID: "test-user",
         jwt: "test-token",
@@ -83,7 +84,10 @@ describe("Relay", () => {
       jest.advanceTimersByTime(3000);
 
       // Dispatching is expected after 7000ms.
-      expect(dispatcherSpy).not.toHaveBeenCalled();
+      expect(dispatcherSpy).toBeCalledTimes(1);
+      expect(dispatcherSpy.mock.calls[0][0].type).not.toEqual(
+        sessionExpiredType
+      );
 
       // Should cause another cleanup and new task to be scheduled to dispatch the session-removed event.
       document.dispatchEvent(sessionCreatedEventMock);
@@ -99,12 +103,13 @@ describe("Relay", () => {
       jest.advanceTimersByTime(4000);
 
       // The second session-created event should have delayed the dispatching.
-      expect(dispatcherSpy).not.toHaveBeenCalled();
+      expect(dispatcherSpy.mock.calls[0][0].type).not.toEqual(
+        sessionExpiredType
+      );
 
       jest.advanceTimersByTime(3000);
 
-      expect(dispatcherSpy).toHaveBeenCalled();
-      expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionExpiredType);
+      expect(dispatcherSpy).toBeCalledTimes(1);
     });
   });
 
@@ -138,7 +143,8 @@ describe("Relay", () => {
     expect(relay._scheduler._tasks).toStrictEqual([]);
 
     jest.advanceTimersByTime(7000);
-    expect(dispatcherSpy).toBeCalledTimes(0);
+    expect(dispatcherSpy).toBeCalledTimes(1);
+    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionNotPresentType);
   });
 
   it("should listen to 'hanko-user-deleted' and remove scheduled events", () => {
@@ -172,7 +178,8 @@ describe("Relay", () => {
 
     jest.advanceTimersByTime(7000);
 
-    expect(dispatcherSpy).toBeCalledTimes(0);
+    expect(dispatcherSpy).toBeCalledTimes(1);
+    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionNotPresentType);
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-removed' if the session is expired", () => {
