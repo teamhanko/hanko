@@ -8,11 +8,14 @@ export interface HankoAuthAdditionalProps {
   experimental?: string;
 }
 
-declare interface HankoAuthElementProps
+export declare interface HankoAuthElementProps
   extends JSX.HTMLAttributes<HTMLElement>,
     HankoAuthAdditionalProps {}
 
-declare interface HankoProfileElementProps
+export declare interface HankoProfileElementProps
+  extends JSX.HTMLAttributes<HTMLElement> {}
+
+export declare interface HankoEventsElementProps
   extends JSX.HTMLAttributes<HTMLElement> {}
 
 declare global {
@@ -22,12 +25,12 @@ declare global {
     interface IntrinsicElements {
       "hanko-auth": HankoAuthElementProps;
       "hanko-profile": HankoProfileElementProps;
-      "hanko-events": HankoProfileElementProps;
+      "hanko-events": HankoEventsElementProps;
     }
   }
 }
 
-export const HankoAuth = (props: HankoAuthElementProps) => (
+const HankoAuth = (props: HankoAuthElementProps) => (
   <AppProvider
     componentName={"auth"}
     {...props}
@@ -36,7 +39,7 @@ export const HankoAuth = (props: HankoAuthElementProps) => (
   />
 );
 
-export const HankoProfile = (props: HankoProfileElementProps) => (
+const HankoProfile = (props: HankoProfileElementProps) => (
   <AppProvider
     componentName={"profile"}
     {...props}
@@ -45,7 +48,7 @@ export const HankoProfile = (props: HankoProfileElementProps) => (
   />
 );
 
-export const HankoEvents = (props: HankoProfileElementProps) => (
+const HankoEvents = (props: HankoProfileElementProps) => (
   <AppProvider componentName={"events"} {...props} hanko={hanko} />
 );
 
@@ -63,7 +66,7 @@ interface InternalRegisterOptions extends RegisterOptions {
 let hanko: Hanko;
 let injectStyles: boolean;
 
-interface ElementsRegisterReturn {
+export interface ElementsRegisterResult {
   hanko: Hanko;
 }
 
@@ -83,7 +86,7 @@ const _register = async ({
 export const register = async (
   api: string,
   options: RegisterOptions = { shadow: true, injectStyles: true }
-): Promise<ElementsRegisterReturn> => {
+): Promise<ElementsRegisterResult> => {
   hanko = new Hanko(api);
   injectStyles = options.injectStyles;
   await Promise.all([

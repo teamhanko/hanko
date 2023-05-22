@@ -88,6 +88,22 @@ A web component that allows to manage emails, passwords and passkeys.
 
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 
+### &lt;hanko-events&gt;
+
+A web component that allows to bind event handler to certain events, without displaying UI elements. Every other Hanko
+web components can also be used to subscribe to the same events. Also, you can bind event handler via the
+`frontned-sdk` (see next section).
+
+#### Markup
+
+```html
+<hanko-events id="events"></hanko-events>
+<script>
+  document.getElementById("events").addEventListener("onAuthFlowCompleted", console.log)
+  // more events are available (see "frontend-sdk" docs)...
+</script>
+```
+
 ### Frontend-SDK Examples
 
 The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by the `register()`
@@ -355,6 +371,23 @@ Take a look at our [live demo](https://example.hanko.io).
 To learn more about how to integrate the Hanko elements into frontend frameworks, see our
 [guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
 [example applications](https://github.com/teamhanko/hanko/blob/main/frontend/examples/README.md).
+
+## Exports
+
+The `@teamhanko/hanko-elements` package exports the functions and interfaces listed below and additionally every
+declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
+
+### Functions
+
+- `register` - A function to register the web components to the shadow dom
+
+### Interfaces
+
+- `RegisterOptions` represents the options of the `register()` function.
+- `ElementsRegisterResult` represents the return value of the `register()` function.
+- `HankoAuthElementProps` - represents the `<hanko-auth />` element properties.
+- `HankoProfileElementProps` - represents the `<hanko-profile />` element properties.
+- `HankoEventsElementProps` - represents the `<hanko-events />` element properties.
 
 ## Browser support
 
