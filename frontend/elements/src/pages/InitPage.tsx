@@ -31,7 +31,9 @@ const InitPage = () => {
     ])
       .then(() => hanko.webauthn.shouldRegister(_user))
       .then((shouldRegister) =>
-        shouldRegister ? <RegisterPasskeyPage /> : <LoginFinishedPage />
+        setPage(
+          shouldRegister ? <RegisterPasskeyPage /> : <LoginFinishedPage />
+        )
       );
   }, [hanko.config, hanko.user, hanko.webauthn, setConfig, setUser]);
 
