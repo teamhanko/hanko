@@ -59,7 +59,6 @@ class EmailClient extends Client {
     if (response.status === 400) {
       throw new EmailAddressAlreadyExistsError();
     } else if (response.status === 401) {
-      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (response.status === 409) {
       throw new MaxNumOfEmailAddressesReachedError();

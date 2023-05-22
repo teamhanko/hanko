@@ -135,7 +135,7 @@ const AppProvider = ({
     ref.current?.dispatchEvent(
       new CustomEvent<T>(type, {
         detail,
-        bubbles: true,
+        bubbles: false,
         composed: true,
       })
     );

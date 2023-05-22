@@ -34,7 +34,7 @@
 <script type="module">
     import { register } from "../dist/elements.js";
 
-    const { hanko } = await register("http://localhost:8000", { shadow: true });
+    const { hanko } = await register("http://localhost:8000");
 
     function showLogin() {
         document.getElementById("auth").hidden = false;
@@ -47,8 +47,7 @@
     }
 
     hanko.onSessionCreated(console.info);
-    hanko.onSessionResumed(console.info);
-    hanko.onSessionExpired(showLogin);
+    hanko.onSessionResumed(showProfile);
     hanko.onAuthFlowCompleted(showProfile);
     hanko.onSessionExpired(showLogin);
     hanko.onUserLoggedOut(showLogin);
