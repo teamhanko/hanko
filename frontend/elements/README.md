@@ -308,7 +308,7 @@ There is also the possibility to provide your own CSS rules when the web compone
 DOM:
 
 ```typescript
-register({ shadow: false })
+register("https://hanko.yourdomain.com",{ shadow: false })
 ```
 
 Please take a look at the [CSS example](https://github.com/teamhanko/hanko/raw/main/frontend/elements/example.css) file to see
@@ -324,7 +324,7 @@ example if you like to change the background color, include the following CSS ru
 Also, you can prevent injecting any styles:
 
 ```typescript
-register({ shadow: false, injectStyles: false })
+register("https://hanko.yourdomain.com", { shadow: false, injectStyles: false })
 ```
 
 so you don't need to override properties but provide the entirety of CSS rules:
