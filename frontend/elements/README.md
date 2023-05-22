@@ -157,59 +157,58 @@ variables including default values can be found below:
 ```css
 hanko-auth, hanko-profile {
   /* Color Scheme */
-  --color: #171717
-  --color-shade-1: #8f9095
-  --color-shade-2: #e5e6ef
+  --color: #171717;
+  --color-shade-1: #8f9095;
+  --color-shade-2: #e5e6ef;
 
-  --brand-color: #506cf0
-  --brand-color-shade-1: #6b84fb
-  --brand-contrast-color: white
+  --brand-color: #506cf0;
+  --brand-color-shade-1: #6b84fb;
+  --brand-contrast-color: white;
 
-  --background-color: white
-  --error-color: #e82020
-  --link-color: #506cf0
+  --background-color: white;
+  --error-color: #e82020;
+  --link-color: #506cf0;
 
   /* Font Styles */
-  --font-weight: 400
-  --font-size: 14px
-  --font-family: sans-serif
+  --font-weight: 400;
+  --font-size: 14px;
+  --font-family: sans-serif;
 
   /* Border Styles */
-  --border-radius: 4px
-  --border-style: solid
-  --border-width: 1px
+  --border-radius: 4px;
+  --border-style: solid;
+  --border-width: 1px;
 
   /* Item Styles */
-  --item-height: 34px
-  --item-margin: .5rem 0
+  --item-height: 34px;
+  --item-margin: .5rem 0;
 
   /* Container Styles */
-  --container-padding: 0
-  --container-max-width: 600px
+  --container-padding: 0;
+  --container-max-width: 600px;
 
   /* Headline Styles */
-  --headline1-font-size: 24px
-  --headline1-font-weight: 600
-  --headline1-margin: 0 0 .5rem
+  --headline1-font-size: 24px;
+  --headline1-font-weight: 600;
+  --headline1-margin: 0 0 .5rem;
 
-  --headline2-font-size: 14px
-  --headline2-font-weight: 600
-  --headline2-margin: 1rem 0 .25rem
+  --headline2-font-size: 14px;
+  --headline2-font-weight: 600;
+  --headline2-margin: 1rem 0 .25rem;
 
   /* Divider Styles */
-  --divider-padding: 0 42px
-  --divider-display: block
-  --divider-visibility: visible
+  --divider-padding: 0 42px;
+  --divider-visibility: visible;
 
   /* Link Styles */
-  --link-text-decoration: none
-  --link-text-decoration-hover: underline
+  --link-text-decoration: none;
+  --link-text-decoration-hover: underline;
 
   /* Input Styles */
-  --input-min-width: 12em
+  --input-min-width: 12em;
 
   /* Button Styles */
-  --button-min-width: max-content
+  --button-min-width: max-content;
 }
 ```
 
