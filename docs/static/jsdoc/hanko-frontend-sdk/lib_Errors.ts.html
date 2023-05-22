@@ -1,0 +1,430 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> lib/Errors.ts</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / Internal</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Cookie.html">Cookie</a></li><li><a href="Dispatcher.html">Dispatcher</a></li><li><a href="Headers.html">Headers</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="PasscodeState.html">PasscodeState</a></li><li><a href="PasswordState.html">PasswordState</a></li><li><a href="Relay.html">Relay</a></li><li><a href="Response.html">Response</a></li><li><a href="Scheduler.html">Scheduler</a></li><li><a href="SessionState.html">SessionState</a></li><li><a href="State.html">State</a></li><li><a href="Throttle.html">Throttle</a></li><li><a href="UserState.html">UserState</a></li><li><a href="WebauthnState.html">WebauthnState</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="ConfigClient.html">ConfigClient</a></li><li><a href="EmailClient.html">EmailClient</a></li><li><a href="PasscodeClient.html">PasscodeClient</a></li><li><a href="PasswordClient.html">PasswordClient</a></li><li><a href="ThirdPartyClient.html">ThirdPartyClient</a></li><li><a href="TokenClient.html">TokenClient</a></li><li><a href="UserClient.html">UserClient</a></li><li><a href="WebauthnClient.html">WebauthnClient</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="EmailAddressAlreadyExistsError.html">EmailAddressAlreadyExistsError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfEmailAddressesReachedError.html">MaxNumOfEmailAddressesReachedError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="ThirdPartyError.html">ThirdPartyError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="UserVerificationError.html">UserVerificationError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Events</h3><ul><li><a href="Listener.html">Listener</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="AccountConfig.html">AccountConfig</a></li><li><a href="Config.html">Config</a></li><li><a href="Credential.html">Credential</a></li><li><a href="Email.html">Email</a></li><li><a href="EmailConfig.html">EmailConfig</a></li><li><a href="Emails.html">Emails</a></li><li><a href="Identity.html">Identity</a></li><li><a href="Passcode.html">Passcode</a></li><li><a href="PasswordConfig.html">PasswordConfig</a></li><li><a href="TokenFinalized.html">TokenFinalized</a></li><li><a href="User.html">User</a></li><li><a href="UserCreated.html">UserCreated</a></li><li><a href="UserInfo.html">UserInfo</a></li><li><a href="WebauthnCredential.html">WebauthnCredential</a></li><li><a href="WebauthnCredentials.html">WebauthnCredentials</a></li><li><a href="WebauthnFinalized.html">WebauthnFinalized</a></li><li><a href="WebauthnTransports.html">WebauthnTransports</a></li></ul><h3>Interfaces / Events</h3><ul><li><a href="AuthFlowCompletedEventDetail.html">AuthFlowCompletedEventDetail</a></li><li><a href="SessionEventDetail.html">SessionEventDetail</a></li></ul><h3>Interfaces / Internal</h3><ul><li><a href="LocalStorage.html">LocalStorage</a></li><li><a href="LocalStoragePasscode.html">LocalStoragePasscode</a></li><li><a href="LocalStoragePassword.html">LocalStoragePassword</a></li><li><a href="LocalStorageSession.html">LocalStorageSession</a></li><li><a href="LocalStorageUser.html">LocalStorageUser</a></li><li><a href="LocalStorageUsers.html">LocalStorageUsers</a></li><li><a href="LocalStorageWebauthn.html">LocalStorageWebauthn</a></li><li><a href="ThrottleOptions.html">ThrottleOptions</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>lib/Errors.ts</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Every error thrown in the SDK is an instance of 'HankoError'. The value of the 'code' property is eligible to
+ * translate the error into an error message.
+ *
+ * @extends {Error}
+ * @category SDK
+ * @subcategory Errors
+ * @param code {string} - An error code that refers to the error instance.
+ * @param cause {Error=} - The original error
+ */
+abstract class HankoError extends Error {
+  code: string;
+  cause?: Error;
+
+  // eslint-disable-next-line require-jsdoc
+  protected constructor(message: string, code: string, cause?: Error) {
+    super(message);
+    /**
+     * @public
+     * @type {string}
+     */
+    this.code = code;
+    /**
+     * @public
+     * @type {Error=}
+     */
+    this.cause = cause;
+    Object.setPrototypeOf(this, HankoError.prototype);
+  }
+}
+
+/**
+ * Every error that doesn't need to be handled in a special way is a 'TechnicalError'. Whenever you catch one, there is
+ * usually nothing you can do but present an error to the user, e.g. "Something went wrong".
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class TechnicalError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Technical error", "somethingWentWrong", cause);
+    Object.setPrototypeOf(this, TechnicalError.prototype);
+  }
+}
+
+/**
+ * Attempting to create a resource that already exists results in a 'ConflictError'.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class ConflictError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(userID?: string, cause?: Error) {
+    super("Conflict error", "conflict", cause);
+    Object.setPrototypeOf(this, ConflictError.prototype);
+  }
+}
+
+/**
+ * A 'RequestTimeoutError' occurs when the specified timeout has been reached.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class RequestTimeoutError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Request timed out error", "requestTimeout", cause);
+    Object.setPrototypeOf(this, RequestTimeoutError.prototype);
+  }
+}
+
+/**
+ * A 'WebauthnRequestCancelledError' occurs during WebAuthn authentication or registration, when the WebAuthn API throws
+ * an error. In most cases, this happens when the user cancels the browser's WebAuthn dialog.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class WebauthnRequestCancelledError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Request cancelled error", "requestCancelled", cause);
+    Object.setPrototypeOf(this, WebauthnRequestCancelledError.prototype);
+  }
+}
+
+/**
+ * An 'InvalidPasswordError' occurs when invalid credentials are provided when logging in with a password.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class InvalidPasswordError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Invalid password error", "invalidPassword", cause);
+    Object.setPrototypeOf(this, InvalidPasswordError.prototype);
+  }
+}
+
+/**
+ * An 'InvalidPasswordError' occurs when an incorrect code is entered when logging in with a passcode.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class InvalidPasscodeError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Invalid Passcode error", "invalidPasscode", cause);
+    Object.setPrototypeOf(this, InvalidPasscodeError.prototype);
+  }
+}
+
+/**
+ * An 'InvalidWebauthnCredentialError' occurs if invalid credentials were used when logging in with WebAuthn.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class InvalidWebauthnCredentialError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super(
+      "Invalid WebAuthn credential error",
+      "invalidWebauthnCredential",
+      cause
+    );
+    Object.setPrototypeOf(this, InvalidWebauthnCredentialError.prototype);
+  }
+}
+
+/**
+ * A 'PasscodeExpiredError' occurs when the passcode has expired.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class PasscodeExpiredError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Passcode expired error", "passcodeExpired", cause);
+    Object.setPrototypeOf(this, PasscodeExpiredError.prototype);
+  }
+}
+
+/**
+ * A 'MaxNumOfPasscodeAttemptsReachedError' occurs when an incorrect passcode is provided too many times.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class MaxNumOfPasscodeAttemptsReachedError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super(
+      "Maximum number of Passcode attempts reached error",
+      "passcodeAttemptsReached",
+      cause
+    );
+    Object.setPrototypeOf(this, MaxNumOfPasscodeAttemptsReachedError.prototype);
+  }
+}
+
+/**
+ * A 'NotFoundError' occurs when the requested resource was not found.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class NotFoundError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Not found error", "notFound", cause);
+    Object.setPrototypeOf(this, NotFoundError.prototype);
+  }
+}
+
+/**
+ * A 'TooManyRequestsError' occurs due to rate limiting when too many requests are made.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class TooManyRequestsError extends HankoError {
+  retryAfter?: number;
+  // eslint-disable-next-line require-jsdoc
+  constructor(retryAfter?: number, cause?: Error) {
+    super("Too many requests error", "tooManyRequests", cause);
+    this.retryAfter = retryAfter;
+    Object.setPrototypeOf(this, TooManyRequestsError.prototype);
+  }
+}
+
+/**
+ * An 'UnauthorizedError' occurs when the user is not authorized to access the resource.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class UnauthorizedError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Unauthorized error", "unauthorized", cause);
+    Object.setPrototypeOf(this, UnauthorizedError.prototype);
+  }
+}
+
+/**
+ * A 'UserVerificationError' occurs when the user verification requirements
+ * for a WebAuthn ceremony are not met.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class UserVerificationError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("User verification error", "userVerification", cause);
+    Object.setPrototypeOf(this, UserVerificationError.prototype);
+  }
+}
+
+/**
+ * A 'MaxNumOfEmailAddressesReachedError' occurs when the user tries to add a new email address while the maximum number
+ * of email addresses (see backend configuration) equals the number of email addresses already registered.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class MaxNumOfEmailAddressesReachedError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super(
+      "Maximum number of email addresses reached error",
+      "maxNumOfEmailAddressesReached",
+      cause
+    );
+    Object.setPrototypeOf(this, MaxNumOfEmailAddressesReachedError.prototype);
+  }
+}
+
+/**
+ * An 'EmailAddressAlreadyExistsError' occurs when the user tries to add a new email address which already exists.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class EmailAddressAlreadyExistsError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super(
+      "The email address already exists",
+      "emailAddressAlreadyExistsError",
+      cause
+    );
+    Object.setPrototypeOf(this, EmailAddressAlreadyExistsError.prototype);
+  }
+}
+
+/**
+ * A `ThirdPartyError` may occur during a sign in/sign up with a third party
+ * provider.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class ThirdPartyError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(code: string, cause?: Error) {
+    super("An error occurred during third party sign up/sign in", code, cause);
+    Object.setPrototypeOf(this, ThirdPartyError.prototype);
+  }
+}
+
+export {
+  HankoError,
+  TechnicalError,
+  ConflictError,
+  RequestTimeoutError,
+  WebauthnRequestCancelledError,
+  InvalidPasswordError,
+  InvalidPasscodeError,
+  InvalidWebauthnCredentialError,
+  PasscodeExpiredError,
+  MaxNumOfPasscodeAttemptsReachedError,
+  NotFoundError,
+  TooManyRequestsError,
+  UnauthorizedError,
+  UserVerificationError,
+  MaxNumOfEmailAddressesReachedError,
+  EmailAddressAlreadyExistsError,
+  ThirdPartyError,
+};
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>
