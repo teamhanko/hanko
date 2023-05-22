@@ -88,10 +88,11 @@ Use the Hanko client provided by `@teamhanko/hanko-elements` to subscribe to
 [events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events).
 
 ```jsx title="HankoAuth.jsx" showLineNumbers
-import React, { useEffect, useCallback } from "react";
-// highlight-next-line
+import React, { useEffect, useCallback, useState } from "react";
+// highlight-start
 import { useRouter } from "next/router";
 import { register, Hanko } from "@teamhanko/hanko-elements";
+// highlight-end
 
 // highlight-next-line
 const hankoApi = "<YOUR_API_URL>";
@@ -99,15 +100,24 @@ const hankoApi = "<YOUR_API_URL>";
 export default function HankoAuth() {
   // highlight-next-line
   const router = useRouter();
-  const hanko = useMemo(() => new Hanko(hankoApi), []);
 
+  // highlight-start
+  const [hanko, setHanko] = useState<Hanko>();
+
+  useEffect(() => {
+    import("@teamhanko/hanko-elements").then(({ Hanko }) => setHanko(new Hanko(hankoApi)));
+  }, []);
+  // highlight-end
+
+  // highlight-start
   const redirectAfterLogin = useCallback(() => {
     // successfully logged in, redirect to a page in your application
     router.replace("...");
   }, [router]);
+  // highlight-end
 
   // highlight-start
-  useEffect(() => hanko.onAuthFlowCompleted(() => {
+  useEffect(() => hanko?.onAuthFlowCompleted(() => {
     redirectAfterLogin();
   }), [hanko, redirectAfterLogin]);
   // highlight-end
@@ -165,7 +175,7 @@ dispatched that you can subscribe to:
 
 ```jsx title="HankoProfile.jsx" showLineNumbers
 // highlight-start
-import { useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { register, Hanko } from "@teamhanko/hanko-elements";
 // highlight-end
@@ -175,7 +185,13 @@ const hankoApi = "<YOUR_API_URL>";
 export default function HankoProfile() {
   // highlight-start
   const router = useRouter();
-  const hanko = useMemo(() => new Hanko(hankoApi), []);
+  const [hanko, setHanko] = useState<Hanko>();
+  // highlight-end
+
+  // highlight-start
+  useEffect(() => {
+    import("@teamhanko/hanko-elements").then(({ Hanko }) => setHanko(new Hanko(hankoApi)));
+  }, []);
   // highlight-end
 
   // highlight-start
@@ -203,7 +219,7 @@ export default function HankoProfile() {
   }, []);
 
   // highlight-start
-  useEffect(() => hanko.onUserLoggedOut(() => {
+  useEffect(() => hanko?.onUserLoggedOut(() => {
     redirectAfterLogout();
   }), [hanko, redirectAfterLogout]);
   // highlight-end
