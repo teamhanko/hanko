@@ -84,6 +84,7 @@ class PasswordClient extends Client {
     });
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();

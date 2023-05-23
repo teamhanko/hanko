@@ -138,7 +138,8 @@ class WebauthnClient extends Client {
       "/webauthn/registration/initialize"
     );
 
-    if (challengeResponse.status >= 400 && challengeResponse.status <= 499) {
+    if (challengeResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!challengeResponse.ok) {
       throw new TechnicalError();
@@ -163,14 +164,12 @@ class WebauthnClient extends Client {
       attestation
     );
 
-    if (
-      attestationResponse.status >= 400 &&
-      attestationResponse.status <= 499
-    ) {
-      if (attestationResponse.status === 422) {
-        throw new UserVerificationError();
-      }
+    if (attestationResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
+    }
+    if (attestationResponse.status === 422) {
+      throw new UserVerificationError();
     }
     if (!attestationResponse.ok) {
       throw new TechnicalError();
@@ -198,6 +197,7 @@ class WebauthnClient extends Client {
     const response = await this.client.get("/webauthn/credentials");
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
@@ -227,6 +227,7 @@ class WebauthnClient extends Client {
     );
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
@@ -252,6 +253,7 @@ class WebauthnClient extends Client {
     );
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();

@@ -140,7 +140,6 @@ class HttpClient {
 
   // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
-    const self = this;
     const url = this.api + path;
     const timeout = this.timeout;
     const bearerToken = this.cookie.getAuthCookie();
@@ -158,9 +157,6 @@ class HttpClient {
       xhr.withCredentials = true;
       xhr.onload = () => {
         const response = new Response(xhr);
-        if (response.status === 401) {
-          self.dispatcher.dispatchSessionExpiredEvent();
-        }
         resolve(response);
       };
 

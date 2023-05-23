@@ -79,11 +79,8 @@ class UserClient extends Client {
   async getCurrent(): Promise<User> {
     const meResponse = await this.client.get("/me");
 
-    if (
-      meResponse.status === 400 ||
-      meResponse.status === 401 ||
-      meResponse.status === 404
-    ) {
+    if (meResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!meResponse.ok) {
       throw new TechnicalError();
@@ -92,11 +89,8 @@ class UserClient extends Client {
     const me: Me = meResponse.json();
     const userResponse = await this.client.get(`/users/${me.id}`);
 
-    if (
-      userResponse.status === 400 ||
-      userResponse.status === 401 ||
-      userResponse.status === 404
-    ) {
+    if (userResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!userResponse.ok) {
       throw new TechnicalError();
@@ -120,6 +114,7 @@ class UserClient extends Client {
       this.client.dispatcher.dispatchUserDeletedEvent();
       return;
     } else if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     }
 

@@ -79,8 +79,6 @@ class PasscodeClient extends Client {
       retryAfter = response.parseNumericHeader("Retry-After");
       this.state.setResendAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
-    } else if (response.status === 401) {
-      throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
     }

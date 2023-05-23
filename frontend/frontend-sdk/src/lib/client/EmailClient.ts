@@ -29,6 +29,7 @@ class EmailClient extends Client {
     const response = await this.client.get("/emails");
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
@@ -59,6 +60,7 @@ class EmailClient extends Client {
     if (response.status === 400) {
       throw new EmailAddressAlreadyExistsError();
     } else if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (response.status === 409) {
       throw new MaxNumOfEmailAddressesReachedError();
@@ -81,6 +83,7 @@ class EmailClient extends Client {
     const response = await this.client.post(`/emails/${emailID}/set_primary`);
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
@@ -103,6 +106,7 @@ class EmailClient extends Client {
     const response = await this.client.delete(`/emails/${emailID}`);
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
