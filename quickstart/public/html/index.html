@@ -25,7 +25,7 @@
 <script type="module">
     import { register } from "{{.HankoElementUrl}}";
 
-    const { hanko } = await register("{{.HankoUrl}}", { shadow: false });
+    const { hanko } = await register("{{.HankoUrl}}");
 
     hanko.onAuthFlowCompleted(() => {
         document.location.href = "/secured"
