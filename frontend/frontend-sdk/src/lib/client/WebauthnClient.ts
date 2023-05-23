@@ -212,7 +212,6 @@ class WebauthnClient extends Client {
    * @param {string=} credentialID - The credential's UUID.
    * @param {string} name - The new credential name.
    * @return {Promise<void>}
-   * @throws {NotFoundError}
    * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
@@ -241,7 +240,6 @@ class WebauthnClient extends Client {
    *
    * @param {string=} credentialID - The credential's UUID.
    * @return {Promise<void>}
-   * @throws {NotFoundError}
    * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}

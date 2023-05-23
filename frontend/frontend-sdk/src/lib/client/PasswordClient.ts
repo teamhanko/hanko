@@ -41,9 +41,10 @@ class PasswordClient extends Client {
    * @param {string} userID - The UUID of the user.
    * @param {string} password - The password.
    * @return {Promise<void>}
-   * @throws {TooManyRequestsError}
+   * @throws {InvalidPasswordError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @throws {TooManyRequestsError}
    * @see https://docs.hanko.io/api/public#tag/Password/operation/passwordLogin
    */
   async login(userID: string, password: string): Promise<void> {

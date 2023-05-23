@@ -6,7 +6,6 @@ import {
   PasscodeExpiredError,
   TechnicalError,
   TooManyRequestsError,
-  UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
 
@@ -38,10 +37,9 @@ class PasscodeClient extends Client {
    * @param {string=} emailID - The UUID of the email address. If unspecified, the email will be sent to the primary email address.
    * @param {boolean=} force - Indicates the passcode should be sent, even if there is another active passcode.
    * @return {Promise<Passcode>}
-   * @throws {TooManyRequestsError}
    * @throws {RequestTimeoutError}
-   * @throws {UnauthorizedError}
    * @throws {TechnicalError}
+   * @throws {TooManyRequestsError}
    * @see https://docs.hanko.io/api/public#tag/Passcode/operation/passcodeInit
    */
   async initialize(

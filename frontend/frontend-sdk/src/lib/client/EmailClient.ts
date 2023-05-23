@@ -45,9 +45,9 @@ class EmailClient extends Client {
    * @return {Promise<Email>}
    * @throws {EmailAddressAlreadyExistsError}
    * @throws {MaxNumOfEmailAddressesReachedError}
-   * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @throws {UnauthorizedError}
    * @see https://docs.hanko.io/api/public#tag/Email-Management/operation/createEmail
    */
   async create(address: string): Promise<Email> {
@@ -74,9 +74,9 @@ class EmailClient extends Client {
    *
    * @param {string} emailID - The ID of the email address to be updated
    * @return {Promise<void>}
-   * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @throws {UnauthorizedError}
    * @see https://docs.hanko.io/api/public#tag/Email-Management/operation/setPrimaryEmail
    */
   async setPrimaryEmail(emailID: string): Promise<void> {
@@ -97,9 +97,9 @@ class EmailClient extends Client {
    *
    * @param {string} emailID - The ID of the email address to be deleted
    * @return {Promise<void>}
-   * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @throws {UnauthorizedError}
    * @see https://docs.hanko.io/api/public#tag/Email-Management/operation/deleteEmail
    */
   async delete(emailID: string): Promise<void> {

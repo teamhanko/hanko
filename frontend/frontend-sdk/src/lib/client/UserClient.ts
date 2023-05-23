@@ -103,7 +103,9 @@ class UserClient extends Client {
    * Deletes the current user and expires the existing session cookie.
    *
    * @return {Promise<void>}
+   * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @throws {UnauthorizedError}
    */
   async delete(): Promise<void> {
     const response = await this.client.delete("/user");
@@ -125,6 +127,7 @@ class UserClient extends Client {
    * Logs out the current user and expires the existing session cookie. A valid session cookie is required to call the logout endpoint.
    *
    * @return {Promise<void>}
+   * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
    */
   async logout(): Promise<void> {
