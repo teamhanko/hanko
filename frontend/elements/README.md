@@ -90,9 +90,9 @@ A web component that allows to manage emails, passwords and passkeys.
 
 ### &lt;hanko-events&gt;
 
-A web component that allows to bind event handler to certain events, without displaying UI elements. Every other Hanko
-web components can also be used to subscribe to the same events. Also, you can bind event handler via the
-`frontned-sdk` (see next section).
+A web component that allows to bind event handler to certain events, without displaying UI elements. Events can be
+subscribed to with the `<hanko-auth>` and `<hanko-profile>` components in the same manner. Also, you can bind event
+handler via the `frontend-sdk` (see next section).
 
 #### Markup
 
@@ -379,7 +379,7 @@ declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-fro
 
 ### Functions
 
-- `register` - A function to register the web components to the shadow dom
+- `register` - A function to register the web components with the browser's custom element registry.
 
 ### Interfaces
 
