@@ -85,8 +85,9 @@ const _register = async ({
 
 export const register = async (
   api: string,
-  options: RegisterOptions = { shadow: true, injectStyles: true }
+  options: RegisterOptions = {}
 ): Promise<RegisterResult> => {
+  options = { shadow: true, injectStyles: true, ...options };
   hanko = new Hanko(api);
   injectStyles = options.injectStyles;
   await Promise.all([
