@@ -150,20 +150,41 @@ const hanko = new Hanko(&quot;http://localhost:3000&quot;)
 </ul>
 <h3>DTO Interfaces</h3>
 <ul>
-<li><code>Config</code></li>
 <li><code>PasswordConfig</code></li>
+<li><code>EmailConfig</code></li>
+<li><code>AccountConfig</code></li>
+<li><code>Config</code></li>
 <li><code>WebauthnFinalized</code></li>
-<li><code>Credential</code></li>
+<li><code>TokenFinalized</code></li>
 <li><code>UserInfo</code></li>
+<li><code>Me</code></li>
+<li><code>Credential</code></li>
 <li><code>User</code></li>
+<li><code>UserCreated</code></li>
+<li><code>Passcode</code></li>
+<li><code>WebauthnTransports</code></li>
+<li><code>Attestation</code></li>
 <li><code>Email</code></li>
 <li><code>Emails</code></li>
-<li><code>Passcode</code></li>
+<li><code>WebauthnCredential</code></li>
+<li><code>WebauthnCredentials</code></li>
+<li><code>Identity</code></li>
 </ul>
-<h3>Event Detail Interfaces</h3>
+<h3>Event Interfaces</h3>
 <ul>
 <li><code>SessionCreatedEventDetail</code></li>
 <li><code>AuthFlowCompletedEventDetail</code></li>
+</ul>
+<h3>Event Types</h3>
+<ul>
+<li><code>CustomEventWithDetail</code></li>
+<li><code>authFlowCompletedType</code></li>
+<li><code>sessionResumedType</code></li>
+<li><code>sessionCreatedType</code></li>
+<li><code>sessionExpiredType</code></li>
+<li><code>sessionNotPresentType</code></li>
+<li><code>userLoggedOutType</code></li>
+<li><code>userDeletedType</code></li>
 </ul>
 <h3>Error Classes</h3>
 <ul>

@@ -63,20 +63,41 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 
 ### DTO Interfaces
 
-- `Config`
 - `PasswordConfig`
+- `EmailConfig`
+- `AccountConfig`
+- `Config`
 - `WebauthnFinalized`
-- `Credential`
+- `TokenFinalized`
 - `UserInfo`
+- `Me`
+- `Credential`
 - `User`
+- `UserCreated`
+- `Passcode`
+- `WebauthnTransports`
+- `Attestation`
 - `Email`
 - `Emails`
-- `Passcode`
+- `WebauthnCredential`
+- `WebauthnCredentials`
+- `Identity`
 
-### Event Detail Interfaces
+### Event Interfaces
 
 - `SessionCreatedEventDetail`
 - `AuthFlowCompletedEventDetail`
+
+### Event Types
+
+- `CustomEventWithDetail`
+- `authFlowCompletedType`
+- `sessionResumedType`
+- `sessionCreatedType`
+- `sessionExpiredType`
+- `sessionNotPresentType`
+- `userLoggedOutType`
+- `userDeletedType`
 
 ### Error Classes
 

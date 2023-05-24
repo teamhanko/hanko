@@ -7,7 +7,7 @@ import { PublicKeyCredentialWithAttestationJSON } from "@github/webauthn-json";
  * @property {boolean} enabled - Indicates passwords are enabled, so the API accepts login attempts using passwords.
  * @property {number} min_password_length - The minimum length of a password. To be used for password validation.
  */
-interface PasswordConfig {
+export interface PasswordConfig {
   enabled: boolean;
   min_password_length: number;
 }
@@ -19,7 +19,7 @@ interface PasswordConfig {
  * @property {boolean} require_verification - Indicates that email addresses must be verified.
  * @property {number} max_num_of_addresses - The maximum number of email addresses a user can have.
  */
-interface EmailConfig {
+export interface EmailConfig {
   require_verification: boolean;
   max_num_of_addresses: number;
 }
@@ -30,7 +30,7 @@ interface EmailConfig {
  * @subcategory DTO
  * @property {boolean} allow_deletion - Indicates the current user is allowed to delete the account.
  */
-interface AccountConfig {
+export interface AccountConfig {
   allow_deletion: boolean;
 }
 
@@ -43,7 +43,7 @@ interface AccountConfig {
  * @property {string[]} providers - The enabled third party providers.
  * @property {AccountConfig} account - Controls the behaviour regarding user accounts.
  */
-interface Config {
+export interface Config {
   password: PasswordConfig;
   emails: EmailConfig;
   providers: string[];
@@ -57,7 +57,7 @@ interface Config {
  * @property {string} credential_id - The ID of the credential that was used.
  * @property {string} user_id - The ID of the user that was used.
  */
-interface WebauthnFinalized {
+export interface WebauthnFinalized {
   credential_id: string;
   user_id: string;
 }
@@ -68,7 +68,7 @@ interface WebauthnFinalized {
  * @subcategory DTO
  * @property {string} user_id - The ID of the user associated with the token.
  */
-interface TokenFinalized {
+export interface TokenFinalized {
   user_id: string;
 }
 
@@ -81,7 +81,7 @@ interface TokenFinalized {
  * @property {string} email_id - The UUID of the email address.
  * @property {boolean} has_webauthn_credential - Indicates that the user has registered a WebAuthn credential in the past.
  */
-interface UserInfo {
+export interface UserInfo {
   id: string;
   verified: boolean;
   email_id: string;
@@ -95,7 +95,7 @@ interface UserInfo {
  * @property {string} id - The UUID of the current user.
  * @ignore
  */
-interface Me {
+export interface Me {
   id: string;
 }
 
@@ -105,7 +105,7 @@ interface Me {
  * @subcategory DTO
  * @property {string} id - The WebAuthn credential ID.
  */
-interface Credential {
+export interface Credential {
   id: string;
 }
 
@@ -117,7 +117,7 @@ interface Credential {
  * @property {string} email - The user's email.
  * @property {Credential[]} webauthn_credentials - A list of credentials that have been registered.
  */
-interface User {
+export interface User {
   id: string;
   email: string;
   webauthn_credentials: Credential[];
@@ -130,7 +130,7 @@ interface User {
  * @property {string} user_id - The user's UUID.
  * @property {string} email_id - The ID of the new email.
  */
-interface UserCreated {
+export interface UserCreated {
   user_id: string;
   email_id: string;
 }
@@ -142,7 +142,7 @@ interface UserCreated {
  * @property {string} id - The UUID of the passcode.
  * @property {number} ttl - How long the code is active in seconds.
  */
-interface Passcode {
+export interface Passcode {
   id: string;
   ttl: number;
 }
@@ -153,7 +153,7 @@ interface Passcode {
  * @subcategory DTO
  * @property {string[]} - Transports which may be used by the authenticator. E.g. "internal", "ble",...
  */
-interface WebauthnTransports extends Array<string> {}
+export interface WebauthnTransports extends Array<string> {}
 
 /**
  * @interface
@@ -162,7 +162,7 @@ interface WebauthnTransports extends Array<string> {}
  * @property {WebauthnTransports} transports
  * @ignore
  */
-interface Attestation extends PublicKeyCredentialWithAttestationJSON {
+export interface Attestation extends PublicKeyCredentialWithAttestationJSON {
   transports: WebauthnTransports;
 }
 
@@ -176,7 +176,7 @@ interface Attestation extends PublicKeyCredentialWithAttestationJSON {
  * @property {boolean} is_primary - Indicates it's the primary email address.
  * @property {Identity} identity - Indicates that this email is linked to a third party account.
  */
-interface Email {
+export interface Email {
   id: string;
   address: string;
   is_verified: boolean;
@@ -190,7 +190,7 @@ interface Email {
  * @subcategory DTO
  * @property {Email[]} - A list of emails assigned to the current user.
  */
-interface Emails extends Array<Email> {}
+export interface Emails extends Array<Email> {}
 
 /**
  * @interface
@@ -205,7 +205,7 @@ interface Emails extends Array<Email> {}
  * @property {string} created_at - Time of credential creation.
  * @property {WebauthnTransports} transports
  */
-interface WebauthnCredential {
+export interface WebauthnCredential {
   id: string;
   name?: string;
   public_key: string;
@@ -222,7 +222,7 @@ interface WebauthnCredential {
  * @subcategory DTO
  * @property {WebauthnCredential[]} - A list of WebAuthn credential assigned to the current user.
  */
-interface WebauthnCredentials extends Array<WebauthnCredential> {}
+export interface WebauthnCredentials extends Array<WebauthnCredential> {}
 
 /**
  * @interface
@@ -231,26 +231,7 @@ interface WebauthnCredentials extends Array<WebauthnCredential> {}
  * @property {id} - The subject ID with the third party provider.
  * @property {provider} - The third party provider name.
  */
-interface Identity {
+export interface Identity {
   id: string;
   provider: string;
 }
-
-export type {
-  PasswordConfig,
-  Config,
-  WebauthnFinalized,
-  TokenFinalized,
-  Credential,
-  UserInfo,
-  Me,
-  UserCreated,
-  User,
-  Email,
-  Emails,
-  Passcode,
-  Attestation,
-  WebauthnCredential,
-  WebauthnCredentials,
-  Identity,
-};
