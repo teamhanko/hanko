@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-frontend-sdk",
-  "version": "0.5.4-alpha",
+  "version": "0.5.4-beta",
   "private": false,
   "publishConfig": {
     "access": "public"
