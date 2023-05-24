@@ -1,0 +1,193 @@
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useNavigate } from "react-router-dom";
+import { TodoClient, Todos } from "./TodoClient";
+import styles from "./Todo.module.css";
+import { Hanko } from "@teamhanko/hanko-elements";
+import { SessionExpiredModal } from "./SessionExpiredModal";
+
+const todoAPI = process.env.REACT_APP_TODO_API!;
+const hankoAPI = process.env.REACT_APP_HANKO_API!;
+
+function Todo() {
+  const navigate = useNavigate();
+  const hankoClient = useMemo(() => new Hanko(hankoAPI), []);
+  const [todos, setTodos] = useState<any[]>([]);
+  const [description, setDescription] = useState<string>("");
+  const [error, setError] = useState<Error | null>(null);
+  const todoClient = useMemo(() => new TodoClient(todoAPI), []);
+  const modalRef = useRef<HTMLDialogElement | null>(null);
+
+  const redirectToLogin = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  const redirectToProfile = () => {
+    navigate("/profile");
+  };
+
+  const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const todo = { description, checked: false, complete: false, title: description };
+
+    todoClient
+      .addTodo(todo)
+      .then((res) => {
+        if (res.status === 401) {
+          modalRef.current?.showModal();
+          return;
+        }
+
+        setDescription("");
+        listTodos();
+
+        return;
+      })
+      .catch(setError);
+  };
+
+  const listTodos = useCallback(() => {
+    todoClient
+      .listTodos()
+      .then((res) => {
+        if (res.status === 401) {
+          modalRef.current?.showModal();
+          return;
+        }
+
+        return res.json();
+      })
+      .then((todo) => {
+        if (todo) {
+          setTodos(todo.data.todoCollection.edges);
+        }
+      })
+      .catch(setError);
+  }, [todoClient]);
+
+  const patchTodo = (id: string, checked: boolean) => {
+    todoClient
+      .patchTodo(id, checked)
+      .then((res) => {
+        if (res.status === 401) {
+          modalRef.current?.showModal();
+          return;
+        }
+
+        listTodos();
+
+        return;
+      })
+      .catch(setError);
+  };
+
+  const deleteTodo = (id: string) => {
+    todoClient
+      .deleteTodo(id)
+      .then((res) => {
+        if (res.status === 401) {
+          modalRef.current?.showModal();
+          return;
+        }
+
+        listTodos();
+
+        return;
+      })
+      .catch(setError);
+  };
+
+  const logout = () => {
+    hankoClient.user.logout().catch(setError);
+  };
+
+  const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDescription(event.currentTarget.value);
+  };
+
+  const changeCheckbox = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { currentTarget } = event;
+    patchTodo(currentTarget.value, currentTarget.checked);
+  };
+
+  useEffect(() => {
+    listTodos();
+  }, [listTodos]);
+
+  useEffect(() => {
+    hankoClient.onSessionNotPresent(() => redirectToLogin());
+  }, [hankoClient, redirectToLogin]);
+
+  useEffect(
+    () => hankoClient.onUserLoggedOut(() => redirectToLogin()),
+    [hankoClient, redirectToLogin]
+  );
+
+  useEffect(
+    () => hankoClient.onSessionExpired(() => modalRef.current?.showModal()),
+    [hankoClient]
+  );
+
+  return (
+    <>
+      <SessionExpiredModal ref={modalRef} />
+      <nav className={styles.nav}>
+        <button onClick={logout} className={styles.button}>
+          Logout
+        </button>
+        <button onClick={redirectToProfile} className={styles.button}>
+          Profile
+        </button>
+        <button disabled className={styles.button}>
+          Todos
+        </button>
+      </nav>
+      <div className={styles.content}>
+        <h1 className={styles.headline}>Todos</h1>
+        <div className={styles.error}>{error?.message}</div>
+        <form onSubmit={addTodo} className={styles.form}>
+          <input
+            required
+            className={styles.input}
+            type={"text"}
+            value={description}
+            onChange={changeDescription}
+          />
+          <button type={"submit"} className={styles.button}>
+            +
+          </button>
+        </form>
+        <div className={styles.list}>
+          {todos.map((todo, index) => (
+            <div className={styles.item} key={index}>
+              <input
+                className={styles.checkbox}
+                id={todo.node.id}
+                type={"checkbox"}
+                value={todo.node.id}
+                checked={todo.node.complete}
+                onChange={changeCheckbox}
+              />
+              <label className={styles.description} htmlFor={todo.node.id}>
+                {todo.node.title}
+              </label>
+              <button
+                className={styles.button}
+                onClick={() => deleteTodo(todo.node.id!)}
+              >
+                ×
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </>
+  );
+}
+
+export default Todo;

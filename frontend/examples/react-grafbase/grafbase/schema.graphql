@@ -1,0 +1,22 @@
+schema
+@auth(
+    providers: [
+        { type: jwks, jwksEndpoint: "{{ env.HANKO_API_URL }}/.well-known/jwks.json" }
+    ]
+    rules: [{ allow: owner} ]
+) {
+    query: Query
+}
+
+
+type TodoList @model {
+    title: String!
+    todos: [Todo]
+}
+
+type Todo @model {
+    list: TodoList
+    title: String!
+    complete: Boolean!
+}
+
