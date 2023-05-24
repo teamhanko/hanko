@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.5.5-beta",
+  "version": "0.5.1-beta",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -14,9 +14,10 @@
   },
   "typesVersions": {
     "*": {
-      "elements": [
-        "dist/Elements.d.ts"
-      ]
+      "elements": ["dist/Elements.d.ts"],
+      "i18n/de": ["dist/i18n/de.d.ts"],
+      "i18n/en": ["dist/i18n/en.d.ts"],
+      "i18n/all": ["dist/i18n/all.d.ts"]
     }
   },
   "exports": {
@@ -24,6 +25,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/elements.js",
       "require": "./dist/elements.js"
+    },
+    "./i18n/de": {
+      "types": "./dist/i18n/de.d.ts",
+      "import": "./dist/i18n/de.js",
+      "require": "./dist/i18n/de.js"
+    },
+    "./i18n/en": {
+      "types": "./dist/i18n/en.d.ts",
+      "import": "./dist/i18n/en.js",
+      "require": "./dist/i18n/en.js"
+    },
+    "./i18n/all": {
+      "types": "./dist/i18n/all.d.ts",
+      "import": "./dist/i18n/all.js",
+      "require": "./dist/i18n/all.js"
     }
   },
   "scripts": {

@@ -21,7 +21,7 @@ import {
   WebauthnCredentials,
 } from "@teamhanko/hanko-frontend-sdk";
 
-import { translations } from "../Translations";
+import { Translations } from "../i18n/translations";
 
 import Container from "../components/wrapper/Container";
 
@@ -36,6 +36,7 @@ type ComponentName = "auth" | "profile" | "events";
 interface Props {
   hanko?: Hanko;
   lang?: string | SignalLike<string>;
+  translations?: Translations;
   fallbackLang?: string;
   injectStyles?: boolean;
   experimental?: string;
@@ -79,6 +80,7 @@ const AppProvider = ({
   experimental = "",
   injectStyles = false,
   enablePasskeys = true,
+  translations,
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
 

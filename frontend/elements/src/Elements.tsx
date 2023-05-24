@@ -1,8 +1,8 @@
 import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
-
 import AppProvider from "./contexts/AppProvider";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
+import { defaultTranslations, Translations } from "./i18n/translations";
 
 export interface HankoAuthAdditionalProps {
   experimental?: string;
@@ -34,6 +34,7 @@ export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
+  translations?: Partial<Translations>;
 }
 
 export interface RegisterResult {
@@ -50,6 +51,7 @@ interface Global {
   hanko?: Hanko;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
+  translations?: Partial<Translations>;
 }
 
 const global: Global = {};
@@ -60,6 +62,7 @@ const HankoAuth = (props: HankoAuthElementProps) => (
     {...props}
     hanko={global.hanko}
     injectStyles={global.injectStyles}
+    translations={global.translations}
     enablePasskeys={global.enablePasskeys}
   />
 );
@@ -70,6 +73,7 @@ const HankoProfile = (props: HankoProfileElementProps) => (
     {...props}
     hanko={global.hanko}
     injectStyles={global.injectStyles}
+    translations={global.translations}
     enablePasskeys={global.enablePasskeys}
   />
 );
@@ -98,6 +102,7 @@ export const register = async (
   options = {
     shadow: true,
     injectStyles: true,
+    translations: { ...defaultTranslations },
     enablePasskeys: true,
     ...options,
   };
@@ -105,6 +110,7 @@ export const register = async (
   global.hanko = new Hanko(api);
   global.injectStyles = options.injectStyles;
   global.enablePasskeys = options.enablePasskeys;
+  global.translations = options.translations;
 
   await Promise.all([
     _register({
