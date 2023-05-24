@@ -119,6 +119,7 @@ export class Relay extends Dispatcher {
     this._listener.onSessionResumed(this.scheduleSessionExpiredEvent);
     this._listener.onSessionExpired(this.cancelSessionExpiredEvent);
     this._listener.onUserDeleted(this.cancelSessionExpiredEvent);
+    this._listener.onUserLoggedOut(this.cancelSessionExpiredEvent);
 
     // Handle cases, where the session has been changed by another window.
     window.addEventListener("storage", this.handleStorageEvent);
