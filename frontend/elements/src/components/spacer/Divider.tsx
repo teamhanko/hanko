@@ -1,7 +1,4 @@
-import { useContext } from "preact/compat";
 import { ComponentChildren } from "preact";
-
-import { TranslateContext } from "@denysvuika/preact-translate";
 
 import styles from "./styles.sass";
 
