@@ -62,7 +62,7 @@ export class Relay extends Dispatcher {
     const expirationSeconds = this._sessionState.getExpirationSeconds();
     const jwt = this._cookie.getAuthCookie();
 
-    return expirationSeconds > 0 && userID.length
+    return expirationSeconds > 0 && userID?.length
       ? {
           userID,
           expirationSeconds,
