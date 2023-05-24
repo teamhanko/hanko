@@ -49,7 +49,13 @@ const HankoProfile = (props: HankoProfileElementProps) => (
 );
 
 const HankoEvents = (props: HankoProfileElementProps) => (
-  <AppProvider componentName={"events"} {...props} hanko={hanko} />
+  <AppProvider
+    componentName={"events"}
+    {...props}
+    hanko={hanko}
+    translations={translations}
+    injectStyles={false}
+  />
 );
 
 export interface RegisterOptions {
@@ -87,9 +93,15 @@ export const register = async (
   api: string,
   options: RegisterOptions = {}
 ): Promise<RegisterResult> => {
-  options = { shadow: true, injectStyles: true, ...options };
+  options = {
+    shadow: true,
+    injectStyles: true,
+    translations: { ...defaultTranslations },
+    ...options,
+  };
   hanko = new Hanko(api);
   injectStyles = options.injectStyles;
+  translations = options.translations;
   await Promise.all([
     _register({
       ...options,
