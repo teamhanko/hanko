@@ -119,9 +119,10 @@ function Todo() {
     listTodos();
   }, [listTodos]);
 
-  useEffect(() => {
-    hankoClient.onSessionNotPresent(() => redirectToLogin());
-  }, [hankoClient, redirectToLogin]);
+  useEffect(
+      () => hankoClient.onSessionNotPresent(() => redirectToLogin()), 
+      [hankoClient, redirectToLogin]
+  );
 
   useEffect(
     () => hankoClient.onUserLoggedOut(() => redirectToLogin()),
