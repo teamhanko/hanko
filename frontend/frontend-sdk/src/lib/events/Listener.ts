@@ -265,10 +265,22 @@ export class Listener {
     return this.addEventListener(authFlowCompletedType, { callback, once });
   }
 
+  /**
+   * Adds an event listener for hanko-session-not-present events. Will be triggered initially, after the page has been
+   * loaded and the user is logged out.
+   *
+   * @param {CallbackFunc<AuthFlowCompletedEventDetail>} callback - The function to be called when the event is triggered.
+   * @param {boolean=} once - Whether the event listener should be removed after being called once.
+   * @returns {CleanupFunc} This function can be called to remove the event listener.
+   */
   public onSessionNotPresent(
     callback: CallbackFunc<null>,
     once?: boolean
   ): CleanupFunc {
-    return this.addEventListener(sessionNotPresentType, { callback, once }, true);
+    return this.addEventListener(
+      sessionNotPresentType,
+      { callback, once },
+      true
+    );
   }
 }
