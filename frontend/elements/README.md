@@ -135,7 +135,7 @@ hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
 
 - "hanko-session-created": Will be triggered before the "hanko-auth-flow-completed" happens, as soon as the user is technically logged in.
 It will also be triggered when the user logs in via another browser window. The event can be used to obtain the JWT. Please note, that the
-JWT is only available, when the Hanko API configuration allows to obtain the JWT. When using Hanko-Cloud
+JWT is only available, when the Hanko-API configuration allows to obtain the JWT. When using Hanko-Cloud
 the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the backend only, as long as
 your backend runs under the same domain as your frontend. To do so, make sure the config parameter "session.enable_auth_token_header"
 is turned off via the [Hanko-API configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md). If you want the JWT to be contained in the event details, you need to turn on
