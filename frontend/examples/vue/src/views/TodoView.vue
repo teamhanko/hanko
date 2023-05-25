@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import { onMounted, ref } from "vue";
-import SessionExpiredModal from "@/components/SessionExpiredModal.vue";
+import OnSessionExpiredModal from "@/components/SessionExpiredModal.vue";
 import type { Todos } from "@/utils/TodoClient";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 import { TodoClient } from "@/utils/TodoClient";
