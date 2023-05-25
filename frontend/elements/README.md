@@ -151,7 +151,7 @@ hanko.onSessionCreated((sessionDetail) => {
 
 - "hanko-session-resumed": Will be triggered after the page has been loaded and there is a valid session, so it can be
 utilized like the "hanko-auth-flow-completed" event, to restore the state of your page, where the user is logged in.
-Note, that a "hanko-user-logged-out" event will be triggered instead of the "hanko-session-removed" event, after the
+Note, that a "hanko-session-not-present" event will be triggered instead of the "hanko-session-resumed" event, after the
 page has been loaded, when the user does not have a valid session.
 
 ```js

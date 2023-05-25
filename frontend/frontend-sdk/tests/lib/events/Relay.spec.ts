@@ -182,7 +182,7 @@ describe("Relay", () => {
     expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionNotPresentType);
   });
 
-  it("should listen to 'storage' events and dispatch 'hanko-session-removed' if the session is expired", () => {
+  it("should listen to 'storage' events and dispatch 'hanko-session-expired' if the session is expired", () => {
     jest.spyOn(relay._sessionState, "getUserID").mockReturnValue("");
     jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValue("");
     jest.spyOn(relay._sessionState, "getExpirationSeconds").mockReturnValue(0);

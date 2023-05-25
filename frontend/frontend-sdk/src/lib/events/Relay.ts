@@ -25,8 +25,8 @@ export class Relay extends Dispatcher {
   }
 
   /**
-   * Removes the scheduled "hanko-session-removed" event and re-schedules a new event with updated expirationSeconds, to
-   * ensure the "hanko-session-removed" event won't be triggered too early.
+   * Removes the scheduled "hanko-session-expired" event and re-schedules a new event with updated expirationSeconds, to
+   * ensure the "hanko-session-expired" event won't be triggered too early.
    *
    * @private
    * @param {SessionEventDetail} detail - The event detail.
@@ -74,7 +74,7 @@ export class Relay extends Dispatcher {
   /**
    * Handles the "storage" event in case the local storage entry, that contains the session detail has been changed by
    * another window. Depending on the new value of `expirationSeconds`, it either dispatches a "hanko-session-created"
-   * or a "hanko-session-removed" event.
+   * or a "hanko-session-expired" event.
    *
    * @private
    * @param {StorageEvent} event - The storage event object.
