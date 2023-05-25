@@ -209,7 +209,7 @@ hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
   JWT is only available, when the Hanko API configuration allows to obtain the JWT. When using Hanko-Cloud
   the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the backend only, as long as
   your backend runs under the same domain as your frontend. To do so, make sure the config parameter "session.enable_auth_token_header"
-  is turned off via the Hanko-API configuration. If you want the JWT to be contained in the event details, you need to turn on
+  is turned off via the [Hanko-API configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md). If you want the JWT to be contained in the event details, you need to turn on
   "session.enable_auth_token_header" when using a cross-domain setup. When it's a same-domain setup you need to turn off
   "session.cookie.http_only" to make the JWT accessible to the frontend.
 
