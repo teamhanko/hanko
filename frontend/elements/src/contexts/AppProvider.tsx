@@ -206,6 +206,7 @@ const AppProvider = ({
             <Fragment>
               {injectStyles ? (
                 <style
+                  /* eslint-disable-next-line react/no-danger */
                   dangerouslySetInnerHTML={{
                     __html: window._hankoStyle.innerHTML,
                   }}
