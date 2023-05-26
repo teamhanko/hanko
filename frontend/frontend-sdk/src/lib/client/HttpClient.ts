@@ -198,16 +198,15 @@ class HttpClient {
         }
       });
 
+    if (jwt) {
+      const secure = !!this.api.match("^https://");
+      this.cookie.setAuthCookie(jwt, secure);
+    }
+
     this.passcodeState.read().reset(userID).write();
 
     if (expirationSeconds > 0) {
       this.sessionState.read();
-
-      if (jwt) {
-        const secure = !!this.api.match("^https://");
-        this.cookie.setAuthCookie(jwt, secure);
-      }
-
       this.sessionState.setExpirationSeconds(expirationSeconds);
       this.sessionState.setUserID(userID);
       this.sessionState.write();
