@@ -92,7 +92,10 @@
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType, sessionResumedType, userLoggedOutType, sessionNotPresentType,
+  authFlowCompletedType,
+  sessionResumedType,
+  userLoggedOutType,
+  sessionNotPresentType,
 } from "./CustomEvents";
 
 /**
@@ -163,6 +166,9 @@ export class Dispatcher {
     this.dispatch(authFlowCompletedType, detail);
   }
 
+  /**
+   * Dispatches a "hanko-session-not-present" event to the document.
+   */
   public dispatchSessionNotPresent() {
     this.dispatch(sessionNotPresentType, null);
   }

@@ -44,6 +44,7 @@ export interface LocalStorageUsers {
  * @subcategory Internal
  */
 abstract class UserState extends State {
+  // eslint-disable-next-line require-jsdoc
   constructor() {
     super("hanko");
   }

@@ -35,7 +35,7 @@ const InitPage = () => {
           shouldRegister ? <RegisterPasskeyPage /> : <LoginFinishedPage />
         )
       );
-  }, [hanko.config, hanko.user, hanko.webauthn, setConfig, setUser]);
+  }, [hanko.config, hanko.user, hanko.webauthn, setConfig, setPage, setUser]);
 
   const hankoAuthInit = useCallback(() => {
     const thirdPartyError = hanko.thirdParty.getError();

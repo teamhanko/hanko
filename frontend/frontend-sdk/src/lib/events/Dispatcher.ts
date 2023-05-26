@@ -5,7 +5,10 @@ import {
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType, sessionResumedType, userLoggedOutType, sessionNotPresentType,
+  authFlowCompletedType,
+  sessionResumedType,
+  userLoggedOutType,
+  sessionNotPresentType,
 } from "./CustomEvents";
 
 /**
@@ -75,7 +78,8 @@ export class Dispatcher {
   public dispatchAuthFlowCompletedEvent(detail: AuthFlowCompletedEventDetail) {
     this.dispatch(authFlowCompletedType, detail);
   }
-/**
+
+  /**
    * Dispatches a "hanko-session-not-present" event to the document.
    */
   public dispatchSessionNotPresent() {

@@ -115,7 +115,10 @@ class WebauthnClient extends Client {
       .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
       .write();
 
-    this.client.processResponseHeadersOnLogin(finalizeResponse.user_id, assertionResponse);
+    this.client.processResponseHeadersOnLogin(
+      finalizeResponse.user_id,
+      assertionResponse
+    );
 
     return finalizeResponse;
   }
