@@ -41,8 +41,9 @@ Use as a module:
 import { register } from "@teamhanko/hanko-elements";
 
 const { hanko } = await register("https://hanko.yourdomain.com", {
-  shadow: true,       // Set to false if you don't want the web component to be attached to the shadow DOM.
-  injectStyles: true  // Set to false if you don't want to inject any default styles.
+  shadow: true,         // Set to false if you don't want the web component to be attached to the shadow DOM.
+  injectStyles: true,   // Set to false if you don't want to inject any default styles.
+  enablePasskeys: true, // Set to false if you don't want passkeys to be enabled.
 });
 ```
 
@@ -53,8 +54,9 @@ With a script tag via CDN:
   import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
 
   const { hanko } = await register("https://hanko.yourdomain.com", {
-    shadow: true,       // Set to false if you don't want the web component to be attached to the shadow DOM.
-    injectStyles: true  // Set to false if you don't want to inject any default styles.
+    shadow: true,         // Set to false if you don't want the web component to be attached to the shadow DOM.
+    injectStyles: true,   // Set to false if you don't want to inject any default styles.
+    enablePasskeys: true, // Set to false if you don't want passkeys to be enabled.
   });
 </script>
 ```

@@ -23,7 +23,7 @@ import Spacer from "../components/spacer/Spacer";
 
 const ProfilePage = () => {
   const { t } = useContext(TranslateContext);
-  const { config, webauthnCredentials, emails, setPage } =
+  const { config, webauthnCredentials, emails, setPage, enablePasskeys } =
     useContext(AppContext);
 
   const [emailError, setEmailError] = useState<HankoError>(null);
@@ -145,22 +145,28 @@ const ProfilePage = () => {
           </Paragraph>
         </Fragment>
       ) : null}
-      <Headline1>{t("headlines.profilePasskeys")}</Headline1>
-      <ErrorMessage error={passkeyError} />
-      <Paragraph>{t("texts.managePasskeys")}</Paragraph>
-      <Paragraph>
-        <ListPasskeysAccordion
-          credentials={webauthnCredentials}
-          setError={setPasskeyError}
-          checkedItemIndex={checkedItemIndexPasskeys}
-          setCheckedItemIndex={setCheckedItemIndexPasskeys}
-        />
-        <AddPasskeyDropdown
-          setError={setPasskeyError}
-          checkedItemIndex={checkedItemIndexAddPasskey}
-          setCheckedItemIndex={setCheckedItemIndexAddPasskey}
-        />
-      </Paragraph>
+      {webauthnCredentials.length > 0 || enablePasskeys ? (
+        <Fragment>
+          <Headline1>{t("headlines.profilePasskeys")}</Headline1>
+          <ErrorMessage error={passkeyError} />
+          <Paragraph>{t("texts.managePasskeys")}</Paragraph>
+          <Paragraph>
+            <ListPasskeysAccordion
+              credentials={webauthnCredentials}
+              setError={setPasskeyError}
+              checkedItemIndex={checkedItemIndexPasskeys}
+              setCheckedItemIndex={setCheckedItemIndexPasskeys}
+            />
+            {enablePasskeys ? (
+              <AddPasskeyDropdown
+                setError={setPasskeyError}
+                checkedItemIndex={checkedItemIndexAddPasskey}
+                setCheckedItemIndex={setCheckedItemIndexAddPasskey}
+              />
+            ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
       {config.account.allow_deletion ? (
         <Fragment>
           <Spacer />
