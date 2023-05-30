@@ -96,12 +96,12 @@ describe("UserClient.getCurrent()", () => {
 
   it.each`
     statusMe | statusUsers | error
-    ${400}   | ${200}      | ${"Unauthorized error"}
+    ${400}   | ${200}      | ${"Technical error"}
     ${401}   | ${200}      | ${"Unauthorized error"}
-    ${404}   | ${200}      | ${"Unauthorized error"}
-    ${200}   | ${400}      | ${"Unauthorized error"}
+    ${404}   | ${200}      | ${"Technical error"}
+    ${200}   | ${400}      | ${"Technical error"}
     ${200}   | ${401}      | ${"Unauthorized error"}
-    ${200}   | ${404}      | ${"Unauthorized error"}
+    ${200}   | ${404}      | ${"Technical error"}
     ${200}   | ${500}      | ${"Technical error"}
     ${500}   | ${200}      | ${"Technical error"}
   `(

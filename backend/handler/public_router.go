@@ -29,10 +29,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		httplimit.HeaderRateLimitLimit,
 		httplimit.HeaderRateLimitRemaining,
 		httplimit.HeaderRateLimitReset,
+		"X-Session-Lifetime",
 	}
+
 	if cfg.Session.EnableAuthTokenHeader {
-		exposeHeader = append(exposeHeader, "X-Auth-Token", "X-Session-Lifetime")
+		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
 		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,

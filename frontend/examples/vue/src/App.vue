@@ -1,5 +1,13 @@
 <script setup lang="ts">
 import { RouterView } from "vue-router";
+import { register } from "@teamhanko/hanko-elements";
+import { onMounted } from "vue";
+
+const hankoAPI = import.meta.env.VITE_HANKO_API;
+
+onMounted(() => {
+  register(hankoAPI);
+});
 </script>
 
 <template>

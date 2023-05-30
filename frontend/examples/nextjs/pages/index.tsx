@@ -9,6 +9,7 @@ const HankoAuth = dynamic(() => import("../components/HankoAuth"), {
 
 const Home: NextPage = () => {
   const [error, setError] = useState<Error | null>(null);
+
   return (
     <div className={styles.content}>
       <div className={styles.error}>{error?.message}</div>

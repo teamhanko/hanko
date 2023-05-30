@@ -18,3 +18,9 @@ body {
 hanko-auth::part(form-item) {
   min-width: 100%; /* input fields and buttons are on top of each other  */
 }
+
+dialog {
+  overflow: hidden;
+  border-radius: 5px;
+  box-shadow: 0 0 30px 7px #111;
+}

@@ -1,26 +1,45 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { TodoClient, Todos } from "./TodoClient";
 import styles from "./Todo.module.css";
+import { Hanko } from "@teamhanko/hanko-elements";
+import { SessionExpiredModal } from "./SessionExpiredModal";
 
-const api = process.env.REACT_APP_TODO_API!;
+const todoAPI = process.env.REACT_APP_TODO_API!;
+const hankoAPI = process.env.REACT_APP_HANKO_API!;
 
 function Todo() {
   const navigate = useNavigate();
+  const hankoClient = useMemo(() => new Hanko(hankoAPI), []);
   const [todos, setTodos] = useState<Todos>([]);
   const [description, setDescription] = useState<string>("");
   const [error, setError] = useState<Error | null>(null);
-  const client = useMemo(() => new TodoClient(api), []);
+  const todoClient = useMemo(() => new TodoClient(todoAPI), []);
+  const modalRef = useRef<HTMLDialogElement | null>(null);
+
+  const redirectToLogin = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
+
+  const redirectToProfile = () => {
+    navigate("/profile");
+  };
 
   const addTodo = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const todo = { description, checked: false };
 
-    client
+    todoClient
       .addTodo(todo)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          modalRef.current?.showModal();
           return;
         }
 
@@ -33,11 +52,11 @@ function Todo() {
   };
 
   const listTodos = useCallback(() => {
-    client
+    todoClient
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          modalRef.current?.showModal();
           return;
         }
 
@@ -49,14 +68,14 @@ function Todo() {
         }
       })
       .catch(setError);
-  }, [client, navigate]);
+  }, [todoClient]);
 
   const patchTodo = (id: string, checked: boolean) => {
-    client
+    todoClient
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          modalRef.current?.showModal();
           return;
         }
 
@@ -68,11 +87,11 @@ function Todo() {
   };
 
   const deleteTodo = (id: string) => {
-    client
+    todoClient
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          modalRef.current?.showModal();
           return;
         }
 
@@ -84,18 +103,8 @@ function Todo() {
   };
 
   const logout = () => {
-    client
-      .logout()
-      .then(() => {
-        navigate("/");
-        return;
-      })
-      .catch(setError);
+    hankoClient.user.logout().catch(setError);
   };
-
-  const profile = () => {
-    navigate("/profile");
-  }
 
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
     setDescription(event.currentTarget.value);
@@ -110,13 +119,29 @@ function Todo() {
     listTodos();
   }, [listTodos]);
 
+  useEffect(
+      () => hankoClient.onSessionNotPresent(() => redirectToLogin()), 
+      [hankoClient, redirectToLogin]
+  );
+
+  useEffect(
+    () => hankoClient.onUserLoggedOut(() => redirectToLogin()),
+    [hankoClient, redirectToLogin]
+  );
+
+  useEffect(
+    () => hankoClient.onSessionExpired(() => modalRef.current?.showModal()),
+    [hankoClient]
+  );
+
   return (
     <>
+      <SessionExpiredModal ref={modalRef} />
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
         </button>
-        <button onClick={profile} className={styles.button}>
+        <button onClick={redirectToProfile} className={styles.button}>
           Profile
         </button>
         <button disabled className={styles.button}>
@@ -152,7 +177,10 @@ function Todo() {
               <label className={styles.description} htmlFor={todo.todoID}>
                 {todo.description}
               </label>
-              <button className={styles.button} onClick={() => deleteTodo(todo.todoID!)}>
+              <button
+                className={styles.button}
+                onClick={() => deleteTodo(todo.todoID!)}
+              >
                 ×
               </button>
             </div>

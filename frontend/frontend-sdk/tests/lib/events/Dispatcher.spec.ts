@@ -2,7 +2,7 @@ import { Dispatcher } from "../../../src/lib/events/Dispatcher";
 import {
   AuthFlowCompletedEventDetail,
   CustomEventWithDetail,
-  SessionCreatedEventDetail,
+  SessionEventDetail,
 } from "../../../src/lib/events/CustomEvents";
 
 describe("Dispatcher", () => {
@@ -28,25 +28,47 @@ describe("Dispatcher", () => {
         new CustomEventWithDetail("hanko-session-created", detail)
       );
       const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionCreatedEventDetail>;
+        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
       expect(event.type).toEqual("hanko-session-created");
       expect(event.detail).toBe(detail);
     });
   });
 
-  describe("dispatchSessionRemovedEvent()", () => {
-    it("dispatches a custom event with the 'hanko-session-removed' type and null detail", () => {
+  describe("dispatchSessionResumedEvent()", () => {
+    it("dispatches a custom event with the 'hanko-session-resumed' type and the provided detail", () => {
+      const detail = {
+        userID: "test-user",
+        jwt: "test-token",
+        expirationSeconds: 7,
+      };
       const dispatchEventSpy = jest.spyOn(dispatcher, "_dispatchEvent");
 
-      dispatcher.dispatchSessionRemovedEvent();
+      dispatcher.dispatchSessionResumedEvent(detail);
 
       expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
       expect(dispatchEventSpy).toHaveBeenCalledWith(
-        new CustomEventWithDetail("hanko-session-removed", null)
+        new CustomEventWithDetail("hanko-session-resumed", detail)
+      );
+      const event = dispatchEventSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
+      expect(event.type).toEqual("hanko-session-resumed");
+      expect(event.detail).toBe(detail);
+    });
+  });
+
+  describe("dispatchSessionExpiredEvent()", () => {
+    it("dispatches a custom event with the 'hanko-session-expired' type and null detail", () => {
+      const dispatchEventSpy = jest.spyOn(dispatcher, "_dispatchEvent");
+
+      dispatcher.dispatchSessionExpiredEvent();
+
+      expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+      expect(dispatchEventSpy).toHaveBeenCalledWith(
+        new CustomEventWithDetail("hanko-session-expired", null)
       );
       const event = dispatchEventSpy.mock
         .calls[0][0] as CustomEventWithDetail<null>;
-      expect(event.type).toEqual("hanko-session-removed");
+      expect(event.type).toEqual("hanko-session-expired");
     });
   });
 
@@ -63,6 +85,22 @@ describe("Dispatcher", () => {
       const event = dispatchEventSpy.mock
         .calls[0][0] as CustomEventWithDetail<null>;
       expect(event.type).toEqual("hanko-user-deleted");
+    });
+  });
+
+  describe("dispatchUserLoggedOutEvent()", () => {
+    it("dispatches a custom event with the 'hanko-user-logged-out' type and null detail", () => {
+      const dispatchEventSpy = jest.spyOn(dispatcher, "_dispatchEvent");
+
+      dispatcher.dispatchUserLoggedOutEvent();
+
+      expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
+      expect(dispatchEventSpy).toHaveBeenCalledWith(
+        new CustomEventWithDetail("hanko-user-logged-out", null)
+      );
+      const event = dispatchEventSpy.mock
+        .calls[0][0] as CustomEventWithDetail<null>;
+      expect(event.type).toEqual("hanko-user-logged-out");
     });
   });
 

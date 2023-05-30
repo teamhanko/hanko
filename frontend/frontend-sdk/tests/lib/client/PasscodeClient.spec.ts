@@ -131,8 +131,9 @@ describe("PasscodeClient.initialize()", () => {
 
   it.each`
     status | error
-    ${401} | ${"Unauthorized error"}
+    ${401} | ${"Technical error"}
     ${500} | ${"Technical error"}
+    ${429} | ${"Too many requests error"}
   `(
     "should throw error when API response is not ok",
     async ({ status, error }) => {

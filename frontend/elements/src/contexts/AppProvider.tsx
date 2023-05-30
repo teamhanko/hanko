@@ -7,6 +7,8 @@ import {
   useCallback,
   useMemo,
   useRef,
+  useEffect,
+  Fragment,
 } from "preact/compat";
 
 import {
@@ -29,12 +31,13 @@ import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
-type ComponentName = "auth" | "profile";
+type ComponentName = "auth" | "profile" | "events";
 
 interface Props {
   hanko?: Hanko;
   lang?: string | SignalLike<string>;
   fallbackLang?: string;
+  injectStyles?: boolean;
   experimental?: string;
   componentName: ComponentName;
   children?: ComponentChildren;
@@ -72,6 +75,7 @@ const AppProvider = ({
   fallbackLang = "en",
   componentName,
   experimental = "",
+  injectStyles = false,
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
 
@@ -117,15 +121,57 @@ const AppProvider = ({
   useMemo(() => {
     switch (componentName) {
       case "auth":
-        hanko.onSessionRemoved(init);
+        hanko.onUserLoggedOut(init);
+        hanko.onSessionExpired(init);
         hanko.onUserDeleted(init);
         break;
       case "profile":
         hanko.onSessionCreated(init);
-        hanko.onSessionRemoved(init);
         break;
     }
   }, [componentName, hanko, init]);
+
+  const dispatchEvent = function <T>(type: string, detail?: T) {
+    ref.current?.dispatchEvent(
+      new CustomEvent<T>(type, {
+        detail,
+        bubbles: false,
+        composed: true,
+      })
+    );
+  };
+
+  useEffect(() => {
+    hanko.onAuthFlowCompleted((detail) => {
+      dispatchEvent("onAuthFlowCompleted", detail);
+    });
+
+    hanko.onUserDeleted(() => {
+      dispatchEvent("onUserDeleted");
+    });
+
+    hanko.onSessionNotPresent(() => {
+      dispatchEvent("onSessionNotPresent");
+    });
+
+    hanko.onSessionCreated((detail) => {
+      dispatchEvent("onSessionCreated", detail);
+    });
+
+    hanko.onSessionResumed((detail) => {
+      dispatchEvent("onSessionResumed", detail);
+    });
+
+    hanko.onSessionExpired(() => {
+      dispatchEvent("onSessionExpired");
+    });
+
+    hanko.onUserLoggedOut(() => {
+      dispatchEvent("onUserLoggedOut");
+    });
+
+    hanko.relay.dispatchInitialEvents();
+  }, [hanko]);
 
   return (
     <AppContext.Provider
@@ -155,7 +201,21 @@ const AppProvider = ({
         lang={lang?.toString()}
         fallbackLang={fallbackLang}
       >
-        <Container ref={ref}>{page}</Container>
+        <Container ref={ref}>
+          {componentName !== "events" ? (
+            <Fragment>
+              {injectStyles ? (
+                <style
+                  /* eslint-disable-next-line react/no-danger */
+                  dangerouslySetInnerHTML={{
+                    __html: window._hankoStyle.innerHTML,
+                  }}
+                />
+              ) : null}
+              {page}
+            </Fragment>
+          ) : null}
+        </Container>
       </TranslateProvider>
     </AppContext.Provider>
   );

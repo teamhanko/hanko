@@ -88,6 +88,22 @@ A web component that allows to manage emails, passwords and passkeys.
 
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
 
+### &lt;hanko-events&gt;
+
+A web component that allows to bind event handler to certain events, without displaying UI elements. Events can be
+subscribed to with the `<hanko-auth>` and `<hanko-profile>` components in the same manner. Also, you can bind event
+handler via the `frontend-sdk` (see next section).
+
+#### Markup
+
+```html
+<hanko-events id="events"></hanko-events>
+<script>
+  document.getElementById("events").addEventListener("onAuthFlowCompleted", console.log)
+  // more events are available (see "frontend-sdk" docs)...
+</script>
+```
+
 ### Frontend-SDK Examples
 
 The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by the `register()`
@@ -96,9 +112,9 @@ function, but please take a look into the [frontend-sdk docs](https://docs.hanko
 Note that you can create a `hanko-frontend-sdk` instance without having to register the web components as follows:
 
 ```js
-import { createHankoClient } from "@teamhanko/hanko-elements";
+import { Hanko } from "@teamhanko/hanko-elements";
 
-const hanko = createHankoClient("https://hanko.yourdomain.com")
+const hanko = new Hanko("https://hanko.yourdomain.com")
 ```
 
 #### Events
@@ -106,27 +122,76 @@ const hanko = createHankoClient("https://hanko.yourdomain.com")
 It is possible to bind callbacks to different custom events in use of the SDKs event listener functions.
 The callback function will be called when the event happens and an object will be passed in, containing event details.
 
-- "hanko-auth-flow-completed": Will be triggered in combination with `<hanko-auth>` after a session has been
-created and the user has completed possible additional steps (e.g. passkey registration or password recovery).
+- "hanko-auth-flow-completed": Will be triggered after a session has been created and the user has completed possible
+additional steps (e.g. passkey registration or password recovery) via the `<hanko-auth>` element.
 
 ```js
 hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
-  // Login or registration completed successfully and a JWT has been issued. You can now take control and redirect the
+  // Login, registration or recovery has been completed successfully. You can now take control and redirect the
   // user to protected pages.
-  console.info(`User signed in (user-id: "${authFlowCompletedDetail.userID}")`);
+  console.info(`User successfully completed the registration or authorization process (user-id: "${authFlowCompletedDetail.userID}")`);
 })
 ```
 
-- "hanko-session-removed": Will be triggered across all browser windows, when the session expires or the user logs out.
+- "hanko-session-created": Will be triggered before the "hanko-auth-flow-completed" happens, as soon as the user is technically logged in.
+It will also be triggered when the user logs in via another browser window. The event can be used to obtain the JWT. Please note, that the
+JWT is only available, when the Hanko-API configuration allows to obtain the JWT. When using Hanko-Cloud
+the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the backend only, as long as
+your backend runs under the same domain as your frontend. To do so, make sure the config parameter "session.enable_auth_token_header"
+is turned off via the [Hanko-API configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md). If you want the JWT to be contained in the event details, you need to turn on
+"session.enable_auth_token_header" when using a cross-domain setup. When it's a same-domain setup you need to turn off
+"session.cookie.http_only" to make the JWT accessible to the frontend.
 
 ```js
-hanko.onSessionRemoved(() => {
-  // The user can now be redirected back to a login page.
+hanko.onSessionCreated((sessionDetail) => {
+  // A new JWT has been issued.
+  console.info(`Session created or updated (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
+})
+```
+
+- "hanko-session-resumed": Will be triggered after the page has been loaded and there is a valid session, so it can be
+utilized like the "hanko-auth-flow-completed" event, to restore the state of your page, where the user is logged in.
+Note, that a "hanko-session-not-present" event will be triggered instead of the "hanko-session-resumed" event, after the
+page has been loaded, when the user does not have a valid session.
+
+```js
+hanko.onSessionResumed((sessionDetail) => {
+  // The user is logged in, protected content can be shown.
+  console.info(`User is already logged in (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
+})
+```
+
+- "hanko-session-expired": Will be triggered when the session has expired, or when the session has been removed in
+another browser window, because the user has logged out, or deleted the account.
+
+```js
+hanko.onSessionExpired(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element, or to prompt the user to log in again.
+  console.info("Session expired");
+})
+```
+
+- "hanko-user-logged-out": Will be triggered, when the user actively logs out. In other browser windows, a "hanko-session-expired" event
+will be triggered at the same time.
+
+```js
+hanko.onUserLoggedOut(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element.
   console.info("User logged out");
 })
 ```
 
-To learn what else you can do, check out the [custom-events](https://github.com/teamhanko/hanko/tree/update-registration-interface/frontend/frontend-sdk#custom-events)
+- "hanko-user-deleted": Will be triggered when the user has deleted the account. In other browser windows, a "hanko-session-expired" event
+will be triggered at the same time.
+
+```js
+hanko.onUserDeleted(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element.
+  console.info("User has been deleted");
+})
+```
+
+To learn what else you can do, check out the [custom-events](https://github.com/teamhanko/hanko/tree/main/frontend/frontend-sdk#custom-events)
 README.
 
 #### User Client
@@ -242,7 +307,7 @@ There is also the possibility to provide your own CSS rules when the web compone
 DOM:
 
 ```typescript
-register({ shadow: false })
+register("https://hanko.yourdomain.com",{ shadow: false })
 ```
 
 Please take a look at the [CSS example](https://github.com/teamhanko/hanko/raw/main/frontend/elements/example.css) file to see
@@ -258,7 +323,7 @@ example if you like to change the background color, include the following CSS ru
 Also, you can prevent injecting any styles:
 
 ```typescript
-register({ shadow: false, injectStyles: false })
+register("https://hanko.yourdomain.com", { shadow: false, injectStyles: false })
 ```
 
 so you don't need to override properties but provide the entirety of CSS rules:
@@ -305,6 +370,23 @@ Take a look at our [live demo](https://example.hanko.io).
 To learn more about how to integrate the Hanko elements into frontend frameworks, see our
 [guides](https://docs.hanko.io/guides/frontend) in the official documentation and our
 [example applications](https://github.com/teamhanko/hanko/blob/main/frontend/examples/README.md).
+
+## Exports
+
+The `@teamhanko/hanko-elements` package exports the functions and interfaces listed below and additionally every
+declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
+
+### Functions
+
+- `register` - A function to register the web components with the browser's custom element registry.
+
+### Interfaces
+
+- `RegisterOptions` - represents the options of the `register()` function.
+- `RegisterResult` - represents the return value of the `register()` function.
+- `HankoAuthElementProps` - represents the `<hanko-auth />` element properties.
+- `HankoProfileElementProps` - represents the `<hanko-profile />` element properties.
+- `HankoEventsElementProps` - represents the `<hanko-events />` element properties.
 
 ## Browser support
 
