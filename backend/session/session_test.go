@@ -40,7 +40,6 @@ func TestGenerator_Verify(t *testing.T) {
 	cfg := config.Config{
 		Session: config.Session{Lifespan: sessionLifespan},
 	}
-	//cfg := config.Session{Lifespan: sessionLifespan}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
