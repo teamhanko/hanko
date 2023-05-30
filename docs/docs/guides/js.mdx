@@ -1,0 +1,142 @@
+---
+title: JS + Hanko
+sidebar_label: Javascript
+keywords: [js, javascript]
+sidebar_custom_props:
+  docCardIconName: javascript
+---
+
+# Javascript
+
+In this guide you will learn how to use the
+[hanko-elements](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md) web components to
+add authentication and a user profile using plain Javascript and HTML.
+
+## Add `<hanko-auth>` component
+
+To provide a login interface in your app, use the `<hanko-auth>` web component. To do so, first import the `register`
+function from `@teamhanko/hanko-elements`. Call it with the URL of the Hanko API as an argument
+to register the `<hanko-auth>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
+Then use the element in your markup.
+
+:::info
+
+If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
+
+```html title="login.html" showLineNumbers
+  <body>
+
+  <hanko-auth lang="en"></hanko-auth>
+
+  <script type="module">
+    import { register } from 'https://esm.run/@teamhanko/hanko-elements';
+
+    await register("<YOUR_API_URL>");
+  </script>
+
+  </body>
+```
+
+## Define event callbacks
+
+Use the Hanko client provided by `@teamhanko/hanko-elements` to subscribe to
+[events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events).
+
+```html title="login.html" showLineNumbers
+  <body>
+
+  <hanko-auth />
+
+  <script type="module">
+    import { register } from 'https://esm.run/@teamhanko/hanko-elements';
+
+    const { hanko } = await register("<YOUR_API_URL>");
+
+    //highlight-start
+    hanko.onAuthFlowCompleted(() => {
+        // successfully logged in, redirect to a page in your application
+        document.location.href = "..."
+    })
+    //highlight-end
+  </script>
+
+  </body>
+```
+
+## Add `<hanko-profile>` component {#hanko-profile}
+
+To provide a page where users can manage their email addresses, password and passkeys, use the `<hanko-profile>` web
+component. Import the `register` function from `@teamhanko/hanko-elements` in
+your React component. Call it with the
+URL of the Hanko API as an argument to register the `<hanko-profile>` element with the browser's
+[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then
+use the element in your markup.
+
+```html title="profile.html" showLineNumbers
+  <body>
+
+  <hanko-profile />
+
+  <script type="module">
+    import { register } from 'https://esm.run/@teamhanko/hanko-elements';
+
+    await register("<YOUR_API_URL>");
+  </script>
+
+  </body>
+```
+
+## Implement logout
+
+Use the Hanko client provided by `@teamhanko/hanko-elements` to log out users. On logout a custom event is
+dispatched that you can subscribe to:
+
+```html title="profile.html" showLineNumbers
+  <body>
+
+  //highlight-start
+  <nav>
+    <a href="#" id="logout-link">Logout</a>
+  </nav>
+  //highlight-end
+
+  <hanko-profile />
+
+  <script type="module">
+    import { register } from 'https://esm.run/@teamhanko/hanko-elements';
+
+    // highlight-start
+    const { hanko } = await register("<YOUR_API_URL>");
+    // highlight-end
+
+    //highlight-start
+    document.getElementById("logout-link")
+      .addEventListener("click", (event) => {
+          event.preventDefault();
+          hanko.user.logout();
+      });
+    //highlight-end
+
+    //highlight-start
+    hanko.onUserLoggedOut(() => {
+        // successfully logged out, redirect to a page in your application
+        document.location.href = "..."
+    }
+    //highlight-end
+  </script>
+
+  </body>
+```
+
+## Customize component styles
+
+The styles of the `hanko-auth` and `hanko-profile` elements can be customized using CSS variables and parts. See our
+guide on customization [here](https://github.com/teamhanko/hanko/tree/main/frontend/elements#ui-customization).
+
+## Authenticate backend requests
+
+If you want to authenticate requests in your own backend, please view our [backend guide](/guides/backend).
