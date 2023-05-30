@@ -42,13 +42,9 @@ func (s *emailSuite) TestEmailHandler_List() {
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
+	s.Require().NoError(err)
 	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
+	s.Require().NoError(err)
 
 	tests := []struct {
 		name          string
@@ -100,13 +96,9 @@ func (s *emailSuite) TestEmailHandler_SetPrimaryEmail() {
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
+	s.Require().NoError(err)
 	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
+	s.Require().NoError(err)
 
 	oldPrimaryEmailId := uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84")
 	newPrimaryEmailId := uuid.FromStringOrNil("8bb4c8a7-a3e6-48bb-b54f-20e3b485ab33")
@@ -149,13 +141,9 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
+	s.Require().NoError(err)
 	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
+	s.Require().NoError(err)
 
 	token, err := sessionManager.GenerateJWT(userId)
 	s.NoError(err)
