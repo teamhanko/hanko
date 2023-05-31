@@ -14,6 +14,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.8.9
 	github.com/h2non/gock v1.2.0
+	github.com/invopop/jsonschema v0.7.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/knadh/koanf v1.5.0
 	github.com/labstack/echo-contrib v0.14.1
@@ -76,6 +77,7 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
+	github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
