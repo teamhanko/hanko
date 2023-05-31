@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.5.5-beta",
+  "version": "0.5.6-beta",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -15,9 +15,9 @@
   "typesVersions": {
     "*": {
       "elements": ["dist/Elements.d.ts"],
-      "lang/de": ["dist/translations/de.d.ts"],
-      "lang/en": ["dist/translations/en.d.ts"],
-      "lang/all": ["dist/translations/all.d.ts"]
+      "i18n/de": ["dist/i18n/de.d.ts"],
+      "i18n/en": ["dist/i18n/en.d.ts"],
+      "i18n/all": ["dist/i18n/all.d.ts"]
     }
   },
   "exports": {
@@ -26,20 +26,20 @@
       "import": "./dist/elements.js",
       "require": "./dist/elements.js"
     },
-    "./lang/de": {
-      "types": "./dist/translations/de.d.ts",
-      "import": "./dist/translations/de.js",
-      "require": "./dist/translations/de.js"
+    "./i18n/de": {
+      "types": "./dist/i18n/de.d.ts",
+      "import": "./dist/i18n/de.js",
+      "require": "./dist/i18n/de.js"
     },
-    "./lang/en": {
-      "types": "./dist/translations/en.d.ts",
-      "import": "./dist/translations/en.js",
-      "require": "./dist/translations/en.js"
+    "./i18n/en": {
+      "types": "./dist/i18n/en.d.ts",
+      "import": "./dist/i18n/en.js",
+      "require": "./dist/i18n/en.js"
     },
-    "./lang/all": {
-      "types": "./dist/translations/all.d.ts",
-      "import": "./dist/translations/all.js",
-      "require": "./dist/translations/all.js"
+    "./i18n/all": {
+      "types": "./dist/i18n/all.d.ts",
+      "import": "./dist/i18n/all.js",
+      "require": "./dist/i18n/all.js"
     }
   },
   "scripts": {

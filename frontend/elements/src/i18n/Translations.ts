@@ -1,4 +1,8 @@
-import { en } from "./translations/en";
+import { en } from "./en";
+
+export interface Translations {
+  [lang: string]: Translation;
+}
 
 export interface Translation {
   headlines: {
@@ -100,13 +104,3 @@ export interface Translation {
 export const defaultTranslations: Translations = {
   en,
 };
-
-export interface Translations {
-  [lang: string]: Translation;
-}
-
-export interface CustomTranslation extends Partial<Translations> {}
-
-export interface CustomTranslations {
-  [lang: string]: CustomTranslation | Translation;
-}

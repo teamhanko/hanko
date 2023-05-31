@@ -13,22 +13,22 @@ module.exports = {
       },
     },
     de: {
-      filename: 'translations/de.js',
-      import: './src/translations/de.ts',
+      filename: 'i18n/de.js',
+      import: './src/i18n/de.ts',
       library: {
         type: 'module'
       },
     },
     en: {
-      filename: 'translations/en.js',
-      import: './src/translations/en.ts',
+      filename: 'i18n/en.js',
+      import: './src/i18n/en.ts',
       library: {
         type: 'module'
       },
     },
     all: {
-      filename: 'translations/all.js',
-      import: './src/translations/all.ts',
+      filename: 'i18n/all.js',
+      import: './src/i18n/all.ts',
       library: {
         type: 'module'
       },
@@ -83,7 +83,7 @@ module.exports = {
       '.tsx',
       '.js',
       '.sass',
-      "declarations.d.ts"
+      'declarations.d.ts'
     ]
   },
   output: {

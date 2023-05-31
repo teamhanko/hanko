@@ -1,4 +1,4 @@
-import { Translation } from "../Translations";
+import { Translation } from "./Translations";
 
 export const en: Translation = {
   headlines: {

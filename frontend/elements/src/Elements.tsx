@@ -2,7 +2,7 @@ import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
 import AppProvider from "./contexts/AppProvider";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
-import { defaultTranslations, Translations } from "./Translations";
+import { defaultTranslations, Translations } from "./i18n/Translations";
 
 export interface HankoAuthAdditionalProps {
   experimental?: string;

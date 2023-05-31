@@ -21,7 +21,7 @@ import {
   WebauthnCredentials,
 } from "@teamhanko/hanko-frontend-sdk";
 
-import { Translations } from "../Translations";
+import { Translations } from "../i18n/Translations";
 
 import Container from "../components/wrapper/Container";
 
