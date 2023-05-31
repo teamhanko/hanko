@@ -41,7 +41,7 @@ func (s *emailSuite) TestEmailHandler_List() {
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 	s.Require().NoError(err)
 
 	tests := []struct {
@@ -95,7 +95,7 @@ func (s *emailSuite) TestEmailHandler_SetPrimaryEmail() {
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 	s.Require().NoError(err)
 
 	oldPrimaryEmailId := uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84")
@@ -140,7 +140,7 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 	s.Require().NoError(err)
 
 	token, err := sessionManager.GenerateJWT(userId)
