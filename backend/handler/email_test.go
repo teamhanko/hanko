@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
@@ -64,11 +62,11 @@ func (s *emailSuite) TestEmailHandler_List() {
 	}
 
 	for _, currentTest := range tests {
-		s.T().Run(currentTest.name, func(t *testing.T) {
+		s.Run(currentTest.name, func() {
 			token, err := sessionManager.GenerateJWT(currentTest.userId)
-			require.NoError(t, err)
+			s.Require().NoError(err)
 			cookie, err := sessionManager.GenerateCookie(token)
-			require.NoError(t, err)
+			s.Require().NoError(err)
 
 			req := httptest.NewRequest(http.MethodGet, "/emails", nil)
 			req.AddCookie(cookie)
@@ -76,10 +74,10 @@ func (s *emailSuite) TestEmailHandler_List() {
 
 			e.ServeHTTP(rec, req)
 
-			if assert.Equal(t, http.StatusOK, rec.Code) {
+			if s.Equal(http.StatusOK, rec.Code) {
 				var emails []*dto.EmailResponse
-				assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &emails))
-				assert.Equal(t, currentTest.expectedCount, len(emails))
+				s.NoError(json.Unmarshal(rec.Body.Bytes(), &emails))
+				s.Equal(currentTest.expectedCount, len(emails))
 			}
 		})
 	}
@@ -171,16 +169,16 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 	}
 
 	for _, currentTest := range tests {
-		s.T().Run(currentTest.name, func(t *testing.T) {
+		s.Run(currentTest.name, func() {
 			req := httptest.NewRequest(http.MethodDelete, fmt.Sprintf("/emails/%s", currentTest.emailId), nil)
 			req.AddCookie(cookie)
 			rec := httptest.NewRecorder()
 
 			e.ServeHTTP(rec, req)
-			if assert.Equal(t, currentTest.responseCode, rec.Code) {
+			if s.Equal(currentTest.responseCode, rec.Code) {
 				emails, err := s.Storage.GetEmailPersister().FindByUserId(userId)
-				require.NoError(t, err)
-				assert.Equal(t, currentTest.expectedCount, len(emails))
+				s.Require().NoError(err)
+				s.Equal(currentTest.expectedCount, len(emails))
 			}
 		})
 	}
