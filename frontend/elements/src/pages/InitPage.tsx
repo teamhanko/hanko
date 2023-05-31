@@ -16,6 +16,7 @@ const InitPage = () => {
   const {
     hanko,
     componentName,
+    enablePasskeys,
     setConfig,
     setUser,
     setEmails,
@@ -32,10 +33,22 @@ const InitPage = () => {
       .then(() => hanko.webauthn.shouldRegister(_user))
       .then((shouldRegister) =>
         setPage(
-          shouldRegister ? <RegisterPasskeyPage /> : <LoginFinishedPage />
+          shouldRegister && enablePasskeys ? (
+            <RegisterPasskeyPage />
+          ) : (
+            <LoginFinishedPage />
+          )
         )
       );
-  }, [hanko.config, hanko.user, hanko.webauthn, setConfig, setPage, setUser]);
+  }, [
+    enablePasskeys,
+    hanko.config,
+    hanko.user,
+    hanko.webauthn,
+    setConfig,
+    setPage,
+    setUser,
+  ]);
 
   const hankoAuthInit = useCallback(() => {
     const thirdPartyError = hanko.thirdParty.getError();
@@ -128,6 +141,7 @@ const InitPage = () => {
   useEffect(() => {
     hanko.relay.dispatchInitialEvents();
   }, [hanko.relay]);
+
   return <LoadingSpinner isLoading />;
 };
 

@@ -40,6 +40,7 @@ interface Props {
   fallbackLang?: string;
   injectStyles?: boolean;
   experimental?: string;
+  enablePasskeys?: boolean;
   componentName: ComponentName;
   children?: ComponentChildren;
 }
@@ -66,6 +67,7 @@ interface Context extends States {
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
   emitSuccessEvent: (userID: string) => void;
+  enablePasskeys: boolean;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -78,6 +80,7 @@ const AppProvider = ({
   experimental = "",
   injectStyles = false,
   translations,
+  enablePasskeys = true,
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
 
@@ -182,6 +185,7 @@ const AppProvider = ({
         componentName,
         experimentalFeatures,
         emitSuccessEvent,
+        enablePasskeys,
         config,
         setConfig,
         userInfo,

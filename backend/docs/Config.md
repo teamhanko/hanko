@@ -171,6 +171,16 @@ session:
   # The JWT will be transmitted via the X-Auth-Token header. Enable during cross-domain operations.
   #
   enable_auth_token_header: false
+  ## audience ##
+  #
+  # Audience optional []string containing strings which get put into the aud claim. If not set default to Webauthn.RelyingParty.Id config parameter.
+  #
+  audience:
+  ## issuer ##
+  #
+  #  optional string to be used in the jwt iss claim.
+  #
+  issuer:
 password:
   ## enabled ##
   #
