@@ -606,5 +606,6 @@ type LoggerConfig struct {
 }
 
 type Account struct {
+	// Allow Deletion indicates if a user can perform self-service deletion
 	AllowDeletion bool `yaml:"allow_deletion" json:"allow_deletion" koanf:"allow_deletion"`
 }
