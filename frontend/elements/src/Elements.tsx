@@ -129,39 +129,3 @@ export const register = async (
 
   return { hanko };
 };
-
-function deepMerge<T>(obj1: T, obj2: Partial<T>): T {
-  const mergedObject = {} as T;
-
-  for (const key in obj1) {
-    if (Object.prototype.hasOwnProperty.call(obj1, key)) {
-      const value1 = obj1[key];
-      const value2 = obj2[key];
-
-      if (
-        typeof value1 === "object" &&
-        value1 !== null &&
-        typeof value2 === "object" &&
-        value2 !== null
-      ) {
-        mergedObject[key] = deepMerge(value1, value2);
-      } else {
-        mergedObject[key] = value1;
-      }
-    }
-  }
-
-  for (const key in obj2) {
-    if (Object.prototype.hasOwnProperty.call(obj2, key)) {
-      const value1 = obj1[key];
-      const value2 = obj2[key];
-
-      if (typeof value1 === "undefined") {
-        mergedObject[key] = value2;
-      }
-    }
-  }
-
-  return mergedObject;
-}
-
