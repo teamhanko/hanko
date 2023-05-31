@@ -117,7 +117,6 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
 	assert.NoError(t, err)
 	assert.Equal(t, []string{
-		"test.hanko.io",
 		"additional.hanko.io",
 		"anotherOne",
 	}, token.Audience())

@@ -61,10 +61,11 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 	default:
 		sameSite = http.SameSiteDefaultMode
 	}
-	audience := make([]string, 0, len(config.Session.Audience)+1)
-	audience = append(audience, config.Webauthn.RelyingParty.Id)
+	var audience []string
 	if config.Session.Audience != nil && len(config.Session.Audience) > 0 {
-		audience = append(audience, config.Session.Audience...)
+		audience = config.Session.Audience
+	} else {
+		audience = []string{config.Webauthn.RelyingParty.Id}
 	}
 	return &manager{
 		jwtGenerator:  g,
