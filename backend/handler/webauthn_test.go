@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -53,7 +52,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/registration/initialize"), nil)
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/registration/initialize", nil)
 	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
 
@@ -100,7 +99,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 }
 }`
 
-	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/registration/finalize"), strings.NewReader(body))
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
 	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
 
@@ -110,7 +109,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 		s.Equal(`{"credential_id":"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH","user_id":"ec4ef049-5b88-4321-a173-21b0eff06a04"}`, strings.TrimSpace(rec.Body.String()))
 	}
 
-	req2 := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/registration/finalize"), strings.NewReader(body))
+	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
 	req2.AddCookie(cookie)
 	rec2 := httptest.NewRecorder()
 
@@ -132,7 +131,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginAuthentication() {
 	s.Require().NoError(err)
 
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
-	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/login/initialize"), nil)
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/initialize", nil)
 	rec := httptest.NewRecorder()
 
 	e.ServeHTTP(rec, req)
