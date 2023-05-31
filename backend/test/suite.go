@@ -8,7 +8,9 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"testing"
 )
 
@@ -83,6 +85,15 @@ func (s *Suite) LoadFixtures(path string) error {
 	}
 
 	return nil
+}
+
+func (s *Suite) GetDefaultSessionManager() session.Manager {
+	jwkManager, err := jwk.NewDefaultManager(DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	s.Require().NoError(err)
+	sessionManager, err := session.NewManager(jwkManager, DefaultConfig.Session)
+	s.Require().NoError(err)
+
+	return sessionManager
 }
 
 func testLogger(level logging.Level, s string, args ...interface{}) {

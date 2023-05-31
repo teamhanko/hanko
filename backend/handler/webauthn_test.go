@@ -2,12 +2,11 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -19,44 +18,78 @@ import (
 	"time"
 )
 
-var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
-var userIdBytes = []byte{0xec, 0x4e, 0xf0, 0x49, 0x5b, 0x88, 0x43, 0x21, 0xa1, 0x73, 0x21, 0xb0, 0xef, 0xf0, 0x6a, 0x4}
-
-func TestNewWebauthnHandler(t *testing.T) {
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
-	assert.NoError(t, err)
-	assert.NotEmpty(t, handler)
+func TestWebauthnSuite(t *testing.T) {
+	suite.Run(t, new(webauthnSuite))
 }
 
-func TestWebauthnHandler_BeginRegistration(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/webauthn/registration/initialize", nil)
+type webauthnSuite struct {
+	test.Suite
+}
+
+func (s *webauthnSuite) TestWebauthnHandler_NewHandler() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+	handler, err := NewWebauthnHandler(&test.DefaultConfig, s.Storage, s.GetDefaultSessionManager(), test.NewAuditLogger())
+	s.NoError(err)
+	s.NotEmpty(handler)
+}
+
+func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn")
+	s.Require().NoError(err)
+
+	userId := "ec4ef049-5b88-4321-a173-21b0eff06a04"
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
+	sessionManager := s.GetDefaultSessionManager()
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/registration/initialize"), nil)
+	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err := token.Set(jwt.SubjectKey, userId)
-	require.NoError(t, err)
-	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
-	require.NoError(t, err)
+	e.ServeHTTP(rec, req)
 
-	if assert.NoError(t, handler.BeginRegistration(c)) {
+	if s.Equal(http.StatusOK, rec.Code) {
 		creationOptions := protocol.CredentialCreation{}
 		err = json.Unmarshal(rec.Body.Bytes(), &creationOptions)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, creationOptions.Response.Challenge)
-		assert.Equal(t, userIdBytes, []byte(creationOptions.Response.User.ID))
-		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
-		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.ResidentKey, protocol.ResidentKeyRequirementRequired)
-		assert.Equal(t, creationOptions.Response.AuthenticatorSelection.UserVerification, protocol.VerificationRequired)
-		assert.True(t, *creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
+		s.NoError(err)
+		s.NotEmpty(creationOptions.Response.Challenge)
+		s.Equal(uuid.FromStringOrNil(userId).Bytes(), []byte(creationOptions.Response.User.ID))
+		s.Equal(test.DefaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
+		s.Equal(protocol.ResidentKeyRequirementRequired, creationOptions.Response.AuthenticatorSelection.ResidentKey)
+		s.Equal(protocol.VerificationRequired, creationOptions.Response.AuthenticatorSelection.UserVerification)
+		s.True(*creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
 	}
 }
 
-func TestWebauthnHandler_FinishRegistration(t *testing.T) {
+func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn_registration")
+	s.Require().NoError(err)
+
+	userId := "ec4ef049-5b88-4321-a173-21b0eff06a04"
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
+	sessionManager := s.GetDefaultSessionManager()
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
 	body := `{
 "id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
 "rawId": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
@@ -66,62 +99,64 @@ func TestWebauthnHandler_FinishRegistration(t *testing.T) {
 "clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoidE9yTkRDRDJ4UWY0ekZqRWp3eGFQOGZPRXJQM3p6MDhyTW9UbEpHdG5LVSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImNyb3NzT3JpZ2luIjpmYWxzZX0"
 }
 }`
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
+
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/registration/finalize"), strings.NewReader(body))
+	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err := token.Set(jwt.SubjectKey, userId)
-	require.NoError(t, err)
-	c.Set("session", token)
 
-	p := test.NewPersister(users, nil, nil, nil, sessionData, nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
-	require.NoError(t, err)
+	e.ServeHTTP(rec, req)
 
-	if assert.NoError(t, handler.FinishRegistration(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-		assert.Regexp(t, `{"credential_id":".*"}`, rec.Body.String())
+	if s.Equal(http.StatusOK, rec.Code) {
+		s.Equal(`{"credential_id":"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH","user_id":"ec4ef049-5b88-4321-a173-21b0eff06a04"}`, strings.TrimSpace(rec.Body.String()))
 	}
 
-	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
+	req2 := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/registration/finalize"), strings.NewReader(body))
+	req2.AddCookie(cookie)
 	rec2 := httptest.NewRecorder()
-	c2 := e.NewContext(req2, rec2)
-	token2 := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId)
-	require.NoError(t, err)
-	c2.Set("session", token2)
 
-	err = handler.FinishRegistration(c2)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
-		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
+	e.ServeHTTP(rec2, req2)
+	if s.Equal(http.StatusBadRequest, rec2.Code) {
+		httpError := dto.HTTPError{}
+		err = json.Unmarshal(rec2.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal(http.StatusBadRequest, httpError.Code)
 	}
 }
 
-func TestWebauthnHandler_BeginAuthentication(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/initialize", nil)
+func (s *webauthnSuite) TestWebauthnHandler_BeginAuthentication() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn")
+	s.Require().NoError(err)
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	req := httptest.NewRequest(http.MethodPost, fmt.Sprintf("/webauthn/login/initialize"), nil)
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, nil, sessionData, nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
-	require.NoError(t, err)
+	e.ServeHTTP(rec, req)
 
-	if assert.NoError(t, handler.BeginAuthentication(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+	if s.Equal(http.StatusOK, rec.Code) {
 		assertionOptions := protocol.CredentialAssertion{}
-		err = json.Unmarshal(rec.Body.Bytes(), &assertionOptions)
-		assert.NoError(t, err)
-		assert.NotEmpty(t, assertionOptions.Response.Challenge)
-		assert.Equal(t, assertionOptions.Response.UserVerification, protocol.VerificationRequired)
-		assert.Equal(t, defaultConfig.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
+		err := json.Unmarshal(rec.Body.Bytes(), &assertionOptions)
+		s.Require().NoError(err)
+		s.NotEmpty(assertionOptions.Response.Challenge)
+		s.Equal(assertionOptions.Response.UserVerification, protocol.VerificationRequired)
+		s.Equal(test.DefaultConfig.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
 	}
 }
 
-func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
+func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn")
+	s.Require().NoError(err)
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
 	body := `{
 "id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
 "rawId": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
@@ -133,38 +168,38 @@ func TestWebauthnHandler_FinishAuthentication(t *testing.T) {
 "userHandle": "7E7wSVuIQyGhcyGw7_BqBA"
 }
 }`
-	e := echo.New()
+
 	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
 	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
 
-	p := test.NewPersister(users, nil, nil, credentials, sessionData, nil, nil, nil, nil, nil, nil)
-	handler, err := NewWebauthnHandler(&defaultConfig, p, sessionManager{}, test.NewAuditLogger())
-	require.NoError(t, err)
+	e.ServeHTTP(rec, req)
 
-	if assert.NoError(t, handler.FinishAuthentication(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
+	if s.Equal(http.StatusOK, rec.Code) {
 		cookies := rec.Result().Cookies()
-		if assert.NotEmpty(t, cookies) {
+		if s.NotEmpty(cookies) {
 			for _, cookie := range cookies {
 				if cookie.Name == "hanko" {
-					assert.Equal(t, userId, cookie.Value)
+					s.Regexp(".*\\..*\\..*", cookie.Value) // check if cookie contains a jwt
 				}
 			}
 		}
+		s.Equal(`{"credential_id":"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH","user_id":"ec4ef049-5b88-4321-a173-21b0eff06a04"}`, strings.TrimSpace(rec.Body.String()))
 	}
 
 	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
 	rec2 := httptest.NewRecorder()
-	c2 := e.NewContext(req2, rec2)
 
-	err = handler.FinishAuthentication(c2)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-		assert.Equal(t, "Stored challenge and received challenge do not match: sessionData not found", err.Error())
+	e.ServeHTTP(rec2, req2)
+
+	if s.Equal(http.StatusUnauthorized, rec2.Code) {
+		httpError := dto.HTTPError{}
+		err = json.Unmarshal(rec2.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal("Stored challenge and received challenge do not match", httpError.Message)
 	}
 }
+
+var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
 var defaultConfig = config.Config{
 	Webauthn: config.WebauthnSettings{
@@ -215,67 +250,6 @@ func (s sessionManager) DeleteCookie() (*http.Cookie, error) {
 
 func (s sessionManager) Verify(token string) (jwt.Token, error) {
 	return nil, nil
-}
-
-var credentials = []models.WebauthnCredential{
-	func() models.WebauthnCredential {
-		uId, _ := uuid.FromString(userId)
-		aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
-		return models.WebauthnCredential{
-			ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
-			UserId:          uId,
-			PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHog",
-			AttestationType: "none",
-			AAGUID:          aaguid,
-			SignCount:       1650958750,
-			CreatedAt:       time.Time{},
-			UpdatedAt:       time.Time{},
-		}
-	}(),
-	func() models.WebauthnCredential {
-		uId, _ := uuid.FromString(userId)
-		aaguid, _ := uuid.FromString("adce0002-35bc-c60a-648b-0b25f1f05503")
-		return models.WebauthnCredential{
-			ID:              "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjK",
-			UserId:          uId,
-			PublicKey:       "pQECAyYgASFYIPG9WtGAri-mevonFPH4p-lI3JBS29zjuvKvJmaP4_mRIlggOjHw31sdAGvE35vmRep-aPcbAAlbuc0KHxQ9u6zcHoj",
-			AttestationType: "none",
-			AAGUID:          aaguid,
-			SignCount:       1650958750,
-			CreatedAt:       time.Time{},
-			UpdatedAt:       time.Time{},
-		}
-	}(),
-}
-
-var sessionData = []models.WebauthnSessionData{
-	func() models.WebauthnSessionData {
-		id, _ := uuid.NewV4()
-		uId, _ := uuid.FromString(userId)
-		return models.WebauthnSessionData{
-			ID:                 id,
-			Challenge:          "tOrNDCD2xQf4zFjEjwxaP8fOErP3zz08rMoTlJGtnKU",
-			UserId:             uId,
-			UserVerification:   string(protocol.VerificationRequired),
-			CreatedAt:          time.Time{},
-			UpdatedAt:          time.Time{},
-			Operation:          models.WebauthnOperationRegistration,
-			AllowedCredentials: nil,
-		}
-	}(),
-	func() models.WebauthnSessionData {
-		id, _ := uuid.NewV4()
-		return models.WebauthnSessionData{
-			ID:                 id,
-			Challenge:          "gKJKmh90vOpYO55oHpqaHX_oMCq4oTZt-D0b6teIzrE",
-			UserId:             uuid.UUID{},
-			UserVerification:   string(protocol.VerificationRequired),
-			CreatedAt:          time.Time{},
-			UpdatedAt:          time.Time{},
-			Operation:          models.WebauthnOperationAuthentication,
-			AllowedCredentials: nil,
-		}
-	}(),
 }
 
 var uId, _ = uuid.FromString(userId)
