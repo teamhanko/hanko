@@ -16,7 +16,7 @@ require (
 	github.com/h2non/gock v1.2.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/knadh/koanf v1.5.0
-	github.com/labstack/echo-contrib v0.14.1
+	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo-jwt/v4 v4.1.0
 	github.com/labstack/echo/v4 v4.10.2
 	github.com/lestrrat-go/jwx/v2 v2.0.9
