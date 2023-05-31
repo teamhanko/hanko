@@ -34,10 +34,11 @@ const DeleteAccountPage = ({ onBack }: Props) => {
     hanko.user
       .delete()
       .then(() => {
-        setIsLoading(false);
+        setError(null);
         setIsSuccess(true);
         return;
       })
+      .finally(() => setIsLoading(false))
       .catch(setError);
   };
 
