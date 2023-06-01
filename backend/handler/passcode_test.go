@@ -182,10 +182,15 @@ func passcodes() []models.Passcode {
 	return []models.Passcode{{
 		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
 		UserId:    uuid.FromStringOrNil(userId),
+		EmailID:   uuid.FromStringOrNil(userId),
 		Ttl:       300,
 		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
 		CreatedAt: now,
 		UpdatedAt: now,
+		Email: models.Email{
+			ID:      uId,
+			Address: "john.doe@example.com",
+		},
 	}}
 }
 
