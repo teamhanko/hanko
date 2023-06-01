@@ -34,7 +34,9 @@ export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
-  translations?: Partial<Translations>;
+  translations?: Translations;
+  translationsDir?: string;
+  fallbackLang?: string;
 }
 
 export interface RegisterResult {
@@ -51,7 +53,9 @@ interface Global {
   hanko?: Hanko;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
-  translations?: Partial<Translations>;
+  translations?: Translations;
+  translationsDir?: string;
+  fallbackLang?: string;
 }
 
 const global: Global = {};
@@ -63,7 +67,9 @@ const HankoAuth = (props: HankoAuthElementProps) => (
     hanko={global.hanko}
     injectStyles={global.injectStyles}
     translations={global.translations}
+    translationsDir={global.translationsDir}
     enablePasskeys={global.enablePasskeys}
+    fallbackLang={global.fallbackLang}
   />
 );
 
@@ -74,7 +80,9 @@ const HankoProfile = (props: HankoProfileElementProps) => (
     hanko={global.hanko}
     injectStyles={global.injectStyles}
     translations={global.translations}
+    translationsDir={global.translationsDir}
     enablePasskeys={global.enablePasskeys}
+    fallbackLang={global.fallbackLang}
   />
 );
 
@@ -102,8 +110,10 @@ export const register = async (
   options = {
     shadow: true,
     injectStyles: true,
-    translations: { ...defaultTranslations },
     enablePasskeys: true,
+    translations: { ...defaultTranslations },
+    translationsDir: "/assets",
+    fallbackLang: "en",
     ...options,
   };
 
@@ -111,6 +121,8 @@ export const register = async (
   global.injectStyles = options.injectStyles;
   global.enablePasskeys = options.enablePasskeys;
   global.translations = options.translations;
+  global.translationsDir = options.translationsDir;
+  global.fallbackLang = options.fallbackLang;
 
   await Promise.all([
     _register({

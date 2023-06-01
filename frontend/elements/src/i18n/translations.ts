@@ -1,7 +1,7 @@
 import { en } from "./en";
 
 export interface Translations {
-  [lang: string]: Translation;
+  [lang: string]: Partial<Translation>;
 }
 
 export interface Translation {
