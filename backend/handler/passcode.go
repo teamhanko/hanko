@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
@@ -138,6 +139,11 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		email = e
 	}
 
+	err = h.CheckIfUserIsEligible(c, user)
+	if err != nil {
+		return err
+	}
+
 	if email.User != nil && email.User.ID.String() != user.ID.String() {
 		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address is assigned to another user"))
 	}
@@ -248,6 +254,11 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		user, err := userPersister.Get(passcode.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
+		}
+
+		err = h.CheckIfUserIsEligible(c, user)
+		if err != nil {
+			return err
 		}
 
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
@@ -365,4 +376,26 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	}
 
 	return transactionError
+}
+
+func (h *PasscodeHandler) CheckIfUserIsEligible(c echo.Context, user *models.User) error {
+	var token jwt.Token
+	sessionCookie, _ := c.Cookie("hanko")
+	// we don't need to check the error, because when the cookie can not be found, the user is not logged in
+	if sessionCookie != nil {
+		token, _ = h.sessionManager.Verify(sessionCookie.Value)
+		// we don't need to check the error, because when the token is not returned, the user is not logged in
+	}
+
+	if token == nil && len(user.Emails) > 0 {
+		// if the user is not logged in and the requested user in the body already has emails then sending and finalizing passcodes is not allowed
+		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address cannot be added to an existing user with existing email addresses"))
+	}
+
+	if token != nil && token.Subject() != user.ID.String() {
+		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
+		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
+	}
+
+	return nil
 }
