@@ -139,9 +139,10 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		email = e
 	}
 
-	err = h.CheckIfUserIsEligible(c, user)
-	if err != nil {
-		return err
+	sessionToken := h.GetSessionToken(c)
+	if sessionToken != nil && sessionToken.Subject() != user.ID.String() {
+		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
+		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
 	}
 
 	if email.User != nil && email.User.ID.String() != user.ID.String() {
@@ -256,11 +257,6 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
 
-		err = h.CheckIfUserIsEligible(c, user)
-		if err != nil {
-			return err
-		}
-
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
 		if lastVerificationTime.Before(startTime) {
 			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("timed out passcode"))
@@ -308,6 +304,22 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		if passcode.Email.User != nil && passcode.Email.User.ID.String() != user.ID.String() {
 			return dto.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
+		}
+
+		emailExistsForUser := false
+		for _, email := range user.Emails {
+			emailExistsForUser = email.ID == passcode.Email.ID
+			if emailExistsForUser {
+				break
+			}
+		}
+
+		existingSessionToken := h.GetSessionToken(c)
+		// return forbidden when none of these cases matches
+		if !((existingSessionToken == nil && emailExistsForUser) || // normal login: when user logs in and the email used is associated with the user
+			(existingSessionToken == nil && len(user.Emails) == 0) || // register: when user register and the user has no emails
+			(existingSessionToken != nil && existingSessionToken.Subject() == user.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passcode and the one in the session matches
+			return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passcode finalization not allowed"))
 		}
 
 		if !passcode.Email.Verified {
@@ -378,7 +390,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	return transactionError
 }
 
-func (h *PasscodeHandler) CheckIfUserIsEligible(c echo.Context, user *models.User) error {
+func (h *PasscodeHandler) GetSessionToken(c echo.Context) jwt.Token {
 	var token jwt.Token
 	sessionCookie, _ := c.Cookie("hanko")
 	// we don't need to check the error, because when the cookie can not be found, the user is not logged in
@@ -387,15 +399,5 @@ func (h *PasscodeHandler) CheckIfUserIsEligible(c echo.Context, user *models.Use
 		// we don't need to check the error, because when the token is not returned, the user is not logged in
 	}
 
-	if token == nil && len(user.Emails) > 0 {
-		// if the user is not logged in and the requested user in the body already has emails then sending and finalizing passcodes is not allowed
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address cannot be added to an existing user with existing email addresses"))
-	}
-
-	if token != nil && token.Subject() != user.ID.String() {
-		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
-	}
-
-	return nil
+	return token
 }
