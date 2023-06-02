@@ -59,9 +59,9 @@ const defaultOptions = {
   shadow: true,               // Set to false if you do not want the web component to be attached to the shadow DOM.
   injectStyles: true,         // Set to false if you do not want to inject any default styles.
   enablePasskeys: true,       // Set to false if you do not want to display passkey-related content.
-  translations: null,         // Additional translations can be added here. Refer to the "Translations" section. English is available by default.
-  translationsDir: "/assets", // The directory path to the public folder containing language files. Refer to the "Translations" section.
-  fallbackLang: "en",         // The fallback language to be used if a translation is not available. Refer to the "Translations" section.
+  translations: null,         // Additional translations can be added here. English is used by default.
+  translationsDir: "/assets", // The directory path to the public folder containing language files.
+  fallbackLang: "en",         // The fallback language to be used if a translation is not available.
 };
 
 const { hanko } = await register("https://hanko.yourdomain.com", defaultOptions);
@@ -362,7 +362,7 @@ sufficient.
 ### Default Behavior
 
 The `hanko-elements` package includes English translations by default. The element appears in English even when the lang
-attribute is omitted because "en" serves as the fallback language.
+attribute is omitted because "en" serves as the [fallback language](#fallback-language) by default.
 
 Script:
 
