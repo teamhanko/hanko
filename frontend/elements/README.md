@@ -29,7 +29,7 @@ pnpm install @teamhanko/hanko-elements
 
 ### Script
 
-To use the web components, you need to register them using the register() function provided by the hanko-elements package.
+To use the web components, you need to register them using the `register()` function provided by the hanko-elements package.
 
 Module Usage:
 
@@ -45,7 +45,7 @@ CDN Usage (with a script tag):
 </script>
 ```
 
-After importing the register() function, call it with the URL of the Hanko API as an argument to register the Hanko
+After importing the `register()` function, call it with the URL of the Hanko API as an argument to register the Hanko
 elements with the browser's CustomElementRegistry.
 
 ```javascript
@@ -56,14 +56,13 @@ You can also pass certain options:
 
 ```javascript
 const defaultOptions = {
-  shadow: true,               // Set to false if you don't want the web component to be attached to the shadow DOM.
-  injectStyles: true,         // Set to false if you don't want to inject any default styles.
-  enablePasskeys: true,       // Set to false if you don't want to display passkey-related contents.
-  translations: null,         // Additional translations, see "Custom Translations" section.
-  translationsDir: "/assets", // A public folder containing language files, see "Custom Translations" section.
-  fallbackLang: "en",         // The fallback language, see "Custom Translations" section.
+  shadow: true,               // Set to false if you do not want the web component to be attached to the shadow DOM.
+  injectStyles: true,         // Set to false if you do not want to inject any default styles.
+  enablePasskeys: true,       // Set to false if you do not want to display passkey-related content.
+  translations: null,         // Additional translations can be added here. Refer to the "Translations" section. English is available by default.
+  translationsDir: "/assets", // The directory path to the public folder containing language files. Refer to the "Translations" section.
+  fallbackLang: "en",         // The fallback language to be used if a translation is not available. Refer to the "Translations" section.
 };
-
 
 const { hanko } = await register("https://hanko.yourdomain.com", defaultOptions);
 ```
@@ -80,7 +79,7 @@ A web component that handles user login and user registration.
 
 #### Attributes
 
-- `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+- `lang` Used to specify the language of the content within the element. See [Translations](#translations).
 - `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
 ### &lt;hanko-profile&gt;
@@ -95,7 +94,7 @@ A web component that allows to manage emails, passwords and passkeys.
 
 #### Attributes
 
-- `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+- `lang` Used to specify the language of the content within the element. See [Translations](#translations).
 
 ### &lt;hanko-events&gt;
 
@@ -401,7 +400,7 @@ Or import all translations at once:
 import { all } from "@teamhanko/hanko-elements/i18n/all";
 ```
 
-After importing, provide the translations through the register() function:
+After importing, provide the translations through the `register()` function:
 
 ```typescript
 register("https://hanko.yourdomain.com", { translations: { ...all, en, de } });
@@ -449,7 +448,7 @@ Markup:
 
 ### Using External Files
 
-For languages provided via the element's lang attribute that are not included in the translations object, the component
+For languages provided via the element's `lang` attribute that are not included in the translations object, the component
 will fetch a JSON file from the location specified by the `translationsDir` option. For example, if "en" is missing due
 to an empty object being passed, as shown in the example below, the component will fetch a file named "/assets/en.json".
 
@@ -482,7 +481,7 @@ import { en } from "@teamhanko/hanko-elements/i18n/en";
 import { Translation } from "@teamhanko/hanko-elements";
 
 const symbols: Partial<Translation> = {
-  labels: { continue: "☺" }
+  labels: { continue: "➔" }
 };
 
 register("https://hanko.yourdomain.com", {
@@ -494,7 +493,7 @@ register("https://hanko.yourdomain.com", {
 Markup:
 
 ```html
-<!-- Will appear in English, but the "continue" button label will be "☺"  -->
+<!-- Will appear in English, but the "continue" button label will be "➔"  -->
 <hanko-auth lang="symbols"></hanko-auth>
 ```
 
