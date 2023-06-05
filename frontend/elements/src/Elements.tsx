@@ -35,8 +35,8 @@ export interface RegisterOptions {
   injectStyles?: boolean;
   enablePasskeys?: boolean;
   translations?: Translations;
-  translationsDir?: string;
-  fallbackLang?: string;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
 }
 
 export interface RegisterResult {
@@ -54,8 +54,8 @@ interface Global {
   injectStyles?: boolean;
   enablePasskeys?: boolean;
   translations?: Translations;
-  translationsDir?: string;
-  fallbackLang?: string;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
 }
 
 const global: Global = {};
@@ -67,9 +67,9 @@ const HankoAuth = (props: HankoAuthElementProps) => (
     hanko={global.hanko}
     injectStyles={global.injectStyles}
     translations={global.translations}
-    translationsDir={global.translationsDir}
+    translationsLocation={global.translationsLocation}
     enablePasskeys={global.enablePasskeys}
-    fallbackLang={global.fallbackLang}
+    fallbackLanguage={global.fallbackLanguage}
   />
 );
 
@@ -80,9 +80,9 @@ const HankoProfile = (props: HankoProfileElementProps) => (
     hanko={global.hanko}
     injectStyles={global.injectStyles}
     translations={global.translations}
-    translationsDir={global.translationsDir}
+    translationsLocation={global.translationsLocation}
     enablePasskeys={global.enablePasskeys}
-    fallbackLang={global.fallbackLang}
+    fallbackLanguage={global.fallbackLanguage}
   />
 );
 
@@ -111,18 +111,18 @@ export const register = async (
     shadow: true,
     injectStyles: true,
     enablePasskeys: true,
-    translations: { ...defaultTranslations },
-    translationsDir: "/assets",
-    fallbackLang: "en",
+    translations: null,
+    translationsLocation: "/i18n",
+    fallbackLanguage: "en",
     ...options,
   };
 
   global.hanko = new Hanko(api);
   global.injectStyles = options.injectStyles;
   global.enablePasskeys = options.enablePasskeys;
-  global.translations = options.translations;
-  global.translationsDir = options.translationsDir;
-  global.fallbackLang = options.fallbackLang;
+  global.translations = options.translations || defaultTranslations;
+  global.translationsLocation = options.translationsLocation;
+  global.fallbackLanguage = options.fallbackLanguage;
 
   await Promise.all([
     _register({

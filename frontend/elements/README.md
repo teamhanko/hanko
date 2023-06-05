@@ -56,12 +56,12 @@ You can also pass certain options:
 
 ```javascript
 const defaultOptions = {
-  shadow: true,               // Set to false if you do not want the web component to be attached to the shadow DOM.
-  injectStyles: true,         // Set to false if you do not want to inject any default styles.
-  enablePasskeys: true,       // Set to false if you do not want to display passkey-related content.
-  translations: null,         // Additional translations can be added here. English is used by default.
-  translationsDir: "/assets", // The directory path to the public folder containing language files.
-  fallbackLang: "en",         // The fallback language to be used if a translation is not available.
+  shadow: true,                  // Set to false if you do not want the web component to be attached to the shadow DOM.
+  injectStyles: true,            // Set to false if you do not want to inject any default styles.
+  enablePasskeys: true,          // Set to false if you do not want to display passkey-related content.
+  translations: null,            // Additional translations can be added here. English is used by default.
+  translationsLocation: "/i18n", // The URL or path where the translation files are located
+  fallbackLanguage: "en",        // The fallback language to be used if a translation is not available.
 };
 
 const { hanko } = await register("https://hanko.yourdomain.com", defaultOptions);
@@ -449,15 +449,15 @@ Markup:
 ### Using External Files
 
 For languages provided via the element's `lang` attribute that are not included in the translations object, the component
-will fetch a JSON file from the location specified by the `translationsDir` option. For example, if "en" is missing due
+will fetch a JSON file from the location specified by the `translationsLocation` option. For example, if "en" is missing due
 to an empty object being passed, as shown in the example below, the component will fetch a file named "/assets/en.json".
 
 Script:
 
 ```typescript
 register("https://hanko.yourdomain.com", {
-  translations: {},          // An empty object, so even the default "en" translation won't be available.
-  translationsDir: "/assets" // A public folder containing language files, e.g., "en.json".
+  translations: {},             // An empty object, so even the default "en" translation won't be available.
+  translationsLocation: "/i18n" // A public folder containing language files, e.g., "en.json".
 });
 ```
 
@@ -470,8 +470,8 @@ Markup:
 
 ### Fallback Language
 
-The `fallbackLang` option is used to specify a fallback language for the web components when translations are missing or
-incomplete for a particular language. By setting the `fallbackLang` option to a valid language string like "en" or "de",
+The `fallbackLanguage` option is used to specify a fallback language for the web components when translations are missing or
+incomplete for a particular language. By setting the `fallbackLanguage` option to a valid language string like "en" or "de",
 the missing translation strings will be automatically retrieved from the specified fallback language.
 
 Script:
@@ -485,7 +485,7 @@ const symbols: Partial<Translation> = {
 };
 
 register("https://hanko.yourdomain.com", {
-  fallbackLang: "en",
+  fallbackLanguage: "en",
   translations: { en, symbols }
 });
 ```

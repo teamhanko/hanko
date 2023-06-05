@@ -37,8 +37,8 @@ interface Props {
   hanko?: Hanko;
   lang?: string | SignalLike<string>;
   translations?: Translations;
-  translationsDir?: string;
-  fallbackLang?: string;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
   injectStyles?: boolean;
   experimental?: string;
   enablePasskeys?: boolean;
@@ -81,8 +81,8 @@ const AppProvider = ({
   injectStyles = false,
   enablePasskeys = true,
   translations,
-  translationsDir = "/assets",
-  fallbackLang = "en",
+  translationsLocation = "/i18n",
+  fallbackLanguage = "en",
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
 
@@ -207,8 +207,8 @@ const AppProvider = ({
       <TranslateProvider
         translations={translations}
         lang={lang?.toString()}
-        fallbackLang={fallbackLang}
-        root={translationsDir}
+        fallbackLang={fallbackLanguage}
+        root={translationsLocation}
       >
         <Container ref={ref}>
           {componentName !== "events" ? (
