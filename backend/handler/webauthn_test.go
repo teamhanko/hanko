@@ -203,7 +203,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 func (s *webauthnSuite) GetDefaultSessionManager() session.Manager {
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 	s.Require().NoError(err)
 
 	return sessionManager
