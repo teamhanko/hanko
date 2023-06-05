@@ -74,7 +74,7 @@ A web component that handles user login and user registration.
 #### Attributes
 
 - `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
-- `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
+- `experimental` A space-separated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
 ### &lt;hanko-profile&gt;
 
