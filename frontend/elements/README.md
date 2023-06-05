@@ -59,8 +59,10 @@ const defaultOptions = {
   shadow: true,                  // Set to false if you do not want the web component to be attached to the shadow DOM.
   injectStyles: true,            // Set to false if you do not want to inject any default styles.
   enablePasskeys: true,          // Set to false if you do not want to display passkey-related content.
-  translations: null,            // Additional translations can be added here. English is used by default.
-  translationsLocation: "/i18n", // The URL or path where the translation files are located
+  translations: null,            // Additional translations can be added here. English is used when the option is not
+                                 // present or set to `null`, whereas setting an empty object `{}` prevents the elements
+                                 // from displaying any translations.
+  translationsLocation: "/i18n", // The URL or path where the translation files are located.
   fallbackLanguage: "en",        // The fallback language to be used if a translation is not available.
 };
 
@@ -314,7 +316,7 @@ The following parts are available:
 - `divider-line` - the line before and after the `divider-text`
 - `form-item` - the container of a form item, e.g. an input field or a button
 
-### CSS classes
+### CSS classes (not recommended)
 
 There is also the possibility to provide your own CSS rules when the web component has not been attached to the shadow
 DOM:
