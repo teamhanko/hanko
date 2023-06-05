@@ -7,8 +7,10 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"net/http"
 	"net/http/httptest"
@@ -196,6 +198,15 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 		s.NoError(err)
 		s.Equal("Stored challenge and received challenge do not match", httpError.Message)
 	}
+}
+
+func (s *webauthnSuite) GetDefaultSessionManager() session.Manager {
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	s.Require().NoError(err)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig.Session)
+	s.Require().NoError(err)
+
+	return sessionManager
 }
 
 var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
