@@ -2,6 +2,7 @@ package session
 
 import (
 	"github.com/gofrs/uuid"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/config"
@@ -12,7 +13,7 @@ import (
 
 func TestNewGenerator(t *testing.T) {
 	manager := test.JwkManager{}
-	cfg := config.Session{}
+	cfg := config.Config{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -20,7 +21,7 @@ func TestNewGenerator(t *testing.T) {
 
 func TestGenerator_Generate(t *testing.T) {
 	manager := test.JwkManager{}
-	cfg := config.Session{}
+	cfg := config.Config{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -36,7 +37,9 @@ func TestGenerator_Generate(t *testing.T) {
 func TestGenerator_Verify(t *testing.T) {
 	sessionLifespan := "5m"
 	manager := test.JwkManager{}
-	cfg := config.Session{Lifespan: sessionLifespan}
+	cfg := config.Config{
+		Session: config.Session{Lifespan: sessionLifespan},
+	}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -59,9 +62,70 @@ func TestGenerator_Verify(t *testing.T) {
 	assert.True(t, token.IssuedAt().Add(sessionDuration).Equal(token.Expiration()))
 }
 
+func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
+	manager := test.JwkManager{}
+	cfg := config.Config{
+		Session: config.Session{
+			Issuer:   "hanko",
+			Lifespan: "5m",
+		},
+		Webauthn: config.WebauthnSettings{
+			RelyingParty: config.RelyingParty{
+				Id: "test.hanko.io",
+			},
+		},
+	}
+	sessionGenerator, err := NewManager(&manager, cfg)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	userId, _ := uuid.NewV4()
+	j, err := sessionGenerator.GenerateJWT(userId)
+	assert.NoError(t, err)
+
+	token, err := jwt.ParseString(j, jwt.WithVerify(false))
+	assert.NoError(t, err)
+	assert.Equal(t, []string{"test.hanko.io"}, token.Audience())
+	assert.Equal(t, "hanko", token.Issuer())
+}
+
+func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
+	manager := test.JwkManager{}
+	cfg := config.Config{
+		Session: config.Session{
+			Issuer:   "hanko",
+			Lifespan: "5m",
+			Audience: []string{
+				"additional.hanko.io",
+				"anotherOne",
+			},
+		},
+		Webauthn: config.WebauthnSettings{
+			RelyingParty: config.RelyingParty{
+				Id: "test.hanko.io",
+			},
+		},
+	}
+	sessionGenerator, err := NewManager(&manager, cfg)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	userId, _ := uuid.NewV4()
+	j, err := sessionGenerator.GenerateJWT(userId)
+	assert.NoError(t, err)
+
+	token, err := jwt.ParseString(j, jwt.WithVerify(false))
+	assert.NoError(t, err)
+	assert.Equal(t, []string{
+		"additional.hanko.io",
+		"anotherOne",
+	}, token.Audience())
+	assert.Equal(t, "hanko", token.Issuer())
+}
+
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := test.JwkManager{}
-	cfg := config.Session{}
+	cfg := config.Config{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
@@ -91,7 +155,7 @@ func TestGenerator_Verify_Error(t *testing.T) {
 
 func TestGenerator_DeleteCookie(t *testing.T) {
 	manager := test.JwkManager{}
-	cfg := config.Session{}
+	cfg := config.Config{}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)

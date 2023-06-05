@@ -30,31 +30,10 @@ declare global {
   }
 }
 
-const HankoAuth = (props: HankoAuthElementProps) => (
-  <AppProvider
-    componentName={"auth"}
-    {...props}
-    hanko={hanko}
-    injectStyles={injectStyles}
-  />
-);
-
-const HankoProfile = (props: HankoProfileElementProps) => (
-  <AppProvider
-    componentName={"profile"}
-    {...props}
-    hanko={hanko}
-    injectStyles={injectStyles}
-  />
-);
-
-const HankoEvents = (props: HankoProfileElementProps) => (
-  <AppProvider componentName={"events"} {...props} hanko={hanko} />
-);
-
 export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
+  enablePasskeys?: boolean;
 }
 
 export interface RegisterResult {
@@ -67,8 +46,37 @@ interface InternalRegisterOptions extends RegisterOptions {
   observedAttributes: string[];
 }
 
-let hanko: Hanko;
-let injectStyles: boolean;
+interface Global {
+  hanko?: Hanko;
+  injectStyles?: boolean;
+  enablePasskeys?: boolean;
+}
+
+const global: Global = {};
+
+const HankoAuth = (props: HankoAuthElementProps) => (
+  <AppProvider
+    componentName={"auth"}
+    {...props}
+    hanko={global.hanko}
+    injectStyles={global.injectStyles}
+    enablePasskeys={global.enablePasskeys}
+  />
+);
+
+const HankoProfile = (props: HankoProfileElementProps) => (
+  <AppProvider
+    componentName={"profile"}
+    {...props}
+    hanko={global.hanko}
+    injectStyles={global.injectStyles}
+    enablePasskeys={global.enablePasskeys}
+  />
+);
+
+const HankoEvents = (props: HankoProfileElementProps) => (
+  <AppProvider componentName={"events"} {...props} hanko={global.hanko} />
+);
 
 const _register = async ({
   tagName,
@@ -87,9 +95,17 @@ export const register = async (
   api: string,
   options: RegisterOptions = {}
 ): Promise<RegisterResult> => {
-  options = { shadow: true, injectStyles: true, ...options };
-  hanko = new Hanko(api);
-  injectStyles = options.injectStyles;
+  options = {
+    shadow: true,
+    injectStyles: true,
+    enablePasskeys: true,
+    ...options,
+  };
+
+  global.hanko = new Hanko(api);
+  global.injectStyles = options.injectStyles;
+  global.enablePasskeys = options.enablePasskeys;
+
   await Promise.all([
     _register({
       ...options,
@@ -111,5 +127,5 @@ export const register = async (
     }),
   ]);
 
-  return { hanko };
+  return { hanko: global.hanko };
 };
