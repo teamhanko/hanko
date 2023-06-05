@@ -405,7 +405,11 @@ import { all } from "@teamhanko/hanko-elements/i18n/all";
 After importing, provide the translations through the `register()` function:
 
 ```typescript
-register("https://hanko.yourdomain.com", { translations: { ...all, en, de } });
+register("https://hanko.yourdomain.com", { translations: { en, de } });
+
+// or
+
+register("https://hanko.yourdomain.com", { translations: all });
 ```
 
 You can now set the lang attribute of the element to the desired language:
@@ -452,7 +456,7 @@ Markup:
 
 For languages provided via the element's `lang` attribute that are not included in the translations object, the component
 will fetch a JSON file from the location specified by the `translationsLocation` option. For example, if "en" is missing due
-to an empty object being passed, as shown in the example below, the component will fetch a file named "/assets/en.json".
+to an empty object being passed, as shown in the example below, the component will fetch a file named "/i18n/en.json".
 
 Script:
 
@@ -466,7 +470,7 @@ register("https://hanko.yourdomain.com", {
 Markup:
 
 ```html
-<!-- Will fetch "/assets/en.json" -->
+<!-- Will fetch "/i18n/en.json" -->
 <hanko-auth lang="en"></hanko-auth>
 ```
 
