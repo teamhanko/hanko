@@ -40,7 +40,7 @@ const ErrorPage = ({ initialError }: Props) => {
       <Headline1>{t("headlines.error")}</Headline1>
       <ErrorMessage error={initialError} />
       <Form onSubmit={onContinueClick}>
-        <Button>Continue</Button>
+        <Button>{t("labels.continue")}</Button>
       </Form>
     </Content>
   );
