@@ -363,8 +363,7 @@ sufficient.
 
 ### Default Behavior
 
-The `hanko-elements` package includes English translations by default. The element appears in English even when the lang
-attribute is omitted because "en" serves as the [fallback language](#fallback-language) by default.
+The `hanko-elements` package includes English translations by default and the `lang` attribute can be omitted.
 
 Script:
 
@@ -375,7 +374,7 @@ register("https://hanko.yourdomain.com");
 Markup:
 
 ```html
-<hanko-auth lang="en"></hanko-auth>
+<hanko-auth></hanko-auth>
 ```
 
 ### Installing Additional Translations
@@ -412,11 +411,10 @@ register("https://hanko.yourdomain.com", { translations: { en, de } });
 register("https://hanko.yourdomain.com", { translations: all });
 ```
 
-You can now set the lang attribute of the element to the desired language:
+You can now set the `lang` attribute of the element to the desired language:
 
 ```html
 <hanko-auth lang="de"></hanko-auth>
-<hanko-profile lang="de"></hanko-profile>
 ```
 
 ### Modifying Translations
@@ -454,9 +452,10 @@ Markup:
 
 ### Using External Files
 
-For languages provided via the element's `lang` attribute that are not included in the translations object, the component
-will fetch a JSON file from the location specified by the `translationsLocation` option. For example, if "en" is missing due
-to an empty object being passed, as shown in the example below, the component will fetch a file named "/i18n/en.json".
+For languages provided via the element's `lang` attribute, or via the [fallback language](#fallback-language) option,
+that are not included in the object passed to the `translations` option, the component will fetch a JSON file from the
+location specified by the `translationsLocation` option. For example, if "en" is missing due to an empty object being
+passed, as shown in the example below, the component will fetch a file named "/i18n/en.json".
 
 Script:
 
@@ -476,9 +475,11 @@ Markup:
 
 ### Fallback Language
 
-The `fallbackLanguage` option is used to specify a fallback language for the web components when translations are missing or
-incomplete for a particular language. By setting the `fallbackLanguage` option to a valid language string like "en" or "de",
-the missing translation strings will be automatically retrieved from the specified fallback language.
+The `fallbackLanguage` option is used to specify a fallback language for the web components when translations are
+missing or incomplete for a particular language. By setting the `fallbackLanguage` option to a valid language string
+like "en" or "de", the missing translation strings will be automatically retrieved from the specified fallback language.
+When the translation for the specified `fallbackLanguage` is not available in the `translations` option, the
+web components will attempt to fetch it from an [external file](#using-external-files).
 
 Script:
 
