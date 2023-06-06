@@ -1,10 +1,10 @@
 module github.com/teamhanko/hanko/backend
 
-go 1.18
+go 1.20
 
 require (
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.13.0
+	github.com/go-playground/validator/v10 v10.14.1
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.7.1
@@ -58,6 +58,7 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.4.0 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.2 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -98,7 +99,7 @@ require (
 	github.com/klauspost/compress v1.16.5 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
-	github.com/leodido/go-urn v1.2.3 // indirect
+	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.1 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
 	github.com/lestrrat-go/httprc v1.0.4 // indirect

@@ -82,7 +82,7 @@ A web component that handles user login and user registration.
 #### Attributes
 
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
-- `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
+- `experimental` A space-separated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
 ### &lt;hanko-profile&gt;
 
