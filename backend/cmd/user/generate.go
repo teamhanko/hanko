@@ -19,7 +19,10 @@ func NewGenerateCommand() *cobra.Command {
 		Short: "Generate mock users and write them to a file.",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			generate()
+			err := generate()
+			if err != nil {
+				log.Println(err)
+			}
 		},
 	}
 
@@ -56,7 +59,7 @@ func generate() error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(outputFile, bytes, 0644)
+	err = os.WriteFile(outputFile, bytes, 0600)
 	if err != nil {
 		return err
 	}

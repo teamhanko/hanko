@@ -71,11 +71,16 @@ func NewImportCommand() *cobra.Command {
 }
 
 func loadFile() ([]ImportEntry, error) {
+	// we explicitly want user input here, hence  #nosec G304
 	jsonFile, err := os.Open(inputFile)
 	if err != nil {
 		return nil, err
 	}
-	defer jsonFile.Close()
+	defer func() {
+		if err := jsonFile.Close(); err != nil {
+			log.Printf("Error closing file: %s\n", err)
+		}
+	}()
 
 	byteValue, _ := io.ReadAll(jsonFile)
 
