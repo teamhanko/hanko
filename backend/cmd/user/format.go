@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"github.com/gofrs/uuid"
 	"time"
 )
 
@@ -42,6 +43,12 @@ func (entry *ImportEntry) validate() error {
 	}
 	if primaryMails != 1 {
 		return errors.New(fmt.Sprintf("Need exactly one primary email, got %v", primaryMails))
+	}
+	if entry.UserID != "" {
+		_, err := uuid.FromString(entry.UserID)
+		if err != nil {
+			return errors.New(fmt.Sprintf("Provided uuid is not valid: %v", entry.UserID))
+		}
 	}
 	return nil
 }
