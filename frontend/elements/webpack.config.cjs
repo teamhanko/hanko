@@ -11,6 +11,27 @@ module.exports = {
       library: {
         type: 'module'
       },
+    },
+    de: {
+      filename: 'i18n/de.js',
+      import: './src/i18n/de.ts',
+      library: {
+        type: 'module'
+      },
+    },
+    en: {
+      filename: 'i18n/en.js',
+      import: './src/i18n/en.ts',
+      library: {
+        type: 'module'
+      },
+    },
+    all: {
+      filename: 'i18n/all.js',
+      import: './src/i18n/all.ts',
+      library: {
+        type: 'module'
+      },
     }
   },
   module: {
@@ -62,8 +83,8 @@ module.exports = {
       '.tsx',
       '.js',
       '.sass',
-      "declarations.d.ts"
-    ],
+      'declarations.d.ts'
+    ]
   },
   output: {
     clean: true,

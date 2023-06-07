@@ -12,22 +12,35 @@ import (
 	"sync"
 )
 
-func NewServeAdminCommand(config *config.Config) *cobra.Command {
-	return &cobra.Command{
+func NewServeAdminCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
+	cmd := &cobra.Command{
 		Use:   "admin",
 		Short: "Start the admin portion of the hanko server",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
-			persister, err := persistence.New(config.Database)
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			go server.StartAdmin(config, &wg, persister, nil)
+			go server.StartAdmin(cfg, &wg, persister, nil)
 
 			wg.Wait()
 		},
 	}
+
+	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+
+	return cmd
 }

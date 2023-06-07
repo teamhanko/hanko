@@ -47,31 +47,59 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 
 - `Hanko` - A class that bundles all functionalities.
 
-### Clients
+### Client Classes
 
 - `ConfigClient` - A class to fetch configurations.
 - `UserClient` - A class to manage users.
 - `WebauthnClient` - A class to handle WebAuthn-related functionalities.
 - `PasswordClient` - A class to manage passwords and password logins.
 - `PasscodeClient` - A class to handle passcode logins.
+- `ThirdPartyClient` - A class to handle social logins.
+- `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
 
-### Utilities
+### Utility Classes
 
 - `WebauthnSupport` - A class to check the browser's WebAuthn support.
 
-### DTOs
+### DTO Interfaces
 
-- `Config`
 - `PasswordConfig`
+- `EmailConfig`
+- `AccountConfig`
+- `Config`
 - `WebauthnFinalized`
-- `Credential`
+- `TokenFinalized`
 - `UserInfo`
+- `Me`
+- `Credential`
 - `User`
+- `UserCreated`
+- `Passcode`
+- `WebauthnTransports`
+- `Attestation`
 - `Email`
 - `Emails`
-- `Passcode`
+- `WebauthnCredential`
+- `WebauthnCredentials`
+- `Identity`
 
-### Errors
+### Event Interfaces
+
+- `SessionCreatedEventDetail`
+- `AuthFlowCompletedEventDetail`
+
+### Event Types
+
+- `CustomEventWithDetail`
+- `authFlowCompletedType`
+- `sessionResumedType`
+- `sessionCreatedType`
+- `sessionExpiredType`
+- `sessionNotPresentType`
+- `userLoggedOutType`
+- `userDeletedType`
+
+### Error Classes
 
 - `HankoError`
 - `TechnicalError`
@@ -98,7 +126,7 @@ not logged in:
 ```typescript
 import { Hanko, UnauthorizedError } from "@teamhanko/hanko-frontend-sdk"
 
-const hanko = new Hanko("http://localhost:3000")
+const hanko = new Hanko("https://[HANKO_API_URL]")
 
 try {
     const user = await hanko.user.getCurrent()
@@ -122,7 +150,7 @@ with a desktop computer:
 ```typescript
 import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from "@teamhanko/hanko-frontend-sdk"
 
-const hanko = new Hanko("http://localhost:3000")
+const hanko = new Hanko("https://[HANKO_API_URL]")
 
 // By passing the user object (see example above) to `hanko.webauthn.shouldRegister(user)` you get an indication of
 // whether a WebAuthn credential registration should be performed on the current browser. This is useful if the user has
@@ -142,6 +170,99 @@ try {
     }
 }
 ```
+
+### Custom Events
+
+You can bind callback functions to different custom events. The callback function will be called when the event happens
+and an object will be passed in, containing event details. The event binding works as follows:
+
+```typescript
+// Controls the optional `once` parameter. When set to `true` the callback function will be called only once.
+const once = false;
+
+const removeEventListener = hanko.onSessionCreated((eventDetail) => {
+    // Your code...
+}, once);
+
+// Removes the event listener, the callback function will not be called anymore.
+removeEventListener();
+
+// Removes all event listeners.
+hanko.removeEventListeners();
+```
+
+The following events are available:
+
+- "hanko-auth-flow-completed": Will be triggered after a session has been created and the user has completed possible
+  additional steps (e.g. passkey registration or password recovery) via the `<hanko-auth>` element.
+
+```js
+hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
+  // Login, registration or recovery has been completed successfully. You can now take control and redirect the
+  // user to protected pages.
+  console.info(`User successfully completed the registration or authorization process (user-id: "${authFlowCompletedDetail.userID}")`);
+})
+```
+
+- "hanko-session-created": Will be triggered before the "hanko-auth-flow-completed" happens, as soon as the user is technically logged in.
+  It will also be triggered when the user logs in via another browser window. The event can be used to obtain the JWT. Please note, that the
+  JWT is only available, when the Hanko API configuration allows to obtain the JWT. When using Hanko-Cloud
+  the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the backend only, as long as
+  your backend runs under the same domain as your frontend. To do so, make sure the config parameter "session.enable_auth_token_header"
+  is turned off via the [Hanko-API configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md). If you want the JWT to be contained in the event details, you need to turn on
+  "session.enable_auth_token_header" when using a cross-domain setup. When it's a same-domain setup you need to turn off
+  "session.cookie.http_only" to make the JWT accessible to the frontend.
+
+```js
+hanko.onSessionCreated((sessionDetail) => {
+  // A new JWT has been issued.
+  console.info(`Session created or updated (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
+})
+```
+
+- "hanko-session-resumed": Will be triggered after the page has been loaded and there is a valid session, so it can be
+  utilized like the "hanko-auth-flow-completed" event, to restore the state of your page, where the user is logged in.
+  Note, that a "hanko-user-logged-out" event will be triggered instead of the "hanko-session-removed" event, after the
+  page has been loaded, when the user does not have a valid session.
+
+```js
+hanko.onSessionResumed((sessionDetail) => {
+  // The user is logged in, protected content can be shown.
+  console.info(`User is already logged in (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
+})
+```
+
+- "hanko-session-expired": Will be triggered when the session has expired, or when the session has been removed in
+  another browser window, because the user has logged out, or deleted the account.
+
+```js
+hanko.onSessionExpired(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element, or to prompt the user to log in again.
+  console.info("Session expired");
+})
+```
+
+- "hanko-user-logged-out": Will be triggered, when the user actively logs out. In other browser windows, a "hanko-session-expired" event
+  will be triggered at the same time.
+
+```js
+hanko.onUserLoggedOut(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element.
+  console.info("User logged out");
+})
+```
+
+- "hanko-user-deleted": Will be triggered when the user has deleted the account. In other browser windows, a "hanko-session-expired" event
+  will be triggered at the same time.
+
+```js
+hanko.onUserDeleted(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element.
+  console.info("User has been deleted");
+})
+```
+
+Please Take a look into the [docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/Hanko.html) for more details.
 
 ## Bugs
 

@@ -5,7 +5,6 @@ import (
 	"github.com/brianvoe/gofakeit/v6"
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
 	"log"
 	"os"
 	"time"
@@ -14,7 +13,7 @@ import (
 var outputFile string
 var count int
 
-func NewGenerateCommand(config *config.Config) *cobra.Command {
+func NewGenerateCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "generate",
 		Short: "Generate mock users and write them to a file.",

@@ -5,9 +5,8 @@ import {
 
 import { WebauthnSupport } from "../WebauthnSupport";
 import { Client } from "./Client";
-import { PasscodeState } from "../state/PasscodeState";
-
-import { WebauthnState } from "../state/WebauthnState";
+import { PasscodeState } from "../state/users/PasscodeState";
+import { WebauthnState } from "../state/users/WebauthnState";
 
 import {
   InvalidWebauthnCredentialError,
@@ -36,7 +35,6 @@ class WebauthnClient extends Client {
   webauthnState: WebauthnState;
   passcodeState: PasscodeState;
   controller: AbortController;
-
   _getCredential = getWebauthnCredential;
   _createCredential = createWebauthnCredential;
 
@@ -69,11 +67,12 @@ class WebauthnClient extends Client {
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnLoginInit
    * @see https://docs.hanko.io/api/public#tag/WebAuthn/operation/webauthnLoginFinal
    * @see https://www.w3.org/TR/webauthn-2/#authentication-ceremony
+   * @return {WebauthnFinalized}
    */
   async login(
     userID?: string,
     useConditionalMediation?: boolean
-  ): Promise<void> {
+  ): Promise<WebauthnFinalized> {
     const challengeResponse = await this.client.post(
       "/webauthn/login/initialize",
       { user_id: userID }
@@ -116,9 +115,12 @@ class WebauthnClient extends Client {
       .addCredential(finalizeResponse.user_id, finalizeResponse.credential_id)
       .write();
 
-    this.passcodeState.read().reset(userID).write();
+    this.client.processResponseHeadersOnLogin(
+      finalizeResponse.user_id,
+      assertionResponse
+    );
 
-    return;
+    return finalizeResponse;
   }
 
   /**
@@ -139,7 +141,8 @@ class WebauthnClient extends Client {
       "/webauthn/registration/initialize"
     );
 
-    if (challengeResponse.status >= 400 && challengeResponse.status <= 499) {
+    if (challengeResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!challengeResponse.ok) {
       throw new TechnicalError();
@@ -164,14 +167,12 @@ class WebauthnClient extends Client {
       attestation
     );
 
-    if (
-      attestationResponse.status >= 400 &&
-      attestationResponse.status <= 499
-    ) {
-      if (attestationResponse.status === 422) {
-        throw new UserVerificationError();
-      }
+    if (attestationResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
+    }
+    if (attestationResponse.status === 422) {
+      throw new UserVerificationError();
     }
     if (!attestationResponse.ok) {
       throw new TechnicalError();
@@ -199,6 +200,7 @@ class WebauthnClient extends Client {
     const response = await this.client.get("/webauthn/credentials");
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
@@ -213,7 +215,6 @@ class WebauthnClient extends Client {
    * @param {string=} credentialID - The credential's UUID.
    * @param {string} name - The new credential name.
    * @return {Promise<void>}
-   * @throws {NotFoundError}
    * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
@@ -228,6 +229,7 @@ class WebauthnClient extends Client {
     );
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
@@ -241,7 +243,6 @@ class WebauthnClient extends Client {
    *
    * @param {string=} credentialID - The credential's UUID.
    * @return {Promise<void>}
-   * @throws {NotFoundError}
    * @throws {UnauthorizedError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
@@ -253,6 +254,7 @@ class WebauthnClient extends Client {
     );
 
     if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();

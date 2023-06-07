@@ -13,13 +13,7 @@ type Props = IconProps & {
   name: IconName;
 };
 
-const Icon = ({
-  name,
-  secondary,
-  size = 18,
-  fadeOut,
-  disabled,
-}: Props) => {
+const Icon = ({ name, secondary, size = 18, fadeOut, disabled }: Props) => {
   const Ico = icons[name];
 
   return (

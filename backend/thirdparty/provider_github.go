@@ -9,12 +9,12 @@ import (
 )
 
 const (
-	GithubAuthBase           = "github.com"
-	GithubAPIBase            = "api.github.com"
-	GithubOauthAuthEndpoint  = "/login/oauth/authorize"
-	GithubOauthTokenEndpoint = "/login/oauth/access_token"
-	GithubUserInfoEndpoint   = "/user"
-	GitHubEmailsEndpoint     = "/user/emails"
+	GithubAuthBase           = "https://github.com"
+	GithubAPIBase            = "https://api.github.com"
+	GithubOauthAuthEndpoint  = GithubAuthBase + "/login/oauth/authorize"
+	GithubOauthTokenEndpoint = GithubAuthBase + "/login/oauth/access_token"
+	GithubUserInfoEndpoint   = GithubAPIBase + "/user"
+	GitHubEmailsEndpoint     = GithubAPIBase + "/user/emails"
 )
 
 var DefaultGitHubScopes = []string{
@@ -23,10 +23,9 @@ var DefaultGitHubScopes = []string{
 
 type githubProvider struct {
 	*oauth2.Config
-	APIPath string
 }
 
-type githubUser struct {
+type GithubUser struct {
 	ID        int    `json:"id"`
 	UserName  string `json:"login"`
 	Email     string `json:"email"`
@@ -34,7 +33,7 @@ type githubUser struct {
 	AvatarURL string `json:"avatar_url"`
 }
 
-type githubUserEmail struct {
+type GithubUserEmail struct {
 	Email    string `json:"email"`
 	Primary  bool   `json:"primary"`
 	Verified bool   `json:"verified"`
@@ -51,14 +50,13 @@ func NewGithubProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
 				// https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#1-request-a-users-github-identity
-				AuthURL: "https://" + GithubAuthBase + GithubOauthAuthEndpoint,
+				AuthURL: GithubOauthAuthEndpoint,
 				// https://docs.github.com/en/developers/apps/building-oauth-apps/authorizing-oauth-apps#2-users-are-redirected-back-to-your-site-by-github
-				TokenURL: "https://" + GithubAuthBase + GithubOauthTokenEndpoint,
+				TokenURL: GithubOauthTokenEndpoint,
 			},
 			RedirectURL: redirectURL,
 			Scopes:      DefaultGitHubScopes,
 		},
-		APIPath: "https://" + GithubAPIBase,
 	}, nil
 }
 
@@ -67,16 +65,16 @@ func (g githubProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 }
 
 func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
-	var user githubUser
+	var user GithubUser
 
 	// https://docs.github.com/en/rest/users/users?apiVersion=2022-11-28#get-the-authenticated-user
-	if err := makeRequest(token, g.Config, g.APIPath+GithubUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(token, g.Config, GithubUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 
 	data := &UserData{
 		Metadata: &Claims{
-			Issuer:            g.APIPath,
+			Issuer:            GithubAuthBase,
 			Subject:           strconv.Itoa(user.ID),
 			Name:              user.Name,
 			Picture:           user.AvatarURL,
@@ -84,11 +82,11 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		},
 	}
 
-	var emails []*githubUserEmail
+	var emails []*GithubUserEmail
 	// The user data 'email' value is the user's publicly visible email address. It is possible that the user
 	// chose to not make this email public, hence the dedicated call to the 'emails' endpoint.
 	// https://docs.github.com/en/rest/users/emails?apiVersion=2022-11-28#list-email-addresses-for-the-authenticated-user
-	if err := makeRequest(token, g.Config, g.APIPath+GitHubEmailsEndpoint, &emails); err != nil {
+	if err := makeRequest(token, g.Config, GitHubEmailsEndpoint, &emails); err != nil {
 		return nil, err
 	}
 

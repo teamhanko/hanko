@@ -17,18 +17,27 @@ beforeEach(() => {
 
 describe("PasswordClient.login()", () => {
   it("should do a password login", async () => {
+    Object.defineProperty(global, "XMLHttpRequest", {
+      value: jest.fn().mockImplementation(() => ({
+        response: JSON.stringify({ foo: "bar" }),
+        open: jest.fn(),
+        setRequestHeader: jest.fn(),
+        getResponseHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue(""),
+        send: jest.fn(),
+      })),
+      configurable: true,
+      writable: true,
+    });
+
     const response = new Response(new XMLHttpRequest());
     response.ok = true;
     jest.spyOn(passwordClient.client, "post").mockResolvedValue(response);
-    jest.spyOn(passwordClient.passcodeState, "read");
-    jest.spyOn(passwordClient.passcodeState, "reset");
-    jest.spyOn(passwordClient.passcodeState, "write");
+    jest.spyOn(passwordClient.client, "processResponseHeadersOnLogin");
 
     const loginResponse = passwordClient.login(userID, password);
     await expect(loginResponse).resolves.toBeUndefined();
-    expect(passwordClient.passcodeState.read).toHaveBeenCalledTimes(1);
-    expect(passwordClient.passcodeState.reset).toHaveBeenCalledWith(userID);
-    expect(passwordClient.passcodeState.write).toHaveBeenCalledTimes(1);
+    expect(passwordClient.client.processResponseHeadersOnLogin).toHaveBeenCalledTimes(1);
     expect(passwordClient.client.post).toHaveBeenCalledWith("/password/login", {
       user_id: userID,
       password,
@@ -52,7 +61,7 @@ describe("PasswordClient.login()", () => {
 
     jest.spyOn(passwordClient.client, "post").mockResolvedValue(response);
     jest
-      .spyOn(response.headers, "get")
+      .spyOn(response.headers, "getResponseHeader")
       .mockReturnValue(`${passwordRetryAfter}`);
     jest.spyOn(passwordClient.passwordState, "read");
     jest.spyOn(passwordClient.passwordState, "setRetryAfter");
@@ -68,7 +77,7 @@ describe("PasswordClient.login()", () => {
       passwordRetryAfter
     );
     expect(passwordClient.passwordState.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.get).toHaveBeenCalledWith("Retry-After");
+    expect(response.headers.getResponseHeader).toHaveBeenCalledWith("Retry-After");
   });
 
   it("should throw error when API response is not ok", async () => {

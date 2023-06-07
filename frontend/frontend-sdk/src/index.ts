@@ -13,6 +13,7 @@ import { UserClient } from "./lib/client/UserClient";
 import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
+import { TokenClient } from "./lib/client/TokenClient";
 
 export {
   ConfigClient,
@@ -22,6 +23,7 @@ export {
   PasscodeClient,
   EmailClient,
   ThirdPartyClient,
+  TokenClient,
 };
 
 // Utils
@@ -34,31 +36,45 @@ export { WebauthnSupport };
 
 import {
   PasswordConfig,
+  EmailConfig,
+  AccountConfig,
   Config,
   WebauthnFinalized,
-  Credential,
+  TokenFinalized,
   UserInfo,
+  Me,
+  Credential,
   User,
+  UserCreated,
+  Passcode,
+  WebauthnTransports,
+  Attestation,
   Email,
   Emails,
   WebauthnCredential,
   WebauthnCredentials,
-  Passcode,
   Identity,
 } from "./lib/Dto";
 
 export type {
   PasswordConfig,
+  EmailConfig,
+  AccountConfig,
   Config,
   WebauthnFinalized,
-  Credential,
+  TokenFinalized,
   UserInfo,
+  Me,
+  Credential,
   User,
+  UserCreated,
+  Passcode,
+  WebauthnTransports,
+  Attestation,
   Email,
   Emails,
   WebauthnCredential,
   WebauthnCredentials,
-  Passcode,
   Identity,
 };
 
@@ -102,4 +118,32 @@ export {
   UnauthorizedError,
   UserVerificationError,
   WebauthnRequestCancelledError,
+};
+
+// Events
+
+import {
+  CustomEventWithDetail,
+  SessionEventDetail,
+  AuthFlowCompletedEventDetail,
+  authFlowCompletedType,
+  sessionCreatedType,
+  sessionResumedType,
+  sessionExpiredType,
+  sessionNotPresentType,
+  userLoggedOutType,
+  userDeletedType,
+} from "./lib/events/CustomEvents";
+
+export type { SessionEventDetail, AuthFlowCompletedEventDetail };
+
+export {
+  authFlowCompletedType,
+  sessionResumedType,
+  sessionCreatedType,
+  sessionExpiredType,
+  sessionNotPresentType,
+  userLoggedOutType,
+  userDeletedType,
+  CustomEventWithDetail,
 };

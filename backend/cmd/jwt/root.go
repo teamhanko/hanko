@@ -2,7 +2,6 @@ package jwt
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
 )
 
 func NewJwtCmd() *cobra.Command {
@@ -13,8 +12,8 @@ func NewJwtCmd() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, cfg *config.Config) {
+func RegisterCommands(parent *cobra.Command) {
 	cmd := NewJwtCmd()
 	parent.AddCommand(cmd)
-	cmd.AddCommand(NewCreateCommand(cfg))
+	cmd.AddCommand(NewCreateCommand())
 }

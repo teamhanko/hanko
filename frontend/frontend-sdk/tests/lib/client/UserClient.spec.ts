@@ -7,6 +7,7 @@ import {
 import { Response } from "../../../src/lib/client/HttpClient";
 
 const userID = "test-user-1";
+const emailID = "test-email-1";
 const email = "test-email-1@test";
 const credentials = [{ id: "test-credential-1" }];
 
@@ -95,12 +96,12 @@ describe("UserClient.getCurrent()", () => {
 
   it.each`
     statusMe | statusUsers | error
-    ${400}   | ${200}      | ${"Unauthorized error"}
+    ${400}   | ${200}      | ${"Technical error"}
     ${401}   | ${200}      | ${"Unauthorized error"}
-    ${404}   | ${200}      | ${"Unauthorized error"}
-    ${200}   | ${400}      | ${"Unauthorized error"}
+    ${404}   | ${200}      | ${"Technical error"}
+    ${200}   | ${400}      | ${"Technical error"}
     ${200}   | ${401}      | ${"Unauthorized error"}
-    ${200}   | ${404}      | ${"Unauthorized error"}
+    ${200}   | ${404}      | ${"Technical error"}
     ${200}   | ${500}      | ${"Technical error"}
     ${500}   | ${200}      | ${"Technical error"}
   `(
@@ -136,12 +137,24 @@ describe("UserClient.getCurrent()", () => {
 
 describe("UserClient.create()", () => {
   it("should create a user", async () => {
+    Object.defineProperty(global, "XMLHttpRequest", {
+      value: jest.fn().mockImplementation(() => ({
+        response: JSON.stringify({ foo: "bar" }),
+        open: jest.fn(),
+        setRequestHeader: jest.fn(),
+        getResponseHeader: jest.fn(),
+        getAllResponseHeaders: jest.fn().mockReturnValue(""),
+        send: jest.fn(),
+      })),
+      configurable: true,
+      writable: true,
+    });
+
     const response = new Response(new XMLHttpRequest());
     response.ok = true;
     response._decodedJSON = {
-      id: userID,
-      email,
-      webauthn_credentials: credentials,
+      user_id: userID,
+      email_id: emailID,
     };
 
     jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
@@ -208,9 +221,7 @@ describe("UserClient.logout()", () => {
       response.status = status;
       response.ok = status >= 200 && status <= 299;
 
-      jest
-        .spyOn(userClient.client, "post")
-        .mockResolvedValueOnce(response)
+      jest.spyOn(userClient.client, "post").mockResolvedValueOnce(response);
 
       await expect(userClient.logout()).rejects.toThrow(error);
 
@@ -243,9 +254,7 @@ describe("UserClient.delete()", () => {
       response.status = status;
       response.ok = status >= 200 && status <= 299;
 
-      jest
-        .spyOn(userClient.client, "delete")
-        .mockResolvedValueOnce(response)
+      jest.spyOn(userClient.client, "delete").mockResolvedValueOnce(response);
 
       await expect(userClient.delete()).rejects.toThrow(error);
 

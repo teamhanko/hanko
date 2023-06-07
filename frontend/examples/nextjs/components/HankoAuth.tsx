@@ -1,5 +1,5 @@
-import { register } from "@teamhanko/hanko-elements";
-import { useCallback, useEffect } from "react";
+import { Hanko, register } from "@teamhanko/hanko-elements";
+import { useCallback, useEffect, useMemo } from "react";
 import { useRouter } from "next/router";
 
 const api = process.env.NEXT_PUBLIC_HANKO_API!;
@@ -10,22 +10,21 @@ interface Props {
 
 function HankoAuth({ setError }: Props) {
   const router = useRouter();
+  const hankoClient = useMemo(() => new Hanko(api), []);
 
   const redirectToTodos = useCallback(() => {
     router.replace("/todo").catch(setError);
   }, [router, setError]);
 
   useEffect(() => {
-    register({ shadow: true }).catch(setError);
+    register(api).catch(setError);
   }, [setError]);
 
-  useEffect(() => {
-    document.addEventListener("hankoAuthSuccess", redirectToTodos);
-    return () =>
-      document.removeEventListener("hankoAuthSuccess", redirectToTodos);
-  }, [redirectToTodos]);
+  useEffect(() => hankoClient.onAuthFlowCompleted(() => {
+    redirectToTodos()
+  }), [hankoClient, redirectToTodos]);
 
-  return <hanko-auth api={api} />;
+  return <hanko-auth />;
 }
 
 export default HankoAuth;

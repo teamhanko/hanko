@@ -2,7 +2,6 @@ package user
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
 )
 
 func NewUserCommand() *cobra.Command {
@@ -13,9 +12,9 @@ func NewUserCommand() *cobra.Command {
 	}
 }
 
-func RegisterCommands(parent *cobra.Command, cfg *config.Config) {
+func RegisterCommands(parent *cobra.Command) {
 	command := NewUserCommand()
 	parent.AddCommand(command)
-	command.AddCommand(NewImportCommand(cfg))
-	command.AddCommand(NewGenerateCommand(cfg))
+	command.AddCommand(NewImportCommand())
+	command.AddCommand(NewGenerateCommand())
 }

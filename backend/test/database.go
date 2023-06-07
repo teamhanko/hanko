@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/go-testfixtures/testfixtures/v3"
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	"github.com/ory/dockertest/v3"
 	"github.com/ory/dockertest/v3/docker"
@@ -55,13 +55,13 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 	}
 
 	hostAndPort := resource.GetHostPort(getPortID(dialect))
-	databaseUrl := fmt.Sprintf("%s://%s:%s@%s/%s?sslmode=disable", dialect, database_user, database_password, hostAndPort, database_name)
+	dsn := getDsn(dialect, hostAndPort)
 
 	_ = resource.Expire(120)
 
 	pool.MaxWait = 120 * time.Second
 	if err = pool.Retry(func() error {
-		db, err := sql.Open(dialect, databaseUrl)
+		db, err := sql.Open(dialect, dsn)
 		if err != nil {
 			return err
 		}
@@ -70,15 +70,23 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 		return nil, fmt.Errorf("could not connect to docker: %w", err)
 	}
 
-	db, err := sql.Open(dialect, databaseUrl)
+	db, err := sql.Open(dialect, dsn)
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to database: %w", err)
+	}
+
+	dbUrl := ""
+	switch dialect {
+	case "mysql":
+		dbUrl = fmt.Sprintf("mysql://%s", dsn)
+	default:
+		dbUrl = dsn
 	}
 
 	return &TestDB{
 		pool:        pool,
 		resource:    resource,
-		DatabaseUrl: databaseUrl,
+		DatabaseUrl: dbUrl,
 		DbCon:       db,
 		Dialect:     dialect,
 	}, nil
@@ -101,7 +109,7 @@ func getContainerOptions(dialect string) (*dockertest.RunOptions, error) {
 	case "postgres":
 		return &dockertest.RunOptions{
 			Repository: "postgres",
-			Tag:        "11",
+			Tag:        "12-alpine",
 			Env: []string{
 				fmt.Sprintf("POSTGRES_PASSWORD=%s", database_password),
 				fmt.Sprintf("POSTGRES_USER=%s", database_user),
@@ -138,21 +146,13 @@ func getPortID(dialect string) string {
 	}
 }
 
-// LoadFixtures loads predefined data from the path in the database.
-func LoadFixtures(db *sql.DB, dialect string, path string) error {
-	fixtures, err := testfixtures.New(
-		testfixtures.Database(db),
-		testfixtures.Dialect(dialect),
-		testfixtures.Directory(path),
-	)
-	if err != nil {
-		return fmt.Errorf("could not create testfixtures: %w", err)
+func getDsn(dialect string, hostAndPort string) string {
+	switch dialect {
+	case "postgres":
+		return fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=disable", database_user, database_password, hostAndPort, database_name)
+	case "mysql":
+		return fmt.Sprintf("%s:%s@(%s)/%s?parseTime=true&multiStatements=true&readTimeout=5s&collation=utf8mb4_general_ci", database_user, database_password, hostAndPort, database_name)
+	default:
+		return ""
 	}
-
-	err = fixtures.Load()
-	if err != nil {
-		return fmt.Errorf("could not load fixtures: %w", err)
-	}
-
-	return nil
 }

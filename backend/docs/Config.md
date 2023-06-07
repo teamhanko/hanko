@@ -5,11 +5,11 @@ Environment variables have higher precedence than configuration via file (i.e. i
 given in the file - multivalued options, like arrays, are also _not_ merged but overwritten entirely).
 
 The schema for the configuration file is given below. To set equivalent environment variables, join keys by `_`
-(underscore) and uppercase the keys, i.e. for `server.public.cors.allow_methods`
+(underscore) and uppercase the keys, i.e. for `server.webauthn.relying_party.origins`
 use:
 
 ```shell
-export SERVER_PUBLIC_CORS_ALLOW_METHODS="GET,PUT,POST,DELETE"
+export SERVER_WEBAUTHN_RELYING_PARTY_ORIGINS="https://hanko.io,android:apk-key-hash:nLSu7w..."
 ```
 
 
@@ -35,23 +35,19 @@ server:
     # Cross Origin Resource Sharing for public endpoints.
     #
     cors:
-      ## enabled ##
+      ## allow_origins ##
       #
-      # Sets whether cors is enabled or not.
+      # A list of allowed origins that may access the public endpoints.
       #
-      # Default value: false
-      #
-      enabled: false
-      allow_credentials: false
       allow_origins:
-        - "*"
-      allow_methods:
-        - ""
-      allow_headers:
-        - ""
-      expose_headers:
-        - ""
-      max_age: 0
+        - "https://hanko.io"
+        - "https://example.com"
+      ## unsafe_wildcard_origin_allowed ##
+      #
+      # If allow_origins contains a wildcard '*' origin, this flag must explicitly be set to 'true'.
+      # Using wildcard '*' origins is insecure and potentially leads to cross-origin attacks.
+      #
+      unsafe_wildcard_origin_allowed: false
   ## admin ##
   #
   # Configuration for the admin API.
@@ -175,6 +171,16 @@ session:
   # The JWT will be transmitted via the X-Auth-Token header. Enable during cross-domain operations.
   #
   enable_auth_token_header: false
+  ## audience ##
+  #
+  # Audience optional []string containing strings which get put into the aud claim. If not set default to Webauthn.RelyingParty.Id config parameter.
+  #
+  audience:
+  ## issuer ##
+  #
+  #  optional string to be used in the jwt iss claim.
+  #
+  issuer:
 password:
   ## enabled ##
   #
@@ -259,23 +265,11 @@ webauthn:
     # - Acme, Inc.
     #
     display_name: ""
-    ## origin ##
-    #
-    # DEPRECATED: use "origins" instead
-    #
-    # The origin for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
-    # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
-    #
-    # Example:
-    # - http://localhost
-    # - https://example.com
-    # - https://subdomain.example.com
-    #
-    origin: "http://localhost"
     ## origins ##
     #
     # A list of origins for which WebAuthn credentials will be accepted by the server. Must include the protocol and can only be the effective domain,
     # or a registrable domain suffix of the effective domain, as specified in the id. Except for localhost, the protocol must always be https for WebAuthn to work.
+    # Ip Addresses will not work.
     #
     # For an Android app the origin must be the base64 url encoded SHA256 fingerprint of the signing certificate.
     #
@@ -429,6 +423,8 @@ third_party:
   #
   # Supports wildcard matching through globbing. e.g. https://*.example.com will allow https://foo.example.com and https://bar.example.com to be accepted.
   # Globbing is also supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1 and https://foo.example.com/page2.
+  # A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+  #
   # More on globbing: https://pkg.go.dev/github.com/gobwas/glob#Compile
   #
   # NOTE: URLs in the list MUST NOT have trailing slash
@@ -462,25 +458,60 @@ third_party:
   providers:
     ##
     #
-    # The Google provider configuration
+    # The Apple provider configuration
     #
-    google:
+    apple:
       ##
       #
-      # Enable or disable the Google provider
+      # Enable or disable the Google provider.
       #
       # Default: false
       #
       enabled: false
       ##
       #
-      # Required. The client ID of your Google OAuth credentials.
-      # See: https://developers.google.com/identity/protocols/oauth2
+      # The client ID (Services ID) of your Apple credentials.
+      # See: https://docs.hanko.io/guides/social/apple
+      #
+      # Required if provider is enabled.
+      #
       #
       client_id: "CHANGE_ME"
       ##
       #
-      # Required. The secret of your Google OAuth credentials
+      # The generated secret of your Apple credentials.
+      # Valid for max. 6 months. Must be regenerated before expiration.
+      # https://docs.hanko.io/guides/social/apple
+      #
+      # Required if provider is enabled.
+      #
+      secret: "CHANGE_ME"
+    ##
+    #
+    # The Google provider configuration
+    #
+    google:
+      ##
+      #
+      # Enable or disable the Google provider.
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # The client ID of your Google OAuth credentials.
+      # See: https://docs.hanko.io/guides/social/google
+      #
+      # Required if provider is enabled.
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # The secret of your Google OAuth credentials
+      # See: https://docs.hanko.io/guides/social/google
+      #
+      # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
     ##
@@ -490,20 +521,25 @@ third_party:
     github:
       ##
       #
-      # Enable or disable the GitHub provider
+      # Enable or disable the GitHub provider.
       #
       # Default: false
       #
       enabled: false
       ##
       #
-      # Required. The client ID of your GitHub OAuth credentials.
-      # See: https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app
+      # The client ID of your GitHub OAuth credentials.
+      # See: https://docs.hanko.io/guides/social/github
+      #
+      # Required if provider is enabled.
       #
       client_id: "CHANGE_ME"
       ##
       #
-      # Required. The secret of your GitHub OAuth credentials
+      # The secret of your GitHub OAuth credentials.
+      # See: https://docs.hanko.io/guides/social/github
+      #
+      # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
 log:

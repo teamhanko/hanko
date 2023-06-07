@@ -1,1 +1,2 @@
+drop_foreign_key("passcodes", "passcodes_emails_id_fk", {"if_exists": false})
 drop_column("passcodes", "email_id")

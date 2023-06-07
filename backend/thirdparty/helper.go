@@ -30,7 +30,7 @@ func GetErrorUrl(redirectTo string, err error) string {
 		redirectUrl = fmt.Sprintf("%s?%s", redirectTo, v.Query())
 	default:
 		u := url.Values{}
-		u.Add("error", ThirdPartyErrorCodeServerError)
+		u.Add("error", ErrorCodeServerError)
 		u.Add("error_description", "an internal error has occurred")
 		redirectUrl = fmt.Sprintf("%s?%s", redirectTo, u.Encode())
 	}

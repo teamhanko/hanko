@@ -1,7 +1,4 @@
 <div class="content">
   <div class="error">{{ error?.message }}</div>
-  <hanko-auth
-    (hankoAuthSuccess)="redirectToTodo()"
-    [api]="api"
-  ></hanko-auth>
+  <hanko-auth (onAuthFlowCompleted)="redirectToTodos()"></hanko-auth>
 </div>

@@ -3,17 +3,23 @@
   import { useNavigate } from "svelte-navigator";
   import type { Todos } from "./TodoClient"
   import { TodoClient } from "./TodoClient";
+  import { Hanko } from "@teamhanko/hanko-elements";
+  import SessionExpiredModal from "./SessionExpiredModal.svelte";
 
-  const api = import.meta.env.VITE_TODO_API;
-  const todoClient = new TodoClient(api);
+  const todoAPI = import.meta.env.VITE_TODO_API;
+  const todoClient = new TodoClient(todoAPI);
+
+  const hankoAPI = import.meta.env.VITE_HANKO_API;
+  const hankoClient = new Hanko(hankoAPI);
 
   const navigate = useNavigate();
 
+  let openSessionExpiredModal;
   let description = '';
   let error: Error | null = null;
   let todos: Todos = [];
 
-  onMount(async () => {
+  onMount(() => {
     listTodos();
   });
 
@@ -33,7 +39,8 @@
       .addTodo(entry)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          //showModal = true;
+          openSessionExpiredModal();
           return;
         }
 
@@ -52,7 +59,7 @@
       .listTodos()
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          openSessionExpiredModal();
           return;
         }
 
@@ -73,7 +80,7 @@
       .patchTodo(id, checked)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          openSessionExpiredModal();
           return;
         }
 
@@ -91,7 +98,7 @@
       .deleteTodo(id)
       .then((res) => {
         if (res.status === 401) {
-          navigate("/");
+          openSessionExpiredModal();
           return;
         }
 
@@ -105,25 +112,26 @@
   };
 
   const logout = () => {
-    todoClient
+    hankoClient.user
       .logout()
-      .then(() => {
-        navigate("/");
-        return;
-      })
       .catch((e) => {
-        console.error(e);
+        error = e;
       });
   }
 
-  const profile = () => {
+  const redirectToLogin = () => {
+    navigate("/");
+  }
+
+  const redirectToProfile = () => {
     navigate("/profile");
   }
 </script>
-
+<SessionExpiredModal bind:openSessionExpiredModal></SessionExpiredModal>
+<hanko-events on:onSessionNotPresent={redirectToLogin} on:onUserLoggedOut={redirectToLogin}></hanko-events>
 <nav class="nav">
   <button class="button" on:click|preventDefault={logout}>Logout</button>
-  <button class="button" on:click|preventDefault={profile}>Profile</button>
+  <button class="button" on:click|preventDefault={redirectToProfile}>Profile</button>
   <button class="button" disabled>Todos</button>
 </nav>
 <div class="content">

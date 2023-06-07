@@ -5,14 +5,18 @@ import { UserClient } from "./lib/client/UserClient";
 import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
+import { TokenClient } from "./lib/client/TokenClient";
+import { Listener } from "./lib/events/Listener";
+import { Relay } from "./lib/events/Relay";
 
 /**
  * A class that bundles all available SDK functions.
  *
+ * @extends {Listener}
  * @param {string} api - The URL of your Hanko API instance
  * @param {number=} timeout - The request timeout in milliseconds
  */
-class Hanko {
+class Hanko extends Listener {
   api: string;
   config: ConfigClient;
   user: UserClient;
@@ -21,9 +25,12 @@ class Hanko {
   passcode: PasscodeClient;
   email: EmailClient;
   thirdParty: ThirdPartyClient;
+  token: TokenClient;
+  relay: Relay;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
+    super();
     this.api = api;
     /**
      *  @public
@@ -60,6 +67,16 @@ class Hanko {
      *  @type {ThirdPartyClient}
      */
     this.thirdParty = new ThirdPartyClient(api, timeout);
+    /**
+     *  @public
+     *  @type {TokenClient}
+     */
+    this.token = new TokenClient(api, timeout);
+    /**
+     *  @public
+     *  @type {Relay}
+     */
+    this.relay = new Relay();
   }
 }
 

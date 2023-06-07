@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
@@ -136,6 +137,12 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	} else {
 		// Send the passcode to the primary email address
 		email = e
+	}
+
+	sessionToken := h.GetSessionToken(c)
+	if sessionToken != nil && sessionToken.Subject() != user.ID.String() {
+		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
+		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
 	}
 
 	if email.User != nil && email.User.ID.String() != user.ID.String() {
@@ -299,6 +306,22 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return dto.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 
+		emailExistsForUser := false
+		for _, email := range user.Emails {
+			emailExistsForUser = email.ID == passcode.Email.ID
+			if emailExistsForUser {
+				break
+			}
+		}
+
+		existingSessionToken := h.GetSessionToken(c)
+		// return forbidden when none of these cases matches
+		if !((existingSessionToken == nil && emailExistsForUser) || // normal login: when user logs in and the email used is associated with the user
+			(existingSessionToken == nil && len(user.Emails) == 0) || // register: when user register and the user has no emails
+			(existingSessionToken != nil && existingSessionToken.Subject() == user.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passcode and the one in the session matches
+			return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passcode finalization not allowed"))
+		}
+
 		if !passcode.Email.Verified {
 			// Update email verified status and assign the email address to the user.
 			passcode.Email.Verified = true
@@ -342,9 +365,10 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		c.SetCookie(cookie)
 
+		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
+
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", token)
-			c.Response().Header().Set("Access-Control-Expose-Headers", "X-Auth-Token")
 		}
 
 		err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
@@ -364,4 +388,16 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 	}
 
 	return transactionError
+}
+
+func (h *PasscodeHandler) GetSessionToken(c echo.Context) jwt.Token {
+	var token jwt.Token
+	sessionCookie, _ := c.Cookie("hanko")
+	// we don't need to check the error, because when the cookie can not be found, the user is not logged in
+	if sessionCookie != nil {
+		token, _ = h.sessionManager.Verify(sessionCookie.Value)
+		// we don't need to check the error, because when the token is not returned, the user is not logged in
+	}
+
+	return token
 }

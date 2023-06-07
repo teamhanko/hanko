@@ -8,83 +8,151 @@ sidebar_custom_props:
   docCardIconName: github-dark
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Login with GitHub
 
 To enable GitHub login for your project, you need to
-- Create a GitHub OAuth application
-- Create and add your Google OAuth credentials to your Hanko backend configuration
-- Add the Hanko `auth` web component or add the required code to your JS Client App using the `hanko-frontend-sdk`.
+- Create a GitHub OAuth application.
+- Create your GitHub OAuth credentials and configure them with Hanko.
+- Add the Hanko `<hanko-auth>` web component or add the required code to your frontend using the `hanko-frontend-sdk`.
 
 ## Access your GitHub account
 
 - Go to [github.com](https://github.com).
-- Click on 'Sign In' at the top right to log in. If you do not have an account yet, create one.
+- Click on `Sign In` at the top right to log in. If you do not have an account yet, create one.
 
-## Create a GitHub Oauth App
+## Create a GitHub OAuth App {#create-app}
 
-Go to the [GitHub Developer Settings](https://github.com/settings/developers) page:
+- Once signed in, click on your profile photo at the top right.
+- If you want to create an OAuth app for your personal account, click `Settings` near the bottom of the menu. If you
+want to create an OAuth app for your organization, first click `Your organizations`, then click the `Settings` button
+for your organization.
+- In the left sidebar, click `Developer settings` (near the bottom).
+- In the left sidebar, click `OAuth Apps`.
+- Click `New OAuth app` on the top right. This will open a registration form. Before filling out the form you need one
+more piece of information (see the [next step](#redirect-url)).
 
-- Click on your profile photo at the top right
-- Click Settings near the bottom of the menu
-- In the left sidebar, click Developer settings (near the bottom)
-- In the left sidebar, click OAuth Apps
+## Get your provider redirect URL {#redirect-url}
 
-## Get your callback URL
+When creating an OAuth app with GitHub, you need to provide a redirect URL that determines where the third party
+provider redirects after a successful login. This redirect URL consists of the base URL of the Hanko API
+and the [`/thirdparty/callback`](http://docs.hanko.io/api/public#tag/Third-Party/operation/thirdPartyCallback) endpoint.
+Your Hanko API base URL, and therefore your redirect URL, depends on whether you use Hanko Cloud or chose to self-host
+the Hanko API:
 
-- Before creating your Oauth app, you need to be aware of the provider callback URL. This is where the third party
-provider redirects after a successful login. The callback URL consists of the base URL of your running
-Hanko backend instance and the `/thirdparty/callback` endpoint:
+```mdx-code-block
+<Tabs groupId="environment">
+<TabItem value="cloud" label="Hanko Cloud">
+```
 
-  ```https://<your_hanko_backend_instance>/thirdparty/callback```
+When using Hanko Cloud you can obtain your redirect URL from the Hanko Cloud Console:
 
+- Sign in to [cloud.hanko.io](https://cloud.hanko.io).
+- Select your `Organization`.
+- Select your `Project`.
+- In the left sidebar, click `Settings`, then select `Identity providers`.
+- Find your redirect URL in the `Redirect URL` input.
 
-## Create a new OAuth application
+You need the redirect URL for [completing the GitHub OAuth app registration](#complete-app) in the next step.
 
-- On GitHub, click 'Register a new application' or 'New OAuth app' if you created one before.
-- Fill in the required information
-  - In 'Application name', enter the name of your app.
-  - In 'Homepage URL', enter the full URL to your app (i.e. `https://<your_hanko_backend_instance`)
-  - In 'Authorization callback URL', enter the callback URL of your app (see the previous step).
-- Click 'Register application'. You should now see an overview of your OAuth app
-- Copy and save the 'Client ID'
-- Click 'Generate a new client secret'.
-- Copy and save the 'Client secret'
+```mdx-code-block
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted">
+```
 
+When self-hosting your redirect URL depends on where you chose to host your Hanko API instance, i.e.
+it looks like: `<your_hanko_api_url>/thirdparty/callback`.
 
-## Configure GitHub credentials with your Hanko backend
+You need the redirect URL for [completing the GitHub OAuth app registration](#complete-app) in the next step and when
+[configuring your GitHub credentials with Hanko](#config-hanko).
 
-Open up your backend [configuration file](https://github.com/teamhanko/hanko/blob/main/backend/config/config.yaml) add
-the following:
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
 
-```yaml
+## Complete OAuth app registration {#complete-app}
+
+- Now, fill in the required information in the OAuth app registration form:
+  - In `Application name`, enter the name of your app.
+  - In `Homepage URL`, enter the full URL to your app.
+  - In `Authorization callback URL`, enter the redirect URL from the [previous step](#redirect-url).
+- Click `Register application`. You should now see an overview of your OAuth app.
+- Copy and save the `Client ID`. You need this in the [next step](#config-hanko).
+- Click `Generate a new client secret`.
+- Copy and save the `Client secret`. You need this in the [next step](#config-hanko).
+
+## Configure GitHub credentials with Hanko {#config-hanko}
+
+Next, you need to configure your GitHub credentials with Hanko. Configuration differs depending on whether you
+use Hanko Cloud or self-host the Hanko API:
+
+```mdx-code-block
+<Tabs groupId="environment">
+<TabItem value="cloud" label="Hanko Cloud">
+```
+
+When using Hanko Cloud, configure third party settings using the Hanko Cloud Console:
+
+- Sign in to [cloud.hanko.io](https://cloud.hanko.io).
+- Select your `Organization`.
+- Select your `Project`.
+- In the left sidebar, click `Settings`, then select `Identity providers`.
+- Under `Identity provider settings` configure the following:
+  - `Error redirect URL`: This is a URL in your frontend the Hanko API redirects to if an error occurs during third
+    party sign-in. When [using the `hanko-elements` web components](#frontend-integration) it should be the URL of the
+    page that embeds the web component such that errors can be processed properly by the web component.
+  - `Allowed redirect URL`: This is a URL in your frontend the Hanko API is allowed to redirect to after third party
+    authentication was successful. When [using the `hanko-elements` web components](#frontend-integration), it should be
+    the URL of the page that embeds the web component.
+    - _**Note**_: supports wildcard matching through globbing:
+      - `https://*.example.com` will allow `https://foo.example.com` and `https://bar.example.com` to be accepted.
+      - `https://foo.example.com/*` will match `https://foo.example.com/page1`
+        and `https://foo.example.com/page2`.
+      - `**` acts as a "super"-wildcard/match-all.
+- Find and expand the `GitHub` provider panel in the `Providers` list.
+- Enable the provider by clicking the toggle switch.
+- Enter your `Client ID` and `Client secret`.
+- Click `Save`.
+
+```mdx-code-block
+</TabItem>
+<TabItem value="self-hosted" label="Self-hosted">
+```
+
+When self-hosting you need to adjust your backend
+[configuration file](https://github.com/teamhanko/hanko/blob/main/backend/config/config.yaml). You must provide
+the following data:
+  - your provider [`redirect_url`](#redirect-url)
+  - your [`client ID`](#complete-app)
+  - your client [`secret`](#complete-app)
+  - an `error_redirect_url`: This is a URL in your frontend the Hanko API redirects to if an error occurs during third
+    party sign-in. When [using the `hanko-elements` web components](#frontend-integration), it should be the URL of the
+    page that embeds the web component such that errors can be processed properly by the web component.
+  - an `allowed_redirect_url`: This is a URL in your frontend the Hanko API is allowed to redirect to after third
+    party sign-in was successful. When [using the `hanko-elements` web components](#frontend-integration), it should be
+    the URL of the page that embeds the web component.
+    - _**Note**_: supports wildcard matching through globbing:
+      - `https://*.example.com` will allow `https://foo.example.com` and `https://bar.example.com` to be accepted.
+      - `https://foo.example.com/*` will match `https://foo.example.com/page1`
+      and `https://foo.example.com/page2`.
+      - `**` acts as a "super"-wildcard/match-all.
+
+Open up your configuration file and add the following:
+
+```yaml title=config.yaml
 third_party:
-  # URL the backend redirects to if an error occurs during third party sign-in. Errors are provided
-  # as 'error' and 'error_description' query params in the redirect location URL.
-  #
-  # When using the Hanko web components it should be the URL of the page that embeds the web component
-  # such that errors can be processed properly by the web component.
-  #
   # You do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when
   # validating redirect URLs.
   #
   # NOTE: URLs MUST NOT have trailing slash
   error_redirect_url: <your_error_redirect_url>
-  # List of URLS the backend is allowed to redirect to after third party sign-in was successful.
-  #
-  # When using the Hanko web components it should be the URL of the page that embeds the
-  # web component.
-  #
-  # Supports wildcard matching through globbing. e.g. https://*.example.com will allow
-  # https://foo.example.com and https://bar.example.com to be accepted. Globbing is also
-  # supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1
-  # and https://foo.example.com/page2.
-  #
-  # More on globbing: https://pkg.go.dev/github.com/gobwas/glob#Compile
-  #
   # NOTE: URLs in the list MUST NOT have trailing slash
   allowed_redirect_urls:
-      - <your_redirect_url>
-  redirect_url: https://<your_hanko_backend_instance>/thirdparty/callback
+      - <your_allowed_redirect_url>
+  redirect_url: <your_provider_redirect_url>
   providers:
     github:
       enabled: true
@@ -92,38 +160,53 @@ third_party:
       secret: <your_github_client_secret>
 ```
 
-## Enable login in your frontend app
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
 
-### With Hanko Elements
+## Enable login in your frontend app {#frontend-integration}
 
-Depending on what framework your frontend uses, integrate the `auth` web component from the `hanko-elements` package
-according to one of our [frontend guides](/guides/frontend). If everything was successful, the component should now
-render a button to login with GitHub on the login view.
+Frontend integration depends on whether you intend to use a pre-built UI as provided by the
+[`@teamhanko/hanko-elements`](https://www.npmjs.com/package/@teamhanko/hanko-elements) package or prefer building
+a custom UI using the [`@teamhanko/hanko-frontend-sdk`](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk).
 
-:::note
+```mdx-code-block
+<Tabs>
+<TabItem value="elements" label="Hanko Elements">
+```
 
-Make sure to configure the page the web component is embedded on as both your `error_redirect_url` as well
-as an `allowed_redirect_url` in your `third_party` settings.
+Depending on what framework your frontend uses, integrate the `<hanko-auth>` web component from the `hanko-elements`
+package according to one of our [frontend guides](/guides/frontend). If everything was successful, the component should
+now render a button for signing in with `GitHub` on the login view.
+
+:::info
+
+Make sure to [configure](#config-hanko) the page the web component is embedded on as your error redirect URL
+as well as an allowed redirect URL.
 
 :::
 
-On successful authentication with the third party provider, the backend issues a JWT (as a cookie or - if enabled
-via backend [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md) option
-`session.enable_auth_token_header` - via `X-Auth-Token` header). The web component recognizes this and continues the
-usual component flow on success or displays errors that occurred during third party
-provider authentication accordingly.
+On successful authentication with the third party provider, the backend issues a session cookie and the web component
+continues the usual component flow on success. Errors that occur during third party
+provider authentication are also picked up and displayed in the web component accordingly.
 
-### With Hanko Frontend SDK
+```mdx-code-block
+</TabItem>
+<TabItem value="sdk" label="Hanko Frontend SDK">
+```
 
 When building your own UI, you can use the `@teamhanko/hanko-frontend-sdk` to initialize third party sign in.
-Call `hanko.thirdParty.auth` with `github` as your provider and the target URL in your app you want to redirect to
-after successful third party authentication (must be configured as an allowed redirect url via
-`third_party.allowed_redirect_urls`).
+Create a [`Hanko` client](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/Hanko.html) instance and call `thirdParty.auth`
+with `github` as your provider and the target URL in your frontend you want to redirect to
+after successful third party authentication (must be [configured](#config-hanko) as an allowed redirect URL).
+Doing so first redirects you to the third party provider, where you then will be prompted
+to authenticate and provide consent for the API to access your data.
 
 ```js showLineNumbers
 import { Hanko } from "@teamhanko/hanko-frontend-sdk"
 
-const hanko = new Hanko("<your_hanko_backend_instance>")
+const hanko = new Hanko("<your_hanko_api_url>")
 
 async function signInWithGitHub() {
     try {
@@ -134,10 +217,40 @@ async function signInWithGitHub() {
 }
 ```
 
-On successful authentication with the third party provider, the backend issues a JWT (as a cookie or - if enabled
-via backend [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md) option
-`session.enable_auth_token_header` - via `X-Auth-Token` header) and redirects to the
-target URL provided in the `hanko.thirdParty.auth` call.
+On successful authentication with the third party provider, the API redirects you to the given redirect URL. The
+URL query includes a one time token that must be exchanged for a JWT. Use the `token.validate`
+method on your client to validate the token:
 
+```js showLineNumbers
+import { Hanko } from "@teamhanko/hanko-frontend-sdk"
 
+const hanko = new Hanko("<your_hanko_api_url>")
 
+async function onLoad() {
+    try {
+       await hanko.token.validate();
+    } catch (error) {
+      // handle error
+    }
+
+    // you should now have a JWT cookie set
+}
+```
+
+On success, the API issues a JWT which is then set by the SDK as a cookie (`hanko`). All other SDK methods can now
+use the cookie to make authenticated requests to the API.
+
+```mdx-code-block
+</TabItem>
+</Tabs>
+```
+
+:::info
+
+If you are self-hosting and your frontend application runs on a different domain than the Hanko API, make sure to
+- enable session token propagation via header manually by setting `session.enable_auth_token_header` to `true` in your
+  configuration, so that session cookies can be set client-side.
+- include your frontend domain in the `server.public.cors.allowed_origins` in your
+  [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md).
+
+:::

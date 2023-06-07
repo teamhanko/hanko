@@ -1,46 +1,41 @@
 <script setup lang="ts">
-import HankoProfile from "@/components/HankoProfile.vue";
-
 import { useRouter } from "vue-router";
-import { TodoClient } from "@/utils/TodoClient";
-import type { Ref } from "vue";
 import { ref } from "vue";
+import OnSessionExpiredModal from "@/components/SessionExpiredModal.vue";
+import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 
 const router = useRouter();
-const api = import.meta.env.VITE_TODO_API;
-const client = new TodoClient(api);
-const error: Ref<Error | null> = ref(null);
 
-function setError(e: Error) {
-  error.value = e;
-}
+const hankoAPI = import.meta.env.VITE_HANKO_API;
+const hankoClient = new Hanko(hankoAPI);
 
-function todos() {
-  router.push("/todo");
-}
+const error = ref<Error>();
 
-function logout() {
-  client
-    .logout()
-    .then(() => {
-      router.push("/");
-      return;
-    })
-    .catch((e) => {
-      error.value = e;
-    });
-}
+const redirectToLogin = () => {
+  router.push("/").catch((e) => (error.value = e));
+};
+
+const redirectToTodos = () => {
+  router.push("/todo").catch((e) => (error.value = e));
+};
+
+const logout = () => {
+  hankoClient.user.logout().catch((e) => (error.value = e));
+};
 </script>
 
 <template>
+  <on-session-expired-modal></on-session-expired-modal>
   <nav class="nav">
     <button @click.prevent="logout" class="button">Logout</button>
     <button disabled class="button">Profile</button>
-    <button @click.prevent="todos" class="button">Todos</button>
+    <button @click.prevent="redirectToTodos" class="button">Todos</button>
   </nav>
   <main class="content">
     <div class="error">{{ error?.message }}</div>
-    <HankoProfile @on-error="setError" />
+    <hanko-profile
+      @onSessionNotPresent="redirectToLogin"
+      @onUserLoggedOut="redirectToLogin"
+    />
   </main>
 </template>
-

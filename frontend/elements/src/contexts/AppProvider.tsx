@@ -7,6 +7,8 @@ import {
   useCallback,
   useMemo,
   useRef,
+  useEffect,
+  Fragment,
 } from "preact/compat";
 
 import {
@@ -19,7 +21,7 @@ import {
   WebauthnCredentials,
 } from "@teamhanko/hanko-frontend-sdk";
 
-import { translations } from "../Translations";
+import { Translations } from "../i18n/translations";
 
 import Container from "../components/wrapper/Container";
 
@@ -29,13 +31,17 @@ import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
-type ComponentName = "auth" | "profile";
+type ComponentName = "auth" | "profile" | "events";
 
 interface Props {
-  api?: string;
+  hanko?: Hanko;
   lang?: string | SignalLike<string>;
-  fallbackLang?: string;
+  translations?: Translations;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
+  injectStyles?: boolean;
   experimental?: string;
+  enablePasskeys?: boolean;
   componentName: ComponentName;
   children?: ComponentChildren;
 }
@@ -61,26 +67,24 @@ interface Context extends States {
   hanko: Hanko;
   componentName: ComponentName;
   experimentalFeatures?: ExperimentalFeatures;
-  emitSuccessEvent: () => void;
+  emitSuccessEvent: (userID: string) => void;
+  enablePasskeys: boolean;
 }
 
 export const AppContext = createContext<Context>(null);
 
 const AppProvider = ({
-  api,
+  hanko,
   lang,
-  fallbackLang = "en",
   componentName,
   experimental = "",
+  injectStyles = false,
+  enablePasskeys = true,
+  translations,
+  translationsLocation = "/i18n",
+  fallbackLanguage = "en",
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
-
-  const hanko = useMemo(() => {
-    if (api) {
-      return new Hanko(api, 13000);
-    }
-    return null;
-  }, [api]);
 
   const experimentalFeatures = useMemo(
     () =>
@@ -91,19 +95,7 @@ const AppProvider = ({
     [experimental]
   );
 
-  const emitSuccessEvent = useCallback(() => {
-    const event = new Event("hankoAuthSuccess", {
-      bubbles: true,
-      composed: true,
-    });
-
-    const fn = setTimeout(() => {
-      ref.current.dispatchEvent(event);
-    }, 500);
-
-    return () => clearTimeout(fn);
-  }, []);
-
+  const initComponent = useMemo(() => <InitPage />, []);
   const [config, setConfig] = useState<Config>();
   const [userInfo, setUserInfo] = useState<UserInfo>(null);
   const [passcode, setPasscode] = useState<Passcode>();
@@ -111,7 +103,82 @@ const AppProvider = ({
   const [emails, setEmails] = useState<Emails>();
   const [webauthnCredentials, setWebauthnCredentials] =
     useState<WebauthnCredentials>();
-  const [page, setPage] = useState<h.JSX.Element>(<InitPage />);
+  const [page, setPage] = useState<h.JSX.Element>(initComponent);
+
+  const init = useCallback(() => {
+    setPage(initComponent);
+  }, [initComponent]);
+
+  const emitSuccessEvent = useCallback(
+    (userID: string) => {
+      const event = new Event("hankoAuthSuccess", {
+        bubbles: true,
+        composed: true,
+      });
+      const fn = setTimeout(() => {
+        hanko.relay.dispatchAuthFlowCompletedEvent({ userID });
+        ref.current.dispatchEvent(event);
+      }, 500);
+
+      return () => clearTimeout(fn);
+    },
+    [hanko]
+  );
+
+  useMemo(() => {
+    switch (componentName) {
+      case "auth":
+        hanko.onUserLoggedOut(init);
+        hanko.onSessionExpired(init);
+        hanko.onUserDeleted(init);
+        break;
+      case "profile":
+        hanko.onSessionCreated(init);
+        break;
+    }
+  }, [componentName, hanko, init]);
+
+  const dispatchEvent = function <T>(type: string, detail?: T) {
+    ref.current?.dispatchEvent(
+      new CustomEvent<T>(type, {
+        detail,
+        bubbles: false,
+        composed: true,
+      })
+    );
+  };
+
+  useEffect(() => {
+    hanko.onAuthFlowCompleted((detail) => {
+      dispatchEvent("onAuthFlowCompleted", detail);
+    });
+
+    hanko.onUserDeleted(() => {
+      dispatchEvent("onUserDeleted");
+    });
+
+    hanko.onSessionNotPresent(() => {
+      dispatchEvent("onSessionNotPresent");
+    });
+
+    hanko.onSessionCreated((detail) => {
+      dispatchEvent("onSessionCreated", detail);
+    });
+
+    hanko.onSessionResumed((detail) => {
+      dispatchEvent("onSessionResumed", detail);
+    });
+
+    hanko.onSessionExpired(() => {
+      dispatchEvent("onSessionExpired");
+    });
+
+    hanko.onUserLoggedOut(() => {
+      dispatchEvent("onUserLoggedOut");
+    });
+
+    hanko.relay.dispatchInitialEvents();
+  }, [hanko]);
 
   return (
     <AppContext.Provider
@@ -120,6 +187,7 @@ const AppProvider = ({
         componentName,
         experimentalFeatures,
         emitSuccessEvent,
+        enablePasskeys,
         config,
         setConfig,
         userInfo,
@@ -139,9 +207,24 @@ const AppProvider = ({
       <TranslateProvider
         translations={translations}
         lang={lang?.toString()}
-        fallbackLang={fallbackLang}
+        fallbackLang={fallbackLanguage}
+        root={translationsLocation}
       >
-        <Container ref={ref}>{page}</Container>
+        <Container ref={ref}>
+          {componentName !== "events" ? (
+            <Fragment>
+              {injectStyles ? (
+                <style
+                  /* eslint-disable-next-line react/no-danger */
+                  dangerouslySetInnerHTML={{
+                    __html: window._hankoStyle.innerHTML,
+                  }}
+                />
+              ) : null}
+              {page}
+            </Fragment>
+          ) : null}
+        </Container>
       </TranslateProvider>
     </AppContext.Provider>
   );

@@ -29,7 +29,7 @@ const sidebars = {
         slug: '/guides/frontend',
         keywords: ['guides']
       },
-      items: ['guides/angular', "guides/next", "guides/react", "guides/svelte", "guides/vue"]
+      items: ['guides/angular', "guides/js", "guides/next", "guides/react", "guides/svelte", "guides/vue"]
     },
     'guides/backend',
     'guides/mobile_guide',
@@ -40,7 +40,7 @@ const sidebars = {
         type: 'doc',
         id: 'guides/social/index'
       },
-      items: ['guides/social/google', "guides/social/github"]
+      items: ['guides/social/apple', 'guides/social/github', 'guides/social/google']
     },
   ],
 };

@@ -1,4 +1,4 @@
-import { Me, User, UserInfo } from "../Dto";
+import { Me, User, UserInfo, UserCreated } from "../Dto";
 import {
   ConflictError,
   NotFoundError,
@@ -44,13 +44,13 @@ class UserClient extends Client {
    * occurred, you may want to prompt the user to log in.
    *
    * @param {string} email - The email address of the user to be created.
-   * @return {Promise<User>}
+   * @return {Promise<UserCreated>}
    * @throws {ConflictError}
    * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
    * @see https://docs.hanko.io/api/public#tag/User-Management/operation/createUser
    */
-  async create(email: string): Promise<User> {
+  async create(email: string): Promise<UserCreated> {
     const response = await this.client.post("/users", { email });
 
     if (response.status === 409) {
@@ -59,7 +59,11 @@ class UserClient extends Client {
       throw new TechnicalError();
     }
 
-    return response.json();
+    const createUser: UserCreated = response.json();
+    if (createUser && createUser.user_id) {
+      this.client.processResponseHeadersOnLogin(createUser.user_id, response);
+    }
+    return createUser;
   }
 
   /**
@@ -75,11 +79,8 @@ class UserClient extends Client {
   async getCurrent(): Promise<User> {
     const meResponse = await this.client.get("/me");
 
-    if (
-      meResponse.status === 400 ||
-      meResponse.status === 401 ||
-      meResponse.status === 404
-    ) {
+    if (meResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!meResponse.ok) {
       throw new TechnicalError();
@@ -88,11 +89,8 @@ class UserClient extends Client {
     const me: Me = meResponse.json();
     const userResponse = await this.client.get(`/users/${me.id}`);
 
-    if (
-      userResponse.status === 400 ||
-      userResponse.status === 401 ||
-      userResponse.status === 404
-    ) {
+    if (userResponse.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     } else if (!userResponse.ok) {
       throw new TechnicalError();
@@ -105,15 +103,20 @@ class UserClient extends Client {
    * Deletes the current user and expires the existing session cookie.
    *
    * @return {Promise<void>}
+   * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
+   * @throws {UnauthorizedError}
    */
   async delete(): Promise<void> {
     const response = await this.client.delete("/user");
 
     if (response.ok) {
-      this.client.removeAuthCookie();
+      this.client.cookie.removeAuthCookie();
+      this.client.sessionState.reset().write();
+      this.client.dispatcher.dispatchUserDeletedEvent();
       return;
     } else if (response.status === 401) {
+      this.client.dispatcher.dispatchSessionExpiredEvent();
       throw new UnauthorizedError();
     }
 
@@ -124,6 +127,7 @@ class UserClient extends Client {
    * Logs out the current user and expires the existing session cookie. A valid session cookie is required to call the logout endpoint.
    *
    * @return {Promise<void>}
+   * @throws {RequestTimeoutError}
    * @throws {TechnicalError}
    */
   async logout(): Promise<void> {
@@ -132,10 +136,13 @@ class UserClient extends Client {
     // For cross-domain operations, the frontend SDK creates the cookie by reading the "X-Auth-Token" header, and
     // "Set-Cookie" headers sent by the backend have no effect due to the browser's security policy, which means that
     // the cookie must also be removed client-side in that case.
-    this.client.removeAuthCookie();
+    this.client.cookie.removeAuthCookie();
+    this.client.sessionState.reset().write();
+    this.client.dispatcher.dispatchUserLoggedOutEvent();
 
     if (logoutResponse.status === 401) {
-      return; // The user is logged out already
+      // The user is logged out already
+      return;
     } else if (!logoutResponse.ok) {
       throw new TechnicalError();
     }

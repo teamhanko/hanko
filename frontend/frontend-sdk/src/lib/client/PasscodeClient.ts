@@ -1,4 +1,4 @@
-import { PasscodeState } from "../state/PasscodeState";
+import { PasscodeState } from "../state/users/PasscodeState";
 import { Passcode } from "../Dto";
 import {
   InvalidPasscodeError,
@@ -6,7 +6,6 @@ import {
   PasscodeExpiredError,
   TechnicalError,
   TooManyRequestsError,
-  UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
 
@@ -38,10 +37,9 @@ class PasscodeClient extends Client {
    * @param {string=} emailID - The UUID of the email address. If unspecified, the email will be sent to the primary email address.
    * @param {boolean=} force - Indicates the passcode should be sent, even if there is another active passcode.
    * @return {Promise<Passcode>}
-   * @throws {TooManyRequestsError}
    * @throws {RequestTimeoutError}
-   * @throws {UnauthorizedError}
    * @throws {TechnicalError}
+   * @throws {TooManyRequestsError}
    * @see https://docs.hanko.io/api/public#tag/Passcode/operation/passcodeInit
    */
   async initialize(
@@ -76,11 +74,9 @@ class PasscodeClient extends Client {
     const response = await this.client.post(`/passcode/login/initialize`, body);
 
     if (response.status === 429) {
-      retryAfter = response.parseRetryAfterHeader();
+      retryAfter = response.parseNumericHeader("Retry-After");
       this.state.setResendAfter(userID, retryAfter).write();
       throw new TooManyRequestsError(retryAfter);
-    } else if (response.status === 401) {
-      throw new UnauthorizedError();
     } else if (!response.ok) {
       throw new TechnicalError();
     }
@@ -132,7 +128,7 @@ class PasscodeClient extends Client {
       throw new TechnicalError();
     }
 
-    this.state.reset(userID).write();
+    this.client.processResponseHeadersOnLogin(userID, response);
 
     return;
   }

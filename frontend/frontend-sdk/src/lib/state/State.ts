@@ -1,4 +1,5 @@
-import { LocalStorageUsers } from "./UserState";
+import { LocalStorageUsers } from "./users/UserState";
+import { LocalStorageSession } from "./session/SessionState";
 
 /**
  * @interface
@@ -8,6 +9,7 @@ import { LocalStorageUsers } from "./UserState";
  */
 interface LocalStorage {
   users?: LocalStorageUsers;
+  session?: LocalStorageSession;
 }
 
 /**
@@ -19,11 +21,11 @@ interface LocalStorage {
  * @subcategory Internal
  */
 abstract class State {
-  private readonly key: string;
+  key: string;
   ls: LocalStorage;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(key = "hanko") {
+  constructor(key: string) {
     /**
      *  @private
      *  @type {string}

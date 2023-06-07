@@ -19,13 +19,13 @@ import (
 )
 
 func TestNewPasscodeHandler(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	assert.NoError(t, err)
 	assert.NotEmpty(t, passcodeHandler)
 }
 
 func TestPasscodeHandler_Init(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	body := dto.PasscodeInitRequest{
@@ -47,7 +47,7 @@ func TestPasscodeHandler_Init(t *testing.T) {
 }
 
 func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	body := dto.PasscodeInitRequest{
@@ -71,7 +71,7 @@ func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	body := dto.PasscodeFinishRequest{
@@ -94,7 +94,7 @@ func TestPasscodeHandler_Finish(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	body := dto.PasscodeFinishRequest{
@@ -119,7 +119,7 @@ func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	body := dto.PasscodeFinishRequest{
@@ -153,7 +153,7 @@ func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
 }
 
 func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
+	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
 	require.NoError(t, err)
 
 	body := dto.PasscodeFinishRequest{
@@ -182,10 +182,15 @@ func passcodes() []models.Passcode {
 	return []models.Passcode{{
 		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
 		UserId:    uuid.FromStringOrNil(userId),
+		EmailID:   uuid.FromStringOrNil(userId),
 		Ttl:       300,
 		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
 		CreatedAt: now,
 		UpdatedAt: now,
+		Email: models.Email{
+			ID:      uId,
+			Address: "john.doe@example.com",
+		},
 	}}
 }
 

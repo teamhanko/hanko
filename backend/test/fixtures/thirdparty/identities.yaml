@@ -1,0 +1,21 @@
+- id: 443a984d-bb1c-46fe-b685-151bd0f017b1
+  provider_id: "google_abcde"
+  provider_name: "google"
+  data: '{"email":"test-with-google-identity@example.com","email_verified":true,"iss":"https://www.googleapis.com","sub":"google_abcde"}'
+  email_id: 15ed767e-1544-4e03-a732-4bf80caa2e78
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: b140230b-be5b-4589-9762-ec72f32d2833
+  provider_id: "1234"
+  provider_name: "github"
+  data: '{"email":"test-with-github-identity@example.com","email_verified":true,"iss":"https://api.github.com","sub":"1234"}'
+  email_id: 80939e4c-0028-4b67-aeee-98c617a20b6b
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 09b084b7-36af-41c5-b4b6-db9b8ed8385b
+  provider_id: "apple_abcde"
+  provider_name: "apple"
+  data: '{"email":"test-with-apple-identity@example.com","email_verified":true,"iss":"https://appleid.apple.com","sub":"apple_abcde"}'
+  email_id: 05ab6e1f-8dfb-4329-ae04-22571a68d96b
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

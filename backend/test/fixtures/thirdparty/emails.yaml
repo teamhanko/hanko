@@ -1,0 +1,44 @@
+- id: 15ed767e-1544-4e03-a732-4bf80caa2e78
+  user_id: e45a7f3f-029d-46fc-a2c6-bed892b1e84e
+  address: test-with-google-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+# satisfies the scenario, where a user changes her primary provider email address changes to another existing email
+# address for that user (identity should then be coupled to this email address)
+- id: 3d9d99d8-ab27-43db-a6ca-e524974de4f0
+  user_id: e45a7f3f-029d-46fc-a2c6-bed892b1e84e
+  address: test-with-google-identity-changed@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 80939e4c-0028-4b67-aeee-98c617a20b6b
+  user_id: 1d6a4824-d935-4980-8f18-8ee5d6efe2fc
+  address: test-with-github-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 05ab6e1f-8dfb-4329-ae04-22571a68d96b
+  user_id: b3537e49-de92-4e16-8981-ae4beb44c447
+  address: test-with-apple-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 527afce8-3b7b-41b6-b1ed-33d408c5a7bb
+  user_id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
+  address: test-no-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 490c7b84-d62f-465b-8471-75dac538e4f3
+  user_id:
+  address: unclaimed-email@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 982cc627-c56c-415d-aa49-fcaa1b39cf14
+  user_id: 5409b292-c1be-421a-ac7d-f8ece1dcd4e4
+  address: provider-primary-email-changed@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

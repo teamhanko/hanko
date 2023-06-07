@@ -1,5 +1,5 @@
 # Build the hanko binary
-FROM golang:1.19 as builder
+FROM golang:1.20 as builder
 WORKDIR /workspace
 
 # Get Delve
@@ -25,6 +25,7 @@ COPY pagination pagination/
 COPY rate_limiter rate_limiter/
 COPY thirdparty thirdparty/
 COPY build_info build_info/
+COPY middleware middleware/
 
 # Build
 RUN go generate ./...

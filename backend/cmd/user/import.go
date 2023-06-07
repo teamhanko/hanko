@@ -19,12 +19,22 @@ import (
 
 var inputFile string
 
-func NewImportCommand(config *config.Config) *cobra.Command {
+func NewImportCommand() *cobra.Command {
+	var (
+		configFile string
+	)
+
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import users into database from a Json file",
 		Long:  ``,
 		Run: func(cmd *cobra.Command, args []string) {
+			//Load cfg
+			cfg, err := config.Load(&configFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+
 			//Load File
 			users, err := loadFile()
 			if err != nil {
@@ -38,7 +48,7 @@ func NewImportCommand(config *config.Config) *cobra.Command {
 				os.Exit(1)
 			}
 			//Import Users
-			persister, err := persistence.New(config.Database)
+			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Println(err)
 				os.Exit(1)
@@ -51,6 +61,7 @@ func NewImportCommand(config *config.Config) *cobra.Command {
 		},
 	}
 
+	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().StringVarP(&inputFile, "inputFile", "i", "", "The json file where the users should be imported from.")
 	err := cmd.MarkFlagRequired("inputFile")
 	if err != nil {

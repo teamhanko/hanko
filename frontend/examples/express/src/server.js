@@ -86,9 +86,4 @@ app.delete("/todo/:id", (req, res) => {
   res.status(204).end();
 });
 
-app.get("/logout", (req, res) => {
-  res.clearCookie("hanko");
-  res.status(204).end();
-});
-
 app.listen(8002);

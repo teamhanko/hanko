@@ -8,11 +8,11 @@ import (
 )
 
 const (
-	GoogleAuthBase           = "accounts.google.com"
-	GoogleAPIBase            = "www.googleapis.com"
-	GoogleOauthAuthEndpoint  = "/o/oauth2/auth"
-	GoogleOauthTokenEndpoint = "/o/oauth2/token"
-	GoogleUserInfoEndpoint   = "/oauth2/v3/userinfo"
+	GoogleAuthBase           = "https://accounts.google.com"
+	GoogleAPIBase            = "https://www.googleapis.com"
+	GoogleOauthAuthEndpoint  = GoogleAuthBase + "/o/oauth2/auth"
+	GoogleOauthTokenEndpoint = GoogleAuthBase + "/o/oauth2/token"
+	GoogleUserInfoEndpoint   = GoogleAPIBase + "/oauth2/v3/userinfo"
 )
 
 var DefaultGoogleScopes = []string{
@@ -21,10 +21,9 @@ var DefaultGoogleScopes = []string{
 
 type googleProvider struct {
 	*oauth2.Config
-	APIPath string
 }
 
-type googleUser struct {
+type GoogleUser struct {
 	ID            string `json:"sub"`
 	Name          string `json:"name"`
 	AvatarURL     string `json:"picture"`
@@ -43,13 +42,12 @@ func NewGoogleProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
-				AuthURL:  "https://" + GoogleAuthBase + GoogleOauthAuthEndpoint,
-				TokenURL: "https://" + GoogleAuthBase + GoogleOauthTokenEndpoint,
+				AuthURL:  GoogleOauthAuthEndpoint,
+				TokenURL: GoogleOauthTokenEndpoint,
 			},
 			Scopes:      DefaultGoogleScopes,
 			RedirectURL: redirectURL,
 		},
-		APIPath: "https://" + GoogleAPIBase,
 	}, nil
 }
 
@@ -58,8 +56,8 @@ func (g googleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 }
 
 func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
-	var user googleUser
-	if err := makeRequest(token, g.Config, g.APIPath+GoogleUserInfoEndpoint, &user); err != nil {
+	var user GoogleUser
+	if err := makeRequest(token, g.Config, GoogleUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 
@@ -78,7 +76,7 @@ func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	}
 
 	data.Metadata = &Claims{
-		Issuer:        g.APIPath,
+		Issuer:        GoogleAuthBase,
 		Subject:       user.ID,
 		Name:          user.Name,
 		Picture:       user.AvatarURL,
