@@ -25,11 +25,11 @@ Add the `nuxt-hanko` module to the `modules` section of your `nuxt.config.ts` fi
 
 ```jsx title="nuxt.config.ts" showLineNumbers
 export default defineNuxtConfig({
-  modules: ["nuxt-hanko"],
+  modules: ['nuxt-hanko'],
   hanko: {
     // You can also configure this by setting NUXT_PUBLIC_HANKO_API_URL environment variable at runtime
-    apiURL: "<YOUR_API_URL>",
-  },
+    apiURL: '<YOUR_API_URL>'
+  }
 });
 ```
 
@@ -151,13 +151,13 @@ export default defineEventHandler(async (event) => {
     return {
       status: 401,
       body: {
-        message: "Unauthorized",
-      },
+        message: 'Unauthorized'
+      }
     };
   }
   // Do something with the Hanko user
   return {
-    hanko: event.context.hanko,
+    hanko: event.context.hanko
   };
 });
 ```

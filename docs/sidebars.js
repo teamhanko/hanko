@@ -18,44 +18,40 @@ const sidebars = {
 
   // But you can create a sidebar manually
   docs: [
-    "intro",
+    'intro',
     {
-      type: "category",
-      label: "Frontend guides",
+      type: 'category',
+      label: 'Frontend guides',
       link: {
-        type: "generated-index",
-        title: "Frontend guides",
+        type: 'generated-index',
+        title: 'Frontend guides',
         description:
-          "Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred frontend framework!",
-        slug: "/guides/frontend",
-        keywords: ["guides"],
+          'Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred frontend framework!',
+        slug: '/guides/frontend',
+        keywords: ['guides']
       },
       items: [
-        "guides/angular",
-        "guides/js",
-        "guides/next",
-        "guides/nuxt",
-        "guides/react",
-        "guides/svelte",
-        "guides/vue",
-      ],
+        'guides/angular',
+        'guides/js',
+        'guides/next',
+        'guides/nuxt',
+        'guides/react',
+        'guides/svelte',
+        'guides/vue'
+      ]
     },
-    "guides/backend",
-    "guides/mobile_guide",
+    'guides/backend',
+    'guides/mobile_guide',
     {
-      type: "category",
-      label: "Social Login",
+      type: 'category',
+      label: 'Social Login',
       link: {
-        type: "doc",
-        id: "guides/social/index",
+        type: 'doc',
+        id: 'guides/social/index'
       },
-      items: [
-        "guides/social/apple",
-        "guides/social/github",
-        "guides/social/google",
-      ],
-    },
-  ],
+      items: ['guides/social/apple', 'guides/social/github', 'guides/social/google']
+    }
+  ]
 };
 
 module.exports = sidebars;
