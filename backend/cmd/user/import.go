@@ -17,11 +17,10 @@ import (
 	"time"
 )
 
-var inputFile string
-
 func NewImportCommand() *cobra.Command {
 	var (
 		configFile string
+		inputFile  string
 	)
 
 	cmd := &cobra.Command{
@@ -36,27 +35,33 @@ func NewImportCommand() *cobra.Command {
 			}
 
 			//Load File
-			users, err := loadFile()
+			// we explicitly want user input here, hence  #nosec G304
+			jsonFile, err := os.Open(inputFile)
 			if err != nil {
-				log.Println(err)
-				os.Exit(1)
+				log.Fatal(err)
+			}
+			defer func() {
+				if err := jsonFile.Close(); err != nil {
+					log.Printf("Error closing file: %s\n", err)
+				}
+			}()
+			users, err := loadFromFile(jsonFile)
+			if err != nil {
+				log.Fatal(err)
 			}
 			//Validate Input
 			err = validateEntries(users)
 			if err != nil {
-				log.Println(err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 			//Import Users
 			persister, err := persistence.New(cfg.Database)
 			if err != nil {
-				log.Println(err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 			err = addToDatabase(users, persister)
 			if err != nil {
-				log.Println(err)
-				os.Exit(1)
+				log.Fatal(err)
 			}
 		},
 	}
@@ -70,25 +75,38 @@ func NewImportCommand() *cobra.Command {
 	return cmd
 }
 
-func loadFile() ([]ImportEntry, error) {
-	// we explicitly want user input here, hence  #nosec G304
-	jsonFile, err := os.Open(inputFile)
+func loadFromFile(input io.Reader) ([]ImportEntry, error) {
+	dec := json.NewDecoder(input)
+
+	// read the open bracket
+	_, err := dec.Token()
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		if err := jsonFile.Close(); err != nil {
-			log.Printf("Error closing file: %s\n", err)
+
+	users := []ImportEntry{}
+
+	// while the array contains values
+	for dec.More() {
+		var userEntry ImportEntry
+		// decode one ImportEntry
+		err := dec.Decode(&userEntry)
+		if err != nil {
+			return nil, err
 		}
-	}()
 
-	byteValue, _ := io.ReadAll(jsonFile)
+		if err := userEntry.validate(); err != nil {
+			return nil, err
+		}
+		users = append(users, userEntry)
+	}
 
-	var users []ImportEntry
-	err = json.Unmarshal(byteValue, &users)
+	// read closing bracket
+	_, err = dec.Token()
 	if err != nil {
 		return nil, err
 	}
+
 	return users, nil
 }
 
