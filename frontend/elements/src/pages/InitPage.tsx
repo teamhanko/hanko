@@ -1,6 +1,10 @@
 import { useCallback, useContext, useEffect } from "preact/compat";
 
-import { UnauthorizedError, User } from "@teamhanko/hanko-frontend-sdk";
+import {
+  HankoError,
+  UnauthorizedError,
+  User,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 
@@ -40,15 +44,7 @@ const InitPage = () => {
           )
         )
       );
-  }, [
-    enablePasskeys,
-    hanko.config,
-    hanko.user,
-    hanko.webauthn,
-    setConfig,
-    setPage,
-    setUser,
-  ]);
+  }, [enablePasskeys, hanko, setConfig, setPage, setUser]);
 
   const hankoAuthInit = useCallback(() => {
     const thirdPartyError = hanko.thirdParty.getError();
@@ -74,14 +70,7 @@ const InitPage = () => {
         .then(() => setPage(<LoginEmailPage />))
         .catch((e) => setPage(<ErrorPage initialError={e} />));
     }
-  }, [
-    afterLogin,
-    hanko.config,
-    hanko.thirdParty,
-    hanko.token,
-    setConfig,
-    setPage,
-  ]);
+  }, [afterLogin, hanko, setConfig, setPage]);
 
   const initHankoProfile = useCallback(() => {
     Promise.all([
@@ -92,22 +81,14 @@ const InitPage = () => {
     ])
       .then(() => setPage(<ProfilePage />))
       .catch((e) => setPage(<ErrorPage initialError={e} />));
-  }, [
-    hanko.config,
-    hanko.email,
-    hanko.user,
-    hanko.webauthn,
-    setConfig,
-    setEmails,
-    setPage,
-    setUser,
-    setWebauthnCredentials,
-  ]);
+  }, [hanko, setConfig, setEmails, setPage, setUser, setWebauthnCredentials]);
 
-  useEffect(() => {
-    if (componentName !== "auth") return;
-    return hanko.onSessionNotPresent(() => hankoAuthInit());
-  }, [componentName, hanko, hankoAuthInit]);
+  const showErrorPage = useCallback(
+    (e: HankoError) => {
+      setPage(<ErrorPage initialError={e} />);
+    },
+    [setPage]
+  );
 
   useEffect(() => {
     if (componentName !== "auth") return;
@@ -115,32 +96,38 @@ const InitPage = () => {
   }, [componentName, hanko, hankoAuthInit]);
 
   useEffect(() => {
-    if (componentName !== "auth") return;
-    return hanko.onSessionResumed(() => {
-      afterLogin().catch((e) => setPage(<ErrorPage initialError={e} />));
-    });
-  }, [afterLogin, componentName, hanko, setPage]);
-
-  useEffect(() => {
-    if (componentName !== "profile") return;
-    return hanko.onSessionResumed(() => initHankoProfile());
-  }, [componentName, hanko, initHankoProfile]);
-
-  useEffect(() => {
     if (componentName !== "profile") return;
     return hanko.onSessionCreated(() => initHankoProfile());
   }, [componentName, hanko, initHankoProfile]);
 
   useEffect(() => {
-    if (componentName !== "profile") return;
-    return hanko.onSessionNotPresent(() =>
-      setPage(<ErrorPage initialError={new UnauthorizedError()} />)
-    );
-  }, [componentName, hanko, initHankoProfile, setPage]);
+    const sessionDetail = hanko.relay.getSessionDetail();
 
-  useEffect(() => {
-    hanko.relay.dispatchInitialEvents();
-  }, [hanko.relay]);
+    switch (componentName) {
+      case "auth":
+        if (sessionDetail) {
+          afterLogin().catch(showErrorPage);
+        } else {
+          hankoAuthInit();
+        }
+        break;
+      case "profile":
+        if (sessionDetail) {
+          initHankoProfile();
+        } else {
+          showErrorPage(new UnauthorizedError());
+        }
+        break;
+    }
+  }, [
+    afterLogin,
+    componentName,
+    hanko,
+    hankoAuthInit,
+    initHankoProfile,
+    setPage,
+    showErrorPage,
+  ]);
 
   return <LoadingSpinner isLoading />;
 };
