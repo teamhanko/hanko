@@ -45,7 +45,7 @@ func NewImportCommand() *cobra.Command {
 					log.Printf("Error closing file: %s\n", err)
 				}
 			}()
-			users, err := loadFromFile(jsonFile)
+			users, err := loadAndValidate(jsonFile)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -75,7 +75,9 @@ func NewImportCommand() *cobra.Command {
 	return cmd
 }
 
-func loadFromFile(input io.Reader) ([]ImportEntry, error) {
+// loadAndValidate reads json from an io.Reader so we read every entry separate and validate it. We go through the whole
+// array to print out every validation error in the input data.
+func loadAndValidate(input io.Reader) ([]ImportEntry, error) {
 	dec := json.NewDecoder(input)
 
 	// read the open bracket
@@ -86,17 +88,26 @@ func loadFromFile(input io.Reader) ([]ImportEntry, error) {
 
 	users := []ImportEntry{}
 
+	numErrors := 0
+	index := 0
 	// while the array contains values
 	for dec.More() {
+		index = index + 1
 		var userEntry ImportEntry
 		// decode one ImportEntry
 		err := dec.Decode(&userEntry)
 		if err != nil {
+			errorMsg := fmt.Sprintf("Error at entry %v : %v", index, err.Error())
+			log.Println(errorMsg)
 			return nil, err
 		}
 
 		if err := userEntry.validate(); err != nil {
-			return nil, err
+			errorMsg := fmt.Sprintf("Error at entry %v : %v", index, err.Error())
+			log.Println(errorMsg)
+			log.Print(userEntry)
+			numErrors++
+			continue
 		}
 		users = append(users, userEntry)
 	}
@@ -106,10 +117,16 @@ func loadFromFile(input io.Reader) ([]ImportEntry, error) {
 	if err != nil {
 		return nil, err
 	}
+	if numErrors > 0 {
+		errMsg := fmt.Sprintf("Found %v errors.", numErrors)
+		log.Printf(errMsg)
+		return nil, errors.New(errMsg)
+	}
 
 	return users, nil
 }
 
+// commits the list of ImportEntries to the database. Wrapped in a transaction so if something fails no new users are added.
 func addToDatabase(entries []ImportEntry, persister persistence.Persister) error {
 	tx := persister.GetConnection()
 	err := tx.Transaction(func(tx *pop.Connection) error {

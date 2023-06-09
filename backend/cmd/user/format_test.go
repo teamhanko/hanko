@@ -39,7 +39,7 @@ func TestImportEntry_validate(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "UserID with with valid uuid must validate",
+			name: "UserID with valid uuid must validate",
 			fields: fields{
 				UserID: validUUID,
 				Emails: Emails{
@@ -55,7 +55,7 @@ func TestImportEntry_validate(t *testing.T) {
 			wantErr: assert.NoError,
 		},
 		{
-			name: "UserID with with invalid uuid must not validate",
+			name: "UserID with invalid uuid must not validate",
 			fields: fields{
 				UserID: invalidUUID,
 				Emails: Emails{
@@ -81,7 +81,7 @@ func TestImportEntry_validate(t *testing.T) {
 			wantErr: assert.Error,
 		},
 		{
-			name: "User with no primary must not validate",
+			name: "User with no primary email must not validate",
 			fields: fields{
 				UserID: "",
 				Emails: Emails{

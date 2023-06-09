@@ -2,14 +2,29 @@ package user
 
 import (
 	"fmt"
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/test"
 	"io"
+	"log"
 	"strings"
 	"testing"
 	"time"
 )
 
-func Test_loadFromFile(t *testing.T) {
+const validUUID2 = "799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3"
+
+func TestImportSuite(t *testing.T) {
+	suite.Run(t, new(importSuite))
+}
+
+type importSuite struct {
+	test.Suite
+}
+
+func (s *importSuite) Test_loadAndValidate() {
 	type args struct {
 		input io.Reader
 	}
@@ -44,7 +59,7 @@ func Test_loadFromFile(t *testing.T) {
 			wantErr: assert.NoError,
 			want: []ImportEntry{
 				{
-					UserID: "799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3",
+					UserID: validUUID2,
 					Emails: Emails{
 						ImportEmail{
 							Address:    "koreyrath@wolff.name",
@@ -65,14 +80,143 @@ func Test_loadFromFile(t *testing.T) {
 			wantErr: assert.Error,
 			want:    nil,
 		},
+		{
+			name: "several validation errors",
+			args: args{
+				input: strings.NewReader("[{\"user_id\":\"799e95f0-4cc7-4bd7-9f1-5fdc4fa26ea3\",\"emails\":[{\"address\":\"koreyrath@wolff.name\",\"is_primary\":true,\"is_verified\":true}],\"created_at\":\"2023-06-07T13:42:49.369489Z\",\"updated_at\":\"2023-06-07T13:42:49.369489Z\"},{\"user_id\":\"799e95f0-4cc7-4bd7-9f1-5fdc4fa26ea3\",\"emails\":[{\"address\":\"koreyrath@wolff.name\",\"is_primary\":false,\"is_verified\":true}],\"created_at\":\"2023-06-07T13:42:49.369489Z\",\"updated_at\":\"2023-06-07T13:42:49.369489Z\"}]\n"),
+			},
+			wantErr: assert.Error,
+			want:    nil,
+		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := loadFromFile(tt.args.input)
-			if !tt.wantErr(t, err, fmt.Sprintf("loadFromFile(%v)", tt.args.input)) {
+		s.Run(tt.name, func() {
+			got, err := loadAndValidate(tt.args.input)
+			if !tt.wantErr(s.T(), err, fmt.Sprintf("loadAndValidate(%v)", tt.args.input)) {
 				return
 			}
-			assert.Equalf(t, tt.want, got, "loadFromFile(%v)", tt.args.input)
+			assert.Equalf(s.T(), tt.want, got, "loadAndValidate(%v)", tt.args.input)
+		})
+	}
+}
+
+func (s *importSuite) Test_addToDatabase() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	type args struct {
+		entries   []ImportEntry
+		persister persistence.Persister
+	}
+	tests := []struct {
+		name         string
+		args         args
+		wantErr      assert.ErrorAssertionFunc
+		wantNumUsers int
+	}{
+		{
+			name: "Positive",
+			args: args{
+				entries: []ImportEntry{
+					{
+						UserID: "",
+						Emails: Emails{
+							ImportEmail{
+								Address:    "primary@hanko.io",
+								IsPrimary:  true,
+								IsVerified: false,
+							},
+						},
+						CreatedAt: nil,
+						UpdatedAt: nil,
+					},
+				},
+				persister: s.Storage,
+			},
+			wantErr:      assert.NoError,
+			wantNumUsers: 1,
+		},
+		{
+			name: "Double uuid",
+			args: args{
+				entries: []ImportEntry{
+					{
+						UserID: validUUID,
+						Emails: Emails{
+							ImportEmail{
+								Address:    "primary1@hanko.io",
+								IsPrimary:  true,
+								IsVerified: false,
+							},
+						},
+						CreatedAt: nil,
+						UpdatedAt: nil,
+					},
+					{
+						UserID: validUUID,
+						Emails: Emails{
+							ImportEmail{
+								Address:    "primary2@hanko.io",
+								IsPrimary:  true,
+								IsVerified: false,
+							},
+						},
+						CreatedAt: nil,
+						UpdatedAt: nil,
+					},
+				},
+				persister: s.Storage,
+			},
+			wantErr:      assert.Error,
+			wantNumUsers: 0,
+		},
+		{
+			name: "Double primary email",
+			args: args{
+				entries: []ImportEntry{
+					{
+						UserID: validUUID,
+						Emails: Emails{
+							ImportEmail{
+								Address:    "primary@hanko.io",
+								IsPrimary:  true,
+								IsVerified: false,
+							},
+						},
+						CreatedAt: nil,
+						UpdatedAt: nil,
+					},
+					{
+						UserID: validUUID,
+						Emails: Emails{
+							ImportEmail{
+								Address:    "primary@hanko.io",
+								IsPrimary:  true,
+								IsVerified: false,
+							},
+						},
+						CreatedAt: nil,
+						UpdatedAt: nil,
+					},
+				},
+				persister: s.Storage,
+			},
+			wantErr:      assert.Error,
+			wantNumUsers: 0,
+		},
+	}
+	for _, tt := range tests {
+		s.T().Run(tt.name, func(t *testing.T) {
+
+			s.SetupTest()
+			tt.wantErr(t, addToDatabase(tt.args.entries, tt.args.persister), fmt.Sprintf("addToDatabase(%v, %v)", tt.args.entries, tt.args.persister))
+			users, err := tt.args.persister.GetUserPersister().List(0, 100, uuid.Nil, "", "")
+			log.Println(users)
+			s.NoError(err)
+			s.Equal(tt.wantNumUsers, len(users))
+
+			s.TearDownTest()
 		})
 	}
 }
