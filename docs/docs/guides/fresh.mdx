@@ -59,16 +59,8 @@ The `<hanko-events>` component provides a convenient way to subscribe to specifi
 [events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events) without displaying any UI elements.
 The other hanko-elements will also dispatch these events.
 
-To utilize this functionality in your Vue application, you can leverage Vue's event binding mechanism and define
-callback functions within your component. This allows you to respond to the dispatched events accordingly.
-
-Import the `register` function from `@teamhanko/hanko-elements` in your Vue component. Call it with the URL of the
-Hanko API as an argument to register the `<hanko-events>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
-Then use the element in your component template.
-
-```js title="HankoAuth.tsx" showLineNumbers
-```
+Unfortunately, in the current state of Fresh, there is no added benefit on using because, you cannot leverage the framework event system
+to handle the dispatched events.
 
 ## Add `<hanko-profile>` component {#hanko-profile}
 
