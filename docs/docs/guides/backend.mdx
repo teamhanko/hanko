@@ -157,13 +157,17 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext<AuthSt
   const jwt = getToken(req);
 
   if (jwt) {
-    const { payload } = await jose.jwtVerify(jwt, JWKS);
-    ctx.state = {auth: payload};
+    try {
+      const { payload } = await jose.jwtVerify(jwt, JWKS);
+      ctx.state = {auth: payload};
 
-    return await ctx.next();
+      return await ctx.next();
+    } catch (error) {
+      return new Response("Invalid token", { status: 403 });
+    }
   }
 
-  return new Response(null, { status: 403 });
+  return new Response("Missing token", { status: 403 });
 };
 ```
 
