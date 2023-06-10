@@ -17,11 +17,10 @@ with your Fresh application.
 
 ## Add `<hanko-auth>` component
 
-To provide a login interface in your app, use the `<hanko-auth>` web component. To do so, first import the
-`register` function from `@teamhanko/hanko-elements` in your Vue component. Call it with the URL of the Hanko API as an argument
-to register the `<hanko-auth>` element with
-the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then
-use the element in your component template.
+To provide a login interface in your app, use the `<hanko-auth>` web component. Due to an 
+[issue](https://github.com/teamhanko/hanko/issues/641) in Fresh, we're using a browser script to load the web elements.
+Call it with the URL of the Hanko API as an argument to register the `<hanko-auth>` element with
+the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
 
 :::info
 
@@ -30,26 +29,28 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 
 :::
 
-```js title="HankoAuth.tsx" showLineNumbers
-<script setup>
-import { onMounted } from "vue";
-import { register } from "@teamhanko/hanko-elements";
+```js title="Login.tsx" showLineNumbers
+const code = `
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
 
-const hankoApi = "<YOUR_API_URL>";
+  register({ shadow: true });
+  document.addEventListener('hankoAuthSuccess', (event) => {
+    document.location.href = '/protected';
+  });
+`;
 
-onMounted(() => {
-  // register the component
-  // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-  register(hankoApi)
-    .catch((error) => {
-      // handle error
-    });
-});
-</script>
+const endpoint = "HANKO_API_URL";
 
-<template>
-  <hanko-auth />
-</template>
+export default function Login() {
+  return (
+    <div class="auth-container">
+      <hanko-auth api={endpoint}></hanko-auth>
+      <script type="module">
+        {code}
+      </script>
+    </div>
+  );
+}
 ```
 
 ## Add `<hanko-events>` component
@@ -66,78 +67,33 @@ Hanko API as an argument to register the `<hanko-events>` element with the brows
 [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
 Then use the element in your component template.
 
-```js title="HankoAuth.vue" showLineNumbers
-<script setup>
-// highlight-next-line
-import { useRouter } from "vue-router";
-import { onMounted } from "vue";
-import { register } from "@teamhanko/hanko-elements";
-
-const hankoApi = "<YOUR_API_URL>";
-
-// highlight-next-line
-const router = useRouter();
-
-// highlight-start
-const redirectAfterLogin = () => {
-  // successfully logged in, redirect to a page in your application
-  router.push({ path: "..." });
-};
-// highlight-end
-
-onMounted(() => {
-  // register the component
-  // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-  register(hankoApi))
-    .catch((error) => {
-      // handle error
-    });
-});
-</script>
-
-<template>
-  // highlight-next-line
-  <hanko-events @onAuthFlowCompleted="redirectAfterLogin" />
-  <hanko-auth />
-</template>
-```
-
-Alternatively, subscribe directly on the `<hanko-auth>` element:
-
-```js showLineNumbers
-<hanko-auth @onAuthFlowCompleted="redirectAfterLogin" />
+```js title="HankoAuth.tsx" showLineNumbers
 ```
 
 ## Add `<hanko-profile>` component {#hanko-profile}
 
 To provide a page where users can manage their email addresses, password and passkeys, use the `<hanko-profile>` web
-component. Just as with the `<hanko-auth>` component, import the `register` function from `@teamhanko/hanko-elements` in
-your Vue component. Call it with the
-URL of the Hanko API as an argument to register the `<hanko-profile>` element with the browser's
-[`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Then use
-the element in your component.
+component. Just as with the `<hanko-auth>` component, import the hanko elements via a native script.
 
-```js title="HankoProfile.vue" showLineNumbers
-<script setup>
-import { onMounted } from "vue";
-import { register } from "@teamhanko/hanko-elements";
+```js title="HankoProfile.tsx" showLineNumbers
+const code = `
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
 
-const hankoApi = "<YOUR_API_URL>";
+  register({ shadow: true });
+`;
 
-onMounted(() => {
-  // register the component
-  // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-  register(hankoApi)
-    .catch((error) => {
-      // handle error
-    });
-});
-</script>
+const endpoint = "HANKO_API_URL";
 
-<template>
-  <hanko-profile />
-</template>
-
+export default function Profile() {
+  return (
+    <div class="profile">
+      <hanko-profile api={endpoint}></hanko-profile>
+      <script type="module">
+        {code}
+      </script>
+    </div>
+  );
+}
 ```
 
 ## Implement logout
@@ -146,51 +102,24 @@ Use the Hanko client provided by `@teamhanko/hanko-elements` to log out users. O
 dispatched that you can subscribe to:
 
 ```js title="HankoProfile.vue" showLineNumbers
-<script setup>
-import { onMounted } from "vue";
-// highlight-start
-import { useRouter } from "vue-router";
-import { register, Hanko } from "@teamhanko/hanko-elements";
-// highlight-end
+const code = `
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
 
-const hankoApi = "<YOUR_API_URL>";
+  register({ shadow: true });
+`;
 
-// highlight-start
-const router = useRouter();
-const hanko = new Hanko(hankoApi);
-// highlight-end
+const endpoint = "HANKO_API_URL";
 
-// highlight-start
-const logout = () => {
-  hanko.user.logout().catch((error) => {
-    // handle error
-  })
+export default function Profile() {
+  return (
+    <div class="profile">
+      <hanko-profile api={endpoint}></hanko-profile>
+      <script type="module">
+        {code}
+      </script>
+    </div>
+  );
 }
-// highlight-end
-
-// highlight-start
-const redirectAfterLogout = () => {
-  router.push({ path: "..." });
-}
-// highlight-end
-
-onMounted(() => {
-  // register the component
-  // see: https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#script
-  register(hankoApi)
-    .catch((error) => {
-      // handle error
-    });
-});
-</script>
-
-<template>
-  // highlight-start
-  <button @click="logout">Logout</button>
-  <hanko-profile @onUserLoggedOut="redirectAfterLogout" />
-  // highlight-end
-</template>
-
 ```
 
 
