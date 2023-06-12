@@ -29,36 +29,44 @@ pnpm install @teamhanko/hanko-elements
 
 ### Script
 
-The web components need to be registered first. You can control whether they should be attached to the shadow DOM or not
-using the `shadow` property. It's set to true by default, and it's possible to make use of the [CSS shadow parts](#css-shadow-parts)
-to change the appearance of the component. [CSS variables](#css-variables) will work in both cases. The `register`
-function returns an instance of the `hanko-frontend-sdk`, that enables you e.g. to fetch user information, or bind event
-listeners.
+To use the web components, you need to register them using the `register()` function provided by the hanko-elements package.
 
-Use as a module:
+Module Usage:
 
 ```typescript
 import { register } from "@teamhanko/hanko-elements";
-
-const { hanko } = await register("https://hanko.yourdomain.com", {
-  shadow: true,         // Set to false if you don't want the web component to be attached to the shadow DOM.
-  injectStyles: true,   // Set to false if you don't want to inject any default styles.
-  enablePasskeys: true, // Set to false if you don't want passkeys to be enabled.
-});
 ```
 
-With a script tag via CDN:
+CDN Usage (with a script tag):
 
 ```html
 <script type="module">
   import { register } from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
-
-  const { hanko } = await register("https://hanko.yourdomain.com", {
-    shadow: true,         // Set to false if you don't want the web component to be attached to the shadow DOM.
-    injectStyles: true,   // Set to false if you don't want to inject any default styles.
-    enablePasskeys: true, // Set to false if you don't want passkeys to be enabled.
-  });
 </script>
+```
+
+After importing the `register()` function, call it with the URL of the Hanko API as an argument to register the Hanko
+elements with the browser's CustomElementRegistry.
+
+```javascript
+const { hanko } = await register("https://hanko.yourdomain.com");
+```
+
+You can also pass certain options:
+
+```javascript
+const defaultOptions = {
+  shadow: true,                  // Set to false if you do not want the web component to be attached to the shadow DOM.
+  injectStyles: true,            // Set to false if you do not want to inject any default styles.
+  enablePasskeys: true,          // Set to false if you do not want to display passkey-related content.
+  translations: null,            // Additional translations can be added here. English is used when the option is not
+                                 // present or set to `null`, whereas setting an empty object `{}` prevents the elements
+                                 // from displaying any translations.
+  translationsLocation: "/i18n", // The URL or path where the translation files are located.
+  fallbackLanguage: "en",        // The fallback language to be used if a translation is not available.
+};
+
+const { hanko } = await register("https://hanko.yourdomain.com", defaultOptions);
 ```
 
 ### &lt;hanko-auth&gt;
@@ -73,8 +81,8 @@ A web component that handles user login and user registration.
 
 #### Attributes
 
-- `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
-- `experimental` A space-seperated list of experimental features to be enabled. See [experimental features](#experimental-features).
+- `lang` Used to specify the language of the content within the element. See [Translations](#translations).
+- `experimental` A space-separated list of experimental features to be enabled. See [experimental features](#experimental-features).
 
 ### &lt;hanko-profile&gt;
 
@@ -88,7 +96,7 @@ A web component that allows to manage emails, passwords and passkeys.
 
 #### Attributes
 
-- `lang` Currently supported values are "en" for English and "de" for German. If the value is omitted, "en" is used.
+- `lang` Used to specify the language of the content within the element. See [Translations](#translations).
 
 ### &lt;hanko-events&gt;
 
@@ -284,6 +292,11 @@ hanko-auth, hanko-profile {
 In addition to the CSS variables, there is the possibility of using the `::part` selector to equip various elements
 with your own styles.
 
+Please note that shadow parts only work when the web components are attached to the shadow DOM:
+```javascript
+register("https://hanko.yourdomain.com", { shadow: true })
+```
+
 The following parts are available:
 
 - `container` - the UI container
@@ -303,13 +316,13 @@ The following parts are available:
 - `divider-line` - the line before and after the `divider-text`
 - `form-item` - the container of a form item, e.g. an input field or a button
 
-### CSS classes
+### CSS classes (not recommended)
 
 There is also the possibility to provide your own CSS rules when the web component has not been attached to the shadow
 DOM:
 
 ```typescript
-register("https://hanko.yourdomain.com",{ shadow: false })
+register("https://hanko.yourdomain.com", { shadow: false })
 ```
 
 Please take a look at the [CSS example](https://github.com/teamhanko/hanko/raw/main/frontend/elements/example.css) file to see
@@ -345,6 +358,151 @@ Keep in mind we made CSS classes available and added light DOM support only beca
 autocompletion of input elements while the web component is attached to the shadow DOM. You would normally prefer to
 attach the component to the shadow DOM and make use of CSS parts for UI customization when the CSS variables are not
 sufficient.
+
+## Translations
+
+### Default Behavior
+
+The `hanko-elements` package includes English translations by default and the `lang` attribute can be omitted.
+
+Script:
+
+```typescript
+register("https://hanko.yourdomain.com");
+```
+
+Markup:
+
+```html
+<hanko-auth></hanko-auth>
+```
+
+### Installing Additional Translations
+
+Translations are currently available for the following languages:
+
+- "en" - English
+- "de" - German
+
+You can import them individually:
+
+```typescript
+// Replace the paths below with
+// "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/{en|de|all|...}.js"
+// if you're using CDN.
+
+import { en } from "@teamhanko/hanko-elements/i18n/en";
+import { de } from "@teamhanko/hanko-elements/i18n/de";
+```
+
+Or import all translations at once:
+
+```typescript
+import { all } from "@teamhanko/hanko-elements/i18n/all";
+```
+
+After importing, provide the translations through the `register()` function:
+
+```typescript
+register("https://hanko.yourdomain.com", { translations: { en, de } });
+
+// or
+
+register("https://hanko.yourdomain.com", { translations: all });
+```
+
+You can now set the `lang` attribute of the element to the desired language:
+
+```html
+<hanko-auth lang="de"></hanko-auth>
+```
+
+### Modifying Translations
+
+You can modify existing translations as follows:
+
+```typescript
+import { en } from "@teamhanko/hanko-elements/i18n/en";
+
+en.errors.somethingWentWrong = "Aww, snap!";
+
+register("https://hanko.yourdomain.com", { translations: { en } });
+```
+
+### Adding New Translations
+
+If you need to create a new translation, pass an object that implements (or partially implements) the `Translation` interface.
+
+Script:
+
+```typescript
+import { all } from "@teamhanko/hanko-elements/i18n/all";
+import { Translation } from "@teamhanko/hanko-elements"; // if you're using typescript
+
+const myLang: Translation = { ... }
+
+register("https://hanko.yourdomain.com", { translations: { ...all, myLang } });
+```
+
+Markup:
+
+```html
+<hanko-auth lang="myLang"></hanko-auth>
+```
+
+### Using External Files
+
+For languages provided via the element's `lang` attribute, or via the [fallback language](#fallback-language) option,
+that are not included in the object passed to the `translations` option, the component will fetch a JSON file from the
+location specified by the `translationsLocation` option. For example, if "en" is missing due to an empty object being
+passed, as shown in the example below, the component will fetch a file named "/i18n/en.json".
+
+Script:
+
+```typescript
+register("https://hanko.yourdomain.com", {
+  translations: {},             // An empty object, so even the default "en" translation won't be available.
+  translationsLocation: "/i18n" // A public folder containing language files, e.g., "en.json".
+});
+```
+
+Markup:
+
+```html
+<!-- Will fetch "/i18n/en.json" -->
+<hanko-auth lang="en"></hanko-auth>
+```
+
+### Fallback Language
+
+The `fallbackLanguage` option is used to specify a fallback language for the web components when translations are
+missing or incomplete for a particular language. By setting the `fallbackLanguage` option to a valid language string
+like "en" or "de", the missing translation strings will be automatically retrieved from the specified fallback language.
+When the translation for the specified `fallbackLanguage` is not available in the `translations` option, the
+web components will attempt to fetch it from an [external file](#using-external-files).
+
+Script:
+
+```typescript
+import { en } from "@teamhanko/hanko-elements/i18n/en";
+import { Translation } from "@teamhanko/hanko-elements";
+
+const symbols: Partial<Translation> = {
+  labels: { continue: "➔" }
+};
+
+register("https://hanko.yourdomain.com", {
+  fallbackLanguage: "en",
+  translations: { en, symbols }
+});
+```
+
+Markup:
+
+```html
+<!-- Will appear in English, but the "continue" button label will be "➔"  -->
+<hanko-auth lang="symbols"></hanko-auth>
+```
 
 ## Experimental Features
 
@@ -386,9 +544,10 @@ declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-fro
 
 - `RegisterOptions` - represents the options of the `register()` function.
 - `RegisterResult` - represents the return value of the `register()` function.
-- `HankoAuthElementProps` - represents the `<hanko-auth />` element properties.
-- `HankoProfileElementProps` - represents the `<hanko-profile />` element properties.
-- `HankoEventsElementProps` - represents the `<hanko-events />` element properties.
+- `Translation` - represents a translation that can be provided through the `RegisterOptions`.
+- `HankoAuthElementProps` - represents the `<hanko-auth>` element properties.
+- `HankoProfileElementProps` - represents the `<hanko-profile>` element properties.
+- `HankoEventsElementProps` - represents the `<hanko-events>` element properties.
 
 ## Browser support
 

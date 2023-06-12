@@ -1,8 +1,8 @@
 import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
-
 import AppProvider from "./contexts/AppProvider";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
+import { defaultTranslations, Translations } from "./i18n/translations";
 
 export interface HankoAuthAdditionalProps {
   experimental?: string;
@@ -34,6 +34,9 @@ export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
+  translations?: Translations;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
 }
 
 export interface RegisterResult {
@@ -50,6 +53,9 @@ interface Global {
   hanko?: Hanko;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
+  translations?: Translations;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
 }
 
 const global: Global = {};
@@ -60,7 +66,10 @@ const HankoAuth = (props: HankoAuthElementProps) => (
     {...props}
     hanko={global.hanko}
     injectStyles={global.injectStyles}
+    translations={global.translations}
+    translationsLocation={global.translationsLocation}
     enablePasskeys={global.enablePasskeys}
+    fallbackLanguage={global.fallbackLanguage}
   />
 );
 
@@ -70,7 +79,10 @@ const HankoProfile = (props: HankoProfileElementProps) => (
     {...props}
     hanko={global.hanko}
     injectStyles={global.injectStyles}
+    translations={global.translations}
+    translationsLocation={global.translationsLocation}
     enablePasskeys={global.enablePasskeys}
+    fallbackLanguage={global.fallbackLanguage}
   />
 );
 
@@ -99,12 +111,18 @@ export const register = async (
     shadow: true,
     injectStyles: true,
     enablePasskeys: true,
+    translations: null,
+    translationsLocation: "/i18n",
+    fallbackLanguage: "en",
     ...options,
   };
 
   global.hanko = new Hanko(api);
   global.injectStyles = options.injectStyles;
   global.enablePasskeys = options.enablePasskeys;
+  global.translations = options.translations || defaultTranslations;
+  global.translationsLocation = options.translationsLocation;
+  global.fallbackLanguage = options.fallbackLanguage;
 
   await Promise.all([
     _register({

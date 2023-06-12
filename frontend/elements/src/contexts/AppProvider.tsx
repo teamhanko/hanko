@@ -21,7 +21,7 @@ import {
   WebauthnCredentials,
 } from "@teamhanko/hanko-frontend-sdk";
 
-import { translations } from "../Translations";
+import { Translations } from "../i18n/translations";
 
 import Container from "../components/wrapper/Container";
 
@@ -36,7 +36,9 @@ type ComponentName = "auth" | "profile" | "events";
 interface Props {
   hanko?: Hanko;
   lang?: string | SignalLike<string>;
-  fallbackLang?: string;
+  translations?: Translations;
+  translationsLocation?: string;
+  fallbackLanguage?: string;
   injectStyles?: boolean;
   experimental?: string;
   enablePasskeys?: boolean;
@@ -74,11 +76,13 @@ export const AppContext = createContext<Context>(null);
 const AppProvider = ({
   hanko,
   lang,
-  fallbackLang = "en",
   componentName,
   experimental = "",
   injectStyles = false,
   enablePasskeys = true,
+  translations,
+  translationsLocation = "/i18n",
+  fallbackLanguage = "en",
 }: Props) => {
   const ref = useRef<HTMLElement>(null);
 
@@ -203,7 +207,8 @@ const AppProvider = ({
       <TranslateProvider
         translations={translations}
         lang={lang?.toString()}
-        fallbackLang={fallbackLang}
+        fallbackLang={fallbackLanguage}
+        root={translationsLocation}
       >
         <Container ref={ref}>
           {componentName !== "events" ? (
