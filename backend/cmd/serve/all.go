@@ -4,7 +4,7 @@ Copyright © 2022 Hanko GmbH <developers@hanko.io>
 package serve
 
 import (
-	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -35,10 +35,10 @@ func NewServeAllCommand() *cobra.Command {
 			var wg sync.WaitGroup
 			wg.Add(2)
 
-			prom := prometheus.NewPrometheus("hanko", nil)
+			prometheus := echoprometheus.NewMiddleware("hanko")
 
-			go server.StartPublic(cfg, &wg, persister, prom)
-			go server.StartAdmin(cfg, &wg, persister, prom)
+			go server.StartPublic(cfg, &wg, persister, prometheus)
+			go server.StartAdmin(cfg, &wg, persister, prometheus)
 
 			wg.Wait()
 		},
