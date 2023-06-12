@@ -17,7 +17,7 @@ with your Fresh application.
 
 ## Add `<hanko-auth>` component
 
-To provide a login interface in your app, use the `<hanko-auth>` web component. Due to an 
+To provide a login interface in your app, use the `<hanko-auth>` web component. Due to an
 [issue](https://github.com/teamhanko/hanko/issues/641) in Fresh, we're using a browser script to load the web elements.
 Call it with the URL of the Hanko API as an argument to register the `<hanko-auth>` element with
 the browser's [`CustomElementRegistry`](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry).
@@ -90,21 +90,36 @@ export default function Profile() {
 
 ## Implement logout
 
-Use the Hanko client provided by `@teamhanko/hanko-elements` to log out users. On logout a custom event is
-dispatched that you can subscribe to:
+Use the Hanko client to logout. The code below use a custom event to trigger the logout:
 
 ```js title="HankoProfile.tsx" showLineNumbers
+const endpoint = "HANKO_API_URL";
 const code = `
   import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
+  import { Hanko } from 'https://esm.sh/@teamhanko/hanko-frontend-sdk@0.5.4-beta';
 
   register({ shadow: true });
+  window.addEventListener('logout', () => {
+    const hanko = new Hanko('${endpoint}');
+    hanko.user.logout()
+      .then(() => {
+        window.location.href = '/signin';
+      })
+      .catch((error) => {
+        // error handling
+      });
+  });
 `;
 
-const endpoint = "HANKO_API_URL";
 
 export default function Profile() {
+  const logout = () => {
+    window.dispatchEvent(new Event("logout"));
+  };
+
   return (
     <div class="profile">
+      <button class="logout-btn" onClick={logout}>Logout</button>
       <hanko-profile api={endpoint}></hanko-profile>
       <script type="module">
         {code}
