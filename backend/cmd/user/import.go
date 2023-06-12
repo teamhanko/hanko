@@ -114,7 +114,6 @@ func loadAndValidate(input io.Reader) ([]ImportEntry, error) {
 	}
 	if numErrors > 0 {
 		errMsg := fmt.Sprintf("Found %v errors.", numErrors)
-		log.Printf(errMsg)
 		return nil, errors.New(errMsg)
 	}
 
