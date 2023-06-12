@@ -22,15 +22,6 @@ type ImportEntry struct {
 	UpdatedAt *time.Time `json:"updated_at" yaml:"updated_at"`
 }
 
-func validateEntries(entries []ImportEntry) error {
-	for i, e := range entries {
-		if err := e.validate(); err != nil {
-			return errors.Join(errors.New(fmt.Sprintf("Error with entry %v", i)), err)
-		}
-	}
-	return nil
-}
-
 func (entry *ImportEntry) validate() error {
 	if len(entry.Emails) == 0 {
 		return errors.New(fmt.Sprintf("Entry with id: %v has got no Emails.", entry.UserID))

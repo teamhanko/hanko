@@ -49,11 +49,6 @@ func NewImportCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			//Validate Input
-			err = validateEntries(users)
-			if err != nil {
-				log.Fatal(err)
-			}
 			//Import Users
 			persister, err := persistence.New(cfg.Database)
 			if err != nil {
