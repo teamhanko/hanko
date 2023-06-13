@@ -1,7 +1,7 @@
 ---
-title: Nuxt.js + Hanko
-sidebar_label: Nuxt.js
-keywords: [nuxt, nuxtjs]
+title: Nuxt + Hanko
+sidebar_label: Nuxt
+keywords: [nuxt]
 sidebar_custom_props:
   docCardIconName: nuxt
 ---
@@ -9,10 +9,10 @@ sidebar_custom_props:
 # Nuxt 3
 
 In this guide you will learn how to install and use the nuxt-hanko module by [Daniel Roe](https://github.com/danielroe/nuxt-hanko).
-The NuxtJS module provides a simple way to add Hanko elements and authentication to your NuxtJS application.
+The Nuxt module provides a simple way to add Hanko elements and authentication to your Nuxt application.
 
 :::info
-This guide and the nuxt-hanko module are only compatible with Nuxt 3. Find out more about Nuxt 3 at [Nuxt.com](https://nuxt.com)
+This guide and the nuxt-hanko module are only compatible with Nuxt 3. Find out more about Nuxt at [Nuxt.com](https://nuxt.com)
 :::
 
 ## Install dependencies
@@ -23,7 +23,7 @@ Install the `nuxt-hanko` package:
 npm install -D nuxt-hanko
 ```
 
-## Configure NuxtJS module
+## Configure Nuxt module
 
 Add the `nuxt-hanko` module to the `modules` section of your `nuxt.config.ts` file.
 
@@ -145,8 +145,8 @@ function logout() {
 
 ## Authenticate backend requests
 
-A global server middleware is added by `nuxt-hanko`. This will automatically authenticate all requests to the server and add a new `hanko` property to the event context.
-You can check the value of `event.context.hanko` to see if the request was authenticated and if so, what the user id is.
+A global server middleware is added by `nuxt-hanko`. After decoding and validating the JWT for the request, a new `hanko` property to is added to the event context.
+You can check the value of `event.context.hanko` to see if the request was authenticated and the decoded JWT payload. The user's id is accessible though the sub claim/property.
 
 ```jsx title="/server/api/endpoint.ts" showLineNumbers
 export default defineEventHandler(async (event) => {
