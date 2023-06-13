@@ -429,6 +429,41 @@ providers and guides.
 
 [Configuration reference](./docs/Config.md)
 
+## User import
+You can import an existing user pool into hanko using json the following format:
+```json
+[
+  {
+    "user_id": "799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3",
+    "emails": [
+      {
+        "address": "koreyrath@wolff.name",
+        "is_primary": true,
+        "is_verified": true
+      }
+    ],
+    "created_at": "2023-06-07T13:42:49.369489Z",
+    "updated_at": "2023-06-07T13:42:49.369489Z"
+  },
+  {
+    "user_id": "",
+    "emails": [
+      {
+        "address": "joshuagrimes@langworth.name",
+        "is_primary": true,
+        "is_verified": true
+      }
+    ],
+    "created_at": "2023-06-07T13:42:49.369494Z",
+    "updated_at": "2023-06-07T13:42:49.369494Z"
+  }
+]
+```
+There is a json schema file located [here](json_schema/hanko.user_import.json) that you can use for validation and input suggestions.
+To import users run:
+
+> hanko user import -i ./path/to/import_file.json
+
 ## License
 
 The Hanko backend ist licensed under the [AGPL-3.0](../LICENSE).
