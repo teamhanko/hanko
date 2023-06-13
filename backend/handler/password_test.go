@@ -1,401 +1,180 @@
 package handler
 
 import (
-	"bytes"
-	"encoding/json"
+	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 )
 
-func TestPasswordHandler_Set_Create(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
+func TestPasswordSuite(t *testing.T) {
+	suite.Run(t, new(passwordSuite))
+}
+
+type passwordSuite struct {
+	test.Suite
+}
+
+func (s *passwordSuite) TestPasswordHandler_Set_Create() {
+	if testing.Short() {
+		s.T().Skip("skipping in short mode")
 	}
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := PasswordSetBody{UserID: userId.String(), Password: "verybadpassword"}
-	bodyJson, err := json.Marshal(body)
-	assert.NoError(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId.String())
-	require.NoError(t, err)
-	c.Set("session", token)
+	userWithNoPassword := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+	userWithPassword := uuid.FromStringOrNil("38bf5a00-d7ea-40a5-a5de-48722c148925")
+	unknownUser := uuid.FromStringOrNil("6a565180-2366-45b1-8785-39f7902c7f2e")
 
-	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
+	cfg := &test.DefaultConfig
+	cfg.Password.Enabled = true
+	cfg.Password.MinPasswordLength = 8
 
-	if assert.NoError(t, handler.Set(c)) {
-		assert.Equal(t, http.StatusCreated, rec.Code)
+	tests := []struct {
+		name         string
+		body         string
+		userId       uuid.UUID
+		expectedCode int
+	}{
+		{
+			name:         "should create a password successful",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, userWithNoPassword),
+			userId:       userWithNoPassword,
+			expectedCode: http.StatusCreated,
+		},
+		{
+			name:         "should update a password successful",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, userWithPassword),
+			userId:       userWithPassword,
+			expectedCode: http.StatusOK,
+		},
+		{
+			name:         "should not create a password that is too short",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "very"}`, userWithNoPassword),
+			userId:       userWithNoPassword,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "should not create a password that is too long",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "thisIsAVeryLongPasswordThatIsUsedToTestIfAnErrorWillBeReturnedForTooLongPasswords"}`, userWithNoPassword),
+			userId:       userWithNoPassword,
+			expectedCode: http.StatusBadRequest,
+		},
+		{
+			name:         "should not create a password for an unknown user",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, unknownUser),
+			userId:       unknownUser,
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name:         "should not create a password for a different user",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, userWithNoPassword),
+			userId:       userWithPassword,
+			expectedCode: http.StatusForbidden,
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.SetupTest()
+			defer s.TearDownTest()
+
+			err := s.LoadFixtures("../test/fixtures/password")
+			s.Require().NoError(err)
+
+			sessionManager := s.GetDefaultSessionManager()
+			token, err := sessionManager.GenerateJWT(currentTest.userId)
+			s.Require().NoError(err)
+			cookie, err := sessionManager.GenerateCookie(token)
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodPut, "/password", strings.NewReader(currentTest.body))
+			req.Header.Set("Content-Type", "application/json")
+			req.AddCookie(cookie)
+			rec := httptest.NewRecorder()
+
+			e := NewPublicRouter(cfg, s.Storage, nil)
+			e.ServeHTTP(rec, req)
+
+			s.Equal(currentTest.expectedCode, rec.Code)
+		})
 	}
 }
 
-func TestPasswordHandler_Set_Create_PasswordTooShort(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
+func (s *passwordSuite) TestPasswordHandler_Login() {
+	if testing.Short() {
+		s.T().Skip("skipping in short mode")
 	}
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := PasswordSetBody{UserID: userId.String(), Password: "very"}
-	bodyJson, err := json.Marshal(body)
-	assert.NoError(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId.String())
-	require.NoError(t, err)
-	c.Set("session", token)
+	err := s.LoadFixtures("../test/fixtures/password")
+	s.Require().NoError(err)
 
-	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{Password: config.Password{MinPasswordLength: 8}}, test.NewAuditLogger())
+	userWithPassword := uuid.FromStringOrNil("38bf5a00-d7ea-40a5-a5de-48722c148925")
+	unknownUser := uuid.FromStringOrNil("6a565180-2366-45b1-8785-39f7902c7f2e")
 
-	err = handler.Set(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
-	}
-}
+	cfg := &test.DefaultConfig
+	cfg.Password.Enabled = true
 
-func TestPasswordHandler_Set_Create_PasswordTooLong(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
+	tests := []struct {
+		name                string
+		body                string
+		expectedCode        int
+		shouldContainCookie bool
+	}{
+		{
+			name:                "should login successful",
+			body:                fmt.Sprintf(`{"user_id": "%s", "password": "SuperSecure"}`, userWithPassword),
+			expectedCode:        http.StatusOK,
+			shouldContainCookie: true,
+		},
+		{
+			name:         "should not login with wrong password",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, userWithPassword),
+			expectedCode: http.StatusUnauthorized,
+		},
+		{
+			name:         "should not login with non existing user",
+			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, unknownUser),
+			expectedCode: http.StatusUnauthorized,
+		},
 	}
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := PasswordSetBody{UserID: userId.String(), Password: "thisIsAVeryLongPasswordThatIsUsedToTestIfAnErrorWillBeReturnedForTooLongPasswords"}
-	bodyJson, err := json.Marshal(body)
-	assert.NoError(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId.String())
-	require.NoError(t, err)
-	c.Set("session", token)
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			req := httptest.NewRequest(http.MethodPost, "/password/login", strings.NewReader(currentTest.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
 
-	p := test.NewPersister(users, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{Password: config.Password{MinPasswordLength: 8}}, test.NewAuditLogger())
+			e := NewPublicRouter(cfg, s.Storage, nil)
+			e.ServeHTTP(rec, req)
 
-	err = handler.Set(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
-	}
-}
-
-func TestPasswordHandler_Set_Update(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("verybadpassword"), 12)
-	assert.NoError(t, err)
-
-	passwords := []models.PasswordCredential{
-		func() models.PasswordCredential {
-			pId, _ := uuid.NewV4()
-			return models.PasswordCredential{
-				ID:        pId,
-				UserId:    userId,
-				Password:  string(hashedPassword),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := PasswordSetBody{UserID: userId.String(), Password: "anotherbadnewpassword"}
-	bodyJson, err := json.Marshal(body)
-	assert.NoError(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId.String())
-	require.NoError(t, err)
-	c.Set("session", token)
-
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	if assert.NoError(t, handler.Set(c)) {
-		assert.Equal(t, http.StatusOK, rec.Code)
-	}
-}
-
-func TestPasswordHandler_Set_UserNotFound(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := PasswordSetBody{UserID: userId.String(), Password: "anotherbadnewpassword"}
-	bodyJson, err := json.Marshal(body)
-	assert.NoError(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	err = token.Set(jwt.SubjectKey, userId.String())
-	require.NoError(t, err)
-	c.Set("session", token)
-
-	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	err = handler.Set(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-	}
-}
-
-func TestPasswordHandler_Set_TokenHasWrongSubject(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("verybadpassword"), 12)
-	assert.NoError(t, err)
-
-	passwords := []models.PasswordCredential{
-		func() models.PasswordCredential {
-			pId, _ := uuid.NewV4()
-			return models.PasswordCredential{
-				ID:        pId,
-				UserId:    userId,
-				Password:  string(hashedPassword),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := PasswordSetBody{UserID: userId.String(), Password: "anotherbadnewpassword"}
-	bodyJson, err := json.Marshal(body)
-	assert.NoError(t, err)
-	req := httptest.NewRequest(http.MethodPost, "/password", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	wrongUid, _ := uuid.NewV4()
-	err = token.Set(jwt.SubjectKey, wrongUid.String())
-	require.NoError(t, err)
-	c.Set("session", token)
-
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	err = handler.Set(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusForbidden, httpError.Code)
-	}
-}
-
-func TestPasswordHandler_Set_BadRequestBody(t *testing.T) {
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := `{"user_id_wrong": "123", "password_wrong": "badpassword"}`
-
-	req := httptest.NewRequest(http.MethodPost, "/password", strings.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	token := jwt.New()
-	uId, _ := uuid.NewV4()
-	err := token.Set(jwt.SubjectKey, uId.String())
-	require.NoError(t, err)
-	c.Set("session", token)
-
-	p := test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	err = handler.Set(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
-	}
-}
-
-func TestPasswordHandler_Login(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("verybadpassword"), 12)
-	assert.NoError(t, err)
-
-	passwords := []models.PasswordCredential{
-		func() models.PasswordCredential {
-			pId, _ := uuid.NewV4()
-			return models.PasswordCredential{
-				ID:        pId,
-				UserId:    userId,
-				Password:  string(hashedPassword),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := `{"user_id": "ec4ef049-5b88-4321-a173-21b0eff06a04", "password": "verybadpassword"}`
-
-	req := httptest.NewRequest(http.MethodPost, "/password/login", strings.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	if assert.NoError(t, handler.Login(c)) {
-		assert.Equal(t, http.StatusOK, rec.Code)
-		cookies := rec.Result().Cookies()
-		if assert.NotEmpty(t, cookies) {
-			for _, cookie := range cookies {
-				if cookie.Name == "hanko" {
-					assert.Equal(t, "ec4ef049-5b88-4321-a173-21b0eff06a04", cookie.Value)
+			if s.Equal(currentTest.expectedCode, rec.Code) && currentTest.shouldContainCookie {
+				cookies := rec.Result().Cookies()
+				if s.NotEmpty(cookies) {
+					for _, cookie := range cookies {
+						if cookie.Name == "hanko" {
+							s.Regexp(".*\\..*\\..*", cookie.Value) // check if cookie contains a jwt
+						}
+					}
 				}
 			}
-		}
+		})
 	}
 }
 
-func TestPasswordHandler_Login_WrongPassword(t *testing.T) {
-	userId, _ := uuid.FromString("ec4ef049-5b88-4321-a173-21b0eff06a04")
-	users := []models.User{
-		func() models.User {
-			return models.User{
-				ID:        userId,
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
+func (s *passwordSuite) GetDefaultSessionManager() session.Manager {
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	s.Require().NoError(err)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	s.Require().NoError(err)
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte("verybadpassword"), 12)
-	assert.NoError(t, err)
-
-	passwords := []models.PasswordCredential{
-		func() models.PasswordCredential {
-			pId, _ := uuid.NewV4()
-			return models.PasswordCredential{
-				ID:        pId,
-				UserId:    userId,
-				Password:  string(hashedPassword),
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			}
-		}(),
-	}
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := `{"user_id": "ec4ef049-5b88-4321-a173-21b0eff06a04", "password": "wrongpassword"}`
-
-	req := httptest.NewRequest(http.MethodPost, "/password/login", strings.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	p := test.NewPersister(users, nil, nil, nil, nil, passwords, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	err = handler.Login(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-	}
-}
-
-func TestPasswordHandler_Login_NonExistingUser(t *testing.T) {
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	body := `{"user_id": "ec4ef049-5b88-4321-a173-21b0eff06a04", "password": "wrongpassword"}`
-
-	req := httptest.NewRequest(http.MethodPost, "/password/login", strings.NewReader(body))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	p := test.NewPersister([]models.User{}, nil, nil, nil, nil, []models.PasswordCredential{}, nil, nil, nil, nil, nil)
-	handler := NewPasswordHandler(p, sessionManager{}, &config.Config{}, test.NewAuditLogger())
-
-	err := handler.Login(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-	}
+	return sessionManager
 }
 
 // TestMaxPasswordLength bcrypt since version 0.5.0 only accepts passwords at least 72 bytes long. This test documents this behaviour.
