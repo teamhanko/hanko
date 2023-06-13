@@ -122,8 +122,8 @@ The styles can be scoped to the login/profile page to ensure they dont affect ot
 
 ## useHanko() composable
 
-The `useHanko` composable provides access to the Hanko SDK and the Hanko user object. It can be used to implement custom behaviours and functions.
-The composable is auto-imported across the app and can simply be used with 'useHanko()' anywhere in your code.
+The `useHanko` composable provides access to the [Hanko SDK](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/index.html) which in turn allows access to the Hanko API, e.g. for accessing the [current user info](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/UserClient.html#getCurrent).
+The composable is auto-imported across the app and can simply be used with `useHanko()` anywhere in your code (see the [next section](#implement-logout) for a usage example).
 
 ## Implement logout
 
