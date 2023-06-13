@@ -17,6 +17,7 @@ easily integrated into any web app with as little as two lines of code.
   - [Audit logs](#audit-logs)
   - [Rate Limiting](#rate-limiting)
   - [Social logins](#social-logins)
+  - [User import](#user-import)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -420,16 +421,7 @@ Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org
 party provider logins. Please view the official [docs](https://docs.hanko.io/guides/social) for a list of supported
 providers and guides.
 
-## API specification
-
-- [Hanko Public API](https://docs.hanko.io/api/public)
-- [Hanko Admin API](https://docs.hanko.io/api/admin)
-
-## Configuration reference
-
-[Configuration reference](./docs/Config.md)
-
-## User import
+### User import
 You can import an existing user pool into hanko using json the following format:
 ```json
 [
@@ -463,6 +455,16 @@ There is a json schema file located [here](json_schema/hanko.user_import.json) t
 To import users run:
 
 > hanko user import -i ./path/to/import_file.json
+
+
+## API specification
+
+- [Hanko Public API](https://docs.hanko.io/api/public)
+- [Hanko Admin API](https://docs.hanko.io/api/admin)
+
+## Configuration reference
+
+[Configuration reference](./docs/Config.md)
 
 ## License
 

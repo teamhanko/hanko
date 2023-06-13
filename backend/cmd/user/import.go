@@ -58,6 +58,7 @@ func NewImportCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
+			log.Println(fmt.Sprintf("Successfully imported %v users.", len(users)))
 		},
 	}
 
