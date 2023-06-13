@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/labstack/echo-contrib/prometheus"
+	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/config"
@@ -10,7 +10,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 )
 
-func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus *prometheus.Prometheus) *echo.Echo {
+func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 	g := e.Group("")
@@ -26,7 +26,8 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	e.Validator = dto.NewCustomValidator()
 
 	if prometheus != nil {
-		prometheus.SetMetricsPath(e)
+		e.Use(prometheus)
+		e.GET("/metrics", echoprometheus.NewHandler())
 	}
 
 	healthHandler := NewHealthHandler()
