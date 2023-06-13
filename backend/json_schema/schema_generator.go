@@ -33,7 +33,7 @@ func generateSchema(codePath, filePath string, structure interface{}) error {
 		panic(err.Error())
 	}
 
-	err = os.WriteFile(filePath, data, 0644)
+	err = os.WriteFile(filePath, data, 0600)
 	if err != nil {
 		fmt.Println(err)
 	}
