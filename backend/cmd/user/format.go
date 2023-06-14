@@ -17,7 +17,7 @@ type ImportEmail struct {
 	IsVerified bool `json:"is_verified" yaml:"is_verified"`
 }
 
-// Emails Array of Email Addresses
+// Emails Array of email addresses
 type Emails []ImportEmail
 
 // ImportEntry represents a user to be imported to the hanko database
