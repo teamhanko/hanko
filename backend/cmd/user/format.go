@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// ImportEmail The import format for an users email
+// ImportEmail The import format for a user's email
 type ImportEmail struct {
 	// Address Valid email address
 	Address string `json:"address" yaml:"address"`
