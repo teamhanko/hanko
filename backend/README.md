@@ -422,7 +422,7 @@ party provider logins. Please view the official [docs](https://docs.hanko.io/gui
 providers and guides.
 
 ### User import
-You can import an existing user pool into hanko using json the following format:
+You can import an existing user pool into Hanko using json in the following format:
 ```json
 [
   {
