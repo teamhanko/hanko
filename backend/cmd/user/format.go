@@ -11,7 +11,7 @@ import (
 type ImportEmail struct {
 	// Address Valid email address
 	Address string `json:"address" yaml:"address"`
-	// IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one Primary EMail.
+	// IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one primary email.
 	IsPrimary bool `json:"is_primary" yaml:"is_primary"`
 	// IsVerified indicates if the email address was previously verified.
 	IsVerified bool `json:"is_verified" yaml:"is_verified"`
