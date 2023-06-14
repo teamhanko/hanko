@@ -146,7 +146,7 @@ function logout() {
 ## Authenticate backend requests
 
 A global server middleware is added by `nuxt-hanko`. After decoding and validating the JWT for the request, a new `hanko` property to is added to the event context.
-You can check the value of `event.context.hanko` to see if the request was authenticated and the decoded JWT payload. The user's id is accessible though the sub claim/property.
+You can check the value of `event.context.hanko` to see if the request was authenticated and the decoded JWT payload. The user's id is accessible though the `sub` claim/property.
 
 ```jsx title="/server/api/endpoint.ts" showLineNumbers
 export default defineEventHandler(async (event) => {
