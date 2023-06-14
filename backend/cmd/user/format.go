@@ -20,7 +20,7 @@ type ImportEmail struct {
 // Emails Array of email addresses
 type Emails []ImportEmail
 
-// ImportEntry represents a user to be imported to the hanko database
+// ImportEntry represents a user to be imported to the Hanko database
 type ImportEntry struct {
 	// UserID optional uuid.v4. If not provided a new one will be generated for the user
 	UserID string `json:"user_id" yaml:"user_id"`
