@@ -159,7 +159,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext<AuthSt
   if (jwt) {
     try {
       const { payload } = await jose.jwtVerify(jwt, JWKS);
-      ctx.state = {auth: payload};
+      ctx.state.auth = payload;
 
       return await ctx.next();
     } catch (error) {
