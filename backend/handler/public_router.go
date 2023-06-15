@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -16,7 +15,7 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus *prometheus.Prometheus) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 
@@ -46,7 +45,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}))
 
 	if prometheus != nil {
-		e.Use(prometheus.HandlerFunc)
+		e.Use(prometheus)
 	}
 
 	e.Validator = dto.NewCustomValidator()

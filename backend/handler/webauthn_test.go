@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
@@ -64,8 +65,12 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
 		creationOptions := protocol.CredentialCreation{}
 		err = json.Unmarshal(rec.Body.Bytes(), &creationOptions)
 		s.NoError(err)
+
+		uId, err := base64.RawURLEncoding.DecodeString(creationOptions.Response.User.ID.(string))
+		s.Require().NoError(err)
+
 		s.NotEmpty(creationOptions.Response.Challenge)
-		s.Equal(uuid.FromStringOrNil(userId).Bytes(), []byte(creationOptions.Response.User.ID))
+		s.Equal(uuid.FromStringOrNil(userId).Bytes(), uId)
 		s.Equal(test.DefaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
 		s.Equal(protocol.ResidentKeyRequirementRequired, creationOptions.Response.AuthenticatorSelection.ResidentKey)
 		s.Equal(protocol.VerificationRequired, creationOptions.Response.AuthenticatorSelection.UserVerification)

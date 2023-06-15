@@ -1,7 +1,7 @@
 
 openapi: 3.0.0
 info:
-  version: '0.4.0'
+  version: '0.8.0'
   title: 'Hanko Public API'
   description: |
     ## Introduction
@@ -52,7 +52,7 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: 'localhost:3000'
+  - url: 'localhost:8001'
 paths:
   /passcode/login/initialize:
     post:
