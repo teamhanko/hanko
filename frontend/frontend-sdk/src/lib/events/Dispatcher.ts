@@ -1,14 +1,12 @@
 import {
-  SessionEventDetail,
+  SessionDetail,
   CustomEventWithDetail,
-  AuthFlowCompletedEventDetail,
+  AuthFlowCompletedDetail,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
   authFlowCompletedType,
-  sessionResumedType,
   userLoggedOutType,
-  sessionNotPresentType,
 } from "./CustomEvents";
 
 /**
@@ -32,20 +30,11 @@ export class Dispatcher {
   }
 
   /**
-   * Dispatches a "hanko-session-resumed" event to the document with the specified detail.
-   *
-   * @param {SessionEventDetail} detail - The event detail.
-   */
-  public dispatchSessionResumedEvent(detail: SessionEventDetail) {
-    this.dispatch(sessionResumedType, detail);
-  }
-
-  /**
    * Dispatches a "hanko-session-created" event to the document with the specified detail.
    *
-   * @param {SessionEventDetail} detail - The event detail.
+   * @param {SessionDetail} detail - The event detail.
    */
-  public dispatchSessionCreatedEvent(detail: SessionEventDetail) {
+  public dispatchSessionCreatedEvent(detail: SessionDetail) {
     this.dispatch(sessionCreatedType, detail);
   }
 
@@ -73,16 +62,9 @@ export class Dispatcher {
   /**
    * Dispatches a "hanko-auth-flow-completed" event to the document with the specified detail.
    *
-   * @param {AuthFlowCompletedEventDetail} detail - The event detail.
+   * @param {AuthFlowCompletedDetail} detail - The event detail.
    */
-  public dispatchAuthFlowCompletedEvent(detail: AuthFlowCompletedEventDetail) {
+  public dispatchAuthFlowCompletedEvent(detail: AuthFlowCompletedDetail) {
     this.dispatch(authFlowCompletedType, detail);
-  }
-
-  /**
-   * Dispatches a "hanko-session-not-present" event to the document.
-   */
-  public dispatchSessionNotPresent() {
-    this.dispatch(sessionNotPresentType, null);
   }
 }

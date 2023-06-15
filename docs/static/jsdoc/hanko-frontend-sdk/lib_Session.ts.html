@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Scheduler</title>
+  <title> lib/Session.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,509 +75,90 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>Scheduler</h1>
+                    <p>Source</p>
+                    <h1>lib/Session.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
-    
-        <h2><span class="attribs"><span class="type-signature"></span></span>Scheduler<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description">A class that manages scheduled tasks.</div>
-        
-    
-</header>
-
-<article>
-    <div class="container-overview">
-    
-        
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
-
-
-    
-    <h4 class="name" id="Scheduler">
-        <a class="href-link" href="#Scheduler">#</a>
-        
-        <span class="code-name">
-            
-                new Scheduler<span class="signature">()</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line8">line 8</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <div class='vertical-section'>
-            <h1>Methods</h1>
-            <div class="members">
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="removeTasksWithType">
-        <a class="href-link" href="#removeTasksWithType">#</a>
-        
-        <span class="code-name">
-            
-                removeTasksWithType<span class="signature">(type)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        Removes all tasks with a given type from the scheduler.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>type</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">string</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The type of tasks to be removed.</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line78">line 78</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="scheduleTask">
-        <a class="href-link" href="#scheduleTask">#</a>
-        
-        <span class="code-name">
-            
-                scheduleTask<span class="signature">(type, func, timeoutSeconds)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        Schedules a task to be executed after a given timeout.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>type</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">string</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The type of the task.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>func</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">function</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The function to be executed when the task is triggered.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>timeoutSeconds</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The timeout after which the task should be executed, in seconds.</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line87">line 87</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-            </div>
-        </div>
     
-
-    
-
-    
-</article>
-
-</section>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { SessionDetail } from "./events/CustomEvents";
+import { SessionState } from "./state/session/SessionState";
+import { Cookie } from "./Cookie";
+
+/**
+ A class representing a session.
+
+ @category SDK
+ @subcategory Session
+ */
+export class Session {
+  private _sessionState: SessionState;
+  private _cookie: Cookie;
+
+  // eslint-disable-next-line require-jsdoc
+  constructor() {
+    this._sessionState = new SessionState();
+    this._cookie = new Cookie();
+  }
+
+  /**
+   Retrieves the session details.
+
+   @returns {SessionDetail} The session details.
+   */
+  public get(): SessionDetail {
+    const detail = this._get();
+    return Session.validate(detail) ? detail : null;
+  }
+
+  /**
+   Checks if the user is logged in.
+
+   @returns {boolean} true if the user is logged in, false otherwise.
+   */
+  public isValid(): boolean {
+    const session = this._get();
+    return Session.validate(session);
+  }
+
+  /**
+   Retrieves the session details.
+
+   @ignore
+   @returns {SessionDetail} The session details.
+   */
+  public _get(): SessionDetail {
+    this._sessionState.read();
+
+    const userID = this._sessionState.getUserID();
+    const expirationSeconds = this._sessionState.getExpirationSeconds();
+    const jwt = this._cookie.getAuthCookie();
+
+    return {
+      userID,
+      expirationSeconds,
+      jwt,
+    };
+  }
+
+  /**
+   Validates the session.
+
+   @private
+   @param {SessionDetail} detail - The session details to validate.
+   @returns {boolean} true if the session details are valid, false otherwise.
+   */
+  private static validate(detail: SessionDetail): boolean {
+    return !!(detail.expirationSeconds > 0 &amp;&amp; detail.userID?.length);
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

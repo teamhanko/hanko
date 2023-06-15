@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import OnSessionExpiredModal from "@/components/SessionExpiredModal.vue";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 
@@ -22,6 +22,12 @@ const redirectToTodos = () => {
 const logout = () => {
   hankoClient.user.logout().catch((e) => (error.value = e));
 };
+
+onMounted(() => {
+  if (!hankoClient.session.isValid()) {
+    redirectToLogin();
+  }
+});
 </script>
 
 <template>
@@ -33,9 +39,6 @@ const logout = () => {
   </nav>
   <main class="content">
     <div class="error">{{ error?.message }}</div>
-    <hanko-profile
-      @onSessionNotPresent="redirectToLogin"
-      @onUserLoggedOut="redirectToLogin"
-    />
+      <hanko-profile @onUserLoggedOut="redirectToLogin" />
   </main>
 </template>

@@ -7,14 +7,6 @@ export const sessionCreatedType: "hanko-session-created" =
   "hanko-session-created";
 
 /**
- * The type of the `hanko-session-resumed` event.
- * @typedef {string} sessionResumedType
- * @memberOf Listener
- */
-export const sessionResumedType: "hanko-session-resumed" =
-  "hanko-session-resumed";
-
-/**
  * The type of the `hanko-session-expired` event.
  * @typedef {string} sessionExpiredType
  * @memberOf Listener
@@ -45,9 +37,6 @@ export const userDeletedType: "hanko-user-deleted" = "hanko-user-deleted";
 export const authFlowCompletedType: "hanko-auth-flow-completed" =
   "hanko-auth-flow-completed";
 
-export const sessionNotPresentType: "hanko-session-not-present" =
-  "hanko-session-not-present";
-
 /**
  * The data passed in the `hanko-session-created` or `hanko-session-resumed` event.
  *
@@ -58,7 +47,7 @@ export const sessionNotPresentType: "hanko-session-not-present" =
  * @property {number} expirationSeconds - The number of seconds until the JWT expires.
  * @property {string} userID - The user associated with the session.
  */
-export interface SessionEventDetail {
+export interface SessionDetail {
   jwt?: string;
   expirationSeconds: number;
   userID: string;
@@ -72,7 +61,7 @@ export interface SessionEventDetail {
  * @subcategory Events
  * @property {string} userID - The user associated with the removed session.
  */
-export interface AuthFlowCompletedEventDetail {
+export interface AuthFlowCompletedDetail {
   userID: string;
 }
 

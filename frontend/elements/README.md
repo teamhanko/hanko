@@ -159,18 +159,6 @@ hanko.onSessionCreated((sessionDetail) => {
 })
 ```
 
-- "hanko-session-resumed": Will be triggered after the page has been loaded and there is a valid session, so it can be
-utilized like the "hanko-auth-flow-completed" event, to restore the state of your page, where the user is logged in.
-Note, that a "hanko-session-not-present" event will be triggered instead of the "hanko-session-resumed" event, after the
-page has been loaded, when the user does not have a valid session.
-
-```js
-hanko.onSessionResumed((sessionDetail) => {
-  // The user is logged in, protected content can be shown.
-  console.info(`User is already logged in (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
-})
-```
-
 - "hanko-session-expired": Will be triggered when the session has expired, or when the session has been removed in
 another browser window, because the user has logged out, or deleted the account.
 
@@ -203,6 +191,22 @@ hanko.onUserDeleted(() => {
 
 To learn what else you can do, check out the [custom-events](https://github.com/teamhanko/hanko/tree/main/frontend/frontend-sdk#custom-events)
 README.
+
+#### Sessions
+
+- Determine whether the user is logged in:
+```js
+hanko.session.isValid();
+```
+
+- Getting the session details:
+```js
+const session = hanko.session.get();
+
+if (session) {
+  console.info(`userID: ${session.userID}, jwt: ${session.jwt}`)
+}
+```
 
 #### User Client
 

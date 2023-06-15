@@ -39,11 +39,18 @@ const Profile: NextPage = () => {
     router.push("/").catch(setError)
   }, [router]);
 
-  useEffect(() => hankoClient?.onUserLoggedOut(() => {
-    redirectToLogin();
-  }), [hankoClient, redirectToLogin]);
+  useEffect(() => {
+    if (!hankoClient) {
+      return;
+    }
 
-  useEffect(() => hankoClient?.onSessionNotPresent(() => {
+    if (!hankoClient.session.isValid()) {
+      redirectToLogin();
+    }
+  }, [hankoClient, redirectToLogin]);
+
+
+  useEffect(() => hankoClient?.onUserLoggedOut(() => {
     redirectToLogin();
   }), [hankoClient, redirectToLogin]);
 

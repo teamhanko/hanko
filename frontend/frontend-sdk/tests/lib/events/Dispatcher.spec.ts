@@ -1,9 +1,9 @@
 import { Dispatcher } from "../../../src/lib/events/Dispatcher";
 import {
-  AuthFlowCompletedEventDetail,
+  AuthFlowCompletedDetail,
   CustomEventWithDetail,
-  SessionEventDetail,
-} from "../../../src/lib/events/CustomEvents";
+  SessionDetail,
+} from "../../../src";
 
 describe("Dispatcher", () => {
   let dispatcher: Dispatcher;
@@ -28,30 +28,8 @@ describe("Dispatcher", () => {
         new CustomEventWithDetail("hanko-session-created", detail)
       );
       const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
+        .calls[0][0] as CustomEventWithDetail<SessionDetail>;
       expect(event.type).toEqual("hanko-session-created");
-      expect(event.detail).toBe(detail);
-    });
-  });
-
-  describe("dispatchSessionResumedEvent()", () => {
-    it("dispatches a custom event with the 'hanko-session-resumed' type and the provided detail", () => {
-      const detail = {
-        userID: "test-user",
-        jwt: "test-token",
-        expirationSeconds: 7,
-      };
-      const dispatchEventSpy = jest.spyOn(dispatcher, "_dispatchEvent");
-
-      dispatcher.dispatchSessionResumedEvent(detail);
-
-      expect(dispatchEventSpy).toHaveBeenCalledTimes(1);
-      expect(dispatchEventSpy).toHaveBeenCalledWith(
-        new CustomEventWithDetail("hanko-session-resumed", detail)
-      );
-      const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
-      expect(event.type).toEqual("hanko-session-resumed");
       expect(event.detail).toBe(detail);
     });
   });
@@ -116,7 +94,7 @@ describe("Dispatcher", () => {
         new CustomEventWithDetail("hanko-auth-flow-completed", detail)
       );
       const event = dispatchEventSpy.mock
-        .calls[0][0] as CustomEventWithDetail<AuthFlowCompletedEventDetail>;
+        .calls[0][0] as CustomEventWithDetail<AuthFlowCompletedDetail>;
       expect(event.type).toEqual("hanko-auth-flow-completed");
       expect(event.detail).toBe(detail);
     });

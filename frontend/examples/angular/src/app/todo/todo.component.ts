@@ -20,7 +20,11 @@ export class TodoComponent implements OnInit {
   private sessionExpiredModalComponent!: SessionExpiredModalComponent;
 
   ngOnInit(): void {
-    this.listTodos();
+      if (this.hankoService.client.session.isValid()) {
+        this.listTodos();
+      } else {
+        this.redirectToLogin();
+      }
   }
 
   changeDescription(event: any) {

@@ -34,10 +34,12 @@ function HankoProfile() {
     register(api).catch(setError);
   }, []);
 
-  useEffect(
-    () => hankoClient.onSessionNotPresent(() => redirectToLogin()),
-    [hankoClient, redirectToLogin]
-  );
+  useEffect(() => {
+    if (!hankoClient.session.isValid()) {
+      redirectToLogin();
+    }
+  }, [hankoClient, redirectToLogin]);
+
 
   useEffect(
     () => hankoClient.onUserLoggedOut(() => redirectToLogin()),

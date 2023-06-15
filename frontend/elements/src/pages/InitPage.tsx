@@ -101,18 +101,18 @@ const InitPage = () => {
   }, [componentName, hanko, initHankoProfile]);
 
   useEffect(() => {
-    const sessionDetail = hanko.relay.getSessionDetail();
+    const sessionIsValid = hanko.session.isValid();
 
     switch (componentName) {
       case "auth":
-        if (sessionDetail) {
+        if (sessionIsValid) {
           afterLogin().catch(showErrorPage);
         } else {
           hankoAuthInit();
         }
         break;
       case "profile":
-        if (sessionDetail) {
+        if (sessionIsValid) {
           initHankoProfile();
         } else {
           showErrorPage(new UnauthorizedError());

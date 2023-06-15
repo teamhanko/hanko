@@ -157,16 +157,8 @@ const AppProvider = ({
       dispatchEvent("onUserDeleted");
     });
 
-    hanko.onSessionNotPresent(() => {
-      dispatchEvent("onSessionNotPresent");
-    });
-
     hanko.onSessionCreated((detail) => {
       dispatchEvent("onSessionCreated", detail);
-    });
-
-    hanko.onSessionResumed((detail) => {
-      dispatchEvent("onSessionResumed", detail);
     });
 
     hanko.onSessionExpired(() => {
@@ -176,8 +168,6 @@ const AppProvider = ({
     hanko.onUserLoggedOut(() => {
       dispatchEvent("onUserLoggedOut");
     });
-
-    hanko.relay.dispatchInitialEvents();
   }, [hanko]);
 
   return (
