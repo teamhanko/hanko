@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/teamhanko/hanko/backend/cmd/user/import-list",
+  "$ref": "#/$defs/ImportList",
+  "$defs": {
+    "Emails": {
+      "items": {
+        "$ref": "#/$defs/ImportEmail"
+      },
+      "type": "array",
+      "description": "Emails Array of Email Addresses"
+    },
+    "ImportEmail": {
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Address Valid email address"
+        },
+        "is_primary": {
+          "type": "boolean",
+          "description": "IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one Primary EMail."
+        },
+        "is_verified": {
+          "type": "boolean",
+          "description": "IsVerified indicates if the email address was previously verified."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "address",
+        "is_primary",
+        "is_verified"
+      ],
+      "description": "ImportEmail The import format for an users email"
+    },
+    "ImportEntry": {
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "description": "UserID optional uuid.v4. If not provided a new one will be generated for the user"
+        },
+        "emails": {
+          "$ref": "#/$defs/Emails",
+          "description": "Emails List of emails"
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "CreatedAt optional timestamp of the users' creation. Will be set to the import date if not provided."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "UpdatedAt optional timestamp of the last update to the user. Will be set to the import date if not provided."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "user_id",
+        "emails",
+        "created_at",
+        "updated_at"
+      ],
+      "description": "ImportEntry represents a user to be imported to the hanko database"
+    },
+    "ImportList": {
+      "items": {
+        "$ref": "#/$defs/ImportEntry"
+      },
+      "type": "array",
+      "description": "ImportList a list of ImportEntries"
+    }
+  }
+}

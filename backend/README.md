@@ -17,6 +17,7 @@ easily integrated into any web app with as little as two lines of code.
   - [Audit logs](#audit-logs)
   - [Rate Limiting](#rate-limiting)
   - [Social logins](#social-logins)
+  - [User import](#user-import)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -116,7 +117,7 @@ Before you can start and use the service you need to run the database migrations
 #### Docker
 
 ```shell
-docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:main migrate up
+docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest migrate up
 ```
 
 > **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
@@ -322,7 +323,7 @@ endpoints). These can be started separately or in a single command.
 ##### Docker
 
 ```shell
-docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:main serve public
+docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest serve public
 ```
 
 > **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
@@ -419,6 +420,42 @@ Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide addition
 Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
 party provider logins. Please view the official [docs](https://docs.hanko.io/guides/social) for a list of supported
 providers and guides.
+
+### User import
+You can import an existing user pool into Hanko using json in the following format:
+```json
+[
+  {
+    "user_id": "799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3",
+    "emails": [
+      {
+        "address": "koreyrath@wolff.name",
+        "is_primary": true,
+        "is_verified": true
+      }
+    ],
+    "created_at": "2023-06-07T13:42:49.369489Z",
+    "updated_at": "2023-06-07T13:42:49.369489Z"
+  },
+  {
+    "user_id": "",
+    "emails": [
+      {
+        "address": "joshuagrimes@langworth.name",
+        "is_primary": true,
+        "is_verified": true
+      }
+    ],
+    "created_at": "2023-06-07T13:42:49.369494Z",
+    "updated_at": "2023-06-07T13:42:49.369494Z"
+  }
+]
+```
+There is a json schema file located [here](json_schema/hanko.user_import.json) that you can use for validation and input suggestions.
+To import users run:
+
+> hanko user import -i ./path/to/import_file.json
+
 
 ## API specification
 
