@@ -1,14 +1,15 @@
-import { AppProps } from "$fresh/server.ts";
-import { Head } from "$fresh/runtime.ts";
+import {AppProps} from "$fresh/server.ts";
+import {Head} from "$fresh/runtime.ts";
 
-export default function App({ Component }: AppProps) {
+export default function App({Component}: AppProps) {
   return (
     <>
       <Head>
-        <link rel="stylesheet" href="/base.css" />
+        <title>Hanko App</title>
+        <link rel="stylesheet" href="/app.css"/>
       </Head>
-      <div class="wrapper">
-        <Component />
+      <div class="p-4 mx-auto max-w-screen-md">
+        <Component/>
       </div>
     </>
   );

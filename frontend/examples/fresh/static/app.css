@@ -14,9 +14,22 @@ body {
   box-sizing: border-box;
 }
 
-hanko-auth::part(form-item) {
-  min-width: 100%; /* input fields and buttons are on top of each other  */
+hanko-auth, hanko-profile {
+  display: block;
+  width: 100%;
 }
+
+hanko-auth::part(container), hanko-profile::part(container) {
+  width: 100%;
+  max-width: none;
+  padding: 0.5em;
+  border-radius: 7.5px;
+}
+
+hanko-auth::part(form-item) {
+  min-width: 100%;
+}
+
 
 .content {
   padding: 24px;
