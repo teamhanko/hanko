@@ -8,28 +8,28 @@ sidebar_custom_props:
 
 # Nuxt
 
-In this guide you will learn how to install and use the nuxt-hanko module by [Daniel Roe](https://github.com/danielroe/nuxt-hanko).
+In this guide you will learn how to install and use the `@nuxtjs/hanko` module.
 The Nuxt module provides a simple way to add Hanko elements and authentication to your Nuxt application.
 
 :::info
-This guide and the nuxt-hanko module are only compatible with Nuxt 3. Find out more about Nuxt at [Nuxt.com](https://nuxt.com).
+This guide and the `@nuxtjs/hanko` module are only compatible with Nuxt 3. Find out more about Nuxt at [Nuxt.com](https://nuxt.com).
 :::
 
 ## Install dependencies
 
-Install the `nuxt-hanko` package:
+Install the `@nuxtjs/hanko` package:
 
 ```shell npm2yarn
-npm install -D nuxt-hanko
+npm install -D @nuxtjs/hanko
 ```
 
 ## Configure Nuxt module
 
-Add the `nuxt-hanko` module to the `modules` section of your `nuxt.config.ts` file.
+Add the `@nuxtjs/hanko` module to the `modules` section of your `nuxt.config.ts` file.
 
 ```jsx title="nuxt.config.ts" showLineNumbers
 export default defineNuxtConfig({
-  modules: ['nuxt-hanko'],
+  modules: ['@nuxtjs/hanko'],
   hanko: {
     // You can also configure this by setting NUXT_PUBLIC_HANKO_API_URL environment variable at runtime
     apiURL: '<YOUR_API_URL>'
@@ -37,7 +37,7 @@ export default defineNuxtConfig({
 });
 ```
 
-The module comes pre-configured with the options for most common use cases, you can override them by adding a `hanko` section to your `nuxt.config.ts` file. For all overrides please check the [module repo](https://github.com/danielroe/nuxt-hanko).
+The module comes pre-configured with the options for most common use cases, you can override them by adding a `hanko` section to your `nuxt.config.ts` file. For all overrides please check the [module repo](https://github.com/nuxt-modules/hanko).
 
 :::info
 
@@ -127,7 +127,7 @@ The composable is auto-imported across the app and can simply be used with `useH
 
 ## Implement logout
 
-To log users out, use the `nuxt-hanko` module's built-in composable `useHanko` and call the `logout` method.
+To log users out, use the `@nuxtjs/hanko` module's built-in composable `useHanko` and call the `logout` method.
 
 ```jsx title="logout.vue" showLineNumbers
 <script setup lang="ts">
@@ -145,7 +145,7 @@ function logout() {
 
 ## Authenticate backend requests
 
-A global server middleware is added by `nuxt-hanko`. After decoding and validating the JWT for the request, a new `hanko` property to is added to the event context.
+A global server middleware is added by `@nuxtjs/hanko`. After decoding and validating the JWT for the request, a new `hanko` property to is added to the event context.
 You can check the value of `event.context.hanko` to see if the request was authenticated and the decoded JWT payload. The user's id is accessible though the `sub` claim/property.
 
 ```jsx title="/server/api/endpoint.ts" showLineNumbers
