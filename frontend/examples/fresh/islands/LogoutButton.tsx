@@ -1,4 +1,4 @@
-const endpoint = "https://4c3bfaa1-a9b2-47ef-9c4f-ac01ee6d2e03.hanko.io";
+const endpoint = "HANKO_API_ENDPOINT";
 
 const code = `
   import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
@@ -23,5 +23,12 @@ export default function Profile() {
     window.dispatchEvent(new Event("logout"));
   };
 
-  return <button onClick={logout}>Logout</button>;
+  return (
+    <>
+      <button onClick={logout}>Logout</button>
+      <script type="module">
+        {code}
+      </script>
+    </>
+  );
 }

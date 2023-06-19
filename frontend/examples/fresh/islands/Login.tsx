@@ -7,7 +7,7 @@ const code = `
   });
 `;
 
-const endpoint = "https://4c3bfaa1-a9b2-47ef-9c4f-ac01ee6d2e03.hanko.io";
+const endpoint = "HANKO_API_ENDPOINT";
 
 export default function Login() {
   return (

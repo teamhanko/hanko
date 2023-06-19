@@ -1,5 +1,5 @@
-import {MiddlewareHandlerContext} from "$fresh/server.ts";
-import {getCookies} from "$std/http/cookie.ts";
+import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { getCookies } from "$std/http/cookie.ts";
 import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts';
 
 const JWKS_ENDPOINT = `${Deno.env.get("HANKO_API_URL")}/.well-known/jwks.json`;
@@ -18,20 +18,21 @@ function getToken(req: Request): string | undefined {
 export async function handler(req: Request, ctx: MiddlewareHandlerContext<AppState>) {
   const JWKS = jose.createRemoteJWKSet(new URL(JWKS_ENDPOINT), {
     cooldownDuration: 120000,
+    timeoutDuration: 15000,
   });
   const jwt = getToken(req);
 
   if (!jwt)
-    return new Response(null, {status: 401});
+    return new Response(null, { status: 401 });
 
   try {
-    const {payload} = await jose.jwtVerify(jwt, JWKS);
+    const { payload } = await jose.jwtVerify(jwt, JWKS);
     ctx.state.auth = payload;
     ctx.state.store = store;
+    const response = await ctx.next();
 
-    return await ctx.next();
+    return response;
   } catch (e) {
-    console.log(e)
-    return new Response(null, {status: 401});
+    return new Response(null, { status: 401 });
   }
 }
