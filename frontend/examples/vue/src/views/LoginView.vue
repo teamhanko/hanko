@@ -1,19 +1,17 @@
 <script setup lang="ts">
-import HankoAuth from "@/components/HankoAuth.vue";
-import type { Ref } from "vue";
 import { ref } from "vue";
+import router from "@/router";
 
-const error: Ref<Error | null> = ref(null);
+const error = ref<Error>();
 
-function setError(e: Error) {
-  error.value = e;
-}
+const redirectToTodos = () => {
+  router.push("/todo").catch((e) => (error.value = e));
+};
 </script>
 
 <template>
   <main class="content">
     <div class="error">{{ error?.message }}</div>
-    <HankoAuth @on-error="setError"/>
+    <hanko-auth @onAuthFlowCompleted="redirectToTodos()" />
   </main>
 </template>
-

@@ -9,10 +9,10 @@ interface Props {
 
 function HankoProfile({ setError }: Props) {
   useEffect(() => {
-    register({ shadow: true }).catch(setError);
+    register(api).catch(setError);
   }, [setError]);
 
-  return <hanko-profile api={api} />;
+  return <hanko-profile />;
 }
 
 export default HankoProfile;

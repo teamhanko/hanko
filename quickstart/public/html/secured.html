@@ -42,6 +42,8 @@
 
     const { hanko } = await register("{{.HankoUrl}}", { shadow: false });
 
+    hanko.onUserDeleted(() => window.location.href = "/" );
+
     document.getElementById("logout-link")
         .addEventListener("click", (event) => {
             event.preventDefault();

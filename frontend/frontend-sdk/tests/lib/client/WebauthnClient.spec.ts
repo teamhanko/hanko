@@ -196,9 +196,9 @@ describe("webauthnClient.register()", () => {
 
   it.each`
     statusInit | statusFinal | error
-    ${400}     | ${200}      | ${"Unauthorized error"}
+    ${401}     | ${200}      | ${"Unauthorized error"}
     ${500}     | ${200}      | ${"Technical error"}
-    ${200}     | ${400}      | ${"Unauthorized error"}
+    ${200}     | ${401}      | ${"Unauthorized error"}
     ${200}     | ${422}      | ${"User verification error"}
     ${200}     | ${500}      | ${"Technical error"}
   `(

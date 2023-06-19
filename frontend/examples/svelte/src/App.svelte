@@ -3,6 +3,14 @@
   import Login from "./lib/Login.svelte";
   import Todo from "./lib/Todo.svelte";
   import Profile from "./lib/Profile.svelte";
+  import { onMount } from "svelte";
+  import { register } from "@teamhanko/hanko-elements";
+
+  const hankoAPI = import.meta.env.VITE_HANKO_API;
+
+  onMount(() => {
+    register(hankoAPI);
+  });
 </script>
 
 <Router>

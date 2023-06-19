@@ -2,7 +2,6 @@ package handler
 
 import (
 	"fmt"
-	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter/httplimit"
@@ -16,7 +15,7 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus *prometheus.Prometheus) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 
@@ -29,10 +28,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		httplimit.HeaderRateLimitLimit,
 		httplimit.HeaderRateLimitRemaining,
 		httplimit.HeaderRateLimitReset,
+		"X-Session-Lifetime",
 	}
+
 	if cfg.Session.EnableAuthTokenHeader {
-		exposeHeader = append(exposeHeader, "X-Auth-Token", "X-Session-Lifetime")
+		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
 		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
@@ -43,7 +45,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}))
 
 	if prometheus != nil {
-		e.Use(prometheus.HandlerFunc)
+		e.Use(prometheus)
 	}
 
 	e.Validator = dto.NewCustomValidator()
@@ -52,7 +54,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, cfg.Session)
+	sessionManager, err := session.NewManager(jwkManager, *cfg)
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}

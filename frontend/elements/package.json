@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.5.0-alpha",
+  "version": "0.5.6-beta",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -14,9 +14,10 @@
   },
   "typesVersions": {
     "*": {
-      "elements": [
-        "dist/Elements.d.ts"
-      ]
+      "elements": ["dist/Elements.d.ts"],
+      "i18n/de": ["dist/i18n/de.d.ts"],
+      "i18n/en": ["dist/i18n/en.d.ts"],
+      "i18n/all": ["dist/i18n/all.d.ts"]
     }
   },
   "exports": {
@@ -24,6 +25,21 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/elements.js",
       "require": "./dist/elements.js"
+    },
+    "./i18n/de": {
+      "types": "./dist/i18n/de.d.ts",
+      "import": "./dist/i18n/de.js",
+      "require": "./dist/i18n/de.js"
+    },
+    "./i18n/en": {
+      "types": "./dist/i18n/en.d.ts",
+      "import": "./dist/i18n/en.js",
+      "require": "./dist/i18n/en.js"
+    },
+    "./i18n/all": {
+      "types": "./dist/i18n/all.d.ts",
+      "import": "./dist/i18n/all.js",
+      "require": "./dist/i18n/all.js"
     }
   },
   "scripts": {
@@ -50,7 +66,7 @@
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "css-loader": "^6.7.3",
-    "eslint": "^8.39.0",
+    "eslint": "^8.42.0",
     "eslint-config-google": "^0.14.0",
     "eslint-config-preact": "^1.3.0",
     "eslint-config-prettier": "^8.6.0",
@@ -67,7 +83,7 @@
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.4.1",
-    "@teamhanko/hanko-frontend-sdk": "^0.5.0-alpha",
+    "@teamhanko/hanko-frontend-sdk": "^0.5.4-beta",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
     "preact": "^10.13.1"

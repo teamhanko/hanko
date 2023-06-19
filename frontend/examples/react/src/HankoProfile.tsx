@@ -1,37 +1,57 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { register } from "@teamhanko/hanko-elements";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Hanko, register } from "@teamhanko/hanko-elements";
 import styles from "./Todo.module.css";
 import { useNavigate } from "react-router-dom";
-import { TodoClient } from "./TodoClient";
+import { SessionExpiredModal } from "./SessionExpiredModal";
 
-const hankoApi = process.env.REACT_APP_HANKO_API!
-const todoApi = process.env.REACT_APP_TODO_API!
+const api = process.env.REACT_APP_HANKO_API!;
 
 function HankoProfile() {
   const navigate = useNavigate();
-  const client = useMemo(() => new TodoClient(todoApi), []);
+  const hankoClient = useMemo(() => new Hanko(api), []);
   const [error, setError] = useState<Error | null>(null);
+  const modalRef = useRef<HTMLDialogElement>(null);
 
   const logout = () => {
-    client
-      .logout()
-      .then(() => {
-        navigate("/");
-        return;
-      })
-      .catch(setError);
+    hankoClient.user.logout().catch(setError);
   };
 
-  const todo = () => {
+  const redirectToTodo = () => {
     navigate("/todo");
-  }
+  };
+
+  const redirectToLogin = useCallback(() => {
+    navigate("/");
+  }, [navigate]);
 
   useEffect(() => {
-    register({ shadow: true }).catch(setError);
+    register(api).catch(setError);
   }, []);
+
+  useEffect(
+    () => hankoClient.onSessionNotPresent(() => redirectToLogin()),
+    [hankoClient, redirectToLogin]
+  );
+
+  useEffect(
+    () => hankoClient.onUserLoggedOut(() => redirectToLogin()),
+    [hankoClient, redirectToLogin]
+  );
+
+  useEffect(
+    () => hankoClient.onSessionExpired(() => modalRef.current?.showModal()),
+    [hankoClient]
+  );
 
   return (
     <>
+      <SessionExpiredModal ref={modalRef} />
       <nav className={styles.nav}>
         <button onClick={logout} className={styles.button}>
           Logout
@@ -39,14 +59,14 @@ function HankoProfile() {
         <button disabled className={styles.button}>
           Profile
         </button>
-        <button onClick={todo} className={styles.button}>
+        <button onClick={redirectToTodo} className={styles.button}>
           Todos
         </button>
       </nav>
       <div className={styles.content}>
         <h1 className={styles.headline}>Profile</h1>
         <div className={styles.error}>{error?.message}</div>
-        <hanko-profile api={hankoApi} />
+        <hanko-profile />
       </div>
     </>
   );

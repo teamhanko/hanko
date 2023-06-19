@@ -3,7 +3,10 @@ import { SessionState } from "../../../src/lib/state/session/SessionState";
 import {
   CustomEventWithDetail,
   sessionCreatedType,
-  sessionRemovedType,
+  SessionEventDetail,
+  sessionExpiredType,
+  sessionNotPresentType,
+  sessionResumedType,
   userDeletedType,
 } from "../../../src/lib/events/CustomEvents";
 
@@ -21,25 +24,8 @@ describe("Relay", () => {
     jest.clearAllTimers();
   });
 
-  describe("dispatchInitialSessionCreatedEvent", () => {
-    it("should not dispatch initial 'hanko-session-created' event when no session is active", () => {
-      jest
-        .spyOn(relay._sessionState, "read")
-        .mockReturnValueOnce(new SessionState());
-      jest
-        .spyOn(relay._sessionState, "getExpirationSeconds")
-        .mockReturnValueOnce(0);
-      jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValueOnce("");
-      jest
-        .spyOn(relay._sessionState, "getUserID")
-        .mockReturnValueOnce("fake_user");
-
-      relay.dispatchInitialEvents();
-      expect(dispatcherSpy).not.toHaveBeenCalled();
-      expect(relay._cookie.getAuthCookie).toHaveBeenCalled();
-    });
-
-    it("should dispatch initial 'hanko-session-created' event when session is active", () => {
+  describe("dispatchInitialEvents()", () => {
+    it("should dispatch initial 'hanko-session-resumed' event when session is active", () => {
       jest
         .spyOn(relay._sessionState, "read")
         .mockReturnValueOnce(new SessionState());
@@ -52,11 +38,14 @@ describe("Relay", () => {
         .mockReturnValueOnce("fake_user");
 
       relay.dispatchInitialEvents();
+      const event = dispatcherSpy.mock
+        .calls[0][0] as CustomEventWithDetail<SessionEventDetail>;
+      expect(event.type).toEqual(sessionResumedType);
       expect(dispatcherSpy).toHaveBeenCalled();
     });
 
     // eslint-disable-next-line jest/no-disabled-tests
-    it.skip("should listen to 'hanko-session-created' events and dispatch 'hanko-session-removed' events", () => {
+    it("should listen to 'hanko-session-created' events and dispatch 'hanko-session-expired' events", () => {
       const mockSessionCreatedDetail = {
         userID: "test-user",
         jwt: "test-token",
@@ -72,12 +61,12 @@ describe("Relay", () => {
         {
           func: () => {},
           timeoutID: 1,
-          type: "hanko-session-removed",
+          type: sessionExpiredType,
         },
         {
           func: () => {},
           timeoutID: 2,
-          type: "hanko-session-removed",
+          type: sessionExpiredType,
         },
       ];
 
@@ -88,14 +77,17 @@ describe("Relay", () => {
         {
           func: expect.any(Function),
           timeoutID: expect.any(Number),
-          type: sessionRemovedType,
+          type: sessionExpiredType,
         },
       ]);
 
       jest.advanceTimersByTime(3000);
 
       // Dispatching is expected after 7000ms.
-      expect(dispatcherSpy).not.toHaveBeenCalled();
+      expect(dispatcherSpy).toBeCalledTimes(1);
+      expect(dispatcherSpy.mock.calls[0][0].type).not.toEqual(
+        sessionExpiredType
+      );
 
       // Should cause another cleanup and new task to be scheduled to dispatch the session-removed event.
       document.dispatchEvent(sessionCreatedEventMock);
@@ -104,23 +96,24 @@ describe("Relay", () => {
         {
           func: expect.any(Function),
           timeoutID: expect.any(Number),
-          type: sessionRemovedType,
+          type: sessionExpiredType,
         },
       ]);
 
       jest.advanceTimersByTime(4000);
 
       // The second session-created event should have delayed the dispatching.
-      expect(dispatcherSpy).not.toHaveBeenCalled();
+      expect(dispatcherSpy.mock.calls[0][0].type).not.toEqual(
+        sessionExpiredType
+      );
 
       jest.advanceTimersByTime(3000);
 
-      expect(dispatcherSpy).toHaveBeenCalled();
-      expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionRemovedType);
+      expect(dispatcherSpy).toBeCalledTimes(1);
     });
   });
 
-  it("should listen to 'hanko-session-removed' and remove scheduled events", () => {
+  it("should listen to 'hanko-session-created' events and remove scheduled events", () => {
     const mockSessionCreatedDetail = {
       userID: "test-user",
       jwt: "test-token",
@@ -130,8 +123,8 @@ describe("Relay", () => {
       sessionCreatedType,
       mockSessionCreatedDetail
     );
-    const sessionRemovedEventMock = new CustomEventWithDetail(
-      sessionRemovedType,
+    const sessionExpiredEventMock = new CustomEventWithDetail(
+      sessionExpiredType,
       null
     );
 
@@ -141,17 +134,17 @@ describe("Relay", () => {
       {
         func: expect.any(Function),
         timeoutID: expect.any(Number),
-        type: sessionRemovedType,
+        type: sessionExpiredType,
       },
     ]);
 
-    document.dispatchEvent(sessionRemovedEventMock);
+    document.dispatchEvent(sessionExpiredEventMock);
 
     expect(relay._scheduler._tasks).toStrictEqual([]);
 
     jest.advanceTimersByTime(7000);
-
-    expect(dispatcherSpy).not.toHaveBeenCalled();
+    expect(dispatcherSpy).toBeCalledTimes(1);
+    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionNotPresentType);
   });
 
   it("should listen to 'hanko-user-deleted' and remove scheduled events", () => {
@@ -170,16 +163,26 @@ describe("Relay", () => {
     );
 
     document.dispatchEvent(sessionCreatedEventMock);
+
+    expect(relay._scheduler._tasks).toStrictEqual([
+      {
+        func: expect.any(Function),
+        timeoutID: expect.any(Number),
+        type: sessionExpiredType,
+      },
+    ]);
+
     document.dispatchEvent(userDeletedEventMock);
 
     expect(relay._scheduler._tasks).toStrictEqual([]);
 
     jest.advanceTimersByTime(7000);
 
-    expect(dispatcherSpy).not.toHaveBeenCalled();
+    expect(dispatcherSpy).toBeCalledTimes(1);
+    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionNotPresentType);
   });
 
-  it("should listen to 'storage' events and dispatch 'hanko-session-removed' if the session is expired", () => {
+  it("should listen to 'storage' events and dispatch 'hanko-session-expired' if the session is expired", () => {
     jest.spyOn(relay._sessionState, "getUserID").mockReturnValue("");
     jest.spyOn(relay._cookie, "getAuthCookie").mockReturnValue("");
     jest.spyOn(relay._sessionState, "getExpirationSeconds").mockReturnValue(0);
@@ -191,7 +194,7 @@ describe("Relay", () => {
     );
 
     expect(dispatcherSpy).toHaveBeenCalled();
-    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionRemovedType);
+    expect(dispatcherSpy.mock.calls[0][0].type).toEqual(sessionExpiredType);
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-created' if session is active", () => {

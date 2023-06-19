@@ -5,7 +5,6 @@ import {
   useMemo,
   useState,
 } from "preact/compat";
-import { Fragment } from "preact";
 
 import {
   HankoError,
@@ -49,6 +48,7 @@ const LoginEmailPage = (props: Props) => {
     hanko,
     experimentalFeatures,
     emitSuccessEvent,
+    enablePasskeys,
     config,
     setPage,
     setPasscode,
@@ -108,7 +108,7 @@ const LoginEmailPage = (props: Props) => {
         .then(() => hanko.webauthn.shouldRegister(_user))
         .then((shouldRegisterPasskey) => {
           const onSuccessHandler = () => {
-            if (shouldRegisterPasskey) {
+            if (shouldRegisterPasskey && enablePasskeys) {
               setPage(<RegisterPasskeyPage />);
               return;
             }
@@ -125,7 +125,14 @@ const LoginEmailPage = (props: Props) => {
         })
         .catch((e) => setPage(<ErrorPage initialError={e} />));
     },
-    [emitSuccessEvent, hanko, setPage, setUser]
+    [
+      emitSuccessEvent,
+      enablePasskeys,
+      hanko.user,
+      hanko.webauthn,
+      setPage,
+      setUser,
+    ]
   );
 
   const renderPasscode = useCallback(
@@ -263,7 +270,7 @@ const LoginEmailPage = (props: Props) => {
     event.preventDefault();
     setIsEmailLoginLoading(true);
 
-    if (isWebAuthnSupported) {
+    if (isWebAuthnSupported && enablePasskeys) {
       loginWithEmailAndWebAuthn().catch((e) => {
         setIsEmailLoginLoading(false);
         setError(e);
@@ -404,43 +411,45 @@ const LoginEmailPage = (props: Props) => {
           {t("labels.continue")}
         </Button>
       </Form>
-      {isWebAuthnSupported && !conditionalMediationEnabled ? (
-        <Fragment>
-          <Divider>{t("labels.or")}</Divider>
-          <Form onSubmit={onPasskeySubmit}>
-            <Button
-              secondary
-              isLoading={isPasskeyLoginLoading}
-              isSuccess={isPasskeyLoginSuccess}
-              disabled={disabled}
-              icon={"passkey"}
-            >
-              {t("labels.signInPasskey")}
-            </Button>
-          </Form>
-          {config.providers?.map((provider: string) => {
-            return (
-              <Form
-                key={provider}
-                onSubmit={(e) => {
-                  onThirdPartyAuth(e, provider);
-                }}
-              >
-                <Button
-                  secondary
-                  isLoading={isThirdPartyLoginLoading === provider}
-                  disabled={disabled}
-                  icon={provider.toLowerCase() as IconName}
-                >
-                  {t("labels.signInWith", {
-                    provider,
-                  })}
-                </Button>
-              </Form>
-            );
-          })}
-        </Fragment>
+      {(enablePasskeys && !conditionalMediationEnabled) ||
+      config.providers?.length ? (
+        <Divider>{t("labels.or")}</Divider>
       ) : null}
+      {enablePasskeys && !conditionalMediationEnabled ? (
+        <Form onSubmit={onPasskeySubmit}>
+          <Button
+            secondary
+            title={
+              !isWebAuthnSupported ? t("labels.webauthnUnsupported") : null
+            }
+            isLoading={isPasskeyLoginLoading}
+            isSuccess={isPasskeyLoginSuccess}
+            disabled={!isWebAuthnSupported || disabled}
+            icon={"passkey"}
+          >
+            {t("labels.signInPasskey")}
+          </Button>
+        </Form>
+      ) : null}
+      {config.providers?.map((provider: string) => (
+        <Form
+          key={provider}
+          onSubmit={(e) => {
+            onThirdPartyAuth(e, provider);
+          }}
+        >
+          <Button
+            secondary
+            isLoading={isThirdPartyLoginLoading === provider}
+            disabled={disabled}
+            icon={provider.toLowerCase() as IconName}
+          >
+            {t("labels.signInWith", {
+              provider,
+            })}
+          </Button>
+        </Form>
+      ))}
     </Content>
   );
 };

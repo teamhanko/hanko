@@ -391,6 +391,12 @@ type Session struct {
 	EnableAuthTokenHeader bool   `yaml:"enable_auth_token_header" json:"enable_auth_token_header" koanf:"enable_auth_token_header" split_words:"true"`
 	Lifespan              string `yaml:"lifespan" json:"lifespan" koanf:"lifespan"`
 	Cookie                Cookie `yaml:"cookie" json:"cookie" koanf:"cookie"`
+
+	// Issuer optional string to be used in the jwt iss claim.
+	Issuer string `yaml:"issuer" json:"issuer" koanf:"issuer"`
+
+	// Audience optional []string containing strings which get put into the aud claim. If not set default to Webauthn.RelyingParty.Id config parameter.
+	Audience []string `yaml:"audience" json:"audience" koanf:"audience"`
 }
 
 func (s *Session) Validate() error {
@@ -600,5 +606,6 @@ type LoggerConfig struct {
 }
 
 type Account struct {
+	// Allow Deletion indicates if a user can perform self-service deletion
 	AllowDeletion bool `yaml:"allow_deletion" json:"allow_deletion" koanf:"allow_deletion"`
 }

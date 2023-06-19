@@ -36,33 +36,45 @@ export { WebauthnSupport };
 
 import {
   PasswordConfig,
+  EmailConfig,
+  AccountConfig,
   Config,
   WebauthnFinalized,
-  Credential,
+  TokenFinalized,
   UserInfo,
-  UserCreated,
+  Me,
+  Credential,
   User,
+  UserCreated,
+  Passcode,
+  WebauthnTransports,
+  Attestation,
   Email,
   Emails,
   WebauthnCredential,
   WebauthnCredentials,
-  Passcode,
   Identity,
 } from "./lib/Dto";
 
 export type {
   PasswordConfig,
+  EmailConfig,
+  AccountConfig,
   Config,
   WebauthnFinalized,
-  Credential,
+  TokenFinalized,
   UserInfo,
-  UserCreated,
+  Me,
+  Credential,
   User,
+  UserCreated,
+  Passcode,
+  WebauthnTransports,
+  Attestation,
   Email,
   Emails,
   WebauthnCredential,
   WebauthnCredentials,
-  Passcode,
   Identity,
 };
 
@@ -111,19 +123,27 @@ export {
 // Events
 
 import {
-  SessionCreatedEventDetail,
+  CustomEventWithDetail,
+  SessionEventDetail,
   AuthFlowCompletedEventDetail,
   authFlowCompletedType,
   sessionCreatedType,
-  sessionRemovedType,
+  sessionResumedType,
+  sessionExpiredType,
+  sessionNotPresentType,
+  userLoggedOutType,
   userDeletedType,
 } from "./lib/events/CustomEvents";
 
-export type { SessionCreatedEventDetail, AuthFlowCompletedEventDetail };
+export type { SessionEventDetail, AuthFlowCompletedEventDetail };
 
 export {
   authFlowCompletedType,
+  sessionResumedType,
   sessionCreatedType,
-  sessionRemovedType,
+  sessionExpiredType,
+  sessionNotPresentType,
+  userLoggedOutType,
   userDeletedType,
+  CustomEventWithDetail,
 };

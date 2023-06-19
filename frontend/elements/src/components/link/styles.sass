@@ -10,24 +10,25 @@
   background: none!important
   border: none
   padding: 0!important
+  transition: all .1s
 
   &:hover
     text-decoration: variables.$link-text-decoration-hover
 
-  &.disabled
-    color: variables.$color
+  &:disabled
+    color: variables.$color!important
     pointer-events: none
     cursor: default
 
   &.danger
-    color: variables.$error-color!important
+    color: variables.$error-color
 
 .linkWrapper
   display: inline-flex
   flex-direction: row
   justify-content: space-between
   align-items: center
-  height: 20px
+  height: 1.2rem
 
   &.reverse
     flex-direction: row-reverse
