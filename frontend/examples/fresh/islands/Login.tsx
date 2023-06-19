@@ -1,3 +1,5 @@
+import { HANKO_API_ENDPOINT } from "../config.ts";
+
 const code = `
   import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
 
@@ -7,12 +9,10 @@ const code = `
   });
 `;
 
-const endpoint = "HANKO_API_ENDPOINT";
-
 export default function Login() {
   return (
     <div>
-      <hanko-auth api={endpoint}></hanko-auth>
+      <hanko-auth api={HANKO_API_ENDPOINT}></hanko-auth>
       <script type="module">
         {code}
       </script>

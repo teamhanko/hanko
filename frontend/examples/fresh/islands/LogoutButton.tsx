@@ -1,4 +1,4 @@
-const endpoint = "HANKO_API_ENDPOINT";
+import { HANKO_API_ENDPOINT } from "../config.ts";
 
 const code = `
   import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
@@ -6,7 +6,7 @@ const code = `
 
   register({ shadow: true });
   window.addEventListener('logout', () => {
-    const hanko = new Hanko('${endpoint}');
+    const hanko = new Hanko('${HANKO_API_ENDPOINT}');
     hanko.user.logout()
       .then(() => {
         window.location.href = '/';
