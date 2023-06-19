@@ -18,6 +18,7 @@ import (
 )
 
 func TestUserSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(userSuite))
 }
 

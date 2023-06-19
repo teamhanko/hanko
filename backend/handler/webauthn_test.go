@@ -21,6 +21,7 @@ import (
 )
 
 func TestWebauthnSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(webauthnSuite))
 }
 

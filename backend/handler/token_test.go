@@ -18,6 +18,7 @@ import (
 )
 
 func TestTokenSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(tokenSuite))
 }
 
