@@ -11,7 +11,7 @@ export const handler: Handlers<unknown, AppState> = {
   },
   async PATCH(req: Request, ctx: HandlerContext<unknown, AppState>): Response {
     const userID = ctx.state.auth.sub!;
-    const todoID = req.params.id;
+    const todoID = ctx.params.id;
     const todos = ctx.state.store.get(userID);
     const data = await req.json();
 
@@ -26,7 +26,7 @@ export const handler: Handlers<unknown, AppState> = {
   },
   DELETE(req: Request, ctx: HandlerContext<unknown, AppState>): Response {
     const userID = ctx.state.auth.sub!;
-    const todoID = req.params.id;
+    const todoID = ctx.params.id;
     const todos = ctx.state.store.get(userID);
     todos.delete(todoID);
 
