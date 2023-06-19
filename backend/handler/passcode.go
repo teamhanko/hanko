@@ -75,7 +75,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	user, err := h.persister.GetUserPersister().Get(userId)
@@ -87,7 +87,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
+		return echo.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 	}
 
 	if h.rateLimiter != nil {
@@ -101,7 +101,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	if body.EmailId != nil {
 		emailId, err = uuid.FromString(*body.EmailId)
 		if err != nil {
-			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+			return echo.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
 		}
 	}
 
@@ -111,7 +111,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		// Send the passcode to the specified email address
 		email, err = h.persister.GetEmailPersister().Get(emailId)
 		if email == nil {
-			return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+			return echo.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 		}
 	} else if e := user.Emails.GetPrimary(); e == nil {
 		// Workaround to support hanko element versions before v0.1.0-alpha:
@@ -124,15 +124,15 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		if emailIdCookie != nil && emailIdCookie.Value != "" {
 			emailId, err = uuid.FromString(emailIdCookie.Value)
 			if err != nil {
-				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
+				return echo.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
 			}
 			email, err = h.persister.GetEmailPersister().Get(emailId)
 			if email == nil {
-				return dto.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
+				return echo.NewHTTPError(http.StatusBadRequest, "the specified emailId is not available")
 			}
 		} else {
 			// Can't determine email address to which the passcode should be sent to
-			return dto.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
+			return echo.NewHTTPError(http.StatusBadRequest, "an emailId needs to be specified")
 		}
 	} else {
 		// Send the passcode to the primary email address
@@ -142,11 +142,11 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	sessionToken := h.GetSessionToken(c)
 	if sessionToken != nil && sessionToken.Subject() != user.ID.String() {
 		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
+		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
 	}
 
 	if email.User != nil && email.User.ID.String() != user.ID.String() {
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address is assigned to another user"))
+		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("email address is assigned to another user"))
 	}
 
 	passcode, err := h.passcodeGenerator.Generate()
@@ -229,7 +229,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 	passcodeId, err := uuid.FromString(body.Id)
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse passcodeId as uuid").SetInternal(err)
 	}
 
 	// only if an internal server error occurs the transaction should be rolled back
@@ -248,7 +248,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = dto.NewHTTPError(http.StatusUnauthorized, "passcode not found")
+			businessError = echo.NewHTTPError(http.StatusUnauthorized, "passcode not found")
 			return nil
 		}
 
@@ -263,7 +263,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = dto.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
+			businessError = echo.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
 			return nil
 		}
 
@@ -280,7 +280,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
-				businessError = dto.NewHTTPError(http.StatusGone, "max attempts reached")
+				businessError = echo.NewHTTPError(http.StatusGone, "max attempts reached")
 				return nil
 			}
 
@@ -293,7 +293,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
+			businessError = echo.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("passcode invalid"))
 			return nil
 		}
 
@@ -303,7 +303,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		}
 
 		if passcode.Email.User != nil && passcode.Email.User.ID.String() != user.ID.String() {
-			return dto.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
+			return echo.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 
 		emailExistsForUser := false
@@ -319,7 +319,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		if !((existingSessionToken == nil && emailExistsForUser) || // normal login: when user logs in and the email used is associated with the user
 			(existingSessionToken == nil && len(user.Emails) == 0) || // register: when user register and the user has no emails
 			(existingSessionToken != nil && existingSessionToken.Subject() == user.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passcode and the one in the session matches
-			return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passcode finalization not allowed"))
+			return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passcode finalization not allowed"))
 		}
 
 		if !passcode.Email.Verified {

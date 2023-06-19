@@ -5,11 +5,11 @@ import (
 	"encoding/json"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
@@ -121,12 +121,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 	rec2 := httptest.NewRecorder()
 
 	e.ServeHTTP(rec2, req2)
-	if s.Equal(http.StatusBadRequest, rec2.Code) {
-		httpError := dto.HTTPError{}
-		err = json.Unmarshal(rec2.Body.Bytes(), &httpError)
-		s.NoError(err)
-		s.Equal(http.StatusBadRequest, httpError.Code)
-	}
+	s.Equal(http.StatusBadRequest, rec2.Code)
 }
 
 func (s *webauthnSuite) TestWebauthnHandler_BeginAuthentication() {
@@ -198,7 +193,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 	e.ServeHTTP(rec2, req2)
 
 	if s.Equal(http.StatusUnauthorized, rec2.Code) {
-		httpError := dto.HTTPError{}
+		httpError := echo.HTTPError{}
 		err = json.Unmarshal(rec2.Body.Bytes(), &httpError)
 		s.NoError(err)
 		s.Equal("Stored challenge and received challenge do not match", httpError.Message)
