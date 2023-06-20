@@ -70,11 +70,11 @@ func (h TokenHandler) Validate(c echo.Context) error {
 		}
 
 		if token == nil {
-			return dto.NewHTTPError(http.StatusNotFound, "token not found")
+			return echo.NewHTTPError(http.StatusNotFound, "token not found")
 		}
 
 		if time.Now().UTC().After(token.ExpiresAt) {
-			return dto.NewHTTPError(http.StatusUnprocessableEntity, "token has expired")
+			return echo.NewHTTPError(http.StatusUnprocessableEntity, "token has expired")
 		}
 
 		terr = tokenPersister.Delete(*token)
@@ -105,7 +105,7 @@ func (h TokenHandler) Validate(c echo.Context) error {
 	})
 
 	if err != nil {
-		var httpError *dto.HTTPError
+		var httpError *echo.HTTPError
 		if errors.As(err, &httpError) {
 			aerr := h.auditLogger.Create(c, models.AuditLogTokenExchangeFailed, nil, err)
 			if aerr != nil {

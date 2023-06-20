@@ -21,6 +21,7 @@ import (
 )
 
 func TestThirdPartySuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(thirdPartySuite))
 }
 

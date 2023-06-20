@@ -3,6 +3,7 @@ package dto
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/labstack/echo/v4"
 	"net/http"
 	"reflect"
 	"strings"
@@ -50,7 +51,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 				}
 			}
 
-			return NewHTTPError(http.StatusBadRequest, strings.Join(vErrs, " and "))
+			return echo.NewHTTPError(http.StatusBadRequest, strings.Join(vErrs, " and "))
 		}
 	}
 
