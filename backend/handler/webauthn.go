@@ -79,7 +79,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusBadRequest, "user not found").SetInternal(errors.New(fmt.Sprintf("user %s not found ", uId)))
+		return echo.NewHTTPError(http.StatusBadRequest, "user not found").SetInternal(errors.New(fmt.Sprintf("user %s not found ", uId)))
 	}
 
 	t := true
@@ -120,7 +120,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 	}
 	request, err := protocol.ParseCredentialCreationResponse(c.Request())
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 	return h.persister.Transaction(func(tx *pop.Connection) error {
 		sessionDataPersister := h.persister.GetWebauthnSessionDataPersisterWithConnection(tx)
@@ -138,7 +138,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
+			return echo.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		if sessionToken.Subject() != sessionData.UserId.String() {
@@ -146,7 +146,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("userId in webauthn.sessionData does not match user session"))
+			return echo.NewHTTPError(http.StatusBadRequest, "Stored challenge and received challenge do not match").SetInternal(errors.New("userId in webauthn.sessionData does not match user session"))
 		}
 
 		webauthnUser, user, err := h.getWebauthnUser(tx, sessionData.UserId)
@@ -159,7 +159,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
+			return echo.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("user not found"))
 		}
 
 		credential, err := h.webauthn.CreateCredential(webauthnUser, *intern.WebauthnSessionDataFromModel(sessionData), request)
@@ -182,7 +182,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
 
-			return dto.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
+			return echo.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
 		}
 
 		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
@@ -230,19 +230,19 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
+			return echo.NewHTTPError(http.StatusBadRequest, "failed to parse UserID as uuid").SetInternal(err)
 		}
 		var webauthnUser *intern.WebauthnUser
 		webauthnUser, user, err = h.getWebauthnUser(h.persister.GetConnection(), userId) // TODO:
 		if err != nil {
-			return dto.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get user: %w", err))
+			return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to get user: %w", err))
 		}
 		if webauthnUser == nil {
 			err = h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationInitFailed, nil, fmt.Errorf("unkown user"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusBadRequest, "user not found")
+			return echo.NewHTTPError(http.StatusBadRequest, "user not found")
 		}
 
 		if len(webauthnUser.WebAuthnCredentials()) > 0 {
@@ -283,7 +283,7 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 	request, err := protocol.ParseCredentialRequestResponse(c.Request())
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, err.Error())
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
@@ -302,7 +302,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			return dto.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
+			return echo.NewHTTPError(http.StatusUnauthorized, "Stored challenge and received challenge do not match").SetInternal(errors.New("sessionData not found"))
 		}
 
 		model := intern.WebauthnSessionDataFromModel(sessionData)
@@ -314,7 +314,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			// Discoverable Login
 			userId, err := uuid.FromBytes(request.Response.UserHandle)
 			if err != nil {
-				return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
+				return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userHandle as uuid").SetInternal(err)
 			}
 			webauthnUser, user, err = h.getWebauthnUser(tx, userId)
 			if err != nil {
@@ -326,7 +326,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
-				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+				return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 			}
 
 			credential, err = h.webauthn.ValidateDiscoverableLogin(func(rawID, userHandle []byte) (user webauthn.User, err error) {
@@ -337,7 +337,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
-				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+				return echo.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
 			}
 		} else {
 			// non discoverable Login
@@ -350,7 +350,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
-				return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+				return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 			}
 			credential, err = h.webauthn.ValidateLogin(webauthnUser, *model, request)
 			if err != nil {
@@ -358,7 +358,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
-				return dto.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
+				return echo.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
 			}
 		}
 
@@ -471,7 +471,7 @@ func (h *WebauthnHandler) UpdateCredential(c echo.Context) error {
 	}
 
 	if credential == nil || credential.UserId.String() != user.ID.String() {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
 	}
 
 	if body.Name != nil {
@@ -515,7 +515,7 @@ func (h *WebauthnHandler) DeleteCredential(c echo.Context) error {
 	}
 
 	if credential == nil || credential.UserId.String() != user.ID.String() {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the user does not have a webauthn credential with the specified credentialId"))
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {

@@ -25,7 +25,7 @@ func NewUserHandlerAdmin(persister persistence.Persister) *UserHandlerAdmin {
 func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 	userId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	p := h.persister.GetUserPersister()
@@ -35,7 +35,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound, "user not found")
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
 	err = p.Delete(*user)
@@ -73,7 +73,7 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	if request.UserId != "" {
 		userId, err = uuid.FromString(request.UserId)
 		if err != nil {
-			return dto.NewHTTPError(http.StatusBadRequest, "failed to parse user_id as uuid").SetInternal(err)
+			return echo.NewHTTPError(http.StatusBadRequest, "failed to parse user_id as uuid").SetInternal(err)
 		}
 	}
 
@@ -84,7 +84,7 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	switch request.SortDirection {
 	case "desc", "asc":
 	default:
-		return dto.NewHTTPError(http.StatusBadRequest, "sort_direction must be desc or asc")
+		return echo.NewHTTPError(http.StatusBadRequest, "sort_direction must be desc or asc")
 	}
 
 	email := strings.ToLower(request.Email)
@@ -115,7 +115,7 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 func (h *UserHandlerAdmin) Get(c echo.Context) error {
 	userId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	p := h.persister.GetUserPersister()
@@ -125,7 +125,7 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound, "user not found")
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
 	return c.JSON(http.StatusOK, admin.FromUserModel(*user))
