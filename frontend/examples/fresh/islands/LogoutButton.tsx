@@ -1,10 +1,9 @@
 import { HANKO_API_ENDPOINT } from "../config.ts";
 
 const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
-  import { Hanko } from 'https://esm.sh/@teamhanko/hanko-frontend-sdk@0.5.4-beta';
+  import { register, Hanko } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
 
-  register({ shadow: true });
+  register('${HANKO_API_ENDPOINT}', { shadow: true });
   window.addEventListener('logout', () => {
     const hanko = new Hanko('${HANKO_API_ENDPOINT}');
     hanko.user.logout()

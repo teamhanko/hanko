@@ -1,9 +1,9 @@
 import { HANKO_API_ENDPOINT } from "../config.ts";
 
 const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
 
-  register({ shadow: true });
+  register('${HANKO_API_ENDPOINT}', { shadow: true });
   document.addEventListener('hankoAuthSuccess', (event) => {
     document.location.href = '/todo';
   });

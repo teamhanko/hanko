@@ -1,8 +1,8 @@
 import { HANKO_API_ENDPOINT } from "../config.ts";
 
 const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
-  register({ shadow: true });
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
+  register('${HANKO_API_ENDPOINT}', { shadow: true });
 `;
 
 export default function Profile() {
