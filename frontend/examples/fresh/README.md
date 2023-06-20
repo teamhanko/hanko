@@ -13,7 +13,7 @@ This is a [Fresh](fresh.deno.dev/) project.
 
 In the `.env` file set up the correct environment variables:
 
-- `VITE_HANKO_API`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the `server.public.address` option in the [configuration file](../../../backend/docs/Config.md))
+- `HANKO_API_URL`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the `server.public.address` option in the [configuration file](../../../backend/docs/Config.md))
 
 In the `config.ts` file set up the `HANKO_API_ENDPOINT` variable too. It's used in islands.
 
