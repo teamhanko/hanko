@@ -30,16 +30,16 @@ If you are self-hosting you need to provide the URL of your running Hanko backen
 :::
 
 ```js title="Login.tsx" showLineNumbers
-const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
+const endpoint = "HANKO_API_URL";
 
-  register({ shadow: true });
+const code = `
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
+
+  register('${endpoint}', { shadow: true });
   document.addEventListener('hankoAuthSuccess', (event) => {
     document.location.href = '/protected';
   });
 `;
-
-const endpoint = "HANKO_API_URL";
 
 export default function Login() {
   return (
@@ -68,13 +68,13 @@ To provide a page where users can manage their email addresses, password and pas
 component. Just as with the `<hanko-auth>` component, import the hanko elements via a native script.
 
 ```js title="HankoProfile.tsx" showLineNumbers
-const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
-
-  register({ shadow: true });
-`;
-
 const endpoint = "HANKO_API_URL";
+
+const code = `
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
+
+  register('${endpoint}', { shadow: true });
+`;
 
 export default function Profile() {
   return (
@@ -95,10 +95,9 @@ Use the Hanko client to logout. The code below use a custom event to trigger the
 ```js title="HankoProfile.tsx" showLineNumbers
 const endpoint = "HANKO_API_URL";
 const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.2.2-alpha';
-  import { Hanko } from 'https://esm.sh/@teamhanko/hanko-frontend-sdk@0.5.4-beta';
+  import { register, Hanko } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
 
-  register({ shadow: true });
+  register('${endpoint}', { shadow: true });
   window.addEventListener('logout', () => {
     const hanko = new Hanko('${endpoint}');
     hanko.user.logout()
