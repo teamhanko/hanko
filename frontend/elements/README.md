@@ -115,6 +115,7 @@ const defaultOptions = {
     shadow: true,                  // Set to false if you do not want the web component to be attached to the shadow DOM.
     injectStyles: true,            // Set to false if you do not want to inject any default styles.
     enablePasskeys: true,          // Set to false if you do not want to display passkey-related content.
+    hidePasskeyButtonOnLogin: false, // Hides the button to sign in with a passkey on the login page.
     translations: null,            // Additional translations can be added here. English is used when the option is not
                                    // present or set to `null`, whereas setting an empty object `{}` prevents the elements
                                    // from displaying any translations.

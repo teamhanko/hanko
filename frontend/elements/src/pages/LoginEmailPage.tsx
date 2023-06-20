@@ -49,6 +49,7 @@ const LoginEmailPage = (props: Props) => {
     experimentalFeatures,
     emitSuccessEvent,
     enablePasskeys,
+    hidePasskeyButtonOnLogin,
     config,
     setPage,
     setPasscode,
@@ -411,7 +412,9 @@ const LoginEmailPage = (props: Props) => {
       config.providers?.length ? (
         <Divider>{t("labels.or")}</Divider>
       ) : null}
-      {enablePasskeys && !conditionalMediationEnabled ? (
+      {enablePasskeys &&
+      !conditionalMediationEnabled &&
+      !hidePasskeyButtonOnLogin ? (
         <Form onSubmit={onPasskeySubmit}>
           <Button
             secondary
