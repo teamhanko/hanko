@@ -1,4 +1,4 @@
-# Hanko React example
+# Hanko Vue example
 
 This is a [Vue](https://vuejs.org/) project bootstrapped with Vue version 3.2.39.
 
