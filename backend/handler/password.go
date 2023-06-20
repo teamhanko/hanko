@@ -64,7 +64,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 
 	sessionUserId, err := uuid.FromString(sessionToken.Subject())
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(body.UserID))
@@ -78,7 +78,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.Password.MinPasswordLength))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.Password.MinPasswordLength))
 	}
 
 	if len(pwBytes) > 72 {
@@ -86,7 +86,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
+		return echo.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
 	}
 
 	if user == nil {
@@ -94,7 +94,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("user %s not found ", sessionUserId)))
+		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("user %s not found ", sessionUserId)))
 	}
 
 	if sessionUserId != user.ID {
@@ -102,7 +102,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New(fmt.Sprintf("session.userId %s tried to set password credentials for body.userId %s", sessionUserId, user.ID)))
+		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New(fmt.Sprintf("session.userId %s tried to set password credentials for body.userId %s", sessionUserId, user.ID)))
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
@@ -166,7 +166,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 
 	userId, err := uuid.FromString(body.UserId)
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest, "user_id is not a uuid").SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, "user_id is not a uuid").SetInternal(err)
 	}
 
 	if h.rateLimiter != nil {
@@ -185,7 +185,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
+		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New("user not found"))
 	}
 
 	pwBytes := []byte(body.Password)
@@ -194,7 +194,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
+		return echo.NewHTTPError(http.StatusBadRequest, "password must not be longer than 72 bytes")
 	}
 
 	pw, err := h.persister.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(body.UserId))
@@ -203,7 +203,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("no password credential found for: %s", body.UserId)))
+		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(errors.New(fmt.Sprintf("no password credential found for: %s", body.UserId)))
 	}
 
 	if err != nil {
@@ -215,7 +215,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
+		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
 	token, err := h.sessionManager.GenerateJWT(pw.UserId)

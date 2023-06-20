@@ -10,7 +10,6 @@ import (
 	"github.com/sethvargo/go-limiter/memorystore"
 	"github.com/sethvargo/go-redisstore"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/dto"
 	"log"
 	"math"
 	"net/http"
@@ -64,7 +63,7 @@ func Limit(store limiter.Store, userId uuid.UUID, c echo.Context) error {
 	// Fail if there were no tokens remaining.
 	if !ok {
 		c.Response().Header().Set(httplimit.HeaderRetryAfter, strconv.Itoa(resetTime))
-		return dto.NewHTTPError(http.StatusTooManyRequests)
+		return echo.NewHTTPError(http.StatusTooManyRequests)
 	}
 	return nil
 }

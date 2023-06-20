@@ -18,6 +18,7 @@ import (
 )
 
 func TestTokenSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(tokenSuite))
 }
 
@@ -96,7 +97,7 @@ func (s *tokenSuite) TestToken_Validate_ExpiredToken() {
 	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err = handler.Validate(c)
 	if s.Error(err) {
-		herr, ok := err.(*dto.HTTPError)
+		herr, ok := err.(*echo.HTTPError)
 		s.True(ok)
 		s.Equal(http.StatusUnprocessableEntity, herr.Code)
 		s.Equal("token has expired", herr.Message)
@@ -125,7 +126,7 @@ func (s *tokenSuite) TestToken_Validate_MissingTokenFromRequest() {
 	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err := handler.Validate(c)
 	if s.Error(err) {
-		herr, ok := err.(*dto.HTTPError)
+		herr, ok := err.(*echo.HTTPError)
 		s.True(ok)
 		s.Equal(http.StatusBadRequest, herr.Code)
 		s.Contains("value is a required field", herr.Message)
@@ -153,7 +154,7 @@ func (s *tokenSuite) TestToken_Validate_InvalidJson() {
 	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err := handler.Validate(c)
 	if s.Error(err) {
-		herr, ok := err.(*dto.HTTPError)
+		herr, ok := err.(*echo.HTTPError)
 		s.True(ok)
 		s.Equal(http.StatusBadRequest, herr.Code)
 
@@ -189,7 +190,7 @@ func (s *tokenSuite) TestToken_Validate_TokenNotFound() {
 	handler := NewTokenHandler(cfg, s.Storage, sessionManager{}, auditLogger)
 	err = handler.Validate(c)
 	if s.Error(err) {
-		herr, ok := err.(*dto.HTTPError)
+		herr, ok := err.(*echo.HTTPError)
 		s.True(ok)
 		s.Equal(http.StatusNotFound, herr.Code)
 		s.Equal("token not found", herr.Message)
