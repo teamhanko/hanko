@@ -104,7 +104,15 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 
 		terr = c.Validate(callback)
 		if terr != nil {
-			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+			if eerr, ok := terr.(*echo.HTTPError); ok {
+				if message, ok2 := eerr.Message.(string); ok2 {
+					return thirdparty.ErrorInvalidRequest(message).WithCause(terr)
+				} else {
+					return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+				}
+			} else {
+				return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+			}
 		}
 
 		expectedState, terr := c.Cookie(HankoThirdpartyStateCookie)
