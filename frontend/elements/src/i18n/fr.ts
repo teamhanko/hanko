@@ -7,7 +7,7 @@ export const fr: Translation = {
     loginFinished: "Connexion réussie",
     loginPasscode: "Entrez le code d'accès",
     loginPassword: "Entrez le mot de passe",
-    registerAuthenticator: "Enregistrer une clé d´identification",
+    registerAuthenticator: "Enregistrer une clé d'identification",
     registerConfirm: "Créer un compte ?",
     registerPassword: "Définir un nouveau mot de passe",
     profileEmails: "Adresses e-mail",
@@ -18,8 +18,8 @@ export const fr: Translation = {
     emailVerified: "Vérifié",
     emailUnverified: "Non vérifié",
     emailDelete: "Supprimer",
-    renamePasskey: "Renommer la clé d´identification",
-    deletePasskey: "Supprimer la clé d´identification",
+    renamePasskey: "Renommer la clé d'identification",
+    deletePasskey: "Supprimer la clé d'identification",
     lastUsedAt: "Dernière utilisation le",
     createdAt: "Créé le",
     connectedAccounts: "Comptes connectés",
@@ -29,7 +29,7 @@ export const fr: Translation = {
     enterPasscode:
       'Saisissez le code d\'accès qui a été envoyé à "{emailAddress}".',
     setupPasskey:
-      "Connectez-vous à votre compte facilement et en toute sécurité avec une clé d´identification. Remarque : Vos données biométriques sont uniquement stockées sur vos appareils et ne seront jamais partagées avec qui que ce soit.",
+      "Connectez-vous à votre compte facilement et en toute sécurité avec une clé d'identification. Remarque : Vos données biométriques sont uniquement stockées sur vos appareils et ne seront jamais partagées avec qui que ce soit.",
     createAccount:
       'Aucun compte n\'existe pour "{emailAddress}". Voulez-vous créer un nouveau compte ?',
     passwordFormatHint:
@@ -52,9 +52,9 @@ export const fr: Translation = {
     emailDeletePrimary:
       "L'adresse e-mail principale ne peut pas être supprimée. Ajoutez d'abord une autre adresse e-mail et définissez-la comme adresse e-mail principale.",
     renamePasskey:
-      "Définissez un nom pour la clé d´identification qui vous aide à identifier où elle est stockée.",
+      "Définissez un nom pour la clé d'identification qui vous aide à identifier où elle est stockée.",
     deletePasskey:
-      "Supprimez cette clé d´identification de votre compte. Notez que la clé d´identification continuera d'exister sur vos appareils et devra également y être supprimée.",
+      "Supprimez cette clé d'identification de votre compte. Notez que la clé d'identification continuera d'exister sur vos appareils et devra également y être supprimée.",
     deleteAccount:
       "Êtes-vous sûr de vouloir supprimer ce compte ? Toutes les données seront supprimées immédiatement et ne pourront pas être récupérées.",
   },
@@ -71,8 +71,8 @@ export const fr: Translation = {
     signInPasscode: "Se connecter avec un code d'accès",
     forgotYourPassword: "Mot de passe oublié ?",
     back: "Retour",
-    signInPasskey: "Se connecter avec une clé d´identification",
-    registerAuthenticator: "Enregistrer une clé d´identification",
+    signInPasskey: "Se connecter avec une clé d'identification",
+    registerAuthenticator: "Enregistrer une clé d'identification",
     signIn: "Se connecter",
     signUp: "S'inscrire",
     sendNewPasscode: "Envoyer un nouveau code",
@@ -86,10 +86,10 @@ export const fr: Translation = {
     newEmailAddress: "Nouvelle adresse e-mail",
     newPassword: "Nouveau mot de passe",
     rename: "Renommer",
-    newPasskeyName: "Nouveau nom de clé d´identification",
+    newPasskeyName: "Nouveau nom de clé d'identification",
     addEmail: "Ajouter une adresse e-mail",
     changePassword: "Changer le mot de passe",
-    addPasskey: "Ajouter une clé d´identification",
+    addPasskey: "Ajouter une clé d'identification",
     webauthnUnsupported:
       "Les clés d'identification ne sont pas prises en charge par votre navigateur",
     signInWith: "Se connecter avec {provider}",
@@ -106,7 +106,7 @@ export const fr: Translation = {
     tooManyRequests:
       "Trop de demandes ont été effectuées. Veuillez attendre pour répéter l'opération demandée.",
     unauthorized: "Votre session a expiré. Veuillez vous connecter à nouveau.",
-    invalidWebauthnCredential: "Cette clé d´identification ne peut plus être utilisée.",
+    invalidWebauthnCredential: "Cette clé d'identification ne peut plus être utilisée.",
     passcodeExpired:
       "Le code d'accès a expiré. Veuillez demander un nouveau code.",
     userVerification:
