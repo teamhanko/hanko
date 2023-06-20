@@ -17,6 +17,7 @@ import (
 const validUUID2 = "799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3"
 
 func TestImportSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(importSuite))
 }
 

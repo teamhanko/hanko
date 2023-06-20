@@ -82,7 +82,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 	}
 
 	if emailCount >= h.cfg.Emails.MaxNumOfAddresses {
-		return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New("max number of email addresses reached"))
+		return echo.NewHTTPError(http.StatusConflict).SetInternal(errors.New("max number of email addresses reached"))
 	}
 
 	newEmailAddress := strings.ToLower(body.Address)
@@ -102,7 +102,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			// The email address already exists.
 			if email.UserID != nil {
 				// The email address exists and is assigned to a user already, therefore it can't be created.
-				return dto.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("email address already exists"))
+				return echo.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("email address already exists"))
 			}
 
 			if !h.cfg.Emails.RequireVerification {
@@ -155,7 +155,7 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 
 	emailId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
-		return dto.NewHTTPError(http.StatusBadRequest).SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest).SetInternal(err)
 	}
 
 	user, err := h.persister.GetUserPersister().Get(userId)
@@ -165,7 +165,7 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 
 	email := user.GetEmailById(emailId)
 	if email == nil {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the email address is not assigned to the current user"))
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("the email address is not assigned to the current user"))
 	}
 
 	if email.IsPrimary() {
@@ -225,7 +225,7 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 	}
 
 	if emailToBeDeleted.IsPrimary() {
-		return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New("primary email can't be deleted"))
+		return echo.NewHTTPError(http.StatusConflict).SetInternal(errors.New("primary email can't be deleted"))
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
