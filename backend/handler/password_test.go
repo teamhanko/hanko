@@ -16,6 +16,7 @@ import (
 )
 
 func TestPasswordSuite(t *testing.T) {
+        t.Parallel()
 	suite.Run(t, new(passwordSuite))
 }
 
