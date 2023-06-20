@@ -412,9 +412,7 @@ const LoginEmailPage = (props: Props) => {
       config.providers?.length ? (
         <Divider>{t("labels.or")}</Divider>
       ) : null}
-      {enablePasskeys &&
-      !conditionalMediationEnabled &&
-      !hidePasskeyButtonOnLogin ? (
+      {enablePasskeys && !hidePasskeyButtonOnLogin ? (
         <Form onSubmit={onPasskeySubmit}>
           <Button
             secondary
