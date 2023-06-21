@@ -26,6 +26,13 @@ module.exports = {
         type: 'module'
       },
     },
+    fr: {
+      filename: 'i18n/fr.js',
+      import: './src/i18n/fr.ts',
+      library: {
+        type: 'module'
+      },
+    },
     all: {
       filename: 'i18n/all.js',
       import: './src/i18n/all.ts',
