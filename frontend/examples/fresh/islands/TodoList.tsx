@@ -69,7 +69,7 @@ export default function TodoList() {
         <div class="">
           <form class="flex" onSubmit={handleSubmit}>
             <input class="w-full mr-2 border-blue-500 rounded p-1.5 border-2 text-black" type="text" value={description} onChange={(event) => setDescription(event.target.value)} />
-            <button class=" rounded border-blue-500 border-2! py-2 px-4">🆕</button>
+            <button class=" rounded border-blue-500 border-2! py-2 px-4">+</button>
           </form>
         </div>
         <div class="mt-8">

@@ -44,7 +44,7 @@ export function TodoItem(props: TodoItemProps) {
     <div class="min-h-40 p-2 my-2 bg-white text-black rounded flex gap-1 items-center">
       <input class="mr-2" type="checkbox" value={checked} checked={checked} onChange={updateTodo} />
       <span class="w-full">{props.description}</span>
-      <button class="ml-2 rounded py-1 px-2" onClick={deleteTodo}>🗑</button>
+      <button class="ml-2 rounded py-1 px-2" onClick={deleteTodo}>x</button>
     </div>
   );
 }

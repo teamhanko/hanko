@@ -1,9 +1,9 @@
-import { HANKO_API_ENDPOINT } from "../config.ts";
+import { HANKO_API_URL } from "../config.ts";
 
 const code = `
   import { register } from 'https://esm.sh/@teamhanko/hanko-elements@0.5.5-beta';
 
-  register('${HANKO_API_ENDPOINT}', { shadow: true });
+  register('${HANKO_API_URL}', { shadow: true });
   document.addEventListener('hankoAuthSuccess', (event) => {
     document.location.href = '/todo';
   });
@@ -12,7 +12,7 @@ const code = `
 export default function Login() {
   return (
     <div>
-      <hanko-auth api={HANKO_API_ENDPOINT}></hanko-auth>
+      <hanko-auth api={HANKO_API_URL}></hanko-auth>
       <script type="module">
         {code}
       </script>
