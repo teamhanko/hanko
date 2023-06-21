@@ -381,8 +381,9 @@ Markup:
 
 Translations are currently available for the following languages:
 
-- "en" - English
 - "de" - German
+- "en" - English
+- "fr" - French
 
 You can import them individually:
 
@@ -391,8 +392,9 @@ You can import them individually:
 // "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/{en|de|all|...}.js"
 // if you're using CDN.
 
-import { en } from "@teamhanko/hanko-elements/i18n/en";
 import { de } from "@teamhanko/hanko-elements/i18n/de";
+import { en } from "@teamhanko/hanko-elements/i18n/en";
+import { fr } from "@teamhanko/hanko-elements/i18n/fr";
 ```
 
 Or import all translations at once:
@@ -404,7 +406,7 @@ import { all } from "@teamhanko/hanko-elements/i18n/all";
 After importing, provide the translations through the `register()` function:
 
 ```typescript
-register("https://hanko.yourdomain.com", { translations: { en, de } });
+register("https://hanko.yourdomain.com", { translations: { de, en, fr } });
 
 // or
 
