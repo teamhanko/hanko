@@ -30,6 +30,7 @@ type Config struct {
 	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party" koanf:"third_party" split_words:"true"`
 	Log         LoggerConfig     `yaml:"log" json:"log" koanf:"log"`
 	Account     Account          `yaml:"account" json:"account" koanf:"account"`
+	OIDC        OIDC             `yaml:"oidc" json:"oidc" koanf:"oidc"`
 }
 
 var (
@@ -599,6 +600,19 @@ func (c *Config) PostProcess() error {
 
 	return nil
 
+}
+
+type OIDCClient struct {
+	ClientID     string   `yaml:"client_id" json:"client_id" koanf:"client_id"`
+	ClientSecret string   `yaml:"client_secret" json:"client_secret" koanf:"client_secret"`
+	ClientType   string   `yaml:"client_type" json:"client_type" koanf:"client_type"`
+	RedirectURI  []string `yaml:"redirect_uri" json:"redirect_uri" koanf:"redirect_uri"`
+}
+
+type OIDC struct {
+	Enabled bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Issuer  string       `yaml:"issuer" json:"issuer" koanf:"issuer"`
+	Clients []OIDCClient `yaml:"clients" json:"clients" koanf:"clients"`
 }
 
 type LoggerConfig struct {
