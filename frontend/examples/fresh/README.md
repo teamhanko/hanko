@@ -11,11 +11,9 @@ This is a [Fresh](fresh.deno.dev/) project.
 
 ### Set up environment variables
 
-In the `.env` file set up the correct environment variables:
+In the `config.ts` file set up the correct variables:
 
 - `HANKO_API_URL`: this is the URL of the Hanko API (default: `http://localhost:8000`)
-
-In the `config.ts` file set up the `HANKO_API_URL` variable too. It's used in islands.
 
 ### Run development server
 

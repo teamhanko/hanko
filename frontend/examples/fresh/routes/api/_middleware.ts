@@ -1,8 +1,9 @@
+import { HANKO_API_URL } from "../../config.ts";
 import { MiddlewareHandlerContext } from "$fresh/server.ts";
 import { getCookies } from "$std/http/cookie.ts";
 import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts';
 
-const JWKS_ENDPOINT = `${Deno.env.get("HANKO_API_URL")}/.well-known/jwks.json`;
+const JWKS_ENDPOINT = `${HANKO_API_URL}/.well-known/jwks.json`;
 const store: Store = new Map();
 
 function getToken(req: Request): string | undefined {
