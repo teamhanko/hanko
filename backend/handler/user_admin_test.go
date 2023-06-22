@@ -13,6 +13,7 @@ import (
 )
 
 func TestUserHandlerAdminSuite(t *testing.T) {
+	t.Parallel()
 	suite.Run(t, new(userAdminSuite))
 }
 

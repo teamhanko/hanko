@@ -60,6 +60,8 @@ export const de: Translation = {
   },
   labels: {
     or: "oder",
+    no: "nein",
+    yes: "ja",
     email: "E-Mail",
     continue: "Weiter",
     skip: "Überspringen",

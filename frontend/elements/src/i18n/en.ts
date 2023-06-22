@@ -58,6 +58,8 @@ export const en: Translation = {
   },
   labels: {
     or: "or",
+    no: "no",
+    yes: "yes",
     email: "Email",
     continue: "Continue",
     skip: "Skip",

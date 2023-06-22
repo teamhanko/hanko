@@ -25,11 +25,20 @@ const sidebars = {
       link: {
         type: 'generated-index',
         title: 'Frontend guides',
-        description: 'Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred frontend framework!',
+        description:
+          'Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred frontend framework!',
         slug: '/guides/frontend',
         keywords: ['guides']
       },
-      items: ['guides/angular', "guides/js", "guides/next", "guides/react", "guides/svelte", "guides/vue"]
+      items: [
+        'guides/angular',
+        'guides/js',
+        'guides/next',
+        'guides/nuxt',
+        'guides/react',
+        'guides/svelte',
+        'guides/vue'
+      ]
     },
     'guides/backend',
     'guides/mobile_guide',
@@ -41,8 +50,8 @@ const sidebars = {
         id: 'guides/social/index'
       },
       items: ['guides/social/apple', 'guides/social/github', 'guides/social/google']
-    },
-  ],
+    }
+  ]
 };
 
 module.exports = sidebars;
