@@ -19,4 +19,4 @@ In the `config.ts` file set up the `HANKO_API_URL` variable too. It's used in is
 
 ### Run development server
 
-Run `deno task start`  for a development server. Navigate to `http://localhost:8000/`. This will watch the project directory and restart as necessary.
+Run `deno task start`  for a development server. Navigate to `http://localhost:8888/`. This will watch the project directory and restart as necessary.
