@@ -111,6 +111,24 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
+	if cfg.OIDC.Enabled {
+		oidcHandler := NewOIDCHandler(cfg, persister, sessionManager, auditLogger)
+		oidc := e.Group("/oauth")
+		oidc.Any("/authorize", oidcHandler.Handler)
+		oidc.Any("/authorize/callback", oidcHandler.Handler)
+		oidc.Any("/device_authorization", oidcHandler.Handler)
+		oidc.Any("/end_session", oidcHandler.Handler)
+		oidc.Any("/introspect", oidcHandler.Handler)
+		oidc.Any("/keys", oidcHandler.Handler)
+		oidc.Any("/revoke", oidcHandler.Handler)
+		oidc.Any("/token", oidcHandler.Handler)
+		oidc.Any("/userinfo", oidcHandler.Handler)
+
+		oidc.GET("/login", oidcHandler.LoginHandler, hankoMiddleware.Session(sessionManager))
+
+		wellKnown.GET("/openid-configuration", oidcHandler.Handler)
+	}
+
 	emailHandler, err := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public email handler: %w", err))

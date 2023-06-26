@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-type OIDCKeysPersister interface {
+type OIDCKeyPersister interface {
 	GetSigningKey(ctx context.Context) (*models.SigningKey, error)
 	GetPublicKeys(ctx context.Context) ([]models.PublicKey, error)
 }
@@ -19,13 +19,13 @@ type oidcKeysPersister struct {
 	db *pop.Connection
 }
 
-func NewOIDCKeysPersister(db *pop.Connection) OIDCKeysPersister {
+func NewOIDCKeyPersister(db *pop.Connection) OIDCKeyPersister {
 	return &oidcKeysPersister{db: db}
 }
 
 func (p *oidcKeysPersister) GetSigningKey(ctx context.Context) (*models.SigningKey, error) {
 	key := models.Key{}
-	err := p.db.WithContext(ctx).Where("expiration > ?", time.Now()).Order("expiration asc").First(&key)
+	err := p.db.WithContext(ctx).Where("expires_at > ?", time.Now()).Order("expires_at asc").First(&key)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

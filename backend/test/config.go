@@ -25,4 +25,17 @@ var DefaultConfig = config.Config{
 			SameSite: "none",
 		},
 	},
+	OIDC: config.OIDC{
+		Enabled: false,
+		Issuer:  "https://example.hanko.io",
+		Key:     "gXK9jVVoRw6m85-XJHdSapaOPnBeifcJ6xcUxC-pJFk=",
+		Clients: []config.OIDCClient{
+			{
+				ClientID:     "19286ac4-2216-44dd-bb21-02a41ea3548d",
+				ClientSecret: "104cff48ae574505874884973de1f2488b8cd56ea55fdd45b2649a071af94617",
+				ClientType:   "web",
+				RedirectURI:  []string{"http://localhost:8080/callback"},
+			},
+		},
+	},
 }

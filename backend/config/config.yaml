@@ -1,6 +1,5 @@
 database:
-  user: hanko
-  password: hanko
+  user: postgres
   host: localhost
   port: 5432
   dialect: postgres

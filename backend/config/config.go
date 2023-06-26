@@ -612,6 +612,7 @@ type OIDCClient struct {
 type OIDC struct {
 	Enabled bool         `yaml:"enabled" json:"enabled" koanf:"enabled"`
 	Issuer  string       `yaml:"issuer" json:"issuer" koanf:"issuer"`
+	Key     string       `yaml:"key" json:"key" koanf:"key"`
 	Clients []OIDCClient `yaml:"clients" json:"clients" koanf:"clients"`
 }
 

@@ -1,15 +1,16 @@
-package main
+package oidc
 
 import (
 	"context"
 	"fmt"
-	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/zitadel/oidc/v2/pkg/oidc"
 	"github.com/zitadel/oidc/v2/pkg/op"
 	"gopkg.in/square/go-jose.v2"
+	"strings"
 	"sync"
 	"time"
 )
@@ -17,30 +18,51 @@ import (
 type Storage struct {
 	lock sync.RWMutex
 
-	db                     *pop.Connection
 	clients                map[string]*Client
 	accessTokenExpiration  time.Duration
 	refreshTokenExpiration time.Duration
 
-	accessTokens  persistence.OIDCAccessTokensPersister
-	refreshTokens persistence.OIDCRefreshTokensPersister
+	accessTokens  persistence.OIDCAccessTokenPersister
+	refreshTokens persistence.OIDCRefreshTokenPersister
 	authRequests  persistence.OIDCAuthRequestPersister
-	keys          persistence.OIDCKeysPersister
+	keys          persistence.OIDCKeyPersister
 	users         persistence.UserPersister
 }
 
-func NewStorage(db *pop.Connection) *Storage {
+func NewStorage(persister persistence.Persister) *Storage {
 	return &Storage{
-		db:            db,
-		accessTokens:  persistence.NewOIDCAccessTokensPersister(db),
-		refreshTokens: persistence.NewOIDCRefreshTokensPersister(db),
-		authRequests:  persistence.NewOIDCAuthRequestPersister(db),
+		accessTokens:           persister.GetOIDCAccessTokenPersister(),
+		refreshTokens:          persister.GetOIDCRefreshTokenPersister(),
+		authRequests:           persister.GetOIDCAuthRequestPersister(),
+		keys:                   persister.GetOIDCKeyPersister(),
+		users:                  persister.GetUserPersister(),
+		clients:                make(map[string]*Client),
+		accessTokenExpiration:  time.Minute,
+		refreshTokenExpiration: time.Hour * 24 * 30,
 	}
+}
+
+func (s *Storage) AddClient(client *config.OIDCClient) error {
+	if client.ClientType == "native" {
+		s.clients[client.ClientID] = NativeClient(client.ClientID, client.RedirectURI...)
+
+		return nil
+	}
+
+	if client.ClientType == "web" {
+		s.clients[client.ClientID] = WebClient(client.ClientID, client.ClientSecret, client.RedirectURI...)
+
+		return nil
+	}
+
+	return fmt.Errorf("unknown client type: %s", client.ClientType)
 }
 
 // CreateAuthRequest implements the op.Storage interface
 // it will be called after parsing and validation of the authentication request
 func (s *Storage) CreateAuthRequest(ctx context.Context, req *oidc.AuthRequest, userID string) (op.AuthRequest, error) {
+	fmt.Println("storage: CreateAuthRequest")
+
 	if len(req.Prompt) == 1 && req.Prompt[0] == "none" {
 		// With prompt=none, there is no way for the user to log in
 		// so return error right away.
@@ -58,6 +80,9 @@ func (s *Storage) CreateAuthRequest(ctx context.Context, req *oidc.AuthRequest, 
 
 	request.ID = uid
 
+	fmt.Println("request: ", request)
+	fmt.Println("request userID: ", userID)
+
 	// and save it in your database (for demonstration purposed we will use a simple map)
 	err = s.authRequests.Create(ctx, request.ToModel())
 	if err != nil {
@@ -70,6 +95,8 @@ func (s *Storage) CreateAuthRequest(ctx context.Context, req *oidc.AuthRequest, 
 // AuthRequestByID implements the op.Storage interface
 // it will be called after the Login UI redirects back to the OIDC endpoint
 func (s *Storage) AuthRequestByID(ctx context.Context, id string) (op.AuthRequest, error) {
+	fmt.Println("storage: AuthRequestByID")
+
 	uid, err := uuid.FromString(id)
 	if err != nil {
 		return nil, fmt.Errorf("failed parse uuid: %w", err)
@@ -80,12 +107,16 @@ func (s *Storage) AuthRequestByID(ctx context.Context, id string) (op.AuthReques
 		return nil, fmt.Errorf("could not get auth request: %w", err)
 	}
 
+	fmt.Println("request: ", request)
+
 	return NewAuthRequestFromModel(request)
 }
 
 // AuthRequestByCode implements the op.Storage interface
 // it will be called after parsing and validation of the token request (in an authorization code flow)
 func (s *Storage) AuthRequestByCode(ctx context.Context, code string) (op.AuthRequest, error) {
+	fmt.Println("storage: AuthRequestByCode")
+
 	request, err := s.authRequests.GetAuthRequestByCode(ctx, code)
 	if err != nil {
 		return nil, fmt.Errorf("could not get auth request by code: %w", err)
@@ -98,6 +129,8 @@ func (s *Storage) AuthRequestByCode(ctx context.Context, code string) (op.AuthRe
 // it will be called after the authentication has been successful and before redirecting the user agent to the
 // redirect_uri (in an authorization code flow)
 func (s *Storage) SaveAuthCode(ctx context.Context, id string, code string) error {
+	fmt.Println("storage: SaveAuthCode")
+
 	uid, err := uuid.FromString(id)
 	if err != nil {
 		return fmt.Errorf("failed parse uuid: %w", err)
@@ -116,6 +149,8 @@ func (s *Storage) SaveAuthCode(ctx context.Context, id string, code string) erro
 // - authentication request (in an implicit flow)
 // - token request (in an authorization code flow)
 func (s *Storage) DeleteAuthRequest(ctx context.Context, id string) error {
+	fmt.Println("storage: DeleteAuthRequest")
+
 	uid, err := uuid.FromString(id)
 	if err != nil {
 		return fmt.Errorf("failed parse uuid: %w", err)
@@ -131,6 +166,8 @@ func (s *Storage) DeleteAuthRequest(ctx context.Context, id string) error {
 
 // createAccessToken will store an access_token in-memory based on the provided information
 func (s *Storage) createAccessToken(ctx context.Context, clientID, subject string, refreshTokenID uuid.UUID, audience, scopes []string) (*models.AccessToken, error) {
+	fmt.Println("storage: createAccessToken")
+
 	uid, err := uuid.NewV4()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate uuid: %w", err)
@@ -146,9 +183,9 @@ func (s *Storage) createAccessToken(ctx context.Context, clientID, subject strin
 		ClientID:     clientID,
 		RefreshToken: refreshToken,
 		Subject:      subject,
-		Audience:     audience,
-		Expiration:   time.Now().Add(s.accessTokenExpiration),
-		Scopes:       scopes,
+		Audience:     strings.Join(audience, ","),
+		ExpiresAt:    time.Now().Add(s.accessTokenExpiration),
+		Scopes:       strings.Join(scopes, ","),
 	}
 
 	err = s.accessTokens.Create(ctx, token)
@@ -160,16 +197,18 @@ func (s *Storage) createAccessToken(ctx context.Context, clientID, subject strin
 }
 
 // createRefreshToken will store a refresh_token in-memory based on the provided information
-func (s *Storage) createRefreshToken(ctx context.Context, accessToken *models.AccessToken, amr []string, authTime time.Time) (*models.RefreshToken, error) {
+func (s *Storage) createRefreshToken(ctx context.Context, id uuid.UUID, clientID string, subject string, audience []string, scopes []string, amr []string, authTime time.Time) (*models.RefreshToken, error) {
+	fmt.Println("storage: createRefreshToken")
+
 	token := models.RefreshToken{
-		ID:         accessToken.RefreshToken.ID,
-		AuthTime:   authTime,
-		AMR:        amr,
-		ClientID:   accessToken.ClientID,
-		UserID:     accessToken.Subject,
-		Audience:   accessToken.Audience,
-		Expiration: time.Now().Add(s.refreshTokenExpiration),
-		Scopes:     accessToken.Scopes,
+		ID:        id,
+		AuthTime:  authTime,
+		AMR:       strings.Join(amr, ","),
+		ClientID:  clientID,
+		UserID:    subject,
+		Audience:  strings.Join(audience, ","),
+		ExpiresAt: time.Now().Add(s.refreshTokenExpiration),
+		Scopes:    strings.Join(scopes, ","),
 	}
 
 	err := s.refreshTokens.Create(ctx, token)
@@ -182,6 +221,8 @@ func (s *Storage) createRefreshToken(ctx context.Context, accessToken *models.Ac
 
 // renewRefreshToken checks the provided refresh_token and creates a new one based on the current
 func (s *Storage) renewRefreshToken(ctx context.Context, clientID, currentRefreshToken string) (*models.RefreshToken, error) {
+	fmt.Println("storage: renewRefreshToken")
+
 	uid, err := uuid.FromString(currentRefreshToken)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse uuid: %w", err)
@@ -219,6 +260,8 @@ func (s *Storage) renewRefreshToken(ctx context.Context, clientID, currentRefres
 }
 
 func (s *Storage) exchangeRefreshToken(ctx context.Context, request op.TokenExchangeRequest) (accessTokenID string, newRefreshToken string, expiration time.Time, err error) {
+	fmt.Println("storage: exchangeRefreshToken")
+
 	applicationID := request.GetClientID()
 	authTime := request.GetAuthTime()
 
@@ -227,22 +270,24 @@ func (s *Storage) exchangeRefreshToken(ctx context.Context, request op.TokenExch
 		return "", "", time.Time{}, fmt.Errorf("failed to generate uuid: %w", err)
 	}
 
+	refreshToken, err := s.createRefreshToken(ctx, refreshTokenID, applicationID, request.GetSubject(), request.GetAudience(), request.GetScopes(), request.GetAMR(), authTime)
+	if err != nil {
+		return "", "", time.Time{}, err
+	}
+
 	accessToken, err := s.createAccessToken(ctx, applicationID, request.GetSubject(), refreshTokenID, request.GetAudience(), request.GetScopes())
 	if err != nil {
 		return "", "", time.Time{}, err
 	}
 
-	refreshToken, err := s.createRefreshToken(ctx, accessToken, nil, authTime)
-	if err != nil {
-		return "", "", time.Time{}, err
-	}
-
-	return accessToken.ID.String(), refreshToken.ID.String(), accessToken.Expiration, nil
+	return accessToken.ID.String(), refreshToken.ID.String(), accessToken.ExpiresAt, nil
 }
 
 // CreateAccessToken implements the op.Storage interface
 // it will be called for all requests able to return an access token (Authorization Code Flow, Implicit Flow, JWT Profile, ...)
 func (s *Storage) CreateAccessToken(ctx context.Context, request op.TokenRequest) (accessTokenID string, expiration time.Time, err error) {
+	fmt.Println("storage: CreateAccessToken")
+
 	var applicationID string
 	switch req := request.(type) {
 	case *AuthRequest:
@@ -259,12 +304,14 @@ func (s *Storage) CreateAccessToken(ctx context.Context, request op.TokenRequest
 		return "", time.Time{}, err
 	}
 
-	return token.ID.String(), token.Expiration, nil
+	return token.ID.String(), token.ExpiresAt, nil
 }
 
 // CreateAccessAndRefreshTokens implements the op.Storage interface
 // it will be called for all requests able to return an access and refresh token (Authorization Code Flow, Refresh Token Request)
 func (s *Storage) CreateAccessAndRefreshTokens(ctx context.Context, request op.TokenRequest, currentRefreshToken string) (accessTokenID string, newRefreshTokenID string, expiration time.Time, err error) {
+	fmt.Println("storage: CreateAccessAndRefreshTokens")
+
 	// generate tokens via token exchange flow if request is relevant
 	if teReq, ok := request.(op.TokenExchangeRequest); ok {
 		return s.exchangeRefreshToken(ctx, teReq)
@@ -280,17 +327,17 @@ func (s *Storage) CreateAccessAndRefreshTokens(ctx context.Context, request op.T
 			return "", "", time.Time{}, fmt.Errorf("failed to generate uuid: %w", err)
 		}
 
+		refreshToken, err := s.createRefreshToken(ctx, refreshTokenID, applicationID, request.GetSubject(), request.GetAudience(), request.GetScopes(), amr, authTime)
+		if err != nil {
+			return "", "", time.Time{}, err
+		}
+
 		accessToken, err := s.createAccessToken(ctx, applicationID, request.GetSubject(), refreshTokenID, request.GetAudience(), request.GetScopes())
 		if err != nil {
 			return "", "", time.Time{}, err
 		}
 
-		refreshToken, err := s.createRefreshToken(ctx, accessToken, amr, authTime)
-		if err != nil {
-			return "", "", time.Time{}, err
-		}
-
-		return accessToken.ID.String(), refreshToken.ID.String(), accessToken.Expiration, nil
+		return accessToken.ID.String(), refreshToken.ID.String(), accessToken.ExpiresAt, nil
 	}
 
 	// if we get here, the currentRefreshToken was not empty, so the call is a refresh token request
@@ -305,12 +352,14 @@ func (s *Storage) CreateAccessAndRefreshTokens(ctx context.Context, request op.T
 		return "", "", time.Time{}, err
 	}
 
-	return accessToken.ID.String(), refreshToken.ID.String(), accessToken.Expiration, nil
+	return accessToken.ID.String(), refreshToken.ID.String(), accessToken.ExpiresAt, nil
 }
 
 // TokenRequestByRefreshToken implements the op.Storage interface
 // it will be called after parsing and validation of the refresh token request
 func (s *Storage) TokenRequestByRefreshToken(ctx context.Context, refreshTokenID string) (op.RefreshTokenRequest, error) {
+	fmt.Println("storage: TokenRequestByRefreshToken")
+
 	uid, err := uuid.FromString(refreshTokenID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse refresh token id: %w", err)
@@ -327,6 +376,8 @@ func (s *Storage) TokenRequestByRefreshToken(ctx context.Context, refreshTokenID
 // TerminateSession implements the op.Storage interface
 // it will be called after the user signed out, therefore the access and refresh token of the user of this client must be removed
 func (s *Storage) TerminateSession(ctx context.Context, userID string, clientID string) error {
+	fmt.Println("storage: TerminateSession")
+
 	err := s.refreshTokens.TerminateSessions(ctx, userID, clientID)
 	if err != nil {
 		return fmt.Errorf("error terminating session: %w", err)
@@ -338,6 +389,8 @@ func (s *Storage) TerminateSession(ctx context.Context, userID string, clientID 
 // RevokeToken implements the op.Storage interface
 // it will be called after parsing and validation of the token revocation request
 func (s *Storage) RevokeToken(ctx context.Context, tokenOrTokenID string, userID string, clientID string) *oidc.Error {
+	fmt.Println("storage: RevokeToken")
+
 	uid, err := uuid.FromString(tokenOrTokenID)
 	if err != nil {
 		return oidc.ErrInvalidRequest().WithDescription("invalid accessToken")
@@ -384,6 +437,8 @@ func (s *Storage) RevokeToken(ctx context.Context, tokenOrTokenID string, userID
 // GetRefreshTokenInfo looks up a refresh token and returns the token id and user id.
 // If given something that is not a refresh token, it must return error.
 func (s *Storage) GetRefreshTokenInfo(ctx context.Context, clientID string, tokenStr string) (userID string, tokenID string, err error) {
+	fmt.Println("storage: GetRefreshTokenInfo")
+
 	uid, err := uuid.FromString(tokenStr)
 	if err != nil {
 		return "", "", op.ErrInvalidRefreshToken
@@ -408,6 +463,8 @@ func (s *Storage) GetRefreshTokenInfo(ctx context.Context, clientID string, toke
 // SigningKey implements the op.Storage interface
 // it will be called when creating the OpenID Provider
 func (s *Storage) SigningKey(ctx context.Context) (op.SigningKey, error) {
+	fmt.Println("storage: SigningKey")
+
 	key, err := s.keys.GetSigningKey(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signing key: %w", err)
@@ -423,6 +480,8 @@ func (s *Storage) SigningKey(ctx context.Context) (op.SigningKey, error) {
 // SignatureAlgorithms implements the op.Storage interface
 // it will be called to get the sign
 func (s *Storage) SignatureAlgorithms(ctx context.Context) ([]jose.SignatureAlgorithm, error) {
+	fmt.Println("storage: SignatureAlgorithms")
+
 	key, err := s.keys.GetSigningKey(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signing key: %w", err)
@@ -438,6 +497,8 @@ func (s *Storage) SignatureAlgorithms(ctx context.Context) ([]jose.SignatureAlgo
 // KeySet implements the op.Storage interface
 // it will be called to get the current (public) keys, among others for the keys_endpoint or for validating access_tokens on the userinfo_endpoint, ...
 func (s *Storage) KeySet(ctx context.Context) ([]op.Key, error) {
+	fmt.Println("storage: KeySet")
+
 	keys, err := s.keys.GetPublicKeys(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signing keys: %w", err)
@@ -454,8 +515,13 @@ func (s *Storage) KeySet(ctx context.Context) ([]op.Key, error) {
 // GetClientByClientID implements the op.Storage interface
 // it will be called whenever information (type, redirect_uris, ...) about the client behind the client_id is needed
 func (s *Storage) GetClientByClientID(ctx context.Context, clientID string) (op.Client, error) {
+	fmt.Println("storage: GetClientByClientID")
+
 	s.lock.RLock()
 	defer s.lock.RUnlock()
+
+	fmt.Println("storage: GetClientByClientID: clientID: ", clientID)
+	fmt.Println(s.clients)
 
 	client, ok := s.clients[clientID]
 	if !ok {
@@ -468,6 +534,8 @@ func (s *Storage) GetClientByClientID(ctx context.Context, clientID string) (op.
 // AuthorizeClientIDSecret implements the op.Storage interface
 // it will be called for validating the client_id, client_secret on token or introspection requests
 func (s *Storage) AuthorizeClientIDSecret(ctx context.Context, clientID, clientSecret string) error {
+	fmt.Println("storage: AuthorizeClientIDSecret")
+
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -486,6 +554,8 @@ func (s *Storage) AuthorizeClientIDSecret(ctx context.Context, clientID, clientS
 // SetUserinfoFromScopes implements the op.Storage interface.
 // Provide an empty implementation and use SetUserinfoFromRequest instead.
 func (s *Storage) SetUserinfoFromScopes(ctx context.Context, userinfo *oidc.UserInfo, userID, clientID string, scopes []string) error {
+	fmt.Println("storage: SetUserinfoFromScopes")
+
 	return nil
 }
 
@@ -530,12 +600,15 @@ func (s *Storage) setUserinfo(ctx context.Context, userInfo *oidc.UserInfo, user
 			*/
 		}
 	}
+
 	return nil
 }
 
 // SetUserinfoFromToken implements the op.Storage interface
 // it will be called for the userinfo endpoint, so we read the token and pass the information from that to the private function
 func (s *Storage) SetUserinfoFromToken(ctx context.Context, userinfo *oidc.UserInfo, tokenID, subject, origin string) error {
+	fmt.Println("storage: SetUserinfoFromToken")
+
 	uid, err := uuid.FromString(tokenID)
 	if err != nil {
 		return fmt.Errorf("failed to parse token id: %w", err)
@@ -550,16 +623,18 @@ func (s *Storage) SetUserinfoFromToken(ctx context.Context, userinfo *oidc.UserI
 		return fmt.Errorf("token not found")
 	}
 
-	if token.Expiration.Before(time.Now()) {
+	if token.ExpiresAt.Before(time.Now()) {
 		return fmt.Errorf("token has expired")
 	}
 
-	return s.setUserinfo(ctx, userinfo, token.Subject, token.ClientID, token.Scopes)
+	return s.setUserinfo(ctx, userinfo, token.Subject, token.ClientID, token.GetScopes())
 }
 
 // SetIntrospectionFromToken implements the op.Storage interface
 // it will be called for the introspection endpoint, so we read the token and pass the information from that to the private function
 func (s *Storage) SetIntrospectionFromToken(ctx context.Context, userinfo *oidc.IntrospectionResponse, tokenID, subject, clientID string) error {
+	fmt.Println("storage: SetIntrospectionFromToken")
+
 	uid, err := uuid.FromString(tokenID)
 	if err != nil {
 		return fmt.Errorf("failed to parse token id: %w", err)
@@ -574,11 +649,11 @@ func (s *Storage) SetIntrospectionFromToken(ctx context.Context, userinfo *oidc.
 		return fmt.Errorf("token not found")
 	}
 
-	if token.Expiration.Before(time.Now()) {
+	if token.ExpiresAt.Before(time.Now()) {
 		return fmt.Errorf("token has expired")
 	}
 
-	for _, aud := range token.Audience {
+	for _, aud := range token.GetAudience() {
 		if aud == clientID {
 			// the introspection response only has to return a boolean (active) if the token is active
 			// this will automatically be done by the library if you don't return an error
@@ -586,14 +661,14 @@ func (s *Storage) SetIntrospectionFromToken(ctx context.Context, userinfo *oidc.
 			// e.g. the userinfo (equivalent to userinfo endpoint)
 
 			userInfo := new(oidc.UserInfo)
-			err := s.setUserinfo(ctx, userInfo, subject, clientID, token.Scopes)
+			err := s.setUserinfo(ctx, userInfo, subject, clientID, token.GetScopes())
 			if err != nil {
 				return err
 			}
 
 			userinfo.SetUserInfo(userInfo)
 			//...and also the requested scopes...
-			userinfo.Scope = token.Scopes
+			userinfo.Scope = token.GetScopes()
 			//...and the client the token was issued to
 			userinfo.ClientID = token.ClientID
 
@@ -605,6 +680,8 @@ func (s *Storage) SetIntrospectionFromToken(ctx context.Context, userinfo *oidc.
 }
 
 func (s *Storage) getPrivateClaimsFromScopes(ctx context.Context, userID, clientID string, scopes []string) (claims map[string]interface{}, err error) {
+	fmt.Println("storage: getPrivateClaimsFromScopes")
+
 	for _, scope := range scopes {
 		switch scope {
 		}
@@ -615,12 +692,16 @@ func (s *Storage) getPrivateClaimsFromScopes(ctx context.Context, userID, client
 // GetPrivateClaimsFromScopes implements the op.Storage interface
 // it will be called for the creation of a JWT access token to assert claims for custom scopes
 func (s *Storage) GetPrivateClaimsFromScopes(ctx context.Context, userID, clientID string, scopes []string) (map[string]interface{}, error) {
+	fmt.Println("storage: GetPrivateClaimsFromScopes")
+
 	return s.getPrivateClaimsFromScopes(ctx, userID, clientID, scopes)
 }
 
 // GetKeyByIDAndClientID implements the op.Storage interface
 // it will be called to validate the signatures of a JWT (JWT Profile Grant and Authentication)
 func (s *Storage) GetKeyByIDAndClientID(ctx context.Context, keyID, clientID string) (*jose.JSONWebKey, error) {
+	fmt.Println("storage: GetKeyByIDAndClientID")
+
 	s.lock.RLock()
 	defer s.lock.RUnlock()
 
@@ -644,6 +725,8 @@ func (s *Storage) GetKeyByIDAndClientID(ctx context.Context, keyID, clientID str
 // ValidateJWTProfileScopes implements the op.Storage interface
 // it will be called to validate the scopes of a JWT Profile Authorization Grant request
 func (s *Storage) ValidateJWTProfileScopes(ctx context.Context, userID string, scopes []string) ([]string, error) {
+	fmt.Println("storage: ValidateJWTProfileScopes")
+
 	allowedScopes := make([]string, 0)
 	for _, scope := range scopes {
 		if scope == oidc.ScopeOpenID {
@@ -662,19 +745,23 @@ func (s *Storage) Health(ctx context.Context) error {
 // next major release, it will be required for op.Storage.
 // It will be called for the creation of an id_token, so we'll just pass it to the private function without any further check
 func (s *Storage) SetUserinfoFromRequest(ctx context.Context, userinfo *oidc.UserInfo, token op.IDTokenRequest, scopes []string) error {
+	fmt.Println("storage: SetUserinfoFromRequest")
+
 	return s.setUserinfo(ctx, userinfo, token.GetSubject(), token.GetClientID(), scopes)
 }
 
 // getInfoFromRequest returns the clientID, authTime and amr depending on the op.TokenRequest type / implementation
 func getInfoFromRequest(req op.TokenRequest) (clientID string, authTime time.Time, amr []string) {
+	fmt.Println("storage: getInfoFromRequest")
+
 	authReq, ok := req.(*AuthRequest) // Code Flow (with scope offline_access)
 	if ok {
-		return authReq.ApplicationID, authReq.authTime, authReq.GetAMR()
+		return authReq.ApplicationID, authReq.GetAuthTime(), authReq.GetAMR()
 	}
 
 	refreshReq, ok := req.(*RefreshTokenRequest) // Refresh Token Request
 	if ok {
-		return refreshReq.ClientID, refreshReq.AuthTime, refreshReq.AMR
+		return refreshReq.ClientID, refreshReq.AuthTime, refreshReq.GetAMR()
 	}
 
 	return "", time.Time{}, nil

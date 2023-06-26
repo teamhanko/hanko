@@ -1,0 +1,9 @@
+create_table("keys") {
+    t.Column("id", "string", {})
+    t.Column("algorithm", "string", {})
+    t.Column("public_key", "string", {"size": 4096})
+    t.Column("private_key", "string", {"size": 4096})
+    t.Column("expires_at", "timestamp", {})
+    t.Timestamps()
+    t.PrimaryKey("id")
+}

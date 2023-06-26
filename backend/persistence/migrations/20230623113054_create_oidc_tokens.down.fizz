@@ -1,0 +1,2 @@
+drop_table("access_tokens")
+drop_table("refresh_tokens")

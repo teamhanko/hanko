@@ -10,7 +10,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-type OIDCAccessTokensPersister interface {
+type OIDCAccessTokenPersister interface {
 	Get(ctx context.Context, uuid uuid.UUID) (*models.AccessToken, error)
 	Create(ctx context.Context, accessToken models.AccessToken) error
 	Delete(ctx context.Context, accessToken models.AccessToken) error
@@ -20,7 +20,7 @@ type oidcAccessTokensPersister struct {
 	db *pop.Connection
 }
 
-func NewOIDCAccessTokensPersister(db *pop.Connection) OIDCAccessTokensPersister {
+func NewOIDCAccessTokenPersister(db *pop.Connection) OIDCAccessTokenPersister {
 	return &oidcAccessTokensPersister{db: db}
 }
 
@@ -59,7 +59,7 @@ func (p *oidcAccessTokensPersister) Delete(ctx context.Context, accessToken mode
 	return nil
 }
 
-type OIDCRefreshTokensPersister interface {
+type OIDCRefreshTokenPersister interface {
 	Get(ctx context.Context, uuid uuid.UUID) (*models.RefreshToken, error)
 	Create(ctx context.Context, refreshToken models.RefreshToken) error
 	Delete(ctx context.Context, refreshToken models.RefreshToken) error
@@ -70,7 +70,7 @@ type oidcRefreshTokensPersister struct {
 	db *pop.Connection
 }
 
-func NewOIDCRefreshTokensPersister(db *pop.Connection) OIDCRefreshTokensPersister {
+func NewOIDCRefreshTokenPersister(db *pop.Connection) OIDCRefreshTokenPersister {
 	return &oidcRefreshTokensPersister{db: db}
 }
 

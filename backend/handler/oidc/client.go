@@ -1,4 +1,4 @@
-package main
+package oidc
 
 import (
 	"github.com/zitadel/oidc/v2/pkg/oidc"

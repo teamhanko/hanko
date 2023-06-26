@@ -1,4 +1,4 @@
-package main
+package oidc
 
 import (
 	"errors"
@@ -6,6 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/zitadel/oidc/v2/pkg/oidc"
 	"golang.org/x/text/language"
+	"strings"
 	"time"
 )
 
@@ -24,9 +25,8 @@ type AuthRequest struct {
 	ResponseType  oidc.ResponseType
 	Nonce         string
 	CodeChallenge string
-
-	done     bool
-	authTime time.Time
+	LoginDone     bool
+	AuthTime      time.Time
 }
 
 func NewAuthRequestFromModel(request *models.AuthRequest) (*AuthRequest, error) {
@@ -35,9 +35,11 @@ func NewAuthRequestFromModel(request *models.AuthRequest) (*AuthRequest, error) 
 	}
 
 	var uiLocales []language.Tag
-	for _, tag := range request.UILocales {
+	for _, tag := range request.GetUILocales() {
 		uiLocales = append(uiLocales, language.Make(tag))
 	}
+
+	maxAuthAge := request.GetMaxAuthAge()
 
 	return &AuthRequest{
 		ID:            request.ID,
@@ -45,15 +47,17 @@ func NewAuthRequestFromModel(request *models.AuthRequest) (*AuthRequest, error) 
 		ApplicationID: request.ClientID,
 		CallbackURI:   request.CallbackURI,
 		TransferState: request.TransferState,
-		Prompt:        request.Prompt,
+		Prompt:        request.GetPrompt(),
 		UiLocales:     uiLocales,
 		LoginHint:     request.LoginHint,
-		MaxAuthAge:    &request.MaxAuthAge,
+		MaxAuthAge:    &maxAuthAge,
 		UserID:        request.UserID,
-		Scopes:        request.Scopes,
+		Scopes:        request.GetScopes(),
 		ResponseType:  oidc.ResponseType(request.ResponseType),
 		Nonce:         request.Nonce,
 		CodeChallenge: request.CodeChallenge,
+		LoginDone:     request.Done,
+		AuthTime:      request.AuthTime,
 	}, nil
 }
 
@@ -69,7 +73,7 @@ func (a *AuthRequest) GetAMR() []string {
 	// TODO: https://www.rfc-editor.org/rfc/rfc8176.html
 
 	// this example only uses password for authentication
-	if a.done {
+	if a.LoginDone {
 		return []string{"pwd"}
 	}
 	return nil
@@ -80,7 +84,7 @@ func (a *AuthRequest) GetAudience() []string {
 }
 
 func (a *AuthRequest) GetAuthTime() time.Time {
-	return a.authTime
+	return a.AuthTime
 }
 
 func (a *AuthRequest) GetClientID() string {
@@ -123,7 +127,7 @@ func (a *AuthRequest) GetSubject() string {
 }
 
 func (a *AuthRequest) Done() bool {
-	return a.done
+	return a.LoginDone
 }
 
 func (a *AuthRequest) ToModel() models.AuthRequest {
@@ -143,12 +147,12 @@ func (a *AuthRequest) ToModel() models.AuthRequest {
 		ClientID:      a.ApplicationID,
 		CallbackURI:   a.CallbackURI,
 		TransferState: a.TransferState,
-		Prompt:        a.Prompt,
-		UILocales:     locales,
+		Prompt:        strings.Join(a.Prompt, ","),
+		UILocales:     strings.Join(locales, ","),
 		LoginHint:     a.LoginHint,
-		MaxAuthAge:    maxAuthAge,
+		MaxAuthAge:    int64(maxAuthAge.Seconds()),
 		UserID:        a.UserID,
-		Scopes:        a.Scopes,
+		Scopes:        strings.Join(a.Scopes, ","),
 		ResponseType:  string(a.ResponseType),
 		Nonce:         a.Nonce,
 		CodeChallenge: a.CodeChallenge,

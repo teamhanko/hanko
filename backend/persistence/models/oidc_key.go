@@ -1,27 +1,48 @@
 package models
 
 import (
+	"crypto/x509"
+	"encoding/pem"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
 	"gopkg.in/square/go-jose.v2"
+	"strings"
 	"time"
 )
 
 type Key struct {
 	ID         uuid.UUID               `db:"id" json:"id"`
 	Algo       jose.SignatureAlgorithm `db:"algorithm" json:"algorithm"`
-	Key        interface{}             `db:"public_key" json:"public_key"`
-	PrivateKey interface{}             `db:"private_key" json:"private_key"`
-	Expiration time.Time               `db:"expiration" json:"expiration"`
+	Key        string                  `db:"public_key" json:"public_key"`
+	PrivateKey string                  `db:"private_key" json:"private_key"`
+	ExpiresAt  time.Time               `db:"expires_at" json:"expires_at"`
 }
 
 func (k *Key) SigningKey() *SigningKey {
+	var key interface{}
+	switch k.Algo {
+	case jose.RS256, jose.RS384, jose.RS512:
+		block, _ := pem.Decode([]byte(strings.Replace(k.PrivateKey, "\\n", "\n", -1)))
+		if block == nil {
+			panic("failed to parse PEM block containing the key")
+		}
+
+		priv, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+		if err != nil {
+			panic(err)
+		}
+
+		key = priv
+	default:
+		panic("not implemented")
+	}
+
 	return &SigningKey{
 		keyID:      k.ID,
 		algorithm:  k.Algo,
-		privateKey: k.PrivateKey,
+		privateKey: key,
 	}
 }
 
@@ -33,10 +54,10 @@ func (k *Key) PublicKey() PublicKey {
 	}
 }
 
-func (t *Key) Validate(tx *pop.Connection) (*validate.Errors, error) {
+func (k *Key) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
-		&validators.UUIDIsPresent{Name: "ID", Field: t.ID},
-		&validators.StringIsPresent{Name: "Algorithm", Field: string(t.Algo)},
+		&validators.UUIDIsPresent{Name: "ID", Field: k.ID},
+		&validators.StringIsPresent{Name: "Algorithm", Field: string(k.Algo)},
 	), nil
 }
 

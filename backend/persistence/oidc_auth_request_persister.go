@@ -8,12 +8,14 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"time"
 )
 
 type OIDCAuthRequestPersister interface {
 	Get(ctx context.Context, uuid uuid.UUID) (*models.AuthRequest, error)
 	Create(ctx context.Context, authRequest models.AuthRequest) error
 	Delete(ctx context.Context, uuid uuid.UUID) error
+	AuthorizeUser(ctx context.Context, uuid uuid.UUID, userID string) error
 
 	StoreAuthCode(ctx context.Context, ID uuid.UUID, code string) error
 	GetAuthRequestByCode(ctx context.Context, code string) (*models.AuthRequest, error)
@@ -57,6 +59,20 @@ func (p *oidcAuthRequestPersister) Delete(ctx context.Context, uuid uuid.UUID) e
 	err := p.db.WithContext(ctx).Destroy(&models.AuthRequest{ID: uuid})
 	if err != nil {
 		return fmt.Errorf("failed to delete auth request: %w", err)
+	}
+
+	return nil
+}
+
+func (p *oidcAuthRequestPersister) AuthorizeUser(ctx context.Context, uuid uuid.UUID, userID string) error {
+	err := p.db.WithContext(ctx).UpdateColumns(&models.AuthRequest{
+		ID:       uuid,
+		UserID:   userID,
+		Done:     true,
+		AuthTime: time.Now(),
+	}, "user_id", "done", "auth_time")
+	if err != nil {
+		return fmt.Errorf("failed to authorize user: %w", err)
 	}
 
 	return nil

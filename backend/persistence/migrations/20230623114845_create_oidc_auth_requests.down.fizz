@@ -1,0 +1,2 @@
+drop_table("auth_codes")
+drop_table("auth_requests")

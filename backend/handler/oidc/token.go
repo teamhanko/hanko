@@ -1,8 +1,9 @@
-package main
+package oidc
 
 import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/zitadel/oidc/v2/pkg/op"
+	"strings"
 	"time"
 )
 
@@ -16,11 +17,11 @@ type RefreshTokenRequest struct {
 }
 
 func (r *RefreshTokenRequest) GetAMR() []string {
-	return r.AMR
+	return r.GetAMR()
 }
 
 func (r *RefreshTokenRequest) GetAudience() []string {
-	return r.Audience
+	return r.GetAudience()
 }
 
 func (r *RefreshTokenRequest) GetAuthTime() time.Time {
@@ -32,7 +33,7 @@ func (r *RefreshTokenRequest) GetClientID() string {
 }
 
 func (r *RefreshTokenRequest) GetScopes() []string {
-	return r.Scopes
+	return r.GetScopes()
 }
 
 func (r *RefreshTokenRequest) GetSubject() string {
@@ -40,5 +41,5 @@ func (r *RefreshTokenRequest) GetSubject() string {
 }
 
 func (r *RefreshTokenRequest) SetCurrentScopes(scopes []string) {
-	r.Scopes = scopes
+	r.Scopes = strings.Join(scopes, ",")
 }

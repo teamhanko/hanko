@@ -39,6 +39,14 @@ type Persister interface {
 	GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) PrimaryEmailPersister
 	GetTokenPersister() TokenPersister
 	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
+	GetOIDCAccessTokenPersister() OIDCAccessTokenPersister
+	GetOIDCAccessTokenPersisterWithConnection(tx *pop.Connection) OIDCAccessTokenPersister
+	GetOIDCRefreshTokenPersister() OIDCRefreshTokenPersister
+	GetOIDCRefreshTokenPersisterWithConnection(tx *pop.Connection) OIDCRefreshTokenPersister
+	GetOIDCKeyPersister() OIDCKeyPersister
+	GetOIDCKeyPersisterWithConnection(tx *pop.Connection) OIDCKeyPersister
+	GetOIDCAuthRequestPersister() OIDCAuthRequestPersister
+	GetOIDCAuthRequestPersisterWithConnection(tx *pop.Connection) OIDCAuthRequestPersister
 }
 
 type Migrator interface {
@@ -203,4 +211,36 @@ func (p *persister) GetTokenPersister() TokenPersister {
 
 func (p *persister) GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister {
 	return NewTokenPersister(tx)
+}
+
+func (p *persister) GetOIDCAccessTokenPersister() OIDCAccessTokenPersister {
+	return NewOIDCAccessTokenPersister(p.DB)
+}
+
+func (p *persister) GetOIDCAccessTokenPersisterWithConnection(tx *pop.Connection) OIDCAccessTokenPersister {
+	return NewOIDCAccessTokenPersister(tx)
+}
+
+func (p *persister) GetOIDCRefreshTokenPersister() OIDCRefreshTokenPersister {
+	return NewOIDCRefreshTokenPersister(p.DB)
+}
+
+func (p *persister) GetOIDCRefreshTokenPersisterWithConnection(tx *pop.Connection) OIDCRefreshTokenPersister {
+	return NewOIDCRefreshTokenPersister(tx)
+}
+
+func (p *persister) GetOIDCKeyPersister() OIDCKeyPersister {
+	return NewOIDCKeyPersister(p.DB)
+}
+
+func (p *persister) GetOIDCKeyPersisterWithConnection(tx *pop.Connection) OIDCKeyPersister {
+	return NewOIDCKeyPersister(tx)
+}
+
+func (p *persister) GetOIDCAuthRequestPersister() OIDCAuthRequestPersister {
+	return NewOIDCAuthRequestPersister(p.DB)
+}
+
+func (p *persister) GetOIDCAuthRequestPersisterWithConnection(tx *pop.Connection) OIDCAuthRequestPersister {
+	return NewOIDCAuthRequestPersister(tx)
 }
