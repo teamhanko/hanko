@@ -69,6 +69,7 @@ interface Context extends States {
   experimentalFeatures?: ExperimentalFeatures;
   emitSuccessEvent: (userID: string) => void;
   enablePasskeys: boolean;
+  lang: string;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -174,6 +175,7 @@ const AppProvider = ({
     <AppContext.Provider
       value={{
         hanko,
+        lang: lang?.toString(),
         componentName,
         experimentalFeatures,
         emitSuccessEvent,

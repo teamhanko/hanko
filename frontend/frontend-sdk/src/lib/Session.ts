@@ -58,6 +58,11 @@ export class Session {
     };
   }
 
+  public isAuthFlowCompleted() {
+    this._sessionState.read();
+    return this._sessionState.getAuthFlowCompleted();
+  }
+
   /**
    Validates the session.
 

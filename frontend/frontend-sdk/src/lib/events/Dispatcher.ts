@@ -8,6 +8,7 @@ import {
   authFlowCompletedType,
   userLoggedOutType,
 } from "./CustomEvents";
+import { SessionState } from "../state/session/SessionState";
 
 /**
  * A class that dispatches custom events.
@@ -17,6 +18,7 @@ import {
  */
 export class Dispatcher {
   _dispatchEvent = document.dispatchEvent.bind(document);
+  _sessionState = new SessionState();
 
   /**
    * Dispatches a custom event.
@@ -65,6 +67,7 @@ export class Dispatcher {
    * @param {AuthFlowCompletedDetail} detail - The event detail.
    */
   public dispatchAuthFlowCompletedEvent(detail: AuthFlowCompletedDetail) {
+    this._sessionState.read().setAuthFlowCompleted(true).write();
     this.dispatch(authFlowCompletedType, detail);
   }
 }

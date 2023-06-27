@@ -1,63 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Hanko Web Component Test</title>
     <style>
+        /* Page Styling */
         body {
-            background-color: #01a7c1;
+            background-color: black;
+            margin: 0;
+            font-weight: 400;
+            font-size: 14px;
+            font-family: sans-serif;
         }
 
-        hanko-auth, hanko-profile {
+        /* Navigation Bar Styling */
+        nav {
+            width: 100%;
+            height: 3em;
+            background-color: #01a7c1;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 5px;
+            padding: 10px;
+            margin: 0 0 5rem;
+            box-sizing: border-box;
+        }
+
+        /* Main Content Styling */
+        main {
+            display: flex;
+            justify-content: center;
+        }
+
+        main section {
+            min-width: 400px;
+        }
+
+        /* Button and Select Box Styling */
+        button, select {
+            height: 1.5rem;
+        }
+
+        /* Hanko Web Components Styling */
+        .hankoElement {
             --color: #ccf8ff;
             --color-shade-1: #01a7c1;
             --color-shade-2: #546166;
-
             --brand-color: #fa00bb;
             --brand-color-shade-1: #ff2ecb;
             --brand-contrast-color: white;
-
             --link-color: #fac043;
-            --background-color: #30383b;
+            --background-color: black;
             --error-color: #fa0000;
-
             --border-radius: 5px;
-
-            --container-max-width: 450px;
             --container-padding: 15px;
+        }
+
+        #hankoAuth {
+            --container-max-width: 400px;
+        }
+
+        #hankoProfile {
+            --container-max-width: 500px;
         }
     </style>
 </head>
 <body>
-<hanko-auth id="auth" lang="en"></hanko-auth>
-<hanko-profile id="profile" hidden="true" lang="en"></hanko-profile>
+
+<!-- A dialog element for displaying session related information -->
+<dialog id="dialog">
+    <form>
+        <div>
+            <!-- The dialog message will be displayed here -->
+        </div>
+        <br>
+        <button formmethod="dialog">Back to Login</button>
+    </form>
+</dialog>
+
+<!-- Navbar -->
+<nav>
+    <!-- Button for logging out -->
+    <button id="logoutButton" hidden="true">Log out</button>
+
+    <!-- Dropdown for selecting the language -->
+    <select id="langSelect">
+        <option value="de">German</option>
+        <option value="en" selected>English</option>
+        <option value="fr">French</option>
+    </select>
+</nav>
+
+<!-- Main Content -->
+<main>
+    <section>
+        <!-- Hanko Authentication Component -->
+        <hanko-auth id="hankoAuth" class="hankoElement" lang="en"></hanko-auth>
+
+        <!-- Hanko Profile Component -->
+        <hanko-profile id="hankoProfile" class="hankoElement" lang="en" hidden="true"></hanko-profile>
+
+        <!-- Hanko Events Component -->
+        <hanko-events id="hankoEvents" class="hankoElement"></hanko-events>
+    </section>
+</main>
+
 <script type="module">
-    import { register } from "../dist/elements.js";
+    import {register} from "../dist/elements.js";
+    import {all} from "../dist/i18n/all.js";
 
-    const { hanko } = await register("http://localhost:8000");
+    // Change `apiURL` to where your Hanko-API instance is running.
+    const apiURL = "http://localhost:8000";
 
+    // Register Hanko Web Components
+    const {hanko} = await register(apiURL, {translations: all});
+
+    // Get DOM elements
+    const dialogEl = document.getElementById("dialog"),
+        hankoAuthEl = document.getElementById("hankoAuth"),
+        hankoProfileEl = document.getElementById("hankoProfile"),
+        hankoEventsEl = document.getElementById("hankoEvents"),
+        logoutButtonEl = document.getElementById("logoutButton"),
+        langSelectEl = document.getElementById("langSelect");
+
+    function setVisibility(element, visible) {
+        element.hidden = !visible;
+    }
+
+    // Function to show the login UI
     function showLogin() {
-        document.getElementById("auth").hidden = false;
-        document.getElementById("profile").hidden = true;
+        setVisibility(hankoAuthEl, true);
+        setVisibility(hankoProfileEl, false);
+        setVisibility(logoutButtonEl, false);
     }
 
+    // Function to show the profile UI
     function showProfile() {
-        document.getElementById("auth").hidden = true;
-        document.getElementById("profile").hidden = false;
+        setVisibility(hankoAuthEl, false);
+        setVisibility(hankoProfileEl, true);
+        setVisibility(logoutButtonEl, true);
     }
 
-    if (hanko.session.isValid()) {
-        showProfile();
-    } else {
-        showLogin();
+    // Function to change the translation language
+    function changeLanguage(lang) {
+        hankoAuthEl.lang = lang;
+        hankoProfileEl.lang = lang;
     }
 
-    hanko.onSessionCreated(console.info);
-    hanko.onAuthFlowCompleted(showProfile);
-    hanko.onSessionExpired(showLogin);
-    hanko.onUserLoggedOut(showLogin);
-    hanko.onUserDeleted(showLogin);
+    // Function to show a dialog with the specified text
+    function showDialog(message) {
+        dialogEl.getElementsByTagName("div").item(0).innerText = message;
+        dialogEl.showModal();
+    }
+
+    // Function to add event listeners
+    function addEventListeners() {
+        dialogEl.addEventListener('close', () => {
+            if (!hanko.session.isValid()) showLogin();
+        });
+
+        logoutButtonEl.addEventListener("click", () => {
+            hanko.user.logout();
+        });
+
+        langSelectEl.addEventListener("input", (event) => {
+            changeLanguage(event.target.value)
+        });
+
+        hankoEventsEl.addEventListener("onAuthFlowCompleted", () => {
+            showProfile();
+        });
+
+        hankoEventsEl.addEventListener("onSessionCreated", () => {
+            if (dialogEl.open) dialogEl.close();
+            setVisibility(logoutButtonEl, true);
+        });
+
+        hankoEventsEl.addEventListener("onSessionExpired", () => {
+            showDialog("Your session has expired");
+        });
+
+        hankoEventsEl.addEventListener("onUserLoggedOut", () => {
+            showLogin();
+        });
+
+        hankoEventsEl.addEventListener("onUserDeleted", () => {
+            showDialog("Your account has been deleted");
+        });
+    }
+
+    // Initialization function
+    function init() {
+        addEventListeners();
+
+        // Check if a valid session exists
+        if (hanko.session.isValid()) {
+            showProfile();
+        } else {
+            showLogin();
+        }
+    }
+
+    // Call the initialization function
+    init();
 </script>
-
 </body>
 </html>
