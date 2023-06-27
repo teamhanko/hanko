@@ -1,10 +1,7 @@
-namespace: hanko
+namespace: hanko-quickstart
 resources:
-  - namespace.yaml
-  - ingress.yaml
-  - ../../base
-  - ../../postgres
-configMapGenerator:
-  - files:
-      - hanko-config.yaml
-    name: hanko-config
+  - ../../base/postgres
+  - ../../base/hanko
+  - ../../base/elements
+  - ../../base/quickstart
+  - ../../base/mailhog

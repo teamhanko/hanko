@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: hanko
-  namespace: hanko
+  name: hanko-public
+  namespace: hanko-tenant
 spec:
   selector:
     app: hanko
   ports:
     - port: 80
-      targetPort: public
+      targetPort: http-public
       protocol: TCP
       name: http
 ---
@@ -16,12 +16,12 @@ apiVersion: v1
 kind: Service
 metadata:
   name: hanko-admin
-  namespace: hanko
+  namespace: hanko-tenant
 spec:
   selector:
     app: hanko
   ports:
     - port: 80
-      targetPort: admin
+      targetPort: http-admin
       protocol: TCP
       name: http
