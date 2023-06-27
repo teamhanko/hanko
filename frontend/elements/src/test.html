@@ -110,11 +110,11 @@
     import {register} from "../dist/elements.js";
     import {all} from "../dist/i18n/all.js";
 
-    // Change `apiURL` to where your Hanko-API instance is running.
-    const apiURL = "http://localhost:8000";
+    // Change `apiUrl` to where your Hanko-API instance is running.
+    const apiUrl = "http://localhost:8000";
 
     // Register Hanko Web Components
-    const {hanko} = await register(apiURL, {translations: all});
+    const {hanko} = await register(apiUrl, {translations: all});
 
     // Get DOM elements
     const dialogEl = document.getElementById("dialog"),
@@ -128,22 +128,8 @@
         element.hidden = !visible;
     }
 
-    // Function to show the login UI
-    function showLogin() {
-        setVisibility(hankoAuthEl, true);
-        setVisibility(hankoProfileEl, false);
-        setVisibility(logoutButtonEl, false);
-    }
-
-    // Function to show the profile UI
-    function showProfile() {
-        setVisibility(hankoAuthEl, false);
-        setVisibility(hankoProfileEl, true);
-        setVisibility(logoutButtonEl, true);
-    }
-
     // Function to change the translation language
-    function changeLanguage(lang) {
+    function selectLanguage(lang) {
         hankoAuthEl.lang = lang;
         hankoProfileEl.lang = lang;
     }
@@ -157,7 +143,10 @@
     // Function to add event listeners
     function addEventListeners() {
         dialogEl.addEventListener('close', () => {
-            if (!hanko.session.isValid()) showLogin();
+            if (!hanko.session.isValid()) {
+                setVisibility(hankoAuthEl, true);
+                setVisibility(hankoProfileEl, false);
+            }
         });
 
         logoutButtonEl.addEventListener("click", () => {
@@ -165,24 +154,31 @@
         });
 
         langSelectEl.addEventListener("input", (event) => {
-            changeLanguage(event.target.value)
+            selectLanguage(event.target.value)
         });
 
         hankoEventsEl.addEventListener("onAuthFlowCompleted", () => {
-            showProfile();
+            setVisibility(hankoAuthEl, false);
+            setVisibility(hankoProfileEl, true);
         });
 
         hankoEventsEl.addEventListener("onSessionCreated", () => {
-            if (dialogEl.open) dialogEl.close();
+            if (dialogEl.open) {
+                dialogEl.close();
+            }
+
             setVisibility(logoutButtonEl, true);
         });
 
         hankoEventsEl.addEventListener("onSessionExpired", () => {
+            setVisibility(logoutButtonEl, false);
             showDialog("Your session has expired");
         });
 
         hankoEventsEl.addEventListener("onUserLoggedOut", () => {
-            showLogin();
+            setVisibility(hankoAuthEl, true);
+            setVisibility(hankoProfileEl, false);
+            setVisibility(logoutButtonEl, false);
         });
 
         hankoEventsEl.addEventListener("onUserDeleted", () => {
@@ -196,9 +192,9 @@
 
         // Check if a valid session exists
         if (hanko.session.isValid()) {
-            showProfile();
-        } else {
-            showLogin();
+            setVisibility(hankoAuthEl, false);
+            setVisibility(hankoProfileEl, true);
+            setVisibility(logoutButtonEl, true);
         }
     }
 
