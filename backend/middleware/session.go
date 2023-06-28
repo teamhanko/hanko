@@ -3,7 +3,6 @@ package middleware
 import (
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/session"
 	"net/http"
 )
@@ -15,7 +14,7 @@ func Session(generator session.Manager) echo.MiddlewareFunc {
 		TokenLookup:    "header:Authorization:Bearer,cookie:hanko",
 		ParseTokenFunc: parseToken(generator),
 		ErrorHandler: func(c echo.Context, err error) error {
-			return dto.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
+			return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 		},
 	}
 	return echojwt.WithConfig(c)

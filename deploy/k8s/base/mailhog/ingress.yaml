@@ -1,26 +1,28 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  namespace: hanko
-  name: hanko
+  namespace: hanko-tenant
+  name: mailhog
   annotations:
     kubernetes.io/ingress.class: "nginx"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  labels:
+    fqdn: mail.quickstart.test
 spec:
   tls:
     - hosts:
-        - hanko.test
-      secretName: hanko-tls
+        - $(MAILHOG_FQDN)
+      secretName: mail-tls
   rules:
-    - host: hanko.test
+    - host: $(MAILHOG_FQDN)
       http:
         paths:
-          - path: /api
+          - path: /
             pathType: Prefix
             backend:
               service:
-                name: hanko
+                name: mailhog
                 port:
-                  name: http
+                  name: mailhog-ui

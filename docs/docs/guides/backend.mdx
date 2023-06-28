@@ -1,7 +1,7 @@
 ---
 sidebar_label: Backend guide
 sidebar_position: 3
-description: "Learn how to authenticate requests in your backend by verifying JWTs (JSON Web Token) using a JWK (JSON Web Key Set)."
+description: 'Learn how to authenticate requests in your backend by verifying JWTs (JSON Web Token) using a JWK (JSON Web Key Set).'
 ---
 
 import Tabs from '@theme/Tabs';
@@ -15,6 +15,10 @@ requests on your backend. To do so, first retrieve the JSON Web Key Set
 ([JWKS](https://datatracker.ietf.org/doc/html/rfc7517))
 containing the public keys used to verify the JWT from the Hanko API's `.well-known/jwks.json` endpoint.
 Then use the JWKS to verify the JWT using a library for the programming language of your choice.
+
+:::info
+If you are using `Nuxt`, please check the [frontend guide](/guides/nuxt) on how to authenticate requests on the backend.
+:::
 
 ```mdx-code-block
 <Tabs>
@@ -81,44 +85,92 @@ packages:
 
 ```javascript showLineNumbers
 const Express = require('express');
-const { expressjwt: jwt } = require("express-jwt");
+const { expressjwt: jwt } = require('express-jwt');
 const jwksRsa = require('jwks-rsa');
 const cookieParser = require('cookie-parser');
 
 const jwksHost = process.env.HANKO_API_URL;
 
 const app = new Express();
-app.use(cookieParser())
-app.use(jwt({
-  secret: jwksRsa.expressJwtSecret({
-    cache: true,
-    rateLimit: true,
-    jwksRequestsPerMinute: 2,
-    jwksUri: `${jwksHost}/.well-known/jwks.json`
-  }),
-  algorithms: [ 'RS256' ],
-  getToken: function fromCookieOrHeader(req) {
-    if (
-      req.headers.authorization &&
-      req.headers.authorization.split(" ")[0] === "Bearer"
-    ) {
-      return req.headers.authorization.split(" ")[1];
-    } else if (req.cookies && req.cookies.hanko) {
-      return req.cookies.hanko;
+app.use(cookieParser());
+app.use(
+  jwt({
+    secret: jwksRsa.expressJwtSecret({
+      cache: true,
+      rateLimit: true,
+      jwksRequestsPerMinute: 2,
+      jwksUri: `${jwksHost}/.well-known/jwks.json`
+    }),
+    algorithms: ['RS256'],
+    getToken: function fromCookieOrHeader(req) {
+      if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+        return req.headers.authorization.split(' ')[1];
+      } else if (req.cookies && req.cookies.hanko) {
+        return req.cookies.hanko;
+      }
+      return null;
     }
-    return null;
-  }
-}));
+  })
+);
 
 // The decoded JWT is available through the `req.auth` property (the exact property
 // making it available can be customized through the `requestProperty` option on
 // middleware creation).
 // see: https://github.com/auth0/express-jwt#api
-app.get("/protected", function (req, res) {
-    if (!req.auth.sub) return res.sendStatus(401);
-    res.sendStatus(200);
+app.get('/protected', function (req, res) {
+  if (!req.auth.sub) return res.sendStatus(401);
+  res.sendStatus(200);
+});
+```
+
+```mdx-code-block
+</TabItem>
+<TabItem value="deno" label="Deno">
+```
+
+This is an example of using an authentication middleware in a [Fresh](https://fresh.deno.dev) app using the [jose](https://github.com/panva/jose/) package:
+
+```javascript showLineNumbers
+import { MiddlewareHandlerContext } from "$fresh/server.ts";
+import { getCookies } from "$std/http/cookie.ts";
+import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts';
+
+interface AuthState {
+  auth: jose.JWTPayload;
+}
+
+const JWKS_ENDPOINT = `${Deno.env.get("HANKO_API_URL")}/.well-known/jwks.json`;
+
+const JWKS = jose.createRemoteJWKSet(new URL(JWKS_ENDPOINT), {
+  cooldownDuration: 120000,
+});
+
+function getToken(req: Request): string | undefined {
+  const cookies = getCookies(req.headers);
+  const authorization = req.headers.get("authorization");
+
+  if (authorization && authorization.split(" ")[0] === "Bearer")
+    return authorization.split(" ")[1]
+  else if (cookies.hanko)
+    return cookies.hanko
+}
+
+export async function handler(req: Request, ctx: MiddlewareHandlerContext<AuthState>) {
+  const jwt = getToken(req);
+
+  if (jwt) {
+    try {
+      const { payload } = await jose.jwtVerify(jwt, JWKS);
+      ctx.state.auth = payload;
+
+      return await ctx.next();
+    } catch (error) {
+      return new Response("Invalid token", { status: 403 });
+    }
   }
-);
+
+  return new Response("Missing token", { status: 403 });
+};
 ```
 
 ```mdx-code-block

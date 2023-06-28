@@ -1,0 +1,25 @@
+namespace: hanko-thirdparty-x-domain
+resources:
+  - ../../base/postgres
+  - ../../base/hanko
+  - ../../base/elements
+  - ../../base/quickstart
+  - ../../base/mailhog
+patchesStrategicMerge:
+  - ingress-patch.yaml
+  - env-patch.yaml
+configMapGenerator:
+  - files:
+      - config.yaml
+    name: hanko
+    behavior: replace
+secretGenerator:
+  - name: github
+    envs:
+      - github.env
+  - name: google
+    envs:
+      - google.env
+  - name: apple
+    envs:
+      - apple.env

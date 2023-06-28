@@ -401,7 +401,6 @@ const LoginEmailPage = (props: Props) => {
           placeholder={t("labels.email")}
           pattern={"^.*[^0-9]+$"}
           disabled={disabled}
-          autoFocus
         />
         <Button
           isLoading={isEmailLoginLoading}

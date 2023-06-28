@@ -1,7 +1,7 @@
 
 openapi: 3.0.0
 info:
-  version: '0.4.0'
+  version: '0.8.0'
   title: 'Hanko Public API'
   description: |
     ## Introduction
@@ -52,7 +52,7 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: 'localhost:3000'
+  - url: 'localhost:8001'
 paths:
   /passcode/login/initialize:
     post:
@@ -482,7 +482,7 @@ paths:
                   type: string
                   required: false
       responses:
-        '201':
+        '200':
           description: 'Credential updated successfully'
         '400':
           $ref: '#/components/responses/BadRequest'
@@ -755,6 +755,22 @@ paths:
           $ref: '#/components/responses/NotFound'
         '500':
           $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: 'Deletes the current user'
+      description: Used to delete the current user. Note that `config.account.allow_deletion` must be set to true.
+      operationId: deleteUser
+      tags:
+        - User Management
+      security:
+        - CookieAuth: [ ]
+        - BearerTokenAuth: [ ]
+      responses:
+        '204':
+          description: 'The user has been deleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /me:
     get:
       summary: 'Get the current user ID'
@@ -779,22 +795,6 @@ paths:
                       - $ref: '#/components/schemas/UUID4'
         '400':
           $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-    delete:
-      summary: 'Deletes the current user'
-      description: Used to delete the current user. Note that `config.account.allow_deletion` must be set to true.
-      operationId: IsUserAuthorized
-      tags:
-        - User Management
-      security:
-        - CookieAuth: [ ]
-        - BearerTokenAuth: [ ]
-      responses:
-        '204':
-          description: 'The user has been deleted'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':

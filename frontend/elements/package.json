@@ -17,6 +17,7 @@
       "elements": ["dist/Elements.d.ts"],
       "i18n/de": ["dist/i18n/de.d.ts"],
       "i18n/en": ["dist/i18n/en.d.ts"],
+      "i18n/fr": ["dist/i18n/fr.d.ts"],
       "i18n/all": ["dist/i18n/all.d.ts"]
     }
   },
@@ -35,6 +36,11 @@
       "types": "./dist/i18n/en.d.ts",
       "import": "./dist/i18n/en.js",
       "require": "./dist/i18n/en.js"
+    },
+    "./i18n/fr": {
+      "types": "./dist/i18n/fr.d.ts",
+      "import": "./dist/i18n/fr.js",
+      "require": "./dist/i18n/fr.js"
     },
     "./i18n/all": {
       "types": "./dist/i18n/all.d.ts",

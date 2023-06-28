@@ -1,0 +1,167 @@
+---
+title: Nuxt
+sidebar_label: Nuxt
+keywords: [nuxt]
+sidebar_custom_props:
+  docCardIconName: nuxt
+---
+
+# Nuxt
+
+In this guide you will learn how to install and use the `@nuxtjs/hanko` module.
+The Nuxt module provides a simple way to add Hanko elements and authentication to your Nuxt application.
+
+:::info
+This guide and the `@nuxtjs/hanko` module are only compatible with Nuxt 3. Find out more about Nuxt at [Nuxt.com](https://nuxt.com).
+:::
+
+## Install dependencies
+
+Install the `@nuxtjs/hanko` package:
+
+```shell npm2yarn
+npm install -D @nuxtjs/hanko
+```
+
+## Configure Nuxt module
+
+Add the `@nuxtjs/hanko` module to the `modules` section of your `nuxt.config.ts` file.
+
+```jsx title="nuxt.config.ts" showLineNumbers
+export default defineNuxtConfig({
+  modules: ['@nuxtjs/hanko'],
+  hanko: {
+    // You can also configure this by setting NUXT_PUBLIC_HANKO_API_URL environment variable at runtime
+    apiURL: '<YOUR_API_URL>'
+  }
+});
+```
+
+The module comes pre-configured with the options for most common use cases, you can override them by adding a `hanko` section to your `nuxt.config.ts` file. For all overrides please check the [module repo](https://github.com/nuxt-modules/hanko).
+
+:::info
+
+If you are using [Hanko Cloud](https://cloud.hanko.io), you can find the API URL on your project dashboard.
+If you are self-hosting you need to provide the URL of your running Hanko backend.
+
+:::
+
+## Hanko Components
+
+You can now use the Hanko components anywhere in your app: `<hanko-auth>`, `<hanko-events>` and `<hanko-profile>`. These are web components that will be rendered on the client-side only. All the props are typed.
+
+You can turn auto-registration of components off (if you wish to use Hanko just on the server side or programmatically) by setting `hanko: { registerComponents: false }` in your `nuxt.config.ts` file.
+
+### `<hanko-auth>` component
+
+To provide a login interface in your app, use the `<hanko-auth>` web component. This will render a login form and handle passkeys auth.
+
+```jsx title="login.vue" showLineNumbers
+<template>
+  <hanko-auth />
+</template>
+```
+
+By default no action is taken after a successful login. When you add the `hanko-logged-out` middleware to the login page it will automatically redirect the user to the page they were on before logging in, or to the optional `redirects.success` value in the module config.
+
+```jsx title="login.vue" showLineNumbers
+<script setup lang="ts">
+definePageMeta({
+  middleware: ['hanko-logged-out']
+})
+</script>
+<template>
+  <hanko-auth />
+</template>
+```
+
+Alternatively you can redirect the user to a page of your choice by adding the `<hanko-events>` component to your page and listening for the `onAuthFlowCompleted` event.
+
+```jsx title="login.vue" showLineNumbers
+<script setup lang="ts">
+function afterLogin() {
+ navigateTo("/user");
+}
+</script>
+<template>
+  <hanko-auth />
+  <hanko-event @onAuthFlowCompleted="afterLogin()" />
+</template>
+```
+
+### Define event callbacks
+
+To subscribe to [events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events) emited by Hanko, you can add the `<hanko-events>` component to your page and listen for the events you are interested in.
+
+```jsx title="page.vue" showLineNumbers
+<script setup lang="ts">
+function updateSession() {
+ // do something
+}
+</script>
+<template>
+  <hanko-event @onSessionCreated="updateSession()" />
+</template>
+```
+
+### Add `<hanko-profile>` component {#hanko-profile}
+
+To provide a page where users can manage their email addresses, password and passkeys, use the `<hanko-profile>` web
+component.
+
+```jsx title="profile.vue" showLineNumbers
+<template>
+  <hanko-profile />
+</template>
+```
+
+### Customize component styles
+
+The styles of the `hanko-auth` and `hanko-profile` elements can be customized using CSS variables and parts. See the guide on customization [here](https://github.com/teamhanko/hanko/tree/main/frontend/elements#ui-customization).
+The styles can be scoped to the login/profile page to ensure they dont affect other parts to the app.
+
+## useHanko() composable
+
+The `useHanko` composable provides access to the [Hanko SDK](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/index.html) which in turn allows access to the Hanko API, e.g. for accessing the [current user info](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/UserClient.html#getCurrent).
+The composable is auto-imported across the app and can simply be used with `useHanko()` anywhere in your code (see the [next section](#implement-logout) for a usage example).
+
+## Implement logout
+
+To log users out, use the `@nuxtjs/hanko` module's built-in composable `useHanko` and call the `logout` method.
+
+```jsx title="logout.vue" showLineNumbers
+<script setup lang="ts">
+const hanko = useHanko()
+function logout() {
+  hanko!.user.logout()
+}
+</script>
+<template>
+  <button @click="logout">
+      Log me out
+  </button>
+</template>
+```
+
+## Authenticate backend requests
+
+A global server middleware is added by `@nuxtjs/hanko`. After decoding and validating the JWT for the request, a new `hanko` property to is added to the event context.
+You can check the value of `event.context.hanko` to see if the request was authenticated and the decoded JWT payload. The user's id is accessible though the `sub` claim/property.
+
+```jsx title="/server/api/endpoint.ts" showLineNumbers
+export default defineEventHandler(async (event) => {
+  const hanko = event.context.hanko;
+  if (!hanko || !hanko.sub) {
+    return {
+      status: 401,
+      body: {
+        message: 'Unauthorized'
+      }
+    };
+  }
+  // Do something with the Hanko user
+  return {
+    hanko: event.context.hanko
+  };
+});
+```

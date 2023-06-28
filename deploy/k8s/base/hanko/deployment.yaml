@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hanko
+  namespace: hanko-tenant
+  labels:
+    app: hanko
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hanko
+  template:
+    metadata:
+      labels:
+        app: hanko
+    spec:
+      containers:
+        - name: hanko
+          image: ghcr.io/teamhanko/hanko:main
+          imagePullPolicy: IfNotPresent
+          command:
+            - /hanko
+          args:
+            - serve
+            - all
+            - '--config'
+            - /etc/config/config.yaml
+          ports:
+            - name: http-public
+              containerPort: 8000
+              protocol: TCP
+            - name: http-admin
+              containerPort: 8001
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config/config.yaml
+              subPath: config.yaml
+      initContainers:
+        - name: hanko-migrate
+          image: ghcr.io/teamhanko/hanko:main
+          imagePullPolicy: IfNotPresent
+          command:
+            - /hanko
+          args:
+            - migrate
+            - up
+            - "--config"
+            - /etc/config/config.yaml
+          volumeMounts:
+            - name: config
+              mountPath: /etc/config/config.yaml
+              subPath: config.yaml
+      volumes:
+        - name: config
+          configMap:
+            name: hanko
+            defaultMode: 420

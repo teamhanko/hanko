@@ -64,7 +64,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		if email != nil {
 			if email.UserID != nil {
 				// The email already exists and is assigned already.
-				return dto.NewHTTPError(http.StatusConflict).SetInternal(errors.New(fmt.Sprintf("user with email %s already exists", body.Email)))
+				return echo.NewHTTPError(http.StatusConflict).SetInternal(errors.New(fmt.Sprintf("user with email %s already exists", body.Email)))
 			}
 
 			if !h.cfg.Emails.RequireVerification {
@@ -148,7 +148,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	if sessionToken.Subject() != userId {
-		return dto.NewHTTPError(http.StatusForbidden).SetInternal(errors.New(fmt.Sprintf("user %s tried to get user %s", sessionToken.Subject(), userId)))
+		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New(fmt.Sprintf("user %s tried to get user %s", sessionToken.Subject(), userId)))
 	}
 
 	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(userId))
@@ -157,7 +157,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 	}
 
 	if user == nil {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	var emailAddress *string
@@ -195,7 +195,7 @@ func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
 	}
 
 	if email == nil || email.UserID == nil {
-		return dto.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
 	}
 
 	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(*email.UserID)
