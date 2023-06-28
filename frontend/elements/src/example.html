@@ -292,6 +292,10 @@ after the user completes the authentication flow), while other events are option
             showAuthComponent(false); // Show profile component
             setVisibility(logoutButtonEl, true); // Show the logout button
         }
+
+        // If the session is not valid, we don't need to do anything since the authentication component is already
+        // visible and the profile component, as well as the logout button, have been hidden in the HTML code using the
+        // "hidden" attribute.
     }
 
     // Call the initialization function
