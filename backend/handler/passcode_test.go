@@ -4,199 +4,223 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
-	"gopkg.in/gomail.v2"
+	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 	"time"
 )
 
-func TestNewPasscodeHandler(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	assert.NoError(t, err)
-	assert.NotEmpty(t, passcodeHandler)
+func TestPasscodeSuite(t *testing.T) {
+	t.Parallel()
+	s := new(passcodeSuite)
+	s.WithEmailServer = true
+	suite.Run(t, s)
 }
 
-func TestPasscodeHandler_Init(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(users, nil, nil, nil, nil, nil, nil, emails, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	require.NoError(t, err)
-
-	body := dto.PasscodeInitRequest{
-		UserId: userId,
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	if assert.NoError(t, passcodeHandler.Init(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-	}
+type passcodeSuite struct {
+	test.Suite
 }
 
-func TestPasscodeHandler_Init_UnknownUserId(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	require.NoError(t, err)
-
-	body := dto.PasscodeInitRequest{
-		UserId: "04603148-036d-403b-bf34-cfe237974ef9",
+func (s *passcodeSuite) TestPasscodeHandler_Init() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
 	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
+	err := s.LoadFixtures("../test/fixtures/passcode")
+	s.Require().NoError(err)
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
-	err = passcodeHandler.Init(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusBadRequest, httpError.Code)
+	emailId := "51b7c175-ceb6-45ba-aae6-0092221c1b84"
+	unknownEmailId := "83618f24-2db8-4ea2-b370-ac8335f782d8"
+	tests := []struct {
+		name                 string
+		body                 dto.PasscodeInitRequest
+		expectedStatusCode   int
+		expectedEmailAddress string
+	}{
+		{
+			name: "with userID and emailID",
+			body: dto.PasscodeInitRequest{
+				UserId:  "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
+				EmailId: &emailId,
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedEmailAddress: "john.doe@example.com",
+		},
+		{
+			name: "only with userID",
+			body: dto.PasscodeInitRequest{
+				UserId: "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
+			},
+			expectedStatusCode:   http.StatusOK,
+			expectedEmailAddress: "john.doe@example.com",
+		},
+		{
+			name: "with unknown userID",
+			body: dto.PasscodeInitRequest{
+				UserId: "83618f24-2db8-4ea2-b370-ac8335f782d8",
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name: "with unknown emailID",
+			body: dto.PasscodeInitRequest{
+				UserId:  "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
+				EmailId: &unknownEmailId,
+			},
+			expectedStatusCode: http.StatusBadRequest,
+		},
 	}
-}
 
-func TestPasscodeHandler_Finish(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(users, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	require.NoError(t, err)
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			bodyJson, err := json.Marshal(currentTest.body)
+			s.Require().NoError(err)
 
-	body := dto.PasscodeFinishRequest{
-		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
-		Code: "123456",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
+			req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", bytes.NewReader(bodyJson))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+			e.ServeHTTP(rec, req)
 
-	if assert.NoError(t, passcodeHandler.Finish(c)) {
-		assert.Equal(t, http.StatusOK, rec.Result().StatusCode)
-	}
-}
+			if s.Equal(currentTest.expectedStatusCode, rec.Code) && currentTest.expectedStatusCode >= 200 && currentTest.expectedStatusCode <= 299 {
+				messages := s.EmailServer.Messages()
 
-func TestPasscodeHandler_Finish_WrongCode(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	require.NoError(t, err)
-
-	body := dto.PasscodeFinishRequest{
-		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
-		Code: "012345",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	err = passcodeHandler.Finish(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-	}
-}
-
-func TestPasscodeHandler_Finish_WrongCode_3_Times(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	require.NoError(t, err)
-
-	body := dto.PasscodeFinishRequest{
-		Id:   "08ee61aa-0946-4ecf-a8bd-e14c604329e2",
-		Code: "012345",
-	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
-
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	for i := 0; i < 3; i++ {
-		req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-		req.Header.Set("Content-Type", "application/json")
-		rec := httptest.NewRecorder()
-		c := e.NewContext(req, rec)
-
-		err = passcodeHandler.Finish(c)
-		if i < 2 {
-			if assert.Error(t, err) {
-				httpError := dto.ToHttpError(err)
-				assert.Equal(t, http.StatusUnauthorized, httpError.Code)
+				emailAddress := s.GetToEmailAddress(messages[len(messages)-1].MsgRequest())
+				s.Equal(currentTest.expectedEmailAddress, emailAddress)
 			}
-		} else {
-			if assert.Error(t, err) {
-				httpError := dto.ToHttpError(err)
-				assert.Equal(t, http.StatusGone, httpError.Code)
-			}
-		}
+		})
 	}
 }
 
-func TestPasscodeHandler_Finish_WrongId(t *testing.T) {
-	passcodeHandler, err := NewPasscodeHandler(&config.Config{}, test.NewPersister(nil, passcodes(), nil, nil, nil, nil, nil, nil, nil, nil, nil), sessionManager{}, mailer{}, test.NewAuditLogger())
-	require.NoError(t, err)
-
-	body := dto.PasscodeFinishRequest{
-		Id:   "1bc9a074-577d-497e-87da-8eaf50f32a26",
-		Code: "123456",
+func (s *passcodeSuite) TestPasscodeHandler_Finish() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
 	}
-	bodyJson, err := json.Marshal(body)
-	require.NoError(t, err)
+	err := s.LoadFixtures("../test/fixtures/passcode")
+	s.Require().NoError(err)
 
-	e := echo.New()
-	e.Validator = dto.NewCustomValidator()
-	req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
 
-	err = passcodeHandler.Finish(c)
-	if assert.Error(t, err) {
-		httpError := dto.ToHttpError(err)
-		assert.Equal(t, http.StatusUnauthorized, httpError.Code)
-	}
-}
+	now := time.Now().UTC()
 
-func passcodes() []models.Passcode {
-	now := time.Now()
-	return []models.Passcode{{
-		ID:        uuid.FromStringOrNil("08ee61aa-0946-4ecf-a8bd-e14c604329e2"),
-		UserId:    uuid.FromStringOrNil(userId),
-		EmailID:   uuid.FromStringOrNil(userId),
+	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte("123456"), 12)
+
+	passcode := models.Passcode{
+		ID:        uuid.FromStringOrNil("a2383922-dea3-46c8-be17-85b267c0d135"),
+		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
+		EmailID:   uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
 		Ttl:       300,
-		Code:      "$2a$12$gBPH9jnbXFmwAGwZMSzYkeXx7oOTElzhvHfiDgj.D7G8q4znvHpMK",
+		Code:      string(hashedPasscode),
+		TryCount:  0,
 		CreatedAt: now,
 		UpdatedAt: now,
-		Email: models.Email{
-			ID:      uId,
-			Address: "john.doe@example.com",
+	}
+
+	passcodeWithExpiredTimeout := models.Passcode{
+		ID:        uuid.FromStringOrNil("a2383922-dea3-46c8-be17-85b267c0d135"),
+		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
+		EmailID:   uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		Ttl:       300,
+		Code:      string(hashedPasscode),
+		TryCount:  0,
+		CreatedAt: now.Add(-500 * time.Second),
+		UpdatedAt: now,
+	}
+
+	tests := []struct {
+		name               string
+		passcodeId         string
+		retryCount         int
+		passcode           models.Passcode
+		code               string
+		expectedStatusCode int
+	}{
+		{
+			name:               "finish successful",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcode,
+			code:               "123456",
+			expectedStatusCode: http.StatusOK,
 		},
-	}}
+		{
+			name:               "with wrong code",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcode,
+			code:               "654321",
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			name:               "with wrong code 3 times",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			retryCount:         2,
+			passcode:           passcode,
+			code:               "654321",
+			expectedStatusCode: http.StatusGone,
+		},
+		{
+			name:               "with wrong passcode ID",
+			passcodeId:         "297cfc1b-98cc-4ae1-bc83-bcafc7f0e876",
+			passcode:           passcode,
+			code:               "123456",
+			expectedStatusCode: http.StatusUnauthorized,
+		},
+		{
+			name:               "after passcode expired",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcodeWithExpiredTimeout,
+			code:               "123456",
+			expectedStatusCode: http.StatusRequestTimeout,
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			// Setup passcode
+			err := s.Storage.GetPasscodePersister().Create(currentTest.passcode)
+			s.Require().NoError(err)
+
+			body := dto.PasscodeFinishRequest{
+				Id:   currentTest.passcodeId,
+				Code: currentTest.code,
+			}
+			bodyJson, err := json.Marshal(body)
+			s.Require().NoError(err)
+
+			responseCode := 0
+			for i := 0; i <= currentTest.retryCount; i++ {
+				req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
+				req.Header.Set("Content-Type", "application/json")
+				rec := httptest.NewRecorder()
+
+				e.ServeHTTP(rec, req)
+				responseCode = rec.Code
+			}
+
+			s.Equal(currentTest.expectedStatusCode, responseCode)
+
+			// remove passcode
+			_ = s.Storage.GetPasscodePersister().Delete(currentTest.passcode)
+		})
+	}
 }
 
-type mailer struct {
+func (s *passcodeSuite) GetToEmailAddress(data string) string {
+	to := regexp.MustCompile("To: (.*)\r")
+	matchTo := to.FindStringSubmatch(data)
+
+	return matchTo[1]
 }
 
-func (m mailer) Send(message *gomail.Message) error {
-	return nil
+func (s *passcodeSuite) GetPasscode(data string) string {
+	passcode := regexp.MustCompile("Subject: Use passcode ([0-9]{1,6}) to sign in to Test")
+	matchPasscode := passcode.FindStringSubmatch(data)
+
+	return matchPasscode[1]
 }
