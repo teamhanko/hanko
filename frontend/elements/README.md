@@ -304,7 +304,8 @@ register("https://hanko.yourdomain.com", { shadow: true })
 The following parts are available:
 
 - `container` - the UI container
-- `headline` - the headline of each page
+- `headline1` - the "h1" headlines
+- `headline2` - the "h2" headlines
 - `paragraph` - the paragraph elements
 - `button` - every button element
 - `primary-button` - the primary button

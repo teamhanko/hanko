@@ -1,8 +1,28 @@
+<!--
+This HTML file showcases the integration of Hanko web components. Here are the features it offers:
+
+1. Hanko Authentication Component: Allows users to authenticate using Hanko. It is represented by the <hanko-auth> tag.
+2. Hanko Profile Component: Displays the user's profile information. It is represented by the <hanko-profile> tag.
+3. Hanko Events Component: Handles various events related to authentication and session management. It is represented by
+   the <hanko-events> tag.
+4. Dialog Element: Presents a dialog to notify the user when a session is over for a certain reason.
+5. Navbar: Includes a logout button and a dropdown menu for selecting the language.
+6. Styling: Provides CSS styles for various elements, including the page, navigation bar, main content, buttons, and the
+   Hanko web components.
+
+To use this HTML file, you need a running Hanko API instance configured to allow requests from the address under which
+this file is hosted. Additionally, the API URL needs to be entered in the designated location within the script block.
+
+The HTML file can be served through any HTTP server. The necessary scripts for the Hanko web components can be imported
+either from a local build or from the CDN.
+
+You can find more details and functionality explanations within the code comments.
+-->
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Hanko Web Component Test</title>
+    <title>Hanko Web Component Example</title>
     <style>
         /* Page Styling */
         body {
@@ -33,6 +53,7 @@
             justify-content: center;
         }
 
+        /* Main Section Styling */
         main section {
             min-width: 400px;
         }
@@ -44,6 +65,7 @@
 
         /* Hanko Web Components Styling */
         .hankoComponent {
+            /* Adjust the CSS variables related to color to create a dark theme for the web components. */
             --color: #ccf8ff;
             --color-shade-1: #01a7c1;
             --color-shade-2: #546166;
@@ -53,22 +75,44 @@
             --link-color: #fac043;
             --background-color: black;
             --error-color: #fa0000;
+
+            /* Slightly increase the border radius for elements within the web components. */
             --border-radius: 5px;
-            --container-padding: 15px;
+        }
+
+        .hankoComponent::part(headline1) {
+            /* Adjust CSS properties for the main headlines using the "::part()" selector. */
+            font-size: 1.3em;
+            font-weight: 400;
         }
 
         #hankoAuth {
+            /* Limit the maximum width and increase the padding of the authentication component. */
             --container-max-width: 400px;
+            --container-padding: 25px;
+        }
+
+        #hankoAuth::part(headline1) {
+            /* Center the main headlines within the authentication component. */
+            text-align: center;
+        }
+
+        #hankoAuth::part(container) {
+            /* Add a border to the authentication component. */
+            border: solid 1px #546166;
+            border-radius: 15px;
         }
 
         #hankoProfile {
-            --container-max-width: 500px;
+            /* Adjust the profile component to be wider than the authentication component and have less padding. */
+            --container-max-width: 550px;
+            --container-padding: 25px 10px 0;
         }
     </style>
 </head>
 <body>
 
-<!-- A dialog element for displaying session related information -->
+<!-- A dialog element to notify the user the session is over for a certain reason -->
 <dialog id="dialog">
     <form>
         <div>
@@ -82,7 +126,7 @@
 <!-- Navbar -->
 <nav>
     <!-- Button for logging out -->
-    <button id="logoutButton" hidden="true">Log out</button>
+    <button id="logoutButton" hidden>Log out</button>
 
     <!-- Dropdown for selecting the language -->
     <select id="langSelect">
@@ -99,7 +143,7 @@
         <hanko-auth id="hankoAuth" class="hankoComponent" lang="en"></hanko-auth>
 
         <!-- Hanko Profile Component -->
-        <hanko-profile id="hankoProfile" class="hankoComponent" lang="en" hidden="true"></hanko-profile>
+        <hanko-profile id="hankoProfile" class="hankoComponent" lang="en" hidden></hanko-profile>
 
         <!-- Hanko Events Component -->
         <hanko-events id="hankoEvents" class="hankoComponent"></hanko-events>
@@ -107,82 +151,113 @@
 </main>
 
 <script type="module">
-    import {register} from "../dist/elements.js";
-    import {all} from "../dist/i18n/all.js";
+    // Uncomment the following two lines if you want to import the local build, which can be created by changing to
+    // the "/frontend" directory and running "npm run build:elements".
+    // import {register} from "../dist/elements.js";
+    // import {all} from "../dist/i18n/all.js";
 
-    // Change `apiUrl` to where your Hanko-API instance is running.
+    // Comment the following two lines if you don't want to import Hanko Elements from the CDN, see comment above.
+    import {register} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
+    import {all} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/all.js";
+
+    // Change `apiUrl` to the URL where your Hanko-API instance is running.
     const apiUrl = "http://localhost:8000";
 
     // Register Hanko Web Components
     const {hanko} = await register(apiUrl, {translations: all});
 
     // Get DOM elements
-    const dialogEl = document.getElementById("dialog"),
-        hankoAuthEl = document.getElementById("hankoAuth"),
+    const hankoAuthEl = document.getElementById("hankoAuth"),
         hankoProfileEl = document.getElementById("hankoProfile"),
         hankoEventsEl = document.getElementById("hankoEvents"),
         logoutButtonEl = document.getElementById("logoutButton"),
-        langSelectEl = document.getElementById("langSelect");
+        langSelectEl = document.getElementById("langSelect"),
+        dialogEl = document.getElementById("dialog"),
+        dialogContentEl = dialogEl.getElementsByTagName("div").item(0);
 
+    // Function to show or hide individual elements
     function setVisibility(element, visible) {
         element.hidden = !visible;
     }
 
-    // Function to change the translation language
+    // Function to show the authentication component or the profile component
+    function showAuthComponent(showAuth) {
+        setVisibility(hankoAuthEl, showAuth);
+        setVisibility(hankoProfileEl, !showAuth);
+    }
+
+    // Function to show the dialog element
+    function showDialog(message) {
+        dialogContentEl.innerText = message;
+        dialogEl.showModal();
+    }
+
+    // Function to change the language of the Hanko web components
     function selectLanguage(lang) {
         hankoAuthEl.lang = lang;
         hankoProfileEl.lang = lang;
     }
 
-    // Function to show a dialog with the specified text
-    function showDialog(message) {
-        dialogEl.getElementsByTagName("div").item(0).innerText = message;
-        dialogEl.showModal();
-    }
-
     // Function to add event listeners
     function addEventListeners() {
-        dialogEl.addEventListener('close', () => {
-            if (!hanko.session.isValid()) {
-                setVisibility(hankoAuthEl, true);
-                setVisibility(hankoProfileEl, false);
+        hankoEventsEl.addEventListener("onSessionCreated", () => {
+            // A session has been created through the hanko-auth component, but the authentication flow might not be
+            // finished yet, so we don't want to hide the hanko-auth component at this time. However, we can show the
+            // logout button, since the user is logged in.
+            setVisibility(logoutButtonEl, true); // Show the logout button
+
+            // When the dialog was initially opened due to the session expiring in the past, and it has not been closed
+            // manually before re-authentication taking place in another browser window, close the dialog automatically.
+            if (dialogEl.open) {
+                dialogEl.close(); // Close the dialog when it is still open and a new session was created
             }
-        });
-
-        logoutButtonEl.addEventListener("click", () => {
-            hanko.user.logout();
-        });
-
-        langSelectEl.addEventListener("input", (event) => {
-            selectLanguage(event.target.value)
         });
 
         hankoEventsEl.addEventListener("onAuthFlowCompleted", () => {
-            setVisibility(hankoAuthEl, false);
-            setVisibility(hankoProfileEl, true);
-        });
-
-        hankoEventsEl.addEventListener("onSessionCreated", () => {
-            if (dialogEl.open) {
-                dialogEl.close();
-            }
-
-            setVisibility(logoutButtonEl, true);
+            // The user has completed the authentication flow through the hanko-auth component, so we can display the
+            // hanko-profile and hide the hanko-auth component.
+            showAuthComponent(false); // Show profile component
         });
 
         hankoEventsEl.addEventListener("onSessionExpired", () => {
-            setVisibility(logoutButtonEl, false);
-            showDialog("Your session has expired");
+            // The session has expired, so we can show the dialog to notify the user. Additionally, the logout button
+            // can be hidden.
+            showDialog("Your session has expired"); // Show message on the overlay dialog
+            setVisibility(logoutButtonEl, false); // Hide the logout button
         });
 
         hankoEventsEl.addEventListener("onUserLoggedOut", () => {
-            setVisibility(hankoAuthEl, true);
-            setVisibility(hankoProfileEl, false);
+            // The user has logged out, so we show the hanko-auth component and hide the profile element as well as the
+            // logout button.
+            showAuthComponent(true); // Show authentication component
             setVisibility(logoutButtonEl, false);
         });
 
         hankoEventsEl.addEventListener("onUserDeleted", () => {
+            // The user has deleted the account, so we only show the dialog and hide the other elements.
+            setVisibility(hankoProfileEl, false);
+            setVisibility(logoutButtonEl, false);
             showDialog("Your account has been deleted");
+        });
+
+        logoutButtonEl.addEventListener("click", () => {
+            // Logout the user, triggering the `onUserLoggedOut` event upon success.
+            hanko.user.logout();
+        });
+
+        dialogEl.addEventListener('close', () => {
+            // When the dialog, which informs the user that the session has expired, is closed, check if the session
+            // has been created again, for example, in another browser window. If it has, there is no need to switch to
+            // the hanko-auth component.
+            if (!hanko.session.isValid()) {
+                showAuthComponent(true); // Show authentication component
+            }
+        });
+
+        langSelectEl.addEventListener("input", (event) => {
+            // If the user selects a different language from the language select box, update the language of the Hanko
+            // components.
+            selectLanguage(event.target.value); // The value is either "de", "en" or "fr"
         });
     }
 
@@ -192,9 +267,8 @@
 
         // Check if a valid session exists
         if (hanko.session.isValid()) {
-            setVisibility(hankoAuthEl, false);
-            setVisibility(hankoProfileEl, true);
-            setVisibility(logoutButtonEl, true);
+            showAuthComponent(false); // Show profile component
+            setVisibility(logoutButtonEl, true); // Show the logout button
         }
     }
 
