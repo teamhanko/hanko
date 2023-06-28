@@ -153,6 +153,11 @@ export class Relay extends Dispatcher {
       return;
     }
 
+    if (this._session.isAuthFlowCompleted()) {
+      this.dispatchAuthFlowCompletedEvent({ userID: sessionDetail.userID });
+      return;
+    }
+
     this.dispatchSessionCreatedEvent(sessionDetail);
   };
 
