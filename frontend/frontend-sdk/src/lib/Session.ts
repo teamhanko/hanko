@@ -58,6 +58,11 @@ export class Session {
     };
   }
 
+  /**
+   Checks if the auth flow is completed. The value resets after the next login attempt.
+
+   @returns {boolean} Returns true if the authentication flow is completed, false otherwise
+   */
   public isAuthFlowCompleted() {
     this._sessionState.read();
     return this._sessionState.getAuthFlowCompleted();

@@ -18,12 +18,12 @@ describe("Session", () => {
       };
 
       // Mock dependencies
-      jest.spyOn(session["_sessionState"], "read").mockImplementation();
+      jest.spyOn(session._sessionState, "read").mockImplementation();
       jest
-        .spyOn(session["_sessionState"], "getUserID")
+        .spyOn(session._sessionState, "getUserID")
         .mockReturnValue(expectedDetails.userID);
       jest
-        .spyOn(session["_sessionState"], "getExpirationSeconds")
+        .spyOn(session._sessionState, "getExpirationSeconds")
         .mockReturnValue(expectedDetails.expirationSeconds);
       jest
         .spyOn(session["_cookie"], "getAuthCookie")
@@ -45,12 +45,12 @@ describe("Session", () => {
       };
 
       // Mock dependencies
-      jest.spyOn(session["_sessionState"], "read").mockImplementation();
+      jest.spyOn(session._sessionState, "read").mockImplementation();
       jest
-        .spyOn(session["_sessionState"], "getUserID")
+        .spyOn(session._sessionState, "getUserID")
         .mockReturnValue(invalidDetails.userID);
       jest
-        .spyOn(session["_sessionState"], "getExpirationSeconds")
+        .spyOn(session._sessionState, "getExpirationSeconds")
         .mockReturnValue(invalidDetails.expirationSeconds);
       jest
         .spyOn(session["_cookie"], "getAuthCookie")
@@ -98,6 +98,36 @@ describe("Session", () => {
       const result = session.isValid();
 
       // Verify
+      expect(result).toBe(false);
+    });
+  });
+
+  describe("isAuthFlowCompleted()", () => {
+    it("should return true when auth flow is completed", () => {
+      jest.spyOn(session._sessionState, "read").mockImplementation();
+      jest.spyOn(session._sessionState, "read");
+      jest
+        .spyOn(session._sessionState, "getAuthFlowCompleted")
+        .mockReturnValue(true);
+
+      // Call the method being tested
+      const result = session.isAuthFlowCompleted();
+
+      // Assert that the result is true
+      expect(result).toBe(true);
+    });
+
+    it("should return false when auth flow is not completed", () => {
+      jest.spyOn(session._sessionState, "read").mockImplementation();
+      jest.spyOn(session._sessionState, "read");
+      jest
+        .spyOn(session._sessionState, "getAuthFlowCompleted")
+        .mockReturnValue(false);
+
+      // Call the method being tested
+      const result = session.isAuthFlowCompleted();
+
+      // Assert that the result is false
       expect(result).toBe(false);
     });
   });

@@ -24,6 +24,7 @@ export const decodedLSContent = (): LocalStorage => ({
   session: {
     userID: "test-user",
     expiry: 1664380000,
+    authFlowCompleted: false,
   },
 });
 
