@@ -37,7 +37,8 @@ const sidebars = {
         'guides/nuxt',
         'guides/react',
         'guides/svelte',
-        'guides/vue'
+        'guides/vue',
+        'guides/fresh',
       ]
     },
     'guides/backend',
