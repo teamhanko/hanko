@@ -2,11 +2,12 @@ package test
 
 import (
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog, emails []models.Email, primaryEmails []models.PrimaryEmail, identities []models.Identity, tokens []models.Token) persistence.Persister {
+func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog, emails []models.Email, primaryEmails []models.PrimaryEmail, identities []models.Identity, tokens []models.Token, accessTokens []models.AccessToken, refreshTokens []models.RefreshToken, keys []models.Key, authRequests []models.AuthRequest, codes map[string]uuid.UUID) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
@@ -19,6 +20,10 @@ func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models
 		primaryEmailPersister:        NewPrimaryEmailPersister(primaryEmails),
 		identityPersister:            NewIdentityPersister(identities),
 		tokenPersister:               NewTokenPersister(tokens),
+		oidcAccessTokensPersister:    NewOidcAccessTokensPersister(accessTokens),
+		oidcRefreshTokensPersister:   NewOidcRefreshTokensPersister(refreshTokens),
+		oidcKeysPersister:            NewOidcKeysPersister(keys),
+		oidcAuthRequestsPersister:    NewOidcAuthRequestsPersister(authRequests, codes),
 	}
 }
 
@@ -34,6 +39,10 @@ type persister struct {
 	primaryEmailPersister        persistence.PrimaryEmailPersister
 	identityPersister            persistence.IdentityPersister
 	tokenPersister               persistence.TokenPersister
+	oidcAccessTokensPersister    persistence.OIDCAccessTokenPersister
+	oidcRefreshTokensPersister   persistence.OIDCRefreshTokenPersister
+	oidcKeysPersister            persistence.OIDCKeyPersister
+	oidcAuthRequestsPersister    persistence.OIDCAuthRequestPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -131,4 +140,36 @@ func (p *persister) GetTokenPersister() persistence.TokenPersister {
 
 func (p *persister) GetTokenPersisterWithConnection(tx *pop.Connection) persistence.TokenPersister {
 	return p.tokenPersister
+}
+
+func (p *persister) GetOIDCAccessTokenPersister() persistence.OIDCAccessTokenPersister {
+	return p.oidcAccessTokensPersister
+}
+
+func (p *persister) GetOIDCAccessTokenPersisterWithConnection(tx *pop.Connection) persistence.OIDCAccessTokenPersister {
+	return p.oidcAccessTokensPersister
+}
+
+func (p *persister) GetOIDCRefreshTokenPersister() persistence.OIDCRefreshTokenPersister {
+	return p.oidcRefreshTokensPersister
+}
+
+func (p *persister) GetOIDCRefreshTokenPersisterWithConnection(tx *pop.Connection) persistence.OIDCRefreshTokenPersister {
+	return p.oidcRefreshTokensPersister
+}
+
+func (p *persister) GetOIDCKeyPersister() persistence.OIDCKeyPersister {
+	return p.oidcKeysPersister
+}
+
+func (p *persister) GetOIDCKeyPersisterWithConnection(tx *pop.Connection) persistence.OIDCKeyPersister {
+	return p.oidcKeysPersister
+}
+
+func (p *persister) GetOIDCAuthRequestPersister() persistence.OIDCAuthRequestPersister {
+	return p.oidcAuthRequestsPersister
+}
+
+func (p *persister) GetOIDCAuthRequestPersisterWithConnection(tx *pop.Connection) persistence.OIDCAuthRequestPersister {
+	return p.oidcAuthRequestsPersister
 }

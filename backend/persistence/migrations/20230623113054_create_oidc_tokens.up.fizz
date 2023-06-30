@@ -1,0 +1,25 @@
+create_table("refresh_tokens") {
+    t.Column("id", "uuid", {})
+	t.Column("client_id", "string", {})
+	t.Column("user_id", "string", {})
+	t.Column("audience", "string", {})
+	t.Column("amr", "string", {})
+	t.Column("scopes", "string", {})
+	t.Column("auth_time", "timestamp", {})
+	t.Column("expires_at", "timestamp", {})
+	t.Timestamps()
+	t.PrimaryKey("id")
+}
+
+create_table("access_tokens") {
+    t.Column("id", "uuid", {})
+    t.Column("refresh_token_id", "uuid", {"null": true})
+    t.Column("client_id", "string", {})
+    t.Column("subject", "string", {})
+	t.Column("audience", "string", {})
+    t.Column("scopes", "string", {})
+    t.Column("expires_at", "timestamp", {})
+	t.Timestamps()
+	t.PrimaryKey("id")
+    t.ForeignKey("refresh_token_id", {"refresh_tokens": ["id"]}, {"on_delete": "cascade"})
+}
