@@ -19,10 +19,6 @@
   let error: Error | null = null;
   let todos: Todos = [];
 
-  onMount(() => {
-    listTodos();
-  });
-
   const changeDescription = (event: any) => {
     description = event.currentTarget.value;
   };
@@ -126,9 +122,17 @@
   const redirectToProfile = () => {
     navigate("/profile");
   }
+
+  onMount(() => {
+    if (hankoClient.session.isValid()) {
+      listTodos();
+    } else {
+      redirectToLogin();
+    }
+  });
 </script>
 <SessionExpiredModal bind:openSessionExpiredModal></SessionExpiredModal>
-<hanko-events on:onSessionNotPresent={redirectToLogin} on:onUserLoggedOut={redirectToLogin}></hanko-events>
+<hanko-events on:onUserLoggedOut={redirectToLogin}></hanko-events>
 <nav class="nav">
   <button class="button" on:click|preventDefault={logout}>Logout</button>
   <button class="button" on:click|preventDefault={redirectToProfile}>Profile</button>

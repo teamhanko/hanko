@@ -85,17 +85,15 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 
 ### Event Interfaces
 
-- `SessionCreatedEventDetail`
-- `AuthFlowCompletedEventDetail`
+- `SessionDetail`
+- `AuthFlowCompletedDetail`
 
 ### Event Types
 
 - `CustomEventWithDetail`
 - `authFlowCompletedType`
-- `sessionResumedType`
 - `sessionCreatedType`
 - `sessionExpiredType`
-- `sessionNotPresentType`
 - `userLoggedOutType`
 - `userDeletedType`
 
@@ -183,12 +181,6 @@ const once = false;
 const removeEventListener = hanko.onSessionCreated((eventDetail) => {
     // Your code...
 }, once);
-
-// Removes the event listener, the callback function will not be called anymore.
-removeEventListener();
-
-// Removes all event listeners.
-hanko.removeEventListeners();
 ```
 
 The following events are available:
@@ -217,18 +209,6 @@ hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
 hanko.onSessionCreated((sessionDetail) => {
   // A new JWT has been issued.
   console.info(`Session created or updated (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
-})
-```
-
-- "hanko-session-resumed": Will be triggered after the page has been loaded and there is a valid session, so it can be
-  utilized like the "hanko-auth-flow-completed" event, to restore the state of your page, where the user is logged in.
-  Note, that a "hanko-user-logged-out" event will be triggered instead of the "hanko-session-removed" event, after the
-  page has been loaded, when the user does not have a valid session.
-
-```js
-hanko.onSessionResumed((sessionDetail) => {
-  // The user is logged in, protected content can be shown.
-  console.info(`User is already logged in (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`);
 })
 ```
 

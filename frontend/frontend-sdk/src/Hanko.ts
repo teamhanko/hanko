@@ -8,6 +8,7 @@ import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 import { TokenClient } from "./lib/client/TokenClient";
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
+import { Session } from "./lib/Session";
 
 /**
  * A class that bundles all available SDK functions.
@@ -27,6 +28,7 @@ class Hanko extends Listener {
   thirdParty: ThirdPartyClient;
   token: TokenClient;
   relay: Relay;
+  session: Session;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, timeout = 13000) {
@@ -77,6 +79,11 @@ class Hanko extends Listener {
      *  @type {Relay}
      */
     this.relay = new Relay();
+    /**
+     *  @public
+     *  @type {Session}
+     */
+    this.session = new Session();
   }
 }
 

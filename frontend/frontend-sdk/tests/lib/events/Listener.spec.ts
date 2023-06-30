@@ -3,7 +3,6 @@ import {
   authFlowCompletedType,
   sessionCreatedType,
   sessionExpiredType,
-  sessionResumedType,
   userDeletedType,
   userLoggedOutType,
 } from "../../../src";
@@ -51,8 +50,6 @@ describe("Listener()", () => {
           trailing: false,
         }
       );
-
-      expect(listener._cleanupFunctions.length).toEqual(1);
 
       const mockEvent = new CustomEvent(sessionCreatedType, {
         detail: mockDetail,
@@ -105,92 +102,6 @@ describe("Listener()", () => {
       });
 
       const cleanup = listener.onSessionCreated(mockCallback, true);
-
-      cleanup();
-
-      document.dispatchEvent(mockEvent);
-      expect(mockCallback).toBeCalledTimes(0);
-    });
-  });
-
-  describe("onSessionResumed()", () => {
-    it("should add an event listener for session resumed events", async () => {
-      const mockDetail = {
-        userID: "testUser",
-        jwt: "testJWT",
-        expirationSeconds: 7,
-      };
-
-      listener.onSessionResumed(mockCallback);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        sessionResumedType,
-        expect.any(Function),
-        { once: false }
-      );
-
-      expect(mockThrottleFunc).toHaveBeenCalledWith(
-        expect.any(Function),
-        listener.throttleLimit,
-        {
-          leading: true,
-          trailing: false,
-        }
-      );
-
-      expect(listener._cleanupFunctions.length).toEqual(1);
-
-      const mockEvent = new CustomEvent(sessionResumedType, {
-        detail: mockDetail,
-      });
-
-      // should throttle
-      document.dispatchEvent(mockEvent);
-      document.dispatchEvent(mockEvent);
-      document.dispatchEvent(mockEvent);
-
-      expect(mockCallback).toHaveBeenCalledWith(mockDetail);
-      expect(mockCallback).toHaveBeenCalledTimes(1);
-    });
-
-    it("should only execute the callback once", async () => {
-      const mockDetail = {
-        userID: "testUser",
-        jwt: "testJWT",
-        expirationSeconds: 7,
-      };
-
-      const mockEvent = new CustomEvent(sessionResumedType, {
-        detail: mockDetail,
-      });
-
-      listener.onSessionResumed(mockCallback, true);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        sessionResumedType,
-        expect.any(Function),
-        { once: true }
-      );
-
-      document.dispatchEvent(mockEvent);
-      jest.advanceTimersByTime(1100); // skip throttle
-      document.dispatchEvent(mockEvent);
-
-      expect(mockCallback).toBeCalledTimes(1);
-    });
-
-    it("should clean up the event listener", async () => {
-      const mockDetail = {
-        userID: "testUser",
-        jwt: "testJWT",
-        expirationSeconds: 7,
-      };
-
-      const mockEvent = new CustomEvent(sessionResumedType, {
-        detail: mockDetail,
-      });
-
-      const cleanup = listener.onSessionResumed(mockCallback, true);
 
       cleanup();
 
@@ -273,7 +184,6 @@ describe("Listener()", () => {
       );
 
       expect(mockThrottleFunc).toBeCalledTimes(0);
-      expect(listener._cleanupFunctions.length).toEqual(1);
 
       const mockEvent = new CustomEvent(authFlowCompletedType, {
         detail: mockDetail,
@@ -389,7 +299,6 @@ describe("Listener()", () => {
       );
 
       expect(mockThrottleFunc).toBeCalledTimes(0);
-      expect(listener._cleanupFunctions.length).toEqual(1);
 
       const mockEvent = new CustomEvent(userDeletedType, {});
 
@@ -426,15 +335,6 @@ describe("Listener()", () => {
 
       document.dispatchEvent(mockEvent);
       expect(mockCallback).toBeCalledTimes(0);
-    });
-  });
-
-  describe("removeEventListener()", () => {
-    it("should cleanup all event listeners", async () => {
-      listener._cleanupFunctions = [mockCallback];
-      listener.removeEventListeners();
-      expect(mockCallback).toBeCalledTimes(1);
-      expect(listener._cleanupFunctions.length).toEqual(0);
     });
   });
 });

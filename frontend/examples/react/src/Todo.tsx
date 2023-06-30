@@ -116,13 +116,13 @@ function Todo() {
   };
 
   useEffect(() => {
-    listTodos();
-  }, [listTodos]);
+    if (hankoClient.session.isValid()) {
+      listTodos();
+    } else {
+      redirectToLogin();
+    }
 
-  useEffect(
-      () => hankoClient.onSessionNotPresent(() => redirectToLogin()), 
-      [hankoClient, redirectToLogin]
-  );
+  }, [hankoClient, listTodos, redirectToLogin]);
 
   useEffect(
     () => hankoClient.onUserLoggedOut(() => redirectToLogin()),
