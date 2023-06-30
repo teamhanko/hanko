@@ -306,22 +306,6 @@ if (session) {
 }
 ```
 
-#### Sessions
-
-- Determine whether the user is logged in:
-```js
-hanko.session.isValid();
-```
-
-- Getting the session details:
-```js
-const session = hanko.session.get();
-
-if (session) {
-  console.info(`userID: ${session.userID}, jwt: ${session.jwt}`)
-}
-```
-
 #### User Client
 
 The SDK contains several client classes to make the communication with the Hanko-API easier. Here some examples of
