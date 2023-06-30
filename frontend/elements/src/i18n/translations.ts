@@ -50,6 +50,8 @@ export interface Translation {
   };
   labels: {
     or: string;
+    no: string;
+    yes: string;
     email: string;
     continue: string;
     skip: string;

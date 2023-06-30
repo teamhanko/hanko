@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailhog
+  namespace: hanko
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mailhog
+    spec:
+      containers:
+        - name: mailhog
+          image:  mailhog/mailhog:latest
+          ports:
+            - containerPort: 8025
+              name: mailhog-ui
+            - containerPort: 1025
+              name: smtp
+  selector:
+    matchLabels:
+      app: mailhog

@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hanko-elements
+  namespace: hanko-tenant
+  labels:
+    app: hanko-elements
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hanko-elements
+  template:
+    metadata:
+      labels:
+        app: hanko-elements
+    spec:
+      containers:
+        - name: hanko-elements
+          image: ghcr.io/teamhanko/hanko/elements:main
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: HANKO_URL
+              value: https://hanko.quickstart.test
+            - name: HANKO_URL_INTERNAL
+              value: http://hanko-public.svc
+            - name: HANKO_ELEMENT_URL
+              value: http://localhost:9500/elements.js
+            - name: HANKO_FRONTEND_SDK_URL
+              value: http://localhost:9500/sdk.modern.js
+          ports:
+            - name: http-public
+              containerPort: 80
+              protocol: TCP

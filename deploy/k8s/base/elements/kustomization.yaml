@@ -1,0 +1,12 @@
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+vars:
+  - fieldref:
+      fieldpath: metadata.labels.fqdn
+    name: ELEMENTS_FQDN
+    objref:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      name: hanko-elements

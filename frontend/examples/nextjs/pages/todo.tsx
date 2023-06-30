@@ -128,13 +128,19 @@ const Todo: NextPage = () => {
     patchTodo(currentTarget.value, currentTarget.checked);
   };
 
-  useEffect(() => listTodos(), [listTodos]);
+  useEffect(() => {
+    if (!hankoClient) {
+      return;
+    }
+
+    if (hankoClient.session.isValid()) {
+      listTodos();
+    } else {
+      redirectToLogin();
+    }
+  }, [hankoClient, listTodos, redirectToLogin]);
 
   useEffect(() => hankoClient?.onUserLoggedOut(() => {
-    redirectToLogin();
-  }), [hankoClient, redirectToLogin]);
-
-  useEffect(() => hankoClient?.onSessionNotPresent(() => {
     redirectToLogin();
   }), [hankoClient, redirectToLogin]);
 

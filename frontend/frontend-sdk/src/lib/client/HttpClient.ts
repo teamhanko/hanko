@@ -209,6 +209,7 @@ class HttpClient {
       this.sessionState.read();
       this.sessionState.setExpirationSeconds(expirationSeconds);
       this.sessionState.setUserID(userID);
+      this.sessionState.setAuthFlowCompleted(false);
       this.sessionState.write();
       this.dispatcher.dispatchSessionCreatedEvent({
         jwt,

@@ -1,0 +1,18 @@
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - services.yaml
+  - ingress.yaml
+namespace: hanko-tenant
+configMapGenerator:
+  - files:
+      - config.yaml
+    name: hanko
+vars:
+  - fieldref:
+      fieldpath: metadata.labels.fqdn
+    name: HANKO_FQDN
+    objref:
+      apiVersion: networking.k8s.io/v1
+      kind: Ingress
+      name: hanko

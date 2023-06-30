@@ -6,5 +6,5 @@
 </nav>
 <div class="content">
   <div class="error">{{ error?.message }}</div>
-  <hanko-profile (onSessionNotPresent)="redirectToLogin()" (onUserLoggedOut)="redirectToLogin()"></hanko-profile>
+  <hanko-profile (onUserLoggedOut)="redirectToLogin()"></hanko-profile>
 </div>

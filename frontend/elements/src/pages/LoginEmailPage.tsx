@@ -61,12 +61,13 @@ const LoginEmailPage = (props: Props) => {
   const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] = useState<boolean>();
   const [isEmailLoginLoading, setIsEmailLoginLoading] = useState<boolean>();
   const [error, setError] = useState<HankoError>(null);
-  const [isWebAuthnSupported, setIsWebAuthnSupported] = useState<boolean>();
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>();
   const [isEmailLoginSuccess, setIsEmailLoginSuccess] = useState<boolean>();
   const [isThirdPartyLoginLoading, setIsThirdPartyLoginLoading] =
     useState<string>("");
+
+  const isWebAuthnSupported = WebauthnSupport.supported();
 
   const disabled = useMemo(
     () =>
@@ -366,10 +367,6 @@ const LoginEmailPage = (props: Props) => {
   }, [loginViaConditionalUI]);
 
   useEffect(() => {
-    setIsWebAuthnSupported(WebauthnSupport.supported());
-  }, []);
-
-  useEffect(() => {
     WebauthnSupport.isConditionalMediationAvailable()
       .then((supported) => setIsConditionalMediationSupported(supported))
       .catch((e) => setError(new TechnicalError(e)));
@@ -401,7 +398,6 @@ const LoginEmailPage = (props: Props) => {
           placeholder={t("labels.email")}
           pattern={"^.*[^0-9]+$"}
           disabled={disabled}
-          autoFocus
         />
         <Button
           isLoading={isEmailLoginLoading}

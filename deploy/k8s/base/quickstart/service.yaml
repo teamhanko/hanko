@@ -1,0 +1,14 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quickstart
+  namespace: hanko-tenant
+spec:
+  selector:
+    app: hanko-quickstart
+  ports:
+    - port: 80
+      targetPort: http-public
+      protocol: TCP
+      name: http

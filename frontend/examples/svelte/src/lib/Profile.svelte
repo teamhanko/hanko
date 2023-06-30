@@ -2,6 +2,7 @@
     import { useNavigate } from "svelte-navigator";
     import { Hanko } from "@teamhanko/hanko-elements";
     import SessionExpiredModal from "./SessionExpiredModal.svelte";
+    import { onMount } from "svelte";
 
     const hankoAPI = import.meta.env.VITE_HANKO_API;
     const hankoClient = new Hanko(hankoAPI);
@@ -24,6 +25,12 @@
     const redirectToTodos = () => {
         navigate("/todo");
     }
+
+    onMount(() => {
+        if (!hankoClient.session.isValid()) {
+            redirectToLogin();
+        }
+    });
 </script>
 
 <SessionExpiredModal bind:showModal></SessionExpiredModal>
@@ -37,5 +44,5 @@
     {#if error}
         <div class="error">{ error?.message }</div>
     {/if}
-    <hanko-profile on:onSessionNotPresent={redirectToLogin} on:onUserLoggedOut={redirectToLogin}></hanko-profile>
+    <hanko-profile on:onUserLoggedOut={redirectToLogin}></hanko-profile>
 </div>

@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hanko-elements
+  namespace: hanko-tenant
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  labels:
+    fqdn: elements.quickstart.test
+spec:
+  tls:
+    - hosts:
+        - $(ELEMENTS_FQDN)
+      secretName: elements-tls
+  rules:
+    - host: $(ELEMENTS_FQDN)
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: elements
+                port:
+                  name: http
