@@ -333,8 +333,8 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 				return webauthnUser, nil
 			}, *model, request)
 			if err != nil {
-				err = h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, user, fmt.Errorf("assertion validation failed"))
-				if err != nil {
+				logErr := h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, user, fmt.Errorf("assertion validation failed"))
+				if logErr != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
 				return echo.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
@@ -354,8 +354,8 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			}
 			credential, err = h.webauthn.ValidateLogin(webauthnUser, *model, request)
 			if err != nil {
-				err = h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, user, fmt.Errorf("assertion validation failed"))
-				if err != nil {
+				logErr := h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalFailed, user, fmt.Errorf("assertion validation failed"))
+				if logErr != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
 				return echo.NewHTTPError(http.StatusUnauthorized, "failed to validate assertion").SetInternal(err)
