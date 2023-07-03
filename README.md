@@ -48,7 +48,7 @@ The remainder of the repository consists of:
 If you want to use the Hanko backend API but prefer to build your own UI, you can still make use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components and the client it provides handles communication with the Hanko backend API and saves you the time of rolling your own.
 
 # Contact us
-Schedule a Hanko Demo. Learn how Hanko will speed up your registration and login flows with passkey.
+Schedule a Hanko demo. Learn how Hanko will speed up your registration and login flows with passkeys.
 
 <a target="_blank" href="https://cal.com/team/hanko/hanko-demo"><img alt="Book us with Cal.com"  src="https://cal.com/book-with-cal-light.svg" /></a>
 
