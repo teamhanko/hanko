@@ -133,7 +133,7 @@ func (m *manager) GenerateCookie(token string) (*http.Cookie, error) {
 // DeleteCookie returns a cookie that will expire the cookie on the frontend
 func (m *manager) DeleteCookie() (*http.Cookie, error) {
 	return &http.Cookie{
-		Name:     "hanko",
+		Name:     m.cookieConfig.Name,
 		Value:    "",
 		Domain:   m.cookieConfig.Domain,
 		Path:     "/",
