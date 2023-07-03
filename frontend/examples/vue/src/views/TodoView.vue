@@ -19,10 +19,6 @@ const error = ref<Error>();
 const todos = ref<Todos>([]);
 const description = ref("");
 
-onMounted(() => {
-  listTodos();
-});
-
 const changeDescription = (event: any) => {
   description.value = event.currentTarget.value;
 };
@@ -113,14 +109,18 @@ const redirectToProfile = () => {
 const logout = () => {
   hankoClient.user.logout().catch((e) => (error.value = e));
 };
+
+onMounted(() => {
+  if (hankoClient.session.isValid()) {
+    listTodos();
+  } else {
+    redirectToLogin();
+  }
+});
 </script>
 
 <template>
-  <hanko-events
-    @onSessionNotPresent="redirectToLogin"
-    @onUserLoggedOut="redirectToLogin"
-  >
-  </hanko-events>
+  <hanko-events @onUserLoggedOut="redirectToLogin"></hanko-events>
   <on-session-expired-modal ref="modal"></on-session-expired-modal>
   <nav class="nav">
     <button @click.prevent="logout" class="button">Logout</button>

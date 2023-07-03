@@ -124,25 +124,21 @@ export {
 
 import {
   CustomEventWithDetail,
-  SessionEventDetail,
-  AuthFlowCompletedEventDetail,
+  SessionDetail,
+  AuthFlowCompletedDetail,
   authFlowCompletedType,
   sessionCreatedType,
-  sessionResumedType,
   sessionExpiredType,
-  sessionNotPresentType,
   userLoggedOutType,
   userDeletedType,
 } from "./lib/events/CustomEvents";
 
-export type { SessionEventDetail, AuthFlowCompletedEventDetail };
+export type { SessionDetail, AuthFlowCompletedDetail };
 
 export {
   authFlowCompletedType,
-  sessionResumedType,
   sessionCreatedType,
   sessionExpiredType,
-  sessionNotPresentType,
   userLoggedOutType,
   userDeletedType,
   CustomEventWithDetail,

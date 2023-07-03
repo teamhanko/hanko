@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Scheduler</title>
+  <title> AuthFlowCompletedDetail</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,8 +73,8 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>Scheduler</h1>
+                    <p>Interface</p>
+                    <h1>AuthFlowCompletedDetail</h1>
                 </header>
                 
 
@@ -85,9 +85,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Scheduler<span class="signature">()</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description">A class that manages scheduled tasks.</div>
+        <h2>AuthFlowCompletedDetail</h2>
         
     
 </header>
@@ -96,164 +94,17 @@
     <div class="container-overview">
     
         
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
-
-
-    
-    <h4 class="name" id="Scheduler">
-        <a class="href-link" href="#Scheduler">#</a>
+            <div class="description">The data passed in the `hanko-auth-flow-completed` event.</div>
         
-        <span class="code-name">
-            
-                new Scheduler<span class="signature">()</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
 
-    
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line8">line 8</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
         
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <div class='vertical-section'>
-            <h1>Methods</h1>
-            <div class="members">
-            
-                <div class="member">
 
 
-    
-    <h4 class="name" id="removeTasksWithType">
-        <a class="href-link" href="#removeTasksWithType">#</a>
-        
-        <span class="code-name">
-            
-                removeTasksWithType<span class="signature">(type)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
+    <h5 class="subsection-title">Properties:</h5>
 
-    
-    
-    <div class="description">
-        Removes all tasks with a given type from the scheduler.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
     
 <div class="table-container">
-    <table class="params table">
+    <table class="props table">
         <thead>
         <tr>
             
@@ -272,36 +123,32 @@
 
         <tbody>
         
-
             
 <tr class="deep-level-0">
-  
-      <td class="name"><code>type</code></td>
-  
+    
+        <td class="name"><code>userID</code></td>
+    
 
-  <td class="type">
-  
-      
+    <td class="type">
+    
+        
 <code class="param-type">string</code>
 
 
-  
-  </td>
+    
+    </td>
 
-  
+    
 
-  
+    
 
-  <td class="description last">The type of tasks to be removed.</td>
+    <td class="description last">The user associated with the removed session.</td>
 </tr>
-
 
         
         </tbody>
     </table>
 </div>
-
-
 
 
 
@@ -338,173 +185,19 @@
 
     
         <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
+            <a href="lib_events_CustomEvents.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line78">line 78</a>
+                <a href="lib_events_CustomEvents.ts.html">lib/events/CustomEvents.ts</a>, <a href="lib_events_CustomEvents.ts.html#line65">line 65</a>
             </span>
         </p>
     
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="scheduleTask">
-        <a class="href-link" href="#scheduleTask">#</a>
         
-        <span class="code-name">
-            
-                scheduleTask<span class="signature">(type, func, timeoutSeconds)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
     
-
-    
-    
-    <div class="description">
-        Schedules a task to be executed after a given timeout.
     </div>
     
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>type</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">string</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The type of the task.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>func</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">function</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The function to be executed when the task is triggered.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>timeoutSeconds</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The timeout after which the task should be executed, in seconds.</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
     
 
     
@@ -519,55 +212,6 @@
 
     
 
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line87">line 87</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</div>
-            
-            </div>
-        </div>
     
 
     
