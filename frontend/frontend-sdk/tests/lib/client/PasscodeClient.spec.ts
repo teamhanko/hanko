@@ -17,7 +17,7 @@ const passcodeValue = "123456";
 let passcodeClient: PasscodeClient;
 
 beforeEach(() => {
-  passcodeClient = new PasscodeClient("http://test.api");
+  passcodeClient = new PasscodeClient("http://test.api", {});
 });
 
 describe("PasscodeClient.initialize()", () => {

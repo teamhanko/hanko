@@ -5,7 +5,7 @@ describe("Cookie()", () => {
   let cookie: Cookie;
 
   beforeEach(() => {
-    cookie = new Cookie();
+    cookie = new Cookie("hanko");
   });
 
   describe("cookie.setAuthCookie()", () => {

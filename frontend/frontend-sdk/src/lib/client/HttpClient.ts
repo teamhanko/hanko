@@ -3,6 +3,7 @@ import { SessionState } from "../state/session/SessionState";
 import { PasscodeState } from "../state/users/PasscodeState";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
+import { Options } from "../../Hanko";
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
  *
@@ -129,13 +130,13 @@ class HttpClient {
   cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
+  constructor(api: string, options: Options) {
     this.api = api;
-    this.timeout = timeout;
-    this.sessionState = new SessionState();
-    this.passcodeState = new PasscodeState();
-    this.dispatcher = new Dispatcher();
-    this.cookie = new Cookie();
+    this.timeout = options.timeout ? options.timeout : 13000;
+    this.sessionState = new SessionState(options.cookieName);
+    this.passcodeState = new PasscodeState(options.cookieName);
+    this.dispatcher = new Dispatcher(options.cookieName);
+    this.cookie = new Cookie(options.cookieName);
   }
 
   // eslint-disable-next-line require-jsdoc

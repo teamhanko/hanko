@@ -4,7 +4,7 @@ import { Response } from "../../../src/lib/client/HttpClient";
 let tokenClient: TokenClient;
 
 beforeEach(() => {
-  tokenClient = new TokenClient("http://test.api");
+  tokenClient = new TokenClient("http://test.api", {});
 });
 
 describe("tokenClient.validate()", () => {

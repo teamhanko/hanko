@@ -3,7 +3,7 @@ import { PasswordState } from "../../../src/lib/state/users/PasswordState";
 
 describe("passwordState.read()", () => {
   it("should read the password state", async () => {
-    const state = new PasswordState();
+    const state = new PasswordState("hanko");
 
     expect(state.read()).toEqual(state);
   });
@@ -12,7 +12,7 @@ describe("passwordState.read()", () => {
 describe("passwordState.getRetryAfter()", () => {
   it("should return seconds until a new login can be attempted", async () => {
     const ls = decodedLSContent();
-    const state = new PasswordState();
+    const state = new PasswordState("hanko");
     const userID = Object.keys(ls.users)[0];
 
     state.ls = ls;
@@ -24,7 +24,7 @@ describe("passwordState.getRetryAfter()", () => {
 describe("passwordState.setRetryAfter()", () => {
   it("should set a timestamp until a new login can be attempted", async () => {
     const ls = decodedLSContent();
-    const state = new PasswordState();
+    const state = new PasswordState("hanko");
     const userID = Object.keys(ls.users)[0];
     const seconds = 42;
 

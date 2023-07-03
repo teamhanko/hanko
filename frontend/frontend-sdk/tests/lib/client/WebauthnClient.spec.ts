@@ -15,7 +15,7 @@ const credentialID = "credential-1";
 let webauthnClient: WebauthnClient;
 
 beforeEach(() => {
-  webauthnClient = new WebauthnClient("http://test.api");
+  webauthnClient = new WebauthnClient("http://test.api", {});
 });
 
 describe("webauthnClient.login()", () => {

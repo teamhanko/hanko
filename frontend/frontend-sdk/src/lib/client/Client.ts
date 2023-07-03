@@ -1,4 +1,5 @@
 import { HttpClient } from "./HttpClient";
+import { Options } from "../../Hanko";
 
 /**
  * A class to be extended by the other client classes.
@@ -13,12 +14,12 @@ abstract class Client {
   client: HttpClient;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
+  constructor(api: string, options: Options) {
     /**
      *  @public
      *  @type {HttpClient}
      */
-    this.client = new HttpClient(api, timeout);
+    this.client = new HttpClient(api, options);
   }
 }
 

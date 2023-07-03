@@ -12,7 +12,7 @@ const passwordRetryAfter = 180;
 let passwordClient: PasswordClient;
 
 beforeEach(() => {
-  passwordClient = new PasswordClient("http://test.api");
+  passwordClient = new PasswordClient("http://test.api", {});
 });
 
 describe("PasswordClient.login()", () => {

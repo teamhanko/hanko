@@ -98,11 +98,6 @@ import { TokenFinalized } from "../Dto";
  * @extends {Client}
  */
 export class TokenClient extends Client {
-  // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
-    super(api, timeout);
-  }
-
   /**
    * Validate a one time token to retrieve a session JWT. Does nothing
    * if the current window location does not contain a 'hanko_token' in the

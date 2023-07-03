@@ -14,7 +14,7 @@ const credentials = [{ id: "test-credential-1" }];
 let userClient: UserClient;
 
 beforeEach(() => {
-  userClient = new UserClient("http://test.api");
+  userClient = new UserClient("http://test.api", {});
 });
 
 describe("UserClient.getInfo()", () => {

@@ -22,6 +22,7 @@ import {
   WebauthnCredentials,
   WebauthnFinalized,
 } from "../Dto";
+import { Options } from "../../Hanko";
 
 /**
  * A class that handles WebAuthn authentication and registration.
@@ -39,18 +40,18 @@ class WebauthnClient extends Client {
   _createCredential = createWebauthnCredential;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
-    super(api, timeout);
+  constructor(api: string, options: Options) {
+    super(api, options);
     /**
      *  @public
      *  @type {WebauthnState}
      */
-    this.webauthnState = new WebauthnState();
+    this.webauthnState = new WebauthnState(options.cookieName);
     /**
      *  @public
      *  @type {PasscodeState}
      */
-    this.passcodeState = new PasscodeState();
+    this.passcodeState = new PasscodeState(options.cookieName);
   }
 
   /**

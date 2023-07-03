@@ -7,7 +7,13 @@ import JSCookie from "js-cookie";
  * @subcategory Internal
  */
 export class Cookie {
-  authCookieName = "hanko";
+  authCookieName: string; // = "hanko";
+
+  // eslint-disable-next-line require-jsdoc
+  constructor(cookieName: string) {
+    this.authCookieName = cookieName;
+  }
+
   /**
    * Returns the authentication token that was stored in the cookie.
    *

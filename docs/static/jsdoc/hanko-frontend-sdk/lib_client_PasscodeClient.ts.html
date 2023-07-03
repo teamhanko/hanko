@@ -95,6 +95,7 @@ import {
   TooManyRequestsError,
 } from "../Errors";
 import { Client } from "./Client";
+import { Options } from "../../Hanko";
 
 /**
  * A class to handle passcodes.
@@ -108,13 +109,13 @@ class PasscodeClient extends Client {
   state: PasscodeState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
-    super(api, timeout);
+  constructor(api: string, options: Options) {
+    super(api, options);
     /**
      *  @public
      *  @type {PasscodeState}
      */
-    this.state = new PasscodeState();
+    this.state = new PasscodeState(options.cookieName);
   }
 
   /**

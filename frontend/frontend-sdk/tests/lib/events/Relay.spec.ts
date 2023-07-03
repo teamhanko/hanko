@@ -11,7 +11,7 @@ describe("Relay", () => {
   let dispatcherSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    relay = new Relay();
+    relay = new Relay("hanko");
     dispatcherSpy = jest.spyOn(relay, "_dispatchEvent");
   });
 

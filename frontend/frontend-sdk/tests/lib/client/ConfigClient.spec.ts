@@ -4,7 +4,7 @@ import { Response } from "../../../src/lib/client/HttpClient";
 let configClient: ConfigClient;
 
 beforeEach(() => {
-  configClient = new ConfigClient("http://test.api");
+  configClient = new ConfigClient("http://test.api", {});
 });
 
 describe("configClient.get()", () => {

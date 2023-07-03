@@ -4,7 +4,7 @@ import { ThirdPartyError } from "../../../src/lib/Errors";
 let thirdPartyClient: ThirdPartyClient;
 
 beforeEach(() => {
-  thirdPartyClient = new ThirdPartyClient("http://test.api");
+  thirdPartyClient = new ThirdPartyClient("http://test.api", {});
 });
 
 describe("thirdPartyClient.auth()", () => {

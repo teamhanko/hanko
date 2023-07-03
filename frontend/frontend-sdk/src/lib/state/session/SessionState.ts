@@ -22,8 +22,8 @@ export interface LocalStorageSession {
  */
 class SessionState extends State {
   // eslint-disable-next-line require-jsdoc
-  constructor() {
-    super("hanko_session");
+  constructor(cookieName: string) {
+    super(`${cookieName}_session`);
   }
 
   /**

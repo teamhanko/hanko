@@ -14,11 +14,12 @@ import { Session } from "../Session";
 export class Relay extends Dispatcher {
   _listener = new Listener();
   _scheduler = new Scheduler();
-  _session = new Session();
+  _session: Session;
 
   // eslint-disable-next-line require-jsdoc
-  constructor() {
-    super();
+  constructor(cookieName: string) {
+    super(cookieName);
+    this._session = new Session(cookieName);
     this.listenEventDependencies();
   }
 

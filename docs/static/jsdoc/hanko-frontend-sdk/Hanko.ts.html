@@ -118,60 +118,79 @@ class Hanko extends Listener {
   session: Session;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
+  constructor(
+    api: string,
+    options: Options = { timeout: 13000, cookieName: "hanko" }
+  ) {
     super();
+    if (options.cookieName === undefined) {
+      options.cookieName = "hanko";
+    }
+    if (options.timeout === undefined) {
+      options.timeout = 13000;
+    }
+    // const opt: Options = {
+    //   timeout: 13000,
+    //   cookieName: "hanko",
+    //   ...options,
+    // };
     this.api = api;
     /**
      *  @public
      *  @type {ConfigClient}
      */
-    this.config = new ConfigClient(api, timeout);
+    this.config = new ConfigClient(api, options);
     /**
      *  @public
      *  @type {UserClient}
      */
-    this.user = new UserClient(api, timeout);
+    this.user = new UserClient(api, options);
     /**
      *  @public
      *  @type {WebauthnClient}
      */
-    this.webauthn = new WebauthnClient(api, timeout);
+    this.webauthn = new WebauthnClient(api, options);
     /**
      *  @public
      *  @type {PasswordClient}
      */
-    this.password = new PasswordClient(api, timeout);
+    this.password = new PasswordClient(api, options);
     /**
      *  @public
      *  @type {PasscodeClient}
      */
-    this.passcode = new PasscodeClient(api, timeout);
+    this.passcode = new PasscodeClient(api, options);
     /**
      *  @public
      *  @type {EmailClient}
      */
-    this.email = new EmailClient(api, timeout);
+    this.email = new EmailClient(api, options);
     /**
      *  @public
      *  @type {ThirdPartyClient}
      */
-    this.thirdParty = new ThirdPartyClient(api, timeout);
+    this.thirdParty = new ThirdPartyClient(api, options);
     /**
      *  @public
      *  @type {TokenClient}
      */
-    this.token = new TokenClient(api, timeout);
+    this.token = new TokenClient(api, options);
     /**
      *  @public
      *  @type {Relay}
      */
-    this.relay = new Relay();
+    this.relay = new Relay(options.cookieName);
     /**
      *  @public
      *  @type {Session}
      */
-    this.session = new Session();
+    this.session = new Session(options.cookieName);
   }
+}
+
+export interface Options {
+  timeout?: number;
+  cookieName?: string;
 }
 
 export { Hanko };

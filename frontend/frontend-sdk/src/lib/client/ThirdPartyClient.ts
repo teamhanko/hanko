@@ -1,5 +1,6 @@
 import { Client } from "./Client";
 import { ThirdPartyError } from "../Errors";
+import { Options } from "../../Hanko";
 
 /**
  * A class that handles communication with the Hanko API for the purposes
@@ -12,8 +13,8 @@ import { ThirdPartyError } from "../Errors";
  */
 export class ThirdPartyClient extends Client {
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
-    super(api, timeout);
+  constructor(api: string, options: Options) {
+    super(api, options);
   }
 
   /**

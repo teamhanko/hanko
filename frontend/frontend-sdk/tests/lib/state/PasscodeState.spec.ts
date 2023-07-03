@@ -3,7 +3,7 @@ import { PasscodeState } from "../../../src/lib/state/users/PasscodeState";
 
 describe("passcodeState.read()", () => {
   it("should read the password state", async () => {
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
 
     expect(state.read()).toEqual(state);
   });
@@ -12,7 +12,7 @@ describe("passcodeState.read()", () => {
 describe("passcodeState.getActiveID()", () => {
   it("should return the id of the currently active passcode", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(ls.users)[0];
 
     state.ls = ls;
@@ -24,7 +24,7 @@ describe("passcodeState.getActiveID()", () => {
 describe("passcodeState.setActiveID()", () => {
   it("should return the id of the currently active passcode", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(ls.users)[0];
     const passcodeID = "test_id_1";
 
@@ -38,7 +38,7 @@ describe("passcodeState.setActiveID()", () => {
 describe("passcodeState.reset()", () => {
   it("should reset information about the active passcode", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(ls.users)[0];
 
     state.ls = ls;
@@ -53,7 +53,7 @@ describe("passcodeState.reset()", () => {
 describe("passcodeState.getResendAfter()", () => {
   it("should return seconds until a new passcode can be send", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(decodedLSContent().users)[0];
 
     state.ls = ls;
@@ -65,7 +65,7 @@ describe("passcodeState.getResendAfter()", () => {
 describe("passcodeState.setResendAfter()", () => {
   it("should set a timestamp until a new passcode can be send", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(ls.users)[0];
     const seconds = 42;
 
@@ -79,7 +79,7 @@ describe("passcodeState.setResendAfter()", () => {
 describe("passcodeState.getTTL()", () => {
   it("should return seconds until the active passcode lives", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(ls.users)[0];
 
     state.ls = ls;
@@ -91,7 +91,7 @@ describe("passcodeState.getTTL()", () => {
 describe("passcodeState.setTTL()", () => {
   it("should set a timestamp until the active passcode lives", async () => {
     const ls = decodedLSContent();
-    const state = new PasscodeState();
+    const state = new PasscodeState("hanko");
     const userID = Object.keys(ls.users)[0];
     const seconds = 42;
 

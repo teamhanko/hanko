@@ -7,6 +7,7 @@ import {
   UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
+import { Options } from "../../Hanko";
 
 /**
  * A class to handle passwords.
@@ -21,18 +22,18 @@ class PasswordClient extends Client {
   passcodeState: PasscodeState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
-    super(api, timeout);
+  constructor(api: string, options: Options) {
+    super(api, options);
     /**
      *  @public
      *  @type {PasswordState}
      */
-    this.passwordState = new PasswordState();
+    this.passwordState = new PasswordState(options.cookieName);
     /**
      *  @public
      *  @type {PasscodeState}
      */
-    this.passcodeState = new PasscodeState();
+    this.passcodeState = new PasscodeState(options.cookieName);
   }
 
   /**

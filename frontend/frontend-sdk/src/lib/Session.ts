@@ -13,9 +13,9 @@ export class Session {
   _cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
-  constructor() {
-    this._sessionState = new SessionState();
-    this._cookie = new Cookie();
+  constructor(cookieName: string) {
+    this._sessionState = new SessionState(cookieName);
+    this._cookie = new Cookie(cookieName);
   }
 
   /**

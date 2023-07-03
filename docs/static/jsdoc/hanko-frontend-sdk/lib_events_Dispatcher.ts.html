@@ -105,7 +105,12 @@ import { SessionState } from "../state/session/SessionState";
  */
 export class Dispatcher {
   _dispatchEvent = document.dispatchEvent.bind(document);
-  _sessionState = new SessionState();
+  _sessionState: SessionState;
+
+  // eslint-disable-next-line require-jsdoc
+  constructor(cookieName: string) {
+    this._sessionState = new SessionState(cookieName);
+  }
 
   /**
    * Dispatches a custom event.

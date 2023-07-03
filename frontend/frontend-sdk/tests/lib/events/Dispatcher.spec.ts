@@ -9,7 +9,7 @@ describe("Dispatcher", () => {
   let dispatcher: Dispatcher;
 
   beforeEach(() => {
-    dispatcher = new Dispatcher();
+    dispatcher = new Dispatcher("hanko");
   });
 
   describe("dispatchSessionCreatedEvent()", () => {
