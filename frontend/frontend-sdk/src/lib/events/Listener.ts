@@ -1,15 +1,13 @@
 import { Throttle } from "../Throttle";
 import {
   CustomEventWithDetail,
-  SessionEventDetail,
-  AuthFlowCompletedEventDetail,
+  SessionDetail,
+  AuthFlowCompletedDetail,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
   authFlowCompletedType,
   userLoggedOutType,
-  sessionResumedType,
-  sessionNotPresentType,
 } from "./CustomEvents";
 
 /**
@@ -72,7 +70,6 @@ interface EventListenerWithTypeParams<T> extends EventListenerParams<T> {
  */
 export class Listener {
   public throttleLimit = 1000;
-  _cleanupFunctions: CleanupFunc[] = [];
   _addEventListener = document.addEventListener.bind(document);
   _removeEventListener = document.removeEventListener.bind(document);
   _throttle = Throttle.throttle;
@@ -121,17 +118,7 @@ export class Listener {
   }: EventListenerWithTypeParams<T>): CleanupFunc {
     const wrappedCallback = this.wrapCallback(callback, throttle);
     this._addEventListener(type, wrappedCallback, { once });
-    const cleanupFunc = () => this._removeEventListener(type, wrappedCallback);
-    this._cleanupFunctions.push(cleanupFunc);
-    return cleanupFunc;
-  }
-
-  /**
-   * Removes all currently installed event listeners.
-   */
-  public removeEventListeners() {
-    this._cleanupFunctions.forEach((cleanupFunc) => cleanupFunc());
-    this._cleanupFunctions = [];
+    return () => this._removeEventListener(type, wrappedCallback);
   }
 
   /**
@@ -180,30 +167,15 @@ export class Listener {
    * Adds an event listener for "hanko-session-created" events. Will be triggered across all browser windows, when the user
    * logs in, or when the page has been loaded or refreshed and there is a valid session.
    *
-   * @param {CallbackFunc<SessionEventDetail>} callback - The function to be called when the event is triggered.
+   * @param {CallbackFunc<SessionDetail>} callback - The function to be called when the event is triggered.
    * @param {boolean=} once - Whether the event listener should be removed after being called once.
    * @returns {CleanupFunc} This function can be called to remove the event listener.
    */
   public onSessionCreated(
-    callback: CallbackFunc<SessionEventDetail>,
+    callback: CallbackFunc<SessionDetail>,
     once?: boolean
   ): CleanupFunc {
     return this.addEventListener(sessionCreatedType, { callback, once }, true);
-  }
-
-  /**
-   * Adds an event listener for "hanko-session-resumed" events. Will be triggered, after the page has been loaded and
-   * the user has an active session.
-   *
-   * @param {CallbackFunc<SessionEventDetail>} callback - The function to be called when the event is triggered.
-   * @param {boolean=} once - Whether the event listener should be removed after being called once.
-   * @returns {CleanupFunc} This function can be called to remove the event listener.
-   */
-  public onSessionResumed(
-    callback: CallbackFunc<SessionEventDetail>,
-    once?: boolean
-  ): CleanupFunc {
-    return this.addEventListener(sessionResumedType, { callback, once }, true);
   }
 
   /**
@@ -254,33 +226,14 @@ export class Listener {
   /**
    * Adds an event listener for hanko-auth-flow-completed events. Will be triggered after the login or registration flow has been completed.
    *
-   * @param {CallbackFunc<AuthFlowCompletedEventDetail>} callback - The function to be called when the event is triggered.
+   * @param {CallbackFunc<AuthFlowCompletedDetail>} callback - The function to be called when the event is triggered.
    * @param {boolean=} once - Whether the event listener should be removed after being called once.
    * @returns {CleanupFunc} This function can be called to remove the event listener.
    */
   public onAuthFlowCompleted(
-    callback: CallbackFunc<AuthFlowCompletedEventDetail>,
+    callback: CallbackFunc<AuthFlowCompletedDetail>,
     once?: boolean
   ): CleanupFunc {
     return this.addEventListener(authFlowCompletedType, { callback, once });
-  }
-
-  /**
-   * Adds an event listener for hanko-session-not-present events. Will be triggered initially, after the page has been
-   * loaded and the user is logged out.
-   *
-   * @param {CallbackFunc<AuthFlowCompletedEventDetail>} callback - The function to be called when the event is triggered.
-   * @param {boolean=} once - Whether the event listener should be removed after being called once.
-   * @returns {CleanupFunc} This function can be called to remove the event listener.
-   */
-  public onSessionNotPresent(
-    callback: CallbackFunc<null>,
-    once?: boolean
-  ): CleanupFunc {
-    return this.addEventListener(
-      sessionNotPresentType,
-      { callback, once },
-      true
-    );
   }
 }

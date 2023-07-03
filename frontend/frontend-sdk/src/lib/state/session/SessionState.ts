@@ -9,6 +9,7 @@ import { State } from "../State";
 export interface LocalStorageSession {
   expiry: number;
   userID: string;
+  authFlowCompleted: boolean;
 }
 
 /**
@@ -43,7 +44,7 @@ class SessionState extends State {
    * @return {LocalStorageSession}
    */
   getState(): LocalStorageSession {
-    this.ls.session ||= { expiry: 0, userID: "" };
+    this.ls.session ||= { expiry: 0, userID: "", authFlowCompleted: false };
     return this.ls.session;
   }
 
@@ -82,6 +83,24 @@ class SessionState extends State {
    */
   setUserID(userID: string): SessionState {
     this.getState().userID = userID;
+    return this;
+  }
+
+  /**
+   * Gets the authFlowCompleted indicator.
+   */
+  getAuthFlowCompleted(): boolean {
+    return this.getState().authFlowCompleted;
+  }
+
+  /**
+   * Sets the authFlowCompleted indicator.
+   *
+   * @param {string} completed - The authFlowCompleted indicator.
+   * @return {SessionState}
+   */
+  setAuthFlowCompleted(completed: boolean): SessionState {
+    this.getState().authFlowCompleted = completed;
     return this;
   }
 

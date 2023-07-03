@@ -61,12 +61,13 @@ const LoginEmailPage = (props: Props) => {
   const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] = useState<boolean>();
   const [isEmailLoginLoading, setIsEmailLoginLoading] = useState<boolean>();
   const [error, setError] = useState<HankoError>(null);
-  const [isWebAuthnSupported, setIsWebAuthnSupported] = useState<boolean>();
   const [isConditionalMediationSupported, setIsConditionalMediationSupported] =
     useState<boolean>();
   const [isEmailLoginSuccess, setIsEmailLoginSuccess] = useState<boolean>();
   const [isThirdPartyLoginLoading, setIsThirdPartyLoginLoading] =
     useState<string>("");
+
+  const isWebAuthnSupported = WebauthnSupport.supported();
 
   const disabled = useMemo(
     () =>
@@ -364,10 +365,6 @@ const LoginEmailPage = (props: Props) => {
   useEffect(() => {
     loginViaConditionalUI();
   }, [loginViaConditionalUI]);
-
-  useEffect(() => {
-    setIsWebAuthnSupported(WebauthnSupport.supported());
-  }, []);
 
   useEffect(() => {
     WebauthnSupport.isConditionalMediationAvailable()

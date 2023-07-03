@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { TodoService } from '../services/todo.service';
 import { HankoService } from "../services/hanko.services";
@@ -8,10 +8,16 @@ import { HankoService } from "../services/hanko.services";
   templateUrl: './profile.component.html',
   styleUrls: ['../app.component.css'],
 })
-export class ProfileComponent {
+export class ProfileComponent implements OnInit {
   error?: Error;
 
   constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
+
+  ngOnInit() {
+    if (!this.hankoService.client.session.isValid()) {
+      this.redirectToLogin();
+    }
+  }
 
   logout() {
     this.hankoService.client.user.logout().catch((e) => (this.error = e));
