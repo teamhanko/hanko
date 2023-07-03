@@ -216,10 +216,19 @@ type Password struct {
 }
 
 type Cookie struct {
+	Name     string `yaml:"name" json:"name" koanf:"name"`
 	Domain   string `yaml:"domain" json:"domain" koanf:"domain"`
 	HttpOnly bool   `yaml:"http_only" json:"http_only" koanf:"http_only" split_words:"true"`
 	SameSite string `yaml:"same_site" json:"same_site" koanf:"same_site" split_words:"true"`
 	Secure   bool   `yaml:"secure" json:"secure" koanf:"secure"`
+}
+
+func (c *Cookie) GetName() string {
+	if c.Name != "" {
+		return c.Name
+	}
+
+	return "hanko"
 }
 
 type ServerSettings struct {

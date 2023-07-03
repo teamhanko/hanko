@@ -59,6 +59,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
+	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
+
 	mailer, err := mail.NewMailer(cfg.Passcode.Smtp)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
@@ -70,23 +72,23 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := e.Group("/password")
-		password.PUT("", passwordHandler.Set, hankoMiddleware.Session(sessionManager))
+		password.PUT("", passwordHandler.Set, sessionMiddleware)
 		password.POST("/login", passwordHandler.Login)
 	}
 
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
 
-	e.GET("/me", userHandler.Me, hankoMiddleware.Session(sessionManager))
+	e.GET("/me", userHandler.Me, sessionMiddleware)
 
 	user := e.Group("/users")
 	user.POST("", userHandler.Create)
-	user.GET("/:id", userHandler.Get, hankoMiddleware.Session(sessionManager))
+	user.GET("/:id", userHandler.Get, sessionMiddleware)
 
 	e.POST("/user", userHandler.GetUserIdByEmail)
-	e.POST("/logout", userHandler.Logout, hankoMiddleware.Session(sessionManager))
+	e.POST("/logout", userHandler.Logout, sessionMiddleware)
 
 	if cfg.Account.AllowDeletion {
-		e.DELETE("/user", userHandler.Delete, hankoMiddleware.Session(sessionManager))
+		e.DELETE("/user", userHandler.Delete, sessionMiddleware)
 	}
 
 	healthHandler := NewHealthHandler()
@@ -117,7 +119,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	webauthn := e.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", hankoMiddleware.Session(sessionManager))
+	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
@@ -125,7 +127,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
 	webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
 
-	webauthnCredentials := webauthn.Group("/credentials", hankoMiddleware.Session(sessionManager))
+	webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
 	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
@@ -135,7 +137,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
-	email := e.Group("/emails", hankoMiddleware.Session(sessionManager))
+	email := e.Group("/emails", sessionMiddleware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)

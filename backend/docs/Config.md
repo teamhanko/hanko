@@ -166,6 +166,13 @@ session:
     # Default value: true
     #
     secure: true
+    ## name ##
+    #
+    # Sets the name of the cookie.
+    #
+    # Default value: hanko
+    #
+    name: true
   ## enable_auth_token_header ##
   #
   # The JWT will be transmitted via the X-Auth-Token header. Enable during cross-domain operations.

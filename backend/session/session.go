@@ -28,6 +28,7 @@ type manager struct {
 }
 
 type cookieConfig struct {
+	Name     string
 	Domain   string
 	HttpOnly bool
 	SameSite http.SameSite
@@ -67,11 +68,13 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 	} else {
 		audience = []string{config.Webauthn.RelyingParty.Id}
 	}
+
 	return &manager{
 		jwtGenerator:  g,
 		sessionLength: duration,
 		issuer:        config.Session.Issuer,
 		cookieConfig: cookieConfig{
+			Name:     config.Session.Cookie.GetName(),
 			Domain:   config.Session.Cookie.Domain,
 			HttpOnly: config.Session.Cookie.HttpOnly,
 			SameSite: sameSite,
@@ -116,7 +119,7 @@ func (m *manager) Verify(token string) (jwt.Token, error) {
 // GenerateCookie creates a new session cookie for the given user
 func (m *manager) GenerateCookie(token string) (*http.Cookie, error) {
 	return &http.Cookie{
-		Name:     "hanko",
+		Name:     m.cookieConfig.Name,
 		Value:    token,
 		Domain:   m.cookieConfig.Domain,
 		Path:     "/",
