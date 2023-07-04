@@ -17,6 +17,7 @@ import (
 
 type Logger interface {
 	Create(echo.Context, models.AuditLogType, *models.User, error) error
+	CreateWithConnection(*pop.Connection, echo.Context, models.AuditLogType, *models.User, error) error
 }
 
 type logger struct {
