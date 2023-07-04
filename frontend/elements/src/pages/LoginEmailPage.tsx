@@ -386,6 +386,10 @@ const LoginEmailPage = (props: Props) => {
     }
   }, [hanko, setPage, isThirdPartyLoginLoading]);
 
+  useEffect(() => {
+    setEmailAddress(prefilledEmail);
+  }, [prefilledEmail]);
+
   return (
     <Content>
       <Headline1>{t("headlines.loginEmail")}</Headline1>
