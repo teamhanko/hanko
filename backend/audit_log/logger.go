@@ -2,6 +2,7 @@ package auditlog
 
 import (
 	"fmt"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	zeroLog "github.com/rs/zerolog"
@@ -44,55 +45,58 @@ func NewLogger(persister persistence.Persister, cfg config.AuditLog) Logger {
 	}
 }
 
-func (c *logger) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
-	if c.storageEnabled {
-		err := c.store(context, auditLogType, user, logError)
+func (l *logger) Create(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
+	return l.CreateWithConnection(l.persister.GetConnection(), context, auditLogType, user, logError)
+}
+
+func (l *logger) CreateWithConnection(tx *pop.Connection, context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
+	if l.storageEnabled {
+		err := l.store(tx, context, auditLogType, user, logError)
 		if err != nil {
 			return err
 		}
 	}
 
-	if c.consoleLoggingEnabled {
-		c.logToConsole(context, auditLogType, user, logError)
+	if l.consoleLoggingEnabled {
+		l.logToConsole(context, auditLogType, user, logError)
 	}
 
 	return nil
 }
 
-func (c *logger) store(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
+func (l *logger) store(tx *pop.Connection, context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) error {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return fmt.Errorf("failed to create id: %w", err)
 	}
-	var userId *uuid.UUID = nil
-	var userEmail *string = nil
-	if user != nil {
-		userId = &user.ID
-		if e := user.Emails.GetPrimary(); e != nil {
-			userEmail = &e.Address
-		}
-	}
-	var errString *string = nil
-	if logError != nil {
-		// check if error is not nil, because else the string (formatted with fmt.Sprintf) would not be empty but look like this: `%!s(<nil>)`
-		tmp := fmt.Sprintf("%s", logError)
-		errString = &tmp
-	}
-	e := models.AuditLog{
+
+	al := models.AuditLog{
 		ID:                id,
 		Type:              auditLogType,
-		Error:             errString,
+		Error:             nil,
 		MetaHttpRequestId: context.Response().Header().Get(echo.HeaderXRequestID),
 		MetaUserAgent:     context.Request().UserAgent(),
 		MetaSourceIp:      context.RealIP(),
-		ActorUserId:       userId,
-		ActorEmail:        userEmail,
+		ActorUserId:       nil,
+		ActorEmail:        nil,
 	}
 
-	return c.persister.GetAuditLogPersister().Create(e)
+	if user != nil {
+		al.ActorUserId = &user.ID
+		if e := user.Emails.GetPrimary(); e != nil {
+			al.ActorEmail = &e.Address
+		}
+	}
+	if logError != nil {
+		// check if error is not nil, because else the string (formatted with fmt.Sprintf) would not be empty but look like this: `%!s(<nil>)`
+		tmp := fmt.Sprintf("%s", logError)
+		al.Error = &tmp
+	}
+
+	return l.persister.GetAuditLogPersisterWithConnection(tx).Create(al)
 }
 
-func (c *logger) logToConsole(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) {
+func (l *logger) logToConsole(context echo.Context, auditLogType models.AuditLogType, user *models.User, logError error) {
 	now := time.Now()
 	loggerEvent := zeroLogger.Log().
 		Str("audience", "audit").
