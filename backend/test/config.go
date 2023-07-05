@@ -15,14 +15,24 @@ var DefaultConfig = config.Config{
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
 	},
-	Passcode: config.Passcode{Smtp: config.SMTP{
-		Host: "localhost",
-		Port: "2500",
-	}},
+	Passcode: config.Passcode{
+		Smtp: config.SMTP{
+			Host: "localhost",
+			Port: "2500",
+		},
+		Email: config.Email{
+			FromAddress: "test@hanko.io",
+			FromName:    "Hanko Test",
+		},
+		TTL: 300,
+	},
 	Session: config.Session{
 		Lifespan: "1h",
 		Cookie: config.Cookie{
 			SameSite: "none",
 		},
+	},
+	Service: config.Service{
+		Name: "Test",
 	},
 }
