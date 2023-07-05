@@ -95,7 +95,6 @@ const AppProvider = ({
     fallbackLanguage,
   } = globalOptions;
   const ref = useRef<HTMLElement>(null);
-  const {} = globalOptions;
   const experimentalFeatures = useMemo(
     () =>
       experimental
