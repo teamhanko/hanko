@@ -7,7 +7,7 @@ import {
   UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
-import { Options } from "../../Hanko";
+import { Options } from "./HttpClient";
 
 /**
  * A class to handle passwords.

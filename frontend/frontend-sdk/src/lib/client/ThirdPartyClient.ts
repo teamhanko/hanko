@@ -12,11 +12,6 @@ import { Options } from "../../Hanko";
  * @extends {Client}
  */
 export class ThirdPartyClient extends Client {
-  // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: Options) {
-    super(api, options);
-  }
-
   /**
    * Performs a request to the Hanko API that redirects to the given
    * third party provider.

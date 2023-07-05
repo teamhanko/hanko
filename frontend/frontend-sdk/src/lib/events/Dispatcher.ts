@@ -11,6 +11,17 @@ import {
 import { SessionState } from "../state/session/SessionState";
 
 /**
+ * Options for Dispatcher
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {string} storageKey - The prefix / name of the local storage keys.
+ */
+interface Options {
+  storageKey: string;
+}
+
+/**
  * A class that dispatches custom events.
  *
  * @category SDK
@@ -21,8 +32,8 @@ export class Dispatcher {
   _sessionState: SessionState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(cookieName: string) {
-    this._sessionState = new SessionState(cookieName);
+  constructor(options: Options) {
+    this._sessionState = new SessionState({ ...options });
   }
 
   /**

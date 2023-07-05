@@ -7,7 +7,11 @@ const emailAddress = "test-email-1@test";
 let emailClient: EmailClient;
 
 beforeEach(() => {
-  emailClient = new EmailClient("http://test.api", {});
+  emailClient = new EmailClient("http://test.api", {
+    cookieName: "hanko",
+    storageKey: "hanko",
+    timeout: 13000,
+  });
 });
 
 describe("EmailClient.list()", () => {

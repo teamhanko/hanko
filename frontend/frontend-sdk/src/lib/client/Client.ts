@@ -1,5 +1,4 @@
-import { HttpClient } from "./HttpClient";
-import { Options } from "../../Hanko";
+import { HttpClient, Options } from "./HttpClient";
 
 /**
  * A class to be extended by the other client classes.
@@ -8,7 +7,7 @@ import { Options } from "../../Hanko";
  * @category SDK
  * @subcategory Internal
  * @param {string} api - The URL of your Hanko API instance
- * @param {number=} timeout - The request timeout in milliseconds
+ * @param {Options} options - The options that can be used
  */
 abstract class Client {
   client: HttpClient;

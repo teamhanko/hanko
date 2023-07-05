@@ -4,7 +4,11 @@ import { ThirdPartyError } from "../../../src/lib/Errors";
 let thirdPartyClient: ThirdPartyClient;
 
 beforeEach(() => {
-  thirdPartyClient = new ThirdPartyClient("http://test.api", {});
+  thirdPartyClient = new ThirdPartyClient("http://test.api", {
+    cookieName: "hanko",
+    storageKey: "hanko",
+    timeout: 13000,
+  });
 });
 
 describe("thirdPartyClient.auth()", () => {

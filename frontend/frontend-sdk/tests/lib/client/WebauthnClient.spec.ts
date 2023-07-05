@@ -15,7 +15,11 @@ const credentialID = "credential-1";
 let webauthnClient: WebauthnClient;
 
 beforeEach(() => {
-  webauthnClient = new WebauthnClient("http://test.api", {});
+  webauthnClient = new WebauthnClient("http://test.api", {
+    cookieName: "hanko",
+    storageKey: "hanko",
+    timeout: 13000,
+  });
 });
 
 describe("webauthnClient.login()", () => {

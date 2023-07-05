@@ -5,6 +5,19 @@ import { Dispatcher } from "./Dispatcher";
 import { Session } from "../Session";
 
 /**
+ * Options for Relay
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {string} cookieName - The name of the session cookie set from the SDK.
+ * @property {string} storageKey - The prefix / name of the local storage keys.
+ */
+interface Options {
+  cookieName: string;
+  storageKey: string;
+}
+
+/**
  * A class that dispatches events and scheduled events, based on other events.
  *
  * @category SDK
@@ -17,9 +30,9 @@ export class Relay extends Dispatcher {
   _session: Session;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(cookieName: string) {
-    super(cookieName);
-    this._session = new Session(cookieName);
+  constructor(options: Options) {
+    super({ ...options });
+    this._session = new Session({ ...options });
     this.listenEventDependencies();
   }
 

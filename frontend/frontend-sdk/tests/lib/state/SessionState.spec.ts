@@ -3,7 +3,7 @@ import { SessionState } from "../../../src/lib/state/session/SessionState";
 
 describe("sessionState.read()", () => {
   it("should read the session state", async () => {
-    const state = new SessionState("hanko");
+    const state = new SessionState({ storageKey: "hanko" });
 
     expect(state.read()).toEqual(state);
   });
@@ -12,7 +12,7 @@ describe("sessionState.read()", () => {
 describe("sessionState.getUserID()", () => {
   it("should return the user id", async () => {
     const ls = decodedLSContent();
-    const state = new SessionState("hanko");
+    const state = new SessionState({ storageKey: "hanko" });
 
     state.ls = ls;
 
@@ -23,7 +23,7 @@ describe("sessionState.getUserID()", () => {
 describe("sessionState.setUserID()", () => {
   it("should set the id of the current user", async () => {
     const ls = decodedLSContent();
-    const state = new SessionState("hanko");
+    const state = new SessionState({ storageKey: "hanko" });
     const userID = "test_id_1";
 
     state.ls = ls;
@@ -36,7 +36,7 @@ describe("sessionState.setUserID()", () => {
 describe("sessionState.reset()", () => {
   it("should reset information about the current session", async () => {
     const ls = decodedLSContent();
-    const state = new SessionState("hanko");
+    const state = new SessionState({ storageKey: "hanko" });
 
     state.ls = ls;
 
@@ -49,7 +49,7 @@ describe("sessionState.reset()", () => {
 describe("sessionState.getExpirationSeconds()", () => {
   it("should return seconds until the session is active", async () => {
     const ls = decodedLSContent();
-    const state = new SessionState("hanko");
+    const state = new SessionState({ storageKey: "hanko" });
 
     state.ls = ls;
 
@@ -59,7 +59,7 @@ describe("sessionState.getExpirationSeconds()", () => {
 
 describe("sessionState.setExpirationSeconds()", () => {
   it("should set a timestamp until the session is active", async () => {
-    const state = new SessionState("hanko");
+    const state = new SessionState({ storageKey: "hanko" });
     const seconds = 42;
 
     expect(state.setExpirationSeconds(seconds)).toEqual(state);

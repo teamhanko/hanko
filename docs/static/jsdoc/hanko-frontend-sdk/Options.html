@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> UserState</title>
+  <title> Options</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,8 +73,8 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Class</p>
-                    <h1>UserState</h1>
+                    <p>Interface</p>
+                    <h1>Options</h1>
                 </header>
                 
 
@@ -85,9 +85,7 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature">(abstract) </span></span>UserState<span class="signature">(key)</span><span class="type-signature"></span></h2>
-        
-            <div class="class-description">A class to read and write local storage contents.</div>
+        <h2>Options</h2>
         
     
 </header>
@@ -96,46 +94,235 @@
     <div class="container-overview">
     
         
-            <div class='vertical-section'>
-                <div class="members">
-                    <div class="member">
-                        <div class=name>
-                            <span class="tag">Constructor</span>
-                        </div>
-                        
-
-
-    
-    <h4 class="name" id="UserState">
-        <a class="href-link" href="#UserState">#</a>
+            <div class="description">The options for the Hanko class</div>
         
-            
-                <span class='tag'>abstract</span>
-            
+
         
-        <span class="code-name">
-            
-                new UserState<span class="signature">(key)</span><span class="type-signature"></span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
 
 
+    <h5 class="subsection-title">Properties:</h5>
 
-
-
-
-
-
-
-    <h5>Parameters:</h5>
     
 <div class="table-container">
-    <table class="params table">
+    <table class="props table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>timeout</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">number</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The http request timeout in milliseconds. Defaults to 13000ms</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>cookieName</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The name of the session cookie set from the SDK. Defaults to "hanko"</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>storageKey</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The prefix / name of the local storage keys. Defaults to "hanko"</td>
+</tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="Hanko.ts.html" class="button">View Source</a>
+            <span>
+                <a href="Hanko.ts.html">Hanko.ts</a>, <a href="Hanko.ts.html#line115">line 115</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+        
+    
+    </div>
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>Options</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Options for Cookie</div>
+        
+
+        
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+<div class="table-container">
+    <table class="props table">
         <thead>
         <tr>
             
@@ -154,29 +341,27 @@
 
         <tbody>
         
-
             
 <tr class="deep-level-0">
-  
-      <td class="name"><code>key</code></td>
-  
+    
+        <td class="name"><code>cookieName</code></td>
+    
 
-  <td class="type">
-  
-      
+    <td class="type">
+    
+        
 <code class="param-type">string</code>
 
 
-  
-  </td>
+    
+    </td>
 
-  
+    
 
-  
+    
 
-  <td class="description last">The local storage key.</td>
+    <td class="description last">The name of the session cookie set from the SDK.</td>
 </tr>
-
 
         
         </tbody>
@@ -185,8 +370,6 @@
 
 
 
-
-
 <dl class="details">
 
     
@@ -220,191 +403,72 @@
 
     
         <p class="tag-source">
-            <a href="lib_state_users_UserState.ts.html" class="button">View Source</a>
+            <a href="lib_Cookie.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_state_users_UserState.ts.html">lib/state/users/UserState.ts</a>, <a href="lib_state_users_UserState.ts.html#line18">line 18</a>
+                <a href="lib_Cookie.ts.html">lib/Cookie.ts</a>, <a href="lib_Cookie.ts.html#line41">line 41</a>
             </span>
         </p>
     
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                </div>
-            </div>
         
     
     </div>
     
     
-        <h3 class="subsection-title">Extends</h3>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>Options</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Options for Session</div>
+        
 
         
 
 
-    <ul>
-        <li><a href="State.html">State</a></li>
-    </ul>
+    <h5 class="subsection-title">Properties:</h5>
 
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <div class='vertical-section'>
-            <h1>Members</h1>
-            <div class="members">
-            
-                <div class="member">
-
-    <span class="method-parameter is-pulled-right">
-        <label>Type:</label>
-        
-<code class="param-type"><a href="LocalStorage.html">LocalStorage</a></code>
-
-
-    </span>
-
-<h4 class="name" id="ls">
-    <a class="href-link" href="#ls">#</a>
-    
-    <span class="code-name">
-        ls
-    </span>
-    
-</h4>
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-    <dt class="inherited-from">Inherited From:</dt>
-    <dd class="inherited-from"><ul class="dummy"><li>
-        <a href="State.html#ls">State#ls</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_state_State.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_state_State.ts.html">lib/state/State.ts</a>, <a href="lib_state_State.ts.html#line23">line 23</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-</div>
-            
-            </div>
-        </div>
-    
-
-    
-        <div class='vertical-section'>
-            <h1>Methods</h1>
-            <div class="members">
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="getUserState">
-        <a class="href-link" href="#getUserState">#</a>
-        
-        <span class="code-name">
-            
-                getUserState<span class="signature">(userID)</span><span class="type-signature"> &rarr; {<a href="LocalStorageUser.html">LocalStorageUser</a>}</span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        Gets the state of the specified user.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
     
 <div class="table-container">
-    <table class="params table">
+    <table class="props table">
         <thead>
         <tr>
             
@@ -423,29 +487,50 @@
 
         <tbody>
         
-
             
 <tr class="deep-level-0">
-  
-      <td class="name"><code>userID</code></td>
-  
+    
+        <td class="name"><code>cookieName</code></td>
+    
 
-  <td class="type">
-  
-      
+    <td class="type">
+    
+        
 <code class="param-type">string</code>
 
 
-  
-  </td>
+    
+    </td>
 
-  
+    
 
-  
+    
 
-  <td class="description last">The UUID of the user.</td>
+    <td class="description last">The name of the session cookie set from the SDK.</td>
 </tr>
 
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>storageKey</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">The prefix / name of the local storage keys.</td>
+</tr>
 
         
         </tbody>
@@ -454,6 +539,196 @@
 
 
 
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_Session.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_Session.ts.html">lib/Session.ts</a>, <a href="lib_Session.ts.html#line77">line 77</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+        
+    
+    </div>
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>Options</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Options for the HttpClient</div>
+        
+
+        
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+<div class="table-container">
+    <table class="props table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>timeout</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">number</code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">The http request timeout in milliseconds.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>cookieName</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">The name of the session cookie set from the SDK.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>storageKey</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">The prefix / name of the local storage keys.</td>
+</tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
 
 
 <dl class="details">
@@ -489,90 +764,116 @@
 
     
         <p class="tag-source">
-            <a href="lib_state_users_UserState.ts.html" class="button">View Source</a>
+            <a href="lib_client_HttpClient.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_state_users_UserState.ts.html">lib/state/users/UserState.ts</a>, <a href="lib_state_users_UserState.ts.html#line63">line 63</a>
+                <a href="lib_client_HttpClient.ts.html">lib/client/HttpClient.ts</a>, <a href="lib_client_HttpClient.ts.html#line303">line 303</a>
             </span>
         </p>
     
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
         
-<code class="param-type"><a href="LocalStorageUser.html">LocalStorageUser</a></code>
-
-
+    
     </div>
     
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-</div>
-            
-                <div class="member">
-
+    
 
     
-    <h4 class="name" id="read">
-        <a class="href-link" href="#read">#</a>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>Options</h2>
         
-        <span class="code-name">
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Options for Dispatcher</div>
+        
+
+        
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+<div class="table-container">
+    <table class="props table">
+        <thead>
+        <tr>
             
-                read<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="State.html">State</a>}</span>
+            <th>Name</th>
             
-        </span>
-    </h4>
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>storageKey</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
     
 
     
-    
-    <div class="description">
-        Reads and decodes the locally stored data.
-    </div>
-    
 
+    <td class="description last">The prefix / name of the local storage keys.</td>
+</tr>
 
-
-
-
-
-
-
-
-
+        
+        </tbody>
+    </table>
+</div>
 
 
 
@@ -584,11 +885,6 @@
 
     
 
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="State.html#read">State#read</a>
-    </li></ul></dd>
     
 
     
@@ -614,90 +910,139 @@
 
     
         <p class="tag-source">
-            <a href="lib_state_State.ts.html" class="button">View Source</a>
+            <a href="lib_events_Dispatcher.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_state_State.ts.html">lib/state/State.ts</a>, <a href="lib_state_State.ts.html#line30">line 30</a>
+                <a href="lib_events_Dispatcher.ts.html">lib/events/Dispatcher.ts</a>, <a href="lib_events_Dispatcher.ts.html#line66">line 66</a>
             </span>
         </p>
     
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
         
-<code class="param-type"><a href="State.html">State</a></code>
-
-
+    
     </div>
     
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-</div>
-            
-                <div class="member">
-
+    
 
     
-    <h4 class="name" id="write">
-        <a class="href-link" href="#write">#</a>
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
+
+
+
+
+
+
+
+<section>
+
+<header>
+    
+        <h2>Options</h2>
         
-        <span class="code-name">
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Options for Relay</div>
+        
+
+        
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+<div class="table-container">
+    <table class="props table">
+        <thead>
+        <tr>
             
-                write<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="State.html">State</a>}</span>
+            <th>Name</th>
             
-        </span>
-    </h4>
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>cookieName</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
     
 
     
+
+    <td class="description last">The name of the session cookie set from the SDK.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
     
-    <div class="description">
-        Encodes and writes the data to the local storage.
-    </div>
+        <td class="name"><code>storageKey</code></td>
     
 
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
 
 
+    
+    </td>
 
+    
 
+    
 
+    <td class="description last">The prefix / name of the local storage keys.</td>
+</tr>
 
-
-
-
+        
+        </tbody>
+    </table>
+</div>
 
 
 
@@ -709,11 +1054,6 @@
 
     
 
-    
-    <dt class="tag-overrides">Overrides:</dt>
-    <dd class="tag-overrides"><ul class="dummy"><li>
-        <a href="State.html#write">State#write</a>
-    </li></ul></dd>
     
 
     
@@ -739,61 +1079,179 @@
 
     
         <p class="tag-source">
-            <a href="lib_state_State.ts.html" class="button">View Source</a>
+            <a href="lib_events_Relay.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_state_State.ts.html">lib/state/State.ts</a>, <a href="lib_state_State.ts.html#line49">line 49</a>
+                <a href="lib_events_Relay.ts.html">lib/events/Relay.ts</a>, <a href="lib_events_Relay.ts.html#line90">line 90</a>
             </span>
         </p>
     
 </dl>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
         
-<code class="param-type"><a href="State.html">State</a></code>
-
-
+    
     </div>
     
-</div>
+    
 
-                
-        </div>
-    </div>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</article>
+
+</section>
 
 
 
 
-</div>
+
+
+
+<section>
+
+<header>
+    
+        <h2>Options</h2>
+        
+    
+</header>
+
+<article>
+    <div class="container-overview">
+    
+        
+            <div class="description">Options for SessionState</div>
+        
+
+        
+
+
+    <h5 class="subsection-title">Properties:</h5>
+
+    
+<div class="table-container">
+    <table class="props table">
+        <thead>
+        <tr>
             
-            </div>
-        </div>
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>storageKey</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+
+    
+
+    <td class="description last">The prefix / name of the local storage keys.</td>
+</tr>
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_state_session_SessionState.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_state_session_SessionState.ts.html">lib/state/session/SessionState.ts</a>, <a href="lib_state_session_SessionState.ts.html#line100">line 100</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+        
+    
+    </div>
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
     
 
     

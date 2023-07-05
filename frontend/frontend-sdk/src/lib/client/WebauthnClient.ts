@@ -22,7 +22,7 @@ import {
   WebauthnCredentials,
   WebauthnFinalized,
 } from "../Dto";
-import { Options } from "../../Hanko";
+import { Options } from "./HttpClient";
 
 /**
  * A class that handles WebAuthn authentication and registration.

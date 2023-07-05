@@ -5,7 +5,7 @@ describe("Session", () => {
   let session: Session;
 
   beforeEach(() => {
-    session = new Session("hanko");
+    session = new Session({ cookieName: "hanko", storageKey: "hanko" });
   });
 
   describe("get", () => {

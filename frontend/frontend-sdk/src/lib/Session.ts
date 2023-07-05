@@ -3,6 +3,19 @@ import { SessionState } from "./state/session/SessionState";
 import { Cookie } from "./Cookie";
 
 /**
+ * Options for Session
+ *
+ * @category SDK
+ * @subcategory Session
+ * @property {string} cookieName - The name of the session cookie set from the SDK.
+ * @property {string} storageKey - The prefix / name of the local storage keys.
+ */
+interface Options {
+  cookieName: string;
+  storageKey: string;
+}
+
+/**
  A class representing a session.
 
  @category SDK
@@ -13,9 +26,9 @@ export class Session {
   _cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(cookieName: string) {
-    this._sessionState = new SessionState(cookieName);
-    this._cookie = new Cookie(cookieName);
+  constructor(options: Options) {
+    this._sessionState = new SessionState({ ...options });
+    this._cookie = new Cookie({ ...options });
   }
 
   /**
