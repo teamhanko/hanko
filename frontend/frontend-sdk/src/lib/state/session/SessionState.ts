@@ -27,7 +27,7 @@ export interface LocalStorageSession {
  * A class to read and write local storage contents regarding sessions.
  *
  * @extends State
- * @param {string} key - The local storage key.
+ * @param {Options} options - The options that can be used
  * @category SDK
  * @subcategory Internal
  */
