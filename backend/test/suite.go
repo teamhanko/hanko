@@ -6,6 +6,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/pop/v6/logging"
 	"github.com/gofrs/uuid"
+	smtpmock "github.com/mocktools/go-smtp-mock/v2"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -14,9 +15,11 @@ import (
 
 type Suite struct {
 	suite.Suite
-	Storage persistence.Storage
-	DB      *TestDB
-	Name    string // used for database docker container name, so that tests can run in parallel
+	Storage         persistence.Storage
+	DB              *TestDB
+	EmailServer     *smtpmock.Server
+	Name            string // used for database docker container name, so that tests can run in parallel
+	WithEmailServer bool
 }
 
 func (s *Suite) SetupSuite() {
@@ -41,6 +44,16 @@ func (s *Suite) SetupSuite() {
 	})
 	s.Require().NoError(err)
 
+	if s.WithEmailServer {
+		server := smtpmock.New(smtpmock.ConfigurationAttr{
+			PortNumber: 2500,
+		})
+
+		err = server.Start()
+		s.Require().NoError(err)
+		s.EmailServer = server
+	}
+
 	s.Storage = storage
 	s.DB = db
 }
@@ -62,6 +75,9 @@ func (s *Suite) TearDownTest() {
 func (s *Suite) TearDownSuite() {
 	if s.DB != nil {
 		s.NoError(PurgeDB(s.DB))
+	}
+	if s.EmailServer != nil {
+		s.NoError(s.EmailServer.Stop())
 	}
 }
 

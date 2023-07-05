@@ -30,4 +30,5 @@ func (s *wellKnownSuite) TestWellKnownHandler_GetPublicKeys() {
 	e.ServeHTTP(rec, req)
 
 	s.Equal(http.StatusOK, rec.Code)
+	s.Equal("max-age=600", rec.Header().Get("Cache-Control"))
 }
