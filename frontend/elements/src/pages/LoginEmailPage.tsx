@@ -408,7 +408,7 @@ const LoginEmailPage = (props: Props) => {
           {t("labels.continue")}
         </Button>
       </Form>
-      {(enablePasskeys && !conditionalMediationEnabled) ||
+      {(enablePasskeys && !hidePasskeyButtonOnLogin) ||
       config.providers?.length ? (
         <Divider>{t("labels.or")}</Divider>
       ) : null}
