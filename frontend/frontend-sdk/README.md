@@ -43,9 +43,9 @@ You can pass certain options, when creating a new `Hanko` instance:
 
 ```js
 const defaultOptions = {
-  timeout: 13000,      // The timeout (in ms) for the HTTP requests.
-  cookieName: "hanko", // The cookie name under which the session token is set.
-  storageKey: "hanko"  // The prefix / name of the localStorage keys.
+  timeout: 13000,           // The timeout (in ms) for the HTTP requests.
+  cookieName: "hanko",      // The cookie name under which the session token is set.
+  localStorageKey: "hanko"  // The prefix / name of the localStorage keys.
 };
 const hanko = new Hanko("http://localhost:3000", defaultOptions);
 ```
