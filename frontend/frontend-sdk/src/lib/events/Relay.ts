@@ -12,7 +12,7 @@ import { Session } from "../Session";
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string} storageKey - The prefix / name of the local storage keys.
  */
-interface Options {
+interface RelayOptions {
   cookieName: string;
   storageKey: string;
 }
@@ -30,7 +30,7 @@ export class Relay extends Dispatcher {
   _session: Session;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(options: Options) {
+  constructor(options: RelayOptions) {
     super({ ...options });
     this._session = new Session({ ...options });
     this.listenEventDependencies();

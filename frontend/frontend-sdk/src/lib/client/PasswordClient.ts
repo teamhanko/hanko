@@ -7,7 +7,7 @@ import {
   UnauthorizedError,
 } from "../Errors";
 import { Client } from "./Client";
-import { Options } from "./HttpClient";
+import { HttpClientOptions } from "./HttpClient";
 
 /**
  * A class to handle passwords.
@@ -22,7 +22,7 @@ class PasswordClient extends Client {
   passcodeState: PasscodeState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: Options) {
+  constructor(api: string, options: HttpClientOptions) {
     super(api, options);
     /**
      *  @public

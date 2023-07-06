@@ -18,7 +18,7 @@ import { Session } from "./lib/Session";
  * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko"
  * @property {string=} storageKey - The prefix / name of the local storage keys. Defaults to "hanko"
  */
-export interface Options {
+export interface HankoOptions {
   timeout?: number;
   cookieName?: string;
   storageKey?: string;
@@ -29,7 +29,7 @@ export interface Options {
  *
  * @extends {Listener}
  * @param {string} api - The URL of your Hanko API instance
- * @param {Options=} options - The options that can be used
+ * @param {HankoOptions=} options - The options that can be used
  */
 class Hanko extends Listener {
   api: string;
@@ -45,7 +45,7 @@ class Hanko extends Listener {
   session: Session;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options?: Options) {
+  constructor(api: string, options?: HankoOptions) {
     super();
     const opts: InternalOptions = {
       timeout: 13000,

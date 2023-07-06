@@ -1,4 +1,4 @@
-import { HttpClient, Options } from "./HttpClient";
+import { HttpClient, HttpClientOptions } from "./HttpClient";
 
 /**
  * A class to be extended by the other client classes.
@@ -7,13 +7,13 @@ import { HttpClient, Options } from "./HttpClient";
  * @category SDK
  * @subcategory Internal
  * @param {string} api - The URL of your Hanko API instance
- * @param {Options} options - The options that can be used
+ * @param {HttpClientOptions} options - The options that can be used
  */
 abstract class Client {
   client: HttpClient;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: Options) {
+  constructor(api: string, options: HttpClientOptions) {
     /**
      *  @public
      *  @type {HttpClient}

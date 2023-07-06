@@ -1,6 +1,6 @@
 import { Client } from "./Client";
 import { ThirdPartyError } from "../Errors";
-import { Options } from "../../Hanko";
+import { HankoOptions } from "../../Hanko";
 
 /**
  * A class that handles communication with the Hanko API for the purposes

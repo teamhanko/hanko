@@ -17,7 +17,7 @@ import { SessionState } from "../state/session/SessionState";
  * @subcategory Internal
  * @property {string} storageKey - The prefix / name of the local storage keys.
  */
-interface Options {
+interface DispatcherOptions {
   storageKey: string;
 }
 
@@ -32,7 +32,7 @@ export class Dispatcher {
   _sessionState: SessionState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(options: Options) {
+  constructor(options: DispatcherOptions) {
     this._sessionState = new SessionState({ ...options });
   }
 

@@ -10,7 +10,7 @@ import { Cookie } from "./Cookie";
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string} storageKey - The prefix / name of the local storage keys.
  */
-interface Options {
+interface SessionOptions {
   cookieName: string;
   storageKey: string;
 }
@@ -26,7 +26,7 @@ export class Session {
   _cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(options: Options) {
+  constructor(options: SessionOptions) {
     this._sessionState = new SessionState({ ...options });
     this._cookie = new Cookie({ ...options });
   }

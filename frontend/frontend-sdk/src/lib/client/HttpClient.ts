@@ -116,7 +116,7 @@ class Response {
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string} storageKey - The prefix / name of the local storage keys.
  */
-export interface Options {
+export interface HttpClientOptions {
   timeout: number;
   cookieName: string;
   storageKey: string;
@@ -134,7 +134,7 @@ export interface Options {
  * @category SDK
  * @subcategory Internal
  * @param {string} api - The URL of your Hanko API instance
- * @param {Options} options - The options the HttpClient must be provided
+ * @param {HttpClientOptions} options - The options the HttpClient must be provided
  */
 class HttpClient {
   timeout: number;
@@ -145,7 +145,7 @@ class HttpClient {
   cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: Options) {
+  constructor(api: string, options: HttpClientOptions) {
     this.api = api;
     this.timeout = options.timeout;
     this.sessionState = new SessionState({ ...options });

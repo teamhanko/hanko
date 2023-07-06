@@ -22,7 +22,7 @@ import {
   WebauthnCredentials,
   WebauthnFinalized,
 } from "../Dto";
-import { Options } from "./HttpClient";
+import { HttpClientOptions } from "./HttpClient";
 
 /**
  * A class that handles WebAuthn authentication and registration.
@@ -40,7 +40,7 @@ class WebauthnClient extends Client {
   _createCredential = createWebauthnCredential;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: Options) {
+  constructor(api: string, options: HttpClientOptions) {
     super(api, options);
     /**
      *  @public

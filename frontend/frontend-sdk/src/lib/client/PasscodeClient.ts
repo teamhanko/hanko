@@ -8,7 +8,7 @@ import {
   TooManyRequestsError,
 } from "../Errors";
 import { Client } from "./Client";
-import { Options } from "./HttpClient";
+import { HttpClientOptions } from "./HttpClient";
 
 /**
  * A class to handle passcodes.
@@ -22,7 +22,7 @@ class PasscodeClient extends Client {
   state: PasscodeState;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: Options) {
+  constructor(api: string, options: HttpClientOptions) {
     super(api, options);
     /**
      *  @public
