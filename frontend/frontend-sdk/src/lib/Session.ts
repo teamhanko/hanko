@@ -8,11 +8,11 @@ import { Cookie } from "./Cookie";
  * @category SDK
  * @subcategory Session
  * @property {string} cookieName - The name of the session cookie set from the SDK.
- * @property {string} storageKey - The prefix / name of the local storage keys.
+ * @property {string} localStorageKey - The prefix / name of the local storage keys.
  */
 interface SessionOptions {
   cookieName: string;
-  storageKey: string;
+  localStorageKey: string;
 }
 
 /**

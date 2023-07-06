@@ -9,7 +9,7 @@ describe("Dispatcher", () => {
   let dispatcher: Dispatcher;
 
   beforeEach(() => {
-    dispatcher = new Dispatcher({ storageKey: "hanko" });
+    dispatcher = new Dispatcher({ localStorageKey: "hanko" });
   });
 
   describe("dispatchSessionCreatedEvent()", () => {

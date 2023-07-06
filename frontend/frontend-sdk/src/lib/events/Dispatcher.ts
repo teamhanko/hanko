@@ -15,10 +15,10 @@ import { SessionState } from "../state/session/SessionState";
  *
  * @category SDK
  * @subcategory Internal
- * @property {string} storageKey - The prefix / name of the local storage keys.
+ * @property {string} localStorageKey - The prefix / name of the local storage keys.
  */
 interface DispatcherOptions {
-  storageKey: string;
+  localStorageKey: string;
 }
 
 /**

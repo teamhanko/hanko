@@ -11,7 +11,7 @@ describe("Relay", () => {
   let dispatcherSpy: jest.SpyInstance;
 
   beforeEach(() => {
-    relay = new Relay({ cookieName: "hanko", storageKey: "hanko" });
+    relay = new Relay({ cookieName: "hanko", localStorageKey: "hanko" });
     dispatcherSpy = jest.spyOn(relay, "_dispatchEvent");
   });
 

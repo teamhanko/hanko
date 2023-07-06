@@ -6,7 +6,7 @@ let thirdPartyClient: ThirdPartyClient;
 beforeEach(() => {
   thirdPartyClient = new ThirdPartyClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
 });

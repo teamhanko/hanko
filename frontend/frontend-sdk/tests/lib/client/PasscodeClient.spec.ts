@@ -19,7 +19,7 @@ let passcodeClient: PasscodeClient;
 beforeEach(() => {
   passcodeClient = new PasscodeClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
 });

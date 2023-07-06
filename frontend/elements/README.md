@@ -120,7 +120,7 @@ const defaultOptions = {
                                    // from displaying any translations.
     translationsLocation: "/i18n", // The URL or path where the translation files are located.
     fallbackLanguage: "en",        // The fallback language to be used if a translation is not available.
-    cookieName: "hanko"            // The name of the cookie the session token is stored in.
+    storageKey: "hanko"            // The name of the cookie the session token is stored in and the prefix / name of local storage keys.
 };
 
 const {hanko} = await register("https://hanko.yourdomain.com", defaultOptions);

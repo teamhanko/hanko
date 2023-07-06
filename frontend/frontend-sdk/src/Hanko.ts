@@ -16,12 +16,12 @@ import { Session } from "./lib/Session";
  * @interface
  * @property {number=} timeout - The http request timeout in milliseconds. Defaults to 13000ms
  * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko"
- * @property {string=} storageKey - The prefix / name of the local storage keys. Defaults to "hanko"
+ * @property {string=} localStorageKey - The prefix / name of the local storage keys. Defaults to "hanko"
  */
 export interface HankoOptions {
   timeout?: number;
   cookieName?: string;
-  storageKey?: string;
+  localStorageKey?: string;
 }
 
 /**
@@ -50,7 +50,7 @@ class Hanko extends Listener {
     const opts: InternalOptions = {
       timeout: 13000,
       cookieName: "hanko",
-      storageKey: "hanko",
+      localStorageKey: "hanko",
     };
     if (options?.cookieName !== undefined) {
       opts.cookieName = options.cookieName;
@@ -58,8 +58,8 @@ class Hanko extends Listener {
     if (options?.timeout !== undefined) {
       opts.timeout = options.timeout;
     }
-    if (options?.storageKey !== undefined) {
-      opts.storageKey = options.storageKey;
+    if (options?.localStorageKey !== undefined) {
+      opts.localStorageKey = options.localStorageKey;
     }
 
     this.api = api;
@@ -120,7 +120,7 @@ class Hanko extends Listener {
 export interface InternalOptions {
   timeout: number;
   cookieName: string;
-  storageKey: string;
+  localStorageKey: string;
 }
 
 export { Hanko };

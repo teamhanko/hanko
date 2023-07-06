@@ -5,10 +5,10 @@ import { State } from "../State";
  *
  * @category SDK
  * @subcategory Internal
- * @property {string} storageKey - The prefix / name of the local storage keys.
+ * @property {string} localStorageKey - The prefix / name of the local storage keys.
  */
 interface SessionStateOptions {
-  storageKey: string;
+  localStorageKey: string;
 }
 
 /**
@@ -34,7 +34,7 @@ export interface LocalStorageSession {
 class SessionState extends State {
   // eslint-disable-next-line require-jsdoc
   constructor(options: SessionStateOptions) {
-    super(`${options.storageKey}_session`);
+    super(`${options.localStorageKey}_session`);
   }
 
   /**

@@ -14,7 +14,7 @@ let passwordClient: PasswordClient;
 beforeEach(() => {
   passwordClient = new PasswordClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
 });

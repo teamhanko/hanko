@@ -17,7 +17,7 @@ let webauthnClient: WebauthnClient;
 beforeEach(() => {
   webauthnClient = new WebauthnClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
 });

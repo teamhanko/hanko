@@ -9,7 +9,7 @@ let emailClient: EmailClient;
 beforeEach(() => {
   emailClient = new EmailClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
 });

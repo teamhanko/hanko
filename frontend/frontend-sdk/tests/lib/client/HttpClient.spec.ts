@@ -25,7 +25,7 @@ beforeEach(() => {
 
   httpClient = new HttpClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
   xhr = new XMLHttpRequest();
@@ -190,7 +190,7 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
   it("should set a cookie if x-auth-token response header is available", async () => {
     const client = new HttpClient("http://test.api", {
       cookieName: "hanko",
-      storageKey: "hanko",
+      localStorageKey: "hanko",
       timeout: 13000,
     });
     const xhr = new XMLHttpRequest();
@@ -231,7 +231,7 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
   it("should set a secure cookie if x-auth-token response header is available and https is being used", async () => {
     const client = new HttpClient("https://test.api", {
       cookieName: "hanko",
-      storageKey: "hanko",
+      localStorageKey: "hanko",
       timeout: 13000,
     });
     const xhr = new XMLHttpRequest();

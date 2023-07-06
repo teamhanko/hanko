@@ -6,7 +6,7 @@ let configClient: ConfigClient;
 beforeEach(() => {
   configClient = new ConfigClient("http://test.api", {
     cookieName: "hanko",
-    storageKey: "hanko",
+    localStorageKey: "hanko",
     timeout: 13000,
   });
 });
