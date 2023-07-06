@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.3.0
+  version: 0.8.0
   title: Hanko Admin API
   description: >
     ## Introduction
@@ -26,7 +26,7 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: localhost:3000
+  - url: localhost:8000
 paths:
   /users:
     get:
