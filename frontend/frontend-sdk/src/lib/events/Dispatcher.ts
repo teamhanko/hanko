@@ -26,6 +26,7 @@ interface DispatcherOptions {
  *
  * @category SDK
  * @subcategory Internal
+ * @param {DispatcherOptions} options - The options that can be used
  */
 export class Dispatcher {
   _dispatchEvent = document.dispatchEvent.bind(document);

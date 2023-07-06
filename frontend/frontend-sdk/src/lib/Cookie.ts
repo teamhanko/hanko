@@ -16,6 +16,7 @@ interface CookieOptions {
  *
  * @category SDK
  * @subcategory Internal
+ * @param {CookieOptions} options - The options that can be used
  */
 export class Cookie {
   authCookieName: string;

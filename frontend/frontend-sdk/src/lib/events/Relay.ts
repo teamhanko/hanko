@@ -23,6 +23,7 @@ interface RelayOptions {
  * @category SDK
  * @subcategory Internal
  * @extends Dispatcher
+ * @param {RelayOptions} options - The options that can be used
  */
 export class Relay extends Dispatcher {
   _listener = new Listener();

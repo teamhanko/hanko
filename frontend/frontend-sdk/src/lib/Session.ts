@@ -20,6 +20,7 @@ interface SessionOptions {
 
  @category SDK
  @subcategory Session
+ @param {SessionOptions} options - The options that can be used
  */
 export class Session {
   _sessionState: SessionState;
