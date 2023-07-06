@@ -6,7 +6,7 @@ import { Cookie } from "./Cookie";
  * Options for Session
  *
  * @category SDK
- * @subcategory Session
+ * @subcategory Internal
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string} localStorageKey - The prefix / name of the local storage keys.
  */
