@@ -25,6 +25,8 @@ func (h *WellKnownHandler) GetPublicKeys(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	c.Response().Header().Add("Cache-Control", "max-age=600")
 	return c.JSON(http.StatusOK, keys)
 }
 

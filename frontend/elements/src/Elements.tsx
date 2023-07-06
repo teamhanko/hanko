@@ -1,6 +1,9 @@
 import { JSX, FunctionalComponent } from "preact";
 import registerCustomElement from "@teamhanko/preact-custom-element";
-import AppProvider from "./contexts/AppProvider";
+import AppProvider, {
+  ComponentName,
+  GlobalOptions,
+} from "./contexts/AppProvider";
 import { Hanko } from "@teamhanko/hanko-frontend-sdk";
 import { defaultTranslations, Translations } from "./i18n/translations";
 
@@ -34,6 +37,7 @@ export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
   enablePasskeys?: boolean;
+  hidePasskeyButtonOnLogin?: boolean;
   translations?: Translations;
   translationsLocation?: string;
   fallbackLanguage?: string;
@@ -50,46 +54,27 @@ interface InternalRegisterOptions extends RegisterOptions {
   observedAttributes: string[];
 }
 
-interface Global {
-  hanko?: Hanko;
-  injectStyles?: boolean;
-  enablePasskeys?: boolean;
-  translations?: Translations;
-  translationsLocation?: string;
-  fallbackLanguage?: string;
-}
+const globalOptions: GlobalOptions = {};
 
-const global: Global = {};
-
-const HankoAuth = (props: HankoAuthElementProps) => (
+const createHankoComponent = (
+  componentName: ComponentName,
+  props: Record<string, any>
+) => (
   <AppProvider
-    componentName={"auth"}
+    componentName={componentName}
+    globalOptions={globalOptions}
     {...props}
-    hanko={global.hanko}
-    injectStyles={global.injectStyles}
-    translations={global.translations}
-    translationsLocation={global.translationsLocation}
-    enablePasskeys={global.enablePasskeys}
-    fallbackLanguage={global.fallbackLanguage}
   />
 );
 
-const HankoProfile = (props: HankoProfileElementProps) => (
-  <AppProvider
-    componentName={"profile"}
-    {...props}
-    hanko={global.hanko}
-    injectStyles={global.injectStyles}
-    translations={global.translations}
-    translationsLocation={global.translationsLocation}
-    enablePasskeys={global.enablePasskeys}
-    fallbackLanguage={global.fallbackLanguage}
-  />
-);
+const HankoAuth = (props: HankoAuthElementProps) =>
+  createHankoComponent("auth", props);
 
-const HankoEvents = (props: HankoProfileElementProps) => (
-  <AppProvider componentName={"events"} {...props} hanko={global.hanko} />
-);
+const HankoProfile = (props: HankoProfileElementProps) =>
+  createHankoComponent("profile", props);
+
+const HankoEvents = (props: HankoEventsElementProps) =>
+  createHankoComponent("events", props);
 
 const _register = async ({
   tagName,
@@ -112,21 +97,23 @@ export const register = async (
     shadow: true,
     injectStyles: true,
     enablePasskeys: true,
+    hidePasskeyButtonOnLogin: false,
     translations: null,
     translationsLocation: "/i18n",
     fallbackLanguage: "en",
     ...options,
   };
 
-  global.hanko = new Hanko(api, {
+  globalOptions.hanko = new Hanko(api, {
     cookieName: options.storageKey,
     localStorageKey: options.storageKey,
   });
-  global.injectStyles = options.injectStyles;
-  global.enablePasskeys = options.enablePasskeys;
-  global.translations = options.translations || defaultTranslations;
-  global.translationsLocation = options.translationsLocation;
-  global.fallbackLanguage = options.fallbackLanguage;
+  globalOptions.injectStyles = options.injectStyles;
+  globalOptions.enablePasskeys = options.enablePasskeys;
+  globalOptions.hidePasskeyButtonOnLogin = options.hidePasskeyButtonOnLogin;
+  globalOptions.translations = options.translations || defaultTranslations;
+  globalOptions.translationsLocation = options.translationsLocation;
+  globalOptions.fallbackLanguage = options.fallbackLanguage;
 
   await Promise.all([
     _register({
@@ -149,5 +136,5 @@ export const register = async (
     }),
   ]);
 
-  return { hanko: global.hanko };
+  return { hanko: globalOptions.hanko };
 };
