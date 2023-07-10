@@ -1,6 +1,17 @@
 import { State } from "../State";
 
 /**
+ * Options for SessionState
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {string} localStorageKey - The prefix / name of the local storage keys.
+ */
+interface SessionStateOptions {
+  localStorageKey: string;
+}
+
+/**
  * @interface
  * @category SDK
  * @subcategory Internal
@@ -16,14 +27,14 @@ export interface LocalStorageSession {
  * A class to read and write local storage contents regarding sessions.
  *
  * @extends State
- * @param {string} key - The local storage key.
+ * @param {SessionStateOptions} options - The options that can be used
  * @category SDK
  * @subcategory Internal
  */
 class SessionState extends State {
   // eslint-disable-next-line require-jsdoc
-  constructor() {
-    super("hanko_session");
+  constructor(options: SessionStateOptions) {
+    super(`${options.localStorageKey}_session`);
   }
 
   /**

@@ -12,7 +12,11 @@ const passwordRetryAfter = 180;
 let passwordClient: PasswordClient;
 
 beforeEach(() => {
-  passwordClient = new PasswordClient("http://test.api");
+  passwordClient = new PasswordClient("http://test.api", {
+    cookieName: "hanko",
+    localStorageKey: "hanko",
+    timeout: 13000,
+  });
 });
 
 describe("PasswordClient.login()", () => {
@@ -37,7 +41,9 @@ describe("PasswordClient.login()", () => {
 
     const loginResponse = passwordClient.login(userID, password);
     await expect(loginResponse).resolves.toBeUndefined();
-    expect(passwordClient.client.processResponseHeadersOnLogin).toHaveBeenCalledTimes(1);
+    expect(
+      passwordClient.client.processResponseHeadersOnLogin
+    ).toHaveBeenCalledTimes(1);
     expect(passwordClient.client.post).toHaveBeenCalledWith("/password/login", {
       user_id: userID,
       password,
@@ -77,7 +83,9 @@ describe("PasswordClient.login()", () => {
       passwordRetryAfter
     );
     expect(passwordClient.passwordState.write).toHaveBeenCalledTimes(1);
-    expect(response.headers.getResponseHeader).toHaveBeenCalledWith("Retry-After");
+    expect(response.headers.getResponseHeader).toHaveBeenCalledWith(
+      "Retry-After"
+    );
   });
 
   it("should throw error when API response is not ok", async () => {

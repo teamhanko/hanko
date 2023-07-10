@@ -11,11 +11,25 @@ import { Relay } from "./lib/events/Relay";
 import { Session } from "./lib/Session";
 
 /**
+ * The options for the Hanko class
+ *
+ * @interface
+ * @property {number=} timeout - The http request timeout in milliseconds. Defaults to 13000ms
+ * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko"
+ * @property {string=} localStorageKey - The prefix / name of the local storage keys. Defaults to "hanko"
+ */
+export interface HankoOptions {
+  timeout?: number;
+  cookieName?: string;
+  localStorageKey?: string;
+}
+
+/**
  * A class that bundles all available SDK functions.
  *
  * @extends {Listener}
  * @param {string} api - The URL of your Hanko API instance
- * @param {number=} timeout - The request timeout in milliseconds
+ * @param {HankoOptions=} options - The options that can be used
  */
 class Hanko extends Listener {
   api: string;
@@ -31,60 +45,82 @@ class Hanko extends Listener {
   session: Session;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
+  constructor(api: string, options?: HankoOptions) {
     super();
+    const opts: InternalOptions = {
+      timeout: 13000,
+      cookieName: "hanko",
+      localStorageKey: "hanko",
+    };
+    if (options?.cookieName !== undefined) {
+      opts.cookieName = options.cookieName;
+    }
+    if (options?.timeout !== undefined) {
+      opts.timeout = options.timeout;
+    }
+    if (options?.localStorageKey !== undefined) {
+      opts.localStorageKey = options.localStorageKey;
+    }
+
     this.api = api;
     /**
      *  @public
      *  @type {ConfigClient}
      */
-    this.config = new ConfigClient(api, timeout);
+    this.config = new ConfigClient(api, opts);
     /**
      *  @public
      *  @type {UserClient}
      */
-    this.user = new UserClient(api, timeout);
+    this.user = new UserClient(api, opts);
     /**
      *  @public
      *  @type {WebauthnClient}
      */
-    this.webauthn = new WebauthnClient(api, timeout);
+    this.webauthn = new WebauthnClient(api, opts);
     /**
      *  @public
      *  @type {PasswordClient}
      */
-    this.password = new PasswordClient(api, timeout);
+    this.password = new PasswordClient(api, opts);
     /**
      *  @public
      *  @type {PasscodeClient}
      */
-    this.passcode = new PasscodeClient(api, timeout);
+    this.passcode = new PasscodeClient(api, opts);
     /**
      *  @public
      *  @type {EmailClient}
      */
-    this.email = new EmailClient(api, timeout);
+    this.email = new EmailClient(api, opts);
     /**
      *  @public
      *  @type {ThirdPartyClient}
      */
-    this.thirdParty = new ThirdPartyClient(api, timeout);
+    this.thirdParty = new ThirdPartyClient(api, opts);
     /**
      *  @public
      *  @type {TokenClient}
      */
-    this.token = new TokenClient(api, timeout);
+    this.token = new TokenClient(api, opts);
     /**
      *  @public
      *  @type {Relay}
      */
-    this.relay = new Relay();
+    this.relay = new Relay({ ...opts });
     /**
      *  @public
      *  @type {Session}
      */
-    this.session = new Session();
+    this.session = new Session({ ...opts });
   }
+}
+
+// eslint-disable-next-line require-jsdoc
+export interface InternalOptions {
+  timeout: number;
+  cookieName: string;
+  localStorageKey: string;
 }
 
 export { Hanko };

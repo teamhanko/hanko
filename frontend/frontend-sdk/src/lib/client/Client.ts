@@ -1,4 +1,4 @@
-import { HttpClient } from "./HttpClient";
+import { HttpClient, HttpClientOptions } from "./HttpClient";
 
 /**
  * A class to be extended by the other client classes.
@@ -7,18 +7,18 @@ import { HttpClient } from "./HttpClient";
  * @category SDK
  * @subcategory Internal
  * @param {string} api - The URL of your Hanko API instance
- * @param {number=} timeout - The request timeout in milliseconds
+ * @param {HttpClientOptions} options - The options that can be used
  */
 abstract class Client {
   client: HttpClient;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
+  constructor(api: string, options: HttpClientOptions) {
     /**
      *  @public
      *  @type {HttpClient}
      */
-    this.client = new HttpClient(api, timeout);
+    this.client = new HttpClient(api, options);
   }
 }
 

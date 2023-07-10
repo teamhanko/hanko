@@ -4,7 +4,11 @@ import { Response } from "../../../src/lib/client/HttpClient";
 let configClient: ConfigClient;
 
 beforeEach(() => {
-  configClient = new ConfigClient("http://test.api");
+  configClient = new ConfigClient("http://test.api", {
+    cookieName: "hanko",
+    localStorageKey: "hanko",
+    timeout: 13000,
+  });
 });
 
 describe("configClient.get()", () => {

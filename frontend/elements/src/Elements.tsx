@@ -41,6 +41,7 @@ export interface RegisterOptions {
   translations?: Translations;
   translationsLocation?: string;
   fallbackLanguage?: string;
+  storageKey?: string;
 }
 
 export interface RegisterResult {
@@ -103,7 +104,10 @@ export const register = async (
     ...options,
   };
 
-  globalOptions.hanko = new Hanko(api);
+  globalOptions.hanko = new Hanko(api, {
+    cookieName: options.storageKey,
+    localStorageKey: options.storageKey,
+  });
   globalOptions.injectStyles = options.injectStyles;
   globalOptions.enablePasskeys = options.enablePasskeys;
   globalOptions.hidePasskeyButtonOnLogin = options.hidePasskeyButtonOnLogin;

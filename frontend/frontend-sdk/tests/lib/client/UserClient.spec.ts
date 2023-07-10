@@ -14,7 +14,11 @@ const credentials = [{ id: "test-credential-1" }];
 let userClient: UserClient;
 
 beforeEach(() => {
-  userClient = new UserClient("http://test.api");
+  userClient = new UserClient("http://test.api", {
+    cookieName: "hanko",
+    localStorageKey: "hanko",
+    timeout: 13000,
+  });
 });
 
 describe("UserClient.getInfo()", () => {

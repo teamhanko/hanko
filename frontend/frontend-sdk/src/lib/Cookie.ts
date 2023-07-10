@@ -1,13 +1,31 @@
 import JSCookie from "js-cookie";
 
 /**
+ * Options for Cookie
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {string} cookieName - The name of the session cookie set from the SDK.
+ */
+interface CookieOptions {
+  cookieName: string;
+}
+
+/**
  * A class to manage cookies.
  *
  * @category SDK
  * @subcategory Internal
+ * @param {CookieOptions} options - The options that can be used
  */
 export class Cookie {
-  authCookieName = "hanko";
+  authCookieName: string;
+
+  // eslint-disable-next-line require-jsdoc
+  constructor(options: CookieOptions) {
+    this.authCookieName = options.cookieName;
+  }
+
   /**
    * Returns the authentication token that was stored in the cookie.
    *

@@ -37,6 +37,19 @@ With a script tag via CDN:
 </script>
 ```
 
+### Options
+
+You can pass certain options, when creating a new `Hanko` instance:
+
+```js
+const defaultOptions = {
+  timeout: 13000,           // The timeout (in ms) for the HTTP requests.
+  cookieName: "hanko",      // The cookie name under which the session token is set.
+  localStorageKey: "hanko"  // The prefix / name of the localStorage keys.
+};
+const hanko = new Hanko("http://localhost:3000", defaultOptions);
+```
+
 ## Documentation
 
 To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc/hanko-frontend-sdk).

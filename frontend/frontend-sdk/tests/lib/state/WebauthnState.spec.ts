@@ -4,7 +4,7 @@ import { Credential } from "../../../src";
 
 describe("webauthnState.read()", () => {
   it("should read the webauthn state", async () => {
-    const state = new WebauthnState();
+    const state = new WebauthnState("hanko");
 
     expect(state.read()).toEqual(state);
   });
@@ -13,7 +13,7 @@ describe("webauthnState.read()", () => {
 describe("webauthnState.getCredentials()", () => {
   it("should read the webauthn state", async () => {
     const ls = decodedLSContent();
-    const state = new WebauthnState();
+    const state = new WebauthnState("hanko");
     const userID = Object.keys(ls.users)[0];
 
     state.ls = ls;
@@ -26,7 +26,7 @@ describe("webauthnState.getCredentials()", () => {
 describe("webauthnState.addCredential()", () => {
   it("should add a credential id", async () => {
     const ls = decodedLSContent();
-    const state = new WebauthnState();
+    const state = new WebauthnState("hanko");
     const userID = Object.keys(ls.users)[0];
     const credentialID = "testCredentialID";
 
@@ -40,7 +40,7 @@ describe("webauthnState.addCredential()", () => {
 describe("webauthnState.matchCredentials()", () => {
   it("should match credential ids", async () => {
     const ls = decodedLSContent();
-    const state = new WebauthnState();
+    const state = new WebauthnState("hanko");
     const userID = Object.keys(ls.users)[0];
     const credentials = ls.users[userID].webauthn.credentials.map(
       (id) => ({ id } as Credential)
@@ -56,7 +56,7 @@ describe("webauthnState.matchCredentials()", () => {
 
   it("shouldn't match credential ids", async () => {
     const ls = decodedLSContent();
-    const state = new WebauthnState();
+    const state = new WebauthnState("hanko");
     const userID = Object.keys(ls.users)[0];
     const credentials = ls.users[userID].webauthn.credentials.map(
       (id) => ({ id } as Credential)

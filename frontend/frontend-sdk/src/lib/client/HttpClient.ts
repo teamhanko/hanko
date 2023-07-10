@@ -3,6 +3,7 @@ import { SessionState } from "../state/session/SessionState";
 import { PasscodeState } from "../state/users/PasscodeState";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
+
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
  *
@@ -107,6 +108,21 @@ class Response {
 }
 
 /**
+ * Options for the HttpClient
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {number} timeout - The http request timeout in milliseconds.
+ * @property {string} cookieName - The name of the session cookie set from the SDK.
+ * @property {string} localStorageKey - The prefix / name of the local storage keys.
+ */
+export interface HttpClientOptions {
+  timeout: number;
+  cookieName: string;
+  localStorageKey: string;
+}
+
+/**
  * Internally used for communication with the Hanko API. It also handles authorization tokens to enable authorized
  * requests.
  *
@@ -118,7 +134,7 @@ class Response {
  * @category SDK
  * @subcategory Internal
  * @param {string} api - The URL of your Hanko API instance
- * @param {number=} timeout - The request timeout in milliseconds
+ * @param {HttpClientOptions} options - The options the HttpClient must be provided
  */
 class HttpClient {
   timeout: number;
@@ -129,13 +145,13 @@ class HttpClient {
   cookie: Cookie;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, timeout = 13000) {
+  constructor(api: string, options: HttpClientOptions) {
     this.api = api;
-    this.timeout = timeout;
-    this.sessionState = new SessionState();
-    this.passcodeState = new PasscodeState();
-    this.dispatcher = new Dispatcher();
-    this.cookie = new Cookie();
+    this.timeout = options.timeout;
+    this.sessionState = new SessionState({ ...options });
+    this.passcodeState = new PasscodeState(options.cookieName);
+    this.dispatcher = new Dispatcher({ ...options });
+    this.cookie = new Cookie({ ...options });
   }
 
   // eslint-disable-next-line require-jsdoc
