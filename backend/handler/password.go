@@ -127,7 +127,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create password: %w", err)
 			} else {
-				err = h.auditLogger.Create(c, models.AuditLogPasswordSetSucceeded, user, nil)
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasswordSetSucceeded, user, nil)
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -139,7 +139,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to set password: %w", err)
 			} else {
-				err = h.auditLogger.Create(c, models.AuditLogPasswordSetSucceeded, user, nil)
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasswordSetSucceeded, user, nil)
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}

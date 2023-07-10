@@ -133,7 +133,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			}
 		}
 
-		err = h.auditLogger.Create(c, models.AuditLogEmailCreated, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailCreated, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
@@ -192,7 +192,7 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 			}
 		}
 
-		err = h.auditLogger.Create(c, models.AuditLogPrimaryEmailChanged, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPrimaryEmailChanged, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
@@ -234,7 +234,7 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to delete email from db: %w", err)
 		}
 
-		err = h.auditLogger.Create(c, models.AuditLogEmailDeleted, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailDeleted, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}

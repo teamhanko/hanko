@@ -244,7 +244,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to get passcode: %w", err)
 		}
 		if passcode == nil {
-			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, nil, fmt.Errorf("unknown passcode"))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, nil, fmt.Errorf("unknown passcode"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -259,7 +259,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
 		if lastVerificationTime.Before(startTime) {
-			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("timed out passcode"))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("timed out passcode"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -276,7 +276,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to delete passcode: %w", err)
 				}
-				err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("max attempts reached"))
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("max attempts reached"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -289,7 +289,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
-			err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("passcode invalid"))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("passcode invalid"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -341,13 +341,13 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 				user.Emails = models.Emails{passcode.Email}
 				user.Emails.SetPrimary(primaryEmail)
-				err = h.auditLogger.Create(c, models.AuditLogPrimaryEmailChanged, user, nil)
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPrimaryEmailChanged, user, nil)
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
 			}
 
-			err = h.auditLogger.Create(c, models.AuditLogEmailVerified, user, nil)
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailVerified, user, nil)
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -371,7 +371,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			c.Response().Header().Set("X-Auth-Token", token)
 		}
 
-		err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}

@@ -115,7 +115,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			}
 		}
 
-		err = h.auditLogger.Create(c, models.AuditLogUserCreated, &newUser, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogUserCreated, &newUser, nil)
 		if err != nil {
 			return fmt.Errorf("failed to write audit log: %w", err)
 		}
@@ -246,7 +246,7 @@ func (h *UserHandler) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
-		err = h.auditLogger.Create(c, models.AuditLogUserDeleted, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogUserDeleted, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to write audit log: %w", err)
 		}
