@@ -46,6 +46,7 @@ export interface GlobalOptions {
 interface Props {
   lang?: string | SignalLike<string>;
   experimental?: string;
+  prefilledEmail?: string;
   componentName: ComponentName;
   globalOptions: GlobalOptions;
   children?: ComponentChildren;
@@ -76,6 +77,7 @@ interface Context extends States {
   enablePasskeys: boolean;
   lang: string;
   hidePasskeyButtonOnLogin: boolean;
+  prefilledEmail: string;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -83,6 +85,7 @@ const AppProvider = ({
   lang,
   componentName,
   experimental = "",
+  prefilledEmail,
   globalOptions,
 }: Props) => {
   const {
@@ -183,7 +186,8 @@ const AppProvider = ({
     <AppContext.Provider
       value={{
         hanko,
-        lang: lang?.toString(),
+        lang: lang?.toString() || fallbackLanguage,
+        prefilledEmail,
         componentName,
         experimentalFeatures,
         emitSuccessEvent,

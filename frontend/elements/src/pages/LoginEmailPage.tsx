@@ -46,6 +46,7 @@ const LoginEmailPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const {
     hanko,
+    prefilledEmail,
     experimentalFeatures,
     emitSuccessEvent,
     enablePasskeys,
@@ -57,7 +58,9 @@ const LoginEmailPage = (props: Props) => {
     setUser,
   } = useContext(AppContext);
 
-  const [emailAddress, setEmailAddress] = useState<string>(props.emailAddress);
+  const [emailAddress, setEmailAddress] = useState<string>(
+    props.emailAddress || prefilledEmail
+  );
   const [isPasskeyLoginLoading, setIsPasskeyLoginLoading] = useState<boolean>();
   const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] = useState<boolean>();
   const [isEmailLoginLoading, setIsEmailLoginLoading] = useState<boolean>();
@@ -382,6 +385,10 @@ const LoginEmailPage = (props: Props) => {
         });
     }
   }, [hanko, setPage, isThirdPartyLoginLoading]);
+
+  useEffect(() => {
+    setEmailAddress(prefilledEmail);
+  }, [prefilledEmail]);
 
   return (
     <Content>

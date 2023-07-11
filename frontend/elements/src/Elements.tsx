@@ -9,6 +9,7 @@ import { defaultTranslations, Translations } from "./i18n/translations";
 
 export interface HankoAuthAdditionalProps {
   experimental?: string;
+  prefilledEmail?: string;
 }
 
 export declare interface HankoAuthElementProps
@@ -120,7 +121,7 @@ export const register = async (
       ...options,
       tagName: "hanko-auth",
       entryComponent: HankoAuth,
-      observedAttributes: ["api", "lang", "experimental"],
+      observedAttributes: ["api", "lang", "experimental", "prefilled-email"],
     }),
     _register({
       ...options,

@@ -164,6 +164,7 @@ A web component that handles user login and user registration.
 
 ##### Attributes
 
+- `prefilled-email` Used to prefill the email input field.
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
 - `experimental` A space-separated list of experimental features to be enabled.
   See [experimental features](#experimental-features).
