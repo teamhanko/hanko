@@ -70,7 +70,7 @@
   "homepage": "https://hanko.io",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.54.0",
+    "@typescript-eslint/parser": "^5.62.0",
     "css-loader": "^6.7.3",
     "eslint": "^8.42.0",
     "eslint-config-google": "^0.14.0",
