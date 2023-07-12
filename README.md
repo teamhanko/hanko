@@ -75,8 +75,8 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| `<hanko-profile>` web component |
 |✅| Rate limiting |
 |✅| OAuth logins (Sign in with Apple/Google/GitHub) |
-|⚙️| User import / export |
-|⚙️| i18n & custom translations |
+|✅| i18n & custom translations |
+|✅| User import |
 |⚙️| Mobile SDKs |
 | | Sign in with Microsoft |
 
