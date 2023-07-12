@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -21,12 +22,21 @@ func NewImportCommand() *cobra.Command {
 	var (
 		configFile string
 		inputFile  string
+		inputUrl   string
 	)
 
 	cmd := &cobra.Command{
 		Use:   "import",
 		Short: "Import users into database from a Json file",
 		Long:  ``,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			fileFlagSet := cmd.Flags().Changed("inputFile")
+			urlFlagSet := cmd.Flags().Changed("inputUrl")
+			if !fileFlagSet && !urlFlagSet {
+				return errors.New("either flag \"inputFile\" or \"inputUrl\" must be set")
+			}
+			return nil
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			//Load cfg
 			cfg, err := config.Load(&configFile)
@@ -34,18 +44,40 @@ func NewImportCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			//Load File
-			// we explicitly want user input here, hence  #nosec G304
-			jsonFile, err := os.Open(inputFile)
-			if err != nil {
-				log.Fatal(err)
+			var reader io.ReadCloser
+			fileAvailable := cmd.Flags().Changed("inputFile")
+			urlAvailable := cmd.Flags().Changed("inputUrl")
+
+			if fileAvailable {
+				//Load File
+				// we explicitly want user input here, hence  #nosec G304
+				reader, err = os.Open(inputFile)
+				if err != nil {
+					log.Fatal(err)
+				}
+			} else if urlAvailable {
+				// Load file from url
+				response, err := http.Get(inputUrl)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				if response.StatusCode <= 200 || response.StatusCode > 299 {
+					log.Fatal(fmt.Errorf("failed to get file from url: %s", response.Status))
+				}
+
+				reader = response.Body
 			}
+
 			defer func() {
-				if err := jsonFile.Close(); err != nil {
-					log.Printf("Error closing file: %s\n", err)
+				if reader != nil {
+					if err := reader.Close(); err != nil {
+						log.Printf("Error closing file: %s\n", err)
+					}
 				}
 			}()
-			users, err := loadAndValidate(jsonFile)
+
+			users, err := loadAndValidate(reader)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -64,10 +96,8 @@ func NewImportCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().StringVarP(&inputFile, "inputFile", "i", "", "The json file where the users should be imported from.")
-	err := cmd.MarkFlagRequired("inputFile")
-	if err != nil {
-		log.Println(err)
-	}
+	cmd.Flags().StringVarP(&inputUrl, "inputUrl", "u", "", "The url to a json file where the users should be imported from.")
+	cmd.MarkFlagsMutuallyExclusive("inputFile", "inputUrl")
 	return cmd
 }
 
