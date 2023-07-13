@@ -62,7 +62,7 @@ func NewImportCommand() *cobra.Command {
 					log.Fatal(err)
 				}
 
-				if response.StatusCode <= 200 || response.StatusCode > 299 {
+				if response.StatusCode < 200 || response.StatusCode > 299 {
 					log.Fatal(fmt.Errorf("failed to get file from url: %s", response.Status))
 				}
 
