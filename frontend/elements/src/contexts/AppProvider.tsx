@@ -211,7 +211,6 @@ const AppProvider = ({
     >
       <TranslateProvider
         translations={translations}
-        lang={lang?.toString()}
         fallbackLang={fallbackLanguage}
         root={translationsLocation}
       >
