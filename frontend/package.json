@@ -15,6 +15,6 @@
     "build:elements:dev": "turbo build:dev --filter=./elements"
   },
   "devDependencies": {
-    "turbo": "^1.10.2"
+    "turbo": "^1.10.7"
   }
 }
