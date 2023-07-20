@@ -177,6 +177,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 	e.ServeHTTP(rec, req)
 
 	if s.Equal(http.StatusOK, rec.Code) {
+		s.Empty(rec.Header().Get("X-Auth-Token"))
 		cookies := rec.Result().Cookies()
 		if s.NotEmpty(cookies) {
 			for _, cookie := range cookies {
@@ -185,6 +186,56 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 				}
 			}
 		}
+		s.Equal(`{"credential_id":"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH","user_id":"ec4ef049-5b88-4321-a173-21b0eff06a04"}`, strings.TrimSpace(rec.Body.String()))
+	}
+
+	req2 := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec2 := httptest.NewRecorder()
+
+	e.ServeHTTP(rec2, req2)
+
+	if s.Equal(http.StatusUnauthorized, rec2.Code) {
+		httpError := echo.HTTPError{}
+		err = json.Unmarshal(rec2.Body.Bytes(), &httpError)
+		s.NoError(err)
+		s.Equal("Stored challenge and received challenge do not match", httpError.Message)
+	}
+}
+
+func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_TokenInHeader() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn")
+	s.Require().NoError(err)
+
+	cfg := test.DefaultConfig
+	cfg.Session.EnableAuthTokenHeader = true
+	e := NewPublicRouter(&cfg, s.Storage, nil)
+
+	body := `{
+"id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+"rawId": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
+"type": "public-key",
+"response": {
+"authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFYmezOw",
+"clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiZ0tKS21oOTB2T3BZTzU1b0hwcWFIWF9vTUNxNG9UWnQtRDBiNnRlSXpyRSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImNyb3NzT3JpZ2luIjpmYWxzZX0",
+"signature": "MEYCIQDi2vYVspG6pf38I4GyQCPOojGbvX4nwSPXCi0hm80twAIhAO3EWjhAnj0UpjU_l0AH5sEh3zq4LDvkvo3AUqaqfGYD",
+"userHandle": "7E7wSVuIQyGhcyGw7_BqBA"
+}
+}`
+
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusOK, rec.Code) {
+		s.Empty(rec.Result().Cookies())
+		token := rec.Header().Get("X-Auth-Token")
+		s.NotEmpty(token)
+		s.Regexp(".*\\..*\\..*", token)
 		s.Equal(`{"credential_id":"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH","user_id":"ec4ef049-5b88-4321-a173-21b0eff06a04"}`, strings.TrimSpace(rec.Body.String()))
 	}
 

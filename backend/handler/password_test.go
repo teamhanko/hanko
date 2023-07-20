@@ -5,6 +5,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
@@ -16,7 +17,7 @@ import (
 )
 
 func TestPasswordSuite(t *testing.T) {
-        t.Parallel()
+	t.Parallel()
 	suite.Run(t, new(passwordSuite))
 }
 
@@ -119,29 +120,47 @@ func (s *passwordSuite) TestPasswordHandler_Login() {
 	userWithPassword := uuid.FromStringOrNil("38bf5a00-d7ea-40a5-a5de-48722c148925")
 	unknownUser := uuid.FromStringOrNil("6a565180-2366-45b1-8785-39f7902c7f2e")
 
-	cfg := &test.DefaultConfig
-	cfg.Password.Enabled = true
+	cfg := func() *config.Config {
+		cfg := test.DefaultConfig
+		cfg.Password.Enabled = true
+		return &cfg
+	}
 
 	tests := []struct {
 		name                string
 		body                string
 		expectedCode        int
+		cfg                 func() *config.Config
 		shouldContainCookie bool
 	}{
 		{
 			name:                "should login successful",
 			body:                fmt.Sprintf(`{"user_id": "%s", "password": "SuperSecure"}`, userWithPassword),
+			cfg:                 cfg,
 			expectedCode:        http.StatusOK,
 			shouldContainCookie: true,
 		},
 		{
+			name: "should login successful with token in header",
+			body: fmt.Sprintf(`{"user_id": "%s", "password": "SuperSecure"}`, userWithPassword),
+			cfg: func() *config.Config {
+				cfg := test.DefaultConfig
+				cfg.Password.Enabled = true
+				cfg.Session.EnableAuthTokenHeader = true
+				return &cfg
+			},
+			expectedCode: http.StatusOK,
+		},
+		{
 			name:         "should not login with wrong password",
 			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, userWithPassword),
+			cfg:          cfg,
 			expectedCode: http.StatusUnauthorized,
 		},
 		{
 			name:         "should not login with non existing user",
 			body:         fmt.Sprintf(`{"user_id": "%s", "password": "verybadpassword"}`, unknownUser),
+			cfg:          cfg,
 			expectedCode: http.StatusUnauthorized,
 		},
 	}
@@ -152,17 +171,25 @@ func (s *passwordSuite) TestPasswordHandler_Login() {
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 
-			e := NewPublicRouter(cfg, s.Storage, nil)
+			e := NewPublicRouter(currentTest.cfg(), s.Storage, nil)
 			e.ServeHTTP(rec, req)
 
-			if s.Equal(currentTest.expectedCode, rec.Code) && currentTest.shouldContainCookie {
-				cookies := rec.Result().Cookies()
-				if s.NotEmpty(cookies) {
-					for _, cookie := range cookies {
-						if cookie.Name == "hanko" {
-							s.Regexp(".*\\..*\\..*", cookie.Value) // check if cookie contains a jwt
+			if s.Equal(currentTest.expectedCode, rec.Code) {
+				if currentTest.shouldContainCookie {
+					s.Empty(rec.Header().Get("X-Auth-Token"))
+					cookies := rec.Result().Cookies()
+					if s.NotEmpty(cookies) {
+						for _, cookie := range cookies {
+							if cookie.Name == "hanko" {
+								s.Regexp(".*\\..*\\..*", cookie.Value) // check if cookie contains a jwt
+							}
 						}
 					}
+				} else if currentTest.cfg().Session.EnableAuthTokenHeader {
+					s.Empty(rec.Result().Cookies())
+					token := rec.Header().Get("X-Auth-Token")
+					s.NotEmpty(token)
+					s.Regexp(".*\\..*\\..*", token)
 				}
 			}
 		})
