@@ -26,7 +26,9 @@ server:
         - 'https://app.domain-app.grocery'
 webauthn:
   relying_party:
-    origin: "https://app.domain-app.grocery"
+    id: "app.domain-app.grocery"
+    origins:
+      - "https://app.domain-app.grocery"
 third_party:
   error_redirect_url: https://app.domain-app.grocery
   allowed_redirect_urls:
