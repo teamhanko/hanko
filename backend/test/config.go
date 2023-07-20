@@ -10,7 +10,8 @@ var DefaultConfig = config.Config{
 			Icon:        "",
 			Origins:     []string{"http://localhost:8080"},
 		},
-		Timeout: 60000,
+		Timeout:          60000,
+		UserVerification: "preferred",
 	},
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},

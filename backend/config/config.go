@@ -9,6 +9,7 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	"golang.org/x/exp/slices"
 	"log"
 	"strings"
 	"time"
@@ -86,7 +87,8 @@ func DefaultConfig() *Config {
 				DisplayName: "Hanko Authentication Service",
 				Origins:     []string{"http://localhost:8888"},
 			},
-			Timeout: 60000,
+			UserVerification: "preferred",
+			Timeout:          60000,
 		},
 		Passcode: Passcode{
 			Smtp: SMTP{
@@ -277,12 +279,17 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty RelyingParty `yaml:"relying_party" json:"relying_party" koanf:"relying_party" split_words:"true"`
-	Timeout      int          `yaml:"timeout" json:"timeout" koanf:"timeout"`
+	RelyingParty     RelyingParty `yaml:"relying_party" json:"relying_party" koanf:"relying_party" split_words:"true"`
+	Timeout          int          `yaml:"timeout" json:"timeout" koanf:"timeout"`
+	UserVerification string       `yaml:"user_verification" json:"user_verification" koanf:"user_verification" split_words:"true""`
 }
 
 // Validate does not need to validate the config, because the library does this already
 func (r *WebauthnSettings) Validate() error {
+	validUv := []string{"required", "preferred", "discouraged"}
+	if !slices.Contains(validUv, r.UserVerification) {
+		return fmt.Errorf("expected user_verification to be one of [%s], got: '%s'", strings.Join(validUv, ", "), r.UserVerification)
+	}
 	return nil
 }
 
