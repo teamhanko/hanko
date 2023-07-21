@@ -74,7 +74,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
 		s.Equal(uuid.FromStringOrNil(userId).Bytes(), uId)
 		s.Equal(test.DefaultConfig.Webauthn.RelyingParty.Id, creationOptions.Response.RelyingParty.ID)
 		s.Equal(protocol.ResidentKeyRequirementRequired, creationOptions.Response.AuthenticatorSelection.ResidentKey)
-		s.Equal(protocol.VerificationRequired, creationOptions.Response.AuthenticatorSelection.UserVerification)
+		s.Equal(protocol.VerificationPreferred, creationOptions.Response.AuthenticatorSelection.UserVerification)
 		s.True(*creationOptions.Response.AuthenticatorSelection.RequireResidentKey)
 	}
 }
@@ -144,7 +144,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginAuthentication() {
 		err := json.Unmarshal(rec.Body.Bytes(), &assertionOptions)
 		s.Require().NoError(err)
 		s.NotEmpty(assertionOptions.Response.Challenge)
-		s.Equal(assertionOptions.Response.UserVerification, protocol.VerificationRequired)
+		s.Equal(assertionOptions.Response.UserVerification, protocol.VerificationPreferred)
 		s.Equal(test.DefaultConfig.Webauthn.RelyingParty.Id, assertionOptions.Response.RelyingPartyID)
 	}
 }
