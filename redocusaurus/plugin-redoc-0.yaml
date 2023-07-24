@@ -1566,13 +1566,15 @@ components:
               format: base64url
               example: o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjfSZYN...
             transports:
-              type: string
-              enum:
-                - usb
-                - nfc
-                - ble
-                - internal
-              example: internal
+              type: array
+              items:
+                type: string
+                enum:
+                  - usb
+                  - nfc
+                  - ble
+                  - internal
+                example: internal
     GetUserResponse:
       type: object
       properties:
