@@ -59,7 +59,7 @@ const LoginEmailPage = (props: Props) => {
   } = useContext(AppContext);
 
   const [emailAddress, setEmailAddress] = useState<string>(
-    props.emailAddress || prefilledEmail
+    props.emailAddress || prefilledEmail || ""
   );
   const [isPasskeyLoginLoading, setIsPasskeyLoginLoading] = useState<boolean>();
   const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] = useState<boolean>();
@@ -387,7 +387,12 @@ const LoginEmailPage = (props: Props) => {
   }, [hanko, setPage, isThirdPartyLoginLoading]);
 
   useEffect(() => {
-    setEmailAddress(prefilledEmail);
+    if (emailAddress.length === 0 && prefilledEmail !== undefined) {
+      setEmailAddress(prefilledEmail);
+    }
+    // The dependency array is missing the emailAddress parameter intentionally because if it is not missing the email
+    // would always be reset to the prefilledEmail when the input is empty
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefilledEmail]);
 
   return (
