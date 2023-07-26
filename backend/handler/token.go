@@ -92,11 +92,12 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			return fmt.Errorf("failed to create session token: %w", err)
 		}
 
-		c.SetCookie(cookie)
 		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", jwtToken)
+		} else {
+			c.SetCookie(cookie)
 		}
 
 		userID = token.UserID
