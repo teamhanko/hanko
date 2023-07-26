@@ -77,7 +77,7 @@ interface Context extends States {
   enablePasskeys: boolean;
   lang: string;
   hidePasskeyButtonOnLogin: boolean;
-  prefilledEmail: string;
+  prefilledEmail?: string;
 }
 
 export const AppContext = createContext<Context>(null);
