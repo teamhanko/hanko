@@ -8,7 +8,7 @@
         "$ref": "#/$defs/ImportEmail"
       },
       "type": "array",
-      "description": "Emails Array of Email Addresses"
+      "description": "Emails Array of email addresses"
     },
     "ImportEmail": {
       "properties": {
@@ -18,7 +18,7 @@
         },
         "is_primary": {
           "type": "boolean",
-          "description": "IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one Primary EMail."
+          "description": "IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one primary email."
         },
         "is_verified": {
           "type": "boolean",
@@ -32,7 +32,7 @@
         "is_primary",
         "is_verified"
       ],
-      "description": "ImportEmail The import format for an users email"
+      "description": "ImportEmail The import format for a user's email"
     },
     "ImportEntry": {
       "properties": {
@@ -63,7 +63,7 @@
         "created_at",
         "updated_at"
       ],
-      "description": "ImportEntry represents a user to be imported to the hanko database"
+      "description": "ImportEntry represents a user to be imported to the Hanko database"
     },
     "ImportList": {
       "items": {
