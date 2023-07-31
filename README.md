@@ -50,7 +50,7 @@ If you want to use the Hanko backend API but prefer to build your own UI, you ca
 # Contact us
 Schedule a Hanko demo. Learn how Hanko will speed up your registration and login flows with passkeys.
 
-<a target="_blank" href="https://cal.com/team/hanko/hanko-demo"><img alt="Book us with Cal.com"  src="https://cal.com/book-with-cal-light.svg" /></a>
+<a target="_blank" href="https://cal.com/team/hanko/demo"><img alt="Book us with Cal.com"  src="https://cal.com/book-with-cal-light.svg" /></a>
 
 
 # Roadmap
@@ -77,13 +77,15 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| OAuth logins (Sign in with Apple/Google/GitHub) |
 |✅| i18n & custom translations |
 |✅| User import |
+|⚙️| API-supported auth flows |
 |⚙️| Mobile SDKs |
+|⚙️| Basic email templating & i8n |
+| | 2FA for securing passcodes & passwords |
+| | Disable sign-ups |
+| | Refresh tokens / sessions |
 | | Sign in with Microsoft |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
-- Basic email templating
-- Refresh tokens / sessions
-- 2FA for securing passcodes & passwords
 - Webhooks
 - Priviledged sessions & step-up authentication
 - Bot protection / Captcha
