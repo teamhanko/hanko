@@ -1,0 +1,572 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/teamhanko/hanko/backend/config/config",
+  "$ref": "#/$defs/Config",
+  "$defs": {
+    "Account": {
+      "properties": {
+        "allow_deletion": {
+          "type": "boolean",
+          "description": "Allow Deletion indicates if a user can perform self-service deletion",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AuditLog": {
+      "properties": {
+        "console_output": {
+          "$ref": "#/$defs/AuditLogConsole"
+        },
+        "storage": {
+          "$ref": "#/$defs/AuditLogStorage"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AuditLogConsole": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "output": {
+          "type": "string",
+          "enum": [
+            "stdout",
+            "stderr"
+          ],
+          "default": "stdout"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AuditLogStorage": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Config": {
+      "properties": {
+        "server": {
+          "$ref": "#/$defs/Server"
+        },
+        "webauthn": {
+          "$ref": "#/$defs/WebauthnSettings"
+        },
+        "passcode": {
+          "$ref": "#/$defs/Passcode"
+        },
+        "password": {
+          "$ref": "#/$defs/Password"
+        },
+        "database": {
+          "$ref": "#/$defs/Database"
+        },
+        "secrets": {
+          "$ref": "#/$defs/Secrets"
+        },
+        "service": {
+          "$ref": "#/$defs/Service"
+        },
+        "session": {
+          "$ref": "#/$defs/Session"
+        },
+        "audit_log": {
+          "$ref": "#/$defs/AuditLog"
+        },
+        "emails": {
+          "$ref": "#/$defs/Emails"
+        },
+        "rate_limiter": {
+          "$ref": "#/$defs/RateLimiter"
+        },
+        "third_party": {
+          "$ref": "#/$defs/ThirdParty"
+        },
+        "log": {
+          "$ref": "#/$defs/LoggerConfig"
+        },
+        "account": {
+          "$ref": "#/$defs/Account"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "passcode",
+        "database",
+        "secrets",
+        "service"
+      ],
+      "description": "Config is the central configuration type"
+    },
+    "Cookie": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "hanko"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "http_only": {
+          "type": "boolean"
+        },
+        "same_site": {
+          "type": "string"
+        },
+        "secure": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Cors": {
+      "properties": {
+        "allow_origins": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "AllowOrigins determines the value of the Access-Control-Allow-Origin\nresponse header. This header defines a list of origins that may access the\nresource.  The wildcard characters '*' and '?' are supported and are\nconverted to regex fragments '.*' and '.' accordingly."
+        },
+        "unsafe_wildcard_origin_allowed": {
+          "type": "boolean",
+          "description": "UnsafeWildcardOriginWithAllowCredentials UNSAFE/INSECURE: allows wildcard '*' origin to be used with AllowCredentials\nflag. In that case we consider any origin allowed and send it back to the client with `Access-Control-Allow-Origin` header.\n\nThis is INSECURE and potentially leads to [cross-origin](https://portswigger.net/research/exploiting-cors-misconfigurations-for-bitcoins-and-bounties)\nattacks. See: https://github.com/labstack/echo/issues/2400 for discussion on the subject.\n\nOptional. Default value is false.",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "allow_origins"
+      ]
+    },
+    "Database": {
+      "oneOf": [
+        {
+          "required": [
+            "user",
+            "password",
+            "host",
+            "port",
+            "dialect"
+          ],
+          "title": "config"
+        },
+        {
+          "required": [
+            "url"
+          ],
+          "title": "url"
+        }
+      ],
+      "properties": {
+        "database": {
+          "type": "string",
+          "default": "hanko"
+        },
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "dialect": {
+          "type": "string",
+          "enum": [
+            "postgres",
+            "mysql",
+            "cockroach"
+          ]
+        },
+        "url": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Database connection settings"
+    },
+    "Email": {
+      "properties": {
+        "from_address": {
+          "type": "string",
+          "default": "passcode@hanko.io"
+        },
+        "from_name": {
+          "type": "string",
+          "default": "Hanko"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Emails": {
+      "properties": {
+        "require_verification": {
+          "type": "boolean",
+          "default": true
+        },
+        "max_num_of_addresses": {
+          "type": "integer",
+          "default": 5
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "LoggerConfig": {
+      "properties": {
+        "log_health_and_metrics": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "log_health_and_metrics"
+      ]
+    },
+    "Passcode": {
+      "properties": {
+        "email": {
+          "$ref": "#/$defs/Email"
+        },
+        "smtp": {
+          "$ref": "#/$defs/SMTP"
+        },
+        "ttl": {
+          "type": "integer",
+          "default": 300
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "email",
+        "smtp"
+      ]
+    },
+    "Password": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "min_password_length": {
+          "type": "integer",
+          "default": 8
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RateLimiter": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "store": {
+          "type": "string",
+          "enum": [
+            "in_memory",
+            "redis"
+          ],
+          "default": "in_memory"
+        },
+        "redis_config": {
+          "$ref": "#/$defs/RedisConfig"
+        },
+        "passcode_limits": {
+          "$ref": "#/$defs/RateLimits"
+        },
+        "password_limits": {
+          "$ref": "#/$defs/RateLimits"
+        },
+        "token_limits": {
+          "$ref": "#/$defs/RateLimits"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "RateLimits": {
+      "properties": {
+        "tokens": {
+          "type": "integer"
+        },
+        "interval": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "tokens",
+        "interval"
+      ]
+    },
+    "RedisConfig": {
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "Address of redis in the form of host[:port][/database]"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "address"
+      ]
+    },
+    "RelyingParty": {
+      "properties": {
+        "id": {
+          "type": "string",
+          "default": "localhost"
+        },
+        "display_name": {
+          "type": "string",
+          "default": "Hanko Authentication Service"
+        },
+        "icon": {
+          "type": "string"
+        },
+        "origins": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "default": [
+            "http://localhost:8888"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "RelyingParty webauthn settings for your application using hanko."
+    },
+    "SMTP": {
+      "properties": {
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "integer"
+            }
+          ]
+        },
+        "user": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "host"
+      ],
+      "description": "SMTP Server Settings for sending passcodes"
+    },
+    "Secrets": {
+      "properties": {
+        "keys": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "minItems": 1,
+          "description": "Keys secrets are used to en- and decrypt the JWKs which get used to sign the JWTs.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail.\n\nEach key must be at least 16 characters long."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "keys"
+      ]
+    },
+    "Server": {
+      "properties": {
+        "public": {
+          "$ref": "#/$defs/ServerSettings"
+        },
+        "admin": {
+          "$ref": "#/$defs/ServerSettings"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "Server contains the setting for the public and admin server"
+    },
+    "ServerSettings": {
+      "properties": {
+        "address": {
+          "type": "string",
+          "description": "The Address to listen on in the form of host:port\nSee net.Dial for details of the address format."
+        },
+        "cors": {
+          "$ref": "#/$defs/Cors"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Service": {
+      "properties": {
+        "name": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "name"
+      ]
+    },
+    "Session": {
+      "properties": {
+        "enable_auth_token_header": {
+          "type": "boolean",
+          "default": false
+        },
+        "lifespan": {
+          "type": "string",
+          "description": "Lifespan, possibly signed sequence of decimal numbers, each with optional fraction and a unit suffix,\nsuch as \"300ms\", \"-1.5h\" or \"2h45m\". Valid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
+          "default": "1h"
+        },
+        "cookie": {
+          "$ref": "#/$defs/Cookie"
+        },
+        "issuer": {
+          "type": "string",
+          "description": "Issuer optional string to be used in the jwt iss claim."
+        },
+        "audience": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "Audience optional []string containing strings which get put into the aud claim. If not set default to Webauthn.RelyingParty.Id config parameter."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ThirdParty": {
+      "properties": {
+        "providers": {
+          "$ref": "#/$defs/ThirdPartyProviders"
+        },
+        "redirect_url": {
+          "type": "string"
+        },
+        "error_redirect_url": {
+          "type": "string"
+        },
+        "allowed_redirect_urls": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "ThirdPartyProvider": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "client_id": {
+          "type": "string"
+        },
+        "secret": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "client_id",
+        "secret"
+      ]
+    },
+    "ThirdPartyProviders": {
+      "properties": {
+        "google": {
+          "$ref": "#/$defs/ThirdPartyProvider"
+        },
+        "github": {
+          "$ref": "#/$defs/ThirdPartyProvider"
+        },
+        "apple": {
+          "$ref": "#/$defs/ThirdPartyProvider"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WebauthnSettings": {
+      "properties": {
+        "relying_party": {
+          "$ref": "#/$defs/RelyingParty"
+        },
+        "timeout": {
+          "type": "integer",
+          "default": 60000
+        },
+        "user_verification": {
+          "type": "string",
+          "enum": [
+            "required",
+            "preferred",
+            "discouraged"
+          ],
+          "default": "preferred"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "WebauthnSettings defines the settings for the webauthn authentication mechanism"
+    }
+  }
+}
