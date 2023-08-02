@@ -1,13 +1,8 @@
 {
-  "include": [
-    "src/**/*",
-    "tests/**/*"
-  ],
+  "include": ["src/**/*", "tests/**/*"],
   "compilerOptions": {
     "paths": {
-      "*": [
-        "./*"
-      ]
+      "*": ["./*"]
     },
     "esModuleInterop": true,
     "baseUrl": "src",
@@ -19,7 +14,7 @@
     "declaration": true,
     "diagnostics": true,
     "outDir": "./dist",
-    "lib":["ES2015", "ES2016", "dom"],
+    "lib": ["ES2015", "ES2016", "dom"],
     "sourceMap": true,
     "noImplicitAny": true,
     "target": "es6",
