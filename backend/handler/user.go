@@ -38,6 +38,10 @@ type UserCreateBody struct {
 }
 
 func (h *UserHandler) Create(c echo.Context) error {
+	if !h.cfg.Account.AllowSignup {
+		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("account signup is disabled"))
+	}
+
 	var body UserCreateBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return dto.ToHttpError(err)

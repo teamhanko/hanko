@@ -83,6 +83,7 @@ export type {
 import {
   HankoError,
   ConflictError,
+  ForbiddenError,
   EmailAddressAlreadyExistsError,
   InvalidPasswordError,
   InvalidPasscodeError,
@@ -103,6 +104,7 @@ import {
 export {
   HankoError,
   ConflictError,
+  ForbiddenError,
   EmailAddressAlreadyExistsError,
   InvalidPasswordError,
   InvalidPasscodeError,

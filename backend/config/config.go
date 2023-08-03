@@ -140,6 +140,10 @@ func DefaultConfig() *Config {
 				Interval: 1 * time.Minute,
 			},
 		},
+		Account: Account{
+			AllowDeletion: false,
+			AllowSignup:   true,
+		},
 	}
 }
 
@@ -626,4 +630,5 @@ type LoggerConfig struct {
 type Account struct {
 	// Allow Deletion indicates if a user can perform self-service deletion
 	AllowDeletion bool `yaml:"allow_deletion" json:"allow_deletion,omitempty" koanf:"allow_deletion" jsonschema:"default=false"`
+	AllowSignup   bool `yaml:"allow_signup" json:"allow_signup,omitempty" koanf:"allow_signup" jsonschema:"default=true"`
 }

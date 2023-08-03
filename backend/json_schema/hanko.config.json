@@ -9,6 +9,11 @@
           "type": "boolean",
           "description": "Allow Deletion indicates if a user can perform self-service deletion",
           "default": false
+        },
+        "allow_signup": {
+          "type": "boolean",
+          "description": "Allow Signup indicates if a user can sign up with service",
+          "default": true
         }
       },
       "additionalProperties": false,

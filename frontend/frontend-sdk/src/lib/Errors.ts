@@ -222,6 +222,21 @@ class UnauthorizedError extends HankoError {
 }
 
 /**
+ * A 'ForbiddenError' occurs when the user is not allowed to perform the requested action.
+ *
+ * @category SDK
+ * @subcategory Errors
+ * @extends {HankoError}
+ */
+class ForbiddenError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
+  constructor(cause?: Error) {
+    super("Forbidden error", "forbidden", cause);
+    Object.setPrototypeOf(this, ForbiddenError.prototype);
+  }
+}
+
+/**
  * A 'UserVerificationError' occurs when the user verification requirements
  * for a WebAuthn ceremony are not met.
  *
@@ -306,6 +321,7 @@ export {
   NotFoundError,
   TooManyRequestsError,
   UnauthorizedError,
+  ForbiddenError,
   UserVerificationError,
   MaxNumOfEmailAddressesReachedError,
   EmailAddressAlreadyExistsError,

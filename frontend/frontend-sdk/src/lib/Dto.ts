@@ -29,9 +29,11 @@ export interface EmailConfig {
  * @category SDK
  * @subcategory DTO
  * @property {boolean} allow_deletion - Indicates the current user is allowed to delete the account.
+ * @property {boolean} allow_signup - Indicates the current user is allowed to sign up.
  */
 export interface AccountConfig {
   allow_deletion: boolean;
+  allow_signup: boolean;
 }
 
 /**
