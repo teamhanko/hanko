@@ -332,7 +332,7 @@ func (e *Email) Validate() error {
 }
 
 type Passcode struct {
-	Email Email `yaml:"email" json:"email" koanf:"email"`
+	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
 	Smtp  SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
 	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 }
