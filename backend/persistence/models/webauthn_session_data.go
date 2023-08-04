@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -25,6 +26,7 @@ type WebauthnSessionData struct {
 	UpdatedAt          time.Time                              `db:"updated_at"`
 	Operation          Operation                              `db:"operation"`
 	AllowedCredentials []WebauthnSessionDataAllowedCredential `has_many:"webauthn_session_data_allowed_credentials"`
+	ExpiresAt          nulls.Time                             `db:"expires_at"`
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
