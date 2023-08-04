@@ -6,3 +6,14 @@
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 
+# expired session data, explicitly set user_id because session data expiry is only checked for non-discoverable login
+- id: afcfeb0f-44e8-4d44-9fab-088459d228f5
+  challenge: "AUgNkV8nmVwv-rl8-aK1ZEX5FlenYCsaTY8vdEcJKJQ"
+  user_id: "46626836-f2db-4ec0-8752-858b544cbc78"
+  user_verification: "required"
+  operation: "authentication"
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  expires_at: 2020-12-31 23:59:59
+
+

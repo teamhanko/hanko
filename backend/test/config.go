@@ -8,7 +8,7 @@ var DefaultConfig = config.Config{
 			Id:          "localhost",
 			DisplayName: "Test Relying Party",
 			Icon:        "",
-			Origins:     []string{"http://localhost:8080"},
+			Origins:     []string{"http://localhost:8080", "http://localhost:8888"},
 		},
 		Timeout:          60000,
 		UserVerification: "preferred",

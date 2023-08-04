@@ -1,0 +1,1 @@
+add_column("webauthn_session_data", "expires_at",  "timestamp", {"null": true})

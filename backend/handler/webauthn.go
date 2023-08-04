@@ -43,8 +43,17 @@ func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, ses
 			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
 			UserVerification:   protocol.VerificationRequired,
 		},
-		Timeout: cfg.Webauthn.Timeout,
-		Debug:   false,
+		Debug: false,
+		Timeouts: webauthn.TimeoutsConfig{
+			Login: webauthn.TimeoutConfig{
+				Timeout: time.Duration(cfg.Webauthn.Timeout) * time.Millisecond,
+				Enforce: true,
+			},
+			Registration: webauthn.TimeoutConfig{
+				Timeout: time.Duration(cfg.Webauthn.Timeout) * time.Millisecond,
+				Enforce: true,
+			},
+		},
 	})
 
 	if err != nil {
