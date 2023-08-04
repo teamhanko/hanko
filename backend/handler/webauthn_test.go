@@ -125,6 +125,43 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 	s.Equal(http.StatusBadRequest, rec2.Code)
 }
 
+func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration_SessionDataExpired() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn_registration")
+	s.Require().NoError(err)
+
+	userId := "ec4ef049-5b88-4321-a173-21b0eff06a04"
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
+	sessionManager := s.GetDefaultSessionManager()
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
+	body := `{
+"id": "4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM",
+"rawId": "4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM",
+"type": "public-key",
+"response": {
+"attestationObject": "o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVikSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAAQECAwQFBgcIAQIDBAUGBwgAIOIlWRhTf45LVyZsJgZmkqtEK-E-tk9I1-z0u13IAFpTpQECAyYgASFYIAeA_nt5TQ8c7bc8hN9_3zqzp3coXO5aplEeHMOQG0hrIlggf_KVxZI_nIedc1XMrwwOMaYNd0qxVpFK7vU79fGBoxY",
+"clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiRmVNYzdzUjlFbGVod0VVNVR0RVdGaTdyUFAzLWtkWlhnbndMdGxiM0NoWSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODg4OCIsImNyb3NzT3JpZ2luIjpmYWxzZX0"
+}
+}`
+
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/registration/finalize", strings.NewReader(body))
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusBadRequest, rec.Code)
+}
+
 func (s *webauthnSuite) TestWebauthnHandler_BeginAuthentication() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode")
@@ -200,6 +237,36 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 		s.NoError(err)
 		s.Equal("Stored challenge and received challenge do not match", httpError.Message)
 	}
+}
+
+func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_SessionDataExpired() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/webauthn")
+	s.Require().NoError(err)
+
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
+	body := `{
+"id": "4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM",
+"rawId": "4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM",
+"type": "public-key",
+"response": {
+"authenticatorData": "SZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2MFAAAABA",
+"clientDataJSON": "eyJ0eXBlIjoid2ViYXV0aG4uZ2V0IiwiY2hhbGxlbmdlIjoiQVVnTmtWOG5tVnd2LXJsOC1hSzFaRVg1RmxlbllDc2FUWTh2ZEVjSktKUSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODg4OCIsImNyb3NzT3JpZ2luIjpmYWxzZSwib3RoZXJfa2V5c19jYW5fYmVfYWRkZWRfaGVyZSI6ImRvIG5vdCBjb21wYXJlIGNsaWVudERhdGFKU09OIGFnYWluc3QgYSB0ZW1wbGF0ZS4gU2VlIGh0dHBzOi8vZ29vLmdsL3lhYlBleCJ9",
+"signature": "MEUCIQD46qneg2W9izFrJ-houyPia_QIcFR_9ZZIoWAqMywRmgIgMed7NAgcXkgCSWtVNknb_D70sn8b-fGwQQBlBCgIJ-c",
+"userHandle": "RmJoNvLbTsCHUoWLVEy8eA"
+}
+}`
+
+	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/finalize", strings.NewReader(body))
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusUnauthorized, rec.Code)
 }
 
 func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_TokenInHeader() {
