@@ -13,5 +13,3 @@ services:
       - "8888:8888"
     networks:
       - intranet
-networks:
-  intranet:
