@@ -8,6 +8,7 @@
   "scripts": {
     "test:nopw": "npx playwright test passwordless common",
     "test:pw": "npx playwright test passwords common",
+    "test:nosignup": "npx playwright test nosignup",
     "test:report": "npx playwright show-report"
   },
   "repository": {

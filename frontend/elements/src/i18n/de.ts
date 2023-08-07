@@ -4,6 +4,7 @@ export const de: Translation = {
   headlines: {
     error: "Ein Fehler ist aufgetreten",
     loginEmail: "Anmelden / Registrieren",
+    loginEmailNoSignup: "Anmelden",
     loginFinished: "Login erfolgreich",
     loginPasscode: "Passcode eingeben",
     loginPassword: "Passwort eingeben",
@@ -24,6 +25,7 @@ export const de: Translation = {
     createdAt: "Erstellt am",
     connectedAccounts: "Verbundene Konten",
     deleteAccount: "Konto löschen",
+    accountNotFound: "Konto nicht gefunden"
   },
   texts: {
     enterPasscode:
@@ -57,6 +59,8 @@ export const de: Translation = {
       "Löschen Sie diesen Passkey aus Ihrem Konto. Beachten Sie, dass der Passkey noch auf Ihren Geräten vorhanden ist und auch dort gelöscht werden muss.",
     deleteAccount:
       "Sind Sie sicher, dass Sie Ihr Konto löschen wollen? Alle Daten werden sofort gelöscht und können nicht wiederhergestellt werden.",
+    noAccountExists:
+      'Es existiert kein Konto für "{emailAddress}".',
   },
   labels: {
     or: "oder",

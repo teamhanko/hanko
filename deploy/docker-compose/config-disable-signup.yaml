@@ -1,0 +1,31 @@
+database:
+  user: hanko
+  password: hanko
+  host: postgresd
+  port: 5432
+  dialect: postgres
+passcode:
+  email:
+    from_address: no-reply@hanko.io
+  smtp:
+    host: "mailslurper"
+    port: "2500"
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
+webauthn:
+  relying_party:
+    origins:
+      - "http://localhost:8888"
+session:
+  cookie:
+    secure: false # is needed for safari, because safari does not store secure cookies on localhost
+server:
+  public:
+    cors:
+      allow_origins:
+        - "http://localhost:8888"
+account:
+  allow_signup: false

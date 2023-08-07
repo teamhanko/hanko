@@ -4,6 +4,7 @@ export const en: Translation = {
   headlines: {
     error: "An error has occurred",
     loginEmail: "Sign in or sign up",
+    loginEmailNoSignup: "Sign in",
     loginFinished: "Login successful",
     loginPasscode: "Enter passcode",
     loginPassword: "Enter password",
@@ -24,6 +25,7 @@ export const en: Translation = {
     createdAt: "Created at",
     connectedAccounts: "Connected accounts",
     deleteAccount: "Delete account",
+    accountNotFound: "Account not found",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -55,6 +57,8 @@ export const en: Translation = {
       "Delete this passkey from your account. Note that the passkey will still exist on your devices and needs to be deleted there as well.",
     deleteAccount:
       "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
+    noAccountExists:
+      'No account exists for "{emailAddress}".',
   },
   labels: {
     or: "or",

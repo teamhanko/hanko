@@ -6,6 +6,8 @@ import { RegisterAuthenticator } from "../pages/RegisterAuthenticator.js";
 import { SecuredContent } from "../pages/SecuredContent.js";
 import { LoginPassword } from "../pages/LoginPassword.js";
 import { RegisterPassword } from "../pages/RegisterPassword.js";
+import { LoginEmailNoSignup } from "../pages/LoginEmailNoSignUp.js";
+import { NoAccountFound } from "../pages/NoAccountFound.js";
 import { MailSlurper } from "../helper/MailSlurper.js";
 import * as Matchers from "../helper/Matchers.js";
 import { Error } from "../pages/Error.js";
@@ -15,6 +17,8 @@ import Setup from "../helper/Setup.js";
 export type Pages = {
   errorPage: Error;
   loginEmailPage: LoginEmail;
+  loginEmailNoSignupPage: LoginEmailNoSignup;
+  noAccountFoundPage: NoAccountFound,
   registerConfirmPage: RegisterConfirm;
   loginPasscodePage: LoginPasscode;
   loginPasswordPage: LoginPassword;
@@ -57,6 +61,19 @@ export const test = base.extend<TestOptions & Pages>({
 
     const loginEmailPage: LoginEmail = new LoginEmail(page);
     await use(loginEmailPage);
+  },
+
+  loginEmailNoSignupPage: async ({ baseURL, page }, use) => { 
+    await Promise.all([
+      page.waitForResponse(Endpoints.API.WELL_KNOWN_CONFIG),
+      page.goto(baseURL!),
+    ]);
+    const loginEmailPageNoSignup: LoginEmailNoSignup = new LoginEmailNoSignup(page);
+    await use(loginEmailPageNoSignup);
+  },
+
+  noAccountFoundPage: async ({ page }, use) => {
+    await use(new NoAccountFound(page));
   },
 
   registerConfirmPage: async ({ page }, use) => {
