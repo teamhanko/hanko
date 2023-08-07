@@ -20,6 +20,7 @@
     "module": "ES2022",
     "useDefineForClassFields": false,
     "lib": ["ES2022", "dom"],
+    "skipLibCheck": true,
     "paths": {
       "@angular/*": ["../../node_modules/@angular/*"]
     }

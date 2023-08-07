@@ -14,7 +14,5 @@ RUN npm install
 # add app
 COPY . ./
 
-RUN cp tsconfig.standalone.json tsconfig.json
-
 # start app
 CMD ["npm", "run", "start-docker"]
