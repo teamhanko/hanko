@@ -579,4 +579,11 @@ account:
   # Default: false
   #
   allow_deletion: false
+  ## allow_signup
+  #
+  # Users are able to sign up new accounts.
+  #
+  # Default: true
+  #
+  allow_signup: true
 ```

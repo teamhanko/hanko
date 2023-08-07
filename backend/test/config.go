@@ -36,4 +36,8 @@ var DefaultConfig = config.Config{
 	Service: config.Service{
 		Name: "Test",
 	},
+	Account: config.Account{
+		AllowSignup:   true,
+		AllowDeletion: false,
+	},
 }

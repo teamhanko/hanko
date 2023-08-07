@@ -220,6 +220,27 @@ func (s *userSuite) TestUserHandler_Create_EmailMissing() {
 	s.Equal(http.StatusBadRequest, rec.Code)
 }
 
+func (s *userSuite) TestUserHandler_Create_AccountCreationDisabled() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	testConfig := test.DefaultConfig
+	testConfig.Account.AllowSignup = false
+	e := NewPublicRouter(&testConfig, s.Storage, nil)
+
+	body := UserCreateBody{Email: "jane.doe@example.com"}
+	bodyJson, err := json.Marshal(body)
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusForbidden, rec.Code)
+}
+
 func (s *userSuite) TestUserHandler_Get() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")

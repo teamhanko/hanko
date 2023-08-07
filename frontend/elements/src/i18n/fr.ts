@@ -4,6 +4,7 @@ export const fr: Translation = {
   headlines: {
     error: "Une erreur s'est produite",
     loginEmail: "Se connecter ou s'inscrire",
+    loginEmailNoSignup: "Se connecter",
     loginFinished: "Connexion réussie",
     loginPasscode: "Entrez le code d'accès",
     loginPassword: "Entrez le mot de passe",
@@ -24,6 +25,7 @@ export const fr: Translation = {
     createdAt: "Créé le",
     connectedAccounts: "Comptes connectés",
     deleteAccount: "Supprimer le compte",
+    accountNotFound: "Compte non trouvé",
   },
   texts: {
     enterPasscode:
@@ -57,6 +59,8 @@ export const fr: Translation = {
       "Supprimez cette clé d'identification de votre compte. Notez que la clé d'identification continuera d'exister sur vos appareils et devra également y être supprimée.",
     deleteAccount:
       "Êtes-vous sûr de vouloir supprimer ce compte ? Toutes les données seront supprimées immédiatement et ne pourront pas être récupérées.",
+    noAccountExists:
+      'Aucun compte n\'existe pour "{emailAddress}".',
   },
   labels: {
     or: "ou",

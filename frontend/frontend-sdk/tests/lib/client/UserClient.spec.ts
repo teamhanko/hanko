@@ -2,6 +2,7 @@ import {
   ConflictError,
   NotFoundError,
   TechnicalError,
+  ForbiddenError,
   UserClient,
 } from "../../../src";
 import { Response } from "../../../src/lib/client/HttpClient";
@@ -177,6 +178,15 @@ describe("UserClient.create()", () => {
 
     const user = userClient.create(email);
     await expect(user).rejects.toThrow(ConflictError);
+  });
+
+  it("should throw error when signup is disabled", async () => {
+    const response = new Response(new XMLHttpRequest());
+    response.status = 403;
+    jest.spyOn(userClient.client, "post").mockResolvedValue(response);
+
+    const user = userClient.create(email);
+    await expect(user).rejects.toThrow(ForbiddenError);
   });
 
   it("should throw error if API response is not ok (no 2xx, no 4xx)", async () => {

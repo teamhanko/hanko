@@ -37,6 +37,7 @@ import LoginPasswordPage from "./LoginPasswordPage";
 import RegisterPasskeyPage from "./RegisterPasskeyPage";
 import RegisterPasswordPage from "./RegisterPasswordPage";
 import ErrorPage from "./ErrorPage";
+import AccountNotFoundPage from "./AccountNotFoundPage";
 
 interface Props {
   emailAddress?: string;
@@ -199,6 +200,15 @@ const LoginEmailPage = (props: Props) => {
     ]
   );
 
+  const renderAccountNotFound = useCallback(
+    () => setPage(<AccountNotFoundPage emailAddress={emailAddress} onBack={onBackHandler}/>), 
+    [ 
+      emailAddress, 
+      onBackHandler, 
+      setPage
+    ]
+  );
+
   const loginWithEmailAndWebAuthn = () => {
     let _userInfo: UserInfo;
     let _webauthnFinalizedResponse: WebauthnFinalized;
@@ -237,7 +247,13 @@ const LoginEmailPage = (props: Props) => {
       })
       .catch((e) => {
         if (e instanceof NotFoundError) {
-          renderRegistrationConfirm();
+          
+          if (config.account.allow_signup) {
+            renderRegistrationConfirm();
+            return;
+          }
+          
+          renderAccountNotFound();
           return;
         }
 
@@ -397,7 +413,7 @@ const LoginEmailPage = (props: Props) => {
 
   return (
     <Content>
-      <Headline1>{t("headlines.loginEmail")}</Headline1>
+      <Headline1>{config.account.allow_signup ? t("headlines.loginEmail") : t("headlines.loginEmailNoSignup")}</Headline1>
       <ErrorMessage error={error} />
       <Form onSubmit={onEmailSubmit}>
         <Input
