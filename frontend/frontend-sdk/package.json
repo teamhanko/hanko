@@ -63,8 +63,5 @@
   },
   "dependencies": {
     "@types/js-cookie": "^3.0.3"
-  },
-  "peerDependencies": {
-    "@github/webauthn-json": "^2.1.1"
   }
 }
