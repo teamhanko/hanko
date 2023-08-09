@@ -12,6 +12,7 @@ import (
 
 func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
+	e.Renderer = NewTemplateRenderer("templates/*.tmpl")
 	e.HideBanner = true
 	g := e.Group("")
 
@@ -29,6 +30,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 		e.Use(prometheus)
 		e.GET("/metrics", echoprometheus.NewHandler())
 	}
+
+	statusHandler := NewStatusHandler(cfg, persister)
+
+	e.GET("/", statusHandler.Status)
 
 	healthHandler := NewHealthHandler()
 

@@ -17,6 +17,9 @@ import (
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
+
+	e.Renderer = NewTemplateRenderer("templates/*.tmpl")
+
 	e.HideBanner = true
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
@@ -77,7 +80,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
+	statusHandler := NewStatusHandler(cfg, persister)
 
+	e.GET("/", statusHandler.Status)
 	e.GET("/me", userHandler.Me, sessionMiddleware)
 
 	user := e.Group("/users")

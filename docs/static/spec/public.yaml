@@ -54,6 +54,22 @@ externalDocs:
 servers:
   - url: 'localhost:8001'
 paths:
+  /:
+    get:
+      summary: Status page
+      description: Return information about the API status
+      operationId: status
+      tags:
+        - Status
+      responses:
+        '200':
+          description: 'An HTML status page is returned if the API is available'
+          content:
+            text/html:
+              schema:
+                type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /passcode/login/initialize:
     post:
       summary: 'Initialize passcode login'
