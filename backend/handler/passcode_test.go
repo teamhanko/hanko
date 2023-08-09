@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
@@ -106,8 +107,6 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 	err := s.LoadFixtures("../test/fixtures/passcode")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
-
 	now := time.Now().UTC()
 
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte("123456"), 12)
@@ -134,6 +133,10 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		UpdatedAt: now,
 	}
 
+	cfg := func() *config.Config {
+		return &test.DefaultConfig
+	}
+
 	tests := []struct {
 		name               string
 		passcodeId         string
@@ -141,6 +144,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		passcode           models.Passcode
 		code               string
 		expectedStatusCode int
+		cfg                func() *config.Config
 	}{
 		{
 			name:               "finish successful",
@@ -148,6 +152,19 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			passcode:           passcode,
 			code:               "123456",
 			expectedStatusCode: http.StatusOK,
+			cfg:                cfg,
+		},
+		{
+			name:               "finish successful with token in header",
+			passcodeId:         "a2383922-dea3-46c8-be17-85b267c0d135",
+			passcode:           passcode,
+			code:               "123456",
+			expectedStatusCode: http.StatusOK,
+			cfg: func() *config.Config {
+				c := test.DefaultConfig
+				c.Session.EnableAuthTokenHeader = true
+				return &c
+			},
 		},
 		{
 			name:               "with wrong code",
@@ -155,6 +172,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			passcode:           passcode,
 			code:               "654321",
 			expectedStatusCode: http.StatusUnauthorized,
+			cfg:                cfg,
 		},
 		{
 			name:               "with wrong code 3 times",
@@ -163,6 +181,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			passcode:           passcode,
 			code:               "654321",
 			expectedStatusCode: http.StatusGone,
+			cfg:                cfg,
 		},
 		{
 			name:               "with wrong passcode ID",
@@ -170,6 +189,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			passcode:           passcode,
 			code:               "123456",
 			expectedStatusCode: http.StatusUnauthorized,
+			cfg:                cfg,
 		},
 		{
 			name:               "after passcode expired",
@@ -177,11 +197,14 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			passcode:           passcodeWithExpiredTimeout,
 			code:               "123456",
 			expectedStatusCode: http.StatusRequestTimeout,
+			cfg:                cfg,
 		},
 	}
 
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
+			e := NewPublicRouter(currentTest.cfg(), s.Storage, nil)
+
 			// Setup passcode
 			err := s.Storage.GetPasscodePersister().Create(currentTest.passcode)
 			s.Require().NoError(err)
@@ -194,6 +217,8 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			s.Require().NoError(err)
 
 			responseCode := 0
+			var response *http.Response
+			var headers http.Header
 			for i := 0; i <= currentTest.retryCount; i++ {
 				req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 				req.Header.Set("Content-Type", "application/json")
@@ -201,9 +226,18 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 
 				e.ServeHTTP(rec, req)
 				responseCode = rec.Code
+				response = rec.Result()
+				headers = rec.Header()
 			}
 
 			s.Equal(currentTest.expectedStatusCode, responseCode)
+
+			if currentTest.cfg().Session.EnableAuthTokenHeader {
+				s.Empty(response.Cookies())
+				token := headers.Get("X-Auth-Token")
+				s.NotEmpty(token)
+				s.Regexp(".*\\..*\\..*", token)
+			}
 
 			// remove passcode
 			_ = s.Storage.GetPasscodePersister().Delete(currentTest.passcode)

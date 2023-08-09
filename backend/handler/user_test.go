@@ -11,6 +11,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
+	"golang.org/x/exp/slices"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -26,11 +27,13 @@ type userSuite struct {
 	test.Suite
 }
 
-func (s *userSuite) TestUserHandler_Create() {
+func (s *userSuite) TestUserHandler_Create_TokenInCookie() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+
+	cfg := test.DefaultConfig
+	e := NewPublicRouter(&cfg, s.Storage, nil)
 
 	body := UserCreateBody{Email: "jane.doe@example.com"}
 	bodyJson, err := json.Marshal(body)
@@ -55,6 +58,59 @@ func (s *userSuite) TestUserHandler_Create() {
 		email, err := s.Storage.GetEmailPersister().FindByAddress(body.Email)
 		s.NoError(err)
 		s.NotNil(email)
+
+		s.Empty(rec.Header().Get("X-Auth-Token"))
+		cookies := rec.Result().Cookies()
+		rec.Result().Cookies()
+		s.NotEmpty(cookies)
+		for _, cookie := range cookies {
+			if cookie.Name == "hanko" {
+				s.Regexp(".*\\..*\\..*", cookie.Value)
+			}
+		}
+	}
+}
+
+func (s *userSuite) TestUserHandler_Create_TokenInHeader() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	cfg := test.DefaultConfig
+	cfg.Session.EnableAuthTokenHeader = true
+	e := NewPublicRouter(&cfg, s.Storage, nil)
+
+	body := UserCreateBody{Email: "jane.doe@example.com"}
+	bodyJson, err := json.Marshal(body)
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusOK, rec.Code) {
+		user := models.User{}
+		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		s.NoError(err)
+		s.False(user.ID.IsNil())
+
+		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+		s.NoError(err)
+		s.Equal(1, count)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress(body.Email)
+		s.NoError(err)
+		s.NotNil(email)
+
+		s.True(!slices.ContainsFunc(rec.Result().Cookies(), func(cookie *http.Cookie) bool {
+			return strings.EqualFold(cookie.Name, cfg.Session.Cookie.Name)
+		}))
+
+		responseToken := rec.Header().Get("X-Auth-Token")
+		s.NotEmpty(responseToken)
+		s.Regexp(".*\\..*\\..*", responseToken)
 	}
 }
 
@@ -162,6 +218,27 @@ func (s *userSuite) TestUserHandler_Create_EmailMissing() {
 	e.ServeHTTP(rec, req)
 
 	s.Equal(http.StatusBadRequest, rec.Code)
+}
+
+func (s *userSuite) TestUserHandler_Create_AccountCreationDisabled() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+	testConfig := test.DefaultConfig
+	testConfig.Account.AllowSignup = false
+	e := NewPublicRouter(&testConfig, s.Storage, nil)
+
+	body := UserCreateBody{Email: "jane.doe@example.com"}
+	bodyJson, err := json.Marshal(body)
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodPost, "/users", bytes.NewReader(bodyJson))
+	req.Header.Set("Content-Type", "application/json")
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	s.Equal(http.StatusForbidden, rec.Code)
 }
 
 func (s *userSuite) TestUserHandler_Get() {
@@ -452,4 +529,49 @@ func (s *userSuite) TestUserHandler_Logout() {
 		split := strings.Split(cookie, ";")
 		s.Equal("Max-Age=0", strings.TrimSpace(split[2]))
 	}
+}
+
+func (s *userSuite) TestUserHandler_Delete() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/user")
+	s.Require().NoError(err)
+
+	userId, _ := uuid.FromString("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+	cfg := test.DefaultConfig
+	cfg.Account.AllowDeletion = true
+	e := NewPublicRouter(&cfg, s.Storage, nil)
+
+	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+	token, err := sessionManager.GenerateJWT(userId)
+	s.Require().NoError(err)
+	cookie, err := sessionManager.GenerateCookie(token)
+	s.Require().NoError(err)
+
+	req := httptest.NewRequest(http.MethodDelete, "/user", nil)
+	req.AddCookie(cookie)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusNoContent, rec.Code) {
+		cookie := rec.Header().Get("Set-Cookie")
+		s.NotEmpty(cookie)
+
+		split := strings.Split(cookie, ";")
+		s.Equal("Max-Age=0", strings.TrimSpace(split[2]))
+	}
+
+	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+	s.NoError(err)
+	s.Equal(0, count)
 }

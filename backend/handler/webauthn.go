@@ -43,8 +43,17 @@ func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, ses
 			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
 			UserVerification:   protocol.VerificationRequired,
 		},
-		Timeout: cfg.Webauthn.Timeout,
-		Debug:   false,
+		Debug: false,
+		Timeouts: webauthn.TimeoutsConfig{
+			Login: webauthn.TimeoutConfig{
+				Timeout: time.Duration(cfg.Webauthn.Timeout) * time.Millisecond,
+				Enforce: true,
+			},
+			Registration: webauthn.TimeoutConfig{
+				Timeout: time.Duration(cfg.Webauthn.Timeout) * time.Millisecond,
+				Enforce: true,
+			},
+		},
 	})
 
 	if err != nil {
@@ -88,7 +97,7 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
 			RequireResidentKey: &t,
 			ResidentKey:        protocol.ResidentKeyRequirementRequired,
-			UserVerification:   protocol.VerificationRequired,
+			UserVerification:   protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification),
 		}),
 		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
 		// don't set the excludeCredentials list, so an already registered device can be re-registered
@@ -246,7 +255,10 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 		}
 
 		if len(webauthnUser.WebAuthnCredentials()) > 0 {
-			options, sessionData, err = h.webauthn.BeginLogin(webauthnUser, webauthn.WithUserVerification(protocol.VerificationRequired))
+			options, sessionData, err = h.webauthn.BeginLogin(
+				webauthnUser,
+				webauthn.WithUserVerification(protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification)),
+			)
 			if err != nil {
 				return fmt.Errorf("failed to create webauthn assertion options: %w", err)
 			}
@@ -254,7 +266,9 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 	}
 	if options == nil && sessionData == nil {
 		var err error
-		options, sessionData, err = h.webauthn.BeginDiscoverableLogin(webauthn.WithUserVerification(protocol.VerificationRequired))
+		options, sessionData, err = h.webauthn.BeginDiscoverableLogin(
+			webauthn.WithUserVerification(protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification)),
+		)
 		if err != nil {
 			return fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 		}
@@ -399,11 +413,12 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return fmt.Errorf("failed to create session cookie: %w", err)
 		}
 
-		c.SetCookie(cookie)
 		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 		if h.cfg.Session.EnableAuthTokenHeader {
 			c.Response().Header().Set("X-Auth-Token", token)
+		} else {
+			c.SetCookie(cookie)
 		}
 
 		err = h.auditLogger.Create(c, models.AuditLogWebAuthnAuthenticationFinalSucceeded, user, nil)

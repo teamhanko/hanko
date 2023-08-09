@@ -7,7 +7,9 @@ export interface Translations {
 export interface Translation {
   headlines: {
     error: string;
+    accountNotFound: string;
     loginEmail: string;
+    loginEmailNoSignup: string;
     loginFinished: string;
     loginPasscode: string;
     loginPassword: string;
@@ -33,6 +35,7 @@ export interface Translation {
     enterPasscode: string;
     setupPasskey: string;
     createAccount: string;
+    noAccountExists: string;
     passwordFormatHint: string;
     manageEmails: string;
     changePassword: string;

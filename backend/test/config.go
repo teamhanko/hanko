@@ -8,9 +8,10 @@ var DefaultConfig = config.Config{
 			Id:          "localhost",
 			DisplayName: "Test Relying Party",
 			Icon:        "",
-			Origins:     []string{"http://localhost:8080"},
+			Origins:     []string{"http://localhost:8080", "http://localhost:8888"},
 		},
-		Timeout: 60000,
+		Timeout:          60000,
+		UserVerification: "preferred",
 	},
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
@@ -34,5 +35,9 @@ var DefaultConfig = config.Config{
 	},
 	Service: config.Service{
 		Name: "Test",
+	},
+	Account: config.Account{
+		AllowSignup:   true,
+		AllowDeletion: false,
 	},
 }

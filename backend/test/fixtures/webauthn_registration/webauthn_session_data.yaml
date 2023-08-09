@@ -5,3 +5,13 @@
   operation: "registration"
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+
+# expired session data
+- id: 65f13ce2-d118-44f0-a38b-8e3ee918c6f3
+  challenge: "FeMc7sR9ElehwEU5TtEWFi7rPP3-kdZXgnwLtlb3ChY"
+  user_id: "ec4ef049-5b88-4321-a173-21b0eff06a04"
+  user_verification: "required"
+  operation: "registration"
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  expires_at: 2020-12-31 23:59:59

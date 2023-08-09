@@ -251,6 +251,19 @@ webauthn:
   # Default: 60000
   #
   timeout: 60000
+  ## user_verification ##
+  #
+  # Describes your requirements regarding local authorization with an authenticator through
+  # various authorization gesture modalities; for example, through a touch plus pin code,
+  # password entry, or biometric recognition.
+  #
+  # Must be one of "required", "preferred" or "discouraged".
+  #
+  # The setting applies to both WebAuthn registration and authentication ceremonies.
+  #
+  # Default: preferred
+  #
+  user_verification: preferred
   relying_party:
     ## id ##
     #
@@ -566,4 +579,11 @@ account:
   # Default: false
   #
   allow_deletion: false
+  ## allow_signup
+  #
+  # Users are able to sign up new accounts.
+  #
+  # Default: true
+  #
+  allow_signup: true
 ```

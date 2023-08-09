@@ -819,6 +819,7 @@ paths:
   /users:
     post:
       summary: 'Create a user'
+      description: Used to create a new user. To disable this endpoint, `config.account.allow_signup` must be set to false.
       operationId: createUser
       tags:
         - User Management
@@ -842,6 +843,8 @@ paths:
                 $ref: '#/components/schemas/CreateUserResponse'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
         '500':
@@ -1096,6 +1099,9 @@ components:
           properties:
             allow_deletion:
               description: Indicates the user account can be deleted by the current user.
+              type: boolean
+            allow_signup:
+              description: Indicates users are able to create new accounts.
               type: boolean
     CookieSession:
       type: string
@@ -1371,13 +1377,15 @@ components:
               format: base64url
               example: o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjfSZYN...
             transports:
-              type: string
-              enum:
-                - usb
-                - nfc
-                - ble
-                - internal
-              example: internal
+              type: array
+              items:
+                type: string
+                enum:
+                  - usb
+                  - nfc
+                  - ble
+                  - internal
+                example: internal
     GetUserResponse:
       type: object
       properties:

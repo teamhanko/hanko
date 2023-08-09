@@ -1,0 +1,1 @@
+drop_column("webauthn_session_data", "expires_at")
