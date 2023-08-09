@@ -21,7 +21,7 @@ require (
 	github.com/knadh/koanf v1.5.0
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo-jwt/v4 v4.1.0
-	github.com/labstack/echo/v4 v4.10.2
+	github.com/labstack/echo/v4 v4.11.1
 	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/lib/pq v1.10.9
 	github.com/mocktools/go-smtp-mock/v2 v2.1.0
@@ -113,7 +113,7 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.17 // indirect
+	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/microcosm-cc/bluemonday v1.0.20 // indirect
