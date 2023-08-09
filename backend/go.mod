@@ -20,7 +20,7 @@ require (
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/knadh/koanf v1.5.0
 	github.com/labstack/echo-contrib v0.15.0
-	github.com/labstack/echo-jwt/v4 v4.1.0
+	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/lestrrat-go/jwx/v2 v2.0.11
 	github.com/lib/pq v1.10.9
@@ -79,7 +79,6 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
-	github.com/golang-jwt/jwt/v4 v4.5.0 // indirect
 	github.com/golang-jwt/jwt/v5 v5.0.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-tpm v0.9.0 // indirect
