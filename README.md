@@ -77,20 +77,21 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| OAuth logins (Sign in with Apple/Google/GitHub) |
 |✅| i18n & custom translations |
 |✅| User import |
+|✅| Disable sign-ups |
 |⚙️| API-supported auth flows |
 |⚙️| Mobile SDKs |
 |⚙️| Basic email templating & i8n |
 | | 2FA for securing passcodes & passwords |
-| | Disable sign-ups |
+| | Webhooks |
 | | Refresh tokens / sessions |
 | | Sign in with Microsoft |
+| | OIDC support |
+| | Enterprise SSO (OIDC/SAML) |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
-- Webhooks
 - Priviledged sessions & step-up authentication
 - Bot protection / Captcha
 - SMS passcode delivery
-- SAML support
 
 # Community
 ## Questions, bugs, ideas
