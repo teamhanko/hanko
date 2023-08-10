@@ -13,12 +13,13 @@ import (
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 
-	e.Renderer = NewTemplateRenderer("templates/*.tmpl")
+	e.Renderer = template.NewTemplateRenderer()
 
 	e.HideBanner = true
 

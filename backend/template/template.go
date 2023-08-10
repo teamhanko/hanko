@@ -1,10 +1,14 @@
-package handler
+package template
 
 import (
+	"embed"
 	"github.com/labstack/echo/v4"
 	"html/template"
 	"io"
 )
+
+//go:embed templates/*
+var templateFS embed.FS
 
 type Template struct {
 	templates *template.Template
@@ -14,8 +18,8 @@ func (t *Template) Render(w io.Writer, name string, data interface{}, c echo.Con
 	return t.templates.ExecuteTemplate(w, name, data)
 }
 
-func NewTemplateRenderer(templates string) *Template {
+func NewTemplateRenderer() *Template {
 	return &Template{
-		templates: template.Must(template.ParseGlob(templates)),
+		templates: template.Must(template.ParseFS(templateFS, "templates/*.tmpl")),
 	}
 }
