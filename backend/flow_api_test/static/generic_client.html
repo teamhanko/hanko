@@ -1,0 +1,270 @@
+<html>
+<head>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-indent: 3em;
+        }
+
+        button, div, li {
+            margin-left: 4em;
+        }
+
+        h1, h2, h3, h4, h5, ul {
+            margin: .5em;
+        }
+
+        h1, h2 {
+            text-indent: 0;
+        }
+
+        h3 {
+            text-indent: 1em;
+        }
+
+        h4 {
+            text-indent: 1.5em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+<h1>✨ Login</h1>
+<button id="newLoginFlowBtn">✍ New login flow</button>
+
+<label for="options"></label>
+<select id="options">
+    <option value="1">Passcodes Only</option>
+    <option value="8">Passcodes and Passwords</option>
+    <option value="4">Passcodes with Email Verification</option>
+    <option value="12">Passcodes with Email Verification and Passwords</option>
+    <option value="14">Second Factor Flow</option>
+</select>
+
+<div id="container"></div>
+<script>
+    const passkeyHandler = (payload) => {
+        document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+    }
+
+    const stateHandler = {
+        "loginPasskey": passkeyHandler,
+        "passkey_login": passkeyHandler,
+        "passkey_registration": passkeyHandler,
+    }
+
+    function generateUI(data) {
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+
+        const stateHeadline = document.createElement('h2');
+        stateHeadline.innerHTML = "📌 State: " + data.state;
+        container.appendChild(stateHeadline);
+
+        const errorHeadline = document.createElement('h3');
+        errorHeadline.innerHTML = "⛔ Error";
+        container.appendChild(errorHeadline);
+
+        if (data.error) {
+            const errorEl = document.createElement('p');
+            errorEl.textContent = `Code: ${data.error.code}, Message: ${data.error.message}`
+            container.appendChild(errorEl);
+        } else {
+            const notAvailable = document.createElement('p');
+            notAvailable.textContent = "[n/a]";
+            container.appendChild(notAvailable);
+        }
+
+        const payloadHeadline = document.createElement('h3');
+        payloadHeadline.innerHTML = "📦 Payload";
+        container.appendChild(payloadHeadline);
+
+        if (data.payload) {
+            const pre = document.createElement('pre');
+            pre.textContent = JSON.stringify(data.payload)
+            container.appendChild(pre);
+        } else {
+            const notAvailable = document.createElement('p');
+            notAvailable.textContent = "[n/a]";
+            container.appendChild(notAvailable);
+        }
+
+        const executeHandlerButton = document.createElement('button');
+        executeHandlerButton.type = 'button';
+        executeHandlerButton.textContent = "☝ Execute handler";
+
+        if (!stateHandler[data.state]) {
+            executeHandlerButton.disabled = true
+        } else {
+            executeHandlerButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                stateHandler[data.state](data.payload);
+            });
+        }
+
+        container.appendChild(executeHandlerButton);
+
+        const methodsHeadline = document.createElement('h3');
+        methodsHeadline.textContent = "🕹 Methods";
+        container.appendChild(methodsHeadline);
+
+        if (data.links) {
+            data.links.forEach(link => {
+                const form = document.createElement('form');
+                form.action = link.href;
+                form.method = 'POST';
+
+                const methodHeadline = document.createElement('h4');
+                methodHeadline.textContent = "⚡ Method: " + link.method_name;
+                form.appendChild(methodHeadline);
+
+
+                const descriptionHeadline = document.createElement('h5');
+                descriptionHeadline.textContent = "📝 Description";
+                form.appendChild(descriptionHeadline);
+
+                const description = document.createElement('div');
+                description.textContent = link.description;
+                form.appendChild(description);
+
+                const inputsHeadline = document.createElement('h5');
+                inputsHeadline.textContent = "⛳ Inputs";
+                form.appendChild(inputsHeadline);
+
+                if (link.inputs) {
+                    const inputList = document.createElement('ul');
+
+                    link.inputs.forEach(input => {
+                        const inputListItem = document.createElement('li');
+
+                        const label = document.createElement("label");
+
+                        const flags = [];
+
+                        if (input.required) {
+                            flags.push("required")
+                        } else {
+                            flags.push("optional")
+                        }
+
+                        if (input.hidden) {
+                            flags.push("hidden");
+                        }
+
+                        const details = (flags.length ? " (" + flags.join(", ") + ")" : "");
+                        label.textContent = input.name + details + ": ";
+                        inputListItem.appendChild(label)
+
+                        const inputElement = document.createElement('input');
+
+                        if (input.value) {
+                            inputElement.defaultValue = input.value
+                        }
+
+                        inputElement.name = input.name;
+                        inputElement.type = input.type;
+                        inputElement.required = input.required;
+
+                        inputListItem.appendChild(inputElement);
+
+                        if (input.error) {
+                            const error = document.createElement('p')
+                            error.textContent = "⛔ Code: " + input.error.code + ", Message: " + input.error.message
+                            inputListItem.appendChild(error);
+                        }
+
+                        inputList.appendChild(inputListItem)
+                    });
+
+                    form.appendChild(inputList);
+                } else {
+                    const notAvailable = document.createElement('p');
+                    notAvailable.textContent = "[n/a]";
+                    form.appendChild(notAvailable);
+                }
+
+                const submitButton = document.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.textContent = "📡 Submit";
+                submitButton.addEventListener('click', (event) => updateFlow(event, form))
+
+                form.appendChild(submitButton);
+
+                container.appendChild(form);
+            });
+        } else {
+            const notAvailable = document.createElement('p');
+            notAvailable.textContent = "[n/a]";
+            container.appendChild(notAvailable);
+        }
+    }
+
+    function serializeForm(form) {
+        const formData = new FormData(form);
+        const data = {};
+
+        formData.forEach((value, key) => {
+            const input = formData.get(key);
+
+            if (input.type === "checkbox") {
+                data[key] = input.checked;
+            } else if (input.type === "number") {
+                data[key] = parseFloat(value + "");
+            } else {
+                data[key] = value;
+            }
+        });
+
+        return data
+    }
+
+    function getFlowOption() {
+        const optionsEl = document.getElementById("options");
+        const selectedIndex = optionsEl.selectedIndex;
+        return parseInt(optionsEl.options[selectedIndex].value, 10);
+    }
+
+    function updateFlow(event, form) {
+        event.preventDefault();
+        const body = JSON.stringify(serializeForm(form))
+
+        fetch(form.action, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: form.method,
+            body: JSON.stringify({input_data: body, flow_option: getFlowOption()}),
+        })
+            .then(response => response.json())
+            .then(generateUI)
+            .catch(console.error);
+    }
+
+    function createFlow() {
+        fetch("/flow_api_login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({flow_option: getFlowOption()})
+        })
+            .then((resp) => resp.json())
+            .then(generateUI)
+            .catch(console.error)
+    }
+
+    function init() {
+        const newLoginFlowBtnEL = document.getElementById("newLoginFlowBtn");
+        newLoginFlowBtnEL.addEventListener("click", () => {
+            createFlow();
+        })
+    }
+
+    init();
+</script>
+</body>
+</html>

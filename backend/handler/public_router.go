@@ -20,6 +20,7 @@ import (
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
+
 	e.Renderer = template.NewTemplateRenderer()
 	e.HideBanner = true
 	g := e.Group("")
