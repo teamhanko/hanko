@@ -12,7 +12,6 @@ type ErrorType struct {
 var (
 	TechnicalError             = &ErrorType{Code: "technical_error", Message: "Something went wrong."}
 	FlowExpiredError           = &ErrorType{Code: "flow_expired_error", Message: "The flow has expired."}
-	FlowDiscontinuityError     = &ErrorType{Code: "flow_discontinuity_error", Message: "The flow can't be continued."}
 	OperationNotPermittedError = &ErrorType{Code: "operation_not_permitted_error", Message: "The operation is not permitted."}
 	FormDataInvalidError       = &ErrorType{Code: "form_data_invalid_error", Message: "Form data invalid."}
 	EmailInvalidError          = &ErrorType{Code: "email_invalid_error", Message: "The email address is invalid."}

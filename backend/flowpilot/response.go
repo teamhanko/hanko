@@ -2,8 +2,8 @@ package flowpilot
 
 import (
 	"fmt"
-	"hanko_flowsc/flowpilot/jsonmanager"
-	"hanko_flowsc/flowpilot/utils"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // Link represents a link to an action.
