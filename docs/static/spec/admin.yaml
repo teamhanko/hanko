@@ -22,8 +22,24 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: 'localhost:8000'
+  - url: 'localhost:8001'
 paths:
+  /:
+    get:
+      summary: Status page
+      description: Return information about the API status. Returns a 500 if there are issues with database connectivity.
+      operationId: status
+      tags:
+        - Status
+      responses:
+        '200':
+          description: 'An HTML status page is returned if the API is available'
+          content:
+            text/html:
+              schema:
+                type: string
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /users:
     get:
       summary: 'Get a list of users'

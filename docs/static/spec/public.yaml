@@ -52,12 +52,12 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: 'localhost:8001'
+  - url: 'localhost:8000'
 paths:
   /:
     get:
       summary: Status page
-      description: Return information about the API status
+      description: Return information about the API status. Returns a 500 if there are issues with database connectivity.
       operationId: status
       tags:
         - Status
