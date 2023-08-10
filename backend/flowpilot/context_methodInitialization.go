@@ -1,6 +1,6 @@
 package flowpilot
 
-import "hanko_flowsc/flowpilot/jsonmanager"
+import "github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 
 // defaultMethodInitializationContext is the default implementation of the methodInitializationContext interface.
 type defaultMethodInitializationContext struct {

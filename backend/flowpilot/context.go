@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"hanko_flowsc/flowpilot/jsonmanager"
-	"hanko_flowsc/flowpilot/utils"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"time"
 )
 
@@ -20,6 +20,9 @@ type flowContext interface {
 	Payload() jsonmanager.JSONManager
 	// Stash returns the JSONManager for accessing stash data.
 	Stash() jsonmanager.JSONManager
+
+	// TODO: Maybe we should remove 'Flash' and provide the same functionality under "Input()"
+
 	// Flash returns the JSONManager for accessing flash data.
 	Flash() jsonmanager.JSONManager
 	// GetInitialState returns the initial state of the Flow.
@@ -60,7 +63,7 @@ type methodExecutionContext interface {
 	// ValidateInputData validates the input data against the schema.
 	ValidateInputData() bool
 
-	// TODO: CopyInputsToStash can maybe removed or replaced with an option you can set via the input options.
+	// TODO: CopyInputsToStash can maybe removed or replaced with an option you can set via the input schema.
 
 	// CopyInputsToStash copies specified inputs to the stash.
 	CopyInputsToStash(inputNames ...string) error

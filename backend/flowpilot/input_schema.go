@@ -2,7 +2,7 @@ package flowpilot
 
 import (
 	"fmt"
-	"hanko_flowsc/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 )
 
 // Schema represents an interface for managing input data schemas.

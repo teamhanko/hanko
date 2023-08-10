@@ -3,7 +3,7 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
-	"hanko_flowsc/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 )
 
 // defaultMethodExecutionContext is the default implementation of the methodExecutionContext interface.

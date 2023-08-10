@@ -3,7 +3,7 @@ package flowpilot
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"hanko_flowsc/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 )
 
 // defaultFlowContext is the default implementation of the flowContext interface.
