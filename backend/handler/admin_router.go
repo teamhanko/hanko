@@ -40,6 +40,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	user := g.Group("/users")
 	user.GET("", userHandler.List)
+	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get)
 	user.DELETE("/:id", userHandler.Delete)
 
