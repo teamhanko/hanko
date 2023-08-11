@@ -63,13 +63,17 @@ paths:
         - Status
       responses:
         '200':
-          description: 'An HTML status page is returned if the API is available'
+          description: 'API is running'
           content:
             text/html:
               schema:
                 type: string
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          description: 'API is not functioning properly'
+          content:
+            text/html:
+              schema:
+                type: string
   /passcode/login/initialize:
     post:
       summary: 'Initialize passcode login'

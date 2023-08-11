@@ -32,7 +32,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 		e.GET("/metrics", echoprometheus.NewHandler())
 	}
 
-	statusHandler := NewStatusHandler(cfg, persister)
+	statusHandler := NewStatusHandler(persister)
 
 	e.GET("/", statusHandler.Status)
 

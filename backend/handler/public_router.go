@@ -81,7 +81,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
-	statusHandler := NewStatusHandler(cfg, persister)
+	statusHandler := NewStatusHandler(persister)
 
 	e.GET("/", statusHandler.Status)
 	e.GET("/me", userHandler.Me, sessionMiddleware)

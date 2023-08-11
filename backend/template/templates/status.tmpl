@@ -6,8 +6,12 @@
 </head>
 <body>
 <h1>API Status</h1>
-<p>✅ API is running</p>
+{{if .dbError}}
+<p>❌ API is not functioning properly due to database connectivity problems.</p>
+{{else}}
+<p>✅ API is running.</p>
 <p>Check integration guides on <a href="https://docs.hanko.io" target="_blank">docs.hanko.io</a></p>
+{{end}}
 </body>
 </html>
 {{end}}
