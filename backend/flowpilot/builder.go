@@ -57,15 +57,3 @@ func (fb *FlowBuilder) Build() Flow {
 		TTL:          fb.ttl,
 	}
 }
-
-// TransitionBuilder is a builder struct for creating a new Transition.
-type TransitionBuilder struct {
-	method Method
-}
-
-// Build constructs and returns the Transition object.
-func (tb *TransitionBuilder) Build() *Transition {
-	return &Transition{
-		Method: tb.method,
-	}
-}
