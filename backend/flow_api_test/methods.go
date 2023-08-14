@@ -282,19 +282,19 @@ func (m VerifyWAAssertion) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(StateSuccess)
 }
 
-type SkipOnboarding struct{}
+type SkipPasskeyCreation struct{}
 
-func (m SkipOnboarding) GetName() flowpilot.MethodName {
-	return MethodSkipOnboarding
+func (m SkipPasskeyCreation) GetName() flowpilot.MethodName {
+	return MethodSkipPasskeyCreation
 }
 
-func (m SkipOnboarding) GetDescription() string {
+func (m SkipPasskeyCreation) GetDescription() string {
 	return "Skips the onboarding process."
 }
 
-func (m SkipOnboarding) Initialize(_ flowpilot.InitializationContext) {}
+func (m SkipPasskeyCreation) Initialize(_ flowpilot.InitializationContext) {}
 
-func (m SkipOnboarding) Execute(c flowpilot.ExecutionContext) error {
+func (m SkipPasskeyCreation) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(StateSuccess)
 }
 

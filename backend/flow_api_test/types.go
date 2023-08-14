@@ -29,6 +29,6 @@ const (
 	MethodRequestRecovery        flowpilot.MethodName = "request_recovery"
 	MethodSubmitPasscodeCode     flowpilot.MethodName = "submit_passcode_code"
 	MethodCreateUser             flowpilot.MethodName = "create_user"
-	MethodSkipOnboarding         flowpilot.MethodName = "skip_onboarding"
+	MethodSkipPasskeyCreation    flowpilot.MethodName = "skip_passkey_creation"
 	MethodBack                   flowpilot.MethodName = "back"
 )

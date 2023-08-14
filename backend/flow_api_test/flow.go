@@ -14,7 +14,7 @@ var Flow = flowpilot.NewFlow("/flow_api_login").
 	State(StateUpdateExistingPassword, SubmitNewPassword{}).
 	State(StateConfirmAccountCreation, CreateUser{}, Back{}).
 	State(StatePasswordCreation, SubmitNewPassword{}).
-	State(StateConfirmPasskeyCreation, GetWAAssertion{}, SkipOnboarding{}).
+	State(StateConfirmPasskeyCreation, GetWAAssertion{}, SkipPasskeyCreation{}).
 	State(StateCreatePasskey, VerifyWAAssertion{}).
 	State(StateVerifyEmailViaPasscode, SubmitPasscodeCode{}).
 	State(StateError).
