@@ -105,6 +105,55 @@ paths:
           $ref: '#/components/responses/InternalServerError'
         '400':
           $ref: '#/components/responses/BadRequest'
+    post:
+      summary: Create a new user
+      operationId: createUser
+      tags:
+        - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: The ID of the new user
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
+                emails:
+                  description: The email addresses of the new user
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                      is_primary:
+                        type: boolean
+                      is_verified:
+                        type: boolean
+                    required:
+                      - address
+                      - is_primary
+                created_at:
+                  description: Time of creation of the user
+                  type: string
+                  format: date-time
+              required:
+                - emails
+      responses:
+        '200':
+          description: 'Details of the newly created user'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
   /users/{id}:
     delete:
       summary: 'Delete a user by ID'
@@ -265,6 +314,15 @@ components:
           example:
             code: 400
             message: Bad Request
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Conflict
     InternalServerError:
       description: Internal server error
       content:
@@ -296,7 +354,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/UUID4'
         created_at:
-          description: Time of creation of the the user
+          description: Time of creation of the user
           type: string
           format: date-time
         updated_at:
@@ -421,7 +479,7 @@ components:
           type: string
           format: email
         created_at:
-          description: Time of creation of the the audit log
+          description: Time of creation of the audit log
           type: string
           format: date-time
           example: 2022-09-14T12:15:09.788784Z
