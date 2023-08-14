@@ -25,6 +25,7 @@ COPY rate_limiter rate_limiter/
 COPY thirdparty thirdparty/
 COPY build_info build_info/
 COPY middleware middleware/
+COPY template template/
 
 # Build
 RUN go generate ./...

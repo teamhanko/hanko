@@ -8,10 +8,12 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/template"
 )
 
 func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
+	e.Renderer = template.NewTemplateRenderer()
 	e.HideBanner = true
 	g := e.Group("")
 
@@ -29,6 +31,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 		e.Use(prometheus)
 		e.GET("/metrics", echoprometheus.NewHandler())
 	}
+
+	statusHandler := NewStatusHandler(persister)
+
+	e.GET("/", statusHandler.Status)
 
 	healthHandler := NewHealthHandler()
 
