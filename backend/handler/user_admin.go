@@ -138,7 +138,7 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 }
 
 func (h *UserHandlerAdmin) Create(c echo.Context) error {
-	var body User
+	var body admin.CreateUser
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return dto.ToHttpError(err)
 	}
@@ -251,16 +251,4 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, admin.FromUserModel(*user))
-}
-
-type User struct {
-	ID        uuid.UUID `json:"id"`
-	Emails    []Email   `json:"emails" validate:"required,gte=1,unique=Address,dive"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type Email struct {
-	Address    string `json:"address" validate:"required,email"`
-	IsPrimary  bool   `json:"is_primary"`
-	IsVerified bool   `json:"is_verified"`
 }
