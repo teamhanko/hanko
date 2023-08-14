@@ -22,9 +22,9 @@ func initPasscode(c flowpilot.ExecutionContext, email string, generate2faToken b
 		// resend passcode
 		id, _ := uuid.NewV4()
 		_ = c.Stash().Set("passcode_id", id.String())
-		_ = c.Flash().Set("passcode_id", id.String())
+		_ = c.Input().Set("passcode_id", id.String())
 	} else {
-		_ = c.Flash().Set("passcode_id", passcodeIDStash.String())
+		_ = c.Input().Set("passcode_id", passcodeIDStash.String())
 	}
 
 	_ = c.Stash().Set("email", email)
@@ -33,7 +33,7 @@ func initPasscode(c flowpilot.ExecutionContext, email string, generate2faToken b
 	if generate2faToken {
 		token, _ := generateToken(32)
 		_ = c.Stash().Set("passcode_2fa_token", token)
-		_ = c.Flash().Set("passcode_2fa_token", token)
+		_ = c.Input().Set("passcode_2fa_token", token)
 	}
 }
 

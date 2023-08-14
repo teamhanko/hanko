@@ -24,7 +24,7 @@ func (m SubmitEmail) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
 	}
 
-	_ = c.CopyInputsToStash("email")
+	_ = c.CopyInputValuesToStash("email")
 
 	user, _ := models.MyUsers.FindByEmail(c.Input().Get("email").String())
 
@@ -108,7 +108,7 @@ func (m SubmitExistingPassword) Execute(c flowpilot.ExecutionContext) error {
 	if user != nil && user.Password == c.Input().Get("password").String() {
 		if myFlowConfig.isEnabled(FlowOptionSecondFactorFlow) && user.Passcode2faEnabled {
 			initPasscode(c, email, true)
-			return c.ContinueFlow(StateLoginWithPasscode)
+			return c.ContinueFlow(StateLoginWithPasscode2FA)
 		}
 
 		if user.PasskeySynced {
@@ -118,7 +118,7 @@ func (m SubmitExistingPassword) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlow(StateConfirmPasskeyCreation)
 	}
 
-	c.Schema().SetError("password", flowpilot.ValueInvalidError)
+	c.Input().SetError("password", flowpilot.ValueInvalidError)
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
 }
@@ -158,7 +158,7 @@ func (m SubmitPasscodeCode) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(
 		flowpilot.StringInput("passcode_id").Required(true).Hidden(true).Preserve(true).CompareWithStash(true),
 		flowpilot.StringInput("code").Required(true).MinLength(6).MaxLength(6).CompareWithStash(true),
-		flowpilot.StringInput("passcode_2fa_token").Required(true).Hidden(true).Preserve(true).CompareWithStash(true).ConditionalIncludeFromStash(true),
+		flowpilot.StringInput("passcode_2fa_token").Required(true).Hidden(true).Preserve(true).CompareWithStash(true).ConditionalIncludeOnState(StateLoginWithPasscode2FA),
 	)
 }
 
@@ -167,13 +167,13 @@ func (m SubmitPasscodeCode) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
 	}
 
-	if StateRecoverPasswordViaPasscode == c.GetCurrentState() {
+	if c.CurrentStateEquals(StateRecoverPasswordViaPasscode) {
 		return c.ContinueFlow(StateUpdateExistingPassword)
 	}
 
 	user, _ := models.MyUsers.FindByEmail(c.Stash().Get("email").String())
 
-	if StateLoginWithPasscode == c.GetCurrentState() || StateVerifyEmailViaPasscode == c.GetCurrentState() {
+	if c.CurrentStateEquals(StateLoginWithPasscode, StateVerifyEmailViaPasscode, StateLoginWithPasscode2FA) {
 		if user != nil && user.PasskeySynced {
 			return c.ContinueFlow(StateSuccess)
 		}
@@ -230,7 +230,7 @@ func (m SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
 	}
 
-	if StateUpdateExistingPassword == c.GetCurrentState() {
+	if c.CurrentStateEquals(StateUpdateExistingPassword) {
 		return c.ContinueFlow(StateSuccess)
 	}
 

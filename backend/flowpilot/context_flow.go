@@ -10,7 +10,6 @@ import (
 type defaultFlowContext struct {
 	payload   jsonmanager.JSONManager // JSONManager for payload data.
 	stash     jsonmanager.JSONManager // JSONManager for stash data.
-	flash     jsonmanager.JSONManager // JSONManager for flash data.
 	flow      Flow                    // The associated Flow instance.
 	dbw       FlowDBWrapper           // Wrapped FlowDB instance with additional functionality.
 	flowModel FlowModel               // The current FlowModel.
@@ -36,6 +35,17 @@ func (fc *defaultFlowContext) GetCurrentState() StateName {
 	return fc.flowModel.CurrentState
 }
 
+// CurrentStateEquals returns true, when one of the given stateNames matches the current state name.
+func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
+	for _, s := range stateNames {
+		if s == fc.flowModel.CurrentState {
+			return true
+		}
+	}
+
+	return false
+}
+
 // GetPreviousState returns a pointer to the previous state of the Flow.
 func (fc *defaultFlowContext) GetPreviousState() *StateName {
 	return fc.flowModel.PreviousState
@@ -54,11 +64,6 @@ func (fc *defaultFlowContext) GetEndState() StateName {
 // Stash returns the JSONManager for accessing stash data.
 func (fc *defaultFlowContext) Stash() jsonmanager.JSONManager {
 	return fc.stash
-}
-
-// Flash returns the JSONManager for accessing flash data.
-func (fc *defaultFlowContext) Flash() jsonmanager.JSONManager {
-	return fc.flash
 }
 
 // StateExists checks if a given state exists within the Flow.

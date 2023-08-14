@@ -2,14 +2,13 @@ package flowpilot
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // Link represents a link to an action.
 type Link struct {
 	Href        string       `json:"href"`
-	Inputs      PublicInputs `json:"inputs"`
+	Inputs      PublicSchema `json:"inputs"`
 	MethodName  MethodName   `json:"method_name"`
 	Description string       `json:"description"`
 }
@@ -33,8 +32,7 @@ type Response struct {
 // methodExecutionResult holds the result of a method execution.
 type methodExecutionResult struct {
 	methodName MethodName
-	schema     ResponseSchema
-	inputData  jsonmanager.ReadOnlyJSONManager
+	schema     MethodExecutionSchema
 }
 
 // executionResult holds the result of an action execution.
@@ -47,8 +45,24 @@ type executionResult struct {
 
 // generateResponse generates a response based on the execution result.
 func (er *executionResult) generateResponse(fc defaultFlowContext) (*Response, error) {
+	// Generate links for the response.
+	links := er.generateLinks(fc)
+
+	// Create the response object.
+	resp := &Response{
+		State:   er.nextState,
+		Payload: fc.payload.Unmarshal(),
+		Links:   links,
+		Error:   er.errType,
+	}
+	return resp, nil
+}
+
+// generateLinks generates a collection of links based on the execution result.
+func (er *executionResult) generateLinks(fc defaultFlowContext) Links {
 	var links Links
 
+	// Get transitions for the next state.
 	transitions := fc.flow.getTransitionsForState(er.nextState)
 
 	if transitions != nil {
@@ -56,29 +70,21 @@ func (er *executionResult) generateResponse(fc defaultFlowContext) (*Response, e
 			currentMethodName := t.Method.GetName()
 			currentDescription := t.Method.GetDescription()
 
+			// Create link HREF based on the current flow context and method name.
 			href := er.createHref(fc, currentMethodName)
+			schema := er.getExecutionSchema(currentMethodName)
 
-			var schema ResponseSchema
-
-			if schema = er.getExecutionSchema(currentMethodName); schema == nil {
-				defaultSchema := DefaultSchema{}
-				mic := defaultMethodInitializationContext{schema: &defaultSchema, stash: fc.stash}
-
-				t.Method.Initialize(&mic)
-
-				if mic.isSuspended {
+			if schema == nil {
+				// Create schema if not available.
+				if schema = er.createSchema(fc, t.Method); schema == nil {
 					continue
 				}
-
-				schema = &defaultSchema
 			}
 
-			schema.applyFlash(fc.flash)
-			schema.applyStash(fc.stash)
-
+			// Create the link instance.
 			link := Link{
 				Href:        href,
-				Inputs:      schema.toPublicInputs(),
+				Inputs:      schema.toPublicSchema(er.nextState),
 				MethodName:  currentMethodName,
 				Description: currentDescription,
 			}
@@ -87,29 +93,43 @@ func (er *executionResult) generateResponse(fc defaultFlowContext) (*Response, e
 		}
 	}
 
-	resp := &Response{
-		State:   er.nextState,
-		Payload: fc.payload.Unmarshal(),
-		Links:   links,
-		Error:   er.errType,
-	}
-
-	return resp, nil
+	return links
 }
 
-// getExecutionSchema gets the execution schema for a given method name.
-func (er *executionResult) getExecutionSchema(methodName MethodName) ResponseSchema {
-	if er.methodExecutionResult == nil || methodName != er.methodExecutionResult.methodName {
-		// The current method result does not belong to the methodName.
+// createSchema creates an execution schema for a method if needed.
+func (er *executionResult) createSchema(fc defaultFlowContext, method Method) MethodExecutionSchema {
+	var schema MethodExecutionSchema
+	var err error
+
+	if er.methodExecutionResult != nil {
+		data := er.methodExecutionResult.schema.getOutputData()
+		schema, err = newSchemaWithOutputData(data)
+	} else {
+		schema = newSchema()
+	}
+
+	if err != nil {
 		return nil
 	}
 
-	schema := er.methodExecutionResult.schema
-	inputData := er.methodExecutionResult.inputData
+	// Initialize the method.
+	mic := defaultMethodInitializationContext{schema: schema.toInitializationSchema(), stash: fc.stash}
+	method.Initialize(&mic)
 
-	schema.preserveInputData(inputData)
+	if mic.isSuspended {
+		return nil
+	}
 
 	return schema
+}
+
+// getExecutionSchema gets the execution schema for a given method name.
+func (er *executionResult) getExecutionSchema(methodName MethodName) MethodExecutionSchema {
+	if er.methodExecutionResult == nil || methodName != er.methodExecutionResult.methodName {
+		return nil
+	}
+
+	return er.methodExecutionResult.schema
 }
 
 // createHref creates a link HREF based on the current flow context and method name.

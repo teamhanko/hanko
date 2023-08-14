@@ -8,10 +8,9 @@ import (
 
 // defaultMethodExecutionContext is the default implementation of the methodExecutionContext interface.
 type defaultMethodExecutionContext struct {
-	methodName   MethodName                      // Name of the method being executed.
-	input        jsonmanager.ReadOnlyJSONManager // ReadOnlyJSONManager for accessing input data.
-	schema       MethodExecutionSchema           // Schema for the method execution.
-	methodResult *executionResult                // Result of the method execution.
+	methodName   MethodName            // Name of the method being executed.
+	input        MethodExecutionSchema // JSONManager for accessing input data.
+	methodResult *executionResult      // Result of the method execution.
 
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
@@ -49,11 +48,8 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 
 	mec.flowModel = *flowModel
 
-	// Get transition data from the response schema for recording.
-	inputData, err := mec.schema.toResponseSchema().getTransitionData(mec.input)
-	if err != nil {
-		return fmt.Errorf("failed to get data from response schema: %w", err)
-	}
+	// Get inputDataToPersist from the executed method's schema for recording.
+	inputDataToPersist := mec.input.getDataToPersist()
 
 	// Prepare parameters for creating a new Transition in the database.
 	transitionCreationParam := transitionCreationParam{
@@ -61,7 +57,7 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 		methodName: mec.methodName,
 		fromState:  currentState,
 		toState:    executionResult.nextState,
-		inputData:  inputData.String(),
+		inputData:  inputDataToPersist.String(),
 		errType:    executionResult.errType,
 	}
 
@@ -87,8 +83,7 @@ func (mec *defaultMethodExecutionContext) continueFlow(nextState StateName, errT
 		errType:   errType,
 		methodExecutionResult: &methodExecutionResult{
 			methodName: mec.methodName,
-			schema:     mec.schema.toResponseSchema(),
-			inputData:  mec.input,
+			schema:     mec.input,
 		},
 	}
 
@@ -103,8 +98,8 @@ func (mec *defaultMethodExecutionContext) continueFlow(nextState StateName, errT
 	return nil
 }
 
-// Input returns the ReadOnlyJSONManager for accessing input data.
-func (mec *defaultMethodExecutionContext) Input() jsonmanager.ReadOnlyJSONManager {
+// Input returns the MethodExecutionSchema for accessing input data.
+func (mec *defaultMethodExecutionContext) Input() MethodExecutionSchema {
 	return mec.input
 }
 
@@ -113,13 +108,8 @@ func (mec *defaultMethodExecutionContext) Payload() jsonmanager.JSONManager {
 	return mec.payload
 }
 
-// Schema returns the MethodExecutionSchema for the method.
-func (mec *defaultMethodExecutionContext) Schema() MethodExecutionSchema {
-	return mec.schema
-}
-
-// CopyInputsToStash copies specified inputs to the stash.
-func (mec *defaultMethodExecutionContext) CopyInputsToStash(inputNames ...string) error {
+// CopyInputValuesToStash copies specified inputs to the stash.
+func (mec *defaultMethodExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
 	for _, inputName := range inputNames {
 		// Copy input values to the stash.
 		err := mec.stash.Set(inputName, mec.input.Get(inputName).Value())
@@ -132,7 +122,7 @@ func (mec *defaultMethodExecutionContext) CopyInputsToStash(inputNames ...string
 
 // ValidateInputData validates the input data against the schema.
 func (mec *defaultMethodExecutionContext) ValidateInputData() bool {
-	return mec.Schema().toResponseSchema().validateInputData(mec.input, mec.stash)
+	return mec.input.validateInputData(mec.flowModel.CurrentState, mec.stash)
 }
 
 // ContinueFlow continues the Flow execution to the specified nextState.
