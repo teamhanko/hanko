@@ -108,10 +108,8 @@ paths:
                     properties:
                       address:
                         type: string
-                      #                        required: true
                       is_primary:
                         type: boolean
-                      #                        required: true
                       is_verified:
                         type: boolean
                     required:
