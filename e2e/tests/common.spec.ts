@@ -3,7 +3,6 @@ import { LoginEmail } from "../pages/LoginEmail.js";
 import type { Mails } from "../helper/MailSlurper.js";
 import Endpoints from "../helper/Endpoints.js";
 import { faker } from "@faker-js/faker";
-import Accounts from "../helper/Accounts.js";
 
 test.describe("@common", () => {
   test.describe("@nowebauthn", () => {
@@ -187,25 +186,6 @@ test.describe("@common", () => {
 
       await test.step("And no cookie should be created", async () => {
         await expect(loginPasscodePage).not.toHaveCookie();
-      });
-    });
-
-    test("Logging in with existing user will prompt for passcode", async ({
-      loginEmailPage,
-      loginPasscodePage
-    }) => {
-      const email = Accounts.test.email;
-
-      await test.step("When I visit the baseURL, the LoginEmail page should be shown", async () => {
-        await expect(loginEmailPage.headline).toBeVisible();
-      });
-
-      await test.step("And when I submit an email address", async () => {
-        await loginEmailPage.continueUsingEmail(email);
-      });
-
-      await test.step("The LoginPasscode page should be shown", async () => {
-        await expect(loginPasscodePage.headline).toBeVisible();
       });
     });
   });

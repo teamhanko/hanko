@@ -1,6 +1,7 @@
 import { test, expect } from "../fixtures/Pages.js";
 import { faker } from "@faker-js/faker";
 import Endpoints from "../helper/Endpoints.js";
+import Accounts from "../helper/Accounts.js";
 
 test.describe("@pw", () => {
   test.beforeEach(async ({}) => {
@@ -280,6 +281,25 @@ test.describe("@pw", () => {
 
       await test.step("And a cookie should have been set", async () => {
         await expect(securedContentPage).toHaveCookie();
+      });
+    });
+
+    test("Logging in with existing user will prompt for password", async ({
+      loginEmailPage,
+      loginPasswordPage
+    }) => {
+      const email = Accounts.test.email;
+
+      await test.step("When I visit the baseURL, the LoginEmail page should be shown", async () => {
+        await expect(loginEmailPage.headline).toBeVisible();
+      });
+
+      await test.step("And when I submit an email address", async () => {
+        await loginEmailPage.continueUsingEmail(email);
+      });
+
+      await test.step("The LoginPassword page should be shown", async () => {
+        await expect(loginPasswordPage.headline).toBeVisible();
       });
     });
   });
