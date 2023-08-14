@@ -33,3 +33,9 @@ func FromUserModel(model models.User) User {
 		UpdatedAt:           model.UpdatedAt,
 	}
 }
+
+type CreateUser struct {
+	ID        uuid.UUID     `json:"id"`
+	Emails    []CreateEmail `json:"emails" validate:"required,gte=1,unique=Address,dive"`
+	CreatedAt time.Time     `json:"created_at"`
+}

@@ -13,10 +13,14 @@ import (
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
+
+	e.Renderer = template.NewTemplateRenderer()
+
 	e.HideBanner = true
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
@@ -77,7 +81,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
+	statusHandler := NewStatusHandler(persister)
 
+	e.GET("/", statusHandler.Status)
 	e.GET("/me", userHandler.Me, sessionMiddleware)
 
 	user := e.Group("/users")
