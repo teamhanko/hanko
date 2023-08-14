@@ -1,6 +1,9 @@
 package flowpilot
 
-import "regexp"
+import (
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"regexp"
+)
 
 // InputType represents the type of the input field.
 type InputType string
@@ -16,32 +19,31 @@ const (
 
 // Input defines the interface for input fields.
 type Input interface {
-	MinLength(minLength int) *DefaultInput
-	MaxLength(maxLength int) *DefaultInput
-	Required(b bool) *DefaultInput
-	Hidden(b bool) *DefaultInput
-	Preserve(b bool) *DefaultInput
-	Persist(b bool) *DefaultInput
+	MinLength(minLength int) Input
+	MaxLength(maxLength int) Input
+	Required(b bool) Input
+	Hidden(b bool) Input
+	Preserve(b bool) Input
+	Persist(b bool) Input
+	ConditionalIncludeOnState(states ...StateName) Input
+	CompareWithStash(b bool) Input
 
-	// TODO: After experimenting with 'ConditionalIncludeFromStash', I realized that it should be replaced with another
-	// function 'ConditionalIncludeOnStates(...StateName)'. This function would include the input field when executed
-	// under specific states. The issue with 'ConditionalIncludeFromStash' is, that if a method "forgets" to set the
-	// value beforehand, the validation won't require the value, since it's not present in the stash. In contrast, using
-	// 'ConditionalIncludeOnStates(...)' makes it clear that the value must be present when the current state matches
-	// and the decision about whether to validate the value or not isn't dependent on a different method.
-
-	ConditionalIncludeFromStash(b bool) *DefaultInput
-	CompareWithStash(b bool) *DefaultInput
-	setValue(value interface{}) *DefaultInput
-	validate(value *string) bool
+	setValue(value interface{}) Input
+	setError(errType *ErrorType)
+	getName() string
+	shouldPersist() bool
+	shouldPreserve() bool
+	isIncludedOnState(stateName StateName) bool
+	validate(stateName StateName, inputData jsonmanager.ReadOnlyJSONManager, stashData jsonmanager.JSONManager) bool
+	toPublicInput() *PublicInput
 }
 
 // defaultExtraInputOptions holds additional input field options.
 type defaultExtraInputOptions struct {
-	preserveValue               bool
-	persistValue                bool
-	conditionalIncludeFromStash bool
-	compareWithStash            bool
+	preserveValue    bool
+	persistValue     bool
+	includeOnStates  []StateName
+	compareWithStash bool
 }
 
 // DefaultInput represents an input field with its options.
@@ -54,6 +56,7 @@ type DefaultInput struct {
 	required  *bool
 	hidden    *bool
 	errorType *ErrorType
+
 	defaultExtraInputOptions
 }
 
@@ -70,106 +73,151 @@ type PublicInput struct {
 }
 
 // newInput creates a new DefaultInput instance with provided parameters.
-func newInput(name string, t InputType, persistValue bool) *DefaultInput {
+func newInput(name string, t InputType, persistValue bool) Input {
 	return &DefaultInput{
 		name:     name,
 		dataType: t,
 		defaultExtraInputOptions: defaultExtraInputOptions{
-			preserveValue:               false,
-			persistValue:                persistValue,
-			conditionalIncludeFromStash: false,
-			compareWithStash:            false,
+			preserveValue:    false,
+			persistValue:     persistValue,
+			includeOnStates:  []StateName{},
+			compareWithStash: false,
 		},
 	}
 }
 
 // StringInput creates a new input field of string type.
-func StringInput(name string) *DefaultInput {
+func StringInput(name string) Input {
 	return newInput(name, StringType, true)
 }
 
 // EmailInput creates a new input field of email type.
-func EmailInput(name string) *DefaultInput {
+func EmailInput(name string) Input {
 	return newInput(name, EmailType, true)
 }
 
 // NumberInput creates a new input field of number type.
-func NumberInput(name string) *DefaultInput {
+func NumberInput(name string) Input {
 	return newInput(name, NumberType, true)
 }
 
 // PasswordInput creates a new input field of password type.
-func PasswordInput(name string) *DefaultInput {
+func PasswordInput(name string) Input {
 	return newInput(name, PasswordType, false)
 }
 
 // JSONInput creates a new input field of JSON type.
-func JSONInput(name string) *DefaultInput {
+func JSONInput(name string) Input {
 	return newInput(name, JSONType, false)
 }
 
 // MinLength sets the minimum length for the input field.
-func (i *DefaultInput) MinLength(minLength int) *DefaultInput {
+func (i *DefaultInput) MinLength(minLength int) Input {
 	i.minLength = &minLength
 	return i
 }
 
 // MaxLength sets the maximum length for the input field.
-func (i *DefaultInput) MaxLength(maxLength int) *DefaultInput {
+func (i *DefaultInput) MaxLength(maxLength int) Input {
 	i.maxLength = &maxLength
 	return i
 }
 
 // Required sets whether the input field is required.
-func (i *DefaultInput) Required(b bool) *DefaultInput {
+func (i *DefaultInput) Required(b bool) Input {
 	i.required = &b
 	return i
 }
 
 // Hidden sets whether the input field is hidden.
-func (i *DefaultInput) Hidden(b bool) *DefaultInput {
+func (i *DefaultInput) Hidden(b bool) Input {
 	i.hidden = &b
 	return i
 }
 
 // Preserve sets whether the input field value should be preserved, so that the value is included in the response
 // instead of being blanked out.
-func (i *DefaultInput) Preserve(b bool) *DefaultInput {
+func (i *DefaultInput) Preserve(b bool) Input {
 	i.preserveValue = b
 	return i
 }
 
 // Persist sets whether the input field value should be persisted.
-func (i *DefaultInput) Persist(b bool) *DefaultInput {
+func (i *DefaultInput) Persist(b bool) Input {
 	i.persistValue = b
 	return i
 }
 
-// ConditionalIncludeFromStash sets whether the input field is conditionally included from the stash.
-func (i *DefaultInput) ConditionalIncludeFromStash(b bool) *DefaultInput {
-	i.conditionalIncludeFromStash = b
+// ConditionalIncludeOnState sets the states where the input field is included.
+func (i *DefaultInput) ConditionalIncludeOnState(stateNames ...StateName) Input {
+	i.includeOnStates = stateNames
 	return i
 }
 
+// isIncludedOnState check if a conditional input field is included according to the given stateName.
+func (i *DefaultInput) isIncludedOnState(stateName StateName) bool {
+	if len(i.includeOnStates) == 0 {
+		return true
+	}
+
+	for _, s := range i.includeOnStates {
+		if s == stateName {
+			return true
+		}
+	}
+
+	return false
+}
+
 // CompareWithStash sets whether the input field is compared with stash values.
-func (i *DefaultInput) CompareWithStash(b bool) *DefaultInput {
+func (i *DefaultInput) CompareWithStash(b bool) Input {
 	i.compareWithStash = b
 	return i
 }
 
-// setValue sets the value for the input field.
-func (i *DefaultInput) setValue(value interface{}) *DefaultInput {
+// setValue sets the value for the input field for the current response.
+func (i *DefaultInput) setValue(value interface{}) Input {
 	i.value = &value
 	return i
 }
 
-// validate performs validation on the input field.
-func (i *DefaultInput) validate(inputValue *string, stashValue *string) bool {
-	// Validate based on input field options.
+// getName returns the name of the input field.
+func (i *DefaultInput) getName() string {
+	return i.name
+}
 
+// setError sets an error to the given input field.
+func (i *DefaultInput) setError(errType *ErrorType) {
+	i.errorType = errType
+}
+
+// shouldPersist indicates the value should be persisted.
+func (i *DefaultInput) shouldPersist() bool {
+	return i.persistValue
+}
+
+// shouldPersist indicates the value should be preserved.
+func (i *DefaultInput) shouldPreserve() bool {
+	return i.preserveValue
+}
+
+// validate performs validation on the input field.
+func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadOnlyJSONManager, stashData jsonmanager.JSONManager) bool {
 	// TODO: Replace with more structured validation logic.
 
-	if i.conditionalIncludeFromStash && stashValue == nil {
+	var inputValue *string
+	var stashValue *string
+
+	if v := inputData.Get(i.name); v.Exists() {
+		inputValue = &v.Str
+	}
+
+	if v := stashData.Get(i.name); v.Exists() {
+		stashValue = &v.Str
+	}
+
+	if len(i.includeOnStates) > 0 && !i.isIncludedOnState(stateName) {
+		// skip validation
 		return true
 	}
 

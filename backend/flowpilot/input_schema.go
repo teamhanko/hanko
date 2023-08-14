@@ -1,61 +1,96 @@
 package flowpilot
 
 import (
-	"fmt"
 	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/tidwall/gjson"
 )
 
-// Schema represents an interface for managing input data schemas.
-type Schema interface {
-	AddInputs(inputList ...*DefaultInput) *DefaultSchema
+// InitializationSchema represents an interface for managing input data schemas.
+type InitializationSchema interface {
+	AddInputs(inputList ...Input)
 }
 
 // MethodExecutionSchema represents an interface for managing method execution schemas.
 type MethodExecutionSchema interface {
+	Get(path string) gjson.Result
+	Set(path string, value interface{}) error
 	SetError(inputName string, errType *ErrorType)
-	toResponseSchema() ResponseSchema
+
+	getInput(name string) Input
+	getOutputData() jsonmanager.ReadOnlyJSONManager
+	getDataToPersist() jsonmanager.ReadOnlyJSONManager
+	validateInputData(stateName StateName, stash jsonmanager.JSONManager) bool
+	toInitializationSchema() InitializationSchema
+	toPublicSchema(stateName StateName) PublicSchema
 }
 
-// ResponseSchema represents an interface for response schemas.
-type ResponseSchema interface {
-	GetInput(name string) *DefaultInput
-	preserveInputData(inputData jsonmanager.ReadOnlyJSONManager)
-	getTransitionData(inputData jsonmanager.ReadOnlyJSONManager) (jsonmanager.ReadOnlyJSONManager, error)
-	applyFlash(flashData jsonmanager.ReadOnlyJSONManager)
-	applyStash(stashData jsonmanager.ReadOnlyJSONManager)
-	validateInputData(inputData jsonmanager.ReadOnlyJSONManager, stash jsonmanager.ReadOnlyJSONManager) bool
-	toPublicInputs() PublicInputs
+// inputs represents a collection of Input instances.
+type inputs []Input
+
+// PublicSchema represents a collection of PublicInput instances.
+type PublicSchema []*PublicInput
+
+// defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
+type defaultSchema struct {
+	inputs
+	inputData  jsonmanager.ReadOnlyJSONManager
+	outputData jsonmanager.JSONManager
 }
 
-// Inputs represents a collection of DefaultInput instances.
-type Inputs []*DefaultInput
-
-// PublicInputs represents a collection of PublicInput instances.
-type PublicInputs []*PublicInput
-
-// DefaultSchema implements the Schema interface and holds a collection of input fields.
-type DefaultSchema struct {
-	Inputs
+// newSchemaWithInputData creates a new MethodExecutionSchema with input data.
+func newSchemaWithInputData(inputData jsonmanager.ReadOnlyJSONManager) MethodExecutionSchema {
+	outputData := jsonmanager.NewJSONManager()
+	return &defaultSchema{
+		inputData:  inputData,
+		outputData: outputData,
+	}
 }
 
-// toResponseSchema converts the DefaultSchema to a ResponseSchema.
-func (s *DefaultSchema) toResponseSchema() ResponseSchema {
-	return s
-}
-
-// AddInputs adds input fields to the DefaultSchema and returns the updated schema.
-func (s *DefaultSchema) AddInputs(inputList ...*DefaultInput) *DefaultSchema {
-	for _, i := range inputList {
-		s.Inputs = append(s.Inputs, i)
+// newSchemaWithInputData creates a new MethodExecutionSchema with input data.
+func newSchemaWithOutputData(outputData jsonmanager.ReadOnlyJSONManager) (MethodExecutionSchema, error) {
+	data, err := jsonmanager.NewJSONManagerFromString(outputData.String())
+	if err != nil {
+		return nil, err
 	}
 
+	return &defaultSchema{
+		inputData:  data,
+		outputData: data,
+	}, nil
+}
+
+// newSchema creates a new MethodExecutionSchema with no input data.
+func newSchema() MethodExecutionSchema {
+	inputData := jsonmanager.NewJSONManager()
+	return newSchemaWithInputData(inputData)
+}
+
+// toInitializationSchema converts MethodExecutionSchema to InitializationSchema.
+func (s *defaultSchema) toInitializationSchema() InitializationSchema {
 	return s
 }
 
-// GetInput retrieves an input field from the schema based on its name.
-func (s *DefaultSchema) GetInput(name string) *DefaultInput {
-	for _, i := range s.Inputs {
-		if i.name == name {
+// Get retrieves a value at the specified path in the input data.
+func (s *defaultSchema) Get(path string) gjson.Result {
+	return s.inputData.Get(path)
+}
+
+// Set updates the JSON data at the specified path with the provided value.
+func (s *defaultSchema) Set(path string, value interface{}) error {
+	return s.outputData.Set(path, value)
+}
+
+// AddInputs adds input fields to the defaultSchema and returns the updated schema.
+func (s *defaultSchema) AddInputs(inputList ...Input) {
+	for _, i := range inputList {
+		s.inputs = append(s.inputs, i)
+	}
+}
+
+// getInput retrieves an input field from the schema based on its name.
+func (s *defaultSchema) getInput(name string) Input {
+	for _, i := range s.inputs {
+		if i.getName() == name {
 			return i
 		}
 	}
@@ -64,29 +99,18 @@ func (s *DefaultSchema) GetInput(name string) *DefaultInput {
 }
 
 // SetError sets an error type for an input field in the schema.
-func (s *DefaultSchema) SetError(inputName string, errType *ErrorType) {
-	if i := s.GetInput(inputName); i != nil {
-		i.errorType = errType
+func (s *defaultSchema) SetError(inputName string, errType *ErrorType) {
+	if i := s.getInput(inputName); i != nil {
+		i.setError(errType)
 	}
 }
 
 // validateInputData validates the input data based on the input definitions in the schema.
-func (s *DefaultSchema) validateInputData(inputData jsonmanager.ReadOnlyJSONManager, stashData jsonmanager.ReadOnlyJSONManager) bool {
+func (s *defaultSchema) validateInputData(stateName StateName, stash jsonmanager.JSONManager) bool {
 	valid := true
 
-	for _, i := range s.Inputs {
-		var inputValue *string
-		var stashValue *string
-
-		if v := inputData.Get(i.name); v.Exists() {
-			inputValue = &v.Str
-		}
-
-		if v := stashData.Get(i.name); v.Exists() {
-			stashValue = &v.Str
-		}
-
-		if !i.validate(inputValue, stashValue) && valid {
+	for _, i := range s.inputs {
+		if !i.validate(stateName, s.inputData, stash) && valid {
 			valid = false
 		}
 	}
@@ -94,62 +118,44 @@ func (s *DefaultSchema) validateInputData(inputData jsonmanager.ReadOnlyJSONMana
 	return valid
 }
 
-// preserveInputData preserves input data by setting values of inputs that should be preserved.
-func (s *DefaultSchema) preserveInputData(inputData jsonmanager.ReadOnlyJSONManager) {
-	for _, i := range s.Inputs {
-		if v := inputData.Get(i.name); v.Exists() {
-			if i.preserveValue {
-				i.setValue(v.Str)
-			}
-		}
-	}
-}
-
-// getTransitionData filters input data to persist based on schema definitions.
-func (s *DefaultSchema) getTransitionData(inputData jsonmanager.ReadOnlyJSONManager) (jsonmanager.ReadOnlyJSONManager, error) {
+// getDataToPersist filters and returns data that should be persisted based on schema definitions.
+func (s *defaultSchema) getDataToPersist() jsonmanager.ReadOnlyJSONManager {
 	toPersist := jsonmanager.NewJSONManager()
 
-	for _, i := range s.Inputs {
-		if v := inputData.Get(i.name); v.Exists() && i.persistValue {
-			if err := toPersist.Set(i.name, v.Value()); err != nil {
-				return nil, fmt.Errorf("failed to copy data: %v", err)
-			}
+	for _, i := range s.inputs {
+		if v := s.inputData.Get(i.getName()); v.Exists() && i.shouldPersist() {
+			_ = toPersist.Set(i.getName(), v.Value())
 		}
 	}
 
-	return toPersist, nil
+	return toPersist
 }
 
-// applyFlash updates input values in the schema with corresponding values from flash data.
-func (s *DefaultSchema) applyFlash(flashData jsonmanager.ReadOnlyJSONManager) {
-	for _, i := range s.Inputs {
-		v := flashData.Get(i.name)
+// getOutputData returns the output data from the schema.
+func (s *defaultSchema) getOutputData() jsonmanager.ReadOnlyJSONManager {
+	return s.outputData
+}
 
-		if v.Exists() {
-			i.setValue(v.Value())
+// toPublicSchema converts defaultSchema to PublicSchema for public exposure.
+func (s *defaultSchema) toPublicSchema(stateName StateName) PublicSchema {
+	var pi PublicSchema
+
+	for _, i := range s.inputs {
+		if !i.isIncludedOnState(stateName) {
+			continue
 		}
-	}
-}
 
-// applyStash updates input values in the schema with corresponding values from stash data.
-func (s *DefaultSchema) applyStash(stashData jsonmanager.ReadOnlyJSONManager) {
-	n := 0
+		outputValue := s.outputData.Get(i.getName())
+		inputValue := s.inputData.Get(i.getName())
 
-	for _, i := range s.Inputs {
-		if !i.conditionalIncludeFromStash || stashData.Get(i.name).Exists() {
-			s.Inputs[n] = i
-			n++
+		if outputValue.Exists() {
+			i.setValue(outputValue.Value())
 		}
-	}
 
-	s.Inputs = s.Inputs[:n]
-}
+		if i.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
+			i.setValue(inputValue.Value())
+		}
 
-// toPublicInputs converts DefaultSchema to PublicInputs for public exposure.
-func (s *DefaultSchema) toPublicInputs() PublicInputs {
-	var pi PublicInputs
-
-	for _, i := range s.Inputs {
 		pi = append(pi, i.toPublicInput())
 	}
 

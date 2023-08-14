@@ -9,6 +9,7 @@ const (
 	StateConfirmAccountCreation     flowpilot.StateName = "confirmation"
 	StateLoginWithPassword          flowpilot.StateName = "login_with_password"
 	StateLoginWithPasscode          flowpilot.StateName = "login_with_passcode"
+	StateLoginWithPasscode2FA       flowpilot.StateName = "login_with_passcode_2fa"
 	StateLoginWithPasskey           flowpilot.StateName = "login_with_passkey"
 	StateCreatePasskey              flowpilot.StateName = "create_passkey"
 	StateUpdateExistingPassword     flowpilot.StateName = "update_existing_password"

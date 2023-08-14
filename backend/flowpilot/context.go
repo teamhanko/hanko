@@ -20,15 +20,12 @@ type flowContext interface {
 	Payload() jsonmanager.JSONManager
 	// Stash returns the JSONManager for accessing stash data.
 	Stash() jsonmanager.JSONManager
-
-	// TODO: Maybe we should remove 'Flash' and provide the same functionality under "Input()"
-
-	// Flash returns the JSONManager for accessing flash data.
-	Flash() jsonmanager.JSONManager
 	// GetInitialState returns the initial state of the Flow.
 	GetInitialState() StateName
 	// GetCurrentState returns the current state of the Flow.
 	GetCurrentState() StateName
+	// CurrentStateEquals returns true, when one of the given states matches the current state.
+	CurrentStateEquals(states ...StateName) bool
 	// GetPreviousState returns the previous state of the Flow.
 	GetPreviousState() *StateName
 	// GetErrorState returns the designated error state of the Flow.
@@ -42,7 +39,7 @@ type flowContext interface {
 // methodInitializationContext represents the basic context for a Flow method's initialization.
 type methodInitializationContext interface {
 	// AddInputs adds input parameters to the schema.
-	AddInputs(inputList ...*DefaultInput) *DefaultSchema
+	AddInputs(inputList ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
 	Stash() jsonmanager.ReadOnlyJSONManager
 	// SuspendMethod suspends the current method's execution.
@@ -51,10 +48,9 @@ type methodInitializationContext interface {
 
 // methodExecutionContext represents the context for a method execution.
 type methodExecutionContext interface {
-	// Input returns the ReadOnlyJSONManager for accessing input data.
-	Input() jsonmanager.ReadOnlyJSONManager
-	// Schema returns the MethodExecutionSchema for the method.
-	Schema() MethodExecutionSchema
+	flowContext
+	// Input returns the MethodExecutionSchema for the method.
+	Input() MethodExecutionSchema
 
 	// TODO: FetchMethodInput (for a method name) is maybe useless and can be removed or replaced.
 
@@ -62,16 +58,12 @@ type methodExecutionContext interface {
 	FetchMethodInput(methodName MethodName) (jsonmanager.ReadOnlyJSONManager, error)
 	// ValidateInputData validates the input data against the schema.
 	ValidateInputData() bool
-
-	// TODO: CopyInputsToStash can maybe removed or replaced with an option you can set via the input schema.
-
-	// CopyInputsToStash copies specified inputs to the stash.
-	CopyInputsToStash(inputNames ...string) error
+	// CopyInputValuesToStash copies specified inputs to the stash.
+	CopyInputValuesToStash(inputNames ...string) error
 }
 
 // methodExecutionContinuationContext represents the context within a method continuation.
 type methodExecutionContinuationContext interface {
-	flowContext
 	methodExecutionContext
 	// ContinueFlow continues the Flow execution to the specified next state.
 	ContinueFlow(nextState StateName) error
@@ -117,7 +109,6 @@ func createAndInitializeFlow(db FlowDB, flow Flow) (*Response, error) {
 
 	stash := jsonmanager.NewJSONManager()
 	payload := jsonmanager.NewJSONManager()
-	flash := jsonmanager.NewJSONManager()
 
 	// Create a new Flow model with the provided parameters.
 	p := flowCreationParam{currentState: flow.InitialState, expiresAt: expiresAt}
@@ -133,7 +124,6 @@ func createAndInitializeFlow(db FlowDB, flow Flow) (*Response, error) {
 		flowModel: *flowModel,
 		stash:     stash,
 		payload:   payload,
-		flash:     flash,
 	}
 
 	// Generate a response based on the execution result.
@@ -171,7 +161,6 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 
 	// Initialize JSONManagers for payload and flash data.
 	payload := jsonmanager.NewJSONManager()
-	flash := jsonmanager.NewJSONManager()
 
 	// Create a defaultFlowContext instance.
 	fc := defaultFlowContext{
@@ -180,7 +169,6 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 		flowModel: *flowModel,
 		stash:     stash,
 		payload:   payload,
-		flash:     flash,
 	}
 
 	// Get the available transitions for the current state.
@@ -205,8 +193,8 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 	}
 
 	// Initialize the schema and method context for method execution.
-	schema := DefaultSchema{}
-	mic := defaultMethodInitializationContext{schema: &schema, stash: stash}
+	schema := newSchemaWithInputData(inputJSON)
+	mic := defaultMethodInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
 	method.Initialize(&mic)
 
 	// Check if the method is suspended.
@@ -216,9 +204,8 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 
 	// Create a methodExecutionContext instance for method execution.
 	mec := defaultMethodExecutionContext{
-		schema:             &schema,
 		methodName:         methodName,
-		input:              inputJSON,
+		input:              schema,
 		defaultFlowContext: fc,
 	}
 
