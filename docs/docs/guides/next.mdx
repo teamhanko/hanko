@@ -127,7 +127,7 @@ export default function LoginPage() {
 
   The register function tries to set up the `<hanko-auth>` element for the browser. But, Next.js pre-renders pages before displaying them. Since it doesn't have access to the browser's `window` object during this pre-render phase, the registration of the custom element would fail.
 
-  To fix this, we can use Next.js's [dynamic import]((https://nextjs.org/docs/advanced-features/dynamic-import)) to load our component only when it's displayed on the client-side and skip the pre-creation step.
+  To fix this, we can use Next.js's [dynamic import](https://nextjs.org/docs/advanced-features/dynamic-import) to load our component only when it's displayed on the client-side and skip the pre-creation step.
 :::
 ```mdx-code-block
 </TabItem>
