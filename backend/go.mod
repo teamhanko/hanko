@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/brianvoe/gofakeit/v6 v6.23.1
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.15.0
+	github.com/go-playground/validator/v10 v10.15.1
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.8.6
@@ -17,6 +17,7 @@ require (
 	github.com/gomodule/redigo v1.8.9
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.7.0
+	github.com/jackc/pgconn v1.14.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/knadh/koanf v1.5.0
 	github.com/labstack/echo-contrib v0.15.0
@@ -90,7 +91,6 @@ require (
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.14.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgproto3/v2 v2.3.2 // indirect
