@@ -31,7 +31,7 @@ HANKO_API_URL=https://f4****-4802-49ad-8e0b-3d3****ab32.hanko.io
 
 ## Add `<hanko-auth>` component
 
-`<hanko-auth>` web component adds login interface to your app. Begin by importing the register function from `@teamhanko/hanko-elements` into your Next.js component. Call it with the Hanko API URL as an argument to register `<hanko-auth>` to the browser's [CustomElementRegistry](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Once done, include it in your JSX.
+The `<hanko-auth>` web component adds a login interface to your app. Begin by importing the register function from `@teamhanko/hanko-elements` into your Next.js component. Call it with the Hanko API URL as an argument to register `<hanko-auth>` with the browser's [CustomElementRegistry](https://developer.mozilla.org/de/docs/Web/API/CustomElementRegistry). Once done, include it in your JSX.
 
 ```mdx-code-block
 <Tabs groupId="environment">
@@ -123,9 +123,9 @@ export default function LoginPage() {
 }
 ```
 :::info
-**Why we use dynamic import in Nextjs pages directory?** 🤔
+**Why do we use dynamic import in the Nextjs pages directory?** 🤔
 
-  The register function tries to set up the `<hanko-auth>` element for the browser. However, Next.js creates pages before they're shown, and it can't access the browser's tools during this process. This means our setup might not work.
+  The register function tries to set up the `<hanko-auth>` element for the browser. But, Next.js pre-renders pages before displaying them. Since it doesn't have access to the browser's `window` object during this pre-render phase, the registration of the custom element would fail.
 
   To fix this, we can use Next.js's [dynamic import]((https://nextjs.org/docs/advanced-features/dynamic-import)) to load our component only when it's displayed on the client-side and skip the pre-creation step.
 :::
@@ -137,12 +137,7 @@ export default function LoginPage() {
 
 ## Define event callbacks
 
-Use the Hanko client provided by `@teamhanko/hanko-elements` to subscribe to
-[events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events).
-
-:::info
-The Hanko client from @teamhanko/hanko-elements lets you "listen" for specific events, like when a user logs in.
-:::
+The Hanko client from `@teamhanko/hanko-elements` lets you "listen" for specific [events](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events). It simplifies the process of subscribing to events, such as user logins.
 
 ```mdx-code-block
 <Tabs groupId="environment">
@@ -244,7 +239,7 @@ export default function HankoAuth() {
 
 ## Add `<hanko-profile>` component {#hanko-profile}
 
-The `<hanko-profile>` component offers a page for managing email addresses and passkeys.
+The `<hanko-profile>` component offers an interface for managing email addresses and passkeys.
 
 ```mdx-code-block
 <Tabs groupId="environment">
@@ -299,7 +294,7 @@ export default function HankoProfile() {
 
 ## Implement logout functionality
 
-You'll use `@teamhanko/hanko-elements` to manage user logouts. When a user logs out, a specific event is triggered that you can subscribe to. Below, we make a logout button component that you can use anywhere.
+You can use `@teamhanko/hanko-elements` to easily manage user logouts. Below, we make a logout button component that you can use anywhere. 
 
 ```mdx-code-block
 <Tabs groupId="environment">
@@ -388,7 +383,7 @@ You can customize the appearance of `hanko-auth` and `hanko-profile` components 
 
 ## Securing routes with Middleware
 
-To add JWT verification middleware with Hanko in your Next.js application, begin by installing the [jose library](https://www.npmjs.com/package/jose). This middleware will ensure secure access to specific routes, like `/dashboard` here, by checking for valid JWT tokens. Here we define the Hanko API URL, extract and verify the JWT from cookies, and redirect unauthorized users to the login page.
+To add JWT verification middleware with Hanko in your Next.js application, we're using [jose library](https://www.npmjs.com/package/jose). However, you're free to choose any other suitable library. This middleware will ensure secure access to specific routes, like `/dashboard` here, by checking for valid JWT. Here we define the Hanko API URL, extract and verify the JWT from cookies, and redirect unauthorized users to the login page.
 
 ```jsx title="middleware.ts" showLineNumbers
 import { NextResponse, NextRequest } from "next/server";
