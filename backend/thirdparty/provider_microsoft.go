@@ -34,7 +34,7 @@ type MicrosoftUser struct {
 // NewMicrosoftProvider creates a Microsoft third party provider.
 func NewMicrosoftProvider(config config.ThirdPartyProvider, redirectURL string) (OAuthProvider, error) {
 	if !config.Enabled {
-		return nil, errors.New("google provider is disabled")
+		return nil, errors.New("microsoft provider is disabled")
 	}
 
 	return &microsoftProvider{
@@ -73,7 +73,7 @@ func (g microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	}
 
 	if len(data.Emails) <= 0 {
-		return nil, errors.New("unable to find email with Google provider")
+		return nil, errors.New("unable to find email with Microsoft provider")
 	}
 
 	data.Metadata = &Claims{
