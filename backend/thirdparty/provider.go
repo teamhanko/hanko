@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/fatih/structs"
-	"github.com/teamhanko/hanko/backend/config"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/fatih/structs"
+	"github.com/teamhanko/hanko/backend/config"
+	"golang.org/x/oauth2"
 )
 
 type UserData struct {
@@ -85,6 +86,8 @@ func GetProvider(config config.ThirdParty, name string) (OAuthProvider, error) {
 		return NewGithubProvider(config.Providers.GitHub, config.RedirectURL)
 	case "apple":
 		return NewAppleProvider(config.Providers.Apple, config.RedirectURL)
+	case "microsoft":
+		return NewMicrosoftProvider(config.Providers.Microsoft, config.RedirectURL)
 	default:
 		return nil, fmt.Errorf("provider '%s' is not supported", name)
 	}
