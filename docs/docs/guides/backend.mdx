@@ -177,12 +177,12 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext<AuthSt
 </TabItem>
 <TabItem value="python" label="Python">
  ```
-This is an example of how you could implement JWT verification in a Python-based backend using
- the [python-jose](https://pypi.org/project/python-jose/)-library.  
+This is an example of how you can decode a JWT
+token using the [pyjwt](https://pyjwt.readthedocs.io/en/stable/)-library.  
 
  ```python showLineNumbers
 from flask import Flask, request, jsonify
-from jose import jwt, jwk
+import jwt
 import requests
 
 app = Flask(__name__)
@@ -190,38 +190,37 @@ app = Flask(__name__)
 # Replace with your Hanko API URL
 HANKO_API_URL = "https://your-hanko-api-url.com"
 
-# Fetch JWK Set from Hanko API's .well-known/jwks.json endpoint
-jwks_response = requests.get(f"{HANKO_API_URL}/.well-known/jwks.json")
-jwks_data = jwks_response.json()
-
-# Create a JWK keyset instance from the retrieved data
-jwk_set = jwk.JWKSet.from_dict(jwks_data)
-
 @app.route('/protected', methods=['GET'])
 def protected_route():
     auth_header = request.headers.get('Authorization')
-    
+
     if not auth_header or not auth_header.startswith('Bearer '):
         return jsonify({"message": "Missing or invalid token"}), 401
-    
+
     token = auth_header.split(' ')[1]
-    
+
     try:
+        jwks_response = requests.get(f"{HANKO_API_URL}/.well-known/jwks.json")
+        jwks_data = jwks_response.json()
+
+        public_key = jwt.algorithms.RSAAlgorithm.from_jwk(jwks_data['keys'][0])
+        
         payload = jwt.decode(
             token,
-            jwk_set,
+            public_key,
             algorithms=['RS256'],
             options={'verify_exp': True}
         )
-        
+
         user_id = payload.get('sub')
         return jsonify({"message": f"Authenticated user: {user_id}"}), 200
-    
+
     except Exception as e:
         return jsonify({"message": "Invalid token"}), 403
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 ``` 
  
   ```mdx-code-block
