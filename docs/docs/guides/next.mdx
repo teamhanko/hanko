@@ -25,8 +25,8 @@ npm install @teamhanko/hanko-elements
 
 Retrieve the API URL from the [Hanko console](https://cloud.hanko.io/) and place it in your .env file.
 
-```sh title=".env"
-HANKO_API_URL=https://f4****-4802-49ad-8e0b-3d3****ab32.hanko.io
+```sh title=".env.local"
+NEXT_PUBLIC_HANKO_API_URL=https://f4****-4802-49ad-8e0b-3d3****ab32.hanko.io
 ```
 
 ## Add `<hanko-auth>` component
@@ -44,7 +44,7 @@ The `<hanko-auth>` web component adds a login interface to your app. Begin by im
 import { useEffect } from "react";
 import { register } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export default function HankoAuth() {
   useEffect(() => {
@@ -66,7 +66,7 @@ export default function HankoAuth() {
 import { useEffect } from "react";
 import { register } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export default function HankoAuth() {
   useEffect(() => {
@@ -151,7 +151,7 @@ import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { register, Hanko } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export default function HankoAuth() {
   const router = useRouter();
@@ -197,7 +197,7 @@ import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/router";
 import { register, Hanko } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export default function HankoAuth() {
   const router = useRouter();
@@ -252,7 +252,7 @@ The `<hanko-profile>` component offers an interface for managing email addresses
 import { useEffect } from "react";
 import { register } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export default function HankoProfile() {
   useEffect(() => {
@@ -274,7 +274,7 @@ export default function HankoProfile() {
 import { useEffect } from "react";
 import { register } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export default function HankoProfile() {
   useEffect(() => {
@@ -308,7 +308,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Hanko } from "@teamhanko/hanko-elements";
 
-const hankoApi = 'process.env.HANKO_API_URL';
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export function LogoutBtn() {
   const router = useRouter();
@@ -345,7 +345,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Hanko } from "@teamhanko/hanko-elements";
 
-const hankoApi = process.env.HANKO_API_URL;
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export function LogoutBtn() {
   const router = useRouter();
@@ -390,7 +390,7 @@ import { NextResponse, NextRequest } from "next/server";
 
 import { jwtVerify, createRemoteJWKSet } from "jose";
 
-const hankoApiUrl = process.env.HANKO_API_URL;
+const hankoApiUrl = process.env.NEXT_PUBLIC_HANKO_API_URL;
 
 export async function middleware(req: NextRequest) {
   const hanko = req.cookies.get("hanko")?.value;
