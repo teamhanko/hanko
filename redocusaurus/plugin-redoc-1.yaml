@@ -26,8 +26,30 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: localhost:8000
+  - url: localhost:8001
 paths:
+  /:
+    get:
+      summary: Status page
+      description: >-
+        Return information about the API status. Returns a 500 if there are
+        issues with database connectivity.
+      operationId: status
+      tags:
+        - Status
+      responses:
+        '200':
+          description: API is running
+          content:
+            text/html:
+              schema:
+                type: string
+        '500':
+          description: API is not functioning properly
+          content:
+            text/html:
+              schema:
+                type: string
   /users:
     get:
       summary: Get a list of users
@@ -89,6 +111,55 @@ paths:
                 $ref: '#/components/headers/Link'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new user
+      operationId: createUser
+      tags:
+        - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: The ID of the new user
+                  allOf:
+                    - $ref: '#/components/schemas/UUID4'
+                emails:
+                  description: The email addresses of the new user
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                      is_primary:
+                        type: boolean
+                      is_verified:
+                        type: boolean
+                    required:
+                      - address
+                      - is_primary
+                created_at:
+                  description: Time of creation of the user
+                  type: string
+                  format: date-time
+              required:
+                - emails
+      responses:
+        '200':
+          description: Details of the newly created user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /users/{id}:
@@ -255,6 +326,15 @@ components:
           example:
             code: 400
             message: Bad Request
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 409
+            message: Conflict
     InternalServerError:
       description: Internal server error
       content:
@@ -286,7 +366,7 @@ components:
           allOf:
             - $ref: '#/components/schemas/UUID4'
         created_at:
-          description: Time of creation of the the user
+          description: Time of creation of the user
           type: string
           format: date-time
         updated_at:
@@ -411,7 +491,7 @@ components:
           type: string
           format: email
         created_at:
-          description: Time of creation of the the audit log
+          description: Time of creation of the audit log
           type: string
           format: date-time
           example: '2022-09-14T12:15:09.788784Z'
