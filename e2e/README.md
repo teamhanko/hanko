@@ -18,7 +18,7 @@ This directory contains E2E tests for the Hanko project using [Playwright](https
 
 To run the tests you need to have the following software installed:
 
-- [Node](https://nodejs.org) v. 16.5.1+/ npm
+- [Node](https://nodejs.org) v. 18.6.0+/ npm
 - [Docker](https://www.docker.com/) / Docker Compose
 
 
