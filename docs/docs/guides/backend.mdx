@@ -178,7 +178,7 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext<AuthSt
 
 <TabItem value="python" label="Python">
 ```
-This is an example of using a custom middleware in a [FastAPI](https://fastapi.tiangolo.com/) based backend using the [PyJWT](https://pyjwt.readthedocs.io/en/stable/) and [PyJWKClient](https://pypi.org/project/pyjwkest/) packages:
+This is an example of using a custom middleware in a [FastAPI](https://fastapi.tiangolo.com/) based backend using the [PyJWT](https://pyjwt.readthedocs.io/en/stable/) package:
 
 ```python showLineNumbers
 from typing import Any
@@ -215,14 +215,15 @@ async def auth(request: Request, call_next: Any):
         return deny()
 
     try:
-        jwks_client = jwt.PyJWKClient(HANKO_API_URL)
+         jwks_client = jwt.PyJWKClient(
+            HANKO_API_URL + "/.well-known/jwks.json", ssl_context=ssl_context
+        )
         signing_key = jwks_client.get_signing_key_from_jwt(token)
         data = jwt.decode(
             token,
             signing_key.key,
             algorithms=["RS256"],
             audience="localhost",
-            options={"verify_exp": False},
         )
 
         if not data:
