@@ -17,7 +17,7 @@
     "vite": "^4.4.9"
   },
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.8.2",
+    "@teamhanko/hanko-elements": "^0.8.3",
     "svelte-navigator": "^3.2.2"
   }
 }
