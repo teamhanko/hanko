@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "0.8.2",
+  "version": "0.8.3",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -89,7 +89,7 @@
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.5.0",
-    "@teamhanko/hanko-frontend-sdk": "^0.8.2",
+    "@teamhanko/hanko-frontend-sdk": "^0.8.3",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
     "preact": "^10.13.1"
