@@ -44,12 +44,14 @@ export interface AccountConfig {
  * @property {EmailConfig} emails - The email configuration.
  * @property {string[]} providers - The enabled third party providers.
  * @property {AccountConfig} account - Controls the behaviour regarding user accounts.
+ * @property {boolean} use_enterprise - Enterprise Connections are enabled.
  */
 export interface Config {
   password: PasswordConfig;
   emails: EmailConfig;
   providers: string[];
   account: AccountConfig;
+  use_enterprise: boolean;
 }
 
 /**

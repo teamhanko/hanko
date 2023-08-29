@@ -1,0 +1,139 @@
+---
+title: SAML SSO (Enterprise Feature)
+sidebar_label: SAML SSO
+description: 'Learn how to configure SAML SSO for Hanko'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Using SAML SSO
+
+SAML SSO provides you with a way to connect your application to enterprise SSO identity providers like Auth0 or MS AD.
+In this guide you will learn how to configure and use the enterprise SAML SSO feature.
+
+## Wording
+
+| Acronym | Name              | Description                                                    |
+|:--------|:------------------|:---------------------------------------------------------------|
+| **SP**  | Service Provider  | Webapp or Backend-Service which needs to authenticate the user |
+| **IdP** | Identity Provider | Holds identity data for a user. Used to authenticate the user  |
+
+## Configure SAML
+
+To configure SAML all you need is to append the following configuration to the root element of your hanko config.yaml file
+and replace all `<VARIABLE>`-Parts with your parameters (There will be an explanation of all tags after the config):
+
+``` yaml showLineNumbers
+saml:
+  enabled: true
+  endpoint_url: <ENDPOINT_URL>
+  audience_uri: "urn:hanko:application"
+  default_redirect_url: <YOUR_APPLICATION_DEFAULT_URL>
+  allowed_redirect_urls:
+    - "<A_REDIRECT_URL>"
+  options:
+    sign_authn_requests: true
+    force_login: false
+    validate_encryption_cert: true
+    skip_signature_validation: false
+    allow_missing_attributes: true
+  identity_providers:
+    - enabled: true
+      name: "<CHOOSE_A_NAME>"
+      domain: "<YOUR_EMAIL_DOMAIN>"
+      metadata_url: "<URL_TO_THE_METADATA_OF_YOUR_IDP>"
+      skip_email_verification: true
+      attribute_map:
+        name: "<NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        family_name: "<FAMILY_NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        given_name: "<GIVEN_NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        middle_name: "<MIDDLE_NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        nickname: "<NICKNAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        preferred_username: "<PREFERRED_USERNAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        profile: "<PROFILE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        picture: "<PICTURE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        website: "<WEBSITE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        gender: "<GENDER_ATTRIBUTE_IN_IDP_ASSERTION>"
+        birthdate: "<BIRTHDAY_ATTRIBUTE_IN_IDP_ASSERTION>"
+        zone_info: "<ZONE_INFO_ATTRIBUTE_IN_IDP_ASSERTION>"
+        locale: "<LOCALE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        update_at: "<UPDATED_AT_ATTRIBUTE_IN_IDP_ASSERTION>"
+        email: "<EMAIL_ATTRIBUTE_IN_IDP_ASSERTION>"
+        email_verified: "<EMAIL_VERIFIED_ATTRIBUTE_IN_IDP_ASSERTION>"
+        phone: "<PHONE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        phone_verified: "<PHONE_VERIFIED_ATTRIBUTE_IN_IDP_ASSERTION>"
+```
+
+Explanation of all tags:
+
+| Level             | Tag                       | Type                | Explanation                                                                                                                                                     |
+|-------------------|---------------------------|---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| saml              | enabled                   | boolean             | Enables or disabled the saml api endpoints. Default: false                                                                                                      |
+| saml              | endpoint_url              | string              | URL at which the SAML endpoints like metadata, callback, etc. are available (e.g. `http://example.com/api`). Will be provided as metadata for IDP               |
+| saml              | audience_uri              | string              | Audience identifier. Should be unique to your app. Will be provided as metadata for IDP                                                                         |
+| saml              | default_redirect_url      | string              | URL to which to redirect in case of errors or when no allowed_redirect_url is provided                                                                          |
+| saml              | allowed_redirect_urls     | []string            | Array of URLs to which hanko is allowed to redirect.                                                                                                            |
+| saml              | options                   |                     | Optional feature toggles for service provider operations                                                                                                        |
+| saml              | identity_providers        | []identity_provider | Array of Identity Providers                                                                                                                                     |
+| options           | sign_authn_requests       | boolean             | Toggle for signing initial authn requests. Default: true                                                                                                        |
+| options           | force_login               | boolean             | Forces the IDP to always show a login window for the user. Default: false                                                                                       |
+| options           | validate_encryption_cert  | bool                | Check if the certificate used for the encryption of the IDP responses is valid. Default: true                                                                   |
+| options           | skip_signature_validation | bool                | Skip checking if the signature of a IDP response is valid. Default: false                                                                                       |
+| options           | allow_missing_attributes  | bool                | allows missing attributes (e.g. the IDP specifies an phone attribute in metadata but does not send it with a SAML Assertion Response). Default: false           |
+| identity_provider | enabled                   | bool                | Activates or deactivates an identity provider. Default: false                                                                                                   |
+| identity_provider | name                      | string              | Easy identifiable name of a provider                                                                                                                            |
+| identity_provider | domain                    | string              | At login the domain will be extracted from the users email address and then used to identify the idp to use. This tag defines for which domain the idp is used. |
+| identity_provider | metadata_url              | string              | public URL where the API can fetch the IDP metadata.                                                                                                            |
+| identity_provider | skip_email_verification   | boolean             | Toggles if the email_verified attribute will be checked. Default: false                                                                                         |
+| identity_provider | attribute_map             |                     | Map of Attributes                                                                                                                                               |
+| attribute_map     | name                      | string              | Maps a SAML Assertion Attribute to the name field in HANKO. Default Value: `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name`                         |
+| attribute_map     | family_name               | string              | Maps a SAML Assertion Attribute to the family name field in HANKO. Default Value: `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname`               |
+| attribute_map     | given_name                | string              | Maps a SAML Assertion Attribute to the given name field in HANKO. Default Value: `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname`              |
+| attribute_map     | middle_name               | string              | Maps a SAML Assertion Attribute to the middle name field in HANKO.                                                                                              |
+| attribute_map     | nickname                  | string              | Maps a SAML Assertion Attribute to the nickname field in HANKO.                                                                                                 |
+| attribute_map     | preferred_username        | string              | Maps a SAML Assertion Attribute to the preferred_username field in HANKO.                                                                                       |
+| attribute_map     | profile                   | string              | Maps a SAML Assertion Attribute to the profile field in HANKO.                                                                                                  |
+| attribute_map     | picture                   | string              | Maps a SAML Assertion Attribute to the picture field in HANKO.                                                                                                  |
+| attribute_map     | website                   | string              | Maps a SAML Assertion Attribute to the website field in HANKO.                                                                                                  |
+| attribute_map     | gender                    | string              | Maps a SAML Assertion Attribute to the gender field in HANKO.                                                                                                   |
+| attribute_map     | birthdate                 | string              | Maps a SAML Assertion Attribute to the birthdate field in HANKO.                                                                                                |
+| attribute_map     | zone_info                 | string              | Maps a SAML Assertion Attribute to the zone_info field in HANKO.                                                                                                |
+| attribute_map     | locale                    | string              | Maps a SAML Assertion Attribute to the locale field in HANKO.                                                                                                   |
+| attribute_map     | updated_at                | string              | Maps a SAML Assertion Attribute to the updated_at field in HANKO.                                                                                               |
+| attribute_map     | email                     | string              | Maps a SAML Assertion Attribute to the email field in HANKO. Default: `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress`                      |
+| attribute_map     | email_verified            | string              | Maps a SAML Assertion Attribute to the email_verified field in HANKO.                                                                                           |
+| attribute_map     | phone                     | string              | Maps a SAML Assertion Attribute to the phone field in HANKO.                                                                                                    |
+| attribute_map     | phone_verified            | string              | Maps a SAML Assertion Attribute to the phone_verified field in HANKO.                                                                                           |
+
+Every IDP-Attribute which is not a hanko field will be mapped into a custom claim map of type `map[string]string` where the key of an entry is the attribute name and the value of an entry is the attribute value.
+
+### Additional Attributes
+For some providers we also provide some additional attributes. The provider will be extracted from the metadata url (e.g. `https://<tenant>.eu.auth0.com/samlp/metadata/<random_app_string>` will load defaults for auth0).
+Currently, there the following extra defaults are provided for the following providers:
+
+#### Auth0
+| Field          | Default        |
+|----------------|----------------|
+| email_verified | email_verified |
+| nickname       | nickname       |
+| picture        | picture        |
+| updated_at     | updated_at     |
+
+## Configure Identity Provider
+
+To configure your entity provider you will mabye need the following parameters:
+
+* Callback-URL: This will be `<ENDPOINT_URL>/callback` (e.g.: ENDPOINT_URL: http://localhost:8000 -> http://localhost:8000/saml/callback)
+* Service Provider Metadata URL: This will be `<ENDPOINT_URL>/metadata?domain=<DOMAIN>` (e.g.: ENDPOINT_URL: http://localhost:8000 , DOMAIN: test.example -> http://localhost:8000/saml/metadata?domain=test.example)
+* Logout URL: This will be `<ENDPOINT_URL>/logout` (e.g.: ENDPOINT_URL: http://localhost:8000 -> http://localhost:8000/saml/logout) - Currently not supported
+* Auth URL: This will be `<ENDPOINT_URL>/auth?domain=<DOMAIN>` (e.g.: ENDPOINT_URL: http://localhost:8000 , DOMAIN: test.example -> http://localhost:8000/saml/auth?domain=test.example)
+
+If your IDP requires you to upload the certificate file of your service provider you can download it on the following url:
+`<ENDPOINT_URL>/saml/metadata?domain=<DOMAIN>&cert_only=true`
+
+## Use SAML Login
+
+With an active saml integration [hanko-elements](/frontend/elements/README.md) will automatically try to use your identity provider. Hanko will extract
+the domain from the email address of a user and if it matches the domain tag of an IDP the user will be redirected to
+the login form of the IDP.

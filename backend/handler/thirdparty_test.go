@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
+	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -129,13 +130,13 @@ func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerifie
 func (s *thirdPartySuite) assertLocationHeaderHasToken(rec *httptest.ResponseRecorder) {
 	location, err := url.Parse(rec.Header().Get("Location"))
 	s.NoError(err)
-	s.True(location.Query().Has(HankoTokenQuery))
-	s.NotEmpty(location.Query().Get(HankoTokenQuery))
+	s.True(location.Query().Has(utils.HankoTokenQuery))
+	s.NotEmpty(location.Query().Get(utils.HankoTokenQuery))
 }
 
 func (s *thirdPartySuite) assertStateCookieRemoved(rec *httptest.ResponseRecorder) {
 	cookies := rec.Result().Cookies()
 	s.Len(cookies, 1)
-	s.Equal(HankoThirdpartyStateCookie, cookies[0].Name)
+	s.Equal(utils.HankoThirdpartyStateCookie, cookies[0].Name)
 	s.Equal(-1, cookies[0].MaxAge)
 }
