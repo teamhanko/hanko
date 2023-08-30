@@ -141,7 +141,7 @@ type transitionCreationParam struct {
 	fromState  StateName  // Source state of the Transition.
 	toState    StateName  // Target state of the Transition.
 	inputData  string     // Input data associated with the Transition.
-	errType    *ErrorType // Optional error type associated with the Transition.
+	flowError  FlowError  // Optional flowError associated with the Transition.
 }
 
 // CreateTransitionWithParam creates a new Transition with the given parameters.
@@ -165,8 +165,9 @@ func (w *DefaultFlowDBWrapper) CreateTransitionWithParam(p transitionCreationPar
 	}
 
 	// Set the error code if provided.
-	if p.errType != nil {
-		tm.ErrorCode = &p.errType.Code
+	if p.flowError != nil {
+		code := p.flowError.Code()
+		tm.ErrorCode = &code
 	}
 
 	// Create the Transition in the database.

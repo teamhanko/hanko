@@ -12,6 +12,7 @@ type FlowBuilder struct {
 	errorState   StateName
 	endState     StateName
 	flow         StateTransitions
+	debug        bool
 }
 
 // NewFlow creates a new FlowBuilder that builds a new flow available under the specified path.
@@ -46,6 +47,12 @@ func (fb *FlowBuilder) FixedStates(initialState, errorState, finalState StateNam
 	return fb
 }
 
+// Debug enables the debug mode, which causes the flow response to contain the actual error.
+func (fb *FlowBuilder) Debug(enabled bool) *FlowBuilder {
+	fb.debug = enabled
+	return fb
+}
+
 // Build constructs and returns the Flow object.
 func (fb *FlowBuilder) Build() Flow {
 	return Flow{
@@ -55,5 +62,6 @@ func (fb *FlowBuilder) Build() Flow {
 		ErrorState:   fb.errorState,
 		EndState:     fb.endState,
 		TTL:          fb.ttl,
+		Debug:        fb.debug,
 	}
 }

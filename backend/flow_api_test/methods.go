@@ -1,6 +1,7 @@
 package flow_api_test
 
 import (
+	"errors"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -21,7 +22,7 @@ func (m SubmitEmail) Initialize(c flowpilot.InitializationContext) {
 
 func (m SubmitEmail) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	_ = c.CopyInputValuesToStash("email")
@@ -38,7 +39,7 @@ func (m SubmitEmail) Execute(c flowpilot.ExecutionContext) error {
 			return c.ContinueFlow(StateLoginWithPasscode)
 		}
 
-		return c.ContinueFlowWithError(StateError, flowpilot.FlowDiscontinuityError)
+		return c.ContinueFlowWithError(StateError, flowpilot.ErrorFlowDiscontinuity)
 	}
 
 	return c.ContinueFlow(StateConfirmAccountCreation)
@@ -77,7 +78,7 @@ func (m VerifyWAPublicKey) Initialize(c flowpilot.InitializationContext) {
 
 func (m VerifyWAPublicKey) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	return c.ContinueFlow(StateSuccess)
@@ -99,7 +100,7 @@ func (m SubmitExistingPassword) Initialize(c flowpilot.InitializationContext) {
 
 func (m SubmitExistingPassword) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	email := c.Stash().Get("email").String()
@@ -118,9 +119,9 @@ func (m SubmitExistingPassword) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlow(StateConfirmPasskeyCreation)
 	}
 
-	c.Input().SetError("password", flowpilot.ValueInvalidError)
+	c.Input().SetError("password", flowpilot.ErrorValueInvalid.Wrap(errors.New("password does not match")))
 
-	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 }
 
 type RequestRecovery struct{}
@@ -164,7 +165,7 @@ func (m SubmitPasscodeCode) Initialize(c flowpilot.InitializationContext) {
 
 func (m SubmitPasscodeCode) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	if c.CurrentStateEquals(StateRecoverPasswordViaPasscode) {
@@ -227,7 +228,7 @@ func (m SubmitNewPassword) Initialize(c flowpilot.InitializationContext) {
 
 func (m SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	if c.CurrentStateEquals(StateUpdateExistingPassword) {
@@ -276,7 +277,7 @@ func (m VerifyWAAssertion) Initialize(c flowpilot.InitializationContext) {
 
 func (m VerifyWAAssertion) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.FormDataInvalidError)
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	return c.ContinueFlow(StateSuccess)
