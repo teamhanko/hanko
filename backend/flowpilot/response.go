@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"fmt"
 	"github.com/teamhanko/hanko/backend/flowpilot/utils"
+	"net/http"
 )
 
 // Link represents a link to an action.
@@ -21,12 +22,69 @@ func (ls *Links) Add(l Link) {
 	*ls = append(*ls, l)
 }
 
-// Response represents the response of an action execution.
-type Response struct {
-	State   StateName   `json:"state"`
-	Payload interface{} `json:"payload,omitempty"`
-	Links   Links       `json:"links"`
-	Error   *ErrorType  `json:"error,omitempty"`
+// PublicError represents an error for public exposure.
+type PublicError struct {
+	Code    string  `json:"code"`
+	Message string  `json:"message"`
+	Origin  *string `json:"origin,omitempty"`
+}
+
+// PublicInput represents an input field for public exposure.
+type PublicInput struct {
+	Name      string       `json:"name"`
+	Type      InputType    `json:"type"`
+	Value     interface{}  `json:"value,omitempty"`
+	MinLength *int         `json:"min_length,omitempty"`
+	MaxLength *int         `json:"max_length,omitempty"`
+	Required  *bool        `json:"required,omitempty"`
+	Hidden    *bool        `json:"hidden,omitempty"`
+	Error     *PublicError `json:"error,omitempty"`
+}
+
+// PublicResponse represents the response of an action execution.
+type PublicResponse struct {
+	State   StateName    `json:"state"`
+	Status  int          `json:"status"`
+	Payload interface{}  `json:"payload,omitempty"`
+	Links   Links        `json:"links"`
+	Error   *PublicError `json:"error,omitempty"`
+}
+
+// FlowResult interface defines methods for obtaining response and status.
+type FlowResult interface {
+	Response() PublicResponse
+	Status() int
+}
+
+// DefaultFlowResult implements FlowResult interface.
+type DefaultFlowResult struct {
+	PublicResponse
+}
+
+// newFlowResultFromResponse creates a FlowResult from a PublicResponse.
+func newFlowResultFromResponse(response PublicResponse) FlowResult {
+	return DefaultFlowResult{PublicResponse: response}
+}
+
+// newFlowResultFromError creates a FlowResult from a FlowError.
+func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) FlowResult {
+	pe := flowError.toPublicError(debug)
+
+	return DefaultFlowResult{PublicResponse: PublicResponse{
+		State:  stateName,
+		Status: flowError.Status(),
+		Error:  &pe,
+	}}
+}
+
+// Response returns the PublicResponse.
+func (r DefaultFlowResult) Response() PublicResponse {
+	return r.PublicResponse
+}
+
+// Status returns the HTTP status code.
+func (r DefaultFlowResult) Status() int {
+	return r.PublicResponse.Status
 }
 
 // methodExecutionResult holds the result of a method execution.
@@ -38,24 +96,34 @@ type methodExecutionResult struct {
 // executionResult holds the result of an action execution.
 type executionResult struct {
 	nextState StateName
-	errType   *ErrorType
+	flowError FlowError
 
 	*methodExecutionResult
 }
 
 // generateResponse generates a response based on the execution result.
-func (er *executionResult) generateResponse(fc defaultFlowContext) (*Response, error) {
+func (er *executionResult) generateResponse(fc defaultFlowContext) FlowResult {
 	// Generate links for the response.
 	links := er.generateLinks(fc)
 
 	// Create the response object.
-	resp := &Response{
+	resp := PublicResponse{
 		State:   er.nextState,
+		Status:  http.StatusOK,
 		Payload: fc.payload.Unmarshal(),
 		Links:   links,
-		Error:   er.errType,
 	}
-	return resp, nil
+
+	// Include flow error if present.
+	if er.flowError != nil {
+		status := er.flowError.Status()
+		publicError := er.flowError.toPublicError(false)
+
+		resp.Status = status
+		resp.Error = &publicError
+	}
+
+	return newFlowResultFromResponse(resp)
 }
 
 // generateLinks generates a collection of links based on the execution result.

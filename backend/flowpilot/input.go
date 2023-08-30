@@ -29,7 +29,7 @@ type Input interface {
 	CompareWithStash(b bool) Input
 
 	setValue(value interface{}) Input
-	setError(errType *ErrorType)
+	setError(inputError InputError)
 	getName() string
 	shouldPersist() bool
 	shouldPreserve() bool
@@ -55,21 +55,9 @@ type DefaultInput struct {
 	maxLength *int
 	required  *bool
 	hidden    *bool
-	errorType *ErrorType
+	error     InputError
 
 	defaultExtraInputOptions
-}
-
-// PublicInput represents an input field for public exposure.
-type PublicInput struct {
-	Name      string      `json:"name"`
-	Type      InputType   `json:"type"`
-	Value     interface{} `json:"value,omitempty"`
-	MinLength *int        `json:"min_length,omitempty"`
-	MaxLength *int        `json:"max_length,omitempty"`
-	Required  *bool       `json:"required,omitempty"`
-	Hidden    *bool       `json:"hidden,omitempty"`
-	Error     *ErrorType  `json:"error,omitempty"`
 }
 
 // newInput creates a new DefaultInput instance with provided parameters.
@@ -187,8 +175,8 @@ func (i *DefaultInput) getName() string {
 }
 
 // setError sets an error to the given input field.
-func (i *DefaultInput) setError(errType *ErrorType) {
-	i.errorType = errType
+func (i *DefaultInput) setError(inputError InputError) {
+	i.error = inputError
 }
 
 // shouldPersist indicates the value should be persisted.
@@ -222,12 +210,12 @@ func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadO
 	}
 
 	if i.required != nil && *i.required && (inputValue == nil || len(*inputValue) <= 0) {
-		i.errorType = ValueMissingError
+		i.error = ErrorValueMissing
 		return false
 	}
 
 	if i.compareWithStash && inputValue != nil && stashValue != nil && *inputValue != *stashValue {
-		i.errorType = ValueInvalidError
+		i.error = ErrorValueInvalid
 		return false
 	}
 
@@ -238,14 +226,14 @@ func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadO
 
 	if i.minLength != nil {
 		if len(*inputValue) < *i.minLength {
-			i.errorType = ValueTooShortError
+			i.error = ErrorValueTooShort
 			return false
 		}
 	}
 
 	if i.maxLength != nil {
 		if len(*inputValue) > *i.maxLength {
-			i.errorType = ValueTooLongError
+			i.error = ErrorValueTooLong
 			return false
 		}
 	}
@@ -253,7 +241,7 @@ func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadO
 	if i.dataType == EmailType {
 		pattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 		if matched := pattern.MatchString(*inputValue); !matched {
-			i.errorType = EmailInvalidError
+			i.error = ErrorEmailInvalid
 			return false
 		}
 	}
@@ -263,6 +251,13 @@ func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadO
 
 // toPublicInput converts the DefaultInput to a PublicInput for public exposure.
 func (i *DefaultInput) toPublicInput() *PublicInput {
+	var pe *PublicError
+
+	if i.error != nil {
+		e := i.error.toPublicError(true)
+		pe = &e
+	}
+
 	return &PublicInput{
 		Name:      i.name,
 		Type:      i.dataType,
@@ -271,6 +266,6 @@ func (i *DefaultInput) toPublicInput() *PublicInput {
 		MaxLength: i.maxLength,
 		Required:  i.required,
 		Hidden:    i.hidden,
-		Error:     i.errorType,
+		Error:     pe,
 	}
 }

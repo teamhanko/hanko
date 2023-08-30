@@ -68,7 +68,7 @@ type methodExecutionContinuationContext interface {
 	// ContinueFlow continues the Flow execution to the specified next state.
 	ContinueFlow(nextState StateName) error
 	// ContinueFlowWithError continues the Flow execution to the specified next state with an error.
-	ContinueFlowWithError(nextState StateName, errType *ErrorType) error
+	ContinueFlowWithError(nextState StateName, flowErr FlowError) error
 
 	// TODO: Implement a function to step back to the previous state (while skipping self-transitions and recalling preserved data).
 }
@@ -96,17 +96,16 @@ type PluginAfterMethodExecutionContext interface {
 }
 
 // createAndInitializeFlow initializes the Flow and returns a flow Response.
-func createAndInitializeFlow(db FlowDB, flow Flow) (*Response, error) {
+func createAndInitializeFlow(db FlowDB, flow Flow) (FlowResult, error) {
 	// Wrap the provided FlowDB with additional functionality.
 	dbw := wrapDB(db)
 	// Calculate the expiration time for the Flow.
 	expiresAt := time.Now().Add(flow.TTL).UTC()
 
-	// Initialize JSONManagers for stash, payload, and flash data.
-
-	// TODO: Consider implementing types for stash, payload, and flash that extend "jsonmanager.NewJSONManager()".
+	// TODO: Consider implementing types for stash and payload that extend "jsonmanager.NewJSONManager()".
 	// This could enhance the code structure and provide clearer interfaces for handling these data structures.
 
+	// Initialize JSONManagers for stash and payload.
 	stash := jsonmanager.NewJSONManager()
 	payload := jsonmanager.NewJSONManager()
 
@@ -128,29 +127,30 @@ func createAndInitializeFlow(db FlowDB, flow Flow) (*Response, error) {
 
 	// Generate a response based on the execution result.
 	er := executionResult{nextState: flowModel.CurrentState}
-	return er.generateResponse(fc)
+
+	return er.generateResponse(fc), nil
 }
 
 // executeFlowMethod processes the Flow and returns a Response.
-func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Response, error) {
+func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (FlowResult, error) {
 	// Parse the action parameter to get the method name and Flow ID.
 	action, err := utils.ParseActionParam(options.action)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse action param: %w", err)
+		return newFlowResultFromError(flow.ErrorState, ErrorActionParamInvalid.Wrap(err), flow.Debug), nil
 	}
 
 	// Retrieve the Flow model from the database using the Flow ID.
 	flowModel, err := db.GetFlow(action.FlowID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return &Response{State: flow.ErrorState, Error: OperationNotPermittedError}, nil
+		if errors.Is(err, sql.ErrNoRows) {
+			return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err), flow.Debug), nil
 		}
 		return nil, fmt.Errorf("failed to get Flow: %w", err)
 	}
 
 	// Check if the Flow has expired.
 	if time.Now().After(flowModel.ExpiresAt) {
-		return &Response{State: flow.ErrorState, Error: FlowExpiredError}, nil
+		return newFlowResultFromError(flow.ErrorState, ErrorFlowExpired, flow.Debug), nil
 	}
 
 	// Parse stash data from the Flow model.
@@ -174,7 +174,8 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 	// Get the available transitions for the current state.
 	transitions := fc.getCurrentTransitions()
 	if transitions == nil {
-		return &Response{State: flow.ErrorState, Error: OperationNotPermittedError}, nil
+		err2 := errors.New("the state does not allow to continue with the flow")
+		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err2), flow.Debug), nil
 	}
 
 	// Parse raw input data into JSONManager.
@@ -189,7 +190,7 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 	// Get the method associated with the action method name.
 	method, err := transitions.getMethod(methodName)
 	if err != nil {
-		return &Response{State: flow.ErrorState, Error: OperationNotPermittedError}, nil
+		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err), flow.Debug), nil
 	}
 
 	// Initialize the schema and method context for method execution.
@@ -199,7 +200,7 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 
 	// Check if the method is suspended.
 	if mic.isSuspended {
-		return &Response{State: flow.ErrorState, Error: OperationNotPermittedError}, nil
+		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted, flow.Debug), nil
 	}
 
 	// Create a methodExecutionContext instance for method execution.
@@ -222,5 +223,6 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (*Res
 
 	// Generate a response based on the execution result.
 	er := *mec.methodResult
-	return er.generateResponse(fc)
+
+	return er.generateResponse(fc), nil
 }

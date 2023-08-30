@@ -48,8 +48,8 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 
 	mec.flowModel = *flowModel
 
-	// Get inputDataToPersist from the executed method's schema for recording.
-	inputDataToPersist := mec.input.getDataToPersist()
+	// Get the data to persists from the executed method's schema for recording.
+	inputDataToPersist := mec.input.getDataToPersist().String()
 
 	// Prepare parameters for creating a new Transition in the database.
 	transitionCreationParam := transitionCreationParam{
@@ -57,8 +57,8 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 		methodName: mec.methodName,
 		fromState:  currentState,
 		toState:    executionResult.nextState,
-		inputData:  inputDataToPersist.String(),
-		errType:    executionResult.errType,
+		inputData:  inputDataToPersist,
+		flowError:  executionResult.flowError,
 	}
 
 	// Create a new Transition in the database.
@@ -71,7 +71,7 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 }
 
 // continueFlow continues the Flow execution to the specified nextState with an optional error type.
-func (mec *defaultMethodExecutionContext) continueFlow(nextState StateName, errType *ErrorType) error {
+func (mec *defaultMethodExecutionContext) continueFlow(nextState StateName, flowError FlowError) error {
 	// Check if the specified nextState is valid.
 	if exists := mec.flow.stateExists(nextState); !exists {
 		return errors.New("the execution result contains an invalid state")
@@ -80,7 +80,7 @@ func (mec *defaultMethodExecutionContext) continueFlow(nextState StateName, errT
 	// Prepare an executionResult for continuing the Flow.
 	methodResult := executionResult{
 		nextState: nextState,
-		errType:   errType,
+		flowError: flowError,
 		methodExecutionResult: &methodExecutionResult{
 			methodName: mec.methodName,
 			schema:     mec.input,
@@ -131,6 +131,6 @@ func (mec *defaultMethodExecutionContext) ContinueFlow(nextState StateName) erro
 }
 
 // ContinueFlowWithError continues the Flow execution to the specified nextState with an error type.
-func (mec *defaultMethodExecutionContext) ContinueFlowWithError(nextState StateName, errType *ErrorType) error {
-	return mec.continueFlow(nextState, errType)
+func (mec *defaultMethodExecutionContext) ContinueFlowWithError(nextState StateName, flowErr FlowError) error {
+	return mec.continueFlow(nextState, flowErr)
 }

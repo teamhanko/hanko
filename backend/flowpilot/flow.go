@@ -40,8 +40,6 @@ func WithInputData(inputData InputData) func(*flowExecutionOptions) {
 	}
 }
 
-// TODO: Not sure if we really want to have these types for state and method names
-
 // StateName represents the name of a state in a Flow.
 type StateName string
 
@@ -88,6 +86,7 @@ type Flow struct {
 	ErrorState   StateName        // State representing errors.
 	EndState     StateName        // Final state of the flow.
 	TTL          time.Duration    // Time-to-live for the flow.
+	Debug        bool             // Enables debug mode.
 }
 
 // stateExists checks if a state exists in the Flow.
@@ -142,7 +141,7 @@ func (f *Flow) validate() error {
 }
 
 // Execute handles the execution of actions for a Flow.
-func (f *Flow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (*Response, error) {
+func (f *Flow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error) {
 	// Process execution options.
 	var executionOptions flowExecutionOptions
 	for _, option := range opts {
@@ -166,10 +165,15 @@ func (f *Flow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (*Respons
 	return executeFlowMethod(db, *f, executionOptions)
 }
 
-// ErrorResponse returns an error response for the Flow.
-func (f *Flow) ErrorResponse() *Response {
-	return &Response{
-		State: f.ErrorState,
-		Error: TechnicalError,
+// ResultFromError returns an error response for the Flow.
+func (f *Flow) ResultFromError(err error) (result FlowResult) {
+	flowError := ErrorTechnical
+
+	if err2, ok := err.(FlowError); ok {
+		flowError = err2
+	} else {
+		flowError = flowError.Wrap(err)
 	}
+
+	return newFlowResultFromError(f.ErrorState, flowError, f.Debug)
 }

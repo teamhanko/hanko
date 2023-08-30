@@ -14,7 +14,7 @@ type InitializationSchema interface {
 type MethodExecutionSchema interface {
 	Get(path string) gjson.Result
 	Set(path string, value interface{}) error
-	SetError(inputName string, errType *ErrorType)
+	SetError(inputName string, inputError InputError)
 
 	getInput(name string) Input
 	getOutputData() jsonmanager.ReadOnlyJSONManager
@@ -98,10 +98,10 @@ func (s *defaultSchema) getInput(name string) Input {
 	return nil
 }
 
-// SetError sets an error type for an input field in the schema.
-func (s *defaultSchema) SetError(inputName string, errType *ErrorType) {
+// SetError sets an error for an input field in the schema.
+func (s *defaultSchema) SetError(inputName string, inputError InputError) {
 	if i := s.getInput(inputName); i != nil {
-		i.setError(errType)
+		i.setError(inputError)
 	}
 }
 
