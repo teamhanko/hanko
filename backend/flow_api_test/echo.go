@@ -7,7 +7,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"net/http"
 )
 
 type FlowPilotHandler struct {
@@ -32,18 +31,26 @@ func (e *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 
 	myFlowConfig = flowConfig
 
-	return e.Persister.Transaction(func(tx *pop.Connection) error {
+	err := e.Persister.Transaction(func(tx *pop.Connection) error {
 		db := models.NewFlowDB(tx)
 
-		flowResponse, err := Flow.Execute(db,
+		result, flowpilotErr := Flow.Execute(db,
 			flowpilot.WithActionParam(actionParam),
 			flowpilot.WithInputData(body.InputData))
 
-		if err != nil {
-			c.Logger().Errorf("flowpilot error: %w", err)
-			return c.JSON(http.StatusOK, Flow.ErrorResponse())
+		if flowpilotErr != nil {
+			return flowpilotErr
 		}
 
-		return c.JSON(http.StatusOK, flowResponse)
+		return c.JSON(result.Status(), result.Response())
 	})
+
+	if err != nil {
+		c.Logger().Errorf("tx error: %v", err)
+		result := Flow.ResultFromError(err)
+
+		return c.JSON(result.Status(), result.Response())
+	}
+
+	return nil
 }
