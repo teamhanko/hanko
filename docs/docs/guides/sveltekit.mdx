@@ -1,15 +1,15 @@
 ---
-title: Sveltekit + Hanko
-sidebar_label: Sveltekit
+title: SvelteKit + Hanko
+sidebar_label: SvelteKit
 keywords: [svelte, sveltekit]
 sidebar_custom_props:
   docCardIconName: svelte
 ---
 
 
-# Integrate Hanko with Sveltekit
+# SvelteKit
 
-Learn how to quickly add authentication and user profile in your Sveltekit app using Hanko.
+Learn how to quickly add authentication and user profile in your SvelteKit app using Hanko.
 
 ## Install `@teamhanko/hanko-elements`
 
@@ -61,15 +61,15 @@ Here, we utilize the `onAuthflowCompleted` custom event, which is triggered upon
 ```
 
 :::info
-When incorporating any Hanko component in your `+page.svelte` file(routes), it is necessary to disable server-side rendering (SSR) by setting `ssr` to false in your `+layout.ts` file.
+When incorporating any Hanko component in your `+page.svelte` file(routes), it is necessary to disable server-side rendering (SSR) by setting `ssr` to false in your `+page.ts` file.
 
-```js filename="routes/login/+layout.ts"
+```js filename="routes/login/+page.ts"
 export const ssr = false;
 ```
 
 **But why?**
 
-The register function tries to set up the `<hanko-auth>` element for the browser. But, Sveltekit pre-renders pages before displaying them. Since it doesn't have access to the browser's window object during this pre-render phase, the registration of the custom element would fail.
+The register function tries to set up the `<hanko-auth>` element for the browser. But, SvelteKit pre-renders pages before displaying them. Since it doesn't have access to the browser's window object during this pre-render phase, the registration of the custom element would fail.
 :::
 
 
