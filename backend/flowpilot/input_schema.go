@@ -10,8 +10,8 @@ type InitializationSchema interface {
 	AddInputs(inputList ...Input)
 }
 
-// MethodExecutionSchema represents an interface for managing method execution schemas.
-type MethodExecutionSchema interface {
+// ExecutionSchema represents an interface for managing method execution schemas.
+type ExecutionSchema interface {
 	Get(path string) gjson.Result
 	Set(path string, value interface{}) error
 	SetError(inputName string, inputError InputError)
@@ -37,8 +37,8 @@ type defaultSchema struct {
 	outputData jsonmanager.JSONManager
 }
 
-// newSchemaWithInputData creates a new MethodExecutionSchema with input data.
-func newSchemaWithInputData(inputData jsonmanager.ReadOnlyJSONManager) MethodExecutionSchema {
+// newSchemaWithInputData creates a new ExecutionSchema with input data.
+func newSchemaWithInputData(inputData jsonmanager.ReadOnlyJSONManager) ExecutionSchema {
 	outputData := jsonmanager.NewJSONManager()
 	return &defaultSchema{
 		inputData:  inputData,
@@ -46,8 +46,8 @@ func newSchemaWithInputData(inputData jsonmanager.ReadOnlyJSONManager) MethodExe
 	}
 }
 
-// newSchemaWithInputData creates a new MethodExecutionSchema with input data.
-func newSchemaWithOutputData(outputData jsonmanager.ReadOnlyJSONManager) (MethodExecutionSchema, error) {
+// newSchemaWithInputData creates a new ExecutionSchema with input data.
+func newSchemaWithOutputData(outputData jsonmanager.ReadOnlyJSONManager) (ExecutionSchema, error) {
 	data, err := jsonmanager.NewJSONManagerFromString(outputData.String())
 	if err != nil {
 		return nil, err
@@ -59,13 +59,13 @@ func newSchemaWithOutputData(outputData jsonmanager.ReadOnlyJSONManager) (Method
 	}, nil
 }
 
-// newSchema creates a new MethodExecutionSchema with no input data.
-func newSchema() MethodExecutionSchema {
+// newSchema creates a new ExecutionSchema with no input data.
+func newSchema() ExecutionSchema {
 	inputData := jsonmanager.NewJSONManager()
 	return newSchemaWithInputData(inputData)
 }
 
-// toInitializationSchema converts MethodExecutionSchema to InitializationSchema.
+// toInitializationSchema converts ExecutionSchema to InitializationSchema.
 func (s *defaultSchema) toInitializationSchema() InitializationSchema {
 	return s
 }

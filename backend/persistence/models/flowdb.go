@@ -144,7 +144,7 @@ func (flowDB FlowDB) CreateTransition(transitionModel flowpilot.TransitionModel)
 	t := Transition{
 		ID:        transitionModel.ID,
 		FlowID:    transitionModel.FlowID,
-		Method:    string(transitionModel.Method),
+		Action:    string(transitionModel.Action),
 		FromState: string(transitionModel.FromState),
 		ToState:   string(transitionModel.ToState),
 		InputData: transitionModel.InputData,
@@ -161,11 +161,11 @@ func (flowDB FlowDB) CreateTransition(transitionModel flowpilot.TransitionModel)
 	return nil
 }
 
-func (flowDB FlowDB) FindLastTransitionWithMethod(flowID uuid.UUID, method flowpilot.MethodName) (*flowpilot.TransitionModel, error) {
+func (flowDB FlowDB) FindLastTransitionWithAction(flowID uuid.UUID, actionName flowpilot.ActionName) (*flowpilot.TransitionModel, error) {
 	var transitionModel Transition
 
 	err := flowDB.tx.Where("flow_id = ?", flowID).
-		Where("method = ?", method).
+		Where("action = ?", actionName).
 		Order("created_at desc").
 		First(&transitionModel)
 	if err != nil {

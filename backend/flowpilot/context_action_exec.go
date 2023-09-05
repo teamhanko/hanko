@@ -6,17 +6,17 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 )
 
-// defaultMethodExecutionContext is the default implementation of the methodExecutionContext interface.
-type defaultMethodExecutionContext struct {
-	methodName   MethodName            // Name of the method being executed.
-	input        MethodExecutionSchema // JSONManager for accessing input data.
-	methodResult *executionResult      // Result of the method execution.
+// defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
+type defaultActionExecutionContext struct {
+	actionName      ActionName       // Name of the action being executed.
+	input           ExecutionSchema  // JSONManager for accessing input data.
+	executionResult *executionResult // Result of the action execution.
 
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
-// saveNextState updates the Flow's state and saves Transition data after method execution.
-func (mec *defaultMethodExecutionContext) saveNextState(executionResult executionResult) error {
+// saveNextState updates the Flow's state and saves Transition data after action execution.
+func (mec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
 	currentState := mec.flowModel.CurrentState
 	previousState := mec.flowModel.PreviousState
 
@@ -48,13 +48,13 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 
 	mec.flowModel = *flowModel
 
-	// Get the data to persists from the executed method's schema for recording.
+	// Get the data to persists from the executed action schema for recording.
 	inputDataToPersist := mec.input.getDataToPersist().String()
 
 	// Prepare parameters for creating a new Transition in the database.
 	transitionCreationParam := transitionCreationParam{
 		flowID:     mec.flowModel.ID,
-		methodName: mec.methodName,
+		actionName: mec.actionName,
 		fromState:  currentState,
 		toState:    executionResult.nextState,
 		inputData:  inputDataToPersist,
@@ -71,45 +71,45 @@ func (mec *defaultMethodExecutionContext) saveNextState(executionResult executio
 }
 
 // continueFlow continues the Flow execution to the specified nextState with an optional error type.
-func (mec *defaultMethodExecutionContext) continueFlow(nextState StateName, flowError FlowError) error {
+func (mec *defaultActionExecutionContext) continueFlow(nextState StateName, flowError FlowError) error {
 	// Check if the specified nextState is valid.
 	if exists := mec.flow.stateExists(nextState); !exists {
 		return errors.New("the execution result contains an invalid state")
 	}
 
 	// Prepare an executionResult for continuing the Flow.
-	methodResult := executionResult{
+	result := executionResult{
 		nextState: nextState,
 		flowError: flowError,
-		methodExecutionResult: &methodExecutionResult{
-			methodName: mec.methodName,
+		actionExecutionResult: &actionExecutionResult{
+			actionName: mec.actionName,
 			schema:     mec.input,
 		},
 	}
 
 	// Save the next state and transition data.
-	err := mec.saveNextState(methodResult)
+	err := mec.saveNextState(result)
 	if err != nil {
 		return fmt.Errorf("failed to save the transition data: %w", err)
 	}
 
-	mec.methodResult = &methodResult
+	mec.executionResult = &result
 
 	return nil
 }
 
-// Input returns the MethodExecutionSchema for accessing input data.
-func (mec *defaultMethodExecutionContext) Input() MethodExecutionSchema {
+// Input returns the ExecutionSchema for accessing input data.
+func (mec *defaultActionExecutionContext) Input() ExecutionSchema {
 	return mec.input
 }
 
 // Payload returns the JSONManager for accessing payload data.
-func (mec *defaultMethodExecutionContext) Payload() jsonmanager.JSONManager {
+func (mec *defaultActionExecutionContext) Payload() jsonmanager.JSONManager {
 	return mec.payload
 }
 
 // CopyInputValuesToStash copies specified inputs to the stash.
-func (mec *defaultMethodExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
+func (mec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
 	for _, inputName := range inputNames {
 		// Copy input values to the stash.
 		err := mec.stash.Set(inputName, mec.input.Get(inputName).Value())
@@ -121,16 +121,16 @@ func (mec *defaultMethodExecutionContext) CopyInputValuesToStash(inputNames ...s
 }
 
 // ValidateInputData validates the input data against the schema.
-func (mec *defaultMethodExecutionContext) ValidateInputData() bool {
+func (mec *defaultActionExecutionContext) ValidateInputData() bool {
 	return mec.input.validateInputData(mec.flowModel.CurrentState, mec.stash)
 }
 
 // ContinueFlow continues the Flow execution to the specified nextState.
-func (mec *defaultMethodExecutionContext) ContinueFlow(nextState StateName) error {
+func (mec *defaultActionExecutionContext) ContinueFlow(nextState StateName) error {
 	return mec.continueFlow(nextState, nil)
 }
 
 // ContinueFlowWithError continues the Flow execution to the specified nextState with an error type.
-func (mec *defaultMethodExecutionContext) ContinueFlowWithError(nextState StateName, flowErr FlowError) error {
+func (mec *defaultActionExecutionContext) ContinueFlowWithError(nextState StateName, flowErr FlowError) error {
 	return mec.continueFlow(nextState, flowErr)
 }
