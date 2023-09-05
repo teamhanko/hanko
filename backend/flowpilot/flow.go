@@ -26,7 +26,7 @@ type flowExecutionOptions struct {
 	inputData InputData
 }
 
-// WithActionParam sets the MethodName for flowExecutionOptions.
+// WithActionParam sets the ActionName for flowExecutionOptions.
 func WithActionParam(action string) func(*flowExecutionOptions) {
 	return func(f *flowExecutionOptions) {
 		f.action = action
@@ -43,36 +43,36 @@ func WithInputData(inputData InputData) func(*flowExecutionOptions) {
 // StateName represents the name of a state in a Flow.
 type StateName string
 
-// MethodName represents the name of a method associated with a Transition.
-type MethodName string
+// ActionName represents the name of a action associated with a Transition.
+type ActionName string
 
-// TODO: Should it be possible to partially implement the Method interface? E.g. when a method does not require initialization.
+// TODO: Should it be possible to partially implement the Action interface? E.g. when a action does not require initialization.
 
-// Method defines the interface for flow methods.
-type Method interface {
-	GetName() MethodName              // Get the method name.
-	GetDescription() string           // Get the method description.
-	Initialize(InitializationContext) // Initialize the method.
-	Execute(ExecutionContext) error   // Execute the method.
+// Action defines the interface for flow actions.
+type Action interface {
+	GetName() ActionName              // Get the action name.
+	GetDescription() string           // Get the action description.
+	Initialize(InitializationContext) // Initialize the action.
+	Execute(ExecutionContext) error   // Execute the action.
 }
 
-// Transition holds a method associated with a state transition.
+// Transition holds an action associated with a state transition.
 type Transition struct {
-	Method Method
+	Action Action
 }
 
 // Transitions is a collection of Transition instances.
 type Transitions []Transition
 
-// getMethod returns the Method associated with the specified name.
-func (ts *Transitions) getMethod(methodName MethodName) (Method, error) {
+// getAction returns the Action associated with the specified name.
+func (ts *Transitions) getAction(actionName ActionName) (Action, error) {
 	for _, t := range *ts {
-		if t.Method.GetName() == methodName {
-			return t.Method, nil
+		if t.Action.GetName() == actionName {
+			return t.Action, nil
 		}
 	}
 
-	return nil, errors.New(fmt.Sprintf("method '%s' not valid", methodName))
+	return nil, errors.New(fmt.Sprintf("action '%s' not valid", actionName))
 }
 
 // StateTransitions maps states to associated Transitions.
@@ -135,7 +135,7 @@ func (f *Flow) validate() error {
 		return fmt.Errorf("the specified EndState '%s' is not allowed to have transitions", f.EndState)
 	}
 
-	// TODO: Additional validation for unique State and Method names,...
+	// TODO: Additional validation for unique State and Action names,...
 
 	return nil
 }
@@ -162,7 +162,7 @@ func (f *Flow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResu
 	}
 
 	// Otherwise, update an existing Flow.
-	return executeFlowMethod(db, *f, executionOptions)
+	return executeFlowAction(db, *f, executionOptions)
 }
 
 // ResultFromError returns an error response for the Flow.

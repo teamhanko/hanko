@@ -23,7 +23,7 @@ type FlowModel struct {
 type TransitionModel struct {
 	ID        uuid.UUID  // Unique ID of the Transition.
 	FlowID    uuid.UUID  // ID of the associated Flow.
-	Method    MethodName // Name of the method associated with the Transition.
+	Action    ActionName // Name of the action associated with the Action.
 	FromState StateName  // Source state of the Transition.
 	ToState   StateName  // Target state of the Transition.
 	InputData string     // Input data associated with the Transition.
@@ -39,9 +39,9 @@ type FlowDB interface {
 	UpdateFlow(flowModel FlowModel) error
 	CreateTransition(transitionModel TransitionModel) error
 
-	// TODO: "FindLastTransitionWithMethod" might be useless, or can be replaced.
+	// TODO: "FindLastTransitionWithAction" might be useless, or can be replaced.
 
-	FindLastTransitionWithMethod(flowID uuid.UUID, method MethodName) (*TransitionModel, error)
+	FindLastTransitionWithAction(flowID uuid.UUID, method ActionName) (*TransitionModel, error)
 }
 
 // FlowDBWrapper is an extended FlowDB interface that includes additional methods.
@@ -137,7 +137,7 @@ func (w *DefaultFlowDBWrapper) UpdateFlowWithParam(p flowUpdateParam) (*FlowMode
 // transitionCreationParam holds parameters for creating a new Transition.
 type transitionCreationParam struct {
 	flowID     uuid.UUID  // ID of the associated Flow.
-	methodName MethodName // Name of the method associated with the Transition.
+	actionName ActionName // Name of the action associated with the Transition.
 	fromState  StateName  // Source state of the Transition.
 	toState    StateName  // Target state of the Transition.
 	inputData  string     // Input data associated with the Transition.
@@ -156,7 +156,7 @@ func (w *DefaultFlowDBWrapper) CreateTransitionWithParam(p transitionCreationPar
 	tm := TransitionModel{
 		ID:        transitionID,
 		FlowID:    p.flowID,
-		Method:    p.methodName,
+		Action:    p.actionName,
 		FromState: p.fromState,
 		ToState:   p.toState,
 		InputData: p.inputData,

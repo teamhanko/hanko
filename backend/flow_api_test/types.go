@@ -20,16 +20,16 @@ const (
 )
 
 const (
-	MethodSubmitEmail            flowpilot.MethodName = "submit_email"
-	MethodGetWAChallenge         flowpilot.MethodName = "get_webauthn_challenge"
-	MethodVerifyWAPublicKey      flowpilot.MethodName = "verify_webauthn_public_key"
-	MethodGetWAAssertion         flowpilot.MethodName = "get_webauthn_assertion"
-	MethodVerifyWAAssertion      flowpilot.MethodName = "verify_webauthn_assertion_response"
-	MethodSubmitExistingPassword flowpilot.MethodName = "submit_existing_password"
-	MethodSubmitNewPassword      flowpilot.MethodName = "submit_new_password"
-	MethodRequestRecovery        flowpilot.MethodName = "request_recovery"
-	MethodSubmitPasscodeCode     flowpilot.MethodName = "submit_passcode_code"
-	MethodCreateUser             flowpilot.MethodName = "create_user"
-	MethodSkipPasskeyCreation    flowpilot.MethodName = "skip_passkey_creation"
-	MethodBack                   flowpilot.MethodName = "back"
+	ActionSubmitEmail            flowpilot.ActionName = "submit_email"
+	ActionGetWAChallenge         flowpilot.ActionName = "get_webauthn_challenge"
+	ActionVerifyWAPublicKey      flowpilot.ActionName = "verify_webauthn_public_key"
+	ActionGetWAAssertion         flowpilot.ActionName = "get_webauthn_assertion"
+	ActionVerifyWAAssertion      flowpilot.ActionName = "verify_webauthn_assertion_response"
+	ActionSubmitExistingPassword flowpilot.ActionName = "submit_existing_password"
+	ActionSubmitNewPassword      flowpilot.ActionName = "submit_new_password"
+	ActionRequestRecovery        flowpilot.ActionName = "request_recovery"
+	ActionSubmitPasscodeCode     flowpilot.ActionName = "submit_passcode_code"
+	ActionCreateUser             flowpilot.ActionName = "create_user"
+	ActionSkipPasskeyCreation    flowpilot.ActionName = "skip_passkey_creation"
+	ActionBack                   flowpilot.ActionName = "back"
 )

@@ -72,9 +72,9 @@ func (fc *defaultFlowContext) StateExists(stateName StateName) bool {
 }
 
 // FetchMethodInput fetches input data for a specific method.
-func (fc *defaultFlowContext) FetchMethodInput(methodName MethodName) (jsonmanager.ReadOnlyJSONManager, error) {
+func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (jsonmanager.ReadOnlyJSONManager, error) {
 	// Find the last Transition with the specified method from the database wrapper.
-	t, err := fc.dbw.FindLastTransitionWithMethod(fc.flowModel.ID, methodName)
+	t, err := fc.dbw.FindLastTransitionWithAction(fc.flowModel.ID, methodName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get last Transition from dbw: %w", err)
 	}

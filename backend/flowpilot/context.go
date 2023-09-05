@@ -36,35 +36,35 @@ type flowContext interface {
 	StateExists(stateName StateName) bool
 }
 
-// methodInitializationContext represents the basic context for a Flow method's initialization.
-type methodInitializationContext interface {
+// actionInitializationContext represents the basic context for a Flow action's initialization.
+type actionInitializationContext interface {
 	// AddInputs adds input parameters to the schema.
 	AddInputs(inputList ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
 	Stash() jsonmanager.ReadOnlyJSONManager
-	// SuspendMethod suspends the current method's execution.
-	SuspendMethod()
+	// SuspendAction suspends the current action's execution.
+	SuspendAction()
 }
 
-// methodExecutionContext represents the context for a method execution.
-type methodExecutionContext interface {
+// actionExecutionContext represents the context for a action execution.
+type actionExecutionContext interface {
 	flowContext
-	// Input returns the MethodExecutionSchema for the method.
-	Input() MethodExecutionSchema
+	// Input returns the ExecutionSchema for the action.
+	Input() ExecutionSchema
 
-	// TODO: FetchMethodInput (for a method name) is maybe useless and can be removed or replaced.
+	// TODO: FetchActionInput (for a action name) is maybe useless and can be removed or replaced.
 
-	// FetchMethodInput fetches input data for a specific method.
-	FetchMethodInput(methodName MethodName) (jsonmanager.ReadOnlyJSONManager, error)
+	// FetchActionInput fetches input data for a specific action.
+	FetchActionInput(actionName ActionName) (jsonmanager.ReadOnlyJSONManager, error)
 	// ValidateInputData validates the input data against the schema.
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
 }
 
-// methodExecutionContinuationContext represents the context within a method continuation.
-type methodExecutionContinuationContext interface {
-	methodExecutionContext
+// actionExecutionContinuationContext represents the context within an action continuation.
+type actionExecutionContinuationContext interface {
+	actionExecutionContext
 	// ContinueFlow continues the Flow execution to the specified next state.
 	ContinueFlow(nextState StateName) error
 	// ContinueFlowWithError continues the Flow execution to the specified next state with an error.
@@ -73,26 +73,26 @@ type methodExecutionContinuationContext interface {
 	// TODO: Implement a function to step back to the previous state (while skipping self-transitions and recalling preserved data).
 }
 
-// InitializationContext is a shorthand for methodInitializationContext within flow methods.
+// InitializationContext is a shorthand for actionInitializationContext within flow actions.
 type InitializationContext interface {
-	methodInitializationContext
+	actionInitializationContext
 }
 
-// ExecutionContext is a shorthand for methodExecutionContinuationContext within flow methods.
+// ExecutionContext is a shorthand for actionExecutionContinuationContext within flow actions.
 type ExecutionContext interface {
-	methodExecutionContinuationContext
+	actionExecutionContinuationContext
 }
 
 // TODO: The following interfaces are meant for a plugin system. #tbd
 
-// PluginBeforeMethodExecutionContext represents the context for a plugin before a method execution.
-type PluginBeforeMethodExecutionContext interface {
-	methodExecutionContinuationContext
+// PluginBeforeActionExecutionContext represents the context for a plugin before an action execution.
+type PluginBeforeActionExecutionContext interface {
+	actionExecutionContinuationContext
 }
 
-// PluginAfterMethodExecutionContext represents the context for a plugin after a method execution.
-type PluginAfterMethodExecutionContext interface {
-	methodExecutionContext
+// PluginAfterActionExecutionContext represents the context for a plugin after an action execution.
+type PluginAfterActionExecutionContext interface {
+	actionExecutionContext
 }
 
 // createAndInitializeFlow initializes the Flow and returns a flow Response.
@@ -131,16 +131,16 @@ func createAndInitializeFlow(db FlowDB, flow Flow) (FlowResult, error) {
 	return er.generateResponse(fc), nil
 }
 
-// executeFlowMethod processes the Flow and returns a Response.
-func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (FlowResult, error) {
-	// Parse the action parameter to get the method name and Flow ID.
-	action, err := utils.ParseActionParam(options.action)
+// executeFlowAction processes the Flow and returns a Response.
+func executeFlowAction(db FlowDB, flow Flow, options flowExecutionOptions) (FlowResult, error) {
+	// Parse the actionParam parameter to get the actionParam name and Flow ID.
+	actionParam, err := utils.ParseActionParam(options.action)
 	if err != nil {
 		return newFlowResultFromError(flow.ErrorState, ErrorActionParamInvalid.Wrap(err), flow.Debug), nil
 	}
 
 	// Retrieve the Flow model from the database using the Flow ID.
-	flowModel, err := db.GetFlow(action.FlowID)
+	flowModel, err := db.GetFlow(actionParam.FlowID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err), flow.Debug), nil
@@ -185,44 +185,44 @@ func executeFlowMethod(db FlowDB, flow Flow, options flowExecutionOptions) (Flow
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
 
-	// Create a MethodName from the parsed action method name.
-	methodName := MethodName(action.MethodName)
-	// Get the method associated with the action method name.
-	method, err := transitions.getMethod(methodName)
+	// Create a ActionName from the parsed actionParam name.
+	actionName := ActionName(actionParam.ActionName)
+	// Get the action associated with the actionParam name.
+	action, err := transitions.getAction(actionName)
 	if err != nil {
 		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err), flow.Debug), nil
 	}
 
-	// Initialize the schema and method context for method execution.
+	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
-	mic := defaultMethodInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
-	method.Initialize(&mic)
+	mic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
+	action.Initialize(&mic)
 
-	// Check if the method is suspended.
+	// Check if the action is suspended.
 	if mic.isSuspended {
 		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted, flow.Debug), nil
 	}
 
-	// Create a methodExecutionContext instance for method execution.
-	mec := defaultMethodExecutionContext{
-		methodName:         methodName,
+	// Create a actionExecutionContext instance for action execution.
+	mec := defaultActionExecutionContext{
+		actionName:         actionName,
 		input:              schema,
 		defaultFlowContext: fc,
 	}
 
-	// Execute the method and handle any errors.
-	err = method.Execute(&mec)
+	// Execute the action and handle any errors.
+	err = action.Execute(&mec)
 	if err != nil {
-		return nil, fmt.Errorf("the method failed to handle the request: %w", err)
+		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
 	}
 
-	// Ensure that the method has set a result object.
-	if mec.methodResult == nil {
-		return nil, errors.New("the method has not set a result object")
+	// Ensure that the action has set a result object.
+	if mec.executionResult == nil {
+		return nil, errors.New("the action has not set a result object")
 	}
 
 	// Generate a response based on the execution result.
-	er := *mec.methodResult
+	er := *mec.executionResult
 
 	return er.generateResponse(fc), nil
 }
