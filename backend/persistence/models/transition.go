@@ -12,7 +12,7 @@ import (
 type Transition struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	FlowID    uuid.UUID `json:"-" db:"flow_id" `
-	Method    string    `json:"method" db:"method"`
+	Action    string    `json:"action" db:"action"`
 	FromState string    `json:"from_state" db:"from_state"`
 	ToState   string    `json:"to_state" db:"to_state"`
 	InputData string    `json:"input_data" db:"input_data"`
@@ -26,7 +26,7 @@ func (t *Transition) ToFlowpilotModel() *flowpilot.TransitionModel {
 	return &flowpilot.TransitionModel{
 		ID:        t.ID,
 		FlowID:    t.FlowID,
-		Method:    flowpilot.MethodName(t.Method),
+		Action:    flowpilot.ActionName(t.Action),
 		FromState: flowpilot.StateName(t.FromState),
 		ToState:   flowpilot.StateName(t.ToState),
 		InputData: t.InputData,

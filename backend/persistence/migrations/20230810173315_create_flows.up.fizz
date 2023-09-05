@@ -12,7 +12,7 @@ create_table("flows") {
 create_table("transitions") {
   t.Column("id", "uuid", {primary: true})
   t.Column("flow_id", "uuid")
-  t.Column("method", "string")
+  t.Column("action", "string")
   t.Column("from_state", "string")
   t.Column("to_state", "string")
   t.Column("input_data", "string")

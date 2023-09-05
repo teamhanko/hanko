@@ -8,8 +8,8 @@ import (
 
 type SubmitEmail struct{}
 
-func (m SubmitEmail) GetName() flowpilot.MethodName {
-	return MethodSubmitEmail
+func (m SubmitEmail) GetName() flowpilot.ActionName {
+	return ActionSubmitEmail
 }
 
 func (m SubmitEmail) GetDescription() string {
@@ -47,8 +47,8 @@ func (m SubmitEmail) Execute(c flowpilot.ExecutionContext) error {
 
 type GetWAChallenge struct{}
 
-func (m GetWAChallenge) GetName() flowpilot.MethodName {
-	return MethodGetWAChallenge
+func (m GetWAChallenge) GetName() flowpilot.ActionName {
+	return ActionGetWAChallenge
 }
 
 func (m GetWAChallenge) GetDescription() string {
@@ -64,8 +64,8 @@ func (m GetWAChallenge) Execute(c flowpilot.ExecutionContext) error {
 
 type VerifyWAPublicKey struct{}
 
-func (m VerifyWAPublicKey) GetName() flowpilot.MethodName {
-	return MethodVerifyWAPublicKey
+func (m VerifyWAPublicKey) GetName() flowpilot.ActionName {
+	return ActionVerifyWAPublicKey
 }
 
 func (m VerifyWAPublicKey) GetDescription() string {
@@ -86,8 +86,8 @@ func (m VerifyWAPublicKey) Execute(c flowpilot.ExecutionContext) error {
 
 type SubmitExistingPassword struct{}
 
-func (m SubmitExistingPassword) GetName() flowpilot.MethodName {
-	return MethodSubmitExistingPassword
+func (m SubmitExistingPassword) GetName() flowpilot.ActionName {
+	return ActionSubmitExistingPassword
 }
 
 func (m SubmitExistingPassword) GetDescription() string {
@@ -126,8 +126,8 @@ func (m SubmitExistingPassword) Execute(c flowpilot.ExecutionContext) error {
 
 type RequestRecovery struct{}
 
-func (m RequestRecovery) GetName() flowpilot.MethodName {
-	return MethodRequestRecovery
+func (m RequestRecovery) GetName() flowpilot.ActionName {
+	return ActionRequestRecovery
 }
 
 func (m RequestRecovery) GetDescription() string {
@@ -136,7 +136,7 @@ func (m RequestRecovery) GetDescription() string {
 
 func (m RequestRecovery) Initialize(c flowpilot.InitializationContext) {
 	if myFlowConfig.isEnabled(FlowOptionSecondFactorFlow) {
-		c.SuspendMethod()
+		c.SuspendAction()
 	}
 }
 
@@ -147,8 +147,8 @@ func (m RequestRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 type SubmitPasscodeCode struct{}
 
-func (m SubmitPasscodeCode) GetName() flowpilot.MethodName {
-	return MethodSubmitPasscodeCode
+func (m SubmitPasscodeCode) GetName() flowpilot.ActionName {
+	return ActionSubmitPasscodeCode
 }
 
 func (m SubmitPasscodeCode) GetDescription() string {
@@ -187,8 +187,8 @@ func (m SubmitPasscodeCode) Execute(c flowpilot.ExecutionContext) error {
 
 type CreateUser struct{}
 
-func (m CreateUser) GetName() flowpilot.MethodName {
-	return MethodCreateUser
+func (m CreateUser) GetName() flowpilot.ActionName {
+	return ActionCreateUser
 }
 
 func (m CreateUser) GetDescription() string {
@@ -214,8 +214,8 @@ func (m CreateUser) Execute(c flowpilot.ExecutionContext) error {
 
 type SubmitNewPassword struct{}
 
-func (m SubmitNewPassword) GetName() flowpilot.MethodName {
-	return MethodSubmitNewPassword
+func (m SubmitNewPassword) GetName() flowpilot.ActionName {
+	return ActionSubmitNewPassword
 }
 
 func (m SubmitNewPassword) GetDescription() string {
@@ -246,8 +246,8 @@ func (m SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
 
 type GetWAAssertion struct{}
 
-func (m GetWAAssertion) GetName() flowpilot.MethodName {
-	return MethodGetWAAssertion
+func (m GetWAAssertion) GetName() flowpilot.ActionName {
+	return ActionGetWAAssertion
 }
 
 func (m GetWAAssertion) GetDescription() string {
@@ -263,8 +263,8 @@ func (m GetWAAssertion) Execute(c flowpilot.ExecutionContext) error {
 
 type VerifyWAAssertion struct{}
 
-func (m VerifyWAAssertion) GetName() flowpilot.MethodName {
-	return MethodVerifyWAAssertion
+func (m VerifyWAAssertion) GetName() flowpilot.ActionName {
+	return ActionVerifyWAAssertion
 }
 
 func (m VerifyWAAssertion) GetDescription() string {
@@ -285,8 +285,8 @@ func (m VerifyWAAssertion) Execute(c flowpilot.ExecutionContext) error {
 
 type SkipPasskeyCreation struct{}
 
-func (m SkipPasskeyCreation) GetName() flowpilot.MethodName {
-	return MethodSkipPasskeyCreation
+func (m SkipPasskeyCreation) GetName() flowpilot.ActionName {
+	return ActionSkipPasskeyCreation
 }
 
 func (m SkipPasskeyCreation) GetDescription() string {
@@ -301,8 +301,8 @@ func (m SkipPasskeyCreation) Execute(c flowpilot.ExecutionContext) error {
 
 type Back struct{}
 
-func (m Back) GetName() flowpilot.MethodName {
-	return MethodBack
+func (m Back) GetName() flowpilot.ActionName {
+	return ActionBack
 }
 
 func (m Back) GetDescription() string {

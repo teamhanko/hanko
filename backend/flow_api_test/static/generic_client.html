@@ -108,19 +108,19 @@
 
         container.appendChild(executeHandlerButton);
 
-        const methodsHeadline = document.createElement('h3');
-        methodsHeadline.textContent = "🕹 Methods";
-        container.appendChild(methodsHeadline);
+        const actionsHeadline = document.createElement('h3');
+        actionsHeadline.textContent = "🕹 Actions";
+        container.appendChild(actionsHeadline);
 
-        if (data.links) {
-            data.links.forEach(link => {
+        if (data.actions) {
+            data.actions.forEach(action => {
                 const form = document.createElement('form');
-                form.action = link.href;
+                form.action = action.href;
                 form.method = 'POST';
 
-                const methodHeadline = document.createElement('h4');
-                methodHeadline.textContent = "⚡ Method: " + link.method_name;
-                form.appendChild(methodHeadline);
+                const actionHeadline = document.createElement('h4');
+                actionHeadline.textContent = "⚡ Action: " + action.action_name;
+                form.appendChild(actionHeadline);
 
 
                 const descriptionHeadline = document.createElement('h5');
@@ -128,17 +128,17 @@
                 form.appendChild(descriptionHeadline);
 
                 const description = document.createElement('div');
-                description.textContent = link.description;
+                description.textContent = action.description;
                 form.appendChild(description);
 
                 const inputsHeadline = document.createElement('h5');
                 inputsHeadline.textContent = "⛳ Inputs";
                 form.appendChild(inputsHeadline);
 
-                if (link.inputs) {
+                if (action.inputs) {
                     const inputList = document.createElement('ul');
 
-                    link.inputs.forEach(input => {
+                    action.inputs.forEach(input => {
                         const inputListItem = document.createElement('li');
 
                         const label = document.createElement("label");

@@ -30,10 +30,10 @@ func (fb *FlowBuilder) TTL(ttl time.Duration) *FlowBuilder {
 }
 
 // State adds a new state transition to the FlowBuilder.
-func (fb *FlowBuilder) State(state StateName, mList ...Method) *FlowBuilder {
+func (fb *FlowBuilder) State(state StateName, mList ...Action) *FlowBuilder {
 	var transitions Transitions
 	for _, m := range mList {
-		transitions = append(transitions, Transition{Method: m})
+		transitions = append(transitions, Transition{Action: m})
 	}
 	fb.flow[state] = transitions
 	return fb
