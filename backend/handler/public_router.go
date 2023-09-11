@@ -18,10 +18,13 @@ import (
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
-
 	e.Renderer = template.NewTemplateRenderer()
-
 	e.HideBanner = true
+
+	g := e.Group("")
+	if len(cfg.Server.Public.PathPrefix) > 0 {
+		g = e.Group(cfg.Server.Public.PathPrefix)
+	}
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
@@ -75,7 +78,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
-		password := e.Group("/password")
+		password := g.Group("/password")
 		password.PUT("", passwordHandler.Set, sessionMiddleware)
 		password.POST("/login", passwordHandler.Login)
 	}
@@ -83,18 +86,18 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
 	statusHandler := NewStatusHandler(persister)
 
-	e.GET("/", statusHandler.Status)
-	e.GET("/me", userHandler.Me, sessionMiddleware)
+	g.GET("/", statusHandler.Status)
+	g.GET("/me", userHandler.Me, sessionMiddleware)
 
-	user := e.Group("/users")
+	user := g.Group("/users")
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, sessionMiddleware)
 
-	e.POST("/user", userHandler.GetUserIdByEmail)
-	e.POST("/logout", userHandler.Logout, sessionMiddleware)
+	g.POST("/user", userHandler.GetUserIdByEmail)
+	g.POST("/logout", userHandler.Logout, sessionMiddleware)
 
 	if cfg.Account.AllowDeletion {
-		e.DELETE("/user", userHandler.Delete, sessionMiddleware)
+		g.DELETE("/user", userHandler.Delete, sessionMiddleware)
 	}
 
 	healthHandler := NewHealthHandler()
@@ -124,7 +127,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create public email handler: %w", err))
 	}
 
-	webauthn := e.Group("/webauthn")
+	webauthn := g.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
@@ -138,25 +141,25 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 
-	passcode := e.Group("/passcode")
+	passcode := g.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
-	email := e.Group("/emails", sessionMiddleware)
+	email := g.Group("/emails", sessionMiddleware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
-	thirdparty := e.Group("thirdparty")
+	thirdparty := g.Group("thirdparty")
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
 	thirdparty.GET("/callback", thirdPartyHandler.Callback)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost)
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
-	e.POST("/token", tokenHandler.Validate)
+	g.POST("/token", tokenHandler.Validate)
 
 	return e
 }
