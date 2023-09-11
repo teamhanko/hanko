@@ -20,15 +20,19 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e := echo.New()
 	e.Renderer = template.NewTemplateRenderer()
 	e.HideBanner = true
-
 	g := e.Group("")
+
 	if len(cfg.Server.Public.PathPrefix) > 0 {
 		g = e.Group(cfg.Server.Public.PathPrefix)
 	}
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
-	e.Use(hankoMiddleware.GetLoggerMiddleware())
+	if cfg.Log.LogHealthAndMetrics {
+		e.Use(hankoMiddleware.GetLoggerMiddleware())
+	} else {
+		g.Use(hankoMiddleware.GetLoggerMiddleware())
+	}
 
 	exposeHeader := []string{
 		httplimit.HeaderRetryAfter,
@@ -122,7 +126,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if err != nil {
 		panic(fmt.Errorf("failed to create well-known handler: %w", err))
 	}
-	wellKnown := e.Group("/.well-known")
+	wellKnown := g.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
@@ -166,7 +170,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	g.POST("/token", tokenHandler.Validate)
 
 	sessionHandler := NewSessionHandler(cfg, sessionManager)
-	sess := e.Group("/session")
+	sess := g.Group("/session")
 	sess.GET("/exchange", sessionHandler.ExchangeRefreshToken)
 
 	return e
