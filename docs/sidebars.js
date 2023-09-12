@@ -69,10 +69,6 @@ const sidebars = {
     {
       type: "category",
       label: "Tutorials",
-      // link: {
-      //   type: "doc",
-      //   id: "guides/social/index",
-      // },
       items: [
         "guides/tutorials/php",
       ],
