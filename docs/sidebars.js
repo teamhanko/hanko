@@ -30,7 +30,7 @@ const sidebars = {
         slug: "/guides/fullstack",
         keywords: ["guides"],
       },
-      items: ["guides/next", "guides/nuxt", "guides/fresh"],
+      items: ["guides/next", "guides/nuxt", "guides/sveltekit", "guides/fresh"],
     },
     {
       type: "category",
