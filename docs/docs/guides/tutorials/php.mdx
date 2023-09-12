@@ -1,0 +1,322 @@
+---
+title: Symfony + Hanko
+sidebar_label: Symfony
+keywords: [php, symfony]
+---
+
+# Using Hanko with the Symfony Framework
+
+In this guide we are going to explain how to use Hanko with the Symfony framework for PHP. As Symfony is a full-stack framework with many abstractions for authentication management already present, we try to integrate Hanko as seamlessly as possible.
+
+## Prerequisites
+- PHP 8.1 installed and usable as cli command `php`
+- NodeJS 8.1 with NPM 9.5 installed and usable with default commands `npm` and `node`
+- Symfony CLI installed and usable with the default `symfony` command. For instructions refer to the [Symfony Docs](https://symfony.com/download)
+
+## Creating and running the Symfony application
+Use the following command to create a new symfony application from the Symfony demo template. `<demo-app-name>` is a placeholder for the name of the application (and directory in which it will be located). You can freely choose a `<demo-app-name>` that suits your needs and even describes your application best.
+
+```
+symfony new --demo <demo-app-name>
+``` 
+
+All following commands need to be run in the project directory so we move to this directory:
+
+```
+cd <demo-app-name>
+```
+
+To be able to work on the frontend parts of the project, we need to install all of its JavaScript dependencies first.
+As usual we use NPM for this job.
+
+```
+npm install
+```
+
+We can now start the Symfony development server integrated in the Symfony CLI which serves your application on a local port.
+
+```
+symfony serve
+```
+
+You can now access your demo application using the link in the commands output.
+
+## Integrating Hanko Frontend Components
+To integrate the frontend components, we need to install the `@teamhanko/hanko-elements` package using NPM.
+
+```
+npm install @teamhanko/hanko-elements --save-dev
+```
+
+Using `--save-dev` installs the package to the `devDependwncies` part of `package.json` which is what we want as a Symfony project doesn't have any runtime JavaScript and thus no runtime dependencies.
+
+As we need to set the Hanko API URL somewhere and pass it to the frontend components and backend token validation logic, we create a new entry in the projects `.env` file called `HANKO_API_URL`. E.g. like this:
+
+```
+HANKO_API_URL=https://<id>.hanko.io
+```
+
+The placeholder `<id>` would be your Hanko cloud instance ID. If you don't use Hanko cloud, the complete `HANKO_API_URL` is just the URL the Hanko server you want to use. To deploy yourself a Hanko server instance, refer to the [README](https://github.com/teamhanko/hanko) of the hanko GitHub project.
+
+As we need to access the value of our new environment variable `HANKO_API_URL` somehow inside Twig templates, we chose to create a Twig-Extension:
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FTwig%2FHankoExtension.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+As you can see, there is a `string $hankoApiUrl` parameter in the constructor function of this class. As Symfony auto-discovers  TwigExtensions and tags them correctly, our class is going to be loaded and injected into the Twig environment right away.
+Without "telling" the Symfony DI Container about the value for the `$hankoApiUrl` parameter, Symfony won't be able to instantiate our class. For service creation to work, we need to manually configure a service argument in `config/services.yaml `.
+
+```yaml
+App\Twig\HankoExtension:
+    arguments:
+        $hankoApiUrl: '%env(HANKO_API_URL)%'
+```
+
+As the Symfony Demo Application uses Stimulus controllers with the Symfony UX stimulus-bridge for the original authentication forms, we adapt the `assets/controllers/login-controller.js` to load the `hanko-auth` custom element.
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fassets%2Fcontrollers%2Flogin-controller.js&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+As you can see, the adapted `login-controller` defines the stimulus values `hankoApiUrl` and `loginPath`.
+
+Those values are provided in the `templates/security/login.html.twig` using the `stimulus_controller` Twig function.
+
+There is also a stimulus target defined in the component and marked by the `stimulus_target` Twig helper function.
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Ftemplates%2Fsecurity%2Flogin.html.twig&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+The most important part of this template is the following:
+
+```html
+<div class="row" {{ stimulus_controller('login', {
+    'hankoApiUrl': hanko_api_url(),
+    'loginPath': path('security_login')
+}) }}>
+    <div class="col-sm-8">
+        <div class="well">
+            <h2><i class="fa fa-lock" aria-hidden="true"></i> {{ 'title.login'|trans }}</h2>
+            <hanko-auth {{ stimulus_target('login', 'hankoAuth') }}></hanko-auth>
+        </div>
+    </div>
+</div>
+```
+
+From now on, a user can use the `<hanko-auth>` element to create an account or log themselves in using Hanko. Just the Symfony backend won't be able to determine that the user has logged in with hanko. So we need some backend parts.
+
+## Checking Hanko API tokens and providing a way to setup user account data during registration of a new account
+
+Leveraging the power of the Symfony Security component, we can authenticate the user with a [custom Authenticator](https://symfony.com/doc/current/security/custom_authenticator.html).
+
+The custom Authenticator for this example looks like this:
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FSecurity%2FHankoLoginAuthenticator.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+And has a dependency on three Composer packages which you need to install like this:
+
+```
+composer require lcobucci/clock strobotti/php-jwk lcobucci/jwt
+```
+
+Composer automatically adds those packages to the projects `composer.json`. The versions we used are:
+
+```json
+"lcobucci/clock": "^3.0",
+"lcobucci/jwt": "^5.0",
+"strobotti/php-jwk": "^1.4",
+```
+
+As the Authenticator needs the `$hankoApiUrl` as a constructor parameter, adding this as an argument to the Symfony Service in `services.yaml` like we already did with the `HankoExtension` above, is required:
+
+```yaml
+App\Security\HankoLoginAuthenticator:
+    arguments:
+        $hankoApiUrl: '%env(HANKO_API_URL)%'
+```
+
+For the Authenticator to be called by the framework during user authentication, it has to be configured in the `config/packages/security.yaml` as follows:
+
+```yaml
+firewalls:
+    dev:
+        pattern: ^/(_(profiler|wdt)|css|images|js)/
+        security: false
+
+    main:
+        # this firewall does not have a 'pattern' option because it applies to all URLs
+        lazy: true
+        stateless: true
+        provider: all_users
+        logout:
+            path: security_logout
+        custom_authenticators:
+            - App\Security\HankoLoginAuthenticator
+
+        entry_point: App\Security\HankoAuthenticationEntryPoint
+```
+
+You can find the full `security.yaml` [here](https://github.com/teamhanko/symfony-example/blob/main/config/packages/security.yaml).
+
+Contrary to the default, the `main` firewall has the configuration attribute `stateless: true` which indicates to the Symfony Security component: don't save the resulting authentication state to a cookie and read this cookie the next time a user wants to do something but run the Authenticator on every request and thus validate the `Hanko` cookie (containing a JWT signed by Hanko) on each request.
+
+As you can already see, we also defined a new `entry_point` for the `main` firewall. To understand why we need a custom `entry_point` we first need to understand how the custom Authenticator, we created before, works.
+
+As mentioned before, the Authenticator looks for a `Hanko` cookie inside each request and validates the contained JWT against two rules:
+- Is the JWT still valid right now (checking the `exp` and `iat` token claims)?
+- Was the JWT signed by the given Hanko instance?
+
+To validate the signature of the JWT, the Authenticator needs to load the JWKS from the corresponding Hanko endpoint, match keys and check the signature.
+
+When all of this is done and the token is valid, we extract the `sub` claim of the JWT token (containing the Hanko user id) and build a Symfony Security `Passport` which is then given to a `ChainUserProvider` called `all_users` as given in the security config here:
+
+```yaml
+providers:
+    database_users:
+        entity: { class: App\Entity\User, property: hankoSubjectId }
+
+    hanko_users:
+        id: App\Security\HankoUserProvider
+
+    all_users:
+        chain:
+            providers: ['database_users', 'hanko_users']
+```
+
+A `ChainUserProvider` calls the configured child UserProviders in the given order (first `database_users`, then `hanko_users`) to load a user object.
+
+As the `database_users` provider cannot provide a user when the user registers for the first time, the `hanko_users` provider gets called.
+
+The `hanko_users` provider has a custom service called `HankoUserProvider` associated to it, looking like this:
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FSecurity%2FHankoUserProvider.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+It creates a new `HankoUser` object using the given `$identifier` previously set from the JWTs `sub` claim in the `HankoUserProvider`.
+
+When those steps are done, there is either a `HankoUser` or a normal `User` object set in the Symfony Security module. Depending on which type of User is currently authenticated, we can decide to just show a registration form and don't allow the user to go further using a custom `entry_point` in the `main` firewall part of the `security.yaml` configuration.
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FSecurity%2FHankoAuthenticationEntryPoint.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+Additionally we need to create a new `EventSubscriber` listening on all `KernelEvents::REQUEST` events to redirect users from every other URL than the registration URL back there.
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FEventSubscriber%2FUpgradeHankoUserSubscriber.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+For the purpose of registering a new user, a new Controller method called `register` placed in the `SecurityController` of the Demo project is required looking like this:
+
+```php
+#[Route('/register', name: 'security_register', methods: ['GET', 'POST'])]
+public function register(
+    #[CurrentUser] ?UserInterface $user,
+    Request $request,
+    EntityManagerInterface $entityManager,
+    UserRepository $userRepository
+): Response {
+    // if user is not a HankoUser or does not exist, don't display the register page
+    // as only HankoUsers can be registered
+    if (!$user instanceof HankoUser) {
+        return $this->redirectToRoute('blog_index');
+    }
+
+    $this->saveTargetPath($request->getSession(), 'main', $this->generateUrl('admin_index'));
+
+    $requestData = $request->request->all();
+    if (isset($requestData['user']['email'])) {
+        $databaseUser = $userRepository->findOneByEmail($requestData['user']['email']);
+    }
+
+    if (!isset($databaseUser)) {
+        $databaseUser = new User();
+    }
+
+    $databaseUser->setHankoSubjectId($user->getUserIdentifier());
+    $userForm = $this->createForm(UserType::class, $databaseUser);
+
+    $userForm->handleRequest($request);
+
+    if ($userForm->isSubmitted() && $userForm->isValid()) {
+        $userEmail = $databaseUser->getEmail();
+        \assert(!empty($userEmail), 'User email should not be empty');
+        $databaseUser->setUsername($userEmail);
+
+        $entityManager->persist($databaseUser);
+        $entityManager->flush();
+
+        return $this->redirectToRoute('blog_index');
+    }
+
+    return $this->render('security/register.html.twig', [
+        'userForm' => $userForm,
+    ]);
+}
+```
+
+As one can see, we utilize the Symfony Forms component to create a form based on a `UserType` containing all the form fields.
+
+Symfony Forms will render and validate the form so a new databases based `User` can be created based of the users input.
+
+The Twig template for the new registration controller looks like this:
+
+```html
+<div class="row" {{ stimulus_controller('register', {
+    'hankoApiUrl': hanko_api_url()
+}) }}>
+    <div class="col-sm-5">
+        <div class="jumbotron">
+            {{ form_start(userForm) }}
+                {{ form_widget(userForm) }}
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa fa-save" aria-hidden="true"></i> {{ 'action.save'|trans }}
+                </button>
+            {{ form_end(userForm) }}
+        </div>
+    </div>
+</div>
+```
+
+Here we can also use our previously created Twig function `hanko_api_url` from the `HankoTwigExtension` to pass through the Hanko API URL to our frontend code.
+
+Utilizing another Stimulus Controller for pre-filling the email field with the users email previously typed into the Hanko registration form.
+
+```js
+export default class extends Controller {
+  static targets = ['fullName', 'email', 'username']
+  static values = {
+    hankoApiUrl: String
+  }
+
+  async connect() {
+    let { hanko } = await register(this.hankoApiUrlValue);
+    let user = await hanko.user.getCurrent();
+    let userEmail = user.email;
+
+    this.usernameTarget.value = userEmail;
+    this.emailTarget.value = userEmail;
+  }
+}
+```
+
+The Stimulus targets used by the controller displayed above aren't set using the `stimulus_`-Twig helper functions but provided in the `UserType` Form-Type.
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FForm%2FUserType.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
+
+## Modifying the User entity and removing passwords from the application
+
+As the default `User` in our Demo Application still uses passwords, we need to remove everything about those. Most importantly, we need to modify the `User` entity and the corresponding database table.
+First, we remove the `PasswordAuthenticatedUserInterface` from the `User` and als its corresponding methods like:
+- `getPassword`
+- `setPassword`
+- `getSalt`
+
+While we're at it, adding a field called `hankoSubjectId` referencing the Hanko User ID can be added to the entity and also the database table using a migration which can be created after modifying the `User` entity by running the following command:
+
+```
+php bin/console doctrine:migrations:diff
+```
+
+On the same account, the controller method `UserController::changePassword` can obviously get removed too.
+
+
+## Making logout work
+
+We also need to do some manual steps to allow users to log out of their account again. Usually the Symfony Security component automatically handles this scenario by resetting the users session. As we don't use the session based authentication system but read authentication data from the `Hanko` cookie, this cookie needs to be deleted from the users browser to log them out.
+
+For this, another `EventSUbscriber` is required:
+
+`<script src="https://emgithub.com/embed-v2.js?target=https%3A%2F%2Fgithub.com%2Fteamhanko%2Fsymfony-example%2Fblob%2Fmain%2Fsrc%2FEventSubscriber%2FLogoutHankoUserSubscriber.php&style=default&type=code&showBorder=on&showLineNumbers=on&showFileMeta=on&showFullPath=on&showCopy=on&fetchFromJsDelivr=on"></script>`
