@@ -28,11 +28,11 @@ jobs:
       matrix:
         include:
           - context: ./backend
-            image: ghcr.io/teamhanko/hanko
+            image: ghcr.io/goninaapp/hanko
           - context: ./quickstart
-            image: ghcr.io/teamhanko/hanko/quickstart
+            image: ghcr.io/goninaapp/hanko/quickstart
           - context: ./frontend
-            image: ghcr.io/teamhanko/hanko/elements
+            image: ghcr.io/goninaapp/hanko/elements
     permissions:
       contents: read
       packages: write
