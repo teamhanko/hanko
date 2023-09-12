@@ -256,7 +256,7 @@ func (s *userSuite) TestUserHandler_Get() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
@@ -296,7 +296,7 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
@@ -333,7 +333,7 @@ func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
@@ -470,7 +470,7 @@ func (s *userSuite) TestUserHandler_Me() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
@@ -507,7 +507,7 @@ func (s *userSuite) TestUserHandler_Logout() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
@@ -548,7 +548,7 @@ func (s *userSuite) TestUserHandler_Delete() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}

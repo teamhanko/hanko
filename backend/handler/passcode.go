@@ -353,22 +353,9 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			}
 		}
 
-		token, err := h.sessionManager.GenerateJWT(passcode.UserId)
+		err = h.sessionManager.GenerateCookieOrHeader(passcode.UserId, c)
 		if err != nil {
-			return fmt.Errorf("failed to generate jwt: %w", err)
-		}
-
-		cookie, err := h.sessionManager.GenerateCookie(token)
-		if err != nil {
-			return fmt.Errorf("failed to create session token: %w", err)
-		}
-
-		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
-
-		if h.cfg.Session.EnableAuthTokenHeader {
-			c.Response().Header().Set("X-Auth-Token", token)
-		} else {
-			c.SetCookie(cookie)
+			return fmt.Errorf("failed to generate cookie or header: %w", err)
 		}
 
 		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)

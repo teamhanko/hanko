@@ -101,22 +101,9 @@ func (h *UserHandler) Create(c echo.Context) error {
 				return fmt.Errorf("failed to store primary email: %w", err)
 			}
 
-			token, err := h.sessionManager.GenerateJWT(newUser.ID)
+			err = h.sessionManager.GenerateCookieOrHeader(newUser.ID, c)
 			if err != nil {
-				return fmt.Errorf("failed to generate jwt: %w", err)
-			}
-
-			cookie, err := h.sessionManager.GenerateCookie(token)
-			if err != nil {
-				return fmt.Errorf("failed to create session token: %w", err)
-			}
-
-			c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
-
-			if h.cfg.Session.EnableAuthTokenHeader {
-				c.Response().Header().Set("X-Auth-Token", token)
-			} else {
-				c.SetCookie(cookie)
+				return fmt.Errorf("failed to generate cookie or header: %w", err)
 			}
 		}
 
@@ -256,12 +243,10 @@ func (h *UserHandler) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to write audit log: %w", err)
 		}
 
-		cookie, err := h.sessionManager.DeleteCookie()
+		err = h.sessionManager.DeleteCookie(c)
 		if err != nil {
 			return fmt.Errorf("failed to create session token: %w", err)
 		}
-
-		c.SetCookie(cookie)
 
 		return c.NoContent(http.StatusNoContent)
 	})
@@ -285,12 +270,10 @@ func (h *UserHandler) Logout(c echo.Context) error {
 		return fmt.Errorf("failed to write audit log: %w", err)
 	}
 
-	cookie, err := h.sessionManager.DeleteCookie()
+	err = h.sessionManager.DeleteCookie(c)
 	if err != nil {
 		return fmt.Errorf("failed to create session token: %w", err)
 	}
-
-	c.SetCookie(cookie)
 
 	return c.NoContent(http.StatusNoContent)
 }

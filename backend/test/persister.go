@@ -6,7 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog, emails []models.Email, primaryEmails []models.PrimaryEmail, identities []models.Identity, tokens []models.Token) persistence.Persister {
+func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog, emails []models.Email, primaryEmails []models.PrimaryEmail, identities []models.Identity, tokens []models.Token, sessions []models.Session) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
@@ -19,6 +19,7 @@ func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models
 		primaryEmailPersister:        NewPrimaryEmailPersister(primaryEmails),
 		identityPersister:            NewIdentityPersister(identities),
 		tokenPersister:               NewTokenPersister(tokens),
+		sessionPersister:             NewSessionPersister(sessions),
 	}
 }
 
@@ -34,6 +35,7 @@ type persister struct {
 	primaryEmailPersister        persistence.PrimaryEmailPersister
 	identityPersister            persistence.IdentityPersister
 	tokenPersister               persistence.TokenPersister
+	sessionPersister             persistence.SessionPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -131,4 +133,12 @@ func (p *persister) GetTokenPersister() persistence.TokenPersister {
 
 func (p *persister) GetTokenPersisterWithConnection(tx *pop.Connection) persistence.TokenPersister {
 	return p.tokenPersister
+}
+
+func (p *persister) GetSessionPersister() persistence.SessionPersister {
+	return p.sessionPersister
+}
+
+func (p *persister) GetSessionPersisterWithConnection(tx *pop.Connection) persistence.SessionPersister {
+	return p.sessionPersister
 }

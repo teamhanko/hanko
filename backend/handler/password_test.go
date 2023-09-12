@@ -199,7 +199,7 @@ func (s *passwordSuite) TestPasswordHandler_Login() {
 func (s *passwordSuite) GetDefaultSessionManager() session.Manager {
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	s.Require().NoError(err)
 
 	return sessionManager

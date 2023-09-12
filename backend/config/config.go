@@ -240,8 +240,9 @@ func (c *Cookie) GetName() string {
 type ServerSettings struct {
 	// The Address to listen on in the form of host:port
 	// See net.Dial for details of the address format.
-	Address string `yaml:"address" json:"address,omitempty" koanf:"address"`
-	Cors    Cors   `yaml:"cors" json:"cors,omitempty" koanf:"cors"`
+	Address    string `yaml:"address" json:"address,omitempty" koanf:"address"`
+	PathPrefix string `yaml:"path_prefix" json:"path_prefix,omitempty" koanf:"path_prefix" split_words:"true"`
+	Cors       Cors   `yaml:"cors" json:"cors,omitempty" koanf:"cors"`
 }
 
 type Cors struct {
@@ -416,6 +417,9 @@ type Session struct {
 
 	// Issuer optional string to be used in the jwt iss claim.
 	Issuer string `yaml:"issuer" json:"issuer,omitempty" koanf:"issuer"`
+
+	// EnableRefreshToken optional bool to enable refresh tokens. If set to true, refresh tokens will be issued.
+	EnableRefreshToken bool `yaml:"enable_refresh_token" json:"enable_refresh_token,omitempty" koanf:"enable_refresh_token" split_words:"true" jsonschema:"default=false"`
 
 	// Audience optional []string containing strings which get put into the aud claim. If not set default to Webauthn.RelyingParty.Id config parameter.
 	Audience []string `yaml:"audience" json:"audience,omitempty" koanf:"audience"`

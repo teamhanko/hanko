@@ -2,11 +2,13 @@ package session
 
 import (
 	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/test"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -14,7 +16,7 @@ import (
 func TestNewGenerator(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 }
@@ -22,7 +24,7 @@ func TestNewGenerator(t *testing.T) {
 func TestGenerator_Generate(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -40,7 +42,7 @@ func TestGenerator_Verify(t *testing.T) {
 	cfg := config.Config{
 		Session: config.Session{Lifespan: sessionLifespan},
 	}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -75,7 +77,7 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 			},
 		},
 	}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -106,7 +108,7 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 			},
 		},
 	}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -126,7 +128,7 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
@@ -156,12 +158,78 @@ func TestGenerator_Verify_Error(t *testing.T) {
 func TestGenerator_DeleteCookie(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
-	sessionGenerator, err := NewManager(&manager, cfg)
+	sessionGenerator, err := NewManager(&manager, cfg, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, sessionGenerator)
 
-	cookie, err := sessionGenerator.DeleteCookie()
+	e := echo.New()
+	rec := httptest.NewRecorder()
+	c := e.NewContext(nil, rec)
+
+	err = sessionGenerator.DeleteCookie(c)
 	assert.NoError(t, err)
+
+	cookie := rec.Result().Cookies()[0]
 	assert.Equal(t, -1, cookie.MaxAge)
 	assert.Equal(t, "hanko", cookie.Name)
+}
+
+func TestGenerator_RefreshToken(t *testing.T) {
+	manager := test.JwkManager{}
+	cfg := config.Config{
+		Session: config.Session{
+			EnableRefreshToken: true,
+		},
+	}
+	persister := test.NewSessionPersister(nil)
+
+	sessionGenerator, err := NewManager(&manager, cfg, persister)
+	assert.NoError(t, err)
+	require.NotEmpty(t, sessionGenerator)
+
+	e := echo.New()
+	rec := httptest.NewRecorder()
+	c := e.NewContext(nil, rec)
+
+	uid, err := uuid.NewV4()
+	assert.NoError(t, err)
+
+	err = sessionGenerator.GenerateCookieOrHeader(uid, c)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(rec.Result().Cookies()))
+
+	cookie := rec.Result().Cookies()[0]
+	assert.Equal(t, "hanko", cookie.Name)
+	assert.Equal(t, "/", cookie.Path)
+
+	refreshCookie := rec.Result().Cookies()[1]
+	refreshToken := refreshCookie.Value
+	assert.Equal(t, "hanko-refresh", refreshCookie.Name)
+	assert.Equal(t, "/session/exchange", refreshCookie.Path)
+
+	// Next try to exchange the refresh token for a new session token
+	rec = httptest.NewRecorder()
+	c = e.NewContext(nil, rec)
+
+	err = sessionGenerator.ExchangeRefreshToken(refreshCookie.Value, c)
+	assert.NoError(t, err)
+	assert.Equal(t, 2, len(rec.Result().Cookies()))
+
+	cookie = rec.Result().Cookies()[0]
+	assert.Equal(t, "hanko", cookie.Name)
+	assert.Equal(t, "/", cookie.Path)
+	// assert.NotEqual(t, token, cookie.Value) --> Cannot be checked as the time between the two calls is too short and the JWT will be the same
+
+	refreshCookie = rec.Result().Cookies()[1]
+	assert.Equal(t, "hanko-refresh", refreshCookie.Name)
+	assert.Equal(t, "/session/exchange", refreshCookie.Path)
+	assert.NotEqual(t, refreshToken, refreshCookie.Value)
+
+	// It should not be possible to exchange the old refresh token again
+	rec = httptest.NewRecorder()
+	c = e.NewContext(nil, rec)
+
+	err = sessionGenerator.ExchangeRefreshToken(refreshToken, c)
+	assert.Error(t, err)
+	assert.Equal(t, 0, len(rec.Result().Cookies()))
 }

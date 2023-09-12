@@ -82,22 +82,9 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			return fmt.Errorf("failed to delete token from db: %w", terr)
 		}
 
-		jwtToken, err := h.sessionManager.GenerateJWT(token.UserID)
+		err := h.sessionManager.GenerateCookieOrHeader(token.UserID, c)
 		if err != nil {
-			return fmt.Errorf("failed to generate jwt: %w", err)
-		}
-
-		cookie, err := h.sessionManager.GenerateCookie(jwtToken)
-		if err != nil {
-			return fmt.Errorf("failed to create session token: %w", err)
-		}
-
-		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
-
-		if h.cfg.Session.EnableAuthTokenHeader {
-			c.Response().Header().Set("X-Auth-Token", jwtToken)
-		} else {
-			c.SetCookie(cookie)
+			return fmt.Errorf("failed to generate cookie or header: %w", err)
 		}
 
 		userID = token.UserID

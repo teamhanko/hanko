@@ -43,7 +43,7 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 	jwkMngr, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
 
-	sessionMngr, err := session.NewManager(jwkMngr, *cfg)
+	sessionMngr, err := session.NewManager(jwkMngr, *cfg, s.Storage.GetSessionPersister())
 	s.Require().NoError(err)
 
 	handler := NewThirdPartyHandler(cfg, s.Storage, sessionMngr, auditLogger)

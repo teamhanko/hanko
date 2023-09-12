@@ -39,6 +39,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
 
+	if cfg.Session.EnableRefreshToken && cfg.Session.EnableAuthTokenHeader {
+		exposeHeader = append(exposeHeader, "X-Refresh-Token")
+	}
+
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
 		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
@@ -58,7 +62,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
+	sessionManager, err := session.NewManager(jwkManager, *cfg, persister.GetSessionPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
@@ -157,6 +161,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	e.POST("/token", tokenHandler.Validate)
+
+	sessionHandler := NewSessionHandler(cfg, sessionManager)
+	sess := e.Group("/session")
+	sess.GET("/exchange", sessionHandler.ExchangeRefreshToken)
 
 	return e
 }

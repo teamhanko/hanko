@@ -322,7 +322,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_TokenInHeader
 func (s *webauthnSuite) GetDefaultSessionManager() session.Manager {
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
+	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig, s.Storage.GetSessionPersister())
 	s.Require().NoError(err)
 
 	return sessionManager
@@ -366,15 +366,37 @@ func (s sessionManager) GenerateCookie(token string) (*http.Cookie, error) {
 	}, nil
 }
 
-func (s sessionManager) DeleteCookie() (*http.Cookie, error) {
-	return &http.Cookie{
+func (s sessionManager) GenerateCookieOrHeader(userId uuid.UUID, c echo.Context) error {
+	token, err := s.GenerateJWT(userId)
+	if err != nil {
+		return err
+	}
+
+	cookie, err := s.GenerateCookie(token)
+	if err != nil {
+		return err
+	}
+
+	c.SetCookie(cookie)
+	return nil
+}
+
+func (s sessionManager) ExchangeRefreshToken(id string, c echo.Context) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s sessionManager) DeleteCookie(c echo.Context) error {
+	c.SetCookie(&http.Cookie{
 		Name:     "hanko",
 		Value:    "",
 		Secure:   true,
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		MaxAge:   -1,
-	}, nil
+	})
+
+	return nil
 }
 
 func (s sessionManager) Verify(token string) (jwt.Token, error) {

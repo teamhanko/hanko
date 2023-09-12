@@ -1,0 +1,4 @@
+create_table("sessions") {
+	t.Column("id", "string")
+	t.Column("user_id", "uuid", { "null": true })
+}
