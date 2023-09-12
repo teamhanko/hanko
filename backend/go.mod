@@ -16,7 +16,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.8.9
 	github.com/h2non/gock v1.2.0
-	github.com/invopop/jsonschema v0.7.0
+	github.com/invopop/jsonschema v0.8.0
 	github.com/jackc/pgconn v1.14.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/knadh/koanf v1.5.0
