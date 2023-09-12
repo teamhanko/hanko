@@ -240,8 +240,9 @@ func (c *Cookie) GetName() string {
 type ServerSettings struct {
 	// The Address to listen on in the form of host:port
 	// See net.Dial for details of the address format.
-	Address string `yaml:"address" json:"address,omitempty" koanf:"address"`
-	Cors    Cors   `yaml:"cors" json:"cors,omitempty" koanf:"cors"`
+	Address    string `yaml:"address" json:"address,omitempty" koanf:"address"`
+	PathPrefix string `yaml:"path_prefix" json:"path_prefix,omitempty" koanf:"path_prefix" split_words:"true"`
+	Cors       Cors   `yaml:"cors" json:"cors,omitempty" koanf:"cors"`
 }
 
 type Cors struct {
