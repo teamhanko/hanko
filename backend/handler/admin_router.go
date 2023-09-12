@@ -15,7 +15,11 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	e := echo.New()
 	e.Renderer = template.NewTemplateRenderer()
 	e.HideBanner = true
+
 	g := e.Group("")
+	if len(cfg.Server.Admin.PathPrefix) > 0 {
+		g = e.Group(cfg.Server.Admin.PathPrefix)
+	}
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
