@@ -37,6 +37,7 @@ import LoginPasswordPage from "./LoginPasswordPage";
 import RegisterPasskeyPage from "./RegisterPasskeyPage";
 import RegisterPasswordPage from "./RegisterPasswordPage";
 import ErrorPage from "./ErrorPage";
+import AccountNotFoundPage from "./AccountNotFoundPage";
 
 interface Props {
   emailAddress?: string;
@@ -59,7 +60,7 @@ const LoginEmailPage = (props: Props) => {
   } = useContext(AppContext);
 
   const [emailAddress, setEmailAddress] = useState<string>(
-    props.emailAddress || prefilledEmail
+    props.emailAddress || prefilledEmail || ""
   );
   const [isPasskeyLoginLoading, setIsPasskeyLoginLoading] = useState<boolean>();
   const [isPasskeyLoginSuccess, setIsPasskeyLoginSuccess] = useState<boolean>();
@@ -199,6 +200,15 @@ const LoginEmailPage = (props: Props) => {
     ]
   );
 
+  const renderAccountNotFound = useCallback(
+    () => setPage(<AccountNotFoundPage emailAddress={emailAddress} onBack={onBackHandler}/>), 
+    [ 
+      emailAddress, 
+      onBackHandler, 
+      setPage
+    ]
+  );
+
   const loginWithEmailAndWebAuthn = () => {
     let _userInfo: UserInfo;
     let _webauthnFinalizedResponse: WebauthnFinalized;
@@ -237,7 +247,13 @@ const LoginEmailPage = (props: Props) => {
       })
       .catch((e) => {
         if (e instanceof NotFoundError) {
-          renderRegistrationConfirm();
+          
+          if (config.account.allow_signup) {
+            renderRegistrationConfirm();
+            return;
+          }
+          
+          renderAccountNotFound();
           return;
         }
 
@@ -387,12 +403,17 @@ const LoginEmailPage = (props: Props) => {
   }, [hanko, setPage, isThirdPartyLoginLoading]);
 
   useEffect(() => {
-    setEmailAddress(prefilledEmail);
+    if (emailAddress.length === 0 && prefilledEmail !== undefined) {
+      setEmailAddress(prefilledEmail);
+    }
+    // The dependency array is missing the emailAddress parameter intentionally because if it is not missing the email
+    // would always be reset to the prefilledEmail when the input is empty
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [prefilledEmail]);
 
   return (
     <Content>
-      <Headline1>{t("headlines.loginEmail")}</Headline1>
+      <Headline1>{config.account.allow_signup ? t("headlines.loginEmail") : t("headlines.loginEmailNoSignup")}</Headline1>
       <ErrorMessage error={error} />
       <Form onSubmit={onEmailSubmit}>
         <Input

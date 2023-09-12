@@ -46,6 +46,10 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					vErrs[i] = fmt.Sprintf("%s must be a valid uuid4", err.Field())
 				case "url":
 					vErrs[i] = fmt.Sprintf("%s must be a valid URL", err.Field())
+				case "gte":
+					vErrs[i] = fmt.Sprintf("length of %s must be greater or equal to %v", err.Field(), err.Param())
+				case "unique":
+					vErrs[i] = fmt.Sprintf("%s entries are not unique", err.Field())
 				default:
 					vErrs[i] = fmt.Sprintf("something wrong on %s; %s", err.Field(), err.Tag())
 				}

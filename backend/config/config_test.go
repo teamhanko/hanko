@@ -15,6 +15,12 @@ func TestDefaultConfigNotEnoughForValidation(t *testing.T) {
 	}
 }
 
+func TestDefaultConfigAccountParameters(t *testing.T) {
+	cfg := DefaultConfig()
+	assert.Equal(t, cfg.Account.AllowDeletion, false)
+	assert.Equal(t, cfg.Account.AllowSignup, true)
+}
+
 func TestParseValidConfig(t *testing.T) {
 	configPath := "./config.yaml"
 	cfg, err := Load(&configPath)

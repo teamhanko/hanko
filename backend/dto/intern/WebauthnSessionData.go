@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"time"
@@ -27,6 +28,7 @@ func WebauthnSessionDataFromModel(data *models.WebauthnSessionData) *webauthn.Se
 		UserID:               userId,
 		AllowedCredentialIDs: allowedCredentials,
 		UserVerification:     protocol.UserVerificationRequirement(data.UserVerification),
+		Expires:              data.ExpiresAt.Time,
 	}
 }
 
@@ -58,5 +60,6 @@ func WebauthnSessionDataToModel(data *webauthn.SessionData, operation models.Ope
 		UpdatedAt:          now,
 		Operation:          operation,
 		AllowedCredentials: allowedCredentials,
+		ExpiresAt:          nulls.NewTime(data.Expires),
 	}
 }

@@ -38,6 +38,10 @@ type UserCreateBody struct {
 }
 
 func (h *UserHandler) Create(c echo.Context) error {
+	if !h.cfg.Account.AllowSignup {
+		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("account signup is disabled"))
+	}
+
 	var body UserCreateBody
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return dto.ToHttpError(err)
@@ -107,11 +111,12 @@ func (h *UserHandler) Create(c echo.Context) error {
 				return fmt.Errorf("failed to create session token: %w", err)
 			}
 
-			c.SetCookie(cookie)
 			c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 			if h.cfg.Session.EnableAuthTokenHeader {
 				c.Response().Header().Set("X-Auth-Token", token)
+			} else {
+				c.SetCookie(cookie)
 			}
 		}
 

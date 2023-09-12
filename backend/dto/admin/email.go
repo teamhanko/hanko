@@ -26,3 +26,9 @@ func FromEmailModel(email *models.Email) *Email {
 		UpdatedAt:  email.UpdatedAt,
 	}
 }
+
+type CreateEmail struct {
+	Address    string `json:"address" validate:"required,email"`
+	IsPrimary  bool   `json:"is_primary"`
+	IsVerified bool   `json:"is_verified"`
+}
