@@ -66,6 +66,13 @@ const sidebars = {
         "guides/social/google",
       ],
     },
+    {
+      type: "category",
+      label: "Tutorials",
+      items: [
+        "guides/tutorials/php",
+      ],
+    },
   ],
 };
 
