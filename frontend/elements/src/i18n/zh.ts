@@ -4,6 +4,7 @@ export const zh: Translation = {
   headlines: {
     error: "发生错误",
     loginEmail: "登录或注册",
+    loginEmailNoSignup: "登录",
     loginFinished: "登录成功",
     loginPasscode: "输入验证码",
     loginPassword: "输入密码",
@@ -24,6 +25,7 @@ export const zh: Translation = {
     createdAt: "创建于",
     connectedAccounts: "连接的账户",
     deleteAccount: "删除帐户",
+    accountNotFound: "未找到帐户",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -50,6 +52,7 @@ export const zh: Translation = {
     deletePasskey:
       "从您的账户中删除此密钥。请注意，密钥将继续存在于您的设备上，也需要在那里被删除。",
     deleteAccount: "您确定要删除此账号吗？所有数据将立即被删除，且无法恢复。",
+    noAccountExists: '没有账户"{emailAddress}"。',
   },
   labels: {
     or: "或",
