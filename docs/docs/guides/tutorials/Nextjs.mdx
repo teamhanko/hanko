@@ -97,7 +97,6 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ℹ️ For more information about Prisma integration click [here](https://www.prisma.io/docs/getting-started).
 
 
-
 ## Building the user interface 
 The goal is to build a simple "todo app" with a nice login to protect the todos, for this we will only need two pages:
 * The login page where the Hanko-auth component will play its part in handling authentication.
@@ -263,7 +262,7 @@ export async function POST(req: Request) {
 }
 ```
 
-Since everything on Next.js 13 runs in the server, we can now call Prisma from the `todo/page.tsx` file to get all our todos, then we pass them to our `components/todos/TodoItem.tsx` file to be displayed. This is how the `todo/page.tsx` should look after our changes: 
+By default, Next.js uses Server Components, thanks to that we can now call Prisma from the `todo/page.tsx` file to get all our todos, then we pass them to our `components/todos/TodoItem.tsx` file to be displayed. This is how the `todo/page.tsx` should look after our changes: 
 
 ```javascript
 import { NewTodo } from "@/components/todos/NewTodo";
@@ -649,7 +648,6 @@ export default function Login() {
 }
 
 ```
-
 
 ## Time to display the right Todos 🪄✨
 Lastly, we should only display the todos for the user that is logged in. To do so, we need to link the todos to the correct "user ID". The first step is to update the Todo model in the `prisma schema`:
