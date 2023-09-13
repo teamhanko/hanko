@@ -98,7 +98,7 @@ If you don't have a certificate, you can use the following command to generate o
 openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 3650 -nodes
 ```
 
-The Above command will create two files in the current directory `key.pem` and `cert.pem`, you need to upload `cert.pem` to azure which is the public key here.
+The above command will create two files in the current directory, `key.pem` and `cert.pem`. You need to upload `cert.pem`, which represents the public key, to Azure.
 The contents of `key.pem` should be used as `client_secret` in configuration step.
 :::info
 
