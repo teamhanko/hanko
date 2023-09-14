@@ -1,37 +1,49 @@
+---
+title: Next.js and Hanko Tutorial
+sidebar_label: Next.js
+keywords: [next, next.js]
+sidebar_custom_props:
+  docCardIconName: nextjs-dark
+---
+
 # Using Hanko for a Todo app with Next.js 13 and Prisma
 
 In this tutorial, you’ll learn how to build a Todo app with the Next.js 13 popular “App Router” structure and understand some of the most important changes that come with it. We will build a fully functional todo app, handling the creation, updating when completed and the option to delete the todos.
 
-## Let’s set it up 
-At Hanko, we understand that finding the right stack for the project is a big step. In this guide, we will bring Next.js as the main character of the project, we will test  the Client vs Server Components. For the style, we will use Tailwind CSS. We will use Hanko for the login and registration, user management and logout. Prisma will handle the storage.
+## Let’s set it up
+
+At Hanko, we understand that finding the right stack for the project is a big step. In this guide, we will bring Next.js as the main character of the project, we will test the Client vs Server Components. For the style, we will use Tailwind CSS. We will use Hanko for the login and registration, user management and logout. Prisma will handle the storage.
 
 ### Initiliaze the next app
-To create a new Next.js app, we can use the `create-next-app` or `create-next-app@latest` command-line tool followed by the name of your choice for the app. Open your terminal in Visual Studio Code and run the following command: 
+
+To create a new Next.js app, we can use the `create-next-app` or `create-next-app@latest` command-line tool followed by the name of your choice for the app. Open your terminal in Visual Studio Code and run the following command:
 
 ```
- npx  create-next-app@latest todo-nextjs-hanko 
+ npx  create-next-app@latest todo-nextjs-hanko
 ```
 
-Then you’ll  be asked some prompts on what you will use for the app. The project configuration options should look something like this:
+Then you’ll be asked some prompts on what you will use for the app. The project configuration options should look something like this:
 
-![Pre-config Next.js prompts](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/8djxl7jl42xl90wpps1b.png)
+![Pre-config Next.js prompts](/img/next-tutorial/next-config.png)
 
 The above choices will create a new Next.js app with the chosen name, all the required dependencies for this project will also be installed.
 
 #### Understanding the project structure
-When using the version 13 of  Next.js, we have the option to work with the App Router directory instead of the Pages Router, for a quick summary  we could say that:
 
-* The new directory named “app” is replacing “pages”
-* “page.tsx|page.jsx” is the new “index.tsx|index.jsx” 
-* “layout.tsx” is the new “_app.tsx”
-* Everything is a Server Component unless you make it a Client Component using the “use client” directive at the top of the file.
-* API Routes are now Server Components or Route Handlers (... More info on how this is  very important)
+When using the version 13 of Next.js, we have the option to work with the App Router directory instead of the Pages Router, for a quick summary we could say that:
+
+- The new directory named “app” is replacing “pages”
+- “page.tsx|page.jsx” is the new “index.tsx|index.jsx”
+- “layout.tsx” is the new “\_app.tsx”
+- Everything is a Server Component unless you make it a Client Component using the “use client” directive at the top of the file.
+- API Routes are now Server Components or Route Handlers (... More info on how this is very important)
 
 Remove unnecessary files, such as logos, icons, etc. If you are going to use Tailwind CSS make sure to bring your desired configuration to the `tailwind.config.ts` file, defining your color palette, fonts, breakpoints, ect.
 
 ℹ️ For more information about the App Router of Next.js click [here](https://nextjs.org/docs).
 
-### Get Prisma started
+### Setting up Prisma
+
 Install the Prisma CLI as a development dependency in the project:
 
 ```
@@ -44,6 +56,7 @@ Set up Prisma with the init command of the Prisma CLI:
 $ npx prisma init --datasource-provider sqlite
 
 ```
+
 This creates a new `prisma` directory with your Prisma schema file and configures SQLite as your database. Once we also create the "Todo" model, the Prisma schema file should look like this:
 
 ```
@@ -60,7 +73,7 @@ datasource db {
 }
 
 model Todo {
-  
+
  id String @id @default(uuid())
   title String
   complete Boolean
@@ -68,11 +81,13 @@ model Todo {
   updatedAt DateTime @updatedAt
 }
 ```
+
 At this point, you have a Prisma schema but no database yet. Run the following command in your terminal to create the SQLite database and the Todo table:
 
 ```
  $ npx prisma migrate dev --name init
 ```
+
 This command did two things:
 
 1. It creates a new SQL migration file for this migration in the `prisma/migrations` directory.
@@ -80,9 +95,9 @@ This command did two things:
 
 Because the SQLite database file didn't exist before, the command also created it inside the `prisma` directory with the name `dev.db` as defined via the environment variable in the `.env` file.
 
-To prevent problems when instantiating PrismaClient, on the Prisma Docs there’s a [section](https://www.prisma.io/docs/guides/other/troubleshooting-orm/help-articles/nextjs-prisma-client-dev-practices) dedicated to the best practice to do it. Let’s try it by creating a `db.ts` file in the root of the app and add the following code inside: 
+To prevent problems when instantiating PrismaClient, on the Prisma Docs there’s a [section](https://www.prisma.io/docs/guides/other/troubleshooting-orm/help-articles/nextjs-prisma-client-dev-practices) dedicated to the best practice to do it. Let’s try it by creating a `db.ts` file in the root of the app and add the following code inside:
 
-```javascript
+```js
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
@@ -94,35 +109,39 @@ export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 
 ```
+
 ℹ️ For more information about Prisma integration click [here](https://www.prisma.io/docs/getting-started).
 
+## Building the user interface
 
-## Building the user interface 
 The goal is to build a simple "todo app" with a nice login to protect the todos, for this we will only need two pages:
-* The login page where the Hanko-auth component will play its part in handling authentication.
-* The todo page where all the todos will be displayed. 
 
-### App structure 
+- The login page where the Hanko-auth component will play its part in handling authentication.
+- The todo page where all the todos will be displayed.
+
+### App structure
+
 In the App Router directory, the `page.tsx` is like the new `index.tsx`, which means that this name will play an important role when creating a new route. You can define a page by exporting a component from a `page.tsx` file.
 
 Now you can update the `page.tsx` file to display "Hello World" as done below.
 
-```javascript
- export default function Home() {
-return (
-<div> 
-   <p>Hello World</p>
-</div>
-);
+```js
+export default function Home() {
+  return (
+    <div>
+      <p>Hello World</p>
+    </div>
+  );
 }
 ```
 
- We will get back to it later to add a nice login with Hanko.
+We will get back to it later to add a nice login with Hanko.
 
-### The Todo page 
+### The Todo page
+
 We will style this page using Tailwind CSS classes to create a centered container to display the todos. we need a form with an input to create the new todos, and every todo element will have a checkbox and a delete button. Inside the `app` directory, create a new `todo` folder with a `page.tsx` file inside of it. Use the code below as the `todo/page.tsx` contents:
 
-```javascript
+```js
 export default function Todo() {
   return (
     <main className=" flex min-h-screen justify-center items-center bg-slate-50 ">
@@ -138,9 +157,7 @@ export default function Todo() {
               required
             />
             <button className="  bg-slate-50 rounded-full p-1 border border-slate-400 text-slate-400 hover:text-slate-500 text-base hover:ring-0 hover:ring-slate-100 hover:border-slate-500">
-              <p className=" text-center">
-             +
-              </p>
+              <p className=" text-center">+</p>
             </button>
           </form>
         </div>
@@ -168,16 +185,16 @@ export default function Todo() {
     </main>
   );
 }
-
 ```
 
 ℹ️ For a better understanding of the Tailwind CSS classes click [here](https://tailwindcomponents.com/cheatsheet/).
 
+## Todos in the making
 
-## Todos in the making 
-To make our app functional, we need to be able to create a new todo, then check the todo once it’s completed and finally be able to remove a single todo from the list. 
+To make our app functional, we need to be able to create a new todo, then check the todo once it’s completed and finally be able to remove a single todo from the list.
 
 ### API Routes in Next.js 13
+
 What we know as API Routes are replaced by Route Handlers and they are defined in a `route.ts|js` file inside the `app` directory. Read more about the Route Handlers in the [Next.js Docs](https://nextjs.org/docs/app/building-your-application/routing/route-handlers).
 
 Inside the `app` directory create an `api` folder. We will group our Route Handlers as follows: one directory `todo` with a `route.tsx` which will contain the `POST` HTTP method handler for creating a new todo, and in that same directory we will use a dynamic route to `GET` and `DELETE` todos. Should look like the following example:
@@ -191,9 +208,10 @@ api
 ```
 
 ### New Todo
+
 This is a good moment to start breaking it down into components, let’s first create a `components` folder at the root directory, then create a `components/todos/NewTodo.tsx` file and use the following as its contents:
- 
-```javascript
+
+```js
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -239,15 +257,14 @@ export const NewTodo = () => {
       </form>
     </div>
   );
-}
-
+};
 ```
 
-This is a good example of where to use the "use client" directive since we are using `useState()` and subscribing to interactive events. 
+This is a good example of where to use the "use client" directive since we are using `useState()` and subscribing to interactive events.
 
 This is how we call Prisma to create the todo inside the `api/todo/route.ts` Route Handler:
 
-```javascript
+```js
 import { NextResponse } from "next/server";
 import { prisma } from "@/db";
 
@@ -262,9 +279,9 @@ export async function POST(req: Request) {
 }
 ```
 
-By default, Next.js uses Server Components, thanks to that we can now call Prisma from the `todo/page.tsx` file to get all our todos, then we pass them to our `components/todos/TodoItem.tsx` file to be displayed. This is how the `todo/page.tsx` should look after our changes: 
+By default, Next.js uses Server Components, thanks to that we can now call Prisma from the `todo/page.tsx` file to get all our todos, then we pass them to our `components/todos/TodoItem.tsx` file to be displayed. This is how the `todo/page.tsx` should look after our changes:
 
-```javascript
+```js
 import { NewTodo } from "@/components/todos/NewTodo";
 import { TodoItem } from "@/components/todos/TodoItem";
 import { prisma } from "@/db";
@@ -278,19 +295,21 @@ export default async function Todo() {
         <h1 className="text-3xl text-center">My to dos</h1>
         <NewTodo />
         <ul className="px-6">
-        <TodoItem  todos={todos} />
+          <TodoItem todos={todos} />
         </ul>
       </div>
     </main>
   );
 }
 ```
+
 🚨 Client Components themselves cannot be async functions ([official FAQ](https://nextjs.org/docs/messages/no-async-client-component)). Prisma will break the app if you try to call it inside a Client Component.
 
-### Update and Delete todo by ID 
+### Update and Delete todo by ID
+
 In the next step, we need a way to handle marking a todo as completed and to handle the deletion of a todo. Accordingly, we create `update` and `delete` functions that fetch our dynamic route. This would be the `components/todos/TodoItem.tsx` file:
 
-```javascript
+```js
 "use client";
 import { useRouter } from "next/navigation";
 import { Todo } from "@prisma/client";
@@ -359,7 +378,7 @@ export const TodoItem = ({ todos }: { todos: Todo[] }) => {
 
 Add the following code inside the `api/todo/[id]/route.tsx` Route Handler:
 
-```javascript
+```js
 import { NextResponse } from "next/server";
 import { prisma } from "@/db";
 
@@ -394,34 +413,37 @@ export async function DELETE(req: Request) {
 
 ℹ️ For more information on the Prisma Client Api click [here](https://www.prisma.io/docs/reference/api-reference/prisma-client-reference).
 
-
 ## Authentication by Hanko
-Now is time to start working on the security.
- 
-### Hanko Cloud setup 
-Visit [Hanko Cloud](https://cloud.hanko.io/login) and create an account. Then create an organization to manage your Hanko project. 
 
-![Create a Hanko Organization](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/x8vho8qsrbkkthn6602t.png)
+Now is time to start working on the security.
+
+### Hanko Cloud setup
+
+Visit [Hanko Cloud](https://cloud.hanko.io/login) and create an account. Then create an organization to manage your Hanko project.
+
+![Hanko Cloud Organization](/img/next-tutorial/cloud-organization.png)
 
 Then create a new project and set the App URL to your development URL (example: http://localhost:3000):
 
-![Hanko Cloud Project](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/hgfioy9p3wet6t5fe7sn.png)
+![Hanko Cloud Project](/img/next-tutorial/new-project.png)
 
 And that’s all! Now you can always return to your Hanko Cloud dashboard to see your API URL and other insights about your project, you can also change the app URL in the settings, so that once you want to move from "development" to "production", you can change it to a proper domain/URL. Take the time to discover all the features.
 
-![Hanko Cloud dashboard](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/jvan097duorvng3c1my0.png)
+![Hanko Cloud dashboard](/img/next-tutorial/dashboard.png)
 
 ### Adding Hanko to the Next.js app
-Let’s bring Hanko to the game by installing the package running the code below: 
+
+Let’s bring Hanko to the game by installing the package running the code below:
 
 ```
 npm install @teamhanko/hanko-elements
 ```
+
 First, let’s update our "Home" page and rename the function to "Login". Import the register function from `@teamhanko/hanko-elements`, and call the function with the Hanko API URL as an argument to register the `<hanko-auth>`. Now include it in your JSX:
 
-```javascript
+```js
 "use client";
-import { useEffect} from "react";
+import { useEffect } from "react";
 import { register } from "@teamhanko/hanko-elements";
 
 const hankoApi = "YOUR_HANKO_API_URL";
@@ -440,13 +462,14 @@ export default function Login() {
   );
 }
 ```
+
 The code snippet above should display the Hanko authentication component:
 
-![Hanko Authentication component](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/ma10mk3z4sk7h925v03t.png)
+![Hanko Authentication component](/img/next-tutorial/hanko-auth.png)
 
- The `<hanko-profile>` component offers a page for managing email addresses and passkeys. Let's create a profile button component by creating a file `components/Profile.tsx` and use the following code as its content:
+The `<hanko-profile>` component offers a page for managing email addresses and passkeys. Let's create a profile button component by creating a file `components/Profile.tsx` and use the following code as its content:
 
-```javascript
+```js
 "use client";
 import { useEffect, useState } from "react";
 import { register } from "@teamhanko/hanko-elements";
@@ -482,13 +505,14 @@ export const Profile = () => {
   );
 };
 ```
+
 It should look like this:
 
-![Hanko Profile Component](https://dev-to-uploads.s3.amazonaws.com/uploads/articles/rmp0lj2lfwdg5kdzlp5c.png)
+![Hanko Profile Component](/img/next-tutorial/hanko-profile.png)
 
 Now let’s use `@teamhanko/hanko-elements` to manage user logouts by creating a logout button component. Create a file `components/Logout.tsx` and use the following as its content:
 
-```javascript
+```js
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -525,32 +549,33 @@ export const Logout = () => {
   );
 };
 ```
- When a user logs out, a specific event is triggered that you can subscribe to, like redirecting to a specific page after logout:
 
-```javascript
-  const renewSession = useCallback(() => {
-    router.replace("/");
-  }, [router]);
+When a user logs out, a specific event is triggered that you can subscribe to, like redirecting to a specific page after logout:
 
-  useEffect(
-    () =>
-      hanko?.onSessionExpired(() => {
-        renewSession();
-      }),
+```js
+const renewSession = useCallback(() => {
+  router.replace("/");
+}, [router]);
 
-    [hanko, renewSession]
-  );
+useEffect(
+  () =>
+    hanko?.onSessionExpired(() => {
+      renewSession();
+    }),
+
+  [hanko, renewSession]
+);
 ```
+
 ℹ️ For more information about all the events that you can "listen" from the Hanko client click [here](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#events).
 
 ℹ️ You can also find information on how to customize Hanko Components by clicking [here](https://github.com/teamhanko/hanko/blob/main/frontend/elements/README.md#ui-customization).
 
-
 ## Verifying JWT with jose library
-The JWT is signed by Hanko and to secure our app we still need to verify the JWT. 
 
-> **What are JWTs?**
-> _A JSON Web Token (JWT) is a compact and self-contained way for transmitting information between parties as a JSON object in a secure way. The purpose of a JWT is to ensure the authenticity of the data._
+The JWT is signed by Hanko and to secure our app we still need to verify the JWT.
+
+> **What are JWTs?** > _A JSON Web Token (JWT) is a compact and self-contained way for transmitting information between parties as a JSON object in a secure way. The purpose of a JWT is to ensure the authenticity of the data._
 
 Hanko handles the authentication and signing of the JWT, on successful authentication with Hanko a cookie, which contains said JWT as its value, is set. we don’t really need to know a lot about them but it’s worth getting familiar with the parts of a JWT (header, payload and signature), and what is a [JWKS](https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-key-sets), for more information you can visit [JWT.io](https://jwt.io/).
 
@@ -559,14 +584,16 @@ To verify the JWT we need to install the `jose-jwt` package:
 ```
 npm i jose
 ```
-Jose is a JavaScript module that supports JWT and provides functionality for signing and verifying tokens. 
 
-ℹ️ For more information about Jose click [here](https://www.npmjs.com/package/jose). 
+Jose is a JavaScript module that supports JWT and provides functionality for signing and verifying tokens.
 
-### Middleware 
-Create a new file `middleware.tsx` in the root of your project and use the following code: 
+ℹ️ For more information about Jose click [here](https://www.npmjs.com/package/jose).
 
-```javascript
+### Middleware
+
+Create a new file `middleware.tsx` in the root of your project and use the following code:
+
+```js
 import * as jose from "jose";
 import { NextRequest } from "next/server";
 
@@ -583,18 +610,20 @@ export default async function middleware(req: NextRequest) {
     const verifiedJWT = await jose.jwtVerify(token, JWKS);
     console.log(verifiedJWT);
   } catch {
-return NextResponse.redirect(new URL("/", req.url));
-}
+    return NextResponse.redirect(new URL("/", req.url));
+  }
 }
 ```
+
 To verify the JWT we need the token and the JWKS. We get the token from the "hanko" cookie, and then we obtain the JSON Web Key Set (JWKS) calling the `createRemoteJWKSet` function from jose. Then we call `await jose.jwtVerify(token, JWKS)`. If the token can be verified, then the promise returned from the function resolves to a decoded token. If it cannot be verified, then the promise rejects and we can catch the error and handle it appropriately, e.g. by redirecting the user to the login/home page. If you console.log the const `verifiedJWT` you should see the decoded token showing the payload, the protectedHeader and the key. Inside the key, you should be able to see a "true" if it’s verified.
 
 ℹ️ For more information about Next.js Middleware click [here](https://nextjs.org/docs/app/building-your-application/routing/middleware#conditional-statements).
 
-### Securing the application and redirecting 
+### Securing the application and redirecting
+
 To prevent unauthorized users from getting access to private user data, we can add the paths to be protected in the Middleware configuration. Copy the following code at the bottom of your `middleware.tsx` file:
 
-```javascript
+```js
 export const config = {
   matcher: ["/todo"],
 };
@@ -602,7 +631,7 @@ export const config = {
 
 Update the `Login` page to subscribe to the events of the Hanko client and redirect to the `Todo` page after a successful login:
 
-```javascript
+```js
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -649,10 +678,11 @@ export default function Login() {
 
 ```
 
-## Time to display the right Todos 🪄✨
+## Time to display the right Todos
+
 Lastly, we should only display the todos for the user that is logged in. To do so, we need to link the todos to the correct "user ID". The first step is to update the Todo model in the `prisma schema`:
 
-```javascript
+```
 model Todo {
   userId String
   id String @id @default(uuid())
@@ -662,19 +692,22 @@ model Todo {
   updatedAt DateTime @updatedAt
 }
 ```
+
 Then run the following command to create a migration:
 
 ```
 npx prisma migrate
 ```
+
 Or the following to push the schema changes directly to the database:
 
 ```
 npx prisma db push
 ```
+
 Next step is to update the `api/todo/route.tsx` file to get the user ID from the token, then create a new todo if there is a user ID:
 
-```javascript
+```js
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import * as jose from "jose";
@@ -704,12 +737,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Not Found" }, { status: 404 });
   }
 }
-
 ```
 
 The final step is to update the Prisma call to fetch all the todos from the `todo/page.tsx`:
 
-```javascript
+```js
 import { Logout } from "@/components/Logout";
 import { Profile } from "@/components/Profile";
 import { NewTodo } from "@/components/todos/NewTodo";
@@ -744,7 +776,6 @@ export default async function Todo() {
     </main>
   );
 }
-
 ```
 
-That’s all, you’ve successfully created a Todo app with Next.js, Hanko, Prisma and Tailwind CSS! 
+That’s all, you’ve successfully created a Todo app with Next.js, Hanko, Prisma and Tailwind CSS!
