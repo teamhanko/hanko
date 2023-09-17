@@ -574,7 +574,7 @@ The JWT is signed by Hanko and to secure our app we still need to verify the JWT
 
 > **What are JWTs?** > _A JSON Web Token (JWT) is a compact and self-contained way for transmitting information between parties as a JSON object in a secure way. The purpose of a JWT is to ensure the authenticity of the data._
 
-Hanko handles the authentication and signing of the JWT, on successful authentication with Hanko a cookie, which contains said JWT as its value, is set. we don’t really need to know a lot about them but it’s worth getting familiar with the parts of a JWT (header, payload and signature), and what is a [JWKS](https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-key-sets), for more information you can visit [JWT.io](https://jwt.io/).
+Hanko handles the authentication and signing of the JWT. On successful authentication with Hanko a cookie, which contains said JWT as its value, is set. We don’t really need to know a lot about JWTs, but it’s worth getting familiar with the parts of a JWT (header, payload and signature), and  with what a [JWKS](https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-key-sets) is. For more information you can visit [JWT.io](https://jwt.io/).
 
 To verify the JWT we need to install the `jose-jwt` package:
 
