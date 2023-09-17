@@ -105,7 +105,6 @@ const globalForPrisma = globalThis as unknown as {
 export const prisma = globalForPrisma.prisma ?? new PrismaClient();
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
-
 ```
 
 ℹ️ For more information about Prisma integration click [here](https://www.prisma.io/docs/getting-started).
