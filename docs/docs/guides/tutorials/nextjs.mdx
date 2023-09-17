@@ -618,7 +618,7 @@ To verify the JWT we need the token and the JWKS. We get the token from the "han
 
 ### Securing the application and redirecting
 
-To prevent unauthorized users from getting access to private user data, we can add the paths to be protected in the Middleware configuration. Copy the following code at the bottom of your `middleware.tsx` file:
+To prevent unauthorized users from getting access to private user data, we can add the paths to be protected in the Middleware configuration. Following the example on the Next.js Docs about the [middleware](https://nextjs.org/docs/app/building-your-application/routing/middleware#example),  copy the following code to the bottom of your `middleware.tsx` file:
 
 ```js
 export const config = {
