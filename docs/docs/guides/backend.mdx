@@ -16,10 +16,6 @@ requests on your backend. To do so, first retrieve the JSON Web Key Set
 containing the public keys used to verify the JWT from the Hanko API's `.well-known/jwks.json` endpoint.
 Then use the JWKS to verify the JWT using a library for the programming language of your choice.
 
-:::info
-If you are using `Nuxt`, please check the [frontend guide](/guides/nuxt) on how to authenticate requests on the backend.
-:::
-
 ```mdx-code-block
 <Tabs>
 <TabItem value="go" label="Go">
