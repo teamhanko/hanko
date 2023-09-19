@@ -23,3 +23,21 @@ export async function userId() {
 
 ## Get user data on the Frontend
 
+Another way to get the user data is adding this code to the same file where we are registering the Hanko-Auth component:
+
+```js
+"use client";
+
+import { Hanko } from "@teamhanko/hanko-elements";
+
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API;
+const hanko = new Hanko(hankoApi);
+
+async function getEmail() {
+  const userData = await hanko?.user.getCurrent();
+  const email = userData.email;
+
+  console.log("user Data:", userData);
+  console.log("email:", email);
+}
+```
