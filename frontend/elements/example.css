@@ -1,7 +1,7 @@
 .hanko_container {
   background-color: var(--background-color, white);
   padding: var(--container-padding, 0);
-  max-width: var(--container-max-width, 600px);
+  max-width: var(--container-max-width, 410px);
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;

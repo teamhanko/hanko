@@ -377,7 +377,7 @@ hanko-profile {
 
   /* Container Styles */
   --container-padding: 30px;
-  --container-max-width: 600px;
+  --container-max-width: 410px;
 
   /* Headline Styles */
   --headline1-font-size: 24px;
