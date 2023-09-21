@@ -363,20 +363,20 @@ hanko-profile {
 
   /* Font Styles */
   --font-weight: 400;
-  --font-size: 14px;
+  --font-size: 16px;
   --font-family: sans-serif;
 
   /* Border Styles */
-  --border-radius: 4px;
+  --border-radius: 8px;
   --border-style: solid;
   --border-width: 1px;
 
   /* Item Styles */
-  --item-height: 34px;
+  --item-height: 42px;
   --item-margin: 0.5rem 0;
 
   /* Container Styles */
-  --container-padding: 0;
+  --container-padding: 30px;
   --container-max-width: 600px;
 
   /* Headline Styles */
@@ -384,7 +384,7 @@ hanko-profile {
   --headline1-font-weight: 600;
   --headline1-margin: 0 0 0.5rem;
 
-  --headline2-font-size: 14px;
+  --headline2-font-size: 16px;
   --headline2-font-weight: 600;
   --headline2-margin: 1rem 0 0.25rem;
 
@@ -397,7 +397,7 @@ hanko-profile {
   --link-text-decoration-hover: underline;
 
   /* Input Styles */
-  --input-min-width: 12em;
+  --input-min-width: 14em;
 
   /* Button Styles */
   --button-min-width: max-content;
