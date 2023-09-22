@@ -43,8 +43,9 @@ func Load(cfgFile *string) (*Config, error) {
 	if cfgFile == nil || *cfgFile == "" {
 		*cfgFile = "./config/config.yaml"
 	}
+
 	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
-		return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
+		log.Println("failed to load config, skipping...")
 	} else {
 		log.Println("Using config file:", *cfgFile)
 	}
