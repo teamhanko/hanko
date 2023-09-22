@@ -382,7 +382,7 @@ hanko-profile {
   /* Headline Styles */
   --headline1-font-size: 24px;
   --headline1-font-weight: 600;
-  --headline1-margin: 0 0 0.5rem;
+  --headline1-margin: 0 0 1rem;
 
   --headline2-font-size: 16px;
   --headline2-font-weight: 600;
