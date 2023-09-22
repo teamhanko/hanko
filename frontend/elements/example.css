@@ -1,202 +1,202 @@
 .hanko_container {
-  background-color: var(--background-color, white);
-  padding: var(--container-padding, 0);
-  max-width: var(--container-max-width, 410px);
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  justify-content: center;
-  align-items: center;
-  align-content: flex-start;
-  box-sizing: border-box;
+    background-color: var(--background-color, white);
+    padding: var(--container-padding, 0);
+    max-width: var(--container-max-width, 410px);
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    align-content: flex-start;
+    box-sizing: border-box
 }
 
 .hanko_content {
-  box-sizing: border-box;
-  flex: 0 1 auto;
-  width: 100%;
-  height: 100%;
+    box-sizing: border-box;
+    flex: 0 1 auto;
+    width: 100%;
+    height: 100%
 }
 
 .hanko_footer {
-  padding: var(--item-margin, 0.5rem 0);
-  box-sizing: border-box;
-  width: 100%;
+    padding: var(--item-margin, 0.5rem 0);
+    box-sizing: border-box;
+    width: 100%
 }
 
 .hanko_footer :nth-child(1) {
-  float: left;
+    float: left
 }
 
 .hanko_footer :nth-child(2) {
-  float: right;
+    float: right
 }
 
 .hanko_form {
-  display: flex;
-  flex-grow: 1;
+    display: flex;
+    flex-grow: 1
 }
 
 .hanko_form .hanko_ul {
-  flex-grow: 1;
-  margin: var(--item-margin, 0.5rem 0);
-  padding-inline-start: 0;
-  list-style-type: none;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1em;
+    flex-grow: 1;
+    margin: var(--item-margin, 0.5rem 0);
+    padding-inline-start: 0;
+    list-style-type: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em
 }
 
 .hanko_form .hanko_li {
-  display: flex;
-  max-width: 100%;
-  flex-grow: 1;
-  flex-basis: min-content;
+    display: flex;
+    max-width: 100%;
+    flex-grow: 1;
+    flex-basis: min-content
 }
 
 .hanko_button {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  border-radius: var(--border-radius, 8px);
-  border-style: var(--border-style, solid);
-  border-width: var(--border-width, 1px);
-  white-space: nowrap;
-  width: 100%;
-  min-width: var(--button-min-width, 7em);
-  height: var(--item-height, 42px);
-  outline: none;
-  cursor: pointer;
-  transition: 0.1s ease-out;
-  flex-grow: 1;
-  flex-shrink: 1;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    border-radius: var(--border-radius, 8px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    white-space: nowrap;
+    width: 100%;
+    min-width: var(--button-min-width, 7em);
+    height: var(--item-height, 42);
+    outline: none;
+    cursor: pointer;
+    transition: .1s ease-out;
+    flex-grow: 1;
+    flex-shrink: 1
 }
 
 .hanko_button:disabled {
-  cursor: default;
+    cursor: default
 }
 
 .hanko_button.hanko_primary {
-  color: var(--brand-contrast-color, white);
-  background: var(--brand-color, #506cf0);
-  border-color: var(--brand-color, #506cf0);
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color, #506cf0);
+    border-color: var(--brand-color, #506cf0)
 }
 
 .hanko_button.hanko_primary:hover {
-  color: var(--brand-contrast-color, white);
-  background: var(--brand-color-shade-1, #6b84fb);
-  border-color: var(--brand-color, #506cf0);
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color-shade-1, #6b84fb);
+    border-color: var(--brand-color, #506cf0)
 }
 
 .hanko_button.hanko_primary:focus {
-  color: var(--brand-contrast-color, white);
-  background: var(--brand-color, #506cf0);
-  border-color: var(--color, #444444);
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color, #506cf0);
+    border-color: var(--color, #333333)
 }
 
 .hanko_button.hanko_primary:disabled {
-  color: var(--color-shade-1, #8f9095);
-  background: var(--color-shade-2, #e5e6ef);
-  border-color: var(--color-shade-2, #e5e6ef);
+    color: var(--color-shade-1, #8f9095);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color-shade-2, #e5e6ef)
 }
 
 .hanko_button.hanko_secondary {
-  color: var(--color, #444444);
-  background: var(--background-color, white);
-  border-color: var(--color, #444444);
+    color: var(--color, #333333);
+    background: var(--background-color, white);
+    border-color: var(--color, #333333)
 }
 
 .hanko_button.hanko_secondary:hover {
-  color: var(--color, #444444);
-  background: var(--color-shade-2, #e5e6ef);
-  border-color: var(--color, #444444);
+    color: var(--color, #333333);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color, #333333)
 }
 
 .hanko_button.hanko_secondary:focus {
-  color: var(--color, #444444);
-  background: var(--background-color, white);
-  border-color: var(--brand-color, #506cf0);
+    color: var(--color, #333333);
+    background: var(--background-color, white);
+    border-color: var(--brand-color, #506cf0)
 }
 
 .hanko_button.hanko_secondary:disabled {
-  color: var(--color-shade-1, #8f9095);
-  background: var(--color-shade-2, #e5e6ef);
-  border-color: var(--color-shade-1, #8f9095);
+    color: var(--color-shade-1, #8f9095);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_inputWrapper {
-  flex-grow: 1;
-  position: relative;
-  display: flex;
-  min-width: var(--input-min-width, 14em);
-  max-width: 100%;
+    flex-grow: 1;
+    position: relative;
+    display: flex;
+    min-width: var(--input-min-width, 14em);
+    max-width: 100%
 }
 
 .hanko_input {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  border-radius: var(--border-radius, 8px);
-  border-style: var(--border-style, solid);
-  border-width: var(--border-width, 1px);
-  height: var(--item-height, 42px);
-  color: var(--color, #444444);
-  border-color: var(--color-shade-1, #8f9095);
-  background: var(--background-color, white);
-  padding: 0 0.5rem;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-  transition: 0.1s ease-out;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    border-radius: var(--border-radius, 8px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    height: var(--item-height, 42px);
+    color: var(--color, #333333);
+    border-color: var(--color-shade-1, #8f9095);
+    background: var(--background-color, white);
+    padding: 0 .5rem;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    transition: .1s ease-out
 }
 
 .hanko_input:-webkit-autofill,
 .hanko_input:-webkit-autofill:hover,
 .hanko_input:-webkit-autofill:focus {
-  -webkit-text-fill-color: var(--color, #444444);
-  -webkit-box-shadow: 0 0 0 50px var(--background-color, white) inset;
+    -webkit-text-fill-color: var(--color, #333333);
+    -webkit-box-shadow: 0 0 0 50px var(--background-color, white) inset
 }
 
 .hanko_input::-ms-reveal,
 .hanko_input::-ms-clear {
-  display: none;
+    display: none
 }
 
 .hanko_input::placeholder {
-  color: var(--color-shade-1, #8f9095);
+    color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_input:focus {
-  color: var(--color, #444444);
-  border-color: var(--color, #444444);
+    color: var(--color, #333333);
+    border-color: var(--color, #333333)
 }
 
 .hanko_input:disabled {
-  color: var(--color-shade-1, #8f9095);
-  background: var(--color-shade-2, #e5e6ef);
-  border-color: var(--color-shade-1, #8f9095);
+    color: var(--color-shade-1, #8f9095);
+    background: var(--color-shade-2, #e5e6ef);
+    border-color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_passcodeInputWrapper {
-  flex-grow: 1;
-  min-width: var(--input-min-width, 14em);
-  max-width: fit-content;
-  position: relative;
-  display: flex;
-  justify-content: space-between;
+    flex-grow: 1;
+    min-width: var(--input-min-width, 14em);
+    max-width: fit-content;
+    position: relative;
+    display: flex;
+    justify-content: space-between
 }
 
 .hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper {
-  flex-grow: 1;
-  margin: 0 0.5rem 0 0;
+    flex-grow: 1;
+    margin: 0 .5rem 0 0
 }
 
 .hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper:last-child {
-  margin: 0;
+    margin: 0
 }
 
 .hanko_passcodeInputWrapper .hanko_passcodeDigitWrapper .hanko_input {
-  text-align: center;
+    text-align: center
 }
 
 .hanko_icon,
@@ -204,9 +204,9 @@
 .hanko_loadingSpinnerWrapperIcon .hanko_loadingSpinner,
 .hanko_exclamationMark,
 .hanko_checkmark {
-  display: inline-block;
-  fill: var(--brand-contrast-color, white);
-  width: 18px;
+    display: inline-block;
+    fill: var(--brand-contrast-color, white);
+    width: 18px
 }
 
 .hanko_icon.hanko_secondary,
@@ -214,7 +214,7 @@
 .hanko_loadingSpinnerWrapperIcon .hanko_secondary.hanko_loadingSpinner,
 .hanko_secondary.hanko_exclamationMark,
 .hanko_secondary.hanko_checkmark {
-  fill: var(--color, #444444);
+    fill: var(--color, #333333)
 }
 
 .hanko_icon.hanko_disabled,
@@ -222,354 +222,327 @@
 .hanko_loadingSpinnerWrapperIcon .hanko_disabled.hanko_loadingSpinner,
 .hanko_disabled.hanko_exclamationMark,
 .hanko_disabled.hanko_checkmark {
-  fill: var(--color-shade-1, #8f9095);
+    fill: var(--color-shade-1, #8f9095)
 }
 
 .hanko_checkmark {
-  fill: var(--brand-color, #506cf0);
+    fill: var(--brand-color, #506cf0)
 }
 
 .hanko_checkmark.hanko_secondary {
-  fill: var(--color-shade-1, #8f9095);
+    fill: var(--color-shade-1, #8f9095)
 }
 
 .hanko_checkmark.hanko_fadeOut {
-  animation: hanko_fadeOut ease-out 1.5s forwards !important;
+    animation: hanko_fadeOut ease-out 1.5s forwards !important
 }
 
 @keyframes hanko_fadeOut {
-  0% {
-    opacity: 1;
-  }
+    0% {
+        opacity: 1
+    }
 
-  100% {
-    opacity: 0;
-  }
+    100% {
+        opacity: 0
+    }
 }
 
 .hanko_exclamationMark {
-  fill: var(--error-color, #e82020);
-  padding-right: 5px;
+    fill: var(--error-color, #e82020);
+    padding-right: 5px
 }
 
 .hanko_loadingSpinnerWrapperIcon {
-  justify-content: flex-start;
-  width: 100%;
-  column-gap: 10px;
-  margin-left: 10px;
+    justify-content: flex-start;
+    width: 100%;
+    column-gap: 10px;
+    margin-left: 10px
 }
 
 .hanko_loadingSpinnerWrapper,
 .hanko_loadingSpinnerWrapperIcon {
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
-  margin: 0 5px;
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    margin: 0 5px
 }
 
 .hanko_loadingSpinnerWrapper .hanko_loadingSpinner,
 .hanko_loadingSpinnerWrapperIcon .hanko_loadingSpinner {
-  fill: var(--brand-color, #506cf0);
-  animation: hanko_spin 500ms ease-in-out infinite;
+    fill: var(--brand-color, #506cf0);
+    animation: hanko_spin 500ms ease-in-out infinite
 }
 
 .hanko_loadingSpinnerWrapper.hanko_secondary,
 .hanko_secondary.hanko_loadingSpinnerWrapperIcon {
-  fill: var(--color-shade-1, #8f9095);
+    fill: var(--color-shade-1, #8f9095)
 }
 
 @keyframes hanko_spin {
-  0% {
-    transform: rotate(0deg);
-  }
+    0% {
+        transform: rotate(0deg)
+    }
 
-  100% {
-    transform: rotate(360deg);
-  }
+    100% {
+        transform: rotate(360deg)
+    }
 }
 
 .hanko_googleIcon.hanko_disabled {
-  fill: var(--color-shade-1, #8f9095);
+    fill: var(--color-shade-1, #8f9095)
 }
 
 .hanko_googleIcon.hanko_blue {
-  fill: #4285f4;
+    fill: #4285f4
 }
 
 .hanko_googleIcon.hanko_green {
-  fill: #34a853;
+    fill: #34a853
 }
 
 .hanko_googleIcon.hanko_yellow {
-  fill: #fbbc05;
+    fill: #fbbc05
 }
 
 .hanko_googleIcon.hanko_red {
-  fill: #ea4335;
+    fill: #ea4335
 }
 
 .hanko_headline {
-  color: var(--color, #444444);
-  font-family: var(--font-family, sans-serif);
-  text-align: left;
-  letter-spacing: 0;
-  font-style: normal;
-  line-height: 1.1;
+    color: var(--color, #333333);
+    font-family: var(--font-family, sans-serif);
+    text-align: left;
+    letter-spacing: 0;
+    font-style: normal;
+    line-height: 1.1
 }
 
 .hanko_headline.hanko_grade1 {
-  font-size: var(--headline1-font-size, 24px);
-  font-weight: var(--headline1-font-weight, 600);
-  margin: var(--headline1-margin, 0 0 1rem);
+    font-size: var(--headline1-font-size, 24px);
+    font-weight: var(--headline1-font-weight, 600);
+    margin: var(--headline1-margin, 0 0 1rem)
 }
 
 .hanko_headline.hanko_grade2 {
-  font-size: var(--headline2-font-size, 12px);
-  font-weight: var(--headline2-font-weight, 600);
-  margin: var(--headline2-margin, 1rem 0 0.5rem);
+    font-size: var(--headline2-font-size, 16px);
+    font-weight: var(--headline2-font-weight, 600);
+    margin: var(--headline2-margin, 1rem 0 0.5rem)
 }
 
 .hanko_errorMessage {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  border-radius: var(--border-radius, 8px);
-  border-style: var(--border-style, solid);
-  border-width: var(--border-width, 1px);
-  color: var(--error-color, #e82020);
-  background: var(--background-color, white);
-  padding: 0.25rem;
-  margin: var(--item-margin, 0.5rem 0);
-  min-height: var(--item-height, 42px);
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    border-radius: var(--border-radius, 8px);
+    border-style: var(--border-style, solid);
+    border-width: var(--border-width, 1px);
+    color: var(--error-color, #e82020);
+    background: var(--background-color, white);
+    padding: .25rem;
+    margin: var(--item-margin, 0.5rem 0);
+    min-height: var(--item-height, 42px);
+    display: flex;
+    align-items: center;
+    box-sizing: border-box
 }
 
-.hanko_errorMessage > span:first-child {
-  display: inline-flex;
+.hanko_errorMessage>span:first-child {
+    display: inline-flex
 }
 
 .hanko_errorMessage[hidden] {
-  display: none;
+    display: none
 }
 
 .hanko_paragraph {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  color: var(--color, #444444);
-  margin: var(--item-margin, 0.5rem 0);
-  text-align: left;
-  word-break: break-word;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    color: var(--color, #333333);
+    margin: var(--item-margin, 0.5rem 0);
+    text-align: left;
+    word-break: break-word
 }
 
 .hanko_accordion {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  width: 100%;
-  overflow: hidden;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    width: 100%;
+    overflow: hidden
 }
 
 .hanko_accordion .hanko_accordionItem {
-  color: var(--color, #444444);
-  margin: 0.25rem 0;
-  overflow: hidden;
+    color: var(--color, #333333);
+    margin: .25rem 0;
+    overflow: hidden
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label {
-  border-radius: var(--border-radius, 8px);
-  border-style: none;
-  height: var(--item-height, 42px);
-  background: var(--background-color, white);
-  box-sizing: border-box;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1rem;
-  margin: 0;
-  cursor: pointer;
-  transition: all 0.35s;
+    border-radius: var(--border-radius, 8px);
+    border-style: none;
+    height: var(--item-height, 42px);
+    background: var(--background-color, white);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1rem;
+    margin: 0;
+    cursor: pointer;
+    transition: all .35s
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label .hanko_labelText {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_label
-  .hanko_labelText
-  .hanko_description {
-  color: var(--color-shade-1, #8f9095);
+.hanko_accordion .hanko_accordionItem .hanko_label .hanko_labelText .hanko_description {
+    color: var(--color-shade-1, #8f9095)
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label.hanko_dropdown {
-  color: var(--link-color, #506cf0);
-  justify-content: flex-start;
-  width: fit-content;
+    color: var(--link-color, #506cf0);
+    justify-content: flex-start;
+    width: fit-content
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label:hover {
-  color: var(--brand-contrast-color, white);
-  background: var(--brand-color-shade-1, #6b84fb);
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color-shade-1, #6b84fb)
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label:hover .hanko_description {
-  color: var(--brand-contrast-color, white);
+    color: var(--brand-contrast-color, white)
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label:hover.hanko_dropdown {
-  color: var(--link-color, #506cf0);
-  background: none;
+    color: var(--link-color, #506cf0);
+    background: none
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label:not(.hanko_dropdown)::after {
-  content: "❯";
-  width: 1rem;
-  text-align: center;
-  transition: all 0.35s;
+    content: "❯";
+    width: 1rem;
+    text-align: center;
+    transition: all .35s
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label.hanko_dropdown::before {
-  content: "+";
-  width: 1em;
-  text-align: center;
-  transition: all 0.35s;
+    content: "+";
+    width: 1em;
+    text-align: center;
+    transition: all .35s
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_accordionInput {
-  position: absolute;
-  opacity: 0;
-  z-index: -1;
+    position: absolute;
+    opacity: 0;
+    z-index: -1
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionInput:checked
-  + .hanko_label {
-  color: var(--brand-contrast-color, white);
-  background: var(--brand-color, #506cf0);
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label {
+    color: var(--brand-contrast-color, white);
+    background: var(--brand-color, #506cf0)
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionInput:checked
-  + .hanko_label
-  .hanko_description {
-  color: var(--brand-contrast-color, white);
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label .hanko_description {
+    color: var(--brand-contrast-color, white)
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionInput:checked
-  + .hanko_label.hanko_dropdown {
-  color: var(--link-color, #506cf0);
-  background: none;
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label.hanko_dropdown {
+    color: var(--link-color, #506cf0);
+    background: none
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionInput:checked
-  + .hanko_label:not(.hanko_dropdown)::after {
-  transform: rotate(90deg);
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label:not(.hanko_dropdown)::after {
+    transform: rotate(90deg)
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionInput:checked
-  + .hanko_label.hanko_dropdown::before {
-  content: "-";
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label.hanko_dropdown::before {
+    content: "-"
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionInput:checked
-  + .hanko_label
-  ~ .hanko_accordionContent {
-  margin: 0.25rem 1rem;
-  opacity: 1;
-  max-height: 100vh;
+.hanko_accordion .hanko_accordionItem .hanko_accordionInput:checked+.hanko_label~.hanko_accordionContent {
+    margin: .25rem 1rem;
+    opacity: 1;
+    max-height: 100vh
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_accordionContent {
-  max-height: 0;
-  margin: 0 1rem;
-  opacity: 0;
-  overflow: hidden;
-  transition: all 0.35s;
+    max-height: 0;
+    margin: 0 1rem;
+    opacity: 0;
+    overflow: hidden;
+    transition: all .35s
 }
 
-.hanko_accordion
-  .hanko_accordionItem
-  .hanko_accordionContent.hanko_dropdownContent {
-  border-style: none;
+.hanko_accordion .hanko_accordionItem .hanko_accordionContent.hanko_dropdownContent {
+    border-style: none
 }
 
 .hanko_link {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  color: var(--link-color, #506cf0);
-  text-decoration: var(--link-text-decoration, none);
-  cursor: pointer;
-  background: none !important;
-  border: none;
-  padding: 0 !important;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    color: var(--link-color, #506cf0);
+    text-decoration: var(--link-text-decoration, none);
+    cursor: pointer;
+    background: none !important;
+    border: none;
+    padding: 0 !important
 }
 
 .hanko_link:hover {
-  text-decoration: var(--link-text-decoration-hover, underline);
+    text-decoration: var(--link-text-decoration-hover, underline)
 }
 
 .hanko_link.hanko_disabled {
-  color: var(--color, #444444);
-  pointer-events: none;
-  cursor: default;
+    color: var(--color, #333333);
+    pointer-events: none;
+    cursor: default
 }
 
 .hanko_link.hanko_danger {
-  color: var(--error-color, #e82020) !important;
+    color: var(--error-color, #e82020) !important
 }
 
 .hanko_linkWrapper {
-  display: inline-flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  height: 28px;
+    display: inline-flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    height: 20px
 }
 
 .hanko_linkWrapper.hanko_reverse {
-  flex-direction: row-reverse;
+    flex-direction: row-reverse
 }
 
 .hanko_divider {
-  font-weight: var(--font-weight, 400);
-  font-size: var(--font-size, 16px);
-  font-family: var(--font-family, sans-serif);
-  display: var(--divider-display, flex);
-  visibility: var(--divider-visibility, visible);
-  color: var(--color-shade-1, #8f9095);
-  margin: var(--item-margin, 0.5rem 0);
-  padding: 8px;
+    font-weight: var(--font-weight, 400);
+    font-size: var(--font-size, 16px);
+    font-family: var(--font-family, sans-serif);
+    display: var(--divider-display, flex);
+    visibility: var(--divider-visibility, visible);
+    color: var(--color-shade-1, #8f9095);
+    margin: var(--item-margin, 0.5rem 0)
 }
 
 .hanko_divider .hanko_line {
-  border-bottom-style: var(--border-style, solid);
-  border-bottom-width: var(--border-width, 1px);
-  color: inherit;
-  font: inherit;
-  width: 100%;
+    border-bottom-style: var(--border-style, solid);
+    border-bottom-width: var(--border-width, 1px);
+    color: inherit;
+    font: inherit;
+    width: 100%
 }
 
 .hanko_divider .hanko_text {
-  font: inherit;
-  color: inherit;
-  background: var(--background-color, white);
-  padding: var(--divider-padding, 0 42px);
-  line-height: 0.1em;
+    font: inherit;
+    color: inherit;
+    background: var(--background-color, white);
+    padding: var(--divider-padding, 0 42px);
+    line-height: .1em
 }

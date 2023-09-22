@@ -112,21 +112,21 @@ You can also pass certain options:
 
 ```javascript
 const defaultOptions = {
-  shadow: true, // Set to false if you do not want the web component to be attached to the shadow DOM.
-  injectStyles: true, // Set to false if you do not want to inject any default styles.
-  enablePasskeys: true, // Set to false if you do not want to display passkey-related content.
+  shadow: true,                    // Set to false if you do not want the web component to be attached to the shadow DOM.
+  injectStyles: true,              // Set to false if you do not want to inject any default styles.
+  enablePasskeys: true,            // Set to false if you do not want to display passkey-related content.
   hidePasskeyButtonOnLogin: false, // Hides the button to sign in with a passkey on the login page.
-  translations: null, // Additional translations can be added here. English is used when the option is not
-  // present or set to `null`, whereas setting an empty object `{}` prevents the elements
-  // from displaying any translations.
-  translationsLocation: "/i18n", // The URL or path where the translation files are located.
-  fallbackLanguage: "en", // The fallback language to be used if a translation is not available.
-  storageKey: "hanko", // The name of the cookie the session token is stored in and the prefix / name of local storage keys
+  translations: null,              // Additional translations can be added here. English is used when the option is not
+                                   // present or set to `null`, whereas setting an empty object `{}` prevents the elements
+                                   // from displaying any translations.
+  translationsLocation: "/i18n",   // The URL or path where the translation files are located.
+  fallbackLanguage: "en",          // The fallback language to be used if a translation is not available.
+  storageKey: "hanko",             // The name of the cookie the session token is stored in and the prefix / name of local storage keys
 };
 
 const { hanko } = await register(
   "https://hanko.yourdomain.com",
-  defaultOptions,
+  defaultOptions
 );
 ```
 
@@ -232,7 +232,7 @@ hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
   // Login, registration or recovery has been completed successfully. You can now take control and redirect the
   // user to protected pages.
   console.info(
-    `User successfully completed the registration or authorization process (user-id: "${authFlowCompletedDetail.userID}")`,
+    `User successfully completed the registration or authorization process (user-id: "${authFlowCompletedDetail.userID}")`
   );
 });
 ```
@@ -255,7 +255,7 @@ frontend.
 hanko.onSessionCreated((sessionDetail) => {
   // A new JWT has been issued.
   console.info(
-    `Session created or updated (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`,
+    `Session created or updated (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`
   );
 });
 ```
@@ -349,7 +349,7 @@ variables including default values can be found below:
 hanko-auth,
 hanko-profile {
   /* Color Scheme */
-  --color: #444444;
+  --color: #333333;
   --color-shade-1: #8f9095;
   --color-shade-2: #e5e6ef;
 
@@ -372,7 +372,7 @@ hanko-profile {
   --border-width: 1px;
 
   /* Item Styles */
-  --item-height: 42px;
+  --item-height: 34px;
   --item-margin: 0.5rem 0;
 
   /* Container Styles */
@@ -384,7 +384,7 @@ hanko-profile {
   --headline1-font-weight: 600;
   --headline1-margin: 0 0 1rem;
 
-  --headline2-font-size: 14px;
+  --headline2-font-size: 16px;
   --headline2-font-weight: 600;
   --headline2-margin: 1rem 0 0.5rem;
 
