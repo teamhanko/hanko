@@ -386,7 +386,7 @@ hanko-profile {
 
   --headline2-font-size: 16px;
   --headline2-font-weight: 600;
-  --headline2-margin: 1rem 0 0.25rem;
+  --headline2-margin: 1rem 0 0.5rem;
 
   /* Divider Styles */
   --divider-padding: 0 42px;
