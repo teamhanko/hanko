@@ -41,10 +41,13 @@ func Load(cfgFile *string) (*Config, error) {
 	k := koanf.New(".")
 	var err error
 	if cfgFile == nil || *cfgFile == "" {
-		*cfgFile = "./config/config.yaml"
+		*cfgFile = DefaultConfigFilePath
 	}
 
 	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
+		if *cfgFile != DefaultConfigFilePath {
+			return nil, fmt.Errorf("failed to load config file: %w", err)
+		}
 		log.Println("failed to load config, skipping...")
 	} else {
 		log.Println("Using config file:", *cfgFile)
