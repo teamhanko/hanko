@@ -36,7 +36,7 @@ export const en: Translation = {
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
     manageEmails:
-      "Used for passcode austhentication.",
+      "Used for passcode authentication.",
     changePassword: "Set a new password.",
     managePasskeys: "Your passkeys allow you to sign in to this account.",
     isPrimaryEmail:
