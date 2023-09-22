@@ -46,7 +46,7 @@ func Load(cfgFile *string) (*Config, error) {
 
 	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
 		if *cfgFile != DefaultConfigFilePath {
-			return nil, fmt.Errorf("failed to load config file: %w", err)
+			return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
 		}
 		log.Println("failed to load config, skipping...")
 	} else {
