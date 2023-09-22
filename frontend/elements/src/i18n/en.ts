@@ -40,9 +40,9 @@ export const en: Translation = {
     changePassword: "Set a new password.",
     managePasskeys: "Your passkeys allow you to sign in to this account.",
     isPrimaryEmail:
-      "Used for passcodes and as a username for passkeys.",
+      "This email address will be used as username for your passkeys.",
     setPrimaryEmail:
-      "Use this email for passcodes and as a username for passkeys.",
+      "Set this email to be used as username for new passkeys.",
     emailVerified: "This email address has been verified.",
     emailUnverified: "This email address has not been verified.",
     emailDelete:
