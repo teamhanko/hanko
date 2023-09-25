@@ -1,10 +1,18 @@
 ---
-title: Handling User ID and Email
+title: Getting user Data
 sidebar_label: User data
 keywords: [user, user ID, userID, email]
 ---
 
+Since every project can have a different need when handling user onboarding,
+we have put together some of the approcaches you can use to
+obtain the data needed to identify a specific user.
+
 ## Get user ID from the JWT
+
+On successful authentication, Hanko retreives a JWT contained inside of a cookie. One of the the thing
+we can get from this JWT is the user ID, we can use [jose library](https://www.npmjs.com/package/jose) to decode
+the value of such JWT:
 
 ```js
 import { cookies } from "next/headers";
@@ -19,11 +27,41 @@ export async function userId() {
 }
 ```
 
-## Get user data from Hanko admin API
+## Get user by ID using Hanko Admin API
+
+The [Hanko Admin API](https://docs.hanko.io/api/admin) provides detailed information about an specific user,
+using the user ID as an identifier. In the Hanko Cloud Settings, you have the option to enable the Admin API
+(it's a Pro feature) and create an `API Key`, when this last one is created the `secret` will be shown to you
+only one time, make sure you store it in a safe place.
+
+The Admin API is protected and you're gonna need to send the `secret`
+inside the `headers` in your `fetch`request:
+
+```js
+async function getUserData() {
+  const adminAPI = process.env.ADMIN_API;
+  const adminSecret = process.env.ADMIN_SECRET;
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${adminSecret}`,
+    },
+  };
+
+  fetch(`${adminAPI}/users/${userID}`, options)
+    .then((response) => response.json())
+    .then((response) => console.log(response))
+    .catch((err) => console.error(err));
+}
+
+const userData = await getUserData();
+console.log("user data:", userData);
+```
 
 ## Get user data on the Frontend
 
-Another way to get the user data is adding this code to the same file where we are registering the Hanko-Auth component:
+If you only need the user email for a frontend usage, you can add this code to the same file where we are
+registering the Hanko-Auth component:
 
 ```js
 "use client";
@@ -40,4 +78,13 @@ async function getEmail() {
   console.log("user Data:", userData);
   console.log("email:", email);
 }
+```
+
+And call `getEmail()` inside of the callback used to redirect after a successful authentication:
+
+```js
+const redirectAfterLogin = useCallback(() => {
+  router.replace("/dashboard");
+  getEmail();
+}, [router]);
 ```
