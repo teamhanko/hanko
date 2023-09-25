@@ -349,7 +349,7 @@ variables including default values can be found below:
 hanko-auth,
 hanko-profile {
   /* Color Scheme */
-  --color: #171717;
+  --color: #333333;
   --color-shade-1: #8f9095;
   --color-shade-2: #e5e6ef;
 
@@ -363,11 +363,11 @@ hanko-profile {
 
   /* Font Styles */
   --font-weight: 400;
-  --font-size: 14px;
+  --font-size: 16px;
   --font-family: sans-serif;
 
   /* Border Styles */
-  --border-radius: 4px;
+  --border-radius: 8px;
   --border-style: solid;
   --border-width: 1px;
 
@@ -376,17 +376,17 @@ hanko-profile {
   --item-margin: 0.5rem 0;
 
   /* Container Styles */
-  --container-padding: 0;
-  --container-max-width: 600px;
+  --container-padding: 30px;
+  --container-max-width: 410px;
 
   /* Headline Styles */
   --headline1-font-size: 24px;
   --headline1-font-weight: 600;
-  --headline1-margin: 0 0 0.5rem;
+  --headline1-margin: 0 0 1rem;
 
-  --headline2-font-size: 14px;
+  --headline2-font-size: 16px;
   --headline2-font-weight: 600;
-  --headline2-margin: 1rem 0 0.25rem;
+  --headline2-margin: 1rem 0 0.5rem;
 
   /* Divider Styles */
   --divider-padding: 0 42px;
@@ -397,7 +397,7 @@ hanko-profile {
   --link-text-decoration-hover: underline;
 
   /* Input Styles */
-  --input-min-width: 12em;
+  --input-min-width: 14em;
 
   /* Button Styles */
   --button-min-width: max-content;
