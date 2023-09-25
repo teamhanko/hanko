@@ -567,7 +567,7 @@ useEffect(
 
 ## Verifying JWT with jose library
 
-The JWT is signed by Hanko and to secure our app we still need to verify the JWT.
+Hanko issues a cookie after a successful login. The value of this cookie is a JWT and to secure our app we still need to verify the JWT.
 
 > **What are JWTs?** > _A JSON Web Token (JWT) is a compact and self-contained way for transmitting information between parties as a JSON object in a secure way. The purpose of a JWT is to ensure the authenticity of the data._
 
