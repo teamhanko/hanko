@@ -14,11 +14,24 @@
   },
   "typesVersions": {
     "*": {
-      "elements": ["dist/Elements.d.ts"],
-      "i18n/de": ["dist/i18n/de.d.ts"],
-      "i18n/en": ["dist/i18n/en.d.ts"],
-      "i18n/fr": ["dist/i18n/fr.d.ts"],
-      "i18n/all": ["dist/i18n/all.d.ts"]
+      "elements": [
+        "dist/Elements.d.ts"
+      ],
+      "i18n/de": [
+        "dist/i18n/de.d.ts"
+      ],
+      "i18n/en": [
+        "dist/i18n/en.d.ts"
+      ],
+      "i18n/fr": [
+        "dist/i18n/fr.d.ts"
+      ],
+      "i18n/zh": [
+        "dist/i18n/zh.d.ts"
+      ],
+      "i18n/all": [
+        "dist/i18n/all.d.ts"
+      ]
     }
   },
   "exports": {
@@ -41,6 +54,11 @@
       "types": "./dist/i18n/fr.d.ts",
       "import": "./dist/i18n/fr.js",
       "require": "./dist/i18n/fr.js"
+    },
+    "./i18n/zh": {
+      "types": "./dist/i18n/zh.d.ts",
+      "import": "./dist/i18n/zh.js",
+      "require": "./dist/i18n/zh.js"
     },
     "./i18n/all": {
       "types": "./dist/i18n/all.d.ts",
