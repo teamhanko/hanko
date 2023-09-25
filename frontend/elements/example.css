@@ -1,7 +1,7 @@
 .hanko_container {
     background-color: var(--background-color, white);
     padding: var(--container-padding, 0);
-    max-width: var(--container-max-width, 600px);
+    max-width: var(--container-max-width, 410px);
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;
@@ -56,15 +56,15 @@
 
 .hanko_button {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
-    border-radius: var(--border-radius, 4px);
+    border-radius: var(--border-radius, 8px);
     border-style: var(--border-style, solid);
     border-width: var(--border-width, 1px);
     white-space: nowrap;
     width: 100%;
     min-width: var(--button-min-width, 7em);
-    height: var(--item-height, 34px);
+    height: var(--item-height, 42);
     outline: none;
     cursor: pointer;
     transition: .1s ease-out;
@@ -91,7 +91,7 @@
 .hanko_button.hanko_primary:focus {
     color: var(--brand-contrast-color, white);
     background: var(--brand-color, #506cf0);
-    border-color: var(--color, #171717)
+    border-color: var(--color, #333333)
 }
 
 .hanko_button.hanko_primary:disabled {
@@ -101,19 +101,19 @@
 }
 
 .hanko_button.hanko_secondary {
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     background: var(--background-color, white);
-    border-color: var(--color, #171717)
+    border-color: var(--color, #333333)
 }
 
 .hanko_button.hanko_secondary:hover {
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     background: var(--color-shade-2, #e5e6ef);
-    border-color: var(--color, #171717)
+    border-color: var(--color, #333333)
 }
 
 .hanko_button.hanko_secondary:focus {
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     background: var(--background-color, white);
     border-color: var(--brand-color, #506cf0)
 }
@@ -134,13 +134,13 @@
 
 .hanko_input {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
-    border-radius: var(--border-radius, 4px);
+    border-radius: var(--border-radius, 8px);
     border-style: var(--border-style, solid);
     border-width: var(--border-width, 1px);
-    height: var(--item-height, 34px);
-    color: var(--color, #171717);
+    height: var(--item-height, 42px);
+    color: var(--color, #333333);
     border-color: var(--color-shade-1, #8f9095);
     background: var(--background-color, white);
     padding: 0 .5rem;
@@ -153,7 +153,7 @@
 .hanko_input:-webkit-autofill,
 .hanko_input:-webkit-autofill:hover,
 .hanko_input:-webkit-autofill:focus {
-    -webkit-text-fill-color: var(--color, #171717);
+    -webkit-text-fill-color: var(--color, #333333);
     -webkit-box-shadow: 0 0 0 50px var(--background-color, white) inset
 }
 
@@ -167,8 +167,8 @@
 }
 
 .hanko_input:focus {
-    color: var(--color, #171717);
-    border-color: var(--color, #171717)
+    color: var(--color, #333333);
+    border-color: var(--color, #333333)
 }
 
 .hanko_input:disabled {
@@ -214,7 +214,7 @@
 .hanko_loadingSpinnerWrapperIcon .hanko_secondary.hanko_loadingSpinner,
 .hanko_secondary.hanko_exclamationMark,
 .hanko_secondary.hanko_checkmark {
-    fill: var(--color, #171717)
+    fill: var(--color, #333333)
 }
 
 .hanko_icon.hanko_disabled,
@@ -309,7 +309,7 @@
 }
 
 .hanko_headline {
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     font-family: var(--font-family, sans-serif);
     text-align: left;
     letter-spacing: 0;
@@ -320,27 +320,27 @@
 .hanko_headline.hanko_grade1 {
     font-size: var(--headline1-font-size, 24px);
     font-weight: var(--headline1-font-weight, 600);
-    margin: var(--headline1-margin, 0 0 0.5rem)
+    margin: var(--headline1-margin, 0 0 1rem)
 }
 
 .hanko_headline.hanko_grade2 {
-    font-size: var(--headline2-font-size, 14px);
+    font-size: var(--headline2-font-size, 16px);
     font-weight: var(--headline2-font-weight, 600);
-    margin: var(--headline2-margin, 1rem 0 0.25rem)
+    margin: var(--headline2-margin, 1rem 0 0.5rem)
 }
 
 .hanko_errorMessage {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
-    border-radius: var(--border-radius, 4px);
+    border-radius: var(--border-radius, 8px);
     border-style: var(--border-style, solid);
     border-width: var(--border-width, 1px);
     color: var(--error-color, #e82020);
     background: var(--background-color, white);
     padding: .25rem;
     margin: var(--item-margin, 0.5rem 0);
-    min-height: var(--item-height, 34px);
+    min-height: var(--item-height, 42px);
     display: flex;
     align-items: center;
     box-sizing: border-box
@@ -356,9 +356,9 @@
 
 .hanko_paragraph {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     margin: var(--item-margin, 0.5rem 0);
     text-align: left;
     word-break: break-word
@@ -366,22 +366,22 @@
 
 .hanko_accordion {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
     width: 100%;
     overflow: hidden
 }
 
 .hanko_accordion .hanko_accordionItem {
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     margin: .25rem 0;
     overflow: hidden
 }
 
 .hanko_accordion .hanko_accordionItem .hanko_label {
-    border-radius: var(--border-radius, 4px);
+    border-radius: var(--border-radius, 8px);
     border-style: none;
-    height: var(--item-height, 34px);
+    height: var(--item-height, 42px);
     background: var(--background-color, white);
     box-sizing: border-box;
     display: flex;
@@ -485,7 +485,7 @@
 
 .hanko_link {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
     color: var(--link-color, #506cf0);
     text-decoration: var(--link-text-decoration, none);
@@ -500,7 +500,7 @@
 }
 
 .hanko_link.hanko_disabled {
-    color: var(--color, #171717);
+    color: var(--color, #333333);
     pointer-events: none;
     cursor: default
 }
@@ -523,7 +523,7 @@
 
 .hanko_divider {
     font-weight: var(--font-weight, 400);
-    font-size: var(--font-size, 14px);
+    font-size: var(--font-size, 16px);
     font-family: var(--font-family, sans-serif);
     display: var(--divider-display, flex);
     visibility: var(--divider-visibility, visible);
