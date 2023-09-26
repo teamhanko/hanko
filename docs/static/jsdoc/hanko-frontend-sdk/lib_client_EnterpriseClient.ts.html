@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> SessionStateOptions</title>
+  <title> lib/client/EnterpriseClient.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,153 +75,146 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Interface</p>
-                    <h1>SessionStateOptions</h1>
+                    <p>Source</p>
+                    <h1>lib/client/EnterpriseClient.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2>SessionStateOptions</h2>
-        
-    
-</header>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import { Client } from "./Client";
+import { NotFoundError, TechnicalError, ThirdPartyError } from "../Errors";
 
-<article>
-    <div class="container-overview">
-    
-        
-            <div class="description">Options for SessionState</div>
-        
+/**
+ * A class that handles communication with the Hanko API for the purposes
+ * of authenticating through a third party provider.
+ *
+ * @constructor
+ * @category SDK
+ * @subcategory Clients
+ * @extends {Client}
+ */
+export class EnterpriseClient extends Client {
+  /**
+   * Extracts the domain from an email address
+   * @param {string} email E-Mail address of the user from which the domain will be extracted.
+   * @throws {ThirdPartyError}
+   * @private
+   */
+  private getDomain(email: string): string {
+    if (!email) {
+      throw new ThirdPartyError(
+        "somethingWentWrong",
+        new Error("email missing from request"),
+      );
+    }
 
-        
+    const emailParts = email.split("@");
+    if (emailParts.length !== 2) {
+      throw new ThirdPartyError(
+        "somethingWentWrong",
+        new Error("email is not in a valid email format."),
+      );
+    }
 
+    const domain = emailParts[1].trim();
+    if (domain === "") {
+      throw new ThirdPartyError(
+        "somethingWentWrong",
+        new Error("email is not in a valid email format."),
+      );
+    }
 
-    <h5 class="subsection-title">Properties:</h5>
+    return domain;
+  }
 
-    
-<div class="table-container">
-    <table class="props table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
+  /**
+   * Performs a request to the Hanko API to check if there is a provider for the users e-mail domain
+   *
+   * @param {string} email - E-Mail address of the user to login
+   */
+  async hasProvider(email: string): Promise&lt;boolean> {
+    const domain = this.getDomain(email);
 
-            <th>Type</th>
+    return this.client.get(`/saml/provider?domain=${domain}`).then((resp) => {
+      if (resp.status == 404) {
+        throw new NotFoundError(new Error("provider not found"));
+      }
 
-            
+      if (!resp.ok) {
+        throw new TechnicalError(new Error("unable to fetch provider"));
+      }
 
-            
+      return resp.ok;
+    });
+  }
 
-            <th class="last">Description</th>
-        </tr>
-        </thead>
+  /**
+   * Performs a request to the Hanko API that redirects to the given
+   * third party provider.
+   *
+   * @param {string} email - E-Mail address of the user
+   * @param {string} redirectTo - The URL to redirect to after a successful third party authentication
+   * @throws {ThirdPartyError}
+   * @see http://docs.hanko.io/api/public#tag/Third-Party/operation/enterpriseAuth
+   */
+  auth(email: string, redirectTo: string): void {
+    const url = new URL("/saml/auth", this.client.api);
+    const domain = this.getDomain(email);
 
-        <tbody>
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>localStorageKey</code></td>
-    
+    if (!redirectTo) {
+      throw new ThirdPartyError(
+        "somethingWentWrong",
+        new Error("redirectTo missing from request"),
+      );
+    }
 
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
+    url.searchParams.append("domain", domain);
+    url.searchParams.append("redirect_to", redirectTo);
 
+    window.location.assign(url.href);
+  }
 
-    
-    </td>
+  /**
+   * Get a third party error from the current location's query params.
+   * @returns {(ThirdPartyError|undefined)} The ThirdPartyError.
+   */
+  getError() {
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    const errorDescription = params.get("error_description");
+    if (error) {
+      let code;
+      switch (error) {
+        case "access_denied":
+          code = "enterpriseAccessDenied";
+          break;
+        case "user_conflict":
+          code = "emailAddressAlreadyExistsError";
+          break;
+        case "multiple_accounts":
+          code = "enterpriseMultipleAccounts";
+          break;
+        case "unverified_email":
+          code = "enterpriseUnverifiedEmail";
+          break;
+        case "email_maxnum":
+          code = "maxNumOfEmailAddressesReached";
+          break;
+        default:
+          code = "somethingWentWrong";
+      }
 
-    
-
-    
-
-    <td class="description last">The prefix / name of the local storage keys.</td>
-</tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_state_session_SessionState.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_state_session_SessionState.ts.html">lib/state/session/SessionState.ts</a>, <a href="lib_state_session_SessionState.ts.html#line100">line 100</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+      return new ThirdPartyError(code, new Error(errorDescription));
+    }
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 
