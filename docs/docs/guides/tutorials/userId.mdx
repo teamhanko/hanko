@@ -73,8 +73,7 @@ async function getEmail() {
   const userData = await hanko?.user.getCurrent();
   const email = userData.email;
 
-  console.log("user Data:", userData);
-  console.log("email:", email);
+  return userData;
 }
 ```
 
