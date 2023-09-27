@@ -12,9 +12,9 @@
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-frontend-sdk?label=hanko-frontend-sdk)](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk)
 
 # About Hanko
-Hanko is an open-source authentication and user management solution with a focus on moving the login beyond passwords, while being 100% deployable today.
+Hanko is an open source authentication and user management solution with a focus on moving the login beyond passwords, while being 100% deployable today.
 
-- Built around [passkeys](https://www.passkeys.io) as introduced by Apple, Google, and Microsoft
+- Built for [passkeys](https://www.passkeys.io) as introduced by Apple, Google, and Microsoft
 - Fast integration with Hanko Elements web components (login box and user profile)
 - API-first, small footprint, cloud-native
 
@@ -31,7 +31,7 @@ With most devices and browsers now shipping with passkey support and convenient 
 
 # Architecture
 The main building blocks of the Hanko project are
-- [backend](/backend/README.md) - An authentication API for passkeys, passcodes, and (optional) passwords, as well as user management and JWT issuing
+- [backend](/backend/README.md) - An authentication API for passkeys, passcodes, and (optional) passwords, OAuth SSO, as well as user management and JWT issuing
 - [hanko-elements](/frontend/elements/README.md) - Web components made for Hanko backend that provide onboarding and login functionality and are customizable with CSS
 - [hanko-frontend-sdk](/frontend/frontend-sdk/README.md) - A client package for using the Hanko API
 
@@ -78,6 +78,7 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| i18n & custom translations |
 |✅| User import |
 |✅| Disable sign-ups |
+|⚙️| Enterprise SSO (OIDC/SAML) |
 |⚙️| API-supported auth flows |
 |⚙️| Mobile SDKs |
 |⚙️| Basic email templating & i8n |
@@ -86,7 +87,6 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 | | Refresh tokens / sessions |
 | | Sign in with Microsoft |
 | | OIDC support |
-| | Enterprise SSO (OIDC/SAML) |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
 - Priviledged sessions & step-up authentication
@@ -97,8 +97,8 @@ Additional features that have been requested or that we would like to build but 
 ## Questions, bugs, ideas
 If you have any questions or issues, please check this project's [Q&A section in discussions](https://github.com/teamhanko/hanko/discussions/categories/q-a) and the [open issues](https://github.com/teamhanko/hanko/issues). Feel free to comment on existing issues or create a new issue if you encounter any bugs or have a feature request. For yet unanswered questions, feedback, or new ideas, please open a new discussion.
 
-## Discord community & Twitter
-We invite you to join our growing [Discord community](https://www.hanko.io/community) if you want to get the latest updates on passkeys, WebAuthn, and this project, or if you just want to chat with us. You can also [follow us on Twitter](https://twitter.com/hanko_io).
+## Discord community & X
+We invite you to join our growing [Discord community](https://www.hanko.io/community) if you want to get the latest updates on passkeys, WebAuthn, and this project, or if you just want to chat with us. You can also [follow us on Twitter](https://x.com/hanko_io).
 
 # Licenses
 [hanko-elements](frontend/elements) and [hanko-frontend-sdk](frontend/frontend-sdk) are licensed under the [MIT License](frontend/elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
