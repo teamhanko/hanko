@@ -1,0 +1,130 @@
+---
+title: Getting user data
+sidebar_label: User data
+keywords: [user, user ID, userID, email]
+---
+
+import Tabs from "@theme/Tabs";
+import TabItem from "@theme/TabItem";
+
+Every project has different needs when handling user onboarding. The following sections show how to get the user data from Hanko.
+
+:::info
+**It's good to remember that the user ID is the immmutable identifier**
+
+The primary email adress can be changed, therefore when handling user registration, the user `id` should be used to
+dermine if it's a known user.
+:::
+
+## Get user data on the Frontend
+
+If you only need the user data for a frontend usage, you can use `Hanko.user.getCurrent()` function from the
+[hanko-frontend-sdk](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk) (it is also re-exported from
+[hanko-elements](https://www.npmjs.com/package/@teamhanko/hanko-elements)):
+
+```mdx-code-block
+<Tabs>
+<TabItem value="next.js" label="Next.js">
+```
+
+```js
+"use client";
+
+import { Hanko } from "@teamhanko/hanko-elements";
+
+const hankoApi = process.env.NEXT_PUBLIC_HANKO_API;
+const hanko = new Hanko(hankoApi);
+
+async function getEmail() {
+  const userData = await hanko?.user.getCurrent();
+  const email = userData.email;
+
+  return email;
+}
+```
+
+```mdx-code-block
+</TabItem>
+
+</Tabs>
+```
+
+And call `getEmail()` where you need the user data (e.g. a navigation bar, etc).
+
+## Get user data on the Backend
+
+### Get user ID from the JWT
+
+On successful authentication, Hanko retreives a JWT contained inside of a cookie. One of the the things
+we can get from this JWT is the user ID, we can use [jose library](https://www.npmjs.com/package/jose) to decode
+the value of such JWT:
+
+```mdx-code-block
+<Tabs>
+<TabItem value="next.js" label="Next.js">
+```
+
+```js
+import { cookies } from "next/headers";
+import * as jose from "jose";
+
+export async function userId() {
+  const token = cookies().get("hanko")?.value;
+  const payload = jose.decodeJwt(token ?? "");
+
+  const userID = payload.sub;
+  return userID;
+}
+```
+
+```mdx-code-block
+</TabItem>
+
+</Tabs>
+```
+
+### Get user data using the Hanko Admin API
+
+The [Hanko Admin API](https://docs.hanko.io/api/admin) provides detailed information about an specific user.
+To get it just call the `/users/{id}` endpoint of the Hanko Admin API, where `id` is the user id from the JWT.
+
+```mdx-code-block
+<Tabs>
+<TabItem value="next.js" label="Next.js">
+```
+
+```js
+async function getUserData() {
+  const adminAPI = process.env.ADMIN_API;
+  const adminSecret = process.env.ADMIN_SECRET;
+  const options = {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${adminSecret}`,
+    },
+  };
+
+  fetch(`${adminAPI}/users/${userID}`, options)
+    .then((response) => response.json())
+    .then((response) => console.log(response))
+    .catch((err) => console.error(err));
+}
+
+const userData = await getUserData();
+console.log("user data:", userData);
+```
+
+```mdx-code-block
+</TabItem>
+
+</Tabs>
+```
+
+:::info
+
+On Hanko Cloud the Hanko Admin API is a paid feature and must be enabled separately.
+
+You also need an API key `secret` to access the Hanko Admin API. You can generate one under the `Settings/API Keys` section of your project.
+Keep in mind, that the API key `secret` is only showed once, so make sure to store it in a safe place.
+
+:::
