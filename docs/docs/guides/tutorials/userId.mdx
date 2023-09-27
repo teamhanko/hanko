@@ -80,10 +80,4 @@ async function getEmail() {
 
 And call `getEmail()` inside of the callback used to redirect after a successful authentication:
 
-```js
-const redirectAfterLogin = useCallback(() => {
-  router.replace("/dashboard");
-  getEmail();
-}, [router]);
-```
 
