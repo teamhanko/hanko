@@ -10,7 +10,7 @@ obtain the data needed to identify a specific user.
 
 ## Get user ID from the JWT
 
-On successful authentication, Hanko retreives a JWT contained inside of a cookie. One of the the thing
+On successful authentication, Hanko retreives a JWT contained inside of a cookie. One of the the things
 we can get from this JWT is the user ID, we can use [jose library](https://www.npmjs.com/package/jose) to decode
 the value of such JWT:
 
@@ -60,7 +60,7 @@ console.log("user data:", userData);
 
 ## Get user data on the Frontend
 
-If you only need the user email for a frontend usage, you can add this code to the same file where we are
+If you only need the user email or the user id for a frontend usage, you can add this code to the same file where we are
 registering the Hanko-Auth component:
 
 ```js
@@ -88,3 +88,4 @@ const redirectAfterLogin = useCallback(() => {
   getEmail();
 }, [router]);
 ```
+
