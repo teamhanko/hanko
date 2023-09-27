@@ -106,10 +106,33 @@ To submit your code:
     the displayed template).
 11. If a pull request is not ready to be reviewed it should be marked as a "Draft".
 
-
 When pull requests fail test checks, authors are expected to update
 their pull requests to address the failures until the tests pass. If you have trouble or questions on how to add to
 existing tests, reach out through our [communication](#communication) channels.
+
+## Contributing to the Hanko Web Components
+
+When contributing to the Hanko components, once you have followed the first 4 steps of the segment [submitting code](https://github.com/teamhanko/hanko/blob/main/CONTRIBUTING.md#submitting-code), to apply changes to the `hanko-auth`or `hanko-profile` components:
+
+1. change directory to frontend:
+
+`cd frontend`
+
+2. Run locally the example app for React:
+
+`npm run start --workspace examples/react`
+
+Or with [docker-compose](https://www.docker.com/products/docker-desktop/) to start the app:
+
+\*Need to bring command or point out propperly
+
+3. Apply the changes inside `frontend/elements/src`. In the file `_presets.sass` you can find the custom variables for the components.
+
+4. Run the `build` command on the `elements` to see the changes you just applied:
+
+`npm run build --workspace elements`
+
+Now continue with the step 5 of the previous segment.
 
 # Commit Message Guidelines
 
@@ -126,6 +149,7 @@ The commit message should be structured as follows:
 ```
 
 The commit message headline should have the following structure:
+
 ```
 <type>(<optional scope>): <description>
    │            │               │
@@ -135,16 +159,18 @@ The commit message headline should have the following structure:
    │
    └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test|chore
 ```
+
 The `<type>` should be one of the following:
-* **build**: Changes that affect the build system
-* **ci**: Changes that affect the CI workflows (e.g. changes to `.github` CI configuration files)
-* **docs**: Documentation only changes (this includes both content in the `docs` as well as changes to readmes)
-* **feat**: A new feature
-* **fix**: A bug fix
-* **perf**: A code change that improves performance
-* **refactor**: A code change that neither fixes a bug nor adds a feature
-* **test**: Adding missing tests or correcting existing tests
-* **chore**: Anything that cannot be categorized properly using the above prefixes (e.g. increasing versions)
+
+- **build**: Changes that affect the build system
+- **ci**: Changes that affect the CI workflows (e.g. changes to `.github` CI configuration files)
+- **docs**: Documentation only changes (this includes both content in the `docs` as well as changes to readmes)
+- **feat**: A new feature
+- **fix**: A bug fix
+- **perf**: A code change that improves performance
+- **refactor**: A code change that neither fixes a bug nor adds a feature
+- **test**: Adding missing tests or correcting existing tests
+- **chore**: Anything that cannot be categorized properly using the above prefixes (e.g. increasing versions)
 
 The `<scope>` is optional. If present, it should be the name of the (npm) package or directory affected by the changes of
 the commit.
