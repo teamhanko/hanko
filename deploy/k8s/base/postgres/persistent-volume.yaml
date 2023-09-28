@@ -1,19 +1,5 @@
----
-kind: PersistentVolume
-apiVersion: v1
-metadata:
-  name: postgres-pv
-  namespace: hanko
-  labels:
-    type: local
-spec:
-  storageClassName: standard
-  capacity:
-    storage: 100M
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
+# Persistence Volume definition removed because it somehow made problems with the postgres container.
+# Volume now gets created dynamically (based on the claim).
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
