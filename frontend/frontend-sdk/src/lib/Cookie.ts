@@ -12,6 +12,19 @@ interface CookieOptions {
 }
 
 /**
+ * Options for setting the auth cookie.
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {boolean} secure - Indicates if the Secure attribute of the cookie should be set.
+ * @property {number | Date | undefined} expires - The expiration of the cookie.
+ */
+interface SetAuthCookieOptions {
+  secure?: boolean;
+  expires?: number | Date | undefined;
+}
+
+/**
  * A class to manage cookies.
  *
  * @category SDK
@@ -39,10 +52,13 @@ export class Cookie {
    * Stores the authentication token to the cookie.
    *
    * @param {string} token - The authentication token to be stored.
-   * @param {boolean=} secure - Indicates a secure cookie should be set. Default is `true`.
+   * @param options
    */
-  setAuthCookie(token: string, secure = true) {
-    JSCookie.set(this.authCookieName, token, { secure });
+  setAuthCookie(
+    token: string,
+    options: SetAuthCookieOptions = { secure: true },
+  ) {
+    JSCookie.set(this.authCookieName, token, options);
   }
 
   /**

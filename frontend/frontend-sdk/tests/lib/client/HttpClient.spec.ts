@@ -4,6 +4,7 @@ import {
   HttpClient,
 } from "../../../src/lib/client/HttpClient";
 import { RequestTimeoutError, TechnicalError } from "../../../src";
+import { fakeTimerNow } from "../../setup";
 
 const jwt = "test-token";
 let httpClient: HttpClient;
@@ -224,7 +225,10 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
     );
     expect(client.sessionState.setUserID).toHaveBeenCalledWith(userID);
 
-    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, false);
+    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, {
+      secure: false,
+      expires: new Date(fakeTimerNow + expirationSeconds * 1000),
+    });
     expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
   });
 
@@ -240,7 +244,10 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
     jest.spyOn(client.cookie, "setAuthCookie");
     client.processResponseHeadersOnLogin(userID, response);
 
-    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, true);
+    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, {
+      secure: true,
+      expires: new Date(fakeTimerNow + expirationSeconds * 1000),
+    });
     expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
   });
 });
