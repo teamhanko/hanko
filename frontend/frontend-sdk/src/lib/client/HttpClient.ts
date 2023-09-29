@@ -3,6 +3,7 @@ import { SessionState } from "../state/session/SessionState";
 import { PasscodeState } from "../state/users/PasscodeState";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
+import { decodeJwt } from "jose";
 
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
@@ -216,8 +217,11 @@ class HttpClient {
 
     if (jwt) {
       const secure = !!this.api.match("^https://");
-      const expires = new Date(new Date().getTime() + expirationSeconds * 1000);
-      this.cookie.setAuthCookie(jwt, { secure, expires });
+      const decodedJwt = decodeJwt(jwt);
+      this.cookie.setAuthCookie(jwt, {
+        secure,
+        expires: new Date(decodedJwt.exp * 1000),
+      });
     }
 
     this.passcodeState.read().reset(userID).write();
