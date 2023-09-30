@@ -16,7 +16,6 @@ const code = `
   });
 `;
 
-
 export default function Profile() {
   const logout = () => {
     window.dispatchEvent(new Event("logout"));

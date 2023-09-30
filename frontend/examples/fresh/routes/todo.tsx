@@ -7,9 +7,9 @@ export default function Todo() {
       <nav class="nav flex justify-end gap-3">
         <a href="#" class="button">Todos</a>
         <a href="/profile" class="button">Profile</a>
-        <LogoutButton/>
+        <LogoutButton />
       </nav>
-      <TodoList/>
+      <TodoList />
     </>
   );
 }
