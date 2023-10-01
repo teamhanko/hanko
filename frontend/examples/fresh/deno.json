@@ -20,6 +20,7 @@
   },
   "fmt": {
     "exclude": [
+      "README.md",
       "_fresh"
     ]
   },
@@ -36,6 +37,9 @@
   },
   "compilerOptions": {
     "jsx": "react-jsx",
-    "jsxImportSource": "preact"
+    "jsxImportSource": "preact",
+    "types": [
+      "./types.d.ts"
+    ]
   }
 }
