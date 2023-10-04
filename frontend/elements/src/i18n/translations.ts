@@ -82,7 +82,7 @@ export interface Translation {
     newPasskeyName: string;
     addEmail: string;
     changePassword: string;
-    addPasskey: string;
+    createPasskey: string;
     webauthnUnsupported: string;
     signInWith: string;
     deleteAccount: string;

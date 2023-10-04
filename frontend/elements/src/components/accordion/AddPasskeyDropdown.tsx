@@ -62,7 +62,7 @@ const AddPasskeyDropdown = ({
   return (
     <Dropdown
       name={"add-passkey-dropdown"}
-      title={t("labels.addPasskey")}
+      title={t("labels.createPasskey")}
       checkedItemIndex={checkedItemIndex}
       setCheckedItemIndex={setCheckedItemIndex}
     >
