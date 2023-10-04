@@ -1,155 +1,353 @@
 # Contributing to Hanko
 
-Thank you for considering contributing to Hanko! Following are the guidelines we would like you to follow:
+Thank you for considering contributing to Hanko. We are excited to welcome you aboard! 🚀
 
-- [Code of Conduct](#code-of-conduct)
-- [Communication](#communication)
-- [Reporting Issues](#reporting-issues)
-  - [Security](#security)
-  - [Bugs](#bugs)
-- [Feature Requests](#feature-requests)
-- [Submitting Code](#submitting-code)
-- [Commit Message Guidelines](#commit-message-guidelines)
-- [Style Guidelines](#style-guidelines)
+Please take some time to read this guide to understand contributing best practices for Hanko.
 
-## Code of Conduct
+Big thanks for helping us make Hanko even better. 🤩
 
-We expect all contributors to adhere to our [Code of Conduct](./CODE_OF_CONDUCT.md).
+## Developing
 
-## Communication
+The development branch is `main`. This is the branch that all pull requests should be made against.
 
-If you have any questions, want to discuss bugs or feature requests, or just want talk to other Hanko users you are welcome
-to join our [Slack](https://hanko.io/community) community or use the [Hanko Discussions](https://github.com/teamhanko/hanko/discussions)
-(especially useful for long term discussion or larger questions).
+### Prerequisites
 
-## Reporting issues
+[Go (v1.18+)](https://go.dev/doc/install)
 
-Reporting issues requires a [GitHub](https://github.com/) account. Please do not use the issue
-tracker for general support questions but use the above mentioned [communication](#communication) channels.
+[Docker](https://www.docker.com/get-started/)
 
-### Security
+### Set up
 
-Pursuant to our [security policy](./SECURITY.md), any security vulnerabilities should be reported directly to
-`security@hanko.io` instead of using the issue tracker.
-
-### Bugs
-
-Bugs are tracked as [GitHub issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues).
-When reporting a bug choose "Bug Report" when [creating](https://github.com/teamhanko/hanko/issues/new/choose) a new
-issue. Doing so will present you with a template form to fill out. Be as detailed as possible. Good
-bug reports are vital, so thank you for taking the time!
-
-Before reporting a bug:
-
-1. Take a look at the [existing issues](https://github.com/teamhanko/hanko/issues?q=is%3Aissue+label%3Abug) and make
-   sure the issue hasn't already been reported. If you find a similar bug and the issue is still open, consider adding
-   a comment providing any new information that you might be able to report.
-2. Make sure the issue hasn't been fixed already. Try to reproduce it using the latest `main` branch in the repository if
-   you were not working with the latest version.
-3. Make sure the bug is really a bug. If you need general support or are unsure whether some behaviour represents a bug
-   please do not file a bug ticket but reach out through the above mentioned [communication](#communication) channels.
-4. Gather as much information about the bug as you can. Logs, screenshots/screen captures, steps to reproduce the bug
-   can be vital for a useful bug report.
-
-If you already have suggestions on how to fix the bug, do not hesitate to include them in the bug description.
-
-## Feature requests
-
-Just like bugs, feature requests are tracked as [GitHub issues](https://docs.github.com/en/issues/tracking-your-work-with-issues/about-issues).
-When suggesting an enhancement choose "Feature Request" when [creating](https://github.com/teamhanko/hanko/issues/new/choose) a new
-issue and fill out the template form.
-
-Before making a feature request:
-
-1. Take a look at the [existing issues](https://github.com/teamhanko/hanko/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement) and make
-   sure the issue hasn't already been reported.
-2. Make sure the issue hasn't been implemented already. Always try using the latest `main` branch in the repository if
-   to confirm the feature is not already in place.
-
-When filling out the template form, be sure to be as detailed as possible. Describe the current behavior and explain
-which behavior you expect to see instead. Explain why this enhancement would be useful to Hanko users.
-
-## Submitting Code
-
-Contributing code requires a [GitHub](https://github.com/) account. All contributions are made via
-[pull requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests).
-Pull requests should target the `main` branch.
-
-To submit your code:
-
-1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo#forking-a-repository) the [repository](https://github.com/teamhanko/hanko).
-2. [Clone](https://docs.github.com/en/get-started/quickstart/fork-a-repo#cloning-your-forked-repository) the forked repository.
-3. [Configure remotes](https://docs.github.com/en/get-started/quickstart/fork-a-repo#configuring-git-to-sync-your-fork-with-the-original-repository).
-4. Create a new [branch](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches)
-   off of the `main` branch.
+Clone the repo into a public GitHub repository or [fork the repo](https://github.com/teamhanko/hanko/fork).
+   
+   ```sh
+    git clone https://github.com/<github_username>/hanko.git
    ```
-   git checkout -b <new-branch-name>
-   ```
-5. Make your changes. Make sure to follow the [Style Guidelines](#style-guidelines). Commit your changes.
-   ```
-   git add -A
-   git commit
-   ```
-   Commit messages should follow the [Commit Message Guidelines](#commit-message-guidelines).
-6. Make sure to update, or add to any tests where appropriate. Try to run tests locally first (`go test ./...` for the
-   `backend`, see the [README](./e2e/README.md) for the `e2e`tests on how to run them).
-7. If you added or changed a feature, make sure to document it in the README.md file. If your change
-   affects the `backend` API update the [Open API spec(s)](./docs/static/spec).
-   If your changes affect the `backend` configuration, update the [Config.md](./backend/docs/Config.md).
-8. Push your feature branch up to your fork:
-   ```
-   git push origin <feature-branch-name>
-   ```
-9. [Create a pull request from your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
-10. Submit the pull request by filling out the [pull request template](./.github/PULL_REQUEST_TEMPLATE.md)
-    (note: the template should be displayed automatically once you open a pull request; take account of the comments in
-    the displayed template).
-11. If a pull request is not ready to be reviewed it should be marked as a "Draft".
+  
 
+## Running Backend
 
-When pull requests fail test checks, authors are expected to update
-their pull requests to address the failures until the tests pass. If you have trouble or questions on how to add to
-existing tests, reach out through our [communication](#communication) channels.
+> **Note** If you just want to jump right into the experience of passkeys and passcodes, head over to the
+> [quickstart guide](../quickstart/README.md).
 
-# Commit Message Guidelines
+To get the Hanko backend up and running you need to:
 
-Commit messages should adhere to the
-[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification.
-The commit message should be structured as follows:
+### Run a database
 
-```
-<type>(<optional scope>): <description>
+The following databases are currently supported:
 
-<optional body>
+- PostgreSQL
+- MySQL
 
-<optional footer(s)>
+#### Postgres
+
+Use Docker to run a container based on the official [Postgres](https://hub.docker.com/_/postgres) image:
+
+```shell
+docker run --name=postgres \
+-e POSTGRES_USER=<DB_USER> \
+-e POSTGRES_PASSWORD=<DB_PASSWORD> \
+-e POSTGRES_DB=<DB_DATABASE> \
+-p <DB_PORT>:5432 \
+-d postgres
 ```
 
-The commit message headline should have the following structure:
-```
-<type>(<optional scope>): <description>
-   │            │               │
-   │            │               └─⫸ Summary in present tense. Not capitalized. No period at the end.
-   │            │
-   │            └─⫸ Commit Scope: optional
-   │
-   └─⫸ Commit Type: build|ci|docs|feat|fix|perf|refactor|test|chore
-```
-The `<type>` should be one of the following:
-* **build**: Changes that affect the build system
-* **ci**: Changes that affect the CI workflows (e.g. changes to `.github` CI configuration files)
-* **docs**: Documentation only changes (this includes both content in the `docs` as well as changes to readmes)
-* **feat**: A new feature
-* **fix**: A bug fix
-* **perf**: A code change that improves performance
-* **refactor**: A code change that neither fixes a bug nor adds a feature
-* **test**: Adding missing tests or correcting existing tests
-* **chore**: Anything that cannot be categorized properly using the above prefixes (e.g. increasing versions)
+or use the [official binary packages](https://www.postgresql.org/download/) to install and run
+a Postgres instance.
 
-The `<scope>` is optional. If present, it should be the name of the (npm) package or directory affected by the changes of
-the commit.
+#### MySQL
 
-# Style Guidelines
+Use Docker to run a container based on the official [MySQL](https://hub.docker.com/_/mysql) image:
+
+```shell
+docker run --name=mysql \
+-e MYSQL_USER=<DB_USER> \
+-e MYSQL_PASSWORD=<DB_PASSWORD> \
+-e MYSQL_DATABASE=<DB_DATABASE> \
+-e MYSQL_RANDOM_ROOT_PASSWORD=true \
+-p <DB_PORT>:3306 \
+-d mysql:latest
+```
+
+or follow the official [installation instructions](https://dev.mysql.com/doc/mysql-getting-started/en/#mysql-getting-started-installing) to install and run
+a MySQL instance.
+
+### Configure database access
+
+Open the `config.yaml` file in the `backend/config` or create your own `*.yaml` file and add the following:
+
+```yaml
+database:
+  user: <DB_USER>
+  password: <DB_PASSWORD>
+  host: localhost # change this if the DB is not running on localhost, esp. in a production setting
+  port: <DB_PORT>
+  database: <DB_DATABASE>
+  dialect: <DB_DIALECT> # depending on your choice of DB: postgres, mysql
+```
+
+Replace `<DB_USER>`, `<DB_PASSWORD>`, `<DB_PORT>`, `<DB_DATABASE>` with the values used in your running
+DB instance (cf. the Docker commands above used for running the DB containers) and replace `<DB_DIALECT>` with
+the DB of your choice.
+
+### Apply Database migrations
+
+Before you can start and use the service you need to run the database migrations:
+
+#### Docker
+
+```shell
+docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest migrate up
+```
+
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+
+#### From source
+
+First build the Hanko backend. The only prerequisite is to have Go (v1.18+) [installed](https://go.dev/doc/install)
+on your computer.
+
+```shell
+go generate ./...
+go build -a -o hanko main.go
+```
+
+This command will create an executable with the name `hanko`, which then can be used to apply the database migrations
+and start the Hanko backend.
+
+To apply the migrations, run:
+
+```shell
+./hanko migrate up --config <PATH-TO-CONFIG-FILE>
+```
+
+> **Note** The path to the config file can be relative or absolute.
+
+
+### Run and configure an SMTP server
+
+The Hanko backend requires an SMTP server to send out mails containing
+passcodes (e.g. for the purpose of email verification, password recovery).
+
+For local development purposes you can use, e.g., [Mailslurper](https://www.mailslurper.com/).
+Follow the official [installation](https://github.com/mailslurper/mailslurper/wiki/Getting-Started) instructions or
+use an (inofficial) [Docker image](https://hub.docker.com/r/marcopas/docker-mailslurper) to get it up and running:
+
+```shell
+docker run --name=mailslurper -it -p 2500:2500 -p 8080:8080 -p 8085:8085 @marcopas/docker-mailslurper
+```
+
+where in this case
+- `2500` is the SMTP port of the service
+- `8080` is the port for the GUI application for managing mails
+- `8085` is the port for the [API](https://github.com/mailslurper/mailslurper/wiki/API-Guide) service for managing mails
+
+When using the above Docker command to run a Mailslurper container, it does not configure
+a user/password, so a minimal configuration in your configuration file (`backend/config/config.yaml` or
+your own `*.yaml` file) could contain the following:
+
+```yaml
+passcode:
+  email:
+    from_address: no-reply@example.com
+    from_name: Example Application
+  smtp:
+    host: localhost
+    port: 2500
+```
+
+To ensure that passcode emails also contain a proper subject header, configure a service
+name:
+
+```yaml
+service:
+  name: Example Authentication Service
+```
+
+In a production setting you would rather use a self-hosted SMTP server or a managed service like AWS SES. In that case
+you need to supply the `passcode.smtp.host`, `passcode.smtp.port` as well as the `passcode.smtp.user`,
+`passcode.smtp.password` settings according to your server/service settings.
+
+> **Note** The `passcode.smtp.host` configuration entry is required for the service to start up.
+> Only a check for a non-empty string value will be performed. Also: SMTP-connection related values are not
+> verified, i.e. the application may start but no emails will be sent and your users might not be able to log in if
+> the provided values do not describe an existing SMTP server.
+
+### Configure JSON Web Key Set generation
+
+The API uses [JSON Web Tokens](https://www.rfc-editor.org/rfc/rfc7519.html) (JWTs) for
+[authentication](https://docs.hanko.io/api/public#section/Authentication).
+JWTs are verified using [JSON Web Keys](https://www.rfc-editor.org/rfc/rfc7517) (JWK).
+JWKs are created internally by setting `secrets.keys` options in the
+configuration file (`backend/config/config.yaml` or your own `*.yaml` file):
+
+```yaml
+secrets:
+  keys:
+    - <CHANGE-ME>
+```
+
+> **Note**  at least one `secrets.keys` entry must be provided and each entry must be a random generated string at least 16 characters long.
+
+Keys secrets are used to en- and decrypt the JWKs which get used to sign the JWTs.
+For every key a JWK is generated, encrypted with the key and persisted in the database.
+
+The Hanko backend API publishes public cryptographic keys as a JWK set through the `.well-known/jwks.json`
+[endpoint](https://docs.hanko.io/api/public#tag/.well-known/operation/getJwks) to enable clients to verify token
+signatures.
+
+### Configure WebAuthn
+
+Passkeys are based on the [Web Authentication API](https://www.w3.org/TR/webauthn-2/#web-authentication-api).
+In order to create and login with passkeys, the Hanko backend must be provided information about
+the [WebAuthn Relying Party](https://www.w3.org/TR/webauthn-2/#webauthn-relying-party).
+
+For most use cases, you just need the domain of your web application that uses the Hanko backend. Set
+`webauthn.relying_party.id` to the domain and set `webauthn.relying_party.origin` to the domain _including_ the
+protocol.
+
+> **Important**: If you are hosting your web application on a non-standard HTTP port (i.e. `80`) you also have to
+> include this in the origin setting.
+
+#### Local development example
+
+When developing locally, the Hanko backend defaults to:
+
+```yaml
+webauthn:
+  relying_party:
+    id: "localhost"
+    display_name: "Hanko Authentication Service"
+    origins:
+      - "http://localhost"
+```
+
+so no further configuration changes need to be made to your configuration file.
+
+#### Production Examples
+
+When you have a website hosted at `example.com` and you want to add a login to it that will be available
+at `https://example.com/login`, the WebAuthn config would look like this:
+
+```yaml
+webauthn:
+  relying_party:
+    id: "example.com"
+    display_name: "Example Project"
+    origins:
+      - "https://example.com"
+```
+
+If the login should be available at `https://login.example.com` instead, then the WebAuthn config would look like this:
+
+```yaml
+webauthn:
+  relying_party:
+    id: "login.example.com"
+    display_name: "Example Project"
+    origins:
+      - "https://login.example.com"
+```
+
+Given the above scenario, you still may want to bind your users WebAuthn credentials to `example.com` if you plan to
+add other services on other subdomains later that should be able to use existing credentials. Another reason can be if
+you want to have the option to move your login from `https://login.example.com` to `https://example.com/login` at some
+point. Then the WebAuthn config would look like this:
+
+```yaml
+webauthn:
+  relying_party:
+    id: "example.com"
+    display_name: "Example Project"
+    origins:
+      - "https://login.example.com"
+```
+
+### Configure CORS
+
+Because the backend and your application(s) consuming backend API most likely have different origins, i.e.
+scheme (protocol), hostname (domain), and port part of the URL are different, you need to configure
+Cross-Origin Resource Sharing (CORS) and specify your application(s) as allowed origins:
+
+```yaml
+server:
+  public:
+    cors:
+      allow_origins:
+        - https://example.com
+```
+
+When you include a wildcard `*` origin you need to set `unsafe_wildcard_origin_allowed: true`:
+
+```yaml
+server:
+  public:
+    cors:
+      allow_origins:
+        - "*"
+      unsafe_wildcard_origin_allowed: true
+```
+
+Wildcard `*` origins can lead to cross-site attacks and when you include a `*` wildcard origin,
+we want to make sure, that you understand what you are doing, hence this flag.
+
+> **Note** In most cases, the `allow_origins` list here should contain the same entries as the `webauthn.relying_party.origins` list. Only when you have an Android app you will have an extra entry (`android:apk-key-hash:...`) in the `webauthn.relying_party.origins` list.
+
+### Start the backend
+
+The Hanko backend consists of a public and an administrative API (currently providing user management
+endpoints). These can be started separately or in a single command.
+
+#### Start the public API
+
+##### Docker
+
+```shell
+docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest serve public
+```
+
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+
+The service is now available at `localhost:8000`.
+
+`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
+the `server.public.address` option.
+
+##### From source
+
+```shell
+go generate ./...
+go build -a -o hanko main.go
+```
+
+Then run:
+```shell
+./hanko serve public --config <PATH-TO-CONFIG-FILE>
+```
+
+The service is now available at `localhost:8000`.
+
+#### Start the admin API
+
+In the usage section above we only started the public API. Use the command below to start the admin API. The default
+port is `8001`, but can be [customized](./docs/Config.md) in the configuration through the
+`server.admin.address` option.
+
+```shell
+serve admin
+```
+
+> **Warning** The admin API must be protected by an access management system.
+
+##### Start both public and admin API
+
+Use this command to start the public and admin API together:
+
+```shell
+serve all
+```
+
+# Style guidelines
 
 ## Go
 
