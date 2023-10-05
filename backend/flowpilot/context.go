@@ -5,48 +5,47 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"time"
 )
 
-// flowContext represents the basic context for a Flow.
+// flowContext represents the basic context for a flow.
 type flowContext interface {
-	// GetFlowID returns the unique ID of the current Flow.
+	// GetFlowID returns the unique ID of the current defaultFlow.
 	GetFlowID() uuid.UUID
-	// GetPath returns the current path within the Flow.
+	// GetPath returns the current path within the flow.
 	GetPath() string
 	// Payload returns the JSONManager for accessing payload data.
-	Payload() jsonmanager.JSONManager
+	Payload() utils.Payload
 	// Stash returns the JSONManager for accessing stash data.
-	Stash() jsonmanager.JSONManager
-	// GetInitialState returns the initial state of the Flow.
+	Stash() utils.Stash
+	// GetInitialState returns the initial state of the flow.
 	GetInitialState() StateName
-	// GetCurrentState returns the current state of the Flow.
+	// GetCurrentState returns the current state of the flow.
 	GetCurrentState() StateName
 	// CurrentStateEquals returns true, when one of the given states matches the current state.
 	CurrentStateEquals(states ...StateName) bool
-	// GetPreviousState returns the previous state of the Flow.
+	// GetPreviousState returns the previous state of the flow.
 	GetPreviousState() *StateName
-	// GetErrorState returns the designated error state of the Flow.
+	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
-	// GetEndState returns the final state of the Flow.
+	// GetEndState returns the final state of the flow.
 	GetEndState() StateName
-	// StateExists checks if a given state exists within the Flow.
+	// StateExists checks if a given state exists within the flow.
 	StateExists(stateName StateName) bool
 }
 
-// actionInitializationContext represents the basic context for a Flow action's initialization.
+// actionInitializationContext represents the basic context for a flow action's initialization.
 type actionInitializationContext interface {
 	// AddInputs adds input parameters to the schema.
-	AddInputs(inputList ...Input)
+	AddInputs(inputs ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
-	Stash() jsonmanager.ReadOnlyJSONManager
+	Stash() utils.Stash
 	// SuspendAction suspends the current action's execution.
 	SuspendAction()
 }
 
-// actionExecutionContext represents the context for a action execution.
+// actionExecutionContext represents the context for an action execution.
 type actionExecutionContext interface {
 	flowContext
 	// Input returns the ExecutionSchema for the action.
@@ -55,7 +54,7 @@ type actionExecutionContext interface {
 	// TODO: FetchActionInput (for a action name) is maybe useless and can be removed or replaced.
 
 	// FetchActionInput fetches input data for a specific action.
-	FetchActionInput(actionName ActionName) (jsonmanager.ReadOnlyJSONManager, error)
+	FetchActionInput(actionName ActionName) (utils.ReadOnlyActionInput, error)
 	// ValidateInputData validates the input data against the schema.
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
@@ -65,20 +64,23 @@ type actionExecutionContext interface {
 // actionExecutionContinuationContext represents the context within an action continuation.
 type actionExecutionContinuationContext interface {
 	actionExecutionContext
-	// ContinueFlow continues the Flow execution to the specified next state.
+	// ContinueFlow continues the flow execution to the specified next state.
 	ContinueFlow(nextState StateName) error
-	// ContinueFlowWithError continues the Flow execution to the specified next state with an error.
+	// ContinueFlowWithError continues the flow execution to the specified next state with an error.
 	ContinueFlowWithError(nextState StateName, flowErr FlowError) error
-
+	// StartSubFlow starts a sub-flow and continues the flow execution to the specified next states after the sub-flow has been ended.
+	StartSubFlow(initState StateName, nextStates ...StateName) error
+	// EndSubFlow ends the sub-flow and continues the flow execution to the previously specified next states.
+	EndSubFlow() error
 	// TODO: Implement a function to step back to the previous state (while skipping self-transitions and recalling preserved data).
 }
 
-// InitializationContext is a shorthand for actionInitializationContext within flow actions.
+// InitializationContext is a shorthand for actionInitializationContext within the flow initialization method.
 type InitializationContext interface {
 	actionInitializationContext
 }
 
-// ExecutionContext is a shorthand for actionExecutionContinuationContext within flow actions.
+// ExecutionContext is a shorthand for actionExecutionContinuationContext within flow execution method.
 type ExecutionContext interface {
 	actionExecutionContinuationContext
 }
@@ -95,25 +97,22 @@ type PluginAfterActionExecutionContext interface {
 	actionExecutionContext
 }
 
-// createAndInitializeFlow initializes the Flow and returns a flow Response.
-func createAndInitializeFlow(db FlowDB, flow Flow) (FlowResult, error) {
+// createAndInitializeFlow initializes the flow and returns a flow Response.
+func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	// Wrap the provided FlowDB with additional functionality.
 	dbw := wrapDB(db)
-	// Calculate the expiration time for the Flow.
-	expiresAt := time.Now().Add(flow.TTL).UTC()
-
-	// TODO: Consider implementing types for stash and payload that extend "jsonmanager.NewJSONManager()".
-	// This could enhance the code structure and provide clearer interfaces for handling these data structures.
+	// Calculate the expiration time for the flow.
+	expiresAt := time.Now().Add(flow.ttl).UTC()
 
 	// Initialize JSONManagers for stash and payload.
-	stash := jsonmanager.NewJSONManager()
-	payload := jsonmanager.NewJSONManager()
+	stash := utils.NewStash()
+	payload := utils.NewPayload()
 
-	// Create a new Flow model with the provided parameters.
-	p := flowCreationParam{currentState: flow.InitialState, expiresAt: expiresAt}
-	flowModel, err := dbw.CreateFlowWithParam(p)
+	// Create a new flow model with the provided parameters.
+	flowCreation := flowCreationParam{currentState: flow.initialState, expiresAt: expiresAt}
+	flowModel, err := dbw.CreateFlowWithParam(flowCreation)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Flow: %w", err)
+		return nil, fmt.Errorf("failed to create flow: %w", err)
 	}
 
 	// Create a defaultFlowContext instance.
@@ -128,39 +127,39 @@ func createAndInitializeFlow(db FlowDB, flow Flow) (FlowResult, error) {
 	// Generate a response based on the execution result.
 	er := executionResult{nextState: flowModel.CurrentState}
 
-	return er.generateResponse(fc), nil
+	return er.generateResponse(fc, flow.debug), nil
 }
 
-// executeFlowAction processes the Flow and returns a Response.
-func executeFlowAction(db FlowDB, flow Flow, options flowExecutionOptions) (FlowResult, error) {
-	// Parse the actionParam parameter to get the actionParam name and Flow ID.
+// executeFlowAction processes the flow and returns a Response.
+func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions) (FlowResult, error) {
+	// Parse the actionParam parameter to get the actionParam name and flow ID.
 	actionParam, err := utils.ParseActionParam(options.action)
 	if err != nil {
-		return newFlowResultFromError(flow.ErrorState, ErrorActionParamInvalid.Wrap(err), flow.Debug), nil
+		return newFlowResultFromError(flow.errorState, ErrorActionParamInvalid.Wrap(err), flow.debug), nil
 	}
 
-	// Retrieve the Flow model from the database using the Flow ID.
+	// Retrieve the flow model from the database using the flow ID.
 	flowModel, err := db.GetFlow(actionParam.FlowID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err), flow.Debug), nil
+			return newFlowResultFromError(flow.errorState, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 		}
-		return nil, fmt.Errorf("failed to get Flow: %w", err)
+		return nil, fmt.Errorf("failed to get flow: %w", err)
 	}
 
-	// Check if the Flow has expired.
+	// Check if the flow has expired.
 	if time.Now().After(flowModel.ExpiresAt) {
-		return newFlowResultFromError(flow.ErrorState, ErrorFlowExpired, flow.Debug), nil
+		return newFlowResultFromError(flow.errorState, ErrorFlowExpired, flow.debug), nil
 	}
 
-	// Parse stash data from the Flow model.
-	stash, err := jsonmanager.NewJSONManagerFromString(flowModel.StashData)
+	// Parse stash data from the flow model.
+	stash, err := utils.NewStashFromString(flowModel.StashData)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse stash from flowModel: %w", err)
+		return nil, fmt.Errorf("failed to parse stash from flow: %w", err)
 	}
 
 	// Initialize JSONManagers for payload and flash data.
-	payload := jsonmanager.NewJSONManager()
+	payload := utils.NewPayload()
 
 	// Create a defaultFlowContext instance.
 	fc := defaultFlowContext{
@@ -171,58 +170,57 @@ func executeFlowAction(db FlowDB, flow Flow, options flowExecutionOptions) (Flow
 		payload:   payload,
 	}
 
-	// Get the available transitions for the current state.
-	transitions := fc.getCurrentTransitions()
-	if transitions == nil {
-		err2 := errors.New("the state does not allow to continue with the flow")
-		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err2), flow.Debug), nil
+	detail, err := flow.getStateDetail(flowModel.CurrentState)
+	if err != nil {
+		return nil, err
 	}
 
 	// Parse raw input data into JSONManager.
 	raw := options.inputData.getJSONStringOrDefault()
-	inputJSON, err := jsonmanager.NewJSONManagerFromString(raw)
+	inputJSON, err := utils.NewActionInputFromString(raw)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
 
 	// Create a ActionName from the parsed actionParam name.
 	actionName := ActionName(actionParam.ActionName)
+
 	// Get the action associated with the actionParam name.
-	action, err := transitions.getAction(actionName)
+	action, err := detail.actions.getByName(actionName)
 	if err != nil {
-		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted.Wrap(err), flow.Debug), nil
+		return newFlowResultFromError(flow.errorState, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
 	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
-	mic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
-	action.Initialize(&mic)
+	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
+	action.Initialize(&aic)
 
 	// Check if the action is suspended.
-	if mic.isSuspended {
-		return newFlowResultFromError(flow.ErrorState, ErrorOperationNotPermitted, flow.Debug), nil
+	if aic.isSuspended {
+		return newFlowResultFromError(flow.errorState, ErrorOperationNotPermitted, flow.debug), nil
 	}
 
 	// Create a actionExecutionContext instance for action execution.
-	mec := defaultActionExecutionContext{
+	aec := defaultActionExecutionContext{
 		actionName:         actionName,
 		input:              schema,
 		defaultFlowContext: fc,
 	}
 
 	// Execute the action and handle any errors.
-	err = action.Execute(&mec)
+	err = action.Execute(&aec)
 	if err != nil {
 		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
 	}
 
 	// Ensure that the action has set a result object.
-	if mec.executionResult == nil {
+	if aec.executionResult == nil {
 		return nil, errors.New("the action has not set a result object")
 	}
 
 	// Generate a response based on the execution result.
-	er := *mec.executionResult
+	er := *aec.executionResult
 
-	return er.generateResponse(fc), nil
+	return er.generateResponse(fc, flow.debug), nil
 }

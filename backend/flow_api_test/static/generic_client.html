@@ -119,7 +119,7 @@
                 form.method = 'POST';
 
                 const actionHeadline = document.createElement('h4');
-                actionHeadline.textContent = "⚡ Action: " + action.action_name;
+                actionHeadline.textContent = "⚡ Action: " + action.action;
                 form.appendChild(actionHeadline);
 
 
@@ -131,14 +131,14 @@
                 description.textContent = action.description;
                 form.appendChild(description);
 
-                const inputsHeadline = document.createElement('h5');
-                inputsHeadline.textContent = "⛳ Inputs";
-                form.appendChild(inputsHeadline);
+                const schemaHeadline = document.createElement('h5');
+                schemaHeadline.textContent = "⛳ Schema";
+                form.appendChild(schemaHeadline);
 
-                if (action.inputs) {
+                if (action.schema) {
                     const inputList = document.createElement('ul');
 
-                    action.inputs.forEach(input => {
+                    action.schema.forEach(input => {
                         const inputListItem = document.createElement('li');
 
                         const label = document.createElement("label");

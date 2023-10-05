@@ -3,7 +3,7 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
@@ -15,105 +15,103 @@ type defaultActionExecutionContext struct {
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
-// saveNextState updates the Flow's state and saves Transition data after action execution.
-func (mec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
-	currentState := mec.flowModel.CurrentState
-	previousState := mec.flowModel.PreviousState
+// saveNextState updates the flow's state and saves Transition data after action execution.
+func (aec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
+	completed := executionResult.nextState == aec.flow.endState
+	newVersion := aec.flowModel.Version + 1
+	stashData := aec.stash.String()
 
-	// Update the previous state only if the next state is different from the current state.
-	if executionResult.nextState != currentState {
-		previousState = &currentState
+	// Prepare parameters for updating the flow in the database.
+	flowUpdate := flowUpdateParam{
+		flowID:    aec.flowModel.ID,
+		nextState: executionResult.nextState,
+		stashData: stashData,
+		version:   newVersion,
+		completed: completed,
+		expiresAt: aec.flowModel.ExpiresAt,
+		createdAt: aec.flowModel.CreatedAt,
 	}
 
-	completed := executionResult.nextState == mec.flow.EndState
-	newVersion := mec.flowModel.Version + 1
-
-	// Prepare parameters for updating the Flow in the database.
-	flowUpdateParam := flowUpdateParam{
-		flowID:        mec.flowModel.ID,
-		nextState:     executionResult.nextState,
-		previousState: previousState,
-		stashData:     mec.stash.String(),
-		version:       newVersion,
-		completed:     completed,
-		expiresAt:     mec.flowModel.ExpiresAt,
-		createdAt:     mec.flowModel.CreatedAt,
-	}
-
-	// Update the Flow model in the database.
-	flowModel, err := mec.dbw.UpdateFlowWithParam(flowUpdateParam)
-	if err != nil {
+	// Update the flow model in the database.
+	if _, err := aec.dbw.UpdateFlowWithParam(flowUpdate); err != nil {
 		return fmt.Errorf("failed to store updated flow: %w", err)
 	}
 
-	mec.flowModel = *flowModel
-
 	// Get the data to persists from the executed action schema for recording.
-	inputDataToPersist := mec.input.getDataToPersist().String()
+	inputDataToPersist := aec.input.getDataToPersist().String()
 
 	// Prepare parameters for creating a new Transition in the database.
-	transitionCreationParam := transitionCreationParam{
-		flowID:     mec.flowModel.ID,
-		actionName: mec.actionName,
-		fromState:  currentState,
+	transitionCreation := transitionCreationParam{
+		flowID:     aec.flowModel.ID,
+		actionName: aec.actionName,
+		fromState:  aec.flowModel.CurrentState,
 		toState:    executionResult.nextState,
 		inputData:  inputDataToPersist,
 		flowError:  executionResult.flowError,
 	}
 
 	// Create a new Transition in the database.
-	_, err = mec.dbw.CreateTransitionWithParam(transitionCreationParam)
-	if err != nil {
+	if _, err := aec.dbw.CreateTransitionWithParam(transitionCreation); err != nil {
 		return fmt.Errorf("failed to store a new transition: %w", err)
 	}
 
 	return nil
 }
 
-// continueFlow continues the Flow execution to the specified nextState with an optional error type.
-func (mec *defaultActionExecutionContext) continueFlow(nextState StateName, flowError FlowError) error {
-	// Check if the specified nextState is valid.
-	if exists := mec.flow.stateExists(nextState); !exists {
-		return errors.New("the execution result contains an invalid state")
+// continueFlow continues the flow execution to the specified nextState with an optional error type.
+func (aec *defaultActionExecutionContext) continueFlow(nextState StateName, flowError FlowError, skipFlowValidation bool) error {
+	detail, err := aec.flow.getStateDetail(aec.flowModel.CurrentState)
+	if err != nil {
+		return err
 	}
 
-	// Prepare an executionResult for continuing the Flow.
+	if !skipFlowValidation {
+		// Check if the specified nextState is valid.
+		if _, ok := detail.flow[nextState]; !(ok ||
+			detail.subFlows.isEntryStateAllowed(nextState) ||
+			nextState == aec.flow.endState ||
+			nextState == aec.flow.errorState) {
+			return fmt.Errorf("progression to the specified state '%s' is not allowed", nextState)
+		}
+	}
+
+	// Prepare the result for continuing the flow.
+	actionResult := actionExecutionResult{
+		actionName: aec.actionName,
+		schema:     aec.input,
+	}
+
 	result := executionResult{
-		nextState: nextState,
-		flowError: flowError,
-		actionExecutionResult: &actionExecutionResult{
-			actionName: mec.actionName,
-			schema:     mec.input,
-		},
+		nextState:             nextState,
+		flowError:             flowError,
+		actionExecutionResult: &actionResult,
 	}
 
 	// Save the next state and transition data.
-	err := mec.saveNextState(result)
-	if err != nil {
+	if err := aec.saveNextState(result); err != nil {
 		return fmt.Errorf("failed to save the transition data: %w", err)
 	}
 
-	mec.executionResult = &result
+	aec.executionResult = &result
 
 	return nil
 }
 
 // Input returns the ExecutionSchema for accessing input data.
-func (mec *defaultActionExecutionContext) Input() ExecutionSchema {
-	return mec.input
+func (aec *defaultActionExecutionContext) Input() ExecutionSchema {
+	return aec.input
 }
 
 // Payload returns the JSONManager for accessing payload data.
-func (mec *defaultActionExecutionContext) Payload() jsonmanager.JSONManager {
-	return mec.payload
+func (aec *defaultActionExecutionContext) Payload() utils.Payload {
+	return aec.payload
 }
 
 // CopyInputValuesToStash copies specified inputs to the stash.
-func (mec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
+func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
 	for _, inputName := range inputNames {
 		// Copy input values to the stash.
-		err := mec.stash.Set(inputName, mec.input.Get(inputName).Value())
-		if err != nil {
+		if err := aec.stash.Set(inputName, aec.input.Get(inputName).Value()); err != nil {
 			return err
 		}
 	}
@@ -121,16 +119,100 @@ func (mec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...s
 }
 
 // ValidateInputData validates the input data against the schema.
-func (mec *defaultActionExecutionContext) ValidateInputData() bool {
-	return mec.input.validateInputData(mec.flowModel.CurrentState, mec.stash)
+func (aec *defaultActionExecutionContext) ValidateInputData() bool {
+	return aec.input.validateInputData(aec.flowModel.CurrentState, aec.stash)
 }
 
-// ContinueFlow continues the Flow execution to the specified nextState.
-func (mec *defaultActionExecutionContext) ContinueFlow(nextState StateName) error {
-	return mec.continueFlow(nextState, nil)
+// ContinueFlow continues the flow execution to the specified nextState.
+func (aec *defaultActionExecutionContext) ContinueFlow(nextState StateName) error {
+	return aec.continueFlow(nextState, nil, false)
 }
 
-// ContinueFlowWithError continues the Flow execution to the specified nextState with an error type.
-func (mec *defaultActionExecutionContext) ContinueFlowWithError(nextState StateName, flowErr FlowError) error {
-	return mec.continueFlow(nextState, flowErr)
+// ContinueFlowWithError continues the flow execution to the specified nextState with an error type.
+func (aec *defaultActionExecutionContext) ContinueFlowWithError(nextState StateName, flowErr FlowError) error {
+	return aec.continueFlow(nextState, flowErr, false)
+}
+
+// StartSubFlow initiates the sub-flow associated with the specified StateName of the entry state (first parameter).
+// After a sub-flow action calls EndSubFlow(), the flow progresses to a state within the current flow or another
+// sub-flow's entry state, as specified in the list of nextStates (every StateName passed after the first parameter).
+func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nextStates ...StateName) error {
+	detail, err := aec.flow.getStateDetail(aec.flowModel.CurrentState)
+	if err != nil {
+		return err
+	}
+
+	// the specified entry state must be an entry state to a sub-flow of the current flow
+	if entryStateAllowed := detail.subFlows.isEntryStateAllowed(entryState); !entryStateAllowed {
+		return errors.New("the specified entry state is not associated with a sub-flow of the current flow")
+	}
+
+	var scheduledStates []StateName
+
+	for index, nextState := range nextStates {
+		subFlowEntryStateAllowed := detail.subFlows.isEntryStateAllowed(nextState)
+
+		// validate the current next state
+		if index == len(nextStates)-1 {
+			// the last state must be a member of the current flow or a sub-flow entry state
+			if _, ok := detail.flow[nextState]; !ok && !subFlowEntryStateAllowed {
+				return errors.New("the last next state is not a sub-flow entry state or a state associated with the current flow")
+			}
+		} else {
+			// every other state must be a sub-flow entry state
+			if !subFlowEntryStateAllowed {
+				return fmt.Errorf("next state with index %d is not a sub-flow entry state", index)
+			}
+		}
+
+		// append the current nextState to the list of scheduled states
+		scheduledStates = append(scheduledStates, nextState)
+	}
+
+	// get the current sub-flow stack from the stash
+	stack := aec.stash.Get("_.scheduled_states").Array()
+
+	newStack := make([]StateName, len(stack))
+
+	for index := range newStack {
+		newStack[index] = StateName(stack[index].String())
+	}
+
+	// prepend the states to the list of previously defined scheduled states
+	newStack = append(scheduledStates, newStack...)
+
+	err = aec.stash.Set("_.scheduled_states", newStack)
+	if err != nil {
+		return fmt.Errorf("failed to stash scheduled states while staring a sub-flow: %w", err)
+	}
+
+	return aec.continueFlow(entryState, nil, false)
+}
+
+// EndSubFlow ends the current sub-flow and progresses the flow to the previously defined nextStates (see StartSubFlow)
+func (aec *defaultActionExecutionContext) EndSubFlow() error {
+	// retrieve the previously scheduled states form the stash
+	stack := aec.stash.Get("_.scheduled_states").Array()
+
+	newStack := make([]StateName, len(stack))
+
+	for index := range newStack {
+		newStack[index] = StateName(stack[index].String())
+	}
+
+	// if there is no scheduled state left, continue to the end state
+	if len(newStack) == 0 {
+		newStack = append(newStack, aec.GetEndState())
+	}
+
+	// get and remove first stack item
+	nextState := newStack[0]
+	newStack = newStack[1:]
+
+	// stash the updated list of scheduled states
+	if err := aec.stash.Set("_.scheduled_states", newStack); err != nil {
+		return fmt.Errorf("failed to stash scheduled states while ending the sub-flow: %w", err)
+	}
+
+	return aec.continueFlow(nextState, nil, true)
 }

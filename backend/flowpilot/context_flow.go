@@ -3,39 +3,39 @@ package flowpilot
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // defaultFlowContext is the default implementation of the flowContext interface.
 type defaultFlowContext struct {
-	payload   jsonmanager.JSONManager // JSONManager for payload data.
-	stash     jsonmanager.JSONManager // JSONManager for stash data.
-	flow      Flow                    // The associated Flow instance.
-	dbw       FlowDBWrapper           // Wrapped FlowDB instance with additional functionality.
-	flowModel FlowModel               // The current FlowModel.
+	payload   utils.Payload // JSONManager for payload data.
+	stash     utils.Stash   // JSONManager for stash data.
+	flow      defaultFlow   // The associated defaultFlow instance.
+	dbw       FlowDBWrapper // Wrapped FlowDB instance with additional functionality.
+	flowModel FlowModel     // The current FlowModel.
 }
 
-// GetFlowID returns the unique ID of the current Flow.
+// GetFlowID returns the unique ID of the current defaultFlow.
 func (fc *defaultFlowContext) GetFlowID() uuid.UUID {
 	return fc.flowModel.ID
 }
 
-// GetPath returns the current path within the Flow.
+// GetPath returns the current path within the defaultFlow.
 func (fc *defaultFlowContext) GetPath() string {
-	return fc.flow.Path
+	return fc.flow.path
 }
 
-// GetInitialState returns the initial state of the Flow.
+// GetInitialState returns the initial addState of the defaultFlow.
 func (fc *defaultFlowContext) GetInitialState() StateName {
-	return fc.flow.InitialState
+	return fc.flow.initialState
 }
 
-// GetCurrentState returns the current state of the Flow.
+// GetCurrentState returns the current addState of the defaultFlow.
 func (fc *defaultFlowContext) GetCurrentState() StateName {
 	return fc.flowModel.CurrentState
 }
 
-// CurrentStateEquals returns true, when one of the given stateNames matches the current state name.
+// CurrentStateEquals returns true, when one of the given stateNames matches the current addState name.
 func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	for _, s := range stateNames {
 		if s == fc.flowModel.CurrentState {
@@ -46,33 +46,34 @@ func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	return false
 }
 
-// GetPreviousState returns a pointer to the previous state of the Flow.
+// GetPreviousState returns a pointer to the previous addState of the flow.
 func (fc *defaultFlowContext) GetPreviousState() *StateName {
-	return fc.flowModel.PreviousState
+	// TODO: A new state history logic needs to be implemented to reintroduce the functionality
+	return nil
 }
 
-// GetErrorState returns the designated error state of the Flow.
+// GetErrorState returns the designated error addState of the flow.
 func (fc *defaultFlowContext) GetErrorState() StateName {
-	return fc.flow.ErrorState
+	return fc.flow.errorState
 }
 
-// GetEndState returns the final state of the Flow.
+// GetEndState returns the final addState of the flow.
 func (fc *defaultFlowContext) GetEndState() StateName {
-	return fc.flow.EndState
+	return fc.flow.endState
 }
 
 // Stash returns the JSONManager for accessing stash data.
-func (fc *defaultFlowContext) Stash() jsonmanager.JSONManager {
+func (fc *defaultFlowContext) Stash() utils.Stash {
 	return fc.stash
 }
 
-// StateExists checks if a given state exists within the Flow.
+// StateExists checks if a given addState exists within the flow.
 func (fc *defaultFlowContext) StateExists(stateName StateName) bool {
 	return fc.flow.stateExists(stateName)
 }
 
-// FetchMethodInput fetches input data for a specific method.
-func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (jsonmanager.ReadOnlyJSONManager, error) {
+// FetchActionInput fetches input data for a specific action.
+func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (utils.ReadOnlyActionInput, error) {
 	// Find the last Transition with the specified method from the database wrapper.
 	t, err := fc.dbw.FindLastTransitionWithAction(fc.flowModel.ID, methodName)
 	if err != nil {
@@ -81,19 +82,14 @@ func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (jsonmanag
 
 	// If no Transition is found, return an empty JSONManager.
 	if t == nil {
-		return jsonmanager.NewJSONManager(), nil
+		return utils.NewActionInput(), nil
 	}
 
 	// Parse input data from the Transition.
-	inputData, err := jsonmanager.NewJSONManagerFromString(t.InputData)
+	inputData, err := utils.NewActionInputFromString(t.InputData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode Transition data: %w", err)
 	}
 
 	return inputData, nil
-}
-
-// getCurrentTransitions retrieves the Transitions for the current state.
-func (fc *defaultFlowContext) getCurrentTransitions() *Transitions {
-	return fc.flow.getTransitionsForState(fc.flowModel.CurrentState)
 }

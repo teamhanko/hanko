@@ -8,10 +8,10 @@ import (
 
 // PublicAction represents a link to an action.
 type PublicAction struct {
-	Href        string       `json:"href"`
-	Inputs      PublicSchema `json:"inputs"`
-	ActionName  ActionName   `json:"action_name"`
-	Description string       `json:"description"`
+	Href         string       `json:"href"`
+	PublicSchema PublicSchema `json:"schema"`
+	Name         ActionName   `json:"action"`
+	Description  string       `json:"description"`
 }
 
 // PublicActions is a collection of PublicAction instances.
@@ -26,28 +26,28 @@ func (ls *PublicActions) Add(l PublicAction) {
 type PublicError struct {
 	Code    string  `json:"code"`
 	Message string  `json:"message"`
-	Origin  *string `json:"origin,omitempty"`
+	Cause   *string `json:"cause,omitempty"`
 }
 
 // PublicInput represents an input field for public exposure.
 type PublicInput struct {
-	Name      string       `json:"name"`
-	Type      InputType    `json:"type"`
-	Value     interface{}  `json:"value,omitempty"`
-	MinLength *int         `json:"min_length,omitempty"`
-	MaxLength *int         `json:"max_length,omitempty"`
-	Required  *bool        `json:"required,omitempty"`
-	Hidden    *bool        `json:"hidden,omitempty"`
-	Error     *PublicError `json:"error,omitempty"`
+	Name        string       `json:"name"`
+	Type        InputType    `json:"type"`
+	Value       interface{}  `json:"value,omitempty"`
+	MinLength   *int         `json:"min_length,omitempty"`
+	MaxLength   *int         `json:"max_length,omitempty"`
+	Required    *bool        `json:"required,omitempty"`
+	Hidden      *bool        `json:"hidden,omitempty"`
+	PublicError *PublicError `json:"error,omitempty"`
 }
 
 // PublicResponse represents the response of an action execution.
 type PublicResponse struct {
-	State   StateName     `json:"state"`
-	Status  int           `json:"status"`
-	Payload interface{}   `json:"payload,omitempty"`
-	Actions PublicActions `json:"actions"`
-	Error   *PublicError  `json:"error,omitempty"`
+	State         StateName     `json:"state"`
+	Status        int           `json:"status"`
+	Payload       interface{}   `json:"payload,omitempty"`
+	PublicActions PublicActions `json:"actions"`
+	PublicError   *PublicError  `json:"error,omitempty"`
 }
 
 // FlowResult interface defines methods for obtaining response and status.
@@ -62,19 +62,22 @@ type DefaultFlowResult struct {
 }
 
 // newFlowResultFromResponse creates a FlowResult from a PublicResponse.
-func newFlowResultFromResponse(response PublicResponse) FlowResult {
-	return DefaultFlowResult{PublicResponse: response}
+func newFlowResultFromResponse(publicResponse PublicResponse) FlowResult {
+	return DefaultFlowResult{PublicResponse: publicResponse}
 }
 
 // newFlowResultFromError creates a FlowResult from a FlowError.
 func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) FlowResult {
-	pe := flowError.toPublicError(debug)
+	publicError := flowError.toPublicError(debug)
+	status := flowError.Status()
 
-	return DefaultFlowResult{PublicResponse: PublicResponse{
-		State:  stateName,
-		Status: flowError.Status(),
-		Error:  &pe,
-	}}
+	publicResponse := PublicResponse{
+		State:       stateName,
+		Status:      status,
+		PublicError: &publicError,
+	}
+
+	return DefaultFlowResult{PublicResponse: publicResponse}
 }
 
 // Response returns the PublicResponse.
@@ -102,25 +105,28 @@ type executionResult struct {
 }
 
 // generateResponse generates a response based on the execution result.
-func (er *executionResult) generateResponse(fc defaultFlowContext) FlowResult {
+func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) FlowResult {
 	// Generate actions for the response.
 	actions := er.generateActions(fc)
 
+	// Unmarshal the generated payload for the response.
+	payload := fc.payload.Unmarshal()
+
 	// Create the response object.
 	resp := PublicResponse{
-		State:   er.nextState,
-		Status:  http.StatusOK,
-		Payload: fc.payload.Unmarshal(),
-		Actions: actions,
+		State:         er.nextState,
+		Status:        http.StatusOK,
+		Payload:       payload,
+		PublicActions: actions,
 	}
 
 	// Include flow error if present.
 	if er.flowError != nil {
 		status := er.flowError.Status()
-		publicError := er.flowError.toPublicError(false)
+		publicError := er.flowError.toPublicError(debug)
 
 		resp.Status = status
-		resp.Error = &publicError
+		resp.PublicError = &publicError
 	}
 
 	return newFlowResultFromResponse(resp)
@@ -128,63 +134,66 @@ func (er *executionResult) generateResponse(fc defaultFlowContext) FlowResult {
 
 // generateActions generates a collection of links based on the execution result.
 func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions {
-	var actions PublicActions
+	var publicActions PublicActions
 
-	// Get transitions for the next state.
-	transitions := fc.flow.getTransitionsForState(er.nextState)
+	// Get actions for the next addState.
+	detail, _ := fc.flow.getStateDetail(er.nextState)
 
-	if transitions != nil {
-		for _, t := range *transitions {
-			currentActionName := t.Action.GetName()
-			currentDescription := t.Action.GetDescription()
+	if detail != nil {
+		for _, action := range detail.actions {
+			actionName := action.GetName()
+			actionDescription := action.GetDescription()
 
 			// Create action HREF based on the current flow context and method name.
-			href := er.createHref(fc, currentActionName)
-			schema := er.getExecutionSchema(currentActionName)
+			href := er.createHref(fc, actionName)
+			schema := er.getExecutionSchema(actionName)
 
 			if schema == nil {
 				// Create schema if not available.
-				if schema = er.createSchema(fc, t.Action); schema == nil {
+				if schema = er.createSchema(fc, action); schema == nil {
 					continue
 				}
 			}
 
+			publicSchema := schema.toPublicSchema(er.nextState)
+
 			// Create the action instance.
-			action := PublicAction{
-				Href:        href,
-				Inputs:      schema.toPublicSchema(er.nextState),
-				ActionName:  currentActionName,
-				Description: currentDescription,
+			publicAction := PublicAction{
+				Href:         href,
+				PublicSchema: publicSchema,
+				Name:         actionName,
+				Description:  actionDescription,
 			}
 
-			actions.Add(action)
+			publicActions.Add(publicAction)
 		}
 	}
 
-	return actions
+	return publicActions
 }
 
 // createSchema creates an execution schema for a method if needed.
-func (er *executionResult) createSchema(fc defaultFlowContext, method Action) ExecutionSchema {
+func (er *executionResult) createSchema(fc defaultFlowContext, action Action) ExecutionSchema {
 	var schema ExecutionSchema
-	var err error
 
 	if er.actionExecutionResult != nil {
+		var err error
+
 		data := er.actionExecutionResult.schema.getOutputData()
 		schema, err = newSchemaWithOutputData(data)
+
+		if err != nil {
+			return nil
+		}
 	} else {
 		schema = newSchema()
 	}
 
-	if err != nil {
-		return nil
-	}
+	// Initialize the action.
+	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: fc.stash}
+	action.Initialize(&aic)
 
-	// Initialize the method.
-	mic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: fc.stash}
-	method.Initialize(&mic)
-
-	if mic.isSuspended {
+	if aic.isSuspended {
 		return nil
 	}
 
@@ -192,8 +201,8 @@ func (er *executionResult) createSchema(fc defaultFlowContext, method Action) Ex
 }
 
 // getExecutionSchema gets the execution schema for a given method name.
-func (er *executionResult) getExecutionSchema(methodName ActionName) ExecutionSchema {
-	if er.actionExecutionResult == nil || methodName != er.actionExecutionResult.actionName {
+func (er *executionResult) getExecutionSchema(actionName ActionName) ExecutionSchema {
+	if er.actionExecutionResult == nil || actionName != er.actionExecutionResult.actionName {
 		return nil
 	}
 
@@ -201,7 +210,7 @@ func (er *executionResult) getExecutionSchema(methodName ActionName) ExecutionSc
 }
 
 // createHref creates a link HREF based on the current flow context and method name.
-func (er *executionResult) createHref(fc defaultFlowContext, methodName ActionName) string {
-	action := utils.CreateActionParam(string(methodName), fc.GetFlowID())
+func (er *executionResult) createHref(fc defaultFlowContext, actionName ActionName) string {
+	action := utils.CreateActionParam(string(actionName), fc.GetFlowID())
 	return fmt.Sprintf("%s?flowpilot_action=%s", fc.GetPath(), action)
 }
