@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/brianvoe/gofakeit/v6 v6.23.2
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.15.4
+	github.com/go-playground/validator/v10 v10.15.5
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.8.6
@@ -16,7 +16,7 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.8.9
 	github.com/h2non/gock v1.2.0
-	github.com/invopop/jsonschema v0.10.0
+	github.com/invopop/jsonschema v0.11.0
 	github.com/jackc/pgconn v1.14.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/knadh/koanf v1.5.0

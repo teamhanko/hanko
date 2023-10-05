@@ -11,12 +11,12 @@ export class RegisterAuthenticator extends BasePage {
   constructor(page: Page) {
     super(page);
     this.setUpPasskeyButton = page.locator("button[type=submit]", {
-      hasText: "Save a passkey",
+      hasText: "Create a passkey",
     });
     this.skipLink = page.locator("button", {
       hasText: "Skip",
     });
-    this.headline = page.locator("h1", { hasText: "Save a passkey" });
+    this.headline = page.locator("h1", { hasText: "Create a passkey" });
   }
 
   async registerPasskey() {
