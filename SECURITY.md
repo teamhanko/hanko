@@ -1,3 +1,4 @@
+@@ -0,0 +1,11 @@
 # Security Policy
 
 ## Reporting a Vulnerability
