@@ -1,7 +1,7 @@
 package flowpilot
 
 import (
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"regexp"
 )
 
@@ -34,7 +34,7 @@ type Input interface {
 	shouldPersist() bool
 	shouldPreserve() bool
 	isIncludedOnState(stateName StateName) bool
-	validate(stateName StateName, inputData jsonmanager.ReadOnlyJSONManager, stashData jsonmanager.JSONManager) bool
+	validate(stateName StateName, inputData utils.ReadOnlyActionInput, stashData utils.Stash) bool
 	toPublicInput() *PublicInput
 }
 
@@ -61,16 +61,18 @@ type DefaultInput struct {
 }
 
 // newInput creates a new DefaultInput instance with provided parameters.
-func newInput(name string, t InputType, persistValue bool) Input {
+func newInput(name string, inputType InputType, persistValue bool) Input {
+	extraOptions := defaultExtraInputOptions{
+		preserveValue:    false,
+		persistValue:     persistValue,
+		includeOnStates:  []StateName{},
+		compareWithStash: false,
+	}
+
 	return &DefaultInput{
-		name:     name,
-		dataType: t,
-		defaultExtraInputOptions: defaultExtraInputOptions{
-			preserveValue:    false,
-			persistValue:     persistValue,
-			includeOnStates:  []StateName{},
-			compareWithStash: false,
-		},
+		name:                     name,
+		dataType:                 inputType,
+		defaultExtraInputOptions: extraOptions,
 	}
 }
 
@@ -190,7 +192,7 @@ func (i *DefaultInput) shouldPreserve() bool {
 }
 
 // validate performs validation on the input field.
-func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadOnlyJSONManager, stashData jsonmanager.JSONManager) bool {
+func (i *DefaultInput) validate(stateName StateName, inputData utils.ReadOnlyActionInput, stashData utils.Stash) bool {
 	// TODO: Replace with more structured validation logic.
 
 	var inputValue *string
@@ -251,21 +253,21 @@ func (i *DefaultInput) validate(stateName StateName, inputData jsonmanager.ReadO
 
 // toPublicInput converts the DefaultInput to a PublicInput for public exposure.
 func (i *DefaultInput) toPublicInput() *PublicInput {
-	var pe *PublicError
+	var publicError *PublicError
 
 	if i.error != nil {
 		e := i.error.toPublicError(true)
-		pe = &e
+		publicError = &e
 	}
 
 	return &PublicInput{
-		Name:      i.name,
-		Type:      i.dataType,
-		Value:     i.value,
-		MinLength: i.minLength,
-		MaxLength: i.maxLength,
-		Required:  i.required,
-		Hidden:    i.hidden,
-		Error:     pe,
+		Name:        i.name,
+		Type:        i.dataType,
+		Value:       i.value,
+		MinLength:   i.minLength,
+		MaxLength:   i.maxLength,
+		Required:    i.required,
+		Hidden:      i.hidden,
+		PublicError: publicError,
 	}
 }

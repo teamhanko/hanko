@@ -1,7 +1,6 @@
 create_table("flows") {
   t.Column("id", "uuid", {primary: true})
   t.Column("current_state", "string")
-  t.Column("previous_state", "string", {"null": true})
   t.Column("stash_data", "string")
   t.Column("version", "int")
   t.Column("completed", "bool", {"default": false})
