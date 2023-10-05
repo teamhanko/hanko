@@ -35,12 +35,9 @@ import { Hanko } from "@teamhanko/hanko-elements";
 const hankoApi = process.env.NEXT_PUBLIC_HANKO_API;
 const hanko = new Hanko(hankoApi);
 
-async function getEmail() {
-  const userData = await hanko?.user.getCurrent();
-  const email = userData.email;
-
-  return email;
-}
+  const {id, email} = await hanko.user.getCurrent();
+  
+  console.log(`user-id: ${id}, email: ${email}`);
 ```
 
 ```mdx-code-block
