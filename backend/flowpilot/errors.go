@@ -33,7 +33,7 @@ type InputError interface {
 
 // defaultError is a base struct for custom error types.
 type defaultError struct {
-	origin    error  // The error origin.
+	cause     error  // The error cause.
 	code      string // Unique error code.
 	message   string // Contains a description of the error.
 	errorText string // The string representation of the error.
@@ -51,7 +51,7 @@ func (e *defaultError) Message() string {
 
 // Unwrap returns the wrapped error.
 func (e *defaultError) Unwrap() error {
-	return e.origin
+	return e.cause
 }
 
 // Error returns the formatted error message.
@@ -61,17 +61,17 @@ func (e *defaultError) Error() string {
 
 // toPublicError converts the error to a PublicError for public exposure.
 func (e *defaultError) toPublicError(debug bool) PublicError {
-	pe := PublicError{
+	publicError := PublicError{
 		Code:    e.Code(),
 		Message: e.Message(),
 	}
 
-	if debug && e.origin != nil {
-		str := e.origin.Error()
-		pe.Origin = &str
+	if debug && e.cause != nil {
+		cause := e.cause.Error()
+		publicError.Cause = &cause
 	}
 
-	return pe
+	return publicError
 }
 
 // defaultFlowError is a struct for flow-related errors.
@@ -81,26 +81,31 @@ type defaultFlowError struct {
 	status int // The suggested HTTP status code.
 }
 
-func createErrorText(code, message string, origin error) string {
-	txt := fmt.Sprintf("%s - %s", code, message)
-	if origin != nil {
-		txt = fmt.Sprintf("%s: %s", txt, origin.Error())
+// createErrorText creates the text used as the string representation of the error.
+func createErrorText(code, message string, cause error) string {
+	text := fmt.Sprintf("%s - %s", code, message)
+
+	if cause != nil {
+		text = fmt.Sprintf("%s: %s", text, cause.Error())
 	}
-	return txt
+
+	return text
 }
 
 // NewFlowError creates a new FlowError instance.
 func NewFlowError(code, message string, status int) FlowError {
-	return newFlowErrorWithOrigin(code, message, status, nil)
+	return newFlowErrorWithCause(code, message, status, nil)
 }
 
-// newFlowErrorWithOrigin creates a new FlowError instance with an origin error.
-func newFlowErrorWithOrigin(code, message string, status int, origin error) FlowError {
+// newFlowErrorWithCause creates a new FlowError instance with an error cause.
+func newFlowErrorWithCause(code, message string, status int, cause error) FlowError {
+	errorText := createErrorText(code, message, cause)
+
 	e := defaultError{
-		origin:    origin,
+		cause:     cause,
 		code:      code,
 		message:   message,
-		errorText: createErrorText(code, message, origin),
+		errorText: errorText,
 	}
 
 	return &defaultFlowError{defaultError: e, status: status}
@@ -113,7 +118,7 @@ func (e *defaultFlowError) Status() int {
 
 // Wrap wraps the error with another error.
 func (e *defaultFlowError) Wrap(err error) FlowError {
-	return newFlowErrorWithOrigin(e.code, e.message, e.status, err)
+	return newFlowErrorWithCause(e.code, e.message, e.status, err)
 }
 
 // defaultInputError is a struct for input-related errors.
@@ -123,16 +128,18 @@ type defaultInputError struct {
 
 // NewInputError creates a new InputError instance.
 func NewInputError(code, message string) InputError {
-	return newInputErrorWithOrigin(code, message, nil)
+	return newInputErrorWithCause(code, message, nil)
 }
 
-// newInputErrorWithOrigin creates a new InputError instance with an origin error.
-func newInputErrorWithOrigin(code, message string, origin error) InputError {
+// newInputErrorWithCause creates a new InputError instance with an error cause.
+func newInputErrorWithCause(code, message string, cause error) InputError {
+	errorText := createErrorText(code, message, cause)
+
 	e := defaultError{
-		origin:    origin,
+		cause:     cause,
 		code:      code,
 		message:   message,
-		errorText: createErrorText(code, message, origin),
+		errorText: errorText,
 	}
 
 	return &defaultInputError{defaultError: e}
@@ -140,7 +147,7 @@ func newInputErrorWithOrigin(code, message string, origin error) InputError {
 
 // Wrap wraps the error with another error.
 func (e *defaultInputError) Wrap(err error) InputError {
-	return newInputErrorWithOrigin(e.code, e.message, err)
+	return newInputErrorWithCause(e.code, e.message, err)
 }
 
 // Predefined flow error types

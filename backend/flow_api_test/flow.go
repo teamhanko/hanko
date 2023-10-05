@@ -23,4 +23,4 @@ var Flow = flowpilot.NewFlow("/flow_api_login").
 	FixedStates(StateSignInOrSignUp, StateError, StateSuccess).
 	TTL(time.Minute * 10).
 	Debug(true).
-	Build()
+	MustBuild()

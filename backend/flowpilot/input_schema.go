@@ -1,7 +1,7 @@
 package flowpilot
 
 import (
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"github.com/tidwall/gjson"
 )
 
@@ -17,9 +17,9 @@ type ExecutionSchema interface {
 	SetError(inputName string, inputError InputError)
 
 	getInput(name string) Input
-	getOutputData() jsonmanager.ReadOnlyJSONManager
-	getDataToPersist() jsonmanager.ReadOnlyJSONManager
-	validateInputData(stateName StateName, stash jsonmanager.JSONManager) bool
+	getOutputData() utils.ReadOnlyActionInput
+	getDataToPersist() utils.ReadOnlyActionInput
+	validateInputData(stateName StateName, stash utils.Stash) bool
 	toInitializationSchema() InitializationSchema
 	toPublicSchema(stateName StateName) PublicSchema
 }
@@ -33,13 +33,14 @@ type PublicSchema []*PublicInput
 // defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
 type defaultSchema struct {
 	inputs
-	inputData  jsonmanager.ReadOnlyJSONManager
-	outputData jsonmanager.JSONManager
+	inputData  utils.ReadOnlyActionInput
+	outputData utils.ActionInput
 }
 
 // newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithInputData(inputData jsonmanager.ReadOnlyJSONManager) ExecutionSchema {
-	outputData := jsonmanager.NewJSONManager()
+func newSchemaWithInputData(inputData utils.ActionInput) ExecutionSchema {
+	outputData := utils.NewActionInput()
+
 	return &defaultSchema{
 		inputData:  inputData,
 		outputData: outputData,
@@ -47,8 +48,8 @@ func newSchemaWithInputData(inputData jsonmanager.ReadOnlyJSONManager) Execution
 }
 
 // newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithOutputData(outputData jsonmanager.ReadOnlyJSONManager) (ExecutionSchema, error) {
-	data, err := jsonmanager.NewJSONManagerFromString(outputData.String())
+func newSchemaWithOutputData(outputData utils.ReadOnlyActionInput) (ExecutionSchema, error) {
+	data, err := utils.NewActionInputFromString(outputData.String())
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +62,7 @@ func newSchemaWithOutputData(outputData jsonmanager.ReadOnlyJSONManager) (Execut
 
 // newSchema creates a new ExecutionSchema with no input data.
 func newSchema() ExecutionSchema {
-	inputData := jsonmanager.NewJSONManager()
+	inputData := utils.NewActionInput()
 	return newSchemaWithInputData(inputData)
 }
 
@@ -82,16 +83,16 @@ func (s *defaultSchema) Set(path string, value interface{}) error {
 
 // AddInputs adds input fields to the defaultSchema and returns the updated schema.
 func (s *defaultSchema) AddInputs(inputList ...Input) {
-	for _, i := range inputList {
-		s.inputs = append(s.inputs, i)
+	for _, input := range inputList {
+		s.inputs = append(s.inputs, input)
 	}
 }
 
 // getInput retrieves an input field from the schema based on its name.
 func (s *defaultSchema) getInput(name string) Input {
-	for _, i := range s.inputs {
-		if i.getName() == name {
-			return i
+	for _, input := range s.inputs {
+		if input.getName() == name {
+			return input
 		}
 	}
 
@@ -100,17 +101,17 @@ func (s *defaultSchema) getInput(name string) Input {
 
 // SetError sets an error for an input field in the schema.
 func (s *defaultSchema) SetError(inputName string, inputError InputError) {
-	if i := s.getInput(inputName); i != nil {
-		i.setError(inputError)
+	if input := s.getInput(inputName); input != nil {
+		input.setError(inputError)
 	}
 }
 
 // validateInputData validates the input data based on the input definitions in the schema.
-func (s *defaultSchema) validateInputData(stateName StateName, stash jsonmanager.JSONManager) bool {
+func (s *defaultSchema) validateInputData(stateName StateName, stash utils.Stash) bool {
 	valid := true
 
-	for _, i := range s.inputs {
-		if !i.validate(stateName, s.inputData, stash) && valid {
+	for _, input := range s.inputs {
+		if !input.validate(stateName, s.inputData, stash) && valid {
 			valid = false
 		}
 	}
@@ -119,12 +120,12 @@ func (s *defaultSchema) validateInputData(stateName StateName, stash jsonmanager
 }
 
 // getDataToPersist filters and returns data that should be persisted based on schema definitions.
-func (s *defaultSchema) getDataToPersist() jsonmanager.ReadOnlyJSONManager {
-	toPersist := jsonmanager.NewJSONManager()
+func (s *defaultSchema) getDataToPersist() utils.ReadOnlyActionInput {
+	toPersist := utils.NewActionInput()
 
-	for _, i := range s.inputs {
-		if v := s.inputData.Get(i.getName()); v.Exists() && i.shouldPersist() {
-			_ = toPersist.Set(i.getName(), v.Value())
+	for _, input := range s.inputs {
+		if v := s.inputData.Get(input.getName()); v.Exists() && input.shouldPersist() {
+			_ = toPersist.Set(input.getName(), v.Value())
 		}
 	}
 
@@ -132,32 +133,32 @@ func (s *defaultSchema) getDataToPersist() jsonmanager.ReadOnlyJSONManager {
 }
 
 // getOutputData returns the output data from the schema.
-func (s *defaultSchema) getOutputData() jsonmanager.ReadOnlyJSONManager {
+func (s *defaultSchema) getOutputData() utils.ReadOnlyActionInput {
 	return s.outputData
 }
 
 // toPublicSchema converts defaultSchema to PublicSchema for public exposure.
 func (s *defaultSchema) toPublicSchema(stateName StateName) PublicSchema {
-	var pi PublicSchema
+	var publicSchema PublicSchema
 
-	for _, i := range s.inputs {
-		if !i.isIncludedOnState(stateName) {
+	for _, input := range s.inputs {
+		if !input.isIncludedOnState(stateName) {
 			continue
 		}
 
-		outputValue := s.outputData.Get(i.getName())
-		inputValue := s.inputData.Get(i.getName())
+		outputValue := s.outputData.Get(input.getName())
+		inputValue := s.inputData.Get(input.getName())
 
 		if outputValue.Exists() {
-			i.setValue(outputValue.Value())
+			input.setValue(outputValue.Value())
 		}
 
-		if i.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
-			i.setValue(inputValue.Value())
+		if input.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
+			input.setValue(inputValue.Value())
 		}
 
-		pi = append(pi, i.toPublicInput())
+		publicSchema = append(publicSchema, input.toPublicInput())
 	}
 
-	return pi
+	return publicSchema
 }
