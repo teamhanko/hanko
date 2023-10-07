@@ -8,11 +8,11 @@
   "files": [
     "dist"
   ],
-  "types": "dist/index.d.ts",
   "type": "module",
   "source": "src/index.ts",
   "exports": {
     "require": "./dist/sdk.cjs",
+    "types": "./dist/index.d.ts",
     "default": "./dist/sdk.modern.js"
   },
   "main": "./dist/sdk.cjs",
