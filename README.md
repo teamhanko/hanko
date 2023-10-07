@@ -89,7 +89,7 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 | | OIDC support |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
-- Priviledged sessions & step-up authentication
+- Privileged sessions & step-up authentication
 - Bot protection / Captcha
 - SMS passcode delivery
 
