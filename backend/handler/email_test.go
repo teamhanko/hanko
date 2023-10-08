@@ -90,6 +90,8 @@ func (s *emailSuite) TestEmailHandler_Create() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
+	auditLogRecordsKey := "email_created"
+
 	err := s.LoadFixtures("../test/fixtures/email")
 	s.Require().NoError(err)
 
@@ -167,6 +169,7 @@ func (s *emailSuite) TestEmailHandler_Create() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
+			cfg.AuditLog.Storage.Enabled = true
 			cfg.Emails.RequireVerification = currentTest.requiresVerification
 			cfg.Emails.MaxNumOfAddresses = currentTest.maxNumberOfAddresses
 			e := NewPublicRouter(&cfg, s.Storage, nil)
@@ -191,7 +194,11 @@ func (s *emailSuite) TestEmailHandler_Create() {
 			req.AddCookie(cookie)
 			rec := httptest.NewRecorder()
 
+			auditLogsCountBefore := s.getAuditLogRecordsCount(auditLogRecordsKey)
+
 			e.ServeHTTP(rec, req)
+
+			auditLogsCountAfter := s.getAuditLogRecordsCount(auditLogRecordsKey)
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 
@@ -205,10 +212,15 @@ func (s *emailSuite) TestEmailHandler_Create() {
 			if email != nil {
 				if currentTest.expectedEmailUserId != uuid.Nil {
 					s.Equal(currentTest.expectedEmailUserId, *email.UserID)
-					return
+				} else {
+					s.Nil(email.UserID)
 				}
+			}
 
-				s.Nil(email.UserID)
+			if rec.Code == http.StatusOK {
+				s.Equal(auditLogsCountBefore+1, auditLogsCountAfter)
+			} else {
+				s.Equal(auditLogsCountBefore, auditLogsCountAfter)
 			}
 		})
 	}
@@ -314,4 +326,10 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 		})
 	}
 
+}
+
+func (s *emailSuite) getAuditLogRecordsCount(code string) int {
+	logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{code}, "", "", "", "")
+	s.Require().NoError(lerr)
+	return len(logs)
 }
