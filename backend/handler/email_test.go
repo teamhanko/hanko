@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
@@ -79,6 +80,147 @@ func (s *emailSuite) TestEmailHandler_List() {
 				var emails []*dto.EmailResponse
 				s.NoError(json.Unmarshal(rec.Body.Bytes(), &emails))
 				s.Equal(currentTest.expectedCount, len(emails))
+			}
+		})
+	}
+}
+
+func (s *emailSuite) TestEmailHandler_Create() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	auditLogRecordsKey := "email_created"
+
+	err := s.LoadFixtures("../test/fixtures/email")
+	s.Require().NoError(err)
+
+	tests := []struct {
+		name                 string
+		email                string
+		userId               uuid.UUID
+		maxNumberOfAddresses int
+		requiresVerification bool
+		expectedStatusCode   int
+		upsertsRecords       bool
+		expectedEmailUserId  uuid.UUID
+	}{
+		{
+			name:                 "should reject the request when the user has already reached the maximum number of email addresses",
+			email:                "rejection1@example.com",
+			userId:               uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
+			maxNumberOfAddresses: 0,
+			requiresVerification: false,
+			expectedStatusCode:   409,
+			upsertsRecords:       false,
+		},
+		{
+			name:                 "should error if email address is already in use",
+			email:                "john.doe@example.com",
+			userId:               uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+			requiresVerification: false,
+			maxNumberOfAddresses: 100,
+			expectedStatusCode:   400,
+			upsertsRecords:       false,
+			expectedEmailUserId:  uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
+		},
+		{
+			name:                 "should assign the email address to the user if not yet assigned and does not require verification",
+			email:                "john.doe+6@example.com",
+			userId:               uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+			requiresVerification: false,
+			maxNumberOfAddresses: 100,
+			expectedStatusCode:   200,
+			upsertsRecords:       true,
+			expectedEmailUserId:  uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+		},
+		{
+			name:                 "should not assign the email address to the user if not yet assigned and requires verification",
+			email:                "john.doe+7@example.com",
+			userId:               uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+			requiresVerification: true,
+			maxNumberOfAddresses: 100,
+			expectedStatusCode:   200,
+			upsertsRecords:       false,
+			expectedEmailUserId:  uuid.Nil,
+		},
+		{
+			name:                 "should create email record with nil user ID if verification required",
+			email:                "test.email.verification@example.com",
+			userId:               uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+			requiresVerification: true,
+			maxNumberOfAddresses: 100,
+			expectedStatusCode:   200,
+			upsertsRecords:       true,
+			expectedEmailUserId:  uuid.Nil,
+		},
+		{
+			name:                 "should create email record with user ID if verification not required",
+			email:                "test.email.noverification@example.com",
+			userId:               uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+			requiresVerification: false,
+			maxNumberOfAddresses: 100,
+			expectedStatusCode:   200,
+			upsertsRecords:       true,
+			expectedEmailUserId:  uuid.FromStringOrNil("d41df4b7-c055-45e6-9faf-61aa92a4032e"),
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			cfg := test.DefaultConfig
+			cfg.AuditLog.Storage.Enabled = true
+			cfg.Emails.RequireVerification = currentTest.requiresVerification
+			cfg.Emails.MaxNumOfAddresses = currentTest.maxNumberOfAddresses
+			e := NewPublicRouter(&cfg, s.Storage, nil)
+			jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
+			s.Require().NoError(err)
+			sessionManager, err := session.NewManager(jwkManager, cfg)
+			s.Require().NoError(err)
+
+			token, err := sessionManager.GenerateJWT(currentTest.userId)
+			s.Require().NoError(err)
+			cookie, err := sessionManager.GenerateCookie(token)
+			s.Require().NoError(err)
+
+			body := dto.EmailCreateRequest{
+				Address: currentTest.email,
+			}
+			bodyJson, err := json.Marshal(body)
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodPost, "/emails", bytes.NewReader(bodyJson))
+			req.Header.Set("Content-Type", "application/json")
+			req.AddCookie(cookie)
+			rec := httptest.NewRecorder()
+
+			auditLogsCountBefore := s.getAuditLogRecordsCount(auditLogRecordsKey)
+
+			e.ServeHTTP(rec, req)
+
+			auditLogsCountAfter := s.getAuditLogRecordsCount(auditLogRecordsKey)
+
+			s.Equal(currentTest.expectedStatusCode, rec.Code)
+
+			email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email)
+			s.Require().NoError(err)
+
+			if currentTest.upsertsRecords {
+				s.NotNil(email)
+			}
+
+			if email != nil {
+				if currentTest.expectedEmailUserId != uuid.Nil {
+					s.Equal(currentTest.expectedEmailUserId, *email.UserID)
+				} else {
+					s.Nil(email.UserID)
+				}
+			}
+
+			if rec.Code == http.StatusOK {
+				s.Equal(auditLogsCountBefore+1, auditLogsCountAfter)
+			} else {
+				s.Equal(auditLogsCountBefore, auditLogsCountAfter)
 			}
 		})
 	}
@@ -184,4 +326,10 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 		})
 	}
 
+}
+
+func (s *emailSuite) getAuditLogRecordsCount(code string) int {
+	logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{code}, "", "", "", "")
+	s.Require().NoError(lerr)
+	return len(logs)
 }
