@@ -1,5 +1,6 @@
 import JSCookie from "js-cookie";
 import { Cookie } from "../../src/lib/Cookie";
+import { fakeTimerNow } from "../setup";
 
 describe("Cookie()", () => {
   let cookie: Cookie;
@@ -11,7 +12,7 @@ describe("Cookie()", () => {
   describe("cookie.setAuthCookie()", () => {
     it("should set a new cookie", async () => {
       jest.spyOn(JSCookie, "set");
-      cookie.setAuthCookie("test-token", false);
+      cookie.setAuthCookie("test-token", { secure: false });
       expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
         secure: false,
       });
@@ -23,6 +24,16 @@ describe("Cookie()", () => {
 
       expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
         secure: true,
+      });
+    });
+
+    it("should set a new cookie with expiration", async () => {
+      jest.spyOn(JSCookie, "set");
+      const expires = new Date(fakeTimerNow + 60);
+      cookie.setAuthCookie("test-token", { secure: true, expires });
+      expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
+        secure: true,
+        expires,
       });
     });
   });

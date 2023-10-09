@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> LocalStorage</title>
+  <title> SetAuthCookieOptions</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Interface</p>
-                    <h1>LocalStorage</h1>
+                    <h1>SetAuthCookieOptions</h1>
                 </header>
                 
 
@@ -85,7 +85,7 @@
 
 <header>
     
-        <h2>LocalStorage</h2>
+        <h2>SetAuthCookieOptions</h2>
         
     
 </header>
@@ -93,6 +93,8 @@
 <article>
     <div class="container-overview">
     
+        
+            <div class="description">Options for setting the auth cookie.</div>
         
 
         
@@ -112,8 +114,6 @@
             <th>Type</th>
 
             
-            <th>Attributes</th>
-            
 
             
 
@@ -126,31 +126,52 @@
             
 <tr class="deep-level-0">
     
-        <td class="name"><code>users</code></td>
+        <td class="name"><code>secure</code></td>
     
 
     <td class="type">
     
         
-<code class="param-type"><a href="LocalStorageUsers.html">LocalStorageUsers</a></code>
+<code class="param-type">boolean</code>
 
 
     
     </td>
 
     
-        <td class="attributes">
-        
-            &lt;optional><br>
-        
+
+    
+
+    <td class="description last">Indicates if the Secure attribute of the cookie should be set.</td>
+</tr>
 
         
-        </td>
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>expires</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">number</code>
+|
+
+<code class="param-type">Date</code>
+|
+
+<code class="param-type">undefined</code>
+
+
+    
+    </td>
+
     
 
     
 
-    <td class="description last">The user states.</td>
+    <td class="description last">The expiration of the cookie.</td>
 </tr>
 
         
@@ -193,9 +214,9 @@
 
     
         <p class="tag-source">
-            <a href="lib_state_State.ts.html" class="button">View Source</a>
+            <a href="lib_Cookie.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_state_State.ts.html">lib/state/State.ts</a>, <a href="lib_state_State.ts.html#line80">line 80</a>
+                <a href="lib_Cookie.ts.html">lib/Cookie.ts</a>, <a href="lib_Cookie.ts.html#line50">line 50</a>
             </span>
         </p>
     

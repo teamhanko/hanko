@@ -82,12 +82,15 @@ export const fakeXMLHttpRequest = (function () {
   }));
 })();
 
+
 Object.defineProperty(global, "XMLHttpRequest", {
   value: fakeXMLHttpRequest,
   configurable: true,
   writable: true,
 });
 
+export const fakeTimerNow = 1664379699000;
+
 jest.useFakeTimers({
-  now: 1664379699000,
+  now: fakeTimerNow,
 });
