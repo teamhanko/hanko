@@ -48,7 +48,7 @@ func (s samlCertificatePersister) Create(cert *models.SamlCertificate) error {
 	}
 
 	if validationError != nil && validationError.HasAny() {
-		return fmt.Errorf("token object validation failed: %w", validationError)
+		return fmt.Errorf("saml certificate validation failed: %w", validationError)
 	}
 
 	return nil

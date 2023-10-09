@@ -34,7 +34,7 @@ type IdentityProvider struct {
 	Enabled               bool         `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	Name                  string       `yaml:"name" json:"name,omitempty" koanf:"name"`
 	Domain                string       `yaml:"domain" json:"domain,omitempty" koanf:"domain"`
-	MetdadataUrl          string       `yaml:"metadata_url" json:"metadata_url,omitempty" koanf:"metadata_url"`
+	MetadataUrl           string       `yaml:"metadata_url" json:"metadata_url,omitempty" koanf:"metadata_url"`
 	SkipEmailVerification bool         `yaml:"skip_email_verification" json:"skip_email_verification,omitempty" koanf:"skip_email_verification"`
 	AttributeMap          AttributeMap `yaml:"attribute_map" json:"attribute_map,omitempty" koanf:"attribute_map"`
 }
@@ -52,7 +52,7 @@ type AttributeMap struct {
 	Gender            string `yaml:"gender" json:"gender,omitempty" koanf:"gender"`
 	Birthdate         string `yaml:"birthdate" json:"birthdate,omitempty" koanf:"birthdate"`
 	ZoneInfo          string `yaml:"zone_info" json:"zone_info,omitempty" koanf:"zone_info"`
-	Locale            string `yaml:"local" json:"local,omitempty" koanf:"local"`
+	Locale            string `yaml:"locale" json:"locale,omitempty" koanf:"locale"`
 	UpdatedAt         string `yaml:"updated_at" json:"updated_at,omitempty" koanf:"updated_at"`
 	Email             string `yaml:"email" json:"email,omitempty" koanf:"email" jsonschema:"default=http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"`
 	EmailVerified     string `yaml:"email_verified" json:"email_verified,omitempty" koanf:"email_verified"`
@@ -154,13 +154,13 @@ func (idp *IdentityProvider) Validate() error {
 		return fmt.Errorf(invalidUrlFormat, idp.Domain)
 	}
 
-	if strings.TrimSpace(idp.MetdadataUrl) == "" {
+	if strings.TrimSpace(idp.MetadataUrl) == "" {
 		return errors.New("identity provider metadata url must be set")
 	}
 
-	_, err = url.Parse(idp.MetdadataUrl)
+	_, err = url.Parse(idp.MetadataUrl)
 	if err != nil {
-		return fmt.Errorf(invalidUrlFormat, idp.MetdadataUrl)
+		return fmt.Errorf(invalidUrlFormat, idp.MetadataUrl)
 	}
 
 	return nil

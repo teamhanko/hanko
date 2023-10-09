@@ -34,7 +34,7 @@ func NewSamlHandler(cfg *config.Config, persister persistence.Persister, session
 	for _, idpConfig := range cfg.Saml.IdentityProviders {
 		if idpConfig.Enabled {
 			name := ""
-			name, err := parseProviderFromMetadataUrl(idpConfig.MetdadataUrl)
+			name, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
 			if err != nil {
 				panic(err)
 			}
@@ -291,7 +291,7 @@ func (handler *SamlHandler) redirectError(c echo.Context, error error, to string
 	}
 
 	redirectURL := thirdparty.GetErrorUrl(to, error)
-	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
+	return c.Redirect(http.StatusSeeOther, redirectURL)
 }
 
 func (handler *SamlHandler) auditError(c echo.Context, err error) error {

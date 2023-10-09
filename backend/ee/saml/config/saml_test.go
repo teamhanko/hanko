@@ -70,10 +70,10 @@ func TestSamlConfig_ValidateWithEnabledSaml(t *testing.T) {
 		AllowedRedirectURLS:   []string{},
 		AllowedRedirectURLMap: nil,
 		IdentityProviders: []IdentityProvider{{
-			Enabled:      true,
-			Name:         "Test Provider",
-			Domain:       "lorem.ipsum",
-			MetdadataUrl: "http://provider.lorem.ipsum/metadata",
+			Enabled:     true,
+			Name:        "Test Provider",
+			Domain:      "lorem.ipsum",
+			MetadataUrl: "http://provider.lorem.ipsum/metadata",
 		}},
 	}
 
@@ -172,10 +172,10 @@ func TestSamlConfig_ValidateUrlsWithWrongAllowedRedirectUrl(t *testing.T) {
 
 func TestSamlConfig_ValidateProvider(t *testing.T) {
 	cfg := &IdentityProvider{
-		Enabled:      true,
-		Name:         "Lorem",
-		Domain:       "lorem.ipsum",
-		MetdadataUrl: "http://provider.lorem.ipsum/metadata",
+		Enabled:     true,
+		Name:        "Lorem",
+		Domain:      "lorem.ipsum",
+		MetadataUrl: "http://provider.lorem.ipsum/metadata",
 	}
 
 	err := cfg.Validate()
@@ -232,9 +232,9 @@ func TestSamlConfig_ValidateProviderErrorWithInvalidDomain(t *testing.T) {
 
 func TestSamlConfig_ValidateProviderErrorWithEmptyMetadataUrl(t *testing.T) {
 	cfg := &IdentityProvider{
-		Domain:       "lorem.ipsum",
-		Name:         "Test",
-		MetdadataUrl: "",
+		Domain:      "lorem.ipsum",
+		Name:        "Test",
+		MetadataUrl: "",
 	}
 
 	err := cfg.Validate()
@@ -243,9 +243,9 @@ func TestSamlConfig_ValidateProviderErrorWithEmptyMetadataUrl(t *testing.T) {
 
 func TestSamlConfig_ValidateProviderErrorWithSpaceMetadataUrl(t *testing.T) {
 	cfg := &IdentityProvider{
-		Domain:       "lorem.ipsum",
-		Name:         "Test",
-		MetdadataUrl: "  ",
+		Domain:      "lorem.ipsum",
+		Name:        "Test",
+		MetadataUrl: "  ",
 	}
 
 	err := cfg.Validate()
@@ -254,11 +254,11 @@ func TestSamlConfig_ValidateProviderErrorWithSpaceMetadataUrl(t *testing.T) {
 
 func TestSamlConfig_ValidateProviderErrorWithInvalidMetadataUrl(t *testing.T) {
 	cfg := &IdentityProvider{
-		Domain:       "lorem.ipsum",
-		Name:         "Test",
-		MetdadataUrl: "http://lorem:8000.de/ipsum",
+		Domain:      "lorem.ipsum",
+		Name:        "Test",
+		MetadataUrl: "http://lorem:8000.de/ipsum",
 	}
 
 	err := cfg.Validate()
-	assert.Errorf(t, err, invalidUrlFormat, cfg.MetdadataUrl)
+	assert.Errorf(t, err, invalidUrlFormat, cfg.MetadataUrl)
 }

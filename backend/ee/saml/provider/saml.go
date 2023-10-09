@@ -76,7 +76,7 @@ func (sp *BaseSamlProvider) GetUserData(assertionInfo *saml2.AssertionInfo) *thi
 
 	email := thirdparty.Email{
 		Email:    emailAddress,
-		Verified: false,
+		Verified: assertionValues.Get(attributeMap.EmailVerified) != "",
 		Primary:  true,
 	}
 
@@ -106,7 +106,7 @@ func (sp *BaseSamlProvider) GetUserData(assertionInfo *saml2.AssertionInfo) *thi
 		Locale:            assertionValues.Get(attributeMap.Locale),
 		UpdatedAt:         assertionValues.Get(attributeMap.UpdatedAt),
 		Email:             emailAddress,
-		EmailVerified:     assertionValues.Get(attributeMap.EmailVerified) != "" || sp.Config.SkipEmailVerification,
+		EmailVerified:     email.Verified || sp.Config.SkipEmailVerification,
 		Phone:             assertionValues.Get(attributeMap.Phone),
 		PhoneVerified:     assertionValues.Get(attributeMap.PhoneVerified) != "",
 		CustomClaims:      sp.mapCustomClaims(assertionInfo.Values, attributeMap),

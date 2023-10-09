@@ -71,7 +71,7 @@ func loadCertificate(cfg *config.Config, persister persistence.SamlCertificatePe
 }
 
 func fetchIdpMetadata(idpConfig samlConfig.IdentityProvider) (*IdpMetadata, error) {
-	response, err := http.Get(idpConfig.MetdadataUrl)
+	response, err := http.Get(idpConfig.MetadataUrl)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch metadata: %w", err)
 	}

@@ -27,19 +27,27 @@ func NewAuth0ServiceProvider(config *config.Config, idpConfig samlConfig.Identit
 func (sp *Auth0Provider) UseDefaultAttributesIfEmpty() {
 	attributeMap := &sp.Config.AttributeMap
 
+	if attributeMap.Name == "" {
+		attributeMap.Name = "http://schemas.auth0.com/name"
+	}
+
+	if attributeMap.Email == "" {
+		attributeMap.Name = "http://schemas.auth0.com/email"
+	}
+
 	if attributeMap.EmailVerified == "" {
-		attributeMap.EmailVerified = "email_verified"
+		attributeMap.EmailVerified = "http://schemas.auth0.com/email_verified"
 	}
 
 	if attributeMap.NickName == "" {
-		attributeMap.NickName = "nickname"
+		attributeMap.NickName = "http://schemas.auth0.com/nickname"
 	}
 
 	if attributeMap.Picture == "" {
-		attributeMap.Picture = "picture"
+		attributeMap.Picture = "http://schemas.auth0.com/picture"
 	}
 
 	if attributeMap.UpdatedAt == "" {
-		attributeMap.UpdatedAt = "updated_at"
+		attributeMap.UpdatedAt = "http://schemas.auth0.com/updated_at"
 	}
 }

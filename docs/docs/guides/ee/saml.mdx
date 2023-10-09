@@ -113,12 +113,15 @@ For some providers we also provide some additional attributes. The provider will
 Currently, there the following extra defaults are provided for the following providers:
 
 #### Auth0
-| Field          | Default        |
-|----------------|----------------|
-| email_verified | email_verified |
-| nickname       | nickname       |
-| picture        | picture        |
-| updated_at     | updated_at     |
+| Field          | Default                                 |
+|----------------|-----------------------------------------|
+| email_verified | http://schemas.auth0.com/email_verified |
+| nickname       | http://schemas.auth0.com/nickname       |
+| picture        | http://schemas.auth0.com/picture        |
+| updated_at     | http://schemas.auth0.com/updated_at     |
+
+*Please be aware not to set `mapUnknownClaimsAsIs` to true in your auth0 IdP config.* If you set this attribute to true auth0
+will scratch the `http://schemas.auth0.com/auth0/` part, and you have to provide an `attribute_map`-Field.
 
 ## Configure Identity Provider
 
