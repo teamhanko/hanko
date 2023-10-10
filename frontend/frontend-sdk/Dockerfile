@@ -1,13 +1,12 @@
-FROM --platform=$BUILDPLATFORM node:16.16-alpine as build
-
+FROM node:16.16-alpine
 WORKDIR /app
-ENV PATH /app/node_modules/.bin:$PATH
+ENV PATH /app/node_modules/.bin $PATH
 
-COPY package.json ./
-COPY package-lock.json ./
+COPY package.json /app
+COPY package-lock.json /app
 
-RUN npm ci --silent
-COPY . ./
+RUN npm ci --silent /app
+COPY . /app
 RUN npm run build
 
 FROM nginx:stable-alpine
