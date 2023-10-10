@@ -1,0 +1,56 @@
+# Gitpod configuration file
+
+# Git repository URL
+git_url = "https://github.com/teamhanko/hanko.git"
+
+# Branch to use
+git_branch = "main"
+
+# List of dependencies to install
+dependencies = [
+  "go",
+  "typescript",
+  "nodejs",
+  
+]
+
+# Command to run after cloning the repository
+post_clone_command = "go mod tidy"
+
+# Command to run before starting the container
+pre_start_command = "npm install"
+
+# Command to run when the container starts
+start_command = "npm run start"
+
+# Command to run when the container stops
+stop_command = "npm run stop"
+
+# Environment variables to set in the container
+env = {
+  "DB_HOST": "localhost",
+  "DB_USER": "myuser",
+  "DB_PASSWORD": "mypassword"
+}
+
+# Volume mounts
+#volumes = [
+  #{"host_path": "/data", "container_path": "/app/data"}
+#]
+
+# Port mappings
+ports = [
+  {"host_port": 8080, "container_port": 80}
+]
+
+# Gitpod configuration
+gitpod = {
+  "enabled": true,
+  "image": "gitpod/gitpod:latest",
+  #"volume_mounts": [
+    #{"host_path": "/data", "container_path": "/app/data"}
+  #],
+  "port_mappings": [
+    {"host_port": 8080, "container_port": 80}
+  ]
+}
