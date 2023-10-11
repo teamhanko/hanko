@@ -1,0 +1,12 @@
+The information contained within the JSON object can be verified and trusted because it is digitally signed. 
+Although JWTs can also be encrypted to provide secrecy between parties, Auth0-issued JWTs are JSON Web Signatures (JWS), meaning they are signed rather than encrypted. 
+As such, we will focus on signed tokens, which can verify the integrity of theThe information contained within the JSON object can be verified and trusted because it is digitally signed. 
+Although JWTs can also be encrypted to provide secrecy between parties, Auth0-issued JWTs are JSON Web Signatures (JWS), meaning they are signed rather than encrypted. 
+As such, we will focus on signed tokens, which can verify the integrity of the claims contained within them, while encrypted tokens hide those claims from other parties.
+
+In general, JWTs can be signed using a secret (with the HMAC algorithm) or a public/private key pair using RSA or ECDSA (although Auth0 supports only HMAC and RSA). 
+When tokens are signed using public/private key pairs, the signature also certifies that only the party holding the private key is the one that signed it.
+
+Before a received JWT is used, it should be properly validated using its signature. Note that a successfully validated token only means that the information contained within the token has not been modified by anyone else. 
+This doesn't mean that others weren't able to see the content, which is stored in plain text. 
+Because of this, you should never store sensitive information inside a JWT and should take other steps to ensure that JWTs are not intercepted, such as by sending JWTs only over HTTPS, following best practices, and using only secure and up-to-date libraries.
