@@ -1,12 +1,11 @@
-import * as jose from 'https://deno.land/x/jose@v4.14.4/index.ts';
-
+import * as jose from "https://deno.land/x/jose@v4.14.4/index.ts";
 
 declare global {
-  type Todo = { todoID: string, description: string, checked: boolean };
+  type Todo = { todoID: string; description: string; checked: boolean };
   type Store = Map<string, Map<string, Todo>>;
 
   interface AppState {
-    store: Store,
+    store: Store;
     auth: jose.JWTPayload;
   }
 }

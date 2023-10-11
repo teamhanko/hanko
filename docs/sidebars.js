@@ -69,7 +69,7 @@ const sidebars = {
     {
       type: "category",
       label: "Tutorials",
-      items: ["guides/tutorials/php", "guides/tutorials/userData"],
+      items: ["guides/tutorials/php", "guides/tutorials/nextjs", "guides/tutorials/userData"],
     },
   ],
 };
