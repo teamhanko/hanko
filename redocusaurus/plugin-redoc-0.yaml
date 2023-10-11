@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.8.0
+  version: 0.8.4
   title: Hanko Public API
   description: >
     ## Introduction
