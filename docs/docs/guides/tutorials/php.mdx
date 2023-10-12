@@ -317,7 +317,7 @@ The Stimulus targets used by the controller displayed above aren't set using the
 ## Modifying the User entity and removing passwords from the application
 
 As the default `User` in our Demo Application still uses passwords, we need to remove everything about those. Most importantly, we need to modify the `User` entity and the corresponding database table.
-First, we remove the `PasswordAuthenticatedUserInterface` from the `User` and als its corresponding methods like:
+First, we remove the `PasswordAuthenticatedUserInterface` from the `User` and also its corresponding methods like:
 - `getPassword`
 - `setPassword`
 - `getSalt`
