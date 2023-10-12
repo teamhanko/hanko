@@ -18,6 +18,7 @@ func NewSubmitRegistrationIdentifier(cfg config.Config, persister persistence.Pe
 	}
 }
 
+// SubmitRegistrationIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
 type SubmitRegistrationIdentifier struct {
 	cfg         config.Config
 	persister   persistence.Persister
@@ -29,7 +30,7 @@ func (m SubmitRegistrationIdentifier) GetName() flowpilot.ActionName {
 }
 
 func (m SubmitRegistrationIdentifier) GetDescription() string {
-	return "Enter at least one identifier to register."
+	return "Enter an identifier to register."
 }
 
 func (m SubmitRegistrationIdentifier) Initialize(c flowpilot.InitializationContext) {
@@ -61,8 +62,6 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 
 	email := c.Input().Get("email").String()
 	username := c.Input().Get("username").String()
-	//c.Input().SetError("email", flowpilot.ErrorValueMissing)
-	//c.Input().SetError("username", flowpilot.ErrorValueMissing)
 
 	for _, char := range username {
 		// check that username only contains allowed characters
@@ -105,12 +104,14 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		return c.ContinueFlow(common.StateEmailVerification)
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
+	} else if !m.cfg.Passcode.Enabled {
+		// TODO: do we need this setting or should we check the config in common.ActionSkip if passkey onboarding is required, although we know already here, that passkey onboarding is required
+		err = c.Stash().Set("passkey_onboarding_required", true)
+		if err != nil {
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		}
+		return c.ContinueFlow(common.StateOnboardingCreatePasskey)
 	}
 
-	// TODO: do we need this setting or should we check the config in common.ActionSkip if passkey onboarding is required, although we know it already here
-	err = c.Stash().Set("passkey_onboarding_required", true)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-	return c.ContinueFlow(common.StateOnboardingCreatePasskey)
+	return c.ContinueFlow(common.StateSuccess)
 }
