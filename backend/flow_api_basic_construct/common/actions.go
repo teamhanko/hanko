@@ -13,6 +13,7 @@ const (
 	ActionGetWACreationOptions         flowpilot.ActionName = "get_wa_creation_options"
 	ActionSendWAAttestationResponse    flowpilot.ActionName = "send_wa_attestation_options"
 	ActionSubmitPassword               flowpilot.ActionName = "submit_password"
+	ActionSubmitNewPassword            flowpilot.ActionName = "submit_new_password"
 	ActionSubmitTOTPCode               flowpilot.ActionName = "submit_totp_code"
 	ActionGenerateRecoveryCodes        flowpilot.ActionName = "generate_recovery_codes"
 	ActionStart2FARecovery             flowpilot.ActionName = "start_2fa_recovery"
