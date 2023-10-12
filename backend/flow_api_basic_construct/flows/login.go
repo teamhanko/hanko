@@ -1,15 +1,16 @@
 package flows
 
 import (
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/actions"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
 )
 
-func NewLoginFlow() flowpilot.Flow {
+func NewLoginFlow(cfg config.Config) flowpilot.Flow {
 	return flowpilot.NewFlow("login").
-		State(common.StatePreflight, actions.NewSendCapabilities()).
+		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateLoginInit).
 		State(common.StateLoginMethodChooser).
 		State(common.StatePasskeyLogin).

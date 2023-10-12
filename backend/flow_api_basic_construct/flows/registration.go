@@ -2,6 +2,7 @@ package flows
 
 import (
 	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/actions"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -9,10 +10,10 @@ import (
 	"time"
 )
 
-func NewRegistrationFlow(persister persistence.Persister, httpContext echo.Context) flowpilot.Flow {
+func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, httpContext echo.Context) flowpilot.Flow {
 	// TODO:
 	return flowpilot.NewFlow("registration").
-		State(common.StatePreflight, actions.NewSendCapabilities()).
+		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(persister, httpContext), actions.NewLoginWithOauth()).
 		State(common.StateEmailVerification, actions.NewSubmitPasscode()).
 		State(common.StatePasswordCreation).

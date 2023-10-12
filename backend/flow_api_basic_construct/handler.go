@@ -3,6 +3,7 @@ package flow_api_basic_construct
 import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/flows"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -11,16 +12,17 @@ import (
 
 type FlowPilotHandler struct {
 	persister persistence.Persister
+	cfg       config.Config
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	registrationFlow := flows.NewRegistrationFlow(h.persister, c)
+	registrationFlow := flows.NewRegistrationFlow(h.cfg, h.persister, c)
 
 	return h.executeFlow(c, registrationFlow)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	loginFlow := flows.NewLoginFlow()
+	loginFlow := flows.NewLoginFlow(h.cfg)
 
 	return h.executeFlow(c, loginFlow)
 }
