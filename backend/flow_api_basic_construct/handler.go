@@ -5,18 +5,20 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/flows"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type FlowPilotHandler struct {
-	persister persistence.Persister
-	cfg       config.Config
+	persister       persistence.Persister
+	cfg             config.Config
+	passcodeService *services.Passcode
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	registrationFlow := flows.NewRegistrationFlow(h.cfg, h.persister, c)
+	registrationFlow := flows.NewRegistrationFlow(h.cfg, h.persister, h.passcodeService, c)
 
 	return h.executeFlow(c, registrationFlow)
 }

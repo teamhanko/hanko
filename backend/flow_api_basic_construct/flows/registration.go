@@ -5,16 +5,17 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/actions"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"time"
 )
 
-func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, httpContext echo.Context) flowpilot.Flow {
+func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, httpContext echo.Context) flowpilot.Flow {
 	// TODO:
 	return flowpilot.NewFlow("registration").
 		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
-		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(cfg, persister, httpContext), actions.NewLoginWithOauth()).
+		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(cfg, persister, passcodeService, httpContext), actions.NewLoginWithOauth()).
 		State(common.StateEmailVerification, actions.NewSubmitPasscode()).
 		State(common.StatePasswordCreation).
 		State(common.StateSuccess).
