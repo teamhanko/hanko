@@ -1,7 +1,6 @@
 package flowpilot
 
 import (
-	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"github.com/tidwall/gjson"
 )
 
@@ -17,9 +16,9 @@ type ExecutionSchema interface {
 	SetError(inputName string, inputError InputError)
 
 	getInput(name string) Input
-	getOutputData() utils.ReadOnlyActionInput
-	getDataToPersist() utils.ReadOnlyActionInput
-	validateInputData(stateName StateName, stash utils.Stash) bool
+	getOutputData() ReadOnlyActionInput
+	getDataToPersist() ReadOnlyActionInput
+	validateInputData(stateName StateName, stash Stash) bool
 	toInitializationSchema() InitializationSchema
 	toPublicSchema(stateName StateName) PublicSchema
 }
@@ -33,13 +32,13 @@ type PublicSchema []*PublicInput
 // defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
 type defaultSchema struct {
 	inputs
-	inputData  utils.ReadOnlyActionInput
-	outputData utils.ActionInput
+	inputData  ReadOnlyActionInput
+	outputData ActionInput
 }
 
 // newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithInputData(inputData utils.ActionInput) ExecutionSchema {
-	outputData := utils.NewActionInput()
+func newSchemaWithInputData(inputData ActionInput) ExecutionSchema {
+	outputData := NewActionInput()
 
 	return &defaultSchema{
 		inputData:  inputData,
@@ -48,8 +47,8 @@ func newSchemaWithInputData(inputData utils.ActionInput) ExecutionSchema {
 }
 
 // newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithOutputData(outputData utils.ReadOnlyActionInput) (ExecutionSchema, error) {
-	data, err := utils.NewActionInputFromString(outputData.String())
+func newSchemaWithOutputData(outputData ReadOnlyActionInput) (ExecutionSchema, error) {
+	data, err := NewActionInputFromString(outputData.String())
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +61,7 @@ func newSchemaWithOutputData(outputData utils.ReadOnlyActionInput) (ExecutionSch
 
 // newSchema creates a new ExecutionSchema with no input data.
 func newSchema() ExecutionSchema {
-	inputData := utils.NewActionInput()
+	inputData := NewActionInput()
 	return newSchemaWithInputData(inputData)
 }
 
@@ -107,7 +106,7 @@ func (s *defaultSchema) SetError(inputName string, inputError InputError) {
 }
 
 // validateInputData validates the input data based on the input definitions in the schema.
-func (s *defaultSchema) validateInputData(stateName StateName, stash utils.Stash) bool {
+func (s *defaultSchema) validateInputData(stateName StateName, stash Stash) bool {
 	valid := true
 
 	for _, input := range s.inputs {
@@ -120,8 +119,8 @@ func (s *defaultSchema) validateInputData(stateName StateName, stash utils.Stash
 }
 
 // getDataToPersist filters and returns data that should be persisted based on schema definitions.
-func (s *defaultSchema) getDataToPersist() utils.ReadOnlyActionInput {
-	toPersist := utils.NewActionInput()
+func (s *defaultSchema) getDataToPersist() ReadOnlyActionInput {
+	toPersist := NewActionInput()
 
 	for _, input := range s.inputs {
 		if v := s.inputData.Get(input.getName()); v.Exists() && input.shouldPersist() {
@@ -133,7 +132,7 @@ func (s *defaultSchema) getDataToPersist() utils.ReadOnlyActionInput {
 }
 
 // getOutputData returns the output data from the schema.
-func (s *defaultSchema) getOutputData() utils.ReadOnlyActionInput {
+func (s *defaultSchema) getOutputData() ReadOnlyActionInput {
 	return s.outputData
 }
 

@@ -139,10 +139,10 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	fb.addDefaultStates(fb.initialState, fb.errorState, fb.endState)
 
 	if err := fb.scanStateActions(fb.flow, fb.subFlows); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to scan flow states: %w", err)
 	}
 
-	return &defaultFlow{
+	f := defaultFlow{
 		path:         fb.path,
 		flow:         fb.flow,
 		initialState: fb.initialState,
@@ -152,7 +152,9 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		stateDetails: fb.stateDetails,
 		ttl:          fb.ttl,
 		debug:        fb.debug,
-	}, nil
+	}
+
+	return &f, nil
 }
 
 // MustBuild constructs and returns the Flow object, panics on error.
@@ -198,11 +200,13 @@ func (sfb *defaultSubFlowBuilder) FixedStates(initialState StateName) SubFlowBui
 func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
 	sfb.addDefaultStates(sfb.initialState)
 
-	return &defaultFlow{
+	f := defaultFlow{
 		flow:         sfb.flow,
 		initialState: sfb.initialState,
 		subFlows:     sfb.subFlows,
-	}, nil
+	}
+
+	return &f, nil
 }
 
 // MustBuild constructs and returns the SubFlow object, panics on error.

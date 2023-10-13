@@ -1,7 +1,6 @@
 package flowpilot
 
 import (
-	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"regexp"
 )
 
@@ -34,7 +33,7 @@ type Input interface {
 	shouldPersist() bool
 	shouldPreserve() bool
 	isIncludedOnState(stateName StateName) bool
-	validate(stateName StateName, inputData utils.ReadOnlyActionInput, stashData utils.Stash) bool
+	validate(stateName StateName, inputData ReadOnlyActionInput, stashData Stash) bool
 	toPublicInput() *PublicInput
 }
 
@@ -192,7 +191,7 @@ func (i *DefaultInput) shouldPreserve() bool {
 }
 
 // validate performs validation on the input field.
-func (i *DefaultInput) validate(stateName StateName, inputData utils.ReadOnlyActionInput, stashData utils.Stash) bool {
+func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInput, stashData Stash) bool {
 	// TODO: Replace with more structured validation logic.
 
 	var inputValue *string
