@@ -5,24 +5,27 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"strings"
 )
 
-func NewSubmitRegistrationIdentifier(cfg config.Config, persister persistence.Persister, httpContext echo.Context) SubmitRegistrationIdentifier {
+func NewSubmitRegistrationIdentifier(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, httpContext echo.Context) SubmitRegistrationIdentifier {
 	return SubmitRegistrationIdentifier{
 		cfg,
 		persister,
 		httpContext,
+		passcodeService,
 	}
 }
 
 // SubmitRegistrationIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
 type SubmitRegistrationIdentifier struct {
-	cfg         config.Config
-	persister   persistence.Persister
-	httpContext echo.Context
+	cfg             config.Config
+	persister       persistence.Persister
+	httpContext     echo.Context
+	passcodeService *services.Passcode
 }
 
 func (m SubmitRegistrationIdentifier) GetName() flowpilot.ActionName {
@@ -79,7 +82,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		}
 		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
 		if e != nil && !(m.cfg.Identifier.Username.Enabled == "disabled" && m.cfg.Emails.RequireVerification) {
-			c.Input().SetError("email", common.ErrorEmailAlreadyExists) // TODO: Maybe create a new error for this
+			c.Input().SetError("email", common.ErrorEmailAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 	}
@@ -91,7 +94,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical)
 		}
 		if e != nil {
-			c.Input().SetError("username", common.ErrorUsernameAlreadyExists) // TODO: Maybe create a new error for this
+			c.Input().SetError("username", common.ErrorUsernameAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 	}
@@ -102,7 +105,10 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 	}
 
 	if email != "" && m.cfg.Emails.RequireVerification {
-		// TODO: send passcode
+		err = m.passcodeService.SendEmailVerification(c.GetFlowID(), email, m.httpContext.Request().Header.Get("Accept-Language"))
+		if err != nil {
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		}
 		return c.ContinueFlow(common.StateEmailVerification)
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
