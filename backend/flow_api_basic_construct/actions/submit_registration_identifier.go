@@ -72,24 +72,26 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 	}
 
 	if email != "" {
+		// Check that email is not already taken
 		e, err := m.persister.GetEmailPersister().FindByAddress(email)
 		if err != nil {
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
 		}
 		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
 		if e != nil && !(m.cfg.Identifier.Username.Enabled == "disabled" && m.cfg.Emails.RequireVerification) {
-			c.Input().SetError("email", flowpilot.ErrorValueInvalid.Wrap(errors.New("email already exists"))) // TODO: Maybe create a new error for this
+			c.Input().SetError("email", common.ErrorEmailAlreadyExists) // TODO: Maybe create a new error for this
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 	}
 
 	if username != "" {
+		// Check that username is not already taken
 		e, err := m.persister.GetUsernamePersister().Find(username)
 		if err != nil {
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical)
 		}
 		if e != nil {
-			c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username already taken"))) // TODO: Maybe create a new error for this
+			c.Input().SetError("username", common.ErrorUsernameAlreadyExists) // TODO: Maybe create a new error for this
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 	}
@@ -105,11 +107,6 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
 	} else if !m.cfg.Passcode.Enabled {
-		// TODO: do we need this setting or should we check the config in common.ActionSkip if passkey onboarding is required, although we know already here, that passkey onboarding is required
-		err = c.Stash().Set("passkey_onboarding_required", true)
-		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-		}
 		return c.ContinueFlow(common.StateOnboardingCreatePasskey)
 	}
 

@@ -5,7 +5,6 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"net/http"
 )
 
 func NewSendCapabilities(cfg config.Config) SendCapabilities {
@@ -45,14 +44,14 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 		m.cfg.Password.Enabled == false &&
 		m.cfg.Passcode.Enabled == false {
 		// Only passkeys are allowed, but webauthn is not available on the browser
-		return c.ContinueFlowWithError(common.StateError, ErrorDeviceNotCapable)
+		return c.ContinueFlowWithError(common.StateError, common.ErrorDeviceNotCapable)
 	}
 	if capabilities.Webauthn.Available == false &&
 		m.cfg.SecondFactor.Enabled == "required" &&
 		len(m.cfg.SecondFactor.Methods) == 1 &&
 		m.cfg.SecondFactor.Methods[0] == "security_key" {
 		// Only security keys are allowed as a second factor, but webauthn is not available on the browser
-		return c.ContinueFlowWithError(common.StateError, ErrorDeviceNotCapable)
+		return c.ContinueFlowWithError(common.StateError, common.ErrorDeviceNotCapable)
 	}
 
 	err = c.Stash().Set("capabilities", capabilities)
@@ -75,5 +74,3 @@ type capabilities struct {
 type webauthn struct {
 	Available bool `json:"available"`
 }
-
-var ErrorDeviceNotCapable = flowpilot.NewFlowError("device_not_capable", "The device can not login or register.", http.StatusOK) // The device is not able to provide at least one login method.
