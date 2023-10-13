@@ -3,6 +3,11 @@ package flow_api_test
 import "github.com/teamhanko/hanko/backend/flowpilot"
 
 const (
+	StateSecondSubFlowInit  flowpilot.StateName = "StateSecondSubFlowInit"
+	StateThirdSubFlowInit   flowpilot.StateName = "StateThirdSubFlowInit"
+	StateSecondSubFlowFinal flowpilot.StateName = "StateSecondSubFlowFinal"
+	StateFirstSubFlowInit   flowpilot.StateName = "StateFirstSubFlowInit"
+
 	StateSignInOrSignUp             flowpilot.StateName = "init"
 	StateError                      flowpilot.StateName = "error"
 	StateSuccess                    flowpilot.StateName = "success"
@@ -20,6 +25,12 @@ const (
 )
 
 const (
+	ActionEndSubFlow         flowpilot.ActionName = "EndSubFlow"
+	ActionContinueToFinal    flowpilot.ActionName = "ContinueToFinal"
+	ActionStartFirstSubFlow  flowpilot.ActionName = "StartFirstSubFlow"
+	ActionStartSecondSubFlow flowpilot.ActionName = "StartSecondSubFlow"
+	ActionStartThirdSubFlow  flowpilot.ActionName = "StartThirdSubFlow"
+
 	ActionSubmitEmail            flowpilot.ActionName = "submit_email"
 	ActionGetWAChallenge         flowpilot.ActionName = "get_webauthn_challenge"
 	ActionVerifyWAPublicKey      flowpilot.ActionName = "verify_webauthn_public_key"

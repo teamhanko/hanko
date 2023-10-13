@@ -46,8 +46,6 @@ type StateName string
 // ActionName represents the name of an action associated with a Transition.
 type ActionName string
 
-// TODO: Should it be possible to partially implement the Action interface? E.g. when a action does not require initialization.
-
 // Action defines the interface for flow actions.
 type Action interface {
 	GetName() ActionName              // Get the action name.
@@ -56,6 +54,7 @@ type Action interface {
 	Execute(ExecutionContext) error   // Execute the action.
 }
 
+// Actions represents a list of Action
 type Actions []Action
 
 // Transition holds an action associated with a state transition.
@@ -63,6 +62,7 @@ type Transition struct {
 	Action Action
 }
 
+// getByName return the Action with the specified name.
 func (a Actions) getByName(name ActionName) (Action, error) {
 	for _, action := range a {
 		currentName := action.GetName()
@@ -78,9 +78,9 @@ func (a Actions) getByName(name ActionName) (Action, error) {
 // Transitions is a collection of Transition instances.
 type Transitions []Transition
 
-// getActions returns the Action associated with the specified name.
-func (ts *Transitions) getActions() []Action {
-	var actions []Action
+// getActions returns the Actions associated with the transition.
+func (ts *Transitions) getActions() Actions {
+	var actions Actions
 
 	for _, t := range *ts {
 		actions = append(actions, t.Action)
@@ -89,6 +89,7 @@ func (ts *Transitions) getActions() []Action {
 	return actions
 }
 
+// stateDetail represents details for a state, including the associated flow, available sub-flows and eligible actions.
 type stateDetail struct {
 	flow     StateTransitions
 	subFlows SubFlows
@@ -100,6 +101,12 @@ type stateDetails map[StateName]stateDetail
 
 // StateTransitions maps states to associated Transitions.
 type StateTransitions map[StateName]Transitions
+
+// stateExists checks if a state exists in the flow.
+func (st StateTransitions) stateExists(stateName StateName) bool {
+	_, ok := st[stateName]
+	return ok
+}
 
 // SubFlows maps a sub-flow init state to StateTransitions.
 type SubFlows map[StateName]SubFlow
@@ -117,12 +124,12 @@ func (sfs SubFlows) isEntryStateAllowed(entryState StateName) bool {
 }
 
 type flow interface {
-	stateExists(stateName StateName) bool
 	getStateDetail(stateName StateName) (*stateDetail, error)
 	getSubFlows() SubFlows
 	getFlow() StateTransitions
 }
 
+// Flow represents a flow.
 type Flow interface {
 	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
 	ResultFromError(err error) FlowResult
@@ -147,12 +154,6 @@ type defaultFlow struct {
 	endState     StateName        // Final state of the flow.
 	ttl          time.Duration    // Time-to-live for the flow.
 	debug        bool             // Enables debug mode.
-}
-
-// stateExists checks if a state exists in the defaultFlow.
-func (f *defaultFlow) stateExists(stateName StateName) bool {
-	_, ok := f.flow[stateName]
-	return ok
 }
 
 // getActionsForState returns transitions for a specified state.
@@ -196,13 +197,13 @@ func (f *defaultFlow) validate() error {
 	if len(f.endState) == 0 {
 		return errors.New("fixed state 'endState' is not set")
 	}
-	if !f.stateExists(f.initialState) {
+	if !f.flow.stateExists(f.initialState) {
 		return errors.New("fixed state 'initialState' does not belong to the flow")
 	}
-	if !f.stateExists(f.errorState) {
+	if !f.flow.stateExists(f.errorState) {
 		return errors.New("fixed state 'errorState' does not belong to the flow")
 	}
-	if !f.stateExists(f.endState) {
+	if !f.flow.stateExists(f.endState) {
 		return errors.New("fixed state 'endState' does not belong to the flow")
 	}
 	if detail, _ := f.getStateDetail(f.endState); detail == nil || len(detail.actions) > 0 {

@@ -16,9 +16,9 @@ type flowContext interface {
 	// GetPath returns the current path within the flow.
 	GetPath() string
 	// Payload returns the JSONManager for accessing payload data.
-	Payload() utils.Payload
+	Payload() Payload
 	// Stash returns the JSONManager for accessing stash data.
-	Stash() utils.Stash
+	Stash() Stash
 	// GetInitialState returns the initial state of the flow.
 	GetInitialState() StateName
 	// GetCurrentState returns the current state of the flow.
@@ -40,7 +40,7 @@ type actionInitializationContext interface {
 	// AddInputs adds input parameters to the schema.
 	AddInputs(inputs ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
-	Stash() utils.Stash
+	Stash() Stash
 	// SuspendAction suspends the current action's execution.
 	SuspendAction()
 }
@@ -54,7 +54,7 @@ type actionExecutionContext interface {
 	// TODO: FetchActionInput (for a action name) is maybe useless and can be removed or replaced.
 
 	// FetchActionInput fetches input data for a specific action.
-	FetchActionInput(actionName ActionName) (utils.ReadOnlyActionInput, error)
+	FetchActionInput(actionName ActionName) (ReadOnlyActionInput, error)
 	// ValidateInputData validates the input data against the schema.
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
@@ -72,7 +72,8 @@ type actionExecutionContinuationContext interface {
 	StartSubFlow(initState StateName, nextStates ...StateName) error
 	// EndSubFlow ends the sub-flow and continues the flow execution to the previously specified next states.
 	EndSubFlow() error
-	// TODO: Implement a function to step back to the previous state (while skipping self-transitions and recalling preserved data).
+	// ContinueToPreviousState rewinds the flow back to the previous state.
+	ContinueToPreviousState() error
 }
 
 // InitializationContext is a shorthand for actionInitializationContext within the flow initialization method.
@@ -105,8 +106,8 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	expiresAt := time.Now().Add(flow.ttl).UTC()
 
 	// Initialize JSONManagers for stash and payload.
-	stash := utils.NewStash()
-	payload := utils.NewPayload()
+	stash := NewStash()
+	payload := NewPayload()
 
 	// Create a new flow model with the provided parameters.
 	flowCreation := flowCreationParam{currentState: flow.initialState, expiresAt: expiresAt}
@@ -153,13 +154,13 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Parse stash data from the flow model.
-	stash, err := utils.NewStashFromString(flowModel.StashData)
+	stash, err := NewStashFromString(flowModel.StashData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse stash from flow: %w", err)
 	}
 
 	// Initialize JSONManagers for payload and flash data.
-	payload := utils.NewPayload()
+	payload := NewPayload()
 
 	// Create a defaultFlowContext instance.
 	fc := defaultFlowContext{
@@ -177,7 +178,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Parse raw input data into JSONManager.
 	raw := options.inputData.getJSONStringOrDefault()
-	inputJSON, err := utils.NewActionInputFromString(raw)
+	inputJSON, err := NewActionInputFromString(raw)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
