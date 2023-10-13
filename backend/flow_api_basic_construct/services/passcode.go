@@ -56,13 +56,13 @@ func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAd
 
 	passcodeModel := models.Passcode{
 		ID:       passcodeId,
-		FlowID:
+		FlowID:   flowID,
 		Ttl:      service.cfg.Passcode.TTL,
 		Code:     string(hashedPasscode),
 		TryCount: 0,
 	}
 
-	err = service.persister.GetPasscodePersister().Create(passcodeModel) // TODO: Currently does not work, because UserId must be marked as optional in the DB
+	err = service.persister.GetPasscodePersister().Create(passcodeModel)
 	if err != nil {
 		return err
 	}
