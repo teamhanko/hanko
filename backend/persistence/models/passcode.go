@@ -13,6 +13,7 @@ type Passcode struct {
 	ID        uuid.UUID `db:"id"`
 	UserId    uuid.UUID `db:"user_id"`
 	EmailID   uuid.UUID `db:"email_id"`
+	FlowID    uuid.UUID `db:"flow_id"`
 	Ttl       int       `db:"ttl"` // in seconds
 	Code      string    `db:"code"`
 	TryCount  int       `db:"try_count"`
@@ -25,7 +26,6 @@ type Passcode struct {
 func (passcode *Passcode) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: passcode.ID},
-		&validators.UUIDIsPresent{Name: "UserID", Field: passcode.UserId},
 		&validators.StringLengthInRange{Name: "Code", Field: passcode.Code, Min: 6},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: passcode.CreatedAt},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: passcode.UpdatedAt},
