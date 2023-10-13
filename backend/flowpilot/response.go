@@ -18,8 +18,8 @@ type PublicAction struct {
 type PublicActions []PublicAction
 
 // Add adds a link to the collection of PublicActions.
-func (ls *PublicActions) Add(l PublicAction) {
-	*ls = append(*ls, l)
+func (pa *PublicActions) Add(publicAction PublicAction) {
+	*pa = append(*pa, publicAction)
 }
 
 // PublicError represents an error for public exposure.
