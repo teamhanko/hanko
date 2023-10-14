@@ -570,6 +570,7 @@ Translations are currently available for the following languages:
 - "de" - German
 - "en" - English
 - "fr" - French
+- "bn" - Bengali
 
 You can import them individually:
 
@@ -582,6 +583,7 @@ import { de } from "@teamhanko/hanko-elements/i18n/de";
 import { en } from "@teamhanko/hanko-elements/i18n/en";
 import { fr } from "@teamhanko/hanko-elements/i18n/fr";
 import { zh } from "@teamhanko/hanko-elements/i18n/zh";
+import { bn } from "@teamhanko/hanko-elements/i18n/bn";
 ```
 
 Or import all translations at once:
@@ -593,7 +595,7 @@ import { all } from "@teamhanko/hanko-elements/i18n/all";
 After importing, provide the translations through the `register()` function:
 
 ```typescript
-register("https://hanko.yourdomain.com", { translations: { de, en, fr, zh } });
+register("https://hanko.yourdomain.com", { translations: { de, en, fr, zh, bn } });
 
 // or
 

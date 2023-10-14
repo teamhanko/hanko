@@ -29,6 +29,9 @@
       "i18n/zh": [
         "dist/i18n/zh.d.ts"
       ],
+      "i18n/bn":[
+        "dist/i18n/bn.d.ts"
+      ],
       "i18n/all": [
         "dist/i18n/all.d.ts"
       ]
@@ -59,6 +62,11 @@
       "types": "./dist/i18n/zh.d.ts",
       "import": "./dist/i18n/zh.js",
       "require": "./dist/i18n/zh.js"
+    },
+    "./i18n/bn": {
+      "types": "./dist/i18n/bn.d.ts",
+      "import": "./dist/i18n/bn.js",
+      "require": "./dist/i18n/bn.js"
     },
     "./i18n/all": {
       "types": "./dist/i18n/all.d.ts",

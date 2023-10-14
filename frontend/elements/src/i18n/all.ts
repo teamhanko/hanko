@@ -3,4 +3,5 @@ import { de } from "./de";
 import { en } from "./en";
 import { fr } from "./fr";
 import { zh } from "./zh";
-export const all: Translations = { de, en, fr, zh };
+import { bn } from "./bn";
+export const all: Translations = { de, en, fr, zh, bn };
