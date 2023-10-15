@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-frontend-sdk",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -8,12 +8,15 @@
   "files": [
     "dist"
   ],
-  "types": "dist/index.d.ts",
   "type": "module",
   "source": "src/index.ts",
+  "types": "dist/index.d.ts",
   "exports": {
-    "require": "./dist/sdk.cjs",
-    "default": "./dist/sdk.modern.js"
+    ".": {
+      "require": "./dist/sdk.cjs",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/sdk.modern.js"
+    }
   },
   "main": "./dist/sdk.cjs",
   "module": "./dist/sdk.module.js",
