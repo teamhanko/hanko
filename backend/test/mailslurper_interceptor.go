@@ -12,6 +12,7 @@ import (
 
 type MailslurperConfiguration struct {
 	ServicePort int `json:"servicePort" required:"true"`
+	SmtpPort    int `json:"smtpPort" required:"true"`
 }
 
 func NewMailslurperInterceptor() (*mailslurperInterceptor, error) {
@@ -28,13 +29,13 @@ func NewMailslurperInterceptor() (*mailslurperInterceptor, error) {
 	}
 	return &mailslurperInterceptor{
 		ServiceBaseUrl: fmt.Sprintf("http://localhost:%d", config.ServicePort),
-		ServicePort:    config.ServicePort,
+		SmtpPort:       config.SmtpPort,
 	}, nil
 }
 
 type mailslurperInterceptor struct {
 	ServiceBaseUrl string
-	ServicePort    int
+	SmtpPort       int
 }
 
 type GetEmailResponse struct {
@@ -66,8 +67,4 @@ func (m *mailslurperInterceptor) GetEmails() (*GetEmailResponse, error) {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
 	return &result, nil
-}
-
-func (m *mailslurperInterceptor) GetEmailPort() int {
-	return m.ServicePort
 }
