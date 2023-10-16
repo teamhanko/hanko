@@ -26,7 +26,7 @@ type flowContext interface {
 	// CurrentStateEquals returns true, when one of the given states matches the current state.
 	CurrentStateEquals(states ...StateName) bool
 	// GetPreviousState returns the previous state of the flow.
-	GetPreviousState() *StateName
+	GetPreviousState() (*StateName, error)
 	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
 	// GetEndState returns the final state of the flow.
