@@ -67,7 +67,7 @@ func (aec *defaultActionExecutionContext) continueFlow(nextState StateName, flow
 	}
 
 	stateExists := detail.flow.stateExists(nextState)
-	subFlowEntryStateAllowed := detail.subFlows.isEntryStateAllowed(nextState)
+	subFlowEntryStateAllowed := detail.subFlows.stateExists(nextState)
 
 	// Check if the specified nextState is valid.
 	if !(stateExists ||
@@ -168,7 +168,7 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 	}
 
 	if unscheduledState != nil {
-		err = aec.stash.addScheduledStates(*nextState)
+		err = aec.stash.addScheduledStates(*unscheduledState)
 		if err != nil {
 			return fmt.Errorf("failed add scheduled states: %w", err)
 		}
@@ -198,7 +198,7 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nex
 	}
 
 	// the specified entry state must be an entry state to a sub-flow of the current flow
-	if entryStateAllowed := detail.subFlows.isEntryStateAllowed(entryState); !entryStateAllowed {
+	if entryStateAllowed := detail.subFlows.stateExists(entryState); !entryStateAllowed {
 		return fmt.Errorf("the specified entry state '%s' is not associated with a sub-flow of the current flow", entryState)
 	}
 
@@ -207,18 +207,18 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nex
 	// validate the specified nextStates and append valid state to the list of scheduledStates
 	for index, nextState := range nextStates {
 		stateExists := detail.flow.stateExists(nextState)
-		subFlowEntryStateAllowed := detail.subFlows.isEntryStateAllowed(nextState)
+		subFlowEntryStateAllowed := detail.subFlows.stateExists(nextState)
 
 		// validate the current next state
 		if index == len(nextStates)-1 {
 			// the last state must be a member of the current flow or a sub-flow entry state
 			if !stateExists && !subFlowEntryStateAllowed {
-				return fmt.Errorf("the last next state '%s' specified is not a sub-flow entry state or another state associated with the current flow", nextState)
+				return fmt.Errorf("the last next state '%s' specified is not a sub-flow state or another state associated with the current flow", nextState)
 			}
 		} else {
 			// every other state must be a sub-flow entry state
 			if !subFlowEntryStateAllowed {
-				return fmt.Errorf("the specified next state '%s' is not a sub-flow entry state of the current flow", nextState)
+				return fmt.Errorf("the specified next state '%s' is not a sub-flow state of the current flow", nextState)
 			}
 		}
 

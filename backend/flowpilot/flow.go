@@ -1,7 +1,6 @@
 package flowpilot
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -109,13 +108,12 @@ func (st StateTransitions) stateExists(stateName StateName) bool {
 }
 
 // SubFlows maps a sub-flow init state to StateTransitions.
-type SubFlows map[StateName]SubFlow
+type SubFlows []SubFlow
 
-func (sfs SubFlows) isEntryStateAllowed(entryState StateName) bool {
+// stateExists checks if the given state exists in a sub-flow of the current flow.
+func (sfs SubFlows) stateExists(state StateName) bool {
 	for _, subFlow := range sfs {
-		subFlowInitState := subFlow.getInitialState()
-
-		if subFlowInitState == entryState {
+		if subFlow.getFlow().stateExists(state) {
 			return true
 		}
 	}
@@ -134,20 +132,18 @@ type Flow interface {
 	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
 	ResultFromError(err error) FlowResult
 	setDefaults()
-	validate() error
 	flow
 }
 
 type SubFlow interface {
-	getInitialState() StateName
 	flow
 }
 
 // defaultFlow defines a flow structure with states, transitions, and settings.
 type defaultFlow struct {
 	flow         StateTransitions // State transitions mapping.
-	subFlows     SubFlows         // TODO
-	stateDetails stateDetails     //
+	subFlows     SubFlows         // The sub-flows of the current flow.
+	stateDetails stateDetails     // Maps state names to flow details.
 	path         string           // flow path or identifier.
 	initialState StateName        // Initial state of the flow.
 	errorState   StateName        // State representing errors.
@@ -165,10 +161,6 @@ func (f *defaultFlow) getStateDetail(stateName StateName) (*stateDetail, error) 
 	return nil, fmt.Errorf("unknown state: %s", stateName)
 }
 
-func (f *defaultFlow) getInitialState() StateName {
-	return f.initialState
-}
-
 func (f *defaultFlow) getSubFlows() SubFlows {
 	return f.subFlows
 }
@@ -184,35 +176,6 @@ func (f *defaultFlow) setDefaults() {
 	}
 }
 
-// TODO: validate while building the flow
-// validate performs validation checks on the defaultFlow configuration.
-func (f *defaultFlow) validate() error {
-	// Validate fixed states and their presence in the flow.
-	if len(f.initialState) == 0 {
-		return errors.New("fixed state 'initialState' is not set")
-	}
-	if len(f.errorState) == 0 {
-		return errors.New("fixed state 'errorState' is not set")
-	}
-	if len(f.endState) == 0 {
-		return errors.New("fixed state 'endState' is not set")
-	}
-	if !f.flow.stateExists(f.initialState) {
-		return errors.New("fixed state 'initialState' does not belong to the flow")
-	}
-	if !f.flow.stateExists(f.errorState) {
-		return errors.New("fixed state 'errorState' does not belong to the flow")
-	}
-	if !f.flow.stateExists(f.endState) {
-		return errors.New("fixed state 'endState' does not belong to the flow")
-	}
-	if detail, _ := f.getStateDetail(f.endState); detail == nil || len(detail.actions) > 0 {
-		return fmt.Errorf("the specified endState '%s' is not allowed to have transitions", f.endState)
-	}
-
-	return nil
-}
-
 // Execute handles the execution of actions for a defaultFlow.
 func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error) {
 	// Process execution options.
@@ -224,11 +187,6 @@ func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (F
 
 	// Set default values for flow settings.
 	f.setDefaults()
-
-	// Perform validation checks on the flow configuration.
-	if err := f.validate(); err != nil {
-		return nil, fmt.Errorf("invalid flow: %w", err)
-	}
 
 	if len(executionOptions.action) == 0 {
 		// If the action is empty, create a new flow.
