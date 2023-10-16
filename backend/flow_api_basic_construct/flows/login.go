@@ -10,7 +10,7 @@ import (
 
 func NewLoginFlow(cfg config.Config) flowpilot.Flow {
 	return flowpilot.NewFlow("/login").
-		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
+		State(common.StateLoginPreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateLoginInit).
 		State(common.StateLoginMethodChooser).
 		State(common.StatePasskeyLogin).
@@ -24,7 +24,7 @@ func NewLoginFlow(cfg config.Config) flowpilot.Flow {
 		State(common.StateSuccess).
 		State(common.StateError).
 		//SubFlows(NewPasskeyOnboardingSubFlow(), New2FACreationSubFlow()).
-		FixedStates(common.StatePreflight, common.StateError, common.StateSuccess).
+		FixedStates(common.StateLoginPreflight, common.StateError, common.StateSuccess).
 		TTL(10 * time.Minute).
 		MustBuild()
 }

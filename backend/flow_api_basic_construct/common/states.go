@@ -3,10 +3,10 @@ package common
 import "github.com/teamhanko/hanko/backend/flowpilot"
 
 const (
-	StatePreflight flowpilot.StateName = "preflight"
-	StateSuccess   flowpilot.StateName = "success"
-	StateError     flowpilot.StateName = "error"
+	StateSuccess flowpilot.StateName = "success"
+	StateError   flowpilot.StateName = "error"
 
+	StateLoginPreflight               flowpilot.StateName = "login_preflight"
 	StateLoginInit                    flowpilot.StateName = "login_init"
 	StateLoginMethodChooser           flowpilot.StateName = "login_method_chooser"
 	StatePasswordLogin                flowpilot.StateName = "password_login"
@@ -18,9 +18,10 @@ const (
 	StateUseRecoveryCode              flowpilot.StateName = "use_recovery_code"
 	StateRecoveryPasswordCreation     flowpilot.StateName = "recovery_password_creation"
 
-	StateRegistrationInit  flowpilot.StateName = "registration_init"
-	StateEmailVerification flowpilot.StateName = "registration_email_verification"
-	StatePasswordCreation  flowpilot.StateName = "password_creation"
+	StateRegistrationPreflight flowpilot.StateName = "registration_preflight"
+	StateRegistrationInit      flowpilot.StateName = "registration_init"
+	StateEmailVerification     flowpilot.StateName = "registration_email_verification"
+	StatePasswordCreation      flowpilot.StateName = "password_creation"
 
 	StateOnboardingCreatePasskey            flowpilot.StateName = "onboarding_create_passkey"
 	StateOnboardingVerifyPasskeyAttestation flowpilot.StateName = "onboarding_verify_passkey_attestation"

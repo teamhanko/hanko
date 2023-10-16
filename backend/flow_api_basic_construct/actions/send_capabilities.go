@@ -59,8 +59,7 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
 	}
 
-	// TODO: this check is a hack but here we have no other indication in which flow we are
-	if c.GetPath() == "/registration" {
+	if c.GetCurrentState() == common.StateRegistrationPreflight {
 		return c.ContinueFlow(common.StateRegistrationInit)
 	} else {
 		return c.ContinueFlow(common.StateLoginInit)
