@@ -8,7 +8,7 @@ export const en: Translation = {
     loginFinished: "Login successful",
     loginPasscode: "Enter passcode",
     loginPassword: "Enter password",
-    registerAuthenticator: "Save a passkey",
+    registerAuthenticator: "Create a passkey",
     registerConfirm: "Create account?",
     registerPassword: "Set new password",
     profileEmails: "Emails",
@@ -36,25 +36,25 @@ export const en: Translation = {
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
     manageEmails:
-      "Your email addresses are used for communication and authentication.",
+      "Used for passcode authentication.",
     changePassword: "Set a new password.",
     managePasskeys: "Your passkeys allow you to sign in to this account.",
     isPrimaryEmail:
-      "Used for communication, passcodes, and as username for passkeys. To change the primary email address, add another email address first and set it as primary.",
+      "This email address will be used as username for your passkeys.",
     setPrimaryEmail:
-      "Set this email address primary so it will be used for communications, for passcodes, and as a username for passkeys.",
+      "Set this email to be used as username for new passkeys.",
     emailVerified: "This email address has been verified.",
     emailUnverified: "This email address has not been verified.",
     emailDelete:
-      "If you delete this email address, it can no longer be used for signing in to your account. Passkeys that may have been created with this email address will remain intact.",
+      "If you delete this email address, it can no longer be used to sign in.",
     emailDeleteThirdPartyConnection:
-      "If you delete this email address, it can no longer be used for signing in. You can also no longer sign in with or reconnect your {provider} account. Passkeys that may have been created with this email address will remain intact.",
+      "If you delete this email address, it can no longer be used to sign in.",
     emailDeletePrimary:
-      "The primary email address cannot be deleted. Add another email address first and make it your primary email address.",
+      "The primary email address cannot be deleted.",
     renamePasskey:
-      "Set a name for the passkey that helps you identify where it is stored.",
+      "Set a name for the passkey.",
     deletePasskey:
-      "Delete this passkey from your account. Note that the passkey will still exist on your devices and needs to be deleted there as well.",
+      "Delete this passkey from your account.",
     deleteAccount:
       "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
     noAccountExists:
@@ -74,7 +74,7 @@ export const en: Translation = {
     forgotYourPassword: "Forgot your password?",
     back: "Back",
     signInPasskey: "Sign in with a passkey",
-    registerAuthenticator: "Save a passkey",
+    registerAuthenticator: "Create a passkey",
     signIn: "Sign in",
     signUp: "Sign up",
     sendNewPasscode: "Send new code",
@@ -91,7 +91,7 @@ export const en: Translation = {
     newPasskeyName: "New passkey name",
     addEmail: "Add email",
     changePassword: "Change password",
-    addPasskey: "Add passkey",
+    createPasskey: "Create a passkey",
     webauthnUnsupported: "Passkeys are not supported by your browser",
     signInWith: "Sign in with {provider}",
     deleteAccount: "Yes, delete this account.",

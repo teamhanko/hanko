@@ -20,7 +20,7 @@ test.describe("@nopw", () => {
         },
       });
 
-      test(`Register, add passkey, logout, login with passkey with authenticator transport ${transport}`, async ({
+      test(`Register, Create a passkey, logout, login with passkey with authenticator transport ${transport}`, async ({
         loginEmailPage,
         registerConfirmPage,
         loginPasscodePage,

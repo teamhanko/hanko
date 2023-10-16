@@ -209,14 +209,15 @@ class HttpClient {
         } else if (header.startsWith("x-session-lifetime")) {
           expirationSeconds = parseInt(
             response.headers.getResponseHeader("X-Session-Lifetime"),
-            10
+            10,
           );
         }
       });
 
     if (jwt) {
       const secure = !!this.api.match("^https://");
-      this.cookie.setAuthCookie(jwt, secure);
+      const expires = new Date(new Date().getTime() + expirationSeconds * 1000);
+      this.cookie.setAuthCookie(jwt, { secure, expires });
     }
 
     this.passcodeState.read().reset(userID).write();

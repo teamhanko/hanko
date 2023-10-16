@@ -21,8 +21,7 @@ export function TodoItem(props: TodoItemProps) {
     if (response.ok) {
       setChecked(target.checked);
       props.onUpdate(props.todoID, target.checked);
-    }
-    else {
+    } else {
       props.onError(response.statusText);
     }
   };
@@ -34,15 +33,20 @@ export function TodoItem(props: TodoItemProps) {
 
     if (response.ok) {
       props.onDelete(props.todoID);
-    }
-    else {
+    } else {
       props.onError(response.statusText);
     }
   };
 
   return (
     <div class="min-h-40 p-2 my-2 bg-white text-black rounded flex gap-1 items-center">
-      <input class="mr-2" type="checkbox" value={checked} checked={checked} onChange={updateTodo} />
+      <input
+        class="mr-2"
+        type="checkbox"
+        value={checked}
+        checked={checked}
+        onChange={updateTodo}
+      />
       <span class="w-full">{props.description}</span>
       <button class="ml-2 rounded py-1 px-2" onClick={deleteTodo}>x</button>
     </div>

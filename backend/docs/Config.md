@@ -491,7 +491,7 @@ third_party:
       ##
       #
       # The client ID (Services ID) of your Apple credentials.
-      # See: https://docs.hanko.io/guides/social/apple
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/apple
       #
       # Required if provider is enabled.
       #
@@ -501,7 +501,7 @@ third_party:
       #
       # The generated secret of your Apple credentials.
       # Valid for max. 6 months. Must be regenerated before expiration.
-      # https://docs.hanko.io/guides/social/apple
+      #  https://docs.hanko.io/guides/authentication-methods/oauth/apple
       #
       # Required if provider is enabled.
       #
@@ -521,7 +521,7 @@ third_party:
       ##
       #
       # The client ID of your Google OAuth credentials.
-      # See: https://docs.hanko.io/guides/social/google
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/google
       #
       # Required if provider is enabled.
       #
@@ -529,7 +529,7 @@ third_party:
       ##
       #
       # The secret of your Google OAuth credentials
-      # See: https://docs.hanko.io/guides/social/google
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/google
       #
       # Required if provider is enabled.
       #
@@ -549,7 +549,7 @@ third_party:
       ##
       #
       # The client ID of your GitHub OAuth credentials.
-      # See: https://docs.hanko.io/guides/social/github
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/github
       #
       # Required if provider is enabled.
       #
@@ -557,7 +557,7 @@ third_party:
       ##
       #
       # The secret of your GitHub OAuth credentials.
-      # See: https://docs.hanko.io/guides/social/github
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/github
       #
       # Required if provider is enabled.
       #
