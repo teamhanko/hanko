@@ -74,7 +74,7 @@ func export(persister persistence.Persister, outFile string) error {
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(outputFile, bytes, 0600)
+	err = os.WriteFile(outFile, bytes, 0600)
 	if err != nil {
 		return err
 	}
