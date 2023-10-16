@@ -3,12 +3,13 @@ package user
 import (
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
-// ImportEmail The import format for a user's email
-type ImportEmail struct {
+// ImportOrExportEmail The import/export format for a user's email
+type ImportOrExportEmail struct {
 	// Address Valid email address
 	Address string `json:"address" yaml:"address"`
 	// IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one primary email.
@@ -18,10 +19,10 @@ type ImportEmail struct {
 }
 
 // Emails Array of email addresses
-type Emails []ImportEmail
+type Emails []ImportOrExportEmail
 
-// ImportEntry represents a user to be imported to the Hanko database
-type ImportEntry struct {
+// ImportOrExportEntry represents a user to be imported/export to the Hanko database
+type ImportOrExportEntry struct {
 	// UserID optional uuid.v4. If not provided a new one will be generated for the user
 	UserID string `json:"user_id" yaml:"user_id"`
 	// Emails List of emails
@@ -32,10 +33,10 @@ type ImportEntry struct {
 	UpdatedAt *time.Time `json:"updated_at" yaml:"updated_at"`
 }
 
-// ImportList a list of ImportEntries
-type ImportList []ImportEntry
+// ImportOrExportList a list of ImportEntries
+type ImportOrExportList []ImportOrExportEntry
 
-func (entry *ImportEntry) validate() error {
+func (entry *ImportOrExportEntry) validate() error {
 	if len(entry.Emails) == 0 {
 		return errors.New(fmt.Sprintf("Entry with id: %v has got no Emails.", entry.UserID))
 	}

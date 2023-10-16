@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -15,6 +16,7 @@ type UserPersister interface {
 	Update(models.User) error
 	Delete(models.User) error
 	List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error)
+	All() ([]models.User, error)
 	Count(userId uuid.UUID, email string) (int, error)
 }
 
@@ -24,6 +26,19 @@ type userPersister struct {
 
 func NewUserPersister(db *pop.Connection) UserPersister {
 	return &userPersister{db: db}
+}
+
+func (p *userPersister) All() ([]models.User, error) {
+	users := []models.User{}
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identity", "WebauthnCredentials").All(&users)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return users, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
+	}
+
+	return users, nil
 }
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
