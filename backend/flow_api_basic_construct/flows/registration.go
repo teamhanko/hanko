@@ -13,7 +13,7 @@ import (
 
 func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, httpContext echo.Context) flowpilot.Flow {
 	// TODO:
-	return flowpilot.NewFlow("registration").
+	return flowpilot.NewFlow("/registration").
 		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(cfg, persister, passcodeService, httpContext), actions.NewLoginWithOauth()).
 		State(common.StateEmailVerification, actions.NewSubmitPasscode()).
@@ -23,5 +23,6 @@ func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, pas
 		//SubFlows(NewPasskeyOnboardingSubFlow(), New2FACreationSubFlow()).
 		FixedStates(common.StatePreflight, common.StateError, common.StateSuccess).
 		TTL(10 * time.Minute).
+		Debug(true).
 		MustBuild()
 }

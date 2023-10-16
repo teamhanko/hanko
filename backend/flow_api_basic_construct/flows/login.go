@@ -9,7 +9,7 @@ import (
 )
 
 func NewLoginFlow(cfg config.Config) flowpilot.Flow {
-	return flowpilot.NewFlow("login").
+	return flowpilot.NewFlow("/login").
 		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateLoginInit).
 		State(common.StateLoginMethodChooser).

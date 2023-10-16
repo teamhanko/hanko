@@ -11,6 +11,14 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
+func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode) *FlowPilotHandler {
+	return &FlowPilotHandler{
+		persister,
+		cfg,
+		passcodeService,
+	}
+}
+
 type FlowPilotHandler struct {
 	persister       persistence.Persister
 	cfg             config.Config
@@ -30,7 +38,7 @@ func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
-	actionParam := c.QueryParam("action")
+	actionParam := c.QueryParam("flowpilot_action")
 
 	var body flowpilot.InputData
 	err := c.Bind(&body)

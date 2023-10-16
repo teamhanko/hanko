@@ -9,6 +9,8 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flow_api_test"
 	"github.com/teamhanko/hanko/backend/mail"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
@@ -24,6 +26,17 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	fph := flow_api_test.FlowPilotHandler{Persister: persister}
 	e.POST("/flow_api_login", fph.LoginFlowHandler)
 	////
+
+	emailService, err := services.NewEmailService(*cfg)
+	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+
+	basicFLowHandler := flow_api_basic_construct.NewHandler(
+		*cfg,
+		persister,
+		passcodeService,
+	)
+	e.POST("/registration", basicFLowHandler.RegistrationFlowHandler)
+	e.POST("/login", basicFLowHandler.LoginFlowHandler)
 
 	e.HideBanner = true
 

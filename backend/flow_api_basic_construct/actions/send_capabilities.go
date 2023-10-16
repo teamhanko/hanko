@@ -60,7 +60,7 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	// TODO: this check is a hack but here we have no other indication in which flow we are
-	if c.GetPath() == "registration" {
+	if c.GetPath() == "/registration" {
 		return c.ContinueFlow(common.StateRegistrationInit)
 	} else {
 		return c.ContinueFlow(common.StateLoginInit)

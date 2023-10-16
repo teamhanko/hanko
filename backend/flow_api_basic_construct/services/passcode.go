@@ -54,12 +54,15 @@ func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAd
 		return err
 	}
 
+	now := time.Now().UTC()
 	passcodeModel := models.Passcode{
-		ID:       passcodeId,
-		FlowID:   flowID,
-		Ttl:      service.cfg.Passcode.TTL,
-		Code:     string(hashedPasscode),
-		TryCount: 0,
+		ID:        passcodeId,
+		FlowID:    &flowID,
+		Ttl:       service.cfg.Passcode.TTL,
+		Code:      string(hashedPasscode),
+		TryCount:  0,
+		CreatedAt: now,
+		UpdatedAt: now,
 	}
 
 	err = service.persister.GetPasscodePersister().Create(passcodeModel)
