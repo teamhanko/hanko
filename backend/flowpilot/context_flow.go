@@ -46,14 +46,9 @@ func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 }
 
 // GetPreviousState returns a pointer to the previous state of the flow.
-func (fc *defaultFlowContext) GetPreviousState() *StateName {
-	state, _, _, _ := fc.stash.getLastStateFromHistory()
-
-	if state == nil {
-		state = &fc.flow.initialState
-	}
-
-	return state
+func (fc *defaultFlowContext) GetPreviousState() (*StateName, error) {
+	state, _, _, err := fc.stash.getLastStateFromHistory()
+	return state, err
 }
 
 // GetErrorState returns the designated error state of the flow.

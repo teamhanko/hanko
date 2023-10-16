@@ -1,6 +1,7 @@
 package flowpilot
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -18,7 +19,6 @@ type FlowBuilder interface {
 type SubFlowBuilder interface {
 	State(state StateName, actions ...Action) SubFlowBuilder
 	SubFlows(subFlows ...SubFlow) SubFlowBuilder
-	FixedStates(initialState StateName) SubFlowBuilder
 	Build() (SubFlow, error)
 	MustBuild() SubFlow
 }
@@ -44,7 +44,7 @@ type defaultFlowBuilder struct {
 
 // newFlowBuilderBase creates a new defaultFlowBuilderBase instance.
 func newFlowBuilderBase() defaultFlowBuilderBase {
-	return defaultFlowBuilderBase{flow: make(StateTransitions), subFlows: make(SubFlows), stateDetails: make(stateDetails)}
+	return defaultFlowBuilderBase{flow: make(StateTransitions), subFlows: make(SubFlows, 0), stateDetails: make(stateDetails)}
 }
 
 // NewFlow creates a new defaultFlowBuilder that builds a new flow available under the specified path.
@@ -71,10 +71,7 @@ func (fb *defaultFlowBuilderBase) addState(state StateName, actions ...Action) {
 }
 
 func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...SubFlow) {
-	for _, subFlow := range subFlows {
-		initialState := subFlow.getInitialState()
-		fb.subFlows[initialState] = subFlow
-	}
+	fb.subFlows = append(fb.subFlows, subFlows...)
 }
 
 func (fb *defaultFlowBuilderBase) addDefaultStates(states ...StateName) {
@@ -134,12 +131,44 @@ func (fb *defaultFlowBuilder) scanStateActions(flow StateTransitions, subFlows S
 	return nil
 }
 
+// validate performs validation checks on the flow configuration.
+func (fb *defaultFlowBuilder) validate() error {
+	// Validate fixed states and their presence in the flow.
+	if len(fb.initialState) == 0 {
+		return errors.New("fixed state 'initialState' is not set")
+	}
+	if len(fb.errorState) == 0 {
+		return errors.New("fixed state 'errorState' is not set")
+	}
+	if len(fb.endState) == 0 {
+		return errors.New("fixed state 'endState' is not set")
+	}
+	if !fb.flow.stateExists(fb.initialState) {
+		return errors.New("fixed state 'initialState' does not belong to the flow")
+	}
+	if !fb.flow.stateExists(fb.errorState) {
+		return errors.New("fixed state 'errorState' does not belong to the flow")
+	}
+	if !fb.flow.stateExists(fb.endState) {
+		return errors.New("fixed state 'endState' does not belong to the flow")
+	}
+	if transitions, ok := fb.flow[fb.endState]; ok && len(transitions.getActions()) > 0 {
+		return fmt.Errorf("the specified endState '%s' is not allowed to have transitions", fb.endState)
+	}
+
+	return nil
+}
+
 // Build constructs and returns the Flow object.
 func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	fb.addDefaultStates(fb.initialState, fb.errorState, fb.endState)
 
 	if err := fb.scanStateActions(fb.flow, fb.subFlows); err != nil {
 		return nil, fmt.Errorf("failed to scan flow states: %w", err)
+	}
+
+	if err := fb.validate(); err != nil {
+		return nil, fmt.Errorf("flow validation failed: %w", err)
 	}
 
 	f := defaultFlow{
@@ -190,20 +219,12 @@ func (sfb *defaultSubFlowBuilder) State(state StateName, actions ...Action) SubF
 	return sfb
 }
 
-// FixedStates sets the initial of the sub-flow.
-func (sfb *defaultSubFlowBuilder) FixedStates(initialState StateName) SubFlowBuilder {
-	sfb.initialState = initialState
-	return sfb
-}
-
 // Build constructs and returns the SubFlow object.
 func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
-	sfb.addDefaultStates(sfb.initialState)
 
 	f := defaultFlow{
-		flow:         sfb.flow,
-		initialState: sfb.initialState,
-		subFlows:     sfb.subFlows,
+		flow:     sfb.flow,
+		subFlows: sfb.subFlows,
 	}
 
 	return &f, nil
