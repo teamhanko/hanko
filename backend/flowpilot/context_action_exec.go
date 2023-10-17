@@ -216,7 +216,7 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nex
 				return fmt.Errorf("the last next state '%s' specified is not a sub-flow state or another state associated with the current flow", nextState)
 			}
 		} else {
-			// every other state must be a sub-flow entry state
+			// every other state must be a sub-flow state
 			if !subFlowEntryStateAllowed {
 				return fmt.Errorf("the specified next state '%s' is not a sub-flow state of the current flow", nextState)
 			}
