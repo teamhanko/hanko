@@ -2,9 +2,10 @@ package user
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 const validUUID = "62418053-a2cd-47a8-9b61-4426380d263a"
@@ -27,7 +28,7 @@ func TestImportEntry_validate(t *testing.T) {
 			fields: fields{
 				UserID: "",
 				Emails: Emails{
-					ImportEmail{
+					ImportOrExportEmail{
 						Address:    "primary@hanko.io",
 						IsPrimary:  true,
 						IsVerified: false,
@@ -43,7 +44,7 @@ func TestImportEntry_validate(t *testing.T) {
 			fields: fields{
 				UserID: validUUID,
 				Emails: Emails{
-					ImportEmail{
+					ImportOrExportEmail{
 						Address:    "primary@hanko.io",
 						IsPrimary:  true,
 						IsVerified: false,
@@ -59,7 +60,7 @@ func TestImportEntry_validate(t *testing.T) {
 			fields: fields{
 				UserID: invalidUUID,
 				Emails: Emails{
-					ImportEmail{
+					ImportOrExportEmail{
 						Address:    "primary@hanko.io",
 						IsPrimary:  true,
 						IsVerified: false,
@@ -85,7 +86,7 @@ func TestImportEntry_validate(t *testing.T) {
 			fields: fields{
 				UserID: "",
 				Emails: Emails{
-					ImportEmail{
+					ImportOrExportEmail{
 						Address:    "primary@hanko.io",
 						IsPrimary:  false,
 						IsVerified: false,
@@ -101,12 +102,12 @@ func TestImportEntry_validate(t *testing.T) {
 			fields: fields{
 				UserID: "",
 				Emails: Emails{
-					ImportEmail{
+					ImportOrExportEmail{
 						Address:    "primary@hanko.io",
 						IsPrimary:  true,
 						IsVerified: false,
 					},
-					ImportEmail{
+					ImportOrExportEmail{
 						Address:    "primary2@hanko.io",
 						IsPrimary:  true,
 						IsVerified: false,
@@ -120,7 +121,7 @@ func TestImportEntry_validate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			entry := &ImportEntry{
+			entry := &ImportOrExportEntry{
 				UserID:    tt.fields.UserID,
 				Emails:    tt.fields.Emails,
 				CreatedAt: tt.fields.CreatedAt,
