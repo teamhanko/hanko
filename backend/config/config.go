@@ -34,6 +34,7 @@ type Config struct {
 
 	Identifier   Identifier   `yaml:"identifier" json:"identifier" koanf:"identifier"`
 	SecondFactor SecondFactor `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey      Passkey      `yaml:"passkey" json:"passkey" koanf:"passkey"`
 }
 
 var (
