@@ -211,7 +211,7 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nex
 
 		// validate the current next state
 		if index == len(nextStates)-1 {
-			// the last state must be a member of the current flow or a sub-flow entry state
+			// the last state must be a member of the current flow or a sub-flow
 			if !stateExists && !subFlowEntryStateAllowed {
 				return fmt.Errorf("the last next state '%s' specified is not a sub-flow state or another state associated with the current flow", nextState)
 			}
