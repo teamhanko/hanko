@@ -14,22 +14,22 @@ type defaultFlowContext struct {
 	flowModel FlowModel     // The current FlowModel.
 }
 
-// GetFlowID returns the unique ID of the current defaultFlow.
+// GetFlowID returns the unique ID of the current flow.
 func (fc *defaultFlowContext) GetFlowID() uuid.UUID {
 	return fc.flowModel.ID
 }
 
-// GetPath returns the current path within the defaultFlow.
+// GetPath returns the current path within the flow.
 func (fc *defaultFlowContext) GetPath() string {
 	return fc.flow.path
 }
 
-// GetInitialState returns the initial state of the defaultFlow.
+// GetInitialState returns the initial state of the flow.
 func (fc *defaultFlowContext) GetInitialState() StateName {
-	return fc.flow.initialState
+	return fc.flow.initialStateName
 }
 
-// GetCurrentState returns the current state of the defaultFlow.
+// GetCurrentState returns the current state of the flow.
 func (fc *defaultFlowContext) GetCurrentState() StateName {
 	return fc.flowModel.CurrentState
 }
@@ -53,12 +53,12 @@ func (fc *defaultFlowContext) GetPreviousState() (*StateName, error) {
 
 // GetErrorState returns the designated error state of the flow.
 func (fc *defaultFlowContext) GetErrorState() StateName {
-	return fc.flow.errorState
+	return fc.flow.errorStateName
 }
 
 // GetEndState returns the final state of the flow.
 func (fc *defaultFlowContext) GetEndState() StateName {
-	return fc.flow.endState
+	return fc.flow.endStateName
 }
 
 // Stash returns the JSONManager for accessing stash data.
@@ -68,10 +68,10 @@ func (fc *defaultFlowContext) Stash() Stash {
 
 // StateExists checks if a given state exists within the current (sub-)flow.
 func (fc *defaultFlowContext) StateExists(stateName StateName) bool {
-	detail, _ := fc.flow.getStateDetail(fc.flowModel.CurrentState)
+	state, _ := fc.flow.getState(fc.flowModel.CurrentState)
 
-	if detail != nil {
-		return detail.flow.stateExists(stateName)
+	if state != nil {
+		return state.flow.stateExists(stateName)
 	}
 
 	return false

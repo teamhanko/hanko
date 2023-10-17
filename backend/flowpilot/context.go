@@ -67,9 +67,9 @@ type actionExecutionContinuationContext interface {
 	// ContinueFlow continues the flow execution to the specified next state.
 	ContinueFlow(nextState StateName) error
 	// ContinueFlowWithError continues the flow execution to the specified next state with an error.
-	ContinueFlowWithError(nextState StateName, flowErr FlowError) error
+	ContinueFlowWithError(nextStateName StateName, flowErr FlowError) error
 	// StartSubFlow starts a sub-flow and continues the flow execution to the specified next states after the sub-flow has been ended.
-	StartSubFlow(initState StateName, nextStates ...StateName) error
+	StartSubFlow(initStateName StateName, nextStateNames ...StateName) error
 	// EndSubFlow ends the sub-flow and continues the flow execution to the previously specified next states.
 	EndSubFlow() error
 	// ContinueToPreviousState rewinds the flow back to the previous state.
@@ -110,7 +110,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	payload := NewPayload()
 
 	// Create a new flow model with the provided parameters.
-	flowCreation := flowCreationParam{currentState: flow.initialState, expiresAt: expiresAt}
+	flowCreation := flowCreationParam{currentState: flow.initialStateName, expiresAt: expiresAt}
 	flowModel, err := dbw.CreateFlowWithParam(flowCreation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create flow: %w", err)
@@ -126,7 +126,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	}
 
 	// Generate a response based on the execution result.
-	er := executionResult{nextState: flowModel.CurrentState}
+	er := executionResult{nextStateName: flowModel.CurrentState}
 
 	return er.generateResponse(fc, flow.debug), nil
 }
@@ -136,21 +136,21 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	// Parse the actionParam parameter to get the actionParam name and flow ID.
 	actionParam, err := utils.ParseActionParam(options.action)
 	if err != nil {
-		return newFlowResultFromError(flow.errorState, ErrorActionParamInvalid.Wrap(err), flow.debug), nil
+		return newFlowResultFromError(flow.errorStateName, ErrorActionParamInvalid.Wrap(err), flow.debug), nil
 	}
 
 	// Retrieve the flow model from the database using the flow ID.
 	flowModel, err := db.GetFlow(actionParam.FlowID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return newFlowResultFromError(flow.errorState, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
+			return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 		}
 		return nil, fmt.Errorf("failed to get flow: %w", err)
 	}
 
 	// Check if the flow has expired.
 	if time.Now().After(flowModel.ExpiresAt) {
-		return newFlowResultFromError(flow.errorState, ErrorFlowExpired, flow.debug), nil
+		return newFlowResultFromError(flow.errorStateName, ErrorFlowExpired, flow.debug), nil
 	}
 
 	// Parse stash data from the flow model.
@@ -171,7 +171,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		payload:   payload,
 	}
 
-	detail, err := flow.getStateDetail(flowModel.CurrentState)
+	state, err := flow.getState(flowModel.CurrentState)
 	if err != nil {
 		return nil, err
 	}
@@ -187,9 +187,9 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	actionName := ActionName(actionParam.ActionName)
 
 	// Get the action associated with the actionParam name.
-	action, err := detail.actions.getByName(actionName)
+	action, err := state.getAction(actionName)
 	if err != nil {
-		return newFlowResultFromError(flow.errorState, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
+		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
 	// Initialize the schema and action context for action execution.
@@ -199,7 +199,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Check if the action is suspended.
 	if aic.isSuspended {
-		return newFlowResultFromError(flow.errorState, ErrorOperationNotPermitted, flow.debug), nil
+		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
 	}
 
 	// Create a actionExecutionContext instance for action execution.

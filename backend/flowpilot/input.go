@@ -24,7 +24,7 @@ type Input interface {
 	Hidden(b bool) Input
 	Preserve(b bool) Input
 	Persist(b bool) Input
-	ConditionalIncludeOnState(states ...StateName) Input
+	ConditionalIncludeOnState(stateNames ...StateName) Input
 	CompareWithStash(b bool) Input
 
 	setValue(value interface{}) Input
