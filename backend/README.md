@@ -11,6 +11,7 @@ easily integrated into any web app with as little as two lines of code.
 
 - [API features](#api-features)
 - [Running the backend](#running-the-backend)
+- [Running tests](#running-tests)
 - [Additional topics](#additional-topics)
   - [Enabling password authentication](#enabling-password-authentication)
   - [Cross-domain communication](#cross-domain-communication)
@@ -365,6 +366,20 @@ Use this command to start the public and admin API together:
 
 ```shell
 serve all
+```
+
+## Running tests
+
+Prior to running tests, you'll need to start up a test Mailslurper docker container for the tests to send emails to. You can run the Mailslurper instance by running the following command at the root directory:
+
+```bash
+docker-compose -f ./backend/test/docker-compose.test.yaml up --build -d
+```
+
+Once the instance is running, run tests with the following command within the `backend` directory:
+
+```bash
+go test -v ./...
 ```
 
 ## Additional topics
