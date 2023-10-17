@@ -8,13 +8,13 @@ import (
 
 // Stash defines the interface for managing JSON data.
 type Stash interface {
-	jsonmanager.JSONManager
-
-	getLastStateFromHistory() (state, unscheduledState *StateName, numOfScheduledStates *int64, err error)
-	addStateToHistory(state StateName, unscheduledState *StateName, numOfScheduledStates *int64) error
+	getLastStateFromHistory() (stateName, unscheduledState *StateName, numOfScheduledStates *int64, err error)
+	addStateToHistory(stateName StateName, unscheduledStateName *StateName, numOfScheduledStates *int64) error
 	removeLastStateFromHistory() error
-	addScheduledStates(scheduledStates ...StateName) error
+	addScheduledStates(scheduledStateNames ...StateName) error
 	removeLastScheduledState() (*StateName, error)
+
+	jsonmanager.JSONManager
 }
 
 // defaultStash implements the Stash interface.
@@ -33,25 +33,25 @@ func NewStashFromString(data string) (Stash, error) {
 	return &defaultStash{JSONManager: jm}, err
 }
 
-// addStateToHistory adds a state to the history. Specify the values for unscheduledState and numOfScheduledStates to
+// addStateToHistory adds a stateDetail to the history. Specify the values for unscheduledState and numOfScheduledStates to
 // maintain the list of scheduled states if sub-flows are involved.
-func (s *defaultStash) addStateToHistory(state StateName, unscheduledState *StateName, numOfScheduledStates *int64) error {
+func (s *defaultStash) addStateToHistory(stateName StateName, unscheduledStateName *StateName, numOfScheduledStates *int64) error {
 	// Create a new JSONManager to manage the history item
 	historyItem := jsonmanager.NewJSONManager()
 
 	// Get the last state from history
-	lastState, _, _, err := s.getLastStateFromHistory()
+	lastStateName, _, _, err := s.getLastStateFromHistory()
 	if err != nil {
 		return err
 	}
 
-	// If the last state is the same as the new state, do not add it again
-	if lastState != nil && *lastState == state {
+	// If the last state is the same as the current state, do not add it again
+	if lastStateName != nil && *lastStateName == stateName {
 		return nil
 	}
 
-	// Set the state in the history item
-	if err = historyItem.Set("s", state); err != nil {
+	// Set the stateDetail in the history item
+	if err = historyItem.Set("s", stateName); err != nil {
 		return fmt.Errorf("failed to set state: %w", err)
 	}
 
@@ -62,14 +62,14 @@ func (s *defaultStash) addStateToHistory(state StateName, unscheduledState *Stat
 		}
 	}
 
-	// If unscheduledState is provided, set it in the history item
-	if unscheduledState != nil {
-		if err = historyItem.Set("u", *unscheduledState); err != nil {
+	// If unscheduledStateName is provided, set it in the history item
+	if unscheduledStateName != nil {
+		if err = historyItem.Set("u", *unscheduledStateName); err != nil {
 			return fmt.Errorf("failed to set unscheduled_state: %w", err)
 		}
 	}
 
-	// Update the stashed history with the new history item
+	// Add the new history item to the history
 	if err = s.Set("_.state_history.-1", historyItem.Unmarshal()); err != nil {
 		return fmt.Errorf("failed to update stashed history: %w", err)
 	}
@@ -77,7 +77,7 @@ func (s *defaultStash) addStateToHistory(state StateName, unscheduledState *Stat
 	return nil
 }
 
-// removeLastStateFromHistory removes the last state from history.
+// removeLastStateFromHistory removes the last stateDetail from history.
 func (s *defaultStash) removeLastStateFromHistory() error {
 	if err := s.Delete("_.state_history.-1"); err != nil {
 		return err
@@ -86,10 +86,10 @@ func (s *defaultStash) removeLastStateFromHistory() error {
 	return nil
 }
 
-// getLastStateFromHistory returns the last state, as well as the values for unscheduledState and numOfScheduledStates.
+// getLastStateFromHistory returns the last stateDetail, as well as the values for unscheduledState and numOfScheduledStates.
 // These values indicate that further states have been added or removed from the list of scheduled states during the
-// last state.
-func (s *defaultStash) getLastStateFromHistory() (state, unscheduledState *StateName, numOfScheduledStates *int64, err error) {
+// last stateDetail.
+func (s *defaultStash) getLastStateFromHistory() (stateName, unscheduledStateName *StateName, numOfScheduledStates *int64, err error) {
 	// Get the index of the last history item
 	lastItemPosition := s.Get("_.state_history.#").Int() - 1
 
@@ -111,15 +111,15 @@ func (s *defaultStash) getLastStateFromHistory() (state, unscheduledState *State
 		return nil, nil, nil, errors.New("last history item is missing a value for 'state'")
 	}
 
-	// Parse 's' field and assign it to the 'state' variable
+	// Parse 's' field and assign it to the 'stateDetail' variable
 	sn := StateName(lastHistoryItem.Get("s").String())
-	state = &sn
+	stateName = &sn
 
 	// Check if 'u' field exists in the last history item
 	if lastHistoryItem.Get("u").Exists() {
 		// Parse 'u' field and assign it to the 'unscheduledState' variable
 		usn := StateName(lastHistoryItem.Get("u").String())
-		unscheduledState = &usn
+		unscheduledStateName = &usn
 	}
 
 	// Check if 'n' field exists in the last history item
@@ -130,11 +130,11 @@ func (s *defaultStash) getLastStateFromHistory() (state, unscheduledState *State
 	}
 
 	// Return the parsed values
-	return state, unscheduledState, numOfScheduledStates, nil
+	return stateName, unscheduledStateName, numOfScheduledStates, nil
 }
 
 // addScheduledStates adds scheduled states.
-func (s *defaultStash) addScheduledStates(scheduledStates ...StateName) error {
+func (s *defaultStash) addScheduledStates(scheduledStateNames ...StateName) error {
 	// get the current sub-flow stack from the stash
 	stack := s.Get("_.scheduled_states").Array()
 
@@ -145,7 +145,7 @@ func (s *defaultStash) addScheduledStates(scheduledStates ...StateName) error {
 	}
 
 	// prepend the scheduledStates to the list of previously defined scheduled states
-	newStack = append(scheduledStates, newStack...)
+	newStack = append(scheduledStateNames, newStack...)
 
 	if err := s.Set("_.scheduled_states", newStack); err != nil {
 		return fmt.Errorf("failed to set scheduled_states: %w", err)
@@ -154,7 +154,7 @@ func (s *defaultStash) addScheduledStates(scheduledStates ...StateName) error {
 	return nil
 }
 
-// removeLastScheduledState removes and returns the last scheduled state if present.
+// removeLastScheduledState removes and returns the last scheduled stateDetail if present.
 func (s *defaultStash) removeLastScheduledState() (*StateName, error) {
 	// retrieve the previously scheduled states form the stash
 	stack := s.Get("_.scheduled_states").Array()
@@ -170,7 +170,7 @@ func (s *defaultStash) removeLastScheduledState() (*StateName, error) {
 	}
 
 	// get and remove first stack item
-	nextState := newStack[0]
+	nextStateName := newStack[0]
 	newStack = newStack[1:]
 
 	// stash the updated list of scheduled states
@@ -178,5 +178,5 @@ func (s *defaultStash) removeLastScheduledState() (*StateName, error) {
 		return nil, fmt.Errorf("failed to stash scheduled states while ending the sub-flow: %w", err)
 	}
 
-	return &nextState, nil
+	return &nextStateName, nil
 }

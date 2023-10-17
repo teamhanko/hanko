@@ -16,14 +16,14 @@ type defaultActionExecutionContext struct {
 
 // saveNextState updates the flow's state and saves Transition data after action execution.
 func (aec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
-	completed := executionResult.nextState == aec.flow.endState
+	completed := executionResult.nextStateName == aec.flow.endStateName
 	newVersion := aec.flowModel.Version + 1
 	stashData := aec.stash.String()
 
 	// Prepare parameters for updating the flow in the database.
 	flowUpdate := flowUpdateParam{
 		flowID:    aec.flowModel.ID,
-		nextState: executionResult.nextState,
+		nextState: executionResult.nextStateName,
 		stashData: stashData,
 		version:   newVersion,
 		completed: completed,
@@ -44,7 +44,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 		flowID:     aec.flowModel.ID,
 		actionName: aec.actionName,
 		fromState:  aec.flowModel.CurrentState,
-		toState:    executionResult.nextState,
+		toState:    executionResult.nextStateName,
 		inputData:  inputDataToPersist,
 		flowError:  executionResult.flowError,
 	}
@@ -57,37 +57,36 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	return nil
 }
 
-// continueFlow continues the flow execution to the specified nextState with an optional error type.
-func (aec *defaultActionExecutionContext) continueFlow(nextState StateName, flowError FlowError) error {
-	currentState := aec.flowModel.CurrentState
-
-	detail, err := aec.flow.getStateDetail(currentState)
+// continueFlow continues the flow execution to the specified nextStateName with an optional error type.
+func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName, flowError FlowError) error {
+	// Retrieve the current state from the flow.
+	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
 	if err != nil {
 		return fmt.Errorf("invalid current state: %w", err)
 	}
 
-	stateExists := detail.flow.stateExists(nextState)
-	subFlowEntryStateAllowed := detail.subFlows.stateExists(nextState)
+	nextStateAllowed := currentState.flow.stateExists(nextStateName)
 
-	// Check if the specified nextState is valid.
-	if !(stateExists ||
-		subFlowEntryStateAllowed ||
-		nextState == aec.flow.endState ||
-		nextState == aec.flow.errorState) {
-		return fmt.Errorf("progression to the specified state '%s' is not allowed", nextState)
+	// Check if the specified nextStateName is valid.
+	if !(nextStateAllowed ||
+		nextStateName == aec.flow.endStateName ||
+		nextStateName == aec.flow.errorStateName) {
+		return fmt.Errorf("progression to the specified state '%s' is not allowed", nextStateName)
 	}
 
-	if currentState != nextState {
-		err = aec.stash.addStateToHistory(currentState, nil, nil)
+	// Add the current state to the execution history.
+	if currentState.name != nextStateName {
+		err = aec.stash.addStateToHistory(currentState.name, nil, nil)
 		if err != nil {
 			return fmt.Errorf("failed to add the current state to the history: %w", err)
 		}
 	}
 
-	return aec.closeExecutionContext(nextState, flowError)
+	// Close the execution context with the given next state.
+	return aec.closeExecutionContext(nextStateName, flowError)
 }
 
-func (aec *defaultActionExecutionContext) closeExecutionContext(nextState StateName, flowError FlowError) error {
+func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName StateName, flowError FlowError) error {
 	if aec.executionResult != nil {
 		return errors.New("execution context is closed already")
 	}
@@ -99,7 +98,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextState StateN
 	}
 
 	result := executionResult{
-		nextState:             nextState,
+		nextStateName:         nextStateName,
 		flowError:             flowError,
 		actionExecutionResult: &actionResult,
 	}
@@ -141,32 +140,36 @@ func (aec *defaultActionExecutionContext) ValidateInputData() bool {
 	return aec.input.validateInputData(aec.flowModel.CurrentState, aec.stash)
 }
 
-// ContinueFlow continues the flow execution to the specified nextState.
-func (aec *defaultActionExecutionContext) ContinueFlow(nextState StateName) error {
-	return aec.continueFlow(nextState, nil)
+// ContinueFlow continues the flow execution to the specified nextStateName.
+func (aec *defaultActionExecutionContext) ContinueFlow(nextStateName StateName) error {
+	return aec.continueFlow(nextStateName, nil)
 }
 
-// ContinueFlowWithError continues the flow execution to the specified nextState with an error type.
-func (aec *defaultActionExecutionContext) ContinueFlowWithError(nextState StateName, flowErr FlowError) error {
-	return aec.continueFlow(nextState, flowErr)
+// ContinueFlowWithError continues the flow execution to the specified nextStateName with an error type.
+func (aec *defaultActionExecutionContext) ContinueFlowWithError(nextStateName StateName, flowErr FlowError) error {
+	return aec.continueFlow(nextStateName, flowErr)
 }
 
 // ContinueToPreviousState continues the flow back to the previous state.
 func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
-	nextState, unscheduledState, numOfScheduledStates, err := aec.stash.getLastStateFromHistory()
+	// Get the last state, the unscheduled state, and the number of scheduled states from history.
+	lastStateName, unscheduledState, numOfScheduledStates, err := aec.stash.getLastStateFromHistory()
 	if err != nil {
 		return fmt.Errorf("failed get last state from history: %w", err)
 	}
 
+	// Remove the last state from history.
 	err = aec.stash.removeLastStateFromHistory()
 	if err != nil {
 		return fmt.Errorf("failed remove last state from history: %w", err)
 	}
 
-	if nextState == nil {
-		nextState = &aec.flow.initialState
+	// If there was no last state, set it to the initial state.
+	if lastStateName == nil {
+		lastStateName = &aec.flow.initialStateName
 	}
 
+	// Add the unscheduled state back to the scheduled states if available.
 	if unscheduledState != nil {
 		err = aec.stash.addScheduledStates(*unscheduledState)
 		if err != nil {
@@ -174,6 +177,7 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 		}
 	}
 
+	// Remove any previously scheduled states from the schedule.
 	if numOfScheduledStates != nil {
 		for range make([]struct{}, *numOfScheduledStates) {
 			_, err = aec.stash.removeLastScheduledState()
@@ -183,49 +187,50 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 		}
 	}
 
-	return aec.closeExecutionContext(*nextState, nil)
+	// Close the execution context with the last state.
+	return aec.closeExecutionContext(*lastStateName, nil)
 }
 
-// StartSubFlow initiates the sub-flow associated with the specified StateName of the entry state (first parameter).
-// After a sub-flow action calls EndSubFlow(), the flow progresses to a state within the current flow or another
-// sub-flow's entry state, as specified in the list of nextStates (every StateName passed after the first parameter).
-func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nextStates ...StateName) error {
-	currentState := aec.flowModel.CurrentState
-
-	detail, err := aec.flow.getStateDetail(currentState)
+// StartSubFlow initiates a sub-flow associated with the specified entryStateName (first parameter). When a sub-flow
+// action calls EndSubFlow(), the flow progresses to a state within the current flow or another sub-flow's entry state,
+// as specified in the list of nextStates (every StateName passed after the first parameter).
+func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName, nextStateNames ...StateName) error {
+	// Retrieve the current state from the flow.
+	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
 	if err != nil {
 		return fmt.Errorf("invalid current state: %w", err)
 	}
 
-	// the specified entry state must be an entry state to a sub-flow of the current flow
-	if entryStateAllowed := detail.subFlows.stateExists(entryState); !entryStateAllowed {
-		return fmt.Errorf("the specified entry state '%s' is not associated with a sub-flow of the current flow", entryState)
+	// Ensure the specified entry state is associated with a sub-flow of the current flow.
+	if !currentState.subFlows.stateExists(entryStateName) {
+		return fmt.Errorf("the specified entry state '%s' is not associated with a sub-flow of the current flow", entryStateName)
 	}
 
 	var scheduledStates []StateName
 
-	// validate the specified nextStates and append valid state to the list of scheduledStates
-	for index, nextState := range nextStates {
-		stateExists := detail.flow.stateExists(nextState)
-		subFlowEntryStateAllowed := detail.subFlows.stateExists(nextState)
+	// Validate the specified nextStates and append valid states to the list of scheduledStates.
+	for index, nextStateName := range nextStateNames {
+		stateExists := currentState.flow.stateExists(nextStateName)
+		subFlowStateExists := currentState.subFlows.stateExists(nextStateName)
 
-		// validate the current next state
-		if index == len(nextStates)-1 {
-			// the last state must be a member of the current flow or a sub-flow
-			if !stateExists && !subFlowEntryStateAllowed {
-				return fmt.Errorf("the last next state '%s' specified is not a sub-flow state or another state associated with the current flow", nextState)
+		// Validate the current next state.
+		if index == len(nextStateNames)-1 {
+			// The last state must be a member of the current flow or a sub-flow.
+			if !stateExists && !subFlowStateExists {
+				return fmt.Errorf("the last next state '%s' specified is not a sub-flow state or another state associated with the current flow", nextStateName)
 			}
 		} else {
-			// every other state must be a sub-flow state
-			if !subFlowEntryStateAllowed {
-				return fmt.Errorf("the specified next state '%s' is not a sub-flow state of the current flow", nextState)
+			// Every other state must be a sub-flow state.
+			if !subFlowStateExists {
+				return fmt.Errorf("the specified next state '%s' is not a sub-flow state of the current flow", nextStateName)
 			}
 		}
 
-		// append the current nextState to the list of scheduled states
-		scheduledStates = append(scheduledStates, nextState)
+		// Append the current next state to the list of scheduled states.
+		scheduledStates = append(scheduledStates, nextStateName)
 	}
 
+	// Add the scheduled states to the stash.
 	err = aec.stash.addScheduledStates(scheduledStates...)
 	if err != nil {
 		return fmt.Errorf("failed to stash scheduled states: %w", err)
@@ -233,31 +238,38 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryState StateName, nex
 
 	numOfScheduledStates := int64(len(scheduledStates))
 
-	err = aec.stash.addStateToHistory(currentState, nil, &numOfScheduledStates)
+	// Add the current state to the execution history.
+	err = aec.stash.addStateToHistory(currentState.name, nil, &numOfScheduledStates)
 	if err != nil {
 		return fmt.Errorf("failed to add state to history: %w", err)
 	}
 
-	return aec.closeExecutionContext(entryState, nil)
+	// Close the execution context with the entry state of the sub-flow.
+	return aec.closeExecutionContext(entryStateName, nil)
 }
 
-// EndSubFlow ends the current sub-flow and progresses the flow to the previously defined nextStates (see StartSubFlow()).
+// EndSubFlow ends the current sub-flow and progresses the flow to the previously defined next states.
 func (aec *defaultActionExecutionContext) EndSubFlow() error {
-	currentState := aec.flowModel.CurrentState
+	// Retrieve the name of the current state.
+	currentStateName := aec.flowModel.CurrentState
 
-	nextState, err := aec.stash.removeLastScheduledState()
+	// Attempt to remove the last scheduled state from the stash.
+	scheduledStateName, err := aec.stash.removeLastScheduledState()
 	if err != nil {
 		return fmt.Errorf("failed to end sub-flow: %w", err)
 	}
 
-	if nextState == nil {
-		nextState = &aec.flow.endState
+	// If no scheduled state is available, set it to the end state.
+	if scheduledStateName == nil {
+		scheduledStateName = &aec.flow.endStateName
 	} else {
-		err = aec.stash.addStateToHistory(currentState, nextState, nil)
+		// Add the current state to the execution history.
+		err = aec.stash.addStateToHistory(currentStateName, scheduledStateName, nil)
 		if err != nil {
 			return fmt.Errorf("failed to add state to history: %w", err)
 		}
 	}
 
-	return aec.closeExecutionContext(*nextState, nil)
+	// Close the execution context with the scheduled state.
+	return aec.closeExecutionContext(*scheduledStateName, nil)
 }
