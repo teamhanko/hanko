@@ -91,7 +91,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		// Check that username is not already taken
 		e, err := m.persister.GetUsernamePersister().Find(username)
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical)
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
 		}
 		if e != nil {
 			c.Input().SetError("username", common.ErrorUsernameAlreadyExists)
@@ -105,7 +105,11 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 	}
 
 	if email != "" && m.cfg.Emails.RequireVerification {
-		err = m.passcodeService.SendEmailVerification(c.GetFlowID(), email, m.httpContext.Request().Header.Get("Accept-Language"))
+		passcodeId, err := m.passcodeService.SendEmailVerification(c.GetFlowID(), email, m.httpContext.Request().Header.Get("Accept-Language"))
+		if err != nil {
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		}
+		err = c.Stash().Set("passcode_id", passcodeId)
 		if err != nil {
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
 		}

@@ -27,31 +27,31 @@ func NewPasscodeService(cfg config.Config, emailService Email, persister persist
 	}
 }
 
-func (service *Passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) error {
+func (service *Passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return service.sendPasscode(flowID, "email_verification", emailAddress, lang)
 }
 
-func (service *Passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) error {
+func (service *Passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return service.sendPasscode(flowID, "login", emailAddress, lang)
 }
 
-func (service *Passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) error {
+func (service *Passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return service.sendPasscode(flowID, "password_recovery", emailAddress, lang)
 }
 
-func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) error {
+func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
 	code, err := service.passcodeGenerator.Generate()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte(code), 12)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	passcodeId, err := uuid.NewV4()
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	now := time.Now().UTC()
@@ -67,7 +67,7 @@ func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAd
 
 	err = service.persister.GetPasscodePersister().Create(passcodeModel)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
 	durationTTL := time.Duration(passcodeModel.Ttl) * time.Second
@@ -79,8 +79,8 @@ func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAd
 
 	err = service.emailService.SendEmail(template, lang, data, emailAddress)
 	if err != nil {
-		return err
+		return uuid.Nil, err
 	}
 
-	return nil
+	return passcodeId, nil
 }
