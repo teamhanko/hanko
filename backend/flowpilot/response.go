@@ -43,7 +43,7 @@ type PublicInput struct {
 
 // PublicResponse represents the response of an action execution.
 type PublicResponse struct {
-	State         StateName     `json:"state"`
+	StateName     StateName     `json:"state"`
 	Status        int           `json:"status"`
 	Payload       interface{}   `json:"payload,omitempty"`
 	PublicActions PublicActions `json:"actions"`
@@ -72,7 +72,7 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 	status := flowError.Status()
 
 	publicResponse := PublicResponse{
-		State:       stateName,
+		StateName:   stateName,
 		Status:      status,
 		PublicError: &publicError,
 	}
@@ -98,8 +98,8 @@ type actionExecutionResult struct {
 
 // executionResult holds the result of an action execution.
 type executionResult struct {
-	nextState StateName
-	flowError FlowError
+	nextStateName StateName
+	flowError     FlowError
 
 	*actionExecutionResult
 }
@@ -114,7 +114,7 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 
 	// Create the response object.
 	resp := PublicResponse{
-		State:         er.nextState,
+		StateName:     er.nextStateName,
 		Status:        http.StatusOK,
 		Payload:       payload,
 		PublicActions: actions,
@@ -137,10 +137,10 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 	var publicActions PublicActions
 
 	// Get actions for the next addState.
-	detail, _ := fc.flow.getStateDetail(er.nextState)
+	state, _ := fc.flow.getState(er.nextStateName)
 
-	if detail != nil {
-		for _, action := range detail.actions {
+	if state != nil {
+		for _, action := range state.actions {
 			actionName := action.GetName()
 			actionDescription := action.GetDescription()
 
@@ -155,7 +155,7 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 				}
 			}
 
-			publicSchema := schema.toPublicSchema(er.nextState)
+			publicSchema := schema.toPublicSchema(er.nextStateName)
 
 			// Create the action instance.
 			publicAction := PublicAction{
