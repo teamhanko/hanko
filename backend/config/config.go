@@ -9,6 +9,7 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
 	"log"
 	"strings"
@@ -31,6 +32,7 @@ type Config struct {
 	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
 	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
 	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	Saml        config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
 }
 
 var (
@@ -187,6 +189,10 @@ func (c *Config) Validate() error {
 	err = c.ThirdParty.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)
+	}
+	err = c.Saml.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate saml settings: %w", err)
 	}
 	return nil
 }
@@ -546,12 +552,12 @@ func (t *ThirdParty) Validate() error {
 func (t *ThirdParty) PostProcess() error {
 	t.AllowedRedirectURLMap = make(map[string]glob.Glob)
 	urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
-	for _, url := range urls {
-		g, err := glob.Compile(url, '.', '/')
+	for _, redirectUrl := range urls {
+		g, err := glob.Compile(redirectUrl, '.', '/')
 		if err != nil {
 			return fmt.Errorf("failed compile allowed redirect url glob: %w", err)
 		}
-		t.AllowedRedirectURLMap[url] = g
+		t.AllowedRedirectURLMap[redirectUrl] = g
 	}
 
 	return nil
@@ -621,6 +627,11 @@ func (c *Config) PostProcess() error {
 	err := c.ThirdParty.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process third party settings: %w", err)
+	}
+
+	err = c.Saml.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process saml settings: %w", err)
 	}
 
 	return nil

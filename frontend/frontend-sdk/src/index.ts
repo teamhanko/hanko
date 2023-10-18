@@ -14,6 +14,7 @@ import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 import { TokenClient } from "./lib/client/TokenClient";
+import { EnterpriseClient } from "./lib/client/EnterpriseClient";
 
 export {
   ConfigClient,
@@ -24,6 +25,7 @@ export {
   EmailClient,
   ThirdPartyClient,
   TokenClient,
+  EnterpriseClient,
 };
 
 // Utils

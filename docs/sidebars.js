@@ -68,6 +68,20 @@ const sidebars = {
     },
     {
       type: "category",
+      label: "Enterprise Features",
+      link: {
+        type: "generated-index",
+        title: "Enterprise Features",
+        description: "Set up enterprise features to extend your Hanko experience with enterprise Login services",
+        slug: "/guides/ee",
+        keywords: ["guides"],
+      },
+      items: [
+        "guides/ee/saml",
+      ],
+    },
+    {
+      type: "category",
       label: "Tutorials",
       items: ["guides/tutorials/php", "guides/tutorials/nextjs", "guides/tutorials/userData"],
     },

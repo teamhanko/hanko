@@ -586,4 +586,252 @@ account:
   # Default: true
   #
   allow_signup: true
+##
+#
+# SAML Feature (Enterprise Edition)
+#
+saml:
+  ##
+  #
+  # Allow usage of SAML SSO
+  #
+  # Default: false
+  enabled: false
+  ##
+  #
+  # API Endpoint-URL for all saml features
+  # Required if saml is enabled
+  #
+  # NOTE: MUST NOT have trailing slash
+  #
+  # Example: http://localhost:8000
+  #
+  endpoint_url: "<ENDPOINT_URL>"
+  ##
+  #
+  # uri needed to identify audience for IDP
+  # Required if saml is enabled
+  #
+  audience_uri: "urn:hanko:application"
+  ##
+  #
+  # Required if any providers are enabled. URL the backend redirects to if an error occurs during SAML sign-in. Errors are provided
+  # as 'error' and 'error_description' query params in the redirect location URL.
+  #
+  # When using the Hanko web components it should be the URL of the page that embeds the web component such that
+  # errors can be processed properly by the web component.
+  #
+  # You do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when validating
+  # redirect URLs.
+  #
+  # NOTE: MUST NOT have trailing slash
+  #
+  # Example:
+  # - http://localhost:8888/error
+  #
+  default_redirect_url: <YOUR_APPLICATION_DEFAULT_URL>
+  ##
+  #
+  # Required if any providers are enabled.
+  # List of URLS the backend is allowed to redirect to after SAML sign-in was successful.
+  # (see also the 'redirect_to' parameter for the saml initialization endpoint
+  # - https://docs.hanko.io/api/public#tag/SAML/operation/get-saml-auth)
+  #
+  # Supports wildcard matching through globbing. e.g. https://*.example.com will allow https://foo.example.com and https://bar.example.com to be accepted.
+  # Globbing is also supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1 and https://foo.example.com/page2.
+  # A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+  #
+  # More on globbing: https://pkg.go.dev/github.com/gobwas/glob#Compile
+  #
+  # NOTE: URLs in the list MUST NOT have trailing slash
+  #
+  # Examples:
+  # - http://localhost:8888
+  #
+  allowed_redirect_urls:
+    - "<A_REDIRECT_URL>"
+  ##
+  #
+  # Optional feature toggles for Service Provider - Identity Provider Communication
+  #
+  options:
+    ##
+    # toggle for signing authn-requests which are used to start the auth flow
+    #
+    # Default: true
+    #
+    sign_authn_requests: true
+    ##
+    #
+    # Enforces the IDP to show a login window to the user
+    #
+    # Default: false
+    #
+    force_login: false
+    ##
+    #
+    # Also validates the encryption certificate of the IDP
+    #
+    # Default: true
+    #
+    validate_encryption_cert: true
+    ##
+    #
+    # Disables the validation of signature of the IDP Response
+    #
+    # Default: false
+    #
+    skip_signature_validation: false
+    ##
+    #
+    # Allows the processing of SAMLResponses with less attributes than stated in the IDP metadata file
+    #
+    # Default: true
+    #
+    allow_missing_attributes: true
+  ##
+  #
+  # List of available identity providers (Identity Provider = IDP)
+  #
+  identity_providers:
+    ##
+    #
+    # Allows using this identity provider
+    #
+    # Default: false
+    #
+    - enabled: true
+      ##
+      #
+      # Human-readable name of the identity provider
+      #
+      name: "<CHOOSE_A_NAME>"
+      ##
+      #
+      # Domain for which this IDP is used
+      # Required when IDP is enabled
+      #
+      # Example: test.example
+      #
+      domain: "<YOUR_EMAIL_DOMAIN>"
+      ##
+      #
+      # URL where the Service Provider can fetch metadata of the IDP
+      # Required when IDP is enabled
+      #
+      metadata_url: "<URL_TO_THE_METADATA_OF_YOUR_IDP>"
+      ##
+      #
+      # Skips checking the email_verified attribute of the IDP
+      #
+      # Default: false
+      #
+      skip_email_verification: false
+      ##
+      #
+      # Mapping of IDP-Attributes to Hanko specific fields
+      #
+      attribute_map:
+        ##
+        #
+        # username-attribute of the user
+        #
+        # Default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name
+        #
+        name: "<NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # family name - attribute of the user
+        #
+        # Default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname
+        #
+        family_name: "<FAMILY_NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # given name - attribute of the user
+        #
+        # Default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname
+        #
+        given_name: "<GIVEN_NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # middle name - attribute of the user
+        #
+        middle_name: "<MIDDLE_NAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # nickname - attribute of the user
+        #
+        nickname: "<NICKNAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # preferred username - attribute of the user
+        #
+        preferred_username: "<PREFERRED_USERNAME_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # profile - attribute of the user
+        #
+        profile: "<PROFILE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # picture - attribute of the user
+        #
+        picture: "<PICTURE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # website - attribute of the user
+        #
+        website: "<WEBSITE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # gender - attribute of the user
+        #
+        gender: "<GENDER_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # birthdate - attribute of the user
+        #
+        birthdate: "<BIRTHDAY_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # zone info - attribute of the user
+        #
+        zone_info: "<ZONE_INFO_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # locale - attribute of the user
+        #
+        locale: "<LOCALE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # Last Update - attribute of the user
+        #
+        update_at: "<UPDATED_AT_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # E-Mail - attribute of the user
+        #
+        # Default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+        #
+        email: "<EMAIL_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # E-Mail Verified - attribute of the user
+        #
+        # NOTE: Will be checked if skip_email_verification is set to false
+        #
+        # Default: http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
+        #
+        email_verified: "<EMAIL_VERIFIED_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # Phone - attribute of the user
+        #
+        phone: "<PHONE_ATTRIBUTE_IN_IDP_ASSERTION>"
+        ##
+        #
+        # E-Phone Verified - attribute of the user
+        #
+        phone_verified: "<PHONE_VERIFIED_ATTRIBUTE_IN_IDP_ASSERTION>"
 ```
