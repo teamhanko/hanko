@@ -88,7 +88,7 @@ const EmbedGitHubFileContent: FC<EmbedGitHubFileContentProps> = ({
 
 EmbedGitHubFileContent.defaultProps = {
   loadingComponent: <p>loading...</p>,
-  errorComponent: <p>an error occured.</p>,
+  errorComponent: <p>an error occurred.</p>,
   onLoad: () => {},
   onError: (e) => console.log(e)
 };

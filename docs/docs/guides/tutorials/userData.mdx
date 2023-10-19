@@ -13,7 +13,7 @@ Every project has different needs when handling user onboarding. The following s
 **It's good to remember that the user ID is the immmutable identifier**
 
 The primary email address can be changed, therefore when handling user registration, the user `id` should be used to
-dermine if it's a known user.
+determine if it's a known user.
 :::
 
 ## Get user data on the Frontend
@@ -96,7 +96,7 @@ To get a specific user data, call the `/users/{id}` endpoint of the Hanko Admin 
 On Hanko Cloud the Hanko Admin API is a paid feature and must be enabled separately.
 
 You also need an API key `secret` to access the Hanko Admin API. You can generate one under the `Settings/API Keys` section of your project.
-Keep in mind, that the API key `secret` is only showed once, so make sure to store it in a safe place, like an enviromental variable as shown in the following example.
+Keep in mind, that the API key `secret` is only showed once, so make sure to store it in a safe place, like an environmental variable as shown in the following example.
 :::
 
 ```mdx-code-block

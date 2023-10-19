@@ -244,7 +244,7 @@ const hanko = new Hanko(&quot;https://[HANKO_API_URL]&quot;)
 // credential when possibly none exists.
 
 try {
-    // Will cause the browser to present a dialog with various options depending on the WebAuthn implemention.
+    // Will cause the browser to present a dialog with various options depending on the WebAuthn implementation.
     await hanko.webauthn.register()
 
     // Credential has been registered.
