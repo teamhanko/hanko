@@ -29,8 +29,6 @@ type flowContext interface {
 	GetPreviousState() (*StateName, error)
 	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
-	// GetEndState returns the final state of the flow.
-	GetEndState() StateName
 	// StateExists checks if a given state exists within the flow.
 	StateExists(stateName StateName) bool
 }

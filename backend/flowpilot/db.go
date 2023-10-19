@@ -12,7 +12,6 @@ type FlowModel struct {
 	CurrentState StateName // Current addState of the defaultFlow.
 	StashData    string    // Stash data associated with the defaultFlow.
 	Version      int       // Version of the defaultFlow.
-	Completed    bool      // Flag indicating if the defaultFlow is completed.
 	ExpiresAt    time.Time // Expiry time of the defaultFlow.
 	CreatedAt    time.Time // Creation time of the defaultFlow.
 	UpdatedAt    time.Time // Update time of the defaultFlow.
@@ -81,7 +80,6 @@ func (w *DefaultFlowDBWrapper) CreateFlowWithParam(p flowCreationParam) (*FlowMo
 		CurrentState: p.currentState,
 		StashData:    "{}",
 		Version:      0,
-		Completed:    false,
 		ExpiresAt:    p.expiresAt,
 		CreatedAt:    time.Now().UTC(),
 		UpdatedAt:    time.Now().UTC(),
@@ -102,7 +100,6 @@ type flowUpdateParam struct {
 	nextState StateName // Next addState of the flow.
 	stashData string    // Updated stash data for the flow.
 	version   int       // Updated version of the flow.
-	completed bool      // Flag indicating if the flow is completed.
 	expiresAt time.Time // Updated expiry time of the flow.
 	createdAt time.Time // Original creation time of the flow.
 }
@@ -115,7 +112,6 @@ func (w *DefaultFlowDBWrapper) UpdateFlowWithParam(p flowUpdateParam) (*FlowMode
 		CurrentState: p.nextState,
 		StashData:    p.stashData,
 		Version:      p.version,
-		Completed:    p.completed,
 		ExpiresAt:    p.expiresAt,
 		UpdatedAt:    time.Now().UTC(),
 		CreatedAt:    p.createdAt,
