@@ -71,6 +71,7 @@ type stateDetail struct {
 	subFlows    SubFlows
 	actions     Actions
 	beforeHooks HookActions
+	afterHooks  HookActions
 }
 
 // getAction returns the Action with the specified name.
@@ -117,17 +118,19 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 
 // flowBase represents the base of the flow interfaces.
 type flowBase interface {
-	getState(stateName StateName) (*stateDetail, error)
 	getSubFlows() SubFlows
 	getFlow() stateActions
 	getBeforeHooks() stateHooks
+	getAfterHooks() stateHooks
 }
 
 // Flow represents a flow.
 type Flow interface {
 	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
 	ResultFromError(err error) FlowResult
+
 	setDefaults()
+	getState(stateName StateName) (*stateDetail, error)
 
 	flowBase
 }
@@ -137,18 +140,23 @@ type SubFlow interface {
 	flowBase
 }
 
+type defaultFlowBase struct {
+	flow        stateActions // StateName to Actions mapping.
+	subFlows    SubFlows     // The sub-flows of the current flow.
+	beforeHooks stateHooks   // StateName to HookActions mapping.
+	afterHooks  stateHooks   // StateName to HookActions mapping.
+}
+
 // defaultFlow defines a flow structure with states, actions, and settings.
 type defaultFlow struct {
-	flow             stateActions  // StateName to Actions mapping.
-	subFlows         SubFlows      // The sub-flows of the current flow.
 	stateDetails     stateDetails  // Maps state names to flow details.
 	path             string        // flow path or identifier.
-	beforeHooks      stateHooks    // StateName to HookActions mapping.
 	initialStateName StateName     // Initial state of the flow.
 	errorStateName   StateName     // State representing errors.
-	endStateName     StateName     // Final state of the flow.
 	ttl              time.Duration // Time-to-live for the flow.
 	debug            bool          // Enables debug mode.
+
+	defaultFlowBase
 }
 
 // getActionsForState returns state details for the specified state.
@@ -161,17 +169,21 @@ func (f *defaultFlow) getState(stateName StateName) (*stateDetail, error) {
 }
 
 // getSubFlows returns the sub-flows of the current flow.
-func (f *defaultFlow) getSubFlows() SubFlows {
+func (f *defaultFlowBase) getSubFlows() SubFlows {
 	return f.subFlows
 }
 
 // getFlow returns the state to action mapping of the current flow.
-func (f *defaultFlow) getFlow() stateActions {
+func (f *defaultFlowBase) getFlow() stateActions {
 	return f.flow
 }
 
-func (f *defaultFlow) getBeforeHooks() stateHooks {
+func (f *defaultFlowBase) getBeforeHooks() stateHooks {
 	return f.beforeHooks
+}
+
+func (f *defaultFlowBase) getAfterHooks() stateHooks {
+	return f.afterHooks
 }
 
 // setDefaults sets default values for defaultFlow settings.

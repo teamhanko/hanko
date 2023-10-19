@@ -91,7 +91,6 @@ func (flowDB FlowDB) CreateFlow(flowModel flowpilot.FlowModel) error {
 		CurrentState: string(flowModel.CurrentState),
 		StashData:    flowModel.StashData,
 		Version:      flowModel.Version,
-		Completed:    flowModel.Completed,
 		ExpiresAt:    flowModel.ExpiresAt,
 		CreatedAt:    flowModel.CreatedAt,
 		UpdatedAt:    flowModel.UpdatedAt,
@@ -111,7 +110,6 @@ func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
 		CurrentState: string(flowModel.CurrentState),
 		StashData:    flowModel.StashData,
 		Version:      flowModel.Version,
-		Completed:    flowModel.Completed,
 		ExpiresAt:    flowModel.ExpiresAt,
 		CreatedAt:    flowModel.CreatedAt,
 		UpdatedAt:    flowModel.UpdatedAt,
@@ -122,7 +120,7 @@ func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
 	count, err := flowDB.tx.
 		Where("id = ?", f.ID).
 		Where("version = ?", previousVersion).
-		UpdateQuery(f, "current_state", "stash_data", "version", "completed")
+		UpdateQuery(f, "current_state", "stash_data", "version")
 	if err != nil {
 		return err
 	}

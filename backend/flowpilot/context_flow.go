@@ -56,11 +56,6 @@ func (fc *defaultFlowContext) GetErrorState() StateName {
 	return fc.flow.errorStateName
 }
 
-// GetEndState returns the final state of the flow.
-func (fc *defaultFlowContext) GetEndState() StateName {
-	return fc.flow.endStateName
-}
-
 // Stash returns the JSONManager for accessing stash data.
 func (fc *defaultFlowContext) Stash() Stash {
 	return fc.stash
