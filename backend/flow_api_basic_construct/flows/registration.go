@@ -8,21 +8,29 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"time"
 )
 
-func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, httpContext echo.Context) flowpilot.Flow {
+func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, sessionManager session.Manager, httpContext echo.Context) (flowpilot.Flow, error) {
 	// TODO:
+
+	userService := services.NewUserService(persister)
+	passkeyOnboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister, userService, sessionManager, httpContext)
+	if err != nil {
+		return nil, err
+	}
+
 	return flowpilot.NewFlow("/registration").
 		State(common.StateRegistrationPreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(cfg, persister, passcodeService, httpContext), actions.NewLoginWithOauth()).
-		State(common.StateEmailVerification, actions.NewSubmitPasscode(cfg, persister)).
-		State(common.StatePasswordCreation).
+		State(common.StateEmailVerification, actions.NewSubmitPasscode(cfg, persister, userService, sessionManager, httpContext)).
+		State(common.StatePasswordCreation, actions.NewSubmitNewPassword(cfg, userService, sessionManager, httpContext)).
 		State(common.StateSuccess).
 		State(common.StateError).
-		//SubFlows(NewPasskeyOnboardingSubFlow(), New2FACreationSubFlow()).
+		SubFlows(passkeyOnboardingSubFlow).
 		FixedStates(common.StateRegistrationPreflight, common.StateError, common.StateSuccess).
 		TTL(10 * time.Minute).
 		Debug(true).
-		MustBuild()
+		MustBuild(), nil
 }

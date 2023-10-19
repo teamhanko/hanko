@@ -76,6 +76,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 
 	if email != "" {
 		// Check that email is not already taken
+		// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
 		e, err := m.persister.GetEmailPersister().FindByAddress(email)
 		if err != nil {
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
@@ -89,6 +90,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 
 	if username != "" {
 		// Check that username is not already taken
+		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
 		e, err := m.persister.GetUsernamePersister().Find(username)
 		if err != nil {
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
@@ -104,7 +106,9 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
 	}
 
+	// Decide which is the next state according to the config and user input
 	if email != "" && m.cfg.Emails.RequireVerification {
+		// TODO: rate limit sending emails
 		passcodeId, err := m.passcodeService.SendEmailVerification(c.GetFlowID(), email, m.httpContext.Request().Header.Get("Accept-Language"))
 		if err != nil {
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
@@ -117,8 +121,10 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
 	} else if !m.cfg.Passcode.Enabled {
-		return c.ContinueFlow(common.StateOnboardingCreatePasskey)
+		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
 	}
+
+	// TODO: store user and create session token // should this case even exist (only works when email (optional/required) is set by the user) ???
 
 	return c.ContinueFlow(common.StateSuccess)
 }

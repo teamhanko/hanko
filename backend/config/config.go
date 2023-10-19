@@ -148,6 +148,7 @@ func DefaultConfig() *Config {
 			AllowDeletion: false,
 			AllowSignup:   true,
 		},
+		// TODO: add defaults for Passkey, Identifier, SecondFactor
 	}
 }
 
@@ -638,6 +639,8 @@ type Account struct {
 	AllowSignup   bool `yaml:"allow_signup" json:"allow_signup,omitempty" koanf:"allow_signup" jsonschema:"default=true"`
 }
 
+// TODO: below structs need validation, e.g. only allowed names for enabled and also we should reject some configurations (e.g. passcode & passwords are disabled and passkey onboarding is also disabled)
+
 type Identifier struct {
 	Username IdentifierUsername `yaml:"username" json:"username" koanf:"username"`
 	Email    IdentifierEmail    `yaml:"email" json:"email" koanf:"email"`
@@ -656,9 +659,14 @@ type IdentifierEmail struct {
 }
 
 type SecondFactor struct {
-	Enabled       string        `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
-	Methods       []string      `yaml:"methods" json:"methods" koanf:"methods"` // TODO: jsonschema only totp and security_key are allowed
-	RecoveryCodes RecoveryCodes `yaml:"recovery_codes" json:"recovery_codes" koanf:"recovery_codes" split_words:"true"`
+	Enabled       string                 `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
+	Onboarding    SecondFactorOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
+	Methods       []string               `yaml:"methods" json:"methods" koanf:"methods"` // TODO: jsonschema only totp and security_key are allowed
+	RecoveryCodes RecoveryCodes          `yaml:"recovery_codes" json:"recovery_codes" koanf:"recovery_codes" split_words:"true"`
+}
+
+type SecondFactorOnboarding struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
 }
 
 type RecoveryCodes struct {

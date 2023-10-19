@@ -1,6 +1,7 @@
 package flow_api_basic_construct
 
 import (
+	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
@@ -9,13 +10,16 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
+	"net/http"
 )
 
-func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode) *FlowPilotHandler {
+func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, sessionManager session.Manager) *FlowPilotHandler {
 	return &FlowPilotHandler{
 		persister,
 		cfg,
 		passcodeService,
+		sessionManager,
 	}
 }
 
@@ -23,10 +27,14 @@ type FlowPilotHandler struct {
 	persister       persistence.Persister
 	cfg             config.Config
 	passcodeService *services.Passcode
+	sessionManager  session.Manager
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	registrationFlow := flows.NewRegistrationFlow(h.cfg, h.persister, h.passcodeService, c)
+	registrationFlow, err := flows.NewRegistrationFlow(h.cfg, h.persister, h.passcodeService, h.sessionManager, c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to create registration flow: %w", err))
+	}
 
 	return h.executeFlow(c, registrationFlow)
 }

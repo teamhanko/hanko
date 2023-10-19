@@ -3,26 +3,35 @@ package actions
 import (
 	"errors"
 	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 var maxPasscodeTries = 3
 
-func NewSubmitPasscode(cfg config.Config, persister persistence.Persister) SubmitPasscode {
+func NewSubmitPasscode(cfg config.Config, persister persistence.Persister, userService services.User, sessionManager session.Manager, httpContext echo.Context) SubmitPasscode {
 	return SubmitPasscode{
 		cfg,
 		persister,
+		userService,
+		sessionManager,
+		httpContext,
 	}
 }
 
 type SubmitPasscode struct {
-	cfg       config.Config
-	persister persistence.Persister
+	cfg            config.Config
+	persister      persistence.Persister
+	userService    services.User
+	sessionManager session.Manager
+	httpContext    echo.Context
 }
 
 func (m SubmitPasscode) GetName() flowpilot.ActionName {
@@ -86,6 +95,7 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	// TODO: This the current routing is only for the registration flow, when this action is/will be used in the login flow on other states, then the routing needs to be changed accordingly
+	// Decide which is the next state according to the config and user input
 	if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
 	} else /*if m.cfg.SecondFactor.Enabled != "disabled" {
@@ -110,8 +120,42 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 			return c.ContinueFlowWithError(c.GetErrorState(), common.ErrorConfigurationError)
 		}
 	} else*/if !m.cfg.Passcode.Enabled || m.cfg.Passkey.Onboarding.Enabled {
-		return c.ContinueFlow(common.StateOnboardingCreatePasskey)
+		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
 	}
+
+	// store user in the DB
+	userId, err := uuid.NewV4()
+	if err != nil {
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+	}
+	if c.Stash().Get("user_id").Exists() {
+		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
+		if err != nil {
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		}
+	}
+	err = m.userService.CreateUser(
+		userId,
+		c.Stash().Get("email").String(),
+		c.Stash().Get("email_verified").Bool(),
+		c.Stash().Get("username").String(),
+		nil,
+		c.Stash().Get("new_password").String(),
+	)
+	if err != nil {
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+	}
+
+	sessionToken, err := m.sessionManager.GenerateJWT(userId)
+	if err != nil {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
+	}
+	cookie, err := m.sessionManager.GenerateCookie(sessionToken)
+	if err != nil {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
+	}
+
+	m.httpContext.SetCookie(cookie)
 
 	return c.ContinueFlow(common.StateSuccess)
 }

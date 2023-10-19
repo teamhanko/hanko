@@ -43,6 +43,8 @@ type actionInitializationContext interface {
 	Stash() utils.Stash
 	// SuspendAction suspends the current action's execution.
 	SuspendAction()
+	// GetCurrentState returns the current state of the flow.
+	GetCurrentState() StateName
 }
 
 // actionExecutionContext represents the context for an action execution.
@@ -193,7 +195,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
-	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
+	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash, currentState: fc.GetCurrentState()}
 	action.Initialize(&aic)
 
 	// Check if the action is suspended.
