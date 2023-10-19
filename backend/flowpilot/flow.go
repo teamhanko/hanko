@@ -42,7 +42,7 @@ func WithInputData(inputData InputData) func(*flowExecutionOptions) {
 // StateName represents the name of a state in a flow.
 type StateName string
 
-// ActionName represents the name of an action associated with a Transition.
+// ActionName represents the name of an action.
 type ActionName string
 
 // Action defines the interface for flow actions.
@@ -56,31 +56,21 @@ type Action interface {
 // Actions represents a list of Action
 type Actions []Action
 
-// Transition holds an action associated with a state transition.
-type Transition struct {
-	Action Action
+// HookAction defines the interface for a hook action.
+type HookAction interface {
+	Execute(HookExecutionContext) error
 }
 
-// Transitions is a collection of Transition instances.
-type Transitions []Transition
+// HookActions represents a list of HookAction interfaces.
+type HookActions []HookAction
 
-// getActions returns the Actions associated with the transition.
-func (ts *Transitions) getActions() Actions {
-	var actions Actions
-
-	for _, t := range *ts {
-		actions = append(actions, t.Action)
-	}
-
-	return actions
-}
-
-// state represents details for a state, including the associated flow, available sub-flows and eligible actions.
+// state represents details for a state, including the associated actions, available sub-flows and more.
 type stateDetail struct {
-	name     StateName
-	flow     StateTransitions
-	subFlows SubFlows
-	actions  Actions
+	name        StateName
+	flow        stateActions
+	subFlows    SubFlows
+	actions     Actions
+	beforeHooks HookActions
 }
 
 // getAction returns the Action with the specified name.
@@ -99,16 +89,19 @@ func (sd *stateDetail) getAction(actionName ActionName) (Action, error) {
 // stateDetails maps states to associated Actions, flows and sub-flows.
 type stateDetails map[StateName]*stateDetail
 
-// StateTransitions maps states to associated Transitions.
-type StateTransitions map[StateName]Transitions
+// stateActions maps state names to associated actions.
+type stateActions map[StateName]Actions
+
+// stateActions maps state names to associated hook actions.
+type stateHooks map[StateName]HookActions
 
 // stateExists checks if a state exists in the flow.
-func (st StateTransitions) stateExists(stateName StateName) bool {
+func (st stateActions) stateExists(stateName StateName) bool {
 	_, ok := st[stateName]
 	return ok
 }
 
-// SubFlows maps a sub-flow init state to StateTransitions.
+// SubFlows represents a list of SubFlow interfaces.
 type SubFlows []SubFlow
 
 // stateExists checks if the given state exists in a sub-flow of the current flow.
@@ -126,7 +119,8 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 type flowBase interface {
 	getState(stateName StateName) (*stateDetail, error)
 	getSubFlows() SubFlows
-	getFlow() StateTransitions
+	getFlow() stateActions
+	getBeforeHooks() stateHooks
 }
 
 // Flow represents a flow.
@@ -134,6 +128,7 @@ type Flow interface {
 	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
 	ResultFromError(err error) FlowResult
 	setDefaults()
+
 	flowBase
 }
 
@@ -142,20 +137,21 @@ type SubFlow interface {
 	flowBase
 }
 
-// defaultFlow defines a flow structure with states, transitions, and settings.
+// defaultFlow defines a flow structure with states, actions, and settings.
 type defaultFlow struct {
-	flow             StateTransitions // StateName transitions mapping.
-	subFlows         SubFlows         // The sub-flows of the current flow.
-	stateDetails     stateDetails     // Maps state names to flow details.
-	path             string           // flow path or identifier.
-	initialStateName StateName        // Initial state of the flow.
-	errorStateName   StateName        // State representing errors.
-	endStateName     StateName        // Final state of the flow.
-	ttl              time.Duration    // Time-to-live for the flow.
-	debug            bool             // Enables debug mode.
+	flow             stateActions  // StateName to Actions mapping.
+	subFlows         SubFlows      // The sub-flows of the current flow.
+	stateDetails     stateDetails  // Maps state names to flow details.
+	path             string        // flow path or identifier.
+	beforeHooks      stateHooks    // StateName to HookActions mapping.
+	initialStateName StateName     // Initial state of the flow.
+	errorStateName   StateName     // State representing errors.
+	endStateName     StateName     // Final state of the flow.
+	ttl              time.Duration // Time-to-live for the flow.
+	debug            bool          // Enables debug mode.
 }
 
-// getActionsForState returns transitions for a specified state.
+// getActionsForState returns state details for the specified state.
 func (f *defaultFlow) getState(stateName StateName) (*stateDetail, error) {
 	if state, ok := f.stateDetails[stateName]; ok {
 		return state, nil
@@ -170,8 +166,12 @@ func (f *defaultFlow) getSubFlows() SubFlows {
 }
 
 // getFlow returns the state to action mapping of the current flow.
-func (f *defaultFlow) getFlow() StateTransitions {
+func (f *defaultFlow) getFlow() stateActions {
 	return f.flow
+}
+
+func (f *defaultFlow) getBeforeHooks() stateHooks {
+	return f.beforeHooks
 }
 
 // setDefaults sets default values for defaultFlow settings.

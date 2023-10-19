@@ -10,6 +10,7 @@ type FlowBuilder interface {
 	TTL(ttl time.Duration) FlowBuilder
 	State(stateName StateName, actions ...Action) FlowBuilder
 	FixedStates(initialStateName, errorStateName, finalStateName StateName) FlowBuilder
+	BeforeState(stateName StateName, hooks ...HookAction) FlowBuilder
 	Debug(enabled bool) FlowBuilder
 	SubFlows(subFlows ...SubFlow) FlowBuilder
 	Build() (Flow, error)
@@ -18,6 +19,7 @@ type FlowBuilder interface {
 
 type SubFlowBuilder interface {
 	State(stateName StateName, actions ...Action) SubFlowBuilder
+	BeforeState(stateName StateName, hooks ...HookAction) SubFlowBuilder
 	SubFlows(subFlows ...SubFlow) SubFlowBuilder
 	Build() (SubFlow, error)
 	MustBuild() SubFlow
@@ -25,26 +27,27 @@ type SubFlowBuilder interface {
 
 // defaultFlowBuilderBase is the base flow builder struct.
 type defaultFlowBuilderBase struct {
-	flow             StateTransitions
-	subFlows         SubFlows
-	initialStateName StateName
-	stateDetails     stateDetails
+	flow         stateActions
+	subFlows     SubFlows
+	stateDetails stateDetails
+	beforeHooks  stateHooks
 }
 
 // defaultFlowBuilder is a builder struct for creating a new Flow.
 type defaultFlowBuilder struct {
-	path           string
-	ttl            time.Duration
-	errorStateName StateName
-	endStateName   StateName
-	debug          bool
+	path             string
+	ttl              time.Duration
+	initialStateName StateName
+	errorStateName   StateName
+	endStateName     StateName
+	debug            bool
 
 	defaultFlowBuilderBase
 }
 
 // newFlowBuilderBase creates a new defaultFlowBuilderBase instance.
 func newFlowBuilderBase() defaultFlowBuilderBase {
-	return defaultFlowBuilderBase{flow: make(StateTransitions), subFlows: make(SubFlows, 0), stateDetails: make(stateDetails)}
+	return defaultFlowBuilderBase{flow: make(stateActions), subFlows: make(SubFlows, 0), stateDetails: make(stateDetails), beforeHooks: make(stateHooks)}
 }
 
 // NewFlow creates a new defaultFlowBuilder that builds a new flow available under the specified path.
@@ -61,13 +64,12 @@ func (fb *defaultFlowBuilder) TTL(ttl time.Duration) FlowBuilder {
 }
 
 func (fb *defaultFlowBuilderBase) addState(stateName StateName, actions ...Action) {
-	var transitions Transitions
+	fb.flow[stateName] = append(fb.flow[stateName], actions...)
+}
 
-	for _, action := range actions {
-		transitions = append(transitions, Transition{Action: action})
-	}
-
-	fb.flow[stateName] = transitions
+func (fb *defaultFlowBuilderBase) addBeforeStateHooks(stateName StateName, hooks ...HookAction) {
+	fb.addDefaultStates(stateName)
+	fb.beforeHooks[stateName] = append(fb.beforeHooks[stateName], hooks...)
 }
 
 func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...SubFlow) {
@@ -82,9 +84,14 @@ func (fb *defaultFlowBuilderBase) addDefaultStates(stateNames ...StateName) {
 	}
 }
 
-// State adds a new  transition to the flow.
+// State adds a new state to the flow.
 func (fb *defaultFlowBuilder) State(stateName StateName, actions ...Action) FlowBuilder {
 	fb.addState(stateName, actions...)
+	return fb
+}
+
+func (fb *defaultFlowBuilder) BeforeState(stateName StateName, hooks ...HookAction) FlowBuilder {
+	fb.addBeforeStateHooks(stateName, hooks...)
 	return fb
 }
 
@@ -109,23 +116,25 @@ func (fb *defaultFlowBuilder) Debug(enabled bool) FlowBuilder {
 
 // scanFlowStates iterates through each state in the provided flow and associates relevant information, also it checks
 // for uniqueness of state names.
-func (fb *defaultFlowBuilder) scanFlowStates(flow StateTransitions, subFlows SubFlows) error {
+func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 	// Iterate through states in the flow.
-	for stateName, transitions := range flow {
+	for stateName, actions := range flow.getFlow() {
 		// Check if state name is already in use.
 		if _, ok := fb.stateDetails[stateName]; ok {
 			return fmt.Errorf("non-unique flow state '%s'", stateName)
 		}
 
-		// Retrieve associated actions for the state.
-		actions := transitions.getActions()
+		sas := flow.getFlow()
+		sfs := flow.getSubFlows()
+		bhs := flow.getBeforeHooks()
 
 		// Create state details.
 		state := stateDetail{
-			name:     stateName,
-			flow:     flow,
-			subFlows: subFlows,
-			actions:  actions,
+			name:        stateName,
+			actions:     actions,
+			flow:        sas,
+			subFlows:    sfs,
+			beforeHooks: bhs[stateName],
 		}
 
 		// Store state details.
@@ -133,8 +142,8 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow StateTransitions, subFlows Sub
 	}
 
 	// Recursively scan sub-flows.
-	for _, sf := range subFlows {
-		if err := fb.scanFlowStates(sf.getFlow(), sf.getSubFlows()); err != nil {
+	for _, sf := range flow.getSubFlows() {
+		if err := fb.scanFlowStates(sf); err != nil {
 			return err
 		}
 	}
@@ -163,8 +172,8 @@ func (fb *defaultFlowBuilder) validate() error {
 	if !fb.flow.stateExists(fb.endStateName) {
 		return errors.New("fixed state 'endState' does not belong to the flow")
 	}
-	if transitions, ok := fb.flow[fb.endStateName]; ok && len(transitions.getActions()) > 0 {
-		return fmt.Errorf("the specified endState '%s' is not allowed to have transitions", fb.endStateName)
+	if actions, ok := fb.flow[fb.endStateName]; ok && len(actions) > 0 {
+		return fmt.Errorf("the specified endState '%s' is not allowed to have actions", fb.endStateName)
 	}
 
 	return nil
@@ -174,17 +183,14 @@ func (fb *defaultFlowBuilder) validate() error {
 func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	fb.addDefaultStates(fb.initialStateName, fb.errorStateName, fb.endStateName)
 
-	if err := fb.scanFlowStates(fb.flow, fb.subFlows); err != nil {
-		return nil, fmt.Errorf("failed to scan flow states: %w", err)
-	}
-
 	if err := fb.validate(); err != nil {
 		return nil, fmt.Errorf("flow validation failed: %w", err)
 	}
 
-	f := defaultFlow{
+	flow := &defaultFlow{
 		path:             fb.path,
 		flow:             fb.flow,
+		beforeHooks:      fb.beforeHooks,
 		initialStateName: fb.initialStateName,
 		errorStateName:   fb.errorStateName,
 		endStateName:     fb.endStateName,
@@ -194,7 +200,11 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		debug:            fb.debug,
 	}
 
-	return &f, nil
+	if err := fb.scanFlowStates(flow); err != nil {
+		return nil, fmt.Errorf("failed to scan flow states: %w", err)
+	}
+
+	return flow, nil
 }
 
 // MustBuild constructs and returns the Flow object, panics on error.
@@ -224,9 +234,14 @@ func (sfb *defaultSubFlowBuilder) SubFlows(subFlows ...SubFlow) SubFlowBuilder {
 	return sfb
 }
 
-// State adds a new  transition to the flow.
+// State adds a new state to the flow.
 func (sfb *defaultSubFlowBuilder) State(stateName StateName, actions ...Action) SubFlowBuilder {
 	sfb.addState(stateName, actions...)
+	return sfb
+}
+
+func (sfb *defaultSubFlowBuilder) BeforeState(stateName StateName, hooks ...HookAction) SubFlowBuilder {
+	sfb.addBeforeStateHooks(stateName, hooks...)
 	return sfb
 }
 
@@ -234,8 +249,9 @@ func (sfb *defaultSubFlowBuilder) State(stateName StateName, actions ...Action) 
 func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
 
 	f := defaultFlow{
-		flow:     sfb.flow,
-		subFlows: sfb.subFlows,
+		flow:        sfb.flow,
+		subFlows:    sfb.subFlows,
+		beforeHooks: sfb.beforeHooks,
 	}
 
 	return &f, nil

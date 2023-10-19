@@ -378,3 +378,9 @@ func (m Back) Initialize(_ flowpilot.InitializationContext) {}
 func (m Back) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueToPreviousState()
 }
+
+type BeforeStateAction struct{}
+
+func (m BeforeStateAction) Execute(c flowpilot.HookExecutionContext) error {
+	return c.Payload().Set("before_action_executed", true)
+}
