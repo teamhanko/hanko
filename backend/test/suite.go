@@ -16,7 +16,7 @@ type Suite struct {
 	suite.Suite
 	Storage         persistence.Storage
 	DB              *TestDB
-	EmailServer     *mailslurperInterceptor
+	EmailServer     *TestMailslurper
 	Name            string // used for database docker container name, so that tests can run in parallel
 	WithEmailServer bool
 }
@@ -44,7 +44,7 @@ func (s *Suite) SetupSuite() {
 	s.Require().NoError(err)
 
 	if s.WithEmailServer {
-		s.EmailServer, err = NewMailslurperInterceptor()
+		s.EmailServer, err = StartMailslurper()
 		s.Require().NoError(err)
 	}
 
@@ -69,6 +69,9 @@ func (s *Suite) TearDownTest() {
 func (s *Suite) TearDownSuite() {
 	if s.DB != nil {
 		s.NoError(PurgeDB(s.DB))
+	}
+	if s.EmailServer != nil {
+		s.NoError(PurgeMailslurper(s.EmailServer))
 	}
 }
 

@@ -3,7 +3,6 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
@@ -18,7 +17,6 @@ import (
 )
 
 func TestPasscodeSuite(t *testing.T) {
-	t.Parallel()
 	s := new(passcodeSuite)
 	s.WithEmailServer = true
 	suite.Run(t, s)
@@ -38,7 +36,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 	cfg := func() *config.Config {
 		cfg := &test.DefaultConfig
 		cfg.Passcode.Smtp.Host = "localhost"
-		cfg.Passcode.Smtp.Port = fmt.Sprintf("%d", s.EmailServer.SmtpPort)
+		cfg.Passcode.Smtp.Port = s.EmailServer.SmtpPort
 		return cfg
 	}
 
@@ -98,9 +96,11 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 			e.ServeHTTP(rec, req)
 
 			if s.Equal(currentTest.expectedStatusCode, rec.Code) && currentTest.expectedStatusCode >= 200 && currentTest.expectedStatusCode <= 299 {
-				emails, err := s.EmailServer.GetEmails()
+				emails, err := test.GetEmails(s.EmailServer)
 				s.Require().NoError(err)
 				messages := emails.MailItems
+
+				s.Require().Greater(len(messages), 0)
 
 				emailAddress := messages[len(messages)-1].ToAddresses[0]
 				s.Equal(currentTest.expectedEmailAddress, emailAddress)

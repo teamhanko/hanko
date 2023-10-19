@@ -370,13 +370,7 @@ serve all
 
 ## Running tests
 
-Prior to running tests, you'll need to start up a test Mailslurper docker container for the tests to send emails to. You can run the Mailslurper instance by running the following command at the root directory:
-
-```bash
-docker-compose -f ./backend/test/docker-compose.test.yaml up --build -d
-```
-
-Once the instance is running, run tests with the following command within the `backend` directory:
+You can run the unit tests by running the following command within the `backend` directory:
 
 ```bash
 go test -v ./...

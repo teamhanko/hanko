@@ -24,15 +24,6 @@ jobs:
         go generate ./...
         go build -v ./...
 
-    - name: Start test Mailslurper container
-      working-directory: .
-      run: docker-compose -f ./backend/test/docker-compose.test.yaml up --build -d
-
     - name: Test
       working-directory: ./backend
       run: go test -v ./...
-
-    - name: Stop containers
-      if: always()
-      working-directory: .
-      run: docker-compose -f ./backend/test/docker-compose.test.yaml down
