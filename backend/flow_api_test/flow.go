@@ -32,6 +32,7 @@ var Flow = flowpilot.NewFlow("/flow_api_login").
 	State(StatePasswordCreation, SubmitNewPassword{}).
 	State(StateConfirmPasskeyCreation, GetWAAssertion{}, SkipPasskeyCreation{}).
 	State(StateCreatePasskey, VerifyWAAssertion{}).
+	BeforeState(StateSuccess, BeforeStateAction{}).
 	FixedStates(StateSignInOrSignUp, StateError, StateSuccess).
 	SubFlows(FirstSubFlow, ThirdSubFlow).
 	TTL(time.Minute * 10).

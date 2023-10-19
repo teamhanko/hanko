@@ -24,7 +24,7 @@ type flowContext interface {
 	// GetCurrentState returns the current state of the flow.
 	GetCurrentState() StateName
 	// CurrentStateEquals returns true, when one of the given states matches the current state.
-	CurrentStateEquals(states ...StateName) bool
+	CurrentStateEquals(stateNames ...StateName) bool
 	// GetPreviousState returns the previous state of the flow.
 	GetPreviousState() (*StateName, error)
 	// GetErrorState returns the designated error state of the flow.
@@ -65,7 +65,7 @@ type actionExecutionContext interface {
 type actionExecutionContinuationContext interface {
 	actionExecutionContext
 	// ContinueFlow continues the flow execution to the specified next state.
-	ContinueFlow(nextState StateName) error
+	ContinueFlow(nextStateName StateName) error
 	// ContinueFlowWithError continues the flow execution to the specified next state with an error.
 	ContinueFlowWithError(nextStateName StateName, flowErr FlowError) error
 	// StartSubFlow starts a sub-flow and continues the flow execution to the specified next states after the sub-flow has been ended.
@@ -84,6 +84,10 @@ type InitializationContext interface {
 // ExecutionContext is a shorthand for actionExecutionContinuationContext within flow execution method.
 type ExecutionContext interface {
 	actionExecutionContinuationContext
+}
+
+type HookExecutionContext interface {
+	actionExecutionContext
 }
 
 // TODO: The following interfaces are meant for a plugin system. #tbd

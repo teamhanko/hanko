@@ -14,7 +14,7 @@ type defaultActionExecutionContext struct {
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
-// saveNextState updates the flow's state and saves Transition data after action execution.
+// saveNextState updates the flow's state and stores data to the database.
 func (aec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
 	completed := executionResult.nextStateName == aec.flow.endStateName
 	newVersion := aec.flowModel.Version + 1
@@ -39,7 +39,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	// Get the data to persists from the executed action schema for recording.
 	inputDataToPersist := aec.input.getDataToPersist().String()
 
-	// Prepare parameters for creating a new Transition in the database.
+	// Prepare parameters for creating a new transition in the database.
 	transitionCreation := transitionCreationParam{
 		flowID:     aec.flowModel.ID,
 		actionName: aec.actionName,
@@ -91,6 +91,11 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		return errors.New("execution context is closed already")
 	}
 
+	err := aec.executeHookActions(nextStateName)
+	if err != nil {
+		return fmt.Errorf("error while executing hook actions: %w", err)
+	}
+
 	// Prepare the result for continuing the flow.
 	actionResult := actionExecutionResult{
 		actionName: aec.actionName,
@@ -109,6 +114,22 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 	}
 
 	aec.executionResult = &result
+
+	return nil
+}
+
+func (aec *defaultActionExecutionContext) executeHookActions(nextStateName StateName) error {
+	state, err := aec.flow.getState(nextStateName)
+	if err != nil {
+		return err
+	}
+
+	for _, hook := range state.beforeHooks {
+		err = hook.Execute(aec)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
