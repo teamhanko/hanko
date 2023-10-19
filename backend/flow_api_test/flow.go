@@ -12,6 +12,7 @@ var ThirdSubFlow = flowpilot.NewSubFlow().
 var SecondSubFlow = flowpilot.NewSubFlow().
 	State(StateSecondSubFlowInit, ContinueToFinal{}, Back{}).
 	State(StateSecondSubFlowFinal, EndSubFlow{}, Back{}).
+	AfterState(StateSecondSubFlowFinal, AfterStateAction{}).
 	MustBuild()
 
 var FirstSubFlow = flowpilot.NewSubFlow().
@@ -33,7 +34,8 @@ var Flow = flowpilot.NewFlow("/flow_api_login").
 	State(StateConfirmPasskeyCreation, GetWAAssertion{}, SkipPasskeyCreation{}).
 	State(StateCreatePasskey, VerifyWAAssertion{}).
 	BeforeState(StateSuccess, BeforeStateAction{}).
-	FixedStates(StateSignInOrSignUp, StateError, StateSuccess).
+	InitialState(StateSignInOrSignUp).
+	ErrorState(StateError).
 	SubFlows(FirstSubFlow, ThirdSubFlow).
 	TTL(time.Minute * 10).
 	Debug(true).

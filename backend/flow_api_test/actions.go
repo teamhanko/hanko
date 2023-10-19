@@ -384,3 +384,9 @@ type BeforeStateAction struct{}
 func (m BeforeStateAction) Execute(c flowpilot.HookExecutionContext) error {
 	return c.Payload().Set("before_action_executed", true)
 }
+
+type AfterStateAction struct{}
+
+func (m AfterStateAction) Execute(c flowpilot.HookExecutionContext) error {
+	return c.Payload().Set("after_action_executed", true)
+}

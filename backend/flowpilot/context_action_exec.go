@@ -16,7 +16,6 @@ type defaultActionExecutionContext struct {
 
 // saveNextState updates the flow's state and stores data to the database.
 func (aec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
-	completed := executionResult.nextStateName == aec.flow.endStateName
 	newVersion := aec.flowModel.Version + 1
 	stashData := aec.stash.String()
 
@@ -26,7 +25,6 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 		nextState: executionResult.nextStateName,
 		stashData: stashData,
 		version:   newVersion,
-		completed: completed,
 		expiresAt: aec.flowModel.ExpiresAt,
 		createdAt: aec.flowModel.CreatedAt,
 	}
@@ -68,9 +66,7 @@ func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName, 
 	nextStateAllowed := currentState.flow.stateExists(nextStateName)
 
 	// Check if the specified nextStateName is valid.
-	if !(nextStateAllowed ||
-		nextStateName == aec.flow.endStateName ||
-		nextStateName == aec.flow.errorStateName) {
+	if !(nextStateAllowed || nextStateName == aec.flow.errorStateName) {
 		return fmt.Errorf("progression to the specified state '%s' is not allowed", nextStateName)
 	}
 
@@ -119,15 +115,27 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 }
 
 func (aec *defaultActionExecutionContext) executeHookActions(nextStateName StateName) error {
-	state, err := aec.flow.getState(nextStateName)
+	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
 	if err != nil {
 		return err
 	}
 
-	for _, hook := range state.beforeHooks {
+	for _, hook := range currentState.afterHooks {
 		err = hook.Execute(aec)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to execute hook action after state: %w", err)
+		}
+	}
+
+	nextState, err := aec.flow.getState(nextStateName)
+	if err != nil {
+		return err
+	}
+
+	for _, hook := range nextState.beforeHooks {
+		err = hook.Execute(aec)
+		if err != nil {
+			return fmt.Errorf("failed to execute hook action before state: %w", err)
 		}
 	}
 
@@ -229,7 +237,7 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 
 	var scheduledStates []StateName
 
-	// Validate the specified nextStates and append valid states to the list of scheduledStates.
+	// Append valid states to the list of scheduledStates.
 	for index, nextStateName := range nextStateNames {
 		stateExists := currentState.flow.stateExists(nextStateName)
 		subFlowStateExists := currentState.subFlows.stateExists(nextStateName)
@@ -282,7 +290,7 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 
 	// If no scheduled state is available, set it to the end state.
 	if scheduledStateName == nil {
-		scheduledStateName = &aec.flow.endStateName
+		return ErrorFlowDiscontinuity.Wrap(errors.New("can't progress the flow, because no scheduled states were available after the sub-flow ended"))
 	} else {
 		// Add the current state to the execution history.
 		err = aec.stash.addStateToHistory(currentStateName, scheduledStateName, nil)
