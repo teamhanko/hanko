@@ -12,7 +12,7 @@ Hanko is a lightweight, open source user authentication solution that takes you 
 
 Start a project with [Hanko Cloud](https://cloud.hanko.io):
 
-<iframe width="100%" height="450" src="https://www.youtube.com/embed/dSeYqEhqZc0?si=anD8PLuU7khVRfDw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/dSeYqEhqZc0?si=z551zmp3QDyNBv4H" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
 
 Or learn how to [host Hanko](https://github.com/teamhanko/hanko) yourself.
 
