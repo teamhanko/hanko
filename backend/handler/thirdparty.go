@@ -11,14 +11,10 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
-)
-
-const (
-	HankoThirdpartyStateCookie = "hanko_thirdparty_state"
-	HankoTokenQuery            = "hanko_token"
 )
 
 type ThirdPartyHandler struct {
@@ -70,16 +66,13 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 
 	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
 
-	c.SetCookie(&http.Cookie{
-		Name:     HankoThirdpartyStateCookie,
-		Value:    string(state),
-		Path:     "/",
-		Domain:   h.cfg.Session.Cookie.Domain,
+	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 		MaxAge:   300,
-		Secure:   h.cfg.Session.Cookie.Secure,
-		HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+		Path:     "/",
 		SameSite: http.SameSiteLaxMode,
 	})
+
+	c.SetCookie(cookie)
 
 	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
 }
@@ -115,7 +108,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			}
 		}
 
-		expectedState, terr := c.Cookie(HankoThirdpartyStateCookie)
+		expectedState, terr := c.Cookie(utils.HankoThirdpartyStateCookie)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("thirdparty state cookie is missing")
 		}
@@ -170,12 +163,12 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 
 		query := redirectTo.Query()
-		query.Add(HankoTokenQuery, token.Value)
+		query.Add(utils.HankoTokenQuery, token.Value)
 		redirectTo.RawQuery = query.Encode()
 		successRedirectTo = redirectTo
 
 		c.SetCookie(&http.Cookie{
-			Name:     HankoThirdpartyStateCookie,
+			Name:     utils.HankoThirdpartyStateCookie,
 			Value:    "",
 			Path:     "/",
 			Domain:   h.cfg.Session.Cookie.Domain,

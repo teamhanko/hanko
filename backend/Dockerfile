@@ -17,6 +17,7 @@ COPY server server/
 COPY handler handler/
 COPY crypto crypto/
 COPY dto dto/
+COPY ee/saml ee/saml/
 COPY session session/
 COPY mail mail/
 COPY audit_log audit_log/
@@ -26,6 +27,7 @@ COPY thirdparty thirdparty/
 COPY build_info build_info/
 COPY middleware middleware/
 COPY template template/
+COPY utils utils/
 
 # Build
 RUN go generate ./...

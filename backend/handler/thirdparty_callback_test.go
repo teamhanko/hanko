@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/h2non/gock"
 	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -36,7 +37,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -99,7 +100,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -169,7 +170,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -242,7 +243,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -300,7 +301,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -361,7 +362,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -424,7 +425,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -487,7 +488,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -550,7 +551,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -613,7 +614,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 

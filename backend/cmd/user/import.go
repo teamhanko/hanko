@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gobuffalo/pop/v6"
-	"github.com/gofrs/uuid"
-	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
+	"github.com/spf13/cobra"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 func NewImportCommand() *cobra.Command {
@@ -103,7 +104,7 @@ func NewImportCommand() *cobra.Command {
 
 // loadAndValidate reads json from an io.Reader so we read every entry separate and validate it. We go through the whole
 // array to print out every validation error in the input data.
-func loadAndValidate(input io.Reader) ([]ImportEntry, error) {
+func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 	dec := json.NewDecoder(input)
 
 	// read the open bracket
@@ -112,14 +113,14 @@ func loadAndValidate(input io.Reader) ([]ImportEntry, error) {
 		return nil, err
 	}
 
-	users := []ImportEntry{}
+	users := []ImportOrExportEntry{}
 
 	numErrors := 0
 	index := 0
 	// while the array contains values
 	for dec.More() {
 		index = index + 1
-		var userEntry ImportEntry
+		var userEntry ImportOrExportEntry
 		// decode one ImportEntry
 		err := dec.Decode(&userEntry)
 		if err != nil {
@@ -152,7 +153,7 @@ func loadAndValidate(input io.Reader) ([]ImportEntry, error) {
 }
 
 // commits the list of ImportEntries to the database. Wrapped in a transaction so if something fails no new users are added.
-func addToDatabase(entries []ImportEntry, persister persistence.Persister) error {
+func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persister) error {
 	tx := persister.GetConnection()
 	err := tx.Transaction(func(tx *pop.Connection) error {
 		for i, v := range entries {
