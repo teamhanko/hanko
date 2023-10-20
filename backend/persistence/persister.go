@@ -39,6 +39,10 @@ type Persister interface {
 	GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) PrimaryEmailPersister
 	GetTokenPersister() TokenPersister
 	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
+	GetSamlStatePersister() SamlStatePersister
+	GetSamlStatePersisterWithConnection(tx *pop.Connection) SamlStatePersister
+	GetSamlCertificatePersister() SamlCertificatePersister
+	GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister
 }
 
 type Migrator interface {
@@ -203,4 +207,20 @@ func (p *persister) GetTokenPersister() TokenPersister {
 
 func (p *persister) GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister {
 	return NewTokenPersister(tx)
+}
+
+func (p *persister) GetSamlStatePersister() SamlStatePersister {
+	return NewSamlStatePersister(p.DB)
+}
+
+func (p *persister) GetSamlStatePersisterWithConnection(tx *pop.Connection) SamlStatePersister {
+	return NewSamlStatePersister(tx)
+}
+
+func (p *persister) GetSamlCertificatePersister() SamlCertificatePersister {
+	return NewSamlCertificatePersister(p.DB)
+}
+
+func (p *persister) GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister {
+	return NewSamlCertificatePersister(tx)
 }
