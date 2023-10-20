@@ -26,6 +26,9 @@
       "i18n/fr": [
         "dist/i18n/fr.d.ts"
       ],
+      "i18n/pt-BR": [
+        "dist/i18n/pt-BR.d.ts"
+      ],
       "i18n/zh": [
         "dist/i18n/zh.d.ts"
       ],
@@ -54,6 +57,11 @@
       "types": "./dist/i18n/fr.d.ts",
       "import": "./dist/i18n/fr.js",
       "require": "./dist/i18n/fr.js"
+    },
+    "./i18n/pt-BR": {
+      "types": "./dist/i18n/pt-BR.d.ts",
+      "import": "./dist/i18n/pt-BR.js",
+      "require": "./dist/i18n/pt-BR.js"
     },
     "./i18n/zh": {
       "types": "./dist/i18n/zh.d.ts",
