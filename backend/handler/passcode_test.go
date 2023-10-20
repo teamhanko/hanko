@@ -96,10 +96,9 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 			e.ServeHTTP(rec, req)
 
 			if s.Equal(currentTest.expectedStatusCode, rec.Code) && currentTest.expectedStatusCode >= 200 && currentTest.expectedStatusCode <= 299 {
-				emails, err := test.GetEmails(s.EmailServer)
+				emails, err := s.EmailServer.GetEmails()
 				s.Require().NoError(err)
 				messages := emails.MailItems
-
 				s.Require().Greater(len(messages), 0)
 
 				emailAddress := messages[len(messages)-1].ToAddresses[0]

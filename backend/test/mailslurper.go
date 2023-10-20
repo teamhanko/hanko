@@ -13,6 +13,7 @@ import (
 )
 
 type TestMailslurper struct {
+	Id       string
 	pool     *dockertest.Pool
 	resource *dockertest.Resource
 	httpUrl  string
@@ -30,12 +31,11 @@ func StartMailslurper() (*TestMailslurper, error) {
 		return nil, fmt.Errorf("could not connect to docker: %w", err)
 	}
 
-	options := getMailslurperOptions()
+	id := uuid.New().String()
+	options := getMailslurperOptions(id)
 	if err != nil {
 		return nil, fmt.Errorf("could not create docker run options: %w", err)
 	}
-
-	options.Name = "mailslurper-" + uuid.New().String()
 
 	resource, err := pool.RunWithOptions(options, func(config *docker.HostConfig) {
 		config.AutoRemove = true
@@ -69,6 +69,7 @@ func StartMailslurper() (*TestMailslurper, error) {
 	}
 
 	return &TestMailslurper{
+		Id:       id,
 		pool:     pool,
 		resource: resource,
 		httpUrl:  dsn,
@@ -86,7 +87,7 @@ func PurgeMailslurper(instance *TestMailslurper) error {
 	return nil
 }
 
-func getMailslurperOptions() *dockertest.RunOptions {
+func getMailslurperOptions(id string) *dockertest.RunOptions {
 	return &dockertest.RunOptions{
 		Repository: "marcopas/docker-mailslurper",
 		Tag:        "latest",
@@ -94,11 +95,13 @@ func getMailslurperOptions() *dockertest.RunOptions {
 			"8085/tcp",
 			"2500/tcp",
 		},
+		Name: fmt.Sprintf("mailslurper-%s", id),
 	}
 }
 
 type GetEmailResponse struct {
-	MailItems []GetEmailResponseMailItem `json:"mailItems"`
+	MailItems    []GetEmailResponseMailItem `json:"mailItems"`
+	TotalRecords int                        `json:"totalRecords"`
 }
 
 type GetEmailResponseMailItem struct {
@@ -111,19 +114,26 @@ type GetEmailResponseMailItem struct {
 	ContentType string   `json:"contentType"`
 }
 
-func GetEmails(m *TestMailslurper) (*GetEmailResponse, error) {
+func (m *TestMailslurper) GetEmails() (*GetEmailResponse, error) {
+	// Allow buffer time for HTTP server to catch up with received emails
+	time.Sleep(15 * time.Millisecond)
+
 	response, err := http.Get(fmt.Sprintf("%s/mail", m.httpUrl))
 	if err != nil {
 		return nil, fmt.Errorf("failed to get emails from mailslurper: %w", err)
 	}
+
 	defer response.Body.Close()
+
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
+
 	var result GetEmailResponse
 	if err := json.Unmarshal(body, &result); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal response body: %w", err)
 	}
+
 	return &result, nil
 }
