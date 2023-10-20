@@ -64,6 +64,9 @@ func (s *Suite) TearDownTest() {
 		err := s.Storage.MigrateDown(-1)
 		s.NoError(err)
 	}
+	if s.EmailServer != nil {
+		s.NoError(s.EmailServer.DeleteEmails())
+	}
 }
 
 func (s *Suite) TearDownSuite() {
