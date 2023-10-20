@@ -1,6 +1,6 @@
 import { Translation } from "./translations";
 
-export const en: Translation = {
+export const bn: Translation = {
   headlines: {
     error: "একটি ত্রুটি উৎপন্ন হয়েছে",
     loginEmail: "সাইন ইন করুন অথবা নিবন্ধন করুন",
