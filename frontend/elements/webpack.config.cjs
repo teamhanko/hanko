@@ -47,6 +47,13 @@ module.exports = {
         type: "module",
       },
     },
+    bn: {
+      filename: "i18n/bn.js",
+      import: "./src/i18n/bn.ts",
+      library: {
+        type: "module",
+      },
+    },
     all: {
       filename: "i18n/all.js",
       import: "./src/i18n/all.ts",
