@@ -11,6 +11,7 @@ easily integrated into any web app with as little as two lines of code.
 
 - [API features](#api-features)
 - [Running the backend](#running-the-backend)
+- [Running tests](#running-tests)
 - [Additional topics](#additional-topics)
   - [Enabling password authentication](#enabling-password-authentication)
   - [Cross-domain communication](#cross-domain-communication)
@@ -365,6 +366,14 @@ Use this command to start the public and admin API together:
 
 ```shell
 serve all
+```
+
+## Running tests
+
+You can run the unit tests by running the following command within the `backend` directory:
+
+```bash
+go test -v ./...
 ```
 
 ## Additional topics

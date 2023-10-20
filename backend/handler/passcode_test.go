@@ -12,13 +12,11 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"net/http/httptest"
-	"regexp"
 	"testing"
 	"time"
 )
 
 func TestPasscodeSuite(t *testing.T) {
-	t.Parallel()
 	s := new(passcodeSuite)
 	s.WithEmailServer = true
 	suite.Run(t, s)
@@ -35,7 +33,14 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 	err := s.LoadFixtures("../test/fixtures/passcode")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	cfg := func() *config.Config {
+		cfg := &test.DefaultConfig
+		cfg.Passcode.Smtp.Host = "localhost"
+		cfg.Passcode.Smtp.Port = s.EmailServer.SmtpPort
+		return cfg
+	}
+
+	e := NewPublicRouter(cfg(), s.Storage, nil)
 
 	emailId := "51b7c175-ceb6-45ba-aae6-0092221c1b84"
 	unknownEmailId := "83618f24-2db8-4ea2-b370-ac8335f782d8"
@@ -91,9 +96,12 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 			e.ServeHTTP(rec, req)
 
 			if s.Equal(currentTest.expectedStatusCode, rec.Code) && currentTest.expectedStatusCode >= 200 && currentTest.expectedStatusCode <= 299 {
-				messages := s.EmailServer.Messages()
+				emails, err := s.EmailServer.GetEmails()
+				s.Require().NoError(err)
+				messages := emails.MailItems
+				s.Require().Greater(len(messages), 0)
 
-				emailAddress := s.GetToEmailAddress(messages[len(messages)-1].MsgRequest())
+				emailAddress := messages[len(messages)-1].ToAddresses[0]
 				s.Equal(currentTest.expectedEmailAddress, emailAddress)
 			}
 		})
@@ -243,18 +251,4 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			_ = s.Storage.GetPasscodePersister().Delete(currentTest.passcode)
 		})
 	}
-}
-
-func (s *passcodeSuite) GetToEmailAddress(data string) string {
-	to := regexp.MustCompile("To: (.*)\r")
-	matchTo := to.FindStringSubmatch(data)
-
-	return matchTo[1]
-}
-
-func (s *passcodeSuite) GetPasscode(data string) string {
-	passcode := regexp.MustCompile("Subject: Use passcode ([0-9]{1,6}) to sign in to Test")
-	matchPasscode := passcode.FindStringSubmatch(data)
-
-	return matchPasscode[1]
 }
