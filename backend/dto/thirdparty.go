@@ -46,5 +46,6 @@ func getProviderDisplayName(identity *models.Identity) string {
 			return field.Name()
 		}
 	}
-	return ""
+
+	return strings.TrimSpace(identity.ProviderName)
 }

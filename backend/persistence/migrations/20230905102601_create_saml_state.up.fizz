@@ -1,0 +1,9 @@
+create_table("saml_states") {
+    t.Column("id", "uuid", {})
+    t.Column("nonce", "string", {})
+    t.Column("state", "varchar(500)", {})
+    t.Column("expires_at", "timestamp", {})
+    t.Timestamps()
+    t.PrimaryKey("id")
+    t.Index("nonce", {"unique": true})
+}

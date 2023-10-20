@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/mail"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -160,6 +161,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)
+
+	if cfg.Saml.Enabled {
+		saml.CreateSamlRoutes(e, cfg, persister, sessionManager, auditLogger)
+	}
 
 	return e
 }

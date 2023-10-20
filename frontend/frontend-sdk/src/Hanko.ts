@@ -1,4 +1,5 @@
 import { ConfigClient } from "./lib/client/ConfigClient";
+import { EnterpriseClient } from "./lib/client/EnterpriseClient";
 import { PasscodeClient } from "./lib/client/PasscodeClient";
 import { PasswordClient } from "./lib/client/PasswordClient";
 import { UserClient } from "./lib/client/UserClient";
@@ -40,6 +41,7 @@ class Hanko extends Listener {
   passcode: PasscodeClient;
   email: EmailClient;
   thirdParty: ThirdPartyClient;
+  enterprise: EnterpriseClient;
   token: TokenClient;
   relay: Relay;
   session: Session;
@@ -98,6 +100,11 @@ class Hanko extends Listener {
      *  @type {ThirdPartyClient}
      */
     this.thirdParty = new ThirdPartyClient(api, opts);
+    /**
+     *  @public
+     *  @type {EnterpriseClient}
+     */
+    this.enterprise = new EnterpriseClient(api, opts);
     /**
      *  @public
      *  @type {TokenClient}

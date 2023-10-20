@@ -42,10 +42,16 @@ The remainder of the repository consists of:
 
 # Getting started
 1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://www.passkeys.io) or use the [quickstart app](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
-2. Head over to the [backend](/backend/README.md) to learn how to get it up and running for your own project. Use [Hanko Cloud](https://cloud.hanko.io) for a hosted backend.
+2. To run the project locally, there are two options available:
+   - Bare metal:
+      - Head over to the [backend](/backend/README.md) section to learn how to get it up and running for your own project. Use [Hanko Cloud](https://cloud.hanko.io) for a hosted backend.
+   - Docker:
+     -  If you prefer to use [Docker](https://www.docker.com/) to run the project locally, please visit the [Run the quickstart](./quickstart/README.md#run-the-quickstart) for information on how to run the project. This will create everything including frontend and backend components. 
+        -  If you wish to keep only the backend components, you can modify the [quickstart.yaml](./deploy/docker-compose/quickstart.yaml) to remove the unnecessary services. To make changes to the configuration to meet your needs, modify [config.yaml](./deploy/docker-compose/config.yaml).
 3. Then, integrate [hanko-elements](/frontend/elements/README.md) – we provide [example applications](frontend/examples/README.md) and [guides](https://docs.hanko.io/guides/frontend) for your favourite frontend framework in the official documentation
+4. if you have an [enterprise license](/backend/ee) or use [Hanko Cloud](https://cloud.hanko.io) you can also integrate [SAML SSO](/docs). Feel free to use [this guide](https://docs.hanko.io/guides/frontend) to start with SAML SSO
 
-If you want to use the Hanko backend API but prefer to build your own UI, you can still make use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components and the client it provides handles communication with the Hanko backend API and saves you the time of rolling your own.
+If you want to use the Hanko backend API but prefer to build your own UI, you can still make use of the [hanko-frontend-sdk](/frontend/frontend-sdk/README.md). It forms the basis of our web components and the client it provides handles communication with the [Hanko backend API](https://docs.hanko.io/api-reference/introduction) and saves you the time of rolling your own.
 
 # Contact us
 Schedule a Hanko demo. Learn how Hanko will speed up your registration and login flows with passkeys.

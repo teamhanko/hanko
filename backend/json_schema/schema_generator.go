@@ -3,17 +3,18 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/invopop/jsonschema"
 	"github.com/teamhanko/hanko/backend/cmd/user"
 	"github.com/teamhanko/hanko/backend/config"
-	"os"
 )
 
 func main() {
 	if err := generateSchema("./config", "./json_schema/hanko.config.json", &config.Config{}); err != nil {
 		panic(err)
 	}
-	if err := generateSchema("./cmd/user", "./json_schema/hanko.user_import.json", &user.ImportList{}); err != nil {
+	if err := generateSchema("./cmd/user", "./json_schema/hanko.user_import.json", &user.ImportOrExportList{}); err != nil {
 		panic(err)
 	}
 
