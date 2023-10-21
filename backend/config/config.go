@@ -20,6 +20,7 @@ import (
 type Config struct {
 	Server      Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
 	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp        SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
 	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
 	Password    Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
 	Database    Database         `yaml:"database" json:"database" koanf:"database"`
@@ -96,10 +97,10 @@ func DefaultConfig() *Config {
 			UserVerification: "preferred",
 			Timeout:          60000,
 		},
+		Smtp: SMTP{
+			Port: "465",
+		},
 		Passcode: Passcode{
-			Smtp: SMTP{
-				Port: "465",
-			},
 			TTL: 300,
 			Email: Email{
 				FromAddress: "passcode@hanko.io",
@@ -347,7 +348,6 @@ func (e *Email) Validate() error {
 
 type Passcode struct {
 	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	Smtp  SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
 	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 }
 
@@ -355,10 +355,6 @@ func (p *Passcode) Validate() error {
 	err := p.Email.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate email settings: %w", err)
-	}
-	err = p.Smtp.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate smtp settings: %w", err)
 	}
 	return nil
 }
