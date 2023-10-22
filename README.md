@@ -10,6 +10,8 @@
 [![GoDoc](https://godoc.org/github.com/teamhanko/hanko?status.svg)](https://godoc.org/github.com/teamhanko/hanko)
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-elements?label=hanko-elements)](https://www.npmjs.com/package/@teamhanko/hanko-elements)
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-frontend-sdk?label=hanko-frontend-sdk)](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk)
+<img src="https://img.shields.io/static/v1?label=Join&message=Discord&color=blueviolet&style=flat-square" alt="Join Discord">
+<img src="https://img.shields.io/twitter/follow/hanko_io?style=social" alt="Follow us on Twitter">
 
 # About Hanko
 Hanko is an open source authentication and user management solution with a focus on moving the login beyond passwords, while being 100% deployable today.
@@ -105,6 +107,16 @@ If you have any questions or issues, please check this project's [Q&A section in
 
 ## Discord community & X
 We invite you to join our growing [Discord community](https://www.hanko.io/community) if you want to get the latest updates on passkeys, WebAuthn, and this project, or if you just want to chat with us. You can also [follow us on Twitter](https://x.com/hanko_io).
+
+<p align="center">
+    <a href="https://www.hanko.io/community">
+        <img src="https://img.shields.io/static/v1?label=Join&message=Discord&color=blueviolet&style=flat-square" alt="Join Discord">
+    </a>
+    <a href="https://x.com/hanko_io">
+        <img src="https://img.shields.io/twitter/follow/hanko_io?style=social" alt="Follow us on Twitter">
+    </a>
+</p>
+
 
 # Licenses
 [hanko-elements](frontend/elements) and [hanko-frontend-sdk](frontend/frontend-sdk) are licensed under the [MIT License](frontend/elements/LICENSE). Everything else in this repository, including [hanko backend](backend), is licensed under the [AGPL-3.0](/LICENSE).
