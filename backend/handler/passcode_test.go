@@ -227,7 +227,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		{
 			name:                     "create email with session in cookie",
 			passcodeId:               "494129d5-76de-4fae-b07d-f2a521e1804d",
-			passcode:                 passcodeForNonAssignedEmail, // TODO:
+			passcode:                 passcodeForNonAssignedEmail,
 			code:                     "123456",
 			expectedStatusCode:       http.StatusOK,
 			cfg:                      cfg,
@@ -237,7 +237,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		{
 			name:                     "do not create email with wrong session in cookie",
 			passcodeId:               "494129d5-76de-4fae-b07d-f2a521e1804d",
-			passcode:                 passcodeForNonAssignedEmail, // TODO:
+			passcode:                 passcodeForNonAssignedEmail,
 			code:                     "123456",
 			expectedStatusCode:       http.StatusForbidden,
 			cfg:                      cfg,
@@ -247,7 +247,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		{
 			name:                         "create email with session in Authorization header",
 			passcodeId:                   "494129d5-76de-4fae-b07d-f2a521e1804d",
-			passcode:                     passcodeForNonAssignedEmail, // TODO:
+			passcode:                     passcodeForNonAssignedEmail,
 			code:                         "123456",
 			expectedStatusCode:           http.StatusOK,
 			cfg:                          cfg,
@@ -257,7 +257,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		{
 			name:                         "do not create email with wrong session in Authorization header",
 			passcodeId:                   "494129d5-76de-4fae-b07d-f2a521e1804d",
-			passcode:                     passcodeForNonAssignedEmail, // TODO:
+			passcode:                     passcodeForNonAssignedEmail,
 			code:                         "123456",
 			expectedStatusCode:           http.StatusForbidden,
 			cfg:                          cfg,
