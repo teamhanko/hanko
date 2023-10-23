@@ -87,7 +87,7 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |⚙️| Enterprise SSO (OIDC/SAML) |
 |⚙️| API-supported auth flows |
 |⚙️| Mobile SDKs |
-|⚙️| Basic email templating & i8n |
+|⚙️| Basic email templating & i18n |
 | | 2FA for securing passcodes & passwords |
 | | Webhooks |
 | | Refresh tokens / sessions |
