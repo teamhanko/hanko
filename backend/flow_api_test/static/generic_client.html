@@ -46,15 +46,39 @@
 </select>
 
 <div id="container"></div>
-<script>
-    const passkeyHandler = (payload) => {
-        document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+<script type="module">
+    import {
+        parseCreationOptionsFromJSON,
+        create
+    } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
+
+    console.log(parseCreationOptionsFromJSON)
+    console.log(create)
+</script>
+<script type="module">
+    import {
+        parseCreationOptionsFromJSON,
+        create
+    } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
+
+    async function webauthnCreate(payload) {
+        const options = parseCreationOptionsFromJSON(payload)
+        const response = await create(options)
+        return JSON.stringify(response)
+    }
+
+    const passkeyHandler = async (payload) => {
+        // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+
+        console.log(payload)
+        document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creationOptions)
     }
 
     const stateHandler = {
         "loginPasskey": passkeyHandler,
         "passkey_login": passkeyHandler,
         "passkey_registration": passkeyHandler,
+        "onboarding_verify_passkey_attestation": passkeyHandler
     }
 
     function generateUI(data) {
@@ -245,7 +269,7 @@
     }
 
     function createFlow() {
-        fetch("/flow_api_login", {
+        fetch("/registration", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
