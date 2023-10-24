@@ -21,7 +21,3 @@ func (aic *defaultActionInitializationContext) SuspendAction() {
 func (aic *defaultActionInitializationContext) Stash() Stash {
 	return aic.stash
 }
-
-func (aic *defaultActionInitializationContext) GetCurrentState() StateName {
-	return aic.currentState
-}

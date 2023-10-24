@@ -26,12 +26,9 @@ func (m Skip) GetDescription() string {
 }
 
 func (m Skip) Initialize(c flowpilot.InitializationContext) {
-	switch c.GetCurrentState() {
-	case common.StateOnboardingCreatePasskey:
-		if !m.cfg.Passcode.Enabled && !m.cfg.Password.Enabled {
-			// suspend action when only passkeys are allowed
-			c.SuspendAction()
-		}
+	if !m.cfg.Passcode.Enabled && !m.cfg.Password.Enabled {
+		// suspend action when only passkeys are allowed
+		c.SuspendAction()
 	}
 }
 

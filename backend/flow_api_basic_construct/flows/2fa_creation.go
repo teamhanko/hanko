@@ -13,6 +13,5 @@ func New2FACreationSubFlow() flowpilot.SubFlow {
 		State(common.StateCreate2FATOTP).
 		State(common.StateGenerateRecoveryCodes).
 		State(common.StateShowRecoveryCodes).
-		FixedStates(common.StateCreate2FASecurityKey).
 		MustBuild()
 }

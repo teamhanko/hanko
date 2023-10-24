@@ -308,7 +308,6 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
 				State(common.StateOnboardingCreatePasskey).
-				FixedStates(common.StateOnboardingCreatePasskey).
 				Build()
 
 			s.Require().NoError(err)
@@ -319,7 +318,8 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 				State(common.StateSuccess).
 				State(common.StatePasswordCreation).
 				SubFlows(passkeySubFlow).
-				FixedStates(common.StateRegistrationInit, common.StateError, common.StateSuccess).
+				InitialState(common.StateRegistrationInit).
+				ErrorState(common.StateError).
 				Build()
 
 			s.Require().NoError(err)
@@ -333,7 +333,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			s.Require().NoError(err)
 
 			s.Equal(currentTest.statusCode, result.Status())
-			s.Equal(currentTest.expectedState, result.Response().State)
+			s.Equal(currentTest.expectedState, result.Response().StateName)
 			// TODO: check that the schema of the action returns the correct error_code e.g.
 			// result.Response().PublicActions[0].PublicSchema[0].PublicError.Code == ErrorValueInvalid
 		})

@@ -24,7 +24,8 @@ func NewLoginFlow(cfg config.Config) flowpilot.Flow {
 		State(common.StateSuccess).
 		State(common.StateError).
 		//SubFlows(NewPasskeyOnboardingSubFlow(), New2FACreationSubFlow()).
-		FixedStates(common.StateLoginPreflight, common.StateError, common.StateSuccess).
+		InitialState(common.StateLoginPreflight).
+		ErrorState(common.StateError).
 		TTL(10 * time.Minute).
 		MustBuild()
 }

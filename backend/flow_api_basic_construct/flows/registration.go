@@ -27,7 +27,8 @@ func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, pas
 		State(common.StateSuccess).
 		State(common.StateError).
 		SubFlows(passkeyOnboardingSubFlow).
-		FixedStates(common.StateRegistrationPreflight, common.StateError, common.StateSuccess).
+		InitialState(common.StateRegistrationPreflight).
+		ErrorState(common.StateError).
 		TTL(10 * time.Minute).
 		Debug(true).
 		MustBuild(), nil

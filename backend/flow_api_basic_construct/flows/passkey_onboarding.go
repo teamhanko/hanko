@@ -45,6 +45,5 @@ func NewPasskeyOnboardingSubFlow(cfg config.Config, persister persistence.Persis
 	return flowpilot.NewSubFlow().
 		State(common.StateOnboardingCreatePasskey, actions.NewGetWACreationOptions(cfg, persister, wa), actions.NewSkip(cfg)).
 		State(common.StateOnboardingVerifyPasskeyAttestation, actions.NewSendWAAttestationResponse(cfg, persister, wa, userService, sessionManager, httpContext)).
-		FixedStates(common.StateOnboardingCreatePasskey).
-		MustBuild(), nil
+		Build()
 }

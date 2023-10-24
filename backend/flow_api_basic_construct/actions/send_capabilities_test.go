@@ -90,8 +90,10 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilitiesExecute() {
 			flow, err := flowpilot.NewFlow("/registration_test").
 				State(common.StateRegistrationPreflight, NewSendCapabilities(currentTest.cfg)).
 				State(common.StateRegistrationInit).
-				State(common.StateError).State(common.StateSuccess).
-				FixedStates(common.StateRegistrationPreflight, common.StateError, common.StateSuccess).
+				State(common.StateError).
+				State(common.StateSuccess).
+				InitialState(common.StateRegistrationPreflight).
+				ErrorState(common.StateError).
 				Build()
 			s.Require().NoError(err)
 
@@ -103,7 +105,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilitiesExecute() {
 
 			if s.NoError(err) {
 				s.Equal(currentTest.statusCode, result.Status())
-				s.Equal(currentTest.expectedState, result.Response().State)
+				s.Equal(currentTest.expectedState, result.Response().StateName)
 			}
 		})
 	}
