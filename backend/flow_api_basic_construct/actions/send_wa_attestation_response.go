@@ -8,19 +8,17 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
-	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
 	"strings"
 )
 
-func NewSendWAAttestationResponse(cfg config.Config, persister persistence.Persister, wa *webauthnLib.WebAuthn, userService services.User, sessionManager session.Manager, httpContext echo.Context) SendWAAttestationResponse {
+func NewSendWAAttestationResponse(cfg config.Config, persister persistence.Persister, wa *webauthnLib.WebAuthn, sessionManager session.Manager, httpContext echo.Context) SendWAAttestationResponse {
 	return SendWAAttestationResponse{
 		cfg,
 		persister,
 		wa,
-		userService,
 		sessionManager,
 		httpContext,
 	}
@@ -30,7 +28,6 @@ type SendWAAttestationResponse struct {
 	cfg            config.Config
 	persister      persistence.Persister
 	wa             *webauthnLib.WebAuthn
-	userService    services.User
 	sessionManager session.Manager
 	httpContext    echo.Context
 }
@@ -59,15 +56,15 @@ func (m SendWAAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
 
 	sessionDataId, err := uuid.FromString(c.Stash().Get("webauthn_session_data_id").String())
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 	sessionData, err := m.persister.GetWebauthnSessionDataPersister().Get(sessionDataId)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 	userId, err := uuid.FromString(c.Stash().Get("user_id").String())
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 	webauthnUser := WebAuthnUser{
 		ID:       userId,
@@ -80,20 +77,9 @@ func (m SendWAAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	// store user in the DB
-	backupEligible := response.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
-	backupState := response.Response.AttestationObject.AuthData.Flags.HasBackupState()
-	credentialModel := intern.WebauthnCredentialToModel(credential, userId, backupEligible, backupState)
-	err = m.userService.CreateUser(
-		userId,
-		c.Stash().Get("email").String(),
-		c.Stash().Get("email_verified").Bool(),
-		c.Stash().Get("username").String(),
-		credentialModel,
-		c.Stash().Get("new_password").String(),
-	)
+	err = c.Stash().Set("passkey_credential", credential)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	err = m.persister.GetWebauthnSessionDataPersister().Delete(*sessionData)
@@ -101,19 +87,8 @@ func (m SendWAAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
 		// TODO: should we return an error here or just log the error because it is not that critical to delete
 		// the session data as the flow will be marked as complete directly afterwards and the session data are
 		// linked to the flow
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
-
-	sessionToken, err := m.sessionManager.GenerateJWT(userId)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-	cookie, err := m.sessionManager.GenerateCookie(sessionToken)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-
-	m.httpContext.SetCookie(cookie)
 
 	return c.EndSubFlow()
 }

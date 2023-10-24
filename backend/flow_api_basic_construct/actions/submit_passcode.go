@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
-	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
@@ -16,11 +15,10 @@ import (
 
 var maxPasscodeTries = 3
 
-func NewSubmitPasscode(cfg config.Config, persister persistence.Persister, userService services.User, sessionManager session.Manager, httpContext echo.Context) SubmitPasscode {
+func NewSubmitPasscode(cfg config.Config, persister persistence.Persister, sessionManager session.Manager, httpContext echo.Context) SubmitPasscode {
 	return SubmitPasscode{
 		cfg,
 		persister,
-		userService,
 		sessionManager,
 		httpContext,
 	}
@@ -29,7 +27,6 @@ func NewSubmitPasscode(cfg config.Config, persister persistence.Persister, userS
 type SubmitPasscode struct {
 	cfg            config.Config
 	persister      persistence.Persister
-	userService    services.User
 	sessionManager session.Manager
 	httpContext    echo.Context
 }
@@ -53,12 +50,12 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 
 	passcodeId, err := uuid.FromString(c.Stash().Get("passcode_id").String())
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	passcode, err := m.persister.GetPasscodePersister().Get(passcodeId)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	expirationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
@@ -72,11 +69,11 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 		if passcode.TryCount >= maxPasscodeTries {
 			err = m.persister.GetPasscodePersister().Delete(*passcode)
 			if err != nil {
-				return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+				return err
 			}
 			err = c.Stash().Delete("passcode_id")
 			if err != nil {
-				return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+				return err
 			}
 
 			return c.ContinueFlowWithError(c.GetCurrentState(), common.ErrorPasscodeMaxAttemptsReached)
@@ -86,76 +83,21 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 
 	err = c.Stash().Set("email_verified", true) // TODO: maybe change attribute path
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	err = m.persister.GetPasscodePersister().Delete(*passcode)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	// TODO: This the current routing is only for the registration flow, when this action is/will be used in the login flow on other states, then the routing needs to be changed accordingly
 	// Decide which is the next state according to the config and user input
 	if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
-	} else /*if m.cfg.SecondFactor.Enabled != "disabled" {
-		var capabilities capabilities
-		err = json.Unmarshal([]byte(c.Stash().Get("capabilities").String()), &capabilities)
-		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-		}
-
-		nextStates := []flowpilot.StateName{common.StateSuccess}
-		if capabilities.Webauthn.Available && m.cfg.Passkey.Onboarding.Enabled {
-			nextStates = append(nextStates, common.StateOnboardingCreatePasskey)
-		}
-		if capabilities.Webauthn.Available && slices.Contains(m.cfg.SecondFactor.Methods, "security_key") {
-			return c.StartSubFlow(common.StateCreate2FASecurityKey, nextStates...)
-		} else if slices.Contains(m.cfg.SecondFactor.Methods, "totp") {
-			// TODO: This does not work, as a subflow only has ONE init state, but here we need two
-			return c.StartSubFlow(common.StateCreate2FATOTP, nextStates...)
-		} else {
-			// This case should never occur. The config validation should catch this case.
-			// No 2FA method is configured. At least on method must be configured when 2FA is enabled (optional/required).
-			return c.ContinueFlowWithError(c.GetErrorState(), common.ErrorConfigurationError)
-		}
-	} else*/if !m.cfg.Passcode.Enabled || m.cfg.Passkey.Onboarding.Enabled {
+	} else if !m.cfg.Passcode.Enabled || (m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
 		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
 	}
-
-	// store user in the DB
-	userId, err := uuid.NewV4()
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-	if c.Stash().Get("user_id").Exists() {
-		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
-		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-		}
-	}
-	err = m.userService.CreateUser(
-		userId,
-		c.Stash().Get("email").String(),
-		c.Stash().Get("email_verified").Bool(),
-		c.Stash().Get("username").String(),
-		nil,
-		c.Stash().Get("new_password").String(),
-	)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-
-	sessionToken, err := m.sessionManager.GenerateJWT(userId)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-	cookie, err := m.sessionManager.GenerateCookie(sessionToken)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-
-	m.httpContext.SetCookie(cookie)
 
 	return c.ContinueFlow(common.StateSuccess)
 }

@@ -42,6 +42,6 @@ func (m Skip) Execute(c flowpilot.ExecutionContext) error {
 		return c.EndSubFlow()
 	default:
 		// return an error, so we don't implicitly continue to unwanted state
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(errors.New("no destination is defined")))
+		return errors.New("no destination is defined")
 	}
 }

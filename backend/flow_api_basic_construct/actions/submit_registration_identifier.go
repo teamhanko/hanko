@@ -79,7 +79,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
 		e, err := m.persister.GetEmailPersister().FindByAddress(email)
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+			return err
 		}
 		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
 		if e != nil && !(m.cfg.Identifier.Username.Enabled == "disabled" && m.cfg.Emails.RequireVerification) {
@@ -93,7 +93,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
 		e, err := m.persister.GetUsernamePersister().Find(username)
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+			return err
 		}
 		if e != nil {
 			c.Input().SetError("username", common.ErrorUsernameAlreadyExists)
@@ -103,7 +103,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 
 	err := c.CopyInputValuesToStash("email", "username")
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	// Decide which is the next state according to the config and user input
@@ -111,11 +111,11 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		// TODO: rate limit sending emails
 		passcodeId, err := m.passcodeService.SendEmailVerification(c.GetFlowID(), email, m.httpContext.Request().Header.Get("Accept-Language"))
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+			return err
 		}
 		err = c.Stash().Set("passcode_id", passcodeId)
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+			return err
 		}
 		return c.ContinueFlow(common.StateEmailVerification)
 	} else if m.cfg.Password.Enabled {

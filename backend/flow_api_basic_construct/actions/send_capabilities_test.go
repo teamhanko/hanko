@@ -35,7 +35,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilitiesExecute() {
 	}{
 		{
 			name:  "webauthn available, passcode disabled, password disabled",
-			input: `{"capabilities":"{\"webauthn\": {\"available\": true}}"}`,
+			input: `{"webauthn_available": "true"}`,
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},
@@ -46,7 +46,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilitiesExecute() {
 		},
 		{
 			name:  "webauthn not available, passcode disabled, password disabled",
-			input: `{"capabilities":"{\"webauthn\": {\"available\": false}}"}`,
+			input: `{"webauthn_available": "false"}`,
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},
@@ -57,7 +57,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilitiesExecute() {
 		},
 		{
 			name:  "webauthn not available, 2FA required & only security_key is allowed",
-			input: `{"capabilities":"{\"webauthn\": {\"available\": false}}"}`,
+			input: `{"webauthn_available": "false"}`,
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},

@@ -1,21 +1,18 @@
 package actions
 
 import (
-	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
-	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"unicode/utf8"
 )
 
-func NewSubmitNewPassword(cfg config.Config, userService services.User, sessionManager session.Manager, httpContext echo.Context) SubmitNewPassword {
+func NewSubmitNewPassword(cfg config.Config, sessionManager session.Manager, httpContext echo.Context) SubmitNewPassword {
 	return SubmitNewPassword{
 		cfg,
-		userService,
 		sessionManager,
 		httpContext,
 	}
@@ -23,7 +20,6 @@ func NewSubmitNewPassword(cfg config.Config, userService services.User, sessionM
 
 type SubmitNewPassword struct {
 	cfg            config.Config
-	userService    services.User
 	sessionManager session.Manager
 	httpContext    echo.Context
 }
@@ -59,49 +55,15 @@ func (m SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(c.Input().Get("new_password").String()), 12)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 	err = c.Stash().Set("new_password", string(hashedPassword))
 
 	// Decide which is the next state according to the config and user input
-	if m.cfg.Passkey.Onboarding.Enabled {
+	if m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
 		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
 	}
 	// TODO: 2FA routing
-
-	// store user in the DB
-	userId, err := uuid.NewV4()
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-	if c.Stash().Get("user_id").Exists() {
-		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
-		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-		}
-	}
-	err = m.userService.CreateUser(
-		userId,
-		c.Stash().Get("email").String(),
-		c.Stash().Get("email_verified").Bool(),
-		c.Stash().Get("username").String(),
-		nil,
-		c.Stash().Get("new_password").String(),
-	)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-
-	sessionToken, err := m.sessionManager.GenerateJWT(userId)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-	cookie, err := m.sessionManager.GenerateCookie(sessionToken)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
-
-	m.httpContext.SetCookie(cookie)
 
 	return c.ContinueFlow(common.StateSuccess)
 }

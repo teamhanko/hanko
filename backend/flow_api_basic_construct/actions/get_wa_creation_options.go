@@ -45,17 +45,17 @@ func (m GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {
 
 	userId, err := uuid.NewV4()
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 	if !c.Stash().Get("user_id").Exists() {
 		err = c.Stash().Set("user_id", userId)
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+			return err
 		}
 	} else {
 		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
 		if err != nil {
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+			return err
 		}
 	}
 	user := WebAuthnUser{
@@ -77,17 +77,17 @@ func (m GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {
 	sessionDataModel := intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationRegistration)
 	err = m.persister.GetWebauthnSessionDataPersister().Create(*sessionDataModel)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	err = c.Payload().Set("creationOptions", options)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
 	return c.ContinueFlow(common.StateOnboardingVerifyPasskeyAttestation)

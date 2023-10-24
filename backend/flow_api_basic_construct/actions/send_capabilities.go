@@ -1,7 +1,7 @@
 package actions
 
 import (
-	"encoding/json"
+	"errors"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -26,7 +26,7 @@ func (m SendCapabilities) GetDescription() string {
 }
 
 func (m SendCapabilities) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.StringInput("capabilities").Required(true).Hidden(true))
+	c.AddInputs(flowpilot.StringInput("webauthn_available").Required(true).Hidden(true))
 }
 
 func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
@@ -34,19 +34,15 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	var capabilities capabilities
-	err := json.Unmarshal([]byte(c.Input().Get("capabilities").String()), &capabilities)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
-	}
+	webauthnAvailable := c.Input().Get("webauthn_available").String() == "true"
 
-	if capabilities.Webauthn.Available == false &&
+	if webauthnAvailable == false &&
 		m.cfg.Password.Enabled == false &&
 		m.cfg.Passcode.Enabled == false {
 		// Only passkeys are allowed, but webauthn is not available on the browser
 		return c.ContinueFlowWithError(common.StateError, common.ErrorDeviceNotCapable)
 	}
-	if capabilities.Webauthn.Available == false &&
+	if webauthnAvailable == false &&
 		m.cfg.SecondFactor.Enabled == "required" &&
 		len(m.cfg.SecondFactor.Methods) == 1 &&
 		m.cfg.SecondFactor.Methods[0] == "security_key" {
@@ -54,22 +50,17 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(common.StateError, common.ErrorDeviceNotCapable)
 	}
 
-	err = c.Stash().Set("capabilities", capabilities)
+	err := c.Stash().Set("webauthn_available", webauthnAvailable)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return err
 	}
 
-	if c.GetCurrentState() == common.StateRegistrationPreflight {
+	switch c.GetCurrentState() {
+	case common.StateRegistrationPreflight:
 		return c.ContinueFlow(common.StateRegistrationInit)
-	} else {
+	case common.StateLoginPreflight:
 		return c.ContinueFlow(common.StateLoginInit)
+	default:
+		return errors.New("unknown parent state")
 	}
-}
-
-type capabilities struct {
-	Webauthn webauthn `json:"webauthn"`
-}
-
-type webauthn struct {
-	Available bool `json:"available"`
 }
