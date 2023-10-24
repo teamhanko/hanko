@@ -115,5 +115,5 @@ func (m SendWAAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
 
 	m.httpContext.SetCookie(cookie)
 
-	return c.ContinueFlow(common.StateSuccess)
+	return c.EndSubFlow()
 }
