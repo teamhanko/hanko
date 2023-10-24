@@ -47,7 +47,7 @@ func (m SubmitRegistrationIdentifier) Initialize(c flowpilot.InitializationConte
 		inputs = append(inputs, emailInput)
 	}
 
-	usernameInput := flowpilot.StringInput("username").MinLength(2).MaxLength(255).Persist(true).Preserve(true)
+	usernameInput := flowpilot.StringInput("username").MinLength(m.cfg.Identifier.Username.MinLength).MaxLength(m.cfg.Identifier.Username.MaxLength).Persist(true).Preserve(true)
 	if m.cfg.Identifier.Username.Enabled == "optional" {
 		usernameInput.Required(false)
 		inputs = append(inputs, usernameInput)
