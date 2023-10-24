@@ -29,7 +29,7 @@ type SubmitNewPassword struct {
 }
 
 func (m SubmitNewPassword) GetName() flowpilot.ActionName {
-	return common.ActionSubmitPassword
+	return common.ActionSubmitNewPassword
 }
 
 func (m SubmitNewPassword) GetDescription() string {
