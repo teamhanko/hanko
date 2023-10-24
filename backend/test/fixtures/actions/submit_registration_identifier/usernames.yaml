@@ -1,0 +1,10 @@
+- id: ccef9e6b-f63c-4ddb-9cd0-c675d08b5ad3
+  user_id: b7fe9f28-bc2d-44fc-819e-bcb478656b94
+  username: john.doe
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: 0f0fec08-dcc0-40be-8f89-f9ac8ba27a86
+  user_id: 9ee61f69-952b-400a-adc9-2800aef967fa
+  username: max.mustermann
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00

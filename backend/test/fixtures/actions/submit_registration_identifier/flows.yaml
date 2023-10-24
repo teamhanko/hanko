@@ -1,0 +1,8 @@
+- id: 0b41f4dd-8e46-4a7c-bb4d-d60843113431
+  current_state: registration_init
+  stash_data: {}
+  version: 0
+  completed: false
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00

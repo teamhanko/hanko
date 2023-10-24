@@ -12,9 +12,7 @@ import (
 	"time"
 )
 
-func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, sessionManager session.Manager, httpContext echo.Context) (flowpilot.Flow, error) {
-	// TODO:
-
+func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager, httpContext echo.Context) (flowpilot.Flow, error) {
 	userService := services.NewUserService(persister)
 	passkeyOnboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister, userService, sessionManager, httpContext)
 	if err != nil {

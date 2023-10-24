@@ -14,7 +14,7 @@ import (
 	"net/http"
 )
 
-func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, sessionManager session.Manager) *FlowPilotHandler {
+func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager) *FlowPilotHandler {
 	return &FlowPilotHandler{
 		persister,
 		cfg,
@@ -26,7 +26,7 @@ func NewHandler(cfg config.Config, persister persistence.Persister, passcodeServ
 type FlowPilotHandler struct {
 	persister       persistence.Persister
 	cfg             config.Config
-	passcodeService *services.Passcode
+	passcodeService services.Passcode
 	sessionManager  session.Manager
 }
 

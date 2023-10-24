@@ -11,15 +11,21 @@ import (
 	"time"
 )
 
-type Passcode struct {
+type Passcode interface {
+	SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
+	SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
+	PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
+}
+
+type passcode struct {
 	emailService      Email
 	passcodeGenerator crypto.PasscodeGenerator
 	persister         persistence.Persister
 	cfg               config.Config
 }
 
-func NewPasscodeService(cfg config.Config, emailService Email, persister persistence.Persister) *Passcode {
-	return &Passcode{
+func NewPasscodeService(cfg config.Config, emailService Email, persister persistence.Persister) Passcode {
+	return &passcode{
 		emailService,
 		crypto.NewPasscodeGenerator(),
 		persister,
@@ -27,19 +33,19 @@ func NewPasscodeService(cfg config.Config, emailService Email, persister persist
 	}
 }
 
-func (service *Passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+func (service *passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return service.sendPasscode(flowID, "email_verification", emailAddress, lang)
 }
 
-func (service *Passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+func (service *passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return service.sendPasscode(flowID, "login", emailAddress, lang)
 }
 
-func (service *Passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+func (service *passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return service.sendPasscode(flowID, "password_recovery", emailAddress, lang)
 }
 
-func (service *Passcode) sendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
+func (service *passcode) sendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
 	code, err := service.passcodeGenerator.Generate()
 	if err != nil {
 		return uuid.Nil, err

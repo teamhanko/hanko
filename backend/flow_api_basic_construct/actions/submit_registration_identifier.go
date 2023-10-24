@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-func NewSubmitRegistrationIdentifier(cfg config.Config, persister persistence.Persister, passcodeService *services.Passcode, httpContext echo.Context) SubmitRegistrationIdentifier {
+func NewSubmitRegistrationIdentifier(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, httpContext echo.Context) SubmitRegistrationIdentifier {
 	return SubmitRegistrationIdentifier{
 		cfg,
 		persister,
@@ -25,7 +25,7 @@ type SubmitRegistrationIdentifier struct {
 	cfg             config.Config
 	persister       persistence.Persister
 	httpContext     echo.Context
-	passcodeService *services.Passcode
+	passcodeService services.Passcode
 }
 
 func (m SubmitRegistrationIdentifier) GetName() flowpilot.ActionName {
