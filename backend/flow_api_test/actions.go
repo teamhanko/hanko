@@ -6,6 +6,70 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
+type ContinueToFinal struct{}
+
+func (m ContinueToFinal) GetName() flowpilot.ActionName {
+	return ActionContinueToFinal
+}
+
+func (m ContinueToFinal) GetDescription() string {
+	return ""
+}
+
+func (m ContinueToFinal) Initialize(c flowpilot.InitializationContext) {}
+
+func (m ContinueToFinal) Execute(c flowpilot.ExecutionContext) error {
+	return c.ContinueFlow(StateSecondSubFlowFinal)
+}
+
+type EndSubFlow struct{}
+
+func (m EndSubFlow) GetName() flowpilot.ActionName {
+	return ActionEndSubFlow
+}
+
+func (m EndSubFlow) GetDescription() string {
+	return ""
+}
+
+func (m EndSubFlow) Initialize(c flowpilot.InitializationContext) {}
+
+func (m EndSubFlow) Execute(c flowpilot.ExecutionContext) error {
+	return c.EndSubFlow()
+}
+
+type StartSecondSubFlow struct{}
+
+func (m StartSecondSubFlow) GetName() flowpilot.ActionName {
+	return ActionStartSecondSubFlow
+}
+
+func (m StartSecondSubFlow) GetDescription() string {
+	return ""
+}
+
+func (m StartSecondSubFlow) Initialize(c flowpilot.InitializationContext) {}
+
+func (m StartSecondSubFlow) Execute(c flowpilot.ExecutionContext) error {
+	return c.StartSubFlow(StateSecondSubFlowInit)
+}
+
+type StartFirstSubFlow struct{}
+
+func (m StartFirstSubFlow) GetName() flowpilot.ActionName {
+	return ActionStartFirstSubFlow
+}
+
+func (m StartFirstSubFlow) GetDescription() string {
+	return ""
+}
+
+func (m StartFirstSubFlow) Initialize(c flowpilot.InitializationContext) {}
+
+func (m StartFirstSubFlow) Execute(c flowpilot.ExecutionContext) error {
+	return c.StartSubFlow(StateFirstSubFlowInit, StateThirdSubFlowInit, StateSuccess)
+}
+
 type SubmitEmail struct{}
 
 func (m SubmitEmail) GetName() flowpilot.ActionName {
@@ -312,9 +376,17 @@ func (m Back) GetDescription() string {
 func (m Back) Initialize(_ flowpilot.InitializationContext) {}
 
 func (m Back) Execute(c flowpilot.ExecutionContext) error {
-	if previousState := c.GetPreviousState(); previousState != nil {
-		return c.ContinueFlow(*previousState)
-	}
+	return c.ContinueToPreviousState()
+}
 
-	return c.ContinueFlow(c.GetInitialState())
+type BeforeStateAction struct{}
+
+func (m BeforeStateAction) Execute(c flowpilot.HookExecutionContext) error {
+	return c.Payload().Set("before_action_executed", true)
+}
+
+type AfterStateAction struct{}
+
+func (m AfterStateAction) Execute(c flowpilot.HookExecutionContext) error {
+	return c.Payload().Set("after_action_executed", true)
 }

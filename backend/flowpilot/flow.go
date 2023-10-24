@@ -1,7 +1,6 @@
 package flowpilot
 
 import (
-	"errors"
 	"fmt"
 	"time"
 )
@@ -20,7 +19,7 @@ func (i InputData) getJSONStringOrDefault() string {
 	return i.JSONString
 }
 
-// flowExecutionOptions represents options for executing a defaultFlow.
+// flowExecutionOptions represents options for executing a flow.
 type flowExecutionOptions struct {
 	action    string
 	inputData InputData
@@ -40,13 +39,11 @@ func WithInputData(inputData InputData) func(*flowExecutionOptions) {
 	}
 }
 
-// StateName represents the name of a state in a defaultFlow.
+// StateName represents the name of a state in a flow.
 type StateName string
 
-// ActionName represents the name of an action associated with a Transition.
+// ActionName represents the name of an action.
 type ActionName string
-
-// TODO: Should it be possible to partially implement the Action interface? E.g. when a action does not require initialization.
 
 // Action defines the interface for flow actions.
 type Action interface {
@@ -56,59 +53,62 @@ type Action interface {
 	Execute(ExecutionContext) error   // Execute the action.
 }
 
+// Actions represents a list of Action
 type Actions []Action
 
-// Transition holds an action associated with a state transition.
-type Transition struct {
-	Action Action
+// HookAction defines the interface for a hook action.
+type HookAction interface {
+	Execute(HookExecutionContext) error
 }
 
-func (a Actions) getByName(name ActionName) (Action, error) {
-	for _, action := range a {
-		currentName := action.GetName()
+// HookActions represents a list of HookAction interfaces.
+type HookActions []HookAction
 
-		if currentName == name {
+// state represents details for a state, including the associated actions, available sub-flows and more.
+type stateDetail struct {
+	name        StateName
+	flow        stateActions
+	subFlows    SubFlows
+	actions     Actions
+	beforeHooks HookActions
+	afterHooks  HookActions
+}
+
+// getAction returns the Action with the specified name.
+func (sd *stateDetail) getAction(actionName ActionName) (Action, error) {
+	for _, action := range sd.actions {
+		currentActionName := action.GetName()
+
+		if currentActionName == actionName {
 			return action, nil
 		}
 	}
 
-	return nil, fmt.Errorf("action '%s' not found", name)
-}
-
-// Transitions is a collection of Transition instances.
-type Transitions []Transition
-
-// getActions returns the Action associated with the specified name.
-func (ts *Transitions) getActions() []Action {
-	var actions []Action
-
-	for _, t := range *ts {
-		actions = append(actions, t.Action)
-	}
-
-	return actions
-}
-
-type stateDetail struct {
-	flow     StateTransitions
-	subFlows SubFlows
-	actions  Actions
+	return nil, fmt.Errorf("action '%s' not found", actionName)
 }
 
 // stateDetails maps states to associated Actions, flows and sub-flows.
-type stateDetails map[StateName]stateDetail
+type stateDetails map[StateName]*stateDetail
 
-// StateTransitions maps states to associated Transitions.
-type StateTransitions map[StateName]Transitions
+// stateActions maps state names to associated actions.
+type stateActions map[StateName]Actions
 
-// SubFlows maps a sub-flow init state to StateTransitions.
-type SubFlows map[StateName]SubFlow
+// stateActions maps state names to associated hook actions.
+type stateHooks map[StateName]HookActions
 
-func (sfs SubFlows) isEntryStateAllowed(entryState StateName) bool {
+// stateExists checks if a state exists in the flow.
+func (st stateActions) stateExists(stateName StateName) bool {
+	_, ok := st[stateName]
+	return ok
+}
+
+// SubFlows represents a list of SubFlow interfaces.
+type SubFlows []SubFlow
+
+// stateExists checks if the given state exists in a sub-flow of the current flow.
+func (sfs SubFlows) stateExists(state StateName) bool {
 	for _, subFlow := range sfs {
-		subFlowInitState := subFlow.getInitialState()
-
-		if subFlowInitState == entryState {
+		if subFlow.getFlow().stateExists(state) {
 			return true
 		}
 	}
@@ -116,64 +116,74 @@ func (sfs SubFlows) isEntryStateAllowed(entryState StateName) bool {
 	return false
 }
 
-type flow interface {
-	stateExists(stateName StateName) bool
-	getStateDetail(stateName StateName) (*stateDetail, error)
+// flowBase represents the base of the flow interfaces.
+type flowBase interface {
 	getSubFlows() SubFlows
-	getFlow() StateTransitions
+	getFlow() stateActions
+	getBeforeHooks() stateHooks
+	getAfterHooks() stateHooks
 }
 
+// Flow represents a flow.
 type Flow interface {
 	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
 	ResultFromError(err error) FlowResult
+
 	setDefaults()
-	validate() error
-	flow
+	getState(stateName StateName) (*stateDetail, error)
+
+	flowBase
 }
 
+// SubFlow represents a sub-flow.
 type SubFlow interface {
-	getInitialState() StateName
-	flow
+	flowBase
 }
 
-// defaultFlow defines a flow structure with states, transitions, and settings.
+type defaultFlowBase struct {
+	flow        stateActions // StateName to Actions mapping.
+	subFlows    SubFlows     // The sub-flows of the current flow.
+	beforeHooks stateHooks   // StateName to HookActions mapping.
+	afterHooks  stateHooks   // StateName to HookActions mapping.
+}
+
+// defaultFlow defines a flow structure with states, actions, and settings.
 type defaultFlow struct {
-	flow         StateTransitions // State transitions mapping.
-	subFlows     SubFlows         // TODO
-	stateDetails stateDetails     //
-	path         string           // flow path or identifier.
-	initialState StateName        // Initial state of the flow.
-	errorState   StateName        // State representing errors.
-	endState     StateName        // Final state of the flow.
-	ttl          time.Duration    // Time-to-live for the flow.
-	debug        bool             // Enables debug mode.
+	stateDetails     stateDetails  // Maps state names to flow details.
+	path             string        // flow path or identifier.
+	initialStateName StateName     // Initial state of the flow.
+	errorStateName   StateName     // State representing errors.
+	ttl              time.Duration // Time-to-live for the flow.
+	debug            bool          // Enables debug mode.
+
+	defaultFlowBase
 }
 
-// stateExists checks if a state exists in the defaultFlow.
-func (f *defaultFlow) stateExists(stateName StateName) bool {
-	_, ok := f.flow[stateName]
-	return ok
-}
-
-// getActionsForState returns transitions for a specified state.
-func (f *defaultFlow) getStateDetail(stateName StateName) (*stateDetail, error) {
-	if detail, ok := f.stateDetails[stateName]; ok {
-		return &detail, nil
+// getActionsForState returns state details for the specified state.
+func (f *defaultFlow) getState(stateName StateName) (*stateDetail, error) {
+	if state, ok := f.stateDetails[stateName]; ok {
+		return state, nil
 	}
 
 	return nil, fmt.Errorf("unknown state: %s", stateName)
 }
 
-func (f *defaultFlow) getInitialState() StateName {
-	return f.initialState
-}
-
-func (f *defaultFlow) getSubFlows() SubFlows {
+// getSubFlows returns the sub-flows of the current flow.
+func (f *defaultFlowBase) getSubFlows() SubFlows {
 	return f.subFlows
 }
 
-func (f *defaultFlow) getFlow() StateTransitions {
+// getFlow returns the state to action mapping of the current flow.
+func (f *defaultFlowBase) getFlow() stateActions {
 	return f.flow
+}
+
+func (f *defaultFlowBase) getBeforeHooks() stateHooks {
+	return f.beforeHooks
+}
+
+func (f *defaultFlowBase) getAfterHooks() stateHooks {
+	return f.afterHooks
 }
 
 // setDefaults sets default values for defaultFlow settings.
@@ -181,35 +191,6 @@ func (f *defaultFlow) setDefaults() {
 	if f.ttl.Seconds() == 0 {
 		f.ttl = time.Minute * 60
 	}
-}
-
-// TODO: validate while building the flow
-// validate performs validation checks on the defaultFlow configuration.
-func (f *defaultFlow) validate() error {
-	// Validate fixed states and their presence in the flow.
-	if len(f.initialState) == 0 {
-		return errors.New("fixed state 'initialState' is not set")
-	}
-	if len(f.errorState) == 0 {
-		return errors.New("fixed state 'errorState' is not set")
-	}
-	if len(f.endState) == 0 {
-		return errors.New("fixed state 'endState' is not set")
-	}
-	if !f.stateExists(f.initialState) {
-		return errors.New("fixed state 'initialState' does not belong to the flow")
-	}
-	if !f.stateExists(f.errorState) {
-		return errors.New("fixed state 'errorState' does not belong to the flow")
-	}
-	if !f.stateExists(f.endState) {
-		return errors.New("fixed state 'endState' does not belong to the flow")
-	}
-	if detail, _ := f.getStateDetail(f.endState); detail == nil || len(detail.actions) > 0 {
-		return fmt.Errorf("the specified endState '%s' is not allowed to have transitions", f.endState)
-	}
-
-	return nil
 }
 
 // Execute handles the execution of actions for a defaultFlow.
@@ -224,11 +205,6 @@ func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (F
 	// Set default values for flow settings.
 	f.setDefaults()
 
-	// Perform validation checks on the flow configuration.
-	if err := f.validate(); err != nil {
-		return nil, fmt.Errorf("invalid flow: %w", err)
-	}
-
 	if len(executionOptions.action) == 0 {
 		// If the action is empty, create a new flow.
 		return createAndInitializeFlow(db, *f)
@@ -239,7 +215,7 @@ func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (F
 }
 
 // ResultFromError returns an error response for the defaultFlow.
-func (f *defaultFlow) ResultFromError(err error) (result FlowResult) {
+func (f *defaultFlow) ResultFromError(err error) FlowResult {
 	flowError := ErrorTechnical
 
 	if e, ok := err.(FlowError); ok {
@@ -248,5 +224,5 @@ func (f *defaultFlow) ResultFromError(err error) (result FlowResult) {
 		flowError = flowError.Wrap(err)
 	}
 
-	return newFlowResultFromError(f.errorState, flowError, f.debug)
+	return newFlowResultFromError(f.errorStateName, flowError, f.debug)
 }

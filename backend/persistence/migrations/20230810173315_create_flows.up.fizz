@@ -1,9 +1,8 @@
 create_table("flows") {
   t.Column("id", "uuid", {primary: true})
   t.Column("current_state", "string")
-  t.Column("stash_data", "string")
+  t.Column("stash_data", "string", {"size": 4096})
   t.Column("version", "int")
-  t.Column("completed", "bool", {"default": false})
   t.Column("expires_at", "timestamp")
   t.Timestamps()
 }
