@@ -14,8 +14,6 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
-    env:
-      GORELEASER_CURRENT_TAG: 'v0.0.0'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -25,12 +23,12 @@ jobs:
         with:
           go-version: stable
       - uses: goreleaser/goreleaser-action@v5
-        working-directory: ./backend
         with:
           distribution: goreleaser
           version: latest
           args: release --clean --snapshot
         env:
+          GORELEASER_CURRENT_TAG: 'v0.0.0'
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           mkdir -p dist/artifacts
