@@ -51,7 +51,7 @@ To get the Hanko backend up and running you need to:
 5. [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
 6. [Configure WebAuthn](#configure-webauthn)
 7. [Configure CORS](#configure-cors)
-8. [Start the backend](#run-the-backend)
+8. [Start the backend](#start-the-backend)
 
 ### Run a database
 
