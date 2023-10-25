@@ -24,7 +24,7 @@ type submitRegistrationIdentifierActionSuite struct {
 	test.Suite
 }
 
-func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifierExecute() {
+func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifier_Execute() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode")
 	}
@@ -309,7 +309,6 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			passkeySubFlow, err := flowpilot.NewSubFlow().
 				State(common.StateOnboardingCreatePasskey).
 				Build()
-
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
@@ -321,7 +320,6 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 				InitialState(common.StateRegistrationInit).
 				ErrorState(common.StateError).
 				Build()
-
 			s.Require().NoError(err)
 
 			tx := s.Storage.GetConnection()
@@ -329,7 +327,6 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			actionParam := "submit_registration_identifier@0b41f4dd-8e46-4a7c-bb4d-d60843113431"
 			inputData := flowpilot.InputData{JSONString: currentTest.input}
 			result, err := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(inputData))
-
 			s.Require().NoError(err)
 
 			s.Equal(currentTest.statusCode, result.Status())

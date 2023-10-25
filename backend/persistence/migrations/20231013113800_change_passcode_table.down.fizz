@@ -1,3 +1,4 @@
+sql("DELETE FROM passcodes WHERE user_id IS NULL")
 change_column("passcodes", "user_id", "uuid", {})
 
 drop_foreign_key("passcodes", "passcodes_flows_id_fk", {"if_exists": false})

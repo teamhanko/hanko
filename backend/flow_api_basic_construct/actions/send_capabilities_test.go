@@ -21,7 +21,7 @@ type sendCapabilitiesActionSuite struct {
 	test.Suite
 }
 
-func (s *sendCapabilitiesActionSuite) TestSendCapabilitiesExecute() {
+func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode")
 	}
