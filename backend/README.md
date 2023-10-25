@@ -327,7 +327,7 @@ endpoints). These can be started separately or in a single command.
 docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest serve public
 ```
 
-#### Quick release
+##### Using pre-built binaries
 
 Each release has `hanko`'s binary assets uploaded to it. Alternatively you can use
 [eget](https://github.com/zyedidia/eget):
