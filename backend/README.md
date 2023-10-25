@@ -329,7 +329,7 @@ docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.
 
 ##### Using pre-built binaries
 
-Each release has `hanko`'s binary assets uploaded to it. Alternatively you can use
+Each [GitHub release](https://github.com/teamhanko/hanko/releases) (> 0.9.0) has `hanko`'s binary assets uploaded to it. Alternatively you can use
 [eget](https://github.com/zyedidia/eget):
 
 ```bash
