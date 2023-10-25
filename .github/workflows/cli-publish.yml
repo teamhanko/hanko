@@ -25,7 +25,6 @@ jobs:
           workdir: ./backend
         env:
           GORELEASER_CURRENT_TAG: 'v0.0.0'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
           mkdir -p dist/artifacts
           cp dist/*.{tar.gz,zip} dist/artifacts
@@ -34,3 +33,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: ./backend/dist/artifacts/*
+          fail_on_unmatched_files: true
