@@ -201,13 +201,37 @@ const LoginEmailPage = (props: Props) => {
   );
 
   const renderAccountNotFound = useCallback(
-    () => setPage(<AccountNotFoundPage emailAddress={emailAddress} onBack={onBackHandler}/>), 
-    [ 
-      emailAddress, 
-      onBackHandler, 
-      setPage
-    ]
+    () =>
+      setPage(
+        <AccountNotFoundPage
+          emailAddress={emailAddress}
+          onBack={onBackHandler}
+        />
+      ),
+    [emailAddress, onBackHandler, setPage]
   );
+
+  const loginWithEnterprise = async (): Promise<boolean> => {
+    if (config.use_enterprise) {
+      try {
+        const hasProvider = await hanko.enterprise.hasProvider(emailAddress);
+
+        if (hasProvider) {
+          hanko.enterprise.auth(emailAddress, window.location.href);
+
+          return true;
+        }
+      } catch (e) {
+        if (e instanceof NotFoundError) {
+          return false;
+        }
+
+        throw e;
+      }
+    }
+
+    return false;
+  };
 
   const loginWithEmailAndWebAuthn = () => {
     let _userInfo: UserInfo;
@@ -247,12 +271,11 @@ const LoginEmailPage = (props: Props) => {
       })
       .catch((e) => {
         if (e instanceof NotFoundError) {
-          
           if (config.account.allow_signup) {
             renderRegistrationConfirm();
             return;
           }
-          
+
           renderAccountNotFound();
           return;
         }
@@ -292,15 +315,31 @@ const LoginEmailPage = (props: Props) => {
     setIsEmailLoginLoading(true);
 
     if (isWebAuthnSupported && enablePasskeys) {
-      loginWithEmailAndWebAuthn().catch((e) => {
-        setIsEmailLoginLoading(false);
-        setError(e);
-      });
+      loginWithEnterprise()
+        .then((isEnterpriseLogin) => {
+          if (!isEnterpriseLogin) {
+            return loginWithEmailAndWebAuthn();
+          }
+
+          return;
+        })
+        .catch((e) => {
+          setIsEmailLoginLoading(false);
+          setError(e);
+        });
     } else {
-      loginWithEmail().catch((e) => {
-        setIsEmailLoginLoading(false);
-        setError(e);
-      });
+      loginWithEnterprise()
+        .then((isEnterpriseLogin) => {
+          if (!isEnterpriseLogin) {
+            return loginWithEmail();
+          }
+
+          return;
+        })
+        .catch((e) => {
+          setIsEmailLoginLoading(false);
+          setError(e);
+        });
     }
   };
 
@@ -413,7 +452,11 @@ const LoginEmailPage = (props: Props) => {
 
   return (
     <Content>
-      <Headline1>{config.account.allow_signup ? t("headlines.loginEmail") : t("headlines.loginEmailNoSignup")}</Headline1>
+      <Headline1>
+        {config.account.allow_signup
+          ? t("headlines.loginEmail")
+          : t("headlines.loginEmailNoSignup")}
+      </Headline1>
       <ErrorMessage error={error} />
       <Form onSubmit={onEmailSubmit}>
         <Input

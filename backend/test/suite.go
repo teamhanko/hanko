@@ -6,7 +6,6 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/pop/v6/logging"
 	"github.com/gofrs/uuid"
-	smtpmock "github.com/mocktools/go-smtp-mock/v2"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -17,7 +16,7 @@ type Suite struct {
 	suite.Suite
 	Storage         persistence.Storage
 	DB              *TestDB
-	EmailServer     *smtpmock.Server
+	EmailServer     *TestMailslurper
 	Name            string // used for database docker container name, so that tests can run in parallel
 	WithEmailServer bool
 }
@@ -45,13 +44,8 @@ func (s *Suite) SetupSuite() {
 	s.Require().NoError(err)
 
 	if s.WithEmailServer {
-		server := smtpmock.New(smtpmock.ConfigurationAttr{
-			PortNumber: 2500,
-		})
-
-		err = server.Start()
+		s.EmailServer, err = StartMailslurper()
 		s.Require().NoError(err)
-		s.EmailServer = server
 	}
 
 	s.Storage = storage
@@ -70,6 +64,9 @@ func (s *Suite) TearDownTest() {
 		err := s.Storage.MigrateDown(-1)
 		s.NoError(err)
 	}
+	if s.EmailServer != nil {
+		s.NoError(s.EmailServer.DeleteEmails())
+	}
 }
 
 func (s *Suite) TearDownSuite() {
@@ -77,7 +74,7 @@ func (s *Suite) TearDownSuite() {
 		s.NoError(PurgeDB(s.DB))
 	}
 	if s.EmailServer != nil {
-		s.NoError(s.EmailServer.Stop())
+		s.NoError(PurgeMailslurper(s.EmailServer))
 	}
 }
 
