@@ -1,27 +1,21 @@
 package actions
 
 import (
-	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"unicode/utf8"
 )
 
-func NewSubmitNewPassword(cfg config.Config, sessionManager session.Manager, httpContext echo.Context) SubmitNewPassword {
+func NewSubmitNewPassword(cfg config.Config) SubmitNewPassword {
 	return SubmitNewPassword{
 		cfg,
-		sessionManager,
-		httpContext,
 	}
 }
 
 type SubmitNewPassword struct {
-	cfg            config.Config
-	sessionManager session.Manager
-	httpContext    echo.Context
+	cfg config.Config
 }
 
 func (m SubmitNewPassword) GetName() flowpilot.ActionName {

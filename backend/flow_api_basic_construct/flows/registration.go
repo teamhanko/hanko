@@ -22,8 +22,8 @@ func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, pas
 	return flowpilot.NewFlow("/registration").
 		State(common.StateRegistrationPreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(cfg, persister, passcodeService, httpContext), actions.NewLoginWithOauth()).
-		State(common.StateEmailVerification, actions.NewSubmitPasscode(cfg, persister, sessionManager, httpContext)).
-		State(common.StatePasswordCreation, actions.NewSubmitNewPassword(cfg, sessionManager, httpContext)).
+		State(common.StateEmailVerification, actions.NewSubmitPasscode(cfg, persister)).
+		State(common.StatePasswordCreation, actions.NewSubmitNewPassword(cfg)).
 		BeforeState(common.StateSuccess, hooks.NewBeforeSuccess(persister, sessionManager, httpContext)).
 		State(common.StateSuccess).
 		State(common.StateError).

@@ -3,32 +3,26 @@ package actions
 import (
 	"errors"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
 
 var maxPasscodeTries = 3
 
-func NewSubmitPasscode(cfg config.Config, persister persistence.Persister, sessionManager session.Manager, httpContext echo.Context) SubmitPasscode {
+func NewSubmitPasscode(cfg config.Config, persister persistence.Persister) SubmitPasscode {
 	return SubmitPasscode{
 		cfg,
 		persister,
-		sessionManager,
-		httpContext,
 	}
 }
 
 type SubmitPasscode struct {
-	cfg            config.Config
-	persister      persistence.Persister
-	sessionManager session.Manager
-	httpContext    echo.Context
+	cfg       config.Config
+	persister persistence.Persister
 }
 
 func (m SubmitPasscode) GetName() flowpilot.ActionName {
@@ -56,6 +50,9 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 	passcode, err := m.persister.GetPasscodePersister().Get(passcodeId)
 	if err != nil {
 		return err
+	}
+	if passcode == nil {
+		return errors.New("passcode not found")
 	}
 
 	expirationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
