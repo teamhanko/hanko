@@ -329,10 +329,8 @@ docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.
 
 #### Quick release
 
-Each release has an installation script that can be used to install the `hanko` binary.
-Follow the instructions in the release to use this script.
-
-**Alternatively** using [eget](https://github.com/zyedidia/eget):
+Each release has `hanko`'s binary assets uploaded to it. Alternatively you can use
+[eget](https://github.com/zyedidia/eget):
 
 ```bash
 eget teamhanko/hanko
