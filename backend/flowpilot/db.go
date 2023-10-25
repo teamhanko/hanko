@@ -42,22 +42,22 @@ type FlowDB interface {
 	FindLastTransitionWithAction(flowID uuid.UUID, method ActionName) (*TransitionModel, error)
 }
 
-// FlowDBWrapper is an extended FlowDB interface that includes additional methods.
-type FlowDBWrapper interface {
+// flowDBWrapper is an extended FlowDB interface that includes additional methods.
+type flowDBWrapper interface {
 	FlowDB
-	CreateFlowWithParam(p flowCreationParam) (*FlowModel, error)
-	UpdateFlowWithParam(p flowUpdateParam) (*FlowModel, error)
-	CreateTransitionWithParam(p transitionCreationParam) (*TransitionModel, error)
+	createFlowWithParam(p flowCreationParam) (*FlowModel, error)
+	updateFlowWithParam(p flowUpdateParam) (*FlowModel, error)
+	createTransitionWithParam(p transitionCreationParam) (*TransitionModel, error)
 }
 
-// DefaultFlowDBWrapper wraps a FlowDB instance to provide additional functionality.
-type DefaultFlowDBWrapper struct {
+// defaultFlowDBWrapper wraps a FlowDB instance to provide additional functionality.
+type defaultFlowDBWrapper struct {
 	FlowDB
 }
 
-// wrapDB wraps a FlowDB instance to provide FlowDBWrapper functionality.
-func wrapDB(db FlowDB) FlowDBWrapper {
-	return &DefaultFlowDBWrapper{FlowDB: db}
+// wrapDB wraps a FlowDB instance to provide flowDBWrapper functionality.
+func wrapDB(db FlowDB) flowDBWrapper {
+	return &defaultFlowDBWrapper{FlowDB: db}
 }
 
 // flowCreationParam holds parameters for creating a new defaultFlow.
@@ -67,7 +67,7 @@ type flowCreationParam struct {
 }
 
 // CreateFlowWithParam creates a new defaultFlow with the given parameters.
-func (w *DefaultFlowDBWrapper) CreateFlowWithParam(p flowCreationParam) (*FlowModel, error) {
+func (w *defaultFlowDBWrapper) createFlowWithParam(p flowCreationParam) (*FlowModel, error) {
 	// Generate a new UUID for the defaultFlow.
 	flowID, err := uuid.NewV4()
 	if err != nil {
@@ -105,7 +105,7 @@ type flowUpdateParam struct {
 }
 
 // UpdateFlowWithParam updates the specified defaultFlow with the given parameters.
-func (w *DefaultFlowDBWrapper) UpdateFlowWithParam(p flowUpdateParam) (*FlowModel, error) {
+func (w *defaultFlowDBWrapper) updateFlowWithParam(p flowUpdateParam) (*FlowModel, error) {
 	// Prepare the updated FlowModel.
 	fm := FlowModel{
 		ID:           p.flowID,
@@ -137,7 +137,7 @@ type transitionCreationParam struct {
 }
 
 // CreateTransitionWithParam creates a new Transition with the given parameters.
-func (w *DefaultFlowDBWrapper) CreateTransitionWithParam(p transitionCreationParam) (*TransitionModel, error) {
+func (w *defaultFlowDBWrapper) createTransitionWithParam(p transitionCreationParam) (*TransitionModel, error) {
 	// Generate a new UUID for the Transition.
 	transitionID, err := uuid.NewV4()
 	if err != nil {

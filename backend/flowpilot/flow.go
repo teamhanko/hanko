@@ -126,12 +126,18 @@ type flowBase interface {
 
 // Flow represents a flow.
 type Flow interface {
+	// Execute executes the flow using the provided FlowDB and options.
+	// It returns the result of the flow execution and an error if any.
 	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
+	// ResultFromError converts an error into a FlowResult.
 	ResultFromError(err error) FlowResult
-
+	// Set sets a value with the given key in the flow context.
+	Set(string, interface{})
+	// setDefaults sets the default values for the flow.
 	setDefaults()
+	// getState retrieves the details of a specific state in the flow.
 	getState(stateName StateName) (*stateDetail, error)
-
+	// Embed the flowBase interface.
 	flowBase
 }
 
@@ -139,6 +145,8 @@ type Flow interface {
 type SubFlow interface {
 	flowBase
 }
+
+type contextValues map[string]interface{}
 
 type defaultFlowBase struct {
 	flow        stateActions // StateName to Actions mapping.
@@ -155,8 +163,13 @@ type defaultFlow struct {
 	errorStateName   StateName     // State representing errors.
 	ttl              time.Duration // Time-to-live for the flow.
 	debug            bool          // Enables debug mode.
+	contextValues    contextValues // Values to be used within the flow context.
 
 	defaultFlowBase
+}
+
+func (f *defaultFlow) Set(name string, value interface{}) {
+	f.contextValues[name] = value
 }
 
 // getActionsForState returns state details for the specified state.

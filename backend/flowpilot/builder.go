@@ -207,6 +207,7 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		ttl:              fb.ttl,
 		debug:            fb.debug,
 		defaultFlowBase:  dfb,
+		contextValues:    make(contextValues),
 	}
 
 	if err := fb.scanFlowStates(flow); err != nil {

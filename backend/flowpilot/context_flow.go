@@ -10,7 +10,7 @@ type defaultFlowContext struct {
 	payload   Payload       // JSONManager for payload data.
 	stash     Stash         // JSONManager for stash data.
 	flow      defaultFlow   // The associated defaultFlow instance.
-	dbw       FlowDBWrapper // Wrapped FlowDB instance with additional functionality.
+	dbw       flowDBWrapper // Wrapped FlowDB instance with additional functionality.
 	flowModel FlowModel     // The current FlowModel.
 }
 
@@ -70,6 +70,11 @@ func (fc *defaultFlowContext) StateExists(stateName StateName) bool {
 	}
 
 	return false
+}
+
+// Get returns the context value with the given name.
+func (fc *defaultFlowContext) Get(name string) interface{} {
+	return fc.flow.contextValues[name]
 }
 
 // FetchActionInput fetches input data for a specific action.

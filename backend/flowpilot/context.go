@@ -11,6 +11,8 @@ import (
 
 // flowContext represents the basic context for a flow.
 type flowContext interface {
+	// Get returns the context value with the given name.
+	Get(string) interface{}
 	// GetFlowID returns the unique ID of the current defaultFlow.
 	GetFlowID() uuid.UUID
 	// GetPath returns the current path within the flow.
@@ -113,7 +115,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 
 	// Create a new flow model with the provided parameters.
 	flowCreation := flowCreationParam{currentState: flow.initialStateName, expiresAt: expiresAt}
-	flowModel, err := dbw.CreateFlowWithParam(flowCreation)
+	flowModel, err := dbw.createFlowWithParam(flowCreation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create flow: %w", err)
 	}

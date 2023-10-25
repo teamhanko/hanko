@@ -30,7 +30,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	}
 
 	// Update the flow model in the database.
-	if _, err := aec.dbw.UpdateFlowWithParam(flowUpdate); err != nil {
+	if _, err := aec.dbw.updateFlowWithParam(flowUpdate); err != nil {
 		return fmt.Errorf("failed to store updated flow: %w", err)
 	}
 
@@ -48,7 +48,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	}
 
 	// Create a new Transition in the database.
-	if _, err := aec.dbw.CreateTransitionWithParam(transitionCreation); err != nil {
+	if _, err := aec.dbw.createTransitionWithParam(transitionCreation); err != nil {
 		return fmt.Errorf("failed to store a new transition: %w", err)
 	}
 
