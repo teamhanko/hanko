@@ -123,17 +123,6 @@ docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.
 
 > **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
 
-#### Quick release
-
-Each release has an installation script that can be used to install the `hanko` binary.
-Follow the instructions in the release to use this script.
-
-**Alternatively** using [eget](https://github.com/zyedidia/eget):
-
-```bash
-eget teamhanko/hanko
-```
-
 #### From source
 
 First build the Hanko backend. The only prerequisite is to have Go (v1.18+) [installed](https://go.dev/doc/install)
@@ -338,12 +327,16 @@ endpoints). These can be started separately or in a single command.
 docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest serve public
 ```
 
-> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+#### Quick release
 
-The service is now available at `localhost:8000`.
+Each release has an installation script that can be used to install the `hanko` binary.
+Follow the instructions in the release to use this script.
 
-`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
-the `server.public.address` option.
+**Alternatively** using [eget](https://github.com/zyedidia/eget):
+
+```bash
+eget teamhanko/hanko
+```
 
 ##### From source
 
@@ -356,6 +349,11 @@ Then run:
 ```shell
 ./hanko serve public --config <PATH-TO-CONFIG-FILE>
 ```
+
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+
+`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
+the `server.public.address` option.
 
 The service is now available at `localhost:8000`.
 
