@@ -1,15 +1,11 @@
 name: CLI
 
 on:
-  push:
-    branches: [ main ]
-    tags: [ 'backend/v*.*.*' ]
-  pull_request:
-    branches: [ main ]
+  release:
+    types: [published]
 
 permissions:
   contents: write
-
 
 jobs:
   goreleaser:
@@ -18,7 +14,6 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - run: git fetch --force --tags
       - uses: actions/setup-go@v4
         with:
           go-version: stable
