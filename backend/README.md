@@ -123,6 +123,17 @@ docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.
 
 > **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
 
+#### Quick release
+
+Each release has an installation script that can be used to install the `hanko` binary.
+Follow the instructions in the release to use this script.
+
+**Alternatively** using [eget](https://github.com/zyedidia/eget):
+
+```bash
+eget teamhanko/hanko
+```
+
 #### From source
 
 First build the Hanko backend. The only prerequisite is to have Go (v1.18+) [installed](https://go.dev/doc/install)
