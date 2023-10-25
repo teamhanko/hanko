@@ -1,0 +1,38 @@
+name: CLI
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'backend/v*.*.*' ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    env:
+      GORELEASER_CURRENT_TAG: 'v0.0.0'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - run: git fetch --force --tags
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - uses: goreleaser/goreleaser-action@v5
+        working-directory: ./backend
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --snapshot
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          mkdir -p dist/artifacts
+          cp dist/*.{tar.gz,zip} dist/artifacts
+        working-directory: ./backend
