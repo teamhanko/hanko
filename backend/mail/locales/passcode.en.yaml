@@ -7,3 +7,9 @@ ttl_text:
 email_subject_login:
   description: ""
   other: "Use passcode {{ .Code }} to sign in to {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Use passcode {{ .Code }} to verify your email address"
+email_verification_text:
+  description: ""
+  other: "Enter the following passcode to verify your email address:"

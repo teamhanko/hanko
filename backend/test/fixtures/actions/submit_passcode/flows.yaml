@@ -1,0 +1,42 @@
+- id: 0b41f4dd-8e46-4a7c-bb4d-d60843113431
+  current_state: registration_email_verification
+  stash_data: "{\"passcode_id\":\"2b10fbae-0286-4719-81a6-b52262a02266\",\"webauthn_available\":true}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: 8a2cf90d-dea5-4678-9dca-6707dab6af77
+  current_state: registration_email_verification
+  stash_data: "{\"passcode_id\":\"927b5be2-0add-4d98-b0bb-40c8462b3cca\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: 23524801-f445-4859-bc16-22cf1dd417ac
+  current_state: registration_email_verification
+  stash_data: "{}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: fc4dc7e4-bce7-4154-873b-cb3d766df279
+  current_state: registration_email_verification
+  stash_data: "{\"passcode_id\":\"e086ac7e-19df-4e92-9d4a-9b0a02934507\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: 5a862a2d-0d10-4904-b297-cb32fc43c859
+  current_state: registration_email_verification
+  stash_data: "{\"passcode_id\":\"9b09dcaf-1603-4708-b9e0-239725378576\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: bc3173e7-3204-4b9a-904b-9f812330b0de
+  current_state: registration_email_verification
+  stash_data: "{\"passcode_id\":\"2b10fbae-0286-4719-81a6-b52262a02266\",\"webauthn_available\":false}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00

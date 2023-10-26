@@ -9,6 +9,8 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct"
+	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flow_api_test"
 	"github.com/teamhanko/hanko/backend/mail"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
@@ -24,6 +26,27 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	fph := flow_api_test.FlowPilotHandler{Persister: persister}
 	e.POST("/flow_api_login", fph.LoginFlowHandler)
 	////
+
+	emailService, err := services.NewEmailService(*cfg)
+	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, *cfg)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+
+	basicFLowHandler := flow_api_basic_construct.NewHandler(
+		*cfg,
+		persister,
+		passcodeService,
+		sessionManager,
+	)
+	e.POST("/registration", basicFLowHandler.RegistrationFlowHandler)
+	e.POST("/login", basicFLowHandler.LoginFlowHandler)
 
 	e.HideBanner = true
 
@@ -57,15 +80,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	e.Validator = dto.NewCustomValidator()
-
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 

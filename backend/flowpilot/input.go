@@ -225,7 +225,7 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		return true
 	}
 
-	if i.minLength != nil {
+	if i.minLength != nil && len(*inputValue) > 0 {
 		if len(*inputValue) < *i.minLength {
 			i.error = ErrorValueTooShort
 			return false

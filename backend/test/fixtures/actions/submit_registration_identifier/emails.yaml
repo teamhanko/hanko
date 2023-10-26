@@ -1,0 +1,12 @@
+- id: 7c8a09a9-5418-4e01-9918-968e58982a3a
+  user_id: b7fe9f28-bc2d-44fc-819e-bcb478656b94
+  address: john.doe@example.com
+  verified: true
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: c23941fc-382f-46a3-bf0e-ff0f4258c58b
+  user_id: 0f813887-5479-42d8-b8d7-3e7a2f426516
+  address: jane.doe@example.com
+  verified: true
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00

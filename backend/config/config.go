@@ -31,6 +31,10 @@ type Config struct {
 	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
 	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
 	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+
+	Identifier   Identifier   `yaml:"identifier" json:"identifier" koanf:"identifier"`
+	SecondFactor SecondFactor `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey      Passkey      `yaml:"passkey" json:"passkey" koanf:"passkey"`
 }
 
 var (
@@ -144,6 +148,7 @@ func DefaultConfig() *Config {
 			AllowDeletion: false,
 			AllowSignup:   true,
 		},
+		// TODO: add defaults for Passkey, Identifier, SecondFactor
 	}
 }
 
@@ -336,9 +341,10 @@ func (e *Email) Validate() error {
 }
 
 type Passcode struct {
-	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	Smtp  SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
-	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Enabled bool  `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Email   Email `yaml:"email" json:"email,omitempty" koanf:"email"`
+	Smtp    SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
+	TTL     int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 }
 
 func (p *Passcode) Validate() error {
@@ -631,4 +637,46 @@ type Account struct {
 	// Allow Deletion indicates if a user can perform self-service deletion
 	AllowDeletion bool `yaml:"allow_deletion" json:"allow_deletion,omitempty" koanf:"allow_deletion" jsonschema:"default=false"`
 	AllowSignup   bool `yaml:"allow_signup" json:"allow_signup,omitempty" koanf:"allow_signup" jsonschema:"default=true"`
+}
+
+// TODO: below structs need validation, e.g. only allowed names for enabled and also we should reject some configurations (e.g. passcode & passwords are disabled and passkey onboarding is also disabled)
+
+type Identifier struct {
+	Username IdentifierUsername `yaml:"username" json:"username" koanf:"username"`
+	Email    IdentifierEmail    `yaml:"email" json:"email" koanf:"email"`
+}
+
+type IdentifierUsername struct {
+	Enabled           string `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
+	MaxLength         int    `yaml:"max_length" json:"max_length" koanf:"max_length" split_words:"true"`
+	MinLength         int    `yaml:"min_length" json:"min_length" koanf:"min_length" split_words:"true"`
+	AllowedCharacters string `yaml:"allowed_characters" json:"allowed_characters" koanf:"allowed_characters" split_words:"true"`
+}
+
+type IdentifierEmail struct {
+	Enabled      string `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
+	Verification bool   `yaml:"verification" json:"verification" koanf:"verification"`
+}
+
+type SecondFactor struct {
+	Enabled       string                 `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
+	Onboarding    SecondFactorOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
+	Methods       []string               `yaml:"methods" json:"methods" koanf:"methods"` // TODO: jsonschema only totp and security_key are allowed
+	RecoveryCodes RecoveryCodes          `yaml:"recovery_codes" json:"recovery_codes" koanf:"recovery_codes" split_words:"true"`
+}
+
+type SecondFactorOnboarding struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type RecoveryCodes struct {
+	Enabled string `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional"`
+}
+
+type Passkey struct {
+	Onboarding PasskeyOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
+}
+
+type PasskeyOnboarding struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
 }

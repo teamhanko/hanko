@@ -1,0 +1,9 @@
+create_table("usernames") {
+    t.Column("id", "uuid", {primary: true})
+    t.Column("username", "string", {"size": 255})
+    t.Column("user_id", "uuid", {})
+    t.Timestamps()
+    t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+    t.Index("user_id", {"unique": true})
+    t.Index("username", {"unique": true})
+}
