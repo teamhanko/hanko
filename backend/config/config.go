@@ -283,6 +283,7 @@ func (s *Service) Validate() error {
 
 type Password struct {
 	Enabled           bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Optional          bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
 	MinPasswordLength int  `yaml:"min_password_length" json:"min_password_length,omitempty" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
 }
 
@@ -730,19 +731,22 @@ type Identifier struct {
 }
 
 type IdentifierUsername struct {
-	Enabled           string `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
+	Enabled           bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional          bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
 	MaxLength         int    `yaml:"max_length" json:"max_length" koanf:"max_length" split_words:"true"`
 	MinLength         int    `yaml:"min_length" json:"min_length" koanf:"min_length" split_words:"true"`
 	AllowedCharacters string `yaml:"allowed_characters" json:"allowed_characters" koanf:"allowed_characters" split_words:"true"`
 }
 
 type IdentifierEmail struct {
-	Enabled      string `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
-	Verification bool   `yaml:"verification" json:"verification" koanf:"verification"`
+	Enabled      bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional     bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	Verification bool `yaml:"verification" json:"verification" koanf:"verification"`
 }
 
 type SecondFactor struct {
-	Enabled       string                 `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional,enum=required"`
+	Enabled       bool                   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional      bool                   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
 	Onboarding    SecondFactorOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
 	Methods       []string               `yaml:"methods" json:"methods" koanf:"methods"` // TODO: jsonschema only totp and security_key are allowed
 	RecoveryCodes RecoveryCodes          `yaml:"recovery_codes" json:"recovery_codes" koanf:"recovery_codes" split_words:"true"`
@@ -753,7 +757,8 @@ type SecondFactorOnboarding struct {
 }
 
 type RecoveryCodes struct {
-	Enabled string `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=optional,enum=disabled,enum=optional"`
+	Enabled  bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
 }
 
 type Passkey struct {

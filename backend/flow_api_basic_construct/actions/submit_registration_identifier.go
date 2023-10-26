@@ -37,25 +37,26 @@ func (m SubmitRegistrationIdentifier) GetDescription() string {
 }
 
 func (m SubmitRegistrationIdentifier) Initialize(c flowpilot.InitializationContext) {
-	inputs := make([]flowpilot.Input, 0)
-	emailInput := flowpilot.EmailInput("email").MaxLength(255).Persist(true).Preserve(true)
-	if m.cfg.Identifier.Email.Enabled == "optional" {
-		emailInput.Required(false)
-		inputs = append(inputs, emailInput)
-	} else if m.cfg.Identifier.Email.Enabled == "required" {
-		emailInput.Required(true)
-		inputs = append(inputs, emailInput)
+	if m.cfg.Identifier.Email.Enabled {
+		input := flowpilot.EmailInput("email").
+			MaxLength(255).
+			Persist(true).
+			Preserve(true).
+			Required(!m.cfg.Identifier.Email.Optional)
+
+		c.AddInputs(input)
 	}
 
-	usernameInput := flowpilot.StringInput("username").MinLength(m.cfg.Identifier.Username.MinLength).MaxLength(m.cfg.Identifier.Username.MaxLength).Persist(true).Preserve(true)
-	if m.cfg.Identifier.Username.Enabled == "optional" {
-		usernameInput.Required(false)
-		inputs = append(inputs, usernameInput)
-	} else if m.cfg.Identifier.Username.Enabled == "required" {
-		usernameInput.Required(true)
-		inputs = append(inputs, usernameInput)
+	if m.cfg.Identifier.Username.Enabled {
+		input := flowpilot.StringInput("username").
+			MinLength(m.cfg.Identifier.Username.MinLength).
+			MaxLength(m.cfg.Identifier.Username.MaxLength).
+			Persist(true).
+			Preserve(true).
+			Required(!m.cfg.Identifier.Username.Optional)
+
+		c.AddInputs(input)
 	}
-	c.AddInputs(inputs...)
 }
 
 func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) error {
@@ -82,7 +83,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 			return err
 		}
 		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
-		if e != nil && !(m.cfg.Identifier.Username.Enabled == "disabled" && m.cfg.Emails.RequireVerification) {
+		if e != nil && !(!m.cfg.Identifier.Username.Enabled && m.cfg.Emails.RequireVerification) {
 			c.Input().SetError("email", common.ErrorEmailAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
