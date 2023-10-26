@@ -16,3 +16,24 @@ secrets:
     - abcedfghijklmnopqrstuvwxyz
 service:
   name: Hanko Authentication Service
+webauthn:
+  relying_party:
+    id: localhost
+    origins:
+      - http://localhost:8000
+password:
+  enabled: false
+emails:
+  require_verification: true
+passkey:
+  onboarding:
+    enabled: true
+identifier:
+  username:
+    enabled: "optional"
+    max_length: 255
+    min_length: 3
+    allowed_characters: "abcdefghijklmnopqrstuvwxyz123456789-_."
+  email:
+    enabled: "required"
+    verification: true # maybe we should also consider "disabled|optional|required" or is false interpreted as optional and true as required (and disabled does not exist)

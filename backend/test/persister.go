@@ -59,6 +59,14 @@ type persister struct {
 	webhookPersister             persistence.WebhookPersister
 }
 
+func (p *persister) GetUsernamePersister() persistence.UsernamePersister {
+	return nil
+}
+
+func (p *persister) GetUsernamePersisterWithConnection(tx *pop.Connection) persistence.UsernamePersister {
+	return nil
+}
+
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
 	return p.passwordCredentialPersister
 }

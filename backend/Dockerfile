@@ -30,6 +30,7 @@ COPY template template/
 COPY utils utils/
 COPY mapper mapper/
 COPY webhooks webhooks/
+COPY flowpilot flowpilot/
 
 # Build
 RUN go generate ./...

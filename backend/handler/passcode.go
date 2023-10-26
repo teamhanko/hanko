@@ -170,8 +170,8 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
-		UserId:    userId,
-		EmailID:   email.ID,
+		UserId:    &userId,
+		EmailID:   &email.ID,
 		Ttl:       h.TTL,
 		Code:      string(hashedPasscode),
 		CreatedAt: now,
@@ -288,7 +288,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return nil
 		}
 
-		user, err := userPersister.Get(passcode.UserId)
+		user, err := userPersister.Get(*passcode.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
