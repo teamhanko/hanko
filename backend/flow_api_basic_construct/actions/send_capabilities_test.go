@@ -39,7 +39,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},
-				SecondFactor: config.SecondFactor{Enabled: "disabled"},
+				SecondFactor: config.SecondFactor{Enabled: false},
 			},
 			expectedState: common.StateRegistrationInit,
 			statusCode:    http.StatusOK,
@@ -50,7 +50,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},
-				SecondFactor: config.SecondFactor{Enabled: "disabled"},
+				SecondFactor: config.SecondFactor{Enabled: false},
 			},
 			expectedState: common.StateError,
 			statusCode:    http.StatusOK,
@@ -61,7 +61,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},
-				SecondFactor: config.SecondFactor{Enabled: "disabled"},
+				SecondFactor: config.SecondFactor{Enabled: false},
 			},
 			expectedState: common.StateError,
 			statusCode:    http.StatusOK,
@@ -72,7 +72,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			cfg: config.Config{
 				Password:     config.Password{Enabled: false},
 				Passcode:     config.Passcode{Enabled: false},
-				SecondFactor: config.SecondFactor{Enabled: "disabled"},
+				SecondFactor: config.SecondFactor{Enabled: false},
 			},
 			expectedState: common.StateRegistrationPreflight,
 			statusCode:    http.StatusBadRequest,
