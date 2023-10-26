@@ -91,11 +91,11 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 	if username != "" {
 		// Check that username is not already taken
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
-		e, err := m.persister.GetUsernamePersister().Find(username)
+		u, err := m.persister.GetUserPersister().GetByUsername(username)
 		if err != nil {
 			return err
 		}
-		if e != nil {
+		if u != nil {
 			c.Input().SetError("username", common.ErrorUsernameAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
