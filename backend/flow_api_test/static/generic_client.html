@@ -58,7 +58,9 @@
 <script type="module">
     import {
         parseCreationOptionsFromJSON,
-        create
+        parseRequestOptionsFromJSON,
+        create,
+        get
     } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
 
     async function webauthnCreate(payload) {
@@ -67,18 +69,31 @@
         return JSON.stringify(response)
     }
 
-    const passkeyHandler = async (payload) => {
+    async function webauthnGet(payload) {
+      const options = parseRequestOptionsFromJSON(payload)
+      const response = await get(options)
+      return JSON.stringify(response)
+    }
+
+    const passkeyRegisterHandler = async (payload) => {
         // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
 
         console.log(payload)
         document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creationOptions)
     }
 
+    const passkeyLoginHandler = async (payload) => {
+      // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+
+      console.log(payload)
+      document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
+    }
+
     const stateHandler = {
-        "loginPasskey": passkeyHandler,
-        "passkey_login": passkeyHandler,
-        "passkey_registration": passkeyHandler,
-        "onboarding_verify_passkey_attestation": passkeyHandler
+        "loginPasskey": passkeyRegisterHandler,
+        "passkey_login": passkeyLoginHandler,
+        "passkey_registration": passkeyRegisterHandler,
+        "onboarding_verify_passkey_attestation": passkeyRegisterHandler
     }
 
     function generateUI(data) {
@@ -269,7 +284,7 @@
     }
 
     function createFlow() {
-        fetch("/registration", {
+        fetch("/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

@@ -1,6 +1,9 @@
 package models
 
 import (
+	"encoding/base64"
+	"github.com/go-webauthn/webauthn/protocol"
+	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -43,4 +46,58 @@ func (user *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: user.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: user.CreatedAt},
 	), nil
+}
+
+func (user *User) WebAuthnID() []byte {
+	return user.ID.Bytes()
+}
+
+func (user *User) WebAuthnName() string {
+	email := user.Emails.GetPrimary()
+	if email != nil {
+		return email.Address
+	}
+	return "username" // TODO
+}
+
+func (user *User) WebAuthnDisplayName() string {
+	email := user.Emails.GetPrimary()
+	if email != nil {
+		return email.Address
+	}
+	return "username" // TODO
+}
+
+func (user *User) WebAuthnIcon() string {
+	return ""
+}
+
+func (user *User) WebAuthnCredentials() []webauthn.Credential {
+	var credentials []webauthn.Credential
+
+	for _, credential := range user.WebauthnCredentials {
+		credentialID, _ := base64.RawURLEncoding.DecodeString(credential.ID)
+		publicKey, _ := base64.RawURLEncoding.DecodeString(credential.PublicKey)
+
+		transport := make([]protocol.AuthenticatorTransport, len(credential.Transports))
+
+		for i, t := range credential.Transports {
+			transport[i] = protocol.AuthenticatorTransport(t.Name)
+		}
+
+		c := webauthn.Credential{
+			ID:              credentialID,
+			PublicKey:       publicKey,
+			AttestationType: credential.AttestationType,
+			Authenticator: webauthn.Authenticator{
+				AAGUID:    credential.AAGUID.Bytes(),
+				SignCount: uint32(credential.SignCount),
+			},
+			Transport: transport,
+		}
+
+		credentials = append(credentials, c)
+	}
+
+	return credentials
 }
