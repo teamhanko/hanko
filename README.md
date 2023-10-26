@@ -58,7 +58,6 @@ Schedule a Hanko demo. Learn how Hanko will speed up your registration and login
 
 <a target="_blank" href="https://cal.com/team/hanko/demo"><img alt="Book us with Cal.com"  src="https://cal.com/book-with-cal-light.svg" /></a>
 
-
 # Roadmap
 We are currently in **Beta** and may introduce breaking changes. Watch our releases, leave a star, join our [Discord community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our roadmap:
 
@@ -84,19 +83,26 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| i18n & custom translations |
 |✅| User import |
 |✅| Disable sign-ups |
-|⚙️| Enterprise SSO (OIDC/SAML) |
+|✅| User export |
+|✅| Enterprise SSO (SAML) |
 |⚙️| API-supported auth flows |
-|⚙️| Mobile SDKs |
-|⚙️| Basic email templating & i8n |
+|⚙️| Passkey-only and OAuth-only configurations |
+|⚙️| Username support (non-email) |
 | | 2FA for securing passcodes & passwords |
+| | Email templating & i18n |
 | | Webhooks |
-| | Refresh tokens/sessions |
+| | Refresh tokens / sessions |
+| | `<hanko-menu>` avatar / menu web component |
+| | 📢 Hanko 1.0 Release |
+| | Mobile SDKs |
 | | Sign in with Microsoft |
 | | OIDC support |
 
+
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
+- Custom user data / fields
 - Privileged sessions & step-up authentication
-- Bot protection / Captcha
+- Bot protection / CAPTCHA
 - SMS passcode delivery
 
 # Community
