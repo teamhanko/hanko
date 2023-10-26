@@ -15,14 +15,27 @@ import (
 
 func NewPasskeyOnboardingSubFlow(cfg config.Config, persister persistence.Persister, sessionManager session.Manager, httpContext echo.Context) (flowpilot.SubFlow, error) {
 	// TODO:
-	f := false
-	wa, err := webauthnLib.New(&webauthnLib.Config{
+
+	wa, err := getWebauthn(cfg)
+	if err != nil {
+		return nil, err
+	}
+	return flowpilot.NewSubFlow().
+		State(common.StateOnboardingCreatePasskey, actions.NewGetWACreationOptions(cfg, persister, wa), actions.NewSkip(cfg)).
+		State(common.StateOnboardingVerifyPasskeyAttestation, actions.NewSendWAAttestationResponse(cfg, persister, wa, sessionManager, httpContext)).
+		Build()
+}
+
+func getWebauthn(cfg config.Config) (*webauthnLib.WebAuthn, error) {
+	requireResidentKey := false
+
+	return webauthnLib.New(&webauthnLib.Config{
 		RPID:                  cfg.Webauthn.RelyingParty.Id,
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
 		RPOrigins:             cfg.Webauthn.RelyingParty.Origins,
 		AttestationPreference: protocol.PreferNoAttestation,
 		AuthenticatorSelection: protocol.AuthenticatorSelection{
-			RequireResidentKey: &f,
+			RequireResidentKey: &requireResidentKey,
 			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
 			UserVerification:   protocol.VerificationRequired,
 		},
@@ -38,11 +51,4 @@ func NewPasskeyOnboardingSubFlow(cfg config.Config, persister persistence.Persis
 			},
 		},
 	})
-	if err != nil {
-		return nil, err
-	}
-	return flowpilot.NewSubFlow().
-		State(common.StateOnboardingCreatePasskey, actions.NewGetWACreationOptions(cfg, persister, wa), actions.NewSkip(cfg)).
-		State(common.StateOnboardingVerifyPasskeyAttestation, actions.NewSendWAAttestationResponse(cfg, persister, wa, sessionManager, httpContext)).
-		Build()
 }

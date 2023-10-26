@@ -4,7 +4,9 @@ import "github.com/teamhanko/hanko/backend/flowpilot"
 
 const (
 	ActionSendCapabilities             flowpilot.ActionName = "send_capabilities"
+	ActionSendPasscodeCode             flowpilot.ActionName = "send_passcode_code"
 	ActionLoginWithOauth               flowpilot.ActionName = "login_with_oauth"
+	ActionLoginWithPassword            flowpilot.ActionName = "login_with_password"
 	ActionSubmitRegistrationIdentifier flowpilot.ActionName = "submit_registration_identifier"
 	ActionSubmitLoginIdentifier        flowpilot.ActionName = "submit_login_identifier"
 	ActionSubmitPasscode               flowpilot.ActionName = "submit_email_passcode"
