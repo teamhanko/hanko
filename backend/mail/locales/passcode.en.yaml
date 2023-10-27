@@ -10,6 +10,9 @@ email_subject_login:
 subject_email_verification:
   description: ""
   other: "Use passcode {{ .Code }} to verify your email address"
+subject_login:
+  description: ""
+  other: "Use passcode {{ .Code }} to login to your account"
 email_verification_text:
   description: ""
   other: "Enter the following passcode to verify your email address:"

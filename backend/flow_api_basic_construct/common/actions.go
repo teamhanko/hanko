@@ -5,6 +5,7 @@ import "github.com/teamhanko/hanko/backend/flowpilot"
 const (
 	ActionSendCapabilities               flowpilot.ActionName = "send_capabilities"
 	ActionContinueToPasscodeConfirmation flowpilot.ActionName = "continue_to_passcode_confirmation"
+	ActionContinueToLoginMethodChooser   flowpilot.ActionName = "continue_to_login_method_chooser"
 	ActionLoginWithOauth                 flowpilot.ActionName = "login_with_oauth"
 	ActionLoginWithPassword              flowpilot.ActionName = "login_with_password"
 	ActionSubmitRegistrationIdentifier   flowpilot.ActionName = "submit_registration_identifier"
@@ -22,6 +23,7 @@ const (
 	ActionSubmitRecoveryCode             flowpilot.ActionName = "submit_recovery_code"
 
 	ActionSwitch   flowpilot.ActionName = "switch"
+	ActionBack     flowpilot.ActionName = "back"
 	ActionSkip     flowpilot.ActionName = "skip"
 	ActionContinue flowpilot.ActionName = "continue"
 )

@@ -45,8 +45,7 @@ func (a SubmitLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 		input := flowpilot.StringInput("identifier").
 			Required(true).
 			Preserve(true).
-			MinLength(a.cfg.Identifier.Username.MinLength).
-			MaxLength(a.cfg.Identifier.Username.MaxLength)
+			MaxLength(255)
 
 		c.AddInputs(input)
 	}
@@ -72,18 +71,6 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	if a.cfg.Password.Enabled {
-		if a.cfg.Password.Optional {
-			return c.ContinueFlow(common.StateLoginMethodChooser)
-		} else {
-			return c.ContinueFlow(common.StatePasswordLogin)
-		}
-	}
-
-	if c.Stash().Get("email").Exists() {
-		return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
-	}
-
 	username, err := a.persister.GetUsernamePersister().Find(identifier)
 	if err != nil {
 		return err
@@ -107,7 +94,17 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err = c.Stash().Set("email", primaryEmail.Address); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
+	}
 
+	if a.cfg.Password.Enabled {
+		if a.cfg.Password.Optional {
+			return c.ContinueFlow(common.StateLoginMethodChooser)
+		} else {
+			return c.ContinueFlow(common.StatePasswordLogin)
+		}
+	}
+
+	if c.Stash().Get("email").Exists() {
 		return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
 	}
 

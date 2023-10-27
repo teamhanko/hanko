@@ -21,11 +21,21 @@ func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeSe
 	return flowpilot.NewFlow("/login").
 		State(common.StateLoginPreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateLoginInit, actions.NewSubmitLoginIdentifier(cfg, persister, httpContext), actions.NewLoginWithOauth(), actions.NewGetWARequestOptions(cfg, persister, webauthn)).
-		State(common.StateLoginMethodChooser, actions.NewGetWARequestOptions(cfg, persister, webauthn), actions.NewLoginWithPassword(), actions.NewContinueToPasscodeConfirmation()).
+		State(common.StateLoginMethodChooser,
+			actions.NewGetWARequestOptions(cfg, persister, webauthn),
+			actions.NewLoginWithPassword(),
+			actions.NewContinueToPasscodeConfirmation(cfg, "login"),
+			actions.NewBack(),
+		).
 		State(common.StatePasskeyLogin, actions.NewSendWAAssertionResponse(cfg, persister, webauthn, httpContext)).
-		State(common.StatePasswordLogin).
+		State(common.StatePasswordLogin,
+			actions.NewSubmitPassword(cfg, persister),
+			actions.NewContinueToPasscodeConfirmation(cfg, "recovery"),
+			actions.NewContinueToLoginMethodChooser(),
+			actions.NewBack(),
+		).
 		State(common.StateRecoveryPasscodeConfirmation).
-		State(common.StateLoginPasscodeConfirmation).
+		State(common.StateLoginPasscodeConfirmation, actions.NewSubmitPasscode(cfg, persister)).
 		State(common.StateUse2FASecurityKey).
 		State(common.StateUse2FATOTP).
 		State(common.StateUseRecoveryCode).

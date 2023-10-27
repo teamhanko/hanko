@@ -1,6 +1,7 @@
 package hooks
 
 import (
+	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
@@ -17,9 +18,19 @@ type SendPasscode struct {
 }
 
 func (a SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
+	if !c.Stash().Get("email").Exists() {
+		return errors.New("email has not been stashed")
+	}
+
+	if !c.Stash().Get("passcode_template").Exists() {
+		return errors.New("passcode_template has not been stashed")
+	}
+
 	email := c.Stash().Get("email").String()
+	template := c.Stash().Get("passcode_template").String()
 	acceptLanguageHeader := a.httpContext.Request().Header.Get("Accept-Language")
-	passcodeId, err := a.passcodeService.SendLogin(c.GetFlowID(), email, acceptLanguageHeader)
+
+	passcodeId, err := a.passcodeService.SendPasscode(c.GetFlowID(), template, email, acceptLanguageHeader)
 	if err != nil {
 		return fmt.Errorf("passcode service failed: %w", err)
 	}
