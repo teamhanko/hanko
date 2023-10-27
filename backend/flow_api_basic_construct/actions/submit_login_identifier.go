@@ -35,21 +35,25 @@ func (a SubmitLoginIdentifier) GetDescription() string {
 
 func (a SubmitLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	if !a.cfg.Identifier.Username.Enabled {
-		c.AddInputs(
-			flowpilot.EmailInput("identifier").
-				Required(true).
-				Preserve(true).
-				MaxLength(255))
+		input := flowpilot.EmailInput("identifier").
+			Required(true).
+			Preserve(true).
+			MaxLength(255)
+
+		c.AddInputs(input)
 	} else {
-		c.AddInputs(
-			flowpilot.StringInput("identifier").
-				Required(true).
-				Preserve(true).
-				MinLength(a.cfg.Identifier.Username.MinLength).
-				MaxLength(a.cfg.Identifier.Username.MaxLength))
+		input := flowpilot.StringInput("identifier").
+			Required(true).
+			Preserve(true).
+			MinLength(a.cfg.Identifier.Username.MinLength).
+			MaxLength(a.cfg.Identifier.Username.MaxLength)
+
+		c.AddInputs(input)
 	}
 
-	// TODO: suspend action when no other login method other than oauth is available
+	if !a.cfg.Password.Enabled && !a.cfg.Passcode.Enabled {
+		c.SuspendAction()
+	}
 }
 
 func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
@@ -66,16 +70,6 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err := c.Stash().Set("email", identifier); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
-
-		if a.cfg.Password.Enabled {
-			if a.cfg.Password.Optional {
-				return c.ContinueFlow(common.StateLoginMethodChooser)
-			} else {
-				return c.ContinueFlow(common.StatePasswordLogin)
-			}
-		}
-
-		return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
 	}
 
 	if a.cfg.Password.Enabled {
@@ -84,6 +78,10 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		} else {
 			return c.ContinueFlow(common.StatePasswordLogin)
 		}
+	}
+
+	if c.Stash().Get("email").Exists() {
+		return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
 	}
 
 	username, err := a.persister.GetUsernamePersister().Find(identifier)
