@@ -33,16 +33,13 @@
     </style>
 </head>
 <body>
-<h1>✨ Login</h1>
-<button id="newLoginFlowBtn">✍ New login flow</button>
+<h1>✨ Generic Flowpilot Client</h1>
+<button id="newLoginFlowBtn">✍ New flow</button>
 
 <label for="options"></label>
 <select id="options">
-    <option value="1">Passcodes Only</option>
-    <option value="8">Passcodes and Passwords</option>
-    <option value="4">Passcodes with Email Verification</option>
-    <option value="12">Passcodes with Email Verification and Passwords</option>
-    <option value="14">Second Factor Flow</option>
+    <option value="login">Login</option>
+    <option value="registration">Registration</option>
 </select>
 
 <div id="container"></div>
@@ -261,10 +258,10 @@
         return data
     }
 
-    function getFlowOption() {
+    function getFlowPath() {
         const optionsEl = document.getElementById("options");
         const selectedIndex = optionsEl.selectedIndex;
-        return parseInt(optionsEl.options[selectedIndex].value, 10);
+        return "/" + optionsEl.options[selectedIndex].value
     }
 
     function updateFlow(event, form) {
@@ -276,7 +273,7 @@
                 "Content-Type": "application/json"
             },
             method: form.method,
-            body: JSON.stringify({input_data: body, flow_option: getFlowOption()}),
+            body: JSON.stringify({input_data: body}),
         })
             .then(response => response.json())
             .then(generateUI)
@@ -284,12 +281,12 @@
     }
 
     function createFlow() {
-        fetch("/login", {
+        fetch(getFlowPath(), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({flow_option: getFlowOption()})
+            body: JSON.stringify({flow_option: getFlowPath()})
         })
             .then((resp) => resp.json())
             .then(generateUI)
