@@ -51,7 +51,7 @@ To get the Hanko backend up and running you need to:
 5. [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
 6. [Configure WebAuthn](#configure-webauthn)
 7. [Configure CORS](#configure-cors)
-8. [Start the backend](#run-the-backend)
+8. [Start the backend](#start-the-backend)
 
 ### Run a database
 
@@ -327,12 +327,14 @@ endpoints). These can be started separately or in a single command.
 docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest serve public
 ```
 
-> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+##### Using pre-built binaries
 
-The service is now available at `localhost:8000`.
+Each [GitHub release](https://github.com/teamhanko/hanko/releases) (> 0.9.0) has `hanko`'s binary assets uploaded to it. Alternatively you can use
+a tool like [eget](https://github.com/zyedidia/eget) to install binaries from releases on GitHub:
 
-`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
-the `server.public.address` option.
+```bash
+eget teamhanko/hanko
+```
 
 ##### From source
 
@@ -345,6 +347,11 @@ Then run:
 ```shell
 ./hanko serve public --config <PATH-TO-CONFIG-FILE>
 ```
+
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+
+`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
+the `server.public.address` option.
 
 The service is now available at `localhost:8000`.
 
