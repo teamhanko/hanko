@@ -342,7 +342,7 @@
     margin: var(--item-margin, 0.5rem 0);
     min-height: var(--item-height, 42px);
     display: flex;
-    align-items: center;
+    align-items: start;
     box-sizing: border-box;
     line-height: 20px;
 }
