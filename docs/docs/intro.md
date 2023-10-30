@@ -30,7 +30,7 @@ You can follow our [enterprise guides](/guides/ee) to integrate our enterprise f
 We'd love to hear your thoughts about Hanko, especially if you encounter any problems. Please do not hesitate to reach out. You can find us on
 
 - [Hanko Community Slack](https://www.hanko.io/community)
-- [Twitter](https://twitter.com/hanko_io)
+- [X (Twitter)](https://x.com/hanko_io)
 
 ## Contribute
 
