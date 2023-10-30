@@ -249,7 +249,7 @@
 
 .hanko_exclamationMark {
     fill: var(--error-color, #e82020);
-    padding-right: 1px 6px 0 4px
+    padding: 1px 6px 0 4px
 }
 
 .hanko_loadingSpinnerWrapperIcon {
