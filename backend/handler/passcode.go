@@ -20,6 +20,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -397,6 +398,14 @@ func (h *PasscodeHandler) GetSessionToken(c echo.Context) jwt.Token {
 	if sessionCookie != nil {
 		token, _ = h.sessionManager.Verify(sessionCookie.Value)
 		// we don't need to check the error, because when the token is not returned, the user is not logged in
+	}
+
+	if token == nil {
+		authorizationHeader := c.Request().Header.Get("Authorization")
+		sessionToken := strings.TrimPrefix(authorizationHeader, "Bearer")
+		if strings.TrimSpace(sessionToken) != "" {
+			token, _ = h.sessionManager.Verify(sessionToken)
+		}
 	}
 
 	return token
