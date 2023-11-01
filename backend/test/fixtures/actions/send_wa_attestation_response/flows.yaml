@@ -1,0 +1,14 @@
+- id: 0b41f4dd-8e46-4a7c-bb4d-d60843113431
+  current_state: onboarding_verify_passkey_attestation
+  stash_data: "{\"webauthn_session_data_id\":\"adce0002-35bc-c60a-648b-0b25f1f05503\",\"user_id\":\"ec4ef049-5b88-4321-a173-21b0eff06a04\",\"email\":\"john.doe@example.com\",\"_\":{\"scheduled_states\":[\"success\"]}}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: 53d35f35-c87d-4533-b966-2b48686b9be9
+  current_state: onboarding_verify_passkey_attestation
+  stash_data: "{\"webauthn_session_data_id\":\"65f13ce2-d118-44f0-a38b-8e3ee918c6f3\",\"user_id\":\"ec4ef049-5b88-4321-a173-21b0eff06a04\",\"email\":\"john.doe@example.com\",\"_\":{\"scheduled_states\":[\"success\"]}}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
