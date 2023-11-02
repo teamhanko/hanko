@@ -42,10 +42,11 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 				Emails: config.Emails{
@@ -61,13 +62,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 				},
 			},
@@ -80,13 +82,15 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 				Emails: config.Emails{
@@ -102,10 +106,12 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled: "optional",
+						Enabled:  true,
+						Optional: true,
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 				Emails: config.Emails{
@@ -121,10 +127,11 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 				Emails: config.Emails{
@@ -140,13 +147,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 				},
 			},
@@ -159,13 +167,15 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "optional",
+						Enabled:           true,
+						Optional:          true,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 			},
@@ -178,13 +188,15 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "optional",
+						Enabled:  true,
+						Optional: true,
 					},
 				},
 			},
@@ -197,13 +209,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 				},
 			},
@@ -216,13 +229,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 				},
 			},
@@ -235,13 +249,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled:           "required",
+						Enabled:           true,
+						Optional:          false,
 						MaxLength:         64,
 						MinLength:         3,
 						AllowedCharacters: "abcdefghijklmnopqrstuvwxyz123456789-_.",
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 				},
 			},
@@ -254,10 +269,11 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 				Emails: config.Emails{
@@ -276,10 +292,11 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			cfg: config.Config{
 				Identifier: config.Identifier{
 					Username: config.IdentifierUsername{
-						Enabled: "disabled",
+						Enabled: false,
 					},
 					Email: config.IdentifierEmail{
-						Enabled: "required",
+						Enabled:  true,
+						Optional: false,
 					},
 				},
 				Emails: config.Emails{

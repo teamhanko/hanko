@@ -36,17 +36,16 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 
 	webauthnAvailable := c.Input().Get("webauthn_available").String() == "true"
 
-	if webauthnAvailable == false &&
-		m.cfg.Password.Enabled == false &&
-		m.cfg.Passcode.Enabled == false {
-		// Only passkeys are allowed, but webauthn is not available on the browser
+	// Only passkeys are allowed, but webauthn is not available on the browser
+	if !webauthnAvailable && !m.cfg.Password.Enabled && !m.cfg.Passcode.Enabled {
 		return c.ContinueFlowWithError(common.StateError, common.ErrorDeviceNotCapable)
 	}
-	if webauthnAvailable == false &&
-		m.cfg.SecondFactor.Enabled == "required" &&
+
+	// Only security keys are allowed as a second factor, but webauthn is not available on the browser
+	if !webauthnAvailable &&
+		m.cfg.SecondFactor.Enabled && !m.cfg.SecondFactor.Optional &&
 		len(m.cfg.SecondFactor.Methods) == 1 &&
 		m.cfg.SecondFactor.Methods[0] == "security_key" {
-		// Only security keys are allowed as a second factor, but webauthn is not available on the browser
 		return c.ContinueFlowWithError(common.StateError, common.ErrorDeviceNotCapable)
 	}
 

@@ -31,10 +31,12 @@ passkey:
     enabled: true
 identifier:
   username:
-    enabled: "optional"
+    enabled: true
+    optional: true
     max_length: 255
     min_length: 3
     allowed_characters: "abcdefghijklmnopqrstuvwxyz123456789-_."
   email:
-    enabled: "required"
-    verification: true # maybe we should also consider "disabled|optional|required" or is false interpreted as optional and true as required (and disabled does not exist)
+    enabled: true
+    optional: false
+    verification: true # maybe we should also consider separate opitional attribute or is false interpreted as optional and true as required (and disabled does not exist)
