@@ -1,6 +1,6 @@
 import { Fragment } from "preact";
 import {
-  StateUpdater,
+  SetStateAction,
   useCallback,
   useContext,
   useMemo,
@@ -29,7 +29,7 @@ import LoginPasscodePage from "../../pages/LoginPasscodePage";
 interface Props {
   setError: (e: HankoError) => void;
   checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  setCheckedItemIndex: SetStateAction<number>;
 }
 
 const ListEmailsAccordion = ({

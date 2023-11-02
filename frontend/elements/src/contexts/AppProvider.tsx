@@ -2,7 +2,7 @@ import { ComponentChildren, createContext, h } from "preact";
 import { TranslateProvider } from "@denysvuika/preact-translate";
 
 import {
-  StateUpdater,
+  SetStateAction,
   useState,
   useCallback,
   useMemo,
@@ -54,19 +54,19 @@ interface Props {
 
 interface States {
   config: Config;
-  setConfig: StateUpdater<Config>;
+  setConfig: SetStateAction<Config>;
   userInfo: UserInfo;
-  setUserInfo: StateUpdater<UserInfo>;
+  setUserInfo: SetStateAction<UserInfo>;
   passcode: Passcode;
-  setPasscode: StateUpdater<Passcode>;
+  setPasscode: SetStateAction<Passcode>;
   user: User;
-  setUser: StateUpdater<User>;
+  setUser: SetStateAction<User>;
   emails: Emails;
-  setEmails: StateUpdater<Emails>;
+  setEmails: SetStateAction<Emails>;
   webauthnCredentials: WebauthnCredentials;
-  setWebauthnCredentials: StateUpdater<WebauthnCredentials>;
+  setWebauthnCredentials: SetStateAction<WebauthnCredentials>;
   page: h.JSX.Element;
-  setPage: StateUpdater<h.JSX.Element>;
+  setPage: SetStateAction<h.JSX.Element>;
 }
 
 interface Context extends States {
