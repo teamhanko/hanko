@@ -55,7 +55,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "654321"}`,
 			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg:           config.Config{},
-			expectedState: common.StateEmailVerification,
+			expectedState: common.StateRegistrationPasscodeConfirmation,
 			statusCode:    http.StatusUnauthorized,
 		},
 		{
@@ -63,7 +63,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "654321"}`,
 			flowId:        "8a2cf90d-dea5-4678-9dca-6707dab6af77",
 			cfg:           config.Config{},
-			expectedState: common.StateEmailVerification,
+			expectedState: common.StateRegistrationPasscodeConfirmation,
 			statusCode:    http.StatusUnauthorized,
 		},
 		{
@@ -89,7 +89,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "123456"}`,
 			flowId:        "5a862a2d-0d10-4904-b297-cb32fc43c859",
 			cfg:           config.Config{},
-			expectedState: common.StateEmailVerification,
+			expectedState: common.StateRegistrationPasscodeConfirmation,
 			statusCode:    http.StatusBadRequest,
 		},
 		{
@@ -171,11 +171,11 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(common.StateEmailVerification, NewSubmitPasscode(currentTest.cfg, s.Storage)).
+				State(common.StateRegistrationPasscodeConfirmation, NewSubmitPasscode(currentTest.cfg, s.Storage)).
 				State(common.StatePasswordCreation).
 				State(common.StateSuccess).
 				State(common.StateError).
-				InitialState(common.StateEmailVerification).
+				InitialState(common.StateRegistrationPasscodeConfirmation).
 				ErrorState(common.StateError).
 				SubFlows(passkeySubFlow).
 				Build()

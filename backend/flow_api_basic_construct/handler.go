@@ -40,7 +40,7 @@ func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	loginFlow, err := flows.NewLoginFlow(h.cfg, h.persister, h.passcodeService, c)
+	loginFlow, err := flows.NewLoginFlow(h.cfg, h.persister, h.passcodeService, h.sessionManager, c)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to create login flow: %w", err))
 	}

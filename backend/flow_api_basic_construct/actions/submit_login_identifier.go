@@ -69,30 +69,30 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err := c.Stash().Set("email", identifier); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
-	}
+	} else {
+		username, err := a.persister.GetUsernamePersister().Find(identifier)
+		if err != nil {
+			return err
+		}
 
-	username, err := a.persister.GetUsernamePersister().Find(identifier)
-	if err != nil {
-		return err
-	}
+		if username == nil {
+			c.Input().SetError("identifier", flowpilot.ErrorValueInvalid.Wrap(errors.New("username not found")))
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		}
 
-	if username == nil {
-		c.Input().SetError("identifier", flowpilot.ErrorValueInvalid.Wrap(errors.New("username not found")))
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
-	}
+		if err = c.Stash().Set("username", identifier); err != nil {
+			return fmt.Errorf("failed to set username to stash: %w", err)
+		}
 
-	if err = c.Stash().Set("username", identifier); err != nil {
-		return fmt.Errorf("failed to set username to stash: %w", err)
-	}
+		user, err := a.persister.GetUserPersister().Get(username.UserID)
+		if err != nil {
+			return err
+		}
 
-	user, err := a.persister.GetUserPersister().Get(username.UserID)
-	if err != nil {
-		return err
-	}
-
-	if primaryEmail := user.Emails.GetPrimary(); primaryEmail != nil {
-		if err = c.Stash().Set("email", primaryEmail.Address); err != nil {
-			return fmt.Errorf("failed to set email to stash: %w", err)
+		if primaryEmail := user.Emails.GetPrimary(); primaryEmail != nil {
+			if err = c.Stash().Set("email", primaryEmail.Address); err != nil {
+				return fmt.Errorf("failed to set email to stash: %w", err)
+			}
 		}
 	}
 
@@ -100,11 +100,14 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if a.cfg.Password.Optional {
 			return c.ContinueFlow(common.StateLoginMethodChooser)
 		} else {
-			return c.ContinueFlow(common.StatePasswordLogin)
+			return c.ContinueFlow(common.StateLoginPassword)
 		}
 	}
 
 	if c.Stash().Get("email").Exists() {
+		if err := c.Stash().Set("passcode_template", "login"); err != nil {
+			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+		}
 		return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
 	}
 

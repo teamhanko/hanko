@@ -22,5 +22,5 @@ func (a LoginWithPassword) GetDescription() string {
 func (a LoginWithPassword) Initialize(_ flowpilot.InitializationContext) {}
 
 func (a LoginWithPassword) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueFlow(common.StatePasswordLogin)
+	return c.ContinueFlow(common.StateLoginPassword)
 }

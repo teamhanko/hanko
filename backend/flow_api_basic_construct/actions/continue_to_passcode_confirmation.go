@@ -7,13 +7,12 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewContinueToPasscodeConfirmation(cfg config.Config, template string) flowpilot.Action {
-	return ContinueToPasscodeConfirmation{cfg: cfg, template: template}
+func NewContinueToPasscodeConfirmation(cfg config.Config) flowpilot.Action {
+	return ContinueToPasscodeConfirmation{cfg: cfg}
 }
 
 type ContinueToPasscodeConfirmation struct {
-	cfg      config.Config
-	template string
+	cfg config.Config
 }
 
 func (a ContinueToPasscodeConfirmation) GetName() flowpilot.ActionName {
@@ -21,7 +20,7 @@ func (a ContinueToPasscodeConfirmation) GetName() flowpilot.ActionName {
 }
 
 func (a ContinueToPasscodeConfirmation) GetDescription() string {
-	return fmt.Sprintf("Send a %s passcode code via email.", a.template)
+	return "Send a login passcode code via email."
 }
 
 func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationContext) {
@@ -31,7 +30,7 @@ func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationCon
 }
 
 func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) error {
-	if err := c.Stash().Set("passcode_template", a.template); err != nil {
+	if err := c.Stash().Set("passcode_template", "login"); err != nil {
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 

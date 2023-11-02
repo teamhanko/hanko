@@ -9,11 +9,17 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"time"
 )
 
-func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, httpContext echo.Context) (flowpilot.Flow, error) {
+func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager, httpContext echo.Context) (flowpilot.Flow, error) {
 	webauthn, err := getWebauthn(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	onboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister, sessionManager, httpContext)
 	if err != nil {
 		return nil, err
 	}
@@ -24,26 +30,27 @@ func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeSe
 		State(common.StateLoginMethodChooser,
 			actions.NewGetWARequestOptions(cfg, persister, webauthn),
 			actions.NewLoginWithPassword(),
-			actions.NewContinueToPasscodeConfirmation(cfg, "login"),
+			actions.NewContinueToPasscodeConfirmation(cfg),
 			actions.NewBack(),
 		).
-		State(common.StatePasskeyLogin, actions.NewSendWAAssertionResponse(cfg, persister, webauthn, httpContext)).
-		State(common.StatePasswordLogin,
+		State(common.StateLoginPasskey, actions.NewSendWAAssertionResponse(cfg, persister, webauthn, httpContext)).
+		State(common.StateLoginPassword,
 			actions.NewSubmitPassword(cfg, persister),
-			actions.NewContinueToPasscodeConfirmation(cfg, "recovery"),
+			actions.NewContinueToPasscodeConfirmationRecovery(cfg),
 			actions.NewContinueToLoginMethodChooser(),
 			actions.NewBack(),
 		).
-		State(common.StateRecoveryPasscodeConfirmation).
+		State(common.StateLoginPasscodeConfirmationRecovery, actions.NewSubmitPasscode(cfg, persister)).
 		State(common.StateLoginPasscodeConfirmation, actions.NewSubmitPasscode(cfg, persister)).
-		State(common.StateUse2FASecurityKey).
-		State(common.StateUse2FATOTP).
-		State(common.StateUseRecoveryCode).
-		State(common.StateRecoveryPasswordCreation).
+		//State(common.StateUse2FASecurityKey).
+		//State(common.StateUse2FATOTP).
+		//State(common.StateUseRecoveryCode).
+		State(common.StateLoginPasswordRecovery, actions.NewSubmitNewPassword(cfg)).
 		State(common.StateSuccess).
 		State(common.StateError).
 		BeforeState(common.StateLoginPasscodeConfirmation, hooks.NewSendPasscode(passcodeService, httpContext)).
-		//SubFlows(NewPasskeyOnboardingSubFlow(), New2FACreationSubFlow()).
+		BeforeState(common.StateLoginPasscodeConfirmationRecovery, hooks.NewSendPasscode(passcodeService, httpContext)).
+		SubFlows(onboardingSubFlow).
 		InitialState(common.StateLoginPreflight).
 		ErrorState(common.StateError).
 		TTL(10 * time.Minute).

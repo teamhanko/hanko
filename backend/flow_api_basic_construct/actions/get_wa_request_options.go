@@ -60,5 +60,5 @@ func (a GetWARequestOptions) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set request_options payload: %w", err)
 	}
 
-	return c.ContinueFlow(common.StatePasskeyLogin)
+	return c.ContinueFlow(common.StateLoginPasskey)
 }
