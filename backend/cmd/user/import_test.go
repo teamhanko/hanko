@@ -2,16 +2,17 @@ package user
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/test"
 	"io"
 	"log"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/test"
 )
 
 const validUUID2 = "799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3"
@@ -33,7 +34,7 @@ func (s *importSuite) Test_loadAndValidate() {
 	tests := []struct {
 		name    string
 		args    args
-		want    []ImportEntry
+		want    []ImportOrExportEntry
 		wantErr assert.ErrorAssertionFunc
 	}{
 		{
@@ -42,7 +43,7 @@ func (s *importSuite) Test_loadAndValidate() {
 				input: strings.NewReader("[]"),
 			},
 			wantErr: assert.NoError,
-			want:    []ImportEntry{},
+			want:    []ImportOrExportEntry{},
 		},
 		{
 			name: "empty file -> nil result",
@@ -58,11 +59,11 @@ func (s *importSuite) Test_loadAndValidate() {
 				input: strings.NewReader("[{\"user_id\":\"799e95f0-4cc7-4bd7-9f01-5fdc4fa26ea3\",\"emails\":[{\"address\":\"koreyrath@wolff.name\",\"is_primary\":true,\"is_verified\":true}],\"created_at\":\"2023-06-07T13:42:49.369489Z\",\"updated_at\":\"2023-06-07T13:42:49.369489Z\"}]\n"),
 			},
 			wantErr: assert.NoError,
-			want: []ImportEntry{
+			want: []ImportOrExportEntry{
 				{
 					UserID: validUUID2,
 					Emails: Emails{
-						ImportEmail{
+						ImportOrExportEmail{
 							Address:    "koreyrath@wolff.name",
 							IsPrimary:  true,
 							IsVerified: true,
@@ -107,7 +108,7 @@ func (s *importSuite) Test_addToDatabase() {
 	}
 
 	type args struct {
-		entries   []ImportEntry
+		entries   []ImportOrExportEntry
 		persister persistence.Persister
 	}
 	tests := []struct {
@@ -119,11 +120,11 @@ func (s *importSuite) Test_addToDatabase() {
 		{
 			name: "Positive",
 			args: args{
-				entries: []ImportEntry{
+				entries: []ImportOrExportEntry{
 					{
 						UserID: "",
 						Emails: Emails{
-							ImportEmail{
+							ImportOrExportEmail{
 								Address:    "primary@hanko.io",
 								IsPrimary:  true,
 								IsVerified: false,
@@ -141,11 +142,11 @@ func (s *importSuite) Test_addToDatabase() {
 		{
 			name: "Double uuid",
 			args: args{
-				entries: []ImportEntry{
+				entries: []ImportOrExportEntry{
 					{
 						UserID: validUUID,
 						Emails: Emails{
-							ImportEmail{
+							ImportOrExportEmail{
 								Address:    "primary1@hanko.io",
 								IsPrimary:  true,
 								IsVerified: false,
@@ -157,7 +158,7 @@ func (s *importSuite) Test_addToDatabase() {
 					{
 						UserID: validUUID,
 						Emails: Emails{
-							ImportEmail{
+							ImportOrExportEmail{
 								Address:    "primary2@hanko.io",
 								IsPrimary:  true,
 								IsVerified: false,
@@ -175,11 +176,11 @@ func (s *importSuite) Test_addToDatabase() {
 		{
 			name: "Double primary email",
 			args: args{
-				entries: []ImportEntry{
+				entries: []ImportOrExportEntry{
 					{
 						UserID: validUUID,
 						Emails: Emails{
-							ImportEmail{
+							ImportOrExportEmail{
 								Address:    "primary@hanko.io",
 								IsPrimary:  true,
 								IsVerified: false,
@@ -191,7 +192,7 @@ func (s *importSuite) Test_addToDatabase() {
 					{
 						UserID: validUUID,
 						Emails: Emails{
-							ImportEmail{
+							ImportOrExportEmail{
 								Address:    "primary@hanko.io",
 								IsPrimary:  true,
 								IsVerified: false,

@@ -1,0 +1,36 @@
+name: CLI
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  goreleaser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v4
+        with:
+          go-version: stable
+      - uses: goreleaser/goreleaser-action@v5
+        with:
+          distribution: goreleaser
+          version: latest
+          args: release --clean --snapshot
+          workdir: ./backend
+        env:
+          GORELEASER_CURRENT_TAG: 'v0.0.0' # can be anything since we're using --snapshot
+      - run: |
+          mkdir -p dist/artifacts
+          cp dist/*.{tar.gz,zip} dist/artifacts
+        working-directory: ./backend
+      - name: Upload assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: ./backend/dist/artifacts/*
+          fail_on_unmatched_files: true

@@ -34,3 +34,8 @@
   verified: true
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: 7c4473b8-ddcc-480b-b01f-df89e99f74c9
+  address: john.doe+6@example.com
+  verified: false
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

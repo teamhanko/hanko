@@ -3,7 +3,7 @@ module github.com/teamhanko/hanko/backend
 go 1.20
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.23.2
+	github.com/brianvoe/gofakeit/v6 v6.24.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.15.5
 	github.com/go-sql-driver/mysql v1.7.1
@@ -15,6 +15,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gomodule/redigo v1.8.9
+	github.com/google/uuid v1.4.0
 	github.com/h2non/gock v1.2.0
 	github.com/invopop/jsonschema v0.12.0
 	github.com/jackc/pgconn v1.14.1
@@ -22,14 +23,15 @@ require (
 	github.com/knadh/koanf v1.5.0
 	github.com/labstack/echo-contrib v0.15.0
 	github.com/labstack/echo-jwt/v4 v4.2.0
-	github.com/labstack/echo/v4 v4.11.1
-	github.com/lestrrat-go/jwx/v2 v2.0.13
+	github.com/labstack/echo/v4 v4.11.2
+	github.com/lestrrat-go/jwx/v2 v2.0.16
 	github.com/lib/pq v1.10.9
-	github.com/mocktools/go-smtp-mock/v2 v2.1.0
-	github.com/nicksnyder/go-i18n/v2 v2.2.1
+	github.com/nicksnyder/go-i18n/v2 v2.2.2
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.31.0
+	github.com/russellhaering/gosaml2 v0.9.1
+	github.com/russellhaering/goxmldsig v1.4.0
 	github.com/sethvargo/go-limiter v0.7.2
 	github.com/sethvargo/go-redisstore v0.3.0
 	github.com/spf13/cobra v1.7.0
@@ -52,6 +54,7 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
+	github.com/beevik/etree v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
@@ -60,7 +63,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/docker/cli v23.0.1+incompatible // indirect
-	github.com/docker/docker v23.0.3+incompatible // indirect
+	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
@@ -86,7 +89,6 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/go-tpm v0.9.0 // indirect
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/h2non/parth v0.0.0-20190131123155-b4df798d6542 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
@@ -100,10 +102,10 @@ require (
 	github.com/jackc/pgx/v4 v4.18.1 // indirect
 	github.com/jmoiron/sqlx v1.3.5 // indirect
 	github.com/joho/godotenv v1.5.1 // indirect
+	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/labstack/gommon v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.4 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
@@ -113,6 +115,7 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
+	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
@@ -153,7 +156,7 @@ require (
 	go.opentelemetry.io/otel v1.15.0 // indirect
 	go.opentelemetry.io/otel/trace v1.15.0 // indirect
 	golang.org/x/mod v0.11.0 // indirect
-	golang.org/x/net v0.16.0 // indirect
+	golang.org/x/net v0.17.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/time v0.3.0 // indirect

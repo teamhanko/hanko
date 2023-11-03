@@ -20,12 +20,17 @@ Or learn how to [host Hanko](https://github.com/teamhanko/hanko) yourself.
 
 To integrate Hanko into your project, we are providing [guides](/guides/frontend) for popular frontend frameworks.
 
+## Use enterprise features
+
+To use enterprise features like SAML SSO you need to use [Hanko Cloud](https://cloud.hanko.io) or have a [business subscription](https://www.hanko.io/pricing).
+You can follow our [enterprise guides](/guides/ee) to integrate our enterprise features into your project.
+
 ## Give feedback
 
 We'd love to hear your thoughts about Hanko, especially if you encounter any problems. Please do not hesitate to reach out. You can find us on
 
 - [Hanko Community Slack](https://www.hanko.io/community)
-- [Twitter](https://twitter.com/hanko_io)
+- [X (Twitter)](https://x.com/hanko_io)
 
 ## Contribute
 
