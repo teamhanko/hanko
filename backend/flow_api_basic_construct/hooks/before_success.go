@@ -82,6 +82,7 @@ func (m BeforeSuccess) CreateUser(id uuid.UUID, email string, emailVerified bool
 		now := time.Now().UTC()
 		err := m.persister.GetUserPersisterWithConnection(tx).Create(models.User{
 			ID:        id,
+			Username:  username,
 			CreatedAt: now,
 			UpdatedAt: now,
 		})
@@ -99,14 +100,6 @@ func (m BeforeSuccess) CreateUser(id uuid.UUID, email string, emailVerified bool
 
 			primaryEmail := models.NewPrimaryEmail(emailModel.ID, id)
 			err = m.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
-			if err != nil {
-				return err
-			}
-		}
-
-		if username != "" {
-			usernameModel := models.NewUsername(id, username)
-			err = m.persister.GetUsernamePersisterWithConnection(tx).Create(*usernameModel)
 			if err != nil {
 				return err
 			}

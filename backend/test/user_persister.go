@@ -14,6 +14,17 @@ type userPersister struct {
 	users []models.User
 }
 
+func (p *userPersister) GetByUsername(username string) (*models.User, error) {
+	var found *models.User
+	for _, data := range p.users {
+		if data.Username == username {
+			d := data
+			found = &d
+		}
+	}
+	return found, nil
+}
+
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	var found *models.User
 	for _, data := range p.users {
