@@ -369,3 +369,7 @@ func (t *testPasscodeService) SendLogin(flowID uuid.UUID, emailAddress string, l
 func (t *testPasscodeService) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
 	return uuid.NewV4()
 }
+
+func (t *testPasscodeService) SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
+	return uuid.NewV4()
+}
