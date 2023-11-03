@@ -13,6 +13,7 @@ type User struct {
 	ID                  uuid.UUID            `db:"id" json:"id"`
 	WebauthnCredentials []WebauthnCredential `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
 	Emails              Emails               `has_many:"emails" json:"-"`
+	Username            string               `db:"username" json:"username,omitempty"`
 	CreatedAt           time.Time            `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time            `db:"updated_at" json:"updated_at"`
 }

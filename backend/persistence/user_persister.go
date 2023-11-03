@@ -19,6 +19,7 @@ type UserPersister interface {
 	List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error)
 	All() ([]models.User, error)
 	Count(userId uuid.UUID, email string) (int, error)
+	GetByUsername(username string) (*models.User, error)
 }
 
 type userPersister struct {
@@ -59,6 +60,19 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 	}
 
 	return p.Get(*email.UserID)
+}
+
+func (p *userPersister) GetByUsername(username string) (*models.User, error) {
+	user := models.User{}
+	err := p.db.Eager().Where("username = (?)", username).First(&user)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
 }
 
 func (p *userPersister) Create(user models.User) error {
