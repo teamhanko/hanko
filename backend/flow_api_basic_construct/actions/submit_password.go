@@ -47,16 +47,17 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 
 		userID = *emailModel.UserID
 	} else if c.Stash().Get("username").Exists() {
-		usernameModel, err := a.persister.GetUsernamePersister().Find(c.Stash().Get("username").String())
+		username := c.Stash().Get("username").String()
+		userModel, err := a.persister.GetUserPersister().GetByUsername(username)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
 		}
 
-		if usernameModel == nil {
+		if userModel == nil {
 			return a.wrongCredentialsError(c)
 		}
 
-		userID = usernameModel.UserID
+		userID = userModel.ID
 	} else {
 		return a.wrongCredentialsError(c)
 	}

@@ -70,12 +70,12 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 	} else {
-		username, err := a.persister.GetUsernamePersister().Find(identifier)
+		userModel, err := a.persister.GetUserPersister().GetByUsername(identifier)
 		if err != nil {
 			return err
 		}
 
-		if username == nil {
+		if userModel == nil {
 			c.Input().SetError("identifier", flowpilot.ErrorValueInvalid.Wrap(errors.New("username not found")))
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
@@ -84,13 +84,8 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set username to stash: %w", err)
 		}
 
-		user, err := a.persister.GetUserPersister().Get(username.UserID)
-		if err != nil {
-			return err
-		}
-
-		if primaryEmail := user.Emails.GetPrimary(); primaryEmail != nil {
-			if err = c.Stash().Set("email", primaryEmail.Address); err != nil {
+		if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
+			if err = c.Stash().Set("email", primaryEmailModel.Address); err != nil {
 				return fmt.Errorf("failed to set email to stash: %w", err)
 			}
 		}

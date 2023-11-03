@@ -2,6 +2,7 @@ package actions
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
@@ -43,7 +44,7 @@ func (a SendWAAssertionResponse) GetDescription() string {
 }
 
 func (a SendWAAssertionResponse) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.JSONInput("assertion_response").Required(true).Persist(true))
+	c.AddInputs(flowpilot.JSONInput("assertion_response").Required(true).Persist(false))
 }
 
 func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
@@ -75,6 +76,10 @@ func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
 	userModel, err := a.persister.GetUserPersister().Get(userId)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
+	}
+
+	if userModel == nil {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(errors.New("user does not exist")))
 	}
 
 	discoverableUserHandler := func(rawID, userHandle []byte) (webauthnLib.User, error) {

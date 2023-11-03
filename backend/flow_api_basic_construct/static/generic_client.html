@@ -87,7 +87,7 @@
     }
 
     const stateHandler = {
-        "loginPasskey": passkeyRegisterHandler,
+        "login_passkey": passkeyLoginHandler,
         "passkey_login": passkeyLoginHandler,
         "passkey_registration": passkeyRegisterHandler,
         "onboarding_verify_passkey_attestation": passkeyRegisterHandler
@@ -107,7 +107,7 @@
 
         if (data.error) {
             const errorEl = document.createElement('p');
-            errorEl.textContent = `Code: ${data.error.code}, Message: ${data.error.message}`
+            errorEl.textContent = `Code: ${data.error.code}, Message: ${data.error.message}, Cause: ${data.error.cause}`
             container.appendChild(errorEl);
         } else {
             const notAvailable = document.createElement('p');
