@@ -249,7 +249,7 @@
 
 .hanko_exclamationMark {
     fill: var(--error-color, #e82020);
-    padding-right: 5px
+    padding: 1px 6px 0 4px
 }
 
 .hanko_loadingSpinnerWrapperIcon {
@@ -338,12 +338,13 @@
     border-width: var(--border-width, 1px);
     color: var(--error-color, #e82020);
     background: var(--background-color, white);
-    padding: .25rem;
+    padding: .50rem 1.5rem .50rem .50rem;
     margin: var(--item-margin, 0.5rem 0);
     min-height: var(--item-height, 42px);
     display: flex;
-    align-items: center;
-    box-sizing: border-box
+    align-items: start;
+    box-sizing: border-box;
+    line-height: 20px;
 }
 
 .hanko_errorMessage>span:first-child {
