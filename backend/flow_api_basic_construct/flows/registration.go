@@ -14,7 +14,7 @@ import (
 )
 
 func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager, httpContext echo.Context) (flowpilot.Flow, error) {
-	passkeyOnboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister, sessionManager, httpContext)
+	passkeyOnboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister)
 	if err != nil {
 		return nil, err
 	}
