@@ -44,6 +44,11 @@ func (a SendWAAssertionResponse) GetDescription() string {
 }
 
 func (a SendWAAssertionResponse) Initialize(c flowpilot.InitializationContext) {
+	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	if !webAuthnAvailable {
+		c.SuspendAction()
+	}
+
 	c.AddInputs(flowpilot.JSONInput("assertion_response").Required(true).Persist(false))
 }
 

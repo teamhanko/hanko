@@ -34,7 +34,12 @@ func (a GetWARequestOptions) GetDescription() string {
 	return "Get request options to use a webauthn credential."
 }
 
-func (a GetWARequestOptions) Initialize(_ flowpilot.InitializationContext) {}
+func (a GetWARequestOptions) Initialize(c flowpilot.InitializationContext) {
+	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	if !webAuthnAvailable {
+		c.SuspendAction()
+	}
+}
 
 func (a GetWARequestOptions) Execute(c flowpilot.ExecutionContext) error {
 	options, sessionData, err := a.wa.BeginDiscoverableLogin(

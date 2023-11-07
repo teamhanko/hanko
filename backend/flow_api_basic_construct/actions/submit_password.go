@@ -45,6 +45,10 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}
 
+		if emailModel == nil {
+			return a.wrongCredentialsError(c)
+		}
+
 		userID = *emailModel.UserID
 	} else if c.Stash().Get("username").Exists() {
 		username := c.Stash().Get("username").String()
@@ -111,6 +115,10 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 	err = c.Stash().Set("user", user)
 	if err != nil {
 		return fmt.Errorf("failed to set user to stash: %w", err)
+	}
+
+	if a.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
 	}
 
 	return c.ContinueFlow(common.StateSuccess)
