@@ -90,6 +90,10 @@ export class Session {
    @returns {boolean} true if the session details are valid, false otherwise.
    */
   private static validate(detail: SessionDetail): boolean {
-    return !!(detail.expirationSeconds > 0 && detail.userID?.length);
+    return !!(
+      detail.expirationSeconds > 0 &&
+      detail.userID?.length &&
+      detail.jwt?.length
+    );
   }
 }
