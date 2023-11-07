@@ -61,7 +61,6 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	identifier := c.Input().Get("identifier").String()
-
 	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
 	if isEmail := emailPattern.MatchString(identifier); isEmail {
