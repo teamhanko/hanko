@@ -9,17 +9,16 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/session"
 	"time"
 )
 
-func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager, httpContext echo.Context) (flowpilot.Flow, error) {
+func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, httpContext echo.Context) (flowpilot.Flow, error) {
 	webauthn, err := getWebauthn(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	onboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister, sessionManager, httpContext)
+	onboardingSubFlow, err := NewPasskeyOnboardingSubFlow(cfg, persister)
 	if err != nil {
 		return nil, err
 	}
