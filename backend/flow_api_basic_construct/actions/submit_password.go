@@ -45,6 +45,10 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}
 
+		if emailModel == nil {
+			return a.wrongCredentialsError(c)
+		}
+
 		userID = *emailModel.UserID
 	} else if c.Stash().Get("username").Exists() {
 		username := c.Stash().Get("username").String()
