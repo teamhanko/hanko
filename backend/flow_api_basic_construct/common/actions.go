@@ -15,7 +15,7 @@ const (
 	ActionGetWARequestOptions                    flowpilot.ActionName = "get_wa_request_options"
 	ActionSendWAAssertionResponse                flowpilot.ActionName = "send_wa_request_response"
 	ActionGetWACreationOptions                   flowpilot.ActionName = "get_wa_creation_options"
-	ActionSendWAAttestationResponse              flowpilot.ActionName = "send_wa_attestation_options"
+	ActionSendWAAttestationResponse              flowpilot.ActionName = "send_wa_attestation_response"
 	ActionSubmitPassword                         flowpilot.ActionName = "submit_password"
 	ActionSubmitNewPassword                      flowpilot.ActionName = "submit_new_password"
 	ActionSubmitTOTPCode                         flowpilot.ActionName = "submit_totp_code"

@@ -4,32 +4,23 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/session"
 	"strings"
 )
 
-func NewSendWAAttestationResponse(cfg config.Config, persister persistence.Persister, wa *webauthnLib.WebAuthn, sessionManager session.Manager, httpContext echo.Context) SendWAAttestationResponse {
+func NewSendWAAttestationResponse(persister persistence.Persister, wa *webauthnLib.WebAuthn) SendWAAttestationResponse {
 	return SendWAAttestationResponse{
-		cfg,
 		persister,
 		wa,
-		sessionManager,
-		httpContext,
 	}
 }
 
 type SendWAAttestationResponse struct {
-	cfg            config.Config
-	persister      persistence.Persister
-	wa             *webauthnLib.WebAuthn
-	sessionManager session.Manager
-	httpContext    echo.Context
+	persister persistence.Persister
+	wa        *webauthnLib.WebAuthn
 }
 
 func (m SendWAAttestationResponse) GetName() flowpilot.ActionName {
