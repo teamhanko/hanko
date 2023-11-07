@@ -8,7 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"strings"
+	"regexp"
 )
 
 func NewSubmitLoginIdentifier(cfg config.Config, persister persistence.Persister, httpContext echo.Context) SubmitLoginIdentifier {
@@ -61,9 +61,9 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	identifier := c.Input().Get("identifier").String()
+	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 
-	// TODO: Maybe think of better check?
-	if strings.Contains(identifier, "@") {
+	if isEmail := emailPattern.MatchString(identifier); isEmail {
 		// User has submitted an email address.
 
 		if err := c.Stash().Set("email", identifier); err != nil {
