@@ -8,7 +8,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
-	"log"
 	"net/http"
 	"testing"
 )
@@ -29,20 +28,24 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 	}
 
 	tests := []struct {
-		name          string
-		input         string
-		flowId        string
-		cfg           config.Config
-		expectedState flowpilot.StateName
-		statusCode    int
+		name               string
+		input              string
+		flowId             string
+		cfg                config.Config
+		expectedState      flowpilot.StateName
+		expectedInputError flowpilot.InputError
+		expectedFlowError  flowpilot.FlowError
+		statusCode         int
 	}{
 		{
-			name:          "submit a new password",
-			input:         `{"new_password": "SuperSecure"}`,
-			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
-			cfg:           config.Config{},
-			expectedState: common.StateSuccess,
-			statusCode:    http.StatusOK,
+			name:               "submit a new password",
+			input:              `{"new_password": "SuperSecure"}`,
+			flowId:             "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
+			cfg:                config.Config{},
+			expectedState:      common.StateSuccess,
+			expectedInputError: nil,
+			expectedFlowError:  nil,
+			statusCode:         http.StatusOK,
 		},
 		{
 			name:   "submit a new password that is too short",
@@ -53,16 +56,20 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					MinPasswordLength: 8,
 				},
 			},
-			expectedState: common.StatePasswordCreation,
-			statusCode:    http.StatusBadRequest,
+			expectedState:      common.StatePasswordCreation,
+			expectedInputError: flowpilot.ErrorValueTooShort,
+			expectedFlowError:  flowpilot.ErrorFormDataInvalid,
+			statusCode:         http.StatusBadRequest,
 		},
 		{
-			name:          "submit a password that is too long",
-			input:         `{"new_password": "ThisIsAVeryVeryLongPasswordToCheckTheLengthCheckAndItMustBeVeryLongInOrderToDoSo"}`,
-			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
-			cfg:           config.Config{},
-			expectedState: common.StatePasswordCreation,
-			statusCode:    http.StatusBadRequest,
+			name:               "submit a password that is too long",
+			input:              `{"new_password": "ThisIsAVeryVeryLongPasswordToCheckTheLengthCheckAndItMustBeVeryLongInOrderToDoSo"}`,
+			flowId:             "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
+			cfg:                config.Config{},
+			expectedState:      common.StatePasswordCreation,
+			expectedInputError: flowpilot.ErrorValueTooLong,
+			expectedFlowError:  flowpilot.ErrorFormDataInvalid,
+			statusCode:         http.StatusBadRequest,
 		},
 		{
 			name:   "submit a new password and webauthn is not available and passkey onboarding is enabled",
@@ -75,8 +82,10 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					},
 				},
 			},
-			expectedState: common.StateSuccess,
-			statusCode:    http.StatusOK,
+			expectedState:      common.StateSuccess,
+			expectedInputError: nil,
+			expectedFlowError:  nil,
+			statusCode:         http.StatusOK,
 		},
 		{
 			name:   "submit a new password and webauthn is available and passkey onboarding is disabled",
@@ -89,8 +98,10 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					},
 				},
 			},
-			expectedState: common.StateSuccess,
-			statusCode:    http.StatusOK,
+			expectedState:      common.StateSuccess,
+			expectedInputError: nil,
+			expectedFlowError:  nil,
+			statusCode:         http.StatusOK,
 		},
 		{
 			name:   "submit a new password and webauthn is available and passkey onboarding is enabled",
@@ -103,8 +114,10 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					},
 				},
 			},
-			expectedState: common.StateOnboardingCreatePasskey,
-			statusCode:    http.StatusOK,
+			expectedState:      common.StateOnboardingCreatePasskey,
+			expectedInputError: nil,
+			expectedFlowError:  nil,
+			statusCode:         http.StatusOK,
 		},
 	}
 
@@ -141,9 +154,13 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			s.Equal(currentTest.statusCode, result.Status())
 			s.Equal(currentTest.expectedState, result.Response().StateName)
 
-			log.Println(result.Response().PublicError)
-			// TODO: check that the schema of the action returns the correct error_code e.g.
-			// result.Response().PublicActions[0].PublicSchema[0].PublicError.Code == ErrorValueInvalid
+			if currentTest.expectedFlowError != nil {
+				s.Equal(currentTest.expectedFlowError.Code(), result.Response().PublicError.Code)
+			}
+
+			if currentTest.expectedInputError != nil {
+				s.Equal(currentTest.expectedInputError.Code(), result.Response().PublicActions[0].PublicSchema[0].PublicError.Code)
+			}
 		})
 	}
 
