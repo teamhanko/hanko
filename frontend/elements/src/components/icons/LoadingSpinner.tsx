@@ -19,18 +19,21 @@ const LoadingSpinner = ({
   secondary,
   hasIcon,
 }: Props) => {
+  const partName = "loading-spinner-container";
+
   return (
     <Fragment>
       {isLoading ? (
-        <div className={styles.loadingSpinnerWrapper}>
+        <div className={styles.loadingSpinnerWrapper} part={partName}>
           <Icon name={"spinner"} secondary={secondary} />
         </div>
       ) : isSuccess ? (
-        <div className={styles.loadingSpinnerWrapper}>
+        <div className={styles.loadingSpinnerWrapper} part={partName}>
           <Icon name={"checkmark"} secondary={secondary} fadeOut={fadeOut} />
         </div>
       ) : (
         <div
+          part={partName}
           className={
             hasIcon
               ? styles.loadingSpinnerWrapperIcon

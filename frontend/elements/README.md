@@ -440,6 +440,7 @@ The following parts are available:
 - `divider-text` - the divider text
 - `divider-line` - the line before and after the `divider-text`
 - `form-item` - the container of a form item, e.g. an input field or a button
+- `loading-spinner-container` - a container that wraps texts or icons to be replaced by a loading spinner.
 
 #### Examples
 
