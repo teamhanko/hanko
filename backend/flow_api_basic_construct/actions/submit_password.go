@@ -117,6 +117,10 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user to stash: %w", err)
 	}
 
+	if a.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
+	}
+
 	return c.ContinueFlow(common.StateSuccess)
 }
 
