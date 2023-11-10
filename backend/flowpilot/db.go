@@ -9,7 +9,7 @@ import (
 // FlowModel represents the database model for a defaultFlow.
 type FlowModel struct {
 	ID           uuid.UUID // Unique ID of the defaultFlow.
-	CurrentState StateName // Current addState of the defaultFlow.
+	CurrentState StateName // Current state of the defaultFlow.
 	StashData    string    // Stash data associated with the defaultFlow.
 	Version      int       // Version of the defaultFlow.
 	ExpiresAt    time.Time // Expiry time of the defaultFlow.
@@ -22,8 +22,8 @@ type TransitionModel struct {
 	ID        uuid.UUID  // Unique ID of the Transition.
 	FlowID    uuid.UUID  // ID of the associated defaultFlow.
 	Action    ActionName // Name of the action associated with the Action.
-	FromState StateName  // Source addState of the Transition.
-	ToState   StateName  // Target addState of the Transition.
+	FromState StateName  // Source state of the Transition.
+	ToState   StateName  // Target state of the Transition.
 	InputData string     // Input data associated with the Transition.
 	ErrorCode *string    // Optional error code associated with the Transition.
 	CreatedAt time.Time  // Creation time of the Transition.
@@ -60,10 +60,11 @@ func wrapDB(db FlowDB) flowDBWrapper {
 	return &defaultFlowDBWrapper{FlowDB: db}
 }
 
-// flowCreationParam holds parameters for creating a new defaultFlow.
+// flowCreationParam holds parameters for creating a new flow.
 type flowCreationParam struct {
-	currentState StateName // Initial addState of the defaultFlow.
-	expiresAt    time.Time // Expiry time of the defaultFlow.
+	currentState StateName // Initial state  of the flow.
+	stash        string    //
+	expiresAt    time.Time // Expiry time of the flow.
 }
 
 // CreateFlowWithParam creates a new defaultFlow with the given parameters.
@@ -78,7 +79,7 @@ func (w *defaultFlowDBWrapper) createFlowWithParam(p flowCreationParam) (*FlowMo
 	fm := FlowModel{
 		ID:           flowID,
 		CurrentState: p.currentState,
-		StashData:    "{}",
+		StashData:    p.stash,
 		Version:      0,
 		ExpiresAt:    p.expiresAt,
 		CreatedAt:    time.Now().UTC(),
@@ -94,17 +95,17 @@ func (w *defaultFlowDBWrapper) createFlowWithParam(p flowCreationParam) (*FlowMo
 	return &fm, nil
 }
 
-// flowUpdateParam holds parameters for updating a defaultFlow.
+// flowUpdateParam holds parameters for updating a flow.
 type flowUpdateParam struct {
 	flowID    uuid.UUID // ID of the flow to update.
-	nextState StateName // Next addState of the flow.
+	nextState StateName // Next state of the flow.
 	stashData string    // Updated stash data for the flow.
 	version   int       // Updated version of the flow.
 	expiresAt time.Time // Updated expiry time of the flow.
 	createdAt time.Time // Original creation time of the flow.
 }
 
-// UpdateFlowWithParam updates the specified defaultFlow with the given parameters.
+// UpdateFlowWithParam updates the specified flow with the given parameters.
 func (w *defaultFlowDBWrapper) updateFlowWithParam(p flowUpdateParam) (*FlowModel, error) {
 	// Prepare the updated FlowModel.
 	fm := FlowModel{
@@ -128,10 +129,10 @@ func (w *defaultFlowDBWrapper) updateFlowWithParam(p flowUpdateParam) (*FlowMode
 
 // transitionCreationParam holds parameters for creating a new Transition.
 type transitionCreationParam struct {
-	flowID     uuid.UUID  // ID of the associated defaultFlow.
+	flowID     uuid.UUID  // ID of the associated flow.
 	actionName ActionName // Name of the action associated with the Transition.
-	fromState  StateName  // Source addState of the Transition.
-	toState    StateName  // Target addState of the Transition.
+	fromState  StateName  // Source state of the Transition.
+	toState    StateName  // Target state of the Transition.
 	inputData  string     // Input data associated with the Transition.
 	flowError  FlowError  // Optional flowError associated with the Transition.
 }
