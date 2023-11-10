@@ -35,6 +35,7 @@
   transition: 0.1s ease-out
   flex-grow: 1
   flex-shrink: 1
+  display: inline-flex
 
   &:disabled
     cursor: default
@@ -43,6 +44,7 @@
     color: variables.$brand-contrast-color
     background: variables.$brand-color
     border-color: variables.$brand-color
+    justify-content: center
 
   &.primary:hover
     color: variables.$brand-contrast-color
@@ -63,6 +65,7 @@
     color: variables.$color
     background: variables.$background-color
     border-color: variables.$color
+    justify-content: left
 
   &.secondary:hover
     color: variables.$color
