@@ -34,5 +34,9 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
+	if a.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+		return c.StartSubFlow(common.StatePasscodeConfirmation, common.StateOnboardingCreatePasskey, common.StateSuccess)
+	}
+
+	return c.StartSubFlow(common.StatePasscodeConfirmation, common.StateSuccess)
 }
