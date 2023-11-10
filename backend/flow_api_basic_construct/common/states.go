@@ -6,7 +6,8 @@ const (
 	StateSuccess flowpilot.StateName = "success"
 	StateError   flowpilot.StateName = "error"
 
-	StateLoginPreflight                    flowpilot.StateName = "login_preflight"
+	StatePreflight flowpilot.StateName = "login_preflight"
+
 	StateLoginInit                         flowpilot.StateName = "login_init"
 	StateLoginMethodChooser                flowpilot.StateName = "login_method_chooser"
 	StateLoginPassword                     flowpilot.StateName = "login_password"
@@ -18,7 +19,6 @@ const (
 	StateUseRecoveryCode                   flowpilot.StateName = "use_recovery_code"
 	StateLoginPasswordRecovery             flowpilot.StateName = "login_password_recovery"
 
-	StateRegistrationPreflight            flowpilot.StateName = "registration_preflight"
 	StateRegistrationInit                 flowpilot.StateName = "registration_init"
 	StateRegistrationPasscodeConfirmation flowpilot.StateName = "registration_passcode_confirmation"
 	StatePasswordCreation                 flowpilot.StateName = "password_creation"

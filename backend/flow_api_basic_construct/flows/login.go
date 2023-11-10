@@ -23,8 +23,9 @@ func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeSe
 		return nil, err
 	}
 
+	capabilitiesSubFlow := NewCapabilitiesSubFlow(cfg)
+
 	return flowpilot.NewFlow("/login").
-		State(common.StateLoginPreflight, actions.NewSendCapabilities(cfg)).
 		State(common.StateLoginInit, actions.NewSubmitLoginIdentifier(cfg, persister, httpContext), actions.NewLoginWithOauth(), actions.NewGetWARequestOptions(cfg, persister, webauthn)).
 		State(common.StateLoginMethodChooser,
 			actions.NewGetWARequestOptions(cfg, persister, webauthn),
@@ -49,8 +50,8 @@ func NewLoginFlow(cfg config.Config, persister persistence.Persister, passcodeSe
 		State(common.StateError).
 		BeforeState(common.StateLoginPasscodeConfirmation, hooks.NewSendPasscode(passcodeService, httpContext)).
 		BeforeState(common.StateLoginPasscodeConfirmationRecovery, hooks.NewSendPasscode(passcodeService, httpContext)).
-		SubFlows(onboardingSubFlow).
-		InitialState(common.StateLoginPreflight).
+		SubFlows(capabilitiesSubFlow, onboardingSubFlow).
+		InitialState(common.StatePreflight, common.StateLoginInit).
 		ErrorState(common.StateError).
 		TTL(10 * time.Minute).
 		MustBuild(), nil

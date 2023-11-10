@@ -9,6 +9,6 @@ import (
 
 func NewCapabilitiesSubFlow(cfg config.Config) flowpilot.SubFlow {
 	return flowpilot.NewSubFlow().
-		State(common.StateLoginPreflight, actions.NewSendCapabilities(cfg)).
+		State(common.StatePreflight, actions.NewSendCapabilities(cfg)).
 		MustBuild()
 }
