@@ -58,6 +58,14 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			expectedState: common.StateOnboardingVerifyPasskeyAttestation,
 			statusCode:    http.StatusOK,
 		},
+		{
+			name:          "error state and forbidden status if webauthn not available and action is suspended",
+			input:         "",
+			flowId:        "be57518c-6bd5-4b3e-a91a-6c082e212a58",
+			cfg:           config.Config{},
+			expectedState: common.StateError,
+			statusCode:    http.StatusForbidden,
+		},
 	}
 
 	for _, currentTest := range tests {

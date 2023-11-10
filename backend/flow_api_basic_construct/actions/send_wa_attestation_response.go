@@ -33,6 +33,11 @@ func (m SendWAAttestationResponse) GetDescription() string {
 }
 
 func (m SendWAAttestationResponse) Initialize(c flowpilot.InitializationContext) {
+	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	if !webAuthnAvailable {
+		c.SuspendAction()
+	}
+
 	c.AddInputs(flowpilot.StringInput("public_key").Required(true).Persist(false))
 }
 
