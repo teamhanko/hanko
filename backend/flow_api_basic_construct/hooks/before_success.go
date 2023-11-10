@@ -2,6 +2,7 @@ package hooks
 
 import (
 	"encoding/json"
+	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -36,7 +37,7 @@ func (m BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
 	if c.Stash().Get("user_id").Exists() {
 		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 		}
 	}
 
@@ -44,7 +45,7 @@ func (m BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
 	var passkeyCredential webauthnLib.Credential
 	err = json.Unmarshal([]byte(passkeyCredentialStr), &passkeyCredential)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal stashed passkey_credential: %w", err)
 	}
 	passkeyBackupEligible := c.Stash().Get("passkey_backup_eligible").Bool()
 	passkeyBackupState := c.Stash().Get("passkey_backup_state").Bool()
@@ -59,16 +60,16 @@ func (m BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
 		c.Stash().Get("new_password").String(),
 	)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create user: %w", err)
 	}
 
 	sessionToken, err := m.sessionManager.GenerateJWT(userId)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 	cookie, err := m.sessionManager.GenerateCookie(sessionToken)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate auth cookie, %w", err)
 	}
 
 	m.httpContext.SetCookie(cookie)
