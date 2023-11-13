@@ -34,5 +34,5 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	return c.ContinueFlow(common.StateLoginPasscodeConfirmationRecovery)
+	return c.StartSubFlow(common.StatePasscodeConfirmation, common.StateLoginPasswordRecovery)
 }

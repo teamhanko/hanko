@@ -20,16 +20,26 @@ func NewRegistrationFlow(cfg config.Config, persister persistence.Persister, pas
 	}
 
 	capabilitiesSubFlow := NewCapabilitiesSubFlow(cfg)
+=======
+	passkeySubFlow, err := NewPasscodeSubFlow(cfg, persister, passcodeService, httpContext)
+	if err != nil {
+		return nil, err
+	}
+>>>>>>> e0eb5601 (feat: flowpilot subflow for passcodes (#1187))
 
 	return flowpilot.NewFlow("/registration").
 		State(common.StateRegistrationInit, actions.NewSubmitRegistrationIdentifier(cfg, persister, passcodeService, httpContext), actions.NewLoginWithOauth()).
-		State(common.StateRegistrationPasscodeConfirmation, actions.NewSubmitPasscode(cfg, persister)).
 		State(common.StatePasswordCreation, actions.NewSubmitNewPassword(cfg)).
 		BeforeState(common.StateSuccess, hooks.NewBeforeSuccess(persister, sessionManager, httpContext)).
 		State(common.StateSuccess).
 		State(common.StateError).
+<<<<<<< HEAD
 		SubFlows(capabilitiesSubFlow, passkeyOnboardingSubFlow).
 		InitialState(common.StatePreflight, common.StateRegistrationInit).
+=======
+		SubFlows(passkeyOnboardingSubFlow, passkeySubFlow).
+		InitialState(common.StateRegistrationPreflight).
+>>>>>>> e0eb5601 (feat: flowpilot subflow for passcodes (#1187))
 		ErrorState(common.StateError).
 		TTL(10 * time.Minute).
 		Debug(true).

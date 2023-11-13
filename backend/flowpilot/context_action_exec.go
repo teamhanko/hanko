@@ -135,7 +135,7 @@ func (aec *defaultActionExecutionContext) executeHookActions(nextStateName State
 	for _, hook := range nextState.beforeHooks {
 		err = hook.Execute(aec)
 		if err != nil {
-			return fmt.Errorf("failed to execute hook action before state: %w", err)
+			return fmt.Errorf("failed to execute hook action before state '%s': %w", nextState.name, err)
 		}
 	}
 
