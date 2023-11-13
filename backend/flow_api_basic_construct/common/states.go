@@ -6,7 +6,7 @@ const (
 	StateSuccess flowpilot.StateName = "success"
 	StateError   flowpilot.StateName = "error"
 
-	StatePreflight flowpilot.StateName = "login_preflight"
+	StatePreflight flowpilot.StateName = "preflight"
 
 	StateLoginInit                         flowpilot.StateName = "login_init"
 	StateLoginMethodChooser                flowpilot.StateName = "login_method_chooser"
