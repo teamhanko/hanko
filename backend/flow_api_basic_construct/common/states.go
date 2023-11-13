@@ -8,20 +8,19 @@ const (
 
 	StatePreflight flowpilot.StateName = "preflight"
 
-	StateLoginInit                         flowpilot.StateName = "login_init"
-	StateLoginMethodChooser                flowpilot.StateName = "login_method_chooser"
-	StateLoginPassword                     flowpilot.StateName = "login_password"
-	StateLoginPasscodeConfirmation         flowpilot.StateName = "login_passcode_confirmation"
-	StateLoginPasscodeConfirmationRecovery flowpilot.StateName = "login_passcode_confirmation_recovery"
-	StateLoginPasskey                      flowpilot.StateName = "login_passkey"
-	StateUse2FATOTP                        flowpilot.StateName = "use_2fa_totp"
-	StateUse2FASecurityKey                 flowpilot.StateName = "use_2fa_security_key"
-	StateUseRecoveryCode                   flowpilot.StateName = "use_recovery_code"
-	StateLoginPasswordRecovery             flowpilot.StateName = "login_password_recovery"
+	StatePasscodeConfirmation flowpilot.StateName = "passcode_confirmation"
 
-	StateRegistrationInit                 flowpilot.StateName = "registration_init"
-	StateRegistrationPasscodeConfirmation flowpilot.StateName = "registration_passcode_confirmation"
-	StatePasswordCreation                 flowpilot.StateName = "password_creation"
+	StateLoginInit             flowpilot.StateName = "login_init"
+	StateLoginMethodChooser    flowpilot.StateName = "login_method_chooser"
+	StateLoginPassword         flowpilot.StateName = "login_password"
+	StateLoginPasskey          flowpilot.StateName = "login_passkey"
+	StateUse2FATOTP            flowpilot.StateName = "use_2fa_totp"
+	StateUse2FASecurityKey     flowpilot.StateName = "use_2fa_security_key"
+	StateUseRecoveryCode       flowpilot.StateName = "use_recovery_code"
+	StateLoginPasswordRecovery flowpilot.StateName = "login_password_recovery"
+
+	StateRegistrationInit flowpilot.StateName = "registration_init"
+	StatePasswordCreation flowpilot.StateName = "password_creation"
 
 	StateOnboardingCreatePasskey            flowpilot.StateName = "onboarding_create_passkey"
 	StateOnboardingVerifyPasskeyAttestation flowpilot.StateName = "onboarding_verify_passkey_attestation"
