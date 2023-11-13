@@ -53,7 +53,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: common.StateEmailVerification,
+			expectedState: common.StateRegistrationPasscodeConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -97,7 +97,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: common.StateEmailVerification,
+			expectedState: common.StateRegistrationPasscodeConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -138,7 +138,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: common.StateEmailVerification,
+			expectedState: common.StateRegistrationPasscodeConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -330,7 +330,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 
 			flow, err := flowpilot.NewFlow("/registration_test").
 				State(common.StateRegistrationInit, NewSubmitRegistrationIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
-				State(common.StateEmailVerification).
+				State(common.StateRegistrationPasscodeConfirmation).
 				State(common.StateSuccess).
 				State(common.StatePasswordCreation).
 				SubFlows(passkeySubFlow).
@@ -367,5 +367,9 @@ func (t *testPasscodeService) SendLogin(flowID uuid.UUID, emailAddress string, l
 }
 
 func (t *testPasscodeService) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+	return uuid.NewV4()
+}
+
+func (t *testPasscodeService) SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
 	return uuid.NewV4()
 }

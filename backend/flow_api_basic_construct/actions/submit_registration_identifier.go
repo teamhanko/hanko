@@ -118,7 +118,7 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		if err != nil {
 			return err
 		}
-		return c.ContinueFlow(common.StateEmailVerification)
+		return c.ContinueFlow(common.StateRegistrationPasscodeConfirmation)
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
 	} else if !m.cfg.Passcode.Enabled {
