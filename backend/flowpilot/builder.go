@@ -139,10 +139,13 @@ func (fb *defaultFlowBuilder) validate() error {
 		return errors.New("fixed state 'errorState' is not set")
 	}
 	if !fb.flow.stateExists(fb.initialStateName) && !fb.subFlows.stateExists(fb.initialStateName) {
-		return errors.New("fixed state 'initialState' does not belong to the flow or a sub-flow")
+		return fmt.Errorf("initial state '%s' does not belong to the flow or a sub-flow", fb.initialStateName)
 	}
 	if !fb.flow.stateExists(fb.errorStateName) {
-		return errors.New("fixed state 'errorState' does not belong to the flow")
+		return fmt.Errorf("error state '%s' does not belong to the flow", fb.errorStateName)
+	}
+	if !fb.subFlows.stateExists(fb.initialStateName) && len(fb.initialNextStateNames) > 0 {
+		return fmt.Errorf("initial state '%s' is not a sub-flow state, but next states have been provided", fb.initialStateName)
 	}
 
 	// Validate the specified next states, when the flow starts with a sub-flow.
