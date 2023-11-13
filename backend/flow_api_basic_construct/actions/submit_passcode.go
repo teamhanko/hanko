@@ -88,13 +88,22 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	// TODO: This the current routing is only for the registration flow, when this action is/will be used in the login flow on other states, then the routing needs to be changed accordingly
-	// Decide which is the next state according to the config and user input
-	if m.cfg.Password.Enabled {
-		return c.ContinueFlow(common.StatePasswordCreation)
-	} else if !m.cfg.Passcode.Enabled || (m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
-		return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
+	switch c.GetCurrentState() {
+	case common.StateRegistrationPasscodeConfirmation:
+		if m.cfg.Password.Enabled {
+			return c.ContinueFlow(common.StatePasswordCreation)
+		} else if !m.cfg.Passcode.Enabled || (m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
+			return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
+		}
+	case common.StateLoginPasscodeConfirmation:
+		if m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+			return c.StartSubFlow(common.StateOnboardingCreatePasskey, common.StateSuccess)
+		}
+
+		return c.ContinueFlow(common.StateSuccess)
+	case common.StateLoginPasscodeConfirmationRecovery:
+		return c.ContinueFlow(common.StateLoginPasswordRecovery)
 	}
 
-	return c.ContinueFlow(common.StateSuccess)
+	return flowpilot.ErrorFlowDiscontinuity
 }

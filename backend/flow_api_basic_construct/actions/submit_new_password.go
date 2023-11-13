@@ -43,7 +43,7 @@ func (m SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if len(newPasswordBytes) > 72 {
-		c.Input().SetError("new_password", flowpilot.ErrorValueInvalid)
+		c.Input().SetError("new_password", flowpilot.ErrorValueTooLong)
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 

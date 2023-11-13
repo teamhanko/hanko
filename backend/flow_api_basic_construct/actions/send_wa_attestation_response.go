@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
@@ -32,6 +33,11 @@ func (m SendWAAttestationResponse) GetDescription() string {
 }
 
 func (m SendWAAttestationResponse) Initialize(c flowpilot.InitializationContext) {
+	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	if !webAuthnAvailable {
+		c.SuspendAction()
+	}
+
 	c.AddInputs(flowpilot.StringInput("public_key").Required(true).Persist(false))
 }
 
@@ -75,10 +81,7 @@ func (m SendWAAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
 
 	err = m.persister.GetWebauthnSessionDataPersister().Delete(*sessionData)
 	if err != nil {
-		// TODO: should we return an error here or just log the error because it is not that critical to delete
-		// the session data as the flow will be marked as complete directly afterwards and the session data are
-		// linked to the flow
-		return err
+		return fmt.Errorf("failed to delete webauthn session data: %w", err)
 	}
 
 	return c.EndSubFlow()

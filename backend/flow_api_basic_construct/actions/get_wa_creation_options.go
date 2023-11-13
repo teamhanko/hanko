@@ -35,7 +35,10 @@ func (m GetWACreationOptions) GetDescription() string {
 }
 
 func (m GetWACreationOptions) Initialize(c flowpilot.InitializationContext) {
-	return
+	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	if !webAuthnAvailable {
+		c.SuspendAction()
+	}
 }
 
 func (m GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {

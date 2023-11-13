@@ -113,8 +113,14 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	stash := NewStash()
 	payload := NewPayload()
 
+	// Add the initial next states to the stash to be scheduled after the initial sub-flow.
+	err := stash.addScheduledStates(flow.initialNextStateNames...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
+	}
+
 	// Create a new flow model with the provided parameters.
-	flowCreation := flowCreationParam{currentState: flow.initialStateName, expiresAt: expiresAt}
+	flowCreation := flowCreationParam{currentState: flow.initialStateName, stash: stash.String(), expiresAt: expiresAt}
 	flowModel, err := dbw.createFlowWithParam(flowCreation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create flow: %w", err)
@@ -129,7 +135,6 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		payload:   payload,
 	}
 
-	// Generate a response based on the execution result.
 	er := executionResult{nextStateName: flowModel.CurrentState}
 
 	return er.generateResponse(fc, flow.debug), nil

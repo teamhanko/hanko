@@ -15,6 +15,7 @@ type Passcode interface {
 	SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
 	SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
 	PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
+	SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error)
 }
 
 type passcode struct {
@@ -34,18 +35,18 @@ func NewPasscodeService(cfg config.Config, emailService Email, persister persist
 }
 
 func (service *passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return service.sendPasscode(flowID, "email_verification", emailAddress, lang)
+	return service.SendPasscode(flowID, "email_verification", emailAddress, lang)
 }
 
 func (service *passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return service.sendPasscode(flowID, "login", emailAddress, lang)
+	return service.SendPasscode(flowID, "login", emailAddress, lang)
 }
 
 func (service *passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return service.sendPasscode(flowID, "password_recovery", emailAddress, lang)
+	return service.SendPasscode(flowID, "password_recovery", emailAddress, lang)
 }
 
-func (service *passcode) sendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
+func (service *passcode) SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
 	code, err := service.passcodeGenerator.Generate()
 	if err != nil {
 		return uuid.Nil, err

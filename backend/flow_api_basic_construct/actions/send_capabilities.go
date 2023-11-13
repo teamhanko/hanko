@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"errors"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -54,12 +53,5 @@ func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	switch c.GetCurrentState() {
-	case common.StateRegistrationPreflight:
-		return c.ContinueFlow(common.StateRegistrationInit)
-	case common.StateLoginPreflight:
-		return c.ContinueFlow(common.StateLoginInit)
-	default:
-		return errors.New("unknown parent state")
-	}
+	return c.EndSubFlow()
 }

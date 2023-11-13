@@ -55,7 +55,7 @@ func (p *userPersister) GetByEmail(email string) (*models.User, error) {
 
 func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	user := models.User{}
-	err := p.db.Eager().Where("username = (?)", username).First(&user)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identity", "WebauthnCredentials").Where("username = (?)", username).First(&user)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

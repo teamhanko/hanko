@@ -10,6 +10,15 @@ email_subject_login:
 subject_email_verification:
   description: ""
   other: "Use passcode {{ .Code }} to verify your email address"
+subject_login:
+  description: ""
+  other: "Use passcode {{ .Code }} to login to your account"
+subject_recovery:
+  description: ""
+  other: "Use passcode {{ .Code }} to recover your account"
 email_verification_text:
   description: ""
   other: "Enter the following passcode to verify your email address:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Enter the following passcode on your login screen:"

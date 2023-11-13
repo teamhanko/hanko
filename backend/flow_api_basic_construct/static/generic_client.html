@@ -33,16 +33,13 @@
     </style>
 </head>
 <body>
-<h1>✨ Login</h1>
-<button id="newLoginFlowBtn">✍ New login flow</button>
+<h1>✨ Generic Flowpilot Client</h1>
+<button id="newLoginFlowBtn">✍ New flow</button>
 
 <label for="options"></label>
 <select id="options">
-    <option value="1">Passcodes Only</option>
-    <option value="8">Passcodes and Passwords</option>
-    <option value="4">Passcodes with Email Verification</option>
-    <option value="12">Passcodes with Email Verification and Passwords</option>
-    <option value="14">Second Factor Flow</option>
+    <option value="login">Login</option>
+    <option value="registration">Registration</option>
 </select>
 
 <div id="container"></div>
@@ -58,7 +55,9 @@
 <script type="module">
     import {
         parseCreationOptionsFromJSON,
-        create
+        parseRequestOptionsFromJSON,
+        create,
+        get
     } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
 
     async function webauthnCreate(payload) {
@@ -67,18 +66,31 @@
         return JSON.stringify(response)
     }
 
-    const passkeyHandler = async (payload) => {
+    async function webauthnGet(payload) {
+      const options = parseRequestOptionsFromJSON(payload)
+      const response = await get(options)
+      return JSON.stringify(response)
+    }
+
+    const passkeyRegisterHandler = async (payload) => {
         // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
 
         console.log(payload)
         document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creationOptions)
     }
 
+    const passkeyLoginHandler = async (payload) => {
+      // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+
+      console.log(payload)
+      document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
+    }
+
     const stateHandler = {
-        "loginPasskey": passkeyHandler,
-        "passkey_login": passkeyHandler,
-        "passkey_registration": passkeyHandler,
-        "onboarding_verify_passkey_attestation": passkeyHandler
+        "login_passkey": passkeyLoginHandler,
+        "passkey_login": passkeyLoginHandler,
+        "passkey_registration": passkeyRegisterHandler,
+        "onboarding_verify_passkey_attestation": passkeyRegisterHandler
     }
 
     function generateUI(data) {
@@ -95,7 +107,7 @@
 
         if (data.error) {
             const errorEl = document.createElement('p');
-            errorEl.textContent = `Code: ${data.error.code}, Message: ${data.error.message}`
+            errorEl.textContent = `Code: ${data.error.code}, Message: ${data.error.message}, Cause: ${data.error.cause}`
             container.appendChild(errorEl);
         } else {
             const notAvailable = document.createElement('p');
@@ -246,10 +258,10 @@
         return data
     }
 
-    function getFlowOption() {
+    function getFlowPath() {
         const optionsEl = document.getElementById("options");
         const selectedIndex = optionsEl.selectedIndex;
-        return parseInt(optionsEl.options[selectedIndex].value, 10);
+        return "/" + optionsEl.options[selectedIndex].value
     }
 
     function updateFlow(event, form) {
@@ -261,7 +273,7 @@
                 "Content-Type": "application/json"
             },
             method: form.method,
-            body: JSON.stringify({input_data: body, flow_option: getFlowOption()}),
+            body: JSON.stringify({input_data: body}),
         })
             .then(response => response.json())
             .then(generateUI)
@@ -269,12 +281,12 @@
     }
 
     function createFlow() {
-        fetch("/registration", {
+        fetch(getFlowPath(), {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({flow_option: getFlowOption()})
+            body: JSON.stringify({flow_option: getFlowPath()})
         })
             .then((resp) => resp.json())
             .then(generateUI)
