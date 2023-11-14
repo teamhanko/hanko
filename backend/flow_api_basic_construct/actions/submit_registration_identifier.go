@@ -2,6 +2,7 @@ package actions
 
 import (
 	"errors"
+	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/common"
@@ -109,16 +110,15 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 
 	// Decide which is the next state according to the config and user input
 	if email != "" && m.cfg.Emails.RequireVerification {
-		// TODO: rate limit sending emails
-		passcodeId, err := m.passcodeService.SendEmailVerification(c.GetFlowID(), email, m.httpContext.Request().Header.Get("Accept-Language"))
-		if err != nil {
-			return err
+		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
+			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
-		err = c.Stash().Set("passcode_id", passcodeId)
-		if err != nil {
-			return err
+
+		if m.cfg.Password.Enabled {
+			return c.StartSubFlow(common.StatePasscodeConfirmation, common.StatePasswordCreation)
+		} else if !m.cfg.Passcode.Enabled || (m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
+			return c.StartSubFlow(common.StatePasscodeConfirmation, common.StateOnboardingCreatePasskey, common.StateSuccess)
 		}
-		return c.ContinueFlow(common.StateRegistrationPasscodeConfirmation)
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(common.StatePasswordCreation)
 	} else if !m.cfg.Passcode.Enabled {

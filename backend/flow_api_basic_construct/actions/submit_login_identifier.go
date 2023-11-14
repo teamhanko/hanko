@@ -103,7 +103,7 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err := c.Stash().Set("passcode_template", "login"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
-		return c.ContinueFlow(common.StateLoginPasscodeConfirmation)
+		return c.StartSubFlow(common.StatePasscodeConfirmation, common.StateSuccess)
 	}
 
 	// Username exists, but user has no emails.
