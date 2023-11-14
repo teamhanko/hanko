@@ -86,10 +86,10 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(common.StateRegistrationPreflight).
+				State(common.StatePreflight).
 				State(common.StateSuccess).
 				SubFlows(passkeySubFlow).
-				InitialState(common.StateRegistrationPreflight).
+				InitialState(common.StatePreflight).
 				ErrorState(common.StateError).
 				Build()
 			s.Require().NoError(err)

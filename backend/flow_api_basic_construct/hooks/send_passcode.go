@@ -26,6 +26,8 @@ func (a SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("passcode_template has not been stashed")
 	}
 
+	// TODO: rate limit sending emails
+
 	email := c.Stash().Get("email").String()
 	template := c.Stash().Get("passcode_template").String()
 	acceptLanguageHeader := a.httpContext.Request().Header.Get("Accept-Language")
