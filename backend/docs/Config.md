@@ -483,7 +483,7 @@ third_party:
     apple:
       ##
       #
-      # Enable or disable the Google provider.
+      # Enable or disable the Apple provider.
       #
       # Default: false
       #
