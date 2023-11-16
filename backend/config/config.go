@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/fatih/structs"
+	"github.com/go-webauthn/webauthn/protocol"
+	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobwas/glob"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf"
@@ -684,4 +686,31 @@ type Passkey struct {
 
 type PasskeyOnboarding struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+func (r *WebauthnSettings) GetConfig() (*webauthnLib.WebAuthn, error) {
+	requireResidentKey := false
+
+	return webauthnLib.New(&webauthnLib.Config{
+		RPID:                  r.RelyingParty.Id,
+		RPDisplayName:         r.RelyingParty.DisplayName,
+		RPOrigins:             r.RelyingParty.Origins,
+		AttestationPreference: protocol.PreferNoAttestation,
+		AuthenticatorSelection: protocol.AuthenticatorSelection{
+			RequireResidentKey: &requireResidentKey,
+			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
+			UserVerification:   protocol.VerificationRequired,
+		},
+		Debug: false,
+		Timeouts: webauthnLib.TimeoutsConfig{
+			Login: webauthnLib.TimeoutConfig{
+				Enforce: true,
+				Timeout: time.Duration(r.Timeout) * time.Millisecond,
+			},
+			Registration: webauthnLib.TimeoutConfig{
+				Enforce: true,
+				Timeout: time.Duration(r.Timeout) * time.Millisecond,
+			},
+		},
+	})
 }
