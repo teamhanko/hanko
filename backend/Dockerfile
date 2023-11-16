@@ -30,6 +30,7 @@ COPY template template/
 COPY utils utils/
 COPY mapper mapper/
 COPY webhooks webhooks/
+COPY flow_api flow_api/
 COPY flowpilot flowpilot/
 
 # Build
