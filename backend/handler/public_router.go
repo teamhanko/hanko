@@ -9,8 +9,8 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/flow_api_basic_construct"
-	"github.com/teamhanko/hanko/backend/flow_api_basic_construct/services"
+	"github.com/teamhanko/hanko/backend/flow_api"
+	services2 "github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/mail"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -20,10 +20,10 @@ import (
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
 	e := echo.New()
 
-	e.Static("/flowpilot", "flow_api_basic_construct/static") // TODO: remove!
+	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
 
-	emailService, err := services.NewEmailService(*cfg)
-	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+	emailService, err := services2.NewEmailService(*cfg)
+	passcodeService := services2.NewPasscodeService(*cfg, *emailService, persister)
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {

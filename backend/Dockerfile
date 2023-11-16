@@ -25,8 +25,7 @@ COPY rate_limiter rate_limiter/
 COPY thirdparty thirdparty/
 COPY build_info build_info/
 COPY middleware middleware/
-COPY flow_api_test flow_api_test/
-COPY flow_api_basic_construct flow_api_basic_construct/
+COPY flow_api flow_api/
 COPY flowpilot flowpilot/
 
 # Build
