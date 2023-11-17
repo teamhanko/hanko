@@ -13,13 +13,6 @@ import (
 
 var maxPasscodeTries = 3
 
-func NewSubmitPasscode(cfg config.Config, persister persistence.Persister) SubmitPasscode {
-	return SubmitPasscode{
-		cfg,
-		persister,
-	}
-}
-
 type SubmitPasscode struct {
 	cfg       config.Config
 	persister persistence.Persister

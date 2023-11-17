@@ -6,10 +6,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewLoginWithPassword() flowpilot.Action {
-	return LoginWithPassword{}
-}
-
 type LoginWithPassword struct{}
 
 func (a LoginWithPassword) GetName() flowpilot.ActionName {

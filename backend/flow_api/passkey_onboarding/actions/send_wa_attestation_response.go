@@ -12,13 +12,6 @@ import (
 	"strings"
 )
 
-func NewSendWAAttestationResponse(persister persistence.Persister, wa *webauthnLib.WebAuthn) SendWAAttestationResponse {
-	return SendWAAttestationResponse{
-		persister,
-		wa,
-	}
-}
-
 type SendWAAttestationResponse struct {
 	persister persistence.Persister
 	wa        *webauthnLib.WebAuthn

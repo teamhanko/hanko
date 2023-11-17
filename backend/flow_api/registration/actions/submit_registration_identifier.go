@@ -14,15 +14,6 @@ import (
 	"strings"
 )
 
-func NewSubmitRegistrationIdentifier(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, httpContext echo.Context) SubmitRegistrationIdentifier {
-	return SubmitRegistrationIdentifier{
-		cfg,
-		persister,
-		httpContext,
-		passcodeService,
-	}
-}
-
 // SubmitRegistrationIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
 type SubmitRegistrationIdentifier struct {
 	cfg             config.Config

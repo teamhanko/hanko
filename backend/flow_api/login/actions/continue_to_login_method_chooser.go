@@ -6,10 +6,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewContinueToLoginMethodChooser() flowpilot.Action {
-	return ContinueToLoginMethodChooser{}
-}
-
 type ContinueToLoginMethodChooser struct {
 }
 

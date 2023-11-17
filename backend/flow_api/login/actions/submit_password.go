@@ -12,10 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func NewSubmitPassword(cfg config.Config, persister persistence.Persister) SubmitPassword {
-	return SubmitPassword{cfg: cfg, persister: persister}
-}
-
 type SubmitPassword struct {
 	cfg       config.Config
 	persister persistence.Persister

@@ -13,14 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewGetWARequestOptions(cfg config.Config, persister persistence.Persister, wa *webauthnLib.WebAuthn) flowpilot.Action {
-	return GetWARequestOptions{
-		cfg,
-		persister,
-		wa,
-	}
-}
-
 type GetWARequestOptions struct {
 	cfg       config.Config
 	persister persistence.Persister

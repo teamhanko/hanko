@@ -9,10 +9,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewContinueToPasscodeConfirmationRecovery(cfg config.Config) flowpilot.Action {
-	return ContinueToPasscodeConfirmationRecovery{cfg: cfg}
-}
-
 type ContinueToPasscodeConfirmationRecovery struct {
 	cfg config.Config
 }
