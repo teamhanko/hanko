@@ -1,12 +1,12 @@
-package actions
+package registration
 
 import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
-	passcodeStates "github.com/teamhanko/hanko/backend/flow_api/passcode/states"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	passcode "github.com/teamhanko/hanko/backend/flow_api/passcode"
+	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -108,14 +108,14 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		}
 
 		if m.cfg.Password.Enabled {
-			return c.StartSubFlow(passcodeStates.StatePasscodeConfirmation, shared.StatePasswordCreation)
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StatePasswordCreation)
 		} else if !m.cfg.Passcode.Enabled || (m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
-			return c.StartSubFlow(passcodeStates.StatePasscodeConfirmation, passkeyOnboardingStates.StateOnboardingCreatePasskey, shared.StateSuccess)
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 		}
 	} else if m.cfg.Password.Enabled {
 		return c.ContinueFlow(shared.StatePasswordCreation)
 	} else if !m.cfg.Passcode.Enabled {
-		return c.StartSubFlow(passkeyOnboardingStates.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
 	// TODO: store user and create session token // should this case even exist (only works when email (optional/required) is set by the user) ???

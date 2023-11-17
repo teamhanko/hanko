@@ -1,9 +1,8 @@
-package actions
+package capabilities
 
 import (
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/capabilities/states"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -77,7 +76,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 				Passcode:     config.Passcode{Enabled: false},
 				SecondFactor: config.SecondFactor{Enabled: false},
 			},
-			expectedState: states.StatePreflight,
+			expectedState: StatePreflight,
 			statusCode:    http.StatusBadRequest,
 		},
 	}
@@ -91,11 +90,11 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(states.StatePreflight, NewSendCapabilities(currentTest.cfg)).
+				State(StatePreflight, SendCapabilities{}).
 				State(stateRegistrationInit).
 				State(shared.StateError).
 				State(shared.StateSuccess).
-				InitialState(states.StatePreflight).
+				InitialState(StatePreflight).
 				ErrorState(shared.StateError).
 				Build()
 			s.Require().NoError(err)

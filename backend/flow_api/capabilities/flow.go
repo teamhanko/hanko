@@ -1,11 +1,13 @@
 package capabilities
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/capabilities/actions"
-	"github.com/teamhanko/hanko/backend/flow_api/capabilities/states"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
+const (
+	StatePreflight flowpilot.StateName = "preflight"
+)
+
 var SubFlow = flowpilot.NewSubFlow().
-	State(states.StatePreflight, actions.SendCapabilities{}).
+	State(StatePreflight, SendCapabilities{}).
 	MustBuild()

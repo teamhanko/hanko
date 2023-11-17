@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -115,7 +115,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					},
 				},
 			},
-			expectedState:      passkeyOnboardingStates.StateOnboardingCreatePasskey,
+			expectedState:      passkeyOnboarding.StateOnboardingCreatePasskey,
 			expectedInputError: nil,
 			expectedFlowError:  nil,
 			statusCode:         http.StatusOK,
@@ -131,12 +131,12 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(passkeyOnboardingStates.StateOnboardingCreatePasskey).
+				State(passkeyOnboarding.StateOnboardingCreatePasskey).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(shared.StatePasswordCreation, NewSubmitNewPassword(currentTest.cfg)).
+				State(shared.StatePasswordCreation, SubmitNewPassword{}).
 				State(shared.StateSuccess).
 				SubFlows(passkeySubFlow).
 				InitialState(shared.StatePasswordCreation).
