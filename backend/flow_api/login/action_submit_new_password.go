@@ -1,0 +1,64 @@
+package login
+
+import (
+	"errors"
+	"fmt"
+	"github.com/gofrs/uuid"
+	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
+	"github.com/teamhanko/hanko/backend/flow_api/shared"
+	"github.com/teamhanko/hanko/backend/flowpilot"
+	"golang.org/x/crypto/bcrypt"
+)
+
+type SubmitNewPassword struct {
+	shared.Action
+}
+
+func (a SubmitNewPassword) GetName() flowpilot.ActionName {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a SubmitNewPassword) GetDescription() string {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (a SubmitNewPassword) Initialize(c flowpilot.InitializationContext) {
+	deps := a.GetDepsForInitialization(c)
+	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
+}
+
+func (a SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDepsForExecution(c)
+
+	newPassword := c.Input().Get("new_password").String()
+
+	if !c.Stash().Get("auth_user_id").Exists() {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("auth_user_id does not exist")))
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+
+	passwordPersister := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx)
+
+	authUserID := c.Stash().Get("auth_user_id").String()
+	passwordCredentialModel, err := passwordPersister.GetByUserID(uuid.FromStringOrNil(authUserID))
+	if err != nil {
+		return fmt.Errorf("failed to get password credential by user id: %w", err)
+	}
+
+	passwordCredentialModel.Password = string(hashedPassword)
+
+	err = passwordPersister.Update(*passwordCredentialModel)
+	if err != nil {
+		return fmt.Errorf("failed to update the password credential: %w", err)
+	}
+
+	// Decide which is the next state according to the config and user input
+	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+	}
+
+	return c.ContinueFlow(shared.StateSuccess)
+}
