@@ -1,18 +1,17 @@
 package flow_api_basic_construct
 
 import (
-	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/login"
 	"github.com/teamhanko/hanko/backend/flow_api/registration"
+	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
-	"net/http"
 )
 
 func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager) *FlowPilotHandler {
@@ -32,21 +31,11 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	registrationFlow, err := registration.NewRegistrationFlow(h.cfg, h.persister, h.passcodeService, h.sessionManager, c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to create registration flow: %w", err))
-	}
-
-	return h.executeFlow(c, registrationFlow)
+	return h.executeFlow(c, registration.Flow)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	loginFlow, err := login.NewLoginFlow(h.cfg, h.persister, h.passcodeService, c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError).SetInternal(fmt.Errorf("failed to create login flow: %w", err))
-	}
-
-	return h.executeFlow(c, loginFlow)
+	return h.executeFlow(c, login.Flow)
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
@@ -61,6 +50,8 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		db := models.NewFlowDB(tx)
+
+		flow.Set("dependencies", &shared.Dependencies{Cfg: h.cfg, Tx: tx, Persister: h.persister, HttpContext: c})
 
 		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))
 		if flowPilotErr != nil {

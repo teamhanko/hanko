@@ -13,14 +13,6 @@ import (
 	"regexp"
 )
 
-func NewSubmitLoginIdentifier(cfg config.Config, persister persistence.Persister, httpContext echo.Context) SubmitLoginIdentifier {
-	return SubmitLoginIdentifier{
-		cfg,
-		persister,
-		httpContext,
-	}
-}
-
 type SubmitLoginIdentifier struct {
 	cfg         config.Config
 	persister   persistence.Persister

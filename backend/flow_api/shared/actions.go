@@ -1,6 +1,12 @@
 package shared
 
-import "github.com/teamhanko/hanko/backend/flowpilot"
+import (
+	"github.com/gobuffalo/pop/v6"
+	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence"
+)
 
 const (
 	ActionSendCapabilities                       flowpilot.ActionName = "send_capabilities"
@@ -28,3 +34,16 @@ const (
 	ActionSkip     flowpilot.ActionName = "skip"
 	ActionContinue flowpilot.ActionName = "continue"
 )
+
+type Dependencies struct {
+	Cfg         config.Config
+	Tx          *pop.Connection
+	Persister   persistence.Persister
+	HttpContext echo.Context
+}
+
+type Action struct{}
+
+func (a *Action) GetDeps(c flowpilot.ExecutionContext) *Dependencies {
+	return c.Get("dependencies").(*Dependencies)
+}

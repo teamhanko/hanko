@@ -5,10 +5,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewLoginWithOauth() LoginWithOauth {
-	return LoginWithOauth{}
-}
-
 type LoginWithOauth struct{}
 
 func (m LoginWithOauth) GetName() flowpilot.ActionName {
