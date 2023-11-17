@@ -24,13 +24,13 @@ type Emails []ImportOrExportEmail
 // ImportOrExportEntry represents a user to be imported/export to the Hanko database
 type ImportOrExportEntry struct {
 	// UserID optional uuid.v4. If not provided a new one will be generated for the user
-	UserID string `json:"user_id" yaml:"user_id"`
+	UserID string `json:"user_id,omitempty" yaml:"user_id"`
 	// Emails List of emails
-	Emails Emails `json:"emails" yaml:"emails"`
+	Emails Emails `json:"emails" yaml:"emails" jsonschema:"type=array,minItems=1"`
 	// CreatedAt optional timestamp of the users' creation. Will be set to the import date if not provided.
-	CreatedAt *time.Time `json:"created_at" yaml:"created_at"`
+	CreatedAt *time.Time `json:"created_at,omitempty" yaml:"created_at"`
 	// UpdatedAt optional timestamp of the last update to the user. Will be set to the import date if not provided.
-	UpdatedAt *time.Time `json:"updated_at" yaml:"updated_at"`
+	UpdatedAt *time.Time `json:"updated_at,omitempty" yaml:"updated_at"`
 }
 
 // ImportOrExportList a list of ImportEntries
