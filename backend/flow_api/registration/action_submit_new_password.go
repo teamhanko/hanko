@@ -1,4 +1,4 @@
-package actions
+package registration
 
 import (
 	"github.com/teamhanko/hanko/backend/config"

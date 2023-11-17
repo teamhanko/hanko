@@ -108,12 +108,12 @@ func (m SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) erro
 		}
 
 		if m.cfg.Password.Enabled {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StatePasswordCreation)
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
 		} else if !m.cfg.Passcode.Enabled || (m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
 			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 		}
 	} else if m.cfg.Password.Enabled {
-		return c.ContinueFlow(shared.StatePasswordCreation)
+		return c.ContinueFlow(StatePasswordCreation)
 	} else if !m.cfg.Passcode.Enabled {
 		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
