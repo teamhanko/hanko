@@ -13,14 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewGetWACreationOptions(cfg config.Config, persister persistence.Persister, wa *webauthnLib.WebAuthn) GetWACreationOptions {
-	return GetWACreationOptions{
-		cfg,
-		persister,
-		wa,
-	}
-}
-
 type GetWACreationOptions struct {
 	cfg       config.Config
 	persister persistence.Persister

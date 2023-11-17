@@ -5,10 +5,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewBack() flowpilot.Action {
-	return Back{}
-}
-
 type Back struct{}
 
 func (a Back) GetName() flowpilot.ActionName {

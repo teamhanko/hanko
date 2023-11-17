@@ -8,10 +8,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewSendPasscode(passcodeService services.Passcode, httpContext echo.Context) flowpilot.HookAction {
-	return SendPasscode{httpContext: httpContext, passcodeService: passcodeService}
-}
-
 type SendPasscode struct {
 	httpContext     echo.Context
 	passcodeService services.Passcode

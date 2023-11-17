@@ -15,14 +15,6 @@ import (
 	"time"
 )
 
-func NewBeforeSuccess(persister persistence.Persister, sessionManager session.Manager, httpContext echo.Context) BeforeSuccess {
-	return BeforeSuccess{
-		persister,
-		sessionManager,
-		httpContext,
-	}
-}
-
 type BeforeSuccess struct {
 	persister      persistence.Persister
 	sessionManager session.Manager

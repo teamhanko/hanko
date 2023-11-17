@@ -9,12 +9,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-func NewSkip(cfg config.Config) Skip {
-	return Skip{
-		cfg,
-	}
-}
-
 type Skip struct {
 	cfg config.Config
 }

@@ -10,12 +10,6 @@ import (
 	"unicode/utf8"
 )
 
-func NewSubmitNewPassword(cfg config.Config) SubmitNewPassword {
-	return SubmitNewPassword{
-		cfg,
-	}
-}
-
 type SubmitNewPassword struct {
 	cfg config.Config
 }

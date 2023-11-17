@@ -19,15 +19,6 @@ import (
 	"time"
 )
 
-func NewSendWAAssertionResponse(cfg config.Config, persister persistence.Persister, wa *webauthnLib.WebAuthn, httpContext echo.Context) SendWAAssertionResponse {
-	return SendWAAssertionResponse{
-		cfg,
-		persister,
-		wa,
-		httpContext,
-	}
-}
-
 type SendWAAssertionResponse struct {
 	cfg         config.Config
 	persister   persistence.Persister
