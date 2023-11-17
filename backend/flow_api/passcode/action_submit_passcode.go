@@ -2,6 +2,7 @@ package passcode
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
@@ -69,6 +70,11 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeMaxAttemptsReached)
 		}
 		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeInvalid.Wrap(err))
+	}
+
+	err = c.Stash().Set("auth_user_id", passcode.UserId)
+	if err != nil {
+		return fmt.Errorf("failed to set auth_user_id to the stash: %w", err)
 	}
 
 	err = c.Stash().Set("email_verified", true) // TODO: maybe change attribute path

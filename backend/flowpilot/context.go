@@ -37,6 +37,8 @@ type flowContext interface {
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
 type actionInitializationContext interface {
+	// Get returns the context value with the given name.
+	Get(string) interface{}
 	// AddInputs adds input parameters to the schema.
 	AddInputs(inputs ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
@@ -203,7 +205,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
-	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash}
+	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash, contextValues: flow.contextValues}
 	action.Initialize(&aic)
 
 	// Check if the action is suspended.

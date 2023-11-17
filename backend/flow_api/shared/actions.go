@@ -44,6 +44,10 @@ type Dependencies struct {
 
 type Action struct{}
 
-func (a *Action) GetDeps(c flowpilot.ExecutionContext) *Dependencies {
+func (a *Action) GetDepsForExecution(c flowpilot.ExecutionContext) *Dependencies {
+	return c.Get("dependencies").(*Dependencies)
+}
+
+func (a *Action) GetDepsForInitialization(c flowpilot.InitializationContext) *Dependencies {
 	return c.Get("dependencies").(*Dependencies)
 }

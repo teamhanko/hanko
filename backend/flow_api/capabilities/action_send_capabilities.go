@@ -22,7 +22,7 @@ func (m SendCapabilities) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
-	deps := m.GetDeps(c)
+	deps := m.GetDepsForExecution(c)
 
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
