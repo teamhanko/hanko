@@ -1,10 +1,9 @@
-package actions
+package login
 
 import (
 	"fmt"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/login/states"
-	passcodeStates "github.com/teamhanko/hanko/backend/flow_api/passcode/states"
+	"github.com/teamhanko/hanko/backend/flow_api/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -32,5 +31,5 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	return c.StartSubFlow(passcodeStates.StatePasscodeConfirmation, states.StateLoginPasswordRecovery)
+	return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateLoginPasswordRecovery)
 }

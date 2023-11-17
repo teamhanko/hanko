@@ -1,4 +1,4 @@
-package actions
+package passkey_onboarding
 
 import (
 	"fmt"

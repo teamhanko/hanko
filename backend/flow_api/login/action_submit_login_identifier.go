@@ -1,12 +1,11 @@
-package actions
+package login
 
 import (
 	"errors"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/login/states"
-	passcodeStates "github.com/teamhanko/hanko/backend/flow_api/passcode/states"
+	"github.com/teamhanko/hanko/backend/flow_api/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -87,9 +86,9 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 	if a.cfg.Password.Enabled {
 		if a.cfg.Password.Optional {
-			return c.ContinueFlow(states.StateLoginMethodChooser)
+			return c.ContinueFlow(StateLoginMethodChooser)
 		} else {
-			return c.ContinueFlow(states.StateLoginPassword)
+			return c.ContinueFlow(StateLoginPassword)
 		}
 	}
 
@@ -97,9 +96,9 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err := c.Stash().Set("passcode_template", "login"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
-		return c.StartSubFlow(passcodeStates.StatePasscodeConfirmation, shared.StateSuccess)
+		return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 	}
 
 	// Username exists, but user has no emails.
-	return c.ContinueFlow(states.StateLoginMethodChooser)
+	return c.ContinueFlow(StateLoginMethodChooser)
 }

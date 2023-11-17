@@ -1,10 +1,10 @@
-package actions
+package login
 
 import (
 	"fmt"
 	"github.com/teamhanko/hanko/backend/config"
-	passcodeStates "github.com/teamhanko/hanko/backend/flow_api/passcode/states"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	"github.com/teamhanko/hanko/backend/flow_api/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -33,8 +33,8 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 	}
 
 	if a.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passcodeStates.StatePasscodeConfirmation, passkeyOnboardingStates.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
-	return c.StartSubFlow(passcodeStates.StatePasscodeConfirmation, shared.StateSuccess)
+	return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 }

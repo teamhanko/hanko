@@ -1,7 +1,6 @@
-package actions
+package login
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/login/states"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -19,5 +18,5 @@ func (a LoginWithPassword) GetDescription() string {
 func (a LoginWithPassword) Initialize(_ flowpilot.InitializationContext) {}
 
 func (a LoginWithPassword) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueFlow(states.StateLoginPassword)
+	return c.ContinueFlow(StateLoginPassword)
 }

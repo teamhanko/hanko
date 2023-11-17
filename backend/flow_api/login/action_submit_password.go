@@ -1,11 +1,11 @@
-package actions
+package login
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -115,7 +115,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if a.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passkeyOnboardingStates.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
 	return c.ContinueFlow(shared.StateSuccess)

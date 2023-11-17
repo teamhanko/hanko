@@ -1,4 +1,4 @@
-package actions
+package passkey_onboarding
 
 import (
 	"github.com/go-webauthn/webauthn/protocol"
@@ -6,7 +6,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
-	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -86,7 +85,7 @@ func (m GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	return c.ContinueFlow(states.StateOnboardingVerifyPasskeyAttestation)
+	return c.ContinueFlow(StateOnboardingVerifyPasskeyAttestation)
 }
 
 type WebAuthnUser struct {
