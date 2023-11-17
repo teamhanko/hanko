@@ -1,4 +1,4 @@
-package actions
+package capabilities
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/shared"

@@ -1,4 +1,4 @@
-package actions
+package login
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
-	"github.com/teamhanko/hanko/backend/flow_api/login/states"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -58,5 +57,5 @@ func (a GetWARequestOptions) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set request_options payload: %w", err)
 	}
 
-	return c.ContinueFlow(states.StateLoginPasskey)
+	return c.ContinueFlow(StateLoginPasskey)
 }

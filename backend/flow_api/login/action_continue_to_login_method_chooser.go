@@ -1,7 +1,6 @@
-package actions
+package login
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/login/states"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -24,5 +23,5 @@ func (a ContinueToLoginMethodChooser) Initialize(c flowpilot.InitializationConte
 }
 
 func (a ContinueToLoginMethodChooser) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueFlow(states.StateLoginMethodChooser)
+	return c.ContinueFlow(StateLoginMethodChooser)
 }

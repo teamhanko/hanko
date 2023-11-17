@@ -2,7 +2,7 @@ package actions
 
 import (
 	"github.com/teamhanko/hanko/backend/config"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -51,7 +51,7 @@ func (m SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	// Decide which is the next state according to the config and user input
 	if m.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passkeyOnboardingStates.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 	// TODO: 2FA routing
 

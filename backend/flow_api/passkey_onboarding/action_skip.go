@@ -1,10 +1,7 @@
-package actions
+package passkey_onboarding
 
 import (
-	"errors"
 	"github.com/teamhanko/hanko/backend/config"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
-
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -18,7 +15,7 @@ func (m Skip) GetName() flowpilot.ActionName {
 }
 
 func (m Skip) GetDescription() string {
-	return "Skip the current state."
+	return "Skip the passkey onboarding"
 }
 
 func (m Skip) Initialize(c flowpilot.InitializationContext) {
@@ -29,15 +26,5 @@ func (m Skip) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (m Skip) Execute(c flowpilot.ExecutionContext) error {
-	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
-	}
-
-	switch c.GetCurrentState() {
-	case passkeyOnboardingStates.StateOnboardingCreatePasskey:
-		return c.EndSubFlow()
-	default:
-		// return an error, so we don't implicitly continue to unwanted state
-		return errors.New("no destination is defined")
-	}
+	return c.EndSubFlow()
 }

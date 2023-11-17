@@ -1,11 +1,10 @@
-package actions
+package passcode
 
 import (
 	"fmt"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	passcodeStates "github.com/teamhanko/hanko/backend/flow_api/passcode/states"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -57,7 +56,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "654321"}`,
 			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg:           config.Config{},
-			expectedState: passcodeStates.StatePasscodeConfirmation,
+			expectedState: StatePasscodeConfirmation,
 			statusCode:    http.StatusUnauthorized,
 		},
 		{
@@ -65,7 +64,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "654321"}`,
 			flowId:        "8a2cf90d-dea5-4678-9dca-6707dab6af77",
 			cfg:           config.Config{},
-			expectedState: passcodeStates.StatePasscodeConfirmation,
+			expectedState: StatePasscodeConfirmation,
 			statusCode:    http.StatusUnauthorized,
 		},
 		{
@@ -91,7 +90,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "123456"}`,
 			flowId:        "5a862a2d-0d10-4904-b297-cb32fc43c859",
 			cfg:           config.Config{},
-			expectedState: passcodeStates.StatePasscodeConfirmation,
+			expectedState: StatePasscodeConfirmation,
 			statusCode:    http.StatusBadRequest,
 		},
 		{
@@ -120,7 +119,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 					},
 				},
 			},
-			expectedState: passkeyOnboardingStates.StateOnboardingCreatePasskey,
+			expectedState: passkeyOnboarding.StateOnboardingCreatePasskey,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -137,7 +136,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 					},
 				},
 			},
-			expectedState: passkeyOnboardingStates.StateOnboardingCreatePasskey,
+			expectedState: passkeyOnboarding.StateOnboardingCreatePasskey,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -168,16 +167,16 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(passkeyOnboardingStates.StateOnboardingCreatePasskey).
+				State(passkeyOnboarding.StateOnboardingCreatePasskey).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(passcodeStates.StatePasscodeConfirmation, SubmitPasscode{}).
+				State(StatePasscodeConfirmation, SubmitPasscode{}).
 				State(shared.StatePasswordCreation).
 				State(shared.StateSuccess).
 				State(shared.StateError).
-				InitialState(passcodeStates.StatePasscodeConfirmation).
+				InitialState(StatePasscodeConfirmation).
 				ErrorState(shared.StateError).
 				SubFlows(passkeySubFlow).
 				Build()

@@ -1,12 +1,11 @@
-package actions
+package registration
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/passcode/states"
-	passkeyOnboardingStates "github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	"github.com/teamhanko/hanko/backend/flow_api/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -57,7 +56,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: states.StatePasscodeConfirmation,
+			expectedState: passcode.StatePasscodeConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -77,7 +76,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					},
 				},
 			},
-			expectedState: passkeyOnboardingStates.StateOnboardingCreatePasskey,
+			expectedState: passkey_onboarding.StateOnboardingCreatePasskey,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -101,7 +100,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: states.StatePasscodeConfirmation,
+			expectedState: passcode.StatePasscodeConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -142,7 +141,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: states.StatePasscodeConfirmation,
+			expectedState: passcode.StatePasscodeConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -287,7 +286,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					Enabled: false,
 				},
 			},
-			expectedState: passkeyOnboardingStates.StateOnboardingCreatePasskey,
+			expectedState: passkey_onboarding.StateOnboardingCreatePasskey,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -325,16 +324,17 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 
 			req := httptest.NewRequest(http.MethodPost, "/passcode/login/initialize", nil)
 			req.Header.Set("Content-Type", "application/json")
-			rec := httptest.NewRecorder()
+			//rec := httptest.NewRecorder()
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(passkeyOnboardingStates.StateOnboardingCreatePasskey).
+				State(passkey_onboarding.StateOnboardingCreatePasskey).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(stateRegistrationInit, NewSubmitRegistrationIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
-				State(states.StatePasscodeConfirmation).
+				//State(stateRegistrationInit, SubmitRegistrationIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
+				State(stateRegistrationInit, SubmitRegistrationIdentifier{}).
+				State(passcode.StatePasscodeConfirmation).
 				State(shared.StateSuccess).
 				State(shared.StatePasswordCreation).
 				SubFlows(passkeySubFlow).

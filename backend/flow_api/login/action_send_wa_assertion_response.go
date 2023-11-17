@@ -1,4 +1,4 @@
-package actions
+package login
 
 import (
 	"encoding/base64"

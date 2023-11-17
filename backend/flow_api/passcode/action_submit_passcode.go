@@ -1,4 +1,4 @@
-package actions
+package passcode
 
 import (
 	"errors"

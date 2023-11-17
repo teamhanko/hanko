@@ -1,4 +1,4 @@
-package actions
+package passkey_onboarding
 
 import (
 	"fmt"
@@ -6,8 +6,7 @@ import (
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	capabilitiesStates "github.com/teamhanko/hanko/backend/flow_api/capabilities/states"
-	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding/states"
+	"github.com/teamhanko/hanko/backend/flow_api/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -41,7 +40,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			input:         "",
 			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg:           config.Config{},
-			expectedState: states.StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateOnboardingVerifyPasskeyAttestation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -49,7 +48,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			input:         "",
 			flowId:        "a77e23b2-7ca5-4c76-a20b-c17b7dbcb117",
 			cfg:           config.Config{},
-			expectedState: states.StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateOnboardingVerifyPasskeyAttestation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -57,7 +56,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			input:         "",
 			flowId:        "de87cfc6-a6e2-434d-bbe8-5e5004c9deda",
 			cfg:           config.Config{},
-			expectedState: states.StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateOnboardingVerifyPasskeyAttestation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -82,16 +81,16 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(states.StateOnboardingCreatePasskey, NewGetWACreationOptions(currentTest.cfg, s.Storage, wa)).
-				State(states.StateOnboardingVerifyPasskeyAttestation).
+				State(StateOnboardingCreatePasskey, GetWACreationOptions{}).
+				State(StateOnboardingVerifyPasskeyAttestation).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(capabilitiesStates.StatePreflight).
+				State(capabilities.StatePreflight).
 				State(shared.StateSuccess).
 				SubFlows(passkeySubFlow).
-				InitialState(capabilitiesStates.StatePreflight).
+				InitialState(capabilities.StatePreflight).
 				ErrorState(shared.StateError).
 				Build()
 			s.Require().NoError(err)
