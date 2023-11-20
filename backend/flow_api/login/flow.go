@@ -4,7 +4,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
-	"github.com/teamhanko/hanko/backend/flow_api/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
@@ -45,7 +44,7 @@ var Flow = flowpilot.NewFlow("/login").
 		ContinueToLoginMethodChooser{},
 		shared.Back{},
 	).
-	State(StateLoginPasswordRecovery, registration.SubmitNewPassword{}).
+	State(StateLoginPasswordRecovery, RecoverPassword{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
