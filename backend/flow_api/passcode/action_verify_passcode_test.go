@@ -172,7 +172,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(StatePasscodeConfirmation, SubmitPasscode{}).
+				State(StatePasscodeConfirmation, VerifyPasscode{}).
 				State(shared.StatePasswordCreation).
 				State(shared.StateSuccess).
 				State(shared.StateError).

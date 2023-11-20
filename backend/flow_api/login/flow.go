@@ -21,30 +21,30 @@ const (
 	ActionContinueToLoginMethodChooser           flowpilot.ActionName = "continue_to_login_method_chooser"
 	ActionContinueToPasscodeConfirmation         flowpilot.ActionName = "continue_to_passcode_confirmation"
 	ActionContinueToPasscodeConfirmationRecovery flowpilot.ActionName = "continue_to_passcode_confirmation_recovery"
-	ActionGetWARequestOptions                    flowpilot.ActionName = "get_wa_request_options"
-	ActionLoginWithPassword                      flowpilot.ActionName = "login_with_password"
-	ActionSendWAAssertionResponse                flowpilot.ActionName = "send_wa_request_response"
-	ActionSubmitLoginIdentifier                  flowpilot.ActionName = "submit_login_identifier"
-	ActionRecoverPassword                        flowpilot.ActionName = "recover_password"
-	ActionSubmitPassword                         flowpilot.ActionName = "submit_password"
+	ActionContinueToPasswordLogin                flowpilot.ActionName = "continue_to_password_login"
+	ActionWebauthnGenerateRequestOptions         flowpilot.ActionName = "webauthn_generate_request_options"
+	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_request_response"
+	ActionContinueWithLoginIdentifier            flowpilot.ActionName = "continue_with_login_identifier"
+	ActionPasswordRecovery                       flowpilot.ActionName = "password_recovery"
+	ActionPasswordLogin                          flowpilot.ActionName = "password_login"
 )
 
 var Flow = flowpilot.NewFlow("/login").
-	State(StateLoginInit, SubmitLoginIdentifier{}, GetWARequestOptions{}).
+	State(StateLoginInit, ContinueWithLoginIdentifier{}, WebauthnGenerateRequestOptions{}).
 	State(StateLoginMethodChooser,
-		GetWARequestOptions{},
-		LoginWithPassword{},
+		WebauthnGenerateRequestOptions{},
+		ContinueToPasswordLogin{},
 		ContinueToPasscodeConfirmation{},
 		shared.Back{},
 	).
-	State(StateLoginPasskey, SendWAAssertionResponse{}).
+	State(StateLoginPasskey, WebauthnVerifyAssertionResponse{}).
 	State(StateLoginPassword,
-		SubmitPassword{},
+		PasswordLogin{},
 		ContinueToPasscodeConfirmationRecovery{},
 		ContinueToLoginMethodChooser{},
 		shared.Back{},
 	).
-	State(StateLoginPasswordRecovery, RecoverPassword{}).
+	State(StateLoginPasswordRecovery, PasswordRecovery{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).

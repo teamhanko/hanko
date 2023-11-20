@@ -12,23 +12,23 @@ import (
 
 var maxPasscodeTries = 3
 
-type SubmitPasscode struct {
+type VerifyPasscode struct {
 	shared.Action
 }
 
-func (a SubmitPasscode) GetName() flowpilot.ActionName {
-	return ActionSubmitPasscode
+func (a VerifyPasscode) GetName() flowpilot.ActionName {
+	return ActionVerifyPasscode
 }
 
-func (a SubmitPasscode) GetDescription() string {
+func (a VerifyPasscode) GetDescription() string {
 	return "Enter a passcode."
 }
 
-func (a SubmitPasscode) Initialize(c flowpilot.InitializationContext) {
+func (a VerifyPasscode) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("code").Required(true))
 }
 
-func (a SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
+func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {

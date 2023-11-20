@@ -9,9 +9,9 @@ const (
 )
 
 const (
-	ActionSendCapabilities flowpilot.ActionName = "send_capabilities"
+	ActionRegisterClientCapabilities flowpilot.ActionName = "register_client_capabilities"
 )
 
 var SubFlow = flowpilot.NewSubFlow().
-	State(StatePreflight, SendCapabilities{}).
+	State(StatePreflight, RegisterClientCapabilities{}).
 	MustBuild()

@@ -11,25 +11,25 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-type GetWACreationOptions struct {
+type WebauthnGenerateCreationOptions struct {
 	shared.Action
 }
 
-func (a GetWACreationOptions) GetName() flowpilot.ActionName {
-	return ActionGetWACreationOptions
+func (a WebauthnGenerateCreationOptions) GetName() flowpilot.ActionName {
+	return ActionWebauthnGenerateCreationOptions
 }
 
-func (a GetWACreationOptions) GetDescription() string {
+func (a WebauthnGenerateCreationOptions) GetDescription() string {
 	return "Get creation options to create a webauthn credential."
 }
 
-func (a GetWACreationOptions) Initialize(c flowpilot.InitializationContext) {
+func (a WebauthnGenerateCreationOptions) Initialize(c flowpilot.InitializationContext) {
 	if !c.Stash().Get("webauthn_available").Bool() {
 		c.SuspendAction()
 	}
 }
 
-func (a GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {
+func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
