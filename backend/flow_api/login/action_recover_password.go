@@ -10,24 +10,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type SubmitNewPassword struct {
+type RecoverPassword struct {
 	shared.Action
 }
 
-func (a SubmitNewPassword) GetName() flowpilot.ActionName {
+func (a RecoverPassword) GetName() flowpilot.ActionName {
 	return ActionRecoverPassword
 }
 
-func (a SubmitNewPassword) GetDescription() string {
+func (a RecoverPassword) GetDescription() string {
 	return "Submit a new password."
 }
 
-func (a SubmitNewPassword) Initialize(c flowpilot.InitializationContext) {
+func (a RecoverPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
 }
 
-func (a SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
+func (a RecoverPassword) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	newPassword := c.Input().Get("new_password").String()
