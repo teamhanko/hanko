@@ -9,10 +9,13 @@ import (
 	"time"
 )
 
-// flowContext represents the basic context for a flow.
-type flowContext interface {
+type Context interface {
 	// Get returns the context value with the given name.
 	Get(string) interface{}
+}
+
+// flowContext represents the basic context for a flow.
+type flowContext interface {
 	// GetFlowID returns the unique ID of the current defaultFlow.
 	GetFlowID() uuid.UUID
 	// GetPath returns the current path within the flow.
@@ -37,8 +40,6 @@ type flowContext interface {
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
 type actionInitializationContext interface {
-	// Get returns the context value with the given name.
-	Get(string) interface{}
 	// AddInputs adds input parameters to the schema.
 	AddInputs(inputs ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
@@ -80,15 +81,18 @@ type actionExecutionContinuationContext interface {
 
 // InitializationContext is a shorthand for actionInitializationContext within the flow initialization method.
 type InitializationContext interface {
+	Context
 	actionInitializationContext
 }
 
 // ExecutionContext is a shorthand for actionExecutionContinuationContext within flow execution method.
 type ExecutionContext interface {
+	Context
 	actionExecutionContinuationContext
 }
 
 type HookExecutionContext interface {
+	Context
 	actionExecutionContext
 }
 
@@ -205,7 +209,12 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
-	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: stash, contextValues: flow.contextValues}
+	aic := defaultActionInitializationContext{
+		schema:        schema.toInitializationSchema(),
+		stash:         stash,
+		contextValues: flow.contextValues,
+	}
+
 	action.Initialize(&aic)
 
 	// Check if the action is suspended.

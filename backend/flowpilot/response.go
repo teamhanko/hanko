@@ -190,7 +190,12 @@ func (er *executionResult) createSchema(fc defaultFlowContext, action Action) Ex
 	}
 
 	// Initialize the action.
-	aic := defaultActionInitializationContext{schema: schema.toInitializationSchema(), stash: fc.stash}
+	aic := defaultActionInitializationContext{
+		schema:        schema.toInitializationSchema(),
+		stash:         fc.stash,
+		contextValues: fc.flow.contextValues,
+	}
+
 	action.Initialize(&aic)
 
 	if aic.isSuspended {
