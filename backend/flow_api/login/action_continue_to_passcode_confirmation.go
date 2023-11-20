@@ -13,7 +13,7 @@ type ContinueToPasscodeConfirmation struct {
 }
 
 func (a ContinueToPasscodeConfirmation) GetName() flowpilot.ActionName {
-	return shared.ActionContinueToPasscodeConfirmation
+	return ActionContinueToPasscodeConfirmation
 }
 
 func (a ContinueToPasscodeConfirmation) GetDescription() string {

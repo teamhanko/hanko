@@ -15,7 +15,7 @@ type GetWARequestOptions struct {
 }
 
 func (a GetWARequestOptions) GetName() flowpilot.ActionName {
-	return shared.ActionGetWARequestOptions
+	return ActionGetWARequestOptions
 }
 
 func (a GetWARequestOptions) GetDescription() string {
