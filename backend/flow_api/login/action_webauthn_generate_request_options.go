@@ -10,26 +10,25 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-type GetWARequestOptions struct {
+type WebauthnGenerateRequestOptions struct {
 	shared.Action
 }
 
-func (a GetWARequestOptions) GetName() flowpilot.ActionName {
-	return ActionGetWARequestOptions
+func (a WebauthnGenerateRequestOptions) GetName() flowpilot.ActionName {
+	return ActionWebauthnGenerateRequestOptions
 }
 
-func (a GetWARequestOptions) GetDescription() string {
-	return "Get request options to use a webauthn credential."
+func (a WebauthnGenerateRequestOptions) GetDescription() string {
+	return "Get webauthn request options in order to sign in with a webauthn credential."
 }
 
-func (a GetWARequestOptions) Initialize(c flowpilot.InitializationContext) {
-	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
-	if !webAuthnAvailable {
+func (a WebauthnGenerateRequestOptions) Initialize(c flowpilot.InitializationContext) {
+	if !c.Stash().Get("webauthn_available").Bool() {
 		c.SuspendAction()
 	}
 }
 
-func (a GetWARequestOptions) Execute(c flowpilot.ExecutionContext) error {
+func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	options, sessionData, err := deps.Cfg.Webauthn.Handler.BeginDiscoverableLogin(

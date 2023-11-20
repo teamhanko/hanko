@@ -81,7 +81,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(StateOnboardingCreatePasskey, GetWACreationOptions{}).
+				State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}).
 				State(StateOnboardingVerifyPasskeyAttestation).
 				Build()
 			s.Require().NoError(err)

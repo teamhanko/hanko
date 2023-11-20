@@ -332,8 +332,8 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				//State(stateRegistrationInit, SubmitRegistrationIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
-				State(stateRegistrationInit, SubmitRegistrationIdentifier{}).
+				//State(stateRegistrationInit, RegisterLoginIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
+				State(stateRegistrationInit, RegisterLoginIdentifier{}).
 				State(passcode.StatePasscodeConfirmation).
 				State(shared.StateSuccess).
 				State(shared.StatePasswordCreation).

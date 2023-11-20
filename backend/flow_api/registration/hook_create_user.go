@@ -12,11 +12,11 @@ import (
 	"time"
 )
 
-type BeforeSuccess struct {
+type CreateUser struct {
 	shared.Action
 }
 
-func (h BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
+func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
 	userId, err := uuid.NewV4()
@@ -67,7 +67,7 @@ func (h BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h BeforeSuccess) createUser(deps *shared.Dependencies, id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
+func (h CreateUser) createUser(deps *shared.Dependencies, id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
 	// TODO: add audit log
 	now := time.Now().UTC()
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{

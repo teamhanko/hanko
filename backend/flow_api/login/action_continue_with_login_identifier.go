@@ -9,19 +9,19 @@ import (
 	"regexp"
 )
 
-type SubmitLoginIdentifier struct {
+type ContinueWithLoginIdentifier struct {
 	shared.Action
 }
 
-func (a SubmitLoginIdentifier) GetName() flowpilot.ActionName {
-	return ActionSubmitLoginIdentifier
+func (a ContinueWithLoginIdentifier) GetName() flowpilot.ActionName {
+	return ActionContinueWithLoginIdentifier
 }
 
-func (a SubmitLoginIdentifier) GetDescription() string {
+func (a ContinueWithLoginIdentifier) GetDescription() string {
 	return "Enter an identifier to login."
 }
 
-func (a SubmitLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
+func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
 	if !deps.Cfg.Identifier.Username.Enabled {
@@ -45,7 +45,7 @@ func (a SubmitLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	}
 }
 
-func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
+func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {

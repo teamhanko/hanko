@@ -5,23 +5,23 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type SendCapabilities struct {
+type RegisterClientCapabilities struct {
 	shared.Action
 }
 
-func (a SendCapabilities) GetName() flowpilot.ActionName {
-	return ActionSendCapabilities
+func (a RegisterClientCapabilities) GetName() flowpilot.ActionName {
+	return ActionRegisterClientCapabilities
 }
 
-func (a SendCapabilities) GetDescription() string {
+func (a RegisterClientCapabilities) GetDescription() string {
 	return "Send the computers capabilities."
 }
 
-func (a SendCapabilities) Initialize(c flowpilot.InitializationContext) {
+func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("webauthn_available").Required(true).Hidden(true))
 }
 
-func (a SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
+func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {

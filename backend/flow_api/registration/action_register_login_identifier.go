@@ -10,20 +10,20 @@ import (
 	"strings"
 )
 
-// SubmitRegistrationIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
-type SubmitRegistrationIdentifier struct {
+// RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
+type RegisterLoginIdentifier struct {
 	shared.Action
 }
 
-func (a SubmitRegistrationIdentifier) GetName() flowpilot.ActionName {
-	return ActionSubmitRegistrationIdentifier
+func (a RegisterLoginIdentifier) GetName() flowpilot.ActionName {
+	return ActionRegisterLoginIdentifier
 }
 
-func (a SubmitRegistrationIdentifier) GetDescription() string {
+func (a RegisterLoginIdentifier) GetDescription() string {
 	return "Enter an identifier to register."
 }
 
-func (a SubmitRegistrationIdentifier) Initialize(c flowpilot.InitializationContext) {
+func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
 	if deps.Cfg.Identifier.Email.Enabled {
@@ -48,7 +48,7 @@ func (a SubmitRegistrationIdentifier) Initialize(c flowpilot.InitializationConte
 	}
 }
 
-func (a SubmitRegistrationIdentifier) Execute(c flowpilot.ExecutionContext) error {
+func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {

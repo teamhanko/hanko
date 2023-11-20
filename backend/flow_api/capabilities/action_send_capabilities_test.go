@@ -90,7 +90,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(StatePreflight, SendCapabilities{}).
+				State(StatePreflight, RegisterClientCapabilities{}).
 				State(stateRegistrationInit).
 				State(shared.StateError).
 				State(shared.StateSuccess).

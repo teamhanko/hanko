@@ -11,24 +11,24 @@ import (
 	"unicode/utf8"
 )
 
-type SubmitNewPassword struct {
+type RegisterPassword struct {
 	shared.Action
 }
 
-func (a SubmitNewPassword) GetName() flowpilot.ActionName {
-	return ActionSubmitNewPassword
+func (a RegisterPassword) GetName() flowpilot.ActionName {
+	return ActionRegisterPassword
 }
 
-func (a SubmitNewPassword) GetDescription() string {
+func (a RegisterPassword) GetDescription() string {
 	return "Submit a new password."
 }
 
-func (a SubmitNewPassword) Initialize(c flowpilot.InitializationContext) {
+func (a RegisterPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
 }
 
-func (a SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
+func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
