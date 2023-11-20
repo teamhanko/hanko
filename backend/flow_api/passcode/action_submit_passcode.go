@@ -4,10 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -15,23 +13,24 @@ import (
 var maxPasscodeTries = 3
 
 type SubmitPasscode struct {
-	cfg       config.Config
-	persister persistence.Persister
+	shared.Action
 }
 
-func (m SubmitPasscode) GetName() flowpilot.ActionName {
+func (a SubmitPasscode) GetName() flowpilot.ActionName {
 	return shared.ActionSubmitPasscode
 }
 
-func (m SubmitPasscode) GetDescription() string {
+func (a SubmitPasscode) GetDescription() string {
 	return "Enter a passcode."
 }
 
-func (m SubmitPasscode) Initialize(c flowpilot.InitializationContext) {
+func (a SubmitPasscode) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("code").Required(true))
 }
 
-func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
+func (a SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
@@ -41,7 +40,7 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	passcode, err := m.persister.GetPasscodePersister().Get(passcodeId)
+	passcode, err := deps.Persister.GetPasscodePersister().Get(passcodeId)
 	if err != nil {
 		return err
 	}
@@ -58,7 +57,7 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		passcode.TryCount += 1
 		if passcode.TryCount >= maxPasscodeTries {
-			err = m.persister.GetPasscodePersister().Delete(*passcode)
+			err = deps.Persister.GetPasscodePersister().Delete(*passcode)
 			if err != nil {
 				return err
 			}
@@ -82,7 +81,7 @@ func (m SubmitPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	err = m.persister.GetPasscodePersister().Delete(*passcode)
+	err = deps.Persister.GetPasscodePersisterWithConnection(deps.Tx).Delete(*passcode)
 	if err != nil {
 		return err
 	}

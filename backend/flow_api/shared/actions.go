@@ -4,8 +4,10 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 )
 
 const (
@@ -36,18 +38,16 @@ const (
 )
 
 type Dependencies struct {
-	Cfg         config.Config
-	Tx          *pop.Connection
-	Persister   persistence.Persister
-	HttpContext echo.Context
+	Cfg             config.Config
+	HttpContext     echo.Context
+	PasscodeService services.Passcode
+	Persister       persistence.Persister
+	SessionManager  session.Manager
+	Tx              *pop.Connection
 }
 
 type Action struct{}
 
-func (a *Action) GetDepsForExecution(c flowpilot.ExecutionContext) *Dependencies {
-	return c.Get("dependencies").(*Dependencies)
-}
-
-func (a *Action) GetDepsForInitialization(c flowpilot.InitializationContext) *Dependencies {
+func (a *Action) GetDeps(c flowpilot.Context) *Dependencies {
 	return c.Get("dependencies").(*Dependencies)
 }

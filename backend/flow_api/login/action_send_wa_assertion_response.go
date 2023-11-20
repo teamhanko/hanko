@@ -6,24 +6,17 @@ import (
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"strings"
 	"time"
 )
 
 type SendWAAssertionResponse struct {
-	cfg         config.Config
-	persister   persistence.Persister
-	wa          *webauthnLib.WebAuthn
-	httpContext echo.Context
+	shared.Action
 }
 
 func (a SendWAAssertionResponse) GetName() flowpilot.ActionName {
@@ -35,8 +28,7 @@ func (a SendWAAssertionResponse) GetDescription() string {
 }
 
 func (a SendWAAssertionResponse) Initialize(c flowpilot.InitializationContext) {
-	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
-	if !webAuthnAvailable {
+	if !c.Stash().Get("webauthn_available").Bool() {
 		c.SuspendAction()
 	}
 
@@ -44,6 +36,8 @@ func (a SendWAAssertionResponse) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
@@ -59,7 +53,7 @@ func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return err
 	}
-	sessionDataModel, err := a.persister.GetWebauthnSessionDataPersister().Get(sessionDataId)
+	sessionDataModel, err := deps.Persister.GetWebauthnSessionDataPersister().Get(sessionDataId)
 	if err != nil {
 		return err
 	}
@@ -69,7 +63,7 @@ func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to parse user id from user handle: %w", err)
 	}
 
-	userModel, err := a.persister.GetUserPersister().Get(userId)
+	userModel, err := deps.Persister.GetUserPersister().Get(userId)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
@@ -84,7 +78,7 @@ func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
 
 	sessionData := intern.WebauthnSessionDataFromModel(sessionDataModel)
 
-	credential, err := a.wa.ValidateDiscoverableLogin(discoverableUserHandler, *sessionData, credentialAssertionData)
+	credential, err := deps.Cfg.Webauthn.Handler.ValidateDiscoverableLogin(discoverableUserHandler, *sessionData, credentialAssertionData)
 	if err != nil {
 		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasskeyInvalid.Wrap(fmt.Errorf("failed to validate discoverable login: %w", err)))
 	}
@@ -97,31 +91,23 @@ func (a SendWAAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	err = a.persister.Transaction(func(tx *pop.Connection) error {
-		if credentialModel != nil {
-			now := time.Now().UTC()
-			flags := credentialAssertionData.Response.AuthenticatorData.Flags
+	if credentialModel != nil {
+		now := time.Now().UTC()
+		flags := credentialAssertionData.Response.AuthenticatorData.Flags
 
-			credentialModel.LastUsedAt = &now
-			credentialModel.BackupState = flags.HasBackupState()
-			credentialModel.BackupEligible = flags.HasBackupEligible()
+		credentialModel.LastUsedAt = &now
+		credentialModel.BackupState = flags.HasBackupState()
+		credentialModel.BackupEligible = flags.HasBackupEligible()
 
-			txErr := a.persister.GetWebauthnCredentialPersisterWithConnection(tx).Update(*credentialModel)
-			if txErr != nil {
-				return fmt.Errorf("failed to update webauthn credential: %w", txErr)
-			}
+		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Update(*credentialModel)
+		if err != nil {
+			return fmt.Errorf("failed to update webauthn credential: %w", err)
 		}
+	}
 
-		txErr := a.persister.GetWebauthnSessionDataPersisterWithConnection(tx).Delete(*sessionDataModel)
-		if txErr != nil {
-			return fmt.Errorf("failed to delete assertion session data: %w", txErr)
-		}
-
-		return nil
-	})
-
+	err = deps.Persister.GetWebauthnSessionDataPersisterWithConnection(deps.Tx).Delete(*sessionDataModel)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to delete assertion session data: %w", err)
 	}
 
 	return c.ContinueFlow(shared.StateSuccess)
