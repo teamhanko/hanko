@@ -1,76 +1,78 @@
 package passkey_onboarding
 
 import (
+	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type GetWACreationOptions struct {
-	cfg       config.Config
-	persister persistence.Persister
-	wa        *webauthnLib.WebAuthn
+	shared.Action
 }
 
-func (m GetWACreationOptions) GetName() flowpilot.ActionName {
+func (a GetWACreationOptions) GetName() flowpilot.ActionName {
 	return shared.ActionGetWACreationOptions
 }
 
-func (m GetWACreationOptions) GetDescription() string {
+func (a GetWACreationOptions) GetDescription() string {
 	return "Get creation options to create a webauthn credential."
 }
 
-func (m GetWACreationOptions) Initialize(c flowpilot.InitializationContext) {
-	webAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
-	if !webAuthnAvailable {
+func (a GetWACreationOptions) Initialize(c flowpilot.InitializationContext) {
+	if !c.Stash().Get("webauthn_available").Bool() {
 		c.SuspendAction()
 	}
 }
 
-func (m GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {
+func (a GetWACreationOptions) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	userId, err := uuid.NewV4()
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to generate a new user id: %w", err)
 	}
+
 	if !c.Stash().Get("user_id").Exists() {
 		err = c.Stash().Set("user_id", userId)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to sett user id to the stash: %w", err)
 		}
 	} else {
 		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to parse stashed user id as a uuid: %w", err)
 		}
 	}
+
 	user := WebAuthnUser{
 		ID:       userId,
 		Email:    c.Stash().Get("email").String(),
 		Username: c.Stash().Get("username").String(),
 	}
-	t := true
-	options, sessionData, err := m.wa.BeginRegistration(
+
+	requireResidentKey := true
+
+	options, sessionData, err := deps.Cfg.Webauthn.Handler.BeginRegistration(
 		user,
 		webauthnLib.WithConveyancePreference(protocol.PreferNoAttestation),
 		webauthnLib.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
-			RequireResidentKey: &t,
+			RequireResidentKey: &requireResidentKey,
 			ResidentKey:        protocol.ResidentKeyRequirementRequired,
 			UserVerification:   protocol.VerificationRequired,
 		}),
 	)
 
 	sessionDataModel := intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationRegistration)
-	err = m.persister.GetWebauthnSessionDataPersister().Create(*sessionDataModel)
+	err = deps.Persister.GetWebauthnSessionDataPersister().Create(*sessionDataModel)
 	if err != nil {
 		return err
 	}

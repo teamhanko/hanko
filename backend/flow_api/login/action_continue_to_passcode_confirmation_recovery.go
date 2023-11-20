@@ -2,14 +2,13 @@ package login
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
 type ContinueToPasscodeConfirmationRecovery struct {
-	cfg config.Config
+	shared.Action
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) GetName() flowpilot.ActionName {
@@ -21,7 +20,9 @@ func (a ContinueToPasscodeConfirmationRecovery) GetDescription() string {
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) Initialize(c flowpilot.InitializationContext) {
-	if !a.cfg.Passcode.Enabled || !c.Stash().Get("email").Exists() {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passcode.Enabled || !c.Stash().Get("email").Exists() {
 		c.SuspendAction()
 	}
 }

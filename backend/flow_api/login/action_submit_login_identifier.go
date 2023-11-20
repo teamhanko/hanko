@@ -3,19 +3,14 @@ package login
 import (
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"regexp"
 )
 
 type SubmitLoginIdentifier struct {
-	cfg         config.Config
-	persister   persistence.Persister
-	httpContext echo.Context
+	shared.Action
 }
 
 func (a SubmitLoginIdentifier) GetName() flowpilot.ActionName {
@@ -27,7 +22,9 @@ func (a SubmitLoginIdentifier) GetDescription() string {
 }
 
 func (a SubmitLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
-	if !a.cfg.Identifier.Username.Enabled {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Identifier.Username.Enabled {
 		input := flowpilot.EmailInput("identifier").
 			Required(true).
 			Preserve(true).
@@ -43,12 +40,14 @@ func (a SubmitLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 		c.AddInputs(input)
 	}
 
-	if !a.cfg.Password.Enabled && !a.cfg.Passcode.Enabled {
+	if !deps.Cfg.Password.Enabled && !deps.Cfg.Passcode.Enabled {
 		c.SuspendAction()
 	}
 }
 
 func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
@@ -63,7 +62,7 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 	} else {
-		userModel, err := a.persister.GetUserPersister().GetByUsername(identifier)
+		userModel, err := deps.Persister.GetUserPersister().GetByUsername(identifier)
 		if err != nil {
 			return err
 		}
@@ -84,8 +83,8 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	if a.cfg.Password.Enabled {
-		if a.cfg.Password.Optional {
+	if deps.Cfg.Password.Enabled {
+		if deps.Cfg.Password.Optional {
 			return c.ContinueFlow(StateLoginMethodChooser)
 		} else {
 			return c.ContinueFlow(StateLoginPassword)
@@ -96,6 +95,7 @@ func (a SubmitLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err := c.Stash().Set("passcode_template", "login"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
+
 		return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 	}
 

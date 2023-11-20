@@ -4,24 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/dto/intern"
+	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
 	"time"
 )
 
 type BeforeSuccess struct {
-	persister      persistence.Persister
-	sessionManager session.Manager
-	httpContext    echo.Context
+	shared.Action
 }
 
-func (m BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
+func (h BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
+	deps := h.GetDeps(c)
+
 	userId, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -43,7 +40,8 @@ func (m BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
 	passkeyBackupState := c.Stash().Get("passkey_backup_state").Bool()
 
 	credentialModel := intern.WebauthnCredentialToModel(&passkeyCredential, userId, passkeyBackupEligible, passkeyBackupState)
-	err = m.CreateUser(
+	err = h.createUser(
+		deps,
 		userId,
 		c.Stash().Get("email").String(),
 		c.Stash().Get("email_verified").Bool(),
@@ -55,66 +53,64 @@ func (m BeforeSuccess) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
 
-	sessionToken, err := m.sessionManager.GenerateJWT(userId)
+	sessionToken, err := deps.SessionManager.GenerateJWT(userId)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
-	cookie, err := m.sessionManager.GenerateCookie(sessionToken)
+	cookie, err := deps.SessionManager.GenerateCookie(sessionToken)
 	if err != nil {
 		return fmt.Errorf("failed to generate auth cookie, %w", err)
 	}
 
-	m.httpContext.SetCookie(cookie)
+	deps.HttpContext.SetCookie(cookie)
 
 	return nil
 }
 
-func (m BeforeSuccess) CreateUser(id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
-	return m.persister.Transaction(func(tx *pop.Connection) error {
-		// TODO: add audit log
-		now := time.Now().UTC()
-		err := m.persister.GetUserPersisterWithConnection(tx).Create(models.User{
-			ID:        id,
-			Username:  username,
-			CreatedAt: now,
-			UpdatedAt: now,
-		})
+func (h BeforeSuccess) createUser(deps *shared.Dependencies, id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
+	// TODO: add audit log
+	now := time.Now().UTC()
+	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
+		ID:        id,
+		Username:  username,
+		CreatedAt: now,
+		UpdatedAt: now,
+	})
+	if err != nil {
+		return err
+	}
+
+	if email != "" {
+		emailModel := models.NewEmail(&id, email)
+		emailModel.Verified = emailVerified
+		err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 		if err != nil {
 			return err
 		}
 
-		if email != "" {
-			emailModel := models.NewEmail(&id, email)
-			emailModel.Verified = emailVerified
-			err = m.persister.GetEmailPersisterWithConnection(tx).Create(*emailModel)
-			if err != nil {
-				return err
-			}
-
-			primaryEmail := models.NewPrimaryEmail(emailModel.ID, id)
-			err = m.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
-			if err != nil {
-				return err
-			}
+		primaryEmail := models.NewPrimaryEmail(emailModel.ID, id)
+		err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
+		if err != nil {
+			return err
 		}
+	}
 
-		if passkey != nil {
-			err = m.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*passkey)
-			if err != nil {
-				return err
-			}
+	if passkey != nil {
+		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*passkey)
+		if err != nil {
+			return err
 		}
+	}
 
-		if password != "" {
-			err = m.persister.GetPasswordCredentialPersisterWithConnection(tx).Create(models.PasswordCredential{
-				UserId:   id,
-				Password: password,
-			})
-			if err != nil {
-				return err
-			}
+	if password != "" {
+		err = deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Create(models.PasswordCredential{
+			UserId:   id,
+			Password: password,
+		})
+		if err != nil {
+			return err
 		}
+	}
 
-		return nil
-	})
+	return nil
 }

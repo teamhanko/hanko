@@ -4,17 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type SubmitPassword struct {
-	cfg       config.Config
-	persister persistence.Persister
+	shared.Action
 }
 
 func (a SubmitPassword) GetName() flowpilot.ActionName {
@@ -30,6 +27,8 @@ func (a SubmitPassword) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
@@ -37,7 +36,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 	var userID uuid.UUID
 
 	if c.Stash().Get("email").Exists() {
-		emailModel, err := a.persister.GetEmailPersister().FindByAddress(c.Stash().Get("email").String())
+		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(c.Stash().Get("email").String())
 		if err != nil {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}
@@ -49,7 +48,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 		userID = *emailModel.UserID
 	} else if c.Stash().Get("username").Exists() {
 		username := c.Stash().Get("username").String()
-		userModel, err := a.persister.GetUserPersister().GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
 		}
@@ -71,7 +70,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 	//	}
 	//}
 
-	user, err := a.persister.GetUserPersister().Get(userID)
+	user, err := deps.Persister.GetUserPersister().Get(userID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -88,7 +87,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 		return a.wrongCredentialsError(c)
 	}
 
-	pw, err := a.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	pw, err := deps.Persister.GetPasswordCredentialPersister().GetByUserID(userID)
 	if pw == nil {
 		//err = h.auditLogger.Create(c, models.AuditLogPasswordLoginFailed, user, fmt.Errorf("user has no password credential"))
 		//if err != nil {
@@ -114,7 +113,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user to stash: %w", err)
 	}
 
-	if a.cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
 		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
