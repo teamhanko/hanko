@@ -14,7 +14,7 @@ type SubmitLoginIdentifier struct {
 }
 
 func (a SubmitLoginIdentifier) GetName() flowpilot.ActionName {
-	return shared.ActionSubmitLoginIdentifier
+	return ActionSubmitLoginIdentifier
 }
 
 func (a SubmitLoginIdentifier) GetDescription() string {

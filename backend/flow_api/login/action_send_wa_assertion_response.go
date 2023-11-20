@@ -20,7 +20,7 @@ type SendWAAssertionResponse struct {
 }
 
 func (a SendWAAssertionResponse) GetName() flowpilot.ActionName {
-	return shared.ActionSendWAAssertionResponse
+	return ActionSendWAAssertionResponse
 }
 
 func (a SendWAAssertionResponse) GetDescription() string {

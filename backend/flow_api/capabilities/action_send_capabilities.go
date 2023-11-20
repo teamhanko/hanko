@@ -10,7 +10,7 @@ type SendCapabilities struct {
 }
 
 func (a SendCapabilities) GetName() flowpilot.ActionName {
-	return shared.ActionSendCapabilities
+	return ActionSendCapabilities
 }
 
 func (a SendCapabilities) GetDescription() string {

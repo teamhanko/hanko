@@ -15,7 +15,7 @@ type SendWAAttestationResponse struct {
 }
 
 func (a SendWAAttestationResponse) GetName() flowpilot.ActionName {
-	return shared.ActionSendWAAttestationResponse
+	return ActionSendWAAttestationResponse
 }
 
 func (a SendWAAttestationResponse) GetDescription() string {

@@ -1,7 +1,6 @@
 package login
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
@@ -9,7 +8,7 @@ type ContinueToLoginMethodChooser struct {
 }
 
 func (a ContinueToLoginMethodChooser) GetName() flowpilot.ActionName {
-	return shared.ActionContinueToLoginMethodChooser
+	return ActionContinueToLoginMethodChooser
 }
 
 func (a ContinueToLoginMethodChooser) GetDescription() string {

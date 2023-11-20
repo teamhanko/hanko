@@ -1,14 +1,13 @@
-package actions
+package shared
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
 type Back struct{}
 
 func (a Back) GetName() flowpilot.ActionName {
-	return shared.ActionBack
+	return ActionBack
 }
 
 func (a Back) GetDescription() string {

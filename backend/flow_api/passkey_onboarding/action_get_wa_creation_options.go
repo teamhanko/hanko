@@ -16,7 +16,7 @@ type GetWACreationOptions struct {
 }
 
 func (a GetWACreationOptions) GetName() flowpilot.ActionName {
-	return shared.ActionGetWACreationOptions
+	return ActionGetWACreationOptions
 }
 
 func (a GetWACreationOptions) GetDescription() string {
