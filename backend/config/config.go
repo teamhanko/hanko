@@ -351,9 +351,46 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty     RelyingParty `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
-	Timeout          int          `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
-	UserVerification string       `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
+	RelyingParty     RelyingParty          `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
+	Timeout          int                   `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
+	UserVerification string                `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
+	Handler          *webauthnLib.WebAuthn `jsonschema:"-"`
+}
+
+func (r *WebauthnSettings) PostProcess() error {
+	requireResidentKey := false
+
+	config := &webauthnLib.Config{
+		RPID:                  r.RelyingParty.Id,
+		RPDisplayName:         r.RelyingParty.DisplayName,
+		RPOrigins:             r.RelyingParty.Origins,
+		AttestationPreference: protocol.PreferNoAttestation,
+		AuthenticatorSelection: protocol.AuthenticatorSelection{
+			RequireResidentKey: &requireResidentKey,
+			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
+			UserVerification:   protocol.VerificationRequired,
+		},
+		Debug: false,
+		Timeouts: webauthnLib.TimeoutsConfig{
+			Login: webauthnLib.TimeoutConfig{
+				Enforce: true,
+				Timeout: time.Duration(r.Timeout) * time.Millisecond,
+			},
+			Registration: webauthnLib.TimeoutConfig{
+				Enforce: true,
+				Timeout: time.Duration(r.Timeout) * time.Millisecond,
+			},
+		},
+	}
+
+	handler, err := webauthnLib.New(config)
+	if err != nil {
+		return err
+	}
+
+	r.Handler = handler
+
+	return nil
 }
 
 // Validate does not need to validate the config, because the library does this already
@@ -769,31 +806,4 @@ type Passkey struct {
 
 type PasskeyOnboarding struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
-}
-
-func (r *WebauthnSettings) GetConfig() (*webauthnLib.WebAuthn, error) {
-	requireResidentKey := false
-
-	return webauthnLib.New(&webauthnLib.Config{
-		RPID:                  r.RelyingParty.Id,
-		RPDisplayName:         r.RelyingParty.DisplayName,
-		RPOrigins:             r.RelyingParty.Origins,
-		AttestationPreference: protocol.PreferNoAttestation,
-		AuthenticatorSelection: protocol.AuthenticatorSelection{
-			RequireResidentKey: &requireResidentKey,
-			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
-			UserVerification:   protocol.VerificationRequired,
-		},
-		Debug: false,
-		Timeouts: webauthnLib.TimeoutsConfig{
-			Login: webauthnLib.TimeoutConfig{
-				Enforce: true,
-				Timeout: time.Duration(r.Timeout) * time.Millisecond,
-			},
-			Registration: webauthnLib.TimeoutConfig{
-				Enforce: true,
-				Timeout: time.Duration(r.Timeout) * time.Millisecond,
-			},
-		},
-	})
 }
