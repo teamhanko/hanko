@@ -1,13 +1,14 @@
-package shared
+package passcode
 
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
 type SendPasscode struct {
-	Action
+	shared.Action
 }
 
 func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {

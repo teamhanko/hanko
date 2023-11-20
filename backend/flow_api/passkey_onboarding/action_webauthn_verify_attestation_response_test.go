@@ -77,7 +77,7 @@ func (s *sendWaAttestationResponse) TestSendWaAttestationResponse_Execute() {
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
 				State(StateOnboardingCreatePasskey).
-				State(StateOnboardingVerifyPasskeyAttestation, SendWAAttestationResponse{wa: wa}).
+				State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{wa: wa}).
 				Build()
 			s.Require().NoError(err)
 

@@ -10,12 +10,12 @@ const (
 )
 
 const (
-	ActionGetWACreationOptions      flowpilot.ActionName = "get_wa_creation_options"
-	ActionSendWAAttestationResponse flowpilot.ActionName = "send_wa_attestation_response"
-	ActionSkip                      flowpilot.ActionName = "skip"
+	ActionWebauthnGenerateCreationOptions   flowpilot.ActionName = "webauthn_generate_creation_options"
+	ActionWebauthnVerifyAttestationResponse flowpilot.ActionName = "webauthn_verify_attestation_response"
+	ActionSkip                              flowpilot.ActionName = "skip"
 )
 
 var SubFlow = flowpilot.NewSubFlow().
-	State(StateOnboardingCreatePasskey, GetWACreationOptions{}, Skip{}).
-	State(StateOnboardingVerifyPasskeyAttestation, SendWAAttestationResponse{}).
+	State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}, Skip{}).
+	State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{}).
 	MustBuild()

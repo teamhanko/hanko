@@ -136,7 +136,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(StatePasswordCreation, SubmitNewPassword{}).
+				State(StatePasswordCreation, RegisterPassword{}).
 				State(shared.StateSuccess).
 				SubFlows(passkeySubFlow).
 				InitialState(StatePasswordCreation).

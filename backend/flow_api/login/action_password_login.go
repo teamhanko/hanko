@@ -10,23 +10,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type SubmitPassword struct {
+type PasswordLogin struct {
 	shared.Action
 }
 
-func (a SubmitPassword) GetName() flowpilot.ActionName {
-	return ActionSubmitPassword
+func (a PasswordLogin) GetName() flowpilot.ActionName {
+	return ActionPasswordLogin
 }
 
-func (a SubmitPassword) GetDescription() string {
+func (a PasswordLogin) GetDescription() string {
 	return "Login with a password."
 }
 
-func (a SubmitPassword) Initialize(c flowpilot.InitializationContext) {
+func (a PasswordLogin) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.PasswordInput("password").Required(true))
 }
 
-func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
+func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -120,7 +120,7 @@ func (a SubmitPassword) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(shared.StateSuccess)
 }
 
-func (a SubmitPassword) wrongCredentialsError(c flowpilot.ExecutionContext) error {
+func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error {
 	c.Input().SetError("password", flowpilot.ErrorValueInvalid)
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
 }

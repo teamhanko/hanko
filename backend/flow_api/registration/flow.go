@@ -15,14 +15,14 @@ const (
 )
 
 const (
-	ActionSubmitNewPassword            flowpilot.ActionName = "submit_new_password"
-	ActionSubmitRegistrationIdentifier flowpilot.ActionName = "submit_registration_identifier"
+	ActionRegisterPassword        flowpilot.ActionName = "register_password"
+	ActionRegisterLoginIdentifier flowpilot.ActionName = "register_login_identifier"
 )
 
 var Flow = flowpilot.NewFlow("/registration").
-	State(StateRegistrationInit, SubmitRegistrationIdentifier{}).
-	State(StatePasswordCreation, SubmitNewPassword{}).
-	BeforeState(shared.StateSuccess, BeforeSuccess{}).
+	State(StateRegistrationInit, RegisterLoginIdentifier{}).
+	State(StatePasswordCreation, RegisterPassword{}).
+	BeforeState(shared.StateSuccess, CreateUser{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
