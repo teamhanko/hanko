@@ -51,7 +51,14 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		db := models.NewFlowDB(tx)
 
-		flow.Set("dependencies", &shared.Dependencies{Cfg: h.cfg, Tx: tx, Persister: h.persister, HttpContext: c})
+		flow.Set("dependencies", &shared.Dependencies{
+			Cfg:             h.cfg,
+			Tx:              tx,
+			Persister:       h.persister,
+			HttpContext:     c,
+			SessionManager:  h.sessionManager,
+			PasscodeService: h.passcodeService,
+		})
 
 		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))
 		if flowPilotErr != nil {

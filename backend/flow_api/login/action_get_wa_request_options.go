@@ -4,18 +4,14 @@ import (
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type GetWARequestOptions struct {
-	cfg       config.Config
-	persister persistence.Persister
-	wa        *webauthnLib.WebAuthn
+	shared.Action
 }
 
 func (a GetWARequestOptions) GetName() flowpilot.ActionName {
@@ -34,15 +30,17 @@ func (a GetWARequestOptions) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a GetWARequestOptions) Execute(c flowpilot.ExecutionContext) error {
-	options, sessionData, err := a.wa.BeginDiscoverableLogin(
-		webauthnLib.WithUserVerification(protocol.UserVerificationRequirement(a.cfg.Webauthn.UserVerification)),
+	deps := a.GetDeps(c)
+
+	options, sessionData, err := deps.Cfg.Webauthn.Handler.BeginDiscoverableLogin(
+		webauthnLib.WithUserVerification(protocol.UserVerificationRequirement(deps.Cfg.Webauthn.UserVerification)),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 	}
 
 	webAuthnSessionDataModel := *intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationAuthentication)
-	err = a.persister.GetWebauthnSessionDataPersister().Create(webAuthnSessionDataModel)
+	err = deps.Persister.GetWebauthnSessionDataPersisterWithConnection(deps.Tx).Create(webAuthnSessionDataModel)
 	if err != nil {
 		return fmt.Errorf("failed to store webauthn assertion session data: %w", err)
 	}

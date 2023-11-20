@@ -3,17 +3,17 @@ package hooks
 import (
 	"errors"
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
+	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
 type SendPasscode struct {
-	httpContext     echo.Context
-	passcodeService services.Passcode
+	shared.Action
 }
 
-func (a SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
+func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
+	deps := h.GetDeps(c)
+
 	if !c.Stash().Get("email").Exists() {
 		return errors.New("email has not been stashed")
 	}
@@ -26,9 +26,9 @@ func (a SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 
 	email := c.Stash().Get("email").String()
 	template := c.Stash().Get("passcode_template").String()
-	acceptLanguageHeader := a.httpContext.Request().Header.Get("Accept-Language")
+	acceptLanguageHeader := deps.HttpContext.Request().Header.Get("Accept-Language")
 
-	passcodeId, err := a.passcodeService.SendPasscode(c.GetFlowID(), template, email, acceptLanguageHeader)
+	passcodeId, err := deps.PasscodeService.SendPasscode(c.GetFlowID(), template, email, acceptLanguageHeader)
 	if err != nil {
 		return fmt.Errorf("passcode service failed: %w", err)
 	}

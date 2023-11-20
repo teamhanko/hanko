@@ -9,20 +9,20 @@ type SendCapabilities struct {
 	shared.Action
 }
 
-func (m SendCapabilities) GetName() flowpilot.ActionName {
+func (a SendCapabilities) GetName() flowpilot.ActionName {
 	return shared.ActionSendCapabilities
 }
 
-func (m SendCapabilities) GetDescription() string {
+func (a SendCapabilities) GetDescription() string {
 	return "Send the computers capabilities."
 }
 
-func (m SendCapabilities) Initialize(c flowpilot.InitializationContext) {
+func (a SendCapabilities) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("webauthn_available").Required(true).Hidden(true))
 }
 
-func (m SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
-	deps := m.GetDepsForExecution(c)
+func (a SendCapabilities) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)

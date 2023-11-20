@@ -15,22 +15,20 @@ type SubmitNewPassword struct {
 }
 
 func (a SubmitNewPassword) GetName() flowpilot.ActionName {
-	//TODO implement me
-	panic("implement me")
+	return shared.ActionSubmitNewPassword
 }
 
 func (a SubmitNewPassword) GetDescription() string {
-	//TODO implement me
-	panic("implement me")
+	return "Submit a new password."
 }
 
 func (a SubmitNewPassword) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDepsForInitialization(c)
+	deps := a.GetDeps(c)
 	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
 }
 
 func (a SubmitNewPassword) Execute(c flowpilot.ExecutionContext) error {
-	deps := a.GetDepsForExecution(c)
+	deps := a.GetDeps(c)
 
 	newPassword := c.Input().Get("new_password").String()
 
