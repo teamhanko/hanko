@@ -1,4 +1,4 @@
-package hooks
+package registration
 
 import (
 	"encoding/json"

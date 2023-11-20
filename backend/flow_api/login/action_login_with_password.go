@@ -1,14 +1,13 @@
 package login
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
 type LoginWithPassword struct{}
 
 func (a LoginWithPassword) GetName() flowpilot.ActionName {
-	return shared.ActionLoginWithPassword
+	return ActionLoginWithPassword
 }
 
 func (a LoginWithPassword) GetDescription() string {

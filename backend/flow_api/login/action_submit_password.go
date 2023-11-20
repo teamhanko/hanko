@@ -15,7 +15,7 @@ type SubmitPassword struct {
 }
 
 func (a SubmitPassword) GetName() flowpilot.ActionName {
-	return shared.ActionSubmitPassword
+	return ActionSubmitPassword
 }
 
 func (a SubmitPassword) GetDescription() string {

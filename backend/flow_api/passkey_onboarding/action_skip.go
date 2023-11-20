@@ -10,7 +10,7 @@ type Skip struct {
 }
 
 func (a Skip) GetName() flowpilot.ActionName {
-	return shared.ActionSkip
+	return ActionSkip
 }
 
 func (a Skip) GetDescription() string {
