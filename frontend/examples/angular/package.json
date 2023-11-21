@@ -22,7 +22,7 @@
     "@teamhanko/hanko-elements": "^0.9.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^15.2.4",
+    "@angular-devkit/build-angular": "^17.0.2",
     "@angular/cli": "^15.2.0",
     "@angular/compiler-cli": "^15.2.6",
     "@types/jasmine": "~4.3.5",
