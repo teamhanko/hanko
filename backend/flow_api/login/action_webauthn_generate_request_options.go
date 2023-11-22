@@ -2,12 +2,9 @@ package login
 
 import (
 	"fmt"
-	"github.com/go-webauthn/webauthn/protocol"
-	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnGenerateRequestOptions struct {
@@ -31,25 +28,19 @@ func (a WebauthnGenerateRequestOptions) Initialize(c flowpilot.InitializationCon
 func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	options, sessionData, err := deps.Cfg.Webauthn.Handler.BeginDiscoverableLogin(
-		webauthnLib.WithUserVerification(protocol.UserVerificationRequirement(deps.Cfg.Webauthn.UserVerification)),
-	)
+	params := services.GenerateRequestOptionsParams{Tx: deps.Tx}
+
+	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptions(params)
 	if err != nil {
-		return fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
+		return fmt.Errorf("failed to generate webauthn request options: %w", err)
 	}
 
-	webAuthnSessionDataModel := *intern.WebauthnSessionDataToModel(sessionData, models.WebauthnOperationAuthentication)
-	err = deps.Persister.GetWebauthnSessionDataPersisterWithConnection(deps.Tx).Create(webAuthnSessionDataModel)
-	if err != nil {
-		return fmt.Errorf("failed to store webauthn assertion session data: %w", err)
-	}
-
-	err = c.Stash().Set("webauthn_session_data_id", webAuthnSessionDataModel.ID)
+	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
 	if err != nil {
 		return fmt.Errorf("failed to stash webauthn_session_data_id: %w", err)
 	}
 
-	err = c.Payload().Set("request_options", options)
+	err = c.Payload().Set("request_options", requestOptions)
 	if err != nil {
 		return fmt.Errorf("failed to set request_options payload: %w", err)
 	}

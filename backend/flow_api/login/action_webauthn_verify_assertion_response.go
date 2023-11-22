@@ -1,18 +1,12 @@
 package login
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/go-webauthn/webauthn/protocol"
-	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"strings"
-	"time"
 )
 
 type WebauthnVerifyAssertionResponse struct {
@@ -42,72 +36,26 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
+	if !c.Stash().Get("webauthn_session_data_id").Exists() {
+		return errors.New("webauthn_session_data_id is not present in the stash")
+	}
+
+	sessionDataID := uuid.FromStringOrNil(c.Stash().Get("webauthn_session_data_id").String())
 	assertionResponse := c.Input().Get("assertion_response").String()
-	credentialAssertionData, err := protocol.ParseCredentialRequestResponseBody(strings.NewReader(assertionResponse))
 
+	params := services.VerifyAssertionResponseParams{
+		Tx:                deps.Tx,
+		SessionDataID:     sessionDataID,
+		AssertionResponse: assertionResponse,
+	}
+
+	err := deps.WebauthnService.VerifyAssertionResponse(params)
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(fmt.Errorf("failed to parse assertion response: %w", err)))
-	}
-
-	sessionDataId, err := uuid.FromString(c.Stash().Get("webauthn_session_data_id").String())
-	if err != nil {
-		return err
-	}
-	sessionDataModel, err := deps.Persister.GetWebauthnSessionDataPersister().Get(sessionDataId)
-	if err != nil {
-		return err
-	}
-
-	userId, err := uuid.FromBytes(credentialAssertionData.Response.UserHandle)
-	if err != nil {
-		return fmt.Errorf("failed to parse user id from user handle: %w", err)
-	}
-
-	userModel, err := deps.Persister.GetUserPersister().Get(userId)
-	if err != nil {
-		return fmt.Errorf("failed to fetch user from db: %w", err)
-	}
-
-	if userModel == nil {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorTechnical.Wrap(errors.New("user does not exist")))
-	}
-
-	discoverableUserHandler := func(rawID, userHandle []byte) (webauthnLib.User, error) {
-		return userModel, nil
-	}
-
-	sessionData := intern.WebauthnSessionDataFromModel(sessionDataModel)
-
-	credential, err := deps.Cfg.Webauthn.Handler.ValidateDiscoverableLogin(discoverableUserHandler, *sessionData, credentialAssertionData)
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasskeyInvalid.Wrap(fmt.Errorf("failed to validate discoverable login: %w", err)))
-	}
-
-	var credentialModel *models.WebauthnCredential
-	for i := range userModel.WebauthnCredentials {
-		if userModel.WebauthnCredentials[i].ID == base64.RawURLEncoding.EncodeToString(credential.ID) {
-			credentialModel = &userModel.WebauthnCredentials[i]
-			break
+		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
+			return c.ContinueFlowWithError(StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
 		}
-	}
 
-	if credentialModel != nil {
-		now := time.Now().UTC()
-		flags := credentialAssertionData.Response.AuthenticatorData.Flags
-
-		credentialModel.LastUsedAt = &now
-		credentialModel.BackupState = flags.HasBackupState()
-		credentialModel.BackupEligible = flags.HasBackupEligible()
-
-		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Update(*credentialModel)
-		if err != nil {
-			return fmt.Errorf("failed to update webauthn credential: %w", err)
-		}
-	}
-
-	err = deps.Persister.GetWebauthnSessionDataPersisterWithConnection(deps.Tx).Delete(*sessionDataModel)
-	if err != nil {
-		return fmt.Errorf("failed to delete assertion session data: %w", err)
+		return fmt.Errorf("failed to verify assertion response: %w", err)
 	}
 
 	return c.ContinueFlow(shared.StateSuccess)
