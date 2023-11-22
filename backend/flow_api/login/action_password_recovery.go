@@ -32,15 +32,15 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	newPassword := c.Input().Get("new_password").String()
 
-	if !c.Stash().Get("auth_user_id").Exists() {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("auth_user_id does not exist")))
+	if !c.Stash().Get("user_id").Exists() {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("user_id does not exist")))
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 
 	passwordPersister := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx)
 
-	authUserID := c.Stash().Get("auth_user_id").String()
+	authUserID := c.Stash().Get("user_id").String()
 	passwordCredentialModel, err := passwordPersister.GetByUserID(uuid.FromStringOrNil(authUserID))
 	if err != nil {
 		return fmt.Errorf("failed to get password credential by user id: %w", err)

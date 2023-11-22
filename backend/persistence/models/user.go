@@ -38,6 +38,15 @@ func (user *User) GetEmailByAddress(address string) *Email {
 	return user.Emails.GetEmailByAddress(address)
 }
 
+func (user *User) GetWebauthnCredentialById(credentialId []byte) *WebauthnCredential {
+	for i := range user.WebauthnCredentials {
+		if user.WebauthnCredentials[i].ID == base64.RawURLEncoding.EncodeToString(credentialId) {
+			return &user.WebauthnCredentials[i]
+		}
+	}
+	return nil
+}
+
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (user *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
