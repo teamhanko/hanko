@@ -1,13 +1,12 @@
 package passkey_onboarding
 
 import (
+	"errors"
 	"fmt"
-	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/shared/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"strings"
 )
 
 type WebauthnVerifyAttestationResponse struct {
@@ -31,48 +30,47 @@ func (a WebauthnVerifyAttestationResponse) Initialize(c flowpilot.Initialization
 }
 
 func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	deps := a.GetDeps(c)
-
-	response, err := protocol.ParseCredentialCreationResponseBody(strings.NewReader(c.Input().Get("public_key").String()))
-	if err != nil {
-		return err
+	if !c.Stash().Get("webauthn_session_data_id").Exists() {
+		return errors.New("webauthn_session_data_id does not exist in the stash")
 	}
 
-	sessionDataId, err := uuid.FromString(c.Stash().Get("webauthn_session_data_id").String())
+	sessionDataID, err := uuid.FromString(c.Stash().Get("webauthn_session_data_id").String())
 	if err != nil {
-		return err
-	}
-	sessionData, err := deps.Persister.GetWebauthnSessionDataPersister().Get(sessionDataId)
-	if err != nil {
-		return err
-	}
-	userId, err := uuid.FromString(c.Stash().Get("user_id").String())
-	if err != nil {
-		return err
-	}
-	webauthnUser := WebAuthnUser{
-		ID:       userId,
-		Email:    c.Stash().Get("email").String(),
-		Username: c.Stash().Get("username").String(),
+		return fmt.Errorf("failed to parse webauthn_session_data_id: %w", err)
 	}
 
-	credential, err := deps.Cfg.Webauthn.Handler.CreateCredential(webauthnUser, *intern.WebauthnSessionDataFromModel(sessionData), response)
+	userID, err := uuid.FromString(c.Stash().Get("user_id").String())
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
+		return fmt.Errorf("failed to parse user_id into a uuid: %w", err)
+	}
+
+	params := services.VerifyAttestationResponseParams{
+		Tx:            deps.Tx,
+		SessionDataID: sessionDataID,
+		PublicKey:     c.Input().Get("public_key").String(),
+		UserID:        userID,
+		Email:         c.Stash().Get("email").String(),
+		Username:      c.Stash().Get("username").String(),
+	}
+
+	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
+	if err != nil {
+		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
+			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasskeyInvalid.Wrap(err))
+		}
+
+		return fmt.Errorf("failed to verify attestation response: %w", err)
 	}
 
 	err = c.Stash().Set("passkey_credential", credential)
 	if err != nil {
-		return err
-	}
-
-	err = deps.Persister.GetWebauthnSessionDataPersisterWithConnection(deps.Tx).Delete(*sessionData)
-	if err != nil {
-		return fmt.Errorf("failed to delete webauthn session data: %w", err)
+		return fmt.Errorf("failed to set passkey_credential to the stash: %w", err)
 	}
 
 	return c.EndSubFlow()

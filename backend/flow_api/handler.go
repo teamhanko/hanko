@@ -1,4 +1,4 @@
-package flow_api_basic_construct
+package flow_api
 
 import (
 	"github.com/gobuffalo/pop/v6"
@@ -14,11 +14,12 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, sessionManager session.Manager) *FlowPilotHandler {
+func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, webauthnService services.WebauthnService, sessionManager session.Manager) *FlowPilotHandler {
 	return &FlowPilotHandler{
 		persister,
 		cfg,
 		passcodeService,
+		webauthnService,
 		sessionManager,
 	}
 }
@@ -27,6 +28,7 @@ type FlowPilotHandler struct {
 	persister       persistence.Persister
 	cfg             config.Config
 	passcodeService services.Passcode
+	webauthnService services.WebauthnService
 	sessionManager  session.Manager
 }
 
@@ -58,6 +60,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			HttpContext:     c,
 			SessionManager:  h.sessionManager,
 			PasscodeService: h.passcodeService,
+			WebauthnService: h.webauthnService,
 		})
 
 		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))
