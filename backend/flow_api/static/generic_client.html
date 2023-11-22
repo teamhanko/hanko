@@ -76,7 +76,7 @@
         // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
 
         console.log(payload)
-        document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creationOptions)
+        document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creation_options)
     }
 
     const passkeyLoginHandler = async (payload) => {

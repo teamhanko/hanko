@@ -24,6 +24,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	emailService, err := services2.NewEmailService(*cfg)
 	passcodeService := services2.NewPasscodeService(*cfg, *emailService, persister)
+	webauthnService := services2.NewWebauthnService(*cfg, persister)
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {
@@ -34,14 +35,15 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
-	basicFLowHandler := flow_api_basic_construct.NewHandler(
+	flowAPIHandler := flow_api.NewHandler(
 		*cfg,
 		persister,
 		passcodeService,
+		webauthnService,
 		sessionManager,
 	)
-	e.POST("/registration", basicFLowHandler.RegistrationFlowHandler)
-	e.POST("/login", basicFLowHandler.LoginFlowHandler)
+	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
+	e.POST("/login", flowAPIHandler.LoginFlowHandler)
 
 	e.HideBanner = true
 

@@ -2,7 +2,6 @@ package passcode
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -71,9 +70,14 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeInvalid.Wrap(err))
 	}
 
-	err = c.Stash().Set("auth_user_id", passcode.UserId)
-	if err != nil {
-		return fmt.Errorf("failed to set auth_user_id to the stash: %w", err)
+	// !?
+	//err = c.Stash().Set("user_id", passcode.UserId)
+	//if err != nil {
+	//	return fmt.Errorf("failed to set user_id to the stash: %w", err)
+	//}
+
+	if !c.Stash().Get("user_id").Exists() {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("account does not exist")))
 	}
 
 	err = c.Stash().Set("email_verified", true) // TODO: maybe change attribute path
