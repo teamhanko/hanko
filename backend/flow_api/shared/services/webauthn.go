@@ -211,7 +211,7 @@ func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParam
 
 	sessionDataModel, err := models.NewWebauthnSessionDataFrom(sessionData, models.WebauthnOperationRegistration)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to create new sesseion data model instance: %w", err)
+		return nil, nil, fmt.Errorf("failed to create new session data model instance: %w", err)
 	}
 
 	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Create(*sessionDataModel)
