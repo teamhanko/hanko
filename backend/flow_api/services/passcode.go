@@ -46,8 +46,8 @@ func NewPasscodeService(cfg config.Config, emailService Email, persister persist
 	}
 }
 
-func (service *passcode) VerifyPasscode(tx *pop.Connection, passcodeId uuid.UUID, value string) error {
-	passcodePersister := service.persister.GetPasscodePersisterWithConnection(tx)
+func (s *passcode) VerifyPasscode(tx *pop.Connection, passcodeId uuid.UUID, value string) error {
+	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
 
 	passcodeModel, err := passcodePersister.Get(passcodeId)
 	if err != nil {
@@ -91,20 +91,20 @@ func (service *passcode) VerifyPasscode(tx *pop.Connection, passcodeId uuid.UUID
 	return nil
 }
 
-func (service *passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return service.SendPasscode(flowID, "email_verification", emailAddress, lang)
+func (s *passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+	return s.SendPasscode(flowID, "email_verification", emailAddress, lang)
 }
 
-func (service *passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return service.SendPasscode(flowID, "login", emailAddress, lang)
+func (s *passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+	return s.SendPasscode(flowID, "login", emailAddress, lang)
 }
 
-func (service *passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return service.SendPasscode(flowID, "password_recovery", emailAddress, lang)
+func (s *passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
+	return s.SendPasscode(flowID, "password_recovery", emailAddress, lang)
 }
 
-func (service *passcode) SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
-	code, err := service.passcodeGenerator.Generate()
+func (s *passcode) SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
+	code, err := s.passcodeGenerator.Generate()
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -122,14 +122,14 @@ func (service *passcode) SendPasscode(flowID uuid.UUID, template string, emailAd
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
 		FlowID:    &flowID,
-		Ttl:       service.cfg.Passcode.TTL,
+		Ttl:       s.cfg.Passcode.TTL,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}
 
-	err = service.persister.GetPasscodePersister().Create(passcodeModel)
+	err = s.persister.GetPasscodePersister().Create(passcodeModel)
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -137,11 +137,11 @@ func (service *passcode) SendPasscode(flowID uuid.UUID, template string, emailAd
 	durationTTL := time.Duration(passcodeModel.Ttl) * time.Second
 	data := map[string]interface{}{
 		"Code":        code,
-		"ServiceName": service.cfg.Service.Name,
+		"ServiceName": s.cfg.Service.Name,
 		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
 	}
 
-	err = service.emailService.SendEmail(template, lang, data, emailAddress)
+	err = s.emailService.SendEmail(template, lang, data, emailAddress)
 	if err != nil {
 		return uuid.Nil, err
 	}
