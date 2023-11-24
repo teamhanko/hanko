@@ -1,7 +1,9 @@
 package services
 
 import (
+	"errors"
 	"fmt"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
@@ -11,11 +13,21 @@ import (
 	"time"
 )
 
+var maxPasscodeTries = 3
+
+var (
+	ErrorPasscodeInvalid            = errors.New("passcode invalid")
+	ErrorPasscodeNotFound           = errors.New("passcode not found")
+	ErrorPasscodeExpired            = errors.New("passcode is expired")
+	ErrorPasscodeMaxAttemptsReached = errors.New("the passcode was entered wrong too many times")
+)
+
 type Passcode interface {
 	SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
 	SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
 	PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
 	SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error)
+	VerifyPasscode(tx *pop.Connection, passcodeID uuid.UUID, passcode string) error
 }
 
 type passcode struct {
@@ -32,6 +44,51 @@ func NewPasscodeService(cfg config.Config, emailService Email, persister persist
 		persister,
 		cfg,
 	}
+}
+
+func (service *passcode) VerifyPasscode(tx *pop.Connection, passcodeId uuid.UUID, value string) error {
+	passcodePersister := service.persister.GetPasscodePersisterWithConnection(tx)
+
+	passcodeModel, err := passcodePersister.Get(passcodeId)
+	if err != nil {
+		return fmt.Errorf("failed to get passcode from db: %w", err)
+	}
+
+	if passcodeModel == nil {
+		return ErrorPasscodeNotFound
+	}
+
+	expirationTime := passcodeModel.CreatedAt.Add(time.Duration(passcodeModel.Ttl) * time.Second)
+	if expirationTime.Before(time.Now().UTC()) {
+		return ErrorPasscodeExpired
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(passcodeModel.Code), []byte(value))
+	if err != nil {
+		passcodeModel.TryCount += 1
+		if passcodeModel.TryCount >= maxPasscodeTries {
+			err = passcodePersister.Delete(*passcodeModel)
+			if err != nil {
+				return fmt.Errorf("failed to delete passcode from db: %w", err)
+			}
+
+			return ErrorPasscodeMaxAttemptsReached
+		}
+
+		err = passcodePersister.Update(*passcodeModel)
+		if err != nil {
+			return fmt.Errorf("failed to update passcode: %w", err)
+		}
+
+		return ErrorPasscodeInvalid
+	}
+
+	err = passcodePersister.Delete(*passcodeModel)
+	if err != nil {
+		return fmt.Errorf("failed to delete passcode from db: %w", err)
+	}
+
+	return nil
 }
 
 func (service *passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
