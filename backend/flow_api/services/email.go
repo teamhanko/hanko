@@ -35,25 +35,25 @@ func NewEmailService(cfg config.Config) (*Email, error) {
 // E.g. when the file is created as "email_verification_text.tmpl" then the template name is just "email_verification"
 // Currently only "[template_name]_text.tmpl" template can be used.
 // The subject header of an email is also translated. The message_key must be "subject_[template_name]".
-func (service *Email) SendEmail(template string, lang string, data map[string]interface{}, emailAddress string) error {
-	text, err := service.renderer.Render(fmt.Sprintf("%s_text.tmpl", template), lang, data)
+func (s *Email) SendEmail(template string, lang string, data map[string]interface{}, emailAddress string) error {
+	text, err := s.renderer.Render(fmt.Sprintf("%s_text.tmpl", template), lang, data)
 	if err != nil {
 		return err
 	}
-	//html, err := service.renderer.Render(fmt.Sprintf("%s_html.tmpl", template), lang, data)
+	//html, err := s.renderer.Render(fmt.Sprintf("%s_html.tmpl", template), lang, data)
 	if err != nil {
 		return err
 	}
 
 	message := gomail.NewMessage()
 	message.SetAddressHeader("To", emailAddress, "")
-	message.SetAddressHeader("From", service.cfg.Passcode.Email.FromAddress, service.cfg.Passcode.Email.FromName)
+	message.SetAddressHeader("From", s.cfg.Passcode.Email.FromAddress, s.cfg.Passcode.Email.FromName)
 
-	message.SetHeader("Subject", service.renderer.Translate(lang, fmt.Sprintf("subject_%s", template), data))
+	message.SetHeader("Subject", s.renderer.Translate(lang, fmt.Sprintf("subject_%s", template), data))
 	message.SetBody("text/plain", text)
 	//message.AddAlternative("text/html", html)
 
-	err = service.mailer.Send(message)
+	err = s.mailer.Send(message)
 	if err != nil {
 		return err
 	}
