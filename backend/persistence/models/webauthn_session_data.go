@@ -57,9 +57,6 @@ func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Ope
 	}
 
 	userID, _ := uuid.FromBytes(sessionData.UserID)
-	//if err != nil {
-	//	return nil, fmt.Errorf("failed to parse session data user id: %w", err)
-	//}
 
 	allowedCredentials := make([]WebauthnSessionDataAllowedCredential, len(sessionData.AllowedCredentialIDs))
 
