@@ -24,7 +24,7 @@ export const en: Translation = {
     lastUsedAt: "Ultimo accesso il",
     createdAt: "Creato il",
     connectedAccounts: "Account collegati",
-    deleteAccount: "Rimuovi account",
+    deleteAccount: "Cancella account",
     accountNotFound: "Account non trovato",
   },
   texts: {
@@ -34,9 +34,8 @@ export const en: Translation = {
     createAccount:
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
     passwordFormatHint:
-      "La lunghezza deve essere compresa tra {minLength} e {maxLength} caratteri.",
-    manageEmails:
-      "Used for passcode authentication.",
+      "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
+    manageEmails: "Used for passcode authentication.",
     changePassword: "Imposta una nuova password",
     managePasskeys: "Le tue passkey ti consentono di accedere a questo account.",
     isPrimaryEmail:
@@ -50,13 +49,13 @@ export const en: Translation = {
     emailDeleteThirdPartyConnection:
       "Se cancelli questo indirizzo email, non potrà più essere utilizzato per accedere.",
     emailDeletePrimary:
-      "L'indirizzo email principale non può essere cancellato.",
+      "L'indirizzo email principale non può essere eliminato.",
     renamePasskey:
       "Imposta un nome per la passkey.",
     deletePasskey:
       "Cancella questa passkey dal tuo account.",
     deleteAccount:
-      "Sei sicuro di voler eliminare questo account? Tutti i dati verranno immediatamente cancellati permanentemente e non potranno essere ripristinati.",
+      "Sei sicuro di voler cancellare questo account? Tutti i dati verranno immediatamente cancellati permanentemente e non potranno essere ripristinati.",
     noAccountExists:
       'Non esiste alcun account per "{emailAddress}".',
   },
