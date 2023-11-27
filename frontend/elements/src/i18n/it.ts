@@ -2,7 +2,7 @@ import { Translation } from "./translations";
 
 export const en: Translation = {
   headlines: {
-    error: "Si è verificato un errore An error has occurred",
+    error: "Si è verificato un errore",
     loginEmail: "Accedi o registrati",
     loginEmailNoSignup: "Accedi",
     loginFinished: "Accesso riuscito",
@@ -30,7 +30,7 @@ export const en: Translation = {
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
     setupPasskey:
-      "Accedi al tuo accuont in modo semplice e sicuro con una passkey. Nota: I tuoi dati biometrici sono archiviati solo sui tuoi dispositivi e non saranno condivisi con nessuno.",
+      "Accedi al tuo account in modo semplice e sicuro con una passkey. Nota: I tuoi dati biometrici sono archiviati solo sui tuoi dispositivi e non saranno condivisi con nessuno.",
     createAccount:
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
     passwordFormatHint:
