@@ -84,7 +84,7 @@ export const en: Translation = {
     setAsPrimaryEmail: "Imposta come principale",
     verify: "Verifica",
     delete: "Cancella",
-    newEmailAddress: "Nuovo indirizoz email",
+    newEmailAddress: "Nuovo indirizzo email",
     newPassword: "Nuova password",
     rename: "Rinomina",
     newPasskeyName: "Nuovo nome passkey",
@@ -93,7 +93,7 @@ export const en: Translation = {
     createPasskey: "Crea una passkey",
     webauthnUnsupported: "Le Passkeys non sono supportate dal tuo browser",
     signInWith: "Accedi con {provider}",
-    deleteAccount: "Si, cancella questo account.",
+    deleteAccount: "Sì, cancella questo account.",
   },
   errors: {
     somethingWentWrong:
