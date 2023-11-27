@@ -78,7 +78,7 @@ export const en: Translation = {
     signUp: "Registrati",
     sendNewPasscode: "Invia nuovo codice",
     passwordRetryAfter: "Riprova tra {passwordRetryAfter}",
-    passcodeResendAfter: "Richiedi un unovo codice in {passcodeResendAfter}",
+    passcodeResendAfter: "Richiedi un nuovo codice tra {passcodeResendAfter}",
     unverifiedEmail: "non verificato",
     primaryEmail: "principale",
     setAsPrimaryEmail: "Imposta come principale",
