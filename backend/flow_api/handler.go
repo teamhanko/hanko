@@ -14,11 +14,12 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, webauthnService services.WebauthnService, sessionManager session.Manager) *FlowPilotHandler {
+func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, passwordService services.Password, webauthnService services.WebauthnService, sessionManager session.Manager) *FlowPilotHandler {
 	return &FlowPilotHandler{
 		persister,
 		cfg,
 		passcodeService,
+		passwordService,
 		webauthnService,
 		sessionManager,
 	}
@@ -28,6 +29,7 @@ type FlowPilotHandler struct {
 	persister       persistence.Persister
 	cfg             config.Config
 	passcodeService services.Passcode
+	passwordService services.Password
 	webauthnService services.WebauthnService
 	sessionManager  session.Manager
 }
@@ -60,6 +62,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			HttpContext:     c,
 			SessionManager:  h.sessionManager,
 			PasscodeService: h.passcodeService,
+			PasswordService: h.passwordService,
 			WebauthnService: h.webauthnService,
 		})
 

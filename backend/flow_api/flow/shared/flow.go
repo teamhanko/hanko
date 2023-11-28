@@ -23,6 +23,7 @@ type Dependencies struct {
 	Cfg             config.Config
 	HttpContext     echo.Context
 	PasscodeService services.Passcode
+	PasswordService services.Password
 	WebauthnService services.WebauthnService
 	Persister       persistence.Persister
 	SessionManager  session.Manager

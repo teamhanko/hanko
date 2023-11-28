@@ -6,8 +6,8 @@ import (
 	"github.com/gofrs/uuid"
 	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type PasswordRecovery struct {
@@ -36,21 +36,16 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("user_id does not exist")))
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
-
-	passwordPersister := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx)
-
 	authUserID := c.Stash().Get("user_id").String()
-	passwordCredentialModel, err := passwordPersister.GetByUserID(uuid.FromStringOrNil(authUserID))
-	if err != nil {
-		return fmt.Errorf("failed to get password credential by user id: %w", err)
-	}
 
-	passwordCredentialModel.Password = string(hashedPassword)
-
-	err = passwordPersister.Update(*passwordCredentialModel)
+	err := deps.PasswordService.RecoverPassword(uuid.FromStringOrNil(authUserID), newPassword)
 	if err != nil {
-		return fmt.Errorf("failed to update the password credential: %w", err)
+		if errors.Is(err, services.ErrorPasswordInvalid) {
+			c.Input().SetError("password", flowpilot.ErrorValueInvalid)
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
+		}
+
+		return fmt.Errorf("could not recover password: %w", err)
 	}
 
 	// Decide which is the next state according to the config and user input
