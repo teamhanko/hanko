@@ -1,6 +1,6 @@
 import { Translation } from "./translations";
 
-export const en: Translation = {
+export const it: Translation = {
   headlines: {
     error: "Si è verificato un errore",
     loginEmail: "Accedi o registrati",
