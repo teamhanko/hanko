@@ -3,7 +3,7 @@ module github.com/teamhanko/hanko/backend
 go 1.20
 
 require (
-	github.com/brianvoe/gofakeit/v6 v6.24.0
+	github.com/brianvoe/gofakeit/v6 v6.25.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-sql-driver/mysql v1.7.1
