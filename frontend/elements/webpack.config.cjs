@@ -33,7 +33,7 @@ module.exports = {
         type: "module",
       },
     },
-    fr: {
+    it: {
       filename: "i18n/it.js",
       import: "./src/i18n/it.ts",
       library: {
