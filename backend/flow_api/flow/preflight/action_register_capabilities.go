@@ -1,4 +1,4 @@
-package capabilities
+package preflight
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -32,7 +32,7 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 
 	// Only passkeys are allowed, but webauthn is not available on the browser
 	if !webauthnAvailable && !deps.Cfg.Password.Enabled && !deps.Cfg.Passcode.Enabled {
-		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
+		return c.ContinueFlowWithError(c.GetErrorState(), shared.ErrorDeviceNotCapable)
 	}
 
 	// Only security keys are allowed as a second factor, but webauthn is not available on the browser
@@ -40,7 +40,7 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 		deps.Cfg.SecondFactor.Enabled && !deps.Cfg.SecondFactor.Optional &&
 		len(deps.Cfg.SecondFactor.Methods) == 1 &&
 		deps.Cfg.SecondFactor.Methods[0] == "security_key" {
-		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
+		return c.ContinueFlowWithError(c.GetErrorState(), shared.ErrorDeviceNotCapable)
 	}
 
 	err := c.Stash().Set("webauthn_available", webauthnAvailable)

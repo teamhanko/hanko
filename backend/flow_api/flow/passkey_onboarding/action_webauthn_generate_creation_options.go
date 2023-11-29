@@ -72,5 +72,5 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		return err
 	}
 
-	return c.ContinueFlow(StateOnboardingVerifyPasskeyAttestation)
+	return c.ContinueFlow(StateRegistration)
 }

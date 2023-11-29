@@ -57,7 +57,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					MinPasswordLength: 8,
 				},
 			},
-			expectedState:      StatePasswordCreation,
+			expectedState:      StateNewPasswordPrompt,
 			expectedInputError: flowpilot.ErrorValueTooShort,
 			expectedFlowError:  flowpilot.ErrorFormDataInvalid,
 			statusCode:         http.StatusBadRequest,
@@ -67,7 +67,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			input:              `{"new_password": "ThisIsAVeryVeryLongPasswordToCheckTheLengthCheckAndItMustBeVeryLongInOrderToDoSo"}`,
 			flowId:             "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg:                config.Config{},
-			expectedState:      StatePasswordCreation,
+			expectedState:      StateNewPasswordPrompt,
 			expectedInputError: flowpilot.ErrorValueTooLong,
 			expectedFlowError:  flowpilot.ErrorFormDataInvalid,
 			statusCode:         http.StatusBadRequest,
@@ -115,7 +115,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 					},
 				},
 			},
-			expectedState:      passkeyOnboarding.StateOnboardingCreatePasskey,
+			expectedState:      passkeyOnboarding.StateIntroduction,
 			expectedInputError: nil,
 			expectedFlowError:  nil,
 			statusCode:         http.StatusOK,
@@ -131,15 +131,15 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(passkeyOnboarding.StateOnboardingCreatePasskey).
+				State(passkeyOnboarding.StateIntroduction).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(StatePasswordCreation, RegisterPassword{}).
+				State(StateNewPasswordPrompt, SetNewPassword{}).
 				State(shared.StateSuccess).
 				SubFlows(passkeySubFlow).
-				InitialState(StatePasswordCreation).
+				InitialState(StateNewPasswordPrompt).
 				ErrorState(shared.StateError).
 				Debug(true).
 				Build()

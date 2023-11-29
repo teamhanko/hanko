@@ -50,5 +50,5 @@ func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set request_options payload: %w", err)
 	}
 
-	return c.ContinueFlow(StateLoginPasskey)
+	return c.ContinueFlow(StatePasskeyAuthentication)
 }

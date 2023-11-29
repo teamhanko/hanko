@@ -9,19 +9,19 @@ import (
 	"regexp"
 )
 
-type ContinueWithLoginIdentifier struct {
+type ContinueWithUserIdentifier struct {
 	shared.Action
 }
 
-func (a ContinueWithLoginIdentifier) GetName() flowpilot.ActionName {
-	return ActionContinueWithLoginIdentifier
+func (a ContinueWithUserIdentifier) GetName() flowpilot.ActionName {
+	return ActionContinueWithUserIdentifier
 }
 
-func (a ContinueWithLoginIdentifier) GetDescription() string {
+func (a ContinueWithUserIdentifier) GetDescription() string {
 	return "Enter an identifier to login."
 }
 
-func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
+func (a ContinueWithUserIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
 	if !deps.Cfg.Identifier.Username.Enabled {
@@ -45,7 +45,7 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 	}
 }
 
-func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
+func (a ContinueWithUserIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -97,9 +97,9 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 	if deps.Cfg.Password.Enabled {
 		if deps.Cfg.Password.Optional {
-			return c.ContinueFlow(StateLoginMethodChooser)
+			return c.ContinueFlow(StateMethodSelection)
 		} else {
-			return c.ContinueFlow(StateLoginPassword)
+			return c.ContinueFlow(StatePasswordPrompt)
 		}
 	}
 
@@ -108,9 +108,9 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 
-		return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+		return c.StartSubFlow(passcode.StateConfirmation, StateSuccess)
 	}
 
 	// Username exists, but user has no emails.
-	return c.ContinueFlow(StateLoginMethodChooser)
+	return c.ContinueFlow(StateMethodSelection)
 }

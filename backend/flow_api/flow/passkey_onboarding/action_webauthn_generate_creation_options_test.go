@@ -6,7 +6,7 @@ import (
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/preflight"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -40,7 +40,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			input:         "",
 			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg:           config.Config{},
-			expectedState: StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateRegistration,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -48,7 +48,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			input:         "",
 			flowId:        "a77e23b2-7ca5-4c76-a20b-c17b7dbcb117",
 			cfg:           config.Config{},
-			expectedState: StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateRegistration,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -56,7 +56,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			input:         "",
 			flowId:        "de87cfc6-a6e2-434d-bbe8-5e5004c9deda",
 			cfg:           config.Config{},
-			expectedState: StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateRegistration,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -81,16 +81,16 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}).
-				State(StateOnboardingVerifyPasskeyAttestation).
+				State(StateIntroduction, WebauthnGenerateCreationOptions{}).
+				State(StateRegistration).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(capabilities.StatePreflight).
+				State(preflight.StatePreflight).
 				State(shared.StateSuccess).
 				SubFlows(passkeySubFlow).
-				InitialState(capabilities.StatePreflight).
+				InitialState(preflight.StatePreflight).
 				ErrorState(shared.StateError).
 				Build()
 			s.Require().NoError(err)

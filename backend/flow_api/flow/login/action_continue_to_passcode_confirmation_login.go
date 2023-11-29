@@ -8,19 +8,19 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type ContinueToPasscodeConfirmation struct {
+type ContinueToPasscodeConfirmationLogin struct {
 	shared.Action
 }
 
-func (a ContinueToPasscodeConfirmation) GetName() flowpilot.ActionName {
-	return ActionContinueToPasscodeConfirmation
+func (a ContinueToPasscodeConfirmationLogin) GetName() flowpilot.ActionName {
+	return ActionContinueToPasscodeConfirmationLogin
 }
 
-func (a ContinueToPasscodeConfirmation) GetDescription() string {
+func (a ContinueToPasscodeConfirmationLogin) GetDescription() string {
 	return "Send a login passcode code via email."
 }
 
-func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationContext) {
+func (a ContinueToPasscodeConfirmationLogin) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
 	if !deps.Cfg.Passcode.Enabled || !c.Stash().Get("email").Exists() {
@@ -28,7 +28,7 @@ func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationCon
 	}
 }
 
-func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) error {
+func (a ContinueToPasscodeConfirmationLogin) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if err := c.Stash().Set("passcode_template", "login"); err != nil {
@@ -36,8 +36,8 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 	}
 
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passcode.StateConfirmation, passkey_onboarding.StateIntroduction, StateSuccess)
 	}
 
-	return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+	return c.StartSubFlow(passcode.StateConfirmation, StateSuccess)
 }

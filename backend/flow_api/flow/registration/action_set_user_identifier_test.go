@@ -56,7 +56,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: passcode.StatePasscodeConfirmation,
+			expectedState: passcode.StateConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -76,7 +76,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					},
 				},
 			},
-			expectedState: passkey_onboarding.StateOnboardingCreatePasskey,
+			expectedState: passkey_onboarding.StateIntroduction,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -100,7 +100,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: passcode.StatePasscodeConfirmation,
+			expectedState: passcode.StateConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -141,7 +141,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					RequireVerification: true,
 				},
 			},
-			expectedState: passcode.StatePasscodeConfirmation,
+			expectedState: passcode.StateConfirmation,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -286,7 +286,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 					Enabled: false,
 				},
 			},
-			expectedState: passkey_onboarding.StateOnboardingCreatePasskey,
+			expectedState: passkey_onboarding.StateIntroduction,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -327,14 +327,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			//rec := httptest.NewRecorder()
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(passkey_onboarding.StateOnboardingCreatePasskey).
+				State(passkey_onboarding.StateIntroduction).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				//State(stateRegistrationInit, RegisterLoginIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
-				State(stateRegistrationInit, RegisterLoginIdentifier{}).
-				State(passcode.StatePasscodeConfirmation).
+				//State(stateRegistrationInit, SetUserIdentifier(currentTest.cfg, s.Storage, &testPasscodeService{}, echo.New().NewContext(req, rec))).
+				State(stateRegistrationInit, SetUserIdentifier{}).
+				State(passcode.StateConfirmation).
 				State(shared.StateSuccess).
 				State(shared.StatePasswordCreation).
 				SubFlows(passkeySubFlow).

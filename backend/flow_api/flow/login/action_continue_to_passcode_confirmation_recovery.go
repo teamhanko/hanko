@@ -7,19 +7,19 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type ContinueToPasscodeConfirmationRecovery struct {
+type ContinueToPasscodeConfirmationForRecovery struct {
 	shared.Action
 }
 
-func (a ContinueToPasscodeConfirmationRecovery) GetName() flowpilot.ActionName {
+func (a ContinueToPasscodeConfirmationForRecovery) GetName() flowpilot.ActionName {
 	return ActionContinueToPasscodeConfirmationRecovery
 }
 
-func (a ContinueToPasscodeConfirmationRecovery) GetDescription() string {
+func (a ContinueToPasscodeConfirmationForRecovery) GetDescription() string {
 	return "Send a recovery passcode code via email."
 }
 
-func (a ContinueToPasscodeConfirmationRecovery) Initialize(c flowpilot.InitializationContext) {
+func (a ContinueToPasscodeConfirmationForRecovery) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
 	if !deps.Cfg.Passcode.Enabled || !c.Stash().Get("email").Exists() {
@@ -27,10 +27,10 @@ func (a ContinueToPasscodeConfirmationRecovery) Initialize(c flowpilot.Initializ
 	}
 }
 
-func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionContext) error {
+func (a ContinueToPasscodeConfirmationForRecovery) Execute(c flowpilot.ExecutionContext) error {
 	if err := c.Stash().Set("passcode_template", "recovery"); err != nil {
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateLoginPasswordRecovery)
+	return c.StartSubFlow(passcode.StateConfirmation, StateNewPasswordPrompt)
 }

@@ -1,55 +1,56 @@
 package login
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/preflight"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
 )
 
 const (
-	StateLoginInit             flowpilot.StateName = "login_init"
-	StateLoginMethodChooser    flowpilot.StateName = "login_method_chooser"
-	StateLoginPassword         flowpilot.StateName = "login_password"
-	StateLoginPasskey          flowpilot.StateName = "login_passkey"
-	StateLoginPasswordRecovery flowpilot.StateName = "login_password_recovery"
+	StateUserIdentificationPrompt flowpilot.StateName = "login_user_identification_prompt"
+	StateMethodSelection          flowpilot.StateName = "login_method_selection"
+	StatePasswordPrompt           flowpilot.StateName = "login_password_prompt"
+	StateNewPasswordPrompt        flowpilot.StateName = "login_new_password_prompt"
+	StatePasskeyAuthentication    flowpilot.StateName = "login_passkey_authentication"
+	StateSuccess                  flowpilot.StateName = "login_success"
+	StateError                    flowpilot.StateName = "login_error"
 )
 
 const (
-	ActionContinueToLoginMethodChooser           flowpilot.ActionName = "continue_to_login_method_chooser"
-	ActionContinueToPasscodeConfirmation         flowpilot.ActionName = "continue_to_passcode_confirmation"
+	ActionContinueWithUserIdentifier             flowpilot.ActionName = "continue_with_user_identifier"
+	ActionContinueToMethodSelection              flowpilot.ActionName = "continue_to_method_selection"
+	ActionContinueToPasscodeConfirmationLogin    flowpilot.ActionName = "continue_to_passcode_confirmation_login"
 	ActionContinueToPasscodeConfirmationRecovery flowpilot.ActionName = "continue_to_passcode_confirmation_recovery"
-	ActionContinueToPasswordLogin                flowpilot.ActionName = "continue_to_password_login"
+	ActionContinueToPasswordPrompt               flowpilot.ActionName = "continue_to_password_prompt"
 	ActionWebauthnGenerateRequestOptions         flowpilot.ActionName = "webauthn_generate_request_options"
 	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_request_response"
-	ActionContinueWithLoginIdentifier            flowpilot.ActionName = "continue_with_login_identifier"
-	ActionPasswordRecovery                       flowpilot.ActionName = "password_recovery"
-	ActionPasswordLogin                          flowpilot.ActionName = "password_login"
+	ActionVerifyPassword                         flowpilot.ActionName = "verify_password"
+	ActionSetNewPassword                         flowpilot.ActionName = "set_new_password"
 )
 
 var Flow = flowpilot.NewFlow("/login").
-	State(StateLoginInit, ContinueWithLoginIdentifier{}, WebauthnGenerateRequestOptions{}).
-	State(StateLoginMethodChooser,
+	State(StateUserIdentificationPrompt, ContinueWithUserIdentifier{}, WebauthnGenerateRequestOptions{}).
+	State(StateMethodSelection,
 		WebauthnGenerateRequestOptions{},
-		ContinueToPasswordLogin{},
-		ContinueToPasscodeConfirmation{},
+		ContinueToPasswordPrompt{},
+		ContinueToPasscodeConfirmationLogin{},
 		shared.Back{},
 	).
-	State(StateLoginPasskey, WebauthnVerifyAssertionResponse{}).
-	State(StateLoginPassword,
-		PasswordLogin{},
-		ContinueToPasscodeConfirmationRecovery{},
-		ContinueToLoginMethodChooser{},
+	State(StatePasskeyAuthentication, WebauthnVerifyAssertionResponse{}).
+	State(StatePasswordPrompt,
+		VerifyPassword{},
+		ContinueToPasscodeConfirmationForRecovery{},
+		ContinueToMethodSelection{},
 		shared.Back{},
 	).
-	State(StateLoginPasswordRecovery, PasswordRecovery{}).
-	BeforeState(shared.StateSuccess, shared.IssueSession{}).
-	State(shared.StateSuccess).
-	State(shared.StateError).
-	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
-	InitialState(capabilities.StatePreflight, StateLoginInit).
-	ErrorState(shared.StateError).
+	State(StateNewPasswordPrompt, SetNewPassword{}).
+	BeforeState(StateSuccess, shared.IssueSession{}).
+	InitialState(preflight.StatePreflight, StateUserIdentificationPrompt).
+	ErrorState(StateError).
+	SubFlows(preflight.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
 	TTL(10 * time.Minute).
+	Debug(true).
 	MustBuild()

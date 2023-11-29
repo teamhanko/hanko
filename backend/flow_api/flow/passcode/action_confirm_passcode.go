@@ -9,23 +9,23 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type VerifyPasscode struct {
+type ConfirmPasscode struct {
 	shared.Action
 }
 
-func (a VerifyPasscode) GetName() flowpilot.ActionName {
-	return ActionVerifyPasscode
+func (a ConfirmPasscode) GetName() flowpilot.ActionName {
+	return ActionConfirmPasscode
 }
 
-func (a VerifyPasscode) GetDescription() string {
+func (a ConfirmPasscode) GetDescription() string {
 	return "Enter a passcode."
 }
 
-func (a VerifyPasscode) Initialize(c flowpilot.InitializationContext) {
+func (a ConfirmPasscode) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("code").Required(true))
 }
 
-func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
+func (a ConfirmPasscode) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -42,11 +42,11 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		if errors.Is(err, services.ErrorPasscodeInvalid) ||
 			errors.Is(err, services.ErrorPasscodeNotFound) ||
 			errors.Is(err, services.ErrorPasscodeExpired) {
-			return c.ContinueFlowWithError(c.GetErrorState(), shared.ErrorPasscodeInvalid)
+			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeInvalid)
 		}
 
 		if errors.Is(err, services.ErrorPasscodeMaxAttemptsReached) {
-			return c.ContinueFlowWithError(c.GetErrorState(), shared.ErrorPasscodeMaxAttemptsReached)
+			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeMaxAttemptsReached)
 		}
 
 		return fmt.Errorf("failed to verify passcode: %w", err)

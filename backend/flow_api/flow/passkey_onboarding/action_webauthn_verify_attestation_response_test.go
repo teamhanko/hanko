@@ -6,7 +6,7 @@ import (
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/preflight"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -45,14 +45,14 @@ func (s *sendWaAttestationResponse) TestSendWaAttestationResponse_Execute() {
 			name:          "send a attestation with expired session data",
 			input:         `{"public_key": "{\"id\": \"4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM\",\"rawId\": \"4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM\",\"type\": \"public-key\",\"response\": {\"attestationObject\": \"o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVikSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFAAAAAQECAwQFBgcIAQIDBAUGBwgAIOIlWRhTf45LVyZsJgZmkqtEK-E-tk9I1-z0u13IAFpTpQECAyYgASFYIAeA_nt5TQ8c7bc8hN9_3zqzp3coXO5aplEeHMOQG0hrIlggf_KVxZI_nIedc1XMrwwOMaYNd0qxVpFK7vU79fGBoxY\",\"clientDataJSON\": \"eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiRmVNYzdzUjlFbGVod0VVNVR0RVdGaTdyUFAzLWtkWlhnbndMdGxiM0NoWSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODg4OCIsImNyb3NzT3JpZ2luIjpmYWxzZX0\"}}"}`,
 			flowId:        "53d35f35-c87d-4533-b966-2b48686b9be9",
-			expectedState: StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateRegistration,
 			statusCode:    http.StatusBadRequest,
 		},
 		{
 			name:          "send a attestation with wrong challenge",
 			input:         `{"publicKey":"{\"id\": \"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH\",\"rawId\": \"AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH\",\"type\": \"public-key\",\"response\": {\"attestationObject\": \"o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YVjeSZYN5YgOjGh0NBcPZHZgW4_krrmihjLHmVzzuoMdl2NFYmehnq3OAAI1vMYKZIsLJfHwVQMAWgGhXZHA-Erj4xfo8FKEcB_PmR7mOUVuOn7GZhLwV-kTSh2hrVc6QE7NOikFYXiDo2M_mJ3huHJkDnnc5dHtIxfedbpMdex5fY3hoFs-fwymQjtdqdvti5c4x6UBAgMmIAEhWCDxvVrRgK4vpnr6JxTx-KfpSNyQUtvc47ryryZmj-P5kSJYIDox8N9bHQBrxN-b5kXqfmj3GwAJW7nNCh8UPbus3B6I\",\"clientDataJSON\": \"eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoidE9yTkRDRDJ4UWY0ekZqRWp3eGFQOGZPRXJQM3p6MDhyTW9UbEpHdG5LdSIsIm9yaWdpbiI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODA4MCIsImNyb3NzT3JpZ2luIjpmYWxzZX0\"}}"}`,
 			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
-			expectedState: StateOnboardingVerifyPasskeyAttestation,
+			expectedState: StateRegistration,
 			statusCode:    http.StatusBadRequest,
 		},
 		{
@@ -76,16 +76,16 @@ func (s *sendWaAttestationResponse) TestSendWaAttestationResponse_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(StateOnboardingCreatePasskey).
-				State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{wa: wa}).
+				State(StateIntroduction).
+				State(StateRegistration, WebauthnVerifyAttestationResponse{wa: wa}).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(capabilities.StatePreflight).
+				State(preflight.StatePreflight).
 				State(shared.StateSuccess).
 				SubFlows(passkeySubFlow).
-				InitialState(capabilities.StatePreflight).
+				InitialState(preflight.StatePreflight).
 				ErrorState(shared.StateError).
 				Debug(true).
 				Build()
