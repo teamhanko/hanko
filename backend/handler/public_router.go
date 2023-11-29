@@ -7,12 +7,16 @@ import (
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml"
+	"github.com/teamhanko/hanko/backend/flow_api"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/template"
 )
 
@@ -20,6 +24,34 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e := echo.New()
 
 	e.Renderer = template.NewTemplateRenderer()
+
+	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
+
+	emailService, err := services.NewEmailService(*cfg)
+	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+	passwordService := services.NewPasswordService(*cfg, persister)
+	webauthnService := services.NewWebauthnService(*cfg, persister)
+
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, *cfg)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+
+	flowAPIHandler := flow_api.NewHandler(
+		*cfg,
+		persister,
+		passcodeService,
+		passwordService,
+		webauthnService,
+		sessionManager,
+	)
+	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
+	e.POST("/login", flowAPIHandler.LoginFlowHandler)
+
 	e.HideBanner = true
 	g := e.Group("")
 
