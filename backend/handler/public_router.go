@@ -24,6 +24,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	emailService, err := services.NewEmailService(*cfg)
 	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+	passwordService := services.NewPasswordService(*cfg, persister)
 	webauthnService := services.NewWebauthnService(*cfg, persister)
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
@@ -39,6 +40,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		*cfg,
 		persister,
 		passcodeService,
+		passwordService,
 		webauthnService,
 		sessionManager,
 	)

@@ -6,8 +6,8 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type PasswordLogin struct {
@@ -70,47 +70,13 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	//	}
 	//}
 
-	user, err := deps.Persister.GetUserPersister().Get(userID)
+	err := deps.PasswordService.VerifyPassword(userID, c.Input().Get("password").String())
 	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-	if user == nil {
-		//err = h.auditLogger.Create(c, models.AuditLogPasswordLoginFailed, nil, fmt.Errorf("unknown user: %s", userID))
-		//if err != nil {
-		//	return fmt.Errorf("failed to create audit log: %w", err)
-		//}
-		return a.wrongCredentialsError(c)
-	}
+		if errors.Is(err, services.ErrorPasswordInvalid) {
+			return a.wrongCredentialsError(c)
+		}
 
-	pwBytes := []byte(c.Input().Get("password").String())
-	if len(pwBytes) > 72 {
-		return a.wrongCredentialsError(c)
-	}
-
-	pw, err := deps.Persister.GetPasswordCredentialPersister().GetByUserID(userID)
-	if pw == nil {
-		//err = h.auditLogger.Create(c, models.AuditLogPasswordLoginFailed, user, fmt.Errorf("user has no password credential"))
-		//if err != nil {
-		//	return fmt.Errorf("failed to create audit log: %w", err)
-		//}
-		return a.wrongCredentialsError(c)
-	}
-
-	if err != nil {
-		return fmt.Errorf("error retrieving password credential: %w", err)
-	}
-
-	if err = bcrypt.CompareHashAndPassword([]byte(pw.Password), pwBytes); err != nil {
-		//err = h.auditLogger.Create(c, models.AuditLogPasswordLoginFailed, user, fmt.Errorf("password hash not equal"))
-		//if err != nil {
-		//	return fmt.Errorf("failed to create audit log: %w", err)
-		//}
-		return a.wrongCredentialsError(c)
-	}
-
-	err = c.Stash().Set("user", user)
-	if err != nil {
-		return fmt.Errorf("failed to set user to stash: %w", err)
+		return fmt.Errorf("failed to verify password: %w", err)
 	}
 
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
