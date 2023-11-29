@@ -45,6 +45,7 @@ var Flow = flowpilot.NewFlow("/login").
 		shared.Back{},
 	).
 	State(StateLoginPasswordRecovery, PasswordRecovery{}).
+	BeforeState(shared.StateSuccess, shared.IssueSession{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).

@@ -53,17 +53,6 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to create user: %w", err)
 	}
 
-	sessionToken, err := deps.SessionManager.GenerateJWT(userId)
-	if err != nil {
-		return fmt.Errorf("failed to generate JWT: %w", err)
-	}
-	cookie, err := deps.SessionManager.GenerateCookie(sessionToken)
-	if err != nil {
-		return fmt.Errorf("failed to generate auth cookie, %w", err)
-	}
-
-	deps.HttpContext.SetCookie(cookie)
-
 	return nil
 }
 
