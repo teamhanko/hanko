@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sethvargo/go-limiter"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
@@ -14,6 +15,7 @@ import (
 	"github.com/teamhanko/hanko/backend/mail"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 )
 
@@ -36,14 +38,21 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
-	flowAPIHandler := flow_api.NewHandler(
-		*cfg,
-		persister,
-		passcodeService,
-		passwordService,
-		webauthnService,
-		sessionManager,
-	)
+	var rateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+	}
+
+	flowAPIHandler := flow_api.FlowPilotHandler{
+		Persister:       persister,
+		Cfg:             *cfg,
+		PasscodeService: passcodeService,
+		PasswordService: passwordService,
+		WebauthnService: webauthnService,
+		SessionManager:  sessionManager,
+		RateLimiter:     rateLimiter,
+	}
+
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
 	e.POST("/login", flowAPIHandler.LoginFlowHandler)
 

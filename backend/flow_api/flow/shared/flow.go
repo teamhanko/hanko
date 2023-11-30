@@ -3,6 +3,7 @@ package shared
 import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
+	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -27,6 +28,7 @@ type Dependencies struct {
 	WebauthnService services.WebauthnService
 	Persister       persistence.Persister
 	SessionManager  session.Manager
+	RateLimiter     limiter.Store
 	Tx              *pop.Connection
 }
 
