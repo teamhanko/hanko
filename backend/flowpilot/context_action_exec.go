@@ -87,12 +87,6 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		return errors.New("execution context is closed already")
 	}
 
-	err := aec.executeHookActions(nextStateName)
-	if err != nil {
-		return fmt.Errorf("error while executing hook actions: %w", err)
-	}
-
-	// Prepare the result for continuing the flow.
 	actionResult := actionExecutionResult{
 		actionName: aec.actionName,
 		schema:     aec.input,
@@ -104,13 +98,20 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		actionExecutionResult: &actionResult,
 	}
 
+	aec.executionResult = &result
+
+	err := aec.executeHookActions(nextStateName)
+	if err != nil {
+		return fmt.Errorf("error while executing hook actions: %w", err)
+	}
+
+	// Prepare the result for continuing the flow.
+
 	// Save the next state and transition data.
 	if err := aec.saveNextState(result); err != nil {
 		return fmt.Errorf("failed to save the transition data: %w", err)
 	}
-
 	aec.executionResult = &result
-
 	return nil
 }
 
@@ -162,6 +163,14 @@ func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...s
 	}
 
 	return nil
+}
+
+func (aec *defaultActionExecutionContext) SetFlowError(err FlowError) {
+	aec.executionResult.flowError = err
+}
+
+func (aec *defaultActionExecutionContext) GetFlowError() FlowError {
+	return aec.executionResult.flowError
 }
 
 // ValidateInputData validates the input data against the schema.
