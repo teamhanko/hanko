@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type Context interface {
+type context interface {
 	// Get returns the context value with the given name.
 	Get(string) interface{}
 }
@@ -79,21 +79,27 @@ type actionExecutionContinuationContext interface {
 	ContinueToPreviousState() error
 }
 
+type Context interface {
+	context
+}
+
 // InitializationContext is a shorthand for actionInitializationContext within the flow initialization method.
 type InitializationContext interface {
-	Context
+	context
 	actionInitializationContext
 }
 
 // ExecutionContext is a shorthand for actionExecutionContinuationContext within flow execution method.
 type ExecutionContext interface {
-	Context
+	context
 	actionExecutionContinuationContext
 }
 
 type HookExecutionContext interface {
-	Context
+	context
 	actionExecutionContext
+	SetFlowError(FlowError)
+	GetFlowError() FlowError
 }
 
 // TODO: The following interfaces are meant for a plugin system. #tbd

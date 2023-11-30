@@ -3,6 +3,7 @@ package flow_api
 import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
+	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
@@ -14,24 +15,14 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-func NewHandler(cfg config.Config, persister persistence.Persister, passcodeService services.Passcode, passwordService services.Password, webauthnService services.WebauthnService, sessionManager session.Manager) *FlowPilotHandler {
-	return &FlowPilotHandler{
-		persister,
-		cfg,
-		passcodeService,
-		passwordService,
-		webauthnService,
-		sessionManager,
-	}
-}
-
 type FlowPilotHandler struct {
-	persister       persistence.Persister
-	cfg             config.Config
-	passcodeService services.Passcode
-	passwordService services.Password
-	webauthnService services.WebauthnService
-	sessionManager  session.Manager
+	Persister       persistence.Persister
+	Cfg             config.Config
+	PasscodeService services.Passcode
+	PasswordService services.Password
+	WebauthnService services.WebauthnService
+	SessionManager  session.Manager
+	RateLimiter     limiter.Store
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -52,18 +43,19 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		return c.JSON(result.Status(), result.Response())
 	}
 
-	err = h.persister.Transaction(func(tx *pop.Connection) error {
+	err = h.Persister.Transaction(func(tx *pop.Connection) error {
 		db := models.NewFlowDB(tx)
 
 		flow.Set("dependencies", &shared.Dependencies{
-			Cfg:             h.cfg,
+			Cfg:             h.Cfg,
+			RateLimiter:     h.RateLimiter,
 			Tx:              tx,
-			Persister:       h.persister,
+			Persister:       h.Persister,
 			HttpContext:     c,
-			SessionManager:  h.sessionManager,
-			PasscodeService: h.passcodeService,
-			PasswordService: h.passwordService,
-			WebauthnService: h.webauthnService,
+			SessionManager:  h.SessionManager,
+			PasscodeService: h.PasscodeService,
+			PasswordService: h.PasswordService,
+			WebauthnService: h.WebauthnService,
 		})
 
 		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))

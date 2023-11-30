@@ -32,21 +32,22 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	passcodeId, err := uuid.FromString(c.Stash().Get("passcode_id").String())
-	if err != nil {
-		return err
+	if !c.Stash().Get("passcode_id").Exists() {
+		return errors.New("passcode_id does not exist in the stash")
 	}
 
-	err = deps.PasscodeService.VerifyPasscode(deps.Tx, passcodeId, c.Input().Get("code").String())
+	passcodeID := uuid.FromStringOrNil(c.Stash().Get("passcode_id").String())
+
+	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String())
 	if err != nil {
 		if errors.Is(err, services.ErrorPasscodeInvalid) ||
 			errors.Is(err, services.ErrorPasscodeNotFound) ||
 			errors.Is(err, services.ErrorPasscodeExpired) {
-			return c.ContinueFlowWithError(c.GetErrorState(), shared.ErrorPasscodeInvalid)
+			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeInvalid)
 		}
 
 		if errors.Is(err, services.ErrorPasscodeMaxAttemptsReached) {
-			return c.ContinueFlowWithError(c.GetErrorState(), shared.ErrorPasscodeMaxAttemptsReached)
+			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeMaxAttemptsReached)
 		}
 
 		return fmt.Errorf("failed to verify passcode: %w", err)

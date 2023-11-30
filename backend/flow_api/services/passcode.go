@@ -22,12 +22,22 @@ var (
 	ErrorPasscodeMaxAttemptsReached = errors.New("the passcode was entered wrong too many times")
 )
 
+type SendPasscodeParams struct {
+	FlowID       uuid.UUID
+	Template     string
+	EmailAddress string
+	Language     string
+}
+
+type ValidatePasscodeParams struct {
+	Tx         *pop.Connection
+	PasscodeID uuid.UUID
+}
+
 type Passcode interface {
-	SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
-	SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
-	PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error)
-	SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error)
-	VerifyPasscode(tx *pop.Connection, passcodeID uuid.UUID, passcode string) error
+	ValidatePasscode(ValidatePasscodeParams) (bool, error)
+	SendPasscode(SendPasscodeParams) (uuid.UUID, error)
+	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string) error
 }
 
 type passcode struct {
@@ -46,38 +56,41 @@ func NewPasscodeService(cfg config.Config, emailService Email, persister persist
 	}
 }
 
-func (s *passcode) VerifyPasscode(tx *pop.Connection, passcodeId uuid.UUID, value string) error {
+func (s *passcode) ValidatePasscode(p ValidatePasscodeParams) (bool, error) {
+	if !p.PasscodeID.IsNil() {
+		_, err := s.getPasscode(p.Tx, p.PasscodeID)
+		if err != nil {
+			if errors.Is(err, ErrorPasscodeNotFound) || errors.Is(err, ErrorPasscodeExpired) || errors.Is(err, ErrorPasscodeMaxAttemptsReached) {
+				return false, nil
+			} else {
+				return false, fmt.Errorf("failed to get passcode from db: %v", err)
+			}
+		}
+
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, value string) error {
 	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
-
-	passcodeModel, err := passcodePersister.Get(passcodeId)
+	passcodeModel, err := s.getPasscode(tx, passcodeID)
 	if err != nil {
-		return fmt.Errorf("failed to get passcode from db: %w", err)
-	}
-
-	if passcodeModel == nil {
-		return ErrorPasscodeNotFound
-	}
-
-	expirationTime := passcodeModel.CreatedAt.Add(time.Duration(passcodeModel.Ttl) * time.Second)
-	if expirationTime.Before(time.Now().UTC()) {
-		return ErrorPasscodeExpired
+		return err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(passcodeModel.Code), []byte(value))
 	if err != nil {
 		passcodeModel.TryCount += 1
-		if passcodeModel.TryCount >= maxPasscodeTries {
-			err = passcodePersister.Delete(*passcodeModel)
-			if err != nil {
-				return fmt.Errorf("failed to delete passcode from db: %w", err)
-			}
-
-			return ErrorPasscodeMaxAttemptsReached
-		}
 
 		err = passcodePersister.Update(*passcodeModel)
 		if err != nil {
 			return fmt.Errorf("failed to update passcode: %w", err)
+		}
+
+		if passcodeModel.TryCount >= maxPasscodeTries {
+			return ErrorPasscodeMaxAttemptsReached
 		}
 
 		return ErrorPasscodeInvalid
@@ -91,19 +104,7 @@ func (s *passcode) VerifyPasscode(tx *pop.Connection, passcodeId uuid.UUID, valu
 	return nil
 }
 
-func (s *passcode) SendEmailVerification(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return s.SendPasscode(flowID, "email_verification", emailAddress, lang)
-}
-
-func (s *passcode) SendLogin(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return s.SendPasscode(flowID, "login", emailAddress, lang)
-}
-
-func (s *passcode) PasswordRecovery(flowID uuid.UUID, emailAddress string, lang string) (uuid.UUID, error) {
-	return s.SendPasscode(flowID, "password_recovery", emailAddress, lang)
-}
-
-func (s *passcode) SendPasscode(flowID uuid.UUID, template string, emailAddress string, lang string) (uuid.UUID, error) {
+func (s *passcode) SendPasscode(p SendPasscodeParams) (uuid.UUID, error) {
 	code, err := s.passcodeGenerator.Generate()
 	if err != nil {
 		return uuid.Nil, err
@@ -121,7 +122,7 @@ func (s *passcode) SendPasscode(flowID uuid.UUID, template string, emailAddress 
 	now := time.Now().UTC()
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
-		FlowID:    &flowID,
+		FlowID:    &p.FlowID,
 		Ttl:       s.cfg.Passcode.TTL,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
@@ -141,10 +142,34 @@ func (s *passcode) SendPasscode(flowID uuid.UUID, template string, emailAddress 
 		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
 	}
 
-	err = s.emailService.SendEmail(template, lang, data, emailAddress)
+	err = s.emailService.SendEmail(p.Template, p.Language, data, p.EmailAddress)
 	if err != nil {
 		return uuid.Nil, err
 	}
 
 	return passcodeId, nil
+}
+
+func (s *passcode) getPasscode(tx *pop.Connection, passcodeID uuid.UUID) (*models.Passcode, error) {
+	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
+
+	passcodeModel, err := passcodePersister.Get(passcodeID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get passcode from db: %w", err)
+	}
+
+	if passcodeModel == nil {
+		return nil, ErrorPasscodeNotFound
+	}
+
+	expirationTime := passcodeModel.CreatedAt.Add(time.Duration(passcodeModel.Ttl) * time.Second)
+	if expirationTime.Before(time.Now().UTC()) {
+		return nil, ErrorPasscodeExpired
+	}
+
+	if passcodeModel.TryCount >= maxPasscodeTries {
+		return nil, ErrorPasscodeMaxAttemptsReached
+	}
+
+	return passcodeModel, nil
 }
