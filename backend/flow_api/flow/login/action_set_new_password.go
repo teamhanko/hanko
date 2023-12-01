@@ -10,24 +10,24 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type PasswordRecovery struct {
+type SetNewPassword struct {
 	shared.Action
 }
 
-func (a PasswordRecovery) GetName() flowpilot.ActionName {
-	return ActionPasswordRecovery
+func (a SetNewPassword) GetName() flowpilot.ActionName {
+	return ActionSetNewPassword
 }
 
-func (a PasswordRecovery) GetDescription() string {
+func (a SetNewPassword) GetDescription() string {
 	return "Submit a new password."
 }
 
-func (a PasswordRecovery) Initialize(c flowpilot.InitializationContext) {
+func (a SetNewPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
 }
 
-func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
+func (a SetNewPassword) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	newPassword := c.Input().Get("new_password").String()
@@ -50,8 +50,8 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	// Decide which is the next state according to the config and user input
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passkeyOnboarding.StateIntroduction, StateSuccess)
 	}
 
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlow(StateSuccess)
 }

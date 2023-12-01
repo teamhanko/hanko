@@ -11,11 +11,6 @@ import (
 )
 
 const (
-	StateSuccess flowpilot.StateName = "success"
-	StateError   flowpilot.StateName = "error"
-)
-
-const (
 	ActionBack flowpilot.ActionName = "back"
 )
 

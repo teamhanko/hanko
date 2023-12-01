@@ -11,20 +11,20 @@ import (
 	"strings"
 )
 
-// RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
-type RegisterLoginIdentifier struct {
+// SetUserIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
+type SetUserIdentifier struct {
 	shared.Action
 }
 
-func (a RegisterLoginIdentifier) GetName() flowpilot.ActionName {
-	return ActionRegisterLoginIdentifier
+func (a SetUserIdentifier) GetName() flowpilot.ActionName {
+	return ActionSetUserIdentifier
 }
 
-func (a RegisterLoginIdentifier) GetDescription() string {
+func (a SetUserIdentifier) GetDescription() string {
 	return "Enter an identifier to register."
 }
 
-func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
+func (a SetUserIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
 	if deps.Cfg.Identifier.Email.Enabled {
@@ -49,7 +49,7 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	}
 }
 
-func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
+func (a SetUserIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -116,17 +116,17 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		if deps.Cfg.Password.Enabled {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
+			return c.StartSubFlow(passcode.StateConfirmation, StateNewPasswordPrompt)
 		} else if !deps.Cfg.Passcode.Enabled || (deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+			return c.StartSubFlow(passcode.StateConfirmation, passkey_onboarding.StateIntroduction, StateSuccess)
 		}
 	} else if deps.Cfg.Password.Enabled {
-		return c.ContinueFlow(StatePasswordCreation)
+		return c.ContinueFlow(StateNewPasswordPrompt)
 	} else if !deps.Cfg.Passcode.Enabled {
-		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passkey_onboarding.StateIntroduction, StateSuccess)
 	}
 
 	// TODO: store user and create session token // should this case even exist (only works when email (optional/required) is set by the user) ???
 
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlow(StateSuccess)
 }

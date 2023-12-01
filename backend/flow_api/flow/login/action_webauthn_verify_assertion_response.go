@@ -52,11 +52,11 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	err := deps.WebauthnService.VerifyAssertionResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
-			return c.ContinueFlowWithError(StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
+			return c.ContinueFlowWithError(StateUserIdentificationPrompt, shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify assertion response: %w", err)
 	}
 
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlow(StateSuccess)
 }

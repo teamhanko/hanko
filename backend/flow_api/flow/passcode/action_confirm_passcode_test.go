@@ -56,7 +56,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "654321"}`,
 			flowId:        "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg:           config.Config{},
-			expectedState: StatePasscodeConfirmation,
+			expectedState: StateConfirmation,
 			statusCode:    http.StatusUnauthorized,
 		},
 		{
@@ -64,7 +64,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "654321"}`,
 			flowId:        "8a2cf90d-dea5-4678-9dca-6707dab6af77",
 			cfg:           config.Config{},
-			expectedState: StatePasscodeConfirmation,
+			expectedState: StateConfirmation,
 			statusCode:    http.StatusUnauthorized,
 		},
 		{
@@ -90,7 +90,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			input:         `{"code": "123456"}`,
 			flowId:        "5a862a2d-0d10-4904-b297-cb32fc43c859",
 			cfg:           config.Config{},
-			expectedState: StatePasscodeConfirmation,
+			expectedState: StateConfirmation,
 			statusCode:    http.StatusBadRequest,
 		},
 		{
@@ -119,7 +119,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 					},
 				},
 			},
-			expectedState: passkey_onboarding.StateOnboardingCreatePasskey,
+			expectedState: passkey_onboarding.StateIntroduction,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -136,7 +136,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 					},
 				},
 			},
-			expectedState: passkey_onboarding.StateOnboardingCreatePasskey,
+			expectedState: passkey_onboarding.StateIntroduction,
 			statusCode:    http.StatusOK,
 		},
 		{
@@ -167,16 +167,16 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			s.Require().NoError(err)
 
 			passkeySubFlow, err := flowpilot.NewSubFlow().
-				State(passkey_onboarding.StateOnboardingCreatePasskey).
+				State(passkey_onboarding.StateIntroduction).
 				Build()
 			s.Require().NoError(err)
 
 			flow, err := flowpilot.NewFlow("/registration_test").
-				State(StatePasscodeConfirmation, VerifyPasscode{}).
+				State(StateConfirmation, ConfirmPasscode{}).
 				State(shared.StatePasswordCreation).
 				State(shared.StateSuccess).
 				State(shared.StateError).
-				InitialState(StatePasscodeConfirmation).
+				InitialState(StateConfirmation).
 				ErrorState(shared.StateError).
 				SubFlows(passkeySubFlow).
 				Build()

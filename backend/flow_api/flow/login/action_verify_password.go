@@ -10,23 +10,23 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type PasswordLogin struct {
+type VerifyPassword struct {
 	shared.Action
 }
 
-func (a PasswordLogin) GetName() flowpilot.ActionName {
-	return ActionPasswordLogin
+func (a VerifyPassword) GetName() flowpilot.ActionName {
+	return ActionVerifyPassword
 }
 
-func (a PasswordLogin) GetDescription() string {
+func (a VerifyPassword) GetDescription() string {
 	return "Login with a password."
 }
 
-func (a PasswordLogin) Initialize(c flowpilot.InitializationContext) {
+func (a VerifyPassword) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.PasswordInput("password").Required(true))
 }
 
-func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
+func (a VerifyPassword) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -80,13 +80,13 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passkey_onboarding.StateIntroduction, StateSuccess)
 	}
 
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlow(StateSuccess)
 }
 
-func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error {
+func (a VerifyPassword) wrongCredentialsError(c flowpilot.ExecutionContext) error {
 	c.Input().SetError("password", flowpilot.ErrorValueInvalid)
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
 }

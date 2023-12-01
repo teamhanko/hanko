@@ -1,4 +1,4 @@
-package capabilities
+package preflight
 
 import (
 	"github.com/stretchr/testify/suite"

@@ -5,8 +5,8 @@ import (
 )
 
 const (
-	StateOnboardingCreatePasskey            flowpilot.StateName = "onboarding_create_passkey"
-	StateOnboardingVerifyPasskeyAttestation flowpilot.StateName = "onboarding_verify_passkey_attestation"
+	StateIntroduction flowpilot.StateName = "passkey_onboarding_introduction"
+	StateRegistration flowpilot.StateName = "passkey_onboarding_registration"
 )
 
 const (
@@ -16,6 +16,6 @@ const (
 )
 
 var SubFlow = flowpilot.NewSubFlow().
-	State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}, Skip{}).
-	State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{}).
+	State(StateIntroduction, WebauthnGenerateCreationOptions{}, Skip{}).
+	State(StateRegistration, WebauthnVerifyAttestationResponse{}).
 	MustBuild()
