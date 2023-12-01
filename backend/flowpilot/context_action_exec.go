@@ -111,7 +111,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 	if err := aec.saveNextState(result); err != nil {
 		return fmt.Errorf("failed to save the transition data: %w", err)
 	}
-	aec.executionResult = &result
+
 	return nil
 }
 
