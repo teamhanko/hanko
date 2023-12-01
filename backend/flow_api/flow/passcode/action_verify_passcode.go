@@ -58,6 +58,11 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete passcode_id from stash: %w", err)
 	}
 
+	err = c.Stash().Delete("passcode_email")
+	if err != nil {
+		return fmt.Errorf("failed to delete passcode_email from stash: %w", err)
+	}
+
 	if !c.Stash().Get("user_id").Exists() {
 		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("account does not exist")))
 	}
