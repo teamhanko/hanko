@@ -69,12 +69,10 @@ func (fb *defaultFlowBuilderBase) addState(stateName StateName, actions ...Actio
 }
 
 func (fb *defaultFlowBuilderBase) addBeforeStateHooks(stateName StateName, hooks ...HookAction) {
-	fb.addStateIfNotExists(stateName)
 	fb.beforeHooks[stateName] = append(fb.beforeHooks[stateName], hooks...)
 }
 
 func (fb *defaultFlowBuilderBase) addAfterStateHooks(stateName StateName, hooks ...HookAction) {
-	fb.addStateIfNotExists(stateName)
 	fb.afterHooks[stateName] = append(fb.afterHooks[stateName], hooks...)
 }
 
@@ -101,18 +99,18 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 		}
 
 		f := flow.getFlow()
-		sfs := flow.getSubFlows()
-		bhs := flow.getBeforeHooks()
-		ahs := flow.getAfterHooks()
+		subFlows := flow.getSubFlows()
+		beforeHooks := flow.getBeforeHooks()
+		afterHooks := flow.getAfterHooks()
 
 		// Create state details.
 		state := stateDetail{
 			name:        stateName,
 			actions:     actions,
 			flow:        f,
-			subFlows:    sfs,
-			beforeHooks: bhs[stateName],
-			afterHooks:  ahs[stateName],
+			subFlows:    subFlows,
+			beforeHooks: append(beforeHooks[stateName], fb.beforeHooks[stateName]...),
+			afterHooks:  append(afterHooks[stateName], fb.afterHooks[stateName]...),
 		}
 
 		// Store state details.
