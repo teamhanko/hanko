@@ -23,14 +23,16 @@ recovery_text:
   description: "The content of the recovery text email."
   other: "Enter the following passcode on your login screen:"
 
-subject_email_registration_attempted:
-  description: "Subject for notification about an email registration attempt (e.g. via profile)."
+subject_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Provided email address is not recognized"
+login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "You or someone else tried to sign in to {{ .ServiceName }}, but the provided email address is not recognized. Please create an account first."
+
+subject_registration_attempted:
+  description: "Subject for notification about a registration attempt."
   other: "Provided email address already taken"
-email_registration_attempted_text:
-  description: "Notifies the recipient that either they or someone else attempted to register an email address that is already in use."
-  other: "You or someone else tried to register an email for {{ .ServiceName }}, but the provided email address is already registered. Please try to log in instead."
-
-login_attempted:
-  description: "Informs the recipient that either they or someone else has tried to register with a particular service but using an unrecognized email address."
-  other: "You or someone else has attempted to sign up for {{ .ServiceName }}. However, this email address is not recognized by us. Please create an account first."
-
+registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "You or someone else tried to sign up for {{ .ServiceName }}, but the provided email address is already registered. Please try to log in instead."

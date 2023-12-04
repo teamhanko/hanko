@@ -99,9 +99,9 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return fmt.Errorf("failed to copy email to stash: %w", err)
 				}
 
-				err = c.Stash().Set("passcode_template", "login") // TODO: take another e-mail template, not containing a passcode code
+				err = c.Stash().Set("passcode_template", "registration_attempted")
 				if err != nil {
-					return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+					return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 				}
 
 				return c.StartSubFlow(passcode.StatePasscodeConfirmation)
