@@ -29,3 +29,8 @@ subject_email_registration_attempted:
 email_registration_attempted_text:
   description: "Notifies the recipient that either they or someone else attempted to register an email address that is already in use."
   other: "You or someone else tried to register an email for {{ .ServiceName }}, but the provided email address is already registered. Please try to log in instead."
+
+login_attempted:
+  description: "Informs the recipient that either they or someone else has tried to register with a particular service but using an unrecognized email address."
+  other: "You or someone else has attempted to sign up for {{ .ServiceName }}. However, this email address is not recognized by us. Please create an account first."
+
