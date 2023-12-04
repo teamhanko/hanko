@@ -149,6 +149,18 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 
 	er := executionResult{nextStateName: flowModel.CurrentState}
 
+	aec := defaultActionExecutionContext{
+		actionName:         "",
+		input:              nil,
+		executionResult:    &er,
+		defaultFlowContext: fc,
+	}
+
+	err = aec.executeBeforeHookActions(flow.initialStateName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute before hook actions: %w", err)
+	}
+
 	return er.generateResponse(fc, flow.debug), nil
 }
 
