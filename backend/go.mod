@@ -26,7 +26,7 @@ require (
 	github.com/labstack/echo/v4 v4.11.3
 	github.com/lestrrat-go/jwx/v2 v2.0.17
 	github.com/lib/pq v1.10.9
-	github.com/nicksnyder/go-i18n/v2 v2.2.2
+	github.com/nicksnyder/go-i18n/v2 v2.3.0
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.31.0
