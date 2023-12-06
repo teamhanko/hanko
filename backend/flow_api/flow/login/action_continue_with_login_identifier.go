@@ -89,6 +89,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return fmt.Errorf("failed to set username to stash: %w", err)
 		}
 
+		err = c.Stash().Set("user_id", userModel.ID.String())
+		if err != nil {
+			return fmt.Errorf("failed to set user_id to the stash: %w", err)
+		}
+
 		if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
 			if err = c.Stash().Set("email", primaryEmailModel.Address); err != nil {
 				return fmt.Errorf("failed to set email to stash: %w", err)

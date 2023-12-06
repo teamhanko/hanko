@@ -1,6 +1,7 @@
 package services
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -42,7 +43,7 @@ type VerifyAttestationResponseParams struct {
 
 type WebauthnService interface {
 	GenerateRequestOptions(GenerateRequestOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
-	VerifyAssertionResponse(VerifyAssertionResponseParams) error
+	VerifyAssertionResponse(VerifyAssertionResponseParams) (*models.User, error)
 	GenerateCreationOptions(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
 	VerifyAttestationResponse(VerifyAttestationResponseParams) (*webauthn.Credential, error)
 }
@@ -128,29 +129,29 @@ func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams)
 	return webAuthnSessionDataModel, options, nil
 }
 
-func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParams) error {
+func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParams) (*models.User, error) {
 	credentialAssertionData, err := protocol.ParseCredentialRequestResponseBody(strings.NewReader(p.AssertionResponse))
 	if err != nil {
-		return ErrInvalidWebauthnCredential.Wrap(err)
+		return nil, ErrInvalidWebauthnCredential.Wrap(err)
 	}
 
 	sessionDataModel, err := s.persister.GetWebauthnSessionDataPersister().Get(p.SessionDataID)
 	if err != nil {
-		return fmt.Errorf("failed to get session data from db: %w", err)
+		return nil, fmt.Errorf("failed to get session data from db: %w", err)
 	}
 
 	userID, err := uuid.FromBytes(credentialAssertionData.Response.UserHandle)
 	if err != nil {
-		return fmt.Errorf("failed to parse user id from user handle: %w", err)
+		return nil, fmt.Errorf("failed to parse user id from user handle: %w", err)
 	}
 
 	userModel, err := s.persister.GetUserPersister().Get(userID)
 	if err != nil {
-		return fmt.Errorf("failed to fetch user from db: %w", err)
+		return nil, fmt.Errorf("failed to fetch user from db: %w", err)
 	}
 
 	if userModel == nil {
-		return ErrInvalidWebauthnCredential.Wrap(errors.New("user does not exist"))
+		return nil, ErrInvalidWebauthnCredential.Wrap(errors.New("user does not exist"))
 	}
 
 	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
@@ -165,10 +166,11 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		credentialAssertionData,
 	)
 	if err != nil {
-		return ErrInvalidWebauthnCredential.Wrap(err)
+		return nil, ErrInvalidWebauthnCredential.Wrap(err)
 	}
 
-	if credentialModel := userModel.GetWebauthnCredentialById(credential.ID); credentialModel != nil {
+	encodedCredentialId := base64.RawURLEncoding.EncodeToString(credential.ID)
+	if credentialModel := userModel.GetWebauthnCredentialById(encodedCredentialId); credentialModel != nil {
 		now := time.Now().UTC()
 		flags := credentialAssertionData.Response.AuthenticatorData.Flags
 
@@ -178,16 +180,16 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 
 		err = s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).Update(*credentialModel)
 		if err != nil {
-			return fmt.Errorf("failed to update webauthn credential: %w", err)
+			return nil, fmt.Errorf("failed to update webauthn credential: %w", err)
 		}
 	}
 
 	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Delete(*sessionDataModel)
 	if err != nil {
-		return fmt.Errorf("failed to delete assertion session data: %w", err)
+		return nil, fmt.Errorf("failed to delete assertion session data: %w", err)
 	}
 
-	return nil
+	return userModel, nil
 }
 
 func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
