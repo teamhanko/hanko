@@ -48,6 +48,7 @@
 <select id="options">
     <option value="login">Login</option>
     <option value="registration">Registration</option>
+    <option value="profile">Profile</option>
 </select>
 
 <div id="container"></div>
@@ -98,7 +99,8 @@
         "login_passkey": passkeyLoginHandler,
         "passkey_login": passkeyLoginHandler,
         "passkey_registration": passkeyRegisterHandler,
-        "onboarding_verify_passkey_attestation": passkeyRegisterHandler
+        "onboarding_verify_passkey_attestation": passkeyRegisterHandler,
+        "webauthn_credential_verification": passkeyRegisterHandler
     }
 
     function generateUI(data) {
@@ -129,7 +131,7 @@
 
         if (data.payload) {
             const pre = document.createElement('pre');
-            pre.textContent = JSON.stringify(data.payload)
+            pre.textContent = "\n" + JSON.stringify(data.payload, null, 2)
             container.appendChild(pre);
         } else {
             const notAvailable = document.createElement('p');
