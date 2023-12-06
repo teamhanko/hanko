@@ -11,7 +11,7 @@ import (
 // WebauthnCredential is used by pop to map your webauthn_credentials database table to your go code.
 type WebauthnCredential struct {
 	ID              string     `db:"id" json:"id"`
-	Name            *string    `db:"name" json:"-"`
+	Name            *string    `db:"name" json:"name"` // TODO: nur für flow api test zwecke
 	UserId          uuid.UUID  `db:"user_id" json:"-"`
 	PublicKey       string     `db:"public_key" json:"-"`
 	AttestationType string     `db:"attestation_type" json:"-"`

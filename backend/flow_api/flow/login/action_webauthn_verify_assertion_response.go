@@ -49,13 +49,18 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		AssertionResponse: assertionResponse,
 	}
 
-	err := deps.WebauthnService.VerifyAssertionResponse(params)
+	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
 			return c.ContinueFlowWithError(StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify assertion response: %w", err)
+	}
+
+	err = c.Stash().Set("user_id", userModel.ID.String())
+	if err != nil {
+		return fmt.Errorf("failed to set user_id to the stash: %w", err)
 	}
 
 	return c.ContinueFlow(shared.StateSuccess)

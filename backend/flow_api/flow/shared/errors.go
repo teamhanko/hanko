@@ -12,6 +12,7 @@ var (
 	ErrorPasskeyInvalid             = flowpilot.NewFlowError("passkey_invalid", "The passkey is invalid.", http.StatusUnauthorized)
 	ErrorPasscodeMaxAttemptsReached = flowpilot.NewFlowError("passcode_max_attempts_reached", "The passcode was entered wrong too many times.", http.StatusUnauthorized)
 	ErrorRateLimitExceeded          = flowpilot.NewFlowError("rate_limit_exceeded", "The rate limit has been exceeded.", http.StatusTooManyRequests)
+	ErrorNotFound                   = flowpilot.NewFlowError("not_found", "The requested resource was not found.", http.StatusNotFound)
 )
 
 var (

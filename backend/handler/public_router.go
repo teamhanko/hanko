@@ -58,8 +58,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		RateLimiter:     rateLimiter,
 	}
 
+	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
+
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
 	e.POST("/login", flowAPIHandler.LoginFlowHandler)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, sessionMiddleware)
 
 	e.HideBanner = true
 	g := e.Group("")
@@ -98,8 +101,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	e.Validator = dto.NewCustomValidator()
-
-	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
 	mailer, err := mail.NewMailer(cfg.Smtp)
 	if err != nil {

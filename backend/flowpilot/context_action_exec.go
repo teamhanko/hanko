@@ -88,12 +88,12 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		return errors.New("execution context is closed already")
 	}
 
-	if err := aec.executeBeforeHookActions(nextStateName); err != nil {
-		return fmt.Errorf("error while executing before hook actions: %w", err)
-	}
-
 	if err := aec.executeAfterHookActions(); err != nil {
 		return fmt.Errorf("error while executing after hook actions: %w", err)
+	}
+
+	if err := aec.executeBeforeHookActions(nextStateName); err != nil {
+		return fmt.Errorf("error while executing before hook actions: %w", err)
 	}
 
 	actionResult := actionExecutionResult{

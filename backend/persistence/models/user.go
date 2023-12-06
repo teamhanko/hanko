@@ -15,7 +15,7 @@ import (
 type User struct {
 	ID                  uuid.UUID            `db:"id" json:"id"`
 	WebauthnCredentials []WebauthnCredential `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
-	Emails              Emails               `has_many:"emails" json:"-"`
+	Emails              Emails               `has_many:"emails" json:"emails"`
 	Username            string               `db:"username" json:"username,omitempty"`
 	CreatedAt           time.Time            `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time            `db:"updated_at" json:"updated_at"`
@@ -38,9 +38,9 @@ func (user *User) GetEmailByAddress(address string) *Email {
 	return user.Emails.GetEmailByAddress(address)
 }
 
-func (user *User) GetWebauthnCredentialById(credentialId []byte) *WebauthnCredential {
+func (user *User) GetWebauthnCredentialById(credentialId string) *WebauthnCredential {
 	for i := range user.WebauthnCredentials {
-		if user.WebauthnCredentials[i].ID == base64.RawURLEncoding.EncodeToString(credentialId) {
+		if user.WebauthnCredentials[i].ID == credentialId {
 			return &user.WebauthnCredentials[i]
 		}
 	}

@@ -7,4 +7,26 @@ ttl_text:
 email_subject_login:
   description: ""
   other: "{{ .Code }} is your passcode for {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Use passcode {{ .Code }} to verify your email address"
+subject_login:
+  description: ""
+  other: "Use passcode {{ .Code }} to login to your account"
+subject_recovery:
+  description: ""
+  other: "Use passcode {{ .Code }} to recover your account"
+email_verification_text:
+  description: ""
+  other: "Enter the following passcode to verify your email address:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Enter the following passcode on your login screen:"
+
+subject_email_registration_attempted:
+  description: "Subject for notification about an email registration attempt (e.g. via profile)."
+  other: "Provided email address already taken"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register an email address that is already in use."
+  other: "You or someone else tried to register an email for {{ .ServiceName }}, but the provided email address is already registered. Please try to log in instead."
 

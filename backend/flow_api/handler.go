@@ -6,6 +6,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
@@ -31,6 +32,10 @@ func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 	return h.executeFlow(c, login.Flow)
+}
+
+func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
+	return h.executeFlow(c, profile.Flow)
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
