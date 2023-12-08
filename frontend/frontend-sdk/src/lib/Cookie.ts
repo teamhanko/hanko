@@ -1,4 +1,4 @@
-import JSCookie from "js-cookie";
+import JSCookie, { CookieAttributes } from "js-cookie";
 
 /**
  * Options for Cookie
@@ -9,19 +9,6 @@ import JSCookie from "js-cookie";
  */
 interface CookieOptions {
   cookieName: string;
-}
-
-/**
- * Options for setting the auth cookie.
- *
- * @category SDK
- * @subcategory Internal
- * @property {boolean} secure - Indicates if the Secure attribute of the cookie should be set.
- * @property {number | Date | undefined} expires - The expiration of the cookie.
- */
-interface SetAuthCookieOptions {
-  secure?: boolean;
-  expires?: number | Date | undefined;
 }
 
 /**
@@ -52,12 +39,9 @@ export class Cookie {
    * Stores the authentication token to the cookie.
    *
    * @param {string} token - The authentication token to be stored.
-   * @param {SetAuthCookieOptions} options - Options for setting the auth cookie.
+   * @param {CookieAttributes} options - Options for setting the auth cookie.
    */
-  setAuthCookie(
-    token: string,
-    options: SetAuthCookieOptions = { secure: true },
-  ) {
+  setAuthCookie(token: string, options: CookieAttributes = { secure: true }) {
     JSCookie.set(this.authCookieName, token, options);
   }
 
