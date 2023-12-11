@@ -215,7 +215,9 @@ class HttpClient {
       });
 
     if (jwt) {
-      const secure = !!this.api.match("^https://");
+      const https = new RegExp("^https://");
+      const secure =
+        !!this.api.match(https) && !!window.location.href.match(https);
       const expires = new Date(new Date().getTime() + expirationSeconds * 1000);
       this.cookie.setAuthCookie(jwt, { secure, expires });
     }
