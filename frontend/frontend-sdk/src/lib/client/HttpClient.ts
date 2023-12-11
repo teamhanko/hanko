@@ -114,11 +114,13 @@ class Response {
  * @subcategory Internal
  * @property {number} timeout - The http request timeout in milliseconds.
  * @property {string} cookieName - The name of the session cookie set from the SDK.
+ * @property {string=} cookieDomain - The domain where cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
  * @property {string} localStorageKey - The prefix / name of the local storage keys.
  */
 export interface HttpClientOptions {
   timeout: number;
   cookieName: string;
+  cookieDomain?: string;
   localStorageKey: string;
 }
 
