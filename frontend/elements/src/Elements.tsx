@@ -106,9 +106,7 @@ export const register = async (
     fallbackLanguage: "en",
     ...options,
   };
-  console.log(
-    `ELEMENTS REGISTEROPTIONS COOKIE DOMAIN: ${options.cookieDomain}`,
-  );
+
   globalOptions.hanko = new Hanko(api, {
     cookieName: options.storageKey,
     cookieDomain: options.cookieDomain,
