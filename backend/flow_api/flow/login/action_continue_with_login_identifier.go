@@ -74,11 +74,6 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				return fmt.Errorf("failed to set user_id to the stash: %w", err)
 			}
 		} else {
-			err = c.CopyInputValuesToStash("identifier")
-			if err != nil {
-				return fmt.Errorf("failed to copy user identifier to stash: %w", err)
-			}
-
 			err = c.Stash().Set("passcode_template", "login_attempted")
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
