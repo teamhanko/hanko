@@ -69,12 +69,10 @@ func (fb *defaultFlowBuilderBase) addState(stateName StateName, actions ...Actio
 }
 
 func (fb *defaultFlowBuilderBase) addBeforeStateHooks(stateName StateName, hooks ...HookAction) {
-	fb.addStateIfNotExists(stateName)
 	fb.beforeHooks[stateName] = append(fb.beforeHooks[stateName], hooks...)
 }
 
 func (fb *defaultFlowBuilderBase) addAfterStateHooks(stateName StateName, hooks ...HookAction) {
-	fb.addStateIfNotExists(stateName)
 	fb.afterHooks[stateName] = append(fb.afterHooks[stateName], hooks...)
 }
 
@@ -101,18 +99,26 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 		}
 
 		f := flow.getFlow()
-		sfs := flow.getSubFlows()
-		bhs := flow.getBeforeHooks()
-		ahs := flow.getAfterHooks()
+		subFlows := flow.getSubFlows()
+		beforeHooks := flow.getBeforeHooks()[stateName]
+		afterHooks := flow.getAfterHooks()[stateName]
+
+		// Check if the current state belongs to a sub-flow.
+		if !fb.flow.stateExists(stateName) {
+			// If the main flow includes hook actions for a sub-flow state, add the hooks defined in the main flow to
+			// the list of hooks of the sub-flow state.
+			beforeHooks = append(beforeHooks, fb.beforeHooks[stateName]...)
+			afterHooks = append(afterHooks, fb.afterHooks[stateName]...)
+		}
 
 		// Create state details.
 		state := stateDetail{
 			name:        stateName,
 			actions:     actions,
 			flow:        f,
-			subFlows:    sfs,
-			beforeHooks: bhs[stateName],
-			afterHooks:  ahs[stateName],
+			subFlows:    subFlows,
+			beforeHooks: beforeHooks,
+			afterHooks:  afterHooks,
 		}
 
 		// Store state details.

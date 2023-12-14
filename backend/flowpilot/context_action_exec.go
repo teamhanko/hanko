@@ -100,12 +100,13 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 
 	aec.executionResult = &result
 
-	err := aec.executeHookActions(nextStateName)
-	if err != nil {
-		return fmt.Errorf("error while executing hook actions: %w", err)
+	if err := aec.executeBeforeHookActions(nextStateName); err != nil {
+		return fmt.Errorf("error while executing before hook actions: %w", err)
 	}
 
-	// Prepare the result for continuing the flow.
+	if err := aec.executeAfterHookActions(); err != nil {
+		return fmt.Errorf("error while executing after hook actions: %w", err)
+	}
 
 	// Save the next state and transition data.
 	if err := aec.saveNextState(result); err != nil {
@@ -115,19 +116,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 	return nil
 }
 
-func (aec *defaultActionExecutionContext) executeHookActions(nextStateName StateName) error {
-	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
-	if err != nil {
-		return err
-	}
-
-	for _, hook := range currentState.afterHooks {
-		err = hook.Execute(aec)
-		if err != nil {
-			return fmt.Errorf("failed to execute hook action after state: %w", err)
-		}
-	}
-
+func (aec *defaultActionExecutionContext) executeBeforeHookActions(nextStateName StateName) error {
 	nextState, err := aec.flow.getState(nextStateName)
 	if err != nil {
 		return err
@@ -137,6 +126,22 @@ func (aec *defaultActionExecutionContext) executeHookActions(nextStateName State
 		err = hook.Execute(aec)
 		if err != nil {
 			return fmt.Errorf("failed to execute hook action before state '%s': %w", nextState.name, err)
+		}
+	}
+
+	return nil
+}
+
+func (aec *defaultActionExecutionContext) executeAfterHookActions() error {
+	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
+	if err != nil {
+		return err
+	}
+
+	for _, hook := range currentState.afterHooks {
+		err = hook.Execute(aec)
+		if err != nil {
+			return fmt.Errorf("failed to execute hook action after state: %w", err)
 		}
 	}
 
