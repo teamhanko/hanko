@@ -24,7 +24,15 @@ func (a PasswordRecovery) GetDescription() string {
 
 func (a PasswordRecovery) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
+
+	c.AddInputs(flowpilot.PasswordInput("new_password").
+		Required(true).
+		MinLength(deps.Cfg.Password.MinPasswordLength),
+	)
+
+	if !deps.Cfg.Password.Enabled {
+		c.SuspendAction()
+	}
 }
 
 func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
