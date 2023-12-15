@@ -122,7 +122,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 	} else if deps.Cfg.Password.Enabled {
 		return c.ContinueFlow(StatePasswordCreation)
-	} else if !deps.Cfg.Passcode.Enabled {
+	} else if !deps.Cfg.Passcode.Enabled || (deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
 		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
