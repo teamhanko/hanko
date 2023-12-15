@@ -23,7 +23,13 @@ func (a PasswordLogin) GetDescription() string {
 }
 
 func (a PasswordLogin) Initialize(c flowpilot.InitializationContext) {
+	deps := a.GetDeps(c)
+
 	c.AddInputs(flowpilot.PasswordInput("password").Required(true))
+
+	if !deps.Cfg.Password.Enabled {
+		c.SuspendAction()
+	}
 }
 
 func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
