@@ -126,7 +126,5 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
-	// TODO: store user and create session token // should this case even exist (only works when email (optional/required) is set by the user) ???
-
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
 }
