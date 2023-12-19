@@ -30,6 +30,14 @@
             list-style-type: none;
             padding: 0;
         }
+
+        .link-list {
+            list-style-type: unset;
+        }
+
+        .link-list-item {
+            text-indent: 0;
+        }
     </style>
 </head>
 <body>
@@ -236,6 +244,28 @@
             const notAvailable = document.createElement('p');
             notAvailable.textContent = "[n/a]";
             container.appendChild(notAvailable);
+        }
+
+        const linksHeadline = document.createElement('h3');
+        linksHeadline.textContent = "🔗 Links";
+        container.appendChild(linksHeadline);
+        if (data.links) {
+            const linksList = document.createElement('ul');
+            linksList.classList.add("link-list")
+
+            data.links.forEach(link => {
+                const listItem = document.createElement('li')
+                listItem.classList.add("link-list-item")
+                const anchor = document.createElement('a')
+                anchor.text = '[' + link.category + '] ' + link.name
+                anchor.href = link.href
+                anchor.target = link.target
+
+                listItem.appendChild(anchor)
+                linksList.appendChild(listItem)
+            })
+
+            container.appendChild(linksList)
         }
     }
 
