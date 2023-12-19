@@ -75,7 +75,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return err
 		}
 		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
-		if emailModel != nil && !(!deps.Cfg.Identifier.Username.Enabled && deps.Cfg.Emails.RequireVerification) {
+		if emailModel != nil && !(!deps.Cfg.Identifier.Username.Enabled && deps.Cfg.Identifier.Email.Verification) {
 			c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
@@ -110,19 +110,19 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	// Decide which is the next state according to the config and user input
-	if email != "" && deps.Cfg.Emails.RequireVerification {
+	if email != "" && deps.Cfg.Identifier.Email.Verification {
 		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 
 		if deps.Cfg.Password.Enabled {
 			return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
-		} else if !deps.Cfg.Passcode.Enabled || (deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
-			return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		} else if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 		}
 	} else if deps.Cfg.Password.Enabled {
 		return c.ContinueFlow(StatePasswordCreation)
-	} else if !deps.Cfg.Passcode.Enabled || (deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool()) {
+	} else if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
 		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 

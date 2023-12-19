@@ -191,6 +191,10 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)
 	}
+
+	if c.Identifier.Email.Verification && !c.Passcode.Enabled {
+		return errors.New("passcode must be enabled for email verification")
+	}
 	return nil
 }
 
