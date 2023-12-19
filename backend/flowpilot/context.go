@@ -100,6 +100,7 @@ type HookExecutionContext interface {
 	actionExecutionContext
 	SetFlowError(FlowError)
 	GetFlowError() FlowError
+	AddLink(...Link)
 }
 
 // TODO: The following interfaces are meant for a plugin system. #tbd
