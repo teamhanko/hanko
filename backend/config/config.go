@@ -551,6 +551,7 @@ type ThirdParty struct {
 	Providers             ThirdPartyProviders  `yaml:"providers" json:"providers,omitempty" koanf:"providers"`
 	RedirectURL           string               `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true"`
 	ErrorRedirectURL      string               `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
+	DefaultRedirectURL    string               `yaml:"default_redirect_url" json:"default_redirect_url,omitempty" koanf:"default_redirect_url" split_words:"true"`
 	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
 	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
 }
@@ -570,6 +571,9 @@ func (t *ThirdParty) Validate() error {
 		}
 
 		urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
+		if t.DefaultRedirectURL != "" {
+			urls = append(urls, t.DefaultRedirectURL)
+		}
 		for _, u := range urls {
 			if strings.HasSuffix(u, "/") {
 				return fmt.Errorf("redirect url %s must not have trailing slash", u)
