@@ -30,13 +30,13 @@ func (h OAuthLinks) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	if deps.Cfg.ThirdParty.Providers.GitHub.Enabled {
-		c.AddLink(flowpilot.OAuthLink("github", h.generateHref(deps.HttpContext, "github", returnToUrl)))
+		c.AddLink(OAuthLink("github", h.generateHref(deps.HttpContext, "github", returnToUrl)))
 	}
 	if deps.Cfg.ThirdParty.Providers.Google.Enabled {
-		c.AddLink(flowpilot.OAuthLink("google", h.generateHref(deps.HttpContext, "google", returnToUrl)))
+		c.AddLink(OAuthLink("google", h.generateHref(deps.HttpContext, "google", returnToUrl)))
 	}
 	if deps.Cfg.ThirdParty.Providers.Apple.Enabled {
-		c.AddLink(flowpilot.OAuthLink("apple", h.generateHref(deps.HttpContext, "apple", returnToUrl)))
+		c.AddLink(OAuthLink("apple", h.generateHref(deps.HttpContext, "apple", returnToUrl)))
 	}
 
 	return nil
