@@ -46,8 +46,8 @@ func (h GenerateOAuthLinks) generateHref(c echo.Context, provider string, return
 	host := c.Request().Host
 	forwardedProto := c.Request().Header.Get("X-Forwarded-Proto")
 	if forwardedProto == "" {
-		// If X-Forwarded-Proto is not set, set it to 'http' and hope that an HTTPS redirect is in place
-		// it cannot be set to 'https' because local testing would be more complicated as you would need to set up https
+		// If X-Forwarded-Proto is not set, set it to 'http' and hope that an HTTPS redirect is in place.
+		// It cannot be set to 'https' because local testing would be more complicated as you would need to set up https.
 		forwardedProto = "http"
 	}
 
