@@ -31,6 +31,7 @@ const (
 
 var Flow = flowpilot.NewFlow("/login").
 	State(StateLoginInit, ContinueWithLoginIdentifier{}, WebauthnGenerateRequestOptions{}).
+	BeforeState(StateLoginInit, shared.OAuthLinks{}).
 	State(StateLoginMethodChooser,
 		WebauthnGenerateRequestOptions{},
 		ContinueToPasswordLogin{},
