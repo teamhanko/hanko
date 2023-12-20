@@ -7,11 +7,11 @@ import (
 	"net/url"
 )
 
-type OAuthLinks struct {
+type GenerateOAuthLinks struct {
 	Action
 }
 
-func (h OAuthLinks) Execute(c flowpilot.HookExecutionContext) error {
+func (h GenerateOAuthLinks) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
 	returnToUrl := deps.Cfg.ThirdParty.DefaultRedirectURL
@@ -42,11 +42,11 @@ func (h OAuthLinks) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h OAuthLinks) generateHref(c echo.Context, provider string, returnToUrl string) string {
+func (h GenerateOAuthLinks) generateHref(c echo.Context, provider string, returnToUrl string) string {
 	host := c.Request().Host
 	forwardedProto := c.Request().Header.Get("X-Forwarded-Proto")
 	if forwardedProto == "" {
-		// if X-Forwarded-Proto is not set, set it to http and hope that a https redirect in place
+		// If X-Forwarded-Proto is not set, set it to 'http' and hope that an HTTPS redirect is in place
 		// it cannot be set to 'https' because local testing would be more complicated as you would need to set up https
 		forwardedProto = "http"
 	}
