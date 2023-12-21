@@ -46,8 +46,9 @@ func (h GenerateOAuthLinks) generateHref(c echo.Context, provider string, return
 	host := c.Request().Host
 	forwardedProto := c.Request().Header.Get("X-Forwarded-Proto")
 	if forwardedProto == "" {
-		// If X-Forwarded-Proto is not set, set it to 'http' and hope that an HTTPS redirect is in place.
-		// It cannot be set to 'https' because local testing would be more complicated as you would need to set up https.
+		// Assume that a proxy is setting the X-Forwarded-Proto header correctly. Hanko should always be deployed behind a proxy,
+		// because you cannot start the backend with https and passkeys only work in a secure context.
+		// If the X-Forwarded-Proto header is not set, set it to 'http' because otherwise you would need to set up a https environment for local testing.
 		forwardedProto = "http"
 	}
 
