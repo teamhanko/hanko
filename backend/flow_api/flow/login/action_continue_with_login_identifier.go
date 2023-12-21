@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"regexp"
@@ -108,7 +109,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 
-		return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+		if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		} else {
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+		}
 	}
 
 	// Username exists, but user has no emails.
