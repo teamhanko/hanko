@@ -119,6 +119,8 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
 		} else if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
 			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		} else {
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 		}
 	} else if deps.Cfg.Password.Enabled {
 		return c.ContinueFlow(StatePasswordCreation)
