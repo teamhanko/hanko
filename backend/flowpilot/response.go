@@ -48,6 +48,19 @@ type PublicResponse struct {
 	Payload       interface{}   `json:"payload,omitempty"`
 	PublicActions PublicActions `json:"actions"`
 	PublicError   *PublicError  `json:"error,omitempty"`
+	PublicLinks   PublicLinks   `json:"links"`
+}
+
+// PublicLinks is a collection of Link instances.
+type PublicLinks []PublicLink
+
+// PublicLink represents a link for public exposure.
+// A PublicLink can be a link to an oauth provider (e.g. google) or to the registration/login/tos/privacy page
+type PublicLink struct {
+	Name     string       `json:"name"` // tos, privacy, google, apple, microsoft, login, registration ... // how can we insert custom oauth provider here
+	Href     string       `json:"href"`
+	Category LinkCategory `json:"category"` // oauth, legal, other, ...
+	Target   LinkTarget   `json:"target"`   // can be used to add the target of the a-tag e.g. _blank
 }
 
 // FlowResult interface defines methods for obtaining response and status.
@@ -100,6 +113,7 @@ type actionExecutionResult struct {
 type executionResult struct {
 	nextStateName StateName
 	flowError     FlowError
+	links         []Link
 
 	*actionExecutionResult
 }
@@ -112,12 +126,16 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 	// Unmarshal the generated payload for the response.
 	payload := fc.payload.Unmarshal()
 
+	// Generate links for the response.
+	links := er.generateLinks()
+
 	// Create the response object.
 	resp := PublicResponse{
 		StateName:     er.nextStateName,
 		Status:        http.StatusOK,
 		Payload:       payload,
 		PublicActions: actions,
+		PublicLinks:   links,
 	}
 
 	// Include flow error if present.
@@ -130,6 +148,17 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 	}
 
 	return newFlowResultFromResponse(resp)
+}
+
+func (er *executionResult) generateLinks() PublicLinks {
+	var publicLinks PublicLinks
+
+	for _, link := range er.links {
+		publicLink := link.toPublicLink()
+		publicLinks = append(publicLinks, publicLink)
+	}
+
+	return publicLinks
 }
 
 // generateActions generates a collection of links based on the execution result.

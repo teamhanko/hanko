@@ -10,6 +10,7 @@ type defaultActionExecutionContext struct {
 	actionName      ActionName       // Name of the action being executed.
 	input           ExecutionSchema  // JSONManager for accessing input data.
 	executionResult *executionResult // Result of the action execution.
+	links           []Link           // TODO:
 
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
@@ -87,6 +88,14 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		return errors.New("execution context is closed already")
 	}
 
+	if err := aec.executeBeforeHookActions(nextStateName); err != nil {
+		return fmt.Errorf("error while executing before hook actions: %w", err)
+	}
+
+	if err := aec.executeAfterHookActions(); err != nil {
+		return fmt.Errorf("error while executing after hook actions: %w", err)
+	}
+
 	actionResult := actionExecutionResult{
 		actionName: aec.actionName,
 		schema:     aec.input,
@@ -96,17 +105,10 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		nextStateName:         nextStateName,
 		flowError:             flowError,
 		actionExecutionResult: &actionResult,
+		links:                 aec.links,
 	}
 
 	aec.executionResult = &result
-
-	if err := aec.executeBeforeHookActions(nextStateName); err != nil {
-		return fmt.Errorf("error while executing before hook actions: %w", err)
-	}
-
-	if err := aec.executeAfterHookActions(); err != nil {
-		return fmt.Errorf("error while executing after hook actions: %w", err)
-	}
 
 	// Save the next state and transition data.
 	if err := aec.saveNextState(result); err != nil {
@@ -315,4 +317,8 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 
 	// Close the execution context with the scheduled state.
 	return aec.closeExecutionContext(*scheduledStateName, nil)
+}
+
+func (aec *defaultActionExecutionContext) AddLink(links ...Link) {
+	aec.links = append(aec.links, links...)
 }
