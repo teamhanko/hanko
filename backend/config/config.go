@@ -3,6 +3,10 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
 	"github.com/kelseyhightower/envconfig"
@@ -11,9 +15,6 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
-	"log"
-	"strings"
-	"time"
 )
 
 // Config is the central configuration type
@@ -582,9 +583,10 @@ func (p *ThirdPartyProvider) Validate() error {
 }
 
 type ThirdPartyProviders struct {
-	Google ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
-	GitHub ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
-	Apple  ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
+	Google  ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
+	GitHub  ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
+	Apple   ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
+	Discord ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
 }
 
 func (p *ThirdPartyProviders) Validate() error {

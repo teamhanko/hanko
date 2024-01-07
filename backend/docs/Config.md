@@ -562,6 +562,34 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+    ##
+    #
+    # The Discord provider configuration
+    #
+    discord:
+      ##
+      #
+      # Enable or disable the Discord provider.
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # The client ID of your Discord OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/discord
+      #
+      # Required if provider is enabled.
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # The secret of your Discord OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/discord
+      #
+      # Required if provider is enabled.
+      #
+      secret: "CHANGE_ME"
 log:
   ## log_health_and_metrics
   #
