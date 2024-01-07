@@ -5,5 +5,6 @@ import { default as exclamation } from "./ExclamationMark";
 import { default as google } from "./Google";
 import { default as github } from "./GitHub";
 import { default as apple } from "./Apple";
+import { default as discord } from "./Discord";
 
-export { passkey, spinner, checkmark, exclamation, google, github, apple };
+export { passkey, spinner, checkmark, exclamation, google, github, apple, discord };
