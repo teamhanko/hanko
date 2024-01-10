@@ -8,7 +8,7 @@ require (
 	github.com/go-playground/validator/v10 v10.16.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
-	github.com/go-webauthn/webauthn v0.9.4
+	github.com/go-webauthn/webauthn v0.10.0
 	github.com/gobuffalo/nulls v0.4.2
 	github.com/gobuffalo/pop/v6 v6.1.1
 	github.com/gobuffalo/validate/v3 v3.3.3
@@ -74,7 +74,7 @@ require (
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-webauthn/x v0.1.5 // indirect
+	github.com/go-webauthn/x v0.1.6 // indirect
 	github.com/gobuffalo/envy v1.10.2 // indirect
 	github.com/gobuffalo/fizz v1.14.4 // indirect
 	github.com/gobuffalo/flect v1.0.0 // indirect
