@@ -695,6 +695,9 @@
         },
         "apple": {
           "$ref": "#/$defs/ThirdPartyProvider"
+        },
+        "discord": {
+          "$ref": "#/$defs/ThirdPartyProvider"
         }
       },
       "additionalProperties": false,
