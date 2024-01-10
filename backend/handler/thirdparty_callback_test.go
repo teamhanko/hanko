@@ -2,12 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
@@ -390,6 +391,129 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 		s.Equal("apple_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Discord() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	gock.New(thirdparty.DiscordOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.DiscordUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.DiscordUser{
+			ID:       "discord_abcde",
+			Email:    "test-discord-signup@example.com",
+			Verified: true,
+		})
+
+	cfg := s.setUpConfig([]string{"discord"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "discord", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-discord-signup@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identity
+		s.NotNil(identity)
+		s.Equal("discord", identity.ProviderName)
+		s.Equal("discord_abcde", identity.ProviderID)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Discord() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	gock.New(thirdparty.DiscordOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.DiscordUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.DiscordUser{
+			ID:       "discord_abcde",
+			Email:    "test-with-discord-identity@example.com",
+			Verified: true,
+		})
+
+	cfg := s.setUpConfig([]string{"discord"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "discord", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-discord-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identity
+		s.NotNil(identity)
+		s.Equal("discord", identity.ProviderName)
+		s.Equal("discord_abcde", identity.ProviderID)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}

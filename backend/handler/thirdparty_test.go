@@ -1,6 +1,13 @@
 package handler
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strconv"
+	"testing"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
@@ -13,12 +20,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"github.com/teamhanko/hanko/backend/utils"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strconv"
-	"testing"
-	"time"
 )
 
 func TestThirdPartySuite(t *testing.T) {
@@ -64,11 +65,18 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 					Enabled:  false,
 					ClientID: "fakeClientID",
 					Secret:   "fakeClientSecret",
-				}, GitHub: config.ThirdPartyProvider{
+				},
+				GitHub: config.ThirdPartyProvider{
 					Enabled:  false,
 					ClientID: "fakeClientID",
 					Secret:   "fakeClientSecret",
-				}},
+				},
+				Discord: config.ThirdPartyProvider{
+					Enabled:  false,
+					ClientID: "fakeClientID",
+					Secret:   "fakeClientSecret",
+				},
+			},
 			ErrorRedirectURL:    "https://error.test.example",
 			RedirectURL:         "https://api.test.example/callback",
 			AllowedRedirectURLS: allowedRedirectURLs,
@@ -92,6 +100,8 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 			cfg.ThirdParty.Providers.Google.Enabled = true
 		case "github":
 			cfg.ThirdParty.Providers.GitHub.Enabled = true
+		case "discord":
+			cfg.ThirdParty.Providers.Discord.Enabled = true
 		}
 	}
 
