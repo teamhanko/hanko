@@ -8,7 +8,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"github.com/gobuffalo/validate/v3/validators"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/crypto/aes_gcm"
 	"math/big"
@@ -68,7 +67,7 @@ func encryptPrivateKey(privateKey []byte, encryptionKey string) (string, error) 
 	return encryptedKey, nil
 }
 
-func NewSamlCertificate(cfg *config.Config) (*SamlCertificate, error) {
+func NewSamlCertificate(serviceName string) (*SamlCertificate, error) {
 	id, err := uuid.NewV4()
 	if err != nil {
 		return nil, fmt.Errorf("could not generate id: %w", err)
@@ -98,7 +97,7 @@ func NewSamlCertificate(cfg *config.Config) (*SamlCertificate, error) {
 		return nil, fmt.Errorf("unable to encrypt private key: %w", err)
 	}
 
-	cert, err := GenerateCertificate(cfg.Service.Name, privateKey, now)
+	cert, err := GenerateCertificate(serviceName, privateKey, now)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create certificate: %w", err)
 	}

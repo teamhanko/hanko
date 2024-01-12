@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -44,16 +46,33 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	userHandler := NewUserHandlerAdmin(persister)
 
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+
 	user := g.Group("/users")
 	user.GET("", userHandler.List)
-	user.POST("", userHandler.Create)
+	user.POST("", userHandler.Create, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
-	user.DELETE("/:id", userHandler.Delete)
+	user.DELETE("/:id", userHandler.Delete, webhookMiddleware)
 
 	auditLogHandler := NewAuditLogHandler(persister)
 
 	auditLogs := g.Group("/audit_logs")
 	auditLogs.GET("", auditLogHandler.List)
+
+	webhookHandler := NewWebhookHandler(cfg.Webhooks, persister)
+	webhooks := g.Group("/webhooks")
+	webhooks.GET("", webhookHandler.List)
+	webhooks.POST("", webhookHandler.Create)
+	webhooks.GET("/:id", webhookHandler.Get)
+	webhooks.DELETE("/:id", webhookHandler.Delete)
+	webhooks.PUT("/:id", webhookHandler.Update)
+	webhooks.PUT("/:id/enable", webhookHandler.Enable)
+	webhooks.PUT("/:id/disable", webhookHandler.Disable)
 
 	return e
 }

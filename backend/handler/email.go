@@ -13,6 +13,8 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"net/http"
 	"strings"
 )
@@ -138,6 +140,12 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
+		utils.TriggerWebhooks(c, events.Events{
+			events.User,
+			events.UserUpdate,
+			events.Email,
+			events.EmailCreate,
+		}, email)
 		return c.JSON(http.StatusOK, email)
 	})
 }
@@ -197,6 +205,13 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
+		utils.TriggerWebhooks(c, events.Events{
+			events.User,
+			events.UserUpdate,
+			events.Email,
+			events.EmailPrimary,
+		}, primaryEmail)
+
 		return c.NoContent(http.StatusNoContent)
 	})
 }
@@ -238,6 +253,13 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
+
+		utils.TriggerWebhooks(c, events.Events{
+			events.User,
+			events.UserUpdate,
+			events.Email,
+			events.EmailDelete,
+		}, emailId)
 
 		return c.NoContent(http.StatusNoContent)
 	})

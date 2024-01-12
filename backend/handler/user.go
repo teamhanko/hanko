@@ -13,6 +13,8 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"net/http"
 	"strings"
 )
@@ -136,11 +138,14 @@ func (h *UserHandler) Create(c echo.Context) error {
 			SameSite: http.SameSiteNoneMode,
 		})
 
-		return c.JSON(http.StatusOK, dto.CreateUserResponse{
-			ID:      newUser.ID,
+		newUserDto := dto.CreateUserResponse{
 			UserID:  newUser.ID,
 			EmailID: email.ID,
-		})
+		}
+
+		utils.TriggerWebhooks(c, events.Events{events.User, events.UserCreate}, newUserDto)
+
+		return c.JSON(http.StatusOK, newUserDto)
 	})
 }
 
@@ -262,6 +267,8 @@ func (h *UserHandler) Delete(c echo.Context) error {
 		}
 
 		c.SetCookie(cookie)
+
+		utils.TriggerWebhooks(c, events.Events{events.User, events.UserDelete}, userId.String())
 
 		return c.NoContent(http.StatusNoContent)
 	})

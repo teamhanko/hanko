@@ -1,0 +1,10 @@
+create_table("webhook_events") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("webhook_id", "uuid", { "null": false })
+	t.Column("event", "string", { "null": false })
+
+	t.Timestamps()
+
+    t.Index(["webhook_id", "event"], { "unique": true })
+	t.ForeignKey("webhook_id", {"webhooks": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}

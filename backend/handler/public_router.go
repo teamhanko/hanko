@@ -90,7 +90,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.GET("/", statusHandler.Status)
 	g.GET("/me", userHandler.Me, sessionMiddleware)
 
-	user := g.Group("/users")
+	webhookMiddlware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+
+	user := g.Group("/users", webhookMiddlware)
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, sessionMiddleware)
 
@@ -147,7 +149,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
 	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
-	email := g.Group("/emails", sessionMiddleware)
+	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)

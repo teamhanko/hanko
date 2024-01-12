@@ -33,6 +33,7 @@ type Config struct {
 	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
 	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
 	Saml        config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	Webhooks    WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
 
 var (
@@ -193,6 +194,10 @@ func (c *Config) Validate() error {
 	err = c.Saml.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate saml settings: %w", err)
+	}
+	err = c.Webhooks.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate webhook settings: %w", err)
 	}
 	return nil
 }
