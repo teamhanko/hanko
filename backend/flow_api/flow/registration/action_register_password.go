@@ -58,6 +58,10 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	// Decide which is the next state according to the config and user input
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
+		err = c.Stash().Set("allow_skip_onboarding", true)
+		if err != nil {
+			return fmt.Errorf("failed to set allow_skip_onboarding to stash: %w", err)
+		}
 		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 

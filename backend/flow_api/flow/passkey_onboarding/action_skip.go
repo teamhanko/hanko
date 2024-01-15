@@ -18,10 +18,7 @@ func (a Skip) GetDescription() string {
 }
 
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	if !deps.Cfg.Passcode.Enabled && !deps.Cfg.Password.Enabled {
-		// suspend action when only passkeys are allowed
+	if !c.Stash().Get("allow_skip_onboarding").Bool() {
 		c.SuspendAction()
 	}
 }
