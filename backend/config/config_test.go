@@ -37,6 +37,28 @@ func TestParseValidConfig(t *testing.T) {
 	}
 }
 
+func TestPasscodeSmtpSettingsCopiedToRootLevelSmtp(t *testing.T) {
+	configPath := "./passcode-smtp-config.yaml"
+	cfg, err := Load(&configPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+
+	assert.Equal(t, cfg.Smtp.Port, cfg.Passcode.Smtp.Port)
+	assert.Equal(t, cfg.Smtp.Host, cfg.Passcode.Smtp.Host)
+	assert.Equal(t, cfg.Smtp.Password, cfg.Passcode.Smtp.Password)
+	assert.Equal(t, cfg.Smtp.User, cfg.Passcode.Smtp.User)
+}
+
+func TestRootSmtpPasscodeSmtpConflict(t *testing.T) {
+	configPath := "./root-passcode-smtp-config.yaml"
+	_, err := Load(&configPath)
+	assert.Error(t, err)
+}
+
 func TestMinimalConfigValidates(t *testing.T) {
 	configPath := "./minimal-config.yaml"
 	cfg, err := Load(&configPath)

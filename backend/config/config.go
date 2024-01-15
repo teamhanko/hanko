@@ -71,6 +71,11 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
 	}
 
+	err = c.arrangeSmtpSettings()
+	if err != nil {
+		return nil, fmt.Errorf("failed to arrange smtp settings: %w", err)
+	}
+
 	if err = c.Validate(); err != nil {
 		return nil, fmt.Errorf("failed to validate config: %s", err)
 	}
@@ -105,6 +110,9 @@ func DefaultConfig() *Config {
 			Email: Email{
 				FromAddress: "passcode@hanko.io",
 				FromName:    "Hanko",
+			},
+			Smtp: SMTP{
+				Port: "465",
 			},
 		},
 		Password: Password{
@@ -162,6 +170,10 @@ func (c *Config) Validate() error {
 	err = c.Webauthn.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
+	}
+	err = c.Smtp.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate smtp settings: %w", err)
 	}
 	err = c.Passcode.Validate()
 	if err != nil {
@@ -349,6 +361,8 @@ func (e *Email) Validate() error {
 type Passcode struct {
 	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
 	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	//Deprecated: Use root level Smtp instead
+	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
 
 func (p *Passcode) Validate() error {
@@ -632,6 +646,16 @@ func (c *Config) PostProcess() error {
 
 	return nil
 
+}
+
+func (c *Config) arrangeSmtpSettings() error {
+	if c.Smtp.Validate() == nil && c.Passcode.Smtp.Validate() == nil {
+		return fmt.Errorf("conflicting smtp settings found, please remove either smtp or passcode.smtp from the config")
+	}
+	if c.Smtp.Validate() != nil && c.Passcode.Smtp.Validate() == nil {
+		c.Smtp = c.Passcode.Smtp
+	}
+	return nil
 }
 
 type LoggerConfig struct {
