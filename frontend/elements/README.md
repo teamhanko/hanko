@@ -598,7 +598,7 @@ import { all } from "@teamhanko/hanko-elements/i18n/all";
 After importing, provide the translations through the `register()` function:
 
 ```typescript
-register("https://hanko.yourdomain.com", { translations: { bn, de, en, fr, ptBR, zh } });
+register("https://hanko.yourdomain.com", { translations: { bn, de, en, fr, it, ptBR, zh } });
 
 // or
 

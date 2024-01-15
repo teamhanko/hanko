@@ -1,0 +1,9 @@
+login_text:
+  description: "文本电子邮件的登录内容。"
+  other: "在您的登录屏幕上输入以下验证码："
+ttl_text:
+  description: "验证码的有效时长。"
+  other: "验证码在 {{ .TTL }} 分钟内有效。"
+email_subject_login:
+  description: ""
+  other: "使用验证码 {{ .Code }} 登录到 {{ .ServiceName }}"

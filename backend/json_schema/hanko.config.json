@@ -59,7 +59,7 @@
         "zone_info": {
           "type": "string"
         },
-        "local": {
+        "locale": {
           "type": "string"
         },
         "updated_at": {

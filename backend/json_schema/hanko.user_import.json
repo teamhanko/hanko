@@ -1,16 +1,16 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/teamhanko/hanko/backend/cmd/user/import-list",
-  "$ref": "#/$defs/ImportList",
+  "$id": "https://github.com/teamhanko/hanko/backend/cmd/user/import-or-export-list",
+  "$ref": "#/$defs/ImportOrExportList",
   "$defs": {
     "Emails": {
       "items": {
-        "$ref": "#/$defs/ImportEmail"
+        "$ref": "#/$defs/ImportOrExportEmail"
       },
       "type": "array",
       "description": "Emails Array of email addresses"
     },
-    "ImportEmail": {
+    "ImportOrExportEmail": {
       "properties": {
         "address": {
           "type": "string",
@@ -32,9 +32,9 @@
         "is_primary",
         "is_verified"
       ],
-      "description": "ImportEmail The import format for a user's email"
+      "description": "ImportOrExportEmail The import/export format for a user's email"
     },
-    "ImportEntry": {
+    "ImportOrExportEntry": {
       "properties": {
         "user_id": {
           "type": "string",
@@ -42,6 +42,8 @@
         },
         "emails": {
           "$ref": "#/$defs/Emails",
+          "type": "array",
+          "minItems": 1,
           "description": "Emails List of emails"
         },
         "created_at": {
@@ -58,19 +60,16 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "user_id",
-        "emails",
-        "created_at",
-        "updated_at"
+        "emails"
       ],
-      "description": "ImportEntry represents a user to be imported to the Hanko database"
+      "description": "ImportOrExportEntry represents a user to be imported/export to the Hanko database"
     },
-    "ImportList": {
+    "ImportOrExportList": {
       "items": {
-        "$ref": "#/$defs/ImportEntry"
+        "$ref": "#/$defs/ImportOrExportEntry"
       },
       "type": "array",
-      "description": "ImportList a list of ImportEntries"
+      "description": "ImportOrExportList a list of ImportEntries"
     }
   }
 }
