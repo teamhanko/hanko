@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -38,19 +37,9 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
-		return errors.New("user_id has not been stashed")
-	}
-
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
-	if err != nil {
-		return fmt.Errorf("failed to fetch user from db: %w", err)
-	}
-
-	if userModel == nil {
-		return errors.New("user not found")
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailId := uuid.FromStringOrNil(c.Input().Get("email_id").String())
@@ -71,13 +60,13 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 
 	if primaryEmail == nil {
 		primaryEmail = models.NewPrimaryEmail(emailModel.ID, userModel.ID)
-		err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
+		err := deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
 		if err != nil {
 			return fmt.Errorf("failed to store new primary email: %w", err)
 		}
 	} else {
 		primaryEmail.EmailID = emailModel.ID
-		err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Update(*primaryEmail)
+		err := deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Update(*primaryEmail)
 		if err != nil {
 			return fmt.Errorf("failed to change primary email: %w", err)
 		}

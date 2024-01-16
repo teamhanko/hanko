@@ -322,3 +322,7 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 func (aec *defaultActionExecutionContext) AddLink(links ...Link) {
 	aec.links = append(aec.links, links...)
 }
+
+func (aec *defaultActionExecutionContext) Set(key string, value interface{}) {
+	aec.flow.Set(key, value)
+}
