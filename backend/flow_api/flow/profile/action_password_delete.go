@@ -3,9 +3,9 @@ package profile
 import (
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type PasswordDelete struct {
@@ -31,22 +31,9 @@ func (a PasswordDelete) Initialize(c flowpilot.InitializationContext) {
 func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
-	}
-
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-
-	if userModel == nil {
-		return errors.New("user not found")
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
 	if !deps.Cfg.Passcode.Enabled && len(userModel.WebauthnCredentials) == 0 {
@@ -56,7 +43,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 				Wrap(errors.New("cannot delete password when recovery not possible and no webauthn credential is available")))
 	}
 
-	passwordCredentialModel, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userId)
+	passwordCredentialModel, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userModel.ID)
 	if err != nil {
 		return fmt.Errorf("could not fetch password credential: %w", err)
 	}

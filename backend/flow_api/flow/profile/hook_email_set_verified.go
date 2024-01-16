@@ -2,7 +2,6 @@ package profile
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -19,6 +18,11 @@ func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
 		return nil
 	}
 
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return flowpilot.ErrorOperationNotPermitted
+	}
+
 	if c.Stash().Get("email_verified").Bool() {
 		emailAddressToVerify := c.Stash().Get("email").String()
 
@@ -28,8 +32,7 @@ func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
 		}
 
 		if emailAddressToVerifyModel == nil {
-			userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-			newEmailModel := models.NewEmail(&userId, emailAddressToVerify)
+			newEmailModel := models.NewEmail(&userModel.ID, emailAddressToVerify)
 			newEmailModel.Verified = true
 
 			err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*newEmailModel)
@@ -45,7 +48,7 @@ func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
 			if len(emailModels) == 1 && emailModels[0].ID.String() == newEmailModel.ID.String() {
 				// The user has only one 1 email and it is the email we just added. It makes sense then,
 				// to automatically set this as the primary email.
-				primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userId)
+				primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userModel.ID)
 				err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 				if err != nil {
 					return fmt.Errorf("could not save primary email: %w", err)

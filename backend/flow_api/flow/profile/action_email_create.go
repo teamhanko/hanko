@@ -1,9 +1,7 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -39,14 +37,10 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
-
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
 
 	newEmailAddress := c.Input().Get("email").String()
 
@@ -56,13 +50,18 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if existingEmailModel != nil {
-		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userId.String()) || !deps.Cfg.Identifier.Email.Verification {
+		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Identifier.Email.Verification {
 			c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		} else {
 			err = c.CopyInputValuesToStash("email")
 			if err != nil {
 				return fmt.Errorf("failed to copy email to stash: %w", err)
+			}
+
+			err = c.Stash().Set("user_id", userModel.ID.String())
+			if err != nil {
+				return fmt.Errorf("failed to set user_id to stash: %w", err)
 			}
 
 			err = c.Stash().Set("passcode_template", "email_registration_attempted")
@@ -78,13 +77,18 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to copy email to stash: %w", err)
 		}
 
+		err = c.Stash().Set("user_id", userModel.ID.String())
+		if err != nil {
+			return fmt.Errorf("failed to set user_id to stash: %w", err)
+		}
+
 		err = c.Stash().Set("passcode_template", "email_verification")
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 		return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateProfileInit)
 	} else {
-		emailModel := models.NewEmail(&userId, newEmailAddress)
+		emailModel := models.NewEmail(&userModel.ID, newEmailAddress)
 
 		err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 		if err != nil {
@@ -99,7 +103,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		if len(emailModels) == 1 && emailModels[0].ID.String() == emailModel.ID.String() {
 			// The user has only one 1 email and it is the email we just added. It makes sense then,
 			// to automatically set this as the primary email.
-			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userId)
+			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userModel.ID)
 			err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 			if err != nil {
 				return fmt.Errorf("could not save primary email: %w", err)

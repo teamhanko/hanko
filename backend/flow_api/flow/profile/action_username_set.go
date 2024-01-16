@@ -1,11 +1,10 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type UsernameSet struct {
@@ -37,28 +36,15 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
-	}
-
-	userId := c.Stash().Get("user_id").String()
-
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(uuid.FromStringOrNil(userId))
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-
-	if userModel == nil {
-		return errors.New("user not found")
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
 	username := c.Input().Get("username").String()
 	userModel.Username = username
 
-	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
+	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
 	if err != nil {
 		return fmt.Errorf("could not update user: %w", err)
 	}

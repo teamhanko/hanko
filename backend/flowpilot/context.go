@@ -36,6 +36,8 @@ type flowContext interface {
 	GetErrorState() StateName
 	// StateExists checks if a given state exists within the flow.
 	StateExists(stateName StateName) bool
+	// Set sets a context value for the given key.
+	Set(string, interface{})
 }
 
 // actionInitializationContext represents the basic context for a flow action's initialization.

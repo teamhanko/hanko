@@ -1,11 +1,10 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type PasswordSet struct {
@@ -41,16 +40,12 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-
-	passwordCredential, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userId)
+	passwordCredential, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userModel.ID)
 	if err != nil {
 		return fmt.Errorf("could not fetch password credential: %w", err)
 	}
@@ -58,7 +53,7 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 	password := c.Input().Get("password").String()
 
 	if passwordCredential == nil {
-		err = deps.PasswordService.CreatePassword(userId, password)
+		err = deps.PasswordService.CreatePassword(userModel.ID, password)
 	} else {
 		err = deps.PasswordService.UpdatePassword(passwordCredential, password)
 	}
