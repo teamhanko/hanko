@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnCredentialSave struct {
@@ -18,8 +18,9 @@ type WebauthnCredentialSave struct {
 func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	if !c.Stash().Get("passkey_credential").Exists() {
-		return errors.New("passkey_credential not set in stash")
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return flowpilot.ErrorOperationNotPermitted
 	}
 
 	if !c.Stash().Get("webauthn_credential").Exists() {

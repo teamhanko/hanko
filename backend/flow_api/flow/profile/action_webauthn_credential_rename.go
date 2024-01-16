@@ -1,11 +1,10 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnCredentialRename struct {
@@ -32,27 +31,9 @@ func (a WebauthnCredentialRename) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
-	}
-
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-
-	if userModel == nil {
-		return errors.New("user not found")
-	}
-
-	webauthnCredentialId := c.Input().Get("passkey_id").String()
-	webauthnCredentialModel, err := deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Get(webauthnCredentialId)
-	if err != nil {
-		return fmt.Errorf("could not fetch passkey: %w", err)
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
 	webauthnCredentialModel := userModel.GetWebauthnCredentialById(c.Input().Get("passkey_id").String())
@@ -63,7 +44,7 @@ func (a WebauthnCredentialRename) Execute(c flowpilot.ExecutionContext) error {
 	webauthnCredentialName := c.Input().Get("passkey_name").String()
 	webauthnCredentialModel.Name = &webauthnCredentialName
 
-	err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Update(*webauthnCredentialModel)
+	err := deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Update(*webauthnCredentialModel)
 	if err != nil {
 		return fmt.Errorf("could not update credential: %w", err)
 	}

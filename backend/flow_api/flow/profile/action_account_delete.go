@@ -1,11 +1,10 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type AccountDelete struct {
@@ -31,25 +30,12 @@ func (a AccountDelete) Initialize(c flowpilot.InitializationContext) {
 func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-
-	if userModel == nil {
-		return errors.New("user not found")
-	}
-
-	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
+	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
 	if err != nil {
 		return fmt.Errorf("could not delete user: %w", err)
 	}

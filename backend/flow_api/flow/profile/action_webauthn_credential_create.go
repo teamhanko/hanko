@@ -3,10 +3,10 @@ package profile
 import (
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnCredentialCreate struct {
@@ -30,30 +30,26 @@ func (a WebauthnCredentialCreate) Initialize(c flowpilot.InitializationContext) 
 func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
-	if !c.Stash().Get("primary_email").Exists() && !c.Stash().Get("username").Exists() {
-		return errors.New("either email or username must exist in the stash")
+	primaryEmailModel := userModel.Emails.GetPrimary()
+	if primaryEmailModel == nil && userModel.Username == "" {
+		return errors.New("user must have either email or username")
 	}
 
-	userID, err := uuid.FromString(c.Stash().Get("user_id").String())
-	if err != nil {
-		return fmt.Errorf("failed to parse user id as a uuid: %w", err)
+	var primaryEmailAddress string
+	if primaryEmailModel != nil {
+		primaryEmailAddress = primaryEmailModel.Address
 	}
-
-	email := c.Stash().Get("primary_email").String()
-	username := c.Stash().Get("username").String()
 
 	params := services.GenerateCreationOptionsParams{
 		Tx:       deps.Tx,
-		UserID:   userID,
-		Email:    email,
-		Username: username,
+		UserID:   userModel.ID,
+		Email:    primaryEmailAddress,
+		Username: userModel.Username,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptions(params)

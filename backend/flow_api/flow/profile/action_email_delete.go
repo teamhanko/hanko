@@ -38,18 +38,9 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
-		return c.ContinueFlowWithError(
-			c.GetErrorState(),
-			flowpilot.ErrorOperationNotPermitted.
-				Wrap(errors.New("user_id does not exist")))
-	}
-
-	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
-
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
-	if err != nil {
-		return fmt.Errorf("failed to fetch user from db: %w", err)
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailToBeDeletedId := uuid.FromStringOrNil(c.Input().Get("email_id").String())

@@ -35,22 +35,7 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("user not found")
 	}
 
-	err = c.Stash().Set("user_id", userModel.ID)
-	if err != nil {
-		return fmt.Errorf("failed to set user id to stash: %w", err)
-	}
-
-	err = c.Stash().Set("username", userModel.Username)
-	if err != nil {
-		return fmt.Errorf("failed to set user payload: %w", err)
-	}
-
-	if userModel.Emails.GetPrimary() != nil {
-		err = c.Stash().Set("primary_email", userModel.Emails.GetPrimary().Address)
-		if err != nil {
-			return fmt.Errorf("failed to set user payload: %w", err)
-		}
-	}
+	c.Set("session_user", userModel)
 
 	err = c.Payload().Set("user", userModel)
 	if err != nil {
