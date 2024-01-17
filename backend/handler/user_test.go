@@ -8,6 +8,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
@@ -46,10 +47,10 @@ func (s *userSuite) TestUserHandler_Create_TokenInCookie() {
 	e.ServeHTTP(rec, req)
 
 	if s.Equal(http.StatusOK, rec.Code) {
-		user := models.User{}
+		user := dto.CreateUserResponse{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
-		s.False(user.ID.IsNil())
+		s.False(user.UserID.IsNil())
 
 		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
 		s.NoError(err)
@@ -91,10 +92,10 @@ func (s *userSuite) TestUserHandler_Create_TokenInHeader() {
 	e.ServeHTTP(rec, req)
 
 	if s.Equal(http.StatusOK, rec.Code) {
-		user := models.User{}
+		user := dto.CreateUserResponse{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
-		s.False(user.ID.IsNil())
+		s.False(user.UserID.IsNil())
 
 		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
 		s.NoError(err)
@@ -131,10 +132,10 @@ func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
 	e.ServeHTTP(rec, req)
 
 	if s.Equal(http.StatusOK, rec.Code) {
-		user := models.User{}
+		user := dto.CreateUserResponse{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
-		s.False(user.ID.IsNil())
+		s.False(user.UserID.IsNil())
 
 		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
 		s.NoError(err)

@@ -1,0 +1,25 @@
+- id: 183ab00a-87a6-4356-b489-fd0badece0e3
+  webhook_id: a47fe92a-1e4b-4119-8653-55ad82737c88
+  event: user.create
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 51a3be04-c99d-40f3-a572-c76cadcb883d
+  webhook_id: a47fe92a-1e4b-4119-8653-55ad82737c88
+  event: user.update
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 3a4b1099-ec7b-4723-bee9-923d4faed27e
+  webhook_id: a47fe92a-1e4b-4119-8653-55ad82737c88
+  event: user
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: c4e6d7b6-34b3-4c9e-a259-814312162b2b
+  webhook_id: a47fe92a-1e4b-4119-8653-55ad82737c88
+  event: user.update.email
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: e3a1f35b-5578-43a5-9f62-63eb41c2d394
+  webhook_id: 8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4
+  event: user
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

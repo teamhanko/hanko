@@ -12,7 +12,12 @@ import (
 	"time"
 )
 
-type Manager struct {
+type Manager interface {
+	Trigger(evt events.Event, data interface{})
+	GenerateJWT(data interface{}, event events.Event) (string, error)
+}
+
+type manager struct {
 	logger       echo.Logger
 	webhooks     Webhooks
 	jwtGenerator hankoJwt.Generator
@@ -20,7 +25,7 @@ type Manager struct {
 	persister    persistence.WebhookPersister
 }
 
-func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkManager hankoJwk.Manager, logger echo.Logger) (*Manager, error) {
+func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkManager hankoJwk.Manager, logger echo.Logger) (Manager, error) {
 	hooks := make(Webhooks, 0)
 
 	if cfg.Webhooks.Enabled {
@@ -57,7 +62,7 @@ func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkM
 		audience = []string{cfg.Webauthn.RelyingParty.Id}
 	}
 
-	return &Manager{
+	return &manager{
 		logger:       logger,
 		webhooks:     hooks,
 		jwtGenerator: g,
@@ -66,7 +71,7 @@ func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkM
 	}, nil
 }
 
-func (m *Manager) Trigger(evts events.Events, data interface{}) {
+func (m *manager) Trigger(evt events.Event, data interface{}) {
 	// add db hooks - Done here to prevent a restart in case a hook is added or removed from the database
 	dbHooks, err := m.persister.List(false)
 	if err != nil {
@@ -79,45 +84,44 @@ func (m *Manager) Trigger(evts events.Events, data interface{}) {
 		hooks = append(hooks, NewDatabaseHook(dbHook, m.persister, m.logger))
 	}
 
-	for _, evt := range evts {
-		dataToken, err := m.GenerateJWT(data)
-		if err != nil {
-			m.logger.Error(fmt.Errorf("unable to generate JWT for webhook data: %w", err))
-			return
-		}
-
-		jobData := JobData{
-			Token: dataToken,
-			Event: evt,
-		}
-
-		hookChannel := make(chan Job, len(hooks))
-		for _, hook := range hooks {
-			if hook.HasEvent(evt) {
-				job := Job{
-					Data: jobData,
-					Hook: hook,
-				}
-				hookChannel <- job
-			}
-		}
-		close(hookChannel)
-
-		worker := NewWorker(hookChannel)
-		go worker.Run()
+	dataToken, err := m.GenerateJWT(data, evt)
+	if err != nil {
+		m.logger.Error(fmt.Errorf("unable to generate JWT for webhook data: %w", err))
+		return
 	}
 
+	jobData := JobData{
+		Token: dataToken,
+		Event: evt,
+	}
+
+	hookChannel := make(chan Job, len(hooks))
+	for _, hook := range hooks {
+		if hook.HasEvent(evt) {
+			job := Job{
+				Data: jobData,
+				Hook: hook,
+			}
+			hookChannel <- job
+		}
+	}
+	close(hookChannel)
+
+	worker := NewWorker(hookChannel, m.logger)
+	go worker.Run()
 }
 
-func (m *Manager) GenerateJWT(data interface{}) (string, error) {
+func (m *manager) GenerateJWT(data interface{}, event events.Event) (string, error) {
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(5 * time.Minute)
 
 	token := jwt.New()
-	_ = token.Set(jwt.SubjectKey, data)
+	_ = token.Set(jwt.SubjectKey, "hanko webhooks")
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
 	_ = token.Set(jwt.AudienceKey, m.audience)
+	_ = token.Set("data", data)
+	_ = token.Set("evt", event)
 
 	signed, err := m.jwtGenerator.Sign(token)
 	if err != nil {

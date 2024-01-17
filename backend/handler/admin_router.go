@@ -71,8 +71,6 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.GET("/:id", webhookHandler.Get)
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
-	webhooks.PUT("/:id/enable", webhookHandler.Enable)
-	webhooks.PUT("/:id/disable", webhookHandler.Disable)
 
 	return e
 }

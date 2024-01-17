@@ -33,5 +33,5 @@ func (ch *ConfigHook) Reset() error {
 }
 
 func (ch *ConfigHook) IsEnabled() bool {
-	return false
+	return true
 }

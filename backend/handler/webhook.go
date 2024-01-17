@@ -21,8 +21,6 @@ type WebhookHandler interface {
 	Get(ctx echo.Context) error
 	Delete(ctx echo.Context) error
 	Update(ctx echo.Context) error
-	Enable(ctx echo.Context) error
-	Disable(ctx echo.Context) error
 }
 
 const (
@@ -241,82 +239,6 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 
 		return ctx.JSON(http.StatusOK, webhook)
 	})
-}
-
-func (w *webhookHandler) Enable(ctx echo.Context) error {
-	var dto admin.GetWebhookRequestDto
-	err := ctx.Bind(&dto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	err = ctx.Validate(dto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	persister := w.persister.GetWebhookPersister(nil)
-
-	now := time.Now()
-
-	webhookId, _ := uuid.FromString(dto.ID)
-	webhook, err := w.getWebhook(webhookId, persister)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return err
-	}
-
-	webhook.Failures = 0
-	webhook.Enabled = true
-	webhook.ExpiresAt = now.Add(webhooks.WebhookExpireDuration)
-	webhook.UpdatedAt = now
-
-	err = persister.Update(*webhook)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return fmt.Errorf("unable to update webhook: %w", err)
-	}
-
-	return ctx.JSON(http.StatusOK, webhook)
-}
-
-func (w *webhookHandler) Disable(ctx echo.Context) error {
-	var dto admin.GetWebhookRequestDto
-	err := ctx.Bind(&dto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	err = ctx.Validate(dto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	persister := w.persister.GetWebhookPersister(nil)
-
-	now := time.Now()
-
-	webhookId, _ := uuid.FromString(dto.ID)
-	webhook, err := w.getWebhook(webhookId, persister)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return err
-	}
-
-	webhook.Enabled = false
-	webhook.UpdatedAt = now
-
-	err = persister.Update(*webhook)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return fmt.Errorf("unable to update webhook: %w", err)
-	}
-
-	return ctx.JSON(http.StatusOK, webhook)
 }
 
 func (w *webhookHandler) getWebhook(id uuid.UUID, persister persistence.WebhookPersister) (*models.Webhook, error) {

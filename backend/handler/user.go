@@ -10,6 +10,7 @@ import (
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/dto/admin"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
@@ -143,7 +144,10 @@ func (h *UserHandler) Create(c echo.Context) error {
 			EmailID: email.ID,
 		}
 
-		utils.TriggerWebhooks(c, events.Events{events.User, events.UserCreate}, newUserDto)
+		err = utils.TriggerWebhooks(c, events.UserCreate, admin.FromUserModel(newUser))
+		if err != nil {
+			c.Logger().Warn(err)
+		}
 
 		return c.JSON(http.StatusOK, newUserDto)
 	})
@@ -268,7 +272,10 @@ func (h *UserHandler) Delete(c echo.Context) error {
 
 		c.SetCookie(cookie)
 
-		utils.TriggerWebhooks(c, events.Events{events.User, events.UserDelete}, userId.String())
+		err = utils.TriggerWebhooks(c, events.UserDelete, admin.FromUserModel(*user))
+		if err != nil {
+			c.Logger().Warn(err)
+		}
 
 		return c.NoContent(http.StatusNoContent)
 	})

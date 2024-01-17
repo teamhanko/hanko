@@ -100,7 +100,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	g.POST("/logout", userHandler.Logout, sessionMiddleware)
 
 	if cfg.Account.AllowDeletion {
-		g.DELETE("/user", userHandler.Delete, sessionMiddleware)
+		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddlware)
 	}
 
 	healthHandler := NewHealthHandler()

@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -33,9 +34,7 @@ type BaseWebhook struct {
 
 func (bh *BaseWebhook) HasEvent(evt events.Event) bool {
 	for _, event := range bh.Events {
-		if event == evt {
-			return true
-		}
+		return strings.HasPrefix(string(evt), string(event))
 	}
 
 	return false

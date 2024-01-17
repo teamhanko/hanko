@@ -16,7 +16,7 @@ type WebhookPersister interface {
 	Delete(webhook models.Webhook) error
 	AddEvent(event models.WebhookEvent) error
 	RemoveEvent(event models.WebhookEvent) error
-	List(includeExpired bool) (models.Webhooks, error)
+	List(includeDisabled bool) (models.Webhooks, error)
 	Get(webhookId uuid.UUID) (*models.Webhook, error)
 }
 
@@ -100,7 +100,7 @@ func (w *webhookPersister) List(includeDisabled bool) (models.Webhooks, error) {
 	webhooks := make(models.Webhooks, 0)
 	query := w.db.Eager().Q()
 	if !includeDisabled {
-		query = query.Where("expired = false")
+		query = query.Where("enabled = true")
 	}
 	err := query.All(&webhooks)
 
@@ -117,7 +117,7 @@ func (w *webhookPersister) List(includeDisabled bool) (models.Webhooks, error) {
 
 func (w *webhookPersister) Get(webhookId uuid.UUID) (*models.Webhook, error) {
 	webhook := models.Webhook{}
-	err := w.db.Eager().Where("id = ?", webhookId).First(&webhook)
+	err := w.db.Eager().Find(&webhook, webhookId)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

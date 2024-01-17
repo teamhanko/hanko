@@ -1,6 +1,8 @@
 package webhooks
 
 import (
+	"fmt"
+	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"time"
 )
@@ -16,11 +18,13 @@ type JobData struct {
 }
 
 type Worker struct {
+	logger      echo.Logger
 	hookChannel chan Job
 }
 
-func NewWorker(hookChannel chan Job) Worker {
+func NewWorker(hookChannel chan Job, logger echo.Logger) Worker {
 	return Worker{
+		logger:      logger,
 		hookChannel: hookChannel,
 	}
 }
@@ -34,6 +38,7 @@ func (w *Worker) Run() {
 
 		err := w.triggerWebhook(job)
 		if err != nil {
+			w.logger.Error(fmt.Errorf("unable to trigger webhook: %w", err))
 			continue
 		}
 	}
@@ -47,13 +52,13 @@ func (w *Worker) triggerWebhook(job Job) error {
 		return err
 	}
 
-	if !job.Hook.IsEnabled() {
+	if job.Hook.IsEnabled() {
 		err := job.Hook.Trigger(job.Data)
 		if err != nil {
 			// expire after failure (if failure counter > FailureExpireRate)
-			err := job.Hook.DisableOnFailure()
-			if err != nil {
-				return err
+			disableErr := job.Hook.DisableOnFailure()
+			if disableErr != nil {
+				return disableErr
 			}
 
 			return err
