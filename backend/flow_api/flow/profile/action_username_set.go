@@ -1,10 +1,12 @@
 package profile
 
 import (
+	"errors"
 	"fmt"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"strings"
 )
 
 type UsernameSet struct {
@@ -42,6 +44,15 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	username := c.Input().Get("username").String()
+
+	for _, char := range username {
+		// check that username only contains allowed characters
+		if !strings.Contains(deps.Cfg.Identifier.Username.AllowedCharacters, string(char)) {
+			c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		}
+	}
+
 	userModel.Username = username
 
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
