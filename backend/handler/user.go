@@ -140,6 +140,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		})
 
 		newUserDto := dto.CreateUserResponse{
+			ID:      newUser.ID,
 			UserID:  newUser.ID,
 			EmailID: email.ID,
 		}
