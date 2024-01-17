@@ -17,7 +17,7 @@ func (tm *testManager) Trigger(evt events.Event, data interface{}) {
 	tm.TestFunc()
 }
 
-func (tm *testManager) GenerateJWT(data interface{}) (string, error) {
+func (tm *testManager) GenerateJWT(data interface{}, event events.Event) (string, error) {
 	return "", nil
 }
 
