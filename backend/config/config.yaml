@@ -4,6 +4,12 @@ database:
   host: localhost
   port: 5432
   dialect: postgres
+server:
+  public:
+    cors:
+      allow_origins:
+        - http://localhost:63342
+        - http://localhost:8000/
 passcode:
   enabled: true
   email:
@@ -21,6 +27,7 @@ webauthn:
   relying_party:
     id: localhost
     origins:
+      - http://localhost:63342
       - http://localhost:8000
 password:
   enabled: false

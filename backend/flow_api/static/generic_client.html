@@ -167,7 +167,7 @@
         container.innerHTML = '';
 
         const stateHeadline = document.createElement('h2');
-        stateHeadline.innerHTML = "📌 State: " + data.state;
+        stateHeadline.innerHTML = "📌 State: " + data.name;
         container.appendChild(stateHeadline);
 
         const errorHeadline = document.createElement('h3');
@@ -202,12 +202,12 @@
         executeHandlerButton.type = 'button';
         executeHandlerButton.textContent = "☝ Execute handler";
 
-        if (!stateHandler[data.state]) {
+        if (!stateHandler[data.name]) {
             executeHandlerButton.disabled = true
         } else {
             executeHandlerButton.addEventListener('click', (event) => {
                 event.preventDefault();
-                stateHandler[data.state](data.payload);
+                stateHandler[data.name](data.payload);
             });
         }
 
@@ -218,7 +218,7 @@
         container.appendChild(actionsHeadline);
 
         if (data.actions) {
-            data.actions.forEach(action => {
+            Object.values(data.actions).forEach(action => {
                 const form = document.createElement('form');
                 form.action = action.href;
                 form.method = 'POST';
@@ -241,10 +241,9 @@
                 schemaHeadline.textContent = "⛳ Schema";
                 form.appendChild(schemaHeadline);
 
-                if (action.schema) {
+                if (action.inputs) {
                     const inputList = document.createElement('ul');
-
-                    action.schema.forEach(input => {
+                    Object.values(action.inputs).forEach(input => {
                         const inputListItem = document.createElement('li');
 
                         const label = document.createElement("label");

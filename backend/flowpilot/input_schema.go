@@ -27,7 +27,7 @@ type ExecutionSchema interface {
 type inputs []Input
 
 // PublicSchema represents a collection of PublicInput instances.
-type PublicSchema []*PublicInput
+type PublicSchema map[string]*PublicInput
 
 // defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
 type defaultSchema struct {
@@ -138,7 +138,7 @@ func (s *defaultSchema) getOutputData() ReadOnlyActionInput {
 
 // toPublicSchema converts defaultSchema to PublicSchema for public exposure.
 func (s *defaultSchema) toPublicSchema(stateName StateName) PublicSchema {
-	var publicSchema PublicSchema
+	var publicSchema = make(PublicSchema)
 
 	for _, input := range s.inputs {
 		if !input.isIncludedOnState(stateName) {
@@ -156,7 +156,7 @@ func (s *defaultSchema) toPublicSchema(stateName StateName) PublicSchema {
 			input.setValue(inputValue.Value())
 		}
 
-		publicSchema = append(publicSchema, input.toPublicInput())
+		publicSchema[input.getName()] = input.toPublicInput()
 	}
 
 	return publicSchema
