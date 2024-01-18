@@ -26,6 +26,17 @@ func (a PasswordDelete) Initialize(c flowpilot.InitializationContext) {
 	if !deps.Cfg.Password.Enabled {
 		c.SuspendAction()
 	}
+
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		c.SuspendAction()
+		return
+	}
+
+	if userModel.PasswordCredential == nil {
+		c.SuspendAction()
+		return
+	}
 }
 
 func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {

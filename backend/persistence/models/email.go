@@ -5,6 +5,7 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
+	"golang.org/x/exp/slices"
 	"time"
 )
 
@@ -52,6 +53,12 @@ func (emails Emails) GetVerified() Emails {
 		}
 	}
 	return list
+}
+
+func (emails Emails) HasUnverified() bool {
+	return slices.ContainsFunc(emails, func(e Email) bool {
+		return !e.Verified
+	})
 }
 
 func (emails Emails) GetPrimary() *Email {
