@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -37,7 +38,7 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 
 	c.Set("session_user", userModel)
 
-	err = c.Payload().Set("user", userModel)
+	err = c.Payload().Set("user", dto.ProfileDataFromUserModel(userModel))
 	if err != nil {
 		return fmt.Errorf("failed to set user payload: %w", err)
 	}
