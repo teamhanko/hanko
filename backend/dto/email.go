@@ -10,7 +10,7 @@ type EmailResponse struct {
 	Address    string    `json:"address"`
 	IsVerified bool      `json:"is_verified"`
 	IsPrimary  bool      `json:"is_primary"`
-	Identity   *Identity `json:"identity"`
+	Identity   *Identity `json:"identity,omitempty"`
 }
 
 type EmailCreateRequest struct {
