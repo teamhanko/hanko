@@ -25,9 +25,26 @@ func (a EmailSetPrimary) Initialize(c flowpilot.InitializationContext) {
 
 	if !deps.Cfg.Identifier.Email.Enabled {
 		c.SuspendAction()
-	} else {
-		c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
+		return
 	}
+
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		c.SuspendAction()
+		return
+	}
+
+	if len(userModel.Emails) == 1 && userModel.Emails[0].IsPrimary() {
+		c.SuspendAction()
+		return
+	}
+
+	if len(userModel.Emails) == 0 {
+		c.SuspendAction()
+		return
+	}
+
+	c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
 }
 
 func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {

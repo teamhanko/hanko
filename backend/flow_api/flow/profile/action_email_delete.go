@@ -24,11 +24,34 @@ func (a EmailDelete) GetDescription() string {
 func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Email.Enabled {
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
 		c.SuspendAction()
-	} else {
-		c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
+		return
 	}
+
+	if len(userModel.Emails) == 1 {
+		if deps.Cfg.Identifier.Email.Enabled {
+			if !deps.Cfg.Identifier.Email.Optional {
+				c.SuspendAction()
+				return
+			}
+
+			if len(userModel.WebauthnCredentials) == 0 {
+				if !deps.Cfg.Password.Enabled || userModel.PasswordCredential == nil {
+					c.SuspendAction()
+					return
+				}
+			}
+		}
+	}
+
+	if len(userModel.Emails) == 0 {
+		c.SuspendAction()
+		return
+	}
+
+	c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
 }
 
 func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
@@ -63,12 +86,12 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 			if err != nil {
 				return fmt.Errorf("could not delete primary email: %w", err)
 			}
-
-			err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Delete(*emailToBeDeletedModel)
-			if err != nil {
-				return fmt.Errorf("could not delete email: %w", err)
-			}
 		}
+	}
+
+	err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Delete(*emailToBeDeletedModel)
+	if err != nil {
+		return fmt.Errorf("could not delete email: %w", err)
 	}
 
 	return c.ContinueFlow(StateProfileInit)
