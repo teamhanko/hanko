@@ -175,13 +175,10 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
-			schema := er.getExecutionSchema(actionName)
 
+			schema := er.createSchema(fc, action)
 			if schema == nil {
-				// Create schema if not available.
-				if schema = er.createSchema(fc, action); schema == nil {
-					continue
-				}
+				continue
 			}
 
 			publicSchema := schema.toPublicSchema(er.nextStateName)

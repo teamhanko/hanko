@@ -24,11 +24,23 @@ func (a EmailVerify) GetDescription() string {
 func (a EmailVerify) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Email.Enabled {
+	if !deps.Cfg.Identifier.Email.Enabled || !deps.Cfg.Passcode.Enabled {
 		c.SuspendAction()
-	} else {
-		c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
+		return
 	}
+
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		c.SuspendAction()
+		return
+	}
+
+	if !userModel.Emails.HasUnverified() {
+		c.SuspendAction()
+		return
+	}
+
+	c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
 }
 
 func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {

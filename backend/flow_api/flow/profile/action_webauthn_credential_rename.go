@@ -20,6 +20,17 @@ func (a WebauthnCredentialRename) GetDescription() string {
 }
 
 func (a WebauthnCredentialRename) Initialize(c flowpilot.InitializationContext) {
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		c.SuspendAction()
+		return
+	}
+
+	if len(userModel.WebauthnCredentials) == 0 {
+		c.SuspendAction()
+		return
+	}
+
 	c.AddInputs(flowpilot.StringInput("passkey_id").Required(true).Hidden(true))
 	c.AddInputs(flowpilot.StringInput("passkey_name").Required(true))
 }
