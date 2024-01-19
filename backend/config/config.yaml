@@ -5,7 +5,7 @@ database:
   port: 5432
   dialect: postgres
 passcode:
-  enabled: false
+  enabled: true
   email:
     from_address: no-reply@hanko.io
   smtp:
