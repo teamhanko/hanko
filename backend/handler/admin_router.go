@@ -44,8 +44,6 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
-	userHandler := NewUserHandlerAdmin(persister)
-
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
@@ -53,11 +51,21 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
 
+	userHandler := NewUserHandlerAdmin(persister)
+	emailHandler := NewEmailAdminHandler(cfg, persister)
+
 	user := g.Group("/users")
 	user.GET("", userHandler.List)
 	user.POST("", userHandler.Create, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
 	user.DELETE("/:id", userHandler.Delete, webhookMiddleware)
+
+	email := user.Group("/:user_id/emails", webhookMiddleware)
+	email.GET("", emailHandler.List)
+	email.POST("", emailHandler.Create)
+	email.GET("/:email_id", emailHandler.Get)
+	email.DELETE("/:email_id", emailHandler.Delete)
+	email.POST("/:email_id/set_primary", emailHandler.SetPrimaryEmail)
 
 	auditLogHandler := NewAuditLogHandler(persister)
 

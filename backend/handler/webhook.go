@@ -178,7 +178,7 @@ func (w *webhookHandler) Delete(ctx echo.Context) error {
 	err = persister.Delete(*webhook)
 	if err != nil {
 		ctx.Logger().Error(err)
-		return fmt.Errorf("unable to delete user from database: %w", err)
+		return fmt.Errorf("unable to delete webhook from database: %w", err)
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
