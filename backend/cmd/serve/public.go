@@ -6,6 +6,7 @@ package serve
 import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/server"
 	"log"
@@ -14,7 +15,8 @@ import (
 
 func NewServePublicCommand() *cobra.Command {
 	var (
-		configFile string
+		configFile    string
+		aaguidMapFile string
 	)
 
 	cmd := &cobra.Command{
@@ -27,6 +29,8 @@ func NewServePublicCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
+			aaguidMap := mapper.LoadAaguidMap(&aaguidMapFile)
+
 			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
@@ -34,13 +38,14 @@ func NewServePublicCommand() *cobra.Command {
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			go server.StartPublic(cfg, &wg, persister, nil)
+			go server.StartPublic(cfg, &wg, persister, nil, aaguidMap)
 
 			wg.Wait()
 		},
 	}
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+	cmd.Flags().StringVar(&aaguidMapFile, "aaguid-map", "", "config file")
 
 	return cmd
 }

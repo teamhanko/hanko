@@ -39,14 +39,27 @@ var (
 	DefaultConfigFilePath = "./config/config.yaml"
 )
 
-func Load(cfgFile *string) (*Config, error) {
+func LoadFile(filePath *string, pa koanf.Parser) (*koanf.Koanf, error) {
 	k := koanf.New(".")
-	var err error
+
+	if filePath == nil || *filePath == "" {
+		return nil, nil
+	}
+
+	if err := k.Load(file.Provider(*filePath), pa); err != nil {
+		return nil, fmt.Errorf("failed to load file from '%s': %w", *filePath, err)
+	}
+
+	return k, nil
+}
+
+func Load(cfgFile *string) (*Config, error) {
 	if cfgFile == nil || *cfgFile == "" {
 		*cfgFile = DefaultConfigFilePath
 	}
 
-	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
+	k, err := LoadFile(cfgFile, yaml.Parser())
+	if err != nil {
 		if *cfgFile != DefaultConfigFilePath {
 			return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
 		}

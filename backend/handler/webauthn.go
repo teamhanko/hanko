@@ -14,6 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/dto/intern"
+	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
@@ -28,10 +29,11 @@ type WebauthnHandler struct {
 	sessionManager session.Manager
 	cfg            *config.Config
 	auditLogger    auditlog.Logger
+	aaguidMap      mapper.AaguidMap
 }
 
 // NewWebauthnHandler creates a new handler which handles all webauthn related routes
-func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) (*WebauthnHandler, error) {
+func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger, aaguidMap mapper.AaguidMap) (*WebauthnHandler, error) {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -66,6 +68,7 @@ func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, ses
 		sessionManager: sessionManager,
 		cfg:            cfg,
 		auditLogger:    auditLogger,
+		aaguidMap:      aaguidMap,
 	}, nil
 }
 
@@ -196,7 +199,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 
 		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
 		backupState := request.Response.AttestationObject.AuthData.Flags.HasBackupState()
-		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState)
+		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState, h.aaguidMap)
 		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*model)
 		if err != nil {
 			return fmt.Errorf("failed to store webauthn credential: %w", err)
