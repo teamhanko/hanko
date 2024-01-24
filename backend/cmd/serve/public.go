@@ -15,8 +15,8 @@ import (
 
 func NewServePublicCommand() *cobra.Command {
 	var (
-		configFile    string
-		aaguidMapFile string
+		configFile                string
+		authenticatorMetadataFile string
 	)
 
 	cmd := &cobra.Command{
@@ -29,7 +29,7 @@ func NewServePublicCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			aaguidMap := mapper.LoadAaguidMap(&aaguidMapFile)
+			authenticatorMetadata := mapper.LoadAuthenticatorMetadata(&authenticatorMetadataFile)
 
 			persister, err := persistence.New(cfg.Database)
 			if err != nil {
@@ -38,14 +38,14 @@ func NewServePublicCommand() *cobra.Command {
 			var wg sync.WaitGroup
 			wg.Add(1)
 
-			go server.StartPublic(cfg, &wg, persister, nil, aaguidMap)
+			go server.StartPublic(cfg, &wg, persister, nil, authenticatorMetadata)
 
 			wg.Wait()
 		},
 	}
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
-	cmd.Flags().StringVar(&aaguidMapFile, "aaguid-map", "", "config file")
+	cmd.Flags().StringVar(&authenticatorMetadataFile, "auth-meta", "", "authenticator metadata file")
 
 	return cmd
 }

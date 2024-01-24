@@ -1,9 +1,9 @@
 # Build the hanko binary
-FROM golang:1.20 as builder
+FROM golang:1.20 AS builder
 WORKDIR /workspace
 
 # Get Delve
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install github.com/go-delve/delve/cmd/dlv@latest
+RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go install github.com/go-delve/delve/cmd/dlv@latest
 
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -29,10 +29,14 @@ COPY build_info build_info/
 COPY middleware middleware/
 COPY template template/
 COPY utils utils/
+COPY mapper mapper/
+
+# Load AAGUID map
+RUN wget --quiet https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/main/aaguid.json -O aaguid.json
 
 # Build
 RUN go generate ./...
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags="all=-N -l" -a -o hanko main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go build -gcflags="all=-N -l" -a -o hanko main.go
 
 # Use distroless as minimal base image to package hanko binary
 # See https://github.com/GoogleContainerTools/distroless for details
@@ -40,6 +44,7 @@ FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /go/bin/dlv .
 COPY --from=builder /workspace/hanko .
+COPY --from=builder /workspace/aaguid.json /etc/config/
 USER 65532:65532
 
 EXPOSE 8000 8001 40000

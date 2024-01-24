@@ -16,8 +16,8 @@ import (
 
 func NewServeAllCommand() *cobra.Command {
 	var (
-		configFile    string
-		aaguidMapFile string
+		configFile                string
+		authenticatorMetadataFile string
 	)
 
 	cmd := &cobra.Command{
@@ -30,7 +30,7 @@ func NewServeAllCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			aaguidMap := mapper.LoadAaguidMap(&aaguidMapFile)
+			authenticatorMetadata := mapper.LoadAuthenticatorMetadata(&authenticatorMetadataFile)
 
 			persister, err := persistence.New(cfg.Database)
 			if err != nil {
@@ -41,7 +41,7 @@ func NewServeAllCommand() *cobra.Command {
 
 			prometheus := echoprometheus.NewMiddleware("hanko")
 
-			go server.StartPublic(cfg, &wg, persister, prometheus, aaguidMap)
+			go server.StartPublic(cfg, &wg, persister, prometheus, authenticatorMetadata)
 			go server.StartAdmin(cfg, &wg, persister, prometheus)
 
 			wg.Wait()
@@ -49,7 +49,7 @@ func NewServeAllCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
-	cmd.Flags().StringVar(&aaguidMapFile, "aaguid-map", "", "aaguid map file")
+	cmd.Flags().StringVar(&authenticatorMetadataFile, "auth-meta", "", "authenticator metadata file")
 
 	return cmd
 }

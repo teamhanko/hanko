@@ -18,7 +18,7 @@ import (
 	"github.com/teamhanko/hanko/backend/template"
 )
 
-func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, aaguidMap mapper.AaguidMap) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
 	e.Renderer = template.NewTemplateRenderer()
 	e.HideBanner = true
@@ -103,7 +103,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	healthHandler := NewHealthHandler()
-	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, aaguidMap)
+	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}

@@ -10,14 +10,14 @@ import (
 	"time"
 )
 
-func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible bool, backupState bool, aaguidMap mapper.AaguidMap) *models.WebauthnCredential {
+func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible bool, backupState bool, authenticatorMetadata mapper.AuthenticatorMetadata) *models.WebauthnCredential {
 	now := time.Now().UTC()
 	aaguid, _ := uuid.FromBytes(credential.Authenticator.AAGUID)
 	credentialID := base64.RawURLEncoding.EncodeToString(credential.ID)
 
 	c := &models.WebauthnCredential{
 		ID:              credentialID,
-		Name:            aaguidMap.GetNameForAaguid(aaguid),
+		Name:            authenticatorMetadata.GetNameForAaguid(aaguid),
 		UserId:          userId,
 		PublicKey:       base64.RawURLEncoding.EncodeToString(credential.PublicKey),
 		AttestationType: credential.AttestationType,
