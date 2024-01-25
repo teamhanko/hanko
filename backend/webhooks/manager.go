@@ -18,11 +18,12 @@ type Manager interface {
 }
 
 type manager struct {
-	logger       echo.Logger
-	webhooks     Webhooks
-	jwtGenerator hankoJwt.Generator
-	audience     []string
-	persister    persistence.WebhookPersister
+	logger          echo.Logger
+	webhooks        Webhooks
+	jwtGenerator    hankoJwt.Generator
+	audience        []string
+	persister       persistence.WebhookPersister
+	canExpireAtTime bool
 }
 
 func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkManager hankoJwk.Manager, logger echo.Logger) (Manager, error) {
@@ -63,11 +64,12 @@ func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkM
 	}
 
 	return &manager{
-		logger:       logger,
-		webhooks:     hooks,
-		jwtGenerator: g,
-		audience:     audience,
-		persister:    persister,
+		logger:          logger,
+		webhooks:        hooks,
+		jwtGenerator:    g,
+		audience:        audience,
+		persister:       persister,
+		canExpireAtTime: cfg.Webhooks.AllowTimeExpiration,
 	}, nil
 }
 
@@ -99,8 +101,9 @@ func (m *manager) Trigger(evt events.Event, data interface{}) {
 	for _, hook := range hooks {
 		if hook.HasEvent(evt) {
 			job := Job{
-				Data: jobData,
-				Hook: hook,
+				Data:            jobData,
+				Hook:            hook,
+				CanExpireAtTime: m.canExpireAtTime,
 			}
 			hookChannel <- job
 		}

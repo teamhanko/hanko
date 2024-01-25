@@ -6,7 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-// Deprecated: NewPersister is deprecated. User test.Suite instead
+// Deprecated: NewPersister is deprecated. Use test.Suite instead
 func NewPersister(
 	user []models.User,
 	passcodes []models.Passcode,

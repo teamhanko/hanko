@@ -8,8 +8,9 @@ import (
 )
 
 type Job struct {
-	Data JobData
-	Hook Webhook
+	Data            JobData
+	Hook            Webhook
+	CanExpireAtTime bool
 }
 
 type JobData struct {
@@ -46,10 +47,13 @@ func (w *Worker) Run() {
 
 func (w *Worker) triggerWebhook(job Job) error {
 	now := time.Now()
-	// check for expire date
-	err := job.Hook.DisableOnExpiryDate(now)
-	if err != nil {
-		return err
+	// only if jobs are allowed to expire
+	if job.CanExpireAtTime {
+		// check for expire date
+		err := job.Hook.DisableOnExpiryDate(now)
+		if err != nil {
+			return err
+		}
 	}
 
 	if job.Hook.IsEnabled() {

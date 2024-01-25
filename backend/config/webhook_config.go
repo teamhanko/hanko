@@ -7,8 +7,9 @@ import (
 )
 
 type WebhookSettings struct {
-	Enabled bool     `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	Hooks   Webhooks `yaml:"hooks" json:"hooks,omitempty" koanf:"hooks"`
+	Enabled             bool     `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	AllowTimeExpiration bool     `yaml:"allow_time_expiration" json:"allow_time_expiration,omitempty" koanf:"allow_time_expiration" jsonschema:"default=false"`
+	Hooks               Webhooks `yaml:"hooks" json:"hooks,omitempty" koanf:"hooks"`
 }
 
 func (ws *WebhookSettings) Validate() error {

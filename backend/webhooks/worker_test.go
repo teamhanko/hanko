@@ -3,6 +3,7 @@ package webhooks
 import (
 	"fmt"
 	"github.com/labstack/gommon/log"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"testing"
@@ -109,6 +110,7 @@ func TestWorker_RunJobWithError(t *testing.T) {
 				return fmt.Errorf("forced error")
 			},
 		},
+		CanExpireAtTime: true,
 	}
 
 	hookChannel := make(chan Job, 1)
@@ -171,6 +173,7 @@ func TestWorker_TriggerWebhookWithExpireError(t *testing.T) {
 				return fmt.Errorf("expired error")
 			},
 		},
+		CanExpireAtTime: true,
 	}
 
 	worker := TestWorker{NewWorker(nil, log.New("test"))}
@@ -195,6 +198,7 @@ func TestWorker_TriggerWebhookIgnoreDisabledJob(t *testing.T) {
 				return false
 			},
 		},
+		CanExpireAtTime: true,
 	}
 
 	worker := TestWorker{NewWorker(nil, log.New("test"))}
@@ -227,6 +231,7 @@ func TestWorker_TriggerWebhookTriggerWithError(t *testing.T) {
 				return nil
 			},
 		},
+		CanExpireAtTime: true,
 	}
 
 	worker := TestWorker{NewWorker(nil, log.New("test"))}
@@ -259,6 +264,7 @@ func TestWorker_TriggerWebhookDisableOnFailure(t *testing.T) {
 				return fmt.Errorf("failure error")
 			},
 		},
+		CanExpireAtTime: true,
 	}
 
 	worker := TestWorker{NewWorker(nil, log.New("test"))}
@@ -294,6 +300,43 @@ func TestWorker_TriggerWebhookResetError(t *testing.T) {
 				return fmt.Errorf("disable error")
 			},
 		},
+		CanExpireAtTime: true,
+	}
+
+	worker := TestWorker{NewWorker(nil, log.New("test"))}
+	err := worker.triggerWebhook(job)
+	require.ErrorContains(t, err, "disable error")
+}
+func TestWorker_TriggerWebhookWithDisabledTimeExpire(t *testing.T) {
+	job := Job{
+		Data: JobData{
+			Token: "test-token",
+			Event: events.UserCreate,
+		},
+
+		Hook: &TestHook{
+			ExpireFunc: func() error {
+				assert.Fail(t, "should not run expire func")
+				return nil
+			},
+			IsEnabledFunc: func() bool {
+				require.True(t, true)
+				return true
+			},
+			TriggerFunc: func() error {
+				require.True(t, true)
+				return nil
+			},
+			FailureFunc: func() error {
+				require.True(t, true)
+				return nil
+			},
+			ResetFunc: func() error {
+				require.True(t, true)
+				return fmt.Errorf("disable error")
+			},
+		},
+		CanExpireAtTime: false,
 	}
 
 	worker := TestWorker{NewWorker(nil, log.New("test"))}

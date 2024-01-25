@@ -750,6 +750,10 @@
           "type": "boolean",
           "default": false
         },
+        "allow_time_expiration": {
+          "type": "boolean",
+          "default": false
+        },
         "hooks": {
           "$ref": "#/$defs/Webhooks"
         }
