@@ -11,6 +11,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
+	zeroLogger "github.com/rs/zerolog/log"
 	"log"
 	"strings"
 	"time"
@@ -71,10 +72,7 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
 	}
 
-	err = c.arrangeSmtpSettings()
-	if err != nil {
-		return nil, fmt.Errorf("failed to arrange smtp settings: %w", err)
-	}
+	c.arrangeSmtpSettings()
 
 	if err = c.Validate(); err != nil {
 		return nil, fmt.Errorf("failed to validate config: %s", err)
@@ -648,14 +646,15 @@ func (c *Config) PostProcess() error {
 
 }
 
-func (c *Config) arrangeSmtpSettings() error {
-	if c.Smtp.Validate() == nil && c.Passcode.Smtp.Validate() == nil {
-		return fmt.Errorf("conflicting smtp settings found, please remove either smtp or passcode.smtp from the config")
-	}
-	if c.Smtp.Validate() != nil && c.Passcode.Smtp.Validate() == nil {
+func (c *Config) arrangeSmtpSettings() {
+	if c.Passcode.Smtp.Validate() == nil {
+		if c.Smtp.Validate() == nil {
+			zeroLogger.Warn().Msg("Both smtp and passcode.smtp are set. Using smtp settings from passcode.smtp")
+			return
+		}
+		
 		c.Smtp = c.Passcode.Smtp
 	}
-	return nil
 }
 
 type LoggerConfig struct {

@@ -56,7 +56,7 @@ func TestPasscodeSmtpSettingsCopiedToRootLevelSmtp(t *testing.T) {
 func TestRootSmtpPasscodeSmtpConflict(t *testing.T) {
 	configPath := "./root-passcode-smtp-config.yaml"
 	_, err := Load(&configPath)
-	assert.Error(t, err)
+	assert.NoError(t, err)
 }
 
 func TestMinimalConfigValidates(t *testing.T) {
