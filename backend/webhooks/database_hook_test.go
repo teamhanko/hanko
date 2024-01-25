@@ -91,6 +91,8 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
+	now := time.Now()
+
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
 	err := dbHook.Reset()
 	s.NoError(err)
@@ -101,7 +103,6 @@ func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	s.Less(updatedHook.Failures, hook.Failures, "Failures should be reset to 0")
 	s.Equal(0, updatedHook.Failures)
 
-	now := time.Now()
 	s.True(updatedHook.ExpiresAt.After(now))
 	s.True(updatedHook.UpdatedAt.After(now))
 }

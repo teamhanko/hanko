@@ -189,7 +189,7 @@ func (s *managerSuite) createTestDatabaseWebhook(persister persistence.WebhookPe
 			Callback:  callback,
 			Enabled:   isEnabled,
 			Failures:  0,
-			ExpiresAt: now,
+			ExpiresAt: now.Add(WebhookExpireDuration),
 			CreatedAt: now,
 			UpdatedAt: now,
 		},
