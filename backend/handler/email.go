@@ -10,7 +10,6 @@ import (
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/dto/admin"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
@@ -20,10 +19,6 @@ import (
 	"strings"
 )
 
-const (
-	UpdatedUserErrorMessage = "failed to fetch updated user: %w"
-)
-
 type EmailHandler struct {
 	persister      persistence.Persister
 	cfg            *config.Config
@@ -31,13 +26,13 @@ type EmailHandler struct {
 	auditLogger    auditlog.Logger
 }
 
-func NewEmailHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) (*EmailHandler, error) {
+func NewEmailHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *EmailHandler {
 	return &EmailHandler{
 		persister:      persister,
 		cfg:            cfg,
 		sessionManager: sessionManager,
 		auditLogger:    auditLogger,
-	}, nil
+	}
 }
 
 func (h *EmailHandler) List(c echo.Context) error {
@@ -145,15 +140,8 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
-		updatedUser, err := h.persister.GetUserPersisterWithConnection(tx).Get(user.ID)
-		if err != nil {
-			if err != nil {
-				return fmt.Errorf(UpdatedUserErrorMessage, err)
-			}
-		}
-		err = utils.TriggerWebhooks(c, events.EmailCreate, admin.FromUserModel(*updatedUser))
-		if err != nil {
-			c.Logger().Warn(err)
+		if !h.cfg.Emails.RequireVerification {
+			utils.NotifyUserChange(c, tx, h.persister, events.EmailCreate, userId)
 		}
 
 		return c.JSON(http.StatusOK, email)
@@ -215,16 +203,7 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
-		updatedUser, err := h.persister.GetUserPersisterWithConnection(tx).Get(user.ID)
-		if err != nil {
-			if err != nil {
-				return fmt.Errorf(UpdatedUserErrorMessage, err)
-			}
-		}
-		err = utils.TriggerWebhooks(c, events.EmailPrimary, admin.FromUserModel(*updatedUser))
-		if err != nil {
-			c.Logger().Warn(err)
-		}
+		utils.NotifyUserChange(c, tx, h.persister, events.EmailPrimary, userId)
 
 		return c.NoContent(http.StatusNoContent)
 	})
@@ -268,16 +247,7 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
-		updatedUser, err := h.persister.GetUserPersisterWithConnection(tx).Get(user.ID)
-		if err != nil {
-			if err != nil {
-				return fmt.Errorf(UpdatedUserErrorMessage, err)
-			}
-		}
-		err = utils.TriggerWebhooks(c, events.EmailDelete, admin.FromUserModel(*updatedUser))
-		if err != nil {
-			c.Logger().Warn(err)
-		}
+		utils.NotifyUserChange(c, tx, h.persister, events.EmailDelete, userId)
 
 		return c.NoContent(http.StatusNoContent)
 	})

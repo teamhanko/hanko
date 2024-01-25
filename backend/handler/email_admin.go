@@ -144,16 +144,13 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 			}
 		}
 
-		updatedUser, err := h.persister.GetUserPersisterWithConnection(tx).Get(user.ID)
-		if err != nil {
-			if err != nil {
-				return fmt.Errorf(UpdatedUserErrorMessage, err)
-			}
+		// make email primary if user had no emails prior to email creation
+		if len(user.Emails) == 0 {
+			primaryEmail := models.NewPrimaryEmail(email.ID, user.ID)
+			err = h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 		}
-		err = utils.TriggerWebhooks(ctx, events.EmailCreate, admin.FromUserModel(*updatedUser))
-		if err != nil {
-			ctx.Logger().Warn(err)
-		}
+
+		utils.NotifyUserChange(ctx, tx, h.persister, events.EmailCreate, userId)
 
 		return ctx.JSON(http.StatusCreated, admin.FromEmailModel(email))
 	})
@@ -232,16 +229,7 @@ func (h *emailAdminHandler) Delete(ctx echo.Context) error {
 			return fmt.Errorf("failed to delete email from db: %w", err)
 		}
 
-		updatedUser, err := h.persister.GetUserPersisterWithConnection(tx).Get(user.ID)
-		if err != nil {
-			if err != nil {
-				return fmt.Errorf(UpdatedUserErrorMessage, err)
-			}
-		}
-		err = utils.TriggerWebhooks(ctx, events.EmailDelete, admin.FromUserModel(*updatedUser))
-		if err != nil {
-			ctx.Logger().Warn(err)
-		}
+		utils.NotifyUserChange(ctx, tx, h.persister, events.EmailDelete, userId)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})
@@ -287,16 +275,7 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 			return err
 		}
 
-		updatedUser, err := h.persister.GetUserPersisterWithConnection(tx).Get(user.ID)
-		if err != nil {
-			if err != nil {
-				return fmt.Errorf(UpdatedUserErrorMessage, err)
-			}
-		}
-		err = utils.TriggerWebhooks(ctx, events.EmailPrimary, admin.FromUserModel(*updatedUser))
-		if err != nil {
-			ctx.Logger().Warn(err)
-		}
+		utils.NotifyUserChange(ctx, tx, h.persister, events.EmailPrimary, userId)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})

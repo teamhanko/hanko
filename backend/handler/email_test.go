@@ -26,8 +26,7 @@ type emailSuite struct {
 }
 
 func (s *emailSuite) TestEmailHandler_New() {
-	emailHandler, err := NewEmailHandler(&config.Config{}, s.Storage, sessionManager{}, test.NewAuditLogger())
-	s.NoError(err)
+	emailHandler := NewEmailHandler(&config.Config{}, s.Storage, sessionManager{}, test.NewAuditLogger())
 	s.NotEmpty(emailHandler)
 }
 

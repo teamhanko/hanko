@@ -12,7 +12,7 @@ import (
 func TestNewConfigHook(t *testing.T) {
 	hook := config.Webhook{
 		Callback: "http://lorem.ipsum",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	cfgHook := NewConfigHook(hook, nil)
@@ -23,7 +23,7 @@ func TestConfigHook_DisableOnExpiryDate(t *testing.T) {
 	now := time.Now()
 	hook := config.Webhook{
 		Callback: "http://lorem.ipsum",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	dbHook := NewConfigHook(hook, nil)
@@ -34,7 +34,7 @@ func TestConfigHook_DisableOnExpiryDate(t *testing.T) {
 func TestConfigHook_DisableOnFailure(t *testing.T) {
 	hook := config.Webhook{
 		Callback: "http://lorem.ipsum",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	dbHook := NewConfigHook(hook, nil)
@@ -45,7 +45,7 @@ func TestConfigHook_DisableOnFailure(t *testing.T) {
 func TestConfigHook_Reset(t *testing.T) {
 	hook := config.Webhook{
 		Callback: "http://lorem.ipsum",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	dbHook := NewConfigHook(hook, nil)
@@ -56,7 +56,7 @@ func TestConfigHook_Reset(t *testing.T) {
 func TestConfigHook_IsEnabled(t *testing.T) {
 	hook := config.Webhook{
 		Callback: "http://lorem.ipsum",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	dbHook := NewConfigHook(hook, nil)

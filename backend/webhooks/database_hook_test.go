@@ -2,322 +2,134 @@ package webhooks
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
 	"testing"
 	"time"
 )
 
-func TestNewDatabaseHook(t *testing.T) {
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-	)
+func TestDatabaseHookSuite(t *testing.T) {
+	t.Parallel()
+	suite.Run(t, new(databaseHookSuite))
+}
 
+type databaseHookSuite struct {
+	test.Suite
+}
+
+func (s *databaseHookSuite) TestNewDatabaseHook() {
 	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
+	s.Require().NoError(err)
 
 	hook := models.Webhook{
 		ID:        hookId,
 		Enabled:   false,
 		Failures:  0,
-		ExpiresAt: time.Now().Add(24 * -1 * time.Hour),
+		ExpiresAt: time.Now().Add(WebhookExpireDuration),
 	}
 
-	dbHook := NewDatabaseHook(hook, persister.GetWebhookPersister(nil), nil)
-	require.NotEmpty(t, dbHook)
+	dbHook := NewDatabaseHook(hook, s.Storage.GetWebhookPersister(nil), nil)
+	s.NotEmpty(dbHook)
 }
 
-func TestDatabaseHook_DisableOnExpiryDate(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
+func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
+	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3")
+	dbHook := NewDatabaseHook(hook, whPersister, nil)
 
 	now := time.Now()
-
-	hook := models.Webhook{
-		ID:        hookId,
-		Enabled:   true,
-		Failures:  0,
-		ExpiresAt: now.Add(24 * -1 * time.Hour),
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
-
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
-	err = dbHook.DisableOnExpiryDate(now)
-	assert.NoError(t, err)
+	err := dbHook.DisableOnExpiryDate(now)
+	s.NoError(err)
 
 	updatedHook, err := whPersister.Get(hook.ID)
-	assert.NoError(t, err)
+	s.Require().NoError(err)
 
-	require.False(t, updatedHook.Enabled)
+	s.False(updatedHook.Enabled)
 }
-func TestDatabaseHook_DoNotDisableOnExpiryDate(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
+func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
+	hook, whPersister := s.loadWebhook("a47fe92a-1e4b-4119-8653-55ad82737c88")
+
+	dbHook := NewDatabaseHook(hook, whPersister, nil)
 
 	now := time.Now()
-
-	hook := models.Webhook{
-		ID:        hookId,
-		Enabled:   true,
-		Failures:  0,
-		ExpiresAt: now.Add(24 * 1 * time.Hour),
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
-
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
-	err = dbHook.DisableOnExpiryDate(now)
-	assert.NoError(t, err)
+	err := dbHook.DisableOnExpiryDate(now)
+	s.NoError(err)
 
 	updatedHook, err := whPersister.Get(hook.ID)
-	assert.NoError(t, err)
+	s.Require().NoError(err)
 
-	require.True(t, updatedHook.Enabled)
+	s.True(updatedHook.Enabled)
 }
 
-func TestDatabaseHook_DisableOnFailure(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
-
-	hook := models.Webhook{
-		ID:       hookId,
-		Enabled:  true,
-		Failures: FailureExpireRate,
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
+func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
+	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
-	err = dbHook.DisableOnFailure()
-	assert.NoError(t, err)
+	err := dbHook.DisableOnFailure()
+	s.Require().NoError(err)
 
 	updatedHook, err := whPersister.Get(hook.ID)
-	assert.NoError(t, err)
+	s.NoError(err)
 
-	require.False(t, updatedHook.Enabled)
+	s.False(updatedHook.Enabled)
 }
 
-func TestDatabaseHook_DoNotDisableOnFailure(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
-
-	hook := models.Webhook{
-		ID:       hookId,
-		Enabled:  true,
-		Failures: 0,
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
+func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
+	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
-	err = dbHook.DisableOnFailure()
-	assert.NoError(t, err)
+	err := dbHook.DisableOnFailure()
+	s.NoError(err)
 
 	updatedHook, err := whPersister.Get(hook.ID)
-	assert.NoError(t, err)
+	s.Require().NoError(err)
 
-	require.True(t, updatedHook.Enabled)
+	s.True(updatedHook.Enabled)
 }
 
-func TestDatabaseHook_Reset(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
+func (s *databaseHookSuite) TestDatabaseHook_Reset() {
+	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
+
+	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	err := dbHook.Reset()
+	s.NoError(err)
+
+	updatedHook, err := whPersister.Get(hook.ID)
+	s.Require().NoError(err)
+
+	s.Less(updatedHook.Failures, hook.Failures, "Failures should be reset to 0")
+	s.Equal(0, updatedHook.Failures)
 
 	now := time.Now()
-
-	hook := models.Webhook{
-		ID:       hookId,
-		Enabled:  true,
-		Failures: 3,
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
-
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
-	err = dbHook.Reset()
-	assert.NoError(t, err)
-
-	updatedHook, err := whPersister.Get(hook.ID)
-	assert.NoError(t, err)
-
-	require.Less(t, updatedHook.Failures, hook.Failures, "Failures should be reset to 0")
-	require.Equal(t, 0, updatedHook.Failures)
-
-	require.True(t, updatedHook.ExpiresAt.After(now))
-	require.True(t, updatedHook.UpdatedAt.After(now))
+	s.True(updatedHook.ExpiresAt.After(now))
+	s.True(updatedHook.UpdatedAt.After(now))
 }
 
-func TestDatabaseHook_IsEnabled(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
-
-	hook := models.Webhook{
-		ID:      hookId,
-		Enabled: true,
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
+func (s *databaseHookSuite) TestDatabaseHook_IsEnabled() {
+	hook, whPersister := s.loadWebhook("a47fe92a-1e4b-4119-8653-55ad82737c88")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
 
-	require.True(t, dbHook.IsEnabled())
+	s.True(dbHook.IsEnabled())
 }
 
-func TestDatabaseHook_IsDisabled(t *testing.T) {
-	hookId, err := uuid.NewV4()
-	assert.NoError(t, err)
-
-	hook := models.Webhook{
-		ID:      hookId,
-		Enabled: false,
-	}
-
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{hook},
-		nil,
-	)
-
-	whPersister := persister.GetWebhookPersister(nil)
+func (s *databaseHookSuite) TestDatabaseHook_IsDisabled() {
+	hook, whPersister := s.loadWebhook("279beae1-8a6d-4eaf-a791-1fa79d21d37a")
 
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
 
-	require.False(t, dbHook.IsEnabled())
+	s.False(dbHook.IsEnabled())
+}
+
+func (s *databaseHookSuite) loadWebhook(hookId string) (models.Webhook, persistence.WebhookPersister) {
+	err := s.LoadFixtures("../test/fixtures/webhooks")
+	s.Require().NoError(err)
+
+	whPersister := s.Storage.GetWebhookPersister(nil)
+	hook, err := whPersister.Get(uuid.FromStringOrNil(hookId))
+	s.Require().NoError(err)
+	s.Require().NotEmpty(hook)
+
+	return *hook, whPersister
 }

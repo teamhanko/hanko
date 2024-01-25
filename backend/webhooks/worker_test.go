@@ -66,7 +66,7 @@ func TestWorker_RunJob(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -101,7 +101,7 @@ func TestWorker_RunJobWithError(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -126,7 +126,7 @@ func TestWorker_TriggerWebhook(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -162,7 +162,7 @@ func TestWorker_TriggerWebhookWithExpireError(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -182,7 +182,7 @@ func TestWorker_TriggerWebhookIgnoreDisabledJob(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -206,7 +206,7 @@ func TestWorker_TriggerWebhookTriggerWithError(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -238,7 +238,7 @@ func TestWorker_TriggerWebhookDisableOnFailure(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{
@@ -269,7 +269,7 @@ func TestWorker_TriggerWebhookResetError(t *testing.T) {
 	job := Job{
 		Data: JobData{
 			Token: "test-token",
-			Event: events.User,
+			Event: events.UserCreate,
 		},
 
 		Hook: &TestHook{

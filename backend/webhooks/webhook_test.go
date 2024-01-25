@@ -14,17 +14,17 @@ func TestBaseWebhook_HasEvent(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   nil,
 		Callback: "http://ipsum.lorem",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserUpdate},
 	}
 
-	require.True(t, baseHook.HasEvent(events.User))
+	require.True(t, baseHook.HasEvent(events.EmailCreate))
 }
 
 func TestBaseWebhook_HasSubEvent(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   nil,
 		Callback: "http://ipsum.lorem",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	require.True(t, baseHook.HasEvent(events.UserCreate))
@@ -37,7 +37,7 @@ func TestBaseWebhook_DoesNotHaveEvent(t *testing.T) {
 		Events:   events.Events{events.UserCreate},
 	}
 
-	require.False(t, baseHook.HasEvent(events.User))
+	require.False(t, baseHook.HasEvent("user"))
 }
 
 func TestBaseWebhook_Trigger(t *testing.T) {
@@ -49,12 +49,12 @@ func TestBaseWebhook_Trigger(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   nil,
 		Callback: server.URL,
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	data := JobData{
 		Token: "test-token",
-		Event: events.User,
+		Event: "user",
 	}
 
 	err := baseHook.Trigger(data)
@@ -65,12 +65,12 @@ func TestBaseWebhook_TriggerWithWrongUrl(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   log.New("test"),
 		Callback: "http://broken!",
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	data := JobData{
 		Token: "test-token",
-		Event: events.User,
+		Event: "user",
 	}
 
 	err := baseHook.Trigger(data)
@@ -87,12 +87,12 @@ func TestBaseWebhook_TriggerWithBadStatusCode(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   log.New("test"),
 		Callback: server.URL,
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	data := JobData{
 		Token: "test-token",
-		Event: events.User,
+		Event: "user",
 	}
 
 	err := baseHook.Trigger(data)
@@ -112,12 +112,12 @@ func TestBaseWebhook_TriggerWithBadServer(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   log.New("test"),
 		Callback: server.URL,
-		Events:   events.Events{events.User},
+		Events:   events.Events{events.UserCreate},
 	}
 
 	data := JobData{
 		Token: "test-token",
-		Event: events.User,
+		Event: "user",
 	}
 
 	err := baseHook.Trigger(data)

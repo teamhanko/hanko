@@ -40,7 +40,7 @@ func (s *webhookSuite) TestWebhookHandler_List() {
 		Hooks: config.Webhooks{
 			config.Webhook{
 				Callback: "http://lorem",
-				Events:   events.Events{events.User},
+				Events:   events.Events{events.UserDelete},
 			},
 			config.Webhook{
 				Callback: "http://ipsum",
@@ -62,7 +62,7 @@ func (s *webhookSuite) TestWebhookHandler_List() {
 	err = json.Unmarshal(rec.Body.Bytes(), &dto)
 
 	s.Require().NoError(err)
-	s.Equal(3, len(dto.Database))
+	s.Equal(5, len(dto.Database))
 	s.Equal(2, len(dto.Config))
 }
 
@@ -78,7 +78,7 @@ func (s *webhookSuite) TestWebhookHandler_Create() {
 	testBody := admin.CreateWebhookRequestDto{
 		Callback: "http://lorem",
 		Events: events.Events{
-			events.User,
+			events.UserDelete,
 		},
 	}
 	testBodyJson, err := json.Marshal(testBody)
@@ -121,24 +121,24 @@ func (s *webhookSuite) TestWebhookHandler_CreateWithParams() {
 		{
 			name:           "success",
 			callback:       "http://lorem.ipsum",
-			events:         events.Events{events.User},
+			events:         events.Events{events.UserDelete},
 			expectedStatus: http.StatusCreated,
 		},
 		{
 			name:           "empty callback",
 			callback:       "",
-			events:         events.Events{events.User},
+			events:         events.Events{events.UserDelete},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "missing callback",
-			events:         events.Events{events.User},
+			events:         events.Events{events.UserDelete},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
 			name:           "wrong callback",
 			callback:       "lorem",
-			events:         events.Events{events.User},
+			events:         events.Events{events.UserDelete},
 			expectedStatus: http.StatusBadRequest,
 		},
 		{
@@ -223,7 +223,7 @@ func (s *webhookSuite) TestWebhookHandler_Delete() {
 	s.Require().NoError(err)
 
 	s.Require().Nil(entry)
-	s.Equal(2, len(list))
+	s.Equal(4, len(list))
 
 	err = e.Close()
 	s.Require().NoError(err)
@@ -409,7 +409,7 @@ func (s *webhookSuite) TestWebhookHandler_Update() {
 		CreateWebhookRequestDto: admin.CreateWebhookRequestDto{
 			Callback: "https://ipsum.magna/lorem",
 			Events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 		},
 		Enabled: true,
@@ -470,7 +470,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4",
 			callback: "https://lorem.ipsum.et",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusOK,
@@ -480,7 +480,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da7",
 			callback: "https://lorem.ipsum.et",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusNotFound,
@@ -490,7 +490,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "",
 			callback: "https://lorem.ipsum.et",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusNotFound,
@@ -500,7 +500,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "lorem",
 			callback: "https://lorem.ipsum.et",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusBadRequest,
@@ -509,7 +509,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			name:     "missing ID",
 			callback: "https://lorem.ipsum.et",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusNotFound,
@@ -519,7 +519,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4",
 			callback: "",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusBadRequest,
@@ -529,7 +529,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4",
 			callback: "lorem",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusBadRequest,
@@ -538,7 +538,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			name:   "missing Callback",
 			testId: "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			enabled:        true,
 			expectedStatus: http.StatusBadRequest,
@@ -563,7 +563,7 @@ func (s *webhookSuite) TestWebhookHandler_UpdateWithParams() {
 			testId:   "8b00da9a-cacf-45ea-b25d-c1ce0f0d7da4",
 			callback: "https://lorem.ipsum.et",
 			events: events.Events{
-				events.User,
+				events.UserDelete,
 			},
 			expectedStatus: http.StatusBadRequest,
 		},

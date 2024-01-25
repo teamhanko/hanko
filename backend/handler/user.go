@@ -145,9 +145,11 @@ func (h *UserHandler) Create(c echo.Context) error {
 			EmailID: email.ID,
 		}
 
-		err = utils.TriggerWebhooks(c, events.UserCreate, admin.FromUserModel(newUser))
-		if err != nil {
-			c.Logger().Warn(err)
+		if !h.cfg.Emails.RequireVerification {
+			err = utils.TriggerWebhooks(c, events.UserCreate, admin.FromUserModel(newUser))
+			if err != nil {
+				c.Logger().Warn(err)
+			}
 		}
 
 		return c.JSON(http.StatusOK, newUserDto)

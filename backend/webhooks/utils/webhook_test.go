@@ -28,7 +28,7 @@ func TestWebhook_TriggerWithoutManager(t *testing.T) {
 
 	ctx := e.NewContext(req, rec)
 
-	err := TriggerWebhooks(ctx, events.User, "lorem")
+	err := TriggerWebhooks(ctx, "user", "lorem")
 	require.Error(t, err)
 
 	err = e.Close()
@@ -47,7 +47,7 @@ func TestWebhook_Trigger(t *testing.T) {
 	ctx := e.NewContext(req, rec)
 	ctx.Set("webhook_manager", tm)
 
-	err := TriggerWebhooks(ctx, events.User, "lorem")
+	err := TriggerWebhooks(ctx, "user", "lorem")
 	require.NoError(t, err)
 
 	err = e.Close()

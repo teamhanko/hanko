@@ -125,10 +125,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler, err := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public email handler: %w", err))
-	}
+	emailHandler := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 
 	webauthn := g.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
@@ -147,7 +144,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	passcode := g.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
-	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	passcodeLogin.POST("/finalize", passcodeHandler.Finish, webhookMiddlware)
 
 	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)

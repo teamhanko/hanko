@@ -2,9 +2,9 @@ package webhooks
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/test"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
@@ -14,106 +14,68 @@ import (
 	"time"
 )
 
-func TestNewManager(t *testing.T) {
-	cfg := config.Config{}
-	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-	)
-
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
-	assert.NoError(t, err)
-	require.NotEmpty(t, manager)
+func TestManagerSuite(t *testing.T) {
+	t.Parallel()
+	suite.Run(t, new(managerSuite))
 }
 
-func TestManager_GenerateJWT(t *testing.T) {
+type managerSuite struct {
+	test.Suite
+}
+
+func (s *managerSuite) TestNewManager() {
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-	)
 
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
+	manager, err := NewManager(&cfg, s.Storage.GetWebhookPersister(nil), jwkManager, nil)
+	s.NoError(err)
+	s.NotEmpty(manager)
+}
+
+func (s *managerSuite) TestManager_GenerateJWT() {
+	cfg := config.Config{}
+	jwkManager := test.JwkManager{}
+
+	manager, err := NewManager(&cfg, s.Storage.GetWebhookPersister(nil), jwkManager, nil)
 
 	testData := "lorem-ipsum"
 
-	dataToken, err := manager.GenerateJWT(testData, events.User)
-	assert.NoError(t, err)
-	assert.NotEmpty(t, dataToken)
+	dataToken, err := manager.GenerateJWT(testData, events.UserCreate)
+	s.NoError(err)
+	s.NotEmpty(dataToken)
 }
 
-func TestManager_TriggerWithoutHook(t *testing.T) {
+func (s *managerSuite) TestManager_TriggerWithoutHook() {
+	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Fail(t, "no hook should not trigger a http request")
+		triggered = true
 	}))
 	defer server.Close()
 
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-	)
 
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
-	assert.NoError(t, err)
+	manager, err := NewManager(&cfg, s.Storage.GetWebhookPersister(nil), jwkManager, nil)
+	s.Require().NoError(err)
 
-	manager.Trigger(events.User, "lorem-ipsum")
+	manager.Trigger(events.UserCreate, "lorem-ipsum")
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
+
+	s.False(triggered)
 }
-func TestManager_TriggerWithConfigHook(t *testing.T) {
+func (s *managerSuite) TestManager_TriggerWithConfigHook() {
+	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.True(t, true)
+		triggered = true
 	}))
 	defer server.Close()
 
 	hooks := config.Webhooks{config.Webhook{
 		Callback: server.URL,
 		Events: events.Events{
-			events.User,
+			events.UserCreate,
 		},
 	}}
 
@@ -125,43 +87,28 @@ func TestManager_TriggerWithConfigHook(t *testing.T) {
 	}
 
 	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-	)
+	manager, err := NewManager(&cfg, s.Storage.GetWebhookPersister(nil), jwkManager, nil)
+	s.Require().NoError(err)
 
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
-	assert.NoError(t, err)
-
-	manager.Trigger(events.User, "lorem-ipsum")
+	manager.Trigger(events.UserCreate, "lorem-ipsum")
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
+
+	s.True(triggered)
 }
 
-func TestManager_TriggerWithDisabledConfigHook(t *testing.T) {
+func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
+	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Fail(t, "no hook should not trigger a http request")
+		triggered = true
 	}))
 	defer server.Close()
 
 	hooks := config.Webhooks{config.Webhook{
 		Callback: server.URL,
 		Events: events.Events{
-			events.User,
+			events.UserCreate,
 		},
 	}}
 
@@ -173,151 +120,87 @@ func TestManager_TriggerWithDisabledConfigHook(t *testing.T) {
 	}
 
 	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-	)
+	manager, err := NewManager(&cfg, s.Storage.GetWebhookPersister(nil), jwkManager, nil)
+	s.Require().NoError(err)
 
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
-	assert.NoError(t, err)
-
-	manager.Trigger(events.User, "lorem-ipsum")
+	manager.Trigger(events.UserCreate, "lorem-ipsum")
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
+
+	s.False(triggered)
 }
 
-func TestManager_TriggerWithDbHook(t *testing.T) {
+func (s *managerSuite) TestManager_TriggerWithDbHook() {
+	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.True(t, true)
+		triggered = true
 	}))
 	defer server.Close()
 
-	hookUuid, err := uuid.NewV4()
-	assert.NoError(t, err)
-
-	eventUuid, err := uuid.NewV4()
-	assert.NoError(t, err)
-
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{
-			models.Webhook{
-				ID:        hookUuid,
-				Callback:  server.URL,
-				Enabled:   true,
-				Failures:  0,
-				ExpiresAt: time.Now(),
-				WebhookEvents: models.WebhookEvents{
-					models.WebhookEvent{
-						ID:        eventUuid,
-						Webhook:   nil,
-						WebhookID: hookUuid,
-						Event:     string(events.User),
-						CreatedAt: time.Now(),
-						UpdatedAt: time.Now(),
-					},
-				},
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			},
-		},
-		nil,
-	)
 
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
-	assert.NoError(t, err)
+	persister := s.Storage.GetWebhookPersister(nil)
 
-	manager.Trigger(events.User, "lorem-ipsum")
+	s.createTestDatabaseWebhook(persister, true, server.URL)
+
+	manager, err := NewManager(&cfg, persister, jwkManager, nil)
+	s.Require().NoError(err)
+
+	manager.Trigger(events.UserCreate, "lorem-ipsum")
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
+
+	s.True(triggered)
 }
 
-func TestManager_TriggerWithDisabledDbHook(t *testing.T) {
+func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
+	triggered := false
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Fail(t, "no hook should not trigger a http request")
+		triggered = true
 	}))
 	defer server.Close()
 
-	hookUuid, err := uuid.NewV4()
-	assert.NoError(t, err)
-
-	eventUuid, err := uuid.NewV4()
-	assert.NoError(t, err)
-
 	cfg := config.Config{}
 	jwkManager := test.JwkManager{}
-	persister := test.NewPersister(
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		nil,
-		models.Webhooks{
-			models.Webhook{
-				ID:        hookUuid,
-				Callback:  server.URL,
-				Enabled:   false,
-				Failures:  0,
-				ExpiresAt: time.Now(),
-				WebhookEvents: models.WebhookEvents{
-					models.WebhookEvent{
-						ID:        eventUuid,
-						Webhook:   nil,
-						WebhookID: hookUuid,
-						Event:     string(events.User),
-						CreatedAt: time.Now(),
-						UpdatedAt: time.Now(),
-					},
-				},
-				CreatedAt: time.Now(),
-				UpdatedAt: time.Now(),
-			},
-		},
-		nil,
-	)
+	persister := s.Storage.GetWebhookPersister(nil)
 
-	manager, err := NewManager(&cfg, persister.GetWebhookPersister(nil), jwkManager, nil)
-	assert.NoError(t, err)
+	s.createTestDatabaseWebhook(persister, false, server.URL)
 
-	manager.Trigger(events.User, "lorem-ipsum")
+	manager, err := NewManager(&cfg, persister, jwkManager, nil)
+	s.Require().NoError(err)
+
+	manager.Trigger(events.UserCreate, "lorem-ipsum")
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
+
+	s.False(triggered)
+}
+
+func (s *managerSuite) createTestDatabaseWebhook(persister persistence.WebhookPersister, isEnabled bool, callback string) {
+	now := time.Now()
+	hookId := uuid.FromStringOrNil("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da1")
+	err := persister.Create(
+		models.Webhook{
+			ID:        hookId,
+			Callback:  callback,
+			Enabled:   isEnabled,
+			Failures:  0,
+			ExpiresAt: now,
+			CreatedAt: now,
+			UpdatedAt: now,
+		},
+		models.WebhookEvents{
+			models.WebhookEvent{
+				ID:        uuid.FromStringOrNil("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da0"),
+				WebhookID: hookId,
+				Event:     string(events.UserCreate),
+				CreatedAt: now,
+				UpdatedAt: now,
+			},
+		})
+	s.Require().NoError(err)
 }

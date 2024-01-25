@@ -31,13 +31,6 @@ func (w *Webhook) Validate(tx *pop.Connection) (*validate.Errors, error) {
 		&validators.UUIDIsPresent{Name: "ID", Field: w.ID},
 		&validators.StringIsPresent{Name: "Callback", Field: w.Callback},
 		&validators.TimeIsPresent{Name: "ExpiresAt", Field: w.ExpiresAt},
-		&validators.TimeAfterTime{
-			FirstName:  "Expires At",
-			FirstTime:  w.ExpiresAt,
-			SecondName: "Now",
-			SecondTime: time.Now(),
-		},
-
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: w.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: w.CreatedAt},
 	), nil
