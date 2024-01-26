@@ -649,7 +649,7 @@ func (c *Config) PostProcess() error {
 func (c *Config) arrangeSmtpSettings() {
 	if c.Passcode.Smtp.Validate() == nil {
 		if c.Smtp.Validate() == nil {
-			zeroLogger.Warn().Msg("Both smtp and passcode.smtp are set. Using smtp settings from passcode.smtp")
+			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
 			return
 		}
 		
