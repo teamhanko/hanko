@@ -47,8 +47,6 @@ export const en: Translation = {
     emailUnverified: "This email address has not been verified.",
     emailDelete:
       "If you delete this email address, it can no longer be used to sign in.",
-    emailDeleteThirdPartyConnection:
-      "If you delete this email address, it can no longer be used to sign in.",
     emailDeletePrimary:
       "The primary email address cannot be deleted.",
     renamePasskey:
@@ -119,5 +117,6 @@ export const en: Translation = {
       "Cannot identify account. The email address is used by multiple accounts.",
     thirdPartyUnverifiedEmail:
       "Email verification required. Please verify the used email address with your provider.",
+    signupDisabled: "Account registration is disabled.",
   },
 };

@@ -27,3 +27,22 @@ server:
     cors:
       allow_origins:
         - "http://localhost:8888"
+third_party:
+  allowed_redirect_urls:
+    - "http://localhost:8888**"
+  error_redirect_url: "http://localhost:8888"
+  redirect_url: "http://localhost:8000/thirdparty/callback"
+  providers:
+    github:
+      enabled: true
+      secret: 5393a4ac322d4208f6629d2701048794c10bb42d
+      client_id: 2bea2122332a76f1dae5
+      allow_linking: true
+    google:
+      enabled: true
+      secret: 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
+      client_id: 699926726084-5bqn5i10ov2arctof8c6b104i5pfrdsb.apps.googleusercontent.com
+      allow_linking: true
+audit_log:
+  console_output:
+    enabled: true

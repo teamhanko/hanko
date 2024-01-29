@@ -74,6 +74,10 @@ func ErrorMaxNumberOfAddresses(desc string) *ThirdPartyError {
 	return &ThirdPartyError{Code: ErrorCodeMaxNumberOfAddresses, Description: desc}
 }
 
+func ErrorSignUpDisabled(desc string) *ThirdPartyError {
+	return &ThirdPartyError{Code: ErrorCodeSignUpDisabled, Description: desc}
+}
+
 const (
 	ErrorCodeInvalidRequest          = "invalid_request"
 	ErrorCodeServerError             = "server_error"
@@ -81,4 +85,5 @@ const (
 	ErrorCodeMultipleAccounts        = "multiple_accounts"
 	ErrorCodeUnverifiedProviderEmail = "unverified_email"
 	ErrorCodeMaxNumberOfAddresses    = "email_maxnum"
+	ErrorCodeSignUpDisabled          = "signup_disabled"
 )
