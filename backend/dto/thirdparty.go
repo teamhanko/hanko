@@ -28,6 +28,17 @@ type Identity struct {
 	Provider string `json:"provider"`
 }
 
+type Identities []Identity
+
+func FromIdentitiesModel(identities models.Identities) Identities {
+	var result Identities
+	for _, i := range identities {
+		identity := FromIdentityModel(&i)
+		result = append(result, *identity)
+	}
+	return result
+}
+
 func FromIdentityModel(identity *models.Identity) *Identity {
 	if identity == nil {
 		return nil

@@ -56,18 +56,22 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 		ThirdParty: config.ThirdParty{
 			Providers: config.ThirdPartyProviders{
 				Apple: config.ThirdPartyProvider{
-					Enabled:  false,
-					ClientID: "fakeClientID",
-					Secret:   "fakeClientSecret",
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
 				},
 				Google: config.ThirdPartyProvider{
-					Enabled:  false,
-					ClientID: "fakeClientID",
-					Secret:   "fakeClientSecret",
-				}, GitHub: config.ThirdPartyProvider{
-					Enabled:  false,
-					ClientID: "fakeClientID",
-					Secret:   "fakeClientSecret",
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
+				},
+				GitHub: config.ThirdPartyProvider{
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
 				}},
 			ErrorRedirectURL:    "https://error.test.example",
 			RedirectURL:         "https://api.test.example/callback",
@@ -81,6 +85,9 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 		},
 		Emails: config.Emails{
 			MaxNumOfAddresses: 5,
+		},
+		Account: config.Account{
+			AllowSignup: true,
 		},
 	}
 

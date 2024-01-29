@@ -49,8 +49,6 @@ export const fr: Translation = {
     emailUnverified: "Cette adresse e-mail n'a pas été vérifiée.",
     emailDelete:
       "Si vous supprimez cette adresse e-mail, elle ne pourra plus être utilisée pour vous connecter à votre compte. Les clés d'identification qui ont pu être créées avec cette adresse e-mail resteront intactes.",
-    emailDeleteThirdPartyConnection:
-      "Si vous supprimez cette adresse e-mail, elle ne pourra plus être utilisée pour se connecter. Vous ne pourrez également plus vous connecter avec ou reconnecter votre compte {provider}. Les clés d'identification qui ont pu être créées avec cette adresse e-mail resteront intactes.",
     emailDeletePrimary:
       "L'adresse e-mail principale ne peut pas être supprimée. Ajoutez d'abord une autre adresse e-mail et définissez-la comme adresse e-mail principale.",
     renamePasskey:
@@ -124,5 +122,6 @@ export const fr: Translation = {
       "Impossible d'identifier le compte. L'adresse e-mail est utilisée par plusieurs comptes.",
     thirdPartyUnverifiedEmail:
       "Vérification de l'adresse e-mail requise. Veuillez vérifier l'adresse e-mail utilisée avec votre fournisseur.",
+    signupDisabled: "L'enregistrement du compte est désactivé.",
   },
 };

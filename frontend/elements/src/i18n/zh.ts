@@ -44,8 +44,6 @@ export const zh: Translation = {
     emailUnverified: "此电子邮件地址尚未验证。",
     emailDelete:
       "如果您删除此电子邮件地址，将无法再用于登录您的账户。可能已经用此电子邮件地址创建的密钥将保持完整。",
-    emailDeleteThirdPartyConnection:
-      "如果你删除这个电子邮件地址，你将不能用它登录。你也不能再用你的{provider}帐户登录或重新连接。可能已经用此电子邮件地址创建的密钥将保持完整。",
     emailDeletePrimary:
       "主要电子邮件地址不能被删除。请先添加另一个电子邮件地址并设定为主要电子邮件地址。",
     renamePasskey: "为密钥设定名称，帮助您识别其所存储的位置。",
@@ -109,5 +107,6 @@ export const zh: Translation = {
     thirdPartyMultipleAccounts: "无法确定账户。电子邮件地址被多个账户使用。",
     thirdPartyUnverifiedEmail:
       "需要电子邮件验证。请与您的提供商验证使用的电子邮件地址。",
+    signupDisabled: "帐户注册被禁用。",
   },
 };

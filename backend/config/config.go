@@ -170,6 +170,19 @@ func DefaultConfig() *Config {
 			AllowDeletion: false,
 			AllowSignup:   true,
 		},
+		ThirdParty: ThirdParty{
+			Providers: ThirdPartyProviders{
+				Google: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				GitHub: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				Apple: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+			},
+		},
 	}
 }
 
@@ -585,9 +598,10 @@ func (t *ThirdParty) PostProcess() error {
 }
 
 type ThirdPartyProvider struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+	Enabled      bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID     string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret       string `yaml:"secret" json:"secret" koanf:"secret"`
+	AllowLinking bool   `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" jsonschema:"default=true" split_words:"true"`
 }
 
 func (p *ThirdPartyProvider) Validate() error {
