@@ -1,12 +1,17 @@
 package mapper
 
 import (
+	_ "embed"
+	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/knadh/koanf/parsers/json"
+	kjson "github.com/knadh/koanf/parsers/json"
 	"github.com/teamhanko/hanko/backend/config"
 	"log"
 )
+
+//go:embed aaguid.json
+var authenticatorMetadataJson []byte
 
 type Authenticator struct {
 	Name      string `json:"name"`
@@ -27,19 +32,25 @@ func (am AuthenticatorMetadata) GetNameForAaguid(aaguid uuid.UUID) *string {
 }
 
 func LoadAuthenticatorMetadata(authMetaFilePath *string) AuthenticatorMetadata {
-	k, err := config.LoadFile(authMetaFilePath, json.Parser())
+	k, err := config.LoadFile(authMetaFilePath, kjson.Parser())
 
 	if err != nil {
 		log.Println(err)
 		return nil
 	}
 
+	var authenticatorMetadata AuthenticatorMetadata
+
 	if k == nil {
-		log.Println("no authenticator metadata file provided. Skipping...")
-		return nil
+		log.Println("no authenticator metadata file provided. Using embedded one.")
+		authenticatorMetadata, err = loadFromEmbeddedFile()
+		if err != nil {
+			log.Println("no valid authenticator metadata file provided. Skipping...")
+		}
+
+		return authenticatorMetadata
 	}
 
-	var authenticatorMetadata AuthenticatorMetadata
 	err = k.Unmarshal("", &authenticatorMetadata)
 	if err != nil {
 		log.Println(fmt.Errorf("unable to unmarshal authenticator metadata: %w", err))
@@ -47,4 +58,15 @@ func LoadAuthenticatorMetadata(authMetaFilePath *string) AuthenticatorMetadata {
 	}
 
 	return authenticatorMetadata
+}
+
+func loadFromEmbeddedFile() (AuthenticatorMetadata, error) {
+	var authMeta AuthenticatorMetadata
+	err := json.Unmarshal(authenticatorMetadataJson, &authMeta)
+	if err != nil {
+		log.Println(fmt.Errorf("unable to unmarshal authenticator metadata: %w", err))
+		return nil, err
+	}
+
+	return authMeta, nil
 }

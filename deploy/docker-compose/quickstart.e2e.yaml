@@ -37,7 +37,7 @@ services:
       - '8000:8000' # public
       - '8001:8001' # admin
     restart: unless-stopped
-    command: serve --config /etc/config/config.yaml --auth-meta /etc/config/aaguid.json all
+    command: serve --config /etc/config/config.yaml all
     volumes:
       - type: bind
         source: ./config.yaml

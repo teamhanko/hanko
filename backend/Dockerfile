@@ -30,9 +30,6 @@ COPY template template/
 COPY utils utils/
 COPY mapper mapper/
 
-# Load AAGUID map
-RUN wget --quiet https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/main/aaguid.json -O aaguid.json
-
 # Build
 RUN go generate ./...
 RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go build -a -o hanko main.go
@@ -42,7 +39,6 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go build -a -o hanko main.go
 FROM gcr.io/distroless/static:nonroot
 WORKDIR /
 COPY --from=builder /workspace/hanko .
-COPY --from=builder /workspace/aaguid.json /etc/config/
 USER 65532:65532
 
 ENTRYPOINT ["/hanko"]
