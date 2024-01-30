@@ -141,7 +141,16 @@ func (h *EmailHandler) Create(c echo.Context) error {
 		}
 
 		if !h.cfg.Emails.RequireVerification {
-			utils.NotifyUserChange(c, tx, h.persister, events.EmailCreate, userId)
+			var evt events.Event
+
+			if len(user.Emails) >= 1 {
+				evt = events.EmailCreate
+			} else {
+				evt = events.UserCreate
+			}
+
+			utils.NotifyUserChange(c, tx, h.persister, evt, userId)
+
 		}
 
 		return c.JSON(http.StatusOK, email)

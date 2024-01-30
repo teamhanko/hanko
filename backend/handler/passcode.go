@@ -384,7 +384,15 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 		// notify about email verification result. Last step to prevent a trigger and rollback scenario
 		if h.cfg.Emails.RequireVerification && wasUnverified {
-			utils.NotifyUserChange(c, tx, h.persister, events.EmailCreate, user.ID)
+			var evt events.Event
+
+			if len(user.Emails) >= 1 {
+				evt = events.EmailCreate
+			} else {
+				evt = events.UserCreate
+			}
+
+			utils.NotifyUserChange(c, tx, h.persister, evt, user.ID)
 		}
 
 		return c.JSON(http.StatusOK, dto.PasscodeReturn{
