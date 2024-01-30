@@ -326,6 +326,8 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		}
 
 		wasUnverified := false
+		hasEmails := len(user.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a EmailCreate one
+
 		if !passcode.Email.Verified {
 			wasUnverified = true
 
@@ -386,7 +388,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		if h.cfg.Emails.RequireVerification && wasUnverified {
 			var evt events.Event
 
-			if len(user.Emails) >= 1 {
+			if hasEmails {
 				evt = events.EmailCreate
 			} else {
 				evt = events.UserCreate
