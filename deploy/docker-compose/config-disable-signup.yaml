@@ -4,12 +4,12 @@ database:
   host: postgresd
   port: 5432
   dialect: postgres
+smtp:
+    host: "mailslurper"
+    port: "2500"
 passcode:
   email:
     from_address: no-reply@hanko.io
-  smtp:
-    host: "mailslurper"
-    port: "2500"
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz
