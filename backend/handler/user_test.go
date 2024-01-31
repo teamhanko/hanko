@@ -33,7 +33,7 @@ func (s *userSuite) TestUserHandler_Create_TokenInCookie() {
 	}
 
 	cfg := test.DefaultConfig
-	e := NewPublicRouter(&cfg, s.Storage, nil)
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	body := UserCreateBody{Email: "jane.doe@example.com"}
 	bodyJson, err := json.Marshal(body)
@@ -78,7 +78,7 @@ func (s *userSuite) TestUserHandler_Create_TokenInHeader() {
 
 	cfg := test.DefaultConfig
 	cfg.Session.EnableAuthTokenHeader = true
-	e := NewPublicRouter(&cfg, s.Storage, nil)
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	body := UserCreateBody{Email: "jane.doe@example.com"}
 	bodyJson, err := json.Marshal(body)
@@ -118,7 +118,7 @@ func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	body := UserCreateBody{Email: "JANE.DOE@EXAMPLE.COM"}
 	bodyJson, err := json.Marshal(body)
@@ -153,7 +153,7 @@ func (s *userSuite) TestUserHandler_Create_UserExists() {
 	err := s.LoadFixtures("../test/fixtures/user")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	body := UserCreateBody{Email: "john.doe@example.com"}
 	bodyJson, err := json.Marshal(body)
@@ -175,7 +175,7 @@ func (s *userSuite) TestUserHandler_Create_UserExists_CaseInsensitive() {
 	err := s.LoadFixtures("../test/fixtures/user")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	body := UserCreateBody{Email: "JOHN.DOE@EXAMPLE.COM"}
 	bodyJson, err := json.Marshal(body)
@@ -194,7 +194,7 @@ func (s *userSuite) TestUserHandler_Create_InvalidEmail() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(`{"email": 123"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -209,7 +209,7 @@ func (s *userSuite) TestUserHandler_Create_EmailMissing() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(`{"bogus": 123}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -226,7 +226,7 @@ func (s *userSuite) TestUserHandler_Create_AccountCreationDisabled() {
 	}
 	testConfig := test.DefaultConfig
 	testConfig.Account.AllowSignup = false
-	e := NewPublicRouter(&testConfig, s.Storage, nil)
+	e := NewPublicRouter(&testConfig, s.Storage, nil, nil)
 
 	body := UserCreateBody{Email: "jane.doe@example.com"}
 	bodyJson, err := json.Marshal(body)
@@ -250,7 +250,7 @@ func (s *userSuite) TestUserHandler_Get() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	if err != nil {
@@ -290,7 +290,7 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	if err != nil {
@@ -325,7 +325,7 @@ func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
@@ -356,7 +356,7 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidEmail() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "123"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -371,7 +371,7 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidJson() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`"email": "123}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -386,7 +386,7 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail_UserNotFound() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -406,7 +406,7 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -435,7 +435,7 @@ func (s *userSuite) TestUserHandler_GetUserIdByEmail_CaseInsensitive() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "JOHN.DOE@EXAMPLE.COM"}`))
 	req.Header.Set("Content-Type", "application/json")
@@ -464,7 +464,7 @@ func (s *userSuite) TestUserHandler_Me() {
 
 	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	if err != nil {
@@ -501,7 +501,7 @@ func (s *userSuite) TestUserHandler_Logout() {
 		s.T().Skip("skipping test in short mode.")
 	}
 	userId, _ := uuid.NewV4()
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	if err != nil {
@@ -542,7 +542,7 @@ func (s *userSuite) TestUserHandler_Delete() {
 	userId, _ := uuid.FromString("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 	cfg := test.DefaultConfig
 	cfg.Account.AllowDeletion = true
-	e := NewPublicRouter(&cfg, s.Storage, nil)
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	if err != nil {
