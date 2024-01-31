@@ -18,6 +18,7 @@ type TestMailslurper struct {
 	pool     *dockertest.Pool
 	resource *dockertest.Resource
 	httpUrl  string
+	SmtpHost string
 	SmtpPort string
 }
 
@@ -74,6 +75,7 @@ func StartMailslurper() (*TestMailslurper, error) {
 		pool:     pool,
 		resource: resource,
 		httpUrl:  dsn,
+		SmtpHost: "localhost",
 		SmtpPort: smtpPort,
 	}, nil
 }

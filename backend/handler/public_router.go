@@ -70,7 +70,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
-	mailer, err := mail.NewMailer(cfg.Passcode.Smtp)
+	mailer, err := mail.NewMailer(cfg.Smtp)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}

@@ -343,10 +343,10 @@ var defaultConfig = config.Config{
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
 	},
-	Passcode: config.Passcode{Smtp: config.SMTP{
+	Smtp: config.SMTP{
 		Host: "localhost",
 		Port: "2500",
-	}},
+	},
 }
 
 type sessionManager struct {

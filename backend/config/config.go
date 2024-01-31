@@ -11,6 +11,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
+	zeroLogger "github.com/rs/zerolog/log"
 	"log"
 	"strings"
 	"time"
@@ -20,6 +21,7 @@ import (
 type Config struct {
 	Server      Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
 	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp        SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
 	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
 	Password    Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
 	Database    Database         `yaml:"database" json:"database" koanf:"database"`
@@ -83,6 +85,8 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
 	}
 
+	c.arrangeSmtpSettings()
+
 	if err = c.Validate(); err != nil {
 		return nil, fmt.Errorf("failed to validate config: %s", err)
 	}
@@ -109,14 +113,17 @@ func DefaultConfig() *Config {
 			UserVerification: "preferred",
 			Timeout:          60000,
 		},
+		Smtp: SMTP{
+			Port: "465",
+		},
 		Passcode: Passcode{
-			Smtp: SMTP{
-				Port: "465",
-			},
 			TTL: 300,
 			Email: Email{
 				FromAddress: "passcode@hanko.io",
 				FromName:    "Hanko",
+			},
+			Smtp: SMTP{
+				Port: "465",
 			},
 		},
 		Password: Password{
@@ -174,6 +181,10 @@ func (c *Config) Validate() error {
 	err = c.Webauthn.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
+	}
+	err = c.Smtp.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate smtp settings: %w", err)
 	}
 	err = c.Passcode.Validate()
 	if err != nil {
@@ -360,18 +371,15 @@ func (e *Email) Validate() error {
 
 type Passcode struct {
 	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	Smtp  SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
 	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	//Deprecated: Use root level Smtp instead
+	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
 
 func (p *Passcode) Validate() error {
 	err := p.Email.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate email settings: %w", err)
-	}
-	err = p.Smtp.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate smtp settings: %w", err)
 	}
 	return nil
 }
@@ -649,6 +657,17 @@ func (c *Config) PostProcess() error {
 
 	return nil
 
+}
+
+func (c *Config) arrangeSmtpSettings() {
+	if c.Passcode.Smtp.Validate() == nil {
+		if c.Smtp.Validate() == nil {
+			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
+			return
+		}
+		
+		c.Smtp = c.Passcode.Smtp
+	}
 }
 
 type LoggerConfig struct {

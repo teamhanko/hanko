@@ -1,9 +1,16 @@
-smtp:
+database:
+  user: hanko
+  password: hanko
+  host: localhost
+  port: 5432
+  dialect: postgres
+passcode:
+  email:
+    from_address: no-reply@hanko.io
+  smtp:
     host: smtp.example.com
     user: example
     password: example
-database:
-  url: postgres://postgres:123456@127.0.0.1:5432/dummy
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz
