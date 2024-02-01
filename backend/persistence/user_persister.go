@@ -51,7 +51,7 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 	}
 
 	if err != nil {
-		return nil, fmt.Errorf("failed get user by email address: %w", err)
+		return nil, fmt.Errorf("failed to get user by email address: %w", err)
 	}
 
 	if email.UserID == nil {
