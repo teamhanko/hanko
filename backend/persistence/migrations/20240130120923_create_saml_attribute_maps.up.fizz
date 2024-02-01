@@ -1,0 +1,26 @@
+create_table("saml_attribute_maps") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("saml_identity_provider_id", "uuid", { unique: true })
+	t.Column("name", "string", { "default": "" })
+	t.Column("family_name", "string", { "default": "" })
+	t.Column("given_name", "string", { "default": "" })
+	t.Column("middle_name", "string", { "default": "" })
+	t.Column("nickname", "string", { "default": "" })
+	t.Column("preferred_username", "string", { "default": "" })
+	t.Column("profile", "string", { "default": "" })
+	t.Column("picture", "string", { "default": "" })
+	t.Column("website", "string", { "default": "" })
+	t.Column("gender", "string", { "default": "" })
+	t.Column("birthdate", "string", { "default": "" })
+	t.Column("zone_info", "string", { "default": "" })
+	t.Column("locale", "string", { "default": "" })
+	t.Column("saml_updated_at", "string", { "default": "" })
+	t.Column("email", "string", { "default": "" })
+	t.Column("email_verified", "string", { "default": "" })
+	t.Column("phone", "string", { "default": "" })
+	t.Column("phone_verified", "string", { "default": "" })
+
+	t.Timestamps()
+
+	t.ForeignKey("saml_identity_provider_id", { "saml_identity_providers": ["id"]}, { "on_delete": "CASCADE", "on_update": "CASCADE" })
+}

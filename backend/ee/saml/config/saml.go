@@ -88,10 +88,6 @@ func (s *Saml) Validate() error {
 			return validationErrors
 		}
 
-		if len(s.IdentityProviders) == 0 {
-			return errors.New("at least one SAML provider is needed")
-		}
-
 		for _, provider := range s.IdentityProviders {
 			validationErrors = provider.Validate()
 			if validationErrors != nil {

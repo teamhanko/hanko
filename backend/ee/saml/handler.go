@@ -8,6 +8,7 @@ import (
 	saml2 "github.com/russellhaering/gosaml2"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
+	samlConfig "github.com/teamhanko/hanko/backend/ee/saml/config"
 	"github.com/teamhanko/hanko/backend/ee/saml/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml/provider"
 	samlUtils "github.com/teamhanko/hanko/backend/ee/saml/utils"
@@ -16,6 +17,7 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
+	"golang.org/x/exp/slices"
 	"net/http"
 	"net/url"
 	"strings"
@@ -29,22 +31,21 @@ type SamlHandler struct {
 	providers      []provider.ServiceProvider
 }
 
+const (
+	unableToLoadProviderError = "unable to load providers"
+	metadataErrorMessage      = "unable to provide metadata"
+)
+
 func NewSamlHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *SamlHandler {
 	providers := make([]provider.ServiceProvider, 0)
 	for _, idpConfig := range cfg.Saml.IdentityProviders {
 		if idpConfig.Enabled {
-			name := ""
-			name, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
+			newProvider, err := initializeServiceProvider(idpConfig, cfg, persister)
 			if err != nil {
 				panic(err)
 			}
 
-			newProvider, err := provider.GetProvider(name, cfg, idpConfig, persister.GetSamlCertificatePersister())
-			if err != nil {
-				panic(err)
-			}
-
-			providers = append(providers, newProvider)
+			providers = append(providers, *newProvider)
 		}
 	}
 
@@ -57,6 +58,21 @@ func NewSamlHandler(cfg *config.Config, persister persistence.Persister, session
 	}
 }
 
+func initializeServiceProvider(idpConfig samlConfig.IdentityProvider, cfg *config.Config, persister persistence.Persister) (*provider.ServiceProvider, error) {
+	name := ""
+	name, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	newProvider, err := provider.GetProvider(name, cfg, idpConfig, persister.GetSamlCertificatePersister())
+	if err != nil {
+		return nil, err
+	}
+
+	return &newProvider, nil
+}
+
 func parseProviderFromMetadataUrl(idpUrlString string) (string, error) {
 	idpUrl, err := url.Parse(idpUrlString)
 	if err != nil {
@@ -66,8 +82,12 @@ func parseProviderFromMetadataUrl(idpUrlString string) (string, error) {
 	return idpUrl.Host, nil
 }
 
-func (handler *SamlHandler) getProviderByDomain(domain string) (provider.ServiceProvider, error) {
-	for _, availableProvider := range handler.providers {
+func (handler *SamlHandler) getProviderByDomain(domain string, providers []provider.ServiceProvider) (provider.ServiceProvider, error) {
+	if len(providers) == 0 {
+		return nil, errors.New("no provider configured")
+	}
+
+	for _, availableProvider := range providers {
 		if availableProvider.GetDomain() == domain {
 			return availableProvider, nil
 		}
@@ -84,17 +104,22 @@ func (handler *SamlHandler) Metadata(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, thirdparty.ErrorInvalidRequest("domain is missing"))
 	}
 
-	foundProvider, err := handler.getProviderByDomain(request.Domain)
+	providerList, err := handler.addDbProviders(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer(metadataErrorMessage).WithCause(err))
+	}
+
+	foundProvider, err := handler.getProviderByDomain(request.Domain, providerList)
 	if err != nil {
 		c.Logger().Error(err)
-		return c.NoContent(http.StatusNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
 	if request.CertOnly {
 		cert, err := handler.persister.GetSamlCertificatePersister().GetFirst()
 		if err != nil {
 			c.Logger().Error(err)
-			return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
+			return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer(metadataErrorMessage).WithCause(err))
 		}
 
 		if cert == nil {
@@ -108,7 +133,7 @@ func (handler *SamlHandler) Metadata(c echo.Context) error {
 	xmlMetadata, err := foundProvider.ProvideMetadataAsXml()
 	if err != nil {
 		c.Logger().Error(err)
-		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer(metadataErrorMessage).WithCause(err))
 	}
 
 	c.Response().Header().Set(echo.HeaderContentDisposition, fmt.Sprintf("attachment; filename=%s-metadata.xml", handler.config.Service.Name))
@@ -138,7 +163,12 @@ func (handler *SamlHandler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", request.RedirectTo)), errorRedirectTo)
 	}
 
-	foundProvider, err := handler.getProviderByDomain(request.Domain)
+	providerList, err := handler.addDbProviders(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer(unableToLoadProviderError).WithCause(err))
+	}
+
+	foundProvider, err := handler.getProviderByDomain(request.Domain, providerList)
 	if err != nil {
 		c.Logger().Error(err)
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
@@ -189,12 +219,17 @@ func (handler *SamlHandler) CallbackPost(c echo.Context) error {
 		)
 	}
 
-	foundProvider, samlError := handler.getProviderByDomain(state.Provider)
-	if samlError != nil {
-		c.Logger().Error(samlError)
+	providerList, err := handler.addDbProviders(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer(unableToLoadProviderError).WithCause(err))
+	}
+
+	foundProvider, err := handler.getProviderByDomain(state.Provider, providerList)
+	if err != nil {
+		c.Logger().Error(err)
 		return handler.redirectError(
 			c,
-			thirdparty.ErrorServer("unable to find provider by domain").WithCause(samlError),
+			thirdparty.ErrorServer("unable to find provider by domain").WithCause(err),
 			redirectTo.String(),
 		)
 	}
@@ -327,11 +362,79 @@ func (handler *SamlHandler) GetProvider(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, err)
 	}
 
-	foundProvider, err := handler.getProviderByDomain(request.Domain)
+	providerList, err := handler.addDbProviders(c)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer(unableToLoadProviderError).WithCause(err))
+	}
+
+	foundProvider, err := handler.getProviderByDomain(request.Domain, providerList)
 	if err != nil {
 		c.Logger().Error(err)
-		return c.NoContent(http.StatusNotFound)
+		return echo.NewHTTPError(http.StatusNotFound, err)
 	}
 
 	return c.JSON(http.StatusOK, foundProvider.GetConfig())
+}
+
+func (handler *SamlHandler) addDbProviders(ctx echo.Context) ([]provider.ServiceProvider, error) {
+	serviceProviders := handler.providers
+
+	dbProviders, err := handler.persister.GetSamlIdentityProviderPersister(nil).List()
+	if err != nil {
+		ctx.Logger().Error(err)
+		return nil, err
+	}
+
+	for _, dbProvider := range dbProviders {
+		if dbProvider.Enabled {
+			isAlreadyRegistered := slices.ContainsFunc(handler.providers, func(idp provider.ServiceProvider) bool {
+				return idp.GetDomain() == dbProvider.Domain
+			})
+
+			if isAlreadyRegistered {
+				ctx.Logger().Warn("Provider with domain is already registered from config file")
+				continue
+			}
+
+			attributeMap := samlConfig.AttributeMap{
+				Name:              dbProvider.AttributeMap.Name,
+				FamilyName:        dbProvider.AttributeMap.FamilyName,
+				GivenName:         dbProvider.AttributeMap.GivenName,
+				MiddleName:        dbProvider.AttributeMap.MiddleName,
+				NickName:          dbProvider.AttributeMap.NickName,
+				PreferredUsername: dbProvider.AttributeMap.PreferredUsername,
+				Profile:           dbProvider.AttributeMap.Profile,
+				Picture:           dbProvider.AttributeMap.Picture,
+				Website:           dbProvider.AttributeMap.Website,
+				Gender:            dbProvider.AttributeMap.Gender,
+				Birthdate:         dbProvider.AttributeMap.Birthdate,
+				ZoneInfo:          dbProvider.AttributeMap.ZoneInfo,
+				Locale:            dbProvider.AttributeMap.Locale,
+				UpdatedAt:         dbProvider.AttributeMap.SamlUpdatedAt,
+				Email:             dbProvider.AttributeMap.Email,
+				EmailVerified:     dbProvider.AttributeMap.EmailVerified,
+				Phone:             dbProvider.AttributeMap.Phone,
+				PhoneVerified:     dbProvider.AttributeMap.PhoneVerified,
+			}
+
+			mappedProvider := samlConfig.IdentityProvider{
+				Enabled:               dbProvider.Enabled,
+				Name:                  dbProvider.Name,
+				Domain:                dbProvider.Domain,
+				MetadataUrl:           dbProvider.MetadataUrl,
+				SkipEmailVerification: dbProvider.SkipEmailVerification,
+				AttributeMap:          attributeMap,
+			}
+
+			sp, err := initializeServiceProvider(mappedProvider, handler.config, handler.persister)
+			if err != nil {
+				ctx.Logger().Error(err)
+				return nil, err
+			}
+
+			serviceProviders = append(serviceProviders, *sp)
+		}
+	}
+
+	return serviceProviders, nil
 }

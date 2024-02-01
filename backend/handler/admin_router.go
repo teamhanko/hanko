@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/ee/saml"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/template"
@@ -79,6 +80,8 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.GET("/:id", webhookHandler.Get)
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
+
+	saml.CreateSamlAdminRoutes(e, cfg, persister)
 
 	return e
 }

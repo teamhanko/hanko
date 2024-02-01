@@ -1,0 +1,16 @@
+- id: d531b0ae-4c33-48bb-ad31-e800a71a5056
+  enabled: true
+  name: "hanko"
+  domain: "hanko.io"
+  metadata_url: "https://localhost/metadata"
+  skip_email_verification: false
+  created_at: 2024-02-12 09:21:58.674033
+  updated_at: 2024-02-12 09:21:58.674033
+- id: d531b0ae-4c33-48bb-ad31-e800a71a5057
+  enabled: true
+  name: "local"
+  domain: "localhost"
+  metadata_url: "https://localhost/metadata"
+  skip_email_verification: false
+  created_at: 2024-02-12 09:21:58.674033
+  updated_at: 2024-02-12 09:21:58.674033

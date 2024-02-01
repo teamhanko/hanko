@@ -137,5 +137,5 @@ func GetProvider(providerName string, cfg *config.Config, idpConfig samlConfig.I
 		return NewAuth0ServiceProvider(cfg, idpConfig, persister)
 	}
 
-	return NewBaseSamlProvider(cfg, idpConfig, persister)
+	return NewBaseSamlProvider(cfg, idpConfig, persister, true)
 }
