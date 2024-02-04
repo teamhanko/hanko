@@ -601,11 +601,12 @@ func (t *ThirdParty) PostProcess() error {
 }
 
 type ThirdPartyProvider struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
-	Hidden   bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
-	Slug     string
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID    string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret      string `yaml:"secret" json:"secret" koanf:"secret"`
+	Hidden      bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	Slug        string
 }
 
 type GenericOIDCProvider struct {

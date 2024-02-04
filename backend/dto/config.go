@@ -33,13 +33,21 @@ func GetEnabledProviders(thirdParty config.ThirdParty) []string {
 	for _, field := range s.Fields() {
 		v := field.Value().(config.ThirdPartyProvider)
 		if v.Enabled && !v.Hidden {
-			enabledProviders = append(enabledProviders, field.Name())
+			displayName := field.Name()
+			if v.DisplayName != "" {
+				displayName = v.DisplayName
+			}
+			enabledProviders = append(enabledProviders, displayName)
 		}
 	}
 	if thirdParty.GenericOIDCProviders != nil {
 		for k, v := range thirdParty.GenericOIDCProviders {
 			if v.Enabled && !v.Hidden {
-				enabledProviders = append(enabledProviders, k)
+				displayName := k
+				if v.DisplayName != "" {
+					displayName = v.DisplayName
+				}
+				enabledProviders = append(enabledProviders, displayName)
 			}
 		}
 	}
