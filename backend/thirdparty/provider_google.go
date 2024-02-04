@@ -3,6 +3,7 @@ package thirdparty
 import (
 	"context"
 	"errors"
+
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
 )
@@ -89,4 +90,7 @@ func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (g googleProvider) Name() string {
 	return "google"
+}
+func (g googleProvider) RequireNonce() bool {
+	return true
 }

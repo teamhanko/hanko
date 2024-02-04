@@ -6,13 +6,14 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/fatih/structs"
-	"github.com/teamhanko/hanko/backend/config"
-	"golang.org/x/oauth2"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/fatih/structs"
+	"github.com/teamhanko/hanko/backend/config"
+	"golang.org/x/oauth2"
 )
 
 type UserData struct {
@@ -73,21 +74,47 @@ type OAuthProvider interface {
 	GetUserData(*oauth2.Token) (*UserData, error)
 	GetOAuthToken(string) (*oauth2.Token, error)
 	Name() string
+	RequireNonce() bool
 }
 
-func GetProvider(config config.ThirdParty, name string) (OAuthProvider, error) {
-	n := strings.ToLower(name)
+type Provider struct {
+	OAuthProvider OAuthProvider
+	// TODO: SAML providers
+}
 
+func GetProvider(config config.ThirdParty, name string) (*Provider, error) {
+	n := strings.ToLower(name)
 	switch n {
 	case "google":
-		return NewGoogleProvider(config.Providers.Google, config.RedirectURL)
+		oauthProvider, err := NewGoogleProvider(config.Providers.Google, config.RedirectURL)
+		if err != nil {
+			return nil, err
+		}
+		return &Provider{OAuthProvider: oauthProvider}, nil
 	case "github":
-		return NewGithubProvider(config.Providers.GitHub, config.RedirectURL)
+		oauthProvider, err := NewGithubProvider(config.Providers.GitHub, config.RedirectURL)
+		if err != nil {
+			return nil, err
+		}
+		return &Provider{OAuthProvider: oauthProvider}, nil
 	case "apple":
-		return NewAppleProvider(config.Providers.Apple, config.RedirectURL)
-	default:
-		return nil, fmt.Errorf("provider '%s' is not supported", name)
+		oauthProvider, err := NewAppleProvider(config.Providers.Apple, config.RedirectURL)
+		if err != nil {
+			return nil, err
+		}
+		return &Provider{OAuthProvider: oauthProvider}, nil
 	}
+
+	if config.GenericOIDCProviders != nil {
+		if providerConfig, ok := config.GenericOIDCProviders[n]; ok {
+			oauthProvider, err := NewGenericOIDCProvider(&providerConfig, config.RedirectURL)
+			if err != nil {
+				return nil, err
+			}
+			return &Provider{OAuthProvider: oauthProvider}, nil
+		}
+	}
+	return nil, fmt.Errorf("provider '%s' is not supported", name)
 
 }
 

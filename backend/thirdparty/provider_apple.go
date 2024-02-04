@@ -3,13 +3,14 @@ package thirdparty
 import (
 	"context"
 	"errors"
+	"net/url"
+	"strconv"
+	"strings"
+
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
-	"net/url"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -116,4 +117,7 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (a appleProvider) Name() string {
 	return "apple"
+}
+func (g appleProvider) RequireNonce() bool {
+	return false //?
 }

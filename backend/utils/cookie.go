@@ -1,12 +1,14 @@
 package utils
 
 import (
-	"github.com/teamhanko/hanko/backend/config"
 	"net/http"
+
+	"github.com/teamhanko/hanko/backend/config"
 )
 
 const (
 	HankoThirdpartyStateCookie = "hanko_thirdparty_state"
+	HankoThirdpartyNonceCookie = "hanko_thirdparty_nonce"
 	HankoTokenQuery            = "hanko_token"
 )
 

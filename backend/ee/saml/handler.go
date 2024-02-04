@@ -3,6 +3,10 @@ package saml
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
@@ -16,9 +20,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 type SamlHandler struct {
@@ -229,11 +230,12 @@ func (handler *SamlHandler) linkAccount(c echo.Context, redirectTo *url.URL, sta
 		query.Add(utils.HankoTokenQuery, token.Value)
 		redirectTo.RawQuery = query.Encode()
 
-		cookie := utils.GenerateStateCookie(handler.config, utils.HankoThirdpartyStateCookie, "", utils.CookieOptions{
-			MaxAge:   -1,
-			Path:     "/",
-			SameSite: http.SameSiteLaxMode,
-		})
+		cookie := utils.GenerateStateCookie(handler.config,
+			utils.HankoThirdpartyStateCookie, "", utils.CookieOptions{
+				MaxAge:   -1,
+				Path:     "/",
+				SameSite: http.SameSiteLaxMode,
+			})
 		c.SetCookie(cookie)
 
 		return nil

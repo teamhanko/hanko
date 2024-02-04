@@ -3,9 +3,10 @@ package thirdparty
 import (
 	"context"
 	"errors"
+	"strconv"
+
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
-	"strconv"
 )
 
 const (
@@ -110,4 +111,7 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (g githubProvider) Name() string {
 	return "github"
+}
+func (g githubProvider) RequireNonce() bool {
+	return false //?
 }

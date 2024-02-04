@@ -20,21 +20,30 @@ func FromConfig(config config.Config) PublicConfig {
 	return PublicConfig{
 		Password:                config.Password,
 		Emails:                  config.Emails,
-		Providers:               GetEnabledProviders(config.ThirdParty.Providers),
+		Providers:               GetEnabledProviders(config.ThirdParty),
 		Account:                 config.Account,
 		UseEnterpriseConnection: UseEnterpriseConnection(&config.Saml),
 	}
 }
 
-func GetEnabledProviders(providers config.ThirdPartyProviders) []string {
+func GetEnabledProviders(thirdParty config.ThirdParty) []string {
+	providers := thirdParty.Providers
 	s := structs.New(providers)
 	var enabledProviders []string
 	for _, field := range s.Fields() {
 		v := field.Value().(config.ThirdPartyProvider)
-		if v.Enabled {
+		if v.Enabled && !v.Hidden {
 			enabledProviders = append(enabledProviders, field.Name())
 		}
 	}
+	if thirdParty.GenericOIDCProviders != nil {
+		for k, v := range thirdParty.GenericOIDCProviders {
+			if v.Enabled && !v.Hidden {
+				enabledProviders = append(enabledProviders, k)
+			}
+		}
+	}
+
 	return enabledProviders
 }
 

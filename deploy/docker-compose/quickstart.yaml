@@ -1,4 +1,4 @@
-version: '3.9'
+version: "3.9"
 services:
   hanko-migrate:
     build: ../../backend
@@ -19,8 +19,8 @@ services:
         condition: service_completed_successfully
     build: ../../backend
     ports:
-      - '8000:8000' # public
-      - '8001:8001' # admin
+      - "8000:8000" # public
+      - "8001:8001" # admin
     restart: unless-stopped
     command: serve --config /etc/config/config.yaml all
     volumes:
@@ -67,8 +67,10 @@ services:
   mailslurper:
     image: marcopas/docker-mailslurper:latest
     ports:
-      - '8080:8080' # web UI
-      - '8085:8085'
+      - "8080:8080" # web UI
+      - "8085:8085"
+      - "2500:2500" # smtp
+
     networks:
       - intranet
 networks:

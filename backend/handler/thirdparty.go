@@ -1,7 +1,14 @@
 package handler
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+
+	oidc "github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
@@ -13,8 +20,6 @@ import (
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
 	"golang.org/x/oauth2"
-	"net/http"
-	"net/url"
 )
 
 type ThirdPartyHandler struct {
@@ -31,6 +36,61 @@ func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, s
 		persister:      persister,
 		sessionManager: sessionManager,
 	}
+}
+func (h *ThirdPartyHandler) randString(nByte int) (string, error) {
+	b := make([]byte, nByte)
+	if _, err := io.ReadFull(rand.Reader, b); err != nil {
+		return "", err
+	}
+	return base64.RawURLEncoding.EncodeToString(b), nil
+}
+
+func (h *ThirdPartyHandler) AuthOAuth(c echo.Context, oauthProvider thirdparty.OAuthProvider) error {
+	errorRedirectTo := c.Request().Header.Get("Referer")
+	if errorRedirectTo == "" {
+		errorRedirectTo = h.cfg.ThirdParty.ErrorRedirectURL
+	}
+
+	var request dto.ThirdPartyAuthRequest
+	err := c.Bind(&request)
+	if err != nil {
+		return h.redirectError(c, thirdparty.ErrorServer("could not decode request payload").WithCause(err), errorRedirectTo)
+	}
+
+	state, err := thirdparty.GenerateState(h.cfg, oauthProvider.Name(), request.RedirectTo)
+	if err != nil {
+		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
+	}
+	authCodeOptions := []oauth2.AuthCodeOption{
+		oauth2.SetAuthURLParam("prompt", "consent"),
+	}
+	if oauthProvider.RequireNonce() {
+		nonce, err := h.randString(16)
+		if err != nil {
+			return h.redirectError(c, thirdparty.ErrorServer("internal error").WithCause(err), errorRedirectTo)
+		}
+		nonceCookie := utils.GenerateStateCookie(h.cfg,
+			utils.HankoThirdpartyNonceCookie, string(nonce), utils.CookieOptions{
+				MaxAge:   300,
+				Path:     "/",
+				SameSite: http.SameSiteLaxMode,
+			})
+		c.SetCookie(nonceCookie)
+		authCodeOptions = append(authCodeOptions, oidc.Nonce(nonce))
+	}
+	authCodeUrl := oauthProvider.AuthCodeURL(string(state), authCodeOptions...)
+
+	cookie := utils.GenerateStateCookie(h.cfg,
+		utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
+			MaxAge:   300,
+			Path:     "/",
+			SameSite: http.SameSiteLaxMode,
+		})
+
+	c.SetCookie(cookie)
+
+	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
+
 }
 
 func (h *ThirdPartyHandler) Auth(c echo.Context) error {
@@ -58,23 +118,11 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
-
-	state, err := thirdparty.GenerateState(h.cfg, provider.Name(), request.RedirectTo)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
+	if provider.OAuthProvider != nil {
+		return h.AuthOAuth(c, provider.OAuthProvider)
 	}
+	return h.redirectError(c, thirdparty.ErrorInvalidRequest(fmt.Sprintf("provider '%s' is not supported", request.Provider)), errorRedirectTo)
 
-	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
-
-	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
-		MaxAge:   300,
-		Path:     "/",
-		SameSite: http.SameSiteLaxMode,
-	})
-
-	c.SetCookie(cookie)
-
-	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
 }
 
 func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
@@ -126,22 +174,22 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
-
+		oauthProvider := provider.OAuthProvider
 		if callback.AuthCode == "" {
 			return thirdparty.ErrorInvalidRequest("auth code missing from request")
 		}
 
-		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode)
+		oAuthToken, terr := oauthProvider.GetOAuthToken(callback.AuthCode)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(terr)
 		}
 
-		userData, terr := provider.GetUserData(oAuthToken)
+		userData, terr := oauthProvider.GetUserData(oAuthToken)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.Name())
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, oauthProvider.Name())
 		if terr != nil {
 			return terr
 		}

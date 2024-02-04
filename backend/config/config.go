@@ -3,18 +3,19 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
-	zeroLogger "github.com/rs/zerolog/log"
-	"log"
-	"strings"
-	"time"
 )
 
 // Config is the central configuration type
@@ -91,6 +92,20 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to validate config: %s", err)
 	}
 
+	if c.ThirdParty.GenericOIDCProviders != nil {
+		fixedGenericOIDCProviders := make(map[string]GenericOIDCProvider)
+		for k, v := range c.ThirdParty.GenericOIDCProviders {
+			kl := strings.ToLower(k)
+			v.Slug = kl
+			fixedGenericOIDCProviders[kl] = v
+		}
+		c.ThirdParty.GenericOIDCProviders = fixedGenericOIDCProviders
+	}
+	s := structs.New(c.ThirdParty.Providers)
+	for _, field := range s.Fields() {
+		v := field.Value().(ThirdPartyProvider)
+		v.Slug = strings.ToLower(field.Name())
+	}
 	return c, nil
 }
 
@@ -533,11 +548,12 @@ type RedisConfig struct {
 }
 
 type ThirdParty struct {
-	Providers             ThirdPartyProviders  `yaml:"providers" json:"providers,omitempty" koanf:"providers"`
-	RedirectURL           string               `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true"`
-	ErrorRedirectURL      string               `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
+	GenericOIDCProviders  map[string]GenericOIDCProvider `yaml:"generic_oidc_providers" json:"generic_oidc_providers,omitempty" koanf:"generic_oidc_providers"`
+	Providers             ThirdPartyProviders            `yaml:"providers" json:"providers,omitempty" koanf:"providers"`
+	RedirectURL           string                         `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true"`
+	ErrorRedirectURL      string                         `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
+	AllowedRedirectURLS   []string                       `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
+	AllowedRedirectURLMap map[string]glob.Glob           `jsonschema:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
@@ -588,10 +604,40 @@ type ThirdPartyProvider struct {
 	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
 	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
 	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+	Hidden   bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	Slug     string
+}
+
+type GenericOIDCProvider struct {
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID    string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret      string `yaml:"secret" json:"secret" koanf:"secret"`
+	Scopes      string `yaml:"scopes" json:"scopes" koanf:"scopes"`
+	Hidden      bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	Authority   string `yaml:"authority" json:"authority" koanf:"authority"`
+	Slug        string
 }
 
 func (p *ThirdPartyProvider) Validate() error {
 	if p.Enabled {
+		if p.ClientID == "" {
+			return errors.New("missing client ID")
+		}
+		if p.Secret == "" {
+			return errors.New("missing client secret")
+		}
+	}
+	return nil
+}
+func (p *GenericOIDCProvider) Validate() error {
+	if p.Enabled {
+		if p.DisplayName == "" {
+			return errors.New("missing display name")
+		}
+		if p.Authority == "" {
+			return errors.New("missing authority")
+		}
 		if p.ClientID == "" {
 			return errors.New("missing client ID")
 		}
@@ -665,7 +711,7 @@ func (c *Config) arrangeSmtpSettings() {
 			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
 			return
 		}
-		
+
 		c.Smtp = c.Passcode.Smtp
 	}
 }
