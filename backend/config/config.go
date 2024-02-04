@@ -609,14 +609,15 @@ type ThirdPartyProvider struct {
 }
 
 type GenericOIDCProvider struct {
-	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
-	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID    string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret      string `yaml:"secret" json:"secret" koanf:"secret"`
-	Scopes      string `yaml:"scopes" json:"scopes" koanf:"scopes"`
-	Hidden      bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
-	Authority   string `yaml:"authority" json:"authority" koanf:"authority"`
-	Slug        string
+	DisplayName                      string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	Enabled                          bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID                         string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret                           string `yaml:"secret" json:"secret" koanf:"secret"`
+	Scopes                           string `yaml:"scopes" json:"scopes" koanf:"scopes"`
+	Hidden                           bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	Authority                        string `yaml:"authority" json:"authority" koanf:"authority"`
+	RequireProviderEmailVerification bool   `yaml:"require_provider_email_verification" json:"require_provider_email_verification" koanf:"require_provider_email_verification" split_words:"true"`
+	Slug                             string
 }
 
 func (p *ThirdPartyProvider) Validate() error {

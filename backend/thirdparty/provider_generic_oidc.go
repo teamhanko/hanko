@@ -14,7 +14,7 @@ import (
 type genericOIDCProvider struct {
 	*oauth2.Config
 	oicProviderConfig *config.GenericOIDCProvider
-	verifier          *oidc.IDTokenVerifier
+	oidcProvider      *oidc.Provider
 }
 
 type GenericOAuth2User struct {
@@ -39,6 +39,7 @@ func NewGenericOIDCProvider(oicProviderConfig *config.GenericOIDCProvider, redir
 
 	return &genericOIDCProvider{
 		oicProviderConfig: oicProviderConfig,
+		oidcProvider:      oidcProvider,
 		Config: &oauth2.Config{
 			ClientID:     oicProviderConfig.ClientID,
 			ClientSecret: oicProviderConfig.Secret,
@@ -55,7 +56,7 @@ func (g *genericOIDCProvider) GetOAuthToken(code string) (*oauth2.Token, error) 
 
 func (g *genericOIDCProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	var user GenericOAuth2User
-	if err := makeRequest(token, g.Config, GoogleUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(token, g.Config, g.oidcProvider.UserInfoEndpoint(), &user); err != nil {
 		return nil, err
 	}
 
@@ -72,14 +73,18 @@ func (g *genericOIDCProvider) GetUserData(token *oauth2.Token) (*UserData, error
 	if len(data.Emails) <= 0 {
 		return nil, errors.New("unable to find email with Google provider")
 	}
-
+	emailVerified := user.EmailVerified
+	if !g.oicProviderConfig.RequireProviderEmailVerification {
+		// not required by the config, so we assume it's verified
+		emailVerified = true
+	}
 	data.Metadata = &Claims{
 		Issuer:        GoogleAuthBase,
 		Subject:       user.ID,
 		Name:          user.Name,
 		Picture:       user.AvatarURL,
 		Email:         user.Email,
-		EmailVerified: user.EmailVerified,
+		EmailVerified: emailVerified,
 	}
 
 	return data, nil
