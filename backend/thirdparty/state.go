@@ -4,13 +4,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/crypto/aes_gcm"
-	"time"
 )
 
-func GenerateState(config *config.Config, provider string, redirectTo string) ([]byte, error) {
+type GenerateStateResponse struct {
+	EncryptedState string `json:"encoded_state"`
+	State          *State `json:"state"`
+}
+
+func GenerateState(config *config.Config, provider string, redirectTo string) (*GenerateStateResponse, error) {
 	if provider == "" {
 		return nil, errors.New("provider must be present")
 	}
@@ -44,8 +50,7 @@ func GenerateState(config *config.Config, provider string, redirectTo string) ([
 	if err != nil {
 		return nil, fmt.Errorf("could not encrypt state: %w", err)
 	}
-
-	return []byte(encryptedState), nil
+	return &GenerateStateResponse{EncryptedState: string(encryptedState), State: &state}, nil
 }
 
 type State struct {

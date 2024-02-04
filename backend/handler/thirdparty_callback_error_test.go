@@ -2,12 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignUpUserConflict() {
@@ -35,13 +36,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignUpUserConflic
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -86,13 +87,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -145,16 +146,16 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	mismatchedState, err := thirdparty.GenerateState(cfg, "github", "https://foo.com")
+	mismatchedstateResponse, err := thirdparty.GenerateState(cfg, "github", "https://foo.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(mismatchedState),
+		Value: string(mismatchedstateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -181,10 +182,10 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoThirdPartyCooki
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 
 	c, rec := s.setUpContext(req)
 	handler := s.setUpHandler(cfg)
@@ -210,14 +211,14 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderError() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
 	providerError := "access_denied"
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s&error=%s", state, providerError), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s&error=%s", stateResponse.EncryptedState, providerError), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -243,13 +244,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 
 	cfg := s.setUpConfig([]string{"github"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -276,13 +277,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -315,13 +316,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)
@@ -363,13 +364,13 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 	cfg.Emails.RequireVerification = true
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	stateResponse, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", stateResponse.EncryptedState), nil)
 	req.AddCookie(&http.Cookie{
 		Name:  utils.HankoThirdpartyStateCookie,
-		Value: string(state),
+		Value: string(stateResponse.EncryptedState),
 	})
 
 	c, rec := s.setUpContext(req)

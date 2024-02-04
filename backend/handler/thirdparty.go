@@ -57,31 +57,21 @@ func (h *ThirdPartyHandler) AuthOAuth(c echo.Context, oauthProvider thirdparty.O
 		return h.redirectError(c, thirdparty.ErrorServer("could not decode request payload").WithCause(err), errorRedirectTo)
 	}
 
-	state, err := thirdparty.GenerateState(h.cfg, oauthProvider.Name(), request.RedirectTo)
+	stateResponse, err := thirdparty.GenerateState(h.cfg, oauthProvider.Name(), request.RedirectTo)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
 	authCodeOptions := []oauth2.AuthCodeOption{
 		oauth2.SetAuthURLParam("prompt", "consent"),
+		// add the nonce to the auth code options
+		// will be written into the id_token of the provider
+		oidc.Nonce(stateResponse.State.Nonce),
 	}
-	if oauthProvider.RequireNonce() {
-		nonce, err := h.randString(16)
-		if err != nil {
-			return h.redirectError(c, thirdparty.ErrorServer("internal error").WithCause(err), errorRedirectTo)
-		}
-		nonceCookie := utils.GenerateStateCookie(h.cfg,
-			utils.HankoThirdpartyNonceCookie, string(nonce), utils.CookieOptions{
-				MaxAge:   300,
-				Path:     "/",
-				SameSite: http.SameSiteLaxMode,
-			})
-		c.SetCookie(nonceCookie)
-		authCodeOptions = append(authCodeOptions, oidc.Nonce(nonce))
-	}
-	authCodeUrl := oauthProvider.AuthCodeURL(string(state), authCodeOptions...)
+
+	authCodeUrl := oauthProvider.AuthCodeURL(string(stateResponse.EncryptedState), authCodeOptions...)
 
 	cookie := utils.GenerateStateCookie(h.cfg,
-		utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
+		utils.HankoThirdpartyStateCookie, string(stateResponse.EncryptedState), utils.CookieOptions{
 			MaxAge:   300,
 			Path:     "/",
 			SameSite: http.SameSiteLaxMode,

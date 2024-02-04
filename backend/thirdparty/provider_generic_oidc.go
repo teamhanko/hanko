@@ -14,6 +14,7 @@ import (
 type genericOIDCProvider struct {
 	*oauth2.Config
 	oicProviderConfig *config.GenericOIDCProvider
+	verifier          *oidc.IDTokenVerifier
 }
 
 type GenericOAuth2User struct {
@@ -86,7 +87,4 @@ func (g *genericOIDCProvider) GetUserData(token *oauth2.Token) (*UserData, error
 
 func (g *genericOIDCProvider) Name() string {
 	return g.oicProviderConfig.Slug
-}
-func (g *genericOIDCProvider) RequireNonce() bool {
-	return true
 }

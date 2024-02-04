@@ -74,7 +74,6 @@ type OAuthProvider interface {
 	GetUserData(*oauth2.Token) (*UserData, error)
 	GetOAuthToken(string) (*oauth2.Token, error)
 	Name() string
-	RequireNonce() bool
 }
 
 type Provider struct {

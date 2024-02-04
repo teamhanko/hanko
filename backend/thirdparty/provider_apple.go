@@ -118,6 +118,3 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 func (a appleProvider) Name() string {
 	return "apple"
 }
-func (g appleProvider) RequireNonce() bool {
-	return false //?
-}
