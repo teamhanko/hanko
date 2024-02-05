@@ -10,6 +10,7 @@ import { TokenClient } from "./lib/client/TokenClient";
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
 import { Session } from "./lib/Session";
+import { CookieSameSite } from "./lib/Cookie";
 
 /**
  * The options for the Hanko class
@@ -17,11 +18,15 @@ import { Session } from "./lib/Session";
  * @interface
  * @property {number=} timeout - The http request timeout in milliseconds. Defaults to 13000ms
  * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko"
+ * @property {string=} cookieDomain - The domain where the cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
+ * @property {string=} cookieSameSite - Specify whether/when cookies are sent with cross-site requests. Defaults to "lax".
  * @property {string=} localStorageKey - The prefix / name of the local storage keys. Defaults to "hanko"
  */
 export interface HankoOptions {
   timeout?: number;
   cookieName?: string;
+  cookieDomain?: string;
+  cookieSameSite?: CookieSameSite;
   localStorageKey?: string;
 }
 
@@ -62,6 +67,12 @@ class Hanko extends Listener {
     }
     if (options?.localStorageKey !== undefined) {
       opts.localStorageKey = options.localStorageKey;
+    }
+    if (options?.cookieDomain !== undefined) {
+      opts.cookieDomain = options.cookieDomain;
+    }
+    if (options?.cookieSameSite !== undefined) {
+      opts.cookieSameSite = options.cookieSameSite;
     }
 
     this.api = api;
@@ -127,6 +138,8 @@ class Hanko extends Listener {
 export interface InternalOptions {
   timeout: number;
   cookieName: string;
+  cookieDomain?: string;
+  cookieSameSite?: CookieSameSite;
   localStorageKey: string;
 }
 

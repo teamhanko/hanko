@@ -122,6 +122,9 @@ const defaultOptions = {
   translationsLocation: "/i18n",   // The URL or path where the translation files are located.
   fallbackLanguage: "en",          // The fallback language to be used if a translation is not available.
   storageKey: "hanko",             // The name of the cookie the session token is stored in and the prefix / name of local storage keys
+  cookieDomain: undefined,         // The domain where the cookie set from the SDK is available. When undefined,
+                                   // defaults to the domain of the page where the cookie was created.
+  cookieSameSite: "lax",           // Specify whether/when cookies are sent with cross-site requests.
 };
 
 const { hanko } = await register(
