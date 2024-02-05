@@ -649,9 +649,6 @@ func (p *ThirdPartyProvider) Validate() error {
 }
 func (p *GenericOIDCProvider) Validate() error {
 	if p.Enabled {
-		if p.DisplayName == "" {
-			return errors.New("missing display name")
-		}
 		if p.Authority == "" {
 			return errors.New("missing authority")
 		}

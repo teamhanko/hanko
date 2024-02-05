@@ -1,0 +1,68 @@
+database:
+  user: hanko
+  password: hanko
+  host: postgresd
+  port: 5432
+  dialect: postgres
+smtp:
+  host: "mailslurper"
+  port: "2500"
+passcode:
+  email:
+    from_address: no-reply@hanko.io
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
+webauthn:
+  relying_party:
+    origins:
+      - "http://localhost:8888"
+      - "http://localhost:3000"
+session:
+  cookie:
+    secure: false # is needed for safari, because safari does not store secure cookies on localhost
+server:
+  public:
+    cors:
+      allow_origins:
+        - "http://localhost:8888"
+        - "http://localhost:3000"
+
+third_party:
+  redirect_url: http://localhost:8000/thirdparty/callback
+  error_redirect_url: http://localhost:8888
+  allowed_redirect_urls:
+    - http://localhost:8888**
+    - http://localhost:3000**
+  providers:
+    google:
+      enabled: true
+      client_id: 1096301616546-edbl612881t7rkpljp3qa3juminskulo.apps.googleusercontent.com
+      secret: GOC**[REDACTED]**
+    github:
+      enabled: true
+      client_id: e489eb4f05e9f247d8ad
+      secret: 1bb**[REDACTED]**
+  generic_oidc_providers:
+    google_oidc:
+      authority: https://accounts.google.com
+      #display_name: Google(Generic OIDC Provider)
+      enabled: true
+      client_id: 1096301616546-edbl612881t7rkpljp3qa3juminskulo.apps.googleusercontent.com
+      secret: GOC**[REDACTED]**
+      scopes: "openid profile email"
+      require_provider_email_verification: true
+    mapped_staff_oidc:
+      authority: https://login.microsoftonline.com/590**[REDACTED]**/v2.0
+      #display_name: Mapped Staff (Generic OIDC Provider)
+      enabled: true
+      client_id: 3b918868-9bff-431f-bd9c-f9896d628e6b
+      secret: hU4**[REDACTED]**
+      scopes: "openid profile email User.Read"
+      require_provider_email_verification: false
+      hidden: true
+      metadata:
+        a: "b"
+        c: "d"

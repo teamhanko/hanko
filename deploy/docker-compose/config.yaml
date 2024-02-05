@@ -29,19 +29,3 @@ server:
       allow_origins:
         - "http://localhost:8888"
         - "http://localhost:3000"
-
-third_party:
-  redirect_url: http://localhost:8000/thirdparty/callback
-  error_redirect_url: http://localhost:8888
-  allowed_redirect_urls:
-    - http://localhost:8888**
-    - http://localhost:3000**
-  providers:
-    google:
-      enabled: true
-      client_id: 1096301616546-edbl612881t7rkpljp3qa3juminskulo.apps.googleusercontent.com
-      secret: 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
-    github:
-      enabled: true
-      client_id: e489eb4f05e9f247d8ad
-      secret: 1bb8d1784c7eb45e879a73eab167e9cca9ea6f59

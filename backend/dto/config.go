@@ -27,6 +27,8 @@ func FromConfig(config config.Config) PublicConfig {
 }
 
 func GetEnabledProviders(thirdParty config.ThirdParty) []string {
+	// TODO: a provider should return an slug and the display name.
+	// It looks like the name, aka what is displayed is also used to request and auth
 	providers := thirdParty.Providers
 	s := structs.New(providers)
 	var enabledProviders []string
@@ -34,9 +36,13 @@ func GetEnabledProviders(thirdParty config.ThirdParty) []string {
 		v := field.Value().(config.ThirdPartyProvider)
 		if v.Enabled && !v.Hidden {
 			displayName := field.Name()
-			if v.DisplayName != "" {
-				displayName = v.DisplayName
-			}
+			/*
+				// fails because the display name is uses as the lookup key.
+				// need to send the client both.
+				if v.DisplayName != "" {
+					displayName = v.DisplayName
+				}
+			*/
 			enabledProviders = append(enabledProviders, displayName)
 		}
 	}
@@ -44,9 +50,13 @@ func GetEnabledProviders(thirdParty config.ThirdParty) []string {
 		for k, v := range thirdParty.GenericOIDCProviders {
 			if v.Enabled && !v.Hidden {
 				displayName := k
-				if v.DisplayName != "" {
-					displayName = v.DisplayName
-				}
+				/*
+					// fails because the display name is uses as the lookup key.
+					// need to send the client both.
+					if v.DisplayName != "" {
+						displayName = v.DisplayName
+					}
+				*/
 				enabledProviders = append(enabledProviders, displayName)
 			}
 		}
