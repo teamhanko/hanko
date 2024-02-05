@@ -610,15 +610,30 @@ type ThirdPartyProvider struct {
 }
 
 type GenericOIDCProvider struct {
-	DisplayName                      string `yaml:"display_name" json:"display_name" koanf:"display_name"`
-	Enabled                          bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID                         string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret                           string `yaml:"secret" json:"secret" koanf:"secret"`
-	Scopes                           string `yaml:"scopes" json:"scopes" koanf:"scopes"`
-	Hidden                           bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
-	Authority                        string `yaml:"authority" json:"authority" koanf:"authority"`
-	RequireProviderEmailVerification bool   `yaml:"require_provider_email_verification" json:"require_provider_email_verification" koanf:"require_provider_email_verification" split_words:"true"`
-	Slug                             string
+	// DisplayName is the name of the provider that is displayed to the user.
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	// Enabled indicates if the provider is enabled.
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	// ClientID is the client ID of the provider.
+	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	// Secret is the client secret of the provider.
+	Secret string `yaml:"secret" json:"secret" koanf:"secret"`
+	// Scopes is a space-separated list of scopes that the provider requires.
+	Scopes string `yaml:"scopes" json:"scopes" koanf:"scopes"`
+	// Hidden indicates if the provider should be hidden from the UI. Hidden as an option duing login/signup and later in IDP management.
+	Hidden bool `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	// Authority is the OIDC authority URL of the provider.
+	Authority string `yaml:"authority" json:"authority" koanf:"authority"`
+	// RequireProviderEmailVerification indicates if the provider should require email verification on their end.
+	RequireProviderEmailVerification bool `yaml:"require_provider_email_verification" json:"require_provider_email_verification" koanf:"require_provider_email_verification" split_words:"true"`
+	// ImageRef is a reference to an image that can be used to display the provider's logo.
+	ImageRef string `yaml:"image_ref" json:"image_ref" koanf:"image_ref"`
+	// Metadata is a map of arbitrary key-value pairs that can be used to store additional information about the provider.
+	// TODO: Should be exposed via an admin API for the frontend to consume.
+	Metadata map[string]string `yaml:"metadata" json:"metadata" koanf:"metadata"`
+	// Slug is a unique identifier for the provider. It is used to reference the provider in the configuration.
+	// it is the lowercase version of the third party map key
+	Slug string
 }
 
 func (p *ThirdPartyProvider) Validate() error {
