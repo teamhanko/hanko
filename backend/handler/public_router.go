@@ -11,13 +11,14 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/mail"
+	"github.com/teamhanko/hanko/backend/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/template"
 )
 
-func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
 	e.Renderer = template.NewTemplateRenderer()
 	e.HideBanner = true
@@ -69,7 +70,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
-	mailer, err := mail.NewMailer(cfg.Passcode.Smtp)
+	mailer, err := mail.NewMailer(cfg.Smtp)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
@@ -102,7 +103,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	healthHandler := NewHealthHandler()
-	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
+	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}

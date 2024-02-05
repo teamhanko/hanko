@@ -114,11 +114,13 @@ class Response {
  * @subcategory Internal
  * @property {number} timeout - The http request timeout in milliseconds.
  * @property {string} cookieName - The name of the session cookie set from the SDK.
+ * @property {string=} cookieDomain - The domain where cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
  * @property {string} localStorageKey - The prefix / name of the local storage keys.
  */
 export interface HttpClientOptions {
   timeout: number;
   cookieName: string;
+  cookieDomain?: string;
   localStorageKey: string;
 }
 
@@ -215,7 +217,9 @@ class HttpClient {
       });
 
     if (jwt) {
-      const secure = !!this.api.match("^https://");
+      const https = new RegExp("^https://");
+      const secure =
+        !!this.api.match(https) && !!window.location.href.match(https);
       const expires = new Date(new Date().getTime() + expirationSeconds * 1000);
       this.cookie.setAuthCookie(jwt, { secure, expires });
     }

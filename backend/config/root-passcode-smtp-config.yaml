@@ -1,0 +1,22 @@
+database:
+  user: hanko
+  password: hanko
+  host: localhost
+  port: 5432
+  dialect: postgres
+smtp:
+    host: smtp1.example.com
+    user: example1
+    password: example1
+passcode:
+  email:
+    from_address: no-reply@hanko.io
+  smtp:
+    host: smtp2.example.com
+    user: example2
+    password: example2
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service

@@ -1,5 +1,4 @@
-passcode:
-  smtp:
+smtp:
     host: smtp.example.com
     user: example
     password: example

@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/server"
 	"log"
@@ -15,7 +16,8 @@ import (
 
 func NewServeAllCommand() *cobra.Command {
 	var (
-		configFile string
+		configFile                string
+		authenticatorMetadataFile string
 	)
 
 	cmd := &cobra.Command{
@@ -28,6 +30,8 @@ func NewServeAllCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
+			authenticatorMetadata := mapper.LoadAuthenticatorMetadata(&authenticatorMetadataFile)
+
 			persister, err := persistence.New(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
@@ -37,7 +41,7 @@ func NewServeAllCommand() *cobra.Command {
 
 			prometheus := echoprometheus.NewMiddleware("hanko")
 
-			go server.StartPublic(cfg, &wg, persister, prometheus)
+			go server.StartPublic(cfg, &wg, persister, prometheus, authenticatorMetadata)
 			go server.StartAdmin(cfg, &wg, persister, prometheus)
 
 			wg.Wait()
@@ -45,6 +49,7 @@ func NewServeAllCommand() *cobra.Command {
 	}
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
+	cmd.Flags().StringVar(&authenticatorMetadataFile, "auth-meta", "", "authenticator metadata file")
 
 	return cmd
 }
