@@ -47,7 +47,7 @@ var Flow = flowpilot.NewFlow("/profile").
 	).
 	State(StateProfileWebauthnCredentialVerification, WebauthnVerifyAttestationResponse{}).
 	AfterState(StateProfileWebauthnCredentialVerification, WebauthnCredentialSave{}).
-	AfterState(passcode.StatePasscodeConfirmation, EmailSetVerified{}).
+	AfterState(passcode.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 	State(StateProfileAccountDeleted).
 	ErrorState(shared.StateError).
 	SubFlows(capabilities.SubFlow, passcode.SubFlow).

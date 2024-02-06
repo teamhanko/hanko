@@ -1,26 +1,30 @@
-package profile
+package shared
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-type EmailSetVerified struct {
-	shared.Action
+type EmailPersistVerifiedStatus struct {
+	Action
 }
 
-func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
+func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
 	if !deps.Cfg.Emails.RequireVerification {
 		return nil
 	}
 
-	userModel, ok := c.Get("session_user").(*models.User)
-	if !ok {
+	if !c.Stash().Get("user_id").Exists() {
 		return flowpilot.ErrorOperationNotPermitted
+	}
+
+	userId, err := uuid.FromString(c.Stash().Get("user_id").String())
+	if err != nil {
+		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 	}
 
 	if c.Stash().Get("email_verified").Bool() {
@@ -31,8 +35,18 @@ func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
 			return fmt.Errorf("could not fetch email: %w", err)
 		}
 
-		if emailAddressToVerifyModel == nil {
-			newEmailModel := models.NewEmail(&userModel.ID, emailAddressToVerify)
+		if emailAddressToVerifyModel != nil {
+			if emailAddressToVerifyModel.Verified {
+				return nil
+			} else {
+				emailAddressToVerifyModel.Verified = true
+				err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Update(*emailAddressToVerifyModel)
+				if err != nil {
+					return fmt.Errorf("could not update email: %w", err)
+				}
+			}
+		} else {
+			newEmailModel := models.NewEmail(&userId, emailAddressToVerify)
 			newEmailModel.Verified = true
 
 			err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*newEmailModel)
@@ -48,7 +62,7 @@ func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
 			if len(emailModels) == 1 && emailModels[0].ID.String() == newEmailModel.ID.String() {
 				// The user has only one 1 email and it is the email we just added. It makes sense then,
 				// to automatically set this as the primary email.
-				primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userModel.ID)
+				primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userId)
 				err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 				if err != nil {
 					return fmt.Errorf("could not save primary email: %w", err)
@@ -56,13 +70,6 @@ func (h EmailSetVerified) Execute(c flowpilot.HookExecutionContext) error {
 			}
 
 			return nil
-		} else {
-			emailAddressToVerifyModel.Verified = true
-
-			err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Update(*emailAddressToVerifyModel)
-			if err != nil {
-				return fmt.Errorf("could not update email: %w", err)
-			}
 		}
 	}
 
