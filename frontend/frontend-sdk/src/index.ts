@@ -147,3 +147,9 @@ export {
   userDeletedType,
   CustomEventWithDetail,
 };
+
+// Misc
+
+import { CookieSameSite } from "./lib/Cookie";
+
+export type { CookieSameSite };
