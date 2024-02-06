@@ -26,7 +26,7 @@ jobs:
       - run: echo ${{ steps.tag-version.outputs.git_tag_version }}
       - name: Version correctly set check
         if: steps.package-version.outputs.current-version != steps.tag-version.outputs.git_tag_version
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.setFailed('version in package.json is not equal to git tag version!')
