@@ -5,8 +5,8 @@ database:
   port: 5432
   dialect: postgres
 smtp:
-    host: "mailslurper"
-    port: "2500"
+  host: "mailslurper"
+  port: "2500"
 passcode:
   email:
     from_address: no-reply@hanko.io
@@ -19,6 +19,7 @@ webauthn:
   relying_party:
     origins:
       - "http://localhost:8888"
+      - "http://localhost:3000"
 session:
   cookie:
     secure: false # is needed for safari, because safari does not store secure cookies on localhost
@@ -27,3 +28,4 @@ server:
     cors:
       allow_origins:
         - "http://localhost:8888"
+        - "http://localhost:3000"

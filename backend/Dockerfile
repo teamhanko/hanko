@@ -1,5 +1,5 @@
 # Build the hanko binary
-FROM --platform=$BUILDPLATFORM golang:1.20 AS builder
+FROM --platform=$BUILDPLATFORM golang:1.21 AS builder
 
 ARG TARGETARCH
 

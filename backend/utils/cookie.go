@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"github.com/teamhanko/hanko/backend/config"
 	"net/http"
+
+	"github.com/teamhanko/hanko/backend/config"
 )
 
 const (

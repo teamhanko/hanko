@@ -20,21 +20,48 @@ func FromConfig(config config.Config) PublicConfig {
 	return PublicConfig{
 		Password:                config.Password,
 		Emails:                  config.Emails,
-		Providers:               GetEnabledProviders(config.ThirdParty.Providers),
+		Providers:               GetEnabledProviders(config.ThirdParty),
 		Account:                 config.Account,
 		UseEnterpriseConnection: UseEnterpriseConnection(&config.Saml),
 	}
 }
 
-func GetEnabledProviders(providers config.ThirdPartyProviders) []string {
+func GetEnabledProviders(thirdParty config.ThirdParty) []string {
+	// TODO: a provider should return an slug and the display name.
+	// It looks like the name, aka what is displayed is also used to request and auth
+	providers := thirdParty.Providers
 	s := structs.New(providers)
 	var enabledProviders []string
 	for _, field := range s.Fields() {
 		v := field.Value().(config.ThirdPartyProvider)
-		if v.Enabled {
-			enabledProviders = append(enabledProviders, field.Name())
+		if v.Enabled && !v.Hidden {
+			displayName := field.Name()
+			/*
+				// fails because the display name is uses as the lookup key.
+				// need to send the client both.
+				if v.DisplayName != "" {
+					displayName = v.DisplayName
+				}
+			*/
+			enabledProviders = append(enabledProviders, displayName)
 		}
 	}
+	if thirdParty.GenericOIDCProviders != nil {
+		for k, v := range thirdParty.GenericOIDCProviders {
+			if v.Enabled && !v.Hidden {
+				displayName := k
+				/*
+					// fails because the display name is uses as the lookup key.
+					// need to send the client both.
+					if v.DisplayName != "" {
+						displayName = v.DisplayName
+					}
+				*/
+				enabledProviders = append(enabledProviders, displayName)
+			}
+		}
+	}
+
 	return enabledProviders
 }
 

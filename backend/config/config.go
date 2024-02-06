@@ -3,18 +3,19 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
-	zeroLogger "github.com/rs/zerolog/log"
-	"log"
-	"strings"
-	"time"
 )
 
 // Config is the central configuration type
@@ -91,6 +92,20 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to validate config: %s", err)
 	}
 
+	if c.ThirdParty.GenericOIDCProviders != nil {
+		fixedGenericOIDCProviders := make(map[string]GenericOIDCProvider)
+		for k, v := range c.ThirdParty.GenericOIDCProviders {
+			kl := strings.ToLower(k)
+			v.Slug = kl
+			fixedGenericOIDCProviders[kl] = v
+		}
+		c.ThirdParty.GenericOIDCProviders = fixedGenericOIDCProviders
+	}
+	s := structs.New(c.ThirdParty.Providers)
+	for _, field := range s.Fields() {
+		v := field.Value().(ThirdPartyProvider)
+		v.Slug = strings.ToLower(field.Name())
+	}
 	return c, nil
 }
 
@@ -533,11 +548,12 @@ type RedisConfig struct {
 }
 
 type ThirdParty struct {
-	Providers             ThirdPartyProviders  `yaml:"providers" json:"providers,omitempty" koanf:"providers"`
-	RedirectURL           string               `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true"`
-	ErrorRedirectURL      string               `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
+	GenericOIDCProviders  map[string]GenericOIDCProvider `yaml:"generic_oidc_providers" json:"generic_oidc_providers,omitempty" koanf:"generic_oidc_providers"`
+	Providers             ThirdPartyProviders            `yaml:"providers" json:"providers,omitempty" koanf:"providers"`
+	RedirectURL           string                         `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true"`
+	ErrorRedirectURL      string                         `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
+	AllowedRedirectURLS   []string                       `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
+	AllowedRedirectURLMap map[string]glob.Glob           `jsonschema:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
@@ -585,13 +601,57 @@ func (t *ThirdParty) PostProcess() error {
 }
 
 type ThirdPartyProvider struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID    string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret      string `yaml:"secret" json:"secret" koanf:"secret"`
+	Hidden      bool   `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	Slug        string
+}
+
+type GenericOIDCProvider struct {
+	// DisplayName is the name of the provider that is displayed to the user.
+	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name"`
+	// Enabled indicates if the provider is enabled.
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	// ClientID is the client ID of the provider.
 	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+	// Secret is the client secret of the provider.
+	Secret string `yaml:"secret" json:"secret" koanf:"secret"`
+	// Scopes is a space-separated list of scopes that the provider requires.
+	Scopes string `yaml:"scopes" json:"scopes" koanf:"scopes"`
+	// Hidden indicates if the provider should be hidden from the UI. Hidden as an option duing login/signup and later in IDP management.
+	Hidden bool `yaml:"hidden" json:"hidden" koanf:"hidden"`
+	// Authority is the OIDC authority URL of the provider.
+	Authority string `yaml:"authority" json:"authority" koanf:"authority"`
+	// RequireProviderEmailVerification indicates if the provider should require email verification on their end.
+	RequireProviderEmailVerification bool `yaml:"require_provider_email_verification" json:"require_provider_email_verification" koanf:"require_provider_email_verification" split_words:"true"`
+	// ImageRef is a reference to an image that can be used to display the provider's logo.
+	ImageRef string `yaml:"image_ref" json:"image_ref" koanf:"image_ref"`
+	// Metadata is a map of arbitrary key-value pairs that can be used to store additional information about the provider.
+	// TODO: Should be exposed via an admin API for the frontend to consume.
+	Metadata map[string]string `yaml:"metadata" json:"metadata" koanf:"metadata"`
+	// Slug is a unique identifier for the provider. It is used to reference the provider in the configuration.
+	// it is the lowercase version of the third party map key
+	Slug string
 }
 
 func (p *ThirdPartyProvider) Validate() error {
 	if p.Enabled {
+		if p.ClientID == "" {
+			return errors.New("missing client ID")
+		}
+		if p.Secret == "" {
+			return errors.New("missing client secret")
+		}
+	}
+	return nil
+}
+func (p *GenericOIDCProvider) Validate() error {
+	if p.Enabled {
+		if p.Authority == "" {
+			return errors.New("missing authority")
+		}
 		if p.ClientID == "" {
 			return errors.New("missing client ID")
 		}
@@ -665,7 +725,7 @@ func (c *Config) arrangeSmtpSettings() {
 			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
 			return
 		}
-		
+
 		c.Smtp = c.Passcode.Smtp
 	}
 }

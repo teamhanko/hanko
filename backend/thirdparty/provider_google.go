@@ -3,6 +3,7 @@ package thirdparty
 import (
 	"context"
 	"errors"
+
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
 )
