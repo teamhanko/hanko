@@ -51,6 +51,7 @@ var Flow = flowpilot.NewFlow("/login").
 	State(shared.StateError).
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
 	InitialState(capabilities.StatePreflight, StateLoginInit).
+	AfterState(passcode.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 	ErrorState(shared.StateError).
 	TTL(10 * time.Minute).
 	MustBuild()
