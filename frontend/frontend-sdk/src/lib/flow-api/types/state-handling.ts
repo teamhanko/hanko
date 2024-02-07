@@ -1,6 +1,7 @@
 import { State } from "../State";
 
 import {
+  Action,
   LoginInitActions,
   LoginMethodChooserActions,
   LoginPasskeyActions,
@@ -13,13 +14,14 @@ import {
   PreflightActions,
   RegistrationInitActions,
 } from "./action";
+import { Input } from "./input";
 
 import {
   LoginPasskeyPayload,
   OnboardingVerifyPasskeyAttestationPayload,
 } from "./payload";
 
-type StateName =
+export type StateName =
   | "preflight"
   | "login_init"
   | "login_method_chooser"
@@ -33,7 +35,7 @@ type StateName =
   | "password_creation"
   | "success";
 
-interface StateToActionsMap {
+export interface Actions {
   readonly preflight: PreflightActions;
   readonly login_init: LoginInitActions;
   readonly login_method_chooser: LoginMethodChooserActions;
@@ -48,7 +50,7 @@ interface StateToActionsMap {
   readonly success: null;
 }
 
-interface StateToPayloadMap {
+export interface Payloads {
   readonly preflight: null;
   readonly login_init: null;
   readonly login_method_chooser: null;
@@ -63,38 +65,20 @@ interface StateToPayloadMap {
   readonly success: null;
 }
 
-type MappedActions = {
-  [TStateName in StateName]: StateToActionsMap[TStateName];
-};
+export type FlowPath = "/login" | "/registration" | "/profile";
 
-type MappedPayloads = {
-  [TStateName in StateName]: StateToPayloadMap[TStateName];
-};
-
-type FlowPath = "/login" | "/registration" | "/profile";
-
-type FetchStateFunction = (
+export type FetchNextState = (
   // eslint-disable-next-line no-unused-vars
   href: string,
   // eslint-disable-next-line no-unused-vars
   body?: any
 ) => Promise<State<any>>;
 
-type HandlerFunction<TStateName extends StateName> = (
+export type HandlerFunction<TStateName extends StateName> = (
   // eslint-disable-next-line no-unused-vars
   state: State<TStateName>
 ) => any;
 
-type StateToHandlerMap = {
+export type Handlers = {
   [TStateName in StateName]: HandlerFunction<TStateName>;
-};
-
-export type {
-  StateName,
-  MappedActions,
-  MappedPayloads,
-  FlowPath,
-  FetchStateFunction,
-  HandlerFunction,
-  StateToHandlerMap,
 };

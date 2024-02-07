@@ -1,10 +1,10 @@
 import { Error } from "./error";
 import {
   CredentialCreationOptionsJSON,
-  PublicKeyCredentialWithAssertionJSON
+  PublicKeyCredentialWithAssertionJSON,
 } from "@github/webauthn-json/src/webauthn-json/basic/json";
 
-interface Input<TValue> {
+export interface Input<TValue> {
   name: string;
   type: string;
   value?: TValue;
@@ -15,52 +15,39 @@ interface Input<TValue> {
   error?: Error;
 }
 
-interface PasswordRecoveryInputs {
+export interface PasswordRecoveryInputs {
   readonly new_password: Input<string>;
 }
 
-interface WebauthnVerifyAssertionResponseInputs {
+export interface WebauthnVerifyAssertionResponseInputs {
   readonly assertion_response: Input<PublicKeyCredentialWithAssertionJSON>;
 }
 
-interface WebauthnVerifyAttestationResponseInputs {
+export interface WebauthnVerifyAttestationResponseInputs {
   readonly public_key: Input<CredentialCreationOptionsJSON>;
 }
 
-interface RegisterLoginIdentifierInputs {
+export interface RegisterLoginIdentifierInputs {
   readonly email?: Input<string>;
   readonly username?: Input<string>;
 }
 
-interface RegisterPasswordInputs {
+export interface RegisterPasswordInputs {
   readonly new_password: Input<string>;
 }
 
-interface RegisterClientCapabilitiesInputs {
+export interface RegisterClientCapabilitiesInputs {
   readonly webauthn_available: Input<boolean>;
 }
 
-interface ContinueWithLoginIdentifierInputs {
+export interface ContinueWithLoginIdentifierInputs {
   readonly identifier: Input<string>;
 }
 
-interface PasswordLoginInputs {
+export interface PasswordLoginInputs {
   readonly password: Input<string>;
 }
 
-interface VerifyPasscodeInputs {
+export interface VerifyPasscodeInputs {
   readonly code: Input<string>;
 }
-
-export type {
-  Input,
-  PasswordRecoveryInputs,
-  WebauthnVerifyAssertionResponseInputs,
-  WebauthnVerifyAttestationResponseInputs,
-  RegisterLoginIdentifierInputs,
-  RegisterPasswordInputs,
-  RegisterClientCapabilitiesInputs,
-  ContinueWithLoginIdentifierInputs,
-  PasswordLoginInputs,
-  VerifyPasscodeInputs,
-};
