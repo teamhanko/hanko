@@ -96,50 +96,11 @@ class State<TStateName extends StateName>
           newInputs: any
         ) => {
           const action = {
-            ...(target[prop as Prop] satisfies Original as Action<unknown>),
+            ...deepCopy(
+              target[prop as Prop] satisfies Original as Action<unknown>
+            ),
 
-            // "run" function that sends the action to the Flow API
-            run: () => {
-              const data: Record<string, any> = {};
-
-              // Deal with object-type inputs
-              // i.e. actions.some_action({ ... })
-              //                          ^^^^^^^
-              //
-              // Other input types would look like this:
-              //
-              // actions.another_action(1234);
-              // actions.yet_another_action("foo");
-              //
-              // Meaning
-              if (
-                "inputs" in action &&
-                typeof action.inputs === "object" &&
-                action.inputs !== null
-              ) {
-                // This looks horrible, but at this point we're sure that `action.inputs` is a Record<string, Input>
-                // Because there are no object-type inputs that AREN'T a Record<string, Input>
-                const inputs = action.inputs satisfies object as Record<
-                  string,
-                  Input<unknown>
-                >;
-
-                for (const inputName in action.inputs) {
-                  const input = inputs[inputName];
-
-                  if (input && "value" in input) {
-                    data[inputName] = input.value;
-                  }
-                }
-              }
-
-              // (Possibly add more input types here?)
-
-              // Use the fetch function to perform the action
-              return fetchNextState(this.href, {
-                input_data: JSON.stringify(data),
-              });
-            },
+            run, // sends the action to the Flow API
           };
 
           // Transform this:
@@ -163,12 +124,58 @@ class State<TStateName extends StateName>
           }
 
           return action;
+
+          function run() {
+            const data: Record<string, any> = {};
+
+            // Deal with object-type inputs
+            // i.e. actions.some_action({ ... })
+            //                          ^^^^^^^
+            //
+            // Other input types would look like this:
+            //
+            // actions.another_action(1234);
+            // actions.yet_another_action("foo");
+            //
+            // Meaning
+            if (
+              "inputs" in action &&
+              typeof action.inputs === "object" &&
+              action.inputs !== null
+            ) {
+              // This looks horrible, but at this point we're sure that `action.inputs` is a Record<string, Input>
+              // Because there are no object-type inputs that AREN'T a Record<string, Input>
+              const inputs = action.inputs satisfies object as Record<
+                string,
+                Input<unknown>
+              >;
+
+              for (const inputName in action.inputs) {
+                const input = inputs[inputName];
+
+                if (input && "value" in input) {
+                  data[inputName] = input.value;
+                }
+              }
+            }
+
+            // (Possibly add more input types here?)
+
+            // Use the fetch function to perform the action
+            return fetchNextState(this.href, {
+              input_data: JSON.stringify(data),
+            });
+          }
         };
 
         return createAction;
       },
     }) satisfies Actions[TStateName] as any;
   }
+}
+
+function deepCopy<T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
 }
 
 export { State };
