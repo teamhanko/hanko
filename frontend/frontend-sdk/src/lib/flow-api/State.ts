@@ -95,13 +95,12 @@ class State<TStateName extends StateName>
         const createAction: CreateAction<Action<unknown>> = (
           newInputs: any
         ) => {
-          const action = {
-            ...deepCopy(
+          const action = Object.assign(
+            deepCopy(
               target[prop as Prop] satisfies Original as Action<unknown>
             ),
-
-            run, // sends the action to the Flow API
-          };
+            { run }
+          );
 
           // Transform this:
           // actions.login_password_recovery({ new_password: "password" });
