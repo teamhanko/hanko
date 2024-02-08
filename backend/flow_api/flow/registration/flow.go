@@ -30,5 +30,4 @@ var Flow = flowpilot.NewFlow("/registration").
 	InitialState(capabilities.StatePreflight, StateRegistrationInit).
 	ErrorState(shared.StateError).
 	TTL(10 * time.Minute).
-	Debug(true).
-	MustBuild()
+	Debug(true)

@@ -90,7 +90,11 @@ func (fb *defaultFlowBuilderBase) addStateIfNotExists(stateNames ...StateName) {
 
 // scanFlowStates iterates through each state in the provided flow and associates relevant information, also it checks
 // for uniqueness of state names.
-func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
+func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) error {
+	// Check if states were already scanned, if so, don't scan again
+	if len(fb.stateDetails) > 0 && isRootFlow {
+		return nil
+	}
 	// Iterate through states in the flow.
 	for stateName, actions := range flow.getFlow() {
 		// Check if state name is already in use.
@@ -127,7 +131,7 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 
 	// Recursively scan sub-flows.
 	for _, sf := range flow.getSubFlows() {
-		if err := fb.scanFlowStates(sf); err != nil {
+		if err := fb.scanFlowStates(sf, false); err != nil {
 			return err
 		}
 	}
@@ -252,7 +256,7 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		contextValues:         make(contextValues),
 	}
 
-	if err := fb.scanFlowStates(flow); err != nil {
+	if err := fb.scanFlowStates(flow, true); err != nil {
 		return nil, fmt.Errorf("failed to scan flow states: %w", err)
 	}
 
