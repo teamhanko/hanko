@@ -12,6 +12,7 @@ import (
 
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
+	GetByEmailAddress(string) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
@@ -30,7 +31,7 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identity", "WebauthnCredentials").Find(&user, id)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials").Find(&user, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -41,17 +42,23 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (p *userPersister) GetByEmail(email string) (*models.User, error) {
-	user := models.User{}
-	err := p.db.Eager().Where("email = (?)", email).First(&user)
+func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, error) {
+	email := models.Email{}
+	err := p.db.Where("address = (?)", emailAddress).First(&email)
+
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user by email address: %w", err)
 	}
 
-	return &user, nil
+	if email.UserID == nil {
+		return nil, nil
+	}
+
+	return p.Get(*email.UserID)
 }
 
 func (p *userPersister) Create(user models.User) error {
@@ -115,7 +122,7 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 
 func (p *userPersister) All() ([]models.User, error) {
 	users := []models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identity", "WebauthnCredentials").All(&users)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials").All(&users)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}

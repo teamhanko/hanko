@@ -439,7 +439,7 @@ third_party:
   # Required if any providers are enabled.
   # List of URLS the backend is allowed to redirect to after third party sign-in was successful.
   # (see also the 'redirect_to' parameter for the third party auth initialization endpoint
-  # - https://docs.hanko.io/api/public#tag/Third-Party/operation/thirdPartyAuth)
+  # - https://docs.hanko.io/api-reference/public/third-party/initialize-third-party-login)
   #
   # Supports wildcard matching through globbing. e.g. https://*.example.com will allow https://foo.example.com and https://bar.example.com to be accepted.
   # Globbing is also supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1 and https://foo.example.com/page2.
@@ -506,6 +506,16 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      # Default: true
+      #
+      allow_linking: true
     ##
     #
     # The Google provider configuration
@@ -534,6 +544,16 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      # Default: true
+      #
+      allow_linking: true
     ##
     #
     # The GitHub provider configuration
@@ -562,6 +582,16 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      # Default: true
+      #
+      allow_linking: true
 log:
   ## log_health_and_metrics
   #

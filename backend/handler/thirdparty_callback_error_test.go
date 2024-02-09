@@ -10,7 +10,7 @@ import (
 	"testing"
 )
 
-func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignUpUserConflict() {
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowedForProvider() {
 	defer gock.Off()
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
@@ -34,6 +34,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignUpUserConflic
 		})
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
+	cfg.ThirdParty.Providers.Google.AllowLinking = false
 
 	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)

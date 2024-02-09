@@ -45,7 +45,6 @@ export interface Translation {
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;
-    emailDeleteThirdPartyConnection: string;
     emailDeletePrimary: string;
     renamePasskey: string;
     deletePasskey: string;
@@ -103,6 +102,7 @@ export interface Translation {
     thirdPartyAccessDenied: string;
     thirdPartyMultipleAccounts: string;
     thirdPartyUnverifiedEmail: string;
+    signupDisabled: string;
   };
 }
 

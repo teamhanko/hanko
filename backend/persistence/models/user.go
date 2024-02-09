@@ -27,12 +27,11 @@ func NewUser() User {
 }
 
 func (user *User) GetEmailById(emailId uuid.UUID) *Email {
-	for _, email := range user.Emails {
-		if email.ID.String() == emailId.String() {
-			return &email
-		}
-	}
-	return nil
+	return user.Emails.GetEmailById(emailId)
+}
+
+func (user *User) GetEmailByAddress(address string) *Email {
+	return user.Emails.GetEmailByAddress(address)
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.

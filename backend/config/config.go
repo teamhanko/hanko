@@ -9,9 +9,9 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
-	zeroLogger "github.com/rs/zerolog/log"
 	"log"
 	"strings"
 	"time"
@@ -169,6 +169,19 @@ func DefaultConfig() *Config {
 		Account: Account{
 			AllowDeletion: false,
 			AllowSignup:   true,
+		},
+		ThirdParty: ThirdParty{
+			Providers: ThirdPartyProviders{
+				Google: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				GitHub: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				Apple: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+			},
 		},
 	}
 }
@@ -585,9 +598,10 @@ func (t *ThirdParty) PostProcess() error {
 }
 
 type ThirdPartyProvider struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+	Enabled      bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID     string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret       string `yaml:"secret" json:"secret" koanf:"secret"`
+	AllowLinking bool   `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" split_words:"true"`
 }
 
 func (p *ThirdPartyProvider) Validate() error {
@@ -665,7 +679,7 @@ func (c *Config) arrangeSmtpSettings() {
 			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
 			return
 		}
-		
+
 		c.Smtp = c.Passcode.Smtp
 	}
 }

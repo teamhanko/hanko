@@ -676,6 +676,9 @@
         },
         "secret": {
           "type": "string"
+        },
+        "allow_linking": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -683,7 +686,8 @@
       "required": [
         "enabled",
         "client_id",
-        "secret"
+        "secret",
+        "allow_linking"
       ]
     },
     "ThirdPartyProviders": {

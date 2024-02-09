@@ -46,8 +46,6 @@ export const it: Translation = {
     emailUnverified: "Questo indirizzo email non è stato verificato.",
     emailDelete:
       "Se cancelli questo indirizzo email, non potrà più essere utilizzato per accedere.",
-    emailDeleteThirdPartyConnection:
-      "Se cancelli questo indirizzo email, non potrà più essere utilizzato per accedere.",
     emailDeletePrimary:
       "L'indirizzo email principale non può essere eliminato.",
     renamePasskey:
@@ -118,5 +116,6 @@ export const it: Translation = {
       "Impossibile identificare l'account. L'indirizzo email è utilizzato in più account.",
     thirdPartyUnverifiedEmail:
       "Verifica email richiesta. Verifica l'indirizzo email utilizzato con il tuo provider.",
+    signupDisabled: "La registrazione dell'account è disabilitata.",
   },
 };
