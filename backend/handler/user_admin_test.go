@@ -160,8 +160,6 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
-
 	tests := []struct {
 		name               string
 		body               string
@@ -233,6 +231,8 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 		s.Run(currentTest.name, func() {
 			s.Require().NoError(s.Storage.MigrateUp())
 
+			e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
 			err := s.LoadFixtures("../test/fixtures/user_admin")
 			s.Require().NoError(err)
 
@@ -243,6 +243,10 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 			e.ServeHTTP(rec, req)
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
+
+			err = e.Close()
+			s.Require().NoError(err)
+
 			s.Require().NoError(s.Storage.MigrateDown(-1))
 		})
 	}

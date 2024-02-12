@@ -43,6 +43,7 @@ type Persister interface {
 	GetSamlStatePersisterWithConnection(tx *pop.Connection) SamlStatePersister
 	GetSamlCertificatePersister() SamlCertificatePersister
 	GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister
+	GetWebhookPersister(tx *pop.Connection) WebhookPersister
 }
 
 type Migrator interface {
@@ -223,4 +224,12 @@ func (p *persister) GetSamlCertificatePersister() SamlCertificatePersister {
 
 func (p *persister) GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister {
 	return NewSamlCertificatePersister(tx)
+}
+
+func (p *persister) GetWebhookPersister(tx *pop.Connection) WebhookPersister {
+	if tx != nil {
+		return NewWebhookPersister(tx)
+	}
+
+	return NewWebhookPersister(p.DB)
 }

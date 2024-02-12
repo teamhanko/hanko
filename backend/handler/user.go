@@ -10,9 +10,12 @@ import (
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/dto/admin"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"net/http"
 	"strings"
 )
@@ -136,11 +139,20 @@ func (h *UserHandler) Create(c echo.Context) error {
 			SameSite: http.SameSiteNoneMode,
 		})
 
-		return c.JSON(http.StatusOK, dto.CreateUserResponse{
+		newUserDto := dto.CreateUserResponse{
 			ID:      newUser.ID,
 			UserID:  newUser.ID,
 			EmailID: email.ID,
-		})
+		}
+
+		if !h.cfg.Emails.RequireVerification {
+			err = utils.TriggerWebhooks(c, events.UserCreate, admin.FromUserModel(newUser))
+			if err != nil {
+				c.Logger().Warn(err)
+			}
+		}
+
+		return c.JSON(http.StatusOK, newUserDto)
 	})
 }
 
@@ -262,6 +274,11 @@ func (h *UserHandler) Delete(c echo.Context) error {
 		}
 
 		c.SetCookie(cookie)
+
+		err = utils.TriggerWebhooks(c, events.UserDelete, admin.FromUserModel(*user))
+		if err != nil {
+			c.Logger().Warn(err)
+		}
 
 		return c.NoContent(http.StatusNoContent)
 	})

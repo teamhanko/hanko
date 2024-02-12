@@ -13,6 +13,8 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"net/http"
 	"strings"
 )
@@ -24,13 +26,13 @@ type EmailHandler struct {
 	auditLogger    auditlog.Logger
 }
 
-func NewEmailHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) (*EmailHandler, error) {
+func NewEmailHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *EmailHandler {
 	return &EmailHandler{
 		persister:      persister,
 		cfg:            cfg,
 		sessionManager: sessionManager,
 		auditLogger:    auditLogger,
-	}, nil
+	}
 }
 
 func (h *EmailHandler) List(c echo.Context) error {
@@ -138,6 +140,19 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
+		if !h.cfg.Emails.RequireVerification {
+			var evt events.Event
+
+			if len(user.Emails) >= 1 {
+				evt = events.EmailCreate
+			} else {
+				evt = events.UserCreate
+			}
+
+			utils.NotifyUserChange(c, tx, h.persister, evt, userId)
+
+		}
+
 		return c.JSON(http.StatusOK, email)
 	})
 }
@@ -197,6 +212,8 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
+		utils.NotifyUserChange(c, tx, h.persister, events.EmailPrimary, userId)
+
 		return c.NoContent(http.StatusNoContent)
 	})
 }
@@ -238,6 +255,8 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
+
+		utils.NotifyUserChange(c, tx, h.persister, events.EmailDelete, userId)
 
 		return c.NoContent(http.StatusNoContent)
 	})

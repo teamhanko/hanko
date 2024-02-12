@@ -29,6 +29,7 @@ COPY middleware middleware/
 COPY template template/
 COPY utils utils/
 COPY mapper mapper/
+COPY webhooks webhooks/
 
 # Build
 RUN go generate ./...

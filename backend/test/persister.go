@@ -6,6 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
+// Deprecated: NewPersister is deprecated. Use test.Suite instead
 func NewPersister(
 	user []models.User,
 	passcodes []models.Passcode,
@@ -20,6 +21,8 @@ func NewPersister(
 	tokens []models.Token,
 	samlStates []models.SamlState,
 	samlCertificates []*models.SamlCertificate,
+	webhooks models.Webhooks,
+	webhookEvents models.WebhookEvents,
 ) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
@@ -35,6 +38,7 @@ func NewPersister(
 		tokenPersister:               NewTokenPersister(tokens),
 		samlStatePersister:           NewSamlStatePersister(samlStates),
 		samlCertificatePersister:     NewSamlCertificatePersister(samlCertificates),
+		webhookPersister:             NewWebhookPersister(webhooks, webhookEvents),
 	}
 }
 
@@ -52,6 +56,7 @@ type persister struct {
 	tokenPersister               persistence.TokenPersister
 	samlStatePersister           persistence.SamlStatePersister
 	samlCertificatePersister     persistence.SamlCertificatePersister
+	webhookPersister             persistence.WebhookPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -165,4 +170,8 @@ func (p *persister) GetSamlCertificatePersister() persistence.SamlCertificatePer
 
 func (p *persister) GetSamlCertificatePersisterWithConnection(tx *pop.Connection) persistence.SamlCertificatePersister {
 	return p.samlCertificatePersister
+}
+
+func (p *persister) GetWebhookPersister(_ *pop.Connection) persistence.WebhookPersister {
+	return p.webhookPersister
 }

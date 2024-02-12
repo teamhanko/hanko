@@ -171,6 +171,9 @@
         },
         "saml": {
           "$ref": "#/$defs/Saml"
+        },
+        "webhooks": {
+          "$ref": "#/$defs/WebhookSettings"
         }
       },
       "additionalProperties": false,
@@ -312,6 +315,12 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "Events": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
     },
     "IdentityProvider": {
       "properties": {
@@ -727,6 +736,41 @@
       "additionalProperties": false,
       "type": "object",
       "description": "WebauthnSettings defines the settings for the webauthn authentication mechanism"
+    },
+    "Webhook": {
+      "properties": {
+        "callback": {
+          "type": "string"
+        },
+        "events": {
+          "$ref": "#/$defs/Events"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WebhookSettings": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_time_expiration": {
+          "type": "boolean",
+          "default": false
+        },
+        "hooks": {
+          "$ref": "#/$defs/Webhooks"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Webhooks": {
+      "items": {
+        "$ref": "#/$defs/Webhook"
+      },
+      "type": "array"
     }
   }
 }

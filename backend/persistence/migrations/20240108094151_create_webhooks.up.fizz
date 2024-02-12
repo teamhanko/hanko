@@ -1,0 +1,9 @@
+create_table("webhooks") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("callback", "string", {})
+    t.Column("enabled", "bool", { "default": true })
+    t.Column("failures", "int", { default: 0 })
+    t.Column("expires_at", "timestamp", {})
+
+	t.Timestamps()
+}
