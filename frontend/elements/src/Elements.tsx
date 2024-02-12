@@ -4,7 +4,7 @@ import AppProvider, {
   ComponentName,
   GlobalOptions,
 } from "./contexts/AppProvider";
-import { Hanko } from "@teamhanko/hanko-frontend-sdk";
+import { CookieSameSite, Hanko } from "@teamhanko/hanko-frontend-sdk";
 import { defaultTranslations, Translations } from "./i18n/translations";
 
 export interface HankoAuthAdditionalProps {
@@ -43,6 +43,8 @@ export interface RegisterOptions {
   translationsLocation?: string;
   fallbackLanguage?: string;
   storageKey?: string;
+  cookieDomain?: string;
+  cookieSameSite?: CookieSameSite;
 }
 
 export interface RegisterResult {
@@ -59,7 +61,7 @@ const globalOptions: GlobalOptions = {};
 
 const createHankoComponent = (
   componentName: ComponentName,
-  props: Record<string, any>
+  props: Record<string, any>,
 ) => (
   <AppProvider
     componentName={componentName}
@@ -92,7 +94,7 @@ const _register = async ({
 
 export const register = async (
   api: string,
-  options: RegisterOptions = {}
+  options: RegisterOptions = {},
 ): Promise<RegisterResult> => {
   options = {
     shadow: true,
@@ -107,6 +109,8 @@ export const register = async (
 
   globalOptions.hanko = new Hanko(api, {
     cookieName: options.storageKey,
+    cookieDomain: options.cookieDomain,
+    cookieSameSite: options.cookieSameSite,
     localStorageKey: options.storageKey,
   });
   globalOptions.injectStyles = options.injectStyles;

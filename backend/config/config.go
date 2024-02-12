@@ -9,9 +9,9 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
-	zeroLogger "github.com/rs/zerolog/log"
 	"log"
 	"strings"
 	"time"
@@ -42,14 +42,27 @@ var (
 	DefaultConfigFilePath = "./config/config.yaml"
 )
 
-func Load(cfgFile *string) (*Config, error) {
+func LoadFile(filePath *string, pa koanf.Parser) (*koanf.Koanf, error) {
 	k := koanf.New(".")
-	var err error
+
+	if filePath == nil || *filePath == "" {
+		return nil, nil
+	}
+
+	if err := k.Load(file.Provider(*filePath), pa); err != nil {
+		return nil, fmt.Errorf("failed to load file from '%s': %w", *filePath, err)
+	}
+
+	return k, nil
+}
+
+func Load(cfgFile *string) (*Config, error) {
 	if cfgFile == nil || *cfgFile == "" {
 		*cfgFile = DefaultConfigFilePath
 	}
 
-	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
+	k, err := LoadFile(cfgFile, yaml.Parser())
+	if err != nil {
 		if *cfgFile != DefaultConfigFilePath {
 			return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
 		}
@@ -157,6 +170,19 @@ func DefaultConfig() *Config {
 		Account: Account{
 			AllowDeletion: false,
 			AllowSignup:   true,
+		},
+		ThirdParty: ThirdParty{
+			Providers: ThirdPartyProviders{
+				Google: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				GitHub: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				Apple: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+			},
 		},
 	}
 }
@@ -577,9 +603,10 @@ func (t *ThirdParty) PostProcess() error {
 }
 
 type ThirdPartyProvider struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+	Enabled      bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID     string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret       string `yaml:"secret" json:"secret" koanf:"secret"`
+	AllowLinking bool   `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" split_words:"true"`
 }
 
 func (p *ThirdPartyProvider) Validate() error {
@@ -657,7 +684,7 @@ func (c *Config) arrangeSmtpSettings() {
 			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
 			return
 		}
-		
+
 		c.Smtp = c.Passcode.Smtp
 	}
 }

@@ -43,7 +43,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 		return cfg
 	}
 
-	e := NewPublicRouter(cfg(), s.Storage, nil)
+	e := NewPublicRouter(cfg(), s.Storage, nil, nil)
 
 	emailId := "51b7c175-ceb6-45ba-aae6-0092221c1b84"
 	unknownEmailId := "83618f24-2db8-4ea2-b370-ac8335f782d8"
@@ -278,7 +278,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 			s.Require().NoError(err)
 
-			e := NewPublicRouter(currentTest.cfg(), s.Storage, nil)
+			e := NewPublicRouter(currentTest.cfg(), s.Storage, nil, nil)
 
 			// Setup passcode
 			err = s.Storage.GetPasscodePersister().Create(currentTest.passcode)

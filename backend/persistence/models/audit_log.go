@@ -56,6 +56,7 @@ var (
 
 	AuditLogThirdPartySignUpSucceeded    AuditLogType = "thirdparty_signup_succeeded"
 	AuditLogThirdPartySignInSucceeded    AuditLogType = "thirdparty_signin_succeeded"
+	AuditLogThirdPartyLinkingSucceeded   AuditLogType = "thirdparty_linking_succeeded"
 	AuditLogThirdPartySignInSignUpFailed AuditLogType = "thirdparty_signin_signup_failed"
 
 	AuditLogTokenExchangeSucceeded AuditLogType = "token_exchange_succeeded"

@@ -22,7 +22,7 @@ func (s *wellKnownSuite) TestWellKnownHandler_GetPublicKeys() {
 		s.T().Skip("skipping test in short mode")
 	}
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	req := httptest.NewRequest(http.MethodGet, "/.well-known/jwks.json", nil)
 	rec := httptest.NewRecorder()

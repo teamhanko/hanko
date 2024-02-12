@@ -5,8 +5,8 @@ database:
   port: 5432
   dialect: postgres
 smtp:
-    host: "mailslurper"
-    port: "2500"
+  host: "mailslurper"
+  port: "2500"
 passcode:
   email:
     from_address: no-reply@hanko.io

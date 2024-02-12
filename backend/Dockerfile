@@ -28,6 +28,7 @@ COPY build_info build_info/
 COPY middleware middleware/
 COPY template template/
 COPY utils utils/
+COPY mapper mapper/
 COPY webhooks webhooks/
 
 # Build

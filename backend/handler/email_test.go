@@ -38,7 +38,7 @@ func (s *emailSuite) TestEmailHandler_List() {
 	err := s.LoadFixtures("../test/fixtures/email")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
@@ -171,7 +171,7 @@ func (s *emailSuite) TestEmailHandler_Create() {
 			cfg.AuditLog.Storage.Enabled = true
 			cfg.Emails.RequireVerification = currentTest.requiresVerification
 			cfg.Emails.MaxNumOfAddresses = currentTest.maxNumberOfAddresses
-			e := NewPublicRouter(&cfg, s.Storage, nil)
+			e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 			jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
 			s.Require().NoError(err)
 			sessionManager, err := session.NewManager(jwkManager, cfg)
@@ -233,7 +233,7 @@ func (s *emailSuite) TestEmailHandler_SetPrimaryEmail() {
 	err := s.LoadFixtures("../test/fixtures/email")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
@@ -277,7 +277,7 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 	err := s.LoadFixtures("../test/fixtures/email")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
 	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())

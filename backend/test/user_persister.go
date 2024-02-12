@@ -88,3 +88,12 @@ func (p *userPersister) All() ([]models.User, error) {
 func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
 	return len(p.users), nil
 }
+
+func (p *userPersister) GetByEmailAddress(s string) (*models.User, error) {
+	for _, user := range p.users {
+		if email := user.Emails.GetEmailByAddress(s); email != nil {
+			return &user, nil
+		}
+	}
+	return nil, nil
+}

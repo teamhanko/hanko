@@ -130,6 +130,9 @@
         "webauthn": {
           "$ref": "#/$defs/WebauthnSettings"
         },
+        "smtp": {
+          "$ref": "#/$defs/SMTP"
+        },
         "passcode": {
           "$ref": "#/$defs/Passcode"
         },
@@ -388,19 +391,17 @@
         "email": {
           "$ref": "#/$defs/Email"
         },
-        "smtp": {
-          "$ref": "#/$defs/SMTP"
-        },
         "ttl": {
           "type": "integer",
           "default": 300
+        },
+        "smtp": {
+          "$ref": "#/$defs/SMTP",
+          "description": "Deprecated: Use root level Smtp instead"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "smtp"
-      ]
+      "type": "object"
     },
     "Password": {
       "properties": {
@@ -684,6 +685,9 @@
         },
         "secret": {
           "type": "string"
+        },
+        "allow_linking": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -691,7 +695,8 @@
       "required": [
         "enabled",
         "client_id",
-        "secret"
+        "secret",
+        "allow_linking"
       ]
     },
     "ThirdPartyProviders": {

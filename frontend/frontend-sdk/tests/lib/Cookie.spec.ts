@@ -1,6 +1,7 @@
 import JSCookie from "js-cookie";
 import { Cookie } from "../../src/lib/Cookie";
 import { fakeTimerNow } from "../setup";
+import { Response } from "../../src/lib/client/HttpClient";
 
 describe("Cookie()", () => {
   let cookie: Cookie;
@@ -15,6 +16,8 @@ describe("Cookie()", () => {
       cookie.setAuthCookie("test-token", { secure: false });
       expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
         secure: false,
+        sameSite: "lax",
+        domain: undefined,
       });
     });
 
@@ -24,6 +27,8 @@ describe("Cookie()", () => {
 
       expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
         secure: true,
+        domain: undefined,
+        sameSite: "lax",
       });
     });
 
@@ -33,7 +38,35 @@ describe("Cookie()", () => {
       cookie.setAuthCookie("test-token", { secure: true, expires });
       expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
         secure: true,
+        sameSite: "lax",
+        domain: undefined,
         expires,
+      });
+    });
+
+    it("should set a new cookie with given SameSite value", async () => {
+      jest.spyOn(JSCookie, "set");
+      cookie.setAuthCookie("test-token", { sameSite: "strict" });
+      expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
+        secure: true,
+        sameSite: "strict",
+      });
+    });
+
+    it("should throw if not Secure and SameSite value is none", async () => {
+      jest.spyOn(JSCookie, "set");
+      expect(() => {
+        cookie.setAuthCookie("test-token", { secure: false, sameSite: "none" });
+      }).toThrow("Technical error");
+    });
+
+    it("should set a new cookie with given domain value", async () => {
+      jest.spyOn(JSCookie, "set");
+      cookie.setAuthCookie("test-token", { domain: ".test.app" });
+      expect(JSCookie.set).toHaveBeenCalledWith("hanko", "test-token", {
+        secure: true,
+        sameSite: "lax",
+        domain: ".test.app",
       });
     });
   });
