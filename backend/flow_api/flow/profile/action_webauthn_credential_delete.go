@@ -20,34 +20,7 @@ func (a WebauthnCredentialDelete) GetDescription() string {
 }
 
 func (a WebauthnCredentialDelete) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	userModel, ok := c.Get("session_user").(*models.User)
-	if !ok {
-		c.SuspendAction()
-		return
-	}
-
-	if len(userModel.WebauthnCredentials) == 1 {
-		if deps.Cfg.Passcode.Enabled && !deps.Cfg.Password.Enabled {
-			if deps.Cfg.Identifier.Email.Optional && len(userModel.Emails) == 0 {
-				c.SuspendAction()
-				return
-			}
-		} else if !deps.Cfg.Passcode.Enabled && deps.Cfg.Password.Enabled {
-			if userModel.PasswordCredential == nil {
-				c.SuspendAction()
-				return
-			}
-		} else {
-			if len(userModel.Emails) == 0 && userModel.PasswordCredential == nil {
-				c.SuspendAction()
-				return
-			}
-		}
-	}
-
-	if len(userModel.WebauthnCredentials) == 0 {
+	if a.mustSuspend(c) {
 		c.SuspendAction()
 		return
 	}
@@ -77,5 +50,45 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete passkey: %w", err)
 	}
 
+	updatedUserModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userModel.ID)
+	if err != nil {
+		return fmt.Errorf("could not fetch user: %w", err)
+	}
+	c.Set("session_user", updatedUserModel)
+
+	if a.mustSuspend(c) {
+		c.SuspendAction()
+	}
+
 	return c.ContinueFlow(StateProfileInit)
+}
+
+func (a WebauthnCredentialDelete) mustSuspend(c flowpilot.Context) bool {
+	deps := a.GetDeps(c)
+
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return true
+	}
+
+	if len(userModel.WebauthnCredentials) == 1 {
+		if deps.Cfg.Passcode.Enabled && !deps.Cfg.Password.Enabled {
+			if deps.Cfg.Identifier.Email.Optional && len(userModel.Emails) == 0 {
+				return true
+			}
+		} else if !deps.Cfg.Passcode.Enabled && deps.Cfg.Password.Enabled {
+			if userModel.PasswordCredential == nil {
+				return true
+			}
+		} else {
+			if len(userModel.Emails) == 0 && userModel.PasswordCredential == nil {
+				return true
+			}
+		}
+	}
+
+	if len(userModel.WebauthnCredentials) == 0 {
+		return true
+	}
+	return false
 }

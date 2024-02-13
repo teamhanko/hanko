@@ -21,19 +21,7 @@ func (a PasswordDelete) GetDescription() string {
 }
 
 func (a PasswordDelete) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	if !deps.Cfg.Password.Enabled {
-		c.SuspendAction()
-	}
-
-	userModel, ok := c.Get("session_user").(*models.User)
-	if !ok {
-		c.SuspendAction()
-		return
-	}
-
-	if userModel.PasswordCredential == nil {
+	if a.mustSuspend(c) {
 		c.SuspendAction()
 		return
 	}
@@ -68,5 +56,34 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete password credential: %w", err)
 	}
 
+	updatedUserModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Get(userModel.ID)
+	if err != nil {
+		return fmt.Errorf("could not fetch user: %w", err)
+	}
+	c.Set("session_user", updatedUserModel)
+
+	if a.mustSuspend(c) {
+		c.SuspendAction()
+	}
+
 	return c.ContinueFlow(StateProfileInit)
+}
+
+func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Password.Enabled {
+		return true
+	}
+
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return true
+	}
+
+	if userModel.PasswordCredential == nil {
+		return true
+	}
+
+	return false
 }

@@ -22,31 +22,7 @@ func (a EmailDelete) GetDescription() string {
 }
 
 func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	userModel, ok := c.Get("session_user").(*models.User)
-	if !ok {
-		c.SuspendAction()
-		return
-	}
-
-	if len(userModel.Emails) == 1 {
-		if deps.Cfg.Identifier.Email.Enabled {
-			if !deps.Cfg.Identifier.Email.Optional {
-				c.SuspendAction()
-				return
-			}
-
-			if len(userModel.WebauthnCredentials) == 0 {
-				if !deps.Cfg.Password.Enabled || userModel.PasswordCredential == nil {
-					c.SuspendAction()
-					return
-				}
-			}
-		}
-	}
-
-	if len(userModel.Emails) == 0 {
+	if a.mustSuspend(c) {
 		c.SuspendAction()
 		return
 	}
@@ -94,5 +70,44 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete email: %w", err)
 	}
 
+	updatedUserModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userModel.ID)
+	if err != nil {
+		return fmt.Errorf("could not fetch user: %w", err)
+	}
+	c.Set("session_user", updatedUserModel)
+
+	if a.mustSuspend(c) {
+		c.SuspendAction()
+	}
+
 	return c.ContinueFlow(StateProfileInit)
+}
+
+func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
+	deps := a.GetDeps(c)
+
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		return true
+	}
+
+	if len(userModel.Emails) == 1 {
+		if deps.Cfg.Identifier.Email.Enabled {
+			if !deps.Cfg.Identifier.Email.Optional {
+				return true
+			}
+
+			if len(userModel.WebauthnCredentials) == 0 {
+				if !deps.Cfg.Password.Enabled || userModel.PasswordCredential == nil {
+					return true
+				}
+			}
+		}
+	}
+
+	if len(userModel.Emails) == 0 {
+		return true
+	}
+
+	return false
 }

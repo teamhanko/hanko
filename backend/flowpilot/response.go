@@ -105,8 +105,9 @@ func (r DefaultFlowResult) Status() int {
 
 // actionExecutionResult holds the result of a method execution.
 type actionExecutionResult struct {
-	actionName ActionName
-	schema     ExecutionSchema
+	actionName  ActionName
+	schema      ExecutionSchema
+	isSuspended bool
 }
 
 // executionResult holds the result of an action execution.
@@ -175,9 +176,14 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
+			schema := er.getExecutionSchema(actionName)
 
-			schema := er.createSchema(fc, action)
 			if schema == nil {
+				// Create schema if not available.
+				if schema = er.createSchema(fc, action); schema == nil {
+					continue
+				}
+			} else if er.isSuspended {
 				continue
 			}
 

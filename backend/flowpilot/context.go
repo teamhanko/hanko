@@ -64,6 +64,8 @@ type actionExecutionContext interface {
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
+
+	SuspendAction()
 }
 
 // actionExecutionContinuationContext represents the context within an action continuation.
