@@ -9,7 +9,7 @@ import { Action } from "./types/action";
 import { Input } from "./types/input";
 
 type InputValues<I extends Record<string, Input<any>>> = {
-  [K in keyof I]: I[K]["value"];
+  [K in keyof I]?: I[K]["value"];
 };
 
 type CreateAction<A extends Action<any>> = (
@@ -102,6 +102,8 @@ class State<TStateName extends StateName>
             { run }
           );
 
+          // If `actions` is an object that has inputs,
+          //
           // Transform this:
           // actions.login_password_recovery({ new_password: "password" });
           //                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -130,7 +132,6 @@ class State<TStateName extends StateName>
             // Deal with object-type inputs
             // i.e. actions.some_action({ ... })
             //                          ^^^^^^^
-            //
             // Other input types would look like this:
             //
             // actions.another_action(1234);
