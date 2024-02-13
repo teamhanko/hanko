@@ -8,17 +8,21 @@ import { Error } from "./types/error";
 import { Action } from "./types/action";
 import { Input } from "./types/input";
 
-type InputValues<I extends Record<string, Input<any>>> = {
-  [K in keyof I]?: I[K]["value"];
+type InputValues<TInput extends Record<string, Input<any>>> = {
+  [K in keyof TInput]?: TInput[K]["value"];
 };
 
-type CreateAction<A extends Action<any>> = (
-  inputs: InputValues<A["inputs"]>
-) => A & { run: () => Promise<State<any>> };
+type CreateAction<TAction extends Action<any>> = (
+  inputs: InputValues<TAction["inputs"]>
+) => TAction & {
+  run: () => Promise<State<any>>;
+  validate: () => TAction;
+  tryValidate: () => ValidationError | void;
+};
 
 type ActionFunctions = {
-  [StateName in keyof Actions]: {
-    [ActionName in keyof Actions[StateName]]: Actions[StateName][ActionName] extends Action<
+  [TStateName in keyof Actions]: {
+    [TActionName in keyof Actions[TStateName]]: Actions[TStateName][TActionName] extends Action<
       infer Inputs
     >
       ? CreateAction<Action<Inputs>>
@@ -76,31 +80,82 @@ class State<TStateName extends StateName>
     //
     // Okay, there's one difference, the function call creates a copy of the action, so it's not mutating the original object.
     // The newly created action is returned. It also has a `run` method, which sends the action to the server (fetchNextState)
-    this.actions = this.#createActionsProxy(actions, fetchNextState);
+    this.actions = this.#createActionsProxy(actions);
 
+    // Do not remove! `this.fetchNextState` has to be set for `this.#runAction` to work
     this.fetchNextState = fetchNextState;
   }
 
-  #createActionsProxy(
-    actions: Actions[TStateName],
-    fetchNextState: FetchNextState
-  ) {
+  /**
+   * We get the `actions` object from the server. That object is essentially a definition of actions that can be performed in the current state.
+   *
+   * For example:
+   *
+   *     actions = {
+   *       login_password_recovery: {
+   *         inputs: {
+   *           email: { value: undefined, required: true, ... }
+   *           password: { value: undefined, required: true, min_length: 8, ... }
+   *         }
+   *       },
+   *       create_account: { inputs: ... },
+   *       some_other_action: { inputs: ... },
+   *     };
+   *
+   * The proxy returned by this method creates "action functions".
+   *
+   * Each action function copies the original definition (`{ inputs: ... }`) and modifies that copy with the inputs provided by the user.
+   *
+   * In practice, it looks like this:
+   *
+   *     actions.login_password_recovery({ new_password: "very-secure-123" });
+   *     // => { inputs: { password: { value: "very-secure-123", min_length: 8, ... }}}
+   *
+   * Additionally, helper methods like `run` (to send the action to the server) and `validate` (to validate the inputs; the `inputs` object also contains validation rules)
+   */
+  #createActionsProxy(actions: Actions[TStateName]) {
+    const runAction = (action: Action<any>) => this.runAction(action);
+    const validateAction = (action: Action<any>) => this.validateAction(action);
+
     return new Proxy(actions, {
-      get(target, prop) {
+      get(target, prop): CreateAction<Action<unknown>> {
         if (typeof prop === "symbol") return (target as any)[prop];
 
         type Original = Actions[TStateName][keyof Actions[TStateName]];
         type Prop = keyof typeof target;
 
-        const createAction: CreateAction<Action<unknown>> = (
-          newInputs: any
-        ) => {
-          const action = Object.assign(
-            deepCopy(
-              target[prop as Prop] satisfies Original as Action<unknown>
-            ),
-            { run }
-          );
+        /**
+         * This is the action defintion.
+         * Running the function returned by this getter creates a **deep copy**
+         * with values set by the user.
+         */
+        const originalAction = target[
+          prop as Prop
+        ] satisfies Original as Action<unknown>;
+
+        return (newInputs: any) => {
+          const action = Object.assign(deepCopy(originalAction), {
+            validate() {
+              validateAction(action);
+              return action;
+            },
+            /**
+             * Safe version of `validate` that returns
+             */
+            tryValidate() {
+              try {
+                validateAction(action);
+              } catch (e) {
+                if (e instanceof ValidationError) return e;
+
+                // We still want to throw non-ValidationErrors since they're unexpected (and indicate a bug on our side)
+                throw e;
+              }
+            },
+            run() {
+              return runAction(action);
+            },
+          });
 
           // If `actions` is an object that has inputs,
           //
@@ -125,52 +180,142 @@ class State<TStateName extends StateName>
           }
 
           return action;
-
-          function run() {
-            const data: Record<string, any> = {};
-
-            // Deal with object-type inputs
-            // i.e. actions.some_action({ ... })
-            //                          ^^^^^^^
-            // Other input types would look like this:
-            //
-            // actions.another_action(1234);
-            // actions.yet_another_action("foo");
-            //
-            // Meaning
-            if (
-              "inputs" in action &&
-              typeof action.inputs === "object" &&
-              action.inputs !== null
-            ) {
-              // This looks horrible, but at this point we're sure that `action.inputs` is a Record<string, Input>
-              // Because there are no object-type inputs that AREN'T a Record<string, Input>
-              const inputs = action.inputs satisfies object as Record<
-                string,
-                Input<unknown>
-              >;
-
-              for (const inputName in action.inputs) {
-                const input = inputs[inputName];
-
-                if (input && "value" in input) {
-                  data[inputName] = input.value;
-                }
-              }
-            }
-
-            // (Possibly add more input types here?)
-
-            // Use the fetch function to perform the action
-            return fetchNextState(this.href, {
-              input_data: JSON.stringify(data),
-            });
-          }
         };
-
-        return createAction;
       },
     }) satisfies Actions[TStateName] as any;
+  }
+
+  runAction(action: Action<any>): Promise<State<any>> {
+    const data: Record<string, any> = {};
+
+    // Deal with object-type inputs
+    // i.e. actions.some_action({ ... })
+    //                          ^^^^^^^
+    // Other input types would look like this:
+    //
+    // actions.another_action(1234);
+    // actions.yet_another_action("foo");
+    //
+    // Meaning
+    if (
+      "inputs" in action &&
+      typeof action.inputs === "object" &&
+      action.inputs !== null
+    ) {
+      // This looks horrible, but at this point we're sure that `action.inputs` is a Record<string, Input>
+      // Because there are no object-type inputs that AREN'T a Record<string, Input>
+      const inputs = action.inputs satisfies object as Record<
+        string,
+        Input<unknown>
+      >;
+
+      for (const inputName in action.inputs) {
+        const input = inputs[inputName];
+
+        if (input && "value" in input) {
+          data[inputName] = input.value;
+        }
+      }
+    }
+
+    // (Possibly add more input types here?)
+
+    // Use the fetch function to perform the action
+    return this.fetchNextState(action.href, {
+      input_data: JSON.stringify(data),
+    });
+  }
+
+  validateAction(action: Action<{ [key: string]: Input<unknown> }>) {
+    if (!("inputs" in action)) return;
+
+    for (const inputName in action.inputs) {
+      const input = action.inputs[inputName];
+
+      function reject<T>(
+        reason: ValidationReason,
+        message: string,
+        wanted?: T,
+        actual?: T
+      ) {
+        throw new ValidationError({
+          reason,
+          inputName,
+          wanted,
+          actual,
+          message,
+        });
+      }
+
+      const value = input.value as any; // TS gets in the way here
+
+      // TODO is !input.value right here? this will also reject empty strings, `0`, ... and will never reject an empty array/object
+      if (input.required && !value) {
+        reject(ValidationReason.Required, "is required");
+      }
+
+      const hasLengthRequirement =
+        input.min_length != null || input.max_length != null;
+
+      if (hasLengthRequirement) {
+        if (!("length" in value)) {
+          reject(
+            ValidationReason.InvalidInputDefinition,
+            'has min/max length requirement, but is missing "length" property',
+            "string",
+            typeof value
+          );
+        }
+
+        if (input.min_length != null && value < input.min_length) {
+          reject(
+            ValidationReason.MinLength,
+            `too short (min ${input.min_length})`,
+            input.min_length,
+            value.length
+          );
+        }
+
+        if (input.max_length != null && value > input.max_length) {
+          reject(
+            ValidationReason.MaxLength,
+            `too long (max ${input.max_length})`,
+            input.max_length,
+            value.length
+          );
+        }
+      }
+    }
+  }
+}
+
+export enum ValidationReason {
+  InvalidInputDefinition,
+  MinLength,
+  MaxLength,
+  Required,
+}
+
+export class ValidationError<TWanted = undefined> extends Error {
+  reason: ValidationReason;
+  inputName: string;
+  wanted: TWanted;
+  actual: TWanted;
+
+  constructor(opts: {
+    reason: ValidationReason;
+    inputName: string;
+    wanted: TWanted;
+    actual: TWanted;
+    message: string;
+  }) {
+    super(`"${opts.inputName}" ${opts.message}`);
+
+    this.name = "ValidationError";
+    this.reason = opts.reason;
+    this.inputName = opts.inputName;
+    this.wanted = opts.wanted;
+    this.actual = opts.actual;
   }
 }
 
