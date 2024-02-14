@@ -52,5 +52,4 @@ var Flow = flowpilot.NewFlow("/profile").
 	ErrorState(shared.StateError).
 	SubFlows(capabilities.SubFlow, passcode.SubFlow).
 	TTL(10 * time.Minute).
-	Debug(true).
-	MustBuild()
+	Debug(true)
