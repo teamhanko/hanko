@@ -7,11 +7,13 @@ import (
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
 type defaultActionExecutionContext struct {
-	actionName         ActionName       // Name of the action being executed.
-	input              ExecutionSchema  // JSONManager for accessing input data.
-	executionResult    *executionResult // Result of the action execution.
-	links              []Link           // TODO:
-	isSuspended        bool
+	actionName      ActionName      // Name of the action being executed.
+	input           ExecutionSchema // JSONManager for accessing input data.
+	flowError       FlowError
+	executionResult *executionResult // Result of the action execution.
+	links           []Link           // TODO:
+	isSuspended     bool
+
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
@@ -57,7 +59,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 }
 
 // continueFlow continues the flow execution to the specified nextStateName with an optional error type.
-func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName, flowError FlowError) error {
+func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName) error {
 	// Retrieve the current state from the flow.
 	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
 	if err != nil {
@@ -80,10 +82,10 @@ func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName, 
 	}
 
 	// Close the execution context with the given next state.
-	return aec.closeExecutionContext(nextStateName, flowError)
+	return aec.closeExecutionContext(nextStateName)
 }
 
-func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName StateName, flowError FlowError) error {
+func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName StateName) error {
 	if aec.executionResult != nil {
 		return errors.New("execution context is closed already")
 	}
@@ -104,7 +106,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 
 	result := executionResult{
 		nextStateName:         nextStateName,
-		flowError:             flowError,
+		flowError:             aec.flowError,
 		actionExecutionResult: &actionResult,
 		links:                 aec.links,
 	}
@@ -174,11 +176,11 @@ func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...s
 }
 
 func (aec *defaultActionExecutionContext) SetFlowError(err FlowError) {
-	aec.executionResult.flowError = err
+	aec.flowError = err
 }
 
 func (aec *defaultActionExecutionContext) GetFlowError() FlowError {
-	return aec.executionResult.flowError
+	return aec.flowError
 }
 
 // ValidateInputData validates the input data against the schema.
@@ -188,12 +190,13 @@ func (aec *defaultActionExecutionContext) ValidateInputData() bool {
 
 // ContinueFlow continues the flow execution to the specified nextStateName.
 func (aec *defaultActionExecutionContext) ContinueFlow(nextStateName StateName) error {
-	return aec.continueFlow(nextStateName, nil)
+	return aec.continueFlow(nextStateName)
 }
 
 // ContinueFlowWithError continues the flow execution to the specified nextStateName with an error type.
 func (aec *defaultActionExecutionContext) ContinueFlowWithError(nextStateName StateName, flowErr FlowError) error {
-	return aec.continueFlow(nextStateName, flowErr)
+	aec.flowError = flowErr
+	return aec.continueFlow(nextStateName)
 }
 
 // ContinueToPreviousState continues the flow back to the previous state.
@@ -234,7 +237,7 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 	}
 
 	// Close the execution context with the last state.
-	return aec.closeExecutionContext(*lastStateName, nil)
+	return aec.closeExecutionContext(*lastStateName)
 }
 
 // StartSubFlow initiates a sub-flow associated with the specified entryStateName (first parameter). When a sub-flow
@@ -291,7 +294,7 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 	}
 
 	// Close the execution context with the entry state of the sub-flow.
-	return aec.closeExecutionContext(entryStateName, nil)
+	return aec.closeExecutionContext(entryStateName)
 }
 
 // EndSubFlow ends the current sub-flow and progresses the flow to the previously defined next states.
@@ -317,7 +320,7 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 	}
 
 	// Close the execution context with the scheduled state.
-	return aec.closeExecutionContext(*scheduledStateName, nil)
+	return aec.closeExecutionContext(*scheduledStateName)
 }
 
 func (aec *defaultActionExecutionContext) AddLink(links ...Link) {
