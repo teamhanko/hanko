@@ -861,7 +861,77 @@ saml:
         phone: "<PHONE_ATTRIBUTE_IN_IDP_ASSERTION>"
         ##
         #
-        # E-Phone Verified - attribute of the user
+        # Phone Verified - attribute of the user
         #
         phone_verified: "<PHONE_VERIFIED_ATTRIBUTE_IN_IDP_ASSERTION>"
+##
+#
+# Webhook Config Section
+#
+webhooks:
+  ##
+  #
+  # Enabled - Enables the webhook feature
+  #
+  enabled: false
+  ##
+  #
+  # Allow timely expiration - Toggle for disabling webhooks when unused for 30 days (only for database webhooks)
+  #
+  allow_time_expiration: false
+  ##
+  #
+  # Hooks - List of webhooks to inform when a change occurs
+  #
+  hooks:
+    ##
+    #
+    # Callback - Endpoint URL to which the change data will be sent
+    #
+    - callback: "<YOUR WEBHOOK ENDPOINT URL>"
+      ##
+      #
+      # Events - Webhook events to listen for
+      #
+      events:
+        ##
+        #
+        # User - Triggers on: user creation, user deletion, user update, email creation, email deletion, change of primary email
+        #
+        - user
+        ##
+        #
+        # User Creation - Triggers on: user creation
+        #
+        - user.create
+        ##
+        #
+        # User Deletion - Triggers on: user deletion
+        #
+        - user.delete
+        ##
+        #
+        # User Update - Triggers on: user update, email creation, email deletion, change of primary email
+        #
+        - user.update
+        ##
+        #
+        # Email - Triggers on: email creation, email deletion, change of primary email
+        #
+        - user.update.email
+        ##
+        #
+        # Email - Triggers on: email creation
+        #
+        - user.update.email.create
+        ##
+        #
+        # Email - Triggers on: email deletion
+        #
+        - user.update.email.delete
+        ##
+        #
+        # Email - Triggers on: change of primary email
+        #
+        - user.update.email.primary
 ```
