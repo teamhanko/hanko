@@ -7,11 +7,11 @@ import (
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
 type defaultActionExecutionContext struct {
-	actionName      ActionName       // Name of the action being executed.
-	input           ExecutionSchema  // JSONManager for accessing input data.
-	executionResult *executionResult // Result of the action execution.
-	links           []Link           // TODO:
-
+	actionName         ActionName       // Name of the action being executed.
+	input              ExecutionSchema  // JSONManager for accessing input data.
+	executionResult    *executionResult // Result of the action execution.
+	links              []Link           // TODO:
+	isSuspended        bool
 	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
@@ -97,8 +97,9 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 	}
 
 	actionResult := actionExecutionResult{
-		actionName: aec.actionName,
-		schema:     aec.input,
+		actionName:  aec.actionName,
+		schema:      aec.input,
+		isSuspended: aec.isSuspended,
 	}
 
 	result := executionResult{
@@ -325,4 +326,8 @@ func (aec *defaultActionExecutionContext) AddLink(links ...Link) {
 
 func (aec *defaultActionExecutionContext) Set(key string, value interface{}) {
 	aec.flow.Set(key, value)
+}
+
+func (aec *defaultActionExecutionContext) SuspendAction() {
+	aec.isSuspended = true
 }
