@@ -29,12 +29,19 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
+
 	cookie, err := deps.SessionManager.GenerateCookie(sessionToken)
 	if err != nil {
 		return fmt.Errorf("failed to generate auth cookie, %w", err)
 	}
 
-	deps.HttpContext.SetCookie(cookie)
+	deps.HttpContext.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
+
+	if deps.Cfg.Session.EnableAuthTokenHeader {
+		deps.HttpContext.Response().Header().Set("X-Auth-Token", sessionToken)
+	} else {
+		deps.HttpContext.SetCookie(cookie)
+	}
 
 	return nil
 }
