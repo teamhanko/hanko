@@ -492,9 +492,31 @@ To import users run:
 
 ### Webhooks
 
-#### Events
 Webhooks are an easy way to get informed about changes in your Hanko instance (e.g. user or email updates).
-Hanko provides the following event structure:
+To use webhooks you have to provide an endpoint on your application which can process the events. Please be aware that your
+endpoint need to respond with an HTTP status code 200. Else-wise the delivery of the event will not be counted as successful.
+
+#### Events
+When a webhook is triggered it will send you a **JSON** body which contains the event and a jwt.
+The JWT contains 2 custom claims:
+
+* **data**: contains the whole object for which the change was made. (e.g.: the whole user object when an email or user is changed/created/deleted)
+* **evt**: the event for which the webhook was triggered
+
+A typical webhook event looks like:
+
+```json
+{
+  "token": "the-jwt-token-which-contains-the-data",
+  "event": "name of the event"
+}
+```
+
+To decode the webhook you can use the JWKs created in [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
+
+#### Event Types
+
+Hanko sends webhooks for the following event types:
 
 | Event                     | Triggers on                                                                                        |
 |---------------------------|----------------------------------------------------------------------------------------------------|
