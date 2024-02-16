@@ -433,10 +433,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Discord() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("discord", "discord_abcde")
 		s.NotNil(identity)
-		s.Equal("discord", identity.ProviderName)
-		s.Equal("discord_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
@@ -496,10 +494,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Discord() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("discord", "discord_abcde")
 		s.NotNil(identity)
-		s.Equal("discord", identity.ProviderName)
-		s.Equal("discord_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
 		s.NoError(lerr)
