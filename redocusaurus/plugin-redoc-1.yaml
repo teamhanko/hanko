@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.8.4
+  version: 0.10.0
   title: Hanko Admin API
   description: >
     ## Introduction
@@ -26,7 +26,7 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: localhost:8001
+  - url: http://localhost:8001
 paths:
   /:
     get:
@@ -104,11 +104,9 @@ paths:
                   $ref: '#/components/schemas/User'
           headers:
             X-Total-Count:
-              schema:
-                $ref: '#/components/headers/X-Total-Count'
+              $ref: '#/components/headers/X-Total-Count'
             Link:
-              schema:
-                $ref: '#/components/headers/Link'
+              $ref: '#/components/headers/Link'
         '400':
           $ref: '#/components/responses/BadRequest'
         '500':
@@ -292,11 +290,9 @@ paths:
                   $ref: '#/components/schemas/AuditLog'
           headers:
             X-Total-Count:
-              schema:
-                $ref: '#/components/headers/X-Total-Count'
+              $ref: '#/components/headers/X-Total-Count'
             Link:
-              schema:
-                $ref: '#/components/headers/Link'
+              $ref: '#/components/headers/Link'
         '500':
           $ref: '#/components/responses/InternalServerError'
   /metrics:
@@ -315,7 +311,247 @@ paths:
               schema:
                 type: string
                 example: go_gc_duration_seconds{quantile="0"} 2.5875e-05
+  /webhooks:
+    get:
+      summary: Get a list of webhooks
+      description: 'Returns a list of all configured webhooks. '
+      operationId: list-webhooks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  database:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DatabaseWebhook'
+                  config:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new database webhook
+      description: ''
+      operationId: create-db-webhooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Webhook'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /webhooks/{id}:
+    get:
+      summary: Get a webhook by ID
+      operationId: get-webhooks-id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete a webhook by ID
+      operationId: delete-webhooks-id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update a webhook by ID
+      operationId: put-webhooks-id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Webhook'
+                - type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                  required:
+                    - enabled
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/{id}/emails:
+    get:
+      summary: Get a list of emails for a user
+      operationId: get-users-id-emails
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Email'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create an email for a user
+      operationId: post-users-id-emails
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateEmail'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/{id}/emails/{email_id}:
+    get:
+      summary: Get an email of a user
+      operationId: get-users-id-emails-email_id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: email_id
+          in: path
+          description: UUID of the requested email
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Remove an email from a user
+      operationId: delete-users-emails-email_id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: email_id
+          in: path
+          description: UUID of the requested email
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /users/{id}/emails/{email_id}/set_primary:
+    post:
+      summary: Set email as primary
+      operationId: post-users-emails-email_id-set_primary
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: email_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      description: UUID of the requested object
+      required: true
+      schema:
+        type: string
+        format: uuid
+  requestBodies:
+    CreateEmail:
+      description: Request Body for creating an email for a user
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              address:
+                type: string
+                format: email
+              is_primary:
+                type: boolean
+              is_verified:
+                type: boolean
+            required:
+              - address
   responses:
     BadRequest:
       description: Bad Request
@@ -354,6 +590,10 @@ components:
             code: 404
             message: Not found
   schemas:
+    UUID4:
+      type: string
+      format: uuid4
+      example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
     User:
       type: object
       required:
@@ -495,15 +735,78 @@ components:
           type: string
           format: date-time
           example: '2022-09-14T12:15:09.788784Z'
+    DatabaseWebhookEvent:
+      type: object
+      title: DatabaseWebhookEvent
+      properties:
+        id:
+          type: string
+          format: uuid
+        event:
+          type: string
+          enum:
+            - user
+            - user.create
+            - user.delete
+            - user.update
+            - user.update.email
+            - user.update.email.create
+            - user.update.email.delete
+            - user.update.email.primary
+    DatabaseWebhook:
+      type: object
+      title: DatabaseWebhook
+      properties:
+        id:
+          type: string
+          format: uuid
+        callback:
+          type: string
+          format: uri
+        enabled:
+          type: boolean
+        failures:
+          type: integer
+          minimum: 0
+        expires_at:
+          type: string
+          format: date-time
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatabaseWebhookEvent'
+        created_at:
+          type: string
+          format: date-time
         updated_at:
           description: Time of last update of the audit log
           type: string
           format: date-time
           example: '2022-09-14T12:15:09.788784Z'
-    UUID4:
-      type: string
-      format: uuid4
-      example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
+    Webhook:
+      type: object
+      title: Webhook
+      properties:
+        callback:
+          type: string
+          format: uri
+        events:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+              - user
+              - user.create
+              - user.delete
+              - user.update
+              - user.update.email
+              - user.update.email.create
+              - user.update.email.delete
+              - user.update.email.primary
+      required:
+        - callback
+        - events
     Error:
       type: object
       required:

@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.8.4
+  version: 0.10.0
   title: Hanko Public API
   description: >
     ## Introduction
@@ -1185,6 +1185,249 @@ paths:
           $ref: '#/components/responses/Conflict'
         '500':
           $ref: '#/components/responses/InternalServerError'
+  /saml/provider:
+    get:
+      summary: Get a SAML Provider - Only available when SAML in config is enabled
+      description: Get a SAML service provider config for a provided domain.
+      operationId: get-saml-provider
+      tags:
+        - Enterprise Features
+      parameters:
+        - name: domain
+          in: query
+          description: >-
+            full qualified domain name to which a SAML service provider is
+            registered
+          required: true
+          schema:
+            type: string
+            format: hostname
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  enabled:
+                    type: boolean
+                    readOnly: true
+                    default: true
+                  name:
+                    type: string
+                    readOnly: true
+                    example: The Name
+                  domain:
+                    type: string
+                    format: hostname
+                    readOnly: true
+                    example: text.example
+                  metadata_url:
+                    type: string
+                    format: uri
+                    readOnly: true
+                    example: http://idp-metadata.url
+                  skip_email_verification:
+                    type: boolean
+                    readOnly: true
+                    default: false
+                  attribute_map:
+                    type: object
+                    additionalProperties: false
+                    properties:
+                      name:
+                        type: string
+                      family_name:
+                        type: string
+                      given_name:
+                        type: string
+                      middle_name:
+                        type: string
+                      nickname:
+                        type: string
+                      preferred_username:
+                        type: string
+                      profile:
+                        type: string
+                      picture:
+                        type: string
+                      website:
+                        type: string
+                      gender:
+                        type: string
+                      birthdate:
+                        type: string
+                      zone_info:
+                        type: string
+                      locale:
+                        type: string
+                      updated_at:
+                        type: string
+                      email:
+                        type: string
+                      email_verified:
+                        type: string
+                      phone:
+                        type: string
+                      phone_verified:
+                        type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Not Found
+      servers:
+        - url: localhost:8000
+  /saml/metadata:
+    get:
+      summary: Get SAML Metadata - Only available when SAML in config is enabled
+      description: Downloads SAML service Provider Metadata or Public Certificate
+      operationId: get-saml-metadata
+      tags:
+        - Enterprise Features
+      parameters:
+        - name: domain
+          in: query
+          description: >-
+            full qualified domain name to which a SAML service provider is
+            registered
+          required: true
+          schema:
+            type: string
+        - name: cert_only
+          in: query
+          description: Toggle to download the SAML service provider public certificate
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: OK
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Not Found
+      servers:
+        - url: localhost:8000
+  /saml/auth:
+    get:
+      summary: Initialize SAML login - Only available when SAML in config is enabled
+      description: |
+        Initialize an SAML login with an identity provider by redirecting to
+        the specified domain login URL to retrieve a SAML Assertion.
+      operationId: get-saml-auth
+      tags:
+        - Enterprise Features
+      parameters:
+        - name: domain
+          in: query
+          description: >-
+            full qualified domain name to which a SAML service provider is
+            registered
+          required: true
+          schema:
+            type: string
+        - name: redirect_to
+          in: query
+          description: >
+            Base64url encoded string representing the URL the
+
+            [`/callback`](#tag/Enterprise-Features/operation/post-saml-callback)
+            eventually redirects to after successful login
+
+            with the saml identity provider. It must match one of the allowed
+            redirect URLs set in the backend
+
+            [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+
+            through the `saml.allowed_redirect_urls`.
+          required: true
+          schema:
+            type: string
+            format: base64url
+      responses:
+        '307':
+          description: Redirect to third party provider
+          headers:
+            Location:
+              schema:
+                type: string
+              description: >
+                Redirect to the third party provider on success. On error,
+                redirects to the `Referer`. If `Referer` is
+
+                not present, redirects to the `saml.default_redirect_url` set in
+                the backend
+
+                [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config).
+
+                Error details are provided in the location URL in the form of
+                `error` and `error_description`
+
+                query params.
+      servers:
+        - url: localhost:8000
+  /saml/callback:
+    post:
+      summary: >-
+        SAML identity provider callback - Only available when SAML in config is
+        enabled
+      description: >-
+        Callback endpoint called by the identity provicer after successful
+        login.
+      operationId: post-saml-callback
+      tags:
+        - Enterprise Features
+      requestBody:
+        description: SAML Identity Provider Response
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                RelayState:
+                  type: string
+                SAMLResponse:
+                  type: string
+      responses:
+        '302':
+          description: Found
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: >-
+                Contains the JSON Web Token (JWT) that must be provided to
+                protected endpoints.Cookie attributes (e.g. domain) can be set
+                via
+                [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+                option `session.cookie`.
+            X-Auth-Token:
+              schema:
+                type: string
+              description: >-
+                Present only when enabled via
+                [configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md#hanko-backend-config)
+                option `session.enable_auth_token_header`for purposes of
+                cross-domain communication between client and Hanko API.
+        '307':
+          description: Temporary Redirect
+          headers:
+            Location:
+              schema:
+                type: string
+              description: >-
+                On error, redirect to the `saml.default_redirect_url` set in the
+                backend-configuration. Error details are provided in the
+                location URL in the form of `error` and `error_description`query
+                params.
+      servers:
+        - url: localhost:8000
 components:
   responses:
     BadRequest:
