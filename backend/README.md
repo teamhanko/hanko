@@ -19,6 +19,7 @@ easily integrated into any web app with as little as two lines of code.
   - [Rate Limiting](#rate-limiting)
   - [Social logins](#social-logins)
   - [User import](#user-import)
+  - [Webhooks](#webhooks)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -434,8 +435,24 @@ Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide addition
 ### Social Logins
 
 Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
-party provider logins. Please view the official [docs](https://docs.hanko.io/guides/social) for a list of supported
-providers and guides.
+party provider logins. See the `third_party` option in the [configuration reference](./docs/Config.md) on how to
+configure them. All provider configurations require provider credentials. See the guides in the official
+documentation for instructions on how to obtain these:
+
+- [Apple](https://docs.hanko.io/guides/authentication-methods/oauth/apple)
+- [GitHub](https://docs.hanko.io/guides/authentication-methods/oauth/github)
+- [Google](https://docs.hanko.io/guides/authentication-methods/oauth/google)
+
+#### Account linking
+
+The `allow_linking` configuration option for providers determines whether automatic account linking for this provider
+is activated. Note that account linking is based on e-mail addresses and OAuth providers may allow account holders to
+use unverified e-mail addresses or may not provide any information at all about the verification status of e-mail
+addresses. This poses a security risk and potentially allows bad actors to hijack existing Hanko
+accounts associated with the same address. It is therefore recommended to make sure you trust the provider and to
+also enable `emails.require_verification` in your configuration to ensure that only verified third party provider
+addresses may be used.
+
 
 ### User import
 You can import an existing user pool into Hanko using json in the following format:
@@ -472,6 +489,39 @@ To import users run:
 
 > hanko user import -i ./path/to/import_file.json
 
+
+### Webhooks
+
+#### Events
+Webhooks are an easy way to get informed about changes in your Hanko instance (e.g. user or email updates).
+Hanko provides the following event structure:
+
+| Event                     | Triggers on                                                                                        |
+|---------------------------|----------------------------------------------------------------------------------------------------|
+| user                      | user creation, user deletion, user update, email creation, email deletion, change of primary email |
+| user.create               | user creation                                                                                      |
+| user.delete               | user deletion                                                                                      |
+| user.update               | user update, email creation, email deletion, change of primary email                               |
+| user.update.email         | email creation, email deletion, change of primary email                                            |
+| user.update.email.create  | email creation                                                                                     |
+| user.update.email.delete  | email deletion                                                                                     |
+| user.update.email.primary | change of primary email                                                                            |
+
+As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
+a parent event when you want to receive all subevents or selecting specific subevents.
+
+#### Enabling Webhooks
+
+You can activate webhooks by adding the following snippet to your configuration file:
+
+```yaml
+webhooks:
+  enabled: true
+  hooks:
+    - callback: <YOUR WEBHOOK ENDPOINT>
+      events:
+        - user
+```
 
 ## API specification
 

@@ -48,8 +48,6 @@ export const ptBR: Translation = {
     emailUnverified: "Este e-mail não foi verificado.",
     emailDelete:
       "Se você apagar esse e-mail, não poderá mais usá-lo para entrar em sua conta.",
-    emailDeleteThirdPartyConnection:
-      "Se você apagar esse e-mail, não poderá mais usá-lo para entrar em sua conta.",
     emailDeletePrimary: "O seu e-mail principal não pode ser apagado.",
     renamePasskey: "Defina um nome para a chave de acesso.",
     deletePasskey: "Remova essa chave de acesso da sua conta.",
@@ -118,5 +116,6 @@ export const ptBR: Translation = {
       "Não foi possível identificar a conta. O endereço de e-mail é usado por várias contas.",
     thirdPartyUnverifiedEmail:
       "Verificação de e-mail necessária. Por favor, verifique o e-mail utilizado com o seu provedor.",
+    signupDisabled: "O registro da conta está desativado.",
   },
 };

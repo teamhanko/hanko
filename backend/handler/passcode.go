@@ -17,6 +17,8 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 	"net/http"
@@ -323,7 +325,12 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passcode finalization not allowed"))
 		}
 
+		wasUnverified := false
+		hasEmails := len(user.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a EmailCreate one
+
 		if !passcode.Email.Verified {
+			wasUnverified = true
+
 			// Update email verified status and assign the email address to the user.
 			passcode.Email.Verified = true
 			passcode.Email.UserID = &user.ID
@@ -375,6 +382,19 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
+		}
+
+		// notify about email verification result. Last step to prevent a trigger and rollback scenario
+		if h.cfg.Emails.RequireVerification && wasUnverified {
+			var evt events.Event
+
+			if hasEmails {
+				evt = events.EmailCreate
+			} else {
+				evt = events.UserCreate
+			}
+
+			utils.NotifyUserChange(c, tx, h.persister, evt, user.ID)
 		}
 
 		return c.JSON(http.StatusOK, dto.PasscodeReturn{

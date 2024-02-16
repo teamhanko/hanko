@@ -42,7 +42,7 @@ func loadCertificate(cfg *config.Config, persister persistence.SamlCertificatePe
 	}
 
 	if cert == nil {
-		cert, err = models.NewSamlCertificate(cfg)
+		cert, err = models.NewSamlCertificate(cfg.Service.Name)
 		if err != nil {
 			return nil, err
 		}

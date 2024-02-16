@@ -91,7 +91,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.GET("/", statusHandler.Status)
 	g.GET("/me", userHandler.Me, sessionMiddleware)
 
-	user := g.Group("/users")
+	webhookMiddlware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+
+	user := g.Group("/users", webhookMiddlware)
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, sessionMiddleware)
 
@@ -99,7 +101,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	g.POST("/logout", userHandler.Logout, sessionMiddleware)
 
 	if cfg.Account.AllowDeletion {
-		g.DELETE("/user", userHandler.Delete, sessionMiddleware)
+		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddlware)
 	}
 
 	healthHandler := NewHealthHandler()
@@ -124,10 +126,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler, err := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public email handler: %w", err))
-	}
+	emailHandler := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 
 	webauthn := g.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
@@ -146,9 +145,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	passcode := g.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
-	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	passcodeLogin.POST("/finalize", passcodeHandler.Finish, webhookMiddlware)
 
-	email := g.Group("/emails", sessionMiddleware)
+	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)

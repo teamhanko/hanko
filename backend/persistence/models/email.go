@@ -16,7 +16,7 @@ type Email struct {
 	Verified     bool          `db:"verified" json:"verified"`
 	PrimaryEmail *PrimaryEmail `has_one:"primary_emails" json:"primary_emails,omitempty"`
 	User         *User         `belongs_to:"user" json:"user,omitempty"`
-	Identity     *Identity     `has_one:"identities" json:"identity,omitempty"`
+	Identities   Identities    `has_many:"identities" json:"identity,omitempty"`
 	CreatedAt    time.Time     `db:"created_at" json:"created_at"`
 	UpdatedAt    time.Time     `db:"updated_at" json:"updated_at"`
 }
@@ -71,6 +71,24 @@ func (emails Emails) SetPrimary(primary *PrimaryEmail) {
 		}
 	}
 	return
+}
+
+func (emails Emails) GetEmailByAddress(address string) *Email {
+	for _, email := range emails {
+		if email.Address == address {
+			return &email
+		}
+	}
+	return nil
+}
+
+func (emails Emails) GetEmailById(emailId uuid.UUID) *Email {
+	for _, email := range emails {
+		if email.ID.String() == emailId.String() {
+			return &email
+		}
+	}
+	return nil
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.

@@ -13,6 +13,8 @@ import (
 	"github.com/teamhanko/hanko/backend/pagination"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -47,6 +49,11 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 	err = p.Delete(*user)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	err = utils.TriggerWebhooks(c, events.UserDelete, admin.FromUserModel(*user))
+	if err != nil {
+		c.Logger().Warn(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)
@@ -250,5 +257,12 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	return c.JSON(http.StatusOK, admin.FromUserModel(*user))
+	userDto := admin.FromUserModel(*user)
+
+	err = utils.TriggerWebhooks(c, events.UserCreate, userDto)
+	if err != nil {
+		c.Logger().Warn(err)
+	}
+
+	return c.JSON(http.StatusOK, userDto)
 }

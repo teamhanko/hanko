@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -42,18 +44,41 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+
 	userHandler := NewUserHandlerAdmin(persister)
+	emailHandler := NewEmailAdminHandler(cfg, persister)
 
 	user := g.Group("/users")
 	user.GET("", userHandler.List)
-	user.POST("", userHandler.Create)
+	user.POST("", userHandler.Create, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
-	user.DELETE("/:id", userHandler.Delete)
+	user.DELETE("/:id", userHandler.Delete, webhookMiddleware)
+
+	email := user.Group("/:user_id/emails", webhookMiddleware)
+	email.GET("", emailHandler.List)
+	email.POST("", emailHandler.Create)
+	email.GET("/:email_id", emailHandler.Get)
+	email.DELETE("/:email_id", emailHandler.Delete)
+	email.POST("/:email_id/set_primary", emailHandler.SetPrimaryEmail)
 
 	auditLogHandler := NewAuditLogHandler(persister)
 
 	auditLogs := g.Group("/audit_logs")
 	auditLogs.GET("", auditLogHandler.List)
+
+	webhookHandler := NewWebhookHandler(cfg.Webhooks, persister)
+	webhooks := g.Group("/webhooks")
+	webhooks.GET("", webhookHandler.List)
+	webhooks.POST("", webhookHandler.Create)
+	webhooks.GET("/:id", webhookHandler.Get)
+	webhooks.DELETE("/:id", webhookHandler.Delete)
+	webhooks.PUT("/:id", webhookHandler.Update)
 
 	return e
 }

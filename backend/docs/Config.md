@@ -439,7 +439,7 @@ third_party:
   # Required if any providers are enabled.
   # List of URLS the backend is allowed to redirect to after third party sign-in was successful.
   # (see also the 'redirect_to' parameter for the third party auth initialization endpoint
-  # - https://docs.hanko.io/api/public#tag/Third-Party/operation/thirdPartyAuth)
+  # - https://docs.hanko.io/api-reference/public/third-party/initialize-third-party-login)
   #
   # Supports wildcard matching through globbing. e.g. https://*.example.com will allow https://foo.example.com and https://bar.example.com to be accepted.
   # Globbing is also supported for paths, e.g. https://foo.example.com/* will match https://foo.example.com/page1 and https://foo.example.com/page2.
@@ -506,6 +506,16 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      # Default: true
+      #
+      allow_linking: true
     ##
     #
     # The Google provider configuration
@@ -534,6 +544,16 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      # Default: true
+      #
+      allow_linking: true
     ##
     #
     # The GitHub provider configuration
@@ -562,6 +582,16 @@ third_party:
       # Required if provider is enabled.
       #
       secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      # Default: true
+      #
+      allow_linking: true
 log:
   ## log_health_and_metrics
   #
@@ -831,7 +861,77 @@ saml:
         phone: "<PHONE_ATTRIBUTE_IN_IDP_ASSERTION>"
         ##
         #
-        # E-Phone Verified - attribute of the user
+        # Phone Verified - attribute of the user
         #
         phone_verified: "<PHONE_VERIFIED_ATTRIBUTE_IN_IDP_ASSERTION>"
+##
+#
+# Webhook Config Section
+#
+webhooks:
+  ##
+  #
+  # Enabled - Enables the webhook feature
+  #
+  enabled: false
+  ##
+  #
+  # Allow timely expiration - Toggle for disabling webhooks when unused for 30 days (only for database webhooks)
+  #
+  allow_time_expiration: false
+  ##
+  #
+  # Hooks - List of webhooks to inform when a change occurs
+  #
+  hooks:
+    ##
+    #
+    # Callback - Endpoint URL to which the change data will be sent
+    #
+    - callback: "<YOUR WEBHOOK ENDPOINT URL>"
+      ##
+      #
+      # Events - Webhook events to listen for
+      #
+      events:
+        ##
+        #
+        # User - Triggers on: user creation, user deletion, user update, email creation, email deletion, change of primary email
+        #
+        - user
+        ##
+        #
+        # User Creation - Triggers on: user creation
+        #
+        - user.create
+        ##
+        #
+        # User Deletion - Triggers on: user deletion
+        #
+        - user.delete
+        ##
+        #
+        # User Update - Triggers on: user update, email creation, email deletion, change of primary email
+        #
+        - user.update
+        ##
+        #
+        # Email - Triggers on: email creation, email deletion, change of primary email
+        #
+        - user.update.email
+        ##
+        #
+        # Email - Triggers on: email creation
+        #
+        - user.update.email.create
+        ##
+        #
+        # Email - Triggers on: email deletion
+        #
+        - user.update.email.delete
+        ##
+        #
+        # Email - Triggers on: change of primary email
+        #
+        - user.update.email.primary
 ```
