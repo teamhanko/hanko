@@ -183,6 +183,9 @@ func DefaultConfig() *Config {
 				Apple: ThirdPartyProvider{
 					AllowLinking: true,
 				},
+				Discord: ThirdPartyProvider{
+					AllowLinking: true,
+				},
 			},
 		},
 	}
