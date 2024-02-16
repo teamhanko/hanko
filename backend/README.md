@@ -19,6 +19,7 @@ easily integrated into any web app with as little as two lines of code.
   - [Rate Limiting](#rate-limiting)
   - [Social logins](#social-logins)
   - [User import](#user-import)
+  - [Webhooks](#webhooks)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -488,6 +489,39 @@ To import users run:
 
 > hanko user import -i ./path/to/import_file.json
 
+
+### Webhooks
+
+#### Events
+Webhooks are an easy way to get informed about changes in your Hanko instance (e.g. user or email updates).
+Hanko provides the following event structure:
+
+| Event                     | Triggers on                                                                                        |
+|---------------------------|----------------------------------------------------------------------------------------------------|
+| user                      | user creation, user deletion, user update, email creation, email deletion, change of primary email |
+| user.create               | user creation                                                                                      |
+| user.delete               | user deletion                                                                                      |
+| user.update               | user update, email creation, email deletion, change of primary email                               |
+| user.update.email         | email creation, email deletion, change of primary email                                            |
+| user.update.email.create  | email creation                                                                                     |
+| user.update.email.delete  | email deletion                                                                                     |
+| user.update.email.primary | change of primary email                                                                            |
+
+As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
+a parent event when you want to receive all subevents or selecting specific subevents.
+
+#### Enabling Webhooks
+
+You can activate webhooks by adding the following snippet to your configuration file:
+
+```yaml
+webhooks:
+  enabled: true
+  hooks:
+    - callback: <YOUR WEBHOOK ENDPOINT>
+      events:
+        - user
+```
 
 ## API specification
 
