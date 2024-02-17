@@ -64,6 +64,7 @@ const sidebars = {
         "guides/social/apple",
         "guides/social/github",
         "guides/social/google",
+        "guides/social/microsoft"
       ],
     },
     {
