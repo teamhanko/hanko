@@ -323,4 +323,16 @@ function deepCopy<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+export function isState(x: any): x is State<any> {
+  return (
+    typeof x === "object" &&
+    x !== null &&
+    "status" in x &&
+    "error" in x &&
+    "name" in x &&
+    Boolean(x.name) &&
+    Boolean(x.status)
+  );
+}
+
 export { State };
