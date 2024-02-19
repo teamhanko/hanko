@@ -34,7 +34,9 @@ type BaseWebhook struct {
 
 func (bh *BaseWebhook) HasEvent(evt events.Event) bool {
 	for _, event := range bh.Events {
-		return strings.HasPrefix(string(evt), string(event))
+		if strings.HasPrefix(string(evt), string(event)) {
+			return true
+		}
 	}
 
 	return false
