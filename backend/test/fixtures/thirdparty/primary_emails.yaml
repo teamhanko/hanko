@@ -13,6 +13,11 @@
   user_id: b3537e49-de92-4e16-8981-ae4beb44c447
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: f2eb0190-77f8-42a4-b45f-6f932a98995c
+  email_id: 09f35529-cca6-44a7-ab1d-b07e95a04e3b
+  user_id: d69bffda-4e4a-4424-a238-fbecc1651d81
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 - id: c57715eb-0c63-4910-b429-9b6165c50fab
   email_id: 527afce8-3b7b-41b6-b1ed-33d408c5a7bb
   user_id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
