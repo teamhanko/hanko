@@ -130,3 +130,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
 }
+
+func (a RegisterLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

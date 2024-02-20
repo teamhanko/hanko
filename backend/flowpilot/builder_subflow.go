@@ -45,10 +45,10 @@ func (sfb *defaultSubFlowBuilder) AfterState(stateName StateName, hooks ...HookA
 func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
 
 	f := defaultFlowBase{
-		flow:        sfb.flow,
-		subFlows:    sfb.subFlows,
-		beforeHooks: sfb.beforeHooks,
-		afterHooks:  sfb.afterHooks,
+		flow:             sfb.flow,
+		subFlows:         sfb.subFlows,
+		beforeStateHooks: sfb.beforeStateHooks,
+		afterStateHooks:  sfb.afterStateHooks,
 	}
 
 	return &f, nil

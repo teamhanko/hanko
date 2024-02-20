@@ -65,3 +65,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 
 	return c.ContinueFlow(shared.StateSuccess)
 }
+
+func (a WebauthnVerifyAssertionResponse) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

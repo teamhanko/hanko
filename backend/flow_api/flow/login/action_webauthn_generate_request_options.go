@@ -52,3 +52,7 @@ func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) er
 
 	return c.ContinueFlow(StateLoginPasskey)
 }
+
+func (a WebauthnGenerateRequestOptions) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

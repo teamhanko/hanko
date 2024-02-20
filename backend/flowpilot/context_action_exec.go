@@ -88,11 +88,15 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		return errors.New("execution context is closed already")
 	}
 
-	if err := aec.executeAfterHookActions(); err != nil {
+	if err := aec.executeAfterStateHooks(); err != nil {
 		return fmt.Errorf("error while executing after hook actions: %w", err)
 	}
 
-	if err := aec.executeBeforeHookActions(nextStateName); err != nil {
+	if err := aec.executeAfterEachActionHooks(); err != nil {
+		return fmt.Errorf("error while executing after each action hook actions: %w", err)
+	}
+
+	if err := aec.executeBeforeStateHooks(nextStateName); err != nil {
 		return fmt.Errorf("error while executing before hook actions: %w", err)
 	}
 
@@ -119,13 +123,13 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 	return nil
 }
 
-func (aec *defaultActionExecutionContext) executeBeforeHookActions(nextStateName StateName) error {
+func (aec *defaultActionExecutionContext) executeBeforeStateHooks(nextStateName StateName) error {
 	nextState, err := aec.flow.getState(nextStateName)
 	if err != nil {
 		return err
 	}
 
-	for _, hook := range nextState.beforeHooks {
+	for _, hook := range nextState.beforeStateHooks {
 		err = hook.Execute(aec)
 		if err != nil {
 			return fmt.Errorf("failed to execute hook action before state '%s': %w", nextState.name, err)
@@ -135,16 +139,38 @@ func (aec *defaultActionExecutionContext) executeBeforeHookActions(nextStateName
 	return nil
 }
 
-func (aec *defaultActionExecutionContext) executeAfterHookActions() error {
+func (aec *defaultActionExecutionContext) executeAfterStateHooks() error {
 	currentState, err := aec.flow.getState(aec.flowModel.CurrentState)
 	if err != nil {
 		return err
 	}
 
-	for _, hook := range currentState.afterHooks {
+	for _, hook := range currentState.afterStateHooks {
 		err = hook.Execute(aec)
 		if err != nil {
 			return fmt.Errorf("failed to execute hook action after state: %w", err)
+		}
+	}
+
+	return nil
+}
+
+func (aec *defaultActionExecutionContext) executeBeforeEachActionHooks() error {
+	for _, hook := range aec.flow.beforeEachActionHooks {
+		err := hook.Execute(aec)
+		if err != nil {
+			return fmt.Errorf("failed to execute hook before action '%s'", aec.actionName)
+		}
+	}
+
+	return nil
+}
+
+func (aec *defaultActionExecutionContext) executeAfterEachActionHooks() error {
+	for _, hook := range aec.flow.afterEachActionHooks {
+		err := hook.Execute(aec)
+		if err != nil {
+			return fmt.Errorf("failed to execute hook before action '%s'", aec.actionName)
 		}
 	}
 

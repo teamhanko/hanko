@@ -69,3 +69,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(StateProfileWebauthnCredentialVerification)
 }
+
+func (a WebauthnCredentialCreate) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

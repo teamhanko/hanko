@@ -26,3 +26,7 @@ func (a Skip) Initialize(c flowpilot.InitializationContext) {
 func (a Skip) Execute(c flowpilot.ExecutionContext) error {
 	return c.EndSubFlow()
 }
+
+func (a Skip) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}
