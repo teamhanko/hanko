@@ -108,6 +108,14 @@ Explanation of all tags:
 
 Every IDP-Attribute which is not a hanko field will be mapped into a custom claim map of type `map[string]string` where the key of an entry is the attribute name and the value of an entry is the attribute value.
 
+*Please check if all your attributes are mapped correctly. E.g. in Microsoft AD your email address to log in is not necessarily represented in the `http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress` field.*
+If you feel that you are missing fields, you can use extensions like `SAML-tracer` (Google Chrome/Chromium) to check the assertions exchanged and all fields in them.
+
+### Configure your Identity Provider in database
+
+If you have a great number of identity providers to support you can also persist them to the database by using the admin api endpoints for SAML identity providers.
+The endpoint takes the same parameters as the config file one.
+
 ### Additional Attributes
 For some providers we also provide some additional attributes. The provider will be extracted from the metadata url (e.g. `https://<tenant>.eu.auth0.com/samlp/metadata/<random_app_string>` will load defaults for auth0).
 Currently, there the following extra defaults are provided for the following providers:
@@ -125,7 +133,7 @@ will scratch the `http://schemas.auth0.com/auth0/` part, and you have to provide
 
 ## Configure Identity Provider
 
-To configure your entity provider you will mabye need the following parameters:
+To configure your entity provider you will need the following parameters:
 
 * Callback-URL: This will be `<ENDPOINT_URL>/callback` (e.g.: ENDPOINT_URL: http://localhost:8000 -> http://localhost:8000/saml/callback)
 * Service Provider Metadata URL: This will be `<ENDPOINT_URL>/metadata?domain=<DOMAIN>` (e.g.: ENDPOINT_URL: http://localhost:8000 , DOMAIN: test.example -> http://localhost:8000/saml/metadata?domain=test.example)
