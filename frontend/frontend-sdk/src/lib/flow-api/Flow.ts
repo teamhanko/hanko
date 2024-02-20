@@ -12,7 +12,7 @@ class Flow extends Client {
 
   public async init(
     initPath: FlowPath,
-    handlers: Handlers & { onError: (e: unknown) => any }
+    handlers: Handlers & { onError?: (e: unknown) => any }
   ): Promise<void> {
     const runLoop = async (path: string): Promise<void> => {
       const handlerResult = await this.run(path, handlers);
@@ -41,7 +41,7 @@ class Flow extends Client {
    */
   run = async (
     path: string,
-    handlers: Handlers & { onError: (e: unknown) => any }
+    handlers: Handlers & { onError?: (e: unknown) => any }
   ) => {
     try {
       const state = await this.fetchNextState(path);
@@ -52,14 +52,30 @@ class Flow extends Client {
 
       const handler = handlers[state.name];
       if (!handler) {
-        throw new InvalidStateError(state);
+        throw new HandlerNotFoundError(state);
       }
 
       return handler(state);
     } catch (e) {
-      handlers.onError(e);
+      if (typeof handlers.onError === "function") {
+        return handlers.onError(e);
+      }
+
+      throw e;
     }
   };
+}
+
+export class HandlerNotFoundError extends Error {
+  constructor(public state: State<any>) {
+    super(
+      `No handler found for state: ${
+        typeof state.name === "string"
+          ? `"${state.name}"`
+          : `(${typeof state.name})`
+      }`
+    );
+  }
 }
 
 export class InvalidStateError extends Error {
