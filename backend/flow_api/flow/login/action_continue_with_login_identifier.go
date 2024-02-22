@@ -73,6 +73,13 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			if err != nil {
 				return fmt.Errorf("failed to set user_id to the stash: %w", err)
 			}
+		} else {
+			err = c.Stash().Set("passcode_template", "email_login_attempted")
+			if err != nil {
+				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+			}
+
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation)
 		}
 	} else {
 		userModel, err := deps.Persister.GetUserPersister().GetByUsername(identifier)
