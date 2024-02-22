@@ -193,7 +193,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 				s.Require().NoError(err)
 
 				s.Equal(currentTest.statusCode, result.Status())
-				s.Equal(currentTest.expectedState, result.Response().StateName)
+				s.Equal(currentTest.expectedState, result.Response().Name)
 				// TODO: check that the schema of the action returns the correct error_code e.g.
 				// result.Response().PublicActions[0].PublicSchema[0].PublicError.Code == ErrorValueInvalid
 			}

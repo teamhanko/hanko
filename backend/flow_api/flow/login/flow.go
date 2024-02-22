@@ -23,7 +23,7 @@ const (
 	ActionContinueToPasscodeConfirmationRecovery flowpilot.ActionName = "continue_to_passcode_confirmation_recovery"
 	ActionContinueToPasswordLogin                flowpilot.ActionName = "continue_to_password_login"
 	ActionWebauthnGenerateRequestOptions         flowpilot.ActionName = "webauthn_generate_request_options"
-	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_request_response"
+	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_assertion_response"
 	ActionContinueWithLoginIdentifier            flowpilot.ActionName = "continue_with_login_identifier"
 	ActionPasswordRecovery                       flowpilot.ActionName = "password_recovery"
 	ActionPasswordLogin                          flowpilot.ActionName = "password_login"

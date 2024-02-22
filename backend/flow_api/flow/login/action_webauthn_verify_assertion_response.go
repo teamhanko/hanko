@@ -52,6 +52,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
+			// TODO: the check for ErrInvalidWebauthnCredential is not working, e.g. when the user does not exist.
 			return c.ContinueFlowWithError(StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 

@@ -9,6 +9,7 @@ import { TokenClient } from "./lib/client/TokenClient";
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
 import { Session } from "./lib/Session";
+import { Flow } from "./lib/flow-api/Flow";
 
 /**
  * The options for the Hanko class
@@ -43,6 +44,7 @@ class Hanko extends Listener {
   token: TokenClient;
   relay: Relay;
   session: Session;
+  flow: Flow;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
@@ -113,6 +115,11 @@ class Hanko extends Listener {
      *  @type {Session}
      */
     this.session = new Session({ ...opts });
+    /**
+     *  @public
+     *  @type {Flow}
+     */
+    this.flow = new Flow(api, opts);
   }
 }
 

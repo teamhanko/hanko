@@ -153,7 +153,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			s.Require().NoError(err)
 
 			s.Equal(currentTest.statusCode, result.Status())
-			s.Equal(currentTest.expectedState, result.Response().StateName)
+			s.Equal(currentTest.expectedState, result.Response().Name)
 
 			if currentTest.expectedFlowError != nil {
 				s.Equal(currentTest.expectedFlowError.Code(), result.Response().PublicError.Code)

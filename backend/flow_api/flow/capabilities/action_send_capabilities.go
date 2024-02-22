@@ -18,7 +18,7 @@ func (a RegisterClientCapabilities) GetDescription() string {
 }
 
 func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.StringInput("webauthn_available").Required(true).Hidden(true))
+	c.AddInputs(flowpilot.BooleanInput("webauthn_available").Required(true).Hidden(true))
 }
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
