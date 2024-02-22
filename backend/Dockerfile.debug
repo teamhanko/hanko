@@ -1,9 +1,9 @@
 # Build the hanko binary
-FROM golang:1.20 as builder
+FROM golang:1.20 AS builder
 WORKDIR /workspace
 
 # Get Delve
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go install github.com/go-delve/delve/cmd/dlv@latest
+RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go install github.com/go-delve/delve/cmd/dlv@latest
 
 COPY go.mod go.mod
 COPY go.sum go.sum
@@ -18,6 +18,7 @@ COPY server server/
 COPY handler handler/
 COPY crypto crypto/
 COPY dto dto/
+COPY ee/saml ee/saml/
 COPY session session/
 COPY mail mail/
 COPY audit_log audit_log/
@@ -26,10 +27,14 @@ COPY rate_limiter rate_limiter/
 COPY thirdparty thirdparty/
 COPY build_info build_info/
 COPY middleware middleware/
+COPY template template/
+COPY utils utils/
+COPY mapper mapper/
+COPY webhooks webhooks/
 
 # Build
 RUN go generate ./...
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -gcflags="all=-N -l" -a -o hanko main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go build -gcflags="all=-N -l" -a -o hanko main.go
 
 # Use distroless as minimal base image to package hanko binary
 # See https://github.com/GoogleContainerTools/distroless for details

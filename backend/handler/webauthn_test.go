@@ -33,7 +33,7 @@ func (s *webauthnSuite) TestWebauthnHandler_NewHandler() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode")
 	}
-	handler, err := NewWebauthnHandler(&test.DefaultConfig, s.Storage, s.GetDefaultSessionManager(), test.NewAuditLogger())
+	handler, err := NewWebauthnHandler(&test.DefaultConfig, s.Storage, s.GetDefaultSessionManager(), test.NewAuditLogger(), nil)
 	s.NoError(err)
 	s.NotEmpty(handler)
 }
@@ -48,7 +48,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
 
 	userId := "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
 	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
@@ -89,7 +89,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 
 	userId := "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
 	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
@@ -135,7 +135,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration_SessionDataExpi
 
 	userId := "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
 	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
@@ -170,7 +170,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginAuthentication() {
 	err := s.LoadFixtures("../test/fixtures/webauthn")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 	req := httptest.NewRequest(http.MethodPost, "/webauthn/login/initialize", nil)
 	rec := httptest.NewRecorder()
 
@@ -194,7 +194,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication() {
 	err := s.LoadFixtures("../test/fixtures/webauthn")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	body := `{
 "id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
@@ -247,7 +247,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_SessionDataEx
 	err := s.LoadFixtures("../test/fixtures/webauthn")
 	s.Require().NoError(err)
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil)
+	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	body := `{
 "id": "4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM",
@@ -279,7 +279,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeAuthentication_TokenInHeader
 
 	cfg := test.DefaultConfig
 	cfg.Session.EnableAuthTokenHeader = true
-	e := NewPublicRouter(&cfg, s.Storage, nil)
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	body := `{
 "id": "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjH",
@@ -343,10 +343,10 @@ var defaultConfig = config.Config{
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
 	},
-	Passcode: config.Passcode{Smtp: config.SMTP{
+	Smtp: config.SMTP{
 		Host: "localhost",
 		Port: "2500",
-	}},
+	},
 }
 
 type sessionManager struct {

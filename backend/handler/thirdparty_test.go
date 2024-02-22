@@ -1,6 +1,13 @@
 package handler
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strconv"
+	"testing"
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
@@ -12,12 +19,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strconv"
-	"testing"
-	"time"
+	"github.com/teamhanko/hanko/backend/utils"
 )
 
 func TestThirdPartySuite(t *testing.T) {
@@ -55,19 +57,30 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 		ThirdParty: config.ThirdParty{
 			Providers: config.ThirdPartyProviders{
 				Apple: config.ThirdPartyProvider{
-					Enabled:  false,
-					ClientID: "fakeClientID",
-					Secret:   "fakeClientSecret",
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
 				},
 				Google: config.ThirdPartyProvider{
-					Enabled:  false,
-					ClientID: "fakeClientID",
-					Secret:   "fakeClientSecret",
-				}, GitHub: config.ThirdPartyProvider{
-					Enabled:  false,
-					ClientID: "fakeClientID",
-					Secret:   "fakeClientSecret",
-				}},
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
+				},
+				GitHub: config.ThirdPartyProvider{
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
+				},
+				Discord: config.ThirdPartyProvider{
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: true,
+				},
+			},
 			ErrorRedirectURL:    "https://error.test.example",
 			RedirectURL:         "https://api.test.example/callback",
 			AllowedRedirectURLS: allowedRedirectURLs,
@@ -81,6 +94,9 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 		Emails: config.Emails{
 			MaxNumOfAddresses: 5,
 		},
+		Account: config.Account{
+			AllowSignup: true,
+		},
 	}
 
 	for _, provider := range enabledProviders {
@@ -91,6 +107,8 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 			cfg.ThirdParty.Providers.Google.Enabled = true
 		case "github":
 			cfg.ThirdParty.Providers.GitHub.Enabled = true
+		case "discord":
+			cfg.ThirdParty.Providers.Discord.Enabled = true
 		}
 	}
 
@@ -129,13 +147,13 @@ func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerifie
 func (s *thirdPartySuite) assertLocationHeaderHasToken(rec *httptest.ResponseRecorder) {
 	location, err := url.Parse(rec.Header().Get("Location"))
 	s.NoError(err)
-	s.True(location.Query().Has(HankoTokenQuery))
-	s.NotEmpty(location.Query().Get(HankoTokenQuery))
+	s.True(location.Query().Has(utils.HankoTokenQuery))
+	s.NotEmpty(location.Query().Get(utils.HankoTokenQuery))
 }
 
 func (s *thirdPartySuite) assertStateCookieRemoved(rec *httptest.ResponseRecorder) {
 	cookies := rec.Result().Cookies()
 	s.Len(cookies, 1)
-	s.Equal(HankoThirdpartyStateCookie, cookies[0].Name)
+	s.Equal(utils.HankoThirdpartyStateCookie, cookies[0].Name)
 	s.Equal(-1, cookies[0].MaxAge)
 }

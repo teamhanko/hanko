@@ -14,20 +14,51 @@ type AccountLinkingResult struct {
 }
 
 func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
+	if cfg.Emails.RequireVerification && !userData.Metadata.EmailVerified {
+		return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+	}
+
 	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerName)
 	if err != nil {
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
 
-	if cfg.Emails.RequireVerification && !userData.Metadata.EmailVerified {
-		return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
-	}
-
 	if identity == nil {
-		return signUp(tx, p, userData, providerName)
+		user, err := p.GetUserPersisterWithConnection(tx).GetByEmailAddress(userData.Metadata.Email)
+		if err != nil {
+			return nil, ErrorServer("could not get identity").WithCause(err)
+		}
+
+		if user == nil {
+			return signUp(tx, cfg, p, userData, providerName)
+		} else {
+			return link(tx, cfg, p, userData, providerName, user)
+		}
 	} else {
 		return signIn(tx, cfg, p, userData, identity)
 	}
+}
+
+func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, user *models.User) (*AccountLinkingResult, error) {
+	if !cfg.ThirdParty.Providers.Get(providerName).AllowLinking {
+		return nil, ErrorUserConflict("third party account linking for existing user with same email disallowed")
+	}
+
+	email := user.GetEmailByAddress(userData.Metadata.Email)
+	identity, err := models.NewIdentity(providerName, userData.ToMap(), email.ID)
+	if err != nil {
+		return nil, ErrorServer("could not create identity").WithCause(err)
+	}
+
+	err = p.GetIdentityPersisterWithConnection(tx).Create(*identity)
+	if err != nil {
+		return nil, ErrorServer("could not create identity").WithCause(err)
+	}
+
+	return &AccountLinkingResult{
+		Type: models.AuditLogThirdPartyLinkingSucceeded,
+		User: user,
+	}, nil
 }
 
 func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, identity *models.Identity) (*AccountLinkingResult, error) {
@@ -110,7 +141,11 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	return linkingResult, nil
 }
 
-func signUp(tx *pop.Connection, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
+func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
+	if !cfg.Account.AllowSignup {
+		return nil, ErrorSignUpDisabled("account signup is disabled")
+	}
+
 	var linkingResult *AccountLinkingResult
 
 	userPersister := p.GetUserPersisterWithConnection(tx)
@@ -121,10 +156,6 @@ func signUp(tx *pop.Connection, p persistence.Persister, userData *UserData, pro
 	email, terr := emailPersister.FindByAddress(userData.Metadata.Email)
 	if terr != nil {
 		return nil, ErrorServer("could not get email").WithCause(terr)
-	}
-
-	if email != nil && email.UserID != nil {
-		return nil, ErrorUserConflict("third party account linking for existing user with same email disallowed")
 	}
 
 	user := models.NewUser()

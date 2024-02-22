@@ -12,8 +12,71 @@
         },
         "allow_signup": {
           "type": "boolean",
-          "description": "Allow Signup indicates if a user can sign up with service",
           "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "AttributeMap": {
+      "properties": {
+        "name": {
+          "type": "string",
+          "default": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"
+        },
+        "family_name": {
+          "type": "string",
+          "default": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/surname"
+        },
+        "given_name": {
+          "type": "string",
+          "default": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/givenname"
+        },
+        "middle_name": {
+          "type": "string"
+        },
+        "nickname": {
+          "type": "string"
+        },
+        "preferred_username": {
+          "type": "string"
+        },
+        "profile": {
+          "type": "string"
+        },
+        "picture": {
+          "type": "string"
+        },
+        "website": {
+          "type": "string"
+        },
+        "gender": {
+          "type": "string"
+        },
+        "birthdate": {
+          "type": "string"
+        },
+        "zone_info": {
+          "type": "string"
+        },
+        "locale": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "default": "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"
+        },
+        "email_verified": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "phone_verified": {
+          "type": "string"
         }
       },
       "additionalProperties": false,
@@ -67,6 +130,9 @@
         "webauthn": {
           "$ref": "#/$defs/WebauthnSettings"
         },
+        "smtp": {
+          "$ref": "#/$defs/SMTP"
+        },
         "passcode": {
           "$ref": "#/$defs/Passcode"
         },
@@ -102,6 +168,12 @@
         },
         "account": {
           "$ref": "#/$defs/Account"
+        },
+        "saml": {
+          "$ref": "#/$defs/Saml"
+        },
+        "webhooks": {
+          "$ref": "#/$defs/WebhookSettings"
         }
       },
       "additionalProperties": false,
@@ -244,6 +316,37 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Events": {
+      "items": {
+        "type": "string"
+      },
+      "type": "array"
+    },
+    "IdentityProvider": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "name": {
+          "type": "string"
+        },
+        "domain": {
+          "type": "string"
+        },
+        "metadata_url": {
+          "type": "string"
+        },
+        "skip_email_verification": {
+          "type": "boolean"
+        },
+        "attribute_map": {
+          "$ref": "#/$defs/AttributeMap"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "LoggerConfig": {
       "properties": {
         "log_health_and_metrics": {
@@ -257,24 +360,48 @@
         "log_health_and_metrics"
       ]
     },
+    "Options": {
+      "properties": {
+        "sign_authn_requests": {
+          "type": "boolean",
+          "default": true
+        },
+        "force_login": {
+          "type": "boolean",
+          "default": false
+        },
+        "validate_encryption_cert": {
+          "type": "boolean",
+          "default": true
+        },
+        "skip_signature_validation": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_missing_attributes": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Passcode": {
       "properties": {
         "email": {
           "$ref": "#/$defs/Email"
         },
-        "smtp": {
-          "$ref": "#/$defs/SMTP"
-        },
         "ttl": {
           "type": "integer",
           "default": 300
+        },
+        "smtp": {
+          "$ref": "#/$defs/SMTP",
+          "description": "Deprecated: Use root level Smtp instead"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "smtp"
-      ]
+      "type": "object"
     },
     "Password": {
       "properties": {
@@ -409,6 +536,40 @@
       ],
       "description": "SMTP Server Settings for sending passcodes"
     },
+    "Saml": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "endpoint_url": {
+          "type": "string"
+        },
+        "audience_uri": {
+          "type": "string"
+        },
+        "default_redirect_url": {
+          "type": "string"
+        },
+        "allowed_redirect_urls": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "options": {
+          "$ref": "#/$defs/Options"
+        },
+        "identity_providers": {
+          "items": {
+            "$ref": "#/$defs/IdentityProvider"
+          },
+          "type": "array"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Secrets": {
       "properties": {
         "keys": {
@@ -524,6 +685,9 @@
         },
         "secret": {
           "type": "string"
+        },
+        "allow_linking": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
@@ -531,7 +695,8 @@
       "required": [
         "enabled",
         "client_id",
-        "secret"
+        "secret",
+        "allow_linking"
       ]
     },
     "ThirdPartyProviders": {
@@ -543,6 +708,9 @@
           "$ref": "#/$defs/ThirdPartyProvider"
         },
         "apple": {
+          "$ref": "#/$defs/ThirdPartyProvider"
+        },
+        "discord": {
           "$ref": "#/$defs/ThirdPartyProvider"
         }
       },
@@ -571,6 +739,41 @@
       "additionalProperties": false,
       "type": "object",
       "description": "WebauthnSettings defines the settings for the webauthn authentication mechanism"
+    },
+    "Webhook": {
+      "properties": {
+        "callback": {
+          "type": "string"
+        },
+        "events": {
+          "$ref": "#/$defs/Events"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "WebhookSettings": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "allow_time_expiration": {
+          "type": "boolean",
+          "default": false
+        },
+        "hooks": {
+          "$ref": "#/$defs/Webhooks"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Webhooks": {
+      "items": {
+        "$ref": "#/$defs/Webhook"
+      },
+      "type": "array"
     }
   }
 }

@@ -16,10 +16,6 @@ requests on your backend. To do so, first retrieve the JSON Web Key Set
 containing the public keys used to verify the JWT from the Hanko API's `.well-known/jwks.json` endpoint.
 Then use the JWKS to verify the JWT using a library for the programming language of your choice.
 
-:::info
-If you are using `Nuxt`, please check the [frontend guide](/guides/nuxt) on how to authenticate requests on the backend.
-:::
-
 ```mdx-code-block
 <Tabs>
 <TabItem value="go" label="Go">
@@ -175,5 +171,90 @@ export async function handler(req: Request, ctx: MiddlewareHandlerContext<AuthSt
 
 ```mdx-code-block
 </TabItem>
+
+<TabItem value="python" label="Python">
+```
+This is an example of using a custom middleware in a [FastAPI](https://fastapi.tiangolo.com/) based backend using the [PyJWT](https://pyjwt.readthedocs.io/en/stable/) package:
+
+```python showLineNumbers
+from typing import Any
+import os
+import jwt
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+
+HANKO_API_URL = os.environ.get("HANKO_API_URL")
+
+
+def deny():
+    return JSONResponse(content={"error": "Unauthorized"}, status_code=401)
+
+
+def extract_token_from_header(header: str) -> str:
+    parts = header.split()
+    return parts[1] if len(parts) == 2 and parts[0].lower() == "bearer" else None
+
+
+app = FastAPI()
+
+
+@app.middleware("http")
+async def auth(request: Request, call_next: Any):
+    authorization = request.headers.get("authorization")
+
+    if not authorization:
+        return deny()
+
+    token = extract_token_from_header(authorization)
+
+    if not token:
+        return deny()
+
+    try:
+         # Disable SSL certificate verification while in development
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        jwks_client = jwt.PyJWKClient(
+            HANKO_API_URL + "/.well-known/jwks.json", ssl_context=ssl_context
+        )
+        jwks_client = jwt.PyJWKClient(
+            HANKO_API_URL + "/.well-known/jwks.json", ssl_context=ssl_context
+        )
+        signing_key = jwks_client.get_signing_key_from_jwt(token)
+        data = jwt.decode(
+            token,
+            signing_key.key,
+            algorithms=["RS256"],
+            audience="localhost",
+        )
+
+        if not data:
+            return deny()
+
+        return await call_next(request)
+
+    except (jwt.DecodeError, Exception) as e:
+        print(f"Authentication error: {e}")
+        return deny()
+
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
+
+
+@app.get("/protected")
+async def protected():
+    return {"message": "Hello World"}
+
+
+```
+
+```mdx-code-block
+</TabItem>
+
 </Tabs>
 ```

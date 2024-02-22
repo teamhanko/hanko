@@ -1,8 +1,9 @@
 import { test, expect } from "../fixtures/Pages.js";
 import { faker } from "@faker-js/faker";
+import Accounts from "../helper/Accounts.js";
 
 test.describe("@nosignup", () => {
-    test("Login with account not found", async ({
+    test("Login with account that does not exist", async ({
         loginEmailNoSignupPage,
         noAccountFoundPage
     }) => {
@@ -29,6 +30,26 @@ test.describe("@nosignup", () => {
             await noAccountFoundPage.back();
             await expect(loginEmailNoSignupPage.headline).toBeVisible();
             await expect(loginEmailNoSignupPage.signInPasskeyButton).toBeVisible();
+        });
+    });
+
+    test("Login with existing account", async ({
+        loginEmailNoSignupPage,
+        loginPasscodePage
+    }) => {
+        const email = Accounts.test.email;
+
+        await test.step("When I visit the baseURL, the LoginEmailNoSignup page should be shown", async () => {
+            await expect(loginEmailNoSignupPage.headline).toBeVisible();
+            await expect(loginEmailNoSignupPage.signInPasskeyButton).toBeVisible();
+        });
+
+        await test.step("And when I submit an email that already exists", async () => {
+            await loginEmailNoSignupPage.continueUsingEmail(email);
+        });
+
+        await test.step("Login passocde page should be displayed", async () => {
+            await expect(loginPasscodePage.headline).toBeVisible();
         });
     });
 });

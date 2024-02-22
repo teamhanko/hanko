@@ -17,4 +17,4 @@ In the `config.ts` file set up the correct variables:
 
 ### Run development server
 
-Run `deno task start`  for a development server. Navigate to `http://localhost:8888/`. This will watch the project directory and restart as necessary.
+Run `deno task start` for a development server. Navigate to `http://localhost:8888/`. This will watch the project directory and restart as necessary.

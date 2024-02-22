@@ -17,12 +17,22 @@ type Identity struct {
 	ProviderName string     `json:"provider_name" db:"provider_name"`
 	Data         slices.Map `json:"data" db:"data"`
 	EmailID      uuid.UUID  `json:"email_id" db:"email_id"`
-	Email        *Email     `json:"email" belongs_to:"email"`
+	Email        *Email     `json:"email,omitempty" belongs_to:"email"`
 	CreatedAt    time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt    time.Time  `json:"updated_at" db:"updated_at"`
 }
 
 type Identities []Identity
+
+func (identities Identities) GetIdentity(providerName string, providerId string) *Identity {
+	for _, identity := range identities {
+		if identity.ProviderName == providerName && identity.ProviderID == providerId {
+			return &identity
+		}
+	}
+
+	return nil
+}
 
 func NewIdentity(provider string, identityData map[string]interface{}, emailID uuid.UUID) (*Identity, error) {
 	providerID, ok := identityData["sub"]

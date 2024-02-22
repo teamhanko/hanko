@@ -6,7 +6,24 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models.Jwk, credentials []models.WebauthnCredential, sessionData []models.WebauthnSessionData, passwords []models.PasswordCredential, auditLogs []models.AuditLog, emails []models.Email, primaryEmails []models.PrimaryEmail, identities []models.Identity, tokens []models.Token) persistence.Persister {
+// Deprecated: NewPersister is deprecated. Use test.Suite instead
+func NewPersister(
+	user []models.User,
+	passcodes []models.Passcode,
+	jwks []models.Jwk,
+	credentials []models.WebauthnCredential,
+	sessionData []models.WebauthnSessionData,
+	passwords []models.PasswordCredential,
+	auditLogs []models.AuditLog,
+	emails []models.Email,
+	primaryEmails []models.PrimaryEmail,
+	identities []models.Identity,
+	tokens []models.Token,
+	samlStates []models.SamlState,
+	samlCertificates []*models.SamlCertificate,
+	webhooks models.Webhooks,
+	webhookEvents models.WebhookEvents,
+) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
@@ -19,6 +36,9 @@ func NewPersister(user []models.User, passcodes []models.Passcode, jwks []models
 		primaryEmailPersister:        NewPrimaryEmailPersister(primaryEmails),
 		identityPersister:            NewIdentityPersister(identities),
 		tokenPersister:               NewTokenPersister(tokens),
+		samlStatePersister:           NewSamlStatePersister(samlStates),
+		samlCertificatePersister:     NewSamlCertificatePersister(samlCertificates),
+		webhookPersister:             NewWebhookPersister(webhooks, webhookEvents),
 	}
 }
 
@@ -34,6 +54,9 @@ type persister struct {
 	primaryEmailPersister        persistence.PrimaryEmailPersister
 	identityPersister            persistence.IdentityPersister
 	tokenPersister               persistence.TokenPersister
+	samlStatePersister           persistence.SamlStatePersister
+	samlCertificatePersister     persistence.SamlCertificatePersister
+	webhookPersister             persistence.WebhookPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -131,4 +154,24 @@ func (p *persister) GetTokenPersister() persistence.TokenPersister {
 
 func (p *persister) GetTokenPersisterWithConnection(tx *pop.Connection) persistence.TokenPersister {
 	return p.tokenPersister
+}
+
+func (p *persister) GetSamlStatePersister() persistence.SamlStatePersister {
+	return p.samlStatePersister
+}
+
+func (p *persister) GetSamlStatePersisterWithConnection(tx *pop.Connection) persistence.SamlStatePersister {
+	return p.samlStatePersister
+}
+
+func (p *persister) GetSamlCertificatePersister() persistence.SamlCertificatePersister {
+	return p.samlCertificatePersister
+}
+
+func (p *persister) GetSamlCertificatePersisterWithConnection(tx *pop.Connection) persistence.SamlCertificatePersister {
+	return p.samlCertificatePersister
+}
+
+func (p *persister) GetWebhookPersister(_ *pop.Connection) persistence.WebhookPersister {
+	return p.webhookPersister
 }

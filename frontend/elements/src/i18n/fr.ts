@@ -8,7 +8,7 @@ export const fr: Translation = {
     loginFinished: "Connexion réussie",
     loginPasscode: "Entrez le code d'accès",
     loginPassword: "Entrez le mot de passe",
-    registerAuthenticator: "Enregistrer une clé d'identification",
+    registerAuthenticator: "Créer une clé d'identification",
     registerConfirm: "Créer un compte ?",
     registerPassword: "Définir un nouveau mot de passe",
     profileEmails: "Adresses e-mail",
@@ -49,8 +49,6 @@ export const fr: Translation = {
     emailUnverified: "Cette adresse e-mail n'a pas été vérifiée.",
     emailDelete:
       "Si vous supprimez cette adresse e-mail, elle ne pourra plus être utilisée pour vous connecter à votre compte. Les clés d'identification qui ont pu être créées avec cette adresse e-mail resteront intactes.",
-    emailDeleteThirdPartyConnection:
-      "Si vous supprimez cette adresse e-mail, elle ne pourra plus être utilisée pour se connecter. Vous ne pourrez également plus vous connecter avec ou reconnecter votre compte {provider}. Les clés d'identification qui ont pu être créées avec cette adresse e-mail resteront intactes.",
     emailDeletePrimary:
       "L'adresse e-mail principale ne peut pas être supprimée. Ajoutez d'abord une autre adresse e-mail et définissez-la comme adresse e-mail principale.",
     renamePasskey:
@@ -76,7 +74,7 @@ export const fr: Translation = {
     forgotYourPassword: "Mot de passe oublié ?",
     back: "Retour",
     signInPasskey: "Se connecter avec une clé d'identification",
-    registerAuthenticator: "Enregistrer une clé d'identification",
+    registerAuthenticator: "Créer une clé d'identification",
     signIn: "Se connecter",
     signUp: "S'inscrire",
     sendNewPasscode: "Envoyer un nouveau code",
@@ -93,7 +91,7 @@ export const fr: Translation = {
     newPasskeyName: "Nouveau nom de clé d'identification",
     addEmail: "Ajouter une adresse e-mail",
     changePassword: "Changer le mot de passe",
-    addPasskey: "Ajouter une clé d'identification",
+    createPasskey: "Créer une clé d'identification",
     webauthnUnsupported:
       "Les clés d'identification ne sont pas prises en charge par votre navigateur",
     signInWith: "Se connecter avec {provider}",
@@ -124,5 +122,6 @@ export const fr: Translation = {
       "Impossible d'identifier le compte. L'adresse e-mail est utilisée par plusieurs comptes.",
     thirdPartyUnverifiedEmail:
       "Vérification de l'adresse e-mail requise. Veuillez vérifier l'adresse e-mail utilisée avec votre fournisseur.",
+    signupDisabled: "L'enregistrement du compte est désactivé.",
   },
 };

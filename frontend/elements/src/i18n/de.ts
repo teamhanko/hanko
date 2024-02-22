@@ -8,7 +8,7 @@ export const de: Translation = {
     loginFinished: "Login erfolgreich",
     loginPasscode: "Passcode eingeben",
     loginPassword: "Passwort eingeben",
-    registerAuthenticator: "Passkey einrichten",
+    registerAuthenticator: "Erstellen Sie einen passkey",
     registerConfirm: "Konto erstellen?",
     registerPassword: "Neues Passwort eingeben",
     profileEmails: "E-Mails",
@@ -49,8 +49,6 @@ export const de: Translation = {
     emailUnverified: "Diese E-Mail-Adresse wurde noch nicht verifiziert.",
     emailDelete:
       "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
-    emailDeleteThirdPartyConnection:
-      "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Sie können das verbundene {provider}-Konto ebenfalls nicht mehr zur Anmeldung nutzen oder dieses neu verbinden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
     emailDeletePrimary:
       "Die primäre E-Mail-Adresse kann nicht gelöscht werden. Fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie diese als primär fest.",
     renamePasskey:
@@ -76,7 +74,7 @@ export const de: Translation = {
     forgotYourPassword: "Passwort vergessen?",
     back: "Zurück",
     signInPasskey: "Anmelden mit Passkey",
-    registerAuthenticator: "Passkey einrichten",
+    registerAuthenticator: "Erstellen Sie einen passkey",
     signIn: "Anmelden",
     signUp: "Registrieren",
     sendNewPasscode: "Neuen Code senden",
@@ -93,7 +91,7 @@ export const de: Translation = {
     newPasskeyName: "Neuer Passkey Name",
     addEmail: "E-Mail-Adresse hinzufügen",
     changePassword: "Password ändern",
-    addPasskey: "Passkey hinzufügen",
+    createPasskey: "Erstellen Sie einen passkey",
     webauthnUnsupported: "Passkeys werden von ihrem Browser nicht unterrstützt",
     signInWith: "Anmelden mit {provider}",
     deleteAccount: "Ja, dieses Konto löschen.",
@@ -125,5 +123,6 @@ export const de: Translation = {
       "Konto kann nicht eindeutig identifiziert werden. Die genutzte E-Mail-Adresse wird von mehreren Konten verwendet.",
     thirdPartyUnverifiedEmail:
       "Verifizierung der E-Mail-Adresse erforderlich. Bitte verifizieren sie die genutzte E-Mail-Adresse bei ihrem Provider.",
+    signupDisabled: "Die Kontoregistrierung ist deaktiviert.",
   },
 };

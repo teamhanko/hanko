@@ -15,7 +15,7 @@ For all non 'clean' semver tags (e.g. vX.Y.Z) the format is the following: vX.Y.
 vX.Y.Z: the last tagged semver tag
 CC: Commits since the last tag
 CH: The commit short hash of the current commit
-[-dirty]: is appended if there are any changes that are not commited yet`,
+[-dirty]: is appended if there are any changes that are not committed yet`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println(build_info.GetVersion())
 		},

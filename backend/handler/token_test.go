@@ -48,7 +48,7 @@ func (s *tokenSuite) TestToken_Validate_TokenInCookie() {
 
 	cfg := s.setupConfig()
 	cfg.Session.EnableAuthTokenHeader = false
-	e := NewPublicRouter(cfg, s.Storage, nil)
+	e := NewPublicRouter(cfg, s.Storage, nil, nil)
 	e.ServeHTTP(rec, req)
 
 	s.Equal(rec.Code, http.StatusOK)
@@ -94,7 +94,7 @@ func (s *tokenSuite) TestToken_Validate_TokenInHeader() {
 	rec := httptest.NewRecorder()
 
 	cfg := s.setupConfig()
-	e := NewPublicRouter(cfg, s.Storage, nil)
+	e := NewPublicRouter(cfg, s.Storage, nil, nil)
 	e.ServeHTTP(rec, req)
 
 	s.Equal(rec.Code, http.StatusOK)
@@ -127,7 +127,7 @@ func (s *tokenSuite) TestToken_Validate_ExpiredToken() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := NewPublicRouter(s.setupConfig(), s.Storage, nil)
+	e := NewPublicRouter(s.setupConfig(), s.Storage, nil, nil)
 	e.ServeHTTP(rec, req)
 
 	s.Equal(rec.Code, http.StatusUnprocessableEntity)
@@ -150,7 +150,7 @@ func (s *tokenSuite) TestToken_Validate_MissingTokenFromRequest() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := NewPublicRouter(s.setupConfig(), s.Storage, nil)
+	e := NewPublicRouter(s.setupConfig(), s.Storage, nil, nil)
 	e.ServeHTTP(rec, req)
 
 	s.Equal(rec.Code, http.StatusBadRequest)
@@ -173,7 +173,7 @@ func (s *tokenSuite) TestToken_Validate_InvalidJson() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := NewPublicRouter(s.setupConfig(), s.Storage, nil)
+	e := NewPublicRouter(s.setupConfig(), s.Storage, nil, nil)
 	e.ServeHTTP(rec, req)
 
 	s.Equal(rec.Code, http.StatusBadRequest)
@@ -201,7 +201,7 @@ func (s *tokenSuite) TestToken_Validate_TokenNotFound() {
 	req.Header.Set("Content-Type", "application/json")
 	rec := httptest.NewRecorder()
 
-	e := NewPublicRouter(s.setupConfig(), s.Storage, nil)
+	e := NewPublicRouter(s.setupConfig(), s.Storage, nil, nil)
 	e.ServeHTTP(rec, req)
 
 	s.Equal(rec.Code, http.StatusNotFound)

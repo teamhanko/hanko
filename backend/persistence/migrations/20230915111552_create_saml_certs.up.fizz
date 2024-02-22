@@ -1,0 +1,10 @@
+create_table("saml_certificates") {
+    t.Column("id", "uuid", {})
+    t.Column("cert_data", "text", {})
+    t.Column("cert_key", "text", {})
+    t.Column("encryption_key", "string", {})
+    t.Timestamps()
+
+    t.PrimaryKey("id")
+    t.Index("cert_data", {"unique": "true"})
+}

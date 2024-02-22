@@ -2,12 +2,13 @@ package user
 
 import (
 	"encoding/json"
-	"github.com/brianvoe/gofakeit/v6"
-	"github.com/gofrs/uuid"
-	"github.com/spf13/cobra"
 	"log"
 	"os"
 	"time"
+
+	"github.com/brianvoe/gofakeit/v6"
+	"github.com/gofrs/uuid"
+	"github.com/spf13/cobra"
 )
 
 var outputFile string
@@ -36,18 +37,18 @@ func NewGenerateCommand() *cobra.Command {
 }
 
 func generate() error {
-	var entries []ImportEntry
+	var entries []ImportOrExportEntry
 	for i := 0; i < count; i++ {
 		now := time.Now().UTC()
 		id, _ := uuid.NewV4()
-		emails := []ImportEmail{
+		emails := []ImportOrExportEmail{
 			{
 				Address:    gofakeit.Email(),
 				IsPrimary:  true,
 				IsVerified: true,
 			},
 		}
-		entry := ImportEntry{
+		entry := ImportOrExportEntry{
 			UserID:    id.String(),
 			Emails:    emails,
 			CreatedAt: &now,

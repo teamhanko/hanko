@@ -1,6 +1,7 @@
 import { ComponentChildren, Fragment } from "preact";
 import styles from "./styles.sass";
 import Icon from "./Icon";
+import cx from "classnames";
 
 export type Props = {
   children?: ComponentChildren;
@@ -9,6 +10,7 @@ export type Props = {
   fadeOut?: boolean;
   secondary?: boolean;
   hasIcon?: boolean;
+  maxWidth?: boolean;
 };
 
 const LoadingSpinner = ({
@@ -18,15 +20,16 @@ const LoadingSpinner = ({
   fadeOut,
   secondary,
   hasIcon,
+  maxWidth,
 }: Props) => {
   return (
     <Fragment>
       {isLoading ? (
-        <div className={styles.loadingSpinnerWrapper}>
+        <div className={cx(styles.loadingSpinnerWrapper, styles.centerContent, maxWidth && styles.maxWidth)}>
           <Icon name={"spinner"} secondary={secondary} />
         </div>
       ) : isSuccess ? (
-        <div className={styles.loadingSpinnerWrapper}>
+        <div className={cx(styles.loadingSpinnerWrapper, styles.centerContent,  maxWidth && styles.maxWidth)}>
           <Icon name={"checkmark"} secondary={secondary} fadeOut={fadeOut} />
         </div>
       ) : (

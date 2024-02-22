@@ -2,11 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/thirdparty"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
@@ -36,7 +38,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -58,10 +60,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
-		s.Equal("google", identity.ProviderName)
-		s.Equal("google_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
@@ -99,7 +99,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -121,10 +121,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Google() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
-		s.Equal("google", identity.ProviderName)
-		s.Equal("google_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
 		s.NoError(lerr)
@@ -169,7 +167,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -191,10 +189,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_GitHub() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("github", "1234")
 		s.NotNil(identity)
-		s.Equal("github", identity.ProviderName)
-		s.Equal("1234", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
@@ -242,7 +238,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -264,10 +260,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_GitHub() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("github", "1234")
 		s.NotNil(identity)
-		s.Equal("github", identity.ProviderName)
-		s.Equal("1234", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
@@ -300,7 +294,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -322,10 +316,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("apple", "apple_abcde")
 		s.NotNil(identity)
-		s.Equal("apple", identity.ProviderName)
-		s.Equal("apple_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
@@ -361,7 +353,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -383,12 +375,129 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("apple", "apple_abcde")
 		s.NotNil(identity)
-		s.Equal("apple", identity.ProviderName)
-		s.Equal("apple_abcde", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Discord() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	gock.New(thirdparty.DiscordOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.DiscordUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.DiscordUser{
+			ID:       "discord_abcde",
+			Email:    "test-discord-signup@example.com",
+			Verified: true,
+		})
+
+	cfg := s.setUpConfig([]string{"discord"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "discord", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-discord-signup@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("discord", "discord_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Discord() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	gock.New(thirdparty.DiscordOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.DiscordUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.DiscordUser{
+			ID:       "discord_abcde",
+			Email:    "test-with-discord-identity@example.com",
+			Verified: true,
+		})
+
+	cfg := s.setUpConfig([]string{"discord"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "discord", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-discord-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("discord", "discord_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -424,7 +533,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -446,10 +555,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEma
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("google", "google_unclaimed_email")
 		s.NotNil(identity)
-		s.Equal("google", identity.ProviderName)
-		s.Equal("google_unclaimed_email", identity.ProviderID)
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
 		s.NoError(lerr)
@@ -487,7 +594,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -508,10 +615,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
-		s.Equal("google", identity.ProviderName)
-		s.Equal("google_abcde", identity.ProviderID)
 		s.Equal("test-with-google-identity-changed@example.com", identity.Data["email"])
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
@@ -550,7 +655,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -571,10 +676,8 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.NoError(err)
 		s.NotNil(user)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
-		s.Equal("google", identity.ProviderName)
-		s.Equal("google_abcde", identity.ProviderID)
 		s.Equal("unclaimed-email@example.com", identity.Data["email"])
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
@@ -613,7 +716,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 	req.AddCookie(&http.Cookie{
-		Name:  HankoThirdpartyStateCookie,
+		Name:  utils.HankoThirdpartyStateCookie,
 		Value: string(state),
 	})
 
@@ -635,13 +738,136 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_ProviderEMailCha
 		s.NotNil(user)
 		s.Len(user.Emails, 3)
 
-		identity := email.Identity
+		identity := email.Identities.GetIdentity("google", "google_abcde")
 		s.NotNil(identity)
-		s.Equal("google", identity.ProviderName)
-		s.Equal("google_abcde", identity.ProviderID)
 		s.Equal("non-existent-email@example.com", identity.Data["email"])
 
 		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_ExistingAccountNoIdentities() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.GoogleUser{
+			ID:            "google_1234",
+			Email:         "test-no-identity@example.com",
+			EmailVerified: true,
+		})
+
+	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-no-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+		s.Len(user.Emails, 1)
+
+		identity := email.Identities.GetIdentity("google", "google_1234")
+		s.NotNil(identity)
+		s.Equal("test-no-identity@example.com", identity.Data["email"])
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Link_GoogleToAccountWithGithubIdentity() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	gock.New(thirdparty.GoogleOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.GoogleUserInfoEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(&thirdparty.GoogleUser{
+			ID:            "google_1234",
+			Email:         "test-with-github-identity@example.com",
+			EmailVerified: true,
+		})
+
+	cfg := s.setUpConfig([]string{"google", "github"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-github-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.Len(email.Identities, 2)
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+		s.Len(user.Emails, 1)
+
+		identity := email.Identities.GetIdentity("google", "google_1234")
+		s.NotNil(identity)
+		s.Equal("test-with-github-identity@example.com", identity.Data["email"])
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_linking_succeeded"}, user.ID.String(), user.Emails.GetPrimary().Address, "", "")
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}

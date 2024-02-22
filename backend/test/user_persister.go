@@ -92,6 +92,19 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 	return result[page-1], nil
 }
 
+func (p *userPersister) All() ([]models.User, error) {
+	return p.users, nil
+}
+
 func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
 	return len(p.users), nil
+}
+
+func (p *userPersister) GetByEmailAddress(s string) (*models.User, error) {
+	for _, user := range p.users {
+		if email := user.Emails.GetEmailByAddress(s); email != nil {
+			return &user, nil
+		}
+	}
+	return nil, nil
 }

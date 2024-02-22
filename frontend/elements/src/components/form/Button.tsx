@@ -71,6 +71,7 @@ const Button = ({
         isSuccess={isSuccess}
         secondary={true}
         hasIcon={!!icon}
+        maxWidth
       >
         {icon ? (
           <Icon

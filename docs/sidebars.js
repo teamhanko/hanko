@@ -18,41 +18,74 @@ const sidebars = {
 
   // But you can create a sidebar manually
   docs: [
-    'intro',
+    "intro",
     {
-      type: 'category',
-      label: 'Frontend guides',
+      type: "category",
+      label: "Fullstack guides",
       link: {
-        type: 'generated-index',
-        title: 'Frontend guides',
+        type: "generated-index",
+        title: "Fullstack guides",
         description:
-          'Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred frontend framework!',
-        slug: '/guides/frontend',
-        keywords: ['guides']
+          "Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred fullstack framework!",
+        slug: "/guides/fullstack",
+        keywords: ["guides"],
+      },
+      items: ["guides/next", "guides/nuxt", "guides/sveltekit", "guides/fresh"],
+    },
+    {
+      type: "category",
+      label: "Frontend guides",
+      link: {
+        type: "generated-index",
+        title: "Frontend guides",
+        description:
+          "Set up authentication for your app in minutes by learning how to integrate Hanko with your preferred frontend framework!",
+        slug: "/guides/frontend",
+        keywords: ["guides"],
       },
       items: [
-        'guides/angular',
-        'guides/js',
-        'guides/next',
-        'guides/nuxt',
-        'guides/react',
-        'guides/svelte',
-        'guides/vue',
-        'guides/fresh',
-      ]
+        "guides/angular",
+        "guides/js",
+        "guides/react",
+        "guides/svelte",
+        "guides/vue",
+      ],
     },
-    'guides/backend',
-    'guides/mobile_guide',
+    "guides/backend",
+    "guides/mobile_guide",
     {
-      type: 'category',
-      label: 'Social Login',
+      type: "category",
+      label: "Social Login",
       link: {
-        type: 'doc',
-        id: 'guides/social/index'
+        type: "doc",
+        id: "guides/social/index",
       },
-      items: ['guides/social/apple', 'guides/social/github', 'guides/social/google']
-    }
-  ]
+      items: [
+        "guides/social/apple",
+        "guides/social/github",
+        "guides/social/google",
+      ],
+    },
+    {
+      type: "category",
+      label: "Enterprise Features",
+      link: {
+        type: "generated-index",
+        title: "Enterprise Features",
+        description: "Set up enterprise features to extend your Hanko experience with enterprise Login services",
+        slug: "/guides/ee",
+        keywords: ["guides"],
+      },
+      items: [
+        "guides/ee/saml",
+      ],
+    },
+    {
+      type: "category",
+      label: "Tutorials",
+      items: ["guides/tutorials/php", "guides/tutorials/nextjs", "guides/tutorials/userData"],
+    },
+  ],
 };
 
 module.exports = sidebars;

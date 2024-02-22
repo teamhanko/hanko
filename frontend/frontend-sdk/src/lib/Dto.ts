@@ -44,12 +44,14 @@ export interface AccountConfig {
  * @property {EmailConfig} emails - The email configuration.
  * @property {string[]} providers - The enabled third party providers.
  * @property {AccountConfig} account - Controls the behaviour regarding user accounts.
+ * @property {boolean} use_enterprise - Enterprise Connections are enabled.
  */
 export interface Config {
   password: PasswordConfig;
   emails: EmailConfig;
   providers: string[];
   account: AccountConfig;
+  use_enterprise: boolean;
 }
 
 /**
@@ -177,6 +179,7 @@ export interface Attestation extends PublicKeyCredentialWithAttestationJSON {
  * @property {boolean} is_verified - Indicates whether the email address is verified.
  * @property {boolean} is_primary - Indicates it's the primary email address.
  * @property {Identity} identity - Indicates that this email is linked to a third party account.
+ * @property {Identity[]} identities - A list of identities, each identity indicates that this email is linked to a third party account.
  */
 export interface Email {
   id: string;
@@ -184,6 +187,7 @@ export interface Email {
   is_verified: boolean;
   is_primary: boolean;
   identity: Identity;
+  identities: Identity[];
 }
 
 /**
@@ -230,8 +234,8 @@ export interface WebauthnCredentials extends Array<WebauthnCredential> {}
  * @interface
  * @category SDK
  * @subcategory DTO
- * @property {id} - The subject ID with the third party provider.
- * @property {provider} - The third party provider name.
+ * @property {string} id - The subject ID with the third party provider.
+ * @property {string} provider - The third party provider name.
  */
 export interface Identity {
   id: string;

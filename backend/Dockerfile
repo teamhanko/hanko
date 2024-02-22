@@ -1,5 +1,5 @@
 # Build the hanko binary
-FROM --platform=$BUILDPLATFORM golang:1.20 as builder
+FROM --platform=$BUILDPLATFORM golang:1.20 AS builder
 
 ARG TARGETARCH
 
@@ -17,6 +17,7 @@ COPY server server/
 COPY handler handler/
 COPY crypto crypto/
 COPY dto dto/
+COPY ee/saml ee/saml/
 COPY session session/
 COPY mail mail/
 COPY audit_log audit_log/
@@ -27,10 +28,14 @@ COPY build_info build_info/
 COPY middleware middleware/
 COPY flow_api flow_api/
 COPY flowpilot flowpilot/
+COPY template template/
+COPY utils utils/
+COPY mapper mapper/
+COPY webhooks webhooks/
 
 # Build
 RUN go generate ./...
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=$TARGETARCH go build -a -o hanko main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" go build -a -o hanko main.go
 
 # Use distroless as minimal base image to package hanko binary
 # See https://github.com/GoogleContainerTools/distroless for details

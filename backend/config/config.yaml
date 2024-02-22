@@ -8,9 +8,10 @@ passcode:
   enabled: true
   email:
     from_address: no-reply@hanko.io
-  smtp:
-    host: localhost
-    port: 2500
+smtp:
+    host: smtp.example.com
+    user: example
+    password: example
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz

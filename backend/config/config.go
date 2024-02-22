@@ -3,6 +3,10 @@ package config
 import (
 	"errors"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/fatih/structs"
 	"github.com/go-webauthn/webauthn/protocol"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
@@ -11,16 +15,16 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
+	zeroLogger "github.com/rs/zerolog/log"
+	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
-	"log"
-	"strings"
-	"time"
 )
 
 // Config is the central configuration type
 type Config struct {
 	Server      Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
 	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp        SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
 	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
 	Password    Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
 	Database    Database         `yaml:"database" json:"database" koanf:"database"`
@@ -33,24 +37,42 @@ type Config struct {
 	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
 	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
 	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-
-	Identifier   Identifier   `yaml:"identifier" json:"identifier" koanf:"identifier"`
-	SecondFactor SecondFactor `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
-	Passkey      Passkey      `yaml:"passkey" json:"passkey" koanf:"passkey"`
+	Identifier   Identifier      `yaml:"identifier" json:"identifier" koanf:"identifier"`
+	SecondFactor SecondFactor    `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey      Passkey         `yaml:"passkey" json:"passkey" koanf:"passkey"`
+	Saml        config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	Webhooks    WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
 
 var (
 	DefaultConfigFilePath = "./config/config.yaml"
 )
 
-func Load(cfgFile *string) (*Config, error) {
+func LoadFile(filePath *string, pa koanf.Parser) (*koanf.Koanf, error) {
 	k := koanf.New(".")
-	var err error
-	if cfgFile == nil || *cfgFile == "" {
-		*cfgFile = "./config/config.yaml"
+
+	if filePath == nil || *filePath == "" {
+		return nil, nil
 	}
-	if err = k.Load(file.Provider(*cfgFile), yaml.Parser()); err != nil {
-		return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
+
+	if err := k.Load(file.Provider(*filePath), pa); err != nil {
+		return nil, fmt.Errorf("failed to load file from '%s': %w", *filePath, err)
+	}
+
+	return k, nil
+}
+
+func Load(cfgFile *string) (*Config, error) {
+	if cfgFile == nil || *cfgFile == "" {
+		*cfgFile = DefaultConfigFilePath
+	}
+
+	k, err := LoadFile(cfgFile, yaml.Parser())
+	if err != nil {
+		if *cfgFile != DefaultConfigFilePath {
+			return nil, fmt.Errorf("failed to load config from: %s: %w", *cfgFile, err)
+		}
+		log.Println("failed to load config, skipping...")
 	} else {
 		log.Println("Using config file:", *cfgFile)
 	}
@@ -69,6 +91,8 @@ func Load(cfgFile *string) (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
 	}
+
+	c.arrangeSmtpSettings()
 
 	if err = c.Validate(); err != nil {
 		return nil, fmt.Errorf("failed to validate config: %s", err)
@@ -96,14 +120,17 @@ func DefaultConfig() *Config {
 			UserVerification: "preferred",
 			Timeout:          60000,
 		},
+		Smtp: SMTP{
+			Port: "465",
+		},
 		Passcode: Passcode{
-			Smtp: SMTP{
-				Port: "465",
-			},
 			TTL: 300,
 			Email: Email{
 				FromAddress: "passcode@hanko.io",
 				FromName:    "Hanko",
+			},
+			Smtp: SMTP{
+				Port: "465",
 			},
 		},
 		Password: Password{
@@ -150,7 +177,23 @@ func DefaultConfig() *Config {
 			AllowDeletion: false,
 			AllowSignup:   true,
 		},
-		// TODO: add defaults for Passkey, Identifier, SecondFactor
+		ThirdParty: ThirdParty{
+			Providers: ThirdPartyProviders{
+				Google: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				GitHub: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				Apple: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+				Discord: ThirdPartyProvider{
+					AllowLinking: true,
+				},
+			},
+		},
+    // TODO: add defaults for Passkey, Identifier, SecondFactor
 	}
 }
 
@@ -162,6 +205,10 @@ func (c *Config) Validate() error {
 	err = c.Webauthn.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
+	}
+	err = c.Smtp.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate smtp settings: %w", err)
 	}
 	err = c.Passcode.Validate()
 	if err != nil {
@@ -191,6 +238,13 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)
 	}
+  err = c.Saml.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate saml settings: %w", err)
+	}
+	err = c.Webhooks.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate webhook settings: %w", err)
 
 	if c.Identifier.Email.Verification && !c.Passcode.Enabled {
 		return errors.New("passcode must be enabled for email verification")
@@ -386,19 +440,16 @@ func (e *Email) Validate() error {
 
 type Passcode struct {
 	Enabled bool  `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Email   Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	Smtp    SMTP  `yaml:"smtp" json:"smtp" koanf:"smtp"`
-	TTL     int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
+	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	//Deprecated: Use root level Smtp instead
+	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
 
 func (p *Passcode) Validate() error {
 	err := p.Email.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate email settings: %w", err)
-	}
-	err = p.Smtp.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate smtp settings: %w", err)
 	}
 	return nil
 }
@@ -596,21 +647,22 @@ func (t *ThirdParty) Validate() error {
 func (t *ThirdParty) PostProcess() error {
 	t.AllowedRedirectURLMap = make(map[string]glob.Glob)
 	urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
-	for _, url := range urls {
-		g, err := glob.Compile(url, '.', '/')
+	for _, redirectUrl := range urls {
+		g, err := glob.Compile(redirectUrl, '.', '/')
 		if err != nil {
 			return fmt.Errorf("failed compile allowed redirect url glob: %w", err)
 		}
-		t.AllowedRedirectURLMap[url] = g
+		t.AllowedRedirectURLMap[redirectUrl] = g
 	}
 
 	return nil
 }
 
 type ThirdPartyProvider struct {
-	Enabled  bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
-	Secret   string `yaml:"secret" json:"secret" koanf:"secret"`
+	Enabled      bool   `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	ClientID     string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	Secret       string `yaml:"secret" json:"secret" koanf:"secret"`
+	AllowLinking bool   `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" split_words:"true"`
 }
 
 func (p *ThirdPartyProvider) Validate() error {
@@ -626,9 +678,10 @@ func (p *ThirdPartyProvider) Validate() error {
 }
 
 type ThirdPartyProviders struct {
-	Google ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
-	GitHub ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
-	Apple  ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
+	Google  ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
+	GitHub  ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
+	Apple   ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
+	Discord ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
 }
 
 func (p *ThirdPartyProviders) Validate() error {
@@ -676,10 +729,25 @@ func (c *Config) PostProcess() error {
 	err = c.Webauthn.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process webauthn settings: %w", err)
+	
+  err = c.Saml.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process saml settings: %w", err)
 	}
 
 	return nil
 
+}
+
+func (c *Config) arrangeSmtpSettings() {
+	if c.Passcode.Smtp.Validate() == nil {
+		if c.Smtp.Validate() == nil {
+			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
+			return
+		}
+
+		c.Smtp = c.Passcode.Smtp
+	}
 }
 
 type LoggerConfig struct {

@@ -4,6 +4,7 @@ import {
   HttpClient,
 } from "../../../src/lib/client/HttpClient";
 import { RequestTimeoutError, TechnicalError } from "../../../src";
+import { fakeTimerNow } from "../../setup";
 
 const jwt = "test-token";
 let httpClient: HttpClient;
@@ -42,18 +43,18 @@ describe("httpClient._fetch()", () => {
 
     expect(xhr.setRequestHeader).toHaveBeenCalledWith(
       "Accept",
-      "application/json"
+      "application/json",
     );
     expect(xhr.setRequestHeader).toHaveBeenCalledWith(
       "Content-Type",
-      "application/json"
+      "application/json",
     );
     expect(xhr.setRequestHeader).toHaveBeenCalledTimes(2);
     expect(xhr.open).toHaveBeenNthCalledWith(
       1,
       "GET",
       "http://test.api/test",
-      true
+      true,
     );
     expect(response.json()).toEqual({ foo: "bar" });
   });
@@ -70,7 +71,7 @@ describe("httpClient._fetch()", () => {
 
     expect(xhr.setRequestHeader).toHaveBeenCalledWith(
       "Authorization",
-      `Bearer ${jwt}`
+      `Bearer ${jwt}`,
     );
     expect(xhr.setRequestHeader).toHaveBeenCalledTimes(3);
   });
@@ -158,90 +159,102 @@ describe("headers.get()", () => {
 });
 
 describe("httpClient.processResponseHeadersOnLogin()", () => {
-  const jwt = "test-jwt";
-  const expirationSeconds = 7;
-  const userID = "test-user";
+  describe("when the x-auth-token is available in the response header", () => {
+    const jwt = "test-jwt";
+    const expirationSeconds = 7;
+    const userID = "test-user";
+    const realLocation = window.location;
 
-  beforeEach(() => {
-    Object.defineProperty(global, "XMLHttpRequest", {
-      value: jest.fn().mockImplementation(() => ({
-        response: JSON.stringify({ foo: "bar" }),
-        open: jest.fn(),
-        setRequestHeader: jest.fn(),
-        getResponseHeader: jest
-          .fn()
-          .mockImplementation((name: string) =>
-            name === "X-Auth-Token"
-              ? jwt
-              : name === "X-Session-Lifetime"
-              ? `${expirationSeconds}`
-              : ""
-          ),
-        getAllResponseHeaders: jest
-          .fn()
-          .mockReturnValue("X-Auth-Token: ...\r\nX-Session-Lifetime: ..."),
-        send: jest.fn(),
-      })),
-      configurable: true,
-      writable: true,
+    beforeEach(() => {
+      Object.defineProperty(global, "XMLHttpRequest", {
+        value: jest.fn().mockImplementation(() => ({
+          response: JSON.stringify({ foo: "bar" }),
+          open: jest.fn(),
+          setRequestHeader: jest.fn(),
+          getResponseHeader: jest
+            .fn()
+            .mockImplementation((name: string) =>
+              name === "X-Auth-Token"
+                ? jwt
+                : name === "X-Session-Lifetime"
+                ? `${expirationSeconds}`
+                : "",
+            ),
+          getAllResponseHeaders: jest
+            .fn()
+            .mockReturnValue("X-Auth-Token: ...\r\nX-Session-Lifetime: ..."),
+          send: jest.fn(),
+        })),
+        configurable: true,
+        writable: true,
+      });
+
+      delete window.location;
     });
-  });
 
-  it("should set a cookie if x-auth-token response header is available", async () => {
-    const client = new HttpClient("http://test.api", {
-      cookieName: "hanko",
-      localStorageKey: "hanko",
-      timeout: 13000,
+    afterEach(() => {
+      window.location = realLocation;
     });
-    const xhr = new XMLHttpRequest();
-    const response = new Response(xhr);
 
-    jest.spyOn(response.xhr, "getResponseHeader");
-    jest.spyOn(client.passcodeState, "read");
-    jest.spyOn(client.passcodeState, "reset");
-    jest.spyOn(client.passcodeState, "write");
-    jest.spyOn(client.sessionState, "read");
-    jest.spyOn(client.cookie, "setAuthCookie");
-    jest.spyOn(client.sessionState, "setExpirationSeconds");
-    jest.spyOn(client.sessionState, "setUserID");
-    jest.spyOn(client.sessionState, "write");
+    it.each`
+      protocolApi | protocolClient | secure
+      ${"http"}   | ${"http"}      | ${false}
+      ${"http"}   | ${"https"}     | ${false}
+      ${"https"}  | ${"http"}      | ${false}
+      ${"https"}  | ${"https"}     | ${true}
+    `(
+      "when the API uses $protocolApi and the client uses $protocolClient, should set client state and cookie with secure flag set to $secure",
+      async ({ protocolApi, protocolClient, secure }) => {
+        const client = new HttpClient(`${protocolApi}://test.api`, {
+          cookieName: "hanko",
+          localStorageKey: "hanko",
+          timeout: 13000,
+        });
+        const xhr = new XMLHttpRequest();
+        const response = new Response(xhr);
 
-    client.processResponseHeadersOnLogin(userID, response);
+        // @ts-ignore
+        window.location = {
+          href: `${protocolClient}://test.app`,
+        };
 
-    expect(response.xhr.getResponseHeader).toBeCalledTimes(2);
-    expect(client.passcodeState.read).toBeCalledTimes(1);
-    expect(client.passcodeState.reset).toBeCalledTimes(1);
-    expect(client.passcodeState.write).toBeCalledTimes(1);
+        jest.spyOn(response.xhr, "getResponseHeader");
+        jest.spyOn(client.passcodeState, "read");
+        jest.spyOn(client.passcodeState, "reset");
+        jest.spyOn(client.passcodeState, "write");
+        jest.spyOn(client.sessionState, "read");
+        jest.spyOn(client.cookie, "setAuthCookie");
+        jest.spyOn(client.sessionState, "setExpirationSeconds");
+        jest.spyOn(client.sessionState, "setUserID");
+        jest.spyOn(client.sessionState, "write");
 
-    expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
-    expect(client.sessionState.read).toHaveBeenCalledTimes(1);
-    expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledTimes(1);
-    expect(client.sessionState.setUserID).toHaveBeenCalledTimes(1);
-    expect(client.sessionState.write).toHaveBeenCalledTimes(1);
+        client.processResponseHeadersOnLogin(userID, response);
 
-    expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledWith(
-      expirationSeconds
+        expect(response.xhr.getResponseHeader).toBeCalledTimes(2);
+        expect(client.passcodeState.read).toBeCalledTimes(1);
+        expect(client.passcodeState.reset).toBeCalledTimes(1);
+        expect(client.passcodeState.write).toBeCalledTimes(1);
+
+        expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
+        expect(client.sessionState.read).toHaveBeenCalledTimes(1);
+        expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledTimes(
+          1,
+        );
+        expect(client.sessionState.setUserID).toHaveBeenCalledTimes(1);
+        expect(client.sessionState.write).toHaveBeenCalledTimes(1);
+
+        expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledWith(
+          expirationSeconds,
+        );
+        expect(client.sessionState.setUserID).toHaveBeenCalledWith(userID);
+
+        expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, {
+          secure,
+          expires: new Date(fakeTimerNow + expirationSeconds * 1000),
+        });
+        expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
+      },
     );
-    expect(client.sessionState.setUserID).toHaveBeenCalledWith(userID);
-
-    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, false);
-    expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
-  });
-
-  it("should set a secure cookie if x-auth-token response header is available and https is being used", async () => {
-    const client = new HttpClient("https://test.api", {
-      cookieName: "hanko",
-      localStorageKey: "hanko",
-      timeout: 13000,
-    });
-    const xhr = new XMLHttpRequest();
-    const response = new Response(xhr);
-
-    jest.spyOn(client.cookie, "setAuthCookie");
-    client.processResponseHeadersOnLogin(userID, response);
-
-    expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, true);
-    expect(client.cookie.setAuthCookie).toBeCalledTimes(1);
   });
 });
 

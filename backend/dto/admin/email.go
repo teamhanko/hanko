@@ -26,3 +26,27 @@ func FromEmailModel(email *models.Email) *Email {
 		UpdatedAt:  email.UpdatedAt,
 	}
 }
+
+type CreateEmail struct {
+	Address    string `json:"address" validate:"required,email"`
+	IsPrimary  bool   `json:"is_primary"`
+	IsVerified bool   `json:"is_verified"`
+}
+
+type EmailRequests interface {
+	ListEmailRequestDto | CreateEmailRequestDto | GetEmailRequestDto
+}
+
+type ListEmailRequestDto struct {
+	UserId string `param:"user_id" validate:"required,uuid4"`
+}
+
+type CreateEmailRequestDto struct {
+	ListEmailRequestDto
+	CreateEmail
+}
+
+type GetEmailRequestDto struct {
+	ListEmailRequestDto
+	EmailId string `param:"email_id" validate:"required,uuid4"`
+}

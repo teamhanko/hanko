@@ -1,5 +1,6 @@
 import {
   ConfigClient,
+  EnterpriseClient,
   Hanko,
   PasscodeClient,
   PasswordClient,
@@ -16,5 +17,6 @@ describe("class hanko", () => {
     expect(hanko.passcode).toBeInstanceOf(PasscodeClient);
     expect(hanko.password).toBeInstanceOf(PasswordClient);
     expect(hanko.webauthn).toBeInstanceOf(WebauthnClient);
+    expect(hanko.enterprise).toBeInstanceOf(EnterpriseClient);
   });
 });

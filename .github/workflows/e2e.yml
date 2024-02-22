@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
-        run: docker compose -f "quickstart.yaml" up -d --build
+        run: docker compose -f "quickstart.e2e.yaml" up -d --build
 
       - name: Install dependencies
         working-directory: ./e2e
@@ -28,16 +28,16 @@ jobs:
       - name: Stop containers
         if: always()
         working-directory: ./deploy/docker-compose
-        run: docker compose -f "quickstart.yaml" down
+        run: docker compose -f "quickstart.e2e.yaml" down
   passwords:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
-        run: docker compose -f "quickstart.yaml" up -d --build
+        run: docker compose -f "quickstart.e2e.yaml" up -d --build
         env:
           PASSWORD_ENABLED: true
 
@@ -54,12 +54,12 @@ jobs:
       - name: Stop containers
         if: always()
         working-directory: ./deploy/docker-compose
-        run: docker compose -f "quickstart.yaml" down
+        run: docker compose -f "quickstart.e2e.yaml" down
   nosignup:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Copy config
         working-directory: ./deploy/docker-compose
@@ -67,7 +67,7 @@ jobs:
 
       - name: Start containers
         working-directory: ./deploy/docker-compose
-        run: docker compose -f "quickstart.yaml" up -d --build
+        run: docker compose -f "quickstart.e2e.yaml" up -d --build
 
       - name: Install dependencies
         working-directory: ./e2e
@@ -82,4 +82,4 @@ jobs:
       - name: Stop containers
         if: always()
         working-directory: ./deploy/docker-compose
-        run: docker compose -f "quickstart.yaml" down
+        run: docker compose -f "quickstart.e2e.yaml" down

@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -11,10 +12,12 @@ import (
 
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
+	GetByEmailAddress(string) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
 	List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error)
+	All() ([]models.User, error)
 	Count(userId uuid.UUID, email string) (int, error)
 	GetByUsername(username string) (*models.User, error)
 }
@@ -39,6 +42,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"PasswordCredential"}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
+
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -49,17 +53,23 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (p *userPersister) GetByEmail(email string) (*models.User, error) {
-	user := models.User{}
-	err := p.db.Eager().Where("email = (?)", email).First(&user)
+func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, error) {
+	email := models.Email{}
+	err := p.db.Where("address = (?)", emailAddress).First(&email)
+
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
+
 	if err != nil {
-		return nil, fmt.Errorf("failed to get user: %w", err)
+		return nil, fmt.Errorf("failed to get user by email address: %w", err)
 	}
 
-	return &user, nil
+	if email.UserID == nil {
+		return nil, nil
+	}
+
+	return p.Get(*email.UserID)
 }
 
 func (p *userPersister) GetByUsername(username string) (*models.User, error) {
@@ -124,6 +134,19 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 		Paginate(page, perPage).
 		All(&users)
 
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return users, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to fetch users: %w", err)
+	}
+
+	return users, nil
+}
+
+func (p *userPersister) All() ([]models.User, error) {
+	users := []models.User{}
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials").All(&users)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}

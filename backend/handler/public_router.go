@@ -12,14 +12,17 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flow_api"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
+	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/mail"
+	"github.com/teamhanko/hanko/backend/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/template"
 )
 
-func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc) *echo.Echo {
+func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
 
 	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
@@ -59,11 +62,19 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.POST("/login", flowAPIHandler.LoginFlowHandler)
 	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, sessionMiddleware)
 
+
+	e.Renderer = template.NewTemplateRenderer()
+
 	e.HideBanner = true
+	g := e.Group("")
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
-	e.Use(hankoMiddleware.GetLoggerMiddleware())
+	if cfg.Log.LogHealthAndMetrics {
+		e.Use(hankoMiddleware.GetLoggerMiddleware())
+	} else {
+		g.Use(hankoMiddleware.GetLoggerMiddleware())
+	}
 
 	exposeHeader := []string{
 		httplimit.HeaderRetryAfter,
@@ -92,7 +103,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	mailer, err := mail.NewMailer(cfg.Passcode.Smtp)
+	mailer, err := mail.NewMailer(cfg.Smtp)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
@@ -102,28 +113,32 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
-		password := e.Group("/password")
+		password := g.Group("/password")
 		password.PUT("", passwordHandler.Set, sessionMiddleware)
 		password.POST("/login", passwordHandler.Login)
 	}
 
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
+	statusHandler := NewStatusHandler(persister)
 
-	e.GET("/me", userHandler.Me, sessionMiddleware)
+	e.GET("/", statusHandler.Status)
+	g.GET("/me", userHandler.Me, sessionMiddleware)
 
-	user := e.Group("/users")
+	webhookMiddlware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+
+	user := g.Group("/users", webhookMiddlware)
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, sessionMiddleware)
 
-	e.POST("/user", userHandler.GetUserIdByEmail)
-	e.POST("/logout", userHandler.Logout, sessionMiddleware)
+	g.POST("/user", userHandler.GetUserIdByEmail)
+	g.POST("/logout", userHandler.Logout, sessionMiddleware)
 
 	if cfg.Account.AllowDeletion {
-		e.DELETE("/user", userHandler.Delete, sessionMiddleware)
+		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddlware)
 	}
 
 	healthHandler := NewHealthHandler()
-	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger)
+	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
@@ -140,16 +155,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if err != nil {
 		panic(fmt.Errorf("failed to create well-known handler: %w", err))
 	}
-	wellKnown := e.Group("/.well-known")
+	wellKnown := g.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler, err := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public email handler: %w", err))
-	}
+	emailHandler := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 
-	webauthn := e.Group("/webauthn")
+	webauthn := g.Group("/webauthn")
 	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
 	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
 	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
@@ -163,25 +175,29 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 
-	passcode := e.Group("/passcode")
+	passcode := g.Group("/passcode")
 	passcodeLogin := passcode.Group("/login")
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
-	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	passcodeLogin.POST("/finalize", passcodeHandler.Finish, webhookMiddlware)
 
-	email := e.Group("/emails", sessionMiddleware)
+	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
-	thirdparty := e.Group("thirdparty")
+	thirdparty := g.Group("thirdparty")
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
 	thirdparty.GET("/callback", thirdPartyHandler.Callback)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost)
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
-	e.POST("/token", tokenHandler.Validate)
+	g.POST("/token", tokenHandler.Validate)
+
+	if cfg.Saml.Enabled {
+		saml.CreateSamlRoutes(e, cfg, persister, sessionManager, auditLogger)
+	}
 
 	return e
 }

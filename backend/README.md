@@ -11,6 +11,7 @@ easily integrated into any web app with as little as two lines of code.
 
 - [API features](#api-features)
 - [Running the backend](#running-the-backend)
+- [Running tests](#running-tests)
 - [Additional topics](#additional-topics)
   - [Enabling password authentication](#enabling-password-authentication)
   - [Cross-domain communication](#cross-domain-communication)
@@ -18,6 +19,7 @@ easily integrated into any web app with as little as two lines of code.
   - [Rate Limiting](#rate-limiting)
   - [Social logins](#social-logins)
   - [User import](#user-import)
+  - [Webhooks](#webhooks)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -50,7 +52,7 @@ To get the Hanko backend up and running you need to:
 5. [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
 6. [Configure WebAuthn](#configure-webauthn)
 7. [Configure CORS](#configure-cors)
-8. [Start the backend](#run-the-backend)
+8. [Start the backend](#start-the-backend)
 
 ### Run a database
 
@@ -326,12 +328,14 @@ endpoints). These can be started separately or in a single command.
 docker run --mount type=bind,source=<PATH-TO-CONFIG-FILE>,target=/config/config.yaml -p 8000:8000 -it ghcr.io/teamhanko/hanko:latest serve public
 ```
 
-> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+##### Using pre-built binaries
 
-The service is now available at `localhost:8000`.
+Each [GitHub release](https://github.com/teamhanko/hanko/releases) (> 0.9.0) has `hanko`'s binary assets uploaded to it. Alternatively you can use
+a tool like [eget](https://github.com/zyedidia/eget) to install binaries from releases on GitHub:
 
-`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
-the `server.public.address` option.
+```bash
+eget teamhanko/hanko
+```
 
 ##### From source
 
@@ -344,6 +348,11 @@ Then run:
 ```shell
 ./hanko serve public --config <PATH-TO-CONFIG-FILE>
 ```
+
+> **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
+
+`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
+the `server.public.address` option.
 
 The service is now available at `localhost:8000`.
 
@@ -365,6 +374,14 @@ Use this command to start the public and admin API together:
 
 ```shell
 serve all
+```
+
+## Running tests
+
+You can run the unit tests by running the following command within the `backend` directory:
+
+```bash
+go test -v ./...
 ```
 
 ## Additional topics
@@ -418,8 +435,24 @@ Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide addition
 ### Social Logins
 
 Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
-party provider logins. Please view the official [docs](https://docs.hanko.io/guides/social) for a list of supported
-providers and guides.
+party provider logins. See the `third_party` option in the [configuration reference](./docs/Config.md) on how to
+configure them. All provider configurations require provider credentials. See the guides in the official
+documentation for instructions on how to obtain these:
+
+- [Apple](https://docs.hanko.io/guides/authentication-methods/oauth/apple)
+- [GitHub](https://docs.hanko.io/guides/authentication-methods/oauth/github)
+- [Google](https://docs.hanko.io/guides/authentication-methods/oauth/google)
+
+#### Account linking
+
+The `allow_linking` configuration option for providers determines whether automatic account linking for this provider
+is activated. Note that account linking is based on e-mail addresses and OAuth providers may allow account holders to
+use unverified e-mail addresses or may not provide any information at all about the verification status of e-mail
+addresses. This poses a security risk and potentially allows bad actors to hijack existing Hanko
+accounts associated with the same address. It is therefore recommended to make sure you trust the provider and to
+also enable `emails.require_verification` in your configuration to ensure that only verified third party provider
+addresses may be used.
+
 
 ### User import
 You can import an existing user pool into Hanko using json in the following format:
@@ -456,6 +489,61 @@ To import users run:
 
 > hanko user import -i ./path/to/import_file.json
 
+
+### Webhooks
+
+Webhooks are an easy way to get informed about changes in your Hanko instance (e.g. user or email updates).
+To use webhooks you have to provide an endpoint on your application which can process the events. Please be aware that your
+endpoint need to respond with an HTTP status code 200. Else-wise the delivery of the event will not be counted as successful.
+
+#### Events
+When a webhook is triggered it will send you a **JSON** body which contains the event and a jwt.
+The JWT contains 2 custom claims:
+
+* **data**: contains the whole object for which the change was made. (e.g.: the whole user object when an email or user is changed/created/deleted)
+* **evt**: the event for which the webhook was triggered
+
+A typical webhook event looks like:
+
+```json
+{
+  "token": "the-jwt-token-which-contains-the-data",
+  "event": "name of the event"
+}
+```
+
+To decode the webhook you can use the JWKs created in [Configure JSON Web Key Set generation](#configure-json-web-key-set-generation)
+
+#### Event Types
+
+Hanko sends webhooks for the following event types:
+
+| Event                     | Triggers on                                                                                        |
+|---------------------------|----------------------------------------------------------------------------------------------------|
+| user                      | user creation, user deletion, user update, email creation, email deletion, change of primary email |
+| user.create               | user creation                                                                                      |
+| user.delete               | user deletion                                                                                      |
+| user.update               | user update, email creation, email deletion, change of primary email                               |
+| user.update.email         | email creation, email deletion, change of primary email                                            |
+| user.update.email.create  | email creation                                                                                     |
+| user.update.email.delete  | email deletion                                                                                     |
+| user.update.email.primary | change of primary email                                                                            |
+
+As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
+a parent event when you want to receive all subevents or selecting specific subevents.
+
+#### Enabling Webhooks
+
+You can activate webhooks by adding the following snippet to your configuration file:
+
+```yaml
+webhooks:
+  enabled: true
+  hooks:
+    - callback: <YOUR WEBHOOK ENDPOINT>
+      events:
+        - user
+```
 
 ## API specification
 

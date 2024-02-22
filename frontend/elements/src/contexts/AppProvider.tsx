@@ -145,7 +145,7 @@ const AppProvider = ({
         hanko.onUserDeleted(init);
         break;
       case "profile":
-        hanko.onSessionCreated(init);
+        hanko.onAuthFlowCompleted(init);
         break;
     }
   }, [componentName, hanko, init]);

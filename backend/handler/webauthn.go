@@ -14,6 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/dto/intern"
+	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
@@ -23,15 +24,16 @@ import (
 )
 
 type WebauthnHandler struct {
-	persister      persistence.Persister
-	webauthn       *webauthn.WebAuthn
-	sessionManager session.Manager
-	cfg            *config.Config
-	auditLogger    auditlog.Logger
+	persister             persistence.Persister
+	webauthn              *webauthn.WebAuthn
+	sessionManager        session.Manager
+	cfg                   *config.Config
+	auditLogger           auditlog.Logger
+	authenticatorMetadata mapper.AuthenticatorMetadata
 }
 
 // NewWebauthnHandler creates a new handler which handles all webauthn related routes
-func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) (*WebauthnHandler, error) {
+func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger, authenticatorMetadata mapper.AuthenticatorMetadata) (*WebauthnHandler, error) {
 	f := false
 	wa, err := webauthn.New(&webauthn.Config{
 		RPDisplayName:         cfg.Webauthn.RelyingParty.DisplayName,
@@ -61,11 +63,12 @@ func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, ses
 	}
 
 	return &WebauthnHandler{
-		persister:      persister,
-		webauthn:       wa,
-		sessionManager: sessionManager,
-		cfg:            cfg,
-		auditLogger:    auditLogger,
+		persister:             persister,
+		webauthn:              wa,
+		sessionManager:        sessionManager,
+		cfg:                   cfg,
+		auditLogger:           auditLogger,
+		authenticatorMetadata: authenticatorMetadata,
 	}, nil
 }
 
@@ -196,7 +199,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 
 		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
 		backupState := request.Response.AttestationObject.AuthData.Flags.HasBackupState()
-		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState)
+		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState, h.authenticatorMetadata)
 		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*model)
 		if err != nil {
 			return fmt.Errorf("failed to store webauthn credential: %w", err)

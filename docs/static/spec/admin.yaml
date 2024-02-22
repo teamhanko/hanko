@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  version: '0.8.0'
-  title: 'Hanko Admin API'
+  version: "0.10.0"
+  title: "Hanko Admin API"
   description: |
     ## Introduction
 
@@ -22,11 +22,31 @@ externalDocs:
   description: More about Hanko
   url: https://github.com/teamhanko/hanko
 servers:
-  - url: 'localhost:8000'
+  - url: "http://localhost:8001"
 paths:
+  /:
+    get:
+      summary: Status page
+      description: Return information about the API status. Returns a 500 if there are issues with database connectivity.
+      operationId: status
+      tags:
+        - Status
+      responses:
+        "200":
+          description: "API is running"
+          content:
+            text/html:
+              schema:
+                type: string
+        "500":
+          description: "API is not functioning properly"
+          content:
+            text/html:
+              schema:
+                type: string
   /users:
     get:
-      summary: 'Get a list of users'
+      summary: "Get a list of users"
       operationId: listUsers
       tags:
         - User Management
@@ -47,7 +67,7 @@ paths:
           name: user_id
           schema:
             allOf:
-              - $ref: '#/components/schemas/UUID4'
+              - $ref: "#/components/schemas/UUID4"
             example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
           description: Only users with the specified user_id are included
         - in: query
@@ -66,28 +86,75 @@ paths:
               - desc
           description: The sort direction of the returned list (always sorted by created_at)
       responses:
-        '200':
-          description: 'Details about users'
+        "200":
+          description: "Details about users"
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/User'
+                  $ref: "#/components/schemas/User"
           headers:
             X-Total-Count:
-              schema:
-                $ref: '#/components/headers/X-Total-Count'
+              $ref: "#/components/headers/X-Total-Count"
             Link:
+              $ref: "#/components/headers/Link"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+    post:
+      summary: Create a new user
+      operationId: createUser
+      tags:
+        - User Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: The ID of the new user
+                  allOf:
+                    - $ref: "#/components/schemas/UUID4"
+                emails:
+                  description: The email addresses of the new user
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                      is_primary:
+                        type: boolean
+                      is_verified:
+                        type: boolean
+                    required:
+                      - address
+                      - is_primary
+                created_at:
+                  description: Time of creation of the user
+                  type: string
+                  format: date-time
+              required:
+                - emails
+      responses:
+        "200":
+          description: "Details of the newly created user"
+          content:
+            application/json:
               schema:
-                $ref: '#/components/headers/Link'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-        '400':
-          $ref: '#/components/responses/BadRequest'
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /users/{id}:
     delete:
-      summary: 'Delete a user by ID'
+      summary: "Delete a user by ID"
       operationId: deleteUser
       tags:
         - User Management
@@ -97,16 +164,16 @@ paths:
           description: ID of the user
           required: true
           schema:
-            $ref: '#/components/schemas/UUID4'
+            $ref: "#/components/schemas/UUID4"
       responses:
-        '204':
-          description: 'Deleted'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+        "204":
+          description: "Deleted"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
     get:
-      summary: 'Get a user by ID'
+      summary: "Get a user by ID"
       operationId: getUser
       tags:
         - User Management
@@ -116,23 +183,23 @@ paths:
           description: ID of the user
           required: true
           schema:
-            $ref: '#/components/schemas/UUID4'
+            $ref: "#/components/schemas/UUID4"
       responses:
-        '200':
-          description: 'Details about the user'
+        "200":
+          description: "Details about the user"
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '404':
-          $ref: '#/components/responses/NotFound'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/User"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /audit_logs:
     get:
-      summary: 'Get a list of audit logs'
+      summary: "Get a list of audit logs"
       operationId: listAuditLogs
       tags:
         - Audit Logs
@@ -165,7 +232,7 @@ paths:
           name: actor_user_id
           schema:
             allOf:
-              - $ref: '#/components/schemas/UUID4'
+              - $ref: "#/components/schemas/UUID4"
             example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
           description: Only audit logs with the specified user_id are included
         - in: query
@@ -197,60 +264,307 @@ paths:
             type: array
             items:
               allOf:
-                - $ref: '#/components/schemas/AuditLogTypes'
+                - $ref: "#/components/schemas/AuditLogTypes"
             example: user_created
           style: form
           explode: true
           description: Only audit logs with the specified type are included
       responses:
-        '200':
-          description: 'Details about audit logs'
+        "200":
+          description: "Details about audit logs"
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/AuditLog'
+                  $ref: "#/components/schemas/AuditLog"
           headers:
             X-Total-Count:
-              schema:
-                $ref: '#/components/headers/X-Total-Count'
+              $ref: "#/components/headers/X-Total-Count"
             Link:
-              schema:
-                $ref: '#/components/headers/Link'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+              $ref: "#/components/headers/Link"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
   /metrics:
     get:
-      summary: 'Get Prometheus metrics.'
+      summary: "Get Prometheus metrics."
       operationId: getMetrics
       tags:
         - Metrics
       responses:
-        '200':
-          description: 'Prometheus Metrics for details about the format see: https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details'
+        "200":
+          description: "Prometheus Metrics for details about the format see: https://prometheus.io/docs/instrumenting/exposition_formats/#text-format-details"
           content:
             text/plain:
               schema:
                 type: string
                 example: 'go_gc_duration_seconds{quantile="0"} 2.5875e-05'
+  /webhooks:
+    get:
+      summary: Get a list of webhooks
+      description: 'Returns a list of all configured webhooks. '
+      operationId: list-webhooks
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  database:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DatabaseWebhook'
+                  config:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Webhook'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create a new database webhook
+      description: ''
+      operationId: create-db-webhooks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Webhook'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/webhooks/{id}':
+    get:
+      summary: Get a webhook by ID
+      operationId: get-webhooks-id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Delete a webhook by ID
+      operationId: delete-webhooks-id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          description: Internal Server Error
+    put:
+      summary: Update a webhook by ID
+      operationId: put-webhooks-id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: '#/components/schemas/Webhook'
+                - type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                  required:
+                    - enabled
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DatabaseWebhook'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/users/{id}/emails':
+    get:
+      summary: Get a list of emails for a user
+      operationId: get-users-id-emails
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Email'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      summary: Create an email for a user
+      operationId: post-users-id-emails
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        $ref: '#/components/requestBodies/CreateEmail'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/users/{id}/emails/{email_id}':
+    get:
+      summary: Get an email of a user
+      operationId: get-users-id-emails-email_id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: email_id
+          in: path
+          description: UUID of the requested email
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Email'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      summary: Remove an email from a user
+      operationId: delete-users-emails-email_id
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: email_id
+          in: path
+          description: UUID of the requested email
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  '/users/{id}/emails/{email_id}/set_primary':
+    post:
+      summary: Set email as primary
+      operationId: post-users-emails-email_id-set_primary
+      parameters:
+        - $ref: '#/components/parameters/Id'
+        - name: email_id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: No Content
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      description: UUID of the requested object
+      required: true
+      schema:
+        type: string
+        format: uuid
+  requestBodies:
+    CreateEmail:
+      description: Request Body for creating an email for a user
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              address:
+                type: string
+                format: email
+              is_primary:
+                type: boolean
+              is_verified:
+                type: boolean
+            required:
+              - address
   responses:
     BadRequest:
       description: Bad Request
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             code: 400
             message: Bad Request
+    Conflict:
+      description: Conflict
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+          example:
+            code: 409
+            message: Conflict
     InternalServerError:
       description: Internal server error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             code: 500
             message: Internal Server Error
@@ -259,11 +573,15 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
+            $ref: "#/components/schemas/Error"
           example:
             code: 404
             message: Not found
   schemas:
+    UUID4:
+      type: string
+      format: uuid4
+      example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
     User:
       type: object
       required:
@@ -274,9 +592,9 @@ components:
         id:
           description: The ID of the user
           allOf:
-            - $ref: '#/components/schemas/UUID4'
+            - $ref: "#/components/schemas/UUID4"
         created_at:
-          description: Time of creation of the the user
+          description: Time of creation of the user
           type: string
           format: date-time
         updated_at:
@@ -287,7 +605,7 @@ components:
           description: List of registered Webauthn credentials
           type: array
           items:
-            $ref: '#/components/schemas/WebAuthnCredential'
+            $ref: "#/components/schemas/WebAuthnCredential"
         emails:
           description: List of emails associated to the user
           type: array
@@ -305,7 +623,7 @@ components:
         id:
           description: The ID of the credential
           allOf:
-            - $ref: '#/components/schemas/UUID4'
+            - $ref: "#/components/schemas/UUID4"
         name:
           description: A name that the user choose
           type: string
@@ -340,7 +658,7 @@ components:
         id:
           description: The ID of the email
           allOf:
-            - $ref: '#/components/schemas/UUID4'
+            - $ref: "#/components/schemas/UUID4"
         address:
           description: The email address
           type: string
@@ -373,10 +691,10 @@ components:
         id:
           description: The ID of the audit log
           allOf:
-            - $ref: '#/components/schemas/UUID4'
+            - $ref: "#/components/schemas/UUID4"
         type:
           allOf:
-            - $ref: '#/components/schemas/AuditLogTypes'
+            - $ref: "#/components/schemas/AuditLogTypes"
         error:
           description: A more detailed message why something failed
           type: string
@@ -395,25 +713,88 @@ components:
         actor_user_id:
           description: The userID from the actor
           allOf:
-            - $ref: '#/components/schemas/UUID4'
+            - $ref: "#/components/schemas/UUID4"
         actor_email:
           description: The email from the actor
           type: string
           format: email
         created_at:
-          description: Time of creation of the the audit log
+          description: Time of creation of the audit log
           type: string
           format: date-time
-          example: 2022-09-14T12:15:09.788784Z
+          example: "2022-09-14T12:15:09.788784Z"
+    DatabaseWebhookEvent:
+      type: object
+      title: DatabaseWebhookEvent
+      properties:
+        id:
+          type: string
+          format: uuid
+        event:
+          type: string
+          enum:
+            - user
+            - user.create
+            - user.delete
+            - user.update
+            - user.update.email
+            - user.update.email.create
+            - user.update.email.delete
+            - user.update.email.primary
+    DatabaseWebhook:
+      type: object
+      title: DatabaseWebhook
+      properties:
+        id:
+          type: string
+          format: uuid
+        callback:
+          type: string
+          format: uri
+        enabled:
+          type: boolean
+        failures:
+          type: integer
+          minimum: 0
+        expires_at:
+          type: string
+          format: date-time
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/DatabaseWebhookEvent'
+        created_at:
+          type: string
+          format: date-time
         updated_at:
           description: Time of last update of the audit log
           type: string
           format: date-time
-          example: 2022-09-14T12:15:09.788784Z
-    UUID4:
-      type: string
-      format: uuid4
-      example: c339547d-e17d-4ba7-8a1d-b3d5a4d17c1c
+          example: "2022-09-14T12:15:09.788784Z"
+    Webhook:
+      type: object
+      title: Webhook
+      properties:
+        callback:
+          type: string
+          format: uri
+        events:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum:
+              - user
+              - user.create
+              - user.delete
+              - user.update
+              - user.update.email
+              - user.update.email.create
+              - user.update.email.delete
+              - user.update.email.primary
+      required:
+        - callback
+        - events
     Error:
       type: object
       required:
