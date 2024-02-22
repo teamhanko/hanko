@@ -17,10 +17,6 @@ type SendPasscode struct {
 func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	// TODO: Make this work again or see if it is still necessary. It currently does not work due to changes made
-	// to the order of hook execution in the context_action_exec.go file. GetFlowError operates on an executionResult
-	// which is not available at that point due to the changes. See:
-	// https://github.com/teamhanko/hanko/pull/1270/files#diff-d6234733b6168aebb8ab0a7543a4c7f51020eb1d25292679df4c091a469196f8R90
 	if c.GetFlowError() != nil {
 		return nil
 	}
