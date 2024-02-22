@@ -84,26 +84,26 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| User import |
 |✅| Disable sign-ups |
 |✅| User export |
-|✅| Enterprise SSO (SAML) |
+|✅| SAML enterprise SSO |
+|✅| Webhooks |
 |⚙️| API-supported auth flows |
 |⚙️| Passkey-only and OAuth-only configurations |
 |⚙️| Username support (non-email) |
+|⚙️| OIDC enterprise SSO |
+|⚙️| Custom JWT claims |
 | | 2FA for securing passcodes & passwords |
 | | Email templating & i18n |
-| | Webhooks |
 | | Refresh tokens / sessions |
 | | `<hanko-menu>` avatar / menu web component |
 | | 📢 Hanko 1.0 Release |
 | | Mobile SDKs |
-| | Sign in with Microsoft |
-| | OIDC support |
-
+| | SMS passcode delivery |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
 - Custom user data / fields
 - Privileged sessions & step-up authentication
 - Bot protection / CAPTCHA
-- SMS passcode delivery
+- Hosted auth pages and OIDC provider support |
 
 # Community
 ## Questions, bugs, ideas
