@@ -38,3 +38,17 @@ func (p passwordCredentialPersister) Update(password models.PasswordCredential) 
 	}
 	return nil
 }
+
+func (p *passwordCredentialPersister) Delete(password models.PasswordCredential) error {
+	index := -1
+	for i, data := range p.passwords {
+		if data.ID == password.ID {
+			index = i
+		}
+	}
+	if index > -1 {
+		p.passwords = append(p.passwords[:index], p.passwords[index+1:]...)
+	}
+
+	return nil
+}
