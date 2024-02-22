@@ -7,6 +7,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
 )
@@ -21,15 +22,16 @@ const (
 )
 
 type Dependencies struct {
-	Cfg             config.Config
-	HttpContext     echo.Context
-	PasscodeService services.Passcode
-	PasswordService services.Password
-	WebauthnService services.WebauthnService
-	Persister       persistence.Persister
-	SessionManager  session.Manager
-	RateLimiter     limiter.Store
-	Tx              *pop.Connection
+	Cfg                   config.Config
+	HttpContext           echo.Context
+	PasscodeService       services.Passcode
+	PasswordService       services.Password
+	WebauthnService       services.WebauthnService
+	Persister             persistence.Persister
+	SessionManager        session.Manager
+	RateLimiter           limiter.Store
+	Tx                    *pop.Connection
+	AuthenticatorMetadata mapper.AuthenticatorMetadata
 }
 
 type Action struct{}

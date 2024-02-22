@@ -10,9 +10,9 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/flow_api"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
@@ -47,13 +47,14 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:       persister,
-		Cfg:             *cfg,
-		PasscodeService: passcodeService,
-		PasswordService: passwordService,
-		WebauthnService: webauthnService,
-		SessionManager:  sessionManager,
-		RateLimiter:     rateLimiter,
+		Persister:             persister,
+		Cfg:                   *cfg,
+		PasscodeService:       passcodeService,
+		PasswordService:       passwordService,
+		WebauthnService:       webauthnService,
+		SessionManager:        sessionManager,
+		RateLimiter:           rateLimiter,
+		AuthenticatorMetadata: authenticatorMetadata,
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
@@ -61,7 +62,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
 	e.POST("/login", flowAPIHandler.LoginFlowHandler)
 	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, sessionMiddleware)
-
 
 	e.Renderer = template.NewTemplateRenderer()
 

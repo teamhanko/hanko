@@ -22,26 +22,26 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server      Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
-	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
-	Smtp        SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
-	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
-	Password    Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
-	Database    Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets     Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service     Service          `yaml:"service" json:"service" koanf:"service"`
-	Session     Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
-	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
-	Emails      Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
-	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
-	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
-	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
-	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-	Identifier   Identifier      `yaml:"identifier" json:"identifier" koanf:"identifier"`
-	SecondFactor SecondFactor    `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
-	Passkey      Passkey         `yaml:"passkey" json:"passkey" koanf:"passkey"`
-	Saml        config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
-	Webhooks    WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
+	Server       Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
+	Webauthn     WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp         SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
+	Passcode     Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password     Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
+	Database     Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets      Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service      Service          `yaml:"service" json:"service" koanf:"service"`
+	Session      Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
+	AuditLog     AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
+	Emails       Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
+	RateLimiter  RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
+	ThirdParty   ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
+	Log          LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
+	Account      Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	Identifier   Identifier       `yaml:"identifier" json:"identifier" koanf:"identifier"`
+	SecondFactor SecondFactor     `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey      Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
+	Saml         config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	Webhooks     WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
 
 var (
@@ -193,7 +193,7 @@ func DefaultConfig() *Config {
 				},
 			},
 		},
-    // TODO: add defaults for Passkey, Identifier, SecondFactor
+		// TODO: add defaults for Passkey, Identifier, SecondFactor
 	}
 }
 
@@ -238,13 +238,14 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)
 	}
-  err = c.Saml.Validate()
+	err = c.Saml.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate saml settings: %w", err)
 	}
 	err = c.Webhooks.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webhook settings: %w", err)
+	}
 
 	if c.Identifier.Email.Verification && !c.Passcode.Enabled {
 		return errors.New("passcode must be enabled for email verification")
@@ -440,8 +441,8 @@ func (e *Email) Validate() error {
 
 type Passcode struct {
 	Enabled bool  `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Email   Email `yaml:"email" json:"email,omitempty" koanf:"email"`
+	TTL     int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 	//Deprecated: Use root level Smtp instead
 	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
@@ -729,8 +730,9 @@ func (c *Config) PostProcess() error {
 	err = c.Webauthn.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process webauthn settings: %w", err)
-	
-  err = c.Saml.PostProcess()
+	}
+
+	err = c.Saml.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process saml settings: %w", err)
 	}

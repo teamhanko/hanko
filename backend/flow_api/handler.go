@@ -11,19 +11,21 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 )
 
 type FlowPilotHandler struct {
-	Persister       persistence.Persister
-	Cfg             config.Config
-	PasscodeService services.Passcode
-	PasswordService services.Password
-	WebauthnService services.WebauthnService
-	SessionManager  session.Manager
-	RateLimiter     limiter.Store
+	Persister             persistence.Persister
+	Cfg                   config.Config
+	PasscodeService       services.Passcode
+	PasswordService       services.Password
+	WebauthnService       services.WebauthnService
+	SessionManager        session.Manager
+	RateLimiter           limiter.Store
+	AuthenticatorMetadata mapper.AuthenticatorMetadata
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -52,15 +54,16 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		db := models.NewFlowDB(tx)
 
 		flow.Set("dependencies", &shared.Dependencies{
-			Cfg:             h.Cfg,
-			RateLimiter:     h.RateLimiter,
-			Tx:              tx,
-			Persister:       h.Persister,
-			HttpContext:     c,
-			SessionManager:  h.SessionManager,
-			PasscodeService: h.PasscodeService,
-			PasswordService: h.PasswordService,
-			WebauthnService: h.WebauthnService,
+			Cfg:                   h.Cfg,
+			RateLimiter:           h.RateLimiter,
+			Tx:                    tx,
+			Persister:             h.Persister,
+			HttpContext:           c,
+			SessionManager:        h.SessionManager,
+			PasscodeService:       h.PasscodeService,
+			PasswordService:       h.PasswordService,
+			WebauthnService:       h.WebauthnService,
+			AuthenticatorMetadata: h.AuthenticatorMetadata,
 		})
 
 		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))
