@@ -43,7 +43,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		passkeyBackupEligible := c.Stash().Get("passkey_backup_eligible").Bool()
 		passkeyBackupState := c.Stash().Get("passkey_backup_state").Bool()
 
-		credentialModel = intern.WebauthnCredentialToModel(&passkeyCredential, userId, passkeyBackupEligible, passkeyBackupState)
+		credentialModel = intern.WebauthnCredentialToModel(&passkeyCredential, userId, passkeyBackupEligible, passkeyBackupState, deps.AuthenticatorMetadata)
 	}
 
 	err = h.createUser(

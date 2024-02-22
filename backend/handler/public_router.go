@@ -49,13 +49,14 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:       persister,
-		Cfg:             *cfg,
-		PasscodeService: passcodeService,
-		PasswordService: passwordService,
-		WebauthnService: webauthnService,
-		SessionManager:  sessionManager,
-		RateLimiter:     rateLimiter,
+		Persister:             persister,
+		Cfg:                   *cfg,
+		PasscodeService:       passcodeService,
+		PasswordService:       passwordService,
+		WebauthnService:       webauthnService,
+		SessionManager:        sessionManager,
+		RateLimiter:           rateLimiter,
+		AuthenticatorMetadata: authenticatorMetadata,
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)

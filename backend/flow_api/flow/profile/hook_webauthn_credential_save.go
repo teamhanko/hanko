@@ -35,7 +35,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 	}
 
-	credentialModel := intern.WebauthnCredentialToModel(&webauthnCredential, userModel.ID, webauthnCredential.Flags.BackupEligible, webauthnCredential.Flags.BackupState)
+	credentialModel := intern.WebauthnCredentialToModel(&webauthnCredential, userModel.ID, webauthnCredential.Flags.BackupEligible, webauthnCredential.Flags.BackupState, deps.AuthenticatorMetadata)
 	err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*credentialModel)
 	if err != nil {
 		return fmt.Errorf("failed so save credential: %w", err)

@@ -38,6 +38,9 @@ type Config struct {
 	ThirdParty    ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
 	Log           LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
 	Account       Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	Identifier    Identifier       `yaml:"identifier" json:"identifier" koanf:"identifier"`
+	SecondFactor  SecondFactor     `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey       Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
 	Saml          config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
 	Webhooks      WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
@@ -731,6 +734,11 @@ func (c *Config) PostProcess() error {
 	err := c.ThirdParty.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process third party settings: %w", err)
+	}
+
+	err = c.Webauthn.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process webauthn settings: %w", err)
 	}
 
 	err = c.Saml.PostProcess()
