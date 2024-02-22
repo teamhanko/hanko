@@ -91,3 +91,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(StateProfileInit)
 }
+
+func (a EmailSetPrimary) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

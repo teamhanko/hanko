@@ -82,3 +82,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 
 	return c.ContinueFlow(StateProfileInit)
 }
+
+func (a WebauthnVerifyAttestationResponse) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

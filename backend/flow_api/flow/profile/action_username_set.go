@@ -62,3 +62,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(StateProfileInit)
 }
+
+func (a UsernameSet) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

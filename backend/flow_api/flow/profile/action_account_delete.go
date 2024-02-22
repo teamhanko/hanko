@@ -49,3 +49,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(StateProfileAccountDeleted)
 }
+
+func (a AccountDelete) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

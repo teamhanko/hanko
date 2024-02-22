@@ -75,3 +75,7 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateProfileInit)
 }
+
+func (a EmailVerify) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

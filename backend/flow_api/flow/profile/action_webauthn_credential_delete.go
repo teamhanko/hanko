@@ -50,17 +50,15 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete passkey: %w", err)
 	}
 
-	updatedUserModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userModel.ID)
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-	c.Set("session_user", updatedUserModel)
+	return c.ContinueFlow(StateProfileInit)
+}
 
+func (a WebauthnCredentialDelete) Finalize(c flowpilot.FinalizationContext) error {
 	if a.mustSuspend(c) {
 		c.SuspendAction()
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return nil
 }
 
 func (a WebauthnCredentialDelete) mustSuspend(c flowpilot.Context) bool {

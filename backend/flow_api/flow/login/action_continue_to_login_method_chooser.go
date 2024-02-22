@@ -24,3 +24,7 @@ func (a ContinueToLoginMethodChooser) Initialize(c flowpilot.InitializationConte
 func (a ContinueToLoginMethodChooser) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(StateLoginMethodChooser)
 }
+
+func (a ContinueToLoginMethodChooser) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

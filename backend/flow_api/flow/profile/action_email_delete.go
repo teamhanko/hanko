@@ -70,17 +70,15 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete email: %w", err)
 	}
 
-	updatedUserModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userModel.ID)
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-	c.Set("session_user", updatedUserModel)
+	return c.ContinueFlow(StateProfileInit)
+}
 
+func (a EmailDelete) Finalize(c flowpilot.FinalizationContext) error {
 	if a.mustSuspend(c) {
 		c.SuspendAction()
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return nil
 }
 
 func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {

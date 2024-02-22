@@ -100,3 +100,7 @@ func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error
 	c.Input().SetError("password", flowpilot.ErrorValueInvalid)
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
 }
+
+func (a PasswordLogin) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

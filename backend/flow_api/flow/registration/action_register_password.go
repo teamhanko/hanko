@@ -67,3 +67,7 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(shared.StateSuccess)
 }
+
+func (a RegisterPassword) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}
