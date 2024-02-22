@@ -124,3 +124,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	// Username exists, but user has no emails.
 	return c.ContinueFlow(StateLoginMethodChooser)
 }
+
+func (a ContinueWithLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

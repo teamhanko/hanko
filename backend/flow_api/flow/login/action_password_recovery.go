@@ -63,3 +63,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(shared.StateSuccess)
 }
+
+func (a PasswordRecovery) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

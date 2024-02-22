@@ -47,10 +47,11 @@ type ActionName string
 
 // Action defines the interface for flow actions.
 type Action interface {
-	GetName() ActionName              // Get the action name.
-	GetDescription() string           // Get the action description.
-	Initialize(InitializationContext) // Initialize the action.
-	Execute(ExecutionContext) error   // Execute the action.
+	GetName() ActionName                // Get the action name.
+	GetDescription() string             // Get the action description.
+	Initialize(InitializationContext)   // Initialize the action.
+	Execute(ExecutionContext) error     // Execute the action.
+	Finalize(FinalizationContext) error // Finalize the action.
 }
 
 // Actions represents a list of Action
@@ -66,12 +67,12 @@ type HookActions []HookAction
 
 // state represents details for a state, including the associated actions, available sub-flows and more.
 type stateDetail struct {
-	name        StateName
-	flow        stateActions
-	subFlows    SubFlows
-	actions     Actions
-	beforeHooks HookActions
-	afterHooks  HookActions
+	name             StateName
+	flow             stateActions
+	subFlows         SubFlows
+	actions          Actions
+	beforeStateHooks HookActions
+	afterStateHooks  HookActions
 }
 
 // getAction returns the Action with the specified name.
@@ -120,8 +121,8 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 type flowBase interface {
 	getSubFlows() SubFlows
 	getFlow() stateActions
-	getBeforeHooks() stateHooks
-	getAfterHooks() stateHooks
+	getBeforeStateHooks() stateHooks
+	getAfterStateHooks() stateHooks
 }
 
 // Flow represents a flow.
@@ -149,10 +150,12 @@ type SubFlow interface {
 type contextValues map[string]interface{}
 
 type defaultFlowBase struct {
-	flow        stateActions // StateName to Actions mapping.
-	subFlows    SubFlows     // The sub-flows of the current flow.
-	beforeHooks stateHooks   // StateName to HookActions mapping.
-	afterHooks  stateHooks   // StateName to HookActions mapping.
+	flow                  stateActions // StateName to Actions mapping.
+	subFlows              SubFlows     // The sub-flows of the current flow.
+	beforeStateHooks      stateHooks   // StateName to HookActions mapping.
+	afterStateHooks       stateHooks   // StateName to HookActions mapping.
+	beforeEachActionHooks HookActions  // List of HookActions that run before each action.
+	afterEachActionHooks  HookActions  // List of HookActions that run after each action.
 }
 
 // defaultFlow defines a flow structure with states, actions, and settings.
@@ -192,12 +195,12 @@ func (f *defaultFlowBase) getFlow() stateActions {
 	return f.flow
 }
 
-func (f *defaultFlowBase) getBeforeHooks() stateHooks {
-	return f.beforeHooks
+func (f *defaultFlowBase) getBeforeStateHooks() stateHooks {
+	return f.beforeStateHooks
 }
 
-func (f *defaultFlowBase) getAfterHooks() stateHooks {
-	return f.afterHooks
+func (f *defaultFlowBase) getAfterStateHooks() stateHooks {
+	return f.afterStateHooks
 }
 
 // setDefaults sets default values for defaultFlow settings.

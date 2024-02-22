@@ -19,3 +19,7 @@ func (a Back) Initialize(_ flowpilot.InitializationContext) {}
 func (a Back) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueToPreviousState()
 }
+
+func (a Back) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

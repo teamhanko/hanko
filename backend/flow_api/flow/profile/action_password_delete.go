@@ -56,17 +56,15 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete password credential: %w", err)
 	}
 
-	updatedUserModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Get(userModel.ID)
-	if err != nil {
-		return fmt.Errorf("could not fetch user: %w", err)
-	}
-	c.Set("session_user", updatedUserModel)
+	return c.ContinueFlow(StateProfileInit)
+}
 
+func (a PasswordDelete) Finalize(c flowpilot.FinalizationContext) error {
 	if a.mustSuspend(c) {
 		c.SuspendAction()
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return nil
 }
 
 func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {

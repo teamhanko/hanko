@@ -81,3 +81,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.EndSubFlow()
 }
+
+func (a VerifyPasscode) Finalize(c flowpilot.FinalizationContext) error {
+	return nil
+}

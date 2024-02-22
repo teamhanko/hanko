@@ -46,12 +46,12 @@ type actionInitializationContext interface {
 	AddInputs(inputs ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
 	Stash() Stash
-	// SuspendAction suspends the current action's execution.
-	SuspendAction()
+	actionSuspender
 }
 
 // actionExecutionContext represents the context for an action execution.
 type actionExecutionContext interface {
+	actionSuspender
 	flowContext
 	// Input returns the ExecutionSchema for the action.
 	Input() ExecutionSchema
@@ -64,8 +64,6 @@ type actionExecutionContext interface {
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
-
-	SuspendAction()
 }
 
 // actionExecutionContinuationContext represents the context within an action continuation.
@@ -81,6 +79,15 @@ type actionExecutionContinuationContext interface {
 	EndSubFlow() error
 	// ContinueToPreviousState rewinds the flow back to the previous state.
 	ContinueToPreviousState() error
+}
+
+type actionSuspender interface {
+	// SuspendAction suspends the current action's execution.
+	SuspendAction()
+}
+
+type actionFinalizationContext interface {
+	actionSuspender
 }
 
 type Context interface {
@@ -99,12 +106,21 @@ type ExecutionContext interface {
 	actionExecutionContinuationContext
 }
 
+type FinalizationContext interface {
+	context
+	actionFinalizationContext
+}
+
 type HookExecutionContext interface {
 	context
 	actionExecutionContext
 	SetFlowError(FlowError)
 	GetFlowError() FlowError
 	AddLink(...Link)
+}
+
+type BeforeEachActionExecutionContext interface {
+	actionExecutionContinuationContext
 }
 
 // TODO: The following interfaces are meant for a plugin system. #tbd
@@ -161,7 +177,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		defaultFlowContext: fc,
 	}
 
-	err = aec.executeBeforeHookActions(flow.initialStateName)
+	err = aec.executeBeforeStateHooks(flow.initialStateName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute before hook actions: %w", err)
 	}
@@ -238,18 +254,23 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		contextValues: flow.contextValues,
 	}
 
-	action.Initialize(&aic)
-
-	// Check if the action is suspended.
-	if aic.isSuspended {
-		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
-	}
-
 	// Create a actionExecutionContext instance for action execution.
 	aec := defaultActionExecutionContext{
 		actionName:         actionName,
 		input:              schema,
 		defaultFlowContext: fc,
+	}
+
+	err = aec.executeBeforeEachActionHooks()
+	if err != nil {
+		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
+	}
+
+	action.Initialize(&aic)
+
+	// Check if the action is suspended.
+	if aic.isSuspended {
+		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
 	}
 
 	// Execute the action and handle any errors.
@@ -263,8 +284,18 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return nil, errors.New("the action has not set a result object")
 	}
 
+	afc := defaultActionFinalizationContext{
+		executionResult: aec.executionResult,
+		contextValues:   flow.contextValues,
+	}
+
+	err = action.Finalize(&afc)
+	if err != nil {
+		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
+	}
+
 	// Generate a response based on the execution result.
-	er := *aec.executionResult
+	er := *afc.executionResult
 
 	return er.generateResponse(fc, flow.debug), nil
 }

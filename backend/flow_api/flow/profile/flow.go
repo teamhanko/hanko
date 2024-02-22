@@ -31,6 +31,8 @@ const (
 
 var Flow = flowpilot.NewFlow("/profile").
 	InitialState(capabilities.StatePreflight, StateProfileInit).
+	BeforeEachAction(RefreshSessionUser{}).
+	AfterEachAction(RefreshSessionUser{}).
 	BeforeState(StateProfileInit, GetProfileData{}).
 	State(StateProfileInit,
 		AccountDelete{},

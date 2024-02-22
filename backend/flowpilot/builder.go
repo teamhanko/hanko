@@ -17,15 +17,19 @@ type FlowBuilder interface {
 	SubFlows(subFlows ...SubFlow) FlowBuilder
 	Build() (Flow, error)
 	MustBuild() Flow
+	BeforeEachAction(hooks ...HookAction) FlowBuilder
+	AfterEachAction(hooks ...HookAction) FlowBuilder
 }
 
 // defaultFlowBuilderBase is the base flow builder struct.
 type defaultFlowBuilderBase struct {
-	flow         stateActions
-	subFlows     SubFlows
-	stateDetails stateDetails
-	beforeHooks  stateHooks
-	afterHooks   stateHooks
+	flow                  stateActions
+	subFlows              SubFlows
+	stateDetails          stateDetails
+	beforeStateHooks      stateHooks
+	afterStateHooks       stateHooks
+	beforeEachActionHooks HookActions
+	afterEachActionHooks  HookActions
 }
 
 // defaultFlowBuilder is a builder struct for creating a new Flow.
@@ -43,11 +47,11 @@ type defaultFlowBuilder struct {
 // newFlowBuilderBase creates a new defaultFlowBuilderBase instance.
 func newFlowBuilderBase() defaultFlowBuilderBase {
 	return defaultFlowBuilderBase{
-		flow:         make(stateActions),
-		subFlows:     make(SubFlows, 0),
-		stateDetails: make(stateDetails),
-		beforeHooks:  make(stateHooks),
-		afterHooks:   make(stateHooks),
+		flow:             make(stateActions),
+		subFlows:         make(SubFlows, 0),
+		stateDetails:     make(stateDetails),
+		beforeStateHooks: make(stateHooks),
+		afterStateHooks:  make(stateHooks),
 	}
 }
 
@@ -69,11 +73,19 @@ func (fb *defaultFlowBuilderBase) addState(stateName StateName, actions ...Actio
 }
 
 func (fb *defaultFlowBuilderBase) addBeforeStateHooks(stateName StateName, hooks ...HookAction) {
-	fb.beforeHooks[stateName] = append(fb.beforeHooks[stateName], hooks...)
+	fb.beforeStateHooks[stateName] = append(fb.beforeStateHooks[stateName], hooks...)
 }
 
 func (fb *defaultFlowBuilderBase) addAfterStateHooks(stateName StateName, hooks ...HookAction) {
-	fb.afterHooks[stateName] = append(fb.afterHooks[stateName], hooks...)
+	fb.afterStateHooks[stateName] = append(fb.afterStateHooks[stateName], hooks...)
+}
+
+func (fb *defaultFlowBuilder) addBeforeEachActionHooks(hooks ...HookAction) {
+	fb.beforeEachActionHooks = append(fb.beforeEachActionHooks, hooks...)
+}
+
+func (fb *defaultFlowBuilder) addAfterEachActionHooks(hooks ...HookAction) {
+	fb.afterEachActionHooks = append(fb.afterEachActionHooks, hooks...)
 }
 
 func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...SubFlow) {
@@ -104,25 +116,25 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) err
 
 		f := flow.getFlow()
 		subFlows := flow.getSubFlows()
-		beforeHooks := flow.getBeforeHooks()[stateName]
-		afterHooks := flow.getAfterHooks()[stateName]
+		beforeStateHooks := flow.getBeforeStateHooks()[stateName]
+		afterStateHooks := flow.getAfterStateHooks()[stateName]
 
 		// Check if the current state belongs to a sub-flow.
 		if !fb.flow.stateExists(stateName) {
 			// If the main flow includes hook actions for a sub-flow state, add the hooks defined in the main flow to
 			// the list of hooks of the sub-flow state.
-			beforeHooks = append(beforeHooks, fb.beforeHooks[stateName]...)
-			afterHooks = append(afterHooks, fb.afterHooks[stateName]...)
+			beforeStateHooks = append(beforeStateHooks, fb.beforeStateHooks[stateName]...)
+			afterStateHooks = append(afterStateHooks, fb.afterStateHooks[stateName]...)
 		}
 
 		// Create state details.
 		state := stateDetail{
-			name:        stateName,
-			actions:     actions,
-			flow:        f,
-			subFlows:    subFlows,
-			beforeHooks: beforeHooks,
-			afterHooks:  afterHooks,
+			name:             stateName,
+			actions:          actions,
+			flow:             f,
+			subFlows:         subFlows,
+			beforeStateHooks: beforeStateHooks,
+			afterStateHooks:  afterStateHooks,
 		}
 
 		// Store state details.
@@ -203,6 +215,16 @@ func (fb *defaultFlowBuilder) AfterState(stateName StateName, hooks ...HookActio
 	return fb
 }
 
+func (fb *defaultFlowBuilder) BeforeEachAction(hooks ...HookAction) FlowBuilder {
+	fb.addBeforeEachActionHooks(hooks...)
+	return fb
+}
+
+func (fb *defaultFlowBuilder) AfterEachAction(hooks ...HookAction) FlowBuilder {
+	fb.addAfterEachActionHooks(hooks...)
+	return fb
+}
+
 func (fb *defaultFlowBuilder) InitialState(stateName StateName, nextStateNames ...StateName) FlowBuilder {
 	fb.initialStateName = stateName
 	fb.initialNextStateNames = nextStateNames
@@ -238,10 +260,12 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	}
 
 	dfb := defaultFlowBase{
-		flow:        fb.flow,
-		subFlows:    fb.subFlows,
-		beforeHooks: fb.beforeHooks,
-		afterHooks:  fb.afterHooks,
+		flow:                  fb.flow,
+		subFlows:              fb.subFlows,
+		beforeStateHooks:      fb.beforeStateHooks,
+		afterStateHooks:       fb.afterStateHooks,
+		beforeEachActionHooks: fb.beforeEachActionHooks,
+		afterEachActionHooks:  fb.afterEachActionHooks,
 	}
 
 	flow := &defaultFlow{
