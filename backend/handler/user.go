@@ -123,7 +123,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			}
 		}
 
-		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogUserCreated, &newUser, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogUserCreated, &newUser, nil, auditlog.Detail("so hilf mir doch", 1235))
 		if err != nil {
 			return fmt.Errorf("failed to write audit log: %w", err)
 		}

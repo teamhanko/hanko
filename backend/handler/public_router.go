@@ -46,6 +46,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
 	}
 
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
+
 	flowAPIHandler := flow_api.FlowPilotHandler{
 		Persister:             persister,
 		Cfg:                   *cfg,
@@ -55,6 +57,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		SessionManager:        sessionManager,
 		RateLimiter:           rateLimiter,
 		AuthenticatorMetadata: authenticatorMetadata,
+		AuditLogger:           auditLogger,
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
@@ -107,8 +110,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
-
-	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	if cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)

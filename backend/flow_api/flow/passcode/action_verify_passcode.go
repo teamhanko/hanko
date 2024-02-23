@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type VerifyPasscode struct {
@@ -37,16 +39,46 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	passcodeID := uuid.FromStringOrNil(c.Stash().Get("passcode_id").String())
-
 	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String())
 	if err != nil {
 		if errors.Is(err, services.ErrorPasscodeInvalid) ||
 			errors.Is(err, services.ErrorPasscodeNotFound) ||
 			errors.Is(err, services.ErrorPasscodeExpired) {
+
+			if c.Stash().Get("login_method").Exists() {
+				err = deps.AuditLogger.CreateWithConnection(
+					deps.Tx,
+					deps.HttpContext,
+					models.AuditLogLoginFailure,
+					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get("user_id").String())},
+					err,
+					auditlog.Detail("login_method", "passcode"),
+					auditlog.Detail("flow_id", c.GetFlowID()))
+
+				if err != nil {
+					return fmt.Errorf("could not create audit log: %w", err)
+				}
+			}
+
 			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeInvalid)
 		}
 
 		if errors.Is(err, services.ErrorPasscodeMaxAttemptsReached) {
+			if c.Stash().Get("login_method").Exists() {
+				err = deps.AuditLogger.CreateWithConnection(
+					deps.Tx,
+					deps.HttpContext,
+					models.AuditLogLoginFailure,
+					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get("user_id").String())},
+					err,
+					auditlog.Detail("login_method", "passcode"),
+					auditlog.Detail("flow_id", c.GetFlowID()))
+
+				if err != nil {
+					return fmt.Errorf("could not create audit log: %w", err)
+				}
+			}
+
 			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeMaxAttemptsReached)
 		}
 

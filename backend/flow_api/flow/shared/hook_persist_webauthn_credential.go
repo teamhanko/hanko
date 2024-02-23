@@ -6,8 +6,10 @@ import (
 	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnCredentialSave struct {
@@ -43,5 +45,19 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 	if err != nil {
 		return fmt.Errorf("failed so save credential: %w", err)
 	}
+
+	err = deps.AuditLogger.CreateWithConnection(
+		deps.Tx,
+		deps.HttpContext,
+		models.AuditLogPasskeyCreated,
+		&models.User{ID: userId},
+		nil,
+		auditlog.Detail("credential_id", credentialModel.ID),
+		auditlog.Detail("flow_id", c.GetFlowID()))
+
+	if err != nil {
+		return fmt.Errorf("could not create audit log: %w", err)
+	}
+
 	return nil
 }

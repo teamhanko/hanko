@@ -4,10 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type PasswordLogin struct {
@@ -79,10 +81,28 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	err := deps.PasswordService.VerifyPassword(userID, c.Input().Get("password").String())
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {
+			err = deps.AuditLogger.CreateWithConnection(
+				deps.Tx,
+				deps.HttpContext,
+				models.AuditLogLoginFailure,
+				&models.User{ID: userID},
+				err,
+				auditlog.Detail("login_method", "password"),
+				auditlog.Detail("flow_id", c.GetFlowID()))
+			if err != nil {
+				return fmt.Errorf("could not create audit log: %w", err)
+			}
+
 			return a.wrongCredentialsError(c)
 		}
 
 		return fmt.Errorf("failed to verify password: %w", err)
+	}
+
+	// Set only for audit logging purposes.
+	err = c.Stash().Set("login_method", "password")
+	if err != nil {
+		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
