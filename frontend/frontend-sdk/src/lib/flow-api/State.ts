@@ -94,7 +94,7 @@ class State<TStateName extends StateName>
    *     actions = {
    *       login_password_recovery: {
    *         inputs: {
-   *           email: { value: undefined, required: true, ... }
+   *           email: { value: undefined, required: true, ... },
    *           password: { value: undefined, required: true, min_length: 8, ... }
    *         }
    *       },

@@ -10,28 +10,30 @@ class Flow extends Client {
     return new State(response.json(), this.fetchNextState);
   };
 
+  private handlers: (Handlers & { onError?: (e: unknown) => any }) | undefined;
+
   public async init(
     initPath: FlowPath,
     handlers: Handlers & { onError?: (e: unknown) => any }
   ): Promise<void> {
-    const runLoop = async (path: string): Promise<void> => {
-      const handlerResult = await this.run(path, handlers);
+    this.handlers = handlers;
 
-      // Handlers may return an action to be executed.
-      // When the action is executed, we'll do all of this again (recursive),
-      // so it looks somewhat like this:
-      //
-      // fetch next state -> handler -> action -> fetch next state -> handler -> action -> ...
-      if (isAction(handlerResult)) {
-        return runLoop(handlerResult.href);
-      }
-    };
+    const initState = await this.fetchNextState(initPath);
 
-    return runLoop(initPath);
+    await this.run(initState);
   }
 
   /**
-   * Runs a handler based on the current state and returns the result.
+   * Runs a handler for a given state.
+   *
+   * If the handler returns an action or a state, this method will run the next
+   * appropriate handler for that state. (Recursively)
+   *
+   * If the handlers passed to `init` do not contain an `onError` handler,
+   * this method will throw.
+   *
+   * @see InvalidStateError
+   * @see HandlerNotFoundError
    *
    * @example
    * const handlerResult = await run("/login", {
@@ -39,26 +41,31 @@ class Flow extends Client {
    *   // based on what the /login endpoint returns
    * });
    */
-  run = async (
-    path: string,
-    handlers: Handlers & { onError?: (e: unknown) => any }
-  ) => {
+  run = async (state: State<any>): Promise<unknown> => {
     try {
-      const state = await this.fetchNextState(path);
-
       if (!isState(state)) {
         throw new InvalidStateError(state);
       }
 
-      const handler = handlers[state.name];
+      const handler = this.handlers[state.name];
       if (!handler) {
         throw new HandlerNotFoundError(state);
       }
 
-      return handler(state);
+      let maybeNextState = await handler(state);
+
+      // handler can return an action, which we'll run (and turn into state)...
+      if (isAction(maybeNextState)) {
+        maybeNextState = await (maybeNextState as any).run();
+      }
+
+      // ...or a state, to continue the "run loop"
+      if (isState(maybeNextState)) {
+        return this.run(maybeNextState);
+      }
     } catch (e) {
-      if (typeof handlers.onError === "function") {
-        return handlers.onError(e);
+      if (typeof this.handlers.onError === "function") {
+        return this.handlers.onError(e);
       }
 
       throw e;
