@@ -103,7 +103,7 @@ Additional features that have been requested or that we would like to build but 
 - Custom user data / fields
 - Privileged sessions & step-up authentication
 - Bot protection / CAPTCHA
-- Hosted auth pages and OIDC provider support |
+- Hosted auth pages and OIDC provider support
 
 # Community
 ## Questions, bugs, ideas
