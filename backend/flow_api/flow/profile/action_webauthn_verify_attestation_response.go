@@ -80,6 +80,14 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)
 	}
 
+	// Set user_id explicitly because persisting the credential is now part of a shared hook which has
+	// to work in multiple flows, e.g. the login flow, which does not work with the session_user in the
+	// context like the profile does
+	err = c.Stash().Set("user_id", userModel.ID.String())
+	if err != nil {
+		return fmt.Errorf("failed to set user_id to the stash: %w", err)
+	}
+
 	return c.ContinueFlow(StateProfileInit)
 }
 

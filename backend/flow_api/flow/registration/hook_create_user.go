@@ -31,19 +31,20 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	var credentialModel *models.WebauthnCredential
-	if c.Stash().Get("passkey_credential").Exists() {
-		passkeyCredentialStr := c.Stash().Get("passkey_credential").String()
+	if c.Stash().Get("webauthn_credential").Exists() {
+		webauthnCredentialStr := c.Stash().Get("webauthn_credential").String()
 
-		var passkeyCredential webauthnLib.Credential
-		err = json.Unmarshal([]byte(passkeyCredentialStr), &passkeyCredential)
+		var webauthnCredential webauthnLib.Credential
+		err = json.Unmarshal([]byte(webauthnCredentialStr), &webauthnCredential)
 		if err != nil {
-			return fmt.Errorf("failed to unmarshal stashed passkey_credential: %w", err)
+			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
 
+		// TODO: Who/what sets this? Do we need this?
 		passkeyBackupEligible := c.Stash().Get("passkey_backup_eligible").Bool()
 		passkeyBackupState := c.Stash().Get("passkey_backup_state").Bool()
 
-		credentialModel = intern.WebauthnCredentialToModel(&passkeyCredential, userId, passkeyBackupEligible, passkeyBackupState, deps.AuthenticatorMetadata)
+		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, passkeyBackupEligible, passkeyBackupState, deps.AuthenticatorMetadata)
 	}
 
 	err = h.createUser(
