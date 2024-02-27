@@ -3,6 +3,8 @@ import { State, isState } from "./State";
 import { Action } from "./types/action";
 import { FetchNextState, FlowPath, Handlers } from "./types/state-handling";
 
+type MaybePromise<T> = T | Promise<T>;
+
 // eslint-disable-next-line require-jsdoc
 class Flow extends Client {
   public fetchNextState: FetchNextState = async (href: string, body?: any) => {
@@ -14,11 +16,13 @@ class Flow extends Client {
 
   public async init(
     initPath: FlowPath,
-    handlers: Handlers & { onError?: (e: unknown) => any }
+    handlers: Handlers & { onError?: (e: unknown) => any },
+    getInitState: (flow: Flow) => MaybePromise<State<any> | null> = () =>
+      this.fetchNextState(initPath)
   ): Promise<void> {
     this.handlers = handlers;
 
-    const initState = await this.fetchNextState(initPath);
+    const initState = await getInitState(this);
 
     await this.run(initState);
   }

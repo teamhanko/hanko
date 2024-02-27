@@ -45,11 +45,23 @@ class State<TStateName extends StateName>
 {
   readonly name: StateName;
   readonly payload?: Payloads[TStateName];
-  readonly actions: ActionFunctions[TStateName];
   readonly error: Error;
   readonly status: number;
 
+  readonly #actionDefinitions: Actions[TStateName];
+  readonly actions: ActionFunctions[TStateName];
+
   private readonly fetchNextState: FetchNextState;
+
+  toJSON() {
+    return {
+      name: this.name,
+      payload: this.payload,
+      error: this.error,
+      status: this.status,
+      actions: this.#actionDefinitions,
+    };
+  }
 
   // eslint-disable-next-line require-jsdoc
   constructor(
@@ -60,6 +72,7 @@ class State<TStateName extends StateName>
     this.payload = payload;
     this.error = error;
     this.status = status;
+    this.#actionDefinitions = actions;
 
     // We're doing something really hacky here, but hear me out
     //
