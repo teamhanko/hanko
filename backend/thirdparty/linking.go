@@ -6,12 +6,18 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
 )
 
 type AccountLinkingResult struct {
-	Type models.AuditLogType
-	User *models.User
+	Type         models.AuditLogType
+	User         *models.User
+	WebhookEvent *events.Event
 }
+
+const (
+	getIdentityFailure = "could not get identity"
+)
 
 func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
 	if cfg.Emails.RequireVerification && !userData.Metadata.EmailVerified {
@@ -26,7 +32,7 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 	if identity == nil {
 		user, err := p.GetUserPersisterWithConnection(tx).GetByEmailAddress(userData.Metadata.Email)
 		if err != nil {
-			return nil, ErrorServer("could not get identity").WithCause(err)
+			return nil, ErrorServer(getIdentityFailure).WithCause(err)
 		}
 
 		if user == nil {
@@ -47,22 +53,24 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 	email := user.GetEmailByAddress(userData.Metadata.Email)
 	identity, err := models.NewIdentity(providerName, userData.ToMap(), email.ID)
 	if err != nil {
-		return nil, ErrorServer("could not create identity").WithCause(err)
+		return nil, ErrorServer(getIdentityFailure).WithCause(err)
 	}
 
 	err = p.GetIdentityPersisterWithConnection(tx).Create(*identity)
 	if err != nil {
-		return nil, ErrorServer("could not create identity").WithCause(err)
+		return nil, ErrorServer(getIdentityFailure).WithCause(err)
 	}
 
 	return &AccountLinkingResult{
-		Type: models.AuditLogThirdPartyLinkingSucceeded,
-		User: user,
+		Type:         models.AuditLogThirdPartyLinkingSucceeded,
+		User:         user,
+		WebhookEvent: nil,
 	}, nil
 }
 
 func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, identity *models.Identity) (*AccountLinkingResult, error) {
 	var linkingResult *AccountLinkingResult
+	var webhookEvent events.Event
 
 	userPersister := p.GetUserPersisterWithConnection(tx)
 	emailPersister := p.GetEmailPersisterWithConnection(tx)
@@ -89,6 +97,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 				}
 
 				identity.EmailID = email.ID
+				webhookEvent = events.UserUpdate
 			} else if email.UserID.String() != identity.Email.UserID.String() {
 				// The email is assigned to a different user, and so the identity is linked to multiple users. There
 				// is not much we can do here but return an error.
@@ -119,13 +128,14 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 			}
 
 			identity.EmailID = email.ID
+			webhookEvent = events.EmailCreate
 		}
 	}
 
 	identity.Data = userData.ToMap()
 	terr = identityPersister.Update(*identity)
 	if terr != nil {
-		return nil, ErrorServer("could not get identity").WithCause(terr)
+		return nil, ErrorServer(getIdentityFailure).WithCause(terr)
 	}
 
 	user, terr := userPersister.Get(*identity.Email.UserID)
@@ -134,8 +144,9 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	}
 
 	linkingResult = &AccountLinkingResult{
-		Type: models.AuditLogThirdPartySignInSucceeded,
-		User: user,
+		Type:         models.AuditLogThirdPartySignInSucceeded,
+		User:         user,
+		WebhookEvent: &webhookEvent,
 	}
 
 	return linkingResult, nil
@@ -173,6 +184,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		if terr != nil {
 			return nil, ErrorServer("could not update email").WithCause(terr)
 		}
+
 	} else {
 		// No email exists, create a new one using the provider user data email
 		email = models.NewEmail(&user.ID, userData.Metadata.Email)
@@ -204,9 +216,11 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}
 
+	evt := events.UserCreate
 	linkingResult = &AccountLinkingResult{
-		Type: models.AuditLogThirdPartySignUpSucceeded,
-		User: u,
+		Type:         models.AuditLogThirdPartySignUpSucceeded,
+		User:         u,
+		WebhookEvent: &evt,
 	}
 
 	return linkingResult, nil
