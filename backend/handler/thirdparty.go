@@ -7,11 +7,13 @@ import (
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/dto/admin"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
+	webhookUtils "github.com/teamhanko/hanko/backend/webhooks/utils"
 	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
@@ -189,6 +191,13 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
+	}
+
+	if accountLinkingResult.WebhookEvent != nil {
+		err = webhookUtils.TriggerWebhooks(c, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
+		if err != nil {
+			c.Logger().Warn(err)
+		}
 	}
 
 	return c.Redirect(http.StatusTemporaryRedirect, successRedirectTo.String())

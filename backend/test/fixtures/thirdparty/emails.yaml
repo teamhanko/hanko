@@ -24,6 +24,12 @@
   verified: true
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: 09f35529-cca6-44a7-ab1d-b07e95a04e3b
+  user_id: d69bffda-4e4a-4424-a238-fbecc1651d81
+  address: test-with-discord-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 - id: 527afce8-3b7b-41b6-b1ed-33d408c5a7bb
   user_id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
   address: test-no-identity@example.com

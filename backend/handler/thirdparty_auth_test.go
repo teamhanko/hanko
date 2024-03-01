@@ -1,11 +1,12 @@
 package handler
 
 import (
-	"github.com/teamhanko/hanko/backend/thirdparty"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
+
+	"github.com/teamhanko/hanko/backend/thirdparty"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
@@ -46,6 +47,15 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedProvider:   "apple",
 			requestedRedirectTo: "https://app.test.example",
 			expectedBaseURL:     thirdparty.AppleAuthEndpoint,
+		},
+		{
+			name:                "successful redirect to discord",
+			referer:             "https://login.test.example",
+			enabledProviders:    []string{"discord"},
+			allowedRedirectURLs: []string{"https://*.test.example"},
+			requestedProvider:   "discord",
+			requestedRedirectTo: "https://app.test.example",
+			expectedBaseURL:     thirdparty.DiscordOauthAuthEndpoint,
 		},
 		{
 			name:                     "error redirect on missing provider",
