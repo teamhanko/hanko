@@ -26,6 +26,7 @@ type Input interface {
 	Persist(b bool) Input
 	ConditionalIncludeOnState(stateNames ...StateName) Input
 	CompareWithStash(b bool) Input
+	AllowedValue(value interface{}, name string) Input
 
 	setValue(value interface{}) Input
 	setError(inputError InputError)
@@ -47,16 +48,25 @@ type defaultExtraInputOptions struct {
 
 // DefaultInput represents an input field with its options.
 type DefaultInput struct {
-	name      string
-	dataType  InputType
-	value     interface{}
-	minLength *int
-	maxLength *int
-	required  *bool
-	hidden    *bool
-	error     InputError
+	name          string
+	dataType      InputType
+	value         interface{}
+	minLength     *int
+	maxLength     *int
+	required      *bool
+	hidden        *bool
+	error         InputError
+	allowedValues AllowedValues
 
 	defaultExtraInputOptions
+}
+
+func (i *DefaultInput) AllowedValue(value interface{}, name string) Input {
+	i.allowedValues = append(i.allowedValues, AllowedValue{
+		Value: value,
+		Text:  name,
+	})
+	return i
 }
 
 // newInput creates a new DefaultInput instance with provided parameters.
@@ -73,6 +83,21 @@ func newInput(name string, inputType InputType, persistValue bool) Input {
 		dataType:                 inputType,
 		defaultExtraInputOptions: extraOptions,
 	}
+}
+
+type AllowedValue struct {
+	Value interface{} `json:"value"`
+	Text  string      `json:"name"`
+}
+
+type AllowedValues []AllowedValue
+
+func (av AllowedValues) Values() []interface{} {
+	var values []interface{}
+	for _, v := range av {
+		values = append(values, v.Value)
+	}
+	return values
 }
 
 // StringInput creates a new input field of string type.
@@ -250,6 +275,16 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		}
 	}
 
+	if i.dataType == StringType && i.allowedValues != nil {
+		for _, v := range i.allowedValues.Values() {
+			if v.(string) == *inputValue {
+				return true
+			}
+		}
+		i.error = ErrorValueInvalidMustBeOneOf(i.allowedValues.Values())
+		return false
+	}
+
 	return true
 }
 
@@ -263,13 +298,14 @@ func (i *DefaultInput) toPublicInput() *PublicInput {
 	}
 
 	return &PublicInput{
-		Name:        i.name,
-		Type:        i.dataType,
-		Value:       i.value,
-		MinLength:   i.minLength,
-		MaxLength:   i.maxLength,
-		Required:    i.required,
-		Hidden:      i.hidden,
-		PublicError: publicError,
+		Name:          i.name,
+		Type:          i.dataType,
+		Value:         i.value,
+		MinLength:     i.minLength,
+		MaxLength:     i.maxLength,
+		Required:      i.required,
+		Hidden:        i.hidden,
+		PublicError:   publicError,
+		AllowedValues: i.allowedValues,
 	}
 }

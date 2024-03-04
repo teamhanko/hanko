@@ -69,6 +69,18 @@
         get
     } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
 
+    window.addEventListener("load", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hankoToken = urlParams.get('hanko_token');
+      if (hankoToken) {
+        const state = JSON.parse(localStorage.getItem("thirdparty_oauth_state"))
+        generateUI(state)
+        const form = document.getElementById('exchange_token');
+        form.getElementsByTagName("input")[0].value = hankoToken;
+        window.history.replaceState(null, null, window.location.pathname);
+      }
+    })
+
     async function webauthnCreate(payload) {
         const options = parseCreationOptionsFromJSON(payload)
         const response = await create(options)
@@ -95,12 +107,17 @@
       document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
     }
 
+    const thirdpartyOAuthHandler = (payload) => {
+      window.location.href = payload.redirect_url;
+    }
+
     const stateHandler = {
         "login_passkey": passkeyLoginHandler,
         "passkey_login": passkeyLoginHandler,
         "passkey_registration": passkeyRegisterHandler,
         "onboarding_verify_passkey_attestation": passkeyRegisterHandler,
-        "webauthn_credential_verification": passkeyRegisterHandler
+        "webauthn_credential_verification": passkeyRegisterHandler,
+        "thirdparty_oauth": thirdpartyOAuthHandler
     }
 
     function generateUI(data) {
@@ -163,6 +180,7 @@
                 const form = document.createElement('form');
                 form.action = action.href;
                 form.method = 'POST';
+                form.id = action.action;
 
                 const actionHeadline = document.createElement('h4');
                 actionHeadline.textContent = "⚡ Action: " + action.action;
@@ -308,6 +326,12 @@
             body: JSON.stringify({input_data: body}),
         })
             .then(response => response.json())
+            .then((data) => {
+              if (data.state === 'thirdparty_oauth') {
+                localStorage.setItem('thirdparty_oauth_state', JSON.stringify(data))
+              }
+              return data
+            })
             .then(generateUI)
             .catch(console.error);
     }

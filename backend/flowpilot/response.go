@@ -31,14 +31,15 @@ type PublicError struct {
 
 // PublicInput represents an input field for public exposure.
 type PublicInput struct {
-	Name        string       `json:"name"`
-	Type        InputType    `json:"type"`
-	Value       interface{}  `json:"value,omitempty"`
-	MinLength   *int         `json:"min_length,omitempty"`
-	MaxLength   *int         `json:"max_length,omitempty"`
-	Required    *bool        `json:"required,omitempty"`
-	Hidden      *bool        `json:"hidden,omitempty"`
-	PublicError *PublicError `json:"error,omitempty"`
+	Name          string        `json:"name"`
+	Type          InputType     `json:"type"`
+	Value         interface{}   `json:"value,omitempty"`
+	MinLength     *int          `json:"min_length,omitempty"`
+	MaxLength     *int          `json:"max_length,omitempty"`
+	Required      *bool         `json:"required,omitempty"`
+	Hidden        *bool         `json:"hidden,omitempty"`
+	PublicError   *PublicError  `json:"error,omitempty"`
+	AllowedValues AllowedValues `json:"allowed_values,omitempty"`
 }
 
 // PublicResponse represents the response of an action execution.

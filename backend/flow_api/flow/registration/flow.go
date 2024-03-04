@@ -20,8 +20,8 @@ const (
 )
 
 var Flow = flowpilot.NewFlow("/registration").
-	State(StateRegistrationInit, RegisterLoginIdentifier{}).
-	BeforeState(StateRegistrationInit, shared.GenerateOAuthLinks{}).
+	State(StateRegistrationInit, RegisterLoginIdentifier{}, shared.ThirdPartyOAuth{}).
+	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
 	State(StatePasswordCreation, RegisterPassword{}).
 	BeforeState(shared.StateSuccess, CreateUser{}, shared.IssueSession{}).
 	State(shared.StateSuccess).

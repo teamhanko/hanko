@@ -13,12 +13,15 @@ import (
 )
 
 const (
-	StateSuccess flowpilot.StateName = "success"
-	StateError   flowpilot.StateName = "error"
+	StateSuccess         flowpilot.StateName = "success"
+	StateError           flowpilot.StateName = "error"
+	StateThirdPartyOAuth flowpilot.StateName = "thirdparty_oauth"
 )
 
 const (
-	ActionBack flowpilot.ActionName = "back"
+	ActionBack            flowpilot.ActionName = "back"
+	ActionExchangeToken   flowpilot.ActionName = "exchange_token"
+	ActionThirdPartyOAuth flowpilot.ActionName = "thirdparty_oauth"
 )
 
 type Dependencies struct {

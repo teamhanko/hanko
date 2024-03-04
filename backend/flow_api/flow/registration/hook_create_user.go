@@ -17,6 +17,12 @@ type CreateUser struct {
 }
 
 func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
+	// Set by shared thirdparty_oauth action because the third party callback endpoint already
+	// creates the user.
+	if c.Stash().Get("skip_user_creation").Bool() {
+		return nil
+	}
+
 	deps := h.GetDeps(c)
 
 	userId, err := uuid.NewV4()
