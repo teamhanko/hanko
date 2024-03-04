@@ -26,3 +26,17 @@ func (p *primaryEmailPersister) Update(primaryEmail models.PrimaryEmail) error {
 	}
 	return nil
 }
+
+func (p *primaryEmailPersister) Delete(primaryEmail models.PrimaryEmail) error {
+	index := -1
+	for i, data := range p.primaryEmails {
+		if data.ID == primaryEmail.ID {
+			index = i
+		}
+	}
+	if index > -1 {
+		p.primaryEmails = append(p.primaryEmails[:index], p.primaryEmails[index+1:]...)
+	}
+
+	return nil
+}

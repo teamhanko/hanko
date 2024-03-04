@@ -473,6 +473,14 @@ third_party:
   error_redirect_url: "CHANGE_ME"
   ##
   #
+  # Optional URL where the backend redirects to after the backend successfully verified the response from any third party provider.
+  # This URL is not used when the HTTP 'Referer' Header is set.
+  #
+  # NOTE: MUST NOT have trailing slash
+  #
+  default_redirect_url: "CHANGE_ME"
+  ##
+  #
   # The third party provider configurations. Unknown providers will be ignored.
   #
   providers:

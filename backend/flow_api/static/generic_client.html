@@ -1,0 +1,338 @@
+<html>
+<head>
+    <style>
+        body {
+            font-family: sans-serif;
+            text-indent: 3em;
+        }
+
+        button, div, li {
+            margin-left: 4em;
+        }
+
+        h1, h2, h3, h4, h5, ul {
+            margin: .5em;
+        }
+
+        h1, h2 {
+            text-indent: 0;
+        }
+
+        h3 {
+            text-indent: 1em;
+        }
+
+        h4 {
+            text-indent: 1.5em;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .link-list {
+            list-style-type: unset;
+        }
+
+        .link-list-item {
+            text-indent: 0;
+        }
+    </style>
+</head>
+<body>
+<h1>✨ Generic Flowpilot Client</h1>
+<button id="newLoginFlowBtn">✍ New flow</button>
+
+<label for="options"></label>
+<select id="options">
+    <option value="login">Login</option>
+    <option value="registration">Registration</option>
+    <option value="profile">Profile</option>
+</select>
+
+<div id="container"></div>
+<script type="module">
+    import {
+        parseCreationOptionsFromJSON,
+        create
+    } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
+
+    console.log(parseCreationOptionsFromJSON)
+    console.log(create)
+</script>
+<script type="module">
+    import {
+        parseCreationOptionsFromJSON,
+        parseRequestOptionsFromJSON,
+        create,
+        get
+    } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
+
+    async function webauthnCreate(payload) {
+        const options = parseCreationOptionsFromJSON(payload)
+        const response = await create(options)
+        return JSON.stringify(response)
+    }
+
+    async function webauthnGet(payload) {
+      const options = parseRequestOptionsFromJSON(payload)
+      const response = await get(options)
+      return JSON.stringify(response)
+    }
+
+    const passkeyRegisterHandler = async (payload) => {
+        // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+
+        console.log(payload)
+        document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creation_options)
+    }
+
+    const passkeyLoginHandler = async (payload) => {
+      // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+
+      console.log(payload)
+      document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
+    }
+
+    const stateHandler = {
+        "login_passkey": passkeyLoginHandler,
+        "passkey_login": passkeyLoginHandler,
+        "passkey_registration": passkeyRegisterHandler,
+        "onboarding_verify_passkey_attestation": passkeyRegisterHandler,
+        "webauthn_credential_verification": passkeyRegisterHandler
+    }
+
+    function generateUI(data) {
+        const container = document.getElementById('container');
+        container.innerHTML = '';
+
+        const stateHeadline = document.createElement('h2');
+        stateHeadline.innerHTML = "📌 State: " + data.state;
+        container.appendChild(stateHeadline);
+
+        const errorHeadline = document.createElement('h3');
+        errorHeadline.innerHTML = "⛔ Error";
+        container.appendChild(errorHeadline);
+
+        if (data.error) {
+            const errorEl = document.createElement('p');
+            errorEl.textContent = `Code: ${data.error.code}, Message: ${data.error.message}, Cause: ${data.error.cause}`
+            container.appendChild(errorEl);
+        } else {
+            const notAvailable = document.createElement('p');
+            notAvailable.textContent = "[n/a]";
+            container.appendChild(notAvailable);
+        }
+
+        const payloadHeadline = document.createElement('h3');
+        payloadHeadline.innerHTML = "📦 Payload";
+        container.appendChild(payloadHeadline);
+
+        if (data.payload) {
+            const pre = document.createElement('pre');
+            pre.textContent = "\n" + JSON.stringify(data.payload, null, 2)
+            container.appendChild(pre);
+        } else {
+            const notAvailable = document.createElement('p');
+            notAvailable.textContent = "[n/a]";
+            container.appendChild(notAvailable);
+        }
+
+        const executeHandlerButton = document.createElement('button');
+        executeHandlerButton.type = 'button';
+        executeHandlerButton.textContent = "☝ Execute handler";
+
+        if (!stateHandler[data.state]) {
+            executeHandlerButton.disabled = true
+        } else {
+            executeHandlerButton.addEventListener('click', (event) => {
+                event.preventDefault();
+                stateHandler[data.state](data.payload);
+            });
+        }
+
+        container.appendChild(executeHandlerButton);
+
+        const actionsHeadline = document.createElement('h3');
+        actionsHeadline.textContent = "🕹 Actions";
+        container.appendChild(actionsHeadline);
+
+        if (data.actions) {
+            data.actions.forEach(action => {
+                const form = document.createElement('form');
+                form.action = action.href;
+                form.method = 'POST';
+
+                const actionHeadline = document.createElement('h4');
+                actionHeadline.textContent = "⚡ Action: " + action.action;
+                form.appendChild(actionHeadline);
+
+
+                const descriptionHeadline = document.createElement('h5');
+                descriptionHeadline.textContent = "📝 Description";
+                form.appendChild(descriptionHeadline);
+
+                const description = document.createElement('div');
+                description.textContent = action.description;
+                form.appendChild(description);
+
+                const schemaHeadline = document.createElement('h5');
+                schemaHeadline.textContent = "⛳ Schema";
+                form.appendChild(schemaHeadline);
+
+                if (action.schema) {
+                    const inputList = document.createElement('ul');
+
+                    action.schema.forEach(input => {
+                        const inputListItem = document.createElement('li');
+
+                        const label = document.createElement("label");
+
+                        const flags = [];
+
+                        if (input.required) {
+                            flags.push("required")
+                        } else {
+                            flags.push("optional")
+                        }
+
+                        if (input.hidden) {
+                            flags.push("hidden");
+                        }
+
+                        const details = (flags.length ? " (" + flags.join(", ") + ")" : "");
+                        label.textContent = input.name + details + ": ";
+                        inputListItem.appendChild(label)
+
+                        const inputElement = document.createElement('input');
+
+                        if (input.value) {
+                            inputElement.defaultValue = input.value
+                        }
+
+                        inputElement.name = input.name;
+                        inputElement.type = input.type;
+                        inputElement.required = input.required;
+
+                        inputListItem.appendChild(inputElement);
+
+                        if (input.error) {
+                            const error = document.createElement('p')
+                            error.textContent = "⛔ Code: " + input.error.code + ", Message: " + input.error.message
+                            inputListItem.appendChild(error);
+                        }
+
+                        inputList.appendChild(inputListItem)
+                    });
+
+                    form.appendChild(inputList);
+                } else {
+                    const notAvailable = document.createElement('p');
+                    notAvailable.textContent = "[n/a]";
+                    form.appendChild(notAvailable);
+                }
+
+                const submitButton = document.createElement('button');
+                submitButton.type = 'submit';
+                submitButton.textContent = "📡 Submit";
+                submitButton.addEventListener('click', (event) => updateFlow(event, form))
+
+                form.appendChild(submitButton);
+
+                container.appendChild(form);
+            });
+        } else {
+            const notAvailable = document.createElement('p');
+            notAvailable.textContent = "[n/a]";
+            container.appendChild(notAvailable);
+        }
+
+        const linksHeadline = document.createElement('h3');
+        linksHeadline.textContent = "🔗 Links";
+        container.appendChild(linksHeadline);
+        if (data.links) {
+            const linksList = document.createElement('ul');
+            linksList.classList.add("link-list")
+
+            data.links.forEach(link => {
+                const listItem = document.createElement('li')
+                listItem.classList.add("link-list-item")
+                const anchor = document.createElement('a')
+                anchor.text = '[' + link.category + '] ' + link.name
+                anchor.href = link.href
+                anchor.target = link.target
+
+                listItem.appendChild(anchor)
+                linksList.appendChild(listItem)
+            })
+
+            container.appendChild(linksList)
+        }
+    }
+
+    function serializeForm(form) {
+        const formData = new FormData(form);
+        const data = {};
+
+        formData.forEach((value, key) => {
+            const input = formData.get(key);
+
+            if (input.type === "checkbox") {
+                data[key] = input.checked;
+            } else if (input.type === "number") {
+                data[key] = parseFloat(value + "");
+            } else {
+                data[key] = value;
+            }
+        });
+
+        return data
+    }
+
+    function getFlowPath() {
+        const optionsEl = document.getElementById("options");
+        const selectedIndex = optionsEl.selectedIndex;
+        return "/" + optionsEl.options[selectedIndex].value
+    }
+
+    function updateFlow(event, form) {
+        event.preventDefault();
+        const body = JSON.stringify(serializeForm(form))
+
+        fetch(form.action, {
+            headers: {
+                "Content-Type": "application/json"
+            },
+            method: form.method,
+            body: JSON.stringify({input_data: body}),
+        })
+            .then(response => response.json())
+            .then(generateUI)
+            .catch(console.error);
+    }
+
+    function createFlow() {
+        fetch(getFlowPath(), {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({flow_option: getFlowPath()})
+        })
+            .then((resp) => resp.json())
+            .then(generateUI)
+            .catch(console.error)
+    }
+
+    function init() {
+        const newLoginFlowBtnEL = document.getElementById("newLoginFlowBtn");
+        newLoginFlowBtnEL.addEventListener("click", () => {
+            createFlow();
+        })
+    }
+
+    init();
+</script>
+</body>
+</html>

@@ -5,13 +5,14 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
+	"golang.org/x/exp/slices"
 	"time"
 )
 
 // Email is used by pop to map your users database table to your go code.
 type Email struct {
 	ID           uuid.UUID     `db:"id" json:"id"`
-	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"`
+	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"` // TODO: should not be a pointer anymore
 	Address      string        `db:"address" json:"address"`
 	Verified     bool          `db:"verified" json:"verified"`
 	PrimaryEmail *PrimaryEmail `has_one:"primary_emails" json:"primary_emails,omitempty"`
@@ -52,6 +53,12 @@ func (emails Emails) GetVerified() Emails {
 		}
 	}
 	return list
+}
+
+func (emails Emails) HasUnverified() bool {
+	return slices.ContainsFunc(emails, func(e Email) bool {
+		return !e.Verified
+	})
 }
 
 func (emails Emails) GetPrimary() *Email {

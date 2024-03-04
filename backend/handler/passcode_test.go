@@ -122,10 +122,12 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte("123456"), 12)
 
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+	emailId := uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84")
 	passcode := models.Passcode{
 		ID:        uuid.FromStringOrNil("a2383922-dea3-46c8-be17-85b267c0d135"),
-		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
-		EmailID:   uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		UserId:    &userId,
+		EmailID:   &emailId,
 		Ttl:       300,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
@@ -135,8 +137,8 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 
 	passcodeWithExpiredTimeout := models.Passcode{
 		ID:        uuid.FromStringOrNil("a2383922-dea3-46c8-be17-85b267c0d135"),
-		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
-		EmailID:   uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		UserId:    &userId,
+		EmailID:   &emailId,
 		Ttl:       300,
 		Code:      string(hashedPasscode),
 		TryCount:  0,

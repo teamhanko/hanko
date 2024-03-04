@@ -9,6 +9,7 @@ import (
 type PrimaryEmailPersister interface {
 	Create(models.PrimaryEmail) error
 	Update(models.PrimaryEmail) error
+	Delete(models.PrimaryEmail) error
 }
 
 type primaryEmailPersister struct {
@@ -40,6 +41,15 @@ func (p *primaryEmailPersister) Update(primaryEmail models.PrimaryEmail) error {
 
 	if vErr != nil && vErr.HasAny() {
 		return fmt.Errorf("primary email object validation failed: %w", vErr)
+	}
+
+	return nil
+}
+
+func (e *primaryEmailPersister) Delete(primaryEmail models.PrimaryEmail) error {
+	err := e.db.Destroy(&primaryEmail)
+	if err != nil {
+		return fmt.Errorf("failed to delete email: %w", err)
 	}
 
 	return nil

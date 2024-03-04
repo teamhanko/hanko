@@ -1,0 +1,2 @@
+drop_table("transitions")
+drop_table("flows")

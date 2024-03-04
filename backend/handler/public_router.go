@@ -4,23 +4,67 @@ import (
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sethvargo/go-limiter"
 	"github.com/sethvargo/go-limiter/httplimit"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml"
+	"github.com/teamhanko/hanko/backend/flow_api"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
+
+	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
+
+	emailService, err := services.NewEmailService(*cfg)
+	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+	passwordService := services.NewPasswordService(*cfg, persister)
+	webauthnService := services.NewWebauthnService(*cfg, persister)
+
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, *cfg)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+
+	var rateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+	}
+
+	flowAPIHandler := flow_api.FlowPilotHandler{
+		Persister:             persister,
+		Cfg:                   *cfg,
+		PasscodeService:       passcodeService,
+		PasswordService:       passwordService,
+		WebauthnService:       webauthnService,
+		SessionManager:        sessionManager,
+		RateLimiter:           rateLimiter,
+		AuthenticatorMetadata: authenticatorMetadata,
+	}
+
+	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
+
+	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
+	e.POST("/login", flowAPIHandler.LoginFlowHandler)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, sessionMiddleware)
+
 	e.Renderer = template.NewTemplateRenderer()
+
 	e.HideBanner = true
 	g := e.Group("")
 
@@ -58,17 +102,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	e.Validator = dto.NewCustomValidator()
-
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-
-	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
 	mailer, err := mail.NewMailer(cfg.Smtp)
 	if err != nil {

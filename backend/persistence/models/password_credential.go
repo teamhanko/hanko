@@ -16,6 +16,17 @@ type PasswordCredential struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
+func NewPasswordCredential(userId uuid.UUID, password string) *PasswordCredential {
+	id, _ := uuid.NewV4()
+	return &PasswordCredential{
+		ID:        id,
+		UserId:    userId,
+		Password:  password,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+}
+
 func (password *PasswordCredential) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.StringIsPresent{Name: "Password", Field: password.Password},

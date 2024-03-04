@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/fatih/structs"
+	"github.com/go-webauthn/webauthn/protocol"
+	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobwas/glob"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf"
@@ -20,23 +22,26 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server      Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
-	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
-	Smtp        SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
-	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
-	Password    Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
-	Database    Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets     Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service     Service          `yaml:"service" json:"service" koanf:"service"`
-	Session     Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
-	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
-	Emails      Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
-	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
-	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
-	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
-	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-	Saml        config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
-	Webhooks    WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
+	Server       Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
+	Webauthn     WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp         SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
+	Passcode     Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password     Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
+	Database     Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets      Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service      Service          `yaml:"service" json:"service" koanf:"service"`
+	Session      Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
+	AuditLog     AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
+	Emails       Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
+	RateLimiter  RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
+	ThirdParty   ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
+	Log          LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
+	Account      Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	Identifier   Identifier       `yaml:"identifier" json:"identifier" koanf:"identifier"`
+	SecondFactor SecondFactor     `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey      Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
+	Saml         config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	Webhooks     WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
 
 var (
@@ -188,6 +193,7 @@ func DefaultConfig() *Config {
 				},
 			},
 		},
+		// TODO: add defaults for Passkey, Identifier, SecondFactor
 	}
 }
 
@@ -240,6 +246,10 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate webhook settings: %w", err)
 	}
+
+	if c.Identifier.Email.Verification && !c.Passcode.Enabled {
+		return errors.New("passcode must be enabled for email verification")
+	}
 	return nil
 }
 
@@ -274,6 +284,7 @@ func (s *Service) Validate() error {
 
 type Password struct {
 	Enabled           bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Optional          bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
 	MinPasswordLength int  `yaml:"min_password_length" json:"min_password_length,omitempty" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
 }
 
@@ -339,9 +350,46 @@ func (s *ServerSettings) Validate() error {
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty     RelyingParty `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
-	Timeout          int          `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
-	UserVerification string       `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
+	RelyingParty     RelyingParty          `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
+	Timeout          int                   `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
+	UserVerification string                `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
+	Handler          *webauthnLib.WebAuthn `jsonschema:"-"`
+}
+
+func (r *WebauthnSettings) PostProcess() error {
+	requireResidentKey := false
+
+	config := &webauthnLib.Config{
+		RPID:                  r.RelyingParty.Id,
+		RPDisplayName:         r.RelyingParty.DisplayName,
+		RPOrigins:             r.RelyingParty.Origins,
+		AttestationPreference: protocol.PreferNoAttestation,
+		AuthenticatorSelection: protocol.AuthenticatorSelection{
+			RequireResidentKey: &requireResidentKey,
+			ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
+			UserVerification:   protocol.VerificationRequired,
+		},
+		Debug: false,
+		Timeouts: webauthnLib.TimeoutsConfig{
+			Login: webauthnLib.TimeoutConfig{
+				Enforce: true,
+				Timeout: time.Duration(r.Timeout) * time.Millisecond,
+			},
+			Registration: webauthnLib.TimeoutConfig{
+				Enforce: true,
+				Timeout: time.Duration(r.Timeout) * time.Millisecond,
+			},
+		},
+	}
+
+	handler, err := webauthnLib.New(config)
+	if err != nil {
+		return err
+	}
+
+	r.Handler = handler
+
+	return nil
 }
 
 // Validate does not need to validate the config, because the library does this already
@@ -392,8 +440,9 @@ func (e *Email) Validate() error {
 }
 
 type Passcode struct {
-	Email Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	TTL   int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Enabled bool  `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Email   Email `yaml:"email" json:"email,omitempty" koanf:"email"`
+	TTL     int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 	//Deprecated: Use root level Smtp instead
 	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
@@ -558,6 +607,7 @@ type ThirdParty struct {
 	Providers             ThirdPartyProviders  `yaml:"providers" json:"providers,omitempty" koanf:"providers"`
 	RedirectURL           string               `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true"`
 	ErrorRedirectURL      string               `yaml:"error_redirect_url" json:"error_redirect_url,omitempty" koanf:"error_redirect_url" split_words:"true"`
+	DefaultRedirectURL    string               `yaml:"default_redirect_url" json:"default_redirect_url,omitempty" koanf:"default_redirect_url" split_words:"true"`
 	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
 	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
 }
@@ -577,6 +627,9 @@ func (t *ThirdParty) Validate() error {
 		}
 
 		urls := append(t.AllowedRedirectURLS, t.ErrorRedirectURL)
+		if t.DefaultRedirectURL != "" {
+			urls = append(urls, t.DefaultRedirectURL)
+		}
 		for _, u := range urls {
 			if strings.HasSuffix(u, "/") {
 				return fmt.Errorf("redirect url %s must not have trailing slash", u)
@@ -674,6 +727,11 @@ func (c *Config) PostProcess() error {
 		return fmt.Errorf("failed to post process third party settings: %w", err)
 	}
 
+	err = c.Webauthn.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process webauthn settings: %w", err)
+	}
+
 	err = c.Saml.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process saml settings: %w", err)
@@ -702,4 +760,50 @@ type Account struct {
 	// Allow Deletion indicates if a user can perform self-service deletion
 	AllowDeletion bool `yaml:"allow_deletion" json:"allow_deletion,omitempty" koanf:"allow_deletion" jsonschema:"default=false"`
 	AllowSignup   bool `yaml:"allow_signup" json:"allow_signup,omitempty" koanf:"allow_signup" jsonschema:"default=true"`
+}
+
+// TODO: below structs need validation, e.g. only allowed names for enabled and also we should reject some configurations (e.g. passcode & passwords are disabled and passkey onboarding is also disabled)
+
+type Identifier struct {
+	Username IdentifierUsername `yaml:"username" json:"username" koanf:"username"`
+	Email    IdentifierEmail    `yaml:"email" json:"email" koanf:"email"`
+}
+
+type IdentifierUsername struct {
+	Enabled           bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional          bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	MaxLength         int    `yaml:"max_length" json:"max_length" koanf:"max_length" split_words:"true"`
+	MinLength         int    `yaml:"min_length" json:"min_length" koanf:"min_length" split_words:"true"`
+	AllowedCharacters string `yaml:"allowed_characters" json:"allowed_characters" koanf:"allowed_characters" split_words:"true"`
+}
+
+type IdentifierEmail struct {
+	Enabled      bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional     bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	Verification bool `yaml:"verification" json:"verification" koanf:"verification"`
+}
+
+type SecondFactor struct {
+	Enabled       bool                   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional      bool                   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	Onboarding    SecondFactorOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
+	Methods       []string               `yaml:"methods" json:"methods" koanf:"methods"` // TODO: jsonschema only totp and security_key are allowed
+	RecoveryCodes RecoveryCodes          `yaml:"recovery_codes" json:"recovery_codes" koanf:"recovery_codes" split_words:"true"`
+}
+
+type SecondFactorOnboarding struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type RecoveryCodes struct {
+	Enabled  bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+}
+
+type Passkey struct {
+	Onboarding PasskeyOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
+}
+
+type PasskeyOnboarding struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
 }

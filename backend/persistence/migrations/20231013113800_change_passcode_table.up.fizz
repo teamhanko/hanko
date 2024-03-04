@@ -1,0 +1,7 @@
+change_column("passcodes", "user_id", "uuid", {"null": true})
+
+add_column("passcodes", "flow_id", "uuid", {"null":true})
+add_foreign_key("passcodes", "flow_id", {"flows": ["id"]}, {
+    "on_delete": "cascade",
+    "on_update": "cascade",
+})
