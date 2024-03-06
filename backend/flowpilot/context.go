@@ -46,6 +46,8 @@ type actionInitializationContext interface {
 	AddInputs(inputs ...Input)
 	// Stash returns the ReadOnlyJSONManager for accessing stash data.
 	Stash() Stash
+	// CurrentStateEquals returns true, when one of the given states matches the current state.
+	CurrentStateEquals(stateNames ...StateName) bool
 	actionSuspender
 }
 
@@ -252,6 +254,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		schema:        schema.toInitializationSchema(),
 		stash:         stash,
 		contextValues: flow.contextValues,
+		flowModel:     fc.flowModel,
 	}
 
 	// Create a actionExecutionContext instance for action execution.
