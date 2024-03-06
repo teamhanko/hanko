@@ -50,6 +50,15 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	err := deps.PasswordService.RecoverPassword(uuid.FromStringOrNil(authUserID), newPassword)
 
+	if err != nil {
+		if errors.Is(err, services.ErrorPasswordInvalid) {
+			c.Input().SetError("password", flowpilot.ErrorValueInvalid)
+			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
+		}
+
+		return fmt.Errorf("could not recover password: %w", err)
+	}
+
 	err = deps.AuditLogger.CreateWithConnection(
 		deps.Tx,
 		deps.HttpContext,
@@ -61,15 +70,6 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
-	}
-
-	if err != nil {
-		if errors.Is(err, services.ErrorPasswordInvalid) {
-			c.Input().SetError("password", flowpilot.ErrorValueInvalid)
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
-		}
-
-		return fmt.Errorf("could not recover password: %w", err)
 	}
 
 	// Set only for audit logging purposes.
