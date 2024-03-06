@@ -545,7 +545,6 @@ type AuditLogStorage struct {
 type AuditLogConsole struct {
 	Enabled      bool         `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 	OutputStream OutputStream `yaml:"output" json:"output,omitempty" koanf:"output" split_words:"true" jsonschema:"default=stdout,enum=stdout,enum=stderr"`
-	Mask         bool         `yaml:"mask" json:"mask,omitempty" koanf:"mask" jsonschema:"default=true"`
 }
 
 type Emails struct {
