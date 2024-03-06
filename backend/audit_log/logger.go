@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/utils"
 	"os"
 	"strconv"
 	"time"
@@ -23,7 +24,7 @@ type logger struct {
 	storageEnabled        bool
 	logger                zeroLog.Logger
 	consoleLoggingEnabled bool
-	mask                  bool
+	mustMask              bool
 }
 
 func NewLogger(persister persistence.Persister, cfg config.AuditLog) Logger {
@@ -42,7 +43,7 @@ func NewLogger(persister persistence.Persister, cfg config.AuditLog) Logger {
 		storageEnabled:        cfg.Storage.Enabled,
 		logger:                zeroLog.New(loggerOutput),
 		consoleLoggingEnabled: cfg.ConsoleOutput.Enabled,
-		mask:                  cfg.Mask,
+		mustMask:              cfg.Mask,
 	}
 }
 
@@ -71,8 +72,8 @@ func (l *logger) CreateWithConnection(tx *pop.Connection, context echo.Context, 
 		return err
 	}
 
-	if l.mask {
-		auditLog = auditLog.Mask()
+	if l.mustMask {
+		auditLog = l.mask(auditLog)
 	}
 
 	if l.storageEnabled {
@@ -127,4 +128,23 @@ func (l *logger) getRequestMeta(c echo.Context) models.RequestMeta {
 		UserAgent:     c.Request().UserAgent(),
 		SourceIp:      c.RealIP(),
 	}
+}
+
+func (l *logger) mask(auditLog models.AuditLog) models.AuditLog {
+	if auditLog.ActorEmail != nil && *auditLog.ActorEmail != "" {
+		email := utils.MaskEmail(*auditLog.ActorEmail)
+		auditLog.ActorEmail = &email
+	}
+
+	for key, value := range auditLog.Details {
+		if key == "username" {
+			auditLog.Details[key] = utils.MaskUsername(value.(string))
+		}
+
+		if key == "email" {
+			auditLog.Details[key] = utils.MaskEmail(value.(string))
+		}
+	}
+
+	return auditLog
 }

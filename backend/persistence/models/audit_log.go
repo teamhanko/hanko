@@ -2,7 +2,6 @@ package models
 
 import (
 	"fmt"
-	"github.com/ggwhite/go-masker"
 	"github.com/gobuffalo/pop/v6/slices"
 	"github.com/gofrs/uuid"
 	"time"
@@ -65,25 +64,6 @@ func NewAuditLog(auditLogType AuditLogType, requestMeta RequestMeta, details Det
 		auditLog.Error = &tmp
 	}
 	return auditLog, nil
-}
-
-func (a *AuditLog) Mask() AuditLog {
-	if a.ActorEmail != nil && *a.ActorEmail != "" {
-		email := masker.Email(*a.ActorEmail)
-		a.ActorEmail = &email
-	}
-
-	for key, value := range a.Details {
-		if key == "username" {
-			a.Details[key] = masker.Name(value.(string))
-		}
-
-		if key == "email" {
-			a.Details[key] = masker.Email(value.(string))
-		}
-	}
-
-	return *a
 }
 
 type AuditLogType string
