@@ -168,3 +168,7 @@ var (
 	ErrorValueTooLong  = NewInputError("value_too_long_error", "Value is too long.")
 	ErrorValueTooShort = NewInputError("value_too_short_error", "Value is too short.")
 )
+
+func ErrorValueInvalidMustBeOneOf(values interface{}) InputError {
+	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %+v", values))
+}

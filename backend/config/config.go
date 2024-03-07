@@ -180,15 +180,19 @@ func DefaultConfig() *Config {
 		ThirdParty: ThirdParty{
 			Providers: ThirdPartyProviders{
 				Google: ThirdPartyProvider{
+					DisplayName:  "Google",
 					AllowLinking: true,
 				},
 				GitHub: ThirdPartyProvider{
+					DisplayName:  "GitHub",
 					AllowLinking: true,
 				},
 				Apple: ThirdPartyProvider{
+					DisplayName:  "Apple",
 					AllowLinking: true,
 				},
 				Discord: ThirdPartyProvider{
+					DisplayName:  "Discord",
 					AllowLinking: true,
 				},
 			},
@@ -664,6 +668,7 @@ type ThirdPartyProvider struct {
 	ClientID     string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
 	Secret       string `yaml:"secret" json:"secret" koanf:"secret"`
 	AllowLinking bool   `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" split_words:"true"`
+	DisplayName  string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
 }
 
 func (p *ThirdPartyProvider) Validate() error {
@@ -707,6 +712,19 @@ func (p *ThirdPartyProviders) HasEnabled() bool {
 	}
 
 	return false
+}
+
+func (p *ThirdPartyProviders) GetEnabled() []ThirdPartyProvider {
+	s := structs.New(p)
+	var enabledProviders []ThirdPartyProvider
+	for _, field := range s.Fields() {
+		provider := field.Value().(ThirdPartyProvider)
+		if provider.Enabled {
+			enabledProviders = append(enabledProviders, provider)
+		}
+	}
+
+	return enabledProviders
 }
 
 func (p *ThirdPartyProviders) Get(provider string) *ThirdPartyProvider {
