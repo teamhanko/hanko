@@ -25,11 +25,17 @@ func (a ThirdPartyOAuth) GetDescription() string {
 func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
+	enabledProviders := deps.Cfg.ThirdParty.Providers.GetEnabled()
+	if len(enabledProviders) == 0 {
+		c.SuspendAction()
+		return
+	}
+
 	providerInput := flowpilot.StringInput("provider").
 		Hidden(true).
 		Required(true)
 
-	for _, provider := range deps.Cfg.ThirdParty.Providers.GetEnabled() {
+	for _, provider := range enabledProviders {
 		providerInput.AllowedValue(strings.ToLower(provider.DisplayName), provider.DisplayName)
 	}
 
