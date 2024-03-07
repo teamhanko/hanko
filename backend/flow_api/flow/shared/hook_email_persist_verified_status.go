@@ -17,7 +17,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 	deps := h.GetDeps(c)
 
 	if !c.Stash().Get("email_verified").Bool() {
-		return errors.New("no email has been confirmed as verified")
+		return nil
 	}
 
 	if !c.Stash().Get("email").Exists() {
