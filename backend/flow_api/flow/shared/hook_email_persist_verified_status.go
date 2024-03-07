@@ -16,12 +16,12 @@ type EmailPersistVerifiedStatus struct {
 func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	if !deps.Cfg.Emails.RequireVerification || !c.Stash().Get("email_verified").Bool() {
-		return nil
+	if !c.Stash().Get("email_verified").Bool() {
+		return errors.New("no email has been confirmed as verified")
 	}
 
 	if !c.Stash().Get("email").Exists() {
-		return errors.New("email not set on the stash")
+		return errors.New("verified email not set on the stash")
 	}
 
 	if !c.Stash().Get("user_id").Exists() {
