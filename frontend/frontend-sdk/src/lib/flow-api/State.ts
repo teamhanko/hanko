@@ -131,7 +131,7 @@ class State<TStateName extends StateName>
     const validateAction = (action: Action<any>) => this.validateAction(action);
 
     return new Proxy(actions, {
-      get(target, prop): CreateAction<Action<unknown>> {
+      get(target, prop): CreateAction<Action<unknown>> | undefined {
         if (typeof prop === "symbol") return (target as any)[prop];
 
         type Original = Actions[TStateName][keyof Actions[TStateName]];
@@ -145,6 +145,10 @@ class State<TStateName extends StateName>
         const originalAction = target[
           prop as Prop
         ] satisfies Original as Action<unknown>;
+
+        if (originalAction == null) {
+          return null;
+        }
 
         return (newInputs: any) => {
           const action = Object.assign(deepCopy(originalAction), {
@@ -187,6 +191,10 @@ class State<TStateName extends StateName>
                 string,
                 Input<unknown>
               >;
+
+              if (!actionInputs[inputName]) {
+                actionInputs[inputName] = { name: inputName, type: "" };
+              }
 
               actionInputs[inputName].value = newInputs[inputName];
             }
