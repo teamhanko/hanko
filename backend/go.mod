@@ -25,7 +25,7 @@ require (
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.11.4
 	github.com/labstack/gommon v0.4.2
-	github.com/lestrrat-go/jwx/v2 v2.0.20
+	github.com/lestrrat-go/jwx/v2 v2.0.21
 	github.com/lib/pq v1.10.9
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/ory/dockertest/v3 v3.10.0
@@ -110,7 +110,7 @@ require (
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
-	github.com/lestrrat-go/httprc v1.0.4 // indirect
+	github.com/lestrrat-go/httprc v1.0.5 // indirect
 	github.com/lestrrat-go/iter v1.0.2 // indirect
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
