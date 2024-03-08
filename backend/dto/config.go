@@ -39,16 +39,5 @@ func GetEnabledProviders(providers config.ThirdPartyProviders) []string {
 }
 
 func UseEnterpriseConnection(samlConfig *samlConfig.Saml) bool {
-	hasProvider := false
-
-	if samlConfig != nil && samlConfig.Enabled {
-		for _, availableProvider := range samlConfig.IdentityProviders {
-			if availableProvider.Enabled {
-				hasProvider = true
-			}
-		}
-	}
-
-	return hasProvider
-
+	return samlConfig != nil && samlConfig.Enabled
 }

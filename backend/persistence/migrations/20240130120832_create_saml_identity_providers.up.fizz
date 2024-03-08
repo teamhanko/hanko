@@ -1,0 +1,10 @@
+create_table("saml_identity_providers") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("enabled", "bool", {})
+	t.Column("name", "string", {})
+	t.Column("domain", "string", { unique: true })
+	t.Column("metadata_url", "string", {})
+	t.Column("skip_email_verification", "bool", {})
+
+	t.Timestamps()
+}

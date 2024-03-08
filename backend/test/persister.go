@@ -175,3 +175,7 @@ func (p *persister) GetSamlCertificatePersisterWithConnection(tx *pop.Connection
 func (p *persister) GetWebhookPersister(_ *pop.Connection) persistence.WebhookPersister {
 	return p.webhookPersister
 }
+
+func (p *persister) GetSamlIdentityProviderPersister(tx *pop.Connection) persistence.SamlIdentityProviderPersister {
+	return nil // not used anymore but breaks tests...
+}
