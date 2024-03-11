@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -60,6 +61,19 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 
 	if err != nil {
 		return fmt.Errorf("could not set password: %w", err)
+	}
+
+	err = deps.AuditLogger.CreateWithConnection(
+		deps.Tx,
+		deps.HttpContext,
+		models.AuditLogPasswordChanged,
+		&models.User{ID: userModel.ID},
+		nil,
+		auditlog.Detail("context", "profile"),
+		auditlog.Detail("flow_id", c.GetFlowID()))
+
+	if err != nil {
+		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
 	return c.ContinueFlow(StateProfileInit)

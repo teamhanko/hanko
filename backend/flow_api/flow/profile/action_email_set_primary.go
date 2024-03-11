@@ -3,6 +3,7 @@ package profile
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -87,6 +88,19 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to change primary email: %w", err)
 		}
+	}
+
+	err := deps.AuditLogger.CreateWithConnection(
+		deps.Tx,
+		deps.HttpContext,
+		models.AuditLogPrimaryEmailChanged,
+		&models.User{ID: userModel.ID},
+		nil,
+		auditlog.Detail("email", emailModel.Address),
+		auditlog.Detail("flow_id", c.GetFlowID()))
+
+	if err != nil {
+		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
 	return c.ContinueFlow(StateProfileInit)

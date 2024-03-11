@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -38,6 +39,18 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
 	if err != nil {
 		return fmt.Errorf("could not delete user: %w", err)
+	}
+
+	err = deps.AuditLogger.CreateWithConnection(
+		deps.Tx,
+		deps.HttpContext,
+		models.AuditLogUserDeleted,
+		&models.User{ID: userModel.ID},
+		nil,
+		auditlog.Detail("flow_id", c.GetFlowID()))
+
+	if err != nil {
+		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
 	cookie, err := deps.SessionManager.DeleteCookie()

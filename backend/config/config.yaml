@@ -9,9 +9,9 @@ passcode:
   email:
     from_address: no-reply@hanko.io
 smtp:
-    host: smtp.example.com
-    user: example
-    password: example
+  host: smtp.example.com
+  user: example
+  password: example
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz
