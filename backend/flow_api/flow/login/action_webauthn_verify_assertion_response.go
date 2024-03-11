@@ -4,9 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnVerifyAssertionResponse struct {
@@ -61,6 +63,19 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
+			err = deps.AuditLogger.CreateWithConnection(
+				deps.Tx,
+				deps.HttpContext,
+				models.AuditLogLoginFailure,
+				&models.User{ID: userModel.ID},
+				err,
+				auditlog.Detail("login_method", "passkey"),
+				auditlog.Detail("flow_id", c.GetFlowID()))
+
+			if err != nil {
+				return fmt.Errorf("could not create audit log: %w", err)
+			}
+
 			return c.ContinueFlowWithError(StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
@@ -70,6 +85,12 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	err = c.Stash().Set("user_id", userModel.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to set user_id to the stash: %w", err)
+	}
+
+	// Set only for audit logging purposes.
+	err = c.Stash().Set("login_method", "passkey")
+	if err != nil {
+		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
 	return c.ContinueFlow(shared.StateSuccess)

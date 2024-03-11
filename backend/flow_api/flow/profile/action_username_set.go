@@ -3,6 +3,7 @@ package profile
 import (
 	"errors"
 	"fmt"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -58,6 +59,19 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
 	if err != nil {
 		return fmt.Errorf("could not update user: %w", err)
+	}
+
+	err = deps.AuditLogger.CreateWithConnection(
+		deps.Tx,
+		deps.HttpContext,
+		models.AuditLogUsernameChanged,
+		&models.User{ID: userModel.ID},
+		nil,
+		auditlog.Detail("username", userModel.Username),
+		auditlog.Detail("flow_id", c.GetFlowID()))
+
+	if err != nil {
+		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
 	return c.ContinueFlow(StateProfileInit)

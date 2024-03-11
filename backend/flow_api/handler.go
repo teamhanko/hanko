@@ -4,6 +4,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-limiter"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
@@ -26,6 +27,7 @@ type FlowPilotHandler struct {
 	SessionManager        session.Manager
 	RateLimiter           limiter.Store
 	AuthenticatorMetadata mapper.AuthenticatorMetadata
+	AuditLogger           auditlog.Logger
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -64,6 +66,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			PasswordService:       h.PasswordService,
 			WebauthnService:       h.WebauthnService,
 			AuthenticatorMetadata: h.AuthenticatorMetadata,
+			AuditLogger:           h.AuditLogger,
 		})
 
 		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))

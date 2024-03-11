@@ -1,0 +1,1 @@
+drop_column("audit_logs", "details")

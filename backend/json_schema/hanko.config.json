@@ -89,6 +89,10 @@
         },
         "storage": {
           "$ref": "#/$defs/AuditLogStorage"
+        },
+        "mask": {
+          "type": "boolean",
+          "default": true
         }
       },
       "additionalProperties": false,
@@ -107,6 +111,10 @@
             "stderr"
           ],
           "default": "stdout"
+        },
+        "mask": {
+          "type": "boolean",
+          "default": true
         }
       },
       "additionalProperties": false,
@@ -169,6 +177,15 @@
         "account": {
           "$ref": "#/$defs/Account"
         },
+        "identifier": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "second_factor": {
+          "$ref": "#/$defs/SecondFactor"
+        },
+        "passkey": {
+          "$ref": "#/$defs/Passkey"
+        },
         "saml": {
           "$ref": "#/$defs/Saml"
         },
@@ -182,7 +199,10 @@
         "passcode",
         "database",
         "secrets",
-        "service"
+        "service",
+        "identifier",
+        "second_factor",
+        "passkey"
       ],
       "description": "Config is the central configuration type"
     },
@@ -322,6 +342,74 @@
       },
       "type": "array"
     },
+    "Identifier": {
+      "properties": {
+        "username": {
+          "$ref": "#/$defs/IdentifierUsername"
+        },
+        "email": {
+          "$ref": "#/$defs/IdentifierEmail"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "username",
+        "email"
+      ]
+    },
+    "IdentifierEmail": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "verification": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "optional",
+        "verification"
+      ]
+    },
+    "IdentifierUsername": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "max_length": {
+          "type": "integer"
+        },
+        "min_length": {
+          "type": "integer"
+        },
+        "allowed_characters": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "optional",
+        "max_length",
+        "min_length",
+        "allowed_characters"
+      ]
+    },
     "IdentityProvider": {
       "properties": {
         "enabled": {
@@ -388,6 +476,9 @@
     },
     "Passcode": {
       "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
         "email": {
           "$ref": "#/$defs/Email"
         },
@@ -401,11 +492,42 @@
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "enabled"
+      ]
+    },
+    "Passkey": {
+      "properties": {
+        "onboarding": {
+          "$ref": "#/$defs/PasskeyOnboarding"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "onboarding"
+      ]
+    },
+    "PasskeyOnboarding": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled"
+      ]
     },
     "Password": {
       "properties": {
         "enabled": {
+          "type": "boolean",
+          "default": false
+        },
+        "optional": {
           "type": "boolean",
           "default": false
         },
@@ -461,6 +583,24 @@
       "required": [
         "tokens",
         "interval"
+      ]
+    },
+    "RecoveryCodes": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "optional"
       ]
     },
     "RedisConfig": {
@@ -570,6 +710,52 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "SecondFactor": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "onboarding": {
+          "$ref": "#/$defs/SecondFactorOnboarding"
+        },
+        "methods": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "TODO: jsonschema only totp and security_key are allowed"
+        },
+        "recovery_codes": {
+          "$ref": "#/$defs/RecoveryCodes"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "optional",
+        "onboarding",
+        "methods",
+        "recovery_codes"
+      ]
+    },
+    "SecondFactorOnboarding": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled"
+      ]
+    },
     "Secrets": {
       "properties": {
         "keys": {
@@ -663,6 +849,9 @@
           "type": "string"
         },
         "error_redirect_url": {
+          "type": "string"
+        },
+        "default_redirect_url": {
           "type": "string"
         },
         "allowed_redirect_urls": {
