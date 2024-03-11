@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -27,10 +26,10 @@ func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationCo
 		c.SuspendAction()
 	}
 
-	// We have to include a check for 'preflight' because at the time of the response/schema generation for the
-	// 'login_init' state the flow has not actually progressed to that state yet (i.e. it is still in the 'preflight'
-	// state).
-	if c.CurrentStateEquals(capabilities.StatePreflight, StateLoginInit) {
+	// We have to include a check for 'preflight' (hardcode to not introduce dependency on capabilities package because
+	// at the time of the response/schema generation for the 'login_init' state the flow has not actually progressed to
+	// that state yet (i.e. it is still in the 'preflight' state).
+	if c.CurrentStateEquals("preflight", StateLoginInit) {
 		if !c.Stash().Get("webauthn_conditional_mediation_available").Bool() {
 			c.SuspendAction()
 		}
