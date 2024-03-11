@@ -30,7 +30,7 @@ jobs:
           cp dist/*.{tar.gz,zip} dist/artifacts
         working-directory: ./backend
       - name: Upload assets
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: ./backend/dist/artifacts/*
           fail_on_unmatched_files: true
