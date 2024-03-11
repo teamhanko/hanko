@@ -23,7 +23,6 @@ func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext
 		Hidden(true))
 
 	c.AddInputs(flowpilot.StringInput("webauthn_conditional_mediation_available").
-		Required(true).
 		Hidden(true))
 }
 
