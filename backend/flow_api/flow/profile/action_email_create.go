@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -86,6 +87,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
+
 		return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateProfileInit)
 	} else {
 		emailModel := models.NewEmail(&userModel.ID, newEmailAddress)
@@ -110,6 +112,18 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			}
 		}
 
+		err = deps.AuditLogger.CreateWithConnection(
+			deps.Tx,
+			deps.HttpContext,
+			models.AuditLogEmailCreated,
+			&models.User{ID: userModel.ID},
+			nil,
+			auditlog.Detail("email", emailModel.Address),
+			auditlog.Detail("flow_id", c.GetFlowID()))
+
+		if err != nil {
+			return fmt.Errorf("could not create audit log: %w", err)
+		}
 		return c.ContinueFlow(StateProfileInit)
 	}
 }

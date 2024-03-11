@@ -1,0 +1,1 @@
+add_column("audit_logs", "details", "text", {"null":true})

@@ -3,10 +3,12 @@ package login
 import (
 	"errors"
 	"fmt"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 	"regexp"
 )
 
@@ -88,7 +90,20 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 
 		if userModel == nil {
-			c.Input().SetError("identifier", flowpilot.ErrorValueInvalid.Wrap(errors.New("username not found")))
+			flowError := flowpilot.ErrorValueInvalid.Wrap(errors.New("username not found"))
+			err = deps.AuditLogger.CreateWithConnection(
+				deps.Tx,
+				deps.HttpContext,
+				models.AuditLogLoginFailure,
+				nil,
+				flowError,
+				auditlog.Detail("flow_id", c.GetFlowID()))
+
+			if err != nil {
+				return fmt.Errorf("could not create audit log: %w", err)
+			}
+
+			c.Input().SetError("identifier", flowError)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 
@@ -119,6 +134,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	if c.Stash().Get("email").Exists() {
 		if err := c.Stash().Set("passcode_template", "login"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+		}
+
+		// Set only for audit logging purposes.
+		if err := c.Stash().Set("login_method", "passcode"); err != nil {
+			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
 
 		if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {

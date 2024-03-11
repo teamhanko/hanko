@@ -5,6 +5,7 @@ import (
 	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -37,23 +38,24 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	var credentialModel *models.WebauthnCredential
-	if c.Stash().Get("passkey_credential").Exists() {
-		passkeyCredentialStr := c.Stash().Get("passkey_credential").String()
+	if c.Stash().Get("webauthn_credential").Exists() {
+		webauthnCredentialStr := c.Stash().Get("webauthn_credential").String()
 
-		var passkeyCredential webauthnLib.Credential
-		err = json.Unmarshal([]byte(passkeyCredentialStr), &passkeyCredential)
+		var webauthnCredential webauthnLib.Credential
+		err = json.Unmarshal([]byte(webauthnCredentialStr), &webauthnCredential)
 		if err != nil {
-			return fmt.Errorf("failed to unmarshal stashed passkey_credential: %w", err)
+			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
 
+		// TODO: Who/what sets this? Do we need this?
 		passkeyBackupEligible := c.Stash().Get("passkey_backup_eligible").Bool()
 		passkeyBackupState := c.Stash().Get("passkey_backup_state").Bool()
 
-		credentialModel = intern.WebauthnCredentialToModel(&passkeyCredential, userId, passkeyBackupEligible, passkeyBackupState, deps.AuthenticatorMetadata)
+		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, passkeyBackupEligible, passkeyBackupState, deps.AuthenticatorMetadata)
 	}
 
 	err = h.createUser(
-		deps,
+		c,
 		userId,
 		c.Stash().Get("email").String(),
 		c.Stash().Get("email_verified").Bool(),
@@ -68,9 +70,13 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(deps *shared.Dependencies, id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
-	// TODO: add audit log
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
+	deps := h.GetDeps(c)
+
 	now := time.Now().UTC()
+
+	var auditLogDetails []auditlog.DetailOption
+
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
 		ID:        id,
 		Username:  username,
@@ -101,6 +107,8 @@ func (h CreateUser) createUser(deps *shared.Dependencies, id uuid.UUID, email st
 		if err != nil {
 			return err
 		}
+
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", passkey.ID))
 	}
 
 	if password != "" {
@@ -111,6 +119,31 @@ func (h CreateUser) createUser(deps *shared.Dependencies, id uuid.UUID, email st
 		if err != nil {
 			return err
 		}
+
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("password", true))
+	}
+
+	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(id)
+	if err != nil {
+		return err
+	}
+
+	if user.Username != "" {
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("username", user.Username))
+	}
+
+	auditLogDetails = append(auditLogDetails, auditlog.Detail("flow_id", c.GetFlowID()))
+
+	err = deps.AuditLogger.Create(
+		deps.HttpContext,
+		models.AuditLogUserCreated,
+		user,
+		nil,
+		auditLogDetails...,
+	)
+
+	if err != nil {
+		return fmt.Errorf("failed to create audit log: %w")
 	}
 
 	return nil

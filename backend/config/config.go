@@ -156,6 +156,7 @@ func DefaultConfig() *Config {
 				Enabled:      true,
 				OutputStream: OutputStreamStdOut,
 			},
+			Mask: true,
 		},
 		Emails: Emails{
 			RequireVerification: true,
@@ -545,6 +546,7 @@ func (s *Session) Validate() error {
 type AuditLog struct {
 	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output,omitempty" koanf:"console_output" split_words:"true"`
 	Storage       AuditLogStorage `yaml:"storage" json:"storage,omitempty" koanf:"storage"`
+	Mask          bool            `yaml:"mask" json:"mask,omitempty" koanf:"mask" jsonschema:"default=true"`
 }
 
 type AuditLogStorage struct {

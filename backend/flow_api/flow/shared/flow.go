@@ -4,6 +4,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-limiter"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -35,6 +36,7 @@ type Dependencies struct {
 	RateLimiter           limiter.Store
 	Tx                    *pop.Connection
 	AuthenticatorMetadata mapper.AuthenticatorMetadata
+	AuditLogger           auditlog.Logger
 }
 
 type Action struct{}

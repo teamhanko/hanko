@@ -35,6 +35,11 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
+	// Set only for audit logging purposes.
+	if err := c.Stash().Set("login_method", "passcode"); err != nil {
+		return fmt.Errorf("failed to set login_method to stash: %w", err)
+	}
+
 	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
 		return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}

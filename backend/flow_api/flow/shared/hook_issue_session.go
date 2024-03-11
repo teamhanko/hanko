@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type IssueSession struct {
@@ -41,6 +43,23 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		deps.HttpContext.Response().Header().Set("X-Auth-Token", sessionToken)
 	} else {
 		deps.HttpContext.SetCookie(cookie)
+	}
+
+	// Audit log logins only, because user creation on registration implies that the user is logged
+	// in after a registration. Only login actions should set the "login_method" stash entry.
+	if c.Stash().Get("login_method").Exists() {
+		err = deps.AuditLogger.CreateWithConnection(
+			deps.Tx,
+			deps.HttpContext,
+			models.AuditLogLoginSuccess,
+			&models.User{ID: userId},
+			err,
+			auditlog.Detail("login_method", c.Stash().Get("login_method").String()),
+			auditlog.Detail("flow_id", c.GetFlowID()))
+
+		if err != nil {
+			return fmt.Errorf("could not create audit log: %w", err)
+		}
 	}
 
 	return nil
