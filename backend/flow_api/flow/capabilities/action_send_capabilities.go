@@ -18,7 +18,12 @@ func (a RegisterClientCapabilities) GetDescription() string {
 }
 
 func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.StringInput("webauthn_available").Required(true).Hidden(true))
+	c.AddInputs(flowpilot.StringInput("webauthn_available").
+		Required(true).
+		Hidden(true))
+
+	c.AddInputs(flowpilot.StringInput("webauthn_conditional_mediation_available").
+		Hidden(true))
 }
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
@@ -44,6 +49,12 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 	}
 
 	err := c.Stash().Set("webauthn_available", webauthnAvailable)
+	if err != nil {
+		return err
+	}
+
+	conditionalMediationAvailable := c.Input().Get("webauthn_conditional_mediation_available").Bool()
+	err = c.Stash().Set("webauthn_conditional_mediation_available", conditionalMediationAvailable)
 	if err != nil {
 		return err
 	}

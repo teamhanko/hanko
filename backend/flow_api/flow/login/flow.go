@@ -33,7 +33,9 @@ var Flow = flowpilot.NewFlow("/login").
 	State(StateLoginInit,
 		ContinueWithLoginIdentifier{},
 		WebauthnGenerateRequestOptions{},
+		WebauthnVerifyAssertionResponse{},
 		shared.ThirdPartyOAuth{}).
+	BeforeState(StateLoginInit, WebauthnGenerateRequestOptionsForConditionalUi{}).
 	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
 	State(StateLoginMethodChooser,
 		WebauthnGenerateRequestOptions{},

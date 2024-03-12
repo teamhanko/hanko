@@ -81,6 +81,9 @@
       }
     })
 
+    let abortController = undefined
+    let webauthnAssertionForConditionalUI = undefined
+
     async function webauthnCreate(payload) {
         const options = parseCreationOptionsFromJSON(payload)
         const response = await create(options)
@@ -93,16 +96,51 @@
       return JSON.stringify(response)
     }
 
-    const passkeyRegisterHandler = async (payload) => {
-        // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
+    async function webauthnGetConditional(payload) {
+      const options = parseRequestOptionsFromJSON(payload)
+      options.mediation = "conditional";
 
+      if (abortController) {
+        abortController.abort()
+      }
+
+      abortController = new AbortController();
+      options.signal = abortController.signal
+
+      let assertion;
+      try {
+        assertion = await get(options);
+      } catch (e) {
+        if (e.name === 'AbortError') {
+          console.warn('Conditional UI: aborting credential get request');
+          return;
+        }
+          throw new Error(e);
+      }
+
+      return JSON.stringify(assertion)
+    }
+
+    const awaitAssertionResponseForConditionalUi = async (payload) => {
+      const assertion_response = await webauthnGetConditional(payload.request_options)
+      if (assertion_response) {
+        webauthnAssertionForConditionalUI = assertion_response
+        document.getElementsByName("assertion_response")[0].value = assertion_response
+      }
+    }
+
+    const resetAssertionResponseInput = () => {
+      if (document.getElementsByName("assertion_response").length > 0) {
+        document.getElementsByName("assertion_response")[0].value = ""
+      }
+    }
+
+    const passkeyRegisterHandler = async (payload) => {
         console.log(payload)
         document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creation_options)
     }
 
     const passkeyLoginHandler = async (payload) => {
-      // document.getElementsByName("passkey_public_key")[0].value = prompt(payload.challenge)
-
       console.log(payload)
       document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
     }
@@ -121,6 +159,10 @@
     }
 
     function generateUI(data) {
+        if (data.state === "login_init" && data.payload && data.payload.request_options) {
+          awaitAssertionResponseForConditionalUi(data.payload)
+        }
+
         const container = document.getElementById('container');
         container.innerHTML = '';
 
@@ -241,6 +283,13 @@
                             inputListItem.appendChild(error);
                         }
 
+                        if (data.state === "login_init" && action.action === "webauthn_verify_request_response") {
+                          if (webauthnAssertionForConditionalUI) {
+                            inputElement.value = webauthnAssertionForConditionalUI
+                          }
+                          inputElement.autocomplete = "username webauthn"
+                        }
+
                         inputList.appendChild(inputListItem)
                     });
 
@@ -254,7 +303,12 @@
                 const submitButton = document.createElement('button');
                 submitButton.type = 'submit';
                 submitButton.textContent = "📡 Submit";
-                submitButton.addEventListener('click', (event) => updateFlow(event, form))
+                submitButton.addEventListener('click', (event) => {
+                  if (data.state === "login_init") {
+                    abortController.abort()
+                  }
+                  updateFlow(event, form)
+                })
 
                 form.appendChild(submitButton);
 
@@ -333,7 +387,8 @@
               return data
             })
             .then(generateUI)
-            .catch(console.error);
+            .catch(console.error)
+            .finally(resetAssertionResponseInput);
     }
 
     function createFlow() {
