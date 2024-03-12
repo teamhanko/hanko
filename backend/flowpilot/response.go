@@ -227,6 +227,7 @@ func (er *executionResult) createSchema(fc defaultFlowContext, action Action) Ex
 		schema:        schema.toInitializationSchema(),
 		stash:         fc.stash,
 		contextValues: fc.flow.contextValues,
+		flowModel:     fc.flowModel,
 	}
 
 	action.Initialize(&aic)

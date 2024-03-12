@@ -28,6 +28,15 @@ func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationCo
 		c.SuspendAction()
 	}
 
+	// We have to include a check for 'preflight' (hardcoded so as to not introduce dependency on capabilities package)
+	// because at the time of the response/schema generation for the 'login_init' state the flow has not actually
+	// progressed to that state yet (i.e. it is still in the 'preflight' state).
+	if c.CurrentStateEquals("preflight", StateLoginInit) {
+		if !c.Stash().Get("webauthn_conditional_mediation_available").Bool() {
+			c.SuspendAction()
+		}
+	}
+
 	c.AddInputs(flowpilot.JSONInput("assertion_response").Required(true).Persist(false))
 }
 

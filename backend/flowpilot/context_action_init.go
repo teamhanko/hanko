@@ -6,6 +6,7 @@ type defaultActionInitializationContext struct {
 	isSuspended   bool                 // Flag indicating if the method is suspended.
 	stash         Stash                // ReadOnlyJSONManager for accessing stash data.
 	contextValues contextValues        // Values to be used within the flow context.
+	flowModel     FlowModel
 }
 
 // AddInputs adds input data to the InitializationSchema.
@@ -26,4 +27,14 @@ func (aic *defaultActionInitializationContext) Stash() Stash {
 // Get returns the context value with the given name.
 func (aic *defaultActionInitializationContext) Get(key string) interface{} {
 	return aic.contextValues[key]
+}
+
+func (aic *defaultActionInitializationContext) CurrentStateEquals(stateNames ...StateName) bool {
+	for _, s := range stateNames {
+		if s == aic.flowModel.CurrentState {
+			return true
+		}
+	}
+
+	return false
 }
