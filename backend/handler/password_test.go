@@ -91,7 +91,7 @@ func (s *passwordSuite) TestPasswordHandler_Set_Create() {
 			s.Require().NoError(err)
 
 			sessionManager := s.GetDefaultSessionManager()
-			token, err := sessionManager.GenerateJWT(currentTest.userId)
+			token, err := sessionManager.GenerateJWT(currentTest.userId, nil)
 			s.Require().NoError(err)
 			cookie, err := sessionManager.GenerateCookie(token)
 			s.Require().NoError(err)
@@ -227,17 +227,17 @@ func TestMaxPasswordLength(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			hash, err := bcrypt.GenerateFromPassword([]byte(test.creationPassword), 12)
-			if test.wantErr {
+	for _, passwordTest := range tests {
+		t.Run(passwordTest.name, func(t *testing.T) {
+			hash, err := bcrypt.GenerateFromPassword([]byte(passwordTest.creationPassword), 12)
+			if passwordTest.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
 
-			err = bcrypt.CompareHashAndPassword(hash, []byte(test.loginPassword))
-			if test.wantErr {
+			err = bcrypt.CompareHashAndPassword(hash, []byte(passwordTest.loginPassword))
+			if passwordTest.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)

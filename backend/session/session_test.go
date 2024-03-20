@@ -1,11 +1,13 @@
 package session
 
 import (
+	"encoding/json"
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/test"
 	"testing"
 	"time"
@@ -29,7 +31,7 @@ func TestGenerator_Generate(t *testing.T) {
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
 
-	session, err := sessionGenerator.GenerateJWT(userId)
+	session, err := sessionGenerator.GenerateJWT(userId, nil)
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 }
@@ -47,7 +49,15 @@ func TestGenerator_Verify(t *testing.T) {
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
 
-	session, err := sessionGenerator.GenerateJWT(userId)
+	testEmail := "lorem@ipsum.local"
+
+	emailDto := &dto.EmailJwt{
+		Address:    testEmail,
+		IsPrimary:  true,
+		IsVerified: false,
+	}
+
+	session, err := sessionGenerator.GenerateJWT(userId, emailDto)
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 
@@ -57,6 +67,19 @@ func TestGenerator_Verify(t *testing.T) {
 	assert.Equal(t, token.Subject(), userId.String())
 	assert.False(t, time.Time{}.Equal(token.IssuedAt()))
 	assert.False(t, time.Time{}.Equal(token.Expiration()))
+
+	emailClaim, ok := token.Get("email")
+	assert.True(t, ok)
+	assert.NotNil(t, emailClaim)
+
+	// Workaround as .(EmailJwt) interface conversion is not possible
+	emailJson, _ := json.Marshal(emailClaim)
+	var tokenEmail dto.EmailJwt
+	_ = json.Unmarshal(emailJson, &tokenEmail)
+
+	assert.Equal(t, testEmail, tokenEmail.Address)
+	assert.True(t, tokenEmail.IsPrimary)
+	assert.False(t, tokenEmail.IsVerified)
 
 	sessionDuration, _ := time.ParseDuration(sessionLifespan)
 	assert.True(t, token.IssuedAt().Add(sessionDuration).Equal(token.Expiration()))
@@ -80,7 +103,7 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
-	j, err := sessionGenerator.GenerateJWT(userId)
+	j, err := sessionGenerator.GenerateJWT(userId, nil)
 	assert.NoError(t, err)
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
@@ -111,7 +134,7 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
-	j, err := sessionGenerator.GenerateJWT(userId)
+	j, err := sessionGenerator.GenerateJWT(userId, nil)
 	assert.NoError(t, err)
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
@@ -145,9 +168,9 @@ func TestGenerator_Verify_Error(t *testing.T) {
 		},
 	}
 
-	for _, test := range tests {
-		t.Run(test.Name, func(t *testing.T) {
-			_, err := sessionGenerator.Verify(test.Input)
+	for _, verifyTest := range tests {
+		t.Run(verifyTest.Name, func(t *testing.T) {
+			_, err := sessionGenerator.Verify(verifyTest.Input)
 			assert.Error(t, err)
 		})
 	}

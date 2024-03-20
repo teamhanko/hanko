@@ -39,3 +39,17 @@ func FromEmailModel(email *models.Email) *EmailResponse {
 
 	return emailResponse
 }
+
+type EmailJwt struct {
+	Address    string `json:"address"`
+	IsPrimary  bool   `json:"is_primary"`
+	IsVerified bool   `json:"is_verified"`
+}
+
+func JwtFromEmailModel(email *models.Email) *EmailJwt {
+	return &EmailJwt{
+		Address:    email.Address,
+		IsPrimary:  email.IsPrimary(),
+		IsVerified: email.Verified,
+	}
+}

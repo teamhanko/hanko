@@ -298,13 +298,13 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 				req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 				req.Header.Set("Content-Type", "application/json")
 				if currentTest.sendSessionTokenInAuthHeader {
-					sessionToken, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(currentTest.userId))
+					sessionToken, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(currentTest.userId), nil)
 					s.Require().NoError(err)
 					req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sessionToken))
 				}
 
 				if currentTest.sendSessionTokenInCookie {
-					sessionToken, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(currentTest.userId))
+					sessionToken, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(currentTest.userId), nil)
 					s.Require().NoError(err)
 
 					sessionCookie, err := sessionManager.GenerateCookie(sessionToken)

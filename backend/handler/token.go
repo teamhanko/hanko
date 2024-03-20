@@ -82,7 +82,17 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			return fmt.Errorf("failed to delete token from db: %w", terr)
 		}
 
-		jwtToken, err := h.sessionManager.GenerateJWT(token.UserID)
+		emails, err := h.persister.GetEmailPersister().FindByUserId(token.UserID)
+		if err != nil {
+			return fmt.Errorf("failed to get emails from db: %w", err)
+		}
+
+		var emailJwt *dto.EmailJwt
+		if e := emails.GetPrimary(); e != nil {
+			emailJwt = dto.JwtFromEmailModel(e)
+		}
+
+		jwtToken, err := h.sessionManager.GenerateJWT(token.UserID, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

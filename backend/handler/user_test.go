@@ -261,7 +261,7 @@ func (s *userSuite) TestUserHandler_Get() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -301,7 +301,7 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -338,7 +338,7 @@ func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -475,7 +475,7 @@ func (s *userSuite) TestUserHandler_Me() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -512,7 +512,7 @@ func (s *userSuite) TestUserHandler_Logout() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
-	token, err := sessionManager.GenerateJWT(userId)
+	token, err := sessionManager.GenerateJWT(userId, nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -553,7 +553,7 @@ func (s *userSuite) TestUserHandler_Delete() {
 	if err != nil {
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
-	token, err := sessionManager.GenerateJWT(userId)
+	token, err := sessionManager.GenerateJWT(userId, nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)

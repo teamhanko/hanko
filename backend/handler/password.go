@@ -218,7 +218,12 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
-	token, err := h.sessionManager.GenerateJWT(pw.UserId)
+	var emailJwt *dto.EmailJwt
+	if e := user.Emails.GetPrimary(); e != nil {
+		emailJwt = dto.JwtFromEmailModel(e)
+	}
+
+	token, err := h.sessionManager.GenerateJWT(pw.UserId, emailJwt)
 	if err != nil {
 		return fmt.Errorf("failed to generate jwt: %w", err)
 	}
