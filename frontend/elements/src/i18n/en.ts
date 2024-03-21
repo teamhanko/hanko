@@ -8,7 +8,7 @@ export const en: Translation = {
     loginFinished: "Login successful",
     loginPasscode: "Enter passcode",
     loginPassword: "Enter password",
-    registerAuthenticator: "Create a passkey",
+    registerAuthenticator: "Simplify your sign-in",
     registerConfirm: "Create account?",
     registerPassword: "Set new password",
     profileEmails: "Emails",
@@ -30,7 +30,7 @@ export const en: Translation = {
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
     setupPasskey:
-      "Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.",
+      "With passkeys you can securely use your fingerprint, face, screen lock, or hardware security key to speed up your sign-in experience.",
     createAccount:
       'No account exists for "{emailAddress}". Do you want to create a new account?',
     passwordFormatHint:
