@@ -547,8 +547,8 @@ webhooks:
 
 ## API specification
 
-- [Hanko Public API](https://docs.hanko.io/api/public)
-- [Hanko Admin API](https://docs.hanko.io/api/admin)
+- [Hanko Public API](https://docs.hanko.io/api-reference/public/introduction)
+- [Hanko Admin API](https://docs.hanko.io/api-reference/admin/introduction)
 
 ## Configuration reference
 
