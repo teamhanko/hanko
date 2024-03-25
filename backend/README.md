@@ -32,10 +32,12 @@ easily integrated into any web app with as little as two lines of code.
 - Email verification
 - JWT management
 - User management
+- 3rd-party identity providers
+- Webhooks
+- SAML
 
 ### Upcoming features
 
-- Exponential backoff for password attempts and passcode email sending
 - 2FA configurations (optional, mandatory)
 
 ## Running the backend
@@ -198,7 +200,7 @@ you need to supply the `passcode.smtp.host`, `passcode.smtp.port` as well as the
 ### Configure JSON Web Key Set generation
 
 The API uses [JSON Web Tokens](https://www.rfc-editor.org/rfc/rfc7519.html) (JWTs) for
-[authentication](https://docs.hanko.io/api/public#section/Authentication).
+[authentication](https://docs.hanko.io/api-reference/public/introduction).
 JWTs are verified using [JSON Web Keys](https://www.rfc-editor.org/rfc/rfc7517) (JWK).
 JWKs are created internally by setting `secrets.keys` options in the
 configuration file (`backend/config/config.yaml` or your own `*.yaml` file):
@@ -215,7 +217,7 @@ Keys secrets are used to en- and decrypt the JWKs which get used to sign the JWT
 For every key a JWK is generated, encrypted with the key and persisted in the database.
 
 The Hanko backend API publishes public cryptographic keys as a JWK set through the `.well-known/jwks.json`
-[endpoint](https://docs.hanko.io/api/public#tag/.well-known/operation/getJwks) to enable clients to verify token
+[endpoint](https://docs.hanko.io/api-reference/public/well-known/get-json-web-key-set) to enable clients to verify token
 signatures.
 
 ### Configure WebAuthn
