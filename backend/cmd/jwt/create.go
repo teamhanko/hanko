@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
 	"log"
@@ -52,7 +53,20 @@ func NewCreateCommand() *cobra.Command {
 				return
 			}
 
-			token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(args[0]))
+			userId := uuid.FromStringOrNil(args[0])
+
+			emails, err := persister.GetEmailPersister().FindByUserId(userId)
+			if err != nil {
+				fmt.Printf("failed to get emails from db: %s", err)
+				return
+			}
+
+			var emailJwt *dto.EmailJwt
+			if e := emails.GetPrimary(); e != nil {
+				emailJwt = dto.JwtFromEmailModel(e)
+			}
+
+			token, err := sessionManager.GenerateJWT(userId, emailJwt)
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return

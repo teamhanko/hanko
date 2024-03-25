@@ -8,8 +8,8 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
@@ -17,7 +17,6 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestWebauthnSuite(t *testing.T) {
@@ -51,7 +50,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -92,7 +91,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -138,7 +137,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration_SessionDataExpi
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId))
+	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -330,29 +329,10 @@ func (s *webauthnSuite) GetDefaultSessionManager() session.Manager {
 
 var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 
-var defaultConfig = config.Config{
-	Webauthn: config.WebauthnSettings{
-		RelyingParty: config.RelyingParty{
-			Id:          "localhost",
-			DisplayName: "Test Relying Party",
-			Icon:        "",
-			Origins:     []string{"http://localhost:8080"},
-		},
-		Timeout: 60000,
-	},
-	Secrets: config.Secrets{
-		Keys: []string{"abcdefghijklmnop"},
-	},
-	Smtp: config.SMTP{
-		Host: "localhost",
-		Port: "2500",
-	},
-}
-
 type sessionManager struct {
 }
 
-func (s sessionManager) GenerateJWT(uuid uuid.UUID) (string, error) {
+func (s sessionManager) GenerateJWT(_ uuid.UUID, _ *dto.EmailJwt) (string, error) {
 	return userId, nil
 }
 
@@ -377,7 +357,7 @@ func (s sessionManager) DeleteCookie() (*http.Cookie, error) {
 	}, nil
 }
 
-func (s sessionManager) Verify(token string) (jwt.Token, error) {
+func (s sessionManager) Verify(_ string) (jwt.Token, error) {
 	return nil, nil
 }
 
@@ -389,15 +369,4 @@ var emails = []models.Email{
 		Address:      "john.doe@example.com",
 		PrimaryEmail: &models.PrimaryEmail{ID: uId},
 	},
-}
-
-var users = []models.User{
-	func() models.User {
-		return models.User{
-			ID:        uId,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-			Emails:    emails,
-		}
-	}(),
 }

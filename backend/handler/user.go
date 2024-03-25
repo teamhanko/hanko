@@ -104,7 +104,13 @@ func (h *UserHandler) Create(c echo.Context) error {
 				return fmt.Errorf("failed to store primary email: %w", err)
 			}
 
-			token, err := h.sessionManager.GenerateJWT(newUser.ID)
+			var emailJwt *dto.EmailJwt
+			if e := newUser.Emails.GetPrimary(); e != nil {
+				emailJwt = dto.JwtFromEmailModel(e)
+			}
+
+			token, err := h.sessionManager.GenerateJWT(newUser.ID, emailJwt)
+
 			if err != nil {
 				return fmt.Errorf("failed to generate jwt: %w", err)
 			}

@@ -64,7 +64,7 @@ func (s *emailSuite) TestEmailHandler_List() {
 
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
-			token, err := sessionManager.GenerateJWT(currentTest.userId)
+			token, err := sessionManager.GenerateJWT(currentTest.userId, nil)
 			s.Require().NoError(err)
 			cookie, err := sessionManager.GenerateCookie(token)
 			s.Require().NoError(err)
@@ -177,7 +177,7 @@ func (s *emailSuite) TestEmailHandler_Create() {
 			sessionManager, err := session.NewManager(jwkManager, cfg)
 			s.Require().NoError(err)
 
-			token, err := sessionManager.GenerateJWT(currentTest.userId)
+			token, err := sessionManager.GenerateJWT(currentTest.userId, nil)
 			s.Require().NoError(err)
 			cookie, err := sessionManager.GenerateCookie(token)
 			s.Require().NoError(err)
@@ -244,7 +244,7 @@ func (s *emailSuite) TestEmailHandler_SetPrimaryEmail() {
 	newPrimaryEmailId := uuid.FromStringOrNil("8bb4c8a7-a3e6-48bb-b54f-20e3b485ab33")
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
-	token, err := sessionManager.GenerateJWT(userId)
+	token, err := sessionManager.GenerateJWT(userId, nil)
 	s.NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.NoError(err)
@@ -285,7 +285,7 @@ func (s *emailSuite) TestEmailHandler_Delete() {
 	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 	s.Require().NoError(err)
 
-	token, err := sessionManager.GenerateJWT(userId)
+	token, err := sessionManager.GenerateJWT(userId, nil)
 	s.NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.NoError(err)
