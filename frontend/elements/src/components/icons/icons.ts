@@ -6,5 +6,16 @@ import { default as google } from "./Google";
 import { default as github } from "./GitHub";
 import { default as apple } from "./Apple";
 import { default as discord } from "./Discord";
+import { default as microsoft } from "./Microsoft";
 
-export { passkey, spinner, checkmark, exclamation, google, github, apple, discord };
+export {
+  passkey,
+  spinner,
+  checkmark,
+  exclamation,
+  google,
+  github,
+  apple,
+  discord,
+  microsoft,
+};

@@ -30,6 +30,12 @@
   verified: true
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: d781006b-4f55-4327-bad6-55bc34b88585
+  user_id: 48df412f-a7b1-4fbc-ad2d-56bd3e103fd7
+  address: test-with-microsoft-identity@example.com
+  verified: false
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 - id: 527afce8-3b7b-41b6-b1ed-33d408c5a7bb
   user_id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
   address: test-no-identity@example.com

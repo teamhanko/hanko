@@ -186,6 +186,9 @@ func DefaultConfig() *Config {
 				Discord: ThirdPartyProvider{
 					AllowLinking: true,
 				},
+				Microsoft: ThirdPartyProvider{
+					AllowLinking: true,
+				},
 			},
 		},
 	}
@@ -626,10 +629,11 @@ func (p *ThirdPartyProvider) Validate() error {
 }
 
 type ThirdPartyProviders struct {
-	Google  ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
-	GitHub  ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
-	Apple   ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
-	Discord ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
+	Google    ThirdPartyProvider `yaml:"google" json:"google,omitempty" koanf:"google"`
+	GitHub    ThirdPartyProvider `yaml:"github" json:"github,omitempty" koanf:"github"`
+	Apple     ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
+	Discord   ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
+	Microsoft ThirdPartyProvider `yaml:"microsoft" json:"microsoft,omitempty" koanf:"microsoft"`
 }
 
 func (p *ThirdPartyProviders) Validate() error {

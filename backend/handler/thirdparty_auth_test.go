@@ -58,6 +58,15 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			expectedBaseURL:     thirdparty.DiscordOauthAuthEndpoint,
 		},
 		{
+			name:                "successful redirect to microsoft",
+			referer:             "https://login.test.example",
+			enabledProviders:    []string{"microsoft"},
+			allowedRedirectURLs: []string{"https://*.test.example"},
+			requestedProvider:   "microsoft",
+			requestedRedirectTo: "https://app.test.example",
+			expectedBaseURL:     thirdparty.MicrosoftOAuthAuthEndpoint,
+		},
+		{
 			name:                     "error redirect on missing provider",
 			referer:                  "https://login.test.example",
 			requestedRedirectTo:      "https://app.test.example",

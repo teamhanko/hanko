@@ -389,3 +389,52 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		s.Len(logs, 1)
 	}
 }
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifiedEmail() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	fakeIdToken := s.setUpMicrosoftIdToken("microsoft_abcde", "fakeClientID", "test-with-microsoft-identity@example.com", false)
+	gock.New(thirdparty.MicrosoftOAuthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken", "id_token": fakeIdToken})
+
+	fakeJwkSet := s.setUpFakeJwkSet()
+	gock.New(thirdparty.MicrosoftKeysEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(fakeJwkSet)
+
+	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
+	cfg.Emails.RequireVerification = true
+
+	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+		location, err := rec.Result().Location()
+		s.NoError(err)
+
+		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
+		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
