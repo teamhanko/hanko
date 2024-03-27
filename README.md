@@ -20,7 +20,7 @@ Hanko is an open-source authentication and user management solution with a focus
 
 Available for self-hosting and on [Hanko Cloud](https://www.hanko.io).
 
-Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/). This project is the sum of 5 years of experience implementing FIDO and WebAuthn-based authentication in different applications and platforms.
+Hanko is built and maintained by [Hanko.io](https://www.hanko.io), an active member of the [FIDO Alliance](https://fidoalliance.org/company/hanko/).
 
 # We take you on the journey beyond passwords ...
 ... and make sure your users won't get lost on the way. Passwordless logins have been promised to us for quite some time. But until now, "passwordless" was mostly a compromise that only worked for some of the users and had some severe drawbacks that ultimately led to passwords still being present at almost every login. It's only very recently that passkeys were announced, and the ecosystem of devices, browsers, and operating systems is finally ready to truly move beyond passwords.
@@ -38,7 +38,7 @@ The main building blocks of the Hanko project are
 The remainder of the repository consists of:
 - [quickstart](/quickstart) - A quickstart example app showing off Hanko's login experience and acting as a reference implementation
 - [examples](frontend/examples) - Example implementations for a number of frameworks
-- [docs](/docs) - The Hanko documentation ([docs.hanko.io](https://docs.hanko.io))
+- docs - The Hanko documentation ([docs.hanko.io](https://docs.hanko.io)) -> Moved to its own repo here: https://github.com/teamhanko/docs
 
 # Getting started
 1. Try our hosted [live example](https://example.hanko.io) and our companion page [passkeys.io](https://www.passkeys.io) or use the [quickstart app](/quickstart/README.md) to get a feel for the user experience provided by an application that leverages the Hanko backend API and our custom web component
@@ -59,7 +59,7 @@ Schedule a Hanko demo. Learn how Hanko will speed up your registration and login
 <a target="_blank" href="https://cal.com/team/hanko/demo"><img alt="Book us with Cal.com"  src="https://cal.com/book-with-cal-light.svg" /></a>
 
 # Roadmap
-We are currently in **Beta** and may introduce breaking changes. Watch our releases, leave a star, join our [Discord community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our roadmap:
+Watch our releases, leave a star, join our [Discord community](https://www.hanko.io/community), or sign up to our [product news](https://www.hanko.io/updates) to follow the development. Here's a brief overview of our current roadmap:
 
 | Status | Feature |
 |:------:| :--- |
@@ -84,26 +84,29 @@ We are currently in **Beta** and may introduce breaking changes. Watch our relea
 |✅| User import |
 |✅| Disable sign-ups |
 |✅| User export |
-|✅| SAML enterprise SSO |
+|✅| SAML Enterprise SSO |
 |✅| Webhooks |
 |⚙️| API-supported auth flows |
 |⚙️| Passkey-only and OAuth-only configurations |
 |⚙️| Username support (non-email) |
-|⚙️| OIDC enterprise SSO |
-|⚙️| Custom JWT claims |
-| | 2FA for securing passcodes & passwords |
-| | Email templating & i18n |
+|⚙️| Optional / user-deleteable passwords |
+|⚙️| OIDC Enterprise SSO |
+|⚙️| 2FA (TOTP, security keys |
+| | Email templates & i18n |
 | | Refresh tokens / sessions |
-| | `<hanko-menu>` avatar / menu web component |
 | | 📢 Hanko 1.0 Release |
+| | `<hanko-menu>` web component |
+| | Custom Social SSO connections (OIDC/OAuth2) |
+| | Email security notifications |
+| | Custom JWT claims |
 | | Mobile SDKs |
-| | SMS passcode delivery |
+| | SMS passcodes |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
 - Custom user data / fields
 - Privileged sessions & step-up authentication
 - Bot protection / CAPTCHA
-- Hosted auth pages and OIDC provider support
+- Hosted auth pages / OIDC provider
 
 # Community
 ## Questions, bugs, ideas
