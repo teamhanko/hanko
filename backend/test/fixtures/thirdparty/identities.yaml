@@ -26,3 +26,10 @@
   email_id: 09f35529-cca6-44a7-ab1d-b07e95a04e3b
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: e4cd954b-8f1f-4fa2-b7e9-60a0ffa56363
+  provider_id: "microsoft_abcde"
+  provider_name: "microsoft"
+  data: '{"email":"test-with-microsoft-identity@example.com","iss":"https://login.microsoftonline.com/common","sub":"microsoft_abcde"}'
+  email_id: d781006b-4f55-4327-bad6-55bc34b88585
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

@@ -712,6 +712,9 @@
         },
         "discord": {
           "$ref": "#/$defs/ThirdPartyProvider"
+        },
+        "microsoft": {
+          "$ref": "#/$defs/ThirdPartyProvider"
         }
       },
       "additionalProperties": false,

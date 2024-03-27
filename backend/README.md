@@ -442,6 +442,7 @@ documentation for instructions on how to obtain these:
 - [Apple](https://docs.hanko.io/guides/authentication-methods/oauth/apple)
 - [GitHub](https://docs.hanko.io/guides/authentication-methods/oauth/github)
 - [Google](https://docs.hanko.io/guides/authentication-methods/oauth/google)
+- [Microsoft](https://docs.hanko.io/guides/authentication-methods/oauth/microsoft)
 
 #### Account linking
 
@@ -452,7 +453,6 @@ addresses. This poses a security risk and potentially allows bad actors to hijac
 accounts associated with the same address. It is therefore recommended to make sure you trust the provider and to
 also enable `emails.require_verification` in your configuration to ensure that only verified third party provider
 addresses may be used.
-
 
 ### User import
 You can import an existing user pool into Hanko using json in the following format:

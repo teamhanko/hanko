@@ -88,6 +88,8 @@ func GetProvider(config config.ThirdParty, name string) (OAuthProvider, error) {
 		return NewAppleProvider(config.Providers.Apple, config.RedirectURL)
 	case "discord":
 		return NewDiscordProvider(config.Providers.Discord, config.RedirectURL)
+	case "microsoft":
+		return NewMicrosoftProvider(config.Providers.Microsoft, config.RedirectURL)
 	default:
 		return nil, fmt.Errorf("provider '%s' is not supported", name)
 	}
