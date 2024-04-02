@@ -20,23 +20,24 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server      Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
-	Webauthn    WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
-	Smtp        SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
-	Passcode    Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
-	Password    Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
-	Database    Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets     Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service     Service          `yaml:"service" json:"service" koanf:"service"`
-	Session     Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
-	AuditLog    AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
-	Emails      Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
-	RateLimiter RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
-	ThirdParty  ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
-	Log         LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
-	Account     Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-	Saml        config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
-	Webhooks    WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
+	Server        Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
+	Webauthn      WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp          SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
+	EmailDelivery EmailDelivery    `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true"`
+	Passcode      Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password      Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
+	Database      Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets       Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service       Service          `yaml:"service" json:"service" koanf:"service"`
+	Session       Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
+	AuditLog      AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
+	Emails        Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
+	RateLimiter   RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
+	ThirdParty    ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
+	Log           LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
+	Account       Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	Saml          config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	Webhooks      WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
 
 var (
@@ -117,6 +118,9 @@ func DefaultConfig() *Config {
 		},
 		Smtp: SMTP{
 			Port: "465",
+		},
+		EmailDelivery: EmailDelivery{
+			Enabled: true,
 		},
 		Passcode: Passcode{
 			TTL: 300,
@@ -200,9 +204,11 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
 	}
-	err = c.Smtp.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate smtp settings: %w", err)
+	if c.EmailDelivery.Enabled {
+		err = c.Smtp.Validate()
+		if err != nil {
+			return fmt.Errorf("failed to validate smtp settings: %w", err)
+		}
 	}
 	err = c.Passcode.Validate()
 	if err != nil {
@@ -377,6 +383,10 @@ func (s *SMTP) Validate() error {
 		return errors.New("smtp port must not be empty")
 	}
 	return nil
+}
+
+type EmailDelivery struct {
+	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 }
 
 type Email struct {
@@ -684,6 +694,9 @@ func (c *Config) PostProcess() error {
 }
 
 func (c *Config) arrangeSmtpSettings() {
+	if !c.EmailDelivery.Enabled {
+		return
+	}
 	if c.Passcode.Smtp.Validate() == nil {
 		if c.Smtp.Validate() == nil {
 			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")

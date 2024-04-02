@@ -7,11 +7,13 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/sethvargo/go-limiter"
 	"github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/dto/webhook"
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -189,22 +191,53 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	lang := c.Request().Header.Get("Accept-Language")
-	str, err := h.renderer.Render("loginTextMail", lang, data)
+	subject := h.renderer.Translate(lang, "email_subject_login", data)
+	bodyPlain, err := h.renderer.Render("loginTextMail", lang, data)
 	if err != nil {
 		return fmt.Errorf("failed to render email template: %w", err)
 	}
 
-	message := gomail.NewMessage()
-	message.SetAddressHeader("To", email.Address, "")
-	message.SetAddressHeader("From", h.emailConfig.FromAddress, h.emailConfig.FromName)
+	webhookData := webhook.EmailCreate{
+		Subject:          subject,
+		BodyPlain:        bodyPlain,
+		ToEmailAddress:   email.Address,
+		DeliveredByHanko: true,
+		AcceptLanguage:   lang,
+		Type:             webhook.EmailTypePasscode,
+		Data: webhook.PasscodeData{
+			ServiceName: h.cfg.Service.Name,
+			OtpCode:     passcode,
+			TTL:         h.TTL,
+			ValidUntil:  passcodeModel.CreatedAt.Add(time.Duration(h.TTL) * time.Second).UTC().Unix(),
+		},
+	}
 
-	message.SetHeader("Subject", h.renderer.Translate(lang, "email_subject_login", data))
+	if h.cfg.EmailDelivery.Enabled {
+		message := gomail.NewMessage()
+		message.SetAddressHeader("To", email.Address, "")
+		message.SetAddressHeader("From", h.emailConfig.FromAddress, h.emailConfig.FromName)
 
-	message.SetBody("text/plain", str)
+		message.SetHeader("Subject", subject)
 
-	err = h.mailer.Send(message)
-	if err != nil {
-		return fmt.Errorf("failed to send passcode: %w", err)
+		message.SetBody("text/plain", bodyPlain)
+
+		err = h.mailer.Send(message)
+		if err != nil {
+			return fmt.Errorf("failed to send passcode: %w", err)
+		}
+
+		err = utils.TriggerWebhooks(c, events.EmailCreate, webhookData)
+
+		if err != nil {
+			zeroLogger.Warn().Err(err).Msg("failed to trigger webhook")
+		}
+	} else {
+		webhookData.DeliveredByHanko = false
+		err = utils.TriggerWebhooks(c, events.EmailCreate, webhookData)
+
+		if err != nil {
+			return fmt.Errorf(fmt.Sprintf("failed to trigger webhook: %s", err))
+		}
 	}
 
 	err = h.auditLogger.Create(c, models.AuditLogPasscodeLoginInitSucceeded, user, nil)
@@ -326,7 +359,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		}
 
 		wasUnverified := false
-		hasEmails := len(user.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a EmailCreate one
+		hasEmails := len(user.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a UserEmailCreate one
 
 		if !passcode.Email.Verified {
 			wasUnverified = true
@@ -394,7 +427,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			var evt events.Event
 
 			if hasEmails {
-				evt = events.EmailCreate
+				evt = events.UserEmailCreate
 			} else {
 				evt = events.UserCreate
 			}

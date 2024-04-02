@@ -53,7 +53,6 @@ func Limit(store limiter.Store, userId uuid.UUID, c echo.Context) error {
 	}
 
 	resetTime := int(math.Floor(time.Unix(0, int64(reset)).UTC().Sub(time.Now().UTC()).Seconds()))
-	log.Println(resetTime)
 
 	// Set headers (we do this regardless of whether the request is permitted).
 	c.Response().Header().Set(httplimit.HeaderRateLimitLimit, strconv.FormatUint(limit, 10))

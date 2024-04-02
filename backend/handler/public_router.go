@@ -143,9 +143,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 
 	passcode := g.Group("/passcode")
-	passcodeLogin := passcode.Group("/login")
+	passcodeLogin := passcode.Group("/login", webhookMiddlware)
 	passcodeLogin.POST("/initialize", passcodeHandler.Init)
-	passcodeLogin.POST("/finalize", passcodeHandler.Finish, webhookMiddlware)
+	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 
 	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)

@@ -17,7 +17,7 @@ func TestBaseWebhook_HasEvent(t *testing.T) {
 		Events:   events.Events{events.UserUpdate},
 	}
 
-	require.True(t, baseHook.HasEvent(events.EmailCreate))
+	require.True(t, baseHook.HasEvent(events.UserEmailCreate))
 }
 
 func TestWebhooks_HasEvent_WithMultipleEvents(t *testing.T) {
@@ -37,7 +37,7 @@ func TestWebhooks_HasSubEvent_WithMultipleEvents(t *testing.T) {
 		Events:   events.Events{events.UserCreate, events.UserUpdate},
 	}
 
-	require.True(t, baseHook.HasEvent(events.EmailCreate))
+	require.True(t, baseHook.HasEvent(events.UserEmailCreate))
 }
 
 func TestBaseWebhook_HasSubEvent(t *testing.T) {
