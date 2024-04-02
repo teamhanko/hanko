@@ -5,6 +5,9 @@ import { FetchNextState, FlowPath, Handlers } from "./types/state-handling";
 
 type MaybePromise<T> = T | Promise<T>;
 
+type ExtendedHandlers = Handlers & { onError?: (e: unknown) => any };
+type GetInitState = (flow: Flow) => MaybePromise<State<any> | null>;
+
 // eslint-disable-next-line require-jsdoc
 class Flow extends Client {
   public fetchNextState: FetchNextState = async (href: string, body?: any) => {
@@ -12,19 +15,13 @@ class Flow extends Client {
     return new State(response.json(), this.fetchNextState);
   };
 
-  private handlers: (Handlers & { onError?: (e: unknown) => any }) | undefined;
-
   public async init(
     initPath: FlowPath,
-    handlers: Handlers & { onError?: (e: unknown) => any },
-    getInitState: (flow: Flow) => MaybePromise<State<any> | null> = () =>
-      this.fetchNextState(initPath)
+    handlers: ExtendedHandlers,
+    getInitState: GetInitState = () => this.fetchNextState(initPath)
   ): Promise<void> {
-    this.handlers = handlers;
-
     const initState = await getInitState(this);
-
-    await this.run(initState);
+    await this.run(initState, handlers);
   }
 
   /**
@@ -45,13 +42,16 @@ class Flow extends Client {
    *   // based on what the /login endpoint returns
    * });
    */
-  run = async (state: State<any>): Promise<unknown> => {
+  run = async (
+    state: State<any>,
+    handlers: ExtendedHandlers
+  ): Promise<unknown> => {
     try {
       if (!isState(state)) {
         throw new InvalidStateError(state);
       }
 
-      const handler = this.handlers[state.name];
+      const handler = handlers[state.name];
       if (!handler) {
         throw new HandlerNotFoundError(state);
       }
@@ -65,11 +65,11 @@ class Flow extends Client {
 
       // ...or a state, to continue the "run loop"
       if (isState(maybeNextState)) {
-        return this.run(maybeNextState);
+        return this.run(maybeNextState, handlers);
       }
     } catch (e) {
-      if (typeof this.handlers.onError === "function") {
-        return this.handlers.onError(e);
+      if (typeof handlers.onError === "function") {
+        return handlers.onError(e);
       }
 
       throw e;
