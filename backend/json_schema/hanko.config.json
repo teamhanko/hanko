@@ -133,6 +133,9 @@
         "smtp": {
           "$ref": "#/$defs/SMTP"
         },
+        "email_delivery": {
+          "$ref": "#/$defs/EmailDelivery"
+        },
         "passcode": {
           "$ref": "#/$defs/Passcode"
         },
@@ -301,6 +304,19 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "EmailDelivery": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled"
+      ]
     },
     "Emails": {
       "properties": {
