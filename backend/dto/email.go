@@ -47,6 +47,10 @@ type EmailJwt struct {
 }
 
 func JwtFromEmailModel(email *models.Email) *EmailJwt {
+	if email == nil {
+		return nil
+	}
+
 	return &EmailJwt{
 		Address:    email.Address,
 		IsPrimary:  email.IsPrimary(),
