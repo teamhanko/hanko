@@ -77,6 +77,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			if !h.cfg.Emails.RequireVerification {
 				// Assign the email address to the user because it's currently unassigned and email verification is turned off.
 				email.UserID = &newUser.ID
+
 				err = h.persister.GetEmailPersisterWithConnection(tx).Update(*email)
 				if err != nil {
 					return fmt.Errorf("failed to update email address: %w", err)
@@ -104,8 +105,13 @@ func (h *UserHandler) Create(c echo.Context) error {
 				return fmt.Errorf("failed to store primary email: %w", err)
 			}
 
+			emails, err := h.persister.GetEmailPersisterWithConnection(tx).FindByUserId(newUser.ID)
+			if err != nil {
+				return fmt.Errorf("failed to get email from db: %w", err)
+			}
+
 			var emailJwt *dto.EmailJwt
-			if e := newUser.Emails.GetPrimary(); e != nil {
+			if e := emails.GetPrimary(); e != nil {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
