@@ -5,7 +5,7 @@
     "build": "vite build"
   },
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.10.0",
+    "@teamhanko/hanko-elements": "^0.10.1",
     "vue": "^3.3.8",
     "vue-router": "^4.1.6"
   },
