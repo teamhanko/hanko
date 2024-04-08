@@ -19,3 +19,10 @@
   email_id: 05ab6e1f-8dfb-4329-ae04-22571a68d96b
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: 18d61f13-2789-467a-a3a6-4292c0621580
+  provider_id: "discord_abcde"
+  provider_name: "discord"
+  data: '{"email":"test-with-discord-identity@example.com","email_verified":true,"iss":"https://discord.com/api","sub":"discord_abcde"}'
+  email_id: 09f35529-cca6-44a7-ab1d-b07e95a04e3b
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59

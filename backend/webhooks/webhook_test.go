@@ -20,6 +20,26 @@ func TestBaseWebhook_HasEvent(t *testing.T) {
 	require.True(t, baseHook.HasEvent(events.EmailCreate))
 }
 
+func TestWebhooks_HasEvent_WithMultipleEvents(t *testing.T) {
+	baseHook := BaseWebhook{
+		Logger:   nil,
+		Callback: "http://ipsum.lorem",
+		Events:   events.Events{events.UserCreate, events.UserUpdate},
+	}
+
+	require.True(t, baseHook.HasEvent(events.UserUpdate))
+}
+
+func TestWebhooks_HasSubEvent_WithMultipleEvents(t *testing.T) {
+	baseHook := BaseWebhook{
+		Logger:   nil,
+		Callback: "http://ipsum.lorem",
+		Events:   events.Events{events.UserCreate, events.UserUpdate},
+	}
+
+	require.True(t, baseHook.HasEvent(events.EmailCreate))
+}
+
 func TestBaseWebhook_HasSubEvent(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   nil,

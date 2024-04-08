@@ -70,7 +70,7 @@ jobs:
           tags: |
             type=schedule
             type=ref,event=branch,suffix=-{{sha}}-{{date 'YYYY-MM-DD.HHmmss'}}
-            type=match,pattern=backend/(v\d.\d.\d),group=1,event=tag
+            type=match,pattern=backend/(v\d+.\d+.\d+),group=1,event=tag
             type=ref,event=pr
 
       # Build and push Docker image with Buildx (don't push on PR)
