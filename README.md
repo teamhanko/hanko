@@ -91,7 +91,7 @@ Watch our releases, leave a star, join our [Discord community](https://www.hanko
 |⚙️| Username support (non-email) |
 |⚙️| Optional / user-deleteable passwords |
 |⚙️| OIDC Enterprise SSO |
-|⚙️| 2FA (TOTP, security keys |
+|⚙️| 2FA (TOTP, security keys) |
 | | Email templates & i18n |
 | | Refresh tokens / sessions |
 | | 📢 Hanko 1.0 Release |
