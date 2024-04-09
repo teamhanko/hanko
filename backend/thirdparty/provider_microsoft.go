@@ -84,6 +84,14 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		jwt.WithValidator(p.issuerValidator()),
 	)
 
+	if err != nil {
+		return nil, fmt.Errorf("could not parse id token: %w", err)
+	}
+
+	if parsedIDToken == nil {
+		return nil, errors.New("could not parse id token")
+	}
+
 	idTokenClaims, err := p.getIdTokenClaims(parsedIDToken.PrivateClaims())
 	if err != nil {
 		return nil, fmt.Errorf("could not extract claims from id token: %w", err)
