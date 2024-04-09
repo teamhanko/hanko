@@ -143,7 +143,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	)
 
 	if err != nil {
-		return fmt.Errorf("failed to create audit log: %w")
+		return fmt.Errorf("failed to create audit log: %w", err)
 	}
 
 	return nil
