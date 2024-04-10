@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: "0.10.1"
+  version: "0.10.2"
   title: "Hanko Admin API"
   description: |
     ## Introduction
