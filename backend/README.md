@@ -442,6 +442,7 @@ configure them. All provider configurations require provider credentials. See th
 documentation for instructions on how to obtain these:
 
 - [Apple](https://docs.hanko.io/guides/authentication-methods/oauth/apple)
+- [Discord](https://docs.hanko.io/guides/authentication-methods/oauth/discord)
 - [GitHub](https://docs.hanko.io/guides/authentication-methods/oauth/github)
 - [Google](https://docs.hanko.io/guides/authentication-methods/oauth/google)
 
