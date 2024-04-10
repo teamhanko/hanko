@@ -97,6 +97,10 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		return nil, fmt.Errorf("could not extract claims from id token: %w", err)
 	}
 
+	if idTokenClaims == nil {
+		return nil, errors.New("id token claims must not be nil")
+	}
+
 	var email *Email
 	if idTokenClaims.UserPrincipalName != "" {
 		// Should be an email address, sanity check just to make sure.
@@ -109,19 +113,23 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 			}
 		}
 	} else {
-		if idTokenClaims.Email != "" {
-			if idTokenClaims.IsEmailVerified() {
-				email = &Email{
-					Email:    idTokenClaims.Email,
-					Verified: true,
-					Primary:  true,
-				}
-			} else {
-				email = &Email{
-					Email:    idTokenClaims.Email,
-					Verified: false,
-					Primary:  true,
-				}
+		emailIsVerified, emailVerificationError := idTokenClaims.IsEmailVerified()
+
+		if emailVerificationError != nil {
+			return nil, emailVerificationError
+		}
+
+		if emailIsVerified {
+			email = &Email{
+				Email:    idTokenClaims.Email,
+				Verified: true,
+				Primary:  true,
+			}
+		} else {
+			email = &Email{
+				Email:    idTokenClaims.Email,
+				Verified: false,
+				Primary:  true,
 			}
 		}
 	}
@@ -168,10 +176,20 @@ type microsoftIdTokenClaims struct {
 	XMicrosoftEmailDomainOwnerVerified any    `mapstructure:"xms_edov"`
 }
 
-// IsEmailVerified checks if the email used is verified. Shameless plug from Supabase's GoTrue fork
+// IsEmailVerified checks if the email used is verified. Functionality mainly derived from Supabase's GoTrue fork
 // See: https://github.com/supabase/gotrue/blob/master/internal/api/provider/oidc.go#L221
 // See also: https://www.descope.com/blog/post/noauth
-func (c *microsoftIdTokenClaims) IsEmailVerified() bool {
+func (c *microsoftIdTokenClaims) IsEmailVerified() (bool, error) {
+	address, err := mail.ParseAddress(c.Email)
+
+	if err != nil {
+		return false, fmt.Errorf("could not parse email from email claim: %w", err)
+	}
+
+	if address == nil {
+		return false, errors.New("could not extract email from email claim")
+	}
+
 	emailVerified := false
 
 	edov := c.XMicrosoftEmailDomainOwnerVerified
@@ -185,7 +203,7 @@ func (c *microsoftIdTokenClaims) IsEmailVerified() bool {
 		// will only send out a potentially unverified email address in
 		// single-tenant apps (which we do not support - only the multi-tenant
 		// + public account type).
-		emailVerified = c.Email != ""
+		emailVerified = true
 	} else {
 		edovBool := false
 
@@ -200,10 +218,10 @@ func (c *microsoftIdTokenClaims) IsEmailVerified() bool {
 			edovBool = false
 		}
 
-		emailVerified = c.Email != "" && edovBool
+		emailVerified = edovBool
 	}
 
-	return emailVerified
+	return emailVerified, nil
 }
 
 func (p microsoftProvider) getIdTokenClaims(privateClaims map[string]interface{}) (*microsoftIdTokenClaims, error) {
