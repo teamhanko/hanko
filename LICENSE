@@ -8,6 +8,10 @@ licensed under the license defined in "elements/LICENSE".
 (https://github.com/teamhanko/hanko/tree/main/frontend-sdk) of this repository is
 licensed under the license defined in "frontend-sdk/LICENSE".
 
+  All content that resides under the "backend/ee" directory
+(https://github.com/teamhanko/hanko/tree/main/backend/ee) of this repository is
+licensed under the license defined in "backend/ee/LICENSE".
+
   All third party components incorporated into Hanko software are licensed
 under the original license provided by the owner of the applicable component.
 
