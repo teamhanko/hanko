@@ -111,10 +111,6 @@
             "stderr"
           ],
           "default": "stdout"
-        },
-        "mask": {
-          "type": "boolean",
-          "default": true
         }
       },
       "additionalProperties": false,
