@@ -284,7 +284,8 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Ensure that the action has set a result object.
 	if aec.executionResult == nil {
-		return nil, errors.New("the action has not set a result object")
+		er := executionResult{nextStateName: flowModel.CurrentState}
+		aec.executionResult = &er
 	}
 
 	afc := defaultActionFinalizationContext{

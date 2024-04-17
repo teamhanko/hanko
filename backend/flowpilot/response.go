@@ -9,18 +9,13 @@ import (
 // PublicAction represents a link to an action.
 type PublicAction struct {
 	Href         string       `json:"href"`
-	PublicSchema PublicSchema `json:"schema"`
+	PublicSchema PublicSchema `json:"inputs"`
 	Name         ActionName   `json:"action"`
 	Description  string       `json:"description"`
 }
 
 // PublicActions is a collection of PublicAction instances.
-type PublicActions []PublicAction
-
-// Add adds a link to the collection of PublicActions.
-func (pa *PublicActions) Add(publicAction PublicAction) {
-	*pa = append(*pa, publicAction)
-}
+type PublicActions map[ActionName]PublicAction
 
 // PublicError represents an error for public exposure.
 type PublicError struct {
@@ -44,7 +39,7 @@ type PublicInput struct {
 
 // PublicResponse represents the response of an action execution.
 type PublicResponse struct {
-	StateName     StateName     `json:"state"`
+	Name          StateName     `json:"name"`
 	Status        int           `json:"status"`
 	Payload       interface{}   `json:"payload,omitempty"`
 	PublicActions PublicActions `json:"actions"`
@@ -86,7 +81,7 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 	status := flowError.Status()
 
 	publicResponse := PublicResponse{
-		StateName:   stateName,
+		Name:        stateName,
 		Status:      status,
 		PublicError: &publicError,
 	}
@@ -133,7 +128,7 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 
 	// Create the response object.
 	resp := PublicResponse{
-		StateName:     er.nextStateName,
+		Name:          er.nextStateName,
 		Status:        http.StatusOK,
 		Payload:       payload,
 		PublicActions: actions,
@@ -165,7 +160,7 @@ func (er *executionResult) generateLinks() PublicLinks {
 
 // generateActions generates a collection of links based on the execution result.
 func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions {
-	var publicActions PublicActions
+	var publicActions = make(PublicActions)
 
 	// Get actions for the next addState.
 	state, _ := fc.flow.getState(er.nextStateName)
@@ -198,7 +193,7 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 				Description:  actionDescription,
 			}
 
-			publicActions.Add(publicAction)
+			publicActions[actionName] = publicAction
 		}
 	}
 
