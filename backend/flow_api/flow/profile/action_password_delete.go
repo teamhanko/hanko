@@ -57,10 +57,6 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not delete password credential: %w", err)
 	}
 
-	if err != nil {
-		return fmt.Errorf("could not create password: %w", err)
-	}
-
 	err = deps.AuditLogger.CreateWithConnection(
 		deps.Tx,
 		deps.HttpContext,
