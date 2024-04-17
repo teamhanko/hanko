@@ -107,7 +107,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 
 			if s.NoError(err) {
 				s.Equal(currentTest.statusCode, result.Status())
-				s.Equal(currentTest.expectedState, result.Response().StateName)
+				s.Equal(currentTest.expectedState, result.Response().Name)
 			}
 		})
 	}

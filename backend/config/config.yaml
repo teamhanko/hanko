@@ -8,6 +8,12 @@ smtp:
     host: smtp.example.com
     user: example
     password: example
+server:
+  public:
+    cors:
+      allow_origins:
+        - http://localhost:63342
+        - http://localhost:8000/
 passcode:
   email:
     from_address: no-reply@hanko.io
@@ -20,6 +26,7 @@ webauthn:
   relying_party:
     id: localhost
     origins:
+      - http://localhost:63342
       - http://localhost:8000
 password:
   enabled: false

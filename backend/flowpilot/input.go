@@ -10,6 +10,7 @@ type InputType string
 // Input types enumeration.
 const (
 	StringType   InputType = "string"
+	BooleanType  InputType = "boolean"
 	EmailType    InputType = "email"
 	NumberType   InputType = "number"
 	PasswordType InputType = "password"
@@ -113,6 +114,11 @@ func EmailInput(name string) Input {
 // NumberInput creates a new input field of number type.
 func NumberInput(name string) Input {
 	return newInput(name, NumberType, true)
+}
+
+// BooleanInput creates a new input field of boolean type.
+func BooleanInput(name string) Input {
+	return newInput(name, BooleanType, true)
 }
 
 // PasswordInput creates a new input field of password type.
@@ -235,6 +241,15 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		return true
 	}
 
+	if i.dataType == JSONType {
+		// skip further validation
+		return true
+	}
+
+	if i.dataType == BooleanType {
+		return true
+	}
+
 	isRequired := i.required != nil && *i.required
 	hasEmptyOrNilValue := inputValue == nil || len(*inputValue) <= 0
 
@@ -246,11 +261,6 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 	if i.compareWithStash && inputValue != nil && stashValue != nil && *inputValue != *stashValue {
 		i.error = ErrorValueInvalid
 		return false
-	}
-
-	if i.dataType == JSONType {
-		// skip further validation
-		return true
 	}
 
 	if i.minLength != nil && len(*inputValue) > 0 {
