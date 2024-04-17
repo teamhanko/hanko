@@ -1,7 +1,6 @@
 import { State } from "../State";
 
 import {
-  Action,
   LoginInitActions,
   LoginMethodChooserActions,
   LoginPasskeyActions,
@@ -12,18 +11,22 @@ import {
   PasscodeConfirmationActions,
   PasswordCreationActions,
   PreflightActions,
+  ProfileInitActions,
   RegistrationInitActions,
 } from "./action";
-import { Input } from "./input";
 
 import {
   LoginPasskeyPayload,
   OnboardingVerifyPasskeyAttestationPayload,
+  PasscodeConfirmationPayload,
+  ProfilePayload,
 } from "./payload";
 
 export type StateName =
   | "preflight"
   | "login_init"
+  | "profile_init"
+  | "webauthn_credential_verification"
   | "login_method_chooser"
   | "login_password"
   | "login_password_recovery"
@@ -33,11 +36,14 @@ export type StateName =
   | "onboarding_verify_passkey_attestation"
   | "registration_init"
   | "password_creation"
-  | "success";
+  | "success"
+  | "error";
 
 export interface Actions {
   readonly preflight: PreflightActions;
   readonly login_init: LoginInitActions;
+  readonly profile_init: ProfileInitActions;
+  readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationActions;
   readonly login_method_chooser: LoginMethodChooserActions;
   readonly login_password: LoginPasswordActions;
   readonly login_password_recovery: LoginPasswordRecoveryActions;
@@ -48,21 +54,25 @@ export interface Actions {
   readonly registration_init: RegistrationInitActions;
   readonly password_creation: PasswordCreationActions;
   readonly success: null;
+  readonly error: null;
 }
 
 export interface Payloads {
   readonly preflight: null;
   readonly login_init: null;
+  readonly profile_init: ProfilePayload;
+  readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationPayload;
   readonly login_method_chooser: null;
   readonly login_password: null;
   readonly login_password_recovery: null;
-  readonly passcode_confirmation: null;
+  readonly passcode_confirmation: PasscodeConfirmationPayload;
   readonly login_passkey: LoginPasskeyPayload;
   readonly onboarding_create_passkey: null;
   readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationPayload;
   readonly registration_init: null;
   readonly password_creation: null;
   readonly success: null;
+  readonly error: null;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";
@@ -71,12 +81,12 @@ export type FetchNextState = (
   // eslint-disable-next-line no-unused-vars
   href: string,
   // eslint-disable-next-line no-unused-vars
-  body?: any
+  body?: any,
 ) => Promise<State<any>>;
 
 export type HandlerFunction<TStateName extends StateName> = (
   // eslint-disable-next-line no-unused-vars
-  state: State<TStateName>
+  state: State<TStateName>,
 ) => any;
 
 export type Handlers = {

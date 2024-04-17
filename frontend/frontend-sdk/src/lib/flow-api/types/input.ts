@@ -1,18 +1,18 @@
 import { Error } from "./error";
 import {
-  CredentialCreationOptionsJSON,
+  PublicKeyCredentialWithAttestationJSON,
   PublicKeyCredentialWithAssertionJSON,
-} from "@github/webauthn-json/src/webauthn-json/basic/json";
+} from "@github/webauthn-json";
 
 export interface Input<TValue> {
-  name: string;
-  type: string;
+  readonly name: string;
+  readonly type: string;
   value?: TValue;
-  min_length?: number;
-  max_length?: number;
-  required?: boolean;
-  hidden?: boolean;
-  error?: Error;
+  readonly min_length?: number;
+  readonly max_length?: number;
+  readonly required?: boolean;
+  readonly hidden?: boolean;
+  readonly error?: Error;
 }
 
 export interface PasswordRecoveryInputs {
@@ -24,7 +24,7 @@ export interface WebauthnVerifyAssertionResponseInputs {
 }
 
 export interface WebauthnVerifyAttestationResponseInputs {
-  readonly public_key: Input<CredentialCreationOptionsJSON>;
+  readonly public_key: Input<PublicKeyCredentialWithAttestationJSON>;
 }
 
 export interface RegisterLoginIdentifierInputs {
@@ -41,7 +41,9 @@ export interface RegisterClientCapabilitiesInputs {
 }
 
 export interface ContinueWithLoginIdentifierInputs {
-  readonly identifier: Input<string>;
+  readonly identifier?: Input<string>;
+  readonly email?: Input<string>;
+  readonly username?: Input<string>;
 }
 
 export interface PasswordLoginInputs {
@@ -50,4 +52,37 @@ export interface PasswordLoginInputs {
 
 export interface VerifyPasscodeInputs {
   readonly code: Input<string>;
+}
+
+export interface EmailCreateInputs {
+  readonly email: Input<string>;
+}
+
+export interface EmailDeleteInputs {
+  readonly email_id: Input<string>;
+}
+
+export interface EmailSetPrimaryInputs {
+  readonly email_id: Input<string>;
+}
+
+export interface EmailVerifyInputs {
+  readonly email_id: Input<string>;
+}
+
+export interface PasswordSetInputs {
+  readonly password: Input<string>;
+}
+
+export interface UsernameSetInputs {
+  readonly username: Input<string>;
+}
+
+export interface PasskeyCredentialRename {
+  readonly passkey_id: Input<string>;
+  readonly passkey_name: Input<string>;
+}
+
+export interface PasskeyCredentialDelete {
+  readonly passkey_id: Input<string>;
 }
