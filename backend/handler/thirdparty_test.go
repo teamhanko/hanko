@@ -32,6 +32,7 @@ type thirdPartySuite struct {
 }
 
 func (s *thirdPartySuite) setUpContext(request *http.Request) (echo.Context, *httptest.ResponseRecorder) {
+	s.T().Helper()
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
 	rec := httptest.NewRecorder()
@@ -40,6 +41,7 @@ func (s *thirdPartySuite) setUpContext(request *http.Request) (echo.Context, *ht
 }
 
 func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
+	s.T().Helper()
 	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
 
 	jwkMngr, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
@@ -53,6 +55,7 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 }
 
 func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirectURLs []string) *config.Config {
+	s.T().Helper()
 	cfg := &config.Config{
 		ThirdParty: config.ThirdParty{
 			Providers: config.ThirdPartyProviders{
@@ -79,6 +82,12 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 					ClientID:     "fakeClientID",
 					Secret:       "fakeClientSecret",
 					AllowLinking: true,
+				},
+				Microsoft: config.ThirdPartyProvider{
+					Enabled:      false,
+					ClientID:     "fakeClientID",
+					Secret:       "fakeClientSecret",
+					AllowLinking: false,
 				},
 			},
 			ErrorRedirectURL:    "https://error.test.example",
@@ -109,6 +118,8 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 			cfg.ThirdParty.Providers.GitHub.Enabled = true
 		case "discord":
 			cfg.ThirdParty.Providers.Discord.Enabled = true
+		case "microsoft":
+			cfg.ThirdParty.Providers.Microsoft.Enabled = true
 		}
 	}
 
@@ -119,6 +130,7 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 }
 
 func (s *thirdPartySuite) setUpFakeJwkSet() jwk2.Set {
+	s.T().Helper()
 	generator := test.JwkManager{}
 	keySet, err := generator.GetPublicKeys()
 	s.Require().NoError(err)
@@ -126,6 +138,7 @@ func (s *thirdPartySuite) setUpFakeJwkSet() jwk2.Set {
 }
 
 func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerified bool) string {
+	s.T().Helper()
 	token := jwt.New()
 	_ = token.Set(jwt.SubjectKey, sub)
 	_ = token.Set(jwt.IssuedAtKey, time.Now().UTC())
@@ -144,7 +157,28 @@ func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerifie
 	return string(signedToken)
 }
 
+func (s *thirdPartySuite) setUpMicrosoftIdToken(sub, aud, email string, edov bool) string {
+	s.T().Helper()
+	token := jwt.New()
+	_ = token.Set(jwt.SubjectKey, sub)
+	_ = token.Set(jwt.IssuedAtKey, time.Now().UTC())
+	_ = token.Set(jwt.IssuerKey, "https://login.microsoftonline.com/0ec22c9c-397e-484d-8edc-6212147ebe5b/v2.0")
+	_ = token.Set(jwt.AudienceKey, aud)
+	_ = token.Set("email", email)
+	_ = token.Set("xms_edov", edov)
+
+	generator := test.JwkManager{}
+	signingKey, err := generator.GetSigningKey()
+	s.Require().NoError(err)
+
+	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, signingKey))
+	s.Require().NoError(err)
+
+	return string(signedToken)
+}
+
 func (s *thirdPartySuite) assertLocationHeaderHasToken(rec *httptest.ResponseRecorder) {
+	s.T().Helper()
 	location, err := url.Parse(rec.Header().Get("Location"))
 	s.NoError(err)
 	s.True(location.Query().Has(utils.HankoTokenQuery))
@@ -152,6 +186,7 @@ func (s *thirdPartySuite) assertLocationHeaderHasToken(rec *httptest.ResponseRec
 }
 
 func (s *thirdPartySuite) assertStateCookieRemoved(rec *httptest.ResponseRecorder) {
+	s.T().Helper()
 	cookies := rec.Result().Cookies()
 	s.Len(cookies, 1)
 	s.Equal(utils.HankoThirdpartyStateCookie, cookies[0].Name)
