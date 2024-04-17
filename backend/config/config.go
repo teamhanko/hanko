@@ -677,7 +677,7 @@ type ThirdPartyProvider struct {
 	ClientID     string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
 	Secret       string `yaml:"secret" json:"secret" koanf:"secret"`
 	AllowLinking bool   `yaml:"allow_linking" json:"allow_linking" koanf:"allow_linking" split_words:"true"`
-	DisplayName  string `yaml:"display_name" json:"display_name" koanf:"display_name" split_words:"true"`
+	DisplayName  string `jsonschema:"-"`
 }
 
 func (p *ThirdPartyProvider) Validate() error {

@@ -81,7 +81,7 @@
       }
     })
 
-    let abortController = undefined
+    let abortController = new AbortController()
     let webauthnAssertionForConditionalUI = undefined
 
     async function webauthnCreate(payload) {
