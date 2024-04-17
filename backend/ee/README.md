@@ -7,6 +7,6 @@
 
 Welcome to the Enterprisee Edition (/ee) of Hanko.
 
-The [/ee](https://github.com/teamhanko/hanko/tree/main/backend/ee) subfolder is the place for all the **Enterprise Edition** features from our [Business](https://www.hanko.io/pricing) plan such as SAML SSO.
+The [/ee](https://github.com/teamhanko/hanko/tree/main/backend/ee) subfolder is the place for all the **Enterprise Edition** features available as part of our [Enterprise](https://www.hanko.io/pricing) plan such as SAML SSO.
 
-> _❗ WARNING: This repository is copyrighted (unlike our [main repo](https://github.com/teamhanko/hanko)). You are not allowed to use this code to host your own version of hanko.io without obtaining a proper [license](https://hanko.io/) first❗_
+> _❗ WARNING: All code contained in this folder is copyrighted (unlike other parts of this [repo](https://github.com/teamhanko/hanko)). You are not allowed to use this code to host your own version of Hanko without obtaining a proper [license](https://hanko.io/pricing) first❗_
