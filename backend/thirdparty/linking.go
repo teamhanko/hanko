@@ -19,7 +19,7 @@ const (
 	getIdentityFailure = "could not get identity"
 )
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isSaml bool) (*AccountLinkingResult, error) {
 	if cfg.Emails.RequireVerification && !userData.Metadata.EmailVerified {
 		return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
 	}
@@ -38,15 +38,15 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 		if user == nil {
 			return signUp(tx, cfg, p, userData, providerName)
 		} else {
-			return link(tx, cfg, p, userData, providerName, user)
+			return link(tx, cfg, p, userData, providerName, user, isSaml)
 		}
 	} else {
 		return signIn(tx, cfg, p, userData, identity)
 	}
 }
 
-func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, user *models.User) (*AccountLinkingResult, error) {
-	if !cfg.ThirdParty.Providers.Get(providerName).AllowLinking {
+func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, user *models.User, isSaml bool) (*AccountLinkingResult, error) {
+	if !isSaml && !cfg.ThirdParty.Providers.Get(providerName).AllowLinking {
 		return nil, ErrorUserConflict("third party account linking for existing user with same email disallowed")
 	}
 
