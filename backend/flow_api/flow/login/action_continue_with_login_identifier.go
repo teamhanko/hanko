@@ -1,7 +1,6 @@
 package login
 
 import (
-	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
@@ -27,20 +26,21 @@ func (a ContinueWithLoginIdentifier) GetDescription() string {
 func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Username.Enabled {
-		input := flowpilot.EmailInput("identifier").
+	var input flowpilot.Input
+	if deps.Cfg.Identifier.Username.Enabled && deps.Cfg.Identifier.Email.Enabled {
+		input = flowpilot.StringInput("identifier")
+	} else if deps.Cfg.Identifier.Email.Enabled {
+		input = flowpilot.EmailInput("email")
+	} else if deps.Cfg.Identifier.Username.Enabled {
+		input = flowpilot.StringInput("username")
+	}
+
+	if input != nil {
+		c.AddInputs(input.
 			Required(true).
 			Preserve(true).
-			MaxLength(255)
-
-		c.AddInputs(input)
-	} else {
-		input := flowpilot.StringInput("identifier").
-			Required(true).
-			Preserve(true).
-			MaxLength(255)
-
-		c.AddInputs(input)
+			MinLength(3).
+			MaxLength(255))
 	}
 
 	if !deps.Cfg.Password.Enabled && !deps.Cfg.Passcode.Enabled {
@@ -55,17 +55,20 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	identifier := c.Input().Get("identifier").String()
-	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	identifierInputName, identifierInputValue, treatIdentifierAsEmail := a.analyzeIdentifierInputs(c)
 
-	if isEmail := emailPattern.MatchString(identifier); isEmail {
+	if len(identifierInputValue) == 0 {
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+	}
+
+	if treatIdentifierAsEmail {
 		// User has submitted an email address.
 
-		if err := c.Stash().Set("email", identifier); err != nil {
+		if err := c.Stash().Set("email", identifierInputValue); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 
-		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(identifier)
+		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(identifierInputValue)
 		if err != nil {
 			return fmt.Errorf("failed to get email model from db: %w", err)
 		}
@@ -84,13 +87,13 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return c.StartSubFlow(passcode.StatePasscodeConfirmation)
 		}
 	} else {
-		userModel, err := deps.Persister.GetUserPersister().GetByUsername(identifier)
+		userModel, err := deps.Persister.GetUserPersister().GetByUsername(identifierInputValue)
 		if err != nil {
 			return err
 		}
 
 		if userModel == nil {
-			flowError := flowpilot.ErrorValueInvalid.Wrap(errors.New("username not found"))
+			flowError := shared.ErrorUnknownUsername
 			err = deps.AuditLogger.CreateWithConnection(
 				deps.Tx,
 				deps.HttpContext,
@@ -103,11 +106,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				return fmt.Errorf("could not create audit log: %w", err)
 			}
 
-			c.Input().SetError("identifier", flowError)
+			c.Input().SetError(identifierInputName, flowError)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 
-		if err = c.Stash().Set("username", identifier); err != nil {
+		if err = c.Stash().Set("username", identifierInputValue); err != nil {
 			return fmt.Errorf("failed to set username to stash: %w", err)
 		}
 
@@ -154,4 +157,37 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 func (a ContinueWithLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
 	return nil
+}
+
+// analyzeIdentifierInputs determines if an input value has been provided for 'identifier', 'email', or 'username',
+// according to the configuration. Also adds an input error to the expected input field, if the value is missing.
+// Returns the related input field name, the provided value, and a flag, indicating if the value should be treated as
+// an email (and not as a username).
+func (a ContinueWithLoginIdentifier) analyzeIdentifierInputs(c flowpilot.ExecutionContext) (name string, value string, treatAsEmail bool) {
+	deps := a.GetDeps(c)
+	emailPattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+
+	if deps.Cfg.Identifier.Username.Enabled && deps.Cfg.Identifier.Email.Enabled {
+		// analyze the 'identifier' input field
+		name = "identifier"
+		value = c.Input().Get(name).String()
+		treatAsEmail = emailPattern.MatchString(value)
+	} else if deps.Cfg.Identifier.Email.Enabled {
+		// analyze the 'email' input field
+		name = "email"
+		value = c.Input().Get(name).String()
+		treatAsEmail = true
+	} else if deps.Cfg.Identifier.Username.Enabled {
+		// analyze the 'username' input field
+		name = "username"
+		value = c.Input().Get(name).String()
+		treatAsEmail = false
+	}
+
+	// If no value could not be determined, set an error for the missing input
+	if len(value) == 0 && len(name) > 0 {
+		c.Input().SetError(name, flowpilot.ErrorValueMissing)
+	}
+
+	return name, value, treatAsEmail
 }
