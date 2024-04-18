@@ -14,7 +14,7 @@ const (
 	UserEmailPrimary Event = "user.update.email.primary"
 	UserEmailDelete  Event = "user.update.email.delete"
 
-	EmailCreate Event = "email.create"
+	EmailSend Event = "email.send"
 )
 
 func StringIsValidEvent(value string) bool {
@@ -25,7 +25,7 @@ func StringIsValidEvent(value string) bool {
 func IsValidEvent(evt Event) bool {
 	var isValid bool
 	switch evt {
-	case User, UserCreate, UserUpdate, UserDelete, UserEmail, UserEmailCreate, UserEmailPrimary, UserEmailDelete, EmailCreate:
+	case User, UserCreate, UserUpdate, UserDelete, UserEmail, UserEmailCreate, UserEmailPrimary, UserEmailDelete, EmailSend:
 		isValid = true
 	default:
 		isValid = false

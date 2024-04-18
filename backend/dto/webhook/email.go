@@ -1,6 +1,6 @@
 package webhook
 
-type EmailCreate struct {
+type EmailSend struct {
 	Subject          string    `json:"subject"`        // subject
 	BodyPlain        string    `json:"body_plain"`     // used for string templates
 	Body             string    `json:"body,omitempty"` // used for html templates
