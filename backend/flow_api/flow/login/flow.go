@@ -44,7 +44,7 @@ var Flow = flowpilot.NewFlow("/login").
 		shared.ThirdPartyOAuth{},
 		shared.Back{},
 	).
-	State(StateLoginPasskey, WebauthnVerifyAssertionResponse{}).
+	State(StateLoginPasskey, WebauthnVerifyAssertionResponse{}, shared.Back{}).
 	State(StateLoginPassword,
 		PasswordLogin{},
 		ContinueToPasscodeConfirmationRecovery{},
