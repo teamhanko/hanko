@@ -988,6 +988,6 @@ webhooks:
         #
         # Triggers on: an email was sent or should be sent
         #
-        - email.create
+        - email.send
 
 ```
