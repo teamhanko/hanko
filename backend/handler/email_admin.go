@@ -150,7 +150,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 			err = h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 		}
 
-		utils.NotifyUserChange(ctx, tx, h.persister, events.EmailCreate, userId)
+		utils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailCreate, userId)
 
 		return ctx.JSON(http.StatusCreated, admin.FromEmailModel(email))
 	})
@@ -229,7 +229,7 @@ func (h *emailAdminHandler) Delete(ctx echo.Context) error {
 			return fmt.Errorf("failed to delete email from db: %w", err)
 		}
 
-		utils.NotifyUserChange(ctx, tx, h.persister, events.EmailDelete, userId)
+		utils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailDelete, userId)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})
@@ -275,7 +275,7 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 			return err
 		}
 
-		utils.NotifyUserChange(ctx, tx, h.persister, events.EmailPrimary, userId)
+		utils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailPrimary, userId)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})

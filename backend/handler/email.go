@@ -144,7 +144,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			var evt events.Event
 
 			if len(user.Emails) >= 1 {
-				evt = events.EmailCreate
+				evt = events.UserEmailCreate
 			} else {
 				evt = events.UserCreate
 			}
@@ -212,7 +212,7 @@ func (h *EmailHandler) SetPrimaryEmail(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
-		utils.NotifyUserChange(c, tx, h.persister, events.EmailPrimary, userId)
+		utils.NotifyUserChange(c, tx, h.persister, events.UserEmailPrimary, userId)
 
 		return c.NoContent(http.StatusNoContent)
 	})
@@ -256,7 +256,7 @@ func (h *EmailHandler) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
-		utils.NotifyUserChange(c, tx, h.persister, events.EmailDelete, userId)
+		utils.NotifyUserChange(c, tx, h.persister, events.UserEmailDelete, userId)
 
 		return c.NoContent(http.StatusNoContent)
 	})

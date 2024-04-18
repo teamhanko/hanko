@@ -20,6 +20,9 @@ var DefaultConfig = config.Config{
 		Host: "localhost",
 		Port: "2500",
 	},
+	EmailDelivery: config.EmailDelivery{
+		Enabled: true,
+	},
 	Passcode: config.Passcode{
 		Email: config.Email{
 			FromAddress: "test@hanko.io",

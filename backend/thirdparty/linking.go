@@ -128,7 +128,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 			}
 
 			identity.EmailID = email.ID
-			webhookEvent = events.EmailCreate
+			webhookEvent = events.UserEmailCreate
 		}
 	}
 
