@@ -33,7 +33,7 @@ type PasscodeHandler struct {
 	renderer          *mail.Renderer
 	passcodeGenerator crypto.PasscodeGenerator
 	persister         persistence.Persister
-	emailConfig       config.Email
+	emailConfig       config.PasscodeEmail
 	serviceConfig     config.Service
 	TTL               int
 	sessionManager    session.Manager

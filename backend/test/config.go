@@ -24,7 +24,7 @@ var DefaultConfig = config.Config{
 		Enabled: true,
 	},
 	Passcode: config.Passcode{
-		Email: config.Email{
+		Email: config.PasscodeEmail{
 			FromAddress: "test@hanko.io",
 			FromName:    "Hanko Test",
 		},

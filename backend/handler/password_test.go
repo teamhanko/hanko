@@ -36,7 +36,7 @@ func (s *passwordSuite) TestPasswordHandler_Set_Create() {
 
 	cfg := &test.DefaultConfig
 	cfg.Password.Enabled = true
-	cfg.Password.MinPasswordLength = 8
+	cfg.Password.MinLength = 8
 
 	tests := []struct {
 		name         string

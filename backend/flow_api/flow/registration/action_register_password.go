@@ -24,7 +24,7 @@ func (a RegisterPassword) GetDescription() string {
 
 func (a RegisterPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinPasswordLength))
+	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinLength))
 }
 
 func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
@@ -37,7 +37,7 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 	newPassword := c.Input().Get("new_password").String()
 	newPasswordBytes := []byte(newPassword)
 
-	if utf8.RuneCountInString(newPassword) < deps.Cfg.Password.MinPasswordLength {
+	if utf8.RuneCountInString(newPassword) < deps.Cfg.Password.MinLength {
 		c.Input().SetError("new_password", flowpilot.ErrorValueInvalid)
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}

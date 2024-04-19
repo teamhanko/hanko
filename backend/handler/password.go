@@ -73,12 +73,12 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 	}
 
 	pwBytes := []byte(body.Password)
-	if utf8.RuneCountInString(body.Password) < h.cfg.Password.MinPasswordLength { // use utf8.RuneCountInString, so utf8 characters would count as 1
+	if utf8.RuneCountInString(body.Password) < h.cfg.Password.MinLength { // use utf8.RuneCountInString, so utf8 characters would count as 1
 		err = h.auditLogger.Create(c, models.AuditLogPasswordSetFailed, user, fmt.Errorf("password too short"))
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
-		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.Password.MinPasswordLength))
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("password must be at least %d characters long", h.cfg.Password.MinLength))
 	}
 
 	if len(pwBytes) > 72 {
