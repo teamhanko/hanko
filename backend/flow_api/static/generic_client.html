@@ -159,7 +159,7 @@
     }
 
     function generateUI(data) {
-        if (data.state === "login_init" && data.payload && data.payload.request_options) {
+        if (data.name === "login_init" && data.payload && data.payload.request_options) {
           awaitAssertionResponseForConditionalUi(data.payload)
         }
 
@@ -282,7 +282,7 @@
                             inputListItem.appendChild(error);
                         }
 
-                        if (data.state === "login_init" && action.action === "webauthn_verify_request_response") {
+                        if (data.name === "login_init" && action.action === "webauthn_verify_assertion_response") {
                           if (webauthnAssertionForConditionalUI) {
                             inputElement.value = webauthnAssertionForConditionalUI
                           }
@@ -303,7 +303,7 @@
                 submitButton.type = 'submit';
                 submitButton.textContent = "📡 Submit";
                 submitButton.addEventListener('click', (event) => {
-                  if (data.state === "login_init") {
+                  if (data.name === "login_init") {
                     abortController.abort()
                   }
                   updateFlow(event, form)
@@ -380,7 +380,7 @@
         })
             .then(response => response.json())
             .then((data) => {
-              if (data.state === 'thirdparty_oauth') {
+              if (data.name === 'thirdparty_oauth') {
                 localStorage.setItem('thirdparty_oauth_state', JSON.stringify(data))
               }
               return data
