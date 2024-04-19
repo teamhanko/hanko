@@ -29,7 +29,7 @@ func (a PasswordRecovery) Initialize(c flowpilot.InitializationContext) {
 
 	c.AddInputs(flowpilot.PasswordInput("new_password").
 		Required(true).
-		MinLength(deps.Cfg.Password.MinPasswordLength),
+		MinLength(deps.Cfg.Password.MinLength),
 	)
 
 	if !deps.Cfg.Password.Enabled {

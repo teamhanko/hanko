@@ -54,7 +54,7 @@ func (s *submitNewPassword) TestSubmitNewPassword_Execute() {
 			flowId: "0b41f4dd-8e46-4a7c-bb4d-d60843113431",
 			cfg: config.Config{
 				Password: config.Password{
-					MinPasswordLength: 8,
+					MinLength: 8,
 				},
 			},
 			expectedState:      StatePasswordCreation,

@@ -42,6 +42,8 @@ type Config struct {
 	Passkey      Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
 	Saml         config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
 	Webhooks     WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
+	Email        Email            `yaml:"email" json:"email" koanf:"email"`
+	Username     Username         `yaml:"username" json:"username" koanf:"username"`
 }
 
 var (
@@ -125,7 +127,7 @@ func DefaultConfig() *Config {
 		},
 		Passcode: Passcode{
 			TTL: 300,
-			Email: Email{
+			Email: PasscodeEmail{
 				FromAddress: "passcode@hanko.io",
 				FromName:    "Hanko",
 			},
@@ -134,7 +136,7 @@ func DefaultConfig() *Config {
 			},
 		},
 		Password: Password{
-			MinPasswordLength: 8,
+			MinLength: 8,
 		},
 		Database: Database{
 			Database: "hanko",
@@ -199,6 +201,37 @@ func DefaultConfig() *Config {
 			},
 		},
 		// TODO: add defaults for Passkey, Identifier, SecondFactor
+		Passkey: Passkey{
+			Enabled:               true,
+			Optional:              true,
+			AcquireOnRegistration: "always",
+			AcquireOnLogin:        "always",
+			UserVerification:      "preferred",
+			AttestationPreference: "direct",
+			Limit:                 100,
+			Onboarding:            PasskeyOnboarding{},
+		},
+		Email: Email{
+			Enabled:               true,
+			Optional:              false,
+			AcquireOnRegistration: "always",
+			AcquireOnLogin:        "always",
+			RequireVerification:   true,
+			Limit:                 5,
+			UseAsLoginIdentifier:  true,
+			MaxLength:             120,
+			UseForAuthentication:  true,
+			PasscodeTtl:           300,
+		},
+		Username: Username{
+			Enabled:               true,
+			Optional:              true,
+			AcquireOnRegistration: "always",
+			AcquireOnLogin:        "always",
+			UseAsLoginIdentifier:  false,
+			MinLength:             0,
+			MaxLength:             0,
+		},
 	}
 }
 
@@ -288,9 +321,12 @@ func (s *Service) Validate() error {
 }
 
 type Password struct {
-	Enabled           bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	Optional          bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
-	MinPasswordLength int  `yaml:"min_password_length" json:"min_password_length,omitempty" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
+	Enabled               bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Optional              bool   `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	Recovery              bool   `yaml:"recovery" json:"recovery" koanf:"recovery" jsonschema:"default=true"`
+	MinLength             int    `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
 }
 
 type Cookie struct {
@@ -432,12 +468,12 @@ func (s *SMTP) Validate() error {
 	return nil
 }
 
-type Email struct {
+type PasscodeEmail struct {
 	FromAddress string `yaml:"from_address" json:"from_address,omitempty" koanf:"from_address" split_words:"true" jsonschema:"default=passcode@hanko.io"`
 	FromName    string `yaml:"from_name" json:"from_name,omitempty" koanf:"from_name" split_words:"true" jsonschema:"default=Hanko"`
 }
 
-func (e *Email) Validate() error {
+func (e *PasscodeEmail) Validate() error {
 	if len(strings.TrimSpace(e.FromAddress)) == 0 {
 		return errors.New("from_address must not be empty")
 	}
@@ -445,9 +481,9 @@ func (e *Email) Validate() error {
 }
 
 type Passcode struct {
-	Enabled bool  `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Email   Email `yaml:"email" json:"email,omitempty" koanf:"email"`
-	TTL     int   `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Enabled bool          `yaml:"enabled" json:"enabled" koanf:"enabled"`
+	Email   PasscodeEmail `yaml:"email" json:"email,omitempty" koanf:"email"`
+	TTL     int           `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 	//Deprecated: Use root level Smtp instead
 	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
@@ -784,11 +820,13 @@ type Account struct {
 
 // TODO: below structs need validation, e.g. only allowed names for enabled and also we should reject some configurations (e.g. passcode & passwords are disabled and passkey onboarding is also disabled)
 
+// Deprecated
 type Identifier struct {
 	Username IdentifierUsername `yaml:"username" json:"username" koanf:"username"`
 	Email    IdentifierEmail    `yaml:"email" json:"email" koanf:"email"`
 }
 
+// Deprecated
 type IdentifierUsername struct {
 	Enabled           bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	Optional          bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
@@ -797,6 +835,7 @@ type IdentifierUsername struct {
 	AllowedCharacters string `yaml:"allowed_characters" json:"allowed_characters" koanf:"allowed_characters" split_words:"true"`
 }
 
+// Deprecated
 type IdentifierEmail struct {
 	Enabled      bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	Optional     bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
@@ -821,9 +860,40 @@ type RecoveryCodes struct {
 }
 
 type Passkey struct {
-	Onboarding PasskeyOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
+	Enabled               bool              `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool              `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration string            `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin        string            `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	UserVerification      string            `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
+	AttestationPreference string            `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
+	Limit                 int               `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=100"`
+	Onboarding            PasskeyOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"` // Deprecated
 }
 
+// Deprecated
 type PasskeyOnboarding struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type Email struct {
+	Enabled               bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	RequireVerification   bool   `yaml:"require_verification" json:"require_verification" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
+	Limit                 int    `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=100"`
+	UseAsLoginIdentifier  bool   `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+	MaxLength             int    `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
+	UseForAuthentication  bool   `yaml:"use_for_authentication" json:"use_for_authentication" koanf:"use_for_authentication" jsonschema:"default=true"`
+	PasscodeTtl           int    `yaml:"passcode_ttl" json:"passcode_ttl" koanf:"passcode_ttl" jsonschema:"default=300"`
+}
+
+type Username struct {
+	Enabled               bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	UseAsLoginIdentifier  bool   `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+	MinLength             int    `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
+	MaxLength             int    `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
 }

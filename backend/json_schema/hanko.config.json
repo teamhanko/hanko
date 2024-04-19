@@ -495,6 +495,52 @@
     },
     "Passkey": {
       "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "optional": {
+          "type": "boolean"
+        },
+        "acquire_on_registration": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "acquire_on_login": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "user_verification": {
+          "type": "string",
+          "enum": [
+            "required",
+            "preferred",
+            "discouraged"
+          ],
+          "default": "preferred"
+        },
+        "attestation_preference": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "indirect",
+            "none"
+          ],
+          "default": "direct"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
         "onboarding": {
           "$ref": "#/$defs/PasskeyOnboarding"
         }
@@ -502,6 +548,12 @@
       "additionalProperties": false,
       "type": "object",
       "required": [
+        "enabled",
+        "optional",
+        "acquire_on_registration",
+        "acquire_on_login",
+        "attestation_preference",
+        "limit",
         "onboarding"
       ]
     },
