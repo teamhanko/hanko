@@ -27,7 +27,7 @@ func (a WebauthnVerifyAttestationResponse) Initialize(c flowpilot.Initialization
 		c.SuspendAction()
 	}
 
-	c.AddInputs(flowpilot.StringInput("public_key").Required(true).Persist(false))
+	c.AddInputs(flowpilot.JSONInput("public_key").Required(true).Persist(false))
 }
 
 func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext) error {

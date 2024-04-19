@@ -47,7 +47,7 @@ var Flow = flowpilot.NewFlow("/profile").
 		WebauthnCredentialCreate{},
 		WebauthnCredentialDelete{},
 	).
-	State(StateProfileWebauthnCredentialVerification, WebauthnVerifyAttestationResponse{}).
+	State(StateProfileWebauthnCredentialVerification, WebauthnVerifyAttestationResponse{}, shared.Back{}).
 	AfterState(StateProfileWebauthnCredentialVerification, shared.WebauthnCredentialSave{}).
 	AfterState(passcode.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 	State(StateProfileAccountDeleted).

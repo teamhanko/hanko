@@ -82,20 +82,8 @@ func (user webauthnUser) WebAuthnIcon() string {
 	return ""
 }
 
-type Error struct {
-	Details string
-}
-
-func (e Error) Error() string {
-	return e.Details
-}
-
-func (e Error) Wrap(err error) error {
-	return &Error{Details: fmt.Sprintf("%s: %s", e.Details, err.Error())}
-}
-
 var (
-	ErrInvalidWebauthnCredential = &Error{Details: "this passkey cannot be used anymore"}
+	ErrInvalidWebauthnCredential = errors.New("this passkey cannot be used anymore")
 )
 
 type webauthnService struct {
@@ -132,7 +120,7 @@ func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams)
 func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParams) (*models.User, error) {
 	credentialAssertionData, err := protocol.ParseCredentialRequestResponseBody(strings.NewReader(p.AssertionResponse))
 	if err != nil {
-		return nil, ErrInvalidWebauthnCredential.Wrap(err)
+		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
 	sessionDataModel, err := s.persister.GetWebauthnSessionDataPersister().Get(p.SessionDataID)
@@ -151,7 +139,7 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	}
 
 	if userModel == nil {
-		return nil, ErrInvalidWebauthnCredential.Wrap(errors.New("user does not exist"))
+		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
 	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
@@ -166,7 +154,7 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		credentialAssertionData,
 	)
 	if err != nil {
-		return nil, ErrInvalidWebauthnCredential.Wrap(err)
+		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
 	encodedCredentialId := base64.RawURLEncoding.EncodeToString(credential.ID)
@@ -208,7 +196,7 @@ func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParam
 		webauthn.WithAuthenticatorSelection(authenticatorSelection),
 	)
 	if err != nil {
-		return nil, nil, ErrInvalidWebauthnCredential.Wrap(err)
+		return nil, nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
 	sessionDataModel, err := models.NewWebauthnSessionDataFrom(sessionData, models.WebauthnOperationRegistration)
@@ -245,7 +233,7 @@ func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseP
 		credentialCreationData,
 	)
 	if err != nil {
-		return nil, ErrInvalidWebauthnCredential.Wrap(err)
+		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
 	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Delete(*sessionDataModel)
