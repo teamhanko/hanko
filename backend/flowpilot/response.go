@@ -81,9 +81,10 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 	status := flowError.Status()
 
 	publicResponse := PublicResponse{
-		Name:        stateName,
-		Status:      status,
-		PublicError: &publicError,
+		Name:          stateName,
+		Status:        status,
+		PublicError:   &publicError,
+		PublicActions: PublicActions{},
 	}
 
 	return DefaultFlowResult{PublicResponse: publicResponse}

@@ -1,6 +1,7 @@
 package passkey_onboarding
 
 import (
+	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
@@ -17,5 +18,5 @@ const (
 
 var SubFlow = flowpilot.NewSubFlow().
 	State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}, Skip{}).
-	State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{}).
+	State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{}, shared.Back{}).
 	MustBuild()

@@ -2,7 +2,6 @@ package shared
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
@@ -20,7 +19,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 	deps := h.GetDeps(c)
 
 	if !c.Stash().Get("user_id").Exists() {
-		return flowpilot.ErrorOperationNotPermitted
+		return nil
 	}
 
 	userId, err := uuid.FromString(c.Stash().Get("user_id").String())
@@ -29,7 +28,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 	}
 
 	if !c.Stash().Get("webauthn_credential").Exists() {
-		return errors.New("webauthn_credential not set in stash")
+		return nil
 	}
 
 	webauthnCredentialJson := c.Stash().Get("webauthn_credential").String()

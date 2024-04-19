@@ -67,7 +67,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 				deps.Tx,
 				deps.HttpContext,
 				models.AuditLogLoginFailure,
-				&models.User{ID: userModel.ID},
+				userModel,
 				err,
 				auditlog.Detail("login_method", "passkey"),
 				auditlog.Detail("flow_id", c.GetFlowID()))
