@@ -29,20 +29,22 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("passcode_template has not been stashed")
 	}
 
-	rateLimitKey := createRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
-	resendAfterSeconds, ok, err := rate_limiter.Limit2(deps.RateLimiter, rateLimitKey)
-	if err != nil {
-		return fmt.Errorf("rate limiter failed: %w", err)
-	}
-
-	if !ok {
-		err = c.Payload().Set("resend_after", resendAfterSeconds)
+	if deps.Cfg.RateLimiter.Enabled {
+		rateLimitKey := createRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
+		resendAfterSeconds, ok, err := rate_limiter.Limit2(deps.RateLimiter, rateLimitKey)
 		if err != nil {
-			return fmt.Errorf("failed to set a value for resend_after to the payload: %w", err)
+			return fmt.Errorf("rate limiter failed: %w", err)
 		}
 
-		c.SetFlowError(shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
-		return nil
+		if !ok {
+			err = c.Payload().Set("resend_after", resendAfterSeconds)
+			if err != nil {
+				return fmt.Errorf("failed to set a value for resend_after to the payload: %w", err)
+			}
+
+			c.SetFlowError(shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
+			return nil
+		}
 	}
 
 	validationParams := services.ValidatePasscodeParams{

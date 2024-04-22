@@ -210,7 +210,7 @@ func DefaultConfig() *Config {
 		Passkey: Passkey{
 			Enabled:               true,
 			Optional:              true,
-			AcquireOnRegistration: "always",
+			AcquireOnRegistration: true,
 			AcquireOnLogin:        "always",
 			UserVerification:      "preferred",
 			AttestationPreference: "direct",
@@ -220,8 +220,8 @@ func DefaultConfig() *Config {
 		Email: Email{
 			Enabled:               true,
 			Optional:              false,
-			AcquireOnRegistration: "always",
-			AcquireOnLogin:        "always",
+			AcquireOnRegistration: true,
+			AcquireOnLogin:        true,
 			RequireVerification:   true,
 			Limit:                 5,
 			UseAsLoginIdentifier:  true,
@@ -232,8 +232,8 @@ func DefaultConfig() *Config {
 		Username: Username{
 			Enabled:               true,
 			Optional:              true,
-			AcquireOnRegistration: "always",
-			AcquireOnLogin:        "always",
+			AcquireOnRegistration: true,
+			AcquireOnLogin:        true,
 			UseAsLoginIdentifier:  false,
 			MinLength:             0,
 			MaxLength:             0,
@@ -327,7 +327,7 @@ func (s *Service) Validate() error {
 type Password struct {
 	Enabled               bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	Optional              bool   `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
-	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnRegistration bool   `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
 	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	Recovery              bool   `yaml:"recovery" json:"recovery" koanf:"recovery" jsonschema:"default=true"`
 	MinLength             int    `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
@@ -880,7 +880,7 @@ type RecoveryCodes struct {
 type Passkey struct {
 	Enabled               bool              `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	Optional              bool              `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration string            `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnRegistration bool              `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
 	AcquireOnLogin        string            `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	UserVerification      string            `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 	AttestationPreference string            `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
@@ -894,24 +894,24 @@ type PasskeyOnboarding struct {
 }
 
 type Email struct {
-	Enabled               bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	Optional              bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
-	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
-	RequireVerification   bool   `yaml:"require_verification" json:"require_verification" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
-	Limit                 int    `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=100"`
-	UseAsLoginIdentifier  bool   `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
-	MaxLength             int    `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
-	UseForAuthentication  bool   `yaml:"use_for_authentication" json:"use_for_authentication" koanf:"use_for_authentication" jsonschema:"default=true"`
-	PasscodeTtl           int    `yaml:"passcode_ttl" json:"passcode_ttl" koanf:"passcode_ttl" jsonschema:"default=300"`
+	Enabled               bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
+	AcquireOnLogin        bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
+	RequireVerification   bool `yaml:"require_verification" json:"require_verification" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
+	Limit                 int  `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=100"`
+	UseAsLoginIdentifier  bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+	MaxLength             int  `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
+	UseForAuthentication  bool `yaml:"use_for_authentication" json:"use_for_authentication" koanf:"use_for_authentication" jsonschema:"default=true"`
+	PasscodeTtl           int  `yaml:"passcode_ttl" json:"passcode_ttl" koanf:"passcode_ttl" jsonschema:"default=300"`
 }
 
 type Username struct {
-	Enabled               bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	Optional              bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
-	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
-	UseAsLoginIdentifier  bool   `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
-	MinLength             int    `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
-	MaxLength             int    `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
+	Enabled               bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=false"`
+	AcquireOnLogin        bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
+	UseAsLoginIdentifier  bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+	MinLength             int  `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
+	MaxLength             int  `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
 }

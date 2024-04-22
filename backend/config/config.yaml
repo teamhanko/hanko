@@ -29,20 +29,39 @@ webauthn:
       - http://localhost:63342
       - http://localhost:8000
 password:
-  enabled: false
+  enabled: true
+  optional: true
+  acquire_on_registration: conditional
+  acquire_on_login: always
+  recovery: true
 emails:
   require_verification: true
 passkey:
+  enabled: true
+  optional: true
+  acquire_on_registration: conditional
+  acquire_on_login: always
+  attestation_preference: direct
+  limit: 100
   onboarding:
     enabled: true
-identifier:
-  username:
-    enabled: true
-    optional: true
-    max_length: 255
-    min_length: 3
-    allowed_characters: "abcdefghijklmnopqrstuvwxyz123456789-_."
-  email:
-    enabled: true
-    optional: false
-    verification: true # maybe we should also consider separate opitional attribute or is false interpreted as optional and true as required (and disabled does not exist)
+email:
+  enabled: true
+  optional: true
+  acquire_on_registration: true
+  acquire_on_login: false
+  require_verification: true
+  limit: 100
+  use_as_login_identifier: true
+  max_length: 100
+  use_for_authentication: true
+  passcode_ttl: 300
+username:
+  enabled: true
+  optional: true
+  acquire_on_registration: false
+  acquire_on_login: false
+  use_as_login_identifier: true
+  max_length: 100
+rate_limiter:
+  enabled: false

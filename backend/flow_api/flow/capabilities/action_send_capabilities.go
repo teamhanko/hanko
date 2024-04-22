@@ -18,6 +18,13 @@ func (a RegisterClientCapabilities) GetDescription() string {
 }
 
 func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext) {
+	//deps := a.GetDeps(c)
+	//
+	//if !deps.Cfg.Passkey.Enabled {
+	//	c.SuspendAction()
+	//	return
+	//}
+
 	c.AddInputs(flowpilot.BooleanInput("webauthn_conditional_mediation_available").
 		Hidden(true))
 	c.AddInputs(flowpilot.BooleanInput("webauthn_available").Required(true).Hidden(true))
@@ -25,6 +32,10 @@ func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
+
+	//if !deps.Cfg.Passkey.Enabled {
+	//	c.ContinueFlow()
+	//}
 
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
