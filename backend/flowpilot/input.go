@@ -263,14 +263,14 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		return false
 	}
 
-	if i.minLength != nil && len(*inputValue) > 0 {
+	if !hasEmptyOrNilValue && i.minLength != nil {
 		if len(*inputValue) < *i.minLength {
 			i.error = ErrorValueTooShort
 			return false
 		}
 	}
 
-	if i.maxLength != nil {
+	if !hasEmptyOrNilValue && i.maxLength != nil {
 		if len(*inputValue) > *i.maxLength {
 			i.error = ErrorValueTooLong
 			return false
