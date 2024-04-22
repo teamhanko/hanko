@@ -1,7 +1,8 @@
 import { h } from "preact";
 import { StateUpdater, useContext, useState } from "preact/compat";
+
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { EmailCreateInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
+import { UsernameSetInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
 
 import Form from "../form/Form";
 import Input from "../form/Input";
@@ -10,53 +11,49 @@ import Dropdown from "./Dropdown";
 import ErrorMessage from "../error/ErrorMessage";
 
 interface Props {
-  inputs: EmailCreateInputs;
-  onEmailSubmit: (event: Event, email: string) => Promise<void>;
+  inputs: UsernameSetInputs;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
+  onUsernameSubmit: (event: Event, username: string) => Promise<void>;
 }
 
-const AddEmailDropdown = ({
+const ChangeUsernameDropdown = ({
   inputs,
-  onEmailSubmit,
   checkedItemID,
   setCheckedItemID,
+  onUsernameSubmit,
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const [newEmail, setNewEmail] = useState<string>();
+  const [username, setUsername] = useState<string>(inputs.username.value);
 
   const onInputHandler = (event: Event) => {
     event.preventDefault();
     if (event.target instanceof HTMLInputElement) {
-      setNewEmail(event.target.value);
+      setUsername(event.target.value);
     }
   };
 
   return (
     <Dropdown
-      name={"email-create-dropdown"}
-      title={t("labels.addEmail")}
+      name={"username-edit-dropdown"}
+      title={t("labels.changeUsername")}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}
     >
-      <ErrorMessage flowError={inputs.email?.error} />
-      <Form
-        onSubmit={(event: Event) =>
-          onEmailSubmit(event, newEmail).then(() => setNewEmail(""))
-        }
-      >
+      <ErrorMessage flowError={inputs.username?.error} />
+      <Form onSubmit={(event: Event) => onUsernameSubmit(event, username)}>
         <Input
           markError
-          type={"email"}
-          placeholder={t("labels.newEmailAddress")}
+          placeholder={t("labels.username")}
+          type={"text"}
           onInput={onInputHandler}
-          value={newEmail}
-          flowInput={inputs.email}
+          value={username}
+          flowInput={inputs.username}
         />
-        <Button uiAction={"email-submit"}>{t("labels.save")}</Button>
+        <Button uiAction={"username-set"}>{t("labels.save")}</Button>
       </Form>
     </Dropdown>
   );
 };
 
-export default AddEmailDropdown;
+export default ChangeUsernameDropdown;

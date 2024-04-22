@@ -26,10 +26,14 @@ export const ptBR: Translation = {
     connectedAccounts: "Contas conectadas",
     deleteAccount: "Apagar a conta",
     accountNotFound: "Conta não encontrada",
+    signIn: "Entrar",
+    signUp: "Registrar",
   },
   texts: {
     enterPasscode:
       'Digite o código de acesso que foi enviado para "{emailAddress}".',
+    enterPasscodeNoEmail:
+      "Digite o código enviado para o seu endereço de e-mail principal.",
     setupPasskey:
       "Entre na sua conta de forma fácil e segura com uma chave de acesso. Nota: Os seus dados biométricos são apenas guardados no seu aparelho e nunca serão compartilhados com ninguém.",
     createAccount:
@@ -54,6 +58,7 @@ export const ptBR: Translation = {
     deleteAccount:
       "Tem certeza que deseja apagar esta conta? Todos os dados serão apagados imediatamente e não poderão ser recuperados.",
     noAccountExists: 'Nenhuma conta encontrada para o e-mail "{emailAddress}".',
+    changeYourUsername: "Mude seu nome de usuário",
   },
   labels: {
     or: "ou",
@@ -91,6 +96,12 @@ export const ptBR: Translation = {
       "Chaves de acesso não são compatíveis com seu navegador",
     signInWith: "Entre com {provider}",
     deleteAccount: "Sim, apagar esta conta.",
+    emailOrUsername: "E-mail ou Nome de usuário",
+    username: "Nome de usuário",
+    optional: "opcional",
+    dontHaveAnAccount: "Não tem uma conta?",
+    alreadyHaveAnAccount: "Já tem uma conta?",
+    changeUsername: "Alterar nome de usuário",
   },
   errors: {
     somethingWentWrong:
@@ -117,5 +128,19 @@ export const ptBR: Translation = {
     thirdPartyUnverifiedEmail:
       "Verificação de e-mail necessária. Por favor, verifique o e-mail utilizado com o seu provedor.",
     signupDisabled: "O registro da conta está desativado.",
+  },
+  flowErrors: {
+    flow_expired_error:
+      "A sessão expirou, por favor, clique no botão para reiniciar.",
+    value_invalid_error: "O valor inserido é inválido.",
+    passcode_invalid: "O código fornecido não estava correto.",
+    passkey_invalid: "Esta chave de acesso não pode mais ser utilizada.",
+    passcode_max_attempts_reached:
+      "O código foi inserido incorretamente várias vezes. Por favor, solicite um novo código.",
+    rate_limit_exceeded:
+      "Foram feitas muitas solicitações. Por favor, aguarde para repetir a operação solicitada.",
+    unknown_username_error: "O nome de usuário é desconhecido.",
+    username_already_exists: "O nome de usuário já está em uso.",
+    email_already_taken: "O e-mail já está em uso.",
   },
 };

@@ -1,125 +1,35 @@
 import { Fragment } from "preact";
-import {
-  StateUpdater,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "preact/compat";
-
-import {
-  Email,
-  HankoError,
-  TooManyRequestsError,
-} from "@teamhanko/hanko-frontend-sdk";
+import { StateUpdater, useContext, useMemo } from "preact/compat";
 
 import styles from "./styles.sass";
 
-import { AppContext } from "../../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Accordion from "./Accordion";
 import Paragraph from "../paragraph/Paragraph";
 import Headline2 from "../headline/Headline2";
 import Link from "../link/Link";
-
-import ProfilePage from "../../pages/ProfilePage";
-import LoginPasscodePage from "../../pages/LoginPasscodePage";
+import { Email } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 
 interface Props {
-  setError: (e: HankoError) => void;
-  checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  onEmailDelete: (event: Event, emailID: string) => Promise<void>;
+  onEmailSetPrimary: (event: Event, emailID: string) => Promise<void>;
+  onEmailVerify: (event: Event, emailID: string) => Promise<void>;
+  checkedItemID?: string;
+  setCheckedItemID: StateUpdater<string>;
+  emails?: Email[];
 }
 
 const ListEmailsAccordion = ({
-  setError,
-  checkedItemIndex,
-  setCheckedItemIndex,
+  onEmailDelete,
+  onEmailSetPrimary,
+  onEmailVerify,
+  checkedItemID,
+  setCheckedItemID,
+  emails = [],
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, user, emails, setEmails, setPage, setPasscode } =
-    useContext(AppContext);
-
-  const [isPrimaryEmailLoading, setIsPrimaryEmailLoading] =
-    useState<boolean>(false);
-  const [isVerificationLoading, setIsVerificationLoading] =
-    useState<boolean>(false);
-  const [isDeletionLoading, setIsDeletionLoading] = useState<boolean>(false);
-
-  const isDisabled = useMemo(
-    () => isPrimaryEmailLoading || isVerificationLoading || isDeletionLoading,
-    [isDeletionLoading, isPrimaryEmailLoading, isVerificationLoading]
-  );
-
-  const renderPasscode = useCallback(
-    (email: Email) => {
-      const onBackHandler = () => setPage(<ProfilePage />);
-
-      const showPasscodePage = (e?: HankoError) =>
-        setPage(
-          <LoginPasscodePage
-            userID={user.id}
-            emailID={email.id}
-            emailAddress={email.address}
-            initialError={e}
-            onSuccess={() =>
-              hanko.email.list().then(setEmails).then(onBackHandler)
-            }
-            onBack={onBackHandler}
-          />
-        );
-
-      return hanko.passcode
-        .initialize(user.id, email.id, true)
-        .then(setPasscode)
-        .then(() => showPasscodePage())
-        .catch((e) => {
-          if (e instanceof TooManyRequestsError) {
-            showPasscodePage(e);
-            return;
-          }
-          throw e;
-        });
-    },
-    [hanko.email, hanko.passcode, setEmails, setPage, setPasscode, user.id]
-  );
-
-  const changePrimaryEmail = (event: Event, email: Email) => {
-    event.preventDefault();
-    setIsPrimaryEmailLoading(true);
-    hanko.email
-      .setPrimaryEmail(email.id)
-      .then(() => setError(null))
-      .then(() => hanko.email.list())
-      .then(setEmails)
-      .finally(() => setIsPrimaryEmailLoading(false))
-      .catch(setError);
-  };
-
-  const deleteEmail = (event: Event, email: Email) => {
-    event.preventDefault();
-    setIsDeletionLoading(true);
-    hanko.email
-      .delete(email.id)
-      .then(() => {
-        setError(null);
-        setCheckedItemIndex(null);
-        setIsDeletionLoading(false);
-        return;
-      })
-      .then(() => hanko.email.list())
-      .then(setEmails)
-      .finally(() => setIsDeletionLoading(false))
-      .catch(setError);
-  };
-
-  const verifyEmail = (event: Event, email: Email) => {
-    setIsVerificationLoading(true);
-    renderPasscode(email)
-      .finally(() => setIsVerificationLoading(false))
-      .catch(setError);
-  };
+  const isDisabled = useMemo(() => false, []);
 
   const labels = (email: Email) => {
     const description = (
@@ -158,9 +68,8 @@ const ListEmailsAccordion = ({
             {t("texts.setPrimaryEmail")}
             <br />
             <Link
-              disabled={isDisabled}
-              isLoading={isPrimaryEmailLoading}
-              onClick={(event) => changePrimaryEmail(event, email)}
+              uiAction={"email-set-primary"}
+              onClick={(event: Event) => onEmailSetPrimary(event, email.id)}
               loadingSpinnerPosition={"right"}
             >
               {t("labels.setAsPrimaryEmail")}
@@ -189,9 +98,8 @@ const ListEmailsAccordion = ({
             {t("texts.emailUnverified")}
             <br />
             <Link
-              disabled={isDisabled}
-              isLoading={isVerificationLoading}
-              onClick={(event) => verifyEmail(event, email)}
+              uiAction={"email-verify"}
+              onClick={(event) => onEmailVerify(event, email.id)}
               loadingSpinnerPosition={"right"}
             >
               {t("labels.verify")}
@@ -206,10 +114,10 @@ const ListEmailsAccordion = ({
             {t("texts.emailDelete")}
             <br />
             <Link
+              uiAction={"email-delete"}
               dangerous
-              isLoading={isDeletionLoading}
+              onClick={(event) => onEmailDelete(event, email.id)}
               disabled={isDisabled}
-              onClick={(event) => deleteEmail(event, email)}
               loadingSpinnerPosition={"right"}
             >
               {t("labels.delete")}
@@ -231,24 +139,17 @@ const ListEmailsAccordion = ({
             {email.identities.map((i) => i.provider).join(", ")}
           </Paragraph>
         </Fragment>
-      ) : email.identity ? (
-        <Fragment>
-          <Paragraph>
-            <Headline2>{t("headlines.connectedAccounts")}</Headline2>
-            {email.identity.provider}
-          </Paragraph>
-        </Fragment>
       ) : null}
     </Fragment>
   );
   return (
     <Accordion
-      name={"email-dropdown"}
+      name={"email-edit-dropdown"}
       columnSelector={labels}
       data={emails}
       contentSelector={contents}
-      checkedItemIndex={checkedItemIndex}
-      setCheckedItemIndex={setCheckedItemIndex}
+      checkedItemID={checkedItemID}
+      setCheckedItemID={setCheckedItemID}
     />
   );
 };

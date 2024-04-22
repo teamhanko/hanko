@@ -18,12 +18,7 @@ const Container = forwardRef<HTMLElement>((props: Props, ref) => {
   }, [lang, setLang]);
 
   return (
-    <section
-      // @ts-ignore
-      part={"container"}
-      className={styles.container}
-      ref={ref}
-    >
+    <section part={"container"} className={styles.container} ref={ref}>
       {props.children}
     </section>
   );

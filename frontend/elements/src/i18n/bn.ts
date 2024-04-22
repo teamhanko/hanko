@@ -26,17 +26,19 @@ export const bn: Translation = {
     connectedAccounts: "সংযুক্ত অ্যাকাউন্ট",
     deleteAccount: "অ্যাকাউন্ট মুছে ফেলুন",
     accountNotFound: "অ্যাকাউন্ট পাওয়া যাচ্ছে না",
+    signIn: "সাইন ইন",
+    signUp: "নিবন্ধন করুন",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
+    enterPasscodeNoEmail:
+      "আপনার প্রাথমিক ইমেল ঠিকানায় প্রেরিত পাসকোডটি লিখুন।",
     setupPasskey:
       "একটি পাসকি দিয়ে সহজে এবং নিরাপদে আপনার অ্যাকাউন্টে সাইন ইন করুন। দ্রষ্টব্য: আপনার বায়োমেট্রিক ডেটা শুধুমাত্র আপনার ডিভাইসে সংরক্ষিত থাকে এবং কখনই কারো সাথে শেয়ার করা হবে না।",
     createAccount:
       '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই। আপনি একটি নতুন অ্যাকাউন্ট তৈরি করতে চান?',
-    passwordFormatHint:
-      "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
-    manageEmails:
-      "পাসকোড প্রমাণীকরণের জন্য ব্যবহৃত হয়।",
+    passwordFormatHint: "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
+    manageEmails: "পাসকোড প্রমাণীকরণের জন্য ব্যবহৃত হয়।",
     changePassword: "একটি নতুন পাসওয়ার্ড সেট করুন।",
     managePasskeys: "আপনার পাসকিগুলি আপনাকে এই অ্যাকাউন্টে সাইন ইন করতে দেয়৷",
     isPrimaryEmail:
@@ -47,16 +49,13 @@ export const bn: Translation = {
     emailUnverified: "এই ইমেল ঠিকানা যাচাই করা হয়নি.",
     emailDelete:
       "আপনি এই ইমেল ঠিকানা মুছে ফেললে, এটি আর সাইন ইন করতে ব্যবহার করা যাবে না.",
-    emailDeletePrimary:
-      "প্রাথমিক ইমেল ঠিকানা মুছে ফেলা যাবে না.",
-    renamePasskey:
-      "পাসকির জন্য একটি নাম সেট করুন।",
-    deletePasskey:
-      "আপনার অ্যাকাউন্ট থেকে এই পাসকি মুছুন.",
+    emailDeletePrimary: "প্রাথমিক ইমেল ঠিকানা মুছে ফেলা যাবে না.",
+    renamePasskey: "পাসকির জন্য একটি নাম সেট করুন।",
+    deletePasskey: "আপনার অ্যাকাউন্ট থেকে এই পাসকি মুছুন.",
     deleteAccount:
       "আপনি কি এই অ্যাকাউন্টটি মুছে ফেলার বিষয়ে নিশ্চিত? সমস্ত ডেটা অবিলম্বে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।",
-    noAccountExists:
-      '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই।',
+    noAccountExists: '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই।',
+    changeYourUsername: "আপনার ব্যবহারকারীর নাম পরিবর্তন করুন",
   },
   labels: {
     or: "বা",
@@ -93,6 +92,12 @@ export const bn: Translation = {
     webauthnUnsupported: "পাসকিগুলি আপনার ব্রাউজার দ্বারা সমর্থিত নয়৷",
     signInWith: "{provider} দিয়ে সাইন ইন করুন",
     deleteAccount: "হ্যাঁ, এই অ্যাকাউন্টটি মুছুন.",
+    emailOrUsername: "ইমেল বা ব্যবহারকারীর নাম",
+    username: "ব্যবহারকারীর নাম",
+    optional: "ঐচ্ছিক",
+    dontHaveAnAccount: "একটি অ্যাকাউন্ট নেই?",
+    alreadyHaveAnAccount: "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+    changeUsername: "ব্যবহারকারীর নাম পরিবর্তন করুন",
   },
   errors: {
     somethingWentWrong:
@@ -104,7 +109,8 @@ export const bn: Translation = {
       "পাসকোডটি অনেকবার ভুলভাবে প্রবেশ করানো হয়েছে৷ একটি নতুন কোড অনুরোধ করুন.",
     tooManyRequests:
       "অনেক অনুরোধ করা হয়েছে. অনুগ্রহ করে অনুরোধকৃত অপারেশন পুনরাবৃত্তি করার জন্য অপেক্ষা করুন।",
-    unauthorized: "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ পূর্বক আরো একবার প্রবেশ করুন.",
+    unauthorized:
+      "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ পূর্বক আরো একবার প্রবেশ করুন.",
     invalidWebauthnCredential: "এই পাসকি আর ব্যবহার করা যাবে না।",
     passcodeExpired: "পাসকোড মেয়াদ শেষ হয়েছে. একটি নতুন অনুরোধ করুন.",
     userVerification:
@@ -118,5 +124,19 @@ export const bn: Translation = {
     thirdPartyUnverifiedEmail:
       "ইমেল যাচাইকরণ প্রয়োজন. অনুগ্রহ করে আপনার প্রদানকারীর সাথে ব্যবহৃত ইমেল ঠিকানা যাচাই করুন।",
     signupDisabled: "অ্যাকাউন্ট নিবন্ধন নিষ্ক্রিয় করা হয়েছে",
+  },
+  flowErrors: {
+    flow_expired_error:
+      "সেশনটি মেয়াদ উত্তীর্ণ হয়েছে, দয়া করে পুনরায় শুরু করতে বাটনটি ক্লিক করুন।",
+    value_invalid_error: "প্রবেশিত মান অবৈধ।",
+    passcode_invalid: "প্রদত্ত পাসকোড সঠিক নয়।",
+    passkey_invalid: "এই পাসকী আর ব্যবহার করা যাবে না",
+    passcode_max_attempts_reached:
+      "পাসকোডটি অনেকবার ভুল ভাবে প্রবেশ করা হয়েছে। দয়া করে নতুন কোড অনুরোধ করুন।",
+    rate_limit_exceeded:
+      "অনেকগুলি অনুরোধ করা হয়েছে। অনুরোধকৃত অপারেশন পুনরায় প্রয়াত করতে অপেক্ষা করুন।",
+    unknown_username_error: "ব্যবহারকারীর নাম অজানা।",
+    username_already_exists: "ব্যবহারকারীর নাম ইতিমধ্যে নেওয়া হয়েছে।",
+    email_already_taken: "ইমেলটি ইতিমধ্যে নেওয়া হয়েছে।",
   },
 };

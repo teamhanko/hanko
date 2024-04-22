@@ -26,10 +26,14 @@ export const fr: Translation = {
     connectedAccounts: "Comptes connectés",
     deleteAccount: "Supprimer le compte",
     accountNotFound: "Compte non trouvé",
+    signIn: "Se connecter",
+    signUp: "S'inscrire",
   },
   texts: {
     enterPasscode:
       'Saisissez le code d\'accès qui a été envoyé à "{emailAddress}".',
+    enterPasscodeNoEmail:
+      "Entrez le code envoyé à votre adresse e-mail principale.",
     setupPasskey:
       "Connectez-vous à votre compte facilement et en toute sécurité avec une clé d'identification. Remarque : Vos données biométriques sont uniquement stockées sur vos appareils et ne seront jamais partagées avec qui que ce soit.",
     createAccount:
@@ -57,8 +61,8 @@ export const fr: Translation = {
       "Supprimez cette clé d'identification de votre compte. Notez que la clé d'identification continuera d'exister sur vos appareils et devra également y être supprimée.",
     deleteAccount:
       "Êtes-vous sûr de vouloir supprimer ce compte ? Toutes les données seront supprimées immédiatement et ne pourront pas être récupérées.",
-    noAccountExists:
-      'Aucun compte n\'existe pour "{emailAddress}".',
+    noAccountExists: 'Aucun compte n\'existe pour "{emailAddress}".',
+    changeYourUsername: "Changez votre nom d'utilisateur",
   },
   labels: {
     or: "ou",
@@ -96,6 +100,12 @@ export const fr: Translation = {
       "Les clés d'identification ne sont pas prises en charge par votre navigateur",
     signInWith: "Se connecter avec {provider}",
     deleteAccount: "Oui, supprimer ce compte.",
+    emailOrUsername: "E-mail ou Nom d'utilisateur",
+    username: "Nom d'utilisateur",
+    optional: "facultatif",
+    dontHaveAnAccount: "Vous n'avez pas de compte ?",
+    alreadyHaveAnAccount: "Vous avez déjà un compte ?",
+    changeUsername: "Changer le nom d'utilisateur",
   },
   errors: {
     somethingWentWrong:
@@ -108,7 +118,8 @@ export const fr: Translation = {
     tooManyRequests:
       "Trop de demandes ont été effectuées. Veuillez attendre pour répéter l'opération demandée.",
     unauthorized: "Votre session a expiré. Veuillez vous connecter à nouveau.",
-    invalidWebauthnCredential: "Cette clé d'identification ne peut plus être utilisée.",
+    invalidWebauthnCredential:
+      "Cette clé d'identification ne peut plus être utilisée.",
     passcodeExpired:
       "Le code d'accès a expiré. Veuillez demander un nouveau code.",
     userVerification:
@@ -123,5 +134,19 @@ export const fr: Translation = {
     thirdPartyUnverifiedEmail:
       "Vérification de l'adresse e-mail requise. Veuillez vérifier l'adresse e-mail utilisée avec votre fournisseur.",
     signupDisabled: "L'enregistrement du compte est désactivé.",
+  },
+  flowErrors: {
+    flow_expired_error:
+      "La session a expiré, veuillez cliquer sur le bouton pour redémarrer.",
+    value_invalid_error: "La valeur saisie est invalide.",
+    passcode_invalid: "Le code fourni n'était pas correct.",
+    passkey_invalid: "Cette clé de passe ne peut plus être utilisée.",
+    passcode_max_attempts_reached:
+      "Le code a été entré incorrectement trop de fois. Veuillez demander un nouveau code.",
+    rate_limit_exceeded:
+      "Trop de demandes ont été effectuées. Veuillez patienter pour répéter l'opération demandée.",
+    unknown_username_error: "Le nom d'utilisateur est inconnu.",
+    username_already_exists: "Le nom d'utilisateur est déjà pris.",
+    email_already_taken: "L'adresse e-mail est déjà utilisée.",
   },
 };

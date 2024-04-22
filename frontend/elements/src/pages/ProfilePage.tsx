@@ -1,15 +1,14 @@
 import { Fragment } from "preact";
-import { useContext, useEffect, useState } from "preact/compat";
-
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
-
-import { AppContext } from "../contexts/AppProvider";
+import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
+
+import { useFlowState } from "../contexts/FlowState";
+import { AppContext, UIAction } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";
 import Headline1 from "../components/headline/Headline1";
 import Paragraph from "../components/paragraph/Paragraph";
-import ErrorMessage from "../components/error/ErrorMessage";
 import ListEmailsAccordion from "../components/accordion/ListEmailsAccordion";
 import ListPasskeysAccordion from "../components/accordion/ListPasskeysAccordion";
 import AddEmailDropdown from "../components/accordion/AddEmailDropdown";
@@ -18,163 +17,246 @@ import AddPasskeyDropdown from "../components/accordion/AddPasskeyDropdown";
 import Divider from "../components/spacer/Divider";
 import Button from "../components/form/Button";
 import Form from "../components/form/Form";
-import DeleteAccountPage from "./DeleteAccountPage";
 import Spacer from "../components/spacer/Spacer";
+import ChangeUsernameDropdown from "../components/accordion/ChangeUsernameDropdown";
+import DeleteAccountPage from "./DeleteAccountPage";
+import ErrorBox from "../components/error/ErrorBox";
 
-const ProfilePage = () => {
+interface Props {
+  state: State<"profile_init">;
+  enablePasskeys?: boolean;
+}
+
+const ProfilePage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { config, webauthnCredentials, emails, setPage, enablePasskeys } =
+  const { hanko, setLoadingAction, stateHandler, setUIState, setPage } =
     useContext(AppContext);
+  const { flowState } = useFlowState(props.state);
 
-  const [emailError, setEmailError] = useState<HankoError>(null);
-  const [passwordError, setPasswordError] = useState<HankoError>(null);
-  const [passkeyError, setPasskeyError] = useState<HankoError>(null);
+  const [checkedItemID, setCheckedItemID] = useState<string>("");
 
-  const [checkedItemIndexEmails, setCheckedItemIndexEmails] =
-    useState<number>(null);
-  const [checkedItemIndexAddEmail, setCheckedItemIndexAddEmail] =
-    useState<number>(null);
-  const [checkedItemIndexSetPassword, setCheckedItemIndexSetPassword] =
-    useState<number>(null);
-  const [checkedItemIndexPasskeys, setCheckedItemIndexPasskeys] =
-    useState<number>(null);
-  const [checkedItemIndexAddPasskey, setCheckedItemIndexAddPasskey] =
-    useState<number>(null);
-
-  const deleteUser = (event: Event) => {
-    event.preventDefault();
-    setPage(<DeleteAccountPage onBack={() => setPage(<ProfilePage />)} />);
+  const animationFinished = () => {
+    return new Promise((resolve) => setTimeout(resolve, 360));
   };
 
-  useEffect(() => {
-    if (checkedItemIndexEmails !== null) {
-      setCheckedItemIndexAddEmail(null);
-      setCheckedItemIndexSetPassword(null);
-      setCheckedItemIndexPasskeys(null);
-      setCheckedItemIndexAddPasskey(null);
-    }
-  }, [checkedItemIndexEmails]);
+  const onAction = async (
+    event: Event,
+    uiAction: UIAction,
+    func: () => Promise<State<any>>,
+  ) => {
+    event.preventDefault();
 
-  useEffect(() => {
-    if (checkedItemIndexAddEmail !== null) {
-      setCheckedItemIndexEmails(null);
-      setCheckedItemIndexSetPassword(null);
-      setCheckedItemIndexPasskeys(null);
-      setCheckedItemIndexAddPasskey(null);
-    }
-  }, [checkedItemIndexAddEmail]);
+    setLoadingAction(uiAction);
+    const newState = await func();
 
-  useEffect(() => {
-    if (checkedItemIndexSetPassword !== null) {
-      setCheckedItemIndexAddEmail(null);
-      setCheckedItemIndexEmails(null);
-      setCheckedItemIndexPasskeys(null);
-      setCheckedItemIndexAddPasskey(null);
+    if (!newState?.error) {
+      setCheckedItemID(null);
+      await animationFinished();
     }
-  }, [checkedItemIndexSetPassword]);
 
-  useEffect(() => {
-    if (checkedItemIndexPasskeys !== null) {
-      setCheckedItemIndexAddEmail(null);
-      setCheckedItemIndexEmails(null);
-      setCheckedItemIndexSetPassword(null);
-      setCheckedItemIndexAddPasskey(null);
-    }
-  }, [checkedItemIndexPasskeys]);
+    setLoadingAction(null);
+    await hanko.flow.run(newState, stateHandler);
+  };
 
-  useEffect(() => {
-    if (checkedItemIndexAddPasskey !== null) {
-      setCheckedItemIndexAddEmail(null);
-      setCheckedItemIndexEmails(null);
-      setCheckedItemIndexSetPassword(null);
-      setCheckedItemIndexPasskeys(null);
-    }
-  }, [checkedItemIndexAddPasskey]);
+  const onEmailSubmit = async (event: Event, email: string) => {
+    setUIState((prev) => ({ ...prev, email }));
+    return onAction(
+      event,
+      "email-submit",
+      flowState.actions.email_create({ email }).run,
+    );
+  };
 
-  useEffect(() => {
-    if (emailError !== null) {
-      setPasswordError(null);
-      setPasskeyError(null);
-    }
-  }, [emailError]);
+  const onEmailDelete = async (event: Event, emailID: string) =>
+    onAction(
+      event,
+      "email-delete",
+      flowState.actions.email_delete({ email_id: emailID }).run,
+    );
 
-  useEffect(() => {
-    if (passwordError !== null) {
-      setEmailError(null);
-      setPasskeyError(null);
-    }
-  }, [passwordError]);
+  const onEmailSetPrimary = async (event: Event, emailID: string) =>
+    onAction(
+      event,
+      "email-set-primary",
+      flowState.actions.email_set_primary({ email_id: emailID }).run,
+    );
 
-  useEffect(() => {
-    if (passkeyError !== null) {
-      setEmailError(null);
-      setPasswordError(null);
-    }
-  }, [passkeyError]);
+  const onEmailVerify = async (event: Event, emailID: string) =>
+    onAction(
+      event,
+      "email-verify",
+      flowState.actions.email_verify({ email_id: emailID }).run,
+    );
+
+  const onPasswordSubmit = async (event: Event, password: string) =>
+    onAction(
+      event,
+      "password-submit",
+      flowState.actions.password_set({ password }).run,
+    );
+
+  const onPasswordDelete = async (event: Event) =>
+    onAction(
+      event,
+      "password-delete",
+      flowState.actions.password_delete(null).run,
+    );
+
+  const onUsernameSubmit = async (event: Event, username: string) =>
+    onAction(
+      event,
+      "username-set",
+      flowState.actions.username_set({ username }).run,
+    );
+
+  const onPasskeyNameSubmit = async (event: Event, id: string, name: string) =>
+    onAction(
+      event,
+      "passkey-rename",
+      flowState.actions.webauthn_credential_rename({
+        passkey_id: id,
+        passkey_name: name,
+      }).run,
+    );
+
+  const onPasskeyDelete = async (event: Event, id: string) =>
+    onAction(
+      event,
+      "passkey-delete",
+      flowState.actions.webauthn_credential_delete({ passkey_id: id }).run,
+    );
+
+  const onPasskeySubmit = async (event: Event) =>
+    onAction(
+      event,
+      "passkey-submit",
+      flowState.actions.webauthn_credential_create(null).run,
+    );
+
+  const onAccountDelete = async (event: Event) =>
+    onAction(
+      event,
+      "account_delete",
+      flowState.actions.account_delete(null).run,
+    );
+
+  const onBack = (event: Event) => {
+    event.preventDefault();
+    setPage(
+      <ProfilePage state={flowState} enablePasskeys={props.enablePasskeys} />,
+    );
+    return Promise.resolve();
+  };
+
+  const onUserDelete = (event: Event) => {
+    event.preventDefault();
+    setPage(
+      <DeleteAccountPage onBack={onBack} onAccountDelete={onAccountDelete} />,
+    );
+    return Promise.resolve();
+  };
 
   return (
     <Content>
-      <Headline1>{t("headlines.profileEmails")}</Headline1>
-      <ErrorMessage error={emailError} />
-      <Paragraph>{t("texts.manageEmails")}</Paragraph>
-      <Paragraph>
-        <ListEmailsAccordion
-          setError={setEmailError}
-          checkedItemIndex={checkedItemIndexEmails}
-          setCheckedItemIndex={setCheckedItemIndexEmails}
-        />
-        {emails.length < config.emails.max_num_of_addresses ? (
-          <AddEmailDropdown
-            setError={setEmailError}
-            checkedItemIndex={checkedItemIndexAddEmail}
-            setCheckedItemIndex={setCheckedItemIndexAddEmail}
-          />
-        ) : null}
-      </Paragraph>
-      {config.password.enabled ? (
+      <ErrorBox
+        state={
+          flowState?.error?.code !== "form_data_invalid_error"
+            ? flowState
+            : null
+        }
+      />
+      {flowState.payload?.user?.emails ||
+      flowState.actions.email_create?.(null) ? (
         <Fragment>
-          <Headline1>{t("headlines.profilePassword")}</Headline1>
-          <ErrorMessage error={passwordError} />
-          <Paragraph>{t("texts.changePassword")}</Paragraph>
+          <Headline1>{t("headlines.profileEmails")}</Headline1>
+          <Paragraph>{t("texts.manageEmails")}</Paragraph>
           <Paragraph>
-            <ChangePasswordDropdown
-              setError={setPasswordError}
-              checkedItemIndex={checkedItemIndexSetPassword}
-              setCheckedItemIndex={setCheckedItemIndexSetPassword}
+            <ListEmailsAccordion
+              emails={flowState.payload.user.emails}
+              onEmailDelete={onEmailDelete}
+              onEmailSetPrimary={onEmailSetPrimary}
+              onEmailVerify={onEmailVerify}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
             />
-          </Paragraph>
-        </Fragment>
-      ) : null}
-      {webauthnCredentials.length > 0 || enablePasskeys ? (
-        <Fragment>
-          <Headline1>{t("headlines.profilePasskeys")}</Headline1>
-          <ErrorMessage error={passkeyError} />
-          <Paragraph>{t("texts.managePasskeys")}</Paragraph>
-          <Paragraph>
-            <ListPasskeysAccordion
-              credentials={webauthnCredentials}
-              setError={setPasskeyError}
-              checkedItemIndex={checkedItemIndexPasskeys}
-              setCheckedItemIndex={setCheckedItemIndexPasskeys}
-            />
-            {enablePasskeys ? (
-              <AddPasskeyDropdown
-                setError={setPasskeyError}
-                checkedItemIndex={checkedItemIndexAddPasskey}
-                setCheckedItemIndex={setCheckedItemIndexAddPasskey}
+            {flowState.actions.email_create?.(null) ? (
+              <AddEmailDropdown
+                inputs={flowState.actions.email_create(null).inputs}
+                onEmailSubmit={onEmailSubmit}
+                checkedItemID={checkedItemID}
+                setCheckedItemID={setCheckedItemID}
               />
             ) : null}
           </Paragraph>
         </Fragment>
       ) : null}
-      {config.account.allow_deletion ? (
+      {flowState.actions.password_set?.(null) ? (
+        <Fragment>
+          <Headline1>{t("headlines.profilePassword")}</Headline1>
+          <Paragraph>{t("texts.changePassword")}</Paragraph>
+          <Paragraph>
+            <ChangePasswordDropdown
+              hideDeletePasswordLink={
+                !flowState.actions.password_delete?.(null)
+              }
+              inputs={flowState.actions.password_set(null).inputs}
+              onPasswordSubmit={onPasswordSubmit}
+              onPasswordDelete={onPasswordDelete}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.actions.username_set?.(null) ? (
+        <Fragment>
+          <Headline1>{t("labels.username")}</Headline1>
+          <Paragraph>{t("texts.changeYourUsername")}</Paragraph>
+          <Paragraph>
+            <ChangeUsernameDropdown
+              inputs={flowState.actions.username_set(null).inputs}
+              onUsernameSubmit={onUsernameSubmit}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {props.enablePasskeys &&
+      (flowState.payload?.user?.passkeys ||
+        flowState.actions.webauthn_credential_create?.(null)) ? (
+        <Fragment>
+          <Headline1>{t("headlines.profilePasskeys")}</Headline1>
+          <Paragraph>{t("texts.managePasskeys")}</Paragraph>
+          <Paragraph>
+            <ListPasskeysAccordion
+              onBack={onBack}
+              onPasskeyNameSubmit={onPasskeyNameSubmit}
+              onPasskeyDelete={onPasskeyDelete}
+              passkeys={flowState.payload.user.passkeys}
+              setError={null}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
+            {flowState.actions.webauthn_credential_create?.(null) ? (
+              <AddPasskeyDropdown
+                onPasskeySubmit={onPasskeySubmit}
+                setError={null}
+                checkedItemID={checkedItemID}
+                setCheckedItemID={setCheckedItemID}
+              />
+            ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.actions.account_delete?.(null) ? (
         <Fragment>
           <Spacer />
           <Paragraph>
             <Divider />
           </Paragraph>
           <Paragraph>
-            <Form onSubmit={deleteUser}>
+            <Form onSubmit={onUserDelete}>
               <Button dangerous>{t("headlines.deleteAccount")}</Button>
             </Form>
           </Paragraph>
