@@ -5,10 +5,9 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"strings"
+	"unicode/utf8"
 )
 
 // RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
@@ -27,7 +26,7 @@ func (a RegisterLoginIdentifier) GetDescription() string {
 func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if deps.Cfg.Identifier.Email.Enabled {
+	if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
 		input := flowpilot.EmailInput("email").
 			MaxLength(255).
 			Persist(true).
@@ -37,13 +36,13 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 		c.AddInputs(input)
 	}
 
-	if deps.Cfg.Identifier.Username.Enabled {
+	if deps.Cfg.Username.Enabled && deps.Cfg.Username.AcquireOnRegistration {
 		input := flowpilot.StringInput("username").
-			MinLength(deps.Cfg.Identifier.Username.MinLength).
-			MaxLength(deps.Cfg.Identifier.Username.MaxLength).
+			MinLength(deps.Cfg.Username.MinLength).
+			MaxLength(deps.Cfg.Username.MaxLength).
 			Persist(true).
 			Preserve(true).
-			Required(!deps.Cfg.Identifier.Username.Optional)
+			Required(!deps.Cfg.Username.Optional)
 
 		c.AddInputs(input)
 	}
@@ -59,12 +58,10 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	email := c.Input().Get("email").String()
 	username := c.Input().Get("username").String()
 
-	for _, char := range username {
-		// check that username only contains allowed characters
-		if !strings.Contains(deps.Cfg.Identifier.Username.AllowedCharacters, string(char)) {
-			c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
-		}
+	// check that username only contains allowed characters
+	if !utf8.ValidString(username) {
+		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	if username != "" {
@@ -90,7 +87,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
 		if emailModel != nil {
 			// E-mail address already exists
-			if !deps.Cfg.Emails.RequireVerification {
+			if !deps.Cfg.Email.RequireVerification {
 				c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 				return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 			} else {
@@ -126,22 +123,8 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 	// Decide which is the next state according to the config and user input
 
-	if email != "" && deps.Cfg.Identifier.Email.Verification {
-		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
-			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
-		}
+	if email != "" && deps.Cfg.Email.RequireVerification {
 
-		if deps.Cfg.Password.Enabled {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
-		} else if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-		} else {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-		}
-	} else if deps.Cfg.Password.Enabled {
-		return c.ContinueFlow(StatePasswordCreation)
-	} else if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	}
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)

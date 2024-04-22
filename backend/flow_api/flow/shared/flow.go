@@ -23,6 +23,7 @@ const (
 	ActionBack            flowpilot.ActionName = "back"
 	ActionExchangeToken   flowpilot.ActionName = "exchange_token"
 	ActionThirdPartyOAuth flowpilot.ActionName = "thirdparty_oauth"
+	ActionSkip            flowpilot.ActionName = "skip"
 )
 
 type Dependencies struct {

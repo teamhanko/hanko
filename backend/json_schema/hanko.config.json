@@ -187,6 +187,12 @@
         },
         "webhooks": {
           "$ref": "#/$defs/WebhookSettings"
+        },
+        "email": {
+          "$ref": "#/$defs/Email"
+        },
+        "username": {
+          "$ref": "#/$defs/Username"
         }
       },
       "additionalProperties": false,
@@ -198,7 +204,9 @@
         "service",
         "identifier",
         "second_factor",
-        "passkey"
+        "passkey",
+        "email",
+        "username"
       ],
       "description": "Config is the central configuration type"
     },
@@ -306,17 +314,61 @@
     },
     "Email": {
       "properties": {
-        "from_address": {
-          "type": "string",
-          "default": "passcode@hanko.io"
+        "enabled": {
+          "type": "boolean",
+          "default": true
         },
-        "from_name": {
-          "type": "string",
-          "default": "Hanko"
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_registration": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_login": {
+          "type": "boolean",
+          "default": false
+        },
+        "require_verification": {
+          "type": "boolean",
+          "default": true
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "use_as_login_identifier": {
+          "type": "boolean",
+          "default": true
+        },
+        "max_length": {
+          "type": "integer",
+          "default": 100
+        },
+        "use_for_authentication": {
+          "type": "boolean",
+          "default": true
+        },
+        "passcode_ttl": {
+          "type": "integer",
+          "default": 300
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "enabled",
+        "optional",
+        "acquire_on_registration",
+        "acquire_on_login",
+        "require_verification",
+        "limit",
+        "use_as_login_identifier",
+        "max_length",
+        "use_for_authentication",
+        "passcode_ttl"
+      ]
     },
     "Emails": {
       "properties": {
@@ -352,7 +404,8 @@
       "required": [
         "username",
         "email"
-      ]
+      ],
+      "description": "Deprecated"
     },
     "IdentifierEmail": {
       "properties": {
@@ -374,7 +427,8 @@
         "enabled",
         "optional",
         "verification"
-      ]
+      ],
+      "description": "Deprecated"
     },
     "IdentifierUsername": {
       "properties": {
@@ -404,7 +458,8 @@
         "max_length",
         "min_length",
         "allowed_characters"
-      ]
+      ],
+      "description": "Deprecated"
     },
     "IdentityProvider": {
       "properties": {
@@ -476,7 +531,7 @@
           "type": "boolean"
         },
         "email": {
-          "$ref": "#/$defs/Email"
+          "$ref": "#/$defs/PasscodeEmail"
         },
         "ttl": {
           "type": "integer",
@@ -493,13 +548,29 @@
         "enabled"
       ]
     },
+    "PasscodeEmail": {
+      "properties": {
+        "from_address": {
+          "type": "string",
+          "default": "passcode@hanko.io"
+        },
+        "from_name": {
+          "type": "string",
+          "default": "Hanko"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Passkey": {
       "properties": {
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "optional": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
         },
         "acquire_on_registration": {
           "type": "string",
@@ -542,7 +613,8 @@
           "default": 100
         },
         "onboarding": {
-          "$ref": "#/$defs/PasskeyOnboarding"
+          "$ref": "#/$defs/PasskeyOnboarding",
+          "description": "Deprecated"
         }
       },
       "additionalProperties": false,
@@ -567,7 +639,8 @@
       "type": "object",
       "required": [
         "enabled"
-      ]
+      ],
+      "description": "Deprecated"
     },
     "Password": {
       "properties": {
@@ -579,13 +652,40 @@
           "type": "boolean",
           "default": false
         },
-        "min_password_length": {
+        "acquire_on_registration": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "acquire_on_login": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "recovery": {
+          "type": "boolean",
+          "default": true
+        },
+        "min_length": {
           "type": "integer",
           "default": 8
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "acquire_on_registration",
+        "acquire_on_login",
+        "recovery"
+      ]
     },
     "RateLimiter": {
       "properties": {
@@ -953,6 +1053,48 @@
       },
       "additionalProperties": false,
       "type": "object"
+    },
+    "Username": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_registration": {
+          "type": "boolean",
+          "default": false
+        },
+        "acquire_on_login": {
+          "type": "boolean",
+          "default": false
+        },
+        "use_as_login_identifier": {
+          "type": "boolean",
+          "default": true
+        },
+        "min_length": {
+          "type": "integer",
+          "default": 8
+        },
+        "max_length": {
+          "type": "integer",
+          "default": 100
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "optional",
+        "acquire_on_registration",
+        "acquire_on_login",
+        "use_as_login_identifier",
+        "max_length"
+      ]
     },
     "WebauthnSettings": {
       "properties": {
