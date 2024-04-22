@@ -10,17 +10,21 @@ type GetInitState = (flow: Flow) => MaybePromise<State<any> | null>;
 
 // eslint-disable-next-line require-jsdoc
 class Flow extends Client {
-  public fetchNextState: FetchNextState = async (href: string, body?: any) => {
-    const response = await this.client.post(href, body);
-    return new State(response.json(), this.fetchNextState);
-  };
-
   public async init(
     initPath: FlowPath,
     handlers: ExtendedHandlers,
-    getInitState: GetInitState = () => this.fetchNextState(initPath)
+    // getInitState: GetInitState = () => this.fetchNextState(initPath),
   ): Promise<void> {
-    const initState = await getInitState(this);
+    const fetchNextState: FetchNextState = async (href: string, body?: any) => {
+      try {
+        const response = await this.client.post(href, body);
+        return new State(response.json(), fetchNextState);
+      } catch (e) {
+        handlers.onError?.(e);
+      }
+    };
+
+    const initState = await fetchNextState(initPath);
     await this.run(initState, handlers);
   }
 
@@ -44,7 +48,7 @@ class Flow extends Client {
    */
   run = async (
     state: State<any>,
-    handlers: ExtendedHandlers
+    handlers: ExtendedHandlers,
   ): Promise<unknown> => {
     try {
       if (!isState(state)) {
@@ -71,8 +75,6 @@ class Flow extends Client {
       if (typeof handlers.onError === "function") {
         return handlers.onError(e);
       }
-
-      throw e;
     }
   };
 }
@@ -84,7 +86,7 @@ export class HandlerNotFoundError extends Error {
         typeof state.name === "string"
           ? `"${state.name}"`
           : `(${typeof state.name})`
-      }`
+      }`,
     );
   }
 }
@@ -96,7 +98,7 @@ export class InvalidStateError extends Error {
         typeof state.name === "string"
           ? `"${state.name}"`
           : `(${typeof state.name})`
-      }`
+      }`,
     );
   }
 }
