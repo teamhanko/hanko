@@ -24,5 +24,10 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to set user payload: %w", err)
 	}
 
+	err = c.Input().Set("username", userModel.Username)
+	if err != nil {
+		return fmt.Errorf("failed to set username as input value: %w", err)
+	}
+
 	return nil
 }
