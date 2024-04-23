@@ -224,10 +224,6 @@ const AppProvider = ({
         composed: true,
       });
       const fn = setTimeout(() => {
-        hanko.relay.dispatchSessionCreatedEvent({
-          expirationSeconds: 30,
-          userID,
-        });
         hanko.relay.dispatchAuthFlowCompletedEvent({ userID });
         ref.current.dispatchEvent(event);
       }, 500);
