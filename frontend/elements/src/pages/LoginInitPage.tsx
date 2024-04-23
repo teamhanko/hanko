@@ -111,13 +111,10 @@ const LoginInitPage = (props: Props) => {
     const { inputs } = flowState.actions.continue_with_login_identifier(null);
     if (inputs.email) {
       setIdentifierType("email");
-      setUIState((prev) => ({ ...prev, username: null }));
     } else if (inputs.username) {
       setIdentifierType("username");
-      setUIState((prev) => ({ ...prev, email: null }));
     } else {
       setIdentifierType("identifier");
-      setUIState((prev) => ({ ...prev, email: null }));
     }
   }, [flowState]);
 
