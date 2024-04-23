@@ -399,7 +399,7 @@ const AppProvider = ({
     [
       emitSuccessEvent,
       globalOptions.enablePasskeys,
-      hanko.flow,
+      hanko,
       lastActionSucceeded,
       setLoadingAction,
     ],
@@ -471,7 +471,7 @@ const AppProvider = ({
       hanko.onSessionExpired(cb);
       hanko.onUserDeleted(cb);
     } else if (componentName === "profile") {
-      hanko.onAuthFlowCompleted(cb);
+      hanko.onSessionCreated(cb);
       hanko.onUserLoggedOut(cb);
     }
   }, []);
