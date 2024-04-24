@@ -21,7 +21,7 @@ func (h GetUserData) Execute(c flowpilot.HookExecutionContext) error {
 
 	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
 	if err != nil {
-		return fmt.Errorf("failed to get user fro db: %w", err)
+		return fmt.Errorf("failed to get user from db: %w", err)
 	}
 
 	err = c.Payload().Set("user", dto.ProfileDataFromUserModel(userModel))
