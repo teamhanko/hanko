@@ -468,7 +468,6 @@ const AppProvider = ({
       hanko.onUserDeleted(cb);
     } else if (componentName === "profile") {
       hanko.onSessionCreated(cb);
-      hanko.onUserLoggedOut(cb);
     }
   }, []);
 
