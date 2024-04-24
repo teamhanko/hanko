@@ -23,7 +23,7 @@ var Flow = flowpilot.NewFlow("/registration").
 	State(StateRegistrationInit, RegisterLoginIdentifier{}, shared.ThirdPartyOAuth{}).
 	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
 	State(StatePasswordCreation, RegisterPassword{}, shared.Back{}).
-	BeforeState(shared.StateSuccess, CreateUser{}, shared.IssueSession{}).
+	BeforeState(shared.StateSuccess, CreateUser{}, shared.IssueSession{}, shared.GetUserData{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).

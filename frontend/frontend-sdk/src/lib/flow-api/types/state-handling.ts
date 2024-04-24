@@ -20,6 +20,7 @@ import {
   OnboardingVerifyPasskeyAttestationPayload,
   PasscodeConfirmationPayload,
   ProfilePayload,
+  SuccessPayload,
 } from "./payload";
 
 export type StateName =
@@ -71,7 +72,7 @@ export interface Payloads {
   readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationPayload;
   readonly registration_init: null;
   readonly password_creation: null;
-  readonly success: null;
+  readonly success: SuccessPayload;
   readonly error: null;
 }
 

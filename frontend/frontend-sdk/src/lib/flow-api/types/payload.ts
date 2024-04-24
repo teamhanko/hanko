@@ -54,3 +54,7 @@ export interface User {
 export interface ProfilePayload {
   readonly user: User;
 }
+
+export interface SuccessPayload {
+  readonly user: User;
+}
