@@ -462,7 +462,7 @@ The following parts are available:
 - `divider-line` - the line before and after the `divider-text`
 - `form-item` - the container of a form item, e.g. an input field or a button
 
-#### Examples
+#### Using shadow parts
 
 The following examples demonstrate how to apply styles to specific shadow parts:
 
