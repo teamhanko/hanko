@@ -29,8 +29,8 @@ declare global {
     // eslint-disable-next-line no-unused-vars
     interface IntrinsicElements {
       "hanko-auth": HankoAuthElementProps;
-      "hanko-sign-in": HankoAuthElementProps;
-      "hanko-sign-up": HankoAuthElementProps;
+      "hanko-login": HankoAuthElementProps;
+      "hanko-registration": HankoAuthElementProps;
       "hanko-profile": HankoProfileElementProps;
       "hanko-events": HankoEventsElementProps;
     }
@@ -77,10 +77,10 @@ const HankoAuth = (props: HankoAuthElementProps) =>
   createHankoComponent("auth", props);
 
 const HankoLogin = (props: HankoAuthElementProps) =>
-  createHankoComponent("sign-in", props);
+  createHankoComponent("login", props);
 
 const HankoRegistration = (props: HankoProfileElementProps) =>
-  createHankoComponent("sign-up", props);
+  createHankoComponent("registration", props);
 
 const HankoProfile = (props: HankoProfileElementProps) =>
   createHankoComponent("profile", props);
@@ -145,13 +145,13 @@ export const register = async (
     }),
     _register({
       ...options,
-      tagName: "hanko-sign-in",
+      tagName: "hanko-login",
       entryComponent: HankoLogin,
       observedAttributes,
     }),
     _register({
       ...options,
-      tagName: "hanko-sign-up",
+      tagName: "hanko-registration",
       entryComponent: HankoRegistration,
       observedAttributes,
     }),

@@ -97,7 +97,7 @@ const LoginInitPage = (props: Props) => {
 
   const onRegisterClick = async (event: Event) => {
     event.preventDefault();
-    init("sign-up");
+    init("registration");
   };
 
   const showDivider = useMemo(

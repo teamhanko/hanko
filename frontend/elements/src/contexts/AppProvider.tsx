@@ -57,8 +57,8 @@ type ExperimentalFeatures = ExperimentalFeature[];
 
 export type ComponentName =
   | "auth"
-  | "sign-in"
-  | "sign-up"
+  | "login"
+  | "registration"
   | "profile"
   | "events";
 
@@ -416,10 +416,10 @@ const AppProvider = ({
         case "auth":
           flowInit("/login").catch(handleError);
           break;
-        case "sign-in":
+        case "login":
           flowInit("/login").catch(handleError);
           break;
-        case "sign-up":
+        case "registration":
           flowInit("/registration").catch(handleError);
           break;
         case "profile":
@@ -462,7 +462,7 @@ const AppProvider = ({
     const cb = () => {
       init(componentName);
     };
-    if (["auth", "sign-in", "sign-up"].includes(componentName)) {
+    if (["auth", "login", "registration"].includes(componentName)) {
       hanko.onUserLoggedOut(cb);
       hanko.onSessionExpired(cb);
       hanko.onUserDeleted(cb);

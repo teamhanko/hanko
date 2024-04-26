@@ -65,7 +65,7 @@ const RegistrationInitPage = (props: Props) => {
 
   const onLoginClick = async (event: Event) => {
     event.preventDefault();
-    init("sign-in");
+    init("login");
   };
 
   return (
