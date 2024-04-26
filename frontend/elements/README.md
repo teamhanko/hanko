@@ -157,19 +157,37 @@ of your HTML. A minimal example would look like this:
 
 The individual web component are described in the following sections.
 
-#### &lt;hanko-auth&gt;
+#### &lt;hanko-auth&gt;, &lt;hanko-login&gt; and &lt;hanko-registration&gt;
 
-A web component that handles user login and user registration.
+These three web components offer a user-friendly interface for user login or registration. The difference between
+the components is, that `<hanko-auth>` has the ability to switch between the login and
+registration UI, whereas `<hanko-login>` is dedicated to the login and `<hanko-registration>`
+to the registration only.
 
 ##### Markup
+
+Combined UI for login and registration:
 
 ```html
 <hanko-auth></hanko-auth>
 ```
 
+Dedicated UI for the login:
+
+```html
+<hanko-login></hanko-login>
+```
+
+Dedicated UI for the registration:
+
+```html
+<hanko-registration></hanko-registration>
+```
+
 ##### Attributes
 
 - `prefilled-email` Used to prefill the email input field.
+- `prefilled-username` Used to prefill the username input field.
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
 - `experimental` A space-separated list of experimental features to be enabled.
   See [experimental features](#experimental-features).
