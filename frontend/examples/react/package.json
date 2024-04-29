@@ -2,7 +2,7 @@
   "name": "example-react",
   "private": true,
   "dependencies": {
-    "@teamhanko/hanko-elements": "^0.10.2",
+    "@teamhanko/hanko-elements": "^0.11.0",
     "@types/react": "^18.2.32",
     "@types/react-dom": "^18.2.7",
     "react": "^18.2.0",
