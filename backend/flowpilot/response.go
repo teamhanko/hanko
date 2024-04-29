@@ -167,6 +167,9 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 	state, _ := fc.flow.getState(er.nextStateName)
 
 	if state != nil {
+
+		fc.flow.contextValues["init_schema_creation_next_state"] = er.nextStateName
+
 		for _, action := range state.actions {
 			actionName := action.GetName()
 			actionDescription := action.GetDescription()

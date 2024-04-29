@@ -21,17 +21,18 @@ const (
 	ActionRegisterLoginIdentifier           flowpilot.ActionName = "register_login_identifier"
 	ActionWebauthnGenerateCreationOptions   flowpilot.ActionName = "webauthn_generate_creation_options"
 	ActionWebauthnVerifyAttestationResponse flowpilot.ActionName = "webauthn_verify_attestation_response"
+	ActionContinueToPasswordRegistration    flowpilot.ActionName = "continue_to_password_registration"
 )
 
 var Flow = flowpilot.NewFlow("/registration").
 	State(StateRegistrationInit, RegisterLoginIdentifier{}, shared.ThirdPartyOAuth{}).
 	State(StateRegistrationMethodChooser,
 		WebauthnGenerateCreationOptions{},
-		RegisterPassword{},
+		ContinueToPasswordRegistration{},
 		shared.Back{},
-		//shared.Skip{},
+		shared.Skip{},
 	).
-	State(StateRegisterPasskey, WebauthnVerifyAttestationResponse{}).
+	State(StateRegisterPasskey, WebauthnVerifyAttestationResponse{}, shared.Skip{}). // macht das sinn?
 	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
 	State(StatePasswordCreation, RegisterPassword{}, shared.Back{}).
 	BeforeState(shared.StateSuccess, CreateUser{}, shared.IssueSession{}, shared.GetUserData{}).

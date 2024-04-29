@@ -573,13 +573,8 @@
           "default": true
         },
         "acquire_on_registration": {
-          "type": "string",
-          "enum": [
-            "always",
-            "conditional",
-            "never"
-          ],
-          "default": "always"
+          "type": "boolean",
+          "default": true
         },
         "acquire_on_login": {
           "type": "string",
@@ -653,13 +648,8 @@
           "default": false
         },
         "acquire_on_registration": {
-          "type": "string",
-          "enum": [
-            "always",
-            "conditional",
-            "never"
-          ],
-          "default": "always"
+          "type": "boolean",
+          "default": true
         },
         "acquire_on_login": {
           "type": "string",

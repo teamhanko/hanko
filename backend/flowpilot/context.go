@@ -48,6 +48,7 @@ type actionInitializationContext interface {
 	Stash() Stash
 	// CurrentStateEquals returns true, when one of the given states matches the current state.
 	CurrentStateEquals(stateNames ...StateName) bool
+	GetNextStateDuringInitForSchemaCreation() (StateName, bool)
 	actionSuspender
 }
 
