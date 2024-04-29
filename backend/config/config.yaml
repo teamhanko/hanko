@@ -38,8 +38,8 @@ emails:
   require_verification: true
 passkey:
   enabled: true
-  optional: false
-  acquire_on_registration: true
+  optional: true
+  acquire_on_registration: false
   acquire_on_login: always
   attestation_preference: direct
   limit: 100

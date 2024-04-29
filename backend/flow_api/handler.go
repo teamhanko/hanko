@@ -31,7 +31,8 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, registration.Flow.MustBuild())
+	flow := registration.Flow.MustBuild()
+	return h.executeFlow(c, flow)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {

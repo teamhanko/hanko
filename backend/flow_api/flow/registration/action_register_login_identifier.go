@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_method_chooser"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"unicode/utf8"
@@ -31,7 +34,7 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 			MaxLength(255).
 			Persist(true).
 			Preserve(true).
-			Required(!deps.Cfg.Identifier.Email.Optional)
+			Required(!deps.Cfg.Email.Optional)
 
 		c.AddInputs(input)
 	}
@@ -128,60 +131,58 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 
+		isWebAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
+
 		if deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
 			if deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
 				if deps.Cfg.Password.AcquireOnRegistration && deps.Cfg.Passkey.AcquireOnRegistration {
-					if deps.Cfg.Email.UseForAuthentication { // Brauch ich das?
-						_ = c.Stash().Set("skip_to", shared.StateSuccess)
-						//_ = c.Stash().Set("skip_from", StateRegistrationMethodChooser)
+					if isWebAuthnAvailable {
+						return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_method_chooser.StateRegistrationMethodChooser, shared.StateSuccess)
+					} else {
+						return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 					}
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegistrationMethodChooser) // + Skip
 				} else if deps.Cfg.Password.AcquireOnRegistration && !deps.Cfg.Passkey.AcquireOnRegistration {
-					_ = c.Stash().Set("skip_to", shared.StateSuccess)
-					//_ = c.Stash().Set("skip_from", StatePasswordCreation)
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation) // + Skip für PasswordCreation
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 				} else if !deps.Cfg.Password.AcquireOnRegistration && deps.Cfg.Passkey.AcquireOnRegistration {
-					_ = c.Stash().Set("skip_to", shared.StateSuccess)
-					//_ = c.Stash().Set("skip_from", StateRegisterPasskey)
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey) // + Skip für RegisterPasskey
-				} else {
-					if deps.Cfg.Email.UseForAuthentication {
+					if isWebAuthnAvailable {
+						return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+					} else {
 						return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 					}
+				} else {
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 				}
 			} else if deps.Cfg.Password.Optional && !deps.Cfg.Passkey.Optional {
 				if deps.Cfg.Password.AcquireOnRegistration {
 					// deps.Cfg.Passkey.AcquireOnRegistration egal, da Passkey required und !AcquireOnRegistration
 					// keinen Sinn macht und durch Config Validierung verhindert werden sollte?
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey, StatePasswordCreation) // + Skip für PasswordCreation
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 				} else {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey)
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 				}
 			} else if !deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
 				if deps.Cfg.Passkey.AcquireOnRegistration {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation, StateRegisterPasskey) // + Skip für RegisterPasskey
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 				} else {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 				}
 			} else {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation, StateRegisterPasskey)
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 			}
 		} else if deps.Cfg.Password.Enabled && !deps.Cfg.Passkey.Enabled {
-			if deps.Cfg.Password.Optional && deps.Cfg.Password.AcquireOnRegistration {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation) // + Skip für PasswordCreation
+			if !deps.Cfg.Password.Optional || deps.Cfg.Password.AcquireOnRegistration {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 			} else {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
-			}
-		} else if !deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
-			if deps.Cfg.Passkey.Optional && deps.Cfg.Passkey.AcquireOnRegistration {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey) // + Skip für RegisterPasskey
-			} else {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey)
-			}
-		} else {
-			if deps.Cfg.Email.UseForAuthentication {
 				return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 			}
+		} else if !deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
+			if !deps.Cfg.Passkey.Optional || deps.Cfg.Passkey.AcquireOnRegistration {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+			} else {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+			}
+		} else {
+			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 		}
 	}
 

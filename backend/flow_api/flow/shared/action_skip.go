@@ -17,9 +17,9 @@ func (a Skip) GetDescription() string {
 }
 
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("skip_to").Exists() || c.Stash().Get("skip_to").String() == "" {
-		c.SuspendAction()
-	}
+	//if !c.Stash().Get("skip_to").Exists() || c.Stash().Get("skip_to").String() == "" {
+	//	c.SuspendAction()
+	//}
 
 	//if !c.Stash().Get("skip_from").Exists() || c.Stash().Get("skip_from").String() == "" {
 	//	c.SuspendAction()
@@ -34,8 +34,7 @@ func (a Skip) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a Skip) Execute(c flowpilot.ExecutionContext) error {
-	state := flowpilot.StateName(c.Stash().Get("skip_to").String())
-	return c.ContinueFlow(state)
+	return c.EndSubFlow()
 }
 
 func (a Skip) Finalize(c flowpilot.FinalizationContext) error {

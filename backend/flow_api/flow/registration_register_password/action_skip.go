@@ -1,4 +1,4 @@
-package passkey_onboarding
+package registration_register_password
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -14,16 +14,12 @@ func (a Skip) GetName() flowpilot.ActionName {
 }
 
 func (a Skip) GetDescription() string {
-	return "Skip the passkey onboarding"
+	return "Skip"
 }
 
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
-	//if !c.Stash().Get("allow_skip_onboarding").Bool() {
-	//	c.SuspendAction()
-	//}
-
 	deps := a.GetDeps(c)
-	if !deps.Cfg.Passkey.Optional {
+	if !deps.Cfg.Password.Optional {
 		c.SuspendAction()
 	}
 }
