@@ -200,9 +200,9 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 				errorMessage = fmt.Sprintf("%s: %s: %s", errorMessage, err.Details, err.DevInfo)
 				errorStatus = http.StatusUnprocessableEntity
 			}
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogWebAuthnRegistrationFinalFailed, user, errors.New(errorMessage))
-			if err != nil {
-				return fmt.Errorf(CreateAuditLogFailureMessage, err)
+			aErr := h.auditLogger.CreateWithConnection(tx, c, models.AuditLogWebAuthnRegistrationFinalFailed, user, errors.New(errorMessage))
+			if aErr != nil {
+				return fmt.Errorf(CreateAuditLogFailureMessage, aErr)
 			}
 
 			return echo.NewHTTPError(errorStatus, errorMessage).SetInternal(err)
