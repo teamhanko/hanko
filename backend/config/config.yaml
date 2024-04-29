@@ -31,15 +31,15 @@ webauthn:
 password:
   enabled: true
   optional: true
-  acquire_on_registration: conditional
+  acquire_on_registration: true
   acquire_on_login: always
   recovery: true
 emails:
   require_verification: true
 passkey:
   enabled: true
-  optional: true
-  acquire_on_registration: conditional
+  optional: false
+  acquire_on_registration: true
   acquire_on_login: always
   attestation_preference: direct
   limit: 100

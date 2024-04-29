@@ -124,7 +124,65 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	// Decide which is the next state according to the config and user input
 
 	if email != "" && deps.Cfg.Email.RequireVerification {
+		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
+			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+		}
 
+		if deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
+			if deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
+				if deps.Cfg.Password.AcquireOnRegistration && deps.Cfg.Passkey.AcquireOnRegistration {
+					if deps.Cfg.Email.UseForAuthentication { // Brauch ich das?
+						_ = c.Stash().Set("skip_to", shared.StateSuccess)
+						//_ = c.Stash().Set("skip_from", StateRegistrationMethodChooser)
+					}
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegistrationMethodChooser) // + Skip
+				} else if deps.Cfg.Password.AcquireOnRegistration && !deps.Cfg.Passkey.AcquireOnRegistration {
+					_ = c.Stash().Set("skip_to", shared.StateSuccess)
+					//_ = c.Stash().Set("skip_from", StatePasswordCreation)
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation) // + Skip für PasswordCreation
+				} else if !deps.Cfg.Password.AcquireOnRegistration && deps.Cfg.Passkey.AcquireOnRegistration {
+					_ = c.Stash().Set("skip_to", shared.StateSuccess)
+					//_ = c.Stash().Set("skip_from", StateRegisterPasskey)
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey) // + Skip für RegisterPasskey
+				} else {
+					if deps.Cfg.Email.UseForAuthentication {
+						return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+					}
+				}
+			} else if deps.Cfg.Password.Optional && !deps.Cfg.Passkey.Optional {
+				if deps.Cfg.Password.AcquireOnRegistration {
+					// deps.Cfg.Passkey.AcquireOnRegistration egal, da Passkey required und !AcquireOnRegistration
+					// keinen Sinn macht und durch Config Validierung verhindert werden sollte?
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey, StatePasswordCreation) // + Skip für PasswordCreation
+				} else {
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey)
+				}
+			} else if !deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
+				if deps.Cfg.Passkey.AcquireOnRegistration {
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation, StateRegisterPasskey) // + Skip für RegisterPasskey
+				} else {
+					return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
+				}
+			} else {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation, StateRegisterPasskey)
+			}
+		} else if deps.Cfg.Password.Enabled && !deps.Cfg.Passkey.Enabled {
+			if deps.Cfg.Password.Optional && deps.Cfg.Password.AcquireOnRegistration {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation) // + Skip für PasswordCreation
+			} else {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StatePasswordCreation)
+			}
+		} else if !deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
+			if deps.Cfg.Passkey.Optional && deps.Cfg.Passkey.AcquireOnRegistration {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey) // + Skip für RegisterPasskey
+			} else {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateRegisterPasskey)
+			}
+		} else {
+			if deps.Cfg.Email.UseForAuthentication {
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
+			}
+		}
 	}
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
