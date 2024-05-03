@@ -153,7 +153,9 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
 				}
 			} else if deps.Cfg.Password.Optional && !deps.Cfg.Passkey.Optional {
-				if deps.Cfg.Password.AcquireOnRegistration {
+				if !isWebAuthnAvailable {
+					return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
+				} else if deps.Cfg.Password.AcquireOnRegistration {
 					// deps.Cfg.Passkey.AcquireOnRegistration egal, da Passkey required und !AcquireOnRegistration
 					// keinen Sinn macht und durch Config Validierung verhindert werden sollte?
 					return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation, shared.StateSuccess)
@@ -161,13 +163,16 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 				}
 			} else if !deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
-				if deps.Cfg.Passkey.AcquireOnRegistration {
+				if isWebAuthnAvailable && deps.Cfg.Passkey.AcquireOnRegistration {
 					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 				} else {
 					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 				}
 			} else {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+				if !isWebAuthnAvailable {
+					return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
+				}
+				return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation, shared.StateSuccess)
 			}
 		} else if deps.Cfg.Password.Enabled && !deps.Cfg.Passkey.Enabled {
 			if !deps.Cfg.Password.Optional || deps.Cfg.Password.AcquireOnRegistration {
@@ -177,6 +182,9 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			}
 		} else if !deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
 			if !deps.Cfg.Passkey.Optional || deps.Cfg.Passkey.AcquireOnRegistration {
+				if !isWebAuthnAvailable {
+					return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
+				}
 				return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 			} else {
 				return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)

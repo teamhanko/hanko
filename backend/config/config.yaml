@@ -47,7 +47,7 @@ passkey:
     enabled: true
 email:
   enabled: true
-  optional: true
+  optional: false
   acquire_on_registration: true
   acquire_on_login: false
   require_verification: true
