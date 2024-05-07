@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
@@ -319,6 +320,14 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 		return fmt.Errorf("failed to add state to history: %w", err)
 	}
 
+	subFlow := currentState.subFlows.getSubFlowFromStateName(entryStateName)
+	newPath := utils.NewPath(aec.stash.Get("_.path").String())
+	newPath.Add(subFlow.getName())
+	err = aec.stash.Set("_.path", newPath.String())
+	if err != nil {
+		return fmt.Errorf("failed to stash new path: %w", err)
+	}
+
 	// Close the execution context with the entry state of the sub-flow.
 	return aec.closeExecutionContext(entryStateName)
 }
@@ -343,6 +352,13 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 		if err != nil {
 			return fmt.Errorf("failed to add state to history: %w", err)
 		}
+	}
+
+	newPath := utils.NewPath(aec.stash.Get("_.path").String())
+	newPath.Remove()
+	err = aec.stash.Set("_.path", newPath.String())
+	if err != nil {
+		return fmt.Errorf("failed to stash new path: %w", err)
 	}
 
 	// Close the execution context with the scheduled state.

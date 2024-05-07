@@ -16,7 +16,7 @@ const (
 	ActionSkip                              flowpilot.ActionName = "skip"
 )
 
-var SubFlow = flowpilot.NewSubFlow().
+var SubFlow = flowpilot.NewSubFlow("passkey_onboarding").
 	State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}, Skip{}).
 	State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{}, shared.Back{}).
 	MustBuild()

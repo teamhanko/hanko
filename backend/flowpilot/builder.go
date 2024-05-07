@@ -3,6 +3,8 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
+	"net/url"
+	"strings"
 	"time"
 )
 
@@ -23,6 +25,7 @@ type FlowBuilder interface {
 
 // defaultFlowBuilderBase is the base flow builder struct.
 type defaultFlowBuilderBase struct {
+	name                  string
 	flow                  stateActions
 	subFlows              SubFlows
 	stateDetails          stateDetails
@@ -45,8 +48,9 @@ type defaultFlowBuilder struct {
 }
 
 // newFlowBuilderBase creates a new defaultFlowBuilderBase instance.
-func newFlowBuilderBase() defaultFlowBuilderBase {
+func newFlowBuilderBase(name string) defaultFlowBuilderBase {
 	return defaultFlowBuilderBase{
+		name:             name,
 		flow:             make(stateActions),
 		subFlows:         make(SubFlows, 0),
 		stateDetails:     make(stateDetails),
@@ -57,7 +61,10 @@ func newFlowBuilderBase() defaultFlowBuilderBase {
 
 // NewFlow creates a new defaultFlowBuilder that builds a new flow available under the specified path.
 func NewFlow(path string) FlowBuilder {
-	fbBase := newFlowBuilderBase()
+	u, _ := url.Parse(strings.TrimSpace(path))
+	fbBase := newFlowBuilderBase(strings.ReplaceAll(strings.TrimFunc(u.Path, func(r rune) bool {
+		return r == '/'
+	}), "/", "_"))
 
 	return &defaultFlowBuilder{path: path, defaultFlowBuilderBase: fbBase}
 }
@@ -111,7 +118,6 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) err
 	for stateName, actions := range flow.getFlow() {
 		// Check if state name is already in use.
 		if _, ok := fb.stateDetails[stateName]; ok {
-			//return fmt.Errorf("non-unique flow state '%s'", stateName)
 			continue
 		}
 
@@ -261,6 +267,7 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	}
 
 	dfb := defaultFlowBase{
+		name:                  fb.name,
 		flow:                  fb.flow,
 		subFlows:              fb.subFlows,
 		beforeStateHooks:      fb.beforeStateHooks,

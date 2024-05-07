@@ -12,6 +12,6 @@ const (
 	ActionRegisterClientCapabilities flowpilot.ActionName = "register_client_capabilities"
 )
 
-var SubFlow = flowpilot.NewSubFlow().
+var SubFlow = flowpilot.NewSubFlow("capabilities").
 	State(StatePreflight, RegisterClientCapabilities{}).
 	MustBuild()

@@ -15,7 +15,7 @@ const (
 	ActionResendPasscode flowpilot.ActionName = "resend_passcode"
 )
 
-var SubFlow = flowpilot.NewSubFlow().
+var SubFlow = flowpilot.NewSubFlow("passcode").
 	State(StatePasscodeConfirmation, VerifyPasscode{}, ReSendPasscode{}, shared.Back{}).
 	BeforeState(StatePasscodeConfirmation, SendPasscode{}).
 	MustBuild()
