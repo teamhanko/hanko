@@ -39,14 +39,14 @@ emails:
 passkey:
   enabled: true
   optional: true
-  acquire_on_registration: false
+  acquire_on_registration: true
   acquire_on_login: always
   attestation_preference: direct
   limit: 100
   onboarding:
     enabled: true
 email:
-  enabled: true
+  enabled: false
   optional: false
   acquire_on_registration: true
   acquire_on_login: false

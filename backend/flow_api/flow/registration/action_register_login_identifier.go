@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_method_chooser"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -28,6 +28,12 @@ func (a RegisterLoginIdentifier) GetDescription() string {
 
 func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Email.Enabled || (deps.Cfg.Email.Enabled && !deps.Cfg.Email.AcquireOnRegistration) &&
+		!deps.Cfg.Username.Enabled || (deps.Cfg.Username.Enabled && !deps.Cfg.Username.AcquireOnRegistration) {
+		c.SuspendAction()
+		return
+	}
 
 	if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
 		input := flowpilot.EmailInput("email").
@@ -124,79 +130,96 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to stash user_id: %w", err)
 	}
 
-	// Decide which is the next state according to the config and user input
+	doEmailVerification := email != "" && deps.Cfg.Email.RequireVerification
 
-	if email != "" && deps.Cfg.Email.RequireVerification {
+	if doEmailVerification {
 		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
-
-		isWebAuthnAvailable := c.Stash().Get("webauthn_available").Bool()
-
-		if deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
-			if deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
-				if deps.Cfg.Password.AcquireOnRegistration && deps.Cfg.Passkey.AcquireOnRegistration {
-					if isWebAuthnAvailable {
-						return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_method_chooser.StateRegistrationMethodChooser, shared.StateSuccess)
-					} else {
-						return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
-					}
-				} else if deps.Cfg.Password.AcquireOnRegistration && !deps.Cfg.Passkey.AcquireOnRegistration {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
-				} else if !deps.Cfg.Password.AcquireOnRegistration && deps.Cfg.Passkey.AcquireOnRegistration {
-					if isWebAuthnAvailable {
-						return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-					} else {
-						return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-					}
-				} else {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-				}
-			} else if deps.Cfg.Password.Optional && !deps.Cfg.Passkey.Optional {
-				if !isWebAuthnAvailable {
-					return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
-				} else if deps.Cfg.Password.AcquireOnRegistration {
-					// deps.Cfg.Passkey.AcquireOnRegistration egal, da Passkey required und !AcquireOnRegistration
-					// keinen Sinn macht und durch Config Validierung verhindert werden sollte?
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation, shared.StateSuccess)
-				} else {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-				}
-			} else if !deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
-				if isWebAuthnAvailable && deps.Cfg.Passkey.AcquireOnRegistration {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-				} else {
-					return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
-				}
-			} else {
-				if !isWebAuthnAvailable {
-					return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
-				}
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation, shared.StateSuccess)
-			}
-		} else if deps.Cfg.Password.Enabled && !deps.Cfg.Passkey.Enabled {
-			if !deps.Cfg.Password.Optional || deps.Cfg.Password.AcquireOnRegistration {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, registration_register_password.StatePasswordCreation, shared.StateSuccess)
-			} else {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-			}
-		} else if !deps.Cfg.Password.Enabled && deps.Cfg.Passkey.Enabled {
-			if !deps.Cfg.Passkey.Optional || deps.Cfg.Passkey.AcquireOnRegistration {
-				if !isWebAuthnAvailable {
-					return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
-				}
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-			} else {
-				return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-			}
-		} else {
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-		}
 	}
 
-	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity)
+	states, err := a.generateRegistrationStates(deps.Cfg, generateRegistrationStatesParams{
+		WebauthnAvailable: c.Stash().Get("webauthn_available").Bool(),
+		EmailVerification: doEmailVerification,
+	})
+
+	if err != nil {
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(err))
+	}
+
+	return c.StartSubFlow(states[0], states[1:]...)
 }
 
 func (a RegisterLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
 	return nil
+}
+
+type generateRegistrationStatesParams struct {
+	WebauthnAvailable bool
+	EmailVerification bool
+}
+
+func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p generateRegistrationStatesParams) ([]flowpilot.StateName, error) {
+	stateNames := make([]flowpilot.StateName, 0)
+
+	if p.EmailVerification {
+		stateNames = append(stateNames, passcode.StatePasscodeConfirmation)
+	}
+
+	passkeyEnabled := p.WebauthnAvailable && cfg.Passkey.Enabled
+	passwordEnabled := cfg.Password.Enabled
+	bothEnabled := passkeyEnabled && passwordEnabled
+
+	passkeyOptional := cfg.Passkey.Optional
+	passwordOptional := cfg.Password.Optional
+	bothOptional := passwordOptional && passkeyOptional
+
+	acquirePassword := cfg.Password.AcquireOnRegistration
+	acquirePasskey := cfg.Passkey.AcquireOnRegistration
+	acquireBoth := acquirePassword && acquirePasskey
+
+	if bothEnabled {
+		if acquireBoth {
+			if bothOptional {
+				// Wenn !p.EmailVerification, dann darf man den Chooser nicht skippen
+				stateNames = append(stateNames, StateRegistrationMethodChooser)
+			} else if passwordOptional {
+				// Man darf Password skippen
+				stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation)
+			} else if passkeyOptional {
+				// Man darf Passkey skippen
+				stateNames = append(stateNames, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey)
+			} else {
+				// Man darf keine der beiden Methoden skippen
+				stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation)
+			}
+		} else if acquirePassword {
+			// Wenn !p.EmailVerification, dann darf man Password Creation nicht skippen
+			stateNames = append(stateNames, registration_register_password.StatePasswordCreation)
+		} else if acquirePasskey {
+			stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey)
+		} else {
+			return nil, errors.New("no credential acquired")
+		}
+	} else if passkeyEnabled {
+		if acquirePasskey {
+			stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey)
+		} else {
+			return nil, errors.New("no credential acquired")
+		}
+	} else if passwordEnabled {
+		if acquirePassword {
+			stateNames = append(stateNames, registration_register_password.StatePasswordCreation)
+		} else {
+			return nil, errors.New("no credential acquired")
+		}
+	} else if p.EmailVerification {
+		return append(stateNames, shared.StateSuccess), nil
+	} else {
+		return nil, errors.New("no credential acquired")
+	}
+
+	stateNames = append(stateNames, shared.StateSuccess)
+
+	return stateNames, nil
 }
