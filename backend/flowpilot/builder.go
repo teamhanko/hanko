@@ -127,12 +127,12 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) err
 		afterStateHooks := flow.getAfterStateHooks()[stateName]
 
 		// Check if the current state belongs to a sub-flow.
-		//if !fb.flow.stateExists(stateName) {
-		//	// If the main flow includes hook actions for a sub-flow state, add the hooks defined in the main flow to
-		//	// the list of hooks of the sub-flow state.
-		//	beforeStateHooks = append(beforeStateHooks, fb.beforeStateHooks[stateName]...)
-		//	afterStateHooks = append(afterStateHooks, fb.afterStateHooks[stateName]...)
-		//}
+		if !fb.flow.stateExists(stateName) {
+			// If the main flow includes hook actions for a sub-flow state, add the hooks defined in the main flow to
+			// the list of hooks of the sub-flow state.
+			beforeStateHooks = append(beforeStateHooks, fb.beforeStateHooks[stateName]...)
+			afterStateHooks = append(afterStateHooks, fb.afterStateHooks[stateName]...)
+		}
 
 		// Create state details.
 		state := stateDetail{
