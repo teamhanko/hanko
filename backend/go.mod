@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.19.0
+	github.com/go-playground/validator/v10 v10.20.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.10.2
