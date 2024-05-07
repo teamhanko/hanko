@@ -65,6 +65,8 @@ type HookAction interface {
 // HookActions represents a list of HookAction interfaces.
 type HookActions []HookAction
 
+type HookDetails map[string]HookActions
+
 // state represents details for a state, including the associated actions, available sub-flows and more.
 type stateDetail struct {
 	name             StateName
@@ -117,8 +119,18 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 	return false
 }
 
+func (sfs SubFlows) getSubFlowFromStateName(state StateName) SubFlow {
+	for _, subFlow := range sfs {
+		if subFlow.getFlow().stateExists(state) {
+			return subFlow
+		}
+	}
+	return nil
+}
+
 // flowBase represents the base of the flow interfaces.
 type flowBase interface {
+	getName() string
 	getSubFlows() SubFlows
 	getFlow() stateActions
 	getBeforeStateHooks() stateHooks
@@ -150,6 +162,7 @@ type SubFlow interface {
 type contextValues map[string]interface{}
 
 type defaultFlowBase struct {
+	name                  string
 	flow                  stateActions // StateName to Actions mapping.
 	subFlows              SubFlows     // The sub-flows of the current flow.
 	beforeStateHooks      stateHooks   // StateName to HookActions mapping.
@@ -183,6 +196,11 @@ func (f *defaultFlow) getState(stateName StateName) (*stateDetail, error) {
 	}
 
 	return nil, fmt.Errorf("unknown state: %s", stateName)
+}
+
+// getName returns the flow name.
+func (f *defaultFlowBase) getName() string {
+	return f.name
 }
 
 // getSubFlows returns the sub-flows of the current flow.

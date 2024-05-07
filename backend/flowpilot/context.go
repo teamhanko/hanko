@@ -155,6 +155,11 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
 	}
 
+	err = stash.Set("_.path", utils.NewPath(flow.name))
+	if err != nil {
+		return nil, fmt.Errorf("failed to stash current path: %w", err)
+	}
+
 	// Create a new flow model with the provided parameters.
 	flowCreation := flowCreationParam{currentState: flow.initialStateName, stash: stash.String(), expiresAt: expiresAt}
 	flowModel, err := dbw.createFlowWithParam(flowCreation)

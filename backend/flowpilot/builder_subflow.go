@@ -15,8 +15,8 @@ type defaultSubFlowBuilder struct {
 }
 
 // NewSubFlow creates a new SubFlowBuilder.
-func NewSubFlow() SubFlowBuilder {
-	fbBase := newFlowBuilderBase()
+func NewSubFlow(name string) SubFlowBuilder {
+	fbBase := newFlowBuilderBase(name)
 	return &defaultSubFlowBuilder{defaultFlowBuilderBase: fbBase}
 }
 
@@ -43,8 +43,8 @@ func (sfb *defaultSubFlowBuilder) AfterState(stateName StateName, hooks ...HookA
 
 // Build constructs and returns the SubFlow object.
 func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
-
 	f := defaultFlowBase{
+		name:             sfb.name,
 		flow:             sfb.flow,
 		subFlows:         sfb.subFlows,
 		beforeStateHooks: sfb.beforeStateHooks,
