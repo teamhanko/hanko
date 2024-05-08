@@ -17,6 +17,6 @@ const (
 )
 
 var SubFlow = flowpilot.NewSubFlow("passkey_onboarding").
-	State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}, Skip{}).
+	State(StateOnboardingCreatePasskey, WebauthnGenerateCreationOptions{}, Skip{}, Back{}).
 	State(StateOnboardingVerifyPasskeyAttestation, WebauthnVerifyAttestationResponse{}, shared.Back{}).
 	MustBuild()

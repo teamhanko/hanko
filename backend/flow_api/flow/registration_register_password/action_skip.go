@@ -19,7 +19,8 @@ func (a Skip) GetDescription() string {
 
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	if !deps.Cfg.Password.Optional {
+
+	if !deps.Cfg.Password.Optional || !deps.Cfg.Email.RequireVerification {
 		c.SuspendAction()
 	}
 }
