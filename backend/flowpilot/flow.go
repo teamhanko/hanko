@@ -2,6 +2,7 @@ package flowpilot
 
 import (
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -64,6 +65,17 @@ type HookAction interface {
 
 // HookActions represents a list of HookAction interfaces.
 type HookActions []HookAction
+
+func (actions HookActions) reverse() HookActions {
+	a := make(HookActions, len(actions))
+	copy(a, actions)
+	n := reflect.ValueOf(a).Len()
+	swap := reflect.Swapper(a)
+	for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+		swap(i, j)
+	}
+	return a
+}
 
 type HookDetails map[string]HookActions
 
