@@ -38,7 +38,6 @@ var Flow = flowpilot.NewFlow("/login").
 	BeforeState(StateLoginInit, WebauthnGenerateRequestOptionsForConditionalUi{}).
 	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
 	State(StateLoginMethodChooser,
-		WebauthnGenerateRequestOptions{},
 		ContinueToPasswordLogin{},
 		ContinueToPasscodeConfirmation{},
 		shared.ThirdPartyOAuth{},
@@ -58,6 +57,7 @@ var Flow = flowpilot.NewFlow("/login").
 	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
 	AfterState(passkey_onboarding.StateOnboardingVerifyPasskeyAttestation, shared.WebauthnCredentialSave{}).
 	InitialState(capabilities.StatePreflight, StateLoginInit).
+	BeforeState(passcode.StatePasscodeConfirmation, SelectPasscodeTemplate{}).
 	AfterState(passcode.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 	ErrorState(shared.StateError).
 	TTL(10 * time.Minute)
