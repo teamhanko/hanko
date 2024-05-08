@@ -20,7 +20,9 @@ func (a WebauthnGenerateRequestOptions) GetDescription() string {
 }
 
 func (a WebauthnGenerateRequestOptions) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	deps := a.GetDeps(c)
+
+	if !c.Stash().Get("webauthn_available").Bool() || !deps.Cfg.Passkey.Enabled {
 		c.SuspendAction()
 	}
 }
