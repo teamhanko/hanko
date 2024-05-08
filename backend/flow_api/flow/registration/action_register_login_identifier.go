@@ -29,8 +29,8 @@ func (a RegisterLoginIdentifier) GetDescription() string {
 func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Email.Enabled || (deps.Cfg.Email.Enabled && !deps.Cfg.Email.AcquireOnRegistration) &&
-		!deps.Cfg.Username.Enabled || (deps.Cfg.Username.Enabled && !deps.Cfg.Username.AcquireOnRegistration) {
+	if (!deps.Cfg.Email.Enabled || (deps.Cfg.Email.Enabled && !deps.Cfg.Email.AcquireOnRegistration)) &&
+		(!deps.Cfg.Username.Enabled || (deps.Cfg.Username.Enabled && !deps.Cfg.Username.AcquireOnRegistration)) {
 		c.SuspendAction()
 		return
 	}
@@ -219,7 +219,5 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p
 		return nil, errors.New("no credential acquired")
 	}
 
-	stateNames = append(stateNames, shared.StateSuccess)
-
-	return stateNames, nil
+	return append(stateNames, shared.StateSuccess), nil
 }
