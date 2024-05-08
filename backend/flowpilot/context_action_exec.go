@@ -132,7 +132,7 @@ func (aec *defaultActionExecutionContext) executeBeforeStateHooks(nextStateName 
 		return err
 	}
 
-	for _, hook := range nextState.beforeStateHooks {
+	for _, hook := range nextState.beforeStateHooks.reverse() {
 		err = hook.Execute(aec)
 		if err != nil {
 			return fmt.Errorf("failed to execute hook action before state '%s': %w", nextState.name, err)
@@ -148,7 +148,7 @@ func (aec *defaultActionExecutionContext) executeAfterStateHooks() error {
 		return err
 	}
 
-	for _, hook := range currentState.afterStateHooks {
+	for _, hook := range currentState.afterStateHooks.reverse() {
 		err = hook.Execute(aec)
 		if err != nil {
 			return fmt.Errorf("failed to execute hook action after state: %w", err)
