@@ -1,11 +1,10 @@
-package login
+package login_password
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	passkeyOnboarding "github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -78,12 +77,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	// Decide which is the next state according to the config and user input
-	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-	}
-
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.EndSubFlow()
 }
 
 func (a PasswordRecovery) Finalize(c flowpilot.FinalizationContext) error {

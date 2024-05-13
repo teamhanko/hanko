@@ -1,11 +1,10 @@
-package login
+package login_password
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -105,15 +104,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
-		err = c.Stash().Set("allow_skip_onboarding", true)
-		if err != nil {
-			return fmt.Errorf("failed to set allow_skip_onboarding to stash: %w", err)
-		}
-		return c.StartSubFlow(passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-	}
-
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.EndSubFlow()
 }
 
 func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error {

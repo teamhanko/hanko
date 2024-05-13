@@ -2,6 +2,8 @@ package login
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/login_method_chooser"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -10,23 +12,14 @@ import (
 )
 
 const (
-	StateLoginInit             flowpilot.StateName = "login_init"
-	StateLoginMethodChooser    flowpilot.StateName = "login_method_chooser"
-	StateLoginPassword         flowpilot.StateName = "login_password"
-	StateLoginPasskey          flowpilot.StateName = "login_passkey"
-	StateLoginPasswordRecovery flowpilot.StateName = "login_password_recovery"
+	StateLoginInit    flowpilot.StateName = "login_init"
+	StateLoginPasskey flowpilot.StateName = "login_passkey"
 )
 
 const (
-	ActionContinueToLoginMethodChooser           flowpilot.ActionName = "continue_to_login_method_chooser"
-	ActionContinueToPasscodeConfirmation         flowpilot.ActionName = "continue_to_passcode_confirmation"
-	ActionContinueToPasscodeConfirmationRecovery flowpilot.ActionName = "continue_to_passcode_confirmation_recovery"
-	ActionContinueToPasswordLogin                flowpilot.ActionName = "continue_to_password_login"
-	ActionWebauthnGenerateRequestOptions         flowpilot.ActionName = "webauthn_generate_request_options"
-	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_assertion_response"
-	ActionContinueWithLoginIdentifier            flowpilot.ActionName = "continue_with_login_identifier"
-	ActionPasswordRecovery                       flowpilot.ActionName = "password_recovery"
-	ActionPasswordLogin                          flowpilot.ActionName = "password_login"
+	ActionWebauthnGenerateRequestOptions  flowpilot.ActionName = "webauthn_generate_request_options"
+	ActionWebauthnVerifyAssertionResponse flowpilot.ActionName = "webauthn_verify_assertion_response"
+	ActionContinueWithLoginIdentifier     flowpilot.ActionName = "continue_with_login_identifier"
 )
 
 var Flow = flowpilot.NewFlow("/login").
@@ -37,24 +30,11 @@ var Flow = flowpilot.NewFlow("/login").
 		shared.ThirdPartyOAuth{}).
 	BeforeState(StateLoginInit, WebauthnGenerateRequestOptionsForConditionalUi{}).
 	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
-	State(StateLoginMethodChooser,
-		ContinueToPasswordLogin{},
-		ContinueToPasscodeConfirmation{},
-		shared.ThirdPartyOAuth{},
-		shared.Back{},
-	).
 	State(StateLoginPasskey, WebauthnVerifyAssertionResponse{}, shared.Back{}).
-	State(StateLoginPassword,
-		PasswordLogin{},
-		ContinueToPasscodeConfirmationRecovery{},
-		ContinueToLoginMethodChooser{},
-		shared.Back{},
-	).
-	State(StateLoginPasswordRecovery, PasswordRecovery{}).
-	BeforeState(shared.StateSuccess, shared.IssueSession{}, shared.GetUserData{}).
+	BeforeState(shared.StateSuccess, shared.IssueSession{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
-	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow).
+	SubFlows(capabilities.SubFlow, passkey_onboarding.SubFlow, passcode.SubFlow, login_method_chooser.SubFlow, login_password.SubFlow).
 	AfterState(passkey_onboarding.StateOnboardingVerifyPasskeyAttestation, shared.WebauthnCredentialSave{}).
 	InitialState(capabilities.StatePreflight, StateLoginInit).
 	BeforeState(passcode.StatePasscodeConfirmation, SelectPasscodeTemplate{}).
