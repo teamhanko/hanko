@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/login_method_chooser"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -125,10 +127,8 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 	}
 
-	/// ... was nun? StatePasscodeConfirmation, StateLoginMethodChooser, StateLoginPassword
-
 	if deps.Cfg.Email.UseForAuthentication && deps.Cfg.Password.Enabled {
-		return c.ContinueFlow(StateLoginMethodChooser)
+		return c.StartSubFlow(login_method_chooser.StateLoginMethodChooser, shared.StateSuccess)
 	} else if deps.Cfg.Email.UseForAuthentication {
 		// Set only for audit logging purposes.
 		if err := c.Stash().Set("login_method", "passcode"); err != nil {
@@ -137,7 +137,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	} else if deps.Cfg.Password.Enabled {
-		return c.ContinueFlow(StateLoginPassword)
+		return c.StartSubFlow(login_password.StateLoginPassword, shared.StateSuccess)
 	}
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("no authentication method enabled")))
@@ -194,4 +194,60 @@ func (a ContinueWithLoginIdentifier) analyzeIdentifierInputs(c flowpilot.Executi
 	}
 
 	return name, value, treatAsEmail
+}
+
+func (a ContinueWithLoginIdentifier) generateFlow(passkeysAcquireOnLogin, passwordAcquireOnLogin string, hasPasskey, hasPassword, passkeyOptional, passwordOptional bool) []flowpilot.StateName {
+	result := make([]flowpilot.StateName, 0)
+
+	if passkeysAcquireOnLogin == "always" && passwordAcquireOnLogin == "always" {
+		if !hasPasskey && !hasPassword {
+			result = append(result, "passkey_onboarding", "password_onboarding")
+		} else if hasPasskey && !hasPassword {
+			result = append(result, "password_onboarding")
+		} else if !hasPasskey && hasPassword {
+			result = append(result, "passkey_onboarding")
+		}
+	} else if passkeysAcquireOnLogin == "always" && passwordAcquireOnLogin == "conditional" {
+		if !hasPasskey && !hasPassword {
+			result = append(result, "passkey_onboarding") // skip should lead to password onboarding
+		} else if !hasPasskey && hasPassword {
+			result = append(result, "passkey_onboarding")
+		}
+	} else if passkeysAcquireOnLogin == "conditional" && passwordAcquireOnLogin == "always" {
+		if !hasPasskey && !hasPassword {
+			result = append(result, "password_onboarding") // skip should lead to passkey onboarding
+		} else if hasPasskey && !hasPassword {
+			result = append(result, "password_onboarding")
+		}
+	} else if passkeysAcquireOnLogin == "conditional" && passwordAcquireOnLogin == "conditional" {
+		if !hasPasskey && !hasPassword {
+			if passkeyOptional && passwordOptional {
+				result = append(result, "login_method_onboarding_chooser") // login_method_onboarding_chooser can be skipped
+			} else if passkeyOptional && !passwordOptional {
+				result = append(result, "password_onboarding", "passkey_onboarding") // passkey_onboarding can be skipped
+			} else if !passkeyOptional && passwordOptional {
+				result = append(result, "passkey_onboarding", "password_onboarding") // password_onboarding can be skipped
+			} else if !passkeyOptional && !passwordOptional {
+				result = append(result, "passkey_onboarding", "password_onboarding") // both states cannot be skipped
+			}
+		}
+	} else if passkeysAcquireOnLogin == "conditional" && passwordAcquireOnLogin == "never" {
+		if !hasPasskey && !hasPassword {
+			result = append(result, "passkey_onboarding")
+		}
+	} else if passkeysAcquireOnLogin == "never" && passwordAcquireOnLogin == "conditional" {
+		if !hasPasskey && !hasPassword {
+			result = append(result, "password_onboarding")
+		}
+	} else if passkeysAcquireOnLogin == "never" && passwordAcquireOnLogin == "always" {
+		if !hasPassword {
+			result = append(result, "password_onboarding")
+		}
+	} else if passkeysAcquireOnLogin == "always" && passwordAcquireOnLogin == "never" {
+		if !hasPasskey {
+			result = append(result, "passkey_onboarding")
+		}
+	}
+
+	return result
 }
