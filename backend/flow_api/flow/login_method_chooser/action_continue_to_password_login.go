@@ -1,6 +1,7 @@
-package login
+package login_method_chooser
 
 import (
+	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -17,16 +18,10 @@ func (a ContinueToPasswordLogin) GetDescription() string {
 	return "Continue to the password login."
 }
 
-func (a ContinueToPasswordLogin) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	if !deps.Cfg.Password.Enabled {
-		c.SuspendAction()
-	}
-}
+func (a ContinueToPasswordLogin) Initialize(c flowpilot.InitializationContext) {}
 
 func (a ContinueToPasswordLogin) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueFlow(StateLoginPassword)
+	return c.StartSubFlow(login_password.StateLoginPassword)
 }
 
 func (a ContinueToPasswordLogin) Finalize(c flowpilot.FinalizationContext) error {

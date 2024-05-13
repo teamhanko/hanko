@@ -1,4 +1,4 @@
-package login
+package login_password
 
 import (
 	"fmt"
