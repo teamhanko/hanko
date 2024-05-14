@@ -77,6 +77,11 @@ func (fc *defaultFlowContext) Get(name string) interface{} {
 	return fc.flow.contextValues[name]
 }
 
+// GetName returns the name of the current flow.
+func (fc *defaultFlowContext) GetName() string {
+	return fc.flow.name
+}
+
 // FetchActionInput fetches input data for a specific action.
 func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (ReadOnlyActionInput, error) {
 	// Find the last Transition with the specified method from the database wrapper.

@@ -2,11 +2,17 @@ package flowpilot
 
 // defaultActionInitializationContext is the default implementation of the actionInitializationContext interface.
 type defaultActionInitializationContext struct {
-	schema        InitializationSchema // InitializationSchema for action initialization.
-	isSuspended   bool                 // Flag indicating if the method is suspended.
-	stash         Stash                // ReadOnlyJSONManager for accessing stash data.
-	contextValues contextValues        // Values to be used within the flow context.
-	flowModel     FlowModel
+	schema             InitializationSchema // InitializationSchema for action initialization.
+	isSuspended        bool                 // Flag indicating if the method is suspended.
+	defaultFlowContext                      // Embedding the defaultFlowContext for common context fields.
+}
+
+func (aic *defaultActionInitializationContext) Payload() Payload {
+	return aic.payload
+}
+
+func (aic *defaultActionInitializationContext) Set(s string, i interface{}) {
+	aic.Set(s, i)
 }
 
 // AddInputs adds input data to the InitializationSchema.
@@ -26,7 +32,7 @@ func (aic *defaultActionInitializationContext) Stash() Stash {
 
 // Get returns the context value with the given name.
 func (aic *defaultActionInitializationContext) Get(key string) interface{} {
-	return aic.contextValues[key]
+	return aic.flow.contextValues[key]
 }
 
 func (aic *defaultActionInitializationContext) CurrentStateEquals(stateNames ...StateName) bool {

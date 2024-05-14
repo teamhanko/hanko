@@ -38,6 +38,8 @@ type flowContext interface {
 	StateExists(stateName StateName) bool
 	// Set sets a context value for the given key.
 	Set(string, interface{})
+
+	GetName() string
 }
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
@@ -49,6 +51,7 @@ type actionInitializationContext interface {
 	// CurrentStateEquals returns true, when one of the given states matches the current state.
 	CurrentStateEquals(stateNames ...StateName) bool
 	actionSuspender
+	flowContext
 }
 
 // actionExecutionContext represents the context for an action execution.
@@ -256,10 +259,8 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
 	aic := defaultActionInitializationContext{
-		schema:        schema.toInitializationSchema(),
-		stash:         stash,
-		contextValues: flow.contextValues,
-		flowModel:     fc.flowModel,
+		schema:             schema.toInitializationSchema(),
+		defaultFlowContext: fc,
 	}
 
 	// Create a actionExecutionContext instance for action execution.
