@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login_method_chooser"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
@@ -196,10 +197,10 @@ func (a ContinueWithLoginIdentifier) analyzeIdentifierInputs(c flowpilot.Executi
 	return name, value, treatAsEmail
 }
 
-func (a ContinueWithLoginIdentifier) generateFlow(passkeysAcquireOnLogin, passwordAcquireOnLogin string, hasPasskey, hasPassword, passkeyOptional, passwordOptional bool) []flowpilot.StateName {
+func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg config.Config, hasPasskey, hasPassword bool) []flowpilot.StateName {
 	result := make([]flowpilot.StateName, 0)
 
-	if passkeysAcquireOnLogin == "always" && passwordAcquireOnLogin == "always" {
+	if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "always" {
 		if !hasPasskey && !hasPassword {
 			result = append(result, "passkey_onboarding", "password_onboarding")
 		} else if hasPasskey && !hasPassword {
@@ -207,43 +208,43 @@ func (a ContinueWithLoginIdentifier) generateFlow(passkeysAcquireOnLogin, passwo
 		} else if !hasPasskey && hasPassword {
 			result = append(result, "passkey_onboarding")
 		}
-	} else if passkeysAcquireOnLogin == "always" && passwordAcquireOnLogin == "conditional" {
+	} else if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
 			result = append(result, "passkey_onboarding") // skip should lead to password onboarding
 		} else if !hasPasskey && hasPassword {
 			result = append(result, "passkey_onboarding")
 		}
-	} else if passkeysAcquireOnLogin == "conditional" && passwordAcquireOnLogin == "always" {
+	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "always" {
 		if !hasPasskey && !hasPassword {
 			result = append(result, "password_onboarding") // skip should lead to passkey onboarding
 		} else if hasPasskey && !hasPassword {
 			result = append(result, "password_onboarding")
 		}
-	} else if passkeysAcquireOnLogin == "conditional" && passwordAcquireOnLogin == "conditional" {
+	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
-			if passkeyOptional && passwordOptional {
+			if cfg.Passkey.Optional && cfg.Password.Optional {
 				result = append(result, "login_method_onboarding_chooser") // login_method_onboarding_chooser can be skipped
-			} else if passkeyOptional && !passwordOptional {
+			} else if cfg.Passkey.Optional && !cfg.Password.Optional {
 				result = append(result, "password_onboarding", "passkey_onboarding") // passkey_onboarding can be skipped
-			} else if !passkeyOptional && passwordOptional {
+			} else if !cfg.Passkey.Optional && cfg.Password.Optional {
 				result = append(result, "passkey_onboarding", "password_onboarding") // password_onboarding can be skipped
-			} else if !passkeyOptional && !passwordOptional {
+			} else if !cfg.Passkey.Optional && !cfg.Password.Optional {
 				result = append(result, "passkey_onboarding", "password_onboarding") // both states cannot be skipped
 			}
 		}
-	} else if passkeysAcquireOnLogin == "conditional" && passwordAcquireOnLogin == "never" {
+	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "never" {
 		if !hasPasskey && !hasPassword {
 			result = append(result, "passkey_onboarding")
 		}
-	} else if passkeysAcquireOnLogin == "never" && passwordAcquireOnLogin == "conditional" {
+	} else if cfg.Passkey.AcquireOnLogin == "never" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
 			result = append(result, "password_onboarding")
 		}
-	} else if passkeysAcquireOnLogin == "never" && passwordAcquireOnLogin == "always" {
+	} else if cfg.Passkey.AcquireOnLogin == "never" && cfg.Password.AcquireOnLogin == "always" {
 		if !hasPassword {
 			result = append(result, "password_onboarding")
 		}
-	} else if passkeysAcquireOnLogin == "always" && passwordAcquireOnLogin == "never" {
+	} else if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "never" {
 		if !hasPasskey {
 			result = append(result, "passkey_onboarding")
 		}
