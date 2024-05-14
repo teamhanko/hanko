@@ -38,11 +38,3 @@ func (aic *defaultActionInitializationContext) CurrentStateEquals(stateNames ...
 
 	return false
 }
-
-func (aic *defaultActionInitializationContext) GetNextStateDuringInitForSchemaCreation() (StateName, bool) {
-	result, ok := aic.contextValues["init_schema_creation_next_state"].(StateName)
-	if !ok {
-		return "", false
-	}
-	return result, true
-}
