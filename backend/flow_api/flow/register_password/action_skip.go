@@ -1,4 +1,4 @@
-package registration_register_password
+package register_password
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -14,7 +14,7 @@ func (a Skip) GetName() flowpilot.ActionName {
 }
 
 func (a Skip) GetDescription() string {
-	return "Skip"
+	return "Skip my ass"
 }
 
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
@@ -24,7 +24,6 @@ func (a Skip) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 }
-
 func (a Skip) Execute(c flowpilot.ExecutionContext) error {
 	return c.EndSubFlow()
 }

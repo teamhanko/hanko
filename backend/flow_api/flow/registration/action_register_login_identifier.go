@@ -7,7 +7,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_register_password"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"unicode/utf8"
@@ -185,17 +185,17 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p
 				stateNames = append(stateNames, StateRegistrationMethodChooser)
 			} else if passwordOptional {
 				// Man darf Password skippen
-				stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation)
+				stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey, register_password.StatePasswordCreation)
 			} else if passkeyOptional {
 				// Man darf Passkey skippen
-				stateNames = append(stateNames, registration_register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey)
+				stateNames = append(stateNames, register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey)
 			} else {
 				// Man darf keine der beiden Methoden skippen
-				stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey, registration_register_password.StatePasswordCreation)
+				stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey, register_password.StatePasswordCreation)
 			}
 		} else if acquirePassword {
 			// Wenn !p.EmailVerification, dann darf man Password Creation nicht skippen
-			stateNames = append(stateNames, registration_register_password.StatePasswordCreation)
+			stateNames = append(stateNames, register_password.StatePasswordCreation)
 		} else if acquirePasskey {
 			stateNames = append(stateNames, passkey_onboarding.StateOnboardingCreatePasskey)
 		} else {
@@ -209,7 +209,7 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p
 		}
 	} else if passwordEnabled {
 		if acquirePassword {
-			stateNames = append(stateNames, registration_register_password.StatePasswordCreation)
+			stateNames = append(stateNames, register_password.StatePasswordCreation)
 		} else {
 			return nil, errors.New("no credential acquired")
 		}

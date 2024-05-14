@@ -1,4 +1,4 @@
-package registration_register_password
+package register_password
 
 import (
 	"errors"
@@ -23,7 +23,7 @@ func (a RegisterPassword) GetDescription() string {
 
 func (a RegisterPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	c.AddInputs(flowpilot.PasswordInput("new_password").Required(true).MinLength(deps.Cfg.Password.MinLength))
+	c.AddInputs(flowpilot.PasswordInput("new_password").Required(!deps.Cfg.Password.Optional).MinLength(deps.Cfg.Password.MinLength))
 }
 
 func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {

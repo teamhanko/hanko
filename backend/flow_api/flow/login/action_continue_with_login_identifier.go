@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -68,17 +69,22 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
+	var userModel *models.User
+
 	if treatIdentifierAsEmail {
 		// User has submitted an email address.
 
-		if err := c.Stash().Set("email", identifierInputValue); err != nil {
+		var err error
+		userModel, err = deps.Persister.GetUserPersister().GetByEmailAddress(identifierInputValue)
+		if err != nil {
+			return err
+		}
+
+		if err = c.Stash().Set("email", identifierInputValue); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 
-		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(identifierInputValue)
-		if err != nil {
-			return fmt.Errorf("failed to get email model from db: %w", err)
-		}
+		emailModel := userModel.GetEmailByAddress(identifierInputValue)
 
 		if emailModel != nil && emailModel.UserID != nil {
 			err := c.Stash().Set("user_id", emailModel.UserID.String())
@@ -89,7 +95,8 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	} else {
 		// User has submitted a username.
 
-		userModel, err := deps.Persister.GetUserPersister().GetByUsername(identifierInputValue)
+		var err error
+		userModel, err = deps.Persister.GetUserPersister().GetByUsername(identifierInputValue)
 		if err != nil {
 			return err
 		}
@@ -128,17 +135,20 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 	}
 
+	onboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, len(userModel.WebauthnCredentials) > 0, userModel.PasswordCredential != nil)
+	onboardingStates = append(onboardingStates, shared.StateSuccess)
+
 	if deps.Cfg.Email.UseForAuthentication && deps.Cfg.Password.Enabled {
-		return c.StartSubFlow(login_method_chooser.StateLoginMethodChooser, shared.StateSuccess)
+		return c.StartSubFlow(login_method_chooser.StateLoginMethodChooser, onboardingStates...)
 	} else if deps.Cfg.Email.UseForAuthentication {
 		// Set only for audit logging purposes.
 		if err := c.Stash().Set("login_method", "passcode"); err != nil {
 			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
 
-		return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
+		return c.StartSubFlow(passcode.StatePasscodeConfirmation, onboardingStates...)
 	} else if deps.Cfg.Password.Enabled {
-		return c.StartSubFlow(login_password.StateLoginPassword, shared.StateSuccess)
+		return c.StartSubFlow(login_password.StateLoginPassword, onboardingStates...)
 	}
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("no authentication method enabled")))
@@ -202,51 +212,51 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 
 	if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "always" {
 		if !hasPasskey && !hasPassword {
-			result = append(result, "passkey_onboarding", "password_onboarding")
+			result = append(result, passkey_onboarding.StateOnboardingCreatePasskey, register_password.StatePasswordCreation)
 		} else if hasPasskey && !hasPassword {
-			result = append(result, "password_onboarding")
+			result = append(result, register_password.StatePasswordCreation)
 		} else if !hasPasskey && hasPassword {
-			result = append(result, "passkey_onboarding")
+			result = append(result, passkey_onboarding.StateOnboardingCreatePasskey)
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
-			result = append(result, "passkey_onboarding") // skip should lead to password onboarding
+			result = append(result, passkey_onboarding.StateOnboardingCreatePasskey) // skip should lead to password onboarding
 		} else if !hasPasskey && hasPassword {
-			result = append(result, "passkey_onboarding")
+			result = append(result, passkey_onboarding.StateOnboardingCreatePasskey)
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "always" {
 		if !hasPasskey && !hasPassword {
-			result = append(result, "password_onboarding") // skip should lead to passkey onboarding
+			result = append(result, register_password.StatePasswordCreation) // skip should lead to passkey onboarding
 		} else if hasPasskey && !hasPassword {
-			result = append(result, "password_onboarding")
+			result = append(result, register_password.StatePasswordCreation)
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
 			if cfg.Passkey.Optional && cfg.Password.Optional {
 				result = append(result, "login_method_onboarding_chooser") // login_method_onboarding_chooser can be skipped
 			} else if cfg.Passkey.Optional && !cfg.Password.Optional {
-				result = append(result, "password_onboarding", "passkey_onboarding") // passkey_onboarding can be skipped
+				result = append(result, register_password.StatePasswordCreation, passkey_onboarding.StateOnboardingCreatePasskey) // passkey_onboarding can be skipped
 			} else if !cfg.Passkey.Optional && cfg.Password.Optional {
-				result = append(result, "passkey_onboarding", "password_onboarding") // password_onboarding can be skipped
+				result = append(result, passkey_onboarding.StateOnboardingCreatePasskey, register_password.StatePasswordCreation) // password_onboarding can be skipped
 			} else if !cfg.Passkey.Optional && !cfg.Password.Optional {
-				result = append(result, "passkey_onboarding", "password_onboarding") // both states cannot be skipped
+				result = append(result, passkey_onboarding.StateOnboardingCreatePasskey, register_password.StatePasswordCreation) // both states cannot be skipped
 			}
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "never" {
 		if !hasPasskey && !hasPassword {
-			result = append(result, "passkey_onboarding")
+			result = append(result, passkey_onboarding.StateOnboardingCreatePasskey)
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "never" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
-			result = append(result, "password_onboarding")
+			result = append(result, register_password.StatePasswordCreation)
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "never" && cfg.Password.AcquireOnLogin == "always" {
 		if !hasPassword {
-			result = append(result, "password_onboarding")
+			result = append(result, register_password.StatePasswordCreation)
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "never" {
 		if !hasPasskey {
-			result = append(result, "passkey_onboarding")
+			result = append(result, passkey_onboarding.StateOnboardingCreatePasskey)
 		}
 	}
 

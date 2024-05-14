@@ -4,8 +4,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_method_chooser"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
@@ -32,7 +32,7 @@ var Flow = flowpilot.NewFlow("/registration").
 	BeforeState(shared.StateSuccess, CreateUser{}, shared.IssueSession{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
-	SubFlows(capabilities.SubFlow, registration_method_chooser.SubFlow, passcode.SubFlow, passkey_onboarding.SubFlow, registration_register_password.SubFlow).
+	SubFlows(capabilities.SubFlow, registration_method_chooser.SubFlow, passcode.SubFlow, passkey_onboarding.SubFlow, register_password.SubFlow).
 	InitialState(capabilities.StatePreflight, StateRegistrationInit).
 	ErrorState(shared.StateError).
 	TTL(10 * time.Minute).
