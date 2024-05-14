@@ -1,6 +1,7 @@
 package passkey_onboarding
 
 import (
+	"github.com/teamhanko/hanko/backend/flow_api/flow/register_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -20,13 +21,29 @@ func (a Skip) GetDescription() string {
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Passkey.Optional || !deps.Cfg.Email.RequireVerification {
-		c.SuspendAction()
+	switch c.GetName() {
+	case "registration":
+		if !deps.Cfg.Passkey.Optional || !deps.Cfg.Email.RequireVerification {
+			// Skip is only available when passkeys are optional or the email has been verified beforehand to ensure the
+			// user has a credential after registration.
+			c.SuspendAction()
+		}
+	case "login":
+		if !deps.Cfg.Passkey.Optional {
+			c.SuspendAction()
+		}
 	}
 }
 
 func (a Skip) Execute(c flowpilot.ExecutionContext) error {
-	return c.EndSubFlow()
+	switch c.GetName() {
+	case "registration":
+		return c.EndSubFlow()
+	case "login":
+		return c.StartSubFlow(register_password.StatePasswordCreation)
+	}
+
+	return nil
 }
 
 func (a Skip) Finalize(c flowpilot.FinalizationContext) error {

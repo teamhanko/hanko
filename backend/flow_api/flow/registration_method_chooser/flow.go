@@ -2,7 +2,7 @@ package registration_method_chooser
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passkey_onboarding"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_register_password"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/register_password"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
@@ -23,5 +23,5 @@ var SubFlow = flowpilot.NewSubFlow("registration_method_chooser").
 		ContinueToPasswordRegistration{},
 		Back{},
 		Skip{}).
-	SubFlows(passkey_onboarding.SubFlow, registration_register_password.SubFlow).
+	SubFlows(passkey_onboarding.SubFlow, register_password.SubFlow).
 	MustBuild()

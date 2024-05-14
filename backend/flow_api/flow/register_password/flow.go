@@ -1,4 +1,4 @@
-package registration_register_password
+package register_password
 
 import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -14,6 +14,6 @@ const (
 	ActionBack             flowpilot.ActionName = "back"
 )
 
-var SubFlow = flowpilot.NewSubFlow("registration_register_password").
+var SubFlow = flowpilot.NewSubFlow("register_password").
 	State(StatePasswordCreation, RegisterPassword{}, Back{}, Skip{}).
 	MustBuild()

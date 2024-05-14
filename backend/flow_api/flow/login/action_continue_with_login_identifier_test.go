@@ -35,7 +35,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding", "password_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey", "password_creation"},
 		},
 		{
 			name: "Case always-always (has passkey)",
@@ -47,7 +47,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  true,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding"},
+			want: []flowpilot.StateName{"password_creation"},
 		},
 		{
 			name: "Case always-always (has password)",
@@ -59,7 +59,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: true,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey"},
 		},
 		{
 			name: "Case always-always (has both)",
@@ -83,7 +83,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey"},
 		},
 		{
 			name: "Case always-conditional (has password)",
@@ -95,7 +95,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: true,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey"},
 		},
 		{
 			name: "Case always-conditional (has passkey)",
@@ -131,7 +131,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding"},
+			want: []flowpilot.StateName{"password_creation"},
 		},
 		{
 			name: "Case conditional-always (has passkey)",
@@ -143,7 +143,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  true,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding"},
+			want: []flowpilot.StateName{"password_creation"},
 		},
 		{
 			name: "Case conditional-always (has password)",
@@ -179,7 +179,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding", "password_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey", "password_creation"},
 		},
 		{
 			name: "Case conditional-conditional (no credentials / both optional)",
@@ -203,7 +203,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding", "password_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey", "password_creation"},
 		},
 		{
 			name: "Case conditional-conditional (no credentials / password required)",
@@ -215,7 +215,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding", "passkey_onboarding"},
+			want: []flowpilot.StateName{"password_creation", "onboarding_create_passkey"},
 		},
 		{
 			name: "Case conditional-conditional (no credentials / both required)",
@@ -227,7 +227,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding", "password_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey", "password_creation"},
 		},
 		{
 			name: "Case conditional-conditional (has passkey)",
@@ -275,7 +275,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey"},
 		},
 		{
 			name: "Case conditional-never (has passkey)",
@@ -323,7 +323,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding"},
+			want: []flowpilot.StateName{"password_creation"},
 		},
 		{
 			name: "Case never-conditional (has passkey)",
@@ -419,7 +419,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding"},
+			want: []flowpilot.StateName{"password_creation"},
 		},
 		{
 			name: "Case never-always (has passkey)",
@@ -431,7 +431,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  true,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"password_onboarding"},
+			want: []flowpilot.StateName{"password_creation"},
 		},
 		{
 			name: "Case never-always (has password)",
@@ -467,7 +467,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: false,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey"},
 		},
 		{
 			name: "Case always-never (has passkey)",
@@ -491,7 +491,7 @@ func TestContinueWithLoginIdentifier_generateFlow(t *testing.T) {
 				hasPasskey:  false,
 				hasPassword: true,
 			},
-			want: []flowpilot.StateName{"passkey_onboarding"},
+			want: []flowpilot.StateName{"onboarding_create_passkey"},
 		},
 		{
 			name: "Case always-never (has both)",

@@ -1,4 +1,4 @@
-package registration_register_password
+package register_password
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
