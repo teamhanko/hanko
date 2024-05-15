@@ -2,7 +2,7 @@ package login_method_chooser
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -12,7 +12,7 @@ type ContinueToPasscodeConfirmation struct {
 }
 
 func (a ContinueToPasscodeConfirmation) GetName() flowpilot.ActionName {
-	return ActionContinueToPasscodeConfirmation
+	return constants.ActionContinueToPasscodeConfirmation
 }
 
 func (a ContinueToPasscodeConfirmation) GetDescription() string {
@@ -27,7 +27,7 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set login_method to stash: %w", err)
 	}
 
-	return c.StartSubFlow(passcode.StatePasscodeConfirmation)
+	return c.StartSubFlow(constants.StatePasscodeConfirmation)
 }
 
 func (a ContinueToPasscodeConfirmation) Finalize(c flowpilot.FinalizationContext) error {

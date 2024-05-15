@@ -30,7 +30,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	if deps.Cfg.RateLimiter.Enabled {
-		rateLimitKey := createRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
+		rateLimitKey := rate_limiter.CreateRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
 		resendAfterSeconds, ok, err := rate_limiter.Limit2(deps.RateLimiter, rateLimitKey)
 		if err != nil {
 			return fmt.Errorf("rate limiter failed: %w", err)

@@ -3,6 +3,7 @@ package registration
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"golang.org/x/crypto/bcrypt"
@@ -14,7 +15,7 @@ type RegisterPassword struct {
 }
 
 func (a RegisterPassword) GetName() flowpilot.ActionName {
-	return ActionRegisterPassword
+	return constants.ActionRegisterPassword
 }
 
 func (a RegisterPassword) GetDescription() string {
@@ -64,7 +65,7 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 	//	return c.StartSubFlow(passkeyOnboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
 	//}
 
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlow(constants.StateSuccess)
 }
 
 func (a RegisterPassword) Finalize(c flowpilot.FinalizationContext) error {

@@ -79,3 +79,7 @@ func Limit2(store limiter.Store, key string) (int, bool, error) {
 
 	return retryAfterSeconds, ok, nil
 }
+
+func CreateRateLimitKey(realIP, email string) string {
+	return fmt.Sprintf("%s/%s", realIP, email)
+}

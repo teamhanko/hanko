@@ -13,19 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 )
 
-const (
-	StateSuccess         flowpilot.StateName = "success"
-	StateError           flowpilot.StateName = "error"
-	StateThirdPartyOAuth flowpilot.StateName = "thirdparty_oauth"
-)
-
-const (
-	ActionBack            flowpilot.ActionName = "back"
-	ActionExchangeToken   flowpilot.ActionName = "exchange_token"
-	ActionThirdPartyOAuth flowpilot.ActionName = "thirdparty_oauth"
-	ActionSkip            flowpilot.ActionName = "skip"
-)
-
 type Dependencies struct {
 	Cfg                   config.Config
 	HttpContext           echo.Context

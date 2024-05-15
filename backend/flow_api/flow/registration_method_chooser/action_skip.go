@@ -1,6 +1,7 @@
 package registration_method_chooser
 
 import (
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -10,7 +11,7 @@ type Skip struct {
 }
 
 func (a Skip) GetName() flowpilot.ActionName {
-	return ActionSkip
+	return constants.ActionSkip
 }
 
 func (a Skip) GetDescription() string {

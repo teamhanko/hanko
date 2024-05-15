@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -15,7 +16,7 @@ type UsernameSet struct {
 }
 
 func (a UsernameSet) GetName() flowpilot.ActionName {
-	return ActionUsernameSet
+	return constants.ActionUsernameSet
 }
 
 func (a UsernameSet) GetDescription() string {
@@ -74,7 +75,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return c.ContinueFlow(constants.StateProfileInit)
 }
 
 func (a UsernameSet) Finalize(c flowpilot.FinalizationContext) error {

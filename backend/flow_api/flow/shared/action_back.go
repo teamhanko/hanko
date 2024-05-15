@@ -1,13 +1,14 @@
 package shared
 
 import (
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
 type Back struct{}
 
 func (a Back) GetName() flowpilot.ActionName {
-	return ActionBack
+	return constants.ActionBack
 }
 
 func (a Back) GetDescription() string {
