@@ -77,8 +77,8 @@ func (fc *defaultFlowContext) Get(name string) interface{} {
 	return fc.flow.contextValues[name]
 }
 
-// GetName returns the name of the current flow.
-func (fc *defaultFlowContext) GetName() string {
+// GetFlowName returns the name of the current flow.
+func (fc *defaultFlowContext) GetFlowName() string {
 	return fc.flow.name
 }
 

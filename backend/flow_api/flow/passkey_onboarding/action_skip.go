@@ -21,7 +21,7 @@ func (a Skip) GetDescription() string {
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	switch c.GetName() {
+	switch c.GetFlowName() {
 	case "registration":
 		if !deps.Cfg.Passkey.Optional || !deps.Cfg.Email.RequireVerification {
 			// Skip is only available when passkeys are optional or the email has been verified beforehand to ensure the
@@ -36,7 +36,7 @@ func (a Skip) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a Skip) Execute(c flowpilot.ExecutionContext) error {
-	switch c.GetName() {
+	switch c.GetFlowName() {
 	case "registration":
 		return c.EndSubFlow()
 	case "login":

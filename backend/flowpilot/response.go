@@ -167,20 +167,17 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 	state, _ := fc.flow.getState(er.nextStateName)
 
 	if state != nil {
-
-		fc.flow.contextValues["init_schema_creation_next_state"] = er.nextStateName
-
-		for _, action := range state.actions {
-			actionName := action.GetName()
-			actionDescription := action.GetDescription()
+		for _, actionDetail := range state.actionDetails {
+			actionName := actionDetail.action.GetName()
+			actionDescription := actionDetail.action.GetDescription()
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
 			schema := er.getExecutionSchema(actionName)
 
-			if schema == nil {
+			if schema == nil || actionDetail.flowName != fc.GetFlowName() {
 				// Create schema if not available.
-				if schema = er.createSchema(fc, action); schema == nil {
+				if schema = er.createSchema(fc, actionDetail); schema == nil {
 					continue
 				}
 			} else if er.isSuspended {
@@ -205,7 +202,7 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 }
 
 // createSchema creates an execution schema for a method if needed.
-func (er *executionResult) createSchema(fc defaultFlowContext, action Action) ExecutionSchema {
+func (er *executionResult) createSchema(fc defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
 	var schema ExecutionSchema
 
 	if er.actionExecutionResult != nil {
@@ -227,7 +224,7 @@ func (er *executionResult) createSchema(fc defaultFlowContext, action Action) Ex
 		defaultFlowContext: fc,
 	}
 
-	action.Initialize(&aic)
+	actionDetail.action.Initialize(&aic)
 
 	if aic.isSuspended {
 		return nil

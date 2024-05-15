@@ -14,7 +14,7 @@ func (a Skip) GetName() flowpilot.ActionName {
 }
 
 func (a Skip) GetDescription() string {
-	return "Skip my ass"
+	return "Skip"
 }
 
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
