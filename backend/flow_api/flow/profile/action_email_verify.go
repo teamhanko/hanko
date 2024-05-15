@@ -3,7 +3,7 @@ package profile
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -14,7 +14,7 @@ type EmailVerify struct {
 }
 
 func (a EmailVerify) GetName() flowpilot.ActionName {
-	return ActionEmailVerify
+	return constants.ActionEmailVerify
 }
 
 func (a EmailVerify) GetDescription() string {
@@ -73,7 +73,7 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set passcode_tempalte to stash %w", err)
 	}
 
-	return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateProfileInit)
+	return c.StartSubFlow(constants.StatePasscodeConfirmation, constants.StateProfileInit)
 }
 
 func (a EmailVerify) Finalize(c flowpilot.FinalizationContext) error {

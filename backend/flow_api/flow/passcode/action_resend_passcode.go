@@ -3,6 +3,7 @@ package passcode
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -14,7 +15,7 @@ type ReSendPasscode struct {
 }
 
 func (a ReSendPasscode) GetName() flowpilot.ActionName {
-	return ActionResendPasscode
+	return constants.ActionResendPasscode
 }
 
 func (a ReSendPasscode) GetDescription() string {
@@ -35,7 +36,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if deps.Cfg.RateLimiter.Enabled {
-		rateLimitKey := createRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
+		rateLimitKey := rate_limiter.CreateRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
 		resendAfterSeconds, ok, err := rate_limiter.Limit2(deps.RateLimiter, rateLimitKey)
 		if err != nil {
 			return fmt.Errorf("rate limiter failed: %w", err)

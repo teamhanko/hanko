@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -15,7 +16,7 @@ type WebauthnVerifyAttestationResponse struct {
 }
 
 func (a WebauthnVerifyAttestationResponse) GetName() flowpilot.ActionName {
-	return ActionWebauthnVerifyAttestationResponse
+	return constants.ActionWebauthnVerifyAttestationResponse
 }
 
 func (a WebauthnVerifyAttestationResponse) GetDescription() string {
@@ -88,7 +89,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to set user_id to the stash: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return c.ContinueFlow(constants.StateProfileInit)
 }
 
 func (a WebauthnVerifyAttestationResponse) Finalize(c flowpilot.FinalizationContext) error {

@@ -6,9 +6,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
+	"github.com/teamhanko/hanko/backend/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -31,16 +29,16 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	flow := registration.Flow.MustBuild()
+	flow := flow.RegistrationFlow.MustBuild()
 	return h.executeFlow(c, flow)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, login.Flow.MustBuild())
+	return h.executeFlow(c, flow.LoginFlow.MustBuild())
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, profile.Flow.MustBuild())
+	return h.executeFlow(c, flow.ProfileFlow.MustBuild())
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {

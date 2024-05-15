@@ -3,6 +3,7 @@ package register_password
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"golang.org/x/crypto/bcrypt"
@@ -14,7 +15,7 @@ type RegisterPassword struct {
 }
 
 func (a RegisterPassword) GetName() flowpilot.ActionName {
-	return ActionRegisterPassword
+	return constants.ActionRegisterPassword
 }
 
 func (a RegisterPassword) GetDescription() string {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -16,7 +17,7 @@ type WebauthnVerifyAssertionResponse struct {
 }
 
 func (a WebauthnVerifyAssertionResponse) GetName() flowpilot.ActionName {
-	return ActionWebauthnVerifyAssertionResponse
+	return constants.ActionWebauthnVerifyAssertionResponse
 }
 
 func (a WebauthnVerifyAssertionResponse) GetDescription() string {
@@ -76,7 +77,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 				return fmt.Errorf("could not create audit log: %w", err)
 			}
 
-			return c.ContinueFlowWithError(StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
+			return c.ContinueFlowWithError(constants.StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify assertion response: %w", err)
@@ -93,7 +94,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.ContinueFlow(constants.StateSuccess)
 }
 
 func (a WebauthnVerifyAssertionResponse) Finalize(c flowpilot.FinalizationContext) error {

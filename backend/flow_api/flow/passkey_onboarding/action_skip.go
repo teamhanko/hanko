@@ -1,7 +1,7 @@
 package passkey_onboarding
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/flow/register_password"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +11,7 @@ type Skip struct {
 }
 
 func (a Skip) GetName() flowpilot.ActionName {
-	return ActionSkip
+	return constants.ActionSkip
 }
 
 func (a Skip) GetDescription() string {
@@ -40,7 +40,7 @@ func (a Skip) Execute(c flowpilot.ExecutionContext) error {
 	case "registration":
 		return c.EndSubFlow()
 	case "login":
-		return c.StartSubFlow(register_password.StatePasswordCreation)
+		return c.ContinueFlow(constants.StatePasswordCreationConditional)
 	}
 
 	return nil

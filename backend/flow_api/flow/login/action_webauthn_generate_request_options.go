@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -12,7 +13,7 @@ type WebauthnGenerateRequestOptions struct {
 }
 
 func (a WebauthnGenerateRequestOptions) GetName() flowpilot.ActionName {
-	return ActionWebauthnGenerateRequestOptions
+	return constants.ActionWebauthnGenerateRequestOptions
 }
 
 func (a WebauthnGenerateRequestOptions) GetDescription() string {
@@ -52,7 +53,7 @@ func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set request_options payload: %w", err)
 	}
 
-	return c.ContinueFlow(StateLoginPasskey)
+	return c.ContinueFlow(constants.StateLoginPasskey)
 }
 
 func (a WebauthnGenerateRequestOptions) Finalize(c flowpilot.FinalizationContext) error {

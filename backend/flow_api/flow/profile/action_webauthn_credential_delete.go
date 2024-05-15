@@ -3,6 +3,7 @@ package profile
 import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -13,7 +14,7 @@ type WebauthnCredentialDelete struct {
 }
 
 func (a WebauthnCredentialDelete) GetName() flowpilot.ActionName {
-	return ActionWebauthnCredentialDelete
+	return constants.ActionWebauthnCredentialDelete
 }
 
 func (a WebauthnCredentialDelete) GetDescription() string {
@@ -64,7 +65,7 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return c.ContinueFlow(constants.StateProfileInit)
 }
 
 func (a WebauthnCredentialDelete) Finalize(c flowpilot.FinalizationContext) error {

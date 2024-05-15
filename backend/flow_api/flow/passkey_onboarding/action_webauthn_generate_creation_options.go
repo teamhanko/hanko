@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -14,7 +15,7 @@ type WebauthnGenerateCreationOptions struct {
 }
 
 func (a WebauthnGenerateCreationOptions) GetName() flowpilot.ActionName {
-	return ActionWebauthnGenerateCreationOptions
+	return constants.ActionWebauthnGenerateCreationOptions
 }
 
 func (a WebauthnGenerateCreationOptions) GetDescription() string {
@@ -72,7 +73,7 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		return err
 	}
 
-	return c.ContinueFlow(StateOnboardingVerifyPasskeyAttestation)
+	return c.ContinueFlow(constants.StateOnboardingVerifyPasskeyAttestation)
 }
 
 func (a WebauthnGenerateCreationOptions) Finalize(c flowpilot.FinalizationContext) error {

@@ -2,7 +2,7 @@ package login_password
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -12,7 +12,7 @@ type ContinueToPasscodeConfirmationRecovery struct {
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) GetName() flowpilot.ActionName {
-	return ActionContinueToPasscodeConfirmationRecovery
+	return constants.ActionContinueToPasscodeConfirmationRecovery
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) GetDescription() string {
@@ -32,7 +32,7 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateLoginPasswordRecovery)
+	return c.StartSubFlow(constants.StatePasscodeConfirmation, constants.StateLoginPasswordRecovery)
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) Finalize(c flowpilot.FinalizationContext) error {

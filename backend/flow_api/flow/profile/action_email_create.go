@@ -3,7 +3,7 @@ package profile
 import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -14,7 +14,7 @@ type EmailCreate struct {
 }
 
 func (a EmailCreate) GetName() flowpilot.ActionName {
-	return ActionEmailCreate
+	return constants.ActionEmailCreate
 }
 
 func (a EmailCreate) GetDescription() string {
@@ -70,7 +70,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
 
-			return c.StartSubFlow(passcode.StatePasscodeConfirmation)
+			return c.StartSubFlow(constants.StatePasscodeConfirmation)
 		}
 	} else if deps.Cfg.Identifier.Email.Verification {
 		err = c.CopyInputValuesToStash("email")
@@ -88,7 +88,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 
-		return c.StartSubFlow(passcode.StatePasscodeConfirmation, StateProfileInit)
+		return c.StartSubFlow(constants.StatePasscodeConfirmation, constants.StateProfileInit)
 	} else {
 		emailModel := models.NewEmail(&userModel.ID, newEmailAddress)
 
@@ -124,7 +124,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
 		}
-		return c.ContinueFlow(StateProfileInit)
+		return c.ContinueFlow(constants.StateProfileInit)
 	}
 }
 

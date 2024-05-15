@@ -1,7 +1,7 @@
 package login_method_chooser
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +11,7 @@ type ContinueToPasswordLogin struct {
 }
 
 func (a ContinueToPasswordLogin) GetName() flowpilot.ActionName {
-	return ActionContinueToPasswordLogin
+	return constants.ActionContinueToPasswordLogin
 }
 
 func (a ContinueToPasswordLogin) GetDescription() string {
@@ -21,7 +21,7 @@ func (a ContinueToPasswordLogin) GetDescription() string {
 func (a ContinueToPasswordLogin) Initialize(c flowpilot.InitializationContext) {}
 
 func (a ContinueToPasswordLogin) Execute(c flowpilot.ExecutionContext) error {
-	return c.StartSubFlow(login_password.StateLoginPassword)
+	return c.StartSubFlow(constants.StateLoginPassword)
 }
 
 func (a ContinueToPasswordLogin) Finalize(c flowpilot.FinalizationContext) error {

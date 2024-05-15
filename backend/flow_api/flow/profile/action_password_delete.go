@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -14,7 +15,7 @@ type PasswordDelete struct {
 }
 
 func (a PasswordDelete) GetName() flowpilot.ActionName {
-	return ActionPasswordDelete
+	return constants.ActionPasswordDelete
 }
 
 func (a PasswordDelete) GetDescription() string {
@@ -49,7 +50,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if passwordCredentialModel == nil {
-		return c.ContinueFlow(StateProfileInit)
+		return c.ContinueFlow(constants.StateProfileInit)
 	}
 
 	err = deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Delete(*passwordCredentialModel)
@@ -69,7 +70,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return c.ContinueFlow(constants.StateProfileInit)
 }
 
 func (a PasswordDelete) Finalize(c flowpilot.FinalizationContext) error {

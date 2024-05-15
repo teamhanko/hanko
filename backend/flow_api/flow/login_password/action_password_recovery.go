@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -16,7 +17,7 @@ type PasswordRecovery struct {
 }
 
 func (a PasswordRecovery) GetName() flowpilot.ActionName {
-	return ActionPasswordRecovery
+	return constants.ActionPasswordRecovery
 }
 
 func (a PasswordRecovery) GetDescription() string {

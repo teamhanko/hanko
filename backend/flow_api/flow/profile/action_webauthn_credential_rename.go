@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -12,7 +13,7 @@ type WebauthnCredentialRename struct {
 }
 
 func (a WebauthnCredentialRename) GetName() flowpilot.ActionName {
-	return ActionWebauthnCredentialRename
+	return constants.ActionWebauthnCredentialRename
 }
 
 func (a WebauthnCredentialRename) GetDescription() string {
@@ -60,7 +61,7 @@ func (a WebauthnCredentialRename) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not update credential: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
+	return c.ContinueFlow(constants.StateProfileInit)
 }
 
 func (a WebauthnCredentialRename) Finalize(c flowpilot.FinalizationContext) error {

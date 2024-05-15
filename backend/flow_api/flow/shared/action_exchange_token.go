@@ -3,6 +3,7 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
 )
@@ -12,7 +13,7 @@ type ExchangeToken struct {
 }
 
 func (a ExchangeToken) GetName() flowpilot.ActionName {
-	return ActionExchangeToken
+	return constants.ActionExchangeToken
 }
 
 func (a ExchangeToken) GetDescription() string {
@@ -58,7 +59,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user_id to stash: %w", err)
 	}
 
-	return c.ContinueFlow(StateSuccess)
+	return c.ContinueFlow(constants.StateSuccess)
 }
 
 func (a ExchangeToken) Finalize(c flowpilot.FinalizationContext) error {

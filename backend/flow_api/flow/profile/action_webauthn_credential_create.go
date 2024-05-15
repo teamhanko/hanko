@@ -3,6 +3,7 @@ package profile
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -14,7 +15,7 @@ type WebauthnCredentialCreate struct {
 }
 
 func (a WebauthnCredentialCreate) GetName() flowpilot.ActionName {
-	return ActionWebauthnCredentialCreate
+	return constants.ActionWebauthnCredentialCreate
 }
 
 func (a WebauthnCredentialCreate) GetDescription() string {
@@ -67,7 +68,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	return c.ContinueFlow(StateProfileWebauthnCredentialVerification)
+	return c.ContinueFlow(constants.StateProfileWebauthnCredentialVerification)
 }
 
 func (a WebauthnCredentialCreate) Finalize(c flowpilot.FinalizationContext) error {
