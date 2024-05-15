@@ -55,6 +55,14 @@ type Action interface {
 	Finalize(FinalizationContext) error // Finalize the action.
 }
 
+type defaultActionDetail struct {
+	action   Action
+	flowName string
+}
+
+// actions represents a list of action
+type defaultActionDetails []defaultActionDetail
+
 // Actions represents a list of Action
 type Actions []Action
 
@@ -84,18 +92,18 @@ type stateDetail struct {
 	name             StateName
 	flow             stateActions
 	subFlows         SubFlows
-	actions          Actions
+	actionDetails    defaultActionDetails
 	beforeStateHooks HookActions
 	afterStateHooks  HookActions
 }
 
-// getAction returns the Action with the specified name.
-func (sd *stateDetail) getAction(actionName ActionName) (Action, error) {
-	for _, action := range sd.actions {
-		currentActionName := action.GetName()
+// getActionDetail returns the Action with the specified name.
+func (sd *stateDetail) getActionDetail(actionName ActionName) (*defaultActionDetail, error) {
+	for _, actionDetail := range sd.actionDetails {
+		currentActionName := actionDetail.action.GetName()
 
 		if currentActionName == actionName {
-			return action, nil
+			return &actionDetail, nil
 		}
 	}
 

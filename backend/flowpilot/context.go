@@ -39,7 +39,7 @@ type flowContext interface {
 	// Set sets a context value for the given key.
 	Set(string, interface{})
 
-	GetName() string
+	GetFlowName() string
 }
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
@@ -251,7 +251,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	actionName := ActionName(actionParam.ActionName)
 
 	// Get the action associated with the actionParam name.
-	action, err := state.getAction(actionName)
+	actionDetail, err := state.getActionDetail(actionName)
 	if err != nil {
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
@@ -275,7 +275,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
 	}
 
-	action.Initialize(&aic)
+	actionDetail.action.Initialize(&aic)
 
 	// Check if the action is suspended.
 	if aic.isSuspended {
@@ -283,7 +283,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Execute the action and handle any errors.
-	err = action.Execute(&aec)
+	err = actionDetail.action.Execute(&aec)
 	if err != nil {
 		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
 	}
@@ -299,7 +299,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		contextValues:   flow.contextValues,
 	}
 
-	err = action.Finalize(&afc)
+	err = actionDetail.action.Finalize(&afc)
 	if err != nil {
 		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
 	}

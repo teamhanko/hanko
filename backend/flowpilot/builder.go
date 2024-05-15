@@ -134,10 +134,17 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) err
 			afterStateHooks = append(afterStateHooks, fb.afterStateHooks[stateName]...)
 		}
 
+		actionDetails := make(defaultActionDetails, 0)
+		for _, action := range actions {
+			flowName := flow.getName()
+			actionDetail := defaultActionDetail{action: action, flowName: flowName}
+			actionDetails = append(actionDetails, actionDetail)
+		}
+
 		// Create state details.
 		state := stateDetail{
 			name:             stateName,
-			actions:          actions,
+			actionDetails:    actionDetails,
 			flow:             f,
 			subFlows:         subFlows,
 			beforeStateHooks: beforeStateHooks,
