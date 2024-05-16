@@ -2,7 +2,6 @@ package shared
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
@@ -16,7 +15,7 @@ type ThirdPartyOAuth struct {
 }
 
 func (a ThirdPartyOAuth) GetName() flowpilot.ActionName {
-	return constants.ActionThirdPartyOAuth
+	return ActionThirdPartyOAuth
 }
 
 func (a ThirdPartyOAuth) GetDescription() string {
@@ -84,7 +83,7 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set redirect_url to payload: %w", err)
 	}
 
-	return c.ContinueFlow(constants.StateThirdPartyOAuth)
+	return c.ContinueFlow(StateThirdPartyOAuth)
 }
 
 func (a ThirdPartyOAuth) Finalize(c flowpilot.FinalizationContext) error {

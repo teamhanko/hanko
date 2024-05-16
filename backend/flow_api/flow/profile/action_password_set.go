@@ -3,7 +3,6 @@ package profile
 import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -14,7 +13,7 @@ type PasswordSet struct {
 }
 
 func (a PasswordSet) GetName() flowpilot.ActionName {
-	return constants.ActionPasswordSet
+	return shared.ActionPasswordSet
 }
 
 func (a PasswordSet) GetDescription() string {
@@ -78,7 +77,7 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(constants.StateProfileInit)
+	return c.ContinueFlow(shared.StateProfileInit)
 }
 
 func (a PasswordSet) Finalize(c flowpilot.FinalizationContext) error {

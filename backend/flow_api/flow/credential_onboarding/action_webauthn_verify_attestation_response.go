@@ -1,10 +1,9 @@
-package passkey_onboarding
+package credential_onboarding
 
 import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -15,7 +14,7 @@ type WebauthnVerifyAttestationResponse struct {
 }
 
 func (a WebauthnVerifyAttestationResponse) GetName() flowpilot.ActionName {
-	return constants.ActionWebauthnVerifyAttestationResponse
+	return shared.ActionWebauthnVerifyAttestationResponse
 }
 
 func (a WebauthnVerifyAttestationResponse) GetDescription() string {

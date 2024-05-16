@@ -24,6 +24,11 @@ func (fc *defaultFlowContext) GetPath() string {
 	return fc.flow.path
 }
 
+// GetFlowPath returns the current path within the flow.
+func (fc *defaultFlowContext) GetFlowPath() string {
+	return fc.stash.Get("_.path").String()
+}
+
 // GetInitialState returns the initial state of the flow.
 func (fc *defaultFlowContext) GetInitialState() StateName {
 	return fc.flow.initialStateName

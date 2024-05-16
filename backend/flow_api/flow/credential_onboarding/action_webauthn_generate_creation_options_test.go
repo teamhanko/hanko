@@ -1,4 +1,4 @@
-package passkey_onboarding
+package credential_onboarding
 
 import (
 	"fmt"

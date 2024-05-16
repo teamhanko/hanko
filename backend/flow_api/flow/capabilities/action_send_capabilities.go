@@ -1,7 +1,6 @@
 package capabilities
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +10,7 @@ type RegisterClientCapabilities struct {
 }
 
 func (a RegisterClientCapabilities) GetName() flowpilot.ActionName {
-	return constants.ActionRegisterClientCapabilities
+	return shared.ActionRegisterClientCapabilities
 }
 
 func (a RegisterClientCapabilities) GetDescription() string {
@@ -46,7 +45,7 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 
 	// Only passkeys are allowed, but webauthn is not available on the browser
 	if !webauthnAvailable && !deps.Cfg.Password.Enabled && !deps.Cfg.Passcode.Enabled {
-		return c.ContinueFlowWithError(constants.StateError, shared.ErrorDeviceNotCapable)
+		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
 	}
 
 	// Only security keys are allowed as a second factor, but webauthn is not available on the browser
@@ -54,7 +53,7 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 		deps.Cfg.SecondFactor.Enabled && !deps.Cfg.SecondFactor.Optional &&
 		len(deps.Cfg.SecondFactor.Methods) == 1 &&
 		deps.Cfg.SecondFactor.Methods[0] == "security_key" {
-		return c.ContinueFlowWithError(constants.StateError, shared.ErrorDeviceNotCapable)
+		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
 	}
 
 	err := c.Stash().Set("webauthn_available", webauthnAvailable)

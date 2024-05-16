@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -16,7 +15,7 @@ type EmailDelete struct {
 }
 
 func (a EmailDelete) GetName() flowpilot.ActionName {
-	return constants.ActionEmailDelete
+	return shared.ActionEmailDelete
 }
 
 func (a EmailDelete) GetDescription() string {
@@ -85,7 +84,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(constants.StateProfileInit)
+	return c.ContinueFlow(shared.StateProfileInit)
 }
 
 func (a EmailDelete) Finalize(c flowpilot.FinalizationContext) error {

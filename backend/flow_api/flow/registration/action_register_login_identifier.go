@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"unicode/utf8"
@@ -17,7 +16,7 @@ type RegisterLoginIdentifier struct {
 }
 
 func (a RegisterLoginIdentifier) GetName() flowpilot.ActionName {
-	return constants.ActionRegisterLoginIdentifier
+	return shared.ActionRegisterLoginIdentifier
 }
 
 func (a RegisterLoginIdentifier) GetDescription() string {
@@ -108,7 +107,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 				}
 
-				return c.StartSubFlow(constants.StatePasscodeConfirmation)
+				return c.StartSubFlow(shared.StatePasscodeConfirmation)
 			}
 		}
 	}
@@ -161,7 +160,7 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p
 	stateNames := make([]flowpilot.StateName, 0)
 
 	if p.EmailVerification {
-		stateNames = append(stateNames, constants.StatePasscodeConfirmation)
+		stateNames = append(stateNames, shared.StatePasscodeConfirmation)
 	}
 
 	passkeyEnabled := p.WebauthnAvailable && cfg.Passkey.Enabled
@@ -180,42 +179,42 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p
 		if acquireBoth {
 			if bothOptional {
 				// Wenn !p.EmailVerification, dann darf man den Chooser nicht skippen
-				stateNames = append(stateNames, constants.StateRegistrationMethodChooser)
+				stateNames = append(stateNames, shared.StateRegistrationMethodChooser)
 			} else if passwordOptional {
 				// Man darf Password skippen
-				stateNames = append(stateNames, constants.StateOnboardingCreatePasskey, constants.StatePasswordCreation)
+				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
 			} else if passkeyOptional {
 				// Man darf Passkey skippen
-				stateNames = append(stateNames, constants.StatePasswordCreation, constants.StateOnboardingCreatePasskey)
+				stateNames = append(stateNames, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
 			} else {
 				// Man darf keine der beiden Methoden skippen
-				stateNames = append(stateNames, constants.StateOnboardingCreatePasskey, constants.StatePasswordCreation)
+				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
 			}
 		} else if acquirePassword {
 			// Wenn !p.EmailVerification, dann darf man Password Creation nicht skippen
-			stateNames = append(stateNames, constants.StatePasswordCreation)
+			stateNames = append(stateNames, shared.StatePasswordCreation)
 		} else if acquirePasskey {
-			stateNames = append(stateNames, constants.StateOnboardingCreatePasskey)
+			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
 		} else {
 			return nil, errors.New("no credential acquired")
 		}
 	} else if passkeyEnabled {
 		if acquirePasskey {
-			stateNames = append(stateNames, constants.StateOnboardingCreatePasskey)
+			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
 		} else {
 			return nil, errors.New("no credential acquired")
 		}
 	} else if passwordEnabled {
 		if acquirePassword {
-			stateNames = append(stateNames, constants.StatePasswordCreation)
+			stateNames = append(stateNames, shared.StatePasswordCreation)
 		} else {
 			return nil, errors.New("no credential acquired")
 		}
 	} else if p.EmailVerification {
-		return append(stateNames, constants.StateSuccess), nil
+		return append(stateNames, shared.StateSuccess), nil
 	} else {
 		return nil, errors.New("no credential acquired")
 	}
 
-	return append(stateNames, constants.StateSuccess), nil
+	return append(stateNames, shared.StateSuccess), nil
 }

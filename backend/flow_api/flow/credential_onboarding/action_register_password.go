@@ -1,9 +1,8 @@
-package register_password
+package credential_onboarding
 
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"golang.org/x/crypto/bcrypt"
@@ -15,7 +14,7 @@ type RegisterPassword struct {
 }
 
 func (a RegisterPassword) GetName() flowpilot.ActionName {
-	return constants.ActionRegisterPassword
+	return shared.ActionRegisterPassword
 }
 
 func (a RegisterPassword) GetDescription() string {

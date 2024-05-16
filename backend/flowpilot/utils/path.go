@@ -8,8 +8,8 @@ type Path struct {
 	fragments []string
 }
 
-func NewPath(path string) Path {
-	return Path{fragments: strings.Split(path, ".")}
+func NewPath(path string) *Path {
+	return &Path{fragments: strings.Split(path, ".")}
 }
 
 func (p *Path) Add(fragment string) {

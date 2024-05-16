@@ -3,7 +3,6 @@ package passcode
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -15,7 +14,7 @@ type ReSendPasscode struct {
 }
 
 func (a ReSendPasscode) GetName() flowpilot.ActionName {
-	return constants.ActionResendPasscode
+	return shared.ActionResendPasscode
 }
 
 func (a ReSendPasscode) GetDescription() string {

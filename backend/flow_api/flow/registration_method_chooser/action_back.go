@@ -1,7 +1,6 @@
 package registration_method_chooser
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +10,7 @@ type Back struct {
 }
 
 func (a Back) GetName() flowpilot.ActionName {
-	return constants.ActionBack
+	return shared.ActionBack
 }
 
 func (a Back) GetDescription() string {
