@@ -644,6 +644,7 @@ type ThirdPartyProviders struct {
 	Apple     ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
 	Discord   ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
 	Microsoft ThirdPartyProvider `yaml:"microsoft" json:"microsoft,omitempty" koanf:"microsoft"`
+	Linkedin  ThirdPartyProvider `yaml:"linkedin" json:"linkedin" koanf:"linkedin"`
 }
 
 func (p *ThirdPartyProviders) Validate() error {

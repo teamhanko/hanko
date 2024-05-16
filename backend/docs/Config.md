@@ -681,6 +681,45 @@ third_party:
       # Default: true
       #
       allow_linking: false
+    ##
+    #
+    # The LinkedIn provider configuration
+    #
+    linkedin:
+      ##
+      #
+      # Enable or disable the LinkedIn provider.
+      #
+      # Default: false
+      #
+      enabled: false
+      ##
+      #
+      # The client ID of your LinkedIn OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/linkedin
+      #
+      # Required if provider is enabled.
+      #
+      client_id: "CHANGE_ME"
+      ##
+      #
+      # The secret of your LinkedIn OAuth credentials.
+      # See: https://docs.hanko.io/guides/authentication-methods/oauth/linkedin
+      #
+      # Required if provider is enabled.
+      #
+      secret: "CHANGE_ME"
+      ##
+      #
+      # Indicates whether accounts can be linked with this provider.
+      # This option only controls linking for existing accounts. Account registrations
+      # are not affected (see the 'accounts.allow_signup' option for controlling
+      # account registration).
+      #
+      #
+      # Default: true
+      #
+      allow_linking: false
 log:
   ## log_health_and_metrics
   #
