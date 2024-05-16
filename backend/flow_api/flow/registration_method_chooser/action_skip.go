@@ -1,7 +1,6 @@
 package registration_method_chooser
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +10,7 @@ type Skip struct {
 }
 
 func (a Skip) GetName() flowpilot.ActionName {
-	return constants.ActionSkip
+	return shared.ActionSkip
 }
 
 func (a Skip) GetDescription() string {
@@ -21,7 +20,7 @@ func (a Skip) GetDescription() string {
 func (a Skip) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Email.RequireVerification {
+	if !deps.Cfg.Email.UseForAuthentication {
 		c.SuspendAction()
 	}
 }

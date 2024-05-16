@@ -356,6 +356,12 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 
 	newPath := utils.NewPath(aec.stash.Get("_.path").String())
 	newPath.Remove()
+
+	scheduledSubflow := aec.flow.subFlows.getSubFlowFromStateName(*scheduledStateName)
+	if scheduledSubflow != nil {
+		newPath.Add(scheduledSubflow.getName())
+	}
+
 	err = aec.stash.Set("_.path", newPath.String())
 	if err != nil {
 		return fmt.Errorf("failed to stash new path: %w", err)

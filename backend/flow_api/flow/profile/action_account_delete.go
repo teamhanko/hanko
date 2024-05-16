@@ -3,7 +3,6 @@ package profile
 import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -14,7 +13,7 @@ type AccountDelete struct {
 }
 
 func (a AccountDelete) GetName() flowpilot.ActionName {
-	return constants.ActionAccountDelete
+	return shared.ActionAccountDelete
 }
 
 func (a AccountDelete) GetDescription() string {
@@ -61,7 +60,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	deps.HttpContext.SetCookie(cookie)
 
-	return c.ContinueFlow(constants.StateProfileAccountDeleted)
+	return c.ContinueFlow(shared.StateProfileAccountDeleted)
 }
 
 func (a AccountDelete) Finalize(c flowpilot.FinalizationContext) error {

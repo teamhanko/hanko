@@ -1,7 +1,6 @@
 package registration_method_chooser
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +10,7 @@ type ContinueToPasskeyCreation struct {
 }
 
 func (a ContinueToPasskeyCreation) GetName() flowpilot.ActionName {
-	return constants.ActionContinueToPasskeyRegistration
+	return shared.ActionContinueToPasskeyRegistration
 }
 
 func (a ContinueToPasskeyCreation) GetDescription() string {
@@ -25,7 +24,7 @@ func (a ContinueToPasskeyCreation) Initialize(c flowpilot.InitializationContext)
 }
 
 func (a ContinueToPasskeyCreation) Execute(c flowpilot.ExecutionContext) error {
-	return c.StartSubFlow(constants.StateOnboardingCreatePasskey)
+	return c.StartSubFlow(shared.StateOnboardingCreatePasskey)
 }
 
 func (a ContinueToPasskeyCreation) Finalize(c flowpilot.FinalizationContext) error {

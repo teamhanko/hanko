@@ -1,7 +1,6 @@
-package passkey_onboarding
+package credential_onboarding
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -11,7 +10,7 @@ type Back struct {
 }
 
 func (a Back) GetName() flowpilot.ActionName {
-	return constants.ActionBack
+	return shared.ActionBack
 }
 
 func (a Back) GetDescription() string {
@@ -19,9 +18,8 @@ func (a Back) GetDescription() string {
 }
 
 func (a Back) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	if deps.Cfg.Email.RequireVerification {
+	previousState, _ := c.GetPreviousState()
+	if previousState != nil && *previousState == shared.StatePasscodeConfirmation {
 		c.SuspendAction()
 	}
 }

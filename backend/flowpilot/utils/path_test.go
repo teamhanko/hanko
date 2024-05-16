@@ -12,22 +12,22 @@ func TestNewPath(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want Path
+		want *Path
 	}{
 		{
 			name: "construct path with empty string",
 			args: args{root: ""},
-			want: Path{fragments: []string{""}},
+			want: &Path{fragments: []string{""}},
 		},
 		{
 			name: "construct path with root",
 			args: args{root: "subflow1"},
-			want: Path{fragments: []string{"subflow1"}},
+			want: &Path{fragments: []string{"subflow1"}},
 		},
 		{
 			name: "construct path with path",
 			args: args{root: "subflow1.subflow2"},
-			want: Path{fragments: []string{"subflow1", "subflow2"}},
+			want: &Path{fragments: []string{"subflow1", "subflow2"}},
 		},
 	}
 	for _, tt := range tests {

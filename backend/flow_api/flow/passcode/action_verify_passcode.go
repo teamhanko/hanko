@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/constants"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -17,7 +16,7 @@ type VerifyPasscode struct {
 }
 
 func (a VerifyPasscode) GetName() flowpilot.ActionName {
-	return constants.ActionVerifyPasscode
+	return shared.ActionVerifyPasscode
 }
 
 func (a VerifyPasscode) GetDescription() string {
