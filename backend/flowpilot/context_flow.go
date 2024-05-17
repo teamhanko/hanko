@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // defaultFlowContext is the default implementation of the flowContext interface.
@@ -25,8 +26,8 @@ func (fc *defaultFlowContext) GetPath() string {
 }
 
 // GetFlowPath returns the current path within the flow.
-func (fc *defaultFlowContext) GetFlowPath() string {
-	return fc.stash.Get("_.path").String()
+func (fc *defaultFlowContext) GetFlowPath() utils.Path {
+	return utils.NewPath(fc.stash.Get("_.path").String())
 }
 
 // GetInitialState returns the initial state of the flow.

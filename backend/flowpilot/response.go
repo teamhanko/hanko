@@ -138,7 +138,7 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 	}
 
 	if debug {
-		flowPath := fc.GetFlowPath()
+		flowPath := fc.GetFlowPath().String()
 		resp.FlowPath = &flowPath
 	}
 
