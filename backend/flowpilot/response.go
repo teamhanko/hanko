@@ -40,6 +40,7 @@ type PublicInput struct {
 // PublicResponse represents the response of an action execution.
 type PublicResponse struct {
 	Name          StateName     `json:"name"`
+	FlowPath      *string       `json:"flow_path,omitempty"`
 	Status        int           `json:"status"`
 	Payload       interface{}   `json:"payload,omitempty"`
 	PublicActions PublicActions `json:"actions"`
@@ -134,6 +135,11 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 		Payload:       payload,
 		PublicActions: actions,
 		PublicLinks:   links,
+	}
+
+	if debug {
+		flowPath := fc.GetFlowPath()
+		resp.FlowPath = &flowPath
 	}
 
 	// Include flow error if present.

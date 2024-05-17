@@ -263,6 +263,19 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 		}
 	}
 
+	// If going to the previous state "crosses" subflow boundaries, update stashed flow path accordingly, i.e. remove
+	// last subflow fragment so that going back and restarting the subflow again does not repeatedly amass the same
+	// subflow name in the flow path.
+	subFlowToGoBackTo := aec.flow.subFlows.getSubFlowFromStateName(*lastStateName)
+	currentSubFlow := aec.flow.subFlows.getSubFlowFromStateName(aec.GetCurrentState())
+	// If subFlowToGoBackTo is nil then we probably want to go back to a root flow state.
+	if subFlowToGoBackTo == nil && currentSubFlow != nil ||
+		(subFlowToGoBackTo != nil && currentSubFlow != nil) && subFlowToGoBackTo.getName() != currentSubFlow.getName() {
+		newPath := utils.NewPath(aec.stash.Get("_.path").String())
+		newPath.Remove()
+		_ = aec.stash.Set("_.path", newPath.String())
+	}
+
 	// Close the execution context with the last state.
 	return aec.closeExecutionContext(*lastStateName)
 }
