@@ -36,12 +36,14 @@ func NewSamlHandler(cfg *config.Config, persister persistence.Persister, session
 			name := ""
 			name, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
 			if err != nil {
-				panic(err)
+				fmt.Printf("failed to parse provider from metadata url: %v\n", err)
+				continue
 			}
 
 			newProvider, err := provider.GetProvider(name, cfg, idpConfig, persister.GetSamlCertificatePersister())
 			if err != nil {
-				panic(err)
+				fmt.Printf("failed to initialize provider: %v\n", err)
+				continue
 			}
 
 			providers = append(providers, newProvider)
