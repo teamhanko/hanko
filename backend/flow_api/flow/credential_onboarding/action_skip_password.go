@@ -3,7 +3,6 @@ package credential_onboarding
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"strings"
 )
 
 type SkipPassword struct {
@@ -26,7 +25,7 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 			c.SuspendAction()
 		}
 
-		if strings.Contains(c.GetFlowPath(), "registration_method_chooser") {
+		if c.GetFlowPath().HasFragment("registration_method_chooser") {
 			c.SuspendAction()
 		}
 	}
