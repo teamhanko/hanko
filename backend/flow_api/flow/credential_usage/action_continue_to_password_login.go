@@ -1,4 +1,4 @@
-package login_method_chooser
+package credential_usage
 
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -20,7 +20,7 @@ func (a ContinueToPasswordLogin) GetDescription() string {
 func (a ContinueToPasswordLogin) Initialize(c flowpilot.InitializationContext) {}
 
 func (a ContinueToPasswordLogin) Execute(c flowpilot.ExecutionContext) error {
-	return c.StartSubFlow(shared.StateLoginPassword)
+	return c.ContinueFlow(shared.StateLoginPassword)
 }
 
 func (a ContinueToPasswordLogin) Finalize(c flowpilot.FinalizationContext) error {

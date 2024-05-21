@@ -3,9 +3,8 @@ package flow
 import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/login_method_chooser"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/login_password"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
@@ -18,28 +17,35 @@ var CapabilitiesSubFlow = flowpilot.NewSubFlow("capabilities").
 	State(shared.StatePreflight, capabilities.RegisterClientCapabilities{}).
 	MustBuild()
 
-var LoginMethodChooserSubFlow = flowpilot.NewSubFlow("login_method_chooser").
-	State(shared.StateLoginMethodChooser,
-		login_method_chooser.ContinueToPasswordLogin{},
-		login_method_chooser.ContinueToPasscodeConfirmation{},
-		shared.Back{},
-	).
-	SubFlows(LoginPasswordSubFlow, PasscodeSubFlow).
-	MustBuild()
-
-var LoginPasswordSubFlow = flowpilot.NewSubFlow("login_password").
-	State(shared.StateLoginPassword,
-		login_password.PasswordLogin{},
-		login_password.ContinueToPasscodeConfirmationRecovery{},
-		shared.Back{},
-	).
-	State(shared.StateLoginPasswordRecovery, login_password.PasswordRecovery{}).
-	SubFlows(PasscodeSubFlow).
-	MustBuild()
-
 var PasscodeSubFlow = flowpilot.NewSubFlow("passcode").
-	State(shared.StatePasscodeConfirmation, passcode.VerifyPasscode{}, passcode.ReSendPasscode{}, shared.Back{}).
-	BeforeState(shared.StatePasscodeConfirmation, passcode.SendPasscode{}).
+	State(shared.StatePasscodeConfirmation,
+		passcode.VerifyPasscode{},
+		passcode.ReSendPasscode{},
+		shared.Back{}).
+	BeforeState(shared.StatePasscodeConfirmation,
+		passcode.SendPasscode{}).
+	MustBuild()
+
+var CredentialUsageSubFlow = flowpilot.NewSubFlow("credential_usage").
+	State(shared.StateLoginMethodChooser,
+		credential_usage.ContinueToPasswordLogin{},
+		credential_usage.ContinueToPasscodeConfirmation{},
+		shared.Back{},
+	).
+	State(shared.StateLoginPassword,
+		credential_usage.PasswordLogin{},
+		credential_usage.ContinueToPasscodeConfirmationRecovery{},
+		shared.Back{},
+	).
+	State(shared.StateLoginPasswordRecovery,
+		credential_usage.PasswordRecovery{}).
+	State(shared.StatePasscodeConfirmation,
+		passcode.VerifyPasscode{},
+		passcode.ReSendPasscode{},
+		shared.Back{}).
+	BeforeState(shared.StatePasscodeConfirmation,
+		passcode.SendPasscode{}).
+	SubFlows(PasscodeSubFlow).
 	MustBuild()
 
 var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
@@ -67,29 +73,45 @@ var LoginFlow = flowpilot.NewFlow("/login").
 		login.WebauthnGenerateRequestOptions{},
 		login.WebauthnVerifyAssertionResponse{},
 		shared.ThirdPartyOAuth{}).
-	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
-	State(shared.StateLoginPasskey, login.WebauthnVerifyAssertionResponse{}, shared.Back{}).
+	State(shared.StateThirdPartyOAuth,
+		shared.ExchangeToken{}).
+	State(shared.StateLoginPasskey,
+		login.WebauthnVerifyAssertionResponse{},
+		shared.Back{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	InitialState(shared.StatePreflight, shared.StateLoginInit).
 	ErrorState(shared.StateError).
-	BeforeState(shared.StateLoginInit, login.WebauthnGenerateRequestOptionsForConditionalUi{}).
-	BeforeState(shared.StateSuccess, shared.IssueSession{}).
-	BeforeState(shared.StatePasscodeConfirmation, login.SelectPasscodeTemplate{}).
-	AfterState(shared.StateOnboardingVerifyPasskeyAttestation, shared.WebauthnCredentialSave{}).
-	AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
-	SubFlows(CapabilitiesSubFlow, PasscodeSubFlow, LoginMethodChooserSubFlow, LoginPasswordSubFlow, CredentialOnboardingSubFlow).
+	BeforeState(shared.StateLoginInit,
+		login.WebauthnGenerateRequestOptionsForConditionalUi{}).
+	BeforeState(shared.StateSuccess,
+		shared.IssueSession{}).
+	BeforeState(shared.StatePasscodeConfirmation,
+		login.SelectPasscodeTemplate{}).
+	AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
+		shared.WebauthnCredentialSave{}).
+	AfterState(shared.StatePasscodeConfirmation,
+		shared.EmailPersistVerifiedStatus{}).
+	AfterState(shared.StatePasswordCreation,
+		shared.PasswordSave{}).
+	SubFlows(CapabilitiesSubFlow, CredentialUsageSubFlow, CredentialOnboardingSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 
 var RegistrationFlow = flowpilot.NewFlow("/registration").
-	State(shared.StateRegistrationInit, registration.RegisterLoginIdentifier{}, shared.ThirdPartyOAuth{}).
-	State(shared.StateThirdPartyOAuth, shared.ExchangeToken{}).
+	State(shared.StateRegistrationInit,
+		registration.RegisterLoginIdentifier{},
+		shared.ThirdPartyOAuth{}).
+	State(shared.StateThirdPartyOAuth,
+		shared.ExchangeToken{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
-	InitialState(shared.StatePreflight, shared.StateRegistrationInit).
+	InitialState(shared.StatePreflight,
+		shared.StateRegistrationInit).
 	ErrorState(shared.StateError).
-	BeforeState(shared.StateSuccess, registration.CreateUser{}, shared.IssueSession{}).
+	BeforeState(shared.StateSuccess,
+		registration.CreateUser{},
+		shared.IssueSession{}).
 	SubFlows(CapabilitiesSubFlow, PasscodeSubFlow, CredentialOnboardingSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
