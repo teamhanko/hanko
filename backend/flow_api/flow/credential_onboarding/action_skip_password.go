@@ -1,6 +1,8 @@
 package credential_onboarding
 
 import (
+	"fmt"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -31,7 +33,15 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	}
 }
 func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
-	if prevState, _ := c.GetPreviousState(); prevState != nil && *prevState == shared.StateOnboardingVerifyPasskeyAttestation {
+	deps := a.GetDeps(c)
+
+	userId := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
+	user, err := deps.Persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user from db: %w", err)
+	}
+
+	if len(user.WebauthnCredentials) > 0 {
 		return c.EndSubFlow()
 	}
 
