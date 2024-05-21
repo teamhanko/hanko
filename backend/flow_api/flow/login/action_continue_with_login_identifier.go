@@ -228,7 +228,7 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
 			if cfg.Passkey.Optional && cfg.Password.Optional {
-				result = append(result, "login_method_onboarding_chooser") // login_method_onboarding_chooser can be skipped
+				result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
 			} else if cfg.Passkey.Optional && !cfg.Password.Optional {
 				result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey) // passkey_onboarding can be skipped
 			} else if !cfg.Passkey.Optional && cfg.Password.Optional {
