@@ -179,7 +179,7 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p
 		if acquireBoth {
 			if bothOptional {
 				// Wenn !p.EmailVerification, dann darf man den Chooser nicht skippen
-				stateNames = append(stateNames, shared.StateRegistrationMethodChooser)
+				stateNames = append(stateNames, shared.StateCredentialOnboardingChooser)
 			} else if passwordOptional {
 				// Man darf Password skippen
 				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)

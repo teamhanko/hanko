@@ -9,7 +9,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration_method_chooser"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
@@ -43,31 +42,23 @@ var PasscodeSubFlow = flowpilot.NewSubFlow("passcode").
 	BeforeState(shared.StatePasscodeConfirmation, passcode.SendPasscode{}).
 	MustBuild()
 
-//var PasskeyOnboardingSubFlow = flowpilot.NewSubFlow("passkey_onboarding").
-//	State(shared.StateOnboardingCreatePasskey, passkey_onboarding.WebauthnGenerateCreationOptions{}, passkey_onboarding.Skip{}, passkey_onboarding.Back{}).
-//	State(shared.StateOnboardingVerifyPasskeyAttestation, passkey_onboarding.WebauthnVerifyAttestationResponse{}, shared.Back{}).
-//	// SubFlows(RegisterPasswordSubFlow).
-//	MustBuild()
-//
-//var RegisterPasswordSubFlow = flowpilot.NewSubFlow("register_password").
-//	State(shared.StatePasswordCreation, register_password.RegisterPassword{}, register_password.Back{}, register_password.Skip{}).
-//	// SubFlows(PasskeyOnboardingSubFlow).
-//	MustBuild()
-
 var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
-	State(shared.StateCredentialOnboardingChooser, credential_onboarding.ContinueToPasskey{}, credential_onboarding.ContinueToPassword{}, shared.Skip{}).
-	State(shared.StateOnboardingCreatePasskey, credential_onboarding.WebauthnGenerateCreationOptions{}, credential_onboarding.SkipPasskey{}, credential_onboarding.Back{}).
-	State(shared.StateOnboardingVerifyPasskeyAttestation, credential_onboarding.WebauthnVerifyAttestationResponse{}, shared.Back{}).
-	State(shared.StatePasswordCreation, credential_onboarding.RegisterPassword{}, credential_onboarding.Back{}, credential_onboarding.SkipPassword{}).
-	MustBuild()
-
-var RegistrationMethodChooserSubFlow = flowpilot.NewSubFlow("registration_method_chooser").
-	State(shared.StateRegistrationMethodChooser,
-		registration_method_chooser.ContinueToPasskeyCreation{},
-		registration_method_chooser.ContinueToPasswordRegistration{},
-		registration_method_chooser.Back{},
-		registration_method_chooser.Skip{}).
-	SubFlows(CredentialOnboardingSubFlow).
+	State(shared.StateCredentialOnboardingChooser,
+		credential_onboarding.ContinueToPasskey{},
+		credential_onboarding.ContinueToPassword{},
+		credential_onboarding.SkipCredentialOnboardingMethodChooser{},
+		credential_onboarding.BackCredentialOnboardingMethodChooser{}).
+	State(shared.StateOnboardingCreatePasskey,
+		credential_onboarding.WebauthnGenerateCreationOptions{},
+		credential_onboarding.SkipPasskey{},
+		credential_onboarding.Back{}).
+	State(shared.StateOnboardingVerifyPasskeyAttestation,
+		credential_onboarding.WebauthnVerifyAttestationResponse{},
+		shared.Back{}).
+	State(shared.StatePasswordCreation,
+		credential_onboarding.RegisterPassword{},
+		credential_onboarding.Back{},
+		credential_onboarding.SkipPassword{}).
 	MustBuild()
 
 var LoginFlow = flowpilot.NewFlow("/login").
@@ -99,7 +90,7 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	InitialState(shared.StatePreflight, shared.StateRegistrationInit).
 	ErrorState(shared.StateError).
 	BeforeState(shared.StateSuccess, registration.CreateUser{}, shared.IssueSession{}).
-	SubFlows(CapabilitiesSubFlow, RegistrationMethodChooserSubFlow, PasscodeSubFlow, CredentialOnboardingSubFlow).
+	SubFlows(CapabilitiesSubFlow, PasscodeSubFlow, CredentialOnboardingSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 
