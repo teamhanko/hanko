@@ -1,4 +1,4 @@
-package login_method_chooser
+package credential_usage
 
 import (
 	"fmt"
@@ -26,7 +26,7 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set login_method to stash: %w", err)
 	}
 
-	return c.StartSubFlow(shared.StatePasscodeConfirmation)
+	return c.ContinueFlow(shared.StatePasscodeConfirmation)
 }
 
 func (a ContinueToPasscodeConfirmation) Finalize(c flowpilot.FinalizationContext) error {

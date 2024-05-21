@@ -1,4 +1,4 @@
-package login_password
+package credential_usage
 
 import (
 	"errors"
