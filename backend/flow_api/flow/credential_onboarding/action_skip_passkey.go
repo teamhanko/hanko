@@ -21,11 +21,7 @@ func (a SkipPasskey) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 	switch c.GetFlowName() {
 	case "registration":
-		if !deps.Cfg.Passkey.Optional || !deps.Cfg.Email.RequireVerification {
-			c.SuspendAction()
-		}
-
-		if c.GetFlowPath().HasFragment("registration_method_chooser") {
+		if !deps.Cfg.Passkey.Optional {
 			c.SuspendAction()
 		}
 	}
@@ -33,8 +29,14 @@ func (a SkipPasskey) Initialize(c flowpilot.InitializationContext) {
 func (a SkipPasskey) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	if deps.Cfg.Password.AcquireOnLogin == "conditional" && !c.Stash().Get("user_has_password").Bool() {
-		return c.ContinueFlow(shared.StatePasswordCreation)
+	if c.GetFlowName() == "login" {
+		if deps.Cfg.Password.Enabled && deps.Cfg.Password.AcquireOnLogin == "conditional" && !c.Stash().Get("user_has_password").Bool() {
+			return c.ContinueFlow(shared.StatePasswordCreation)
+		}
+	} else if c.GetFlowName() == "registration" {
+		if deps.Cfg.Password.Enabled && deps.Cfg.Password.AcquireOnRegistration == "conditional" && !c.Stash().Get("user_has_password").Bool() {
+			return c.ContinueFlow(shared.StatePasswordCreation)
+		}
 	}
 
 	return c.EndSubFlow()

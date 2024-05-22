@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"unicode/utf8"
@@ -127,23 +126,19 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to stash user_id: %w", err)
 	}
 
-	doEmailVerification := email != "" && deps.Cfg.Email.RequireVerification
-
-	if doEmailVerification {
+	if email != "" && deps.Cfg.Email.RequireVerification {
 		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 	}
 
-	states, err := a.generateRegistrationStates(deps.Cfg, generateRegistrationStatesParams{
-		WebauthnAvailable: c.Stash().Get("webauthn_available").Bool(),
-		EmailVerification: doEmailVerification,
-	})
+	states := a.generateRegistrationStates(c)
 
-	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(err))
+	if len(states) == 0 {
+		return c.ContinueFlow(shared.StateSuccess)
 	}
 
+	states = append(states, shared.StateSuccess)
 	return c.StartSubFlow(states[0], states[1:]...)
 }
 
@@ -151,70 +146,41 @@ func (a RegisterLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error
 	return nil
 }
 
-type generateRegistrationStatesParams struct {
-	WebauthnAvailable bool
-	EmailVerification bool
-}
+func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {
+	deps := a.GetDeps(c)
 
-func (a RegisterLoginIdentifier) generateRegistrationStates(cfg config.Config, p generateRegistrationStatesParams) ([]flowpilot.StateName, error) {
 	stateNames := make([]flowpilot.StateName, 0)
 
-	if p.EmailVerification {
+	emailExists := c.Input().Get("email").Exists()
+	if emailExists && deps.Cfg.Email.RequireVerification {
 		stateNames = append(stateNames, shared.StatePasscodeConfirmation)
 	}
 
-	passkeyEnabled := p.WebauthnAvailable && cfg.Passkey.Enabled
-	passwordEnabled := cfg.Password.Enabled
+	webauthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
+	passwordEnabled := deps.Cfg.Password.Enabled
 	bothEnabled := passkeyEnabled && passwordEnabled
 
-	passkeyOptional := cfg.Passkey.Optional
-	passwordOptional := cfg.Password.Optional
-	bothOptional := passwordOptional && passkeyOptional
-
-	acquirePassword := cfg.Password.AcquireOnRegistration
-	acquirePasskey := cfg.Passkey.AcquireOnRegistration
-	acquireBoth := acquirePassword && acquirePasskey
+	alwaysPasskey := deps.Cfg.Passkey.AcquireOnRegistration == "always"
+	conditionalPasskey := deps.Cfg.Passkey.AcquireOnRegistration == "conditional"
+	alwaysPassword := deps.Cfg.Password.AcquireOnRegistration == "always"
+	conditionalPassword := deps.Cfg.Password.AcquireOnRegistration == "conditional"
 
 	if bothEnabled {
-		if acquireBoth {
-			if bothOptional {
-				// Wenn !p.EmailVerification, dann darf man den Chooser nicht skippen
-				stateNames = append(stateNames, shared.StateCredentialOnboardingChooser)
-			} else if passwordOptional {
-				// Man darf Password skippen
-				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
-			} else if passkeyOptional {
-				// Man darf Passkey skippen
-				stateNames = append(stateNames, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
-			} else {
-				// Man darf keine der beiden Methoden skippen
-				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
-			}
-		} else if acquirePassword {
-			// Wenn !p.EmailVerification, dann darf man Password Creation nicht skippen
-			stateNames = append(stateNames, shared.StatePasswordCreation)
-		} else if acquirePasskey {
+		if conditionalPasskey && conditionalPassword {
+			stateNames = append(stateNames, shared.StateCredentialOnboardingChooser)
+		} else if alwaysPasskey && !alwaysPassword {
 			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
-		} else {
-			return nil, errors.New("no credential acquired")
-		}
-	} else if passkeyEnabled {
-		if acquirePasskey {
-			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
-		} else {
-			return nil, errors.New("no credential acquired")
-		}
-	} else if passwordEnabled {
-		if acquirePassword {
+		} else if !alwaysPasskey && alwaysPassword {
 			stateNames = append(stateNames, shared.StatePasswordCreation)
-		} else {
-			return nil, errors.New("no credential acquired")
+		} else if alwaysPassword && alwaysPasskey {
+			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
 		}
-	} else if p.EmailVerification {
-		return append(stateNames, shared.StateSuccess), nil
-	} else {
-		return nil, errors.New("no credential acquired")
+	} else if passkeyEnabled && (alwaysPasskey || conditionalPasskey) {
+		stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
+	} else if passwordEnabled && (alwaysPassword || conditionalPassword) {
+		stateNames = append(stateNames, shared.StatePasswordCreation)
 	}
 
-	return append(stateNames, shared.StateSuccess), nil
+	return stateNames
 }
