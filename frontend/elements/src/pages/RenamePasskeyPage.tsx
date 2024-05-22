@@ -1,65 +1,56 @@
 import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
 
-import { HankoError, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
-
-import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
 import Input from "../components/form/Input";
 import Button from "../components/form/Button";
-import ErrorMessage from "../components/error/ErrorMessage";
+import ErrorBox from "../components/error/ErrorBox";
 import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
+import { Passkey } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 
 type Props = {
   oldName: string;
-  credential: WebauthnCredential;
-  onBack: () => void;
+  passkey: Passkey;
+  onBack: (event: Event) => Promise<void>;
+  onPasskeyNameSubmit: (
+    event: Event,
+    id: string,
+    name: string,
+  ) => Promise<void>;
 };
 
-const RenamePasskeyPage = ({ credential, oldName, onBack }: Props) => {
+const RenamePasskeyPage = ({
+  onPasskeyNameSubmit,
+  oldName,
+  onBack,
+  passkey,
+}: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setWebauthnCredentials } = useContext(AppContext);
-
-  const [isPasskeyLoading, setIsPasskeyLoading] = useState<boolean>();
-  const [error, setError] = useState<HankoError>(null);
   const [newName, setNewName] = useState<string>(oldName);
 
-  const onNewNameInput = async (event: Event) => {
+  const onInput = async (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
       setNewName(event.target.value);
     }
-  };
-
-  const onPasskeyNameSubmit = (event: Event) => {
-    event.preventDefault();
-    setIsPasskeyLoading(true);
-    hanko.webauthn
-      .updateCredential(credential.id, newName)
-      .then(() => hanko.webauthn.listCredentials())
-      .then(setWebauthnCredentials)
-      .then(() => onBack())
-      .finally(() => setIsPasskeyLoading(false))
-      .catch(setError);
-  };
-
-  const onBackHandler = (event: Event) => {
-    event.preventDefault();
-    onBack();
   };
 
   return (
     <Fragment>
       <Content>
         <Headline1>{t("headlines.renamePasskey")}</Headline1>
-        <ErrorMessage error={error} />
+        <ErrorBox flowError={null} />
         <Paragraph>{t("texts.renamePasskey")}</Paragraph>
-        <Form onSubmit={onPasskeyNameSubmit}>
+        <Form
+          onSubmit={(event: Event) =>
+            onPasskeyNameSubmit(event, passkey.id, newName)
+          }
+        >
           <Input
             type={"text"}
             name={"passkey"}
@@ -68,21 +59,14 @@ const RenamePasskeyPage = ({ credential, oldName, onBack }: Props) => {
             maxLength={32}
             required={true}
             placeholder={t("labels.newPasskeyName")}
-            onInput={onNewNameInput}
-            disabled={isPasskeyLoading}
+            onInput={onInput}
             autofocus
           />
-          <Button isLoading={isPasskeyLoading} disabled={isPasskeyLoading}>
-            {t("labels.save")}
-          </Button>
+          <Button uiAction={"passkey-rename"}>{t("labels.save")}</Button>
         </Form>
       </Content>
       <Footer>
-        <Link
-          disabled={isPasskeyLoading}
-          onClick={onBackHandler}
-          loadingSpinnerPosition={"right"}
-        >
+        <Link onClick={onBack} loadingSpinnerPosition={"right"}>
           {t("labels.back")}
         </Link>
       </Footer>

@@ -26,37 +26,36 @@ export const en: Translation = {
     connectedAccounts: "Connected accounts",
     deleteAccount: "Delete account",
     accountNotFound: "Account not found",
+    signIn: "Sign in",
+    signUp: "Sign up",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
+    enterPasscodeNoEmail:
+      "Enter the passcode that was sent to your primary email address.",
     setupPasskey:
       "Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.",
     createAccount:
       'No account exists for "{emailAddress}". Do you want to create a new account?',
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
-    manageEmails:
-      "Used for passcode authentication.",
+    manageEmails: "Used for passcode authentication.",
     changePassword: "Set a new password.",
     managePasskeys: "Your passkeys allow you to sign in to this account.",
     isPrimaryEmail:
       "This email address will be used as username for your passkeys.",
-    setPrimaryEmail:
-      "Set this email to be used as username for new passkeys.",
+    setPrimaryEmail: "Set this email to be used as username for new passkeys.",
     emailVerified: "This email address has been verified.",
     emailUnverified: "This email address has not been verified.",
     emailDelete:
       "If you delete this email address, it can no longer be used to sign in.",
-    emailDeletePrimary:
-      "The primary email address cannot be deleted.",
-    renamePasskey:
-      "Set a name for the passkey.",
-    deletePasskey:
-      "Delete this passkey from your account.",
+    emailDeletePrimary: "The primary email address cannot be deleted.",
+    renamePasskey: "Set a name for the passkey.",
+    deletePasskey: "Delete this passkey from your account.",
     deleteAccount:
       "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
-    noAccountExists:
-      'No account exists for "{emailAddress}".',
+    noAccountExists: 'No account exists for "{emailAddress}".',
+    changeYourUsername: "Change your username",
   },
   labels: {
     or: "or",
@@ -93,6 +92,12 @@ export const en: Translation = {
     webauthnUnsupported: "Passkeys are not supported by your browser",
     signInWith: "Sign in with {provider}",
     deleteAccount: "Yes, delete this account.",
+    emailOrUsername: "Email or Username",
+    username: "Username",
+    optional: "optional",
+    dontHaveAnAccount: "Don't have an account?",
+    alreadyHaveAnAccount: "Already have an account?",
+    changeUsername: "Change username",
   },
   errors: {
     somethingWentWrong:
@@ -118,5 +123,19 @@ export const en: Translation = {
     thirdPartyUnverifiedEmail:
       "Email verification required. Please verify the used email address with your provider.",
     signupDisabled: "Account registration is disabled.",
+  },
+  flowErrors: {
+    flow_expired_error:
+      "The session has expired, please click the button to restart.",
+    value_invalid_error: "The entered value is invalid.",
+    passcode_invalid: "The passcode provided was not correct.",
+    passkey_invalid: "This passkey cannot be used anymore",
+    passcode_max_attempts_reached:
+      "The passcode was entered incorrectly too many times. Please request a new code.",
+    rate_limit_exceeded:
+      "Too many requests have been made. Please wait to repeat the requested operation.",
+    unknown_username_error: "The username is unknown.",
+    username_already_exists: "The username is already taken.",
+    email_already_taken: "The email is already taken.",
   },
 };

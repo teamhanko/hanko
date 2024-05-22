@@ -1,95 +1,78 @@
 import { Fragment } from "preact";
-import { StateUpdater, useContext, useState } from "preact/compat";
+import { StateUpdater, useContext } from "preact/compat";
 
-import {
-  HankoError,
-  WebauthnCredentials,
-  WebauthnCredential,
-} from "@teamhanko/hanko-frontend-sdk";
+import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 
-import { AppContext } from "../../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Accordion from "./Accordion";
 import Paragraph from "../paragraph/Paragraph";
 import Link from "../link/Link";
 import Headline2 from "../headline/Headline2";
-
-import ProfilePage from "../../pages/ProfilePage";
+import { Passkey } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
+import { AppContext } from "../../contexts/AppProvider";
 import RenamePasskeyPage from "../../pages/RenamePasskeyPage";
 
 interface Props {
-  credentials: WebauthnCredentials;
+  passkeys: Passkey[];
   setError: (e: HankoError) => void;
-  checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  checkedItemID?: string;
+  setCheckedItemID: StateUpdater<string>;
+  onBack: (event: Event) => Promise<void>;
+  onPasskeyNameSubmit: (
+    event: Event,
+    id: string,
+    name: string,
+  ) => Promise<void>;
+  onPasskeyDelete: (event: Event, id: string) => Promise<void>;
 }
 
 const ListPasskeysAccordion = ({
-  credentials,
-  setError,
-  checkedItemIndex,
-  setCheckedItemIndex,
+  passkeys = [],
+  checkedItemID,
+  setCheckedItemID,
+  onBack,
+  onPasskeyNameSubmit,
+  onPasskeyDelete,
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setWebauthnCredentials, setPage } = useContext(AppContext);
+  const { setPage } = useContext(AppContext);
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const deletePasskey = (event: Event, credential: WebauthnCredential) => {
-    event.preventDefault();
-    setIsLoading(true);
-    hanko.webauthn
-      .deleteCredential(credential.id)
-      .then(() => hanko.webauthn.listCredentials())
-      .then(setWebauthnCredentials)
-      .then(() => {
-        setError(null);
-        setCheckedItemIndex(null);
-        return;
-      })
-      .finally(() => setIsLoading(false))
-      .catch(setError);
-  };
-
-  const onBackHandler = () => {
-    setPage(<ProfilePage />);
-  };
-
-  const renamePasskey = (event: Event, credential: WebauthnCredential) => {
+  const renamePasskey = (event: Event, passkey: Passkey) => {
     event.preventDefault();
     setPage(
       <RenamePasskeyPage
-        oldName={uiDisplayName(credential)}
-        credential={credential}
-        onBack={onBackHandler}
-      />
+        oldName={uiDisplayName(passkey)}
+        passkey={passkey}
+        onBack={onBack}
+        onPasskeyNameSubmit={onPasskeyNameSubmit}
+      />,
     );
   };
 
-  const uiDisplayName = (credential: WebauthnCredential) => {
-    if (credential.name) {
-      return credential.name;
+  const uiDisplayName = (passkey: Passkey) => {
+    if (passkey.name) {
+      return passkey.name;
     }
-    const alphanumeric = credential.public_key.replace(/[\W_]/g, "");
+    const alphanumeric = passkey.public_key.replace(/[\W_]/g, "");
     return `Passkey-${alphanumeric.substring(
       alphanumeric.length - 7,
-      alphanumeric.length
+      alphanumeric.length,
     )}`;
   };
 
   const convertTime = (t: string) => new Date(t).toLocaleString();
 
-  const labels = (credential: WebauthnCredential) => uiDisplayName(credential);
+  const labels = (passkey: Passkey) => uiDisplayName(passkey);
 
-  const contents = (credential: WebauthnCredential) => (
+  const contents = (passkey: Passkey) => (
     <Fragment>
       <Paragraph>
         <Headline2>{t("headlines.renamePasskey")}</Headline2>
         {t("texts.renamePasskey")}
         <br />
         <Link
-          onClick={(event) => renamePasskey(event, credential)}
+          onClick={(event) => renamePasskey(event, passkey)}
           loadingSpinnerPosition={"right"}
         >
           {t("labels.rename")}
@@ -100,9 +83,9 @@ const ListPasskeysAccordion = ({
         {t("texts.deletePasskey")}
         <br />
         <Link
+          uiAction={"password-delete"}
           dangerous
-          isLoading={isLoading}
-          onClick={(event) => deletePasskey(event, credential)}
+          onClick={(event) => onPasskeyDelete(event, passkey.id)}
           loadingSpinnerPosition={"right"}
         >
           {t("labels.delete")}
@@ -110,22 +93,22 @@ const ListPasskeysAccordion = ({
       </Paragraph>
       <Paragraph>
         <Headline2>{t("headlines.lastUsedAt")}</Headline2>
-        {credential.last_used_at ? convertTime(credential.last_used_at) : "-"}
+        {passkey.last_used_at ? convertTime(passkey.last_used_at) : "-"}
       </Paragraph>
       <Paragraph>
         <Headline2>{t("headlines.createdAt")}</Headline2>
-        {convertTime(credential.created_at)}
+        {convertTime(passkey.created_at)}
       </Paragraph>
     </Fragment>
   );
   return (
     <Accordion
-      name={"passkey-dropdown"}
+      name={"passkey-edit-dropdown"}
       columnSelector={labels}
-      data={credentials}
+      data={passkeys}
       contentSelector={contents}
-      checkedItemIndex={checkedItemIndex}
-      setCheckedItemIndex={setCheckedItemIndex}
+      checkedItemID={checkedItemID}
+      setCheckedItemID={setCheckedItemID}
     />
   );
 };

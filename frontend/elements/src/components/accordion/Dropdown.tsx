@@ -7,16 +7,16 @@ interface Props {
   name: string;
   title: string | h.JSX.Element;
   children: ComponentChildren;
-  checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  checkedItemID?: string;
+  setCheckedItemID: StateUpdater<string>;
 }
 
 const Dropdown = ({
   name,
   title,
   children,
-  checkedItemIndex,
-  setCheckedItemIndex,
+  checkedItemID,
+  setCheckedItemID,
 }: Props) => {
   return (
     <Accordion
@@ -24,8 +24,8 @@ const Dropdown = ({
       name={name}
       columnSelector={() => title}
       contentSelector={() => <Fragment>{children}</Fragment>}
-      setCheckedItemIndex={setCheckedItemIndex}
-      checkedItemIndex={checkedItemIndex}
+      setCheckedItemID={setCheckedItemID}
+      checkedItemID={checkedItemID}
       data={[{}]}
     />
   );

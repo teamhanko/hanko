@@ -1,8 +1,7 @@
+import { h } from "preact";
 import { StateUpdater, useContext, useState } from "preact/compat";
+import { PasswordSetInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
 
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
-
-import { AppContext } from "../../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Form from "../form/Form";
@@ -10,45 +9,28 @@ import Input from "../form/Input";
 import Button from "../form/Button";
 import Paragraph from "../paragraph/Paragraph";
 import Dropdown from "./Dropdown";
+import Link from "../link/Link";
+import ErrorMessage from "../error/ErrorMessage";
 
 interface Props {
-  setError: (e: HankoError) => void;
-  checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  inputs: PasswordSetInputs;
+  checkedItemID?: string;
+  setCheckedItemID: StateUpdater<string>;
+  onPasswordSubmit: (event: Event, password: string) => Promise<void>;
+  onPasswordDelete: (event: Event) => Promise<void>;
+  hideDeletePasswordLink?: boolean;
 }
 
 const ChangePasswordDropdown = ({
-  setError,
-  checkedItemIndex,
-  setCheckedItemIndex,
+  inputs,
+  checkedItemID,
+  setCheckedItemID,
+  onPasswordSubmit,
+  onPasswordDelete,
+  hideDeletePasswordLink,
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, config, user } = useContext(AppContext);
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [isSuccess, setIsSuccess] = useState<boolean>(false);
   const [newPassword, setNewPassword] = useState<string>("");
-
-  const changePassword = (event: Event) => {
-    event.preventDefault();
-    setIsLoading(true);
-    hanko.password
-      .update(user.id, newPassword)
-      .then(() => {
-        setNewPassword("");
-        setError(null);
-        setIsSuccess(true);
-        setTimeout(() => {
-          setCheckedItemIndex(null);
-          setTimeout(() => {
-            setIsSuccess(false);
-          }, 500);
-        }, 1000);
-        return;
-      })
-      .finally(() => setIsLoading(false))
-      .catch(setError);
-  };
 
   const onInputHandler = (event: Event) => {
     event.preventDefault();
@@ -59,36 +41,44 @@ const ChangePasswordDropdown = ({
 
   return (
     <Dropdown
-      name={"change-password-dropdown"}
+      name={"password-edit-dropdown"}
       title={t("labels.changePassword")}
-      checkedItemIndex={checkedItemIndex}
-      setCheckedItemIndex={setCheckedItemIndex}
+      checkedItemID={checkedItemID}
+      setCheckedItemID={setCheckedItemID}
     >
       <Paragraph>
         {t("texts.passwordFormatHint", {
-          minLength: config.password.min_password_length,
-          maxLength: 72,
+          minLength: inputs.password.min_length?.toString(10),
+          maxLength: inputs.password.max_length?.toString(10),
         })}
       </Paragraph>
-      <Form onSubmit={changePassword}>
+      <ErrorMessage flowError={inputs.password?.error} />
+      <Form
+        onSubmit={(event: Event) =>
+          onPasswordSubmit(event, newPassword).then(() => setNewPassword(""))
+        }
+      >
         <Input
+          markError
           placeholder={t("labels.newPassword")}
           type={"password"}
           onInput={onInputHandler}
           value={newPassword}
-          minLength={config.password.min_password_length}
-          maxLength={72}
-          required
-          disabled={isLoading || isSuccess}
+          flowInput={inputs.password}
         />
-        <Button
-          isLoading={isLoading}
-          isSuccess={isSuccess}
-          disabled={isLoading}
-        >
-          {t("labels.save")}
-        </Button>
+        <Button uiAction={"password-submit"}>{t("labels.save")}</Button>
       </Form>
+      <Link
+        hidden={hideDeletePasswordLink}
+        uiAction={"password-delete"}
+        dangerous
+        onClick={(event: Event) =>
+          onPasswordDelete(event).then(() => setNewPassword(""))
+        }
+        loadingSpinnerPosition={"right"}
+      >
+        {t("labels.delete")}
+      </Link>
     </Dropdown>
   );
 };

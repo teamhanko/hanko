@@ -26,9 +26,13 @@ export const it: Translation = {
     connectedAccounts: "Account collegati",
     deleteAccount: "Cancella account",
     accountNotFound: "Account non trovato",
+    signIn: "Accedi",
+    signUp: "Registrati",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
+    enterPasscodeNoEmail:
+      "Inserisci il codice inviato al tuo indirizzo email principale.",
     setupPasskey:
       "Accedi al tuo account in modo semplice e sicuro con una passkey. Nota: I tuoi dati biometrici sono archiviati solo sui tuoi dispositivi e non saranno condivisi con nessuno.",
     createAccount:
@@ -37,7 +41,8 @@ export const it: Translation = {
       "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
     manageEmails: "Used for passcode authentication.",
     changePassword: "Imposta una nuova password",
-    managePasskeys: "Le tue passkey ti consentono di accedere a questo account.",
+    managePasskeys:
+      "Le tue passkey ti consentono di accedere a questo account.",
     isPrimaryEmail:
       "Questo indirizzo email verrà utilizzato come nome utente per le tue passkeys.",
     setPrimaryEmail:
@@ -48,14 +53,12 @@ export const it: Translation = {
       "Se cancelli questo indirizzo email, non potrà più essere utilizzato per accedere.",
     emailDeletePrimary:
       "L'indirizzo email principale non può essere eliminato.",
-    renamePasskey:
-      "Imposta un nome per la passkey.",
-    deletePasskey:
-      "Cancella questa passkey dal tuo account.",
+    renamePasskey: "Imposta un nome per la passkey.",
+    deletePasskey: "Cancella questa passkey dal tuo account.",
     deleteAccount:
       "Sei sicuro di voler cancellare questo account? Tutti i dati verranno immediatamente cancellati permanentemente e non potranno essere ripristinati.",
-    noAccountExists:
-      'Non esiste alcun account per "{emailAddress}".',
+    noAccountExists: 'Non esiste alcun account per "{emailAddress}".',
+    changeYourUsername: "Cambia il tuo nome utente",
   },
   labels: {
     or: "o",
@@ -92,10 +95,15 @@ export const it: Translation = {
     webauthnUnsupported: "Le Passkeys non sono supportate dal tuo browser",
     signInWith: "Accedi con {provider}",
     deleteAccount: "Sì, cancella questo account.",
+    emailOrUsername: "E-mail o Nome utente",
+    username: "Nome utente",
+    optional: "opzionale",
+    dontHaveAnAccount: "Non hai un account?",
+    alreadyHaveAnAccount: "Hai già un account?",
+    changeUsername: "Cambia nome utente",
   },
   errors: {
-    somethingWentWrong:
-      "Si è verificato un errore tecnico. Riprova più tardi.",
+    somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",
     requestTimeout: "La richiesta è scaduta.",
     invalidPassword: "Email o password sbagliata.",
     invalidPasscode: "Il codice di accesso inserito non è corretto.",
@@ -105,11 +113,13 @@ export const it: Translation = {
       "Sono state effettuate troppe richieste. Attenti per ripetere l'operazione richiesta.",
     unauthorized: "La sessione è scaduta. Riprova ad accedere.",
     invalidWebauthnCredential: "La passkey non può più essere utilizzata.",
-    passcodeExpired: "Il codice di accesso è scaduto. Richiedi un nuovo codice.",
+    passcodeExpired:
+      "Il codice di accesso è scaduto. Richiedi un nuovo codice.",
     userVerification:
       "Verifica utente richiesta. Assicurati che il tuo dispositivo di autenticazione è protetto con un PIN o un codice biometrico.",
     emailAddressAlreadyExistsError: "L'indirizzo email è già stato utilizzato.",
-    maxNumOfEmailAddressesReached: "Non è possibile aggiungere ulteriori indirizzi email.",
+    maxNumOfEmailAddressesReached:
+      "Non è possibile aggiungere ulteriori indirizzi email.",
     thirdPartyAccessDenied:
       "Accesso negato. La richiesta è stata cancellata dall'utente o il provider ha negato l'accesso per altre ragioni.",
     thirdPartyMultipleAccounts:
@@ -117,5 +127,19 @@ export const it: Translation = {
     thirdPartyUnverifiedEmail:
       "Verifica email richiesta. Verifica l'indirizzo email utilizzato con il tuo provider.",
     signupDisabled: "La registrazione dell'account è disabilitata.",
+  },
+  flowErrors: {
+    flow_expired_error:
+      "La sessione è scaduta, clicca sul pulsante per riavviare.",
+    value_invalid_error: "Il valore inserito non è valido.",
+    passcode_invalid: "Il codice inserito non è corretto.",
+    passkey_invalid: "Questa chiave di accesso non può più essere utilizzata.",
+    passcode_max_attempts_reached:
+      "Il codice è stato inserito troppe volte in modo errato. Si prega di richiedere un nuovo codice.",
+    rate_limit_exceeded:
+      "Troppe richieste sono state effettuate. Si prega di attendere per ripetere l'operazione richiesta.",
+    unknown_username_error: "Il nome utente è sconosciuto.",
+    username_already_exists: "Il nome utente è già in uso.",
+    email_already_taken: "L'indirizzo email è già in uso.",
   },
 };

@@ -1,7 +1,7 @@
 @use '../../variables'
 @use '../../mixins'
 
-.errorMessage
+.errorBox
   @include mixins.font
   @include mixins.border
 
@@ -23,3 +23,6 @@
 
   &[hidden]
     display: none
+
+.errorMessage
+  color: variables.$error-color
