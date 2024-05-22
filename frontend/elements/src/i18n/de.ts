@@ -25,11 +25,15 @@ export const de: Translation = {
     createdAt: "Erstellt am",
     connectedAccounts: "Verbundene Konten",
     deleteAccount: "Konto löschen",
-    accountNotFound: "Konto nicht gefunden"
+    accountNotFound: "Konto nicht gefunden",
+    signIn: "Anmelden",
+    signUp: "Registrieren",
   },
   texts: {
     enterPasscode:
       'Geben Sie den Passcode ein, der an die E-Mail-Adresse "{emailAddress}" gesendet wurde.',
+    enterPasscodeNoEmail:
+      "Geben Sie den Passcode ein, der an Ihre primäre E-Mail-Adresse gesendet wurde.",
     setupPasskey:
       "Ihr Gerät unterstützt die sichere Anmeldung mit Passkeys. Hinweis: Ihre biometrischen Daten verbleiben sicher auf Ihrem Gerät und werden niemals an unseren Server gesendet.",
     createAccount:
@@ -57,8 +61,8 @@ export const de: Translation = {
       "Löschen Sie diesen Passkey aus Ihrem Konto. Beachten Sie, dass der Passkey noch auf Ihren Geräten vorhanden ist und auch dort gelöscht werden muss.",
     deleteAccount:
       "Sind Sie sicher, dass Sie Ihr Konto löschen wollen? Alle Daten werden sofort gelöscht und können nicht wiederhergestellt werden.",
-    noAccountExists:
-      'Es existiert kein Konto für "{emailAddress}".',
+    noAccountExists: 'Es existiert kein Konto für "{emailAddress}".',
+    changeYourUsername: "Ändern Sie Ihren Benutzernamen",
   },
   labels: {
     or: "oder",
@@ -95,6 +99,12 @@ export const de: Translation = {
     webauthnUnsupported: "Passkeys werden von ihrem Browser nicht unterrstützt",
     signInWith: "Anmelden mit {provider}",
     deleteAccount: "Ja, dieses Konto löschen.",
+    emailOrUsername: "E-Mail oder Nutzername",
+    username: "Nutzername",
+    optional: "optional",
+    dontHaveAnAccount: "Sie haben noch kein Konto?",
+    alreadyHaveAnAccount: "Haben Sie bereits ein Konto?",
+    changeUsername: "Benutzernamen ändern",
   },
   errors: {
     somethingWentWrong:
@@ -124,5 +134,19 @@ export const de: Translation = {
     thirdPartyUnverifiedEmail:
       "Verifizierung der E-Mail-Adresse erforderlich. Bitte verifizieren sie die genutzte E-Mail-Adresse bei ihrem Provider.",
     signupDisabled: "Die Kontoregistrierung ist deaktiviert.",
+  },
+  flowErrors: {
+    flow_expired_error:
+      "Die Sitzung ist abgelaufen, bitte klicken Sie auf die Schaltfläche, um neu zu starten.",
+    value_invalid_error: "Der eingegebene Wert ist ungültig.",
+    passcode_invalid: "Der angegebene Passcode war nicht korrekt.",
+    passkey_invalid: "Dieser Passkey kann nicht mehr verwendet werden.",
+    passcode_max_attempts_reached:
+      "Der Passcode wurde zu oft falsch eingegeben. Bitte fordern Sie einen neuen Code an.",
+    rate_limit_exceeded:
+      "Zu viele Anfragen wurden gestellt. Bitte warten Sie, um die angeforderte Operation zu wiederholen.",
+    unknown_username_error: "Der Benutzername ist unbekannt.",
+    username_already_exists: "Der Benutzername ist bereits vergeben.",
+    email_already_taken: "Die E-Mail-Adresse ist bereits vergeben.",
   },
 };

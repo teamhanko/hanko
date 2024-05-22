@@ -145,6 +145,7 @@ class HttpClient {
   passcodeState: PasscodeState;
   dispatcher: Dispatcher;
   cookie: Cookie;
+  response: Response;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options: HttpClientOptions) {
@@ -158,6 +159,7 @@ class HttpClient {
 
   // eslint-disable-next-line require-jsdoc
   _fetch(path: string, options: RequestInit, xhr = new XMLHttpRequest()) {
+    const self = this;
     const url = this.api + path;
     const timeout = this.timeout;
     const bearerToken = this.cookie.getAuthCookie();
@@ -174,8 +176,7 @@ class HttpClient {
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
-        const response = new Response(xhr);
-        resolve(response);
+        resolve((self.response = new Response(xhr)));
       };
 
       xhr.onerror = () => {

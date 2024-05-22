@@ -30,9 +30,12 @@ export interface Translation {
     createdAt: string;
     connectedAccounts: string;
     deleteAccount: string;
+    signIn: string;
+    signUp: string;
   };
   texts: {
     enterPasscode: string;
+    enterPasscodeNoEmail: string;
     setupPasskey: string;
     createAccount: string;
     noAccountExists: string;
@@ -49,6 +52,7 @@ export interface Translation {
     renamePasskey: string;
     deletePasskey: string;
     deleteAccount: string;
+    changeYourUsername: string;
   };
   labels: {
     or: string;
@@ -85,6 +89,12 @@ export interface Translation {
     webauthnUnsupported: string;
     signInWith: string;
     deleteAccount: string;
+    emailOrUsername: string;
+    username: string;
+    optional: string;
+    dontHaveAnAccount: string;
+    alreadyHaveAnAccount: string;
+    changeUsername: string;
   };
   errors: {
     somethingWentWrong: string;
@@ -103,6 +113,17 @@ export interface Translation {
     thirdPartyMultipleAccounts: string;
     thirdPartyUnverifiedEmail: string;
     signupDisabled: string;
+  };
+  flowErrors: {
+    flow_expired_error: string;
+    value_invalid_error: string;
+    passcode_invalid: string;
+    passkey_invalid: string;
+    passcode_max_attempts_reached: string;
+    rate_limit_exceeded: string;
+    unknown_username_error: string;
+    username_already_exists: string;
+    email_already_taken: string;
   };
 }
 

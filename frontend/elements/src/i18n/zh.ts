@@ -26,9 +26,12 @@ export const zh: Translation = {
     connectedAccounts: "连接的账户",
     deleteAccount: "删除帐户",
     accountNotFound: "未找到帐户",
+    signIn: "登录",
+    signUp: "注册",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
+    enterPasscodeNoEmail: "输入发送到您的主要电子邮件地址的验证码。",
     setupPasskey:
       "使用密钥轻松安全地登录您的账户。注意：您的生物识别数据仅存储在您的设备上，永远不会与任何人共享。",
     createAccount: "没有“{emailAddress}”的账户存在。你想要创建一个新账户吗?",
@@ -51,6 +54,7 @@ export const zh: Translation = {
       "从您的账户中删除此密钥。请注意，密钥将继续存在于您的设备上，也需要在那里被删除。",
     deleteAccount: "您确定要删除此账号吗？所有数据将立即被删除，且无法恢复。",
     noAccountExists: '没有账户"{emailAddress}"。',
+    changeYourUsername: "更改您的用户名",
   },
   labels: {
     or: "或",
@@ -87,6 +91,12 @@ export const zh: Translation = {
     webauthnUnsupported: "您的浏览器不支持密钥",
     signInWith: "通过 {provider} 登录",
     deleteAccount: "是的，删除此帐户。",
+    emailOrUsername: "电子邮件或用户名",
+    username: "用户名",
+    optional: "可选的",
+    dontHaveAnAccount: "没有账号？",
+    alreadyHaveAnAccount: "已有账号？",
+    changeUsername: "更改用户名",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",
@@ -108,5 +118,17 @@ export const zh: Translation = {
     thirdPartyUnverifiedEmail:
       "需要电子邮件验证。请与您的提供商验证使用的电子邮件地址。",
     signupDisabled: "帐户注册被禁用。",
+  },
+  flowErrors: {
+    flow_expired_error: "会话已过期，请点击按钮重新启动。",
+    value_invalid_error: "输入的值无效。",
+    passcode_invalid: "提供的密码不正确。",
+    passkey_invalid: "此密码无法再使用。",
+    passcode_max_attempts_reached:
+      "密码输入错误次数太多。请请求一个新的验证码。",
+    rate_limit_exceeded: "请求过多。请等待重复所请求的操作。",
+    unknown_username_error: "用户名未知。",
+    username_already_exists: "用户名已被使用。",
+    email_already_taken: "电子邮件已被使用。",
   },
 };
