@@ -73,6 +73,11 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)
 	}
 
+	err = c.Stash().Set("user_has_webauthn_credential", true)
+	if err != nil {
+		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
+	}
+
 	return c.EndSubFlow()
 }
 

@@ -122,12 +122,19 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		if err != nil {
 			return fmt.Errorf("failed to set user_id to the stash: %w", err)
 		}
-
 		if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
 			if err = c.Stash().Set("email", primaryEmailModel.Address); err != nil {
 				return fmt.Errorf("failed to set email to stash: %w", err)
 			}
 		}
+	}
+
+	if err := c.Stash().Set("user_has_password", userModel.PasswordCredential != nil); err != nil {
+		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	}
+
+	if err := c.Stash().Set("user_has_webauthn_credential", len(userModel.WebauthnCredentials) > 0); err != nil {
+		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 
 	onboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, len(userModel.WebauthnCredentials) > 0, userModel.PasswordCredential != nil)
@@ -227,15 +234,7 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "conditional" {
 		if !hasPasskey && !hasPassword {
-			if cfg.Passkey.Optional && cfg.Password.Optional {
-				result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
-			} else if cfg.Passkey.Optional && !cfg.Password.Optional {
-				result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey) // passkey_onboarding can be skipped
-			} else if !cfg.Passkey.Optional && cfg.Password.Optional {
-				result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation) // password_onboarding can be skipped
-			} else if !cfg.Passkey.Optional && !cfg.Password.Optional {
-				result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation) // both states cannot be skipped
-			}
+			result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
 		}
 	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "never" {
 		if !hasPasskey && !hasPassword {

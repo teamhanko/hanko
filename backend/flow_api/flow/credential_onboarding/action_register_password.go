@@ -55,6 +55,10 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set new_password to stash: %w", err)
 	}
 
+	err = c.Stash().Set("user_has_password", true)
+	if err != nil {
+		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	}
 	// Decide which is the next state according to the config and user input
 	//if deps.Cfg.Passkey.Onboarding.Enabled && c.Stash().Get("webauthn_available").Bool() {
 	//	err = c.Stash().Set("allow_skip_onboarding", true)
