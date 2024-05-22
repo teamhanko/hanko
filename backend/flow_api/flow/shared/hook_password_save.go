@@ -14,12 +14,17 @@ type PasswordSave struct {
 func (h PasswordSave) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
+	if !c.Stash().Get("new_password").Exists() {
+		return nil
+	}
+
 	passwordId, _ := uuid.NewV4()
 	passwordCredential := models.PasswordCredential{
 		ID:       passwordId,
 		UserId:   uuid.FromStringOrNil(c.Stash().Get("user_id").String()),
 		Password: c.Stash().Get("new_password").String(),
 	}
+
 	err := deps.Persister.GetPasswordCredentialPersister().Create(passwordCredential)
 	if err != nil {
 		return fmt.Errorf("could not create passcode: %w", err)
