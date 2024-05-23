@@ -4,6 +4,7 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	samlConfig "github.com/teamhanko/hanko/backend/ee/saml/config"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"strings"
 )
 
 type Auth0Provider struct {
@@ -11,7 +12,7 @@ type Auth0Provider struct {
 }
 
 func NewAuth0ServiceProvider(config *config.Config, idpConfig samlConfig.IdentityProvider, persister persistence.SamlCertificatePersister) (ServiceProvider, error) {
-	serviceProvider, err := NewBaseSamlProvider(config, idpConfig, persister)
+	serviceProvider, err := NewBaseSamlProvider(config, idpConfig, persister, false)
 	if err != nil {
 		return nil, err
 	}
@@ -27,27 +28,27 @@ func NewAuth0ServiceProvider(config *config.Config, idpConfig samlConfig.Identit
 func (sp *Auth0Provider) UseDefaultAttributesIfEmpty() {
 	attributeMap := &sp.Config.AttributeMap
 
-	if attributeMap.Name == "" {
+	if strings.TrimSpace(attributeMap.Name) == "" {
 		attributeMap.Name = "http://schemas.auth0.com/name"
 	}
 
-	if attributeMap.Email == "" {
-		attributeMap.Name = "http://schemas.auth0.com/email"
+	if strings.TrimSpace(attributeMap.Email) == "" {
+		attributeMap.Email = "http://schemas.auth0.com/email"
 	}
 
-	if attributeMap.EmailVerified == "" {
+	if strings.TrimSpace(attributeMap.EmailVerified) == "" {
 		attributeMap.EmailVerified = "http://schemas.auth0.com/email_verified"
 	}
 
-	if attributeMap.NickName == "" {
+	if strings.TrimSpace(attributeMap.NickName) == "" {
 		attributeMap.NickName = "http://schemas.auth0.com/nickname"
 	}
 
-	if attributeMap.Picture == "" {
+	if strings.TrimSpace(attributeMap.Picture) == "" {
 		attributeMap.Picture = "http://schemas.auth0.com/picture"
 	}
 
-	if attributeMap.UpdatedAt == "" {
+	if strings.TrimSpace(attributeMap.UpdatedAt) == "" {
 		attributeMap.UpdatedAt = "http://schemas.auth0.com/updated_at"
 	}
 }

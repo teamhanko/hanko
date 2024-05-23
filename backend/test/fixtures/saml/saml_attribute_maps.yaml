@@ -1,0 +1,22 @@
+- id: 734e1ae8-b039-48a8-9352-7b37626caa66
+  name: ""
+  family_name: ""
+  given_name: ""
+  middle_name: ""
+  nickname: ""
+  preferred_username: ""
+  profile: ""
+  picture: ""
+  website: ""
+  gender: ""
+  birthdate: ""
+  zone_info: ""
+  locale: ""
+  saml_updated_at: ""
+  email: ""
+  email_verified: ""
+  phone: ""
+  phone_verified: ""
+  created_at: 2024-02-12 09:21:58.674033
+  updated_at: 2024-02-12 09:21:58.674033
+  saml_identity_provider_id: d531b0ae-4c33-48bb-ad31-e800a71a5056

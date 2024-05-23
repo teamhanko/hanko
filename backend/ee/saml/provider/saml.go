@@ -18,7 +18,7 @@ type BaseSamlProvider struct {
 	Service saml2.SAMLServiceProvider
 }
 
-func NewBaseSamlProvider(cfg *config.Config, idpConfig samlConfig.IdentityProvider, persister persistence.SamlCertificatePersister) (ServiceProvider, error) {
+func NewBaseSamlProvider(cfg *config.Config, idpConfig samlConfig.IdentityProvider, persister persistence.SamlCertificatePersister, useDefaults bool) (ServiceProvider, error) {
 	serviceProviderCertStore, err := loadCertificate(cfg, persister)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,10 @@ func NewBaseSamlProvider(cfg *config.Config, idpConfig samlConfig.IdentityProvid
 			AllowMissingAttributes:  cfg.Saml.Options.AllowMissingAttributes,
 		},
 	}
-	provider.UseDefaultAttributesIfEmpty()
+
+	if useDefaults {
+		provider.UseDefaultAttributesIfEmpty()
+	}
 
 	return provider, nil
 }
