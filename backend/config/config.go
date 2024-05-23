@@ -204,7 +204,7 @@ func DefaultConfig() *Config {
 		Passkey: Passkey{
 			Enabled:               true,
 			Optional:              true,
-			AcquireOnRegistration: true,
+			AcquireOnRegistration: "always",
 			AcquireOnLogin:        "always",
 			UserVerification:      "preferred",
 			AttestationPreference: "direct",
@@ -323,7 +323,7 @@ func (s *Service) Validate() error {
 type Password struct {
 	Enabled               bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	Optional              bool   `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
-	AcquireOnRegistration bool   `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=never,enum=always,enum=conditional,enum=never"`
 	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	Recovery              bool   `yaml:"recovery" json:"recovery" koanf:"recovery" jsonschema:"default=true"`
 	MinLength             int    `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
@@ -862,7 +862,7 @@ type RecoveryCodes struct {
 type Passkey struct {
 	Enabled               bool              `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	Optional              bool              `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration bool              `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
+	AcquireOnRegistration string            `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	AcquireOnLogin        string            `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	UserVerification      string            `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 	AttestationPreference string            `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
