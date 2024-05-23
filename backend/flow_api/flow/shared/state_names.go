@@ -18,9 +18,9 @@ const (
 	StateProfileAccountDeleted                 flowpilot.StateName = "account_deleted"
 	StateProfileInit                           flowpilot.StateName = "profile_init"
 	StateProfileWebauthnCredentialVerification flowpilot.StateName = "webauthn_credential_verification"
-	StateRegisterPasskey                       flowpilot.StateName = "register_passkey"
 	StateRegistrationInit                      flowpilot.StateName = "registration_init"
-	StateRegistrationMethodChooser             flowpilot.StateName = "registration_method_chooser"
 	StateSuccess                               flowpilot.StateName = "success"
 	StateThirdPartyOAuth                       flowpilot.StateName = "thirdparty_oauth"
+	StateOnboardingEmail                       flowpilot.StateName = "onboarding_email"
+	StateOnboardingUsername                    flowpilot.StateName = "onboarding_username"
 )
