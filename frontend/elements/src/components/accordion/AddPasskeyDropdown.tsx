@@ -1,4 +1,4 @@
-import { StateUpdater, useContext, useState } from "preact/compat";
+import { SetStateAction, useContext, useState } from "preact/compat";
 
 import {
   WebauthnSupport,
@@ -17,7 +17,7 @@ import Dropdown from "./Dropdown";
 interface Props {
   setError: (e: HankoError) => void;
   checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  setCheckedItemIndex: SetStateAction<number>;
 }
 
 const AddPasskeyDropdown = ({
