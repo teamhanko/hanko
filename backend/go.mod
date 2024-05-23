@@ -31,7 +31,7 @@ require (
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
 	github.com/ory/dockertest/v3 v3.10.0
 	github.com/pkg/errors v0.9.1
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.33.0
 	github.com/russellhaering/gosaml2 v0.9.1
 	github.com/russellhaering/goxmldsig v1.4.0
 	github.com/sethvargo/go-limiter v0.7.2
