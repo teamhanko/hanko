@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/user_details"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"time"
 )
@@ -67,6 +68,11 @@ var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
 		credential_onboarding.SkipPassword{}).
 	MustBuild()
 
+var UserDetailsSubFlow = flowpilot.NewSubFlow("user_details").
+	State(shared.StateOnboardingUsername, user_details.UsernameSet{}, user_details.SkipUsername{}).
+	State(shared.StateOnboardingEmail, user_details.EmailAddressSet{}, user_details.SkipEmail{}).
+	MustBuild()
+
 var LoginFlow = flowpilot.NewFlow("/login").
 	State(shared.StateLoginInit,
 		login.ContinueWithLoginIdentifier{},
@@ -94,7 +100,11 @@ var LoginFlow = flowpilot.NewFlow("/login").
 		shared.EmailPersistVerifiedStatus{}).
 	AfterState(shared.StatePasswordCreation,
 		shared.PasswordSave{}).
-	SubFlows(CapabilitiesSubFlow, CredentialUsageSubFlow, CredentialOnboardingSubFlow).
+	SubFlows(
+		CapabilitiesSubFlow,
+		CredentialUsageSubFlow,
+		CredentialOnboardingSubFlow,
+		UserDetailsSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 
@@ -112,7 +122,10 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	BeforeState(shared.StateSuccess,
 		registration.CreateUser{},
 		shared.IssueSession{}).
-	SubFlows(CapabilitiesSubFlow, PasscodeSubFlow, CredentialOnboardingSubFlow).
+	SubFlows(
+		CapabilitiesSubFlow,
+		PasscodeSubFlow,
+		CredentialOnboardingSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 
@@ -139,6 +152,8 @@ var ProfileFlow = flowpilot.NewFlow("/profile").
 	AfterEachAction(profile.RefreshSessionUser{}).
 	AfterState(shared.StateProfileWebauthnCredentialVerification, shared.WebauthnCredentialSave{}).
 	AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
-	SubFlows(CapabilitiesSubFlow, PasscodeSubFlow).
+	SubFlows(
+		CapabilitiesSubFlow,
+		PasscodeSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)

@@ -79,12 +79,14 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 
-		emailModel := userModel.GetEmailByAddress(identifierInputValue)
+		if userModel != nil {
+			emailModel := userModel.GetEmailByAddress(identifierInputValue)
 
-		if emailModel != nil && emailModel.UserID != nil {
-			err := c.Stash().Set("user_id", emailModel.UserID.String())
-			if err != nil {
-				return fmt.Errorf("failed to set user_id to the stash: %w", err)
+			if emailModel != nil && emailModel.UserID != nil {
+				err := c.Stash().Set("user_id", emailModel.UserID.String())
+				if err != nil {
+					return fmt.Errorf("failed to set user_id to the stash: %w", err)
+				}
 			}
 		}
 	} else {
@@ -129,19 +131,21 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 	}
 
-	if err := c.Stash().Set("user_has_password", userModel.PasswordCredential != nil); err != nil {
-		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	var onboardingStates []flowpilot.StateName
+	if userModel != nil {
+		var err error
+		onboardingStates, err = a.determineOnboardingStates(c, userModel)
+		if err != nil {
+			return fmt.Errorf("failed to determine onboarding states: %w", err)
+		}
 	}
-
-	if err := c.Stash().Set("user_has_webauthn_credential", len(userModel.WebauthnCredentials) > 0); err != nil {
-		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
-	}
-
-	onboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, len(userModel.WebauthnCredentials) > 0, userModel.PasswordCredential != nil)
-	onboardingStates = append(onboardingStates, shared.StateSuccess)
 
 	if deps.Cfg.Email.UseForAuthentication && deps.Cfg.Password.Enabled {
-		return c.StartSubFlow(shared.StateLoginMethodChooser, onboardingStates...)
+		if treatIdentifierAsEmail || (!treatIdentifierAsEmail && userModel != nil && userModel.Emails.GetPrimary() != nil) {
+			return c.StartSubFlow(shared.StateLoginMethodChooser, onboardingStates...)
+		}
+
+		return c.StartSubFlow(shared.StateLoginPassword, onboardingStates...)
 	} else if deps.Cfg.Email.UseForAuthentication {
 		// Set only for audit logging purposes.
 		if err := c.Stash().Set("login_method", "passcode"); err != nil {
@@ -154,20 +158,6 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	}
 
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("no authentication method enabled")))
-
-	//if c.Stash().Get("email").Exists() {
-	//
-	//
-	//
-	//	if deps.Cfg.Passkey.AcquireOnLogin == "always" && c.Stash().Get("webauthn_available").Bool() {
-	//		return c.StartSubFlow(passcode.StatePasscodeConfirmation, passkey_onboarding.StateOnboardingCreatePasskey, shared.StateSuccess)
-	//	} else {
-	//		return c.StartSubFlow(passcode.StatePasscodeConfirmation, shared.StateSuccess)
-	//	}
-	//}
-
-	// Username exists, but user has no emails.
-	// return c.ContinueFlow(StateLoginMethodChooser)
 }
 
 func (a ContinueWithLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
@@ -207,6 +197,28 @@ func (a ContinueWithLoginIdentifier) analyzeIdentifierInputs(c flowpilot.Executi
 	}
 
 	return name, value, treatAsEmail
+}
+
+func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.ExecutionContext, userModel *models.User) ([]flowpilot.StateName, error) {
+	deps := a.GetDeps(c)
+
+	userHasPassword := userModel.PasswordCredential != nil
+	userHasWebauthnCredential := len(userModel.WebauthnCredentials) > 0
+	userHasUsername := len(userModel.Username) > 0
+	userHasEmail := len(userModel.Emails) > 0
+
+	if err := c.Stash().Set("user_has_password", userHasPassword); err != nil {
+		return nil, fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	}
+
+	if err := c.Stash().Set("user_has_webauthn_credential", userHasWebauthnCredential); err != nil {
+		return nil, fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
+	}
+
+	userDetailOnboardingStates := a.determineUserDetailOnboardingStates(deps.Cfg, userHasUsername, userHasEmail)
+	credentialOnboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, userHasWebauthnCredential, userHasPassword)
+
+	return append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...), nil
 }
 
 func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg config.Config, hasPasskey, hasPassword bool) []flowpilot.StateName {
@@ -252,6 +264,27 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 		if !hasPasskey {
 			result = append(result, shared.StateOnboardingCreatePasskey)
 		}
+	}
+
+	return result
+}
+
+func (a ContinueWithLoginIdentifier) determineUserDetailOnboardingStates(cfg config.Config, userHasUsername, userHasEmail bool) []flowpilot.StateName {
+	result := make([]flowpilot.StateName, 0)
+
+	acquireUsername := !userHasUsername && cfg.Username.AcquireOnLogin
+	acquireEmail := !userHasEmail && cfg.Email.AcquireOnLogin
+
+	if acquireUsername && acquireEmail {
+		result = append(result, shared.StateOnboardingUsername, shared.StateOnboardingEmail)
+	} else if acquireUsername {
+		result = append(result, shared.StateOnboardingUsername)
+	} else if acquireEmail {
+		result = append(result, shared.StateOnboardingEmail)
+	}
+
+	if acquireEmail && cfg.Email.RequireVerification {
+		result = append(result, shared.StatePasscodeConfirmation)
 	}
 
 	return result
