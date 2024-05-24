@@ -24,7 +24,7 @@ func (a EmailSetPrimary) GetDescription() string {
 func (a EmailSetPrimary) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Email.Enabled {
+	if !deps.Cfg.Email.Enabled {
 		c.SuspendAction()
 		return
 	}

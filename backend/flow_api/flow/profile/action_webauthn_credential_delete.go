@@ -78,29 +78,30 @@ func (a WebauthnCredentialDelete) Finalize(c flowpilot.FinalizationContext) erro
 func (a WebauthnCredentialDelete) mustSuspend(c flowpilot.Context) bool {
 	deps := a.GetDeps(c)
 
+	if !deps.Cfg.Passkey.Enabled {
+		return true
+	}
+
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
 		return true
 	}
 
-	if len(userModel.WebauthnCredentials) == 1 {
-		if deps.Cfg.Passcode.Enabled && !deps.Cfg.Password.Enabled {
-			if deps.Cfg.Identifier.Email.Optional && len(userModel.Emails) == 0 {
-				return true
-			}
-		} else if !deps.Cfg.Passcode.Enabled && deps.Cfg.Password.Enabled {
-			if userModel.PasswordCredential == nil {
-				return true
-			}
-		} else {
-			if len(userModel.Emails) == 0 && userModel.PasswordCredential == nil {
-				return true
-			}
-		}
-	}
-
 	if len(userModel.WebauthnCredentials) == 0 {
 		return true
 	}
+
+	isLastWebauthnCredential := len(userModel.WebauthnCredentials) == 1
+	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username != ""
+	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
+	canDoPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil && (canUseUsernameAsLoginIdentifier || canUseEmailAsLoginIdentifier)
+	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication && (canUseEmailAsLoginIdentifier || canUseUsernameAsLoginIdentifier && len(userModel.Emails) > 0)
+	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled()
+	canUseNoOtherAuthMethod := !canDoPassword && !canDoThirdParty && !canDoPasscode
+
+	if isLastWebauthnCredential && canUseNoOtherAuthMethod {
+		return true
+	}
+
 	return false
 }

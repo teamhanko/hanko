@@ -20,6 +20,13 @@ func (a WebauthnCredentialRename) GetDescription() string {
 }
 
 func (a WebauthnCredentialRename) Initialize(c flowpilot.InitializationContext) {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passkey.Enabled {
+		c.SuspendAction()
+		return
+	}
+
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
 		c.SuspendAction()
