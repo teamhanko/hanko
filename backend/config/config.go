@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"strings"
 	"time"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 	"golang.org/x/exp/slices"
 )
 
@@ -25,6 +27,7 @@ type Config struct {
 	Smtp          SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
 	EmailDelivery EmailDelivery    `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true"`
 	Passcode      Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Passlink      Passlink         `yaml:"passlink" json:"passlink,omitempty" koanf:"passlink"`
 	Password      Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
 	Database      Database         `yaml:"database" json:"database" koanf:"database"`
 	Secrets       Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
@@ -135,6 +138,16 @@ func DefaultConfig() *Config {
 		Password: Password{
 			MinPasswordLength: 8,
 		},
+		Passlink: Passlink{
+			Enabled:    false,
+			URL:        "http://localhost:8888",
+			TTL:        300, // 5 minutes
+			Strictness: models.PasslinkStrictnessNone,
+			Email: Email{
+				FromAddress: "passcode@hanko.io",
+				FromName:    "Hanko",
+			},
+		},
 		Database: Database{
 			Database: "hanko",
 		},
@@ -164,6 +177,10 @@ func DefaultConfig() *Config {
 				Interval: 1 * time.Minute,
 			},
 			PasscodeLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
+			PasslinkLimits: RateLimits{
 				Tokens:   3,
 				Interval: 1 * time.Minute,
 			},
@@ -419,9 +436,36 @@ func (p *Passcode) Validate() error {
 	return nil
 }
 
+type Passlink struct {
+	Enabled    bool                      `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	URL        string                    `yaml:"url" json:"url,omitempty" koanf:"url"`
+	TTL        int                       `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Email      Email                     `yaml:"email" json:"email,omitempty" koanf:"email"`
+	Strictness models.PasslinkStrictness `yaml:"strictness" json:"strictness,omitempty" koanf:"strictness" jsonschema:"default=none,enum=browser,enum=device,enum=none"`
+}
+
+func (p *Passlink) Validate() error {
+	err := p.Email.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate email settings: %w", err)
+	}
+	if len(strings.TrimSpace(p.URL)) == 0 {
+		return errors.New("url must not be empty")
+	}
+	if url, err := url.Parse(p.URL); err != nil {
+		return fmt.Errorf("failed to parse url: %w", err)
+	} else if url.Scheme == "" || url.Host == "" {
+		return errors.New("url must be a valid URL")
+	}
+	if !p.Strictness.Valid() {
+		return fmt.Errorf("invalid passlink strictness: %s", p.Strictness)
+	}
+	return nil
+}
+
 // Database connection settings
 type Database struct {
-	Database string `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"default=hanko" jsonschema:"oneof_required=config"`
+	Database string `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"oneof_required=config,default=hanko"`
 	User     string `yaml:"user" json:"user,omitempty" koanf:"user" jsonschema:"oneof_required=config"`
 	Password string `yaml:"password" json:"password,omitempty" koanf:"password" jsonschema:"oneof_required=config"`
 	Host     string `yaml:"host" json:"host,omitempty" koanf:"host" jsonschema:"oneof_required=config"`
@@ -527,6 +571,7 @@ type RateLimiter struct {
 	Redis          *RedisConfig         `yaml:"redis_config" json:"redis_config,omitempty" koanf:"redis_config"`
 	PasscodeLimits RateLimits           `yaml:"passcode_limits" json:"passcode_limits,omitempty" koanf:"passcode_limits" split_words:"true"`
 	PasswordLimits RateLimits           `yaml:"password_limits" json:"password_limits,omitempty" koanf:"password_limits" split_words:"true"`
+	PasslinkLimits RateLimits           `yaml:"passlink_limits" json:"passlink_limits,omitempty" koanf:"passlink_limits" split_words:"true"`
 	TokenLimits    RateLimits           `yaml:"token_limits" json:"token_limits,omitempty" koanf:"token_limits" split_words:"true"`
 }
 
@@ -539,7 +584,7 @@ type RateLimiterStoreType string
 
 const (
 	RATE_LIMITER_STORE_IN_MEMORY RateLimiterStoreType = "in_memory"
-	RATE_LIMITER_STORE_REDIS                          = "redis"
+	RATE_LIMITER_STORE_REDIS     RateLimiterStoreType = "redis"
 )
 
 func (r *RateLimiter) Validate() error {
@@ -673,7 +718,7 @@ func (p *ThirdPartyProviders) HasEnabled() bool {
 func (p *ThirdPartyProviders) Get(provider string) *ThirdPartyProvider {
 	s := structs.New(p)
 	for _, field := range s.Fields() {
-		if strings.ToLower(field.Name()) == strings.ToLower(provider) {
+		if strings.EqualFold(field.Name(), provider) {
 			p := field.Value().(ThirdPartyProvider)
 			return &p
 		}
