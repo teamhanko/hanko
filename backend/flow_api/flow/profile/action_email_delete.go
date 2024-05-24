@@ -53,7 +53,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if emailToBeDeletedModel.IsPrimary() {
-		if !deps.Cfg.Identifier.Email.Optional {
+		if !deps.Cfg.Email.Optional {
 			return c.ContinueFlowWithError(
 				c.GetCurrentState(),
 				flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("cannot delete primary email")),
@@ -103,21 +103,19 @@ func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
 		return true
 	}
 
-	if len(userModel.Emails) == 1 {
-		if deps.Cfg.Identifier.Email.Enabled {
-			if !deps.Cfg.Identifier.Email.Optional {
-				return true
-			}
-
-			if len(userModel.WebauthnCredentials) == 0 {
-				if !deps.Cfg.Password.Enabled || userModel.PasswordCredential == nil {
-					return true
-				}
-			}
-		}
+	if len(userModel.Emails) == 0 {
+		return true
 	}
 
-	if len(userModel.Emails) == 0 {
+	isLastEmail := len(userModel.Emails) == 1
+	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username != ""
+	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && !isLastEmail
+	canDoPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil && (canUseUsernameAsLoginIdentifier || canUseEmailAsLoginIdentifier)
+	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled()
+	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPassword && !canDoThirdParty
+
+	if deps.Cfg.Email.Enabled && isLastEmail && (!deps.Cfg.Email.Optional || canUseNoOtherAuthMethod) {
 		return true
 	}
 

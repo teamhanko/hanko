@@ -22,7 +22,9 @@ func (a WebauthnCredentialCreate) GetDescription() string {
 }
 
 func (a WebauthnCredentialCreate) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get("webauthn_available").Bool() {
 		c.SuspendAction()
 	}
 }

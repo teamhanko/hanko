@@ -1,7 +1,6 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -34,13 +33,6 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
 		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
-	}
-
-	if !deps.Cfg.Passcode.Enabled && len(userModel.WebauthnCredentials) == 0 {
-		return c.ContinueFlowWithError(
-			c.GetCurrentState(),
-			flowpilot.ErrorFlowDiscontinuity.
-				Wrap(errors.New("cannot delete password when recovery not possible and no webauthn credential is available")))
 	}
 
 	passwordCredentialModel, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userModel.ID)
@@ -93,6 +85,17 @@ func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 	}
 
 	if userModel.PasswordCredential == nil {
+		return true
+	}
+
+	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username != ""
+	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
+	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication && (canUseEmailAsLoginIdentifier || canUseUsernameAsLoginIdentifier && len(userModel.Emails) > 0)
+	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled()
+	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPasscode && !canDoThirdParty
+
+	if canUseNoOtherAuthMethod {
 		return true
 	}
 

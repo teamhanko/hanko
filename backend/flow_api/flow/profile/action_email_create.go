@@ -23,7 +23,7 @@ func (a EmailCreate) GetDescription() string {
 func (a EmailCreate) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Email.Enabled {
+	if !deps.Cfg.Email.Enabled {
 		c.SuspendAction()
 	} else {
 		c.AddInputs(flowpilot.EmailInput("email").Required(true))
@@ -50,7 +50,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if existingEmailModel != nil {
-		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Identifier.Email.Verification {
+		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Email.RequireVerification {
 			c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		} else {
@@ -71,7 +71,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 			return c.StartSubFlow(shared.StatePasscodeConfirmation)
 		}
-	} else if deps.Cfg.Identifier.Email.Verification {
+	} else if deps.Cfg.Email.RequireVerification {
 		err = c.CopyInputValuesToStash("email")
 		if err != nil {
 			return fmt.Errorf("failed to copy email to stash: %w", err)
@@ -96,12 +96,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("could not save email: %w", err)
 		}
 
-		emailModels, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(*emailModel.UserID)
-		if err != nil {
-			return fmt.Errorf("could fetch emails: %w", err)
-		}
-
-		if len(emailModels) == 1 && emailModels[0].ID.String() == emailModel.ID.String() {
+		if len(userModel.Emails) == 0 {
 			// The user has only one 1 email and it is the email we just added. It makes sense then,
 			// to automatically set this as the primary email.
 			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userModel.ID)

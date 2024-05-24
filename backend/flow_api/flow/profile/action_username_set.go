@@ -7,7 +7,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"strings"
+	"unicode/utf8"
 )
 
 type UsernameSet struct {
@@ -25,7 +25,7 @@ func (a UsernameSet) GetDescription() string {
 func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Username.Enabled {
+	if !deps.Cfg.Username.Enabled {
 		c.SuspendAction()
 	} else {
 		c.AddInputs(flowpilot.StringInput("username").Required(true))
@@ -46,12 +46,10 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 
 	username := c.Input().Get("username").String()
 
-	for _, char := range username {
-		// check that username only contains allowed characters
-		if !strings.Contains(deps.Cfg.Identifier.Username.AllowedCharacters, string(char)) {
-			c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
-		}
+	// check that username only contains allowed characters
+	if !utf8.ValidString(username) {
+		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
+		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel.Username = username

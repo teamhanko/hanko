@@ -23,7 +23,7 @@ func (a EmailVerify) GetDescription() string {
 func (a EmailVerify) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Email.Enabled || !deps.Cfg.Passcode.Enabled {
+	if !deps.Cfg.Email.Enabled {
 		c.SuspendAction()
 		return
 	}
