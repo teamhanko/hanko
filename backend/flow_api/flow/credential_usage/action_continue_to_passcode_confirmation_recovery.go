@@ -21,7 +21,7 @@ func (a ContinueToPasscodeConfirmationRecovery) GetDescription() string {
 func (a ContinueToPasscodeConfirmationRecovery) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Passcode.Enabled || !c.Stash().Get("email").Exists() {
+	if !deps.Cfg.Password.Recovery || !c.Stash().Get("email").Exists() {
 		c.SuspendAction()
 	}
 }
