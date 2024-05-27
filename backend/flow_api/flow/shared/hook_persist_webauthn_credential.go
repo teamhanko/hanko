@@ -58,5 +58,9 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
+	if userModel, ok := c.Get("session_user").(*models.User); ok {
+		userModel.WebauthnCredentials = append(userModel.WebauthnCredentials, *credentialModel)
+	}
+
 	return nil
 }

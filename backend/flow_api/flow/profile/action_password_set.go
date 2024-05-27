@@ -55,6 +55,7 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 	password := c.Input().Get("password").String()
 
 	if passwordCredential == nil {
+		passwordCredential = models.NewPasswordCredential(userModel.ID, "") // ?
 		err = deps.PasswordService.CreatePassword(userModel.ID, password)
 	} else {
 		err = deps.PasswordService.UpdatePassword(passwordCredential, password)
@@ -76,6 +77,8 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
+
+	userModel.PasswordCredential = passwordCredential
 
 	return c.ContinueFlow(shared.StateProfileInit)
 }

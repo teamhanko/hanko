@@ -103,6 +103,8 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
+	userModel.SetPrimaryEmail(primaryEmail)
+
 	return c.ContinueFlow(shared.StateProfileInit)
 }
 
