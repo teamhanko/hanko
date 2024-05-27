@@ -18,10 +18,18 @@ func (a Back) GetDescription() string {
 }
 
 func (a Back) Initialize(c flowpilot.InitializationContext) {
-	previousState, _ := c.GetPreviousState()
-	if previousState != nil && *previousState == shared.StatePasscodeConfirmation {
-		c.SuspendAction()
+	if c.GetFlowName() == "registration" {
+		previousState, _ := c.GetPreviousState()
+		if previousState != nil && *previousState == shared.StatePasscodeConfirmation {
+			c.SuspendAction()
+		}
+	} else if c.GetFlowName() == "login" {
+		previousState, _ := c.GetPreviousState()
+		if previousState != nil && (*previousState == shared.StatePasscodeConfirmation || *previousState != shared.StateCredentialOnboardingChooser) {
+			c.SuspendAction()
+		}
 	}
+
 }
 
 func (a Back) Execute(c flowpilot.ExecutionContext) error {
