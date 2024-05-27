@@ -13,6 +13,7 @@ import {
   PreflightActions,
   ProfileInitActions,
   RegistrationInitActions,
+  ThirdpartyOauthActions,
 } from "./action";
 
 import {
@@ -20,7 +21,7 @@ import {
   OnboardingVerifyPasskeyAttestationPayload,
   PasscodeConfirmationPayload,
   ProfilePayload,
-  SuccessPayload,
+  SuccessPayload, ThirdpartyOauthPayload,
 } from "./payload";
 
 export type StateName =
@@ -38,7 +39,8 @@ export type StateName =
   | "registration_init"
   | "password_creation"
   | "success"
-  | "error";
+  | "error"
+  | "thirdparty_oauth";
 
 export interface Actions {
   readonly preflight: PreflightActions;
@@ -54,6 +56,7 @@ export interface Actions {
   readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationActions;
   readonly registration_init: RegistrationInitActions;
   readonly password_creation: PasswordCreationActions;
+  readonly thirdparty_oauth: ThirdpartyOauthActions;
   readonly success: null;
   readonly error: null;
 }
@@ -72,6 +75,7 @@ export interface Payloads {
   readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationPayload;
   readonly registration_init: null;
   readonly password_creation: null;
+  readonly thirdparty_oauth: ThirdpartyOauthPayload;
   readonly success: SuccessPayload;
   readonly error: null;
 }

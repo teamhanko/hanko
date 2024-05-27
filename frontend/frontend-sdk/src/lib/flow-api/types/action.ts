@@ -3,7 +3,7 @@ import {
   EmailCreateInputs,
   EmailDeleteInputs,
   EmailSetPrimaryInputs,
-  EmailVerifyInputs,
+  EmailVerifyInputs, ExchangeTokenInputs,
   PasskeyCredentialDelete,
   PasskeyCredentialRename,
   PasswordLoginInputs,
@@ -11,7 +11,7 @@ import {
   PasswordSetInputs,
   RegisterClientCapabilitiesInputs,
   RegisterLoginIdentifierInputs,
-  RegisterPasswordInputs,
+  RegisterPasswordInputs, ThirdpartyOauthInputs,
   UsernameSetInputs,
   VerifyPasscodeInputs,
   WebauthnVerifyAssertionResponseInputs,
@@ -32,6 +32,7 @@ interface PreflightActions {
 interface LoginInitActions {
   readonly continue_with_login_identifier: Action<ContinueWithLoginIdentifierInputs>;
   readonly webauthn_generate_request_options?: Action<null>;
+  readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
 }
 
 interface ProfileInitActions {
@@ -84,6 +85,7 @@ interface OnboardingVerifyPasskeyAttestationActions {
 
 interface RegistrationInitActions {
   readonly register_login_identifier: Action<RegisterLoginIdentifierInputs>;
+  readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
 }
 
 interface PasswordCreationActions {
@@ -95,6 +97,10 @@ interface PasscodeConfirmationActions {
   readonly verify_passcode: Action<VerifyPasscodeInputs>;
   readonly resend_passcode: Action<null>;
   readonly back: Action<null>;
+}
+
+interface ThirdpartyOauthActions {
+  readonly exchange_token: Action<ExchangeTokenInputs>;
 }
 
 export type {
@@ -111,4 +117,5 @@ export type {
   RegistrationInitActions,
   PasswordCreationActions,
   PasscodeConfirmationActions,
+  ThirdpartyOauthActions
 };

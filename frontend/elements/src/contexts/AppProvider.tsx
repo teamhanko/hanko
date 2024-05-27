@@ -2,34 +2,15 @@ import { JSXInternal } from "preact/src/jsx";
 import { ComponentChildren, createContext, h } from "preact";
 import { TranslateProvider } from "@denysvuika/preact-translate";
 
-import {
-  Fragment,
-  StateUpdater,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "preact/compat";
+import { Fragment, StateUpdater, useCallback, useEffect, useMemo, useRef, useState, } from "preact/compat";
 
-import {
-  get as getWebauthnCredential,
-  create as createWebauthnCredential,
-} from "@github/webauthn-json";
+import { create as createWebauthnCredential, get as getWebauthnCredential, } from "@github/webauthn-json";
 
-import {
-  Hanko,
-  TechnicalError,
-  UnauthorizedError,
-  WebauthnSupport,
-} from "@teamhanko/hanko-frontend-sdk";
+import { Hanko, TechnicalError, UnauthorizedError, WebauthnSupport, } from "@teamhanko/hanko-frontend-sdk";
 
 import { Translations } from "../i18n/translations";
 
-import {
-  FlowPath,
-  Handlers,
-} from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
+import { FlowPath, Handlers, } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
 
 import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
 
@@ -37,7 +18,6 @@ import {
   PublicKeyCredentialWithAssertionJSON,
   PublicKeyCredentialWithAttestationJSON,
 } from "@github/webauthn-json/src/webauthn-json/basic/json";
-import SignalLike = JSXInternal.SignalLike;
 
 import Container from "../components/wrapper/Container";
 import InitPage from "../pages/InitPage";
@@ -51,9 +31,12 @@ import RegistrationInitPage from "../pages/RegistrationInitPage";
 import CreatePasswordPage from "../pages/CreatePasswordPage";
 import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
+import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
+
+const localStorageCacheStateKey = "flow-state"
 
 export type ComponentName =
   | "auth"
@@ -91,7 +74,8 @@ export type UIAction =
   | "skip"
   | "back"
   | "account_delete"
-  | "retry";
+  | "retry"
+  | "thirdparty-submit";
 
 interface UIState {
   username?: string;
@@ -137,13 +121,13 @@ interface Props {
 }
 
 const AppProvider = ({
-  lang,
-  experimental = "",
-  prefilledEmail,
-  prefilledUsername,
-  globalOptions,
-  ...props
-}: Props) => {
+                       lang,
+                       experimental = "",
+                       prefilledEmail,
+                       prefilledUsername,
+                       globalOptions,
+                       ...props
+                     }: Props) => {
   const {
     hanko,
     injectStyles,
@@ -387,6 +371,27 @@ const AppProvider = ({
           />,
         );
       },
+      async thirdparty_oauth(state) {
+        const token = new URLSearchParams(window.location.search).get("hanko_token")
+        if (token && token.length > 0) {
+          const searchParams = new URLSearchParams(window.location.search)
+          const nextState = await state.actions.exchange_token({ token: searchParams.get("hanko_token") }).run()
+
+          searchParams.delete("hanko_token")
+
+          history.replaceState(null, null, window.location.pathname + searchParams.toString())
+
+          stateHandler[nextState.name](nextState)
+          // TODO: what happens when an error occurs, do we need to show a UI ???
+        } else {
+          setUIState((prev) => ({
+            ...prev,
+            lastAction: null
+          }))
+          localStorage.setItem(localStorageCacheStateKey, JSON.stringify(state.toJSON()))
+          window.location.assign(state.payload.redirect_url)
+        }
+      },
       error(state) {
         setLoadingAction(null);
         setPage(<ErrorPage state={state} />);
@@ -404,7 +409,14 @@ const AppProvider = ({
   const flowInit = useCallback(
     async (path: FlowPath) => {
       setLoadingAction("switch-flow");
-      await hanko.flow.init(path, { ...stateHandler });
+      const token = new URLSearchParams(window.location.search).get("hanko_token")
+      const cachedState = localStorage.getItem(localStorageCacheStateKey)
+      if (cachedState && cachedState.length > 0 && token && token.length > 0) {
+        await hanko.flow.fromString(localStorage.getItem(localStorageCacheStateKey), { ...stateHandler })
+        localStorage.removeItem(localStorageCacheStateKey)
+      } else {
+        await hanko.flow.init(path, { ...stateHandler });
+      }
       setLoadingAction(null);
     },
     [stateHandler],

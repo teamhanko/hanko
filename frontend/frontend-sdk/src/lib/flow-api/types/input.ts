@@ -1,8 +1,5 @@
 import { Error } from "./error";
-import {
-  PublicKeyCredentialWithAttestationJSON,
-  PublicKeyCredentialWithAssertionJSON,
-} from "@github/webauthn-json";
+import { PublicKeyCredentialWithAssertionJSON, PublicKeyCredentialWithAttestationJSON, } from "@github/webauthn-json";
 
 export interface Input<TValue> {
   readonly name: string;
@@ -13,6 +10,12 @@ export interface Input<TValue> {
   readonly required?: boolean;
   readonly hidden?: boolean;
   readonly error?: Error;
+  readonly allowed_values?: AllowedInputValues[]
+}
+
+export interface AllowedInputValues {
+  readonly name: string
+  readonly value: string
 }
 
 export interface PasswordRecoveryInputs {
@@ -85,4 +88,13 @@ export interface PasskeyCredentialRename {
 
 export interface PasskeyCredentialDelete {
   readonly passkey_id: Input<string>;
+}
+
+export interface ThirdpartyOauthInputs {
+  readonly provider: Input<string>
+  readonly redirect_to: Input<string>
+}
+
+export interface ExchangeTokenInputs {
+  readonly token: Input<string>
 }
