@@ -149,7 +149,6 @@ var ProfileFlow = flowpilot.NewFlow("/profile").
 	ErrorState(shared.StateError).
 	BeforeEachAction(profile.RefreshSessionUser{}).
 	BeforeState(shared.StateProfileInit, profile.GetProfileData{}).
-	AfterEachAction(profile.RefreshSessionUser{}).
 	AfterState(shared.StateProfileWebauthnCredentialVerification, shared.WebauthnCredentialSave{}).
 	AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 	SubFlows(

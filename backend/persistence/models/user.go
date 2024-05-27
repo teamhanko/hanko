@@ -8,18 +8,30 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
+	"golang.org/x/exp/slices"
 	"time"
 )
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID                  uuid.UUID            `db:"id" json:"id"`
-	WebauthnCredentials []WebauthnCredential `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
-	Emails              Emails               `has_many:"emails" json:"-"`
-	Username            string               `db:"username" json:"username,omitempty"`
-	CreatedAt           time.Time            `db:"created_at" json:"created_at"`
-	UpdatedAt           time.Time            `db:"updated_at" json:"updated_at"`
-	PasswordCredential  *PasswordCredential  `has_one:"password_credentials" json:"-"`
+	ID                  uuid.UUID           `db:"id" json:"id"`
+	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
+	Emails              Emails              `has_many:"emails" json:"-"`
+	Username            string              `db:"username" json:"username,omitempty"`
+	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
+	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
+	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
+}
+
+type WebauthnCredentials []WebauthnCredential
+
+func (creds *WebauthnCredentials) Delete(credentialId string) {
+	for index, cred := range *creds {
+		if cred.ID == credentialId {
+			*creds = slices.Delete(*creds, index, 1)
+			return
+		}
+	}
 }
 
 func NewUser() User {
@@ -28,6 +40,25 @@ func NewUser() User {
 		ID:        id,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+	}
+}
+
+func (user *User) SetPrimaryEmail(primary *PrimaryEmail) {
+	for i := range user.Emails {
+		if user.Emails[i].ID.String() == primary.EmailID.String() {
+			user.Emails[i].PrimaryEmail = primary
+		} else {
+			user.Emails[i].PrimaryEmail = nil
+		}
+	}
+}
+
+func (user *User) UpdateEmail(email Email) {
+	for i := range user.Emails {
+		if user.Emails[i].ID.String() == email.ID.String() {
+			user.Emails[i] = email
+			return
+		}
 	}
 }
 

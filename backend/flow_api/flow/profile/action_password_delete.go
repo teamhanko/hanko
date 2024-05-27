@@ -61,6 +61,8 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
+	userModel.PasswordCredential = nil
+
 	return c.ContinueFlow(shared.StateProfileInit)
 }
 

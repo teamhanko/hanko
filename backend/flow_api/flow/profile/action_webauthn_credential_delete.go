@@ -64,6 +64,8 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
+	userModel.WebauthnCredentials.Delete(webauthnCredentialModel.ID)
+
 	return c.ContinueFlow(shared.StateProfileInit)
 }
 

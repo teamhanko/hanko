@@ -45,9 +45,9 @@ func (email *Email) IsPrimary() bool {
 	return false
 }
 
-func (emails Emails) GetVerified() Emails {
+func (emails *Emails) GetVerified() Emails {
 	var list Emails
-	for _, email := range emails {
+	for _, email := range *emails {
 		if email.Verified {
 			list = append(list, email)
 		}
@@ -55,14 +55,14 @@ func (emails Emails) GetVerified() Emails {
 	return list
 }
 
-func (emails Emails) HasUnverified() bool {
-	return slices.ContainsFunc(emails, func(e Email) bool {
+func (emails *Emails) HasUnverified() bool {
+	return slices.ContainsFunc(*emails, func(e Email) bool {
 		return !e.Verified
 	})
 }
 
-func (emails Emails) GetPrimary() *Email {
-	for _, email := range emails {
+func (emails *Emails) GetPrimary() *Email {
+	for _, email := range *emails {
 		if email.IsPrimary() {
 			return &email
 		}
@@ -70,18 +70,8 @@ func (emails Emails) GetPrimary() *Email {
 	return nil
 }
 
-func (emails Emails) SetPrimary(primary *PrimaryEmail) {
-	for i := range emails {
-		if emails[i].ID.String() == primary.EmailID.String() {
-			emails[i].PrimaryEmail = primary
-			return
-		}
-	}
-	return
-}
-
-func (emails Emails) GetEmailByAddress(address string) *Email {
-	for _, email := range emails {
+func (emails *Emails) GetEmailByAddress(address string) *Email {
+	for _, email := range *emails {
 		if email.Address == address {
 			return &email
 		}
@@ -89,13 +79,22 @@ func (emails Emails) GetEmailByAddress(address string) *Email {
 	return nil
 }
 
-func (emails Emails) GetEmailById(emailId uuid.UUID) *Email {
-	for _, email := range emails {
+func (emails *Emails) GetEmailById(emailId uuid.UUID) *Email {
+	for _, email := range *emails {
 		if email.ID.String() == emailId.String() {
 			return &email
 		}
 	}
 	return nil
+}
+
+func (emails *Emails) Delete(emailId uuid.UUID) {
+	for index, email := range *emails {
+		if email.ID.String() == emailId.String() {
+			*emails = slices.Delete(*emails, index, 1)
+			return
+		}
+	}
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.

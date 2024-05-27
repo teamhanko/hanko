@@ -104,6 +104,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			if err != nil {
 				return fmt.Errorf("could not save primary email: %w", err)
 			}
+			emailModel.PrimaryEmail = primaryEmailModel
 		}
 
 		err = deps.AuditLogger.CreateWithConnection(
@@ -118,6 +119,9 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
 		}
+
+		userModel.Emails = append(userModel.Emails, *emailModel)
+
 		return c.ContinueFlow(shared.StateProfileInit)
 	}
 }
