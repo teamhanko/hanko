@@ -20,6 +20,11 @@ func (a BackCredentialOnboardingMethodChooser) GetDescription() string {
 func (a BackCredentialOnboardingMethodChooser) Initialize(c flowpilot.InitializationContext) {
 	if c.GetFlowName() == "login" {
 		c.SuspendAction()
+	} else if c.GetFlowName() == "registration" {
+		previousState, _ := c.GetPreviousState()
+		if previousState != nil && *previousState == shared.StatePasscodeConfirmation {
+			c.SuspendAction()
+		}
 	}
 }
 
