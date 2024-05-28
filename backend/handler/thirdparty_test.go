@@ -100,8 +100,8 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 		AuditLog: config.AuditLog{
 			Storage: config.AuditLogStorage{Enabled: true},
 		},
-		Emails: config.Emails{
-			MaxNumOfAddresses: 5,
+		Email: config.Email{
+			Limit: 5,
 		},
 		Account: config.Account{
 			AllowSignup: true,

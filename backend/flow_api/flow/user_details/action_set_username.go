@@ -24,8 +24,8 @@ func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 
 	c.AddInputs(flowpilot.StringInput("username").
 		Required(!deps.Cfg.Username.Optional).
-		MinLength(3).
-		MaxLength(255))
+		MinLength(deps.Cfg.Username.MinLength).
+		MaxLength(deps.Cfg.Username.MaxLength))
 }
 
 func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {

@@ -29,9 +29,9 @@ webauthn:
       - http://localhost:63342
       - http://localhost:8000
 password:
-  enabled: true
+  enabled: false
   optional: true
-  acquire_on_registration: true
+  acquire_on_registration: conditional
   acquire_on_login: always
   recovery: true
 emails:
@@ -39,29 +39,34 @@ emails:
 passkey:
   enabled: true
   optional: true
-  acquire_on_registration: true
+  acquire_on_registration: always
   acquire_on_login: always
   attestation_preference: direct
   limit: 100
   onboarding:
     enabled: true
 email:
-  enabled: false
-  optional: false
+  enabled: true
+  optional: true
   acquire_on_registration: true
   acquire_on_login: false
   require_verification: true
   limit: 100
   use_as_login_identifier: true
   max_length: 100
-  use_for_authentication: true
+  use_for_authentication: false
   passcode_ttl: 300
 username:
   enabled: true
   optional: true
-  acquire_on_registration: false
+  acquire_on_registration: true
   acquire_on_login: false
   use_as_login_identifier: true
   max_length: 100
 rate_limiter:
   enabled: false
+email_delivery:
+  from_address: no-reply@hanko.io
+  smtp:
+    host: localhost
+    port: 2500

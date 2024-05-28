@@ -74,7 +74,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusConflict).SetInternal(errors.New(fmt.Sprintf("user with email %s already exists", body.Email)))
 			}
 
-			if !h.cfg.Emails.RequireVerification {
+			if !h.cfg.Email.RequireVerification {
 				// Assign the email address to the user because it's currently unassigned and email verification is turned off.
 				email.UserID = &newUser.ID
 
@@ -85,7 +85,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			}
 		} else {
 			// The email address does not exist, create a new one.
-			if h.cfg.Emails.RequireVerification {
+			if h.cfg.Email.RequireVerification {
 				// The email can only be assigned to the user via passcode verification.
 				email = models.NewEmail(nil, body.Email)
 			} else {
@@ -98,7 +98,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			}
 		}
 
-		if !h.cfg.Emails.RequireVerification {
+		if !h.cfg.Email.RequireVerification {
 			primaryEmail := models.NewPrimaryEmail(email.ID, newUser.ID)
 			err = h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 			if err != nil {
@@ -157,7 +157,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 			EmailID: email.ID,
 		}
 
-		if !h.cfg.Emails.RequireVerification {
+		if !h.cfg.Email.RequireVerification {
 			err = utils.TriggerWebhooks(c, events.UserCreate, admin.FromUserModel(newUser))
 			if err != nil {
 				c.Logger().Warn(err)

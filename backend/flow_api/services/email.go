@@ -18,7 +18,7 @@ func NewEmailService(cfg config.Config) (*Email, error) {
 	if err != nil {
 		return nil, err
 	}
-	mailer, err := mail.NewMailer(cfg.Smtp)
+	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
@@ -47,7 +47,7 @@ func (s *Email) SendEmail(template string, lang string, data map[string]interfac
 
 	message := gomail.NewMessage()
 	message.SetAddressHeader("To", emailAddress, "")
-	message.SetAddressHeader("From", s.cfg.Passcode.Email.FromAddress, s.cfg.Passcode.Email.FromName)
+	message.SetAddressHeader("From", s.cfg.EmailDelivery.FromAddress, s.cfg.EmailDelivery.FromName)
 
 	message.SetHeader("Subject", s.renderer.Translate(lang, fmt.Sprintf("subject_%s", template), data))
 	message.SetBody("text/plain", text)

@@ -25,8 +25,7 @@ func (a EmailAddressSet) Initialize(c flowpilot.InitializationContext) {
 
 	c.AddInputs(flowpilot.StringInput("email").
 		Required(!deps.Cfg.Email.Optional).
-		MinLength(3).
-		MaxLength(255))
+		MaxLength(deps.Cfg.Email.MaxLength))
 }
 
 func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {

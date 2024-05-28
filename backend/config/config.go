@@ -256,6 +256,12 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("failed to validate smtp settings: %w", err)
 		}
 	}
+	if c.EmailDelivery.Enabled {
+		err = c.Smtp.Validate()
+		if err != nil {
+			return fmt.Errorf("failed to validate smtp settings: %w", err)
+		}
+	}
 	err = c.Passcode.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate passcode settings: %w", err)
@@ -393,10 +399,16 @@ func (s *ServerSettings) Validate() error {
 	return nil
 }
 
+type WebauthnTimeouts struct {
+	Registration int `yaml:"registration" json:"registration" koanf:"registration"`
+	Login        int `yaml:"login" json:"login" koanf:"login"`
+}
+
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
 	RelyingParty     RelyingParty          `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
 	Timeout          int                   `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
+	Timeouts         WebauthnTimeouts      `yaml:"timeouts" json:"timeouts,omitempty" koanf:"timeouts" split_words:"true"`
 	UserVerification string                `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 	Handler          *webauthnLib.WebAuthn `jsonschema:"-"`
 }
@@ -891,6 +903,13 @@ type Passkey struct {
 // Deprecated
 type PasskeyOnboarding struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type EmailDelivery struct {
+	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	FromAddress string `yaml:"from_address" json:"from_address" koanf:"from_address" split_words:"true"`
+	FromName    string `yaml:"from_name" json:"from_name" koanf:"from_name" split_words:"true"`
+	SMTP        SMTP   `yaml:"smtp" json:"smtp" koanf:"smtp"`
 }
 
 type Email struct {
