@@ -14,7 +14,7 @@ type AccountLinkingResult struct {
 }
 
 func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
-	if cfg.Emails.RequireVerification && !userData.Metadata.EmailVerified {
+	if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 		return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
 	}
 
@@ -107,7 +107,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 				return nil, ErrorServer("failed to count user emails").WithCause(err)
 			}
 
-			if emailCount >= cfg.Emails.MaxNumOfAddresses {
+			if emailCount >= cfg.Email.Limit {
 				return nil, ErrorMaxNumberOfAddresses("max number of email addresses reached")
 			}
 

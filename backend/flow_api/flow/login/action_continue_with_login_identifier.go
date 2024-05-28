@@ -31,19 +31,22 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 
 	var input flowpilot.Input
 	if usernameEnabled && emailEnabled {
-		input = flowpilot.StringInput("identifier")
+		input = flowpilot.StringInput("identifier").
+			MaxLength(255)
 	} else if emailEnabled {
-		input = flowpilot.EmailInput("email")
+		input = flowpilot.EmailInput("email").
+			MaxLength(deps.Cfg.Email.MaxLength).
+			MinLength(3)
 	} else if usernameEnabled {
-		input = flowpilot.StringInput("username")
+		input = flowpilot.StringInput("username").
+			MaxLength(deps.Cfg.Username.MaxLength).
+			MinLength(deps.Cfg.Username.MinLength)
 	}
 
 	if input != nil {
 		c.AddInputs(input.
 			Required(true).
-			Preserve(true).
-			MinLength(3).
-			MaxLength(255))
+			Preserve(true))
 	}
 
 	if (!deps.Cfg.Password.Enabled && !deps.Cfg.Email.UseForAuthentication) || (!emailEnabled && !usernameEnabled) {

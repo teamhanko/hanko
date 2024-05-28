@@ -31,7 +31,7 @@ type PasscodeHandler struct {
 	renderer          *mail.Renderer
 	passcodeGenerator crypto.PasscodeGenerator
 	persister         persistence.Persister
-	emailConfig       config.PasscodeEmail
+	emailConfig       config.EmailDelivery
 	serviceConfig     config.Service
 	TTL               int
 	sessionManager    session.Manager
@@ -56,9 +56,9 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 		renderer:          renderer,
 		passcodeGenerator: crypto.NewPasscodeGenerator(),
 		persister:         persister,
-		emailConfig:       cfg.Passcode.Email,
+		emailConfig:       cfg.EmailDelivery,
 		serviceConfig:     cfg.Service,
-		TTL:               cfg.Passcode.TTL,
+		TTL:               cfg.Email.PasscodeTtl,
 		sessionManager:    sessionManager,
 		cfg:               cfg,
 		auditLogger:       auditLogger,
@@ -385,7 +385,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		}
 
 		// notify about email verification result. Last step to prevent a trigger and rollback scenario
-		if h.cfg.Emails.RequireVerification && wasUnverified {
+		if h.cfg.Email.RequireVerification && wasUnverified {
 			var evt events.Event
 
 			if hasEmails {

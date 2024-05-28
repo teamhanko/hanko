@@ -22,28 +22,29 @@ import (
 
 // Config is the central configuration type
 type Config struct {
-	Server       Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
-	Webauthn     WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
-	Smtp         SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
-	Passcode     Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
-	Password     Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
-	Database     Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets      Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service      Service          `yaml:"service" json:"service" koanf:"service"`
-	Session      Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
-	AuditLog     AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
-	Emails       Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
-	RateLimiter  RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
-	ThirdParty   ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
-	Log          LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
-	Account      Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-	Identifier   Identifier       `yaml:"identifier" json:"identifier" koanf:"identifier"`
-	SecondFactor SecondFactor     `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
-	Passkey      Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
-	Saml         config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
-	Webhooks     WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
-	Email        Email            `yaml:"email" json:"email" koanf:"email"`
-	Username     Username         `yaml:"username" json:"username" koanf:"username"`
+	Server        Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
+	Webauthn      WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Smtp          SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
+	EmailDelivery EmailDelivery    `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true"`
+	Passcode      Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Password      Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
+	Database      Database         `yaml:"database" json:"database" koanf:"database"`
+	Secrets       Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
+	Service       Service          `yaml:"service" json:"service" koanf:"service"`
+	Session       Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
+	AuditLog      AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
+	Emails        Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
+	RateLimiter   RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
+	ThirdParty    ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
+	Log           LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
+	Account       Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	Identifier    Identifier       `yaml:"identifier" json:"identifier" koanf:"identifier"`
+	SecondFactor  SecondFactor     `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
+	Passkey       Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
+	Saml          config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	Webhooks      WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
+	Email         Email            `yaml:"email" json:"email" koanf:"email"`
+	Username      Username         `yaml:"username" json:"username" koanf:"username"`
 }
 
 var (
@@ -124,6 +125,9 @@ func DefaultConfig() *Config {
 		},
 		Smtp: SMTP{
 			Port: "465",
+		},
+		EmailDelivery: EmailDelivery{
+			Enabled: true,
 		},
 		Passcode: Passcode{
 			TTL: 300,
@@ -247,6 +251,12 @@ func (c *Config) Validate() error {
 	err = c.Smtp.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate smtp settings: %w", err)
+	}
+	if c.EmailDelivery.Enabled {
+		err = c.Smtp.Validate()
+		if err != nil {
+			return fmt.Errorf("failed to validate smtp settings: %w", err)
+		}
 	}
 	err = c.Passcode.Validate()
 	if err != nil {
@@ -389,10 +399,16 @@ func (s *ServerSettings) Validate() error {
 	return nil
 }
 
+type WebauthnTimeouts struct {
+	Registration int `yaml:"registration" json:"registration" koanf:"registration"`
+	Login        int `yaml:"login" json:"login" koanf:"login"`
+}
+
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
 	RelyingParty     RelyingParty          `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
 	Timeout          int                   `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
+	Timeouts         WebauthnTimeouts      `yaml:"timeouts" json:"timeouts,omitempty" koanf:"timeouts" split_words:"true"`
 	UserVerification string                `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 	Handler          *webauthnLib.WebAuthn `jsonschema:"-"`
 }
@@ -873,6 +889,13 @@ type Passkey struct {
 // Deprecated
 type PasskeyOnboarding struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled"`
+}
+
+type EmailDelivery struct {
+	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
+	FromAddress string `yaml:"from_address" json:"from_address" koanf:"from_address" split_words:"true"`
+	FromName    string `yaml:"from_name" json:"from_name" koanf:"from_name" split_words:"true"`
+	SMTP        SMTP   `yaml:"smtp" json:"smtp" koanf:"smtp"`
 }
 
 type Email struct {

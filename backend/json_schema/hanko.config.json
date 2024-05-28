@@ -137,6 +137,9 @@
         "smtp": {
           "$ref": "#/$defs/SMTP"
         },
+        "email_delivery": {
+          "$ref": "#/$defs/EmailDelivery"
+        },
         "passcode": {
           "$ref": "#/$defs/Passcode"
         },
@@ -370,6 +373,31 @@
         "passcode_ttl"
       ]
     },
+    "EmailDelivery": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "from_address": {
+          "type": "string"
+        },
+        "from_name": {
+          "type": "string"
+        },
+        "smtp": {
+          "$ref": "#/$defs/SMTP"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled",
+        "from_address",
+        "from_name",
+        "smtp"
+      ]
+    },
     "Emails": {
       "properties": {
         "require_verification": {
@@ -573,8 +601,13 @@
           "default": true
         },
         "acquire_on_registration": {
-          "type": "boolean",
-          "default": true
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
         },
         "acquire_on_login": {
           "type": "string",
@@ -648,8 +681,13 @@
           "default": false
         },
         "acquire_on_registration": {
-          "type": "boolean",
-          "default": true
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "never"
         },
         "acquire_on_login": {
           "type": "string",

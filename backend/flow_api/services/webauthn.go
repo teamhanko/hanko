@@ -96,7 +96,7 @@ func NewWebauthnService(cfg config.Config, persister persistence.Persister) Weba
 }
 
 func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
-	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Webauthn.UserVerification)
+	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
 	options, sessionData, err := s.cfg.Webauthn.Handler.BeginDiscoverableLogin(
 		webauthn.WithUserVerification(userVerificationRequirement),
 	)
@@ -190,9 +190,10 @@ func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParam
 		UserVerification:   protocol.VerificationRequired,
 	}
 
+	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
 	options, sessionData, err := s.cfg.Webauthn.Handler.BeginRegistration(
 		user,
-		webauthn.WithConveyancePreference(protocol.PreferNoAttestation),
+		webauthn.WithConveyancePreference(attestationPreference),
 		webauthn.WithAuthenticatorSelection(authenticatorSelection),
 	)
 	if err != nil {

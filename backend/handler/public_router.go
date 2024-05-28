@@ -106,7 +106,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	mailer, err := mail.NewMailer(cfg.Smtp)
+	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}

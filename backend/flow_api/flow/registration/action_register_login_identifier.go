@@ -25,6 +25,11 @@ func (a RegisterLoginIdentifier) GetDescription() string {
 func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
+	if !deps.Cfg.Account.AllowSignup {
+		c.SuspendAction()
+		return
+	}
+
 	if (!deps.Cfg.Email.Enabled || (deps.Cfg.Email.Enabled && !deps.Cfg.Email.AcquireOnRegistration)) &&
 		(!deps.Cfg.Username.Enabled || (deps.Cfg.Username.Enabled && !deps.Cfg.Username.AcquireOnRegistration)) {
 		c.SuspendAction()
@@ -33,7 +38,7 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 
 	if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
 		input := flowpilot.EmailInput("email").
-			MaxLength(255).
+			MaxLength(deps.Cfg.Email.MaxLength).
 			Persist(true).
 			Preserve(true).
 			Required(!deps.Cfg.Email.Optional)

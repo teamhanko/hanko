@@ -16,13 +16,16 @@ type PublicConfig struct {
 }
 
 // FromConfig Returns a PublicConfig from the Application configuration
-func FromConfig(config config.Config) PublicConfig {
+func FromConfig(cfg config.Config) PublicConfig {
 	return PublicConfig{
-		Password:                config.Password,
-		Emails:                  config.Emails,
-		Providers:               GetEnabledProviders(config.ThirdParty.Providers),
-		Account:                 config.Account,
-		UseEnterpriseConnection: UseEnterpriseConnection(&config.Saml),
+		Password: cfg.Password,
+		Emails: config.Emails{
+			RequireVerification: cfg.Email.RequireVerification,
+			MaxNumOfAddresses:   cfg.Email.Limit,
+		},
+		Providers:               GetEnabledProviders(cfg.ThirdParty.Providers),
+		Account:                 cfg.Account,
+		UseEnterpriseConnection: UseEnterpriseConnection(&cfg.Saml),
 	}
 }
 
