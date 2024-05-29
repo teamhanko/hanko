@@ -33,16 +33,16 @@ func NewSamlHandler(cfg *config.Config, persister persistence.Persister, session
 	providers := make([]provider.ServiceProvider, 0)
 	for _, idpConfig := range cfg.Saml.IdentityProviders {
 		if idpConfig.Enabled {
-			name := ""
-			name, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
+			hostName := ""
+			hostName, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
 			if err != nil {
-				fmt.Printf("failed to parse provider from metadata url: %v\n", err)
+				fmt.Printf("failed to parse provider '%s' from metadata url: %v\n", idpConfig.Name, err)
 				continue
 			}
 
-			newProvider, err := provider.GetProvider(name, cfg, idpConfig, persister.GetSamlCertificatePersister())
+			newProvider, err := provider.GetProvider(hostName, cfg, idpConfig, persister.GetSamlCertificatePersister())
 			if err != nil {
-				fmt.Printf("failed to initialize provider: %v\n", err)
+				fmt.Printf("failed to initialize provider '%s': %v\n", idpConfig.Name, err)
 				continue
 			}
 
