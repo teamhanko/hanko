@@ -7,6 +7,7 @@ import { default as github } from "./GitHub";
 import { default as apple } from "./Apple";
 import { default as discord } from "./Discord";
 import { default as microsoft } from "./Microsoft";
+import { default as linkedin } from "./LinkedIn";
 
 export {
   passkey,
@@ -18,4 +19,5 @@ export {
   apple,
   discord,
   microsoft,
+  linkedin,
 };
