@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LinkedinIssuer = "https://www.linkedin.com/oauth"
+	LinkedInIssuer = "https://www.linkedin.com/oauth"
 )
 
 var DefaultLinkedinScopes = []string{
@@ -33,24 +33,24 @@ type LinkedinUser struct {
 	Verified bool   `json:"email_verified"`
 }
 
-type linkedinProvider struct {
+type linkedInProvider struct {
 	oidc *oidc.Provider
 	*oauth2.Config
 }
 
-// NewLinkedinProvider creates a LinkedIn third party provider.
-func NewLinkedinProvider(config config.ThirdPartyProvider, redirectURL string) (OAuthProvider, error) {
+// NewLinkedInProvider creates a LinkedIn third party provider.
+func NewLinkedInProvider(config config.ThirdPartyProvider, redirectURL string) (OAuthProvider, error) {
 	if !config.Enabled {
 		return nil, errors.New("linkedIn provider is disabled")
 	}
 
-	oidcProvider, err := oidc.NewProvider(context.Background(), LinkedinIssuer)
+	oidcProvider, err := oidc.NewProvider(context.Background(), LinkedInIssuer)
 	if err != nil {
 		return nil, err
 	}
 	endpoint := oidcProvider.Endpoint()
 
-	return &linkedinProvider{
+	return &linkedInProvider{
 		oidc: oidcProvider,
 		Config: &oauth2.Config{
 			ClientID:     config.ClientID,
@@ -62,11 +62,11 @@ func NewLinkedinProvider(config config.ThirdPartyProvider, redirectURL string) (
 	}, nil
 }
 
-func (g linkedinProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
+func (g linkedInProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 	return g.Exchange(context.Background(), code)
 }
 
-func (g linkedinProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	var user LinkedinUser
 	if err := makeRequest(token, g.Config, g.oidc.UserInfoEndpoint(), &user); err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (g linkedinProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	}
 
 	data.Metadata = &Claims{
-		Issuer:        LinkedinIssuer,
+		Issuer:        LinkedInIssuer,
 		Subject:       user.ID,
 		Name:          user.Name,
 		FamilyName:    user.FamilyName,
@@ -101,6 +101,6 @@ func (g linkedinProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return data, nil
 }
 
-func (g linkedinProvider) Name() string {
+func (g linkedInProvider) Name() string {
 	return "linkedin"
 }

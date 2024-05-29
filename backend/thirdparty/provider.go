@@ -91,7 +91,7 @@ func GetProvider(config config.ThirdParty, name string) (OAuthProvider, error) {
 	case "microsoft":
 		return NewMicrosoftProvider(config.Providers.Microsoft, config.RedirectURL)
 	case "linkedin":
-		return NewLinkedinProvider(config.Providers.Linkedin, config.RedirectURL)
+		return NewLinkedInProvider(config.Providers.LinkedIn, config.RedirectURL)
 	default:
 		return nil, fmt.Errorf("provider '%s' is not supported", name)
 	}
