@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"net/url"
 	"strings"
 	"time"
@@ -109,11 +110,18 @@ func (fb *defaultFlowBuilderBase) addStateIfNotExists(stateNames ...StateName) {
 
 // scanFlowStates iterates through each state in the provided flow and associates relevant information, also it checks
 // for uniqueness of state names.
-func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) error {
+func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool, path utils.Path) error {
 	// Check if states were already scanned, if so, don't scan again
 	if len(fb.stateDetails) > 0 && isRootFlow {
 		return nil
 	}
+
+	if path == nil {
+		path = utils.NewPath(flow.getName())
+	} else {
+		path.Add(flow.getName())
+	}
+
 	// Iterate through states in the flow.
 	for stateName, actions := range flow.getFlow() {
 		// Check if state name is already in use.
@@ -137,7 +145,7 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) err
 		actionDetails := make(defaultActionDetails, 0)
 		for _, action := range actions {
 			flowName := flow.getName()
-			actionDetail := defaultActionDetail{action: action, flowName: flowName}
+			actionDetail := defaultActionDetail{action: action, flowName: flowName, path: utils.NewPath(path.String())}
 			actionDetails = append(actionDetails, actionDetail)
 		}
 
@@ -157,7 +165,7 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) err
 
 	// Recursively scan sub-flows.
 	for _, sf := range flow.getSubFlows() {
-		if err := fb.scanFlowStates(sf, false); err != nil {
+		if err := fb.scanFlowStates(sf, false, utils.NewPath(path.String())); err != nil {
 			return err
 		}
 	}
@@ -295,7 +303,7 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		contextValues:         make(contextValues),
 	}
 
-	if err := fb.scanFlowStates(flow, true); err != nil {
+	if err := fb.scanFlowStates(flow, true, nil); err != nil {
 		return nil, fmt.Errorf("failed to scan flow states: %w", err)
 	}
 

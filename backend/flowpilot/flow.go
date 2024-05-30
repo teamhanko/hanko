@@ -2,6 +2,7 @@ package flowpilot
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"reflect"
 	"time"
 )
@@ -58,6 +59,7 @@ type Action interface {
 type defaultActionDetail struct {
 	action   Action
 	flowName string
+	path     utils.Path
 }
 
 // actions represents a list of action
