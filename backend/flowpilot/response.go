@@ -181,7 +181,7 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 			href := er.createHref(fc, actionName)
 			schema := er.getExecutionSchema(actionName)
 
-			if schema == nil || actionDetail.flowName != fc.GetFlowName() {
+			if schema == nil || actionDetail.path.String() != fc.GetFlowPath().String() {
 				// Create schema if not available.
 				if schema = er.createSchema(fc, actionDetail); schema == nil {
 					continue
