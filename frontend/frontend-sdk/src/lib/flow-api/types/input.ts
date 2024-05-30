@@ -38,6 +38,7 @@ export interface RegisterPasswordInputs {
 
 export interface RegisterClientCapabilitiesInputs {
   readonly webauthn_available: Input<boolean>;
+  readonly webauthn_conditional_mediation_available: Input<boolean>;
 }
 
 export interface ContinueWithLoginIdentifierInputs {
