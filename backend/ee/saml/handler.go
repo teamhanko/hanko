@@ -217,6 +217,7 @@ func (handler *SamlHandler) linkAccount(c echo.Context, redirectTo *url.URL, sta
 		userdata := provider.GetUserData(assertionInfo)
 
 		linkResult, samlError := thirdparty.LinkAccount(tx, handler.config, handler.persister, userdata, state.Provider, true)
+
 		if samlError != nil {
 			return samlError
 		}
