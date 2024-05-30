@@ -64,7 +64,7 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	state, err := thirdparty.GenerateState(&deps.Cfg, provider.Name(), redirectTo)
+	state, err := thirdparty.GenerateState(&deps.Cfg, provider.Name(), redirectTo, thirdparty.GenerateStateForFlowAPI(true))
 	if err != nil {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
 	}

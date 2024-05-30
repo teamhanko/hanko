@@ -125,7 +125,8 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	SubFlows(
 		CapabilitiesSubFlow,
 		PasscodeSubFlow,
-		CredentialOnboardingSubFlow).
+		CredentialOnboardingSubFlow,
+		UserDetailsSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 

@@ -12,15 +12,29 @@ import (
 )
 
 type Token struct {
-	ID        uuid.UUID `db:"id"`
-	UserID    uuid.UUID `db:"user_id"`
-	Value     string    `db:"value"`
-	ExpiresAt time.Time `db:"expires_at"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID         uuid.UUID `db:"id"`
+	UserID     uuid.UUID `db:"user_id"`
+	IdentityID uuid.UUID `db:"identity_id"`
+	IsFlow     bool      `db:"is_flow"`
+	Value      string    `db:"value"`
+	ExpiresAt  time.Time `db:"expires_at"`
+	CreatedAt  time.Time `db:"created_at"`
+	UpdatedAt  time.Time `db:"updated_at"`
 }
 
-func NewToken(userID uuid.UUID) (*Token, error) {
+func TokenWithIdentityID(identityID uuid.UUID) func(*Token) {
+	return func(token *Token) {
+		token.IdentityID = identityID
+	}
+}
+
+func TokenForFlowAPI(isFlow bool) func(*Token) {
+	return func(token *Token) {
+		token.IsFlow = isFlow
+	}
+}
+
+func NewToken(userID uuid.UUID, options ...func(*Token)) (*Token, error) {
 	if userID.IsNil() {
 		return nil, errors.New("userID is required")
 	}
@@ -37,14 +51,20 @@ func NewToken(userID uuid.UUID) (*Token, error) {
 		return nil, fmt.Errorf("could not generate random string: %w", err)
 	}
 
-	return &Token{
+	token := &Token{
 		ID:        id,
 		UserID:    userID,
 		Value:     value,
 		ExpiresAt: now.Add(time.Minute),
 		CreatedAt: now,
 		UpdatedAt: now,
-	}, nil
+	}
+
+	for _, option := range options {
+		option(token)
+	}
+
+	return token, nil
 }
 
 func (token *Token) Validate(tx *pop.Connection) (*validate.Errors, error) {

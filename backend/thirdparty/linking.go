@@ -13,9 +13,11 @@ type AccountLinkingResult struct {
 	User *models.User
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
-	if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
-		return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isFlow bool) (*AccountLinkingResult, error) {
+	if !isFlow {
+		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
+			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+		}
 	}
 
 	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerName)
