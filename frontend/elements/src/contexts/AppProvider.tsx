@@ -174,9 +174,6 @@ const AppProvider = ({
     email: prefilledEmail,
     username: prefilledUsername,
   });
-  // const [abortController, setAbortController] = useState(new AbortController())
-  // let _abortController = new AbortController()
-  // let abortController = useMemo(() => _abortController, [_abortController])
   let abortController = new AbortController();
 
   const setLoadingAction = useCallback((loadingAction: UIAction) => {
