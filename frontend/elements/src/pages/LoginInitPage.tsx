@@ -16,7 +16,6 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Footer from "../components/wrapper/Footer";
-import { get as getWebauthnCredential } from "@github/webauthn-json";
 
 interface Props {
   state: State<"login_init">;
@@ -39,7 +38,6 @@ const LoginInitPage = (props: Props) => {
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
   const { flowState } = useFlowState(props.state);
   const isWebAuthnSupported = WebauthnSupport.supported();
-  let controller = new AbortController();
 
   const onIdentifierInput = (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
@@ -82,10 +80,7 @@ const LoginInitPage = (props: Props) => {
   const onPasskeySubmit = async (event: Event) => {
     event.preventDefault();
 
-    // _createAbortSignal()
-
     setLoadingAction("passkey-submit");
-    // await new Promise(r => setTimeout(r, 2000))
 
     const nextState = await flowState.actions
       .webauthn_generate_request_options(null)
@@ -116,56 +111,6 @@ const LoginInitPage = (props: Props) => {
       setIdentifierType("identifier");
     }
   }, [flowState]);
-
-  useEffect(() => {
-    if (!!flowState.payload.request_options) {
-      // conditionalMediationRequest().then(() => {
-      // })
-    }
-    return () => {
-      if (controller) {
-        console.log("abort webauthn request in cleanup function")
-        controller.abort();
-      }
-    }
-  }, []);
-
-  const _createAbortSignal = () => {
-    if (controller) {
-      console.log("abort webauthn request");
-      controller.abort();
-      console.log(controller);
-    }
-
-    controller = new AbortController();
-    console.log(controller);
-    return controller.signal;
-  };
-
-  const conditionalMediationRequest = async () => {
-    const options = { ...flowState.payload.request_options }
-    options.signal = _createAbortSignal()
-    // `CredentialMediationRequirement` doesn't support "conditional" in the current typescript version.
-    options.mediation = "conditional" as CredentialMediationRequirement
-
-    try {
-      console.log(options)
-      const assertionResponse = await getWebauthnCredential(
-        options,
-      );
-
-      const nextState = await flowState.actions
-        .webauthn_verify_assertion_response({
-          assertion_response: assertionResponse,
-        })
-        .run();
-
-      stateHandler[nextState.name](nextState);
-    } catch (error) {
-      // We do not need to handle the error, because this is a conditional request, which can fail silently
-      console.log(error)
-    }
-  }
 
   return (
     <Fragment>
