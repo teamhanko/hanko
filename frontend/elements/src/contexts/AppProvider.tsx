@@ -382,7 +382,6 @@ const AppProvider = ({
           history.replaceState(null, null, window.location.pathname + searchParams.toString())
 
           stateHandler[nextState.name](nextState)
-          // TODO: what happens when an error occurs, do we need to show a UI ???
         } else {
           setUIState((prev) => ({
             ...prev,
