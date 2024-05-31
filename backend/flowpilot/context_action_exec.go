@@ -3,7 +3,6 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 )
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
@@ -263,17 +262,17 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 		}
 	}
 
-	// If going to the previous state "crosses" subflow boundaries, update stashed flow path accordingly, i.e. remove
+	// If going to the previous state "crosses" subflow boundaries, update stashed flowPath accordingly, i.e. remove
 	// last subflow fragment so that going back and restarting the subflow again does not repeatedly amass the same
-	// subflow name in the flow path.
+	// subflow name in the flowPath.
 	subFlowToGoBackTo := aec.flow.subFlows.getSubFlowFromStateName(*lastStateName)
 	currentSubFlow := aec.flow.subFlows.getSubFlowFromStateName(aec.GetCurrentState())
 	// If subFlowToGoBackTo is nil then we probably want to go back to a root flow state.
 	if subFlowToGoBackTo == nil && currentSubFlow != nil ||
 		(subFlowToGoBackTo != nil && currentSubFlow != nil) && subFlowToGoBackTo.getName() != currentSubFlow.getName() {
-		newPath := utils.NewPath(aec.stash.Get("_.path").String())
-		newPath.Remove()
-		_ = aec.stash.Set("_.path", newPath.String())
+		newPath := newFlowPathFromString(aec.stash.Get("_.flowPath").String())
+		newPath.remove()
+		_ = aec.stash.Set("_.flowPath", newPath.String())
 	}
 
 	// Close the execution context with the last state.
@@ -334,11 +333,11 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 	}
 
 	subFlow := currentState.subFlows.getSubFlowFromStateName(entryStateName)
-	newPath := utils.NewPath(aec.stash.Get("_.path").String())
-	newPath.Add(subFlow.getName())
-	err = aec.stash.Set("_.path", newPath.String())
+	newPath := newFlowPathFromString(aec.stash.Get("_.flowPath").String())
+	newPath.add(subFlow.getName())
+	err = aec.stash.Set("_.flowPath", newPath.String())
 	if err != nil {
-		return fmt.Errorf("failed to stash new path: %w", err)
+		return fmt.Errorf("failed to stash new flowPath: %w", err)
 	}
 
 	// Close the execution context with the entry state of the sub-flow.
@@ -367,17 +366,17 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 		}
 	}
 
-	newPath := utils.NewPath(aec.stash.Get("_.path").String())
-	newPath.Remove()
+	newPath := newFlowPathFromString(aec.stash.Get("_.flowPath").String())
+	newPath.remove()
 
 	scheduledSubflow := aec.flow.subFlows.getSubFlowFromStateName(*scheduledStateName)
 	if scheduledSubflow != nil {
-		newPath.Add(scheduledSubflow.getName())
+		newPath.add(scheduledSubflow.getName())
 	}
 
-	err = aec.stash.Set("_.path", newPath.String())
+	err = aec.stash.Set("_.flowPath", newPath.String())
 	if err != nil {
-		return fmt.Errorf("failed to stash new path: %w", err)
+		return fmt.Errorf("failed to stash new flowPath: %w", err)
 	}
 
 	// Close the execution context with the scheduled state.
