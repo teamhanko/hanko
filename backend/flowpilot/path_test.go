@@ -1,39 +1,58 @@
-package utils
+package flowpilot
 
 import (
 	"reflect"
 	"testing"
 )
 
-func TestNewPath(t *testing.T) {
+func TestNew(t *testing.T) {
+	tests := []struct {
+		name string
+		want *defaultFlowPath
+	}{
+		{
+			name: "construct new path",
+			want: &defaultFlowPath{fragments: []string{}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := newFlowPath(); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newFlowPath() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFromString(t *testing.T) {
 	type args struct {
 		root string
 	}
 	tests := []struct {
 		name string
 		args args
-		want *defaultPath
+		want *defaultFlowPath
 	}{
 		{
 			name: "construct path with empty string",
 			args: args{root: ""},
-			want: &defaultPath{fragments: []string{""}},
+			want: &defaultFlowPath{fragments: []string{""}},
 		},
 		{
 			name: "construct path with root",
 			args: args{root: "subflow1"},
-			want: &defaultPath{fragments: []string{"subflow1"}},
+			want: &defaultFlowPath{fragments: []string{"subflow1"}},
 		},
 		{
 			name: "construct path with path",
 			args: args{root: "subflow1.subflow2"},
-			want: &defaultPath{fragments: []string{"subflow1", "subflow2"}},
+			want: &defaultFlowPath{fragments: []string{"subflow1", "subflow2"}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := NewPath(tt.args.root); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewPath() = %v, want %v", got, tt.want)
+			if got := newFlowPathFromString(tt.args.root); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("newFlowPathFromString() = %v, want %v", got, tt.want)
 			}
 		})
 	}
@@ -50,26 +69,26 @@ func TestPath_Add(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   defaultPath
+		want   defaultFlowPath
 	}{
 		{
 			name:   "add to path with empty fragments",
 			fields: fields{fragments: make([]string, 0)},
 			args:   args{fragment: "subflow1"},
-			want:   defaultPath{fragments: []string{"subflow1"}},
+			want:   defaultFlowPath{fragments: []string{"subflow1"}},
 		},
 		{
 			name:   "add to path with non-empty fragments",
 			fields: fields{fragments: []string{"subflow1"}},
 			args:   args{fragment: "subflow2"},
-			want:   defaultPath{fragments: []string{"subflow1", "subflow2"}},
+			want:   defaultFlowPath{fragments: []string{"subflow1", "subflow2"}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := defaultPath{fragments: tt.fields.fragments}
+			p := defaultFlowPath{fragments: tt.fields.fragments}
 
-			p.Add(tt.args.fragment)
+			p.add(tt.args.fragment)
 			if got := p; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Add() = %v, want %v", got, tt.want)
 			}
@@ -84,29 +103,29 @@ func TestPath_Remove(t *testing.T) {
 	tests := []struct {
 		name   string
 		fields fields
-		want   defaultPath
+		want   defaultFlowPath
 	}{
 		{
 			name:   "remove a fragment",
 			fields: fields{fragments: []string{"subflow1", "subflow2"}},
-			want:   defaultPath{fragments: []string{"subflow1"}},
+			want:   defaultFlowPath{fragments: []string{"subflow1"}},
 		},
 		{
 			name:   "remove until empty",
 			fields: fields{fragments: []string{"subflow1"}},
-			want:   defaultPath{fragments: []string{}},
+			want:   defaultFlowPath{fragments: []string{}},
 		},
 		{
 			name:   "remove when path is empty",
 			fields: fields{fragments: []string{}},
-			want:   defaultPath{fragments: []string{}},
+			want:   defaultFlowPath{fragments: []string{}},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := defaultPath{fragments: tt.fields.fragments}
+			p := defaultFlowPath{fragments: tt.fields.fragments}
 
-			p.Remove()
+			p.remove()
 			if got := p; !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Remove() = %v, want %v", got, tt.want)
 			}
@@ -141,7 +160,7 @@ func TestPath_String(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := defaultPath{
+			p := defaultFlowPath{
 				fragments: tt.fields.fragments,
 			}
 			if got := p.String(); got != tt.want {
@@ -185,7 +204,7 @@ func Test_defaultPath_HasFragment(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p := &defaultPath{
+			p := &defaultFlowPath{
 				fragments: tt.fields.fragments,
 			}
 			if got := p.HasFragment(tt.args.fragment); got != tt.want {
@@ -193,4 +212,22 @@ func Test_defaultPath_HasFragment(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_defaultPath_Copy(t *testing.T) {
+	t.Run("copy path and modify the original", func(t *testing.T) {
+		original := &defaultFlowPath{
+			fragments: []string{"a", "b"},
+		}
+
+		copied := original.copy()
+		if !reflect.DeepEqual(copied, original) {
+			t.Errorf("Copy() = copied version does not equal original version")
+		}
+
+		original.fragments = append(original.fragments, "c")
+		if reflect.DeepEqual(copied, original) {
+			t.Errorf("Copy() = copied version changed after original version has been modified")
+		}
+	})
 }
