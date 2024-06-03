@@ -16,6 +16,7 @@ import {
 } from "./action";
 
 import {
+  LoginInitPayload,
   LoginPasskeyPayload,
   OnboardingVerifyPasskeyAttestationPayload,
   PasscodeConfirmationPayload,
@@ -60,7 +61,7 @@ export interface Actions {
 
 export interface Payloads {
   readonly preflight: null;
-  readonly login_init: null;
+  readonly login_init: LoginInitPayload;
   readonly profile_init: ProfilePayload;
   readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationPayload;
   readonly login_method_chooser: null;
