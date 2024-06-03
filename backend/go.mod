@@ -4,8 +4,9 @@ go 1.20
 
 require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
+	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.20.0
+	github.com/go-playground/validator/v10 v10.21.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.10.2
@@ -63,7 +64,6 @@ require (
 	github.com/cenkalti/backoff/v4 v4.2.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/continuity v0.3.0 // indirect
-	github.com/coreos/go-oidc/v3 v3.9.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.2.0 // indirect
 	github.com/docker/cli v23.0.1+incompatible // indirect
