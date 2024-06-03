@@ -13,8 +13,8 @@ import {
 } from "preact/compat";
 
 import {
-  get as getWebauthnCredential,
   create as createWebauthnCredential,
+  get as getWebauthnCredential,
 } from "@github/webauthn-json";
 
 import {
@@ -37,7 +37,6 @@ import {
   PublicKeyCredentialWithAssertionJSON,
   PublicKeyCredentialWithAttestationJSON,
 } from "@github/webauthn-json/src/webauthn-json/basic/json";
-import SignalLike = JSXInternal.SignalLike;
 
 import Container from "../components/wrapper/Container";
 import InitPage from "../pages/InitPage";
@@ -51,6 +50,7 @@ import RegistrationInitPage from "../pages/RegistrationInitPage";
 import CreatePasswordPage from "../pages/CreatePasswordPage";
 import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
+import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -174,6 +174,7 @@ const AppProvider = ({
     email: prefilledEmail,
     username: prefilledUsername,
   });
+  let abortController = new AbortController();
 
   const setLoadingAction = useCallback((loadingAction: UIAction) => {
     setUIState((prev) => ({
@@ -246,28 +247,15 @@ const AppProvider = ({
     );
   };
 
-  // TODO: to be reintroduced
-  // const [isConditionalMediationSupported, setIsConditionalMediationSupported] =useState<boolean>();
-  // let controller = new AbortController();
-  // const conditionalMediationEnabled = useMemo(
-  //   () =>
-  //     experimentalFeatures.includes("conditionalMediation") &&
-  //     isConditionalMediationSupported,
-  //   [experimentalFeatures, isConditionalMediationSupported],
-  // );
-  // const _createAbortSignal = () => {
-  //   if (controller) {
-  //     controller.abort();
-  //   }
-  //
-  //   controller = new AbortController();
-  //   return controller.signal;
-  // };
-  // useEffect(() => {
-  //   WebauthnSupport.isConditionalMediationAvailable()
-  //     .then((supported) => setIsConditionalMediationSupported(supported))
-  //     .catch((error) => onError(error));
-  // }, []);
+  const _createAbortSignal = () => {
+    if (abortController) {
+      console.log("_createAbortSignal abort");
+      abortController.abort();
+    }
+
+    abortController = new AbortController();
+    return abortController.signal;
+  };
 
   const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
     () => ({
@@ -275,15 +263,46 @@ const AppProvider = ({
         handleError(e);
       },
       async preflight(state) {
+        const conditionalMediationAvailable =
+          await WebauthnSupport.isConditionalMediationAvailable();
+
         const newState = await state.actions
           .register_client_capabilities({
             webauthn_available: isWebAuthnSupported,
+            webauthn_conditional_mediation_available:
+              conditionalMediationAvailable,
           })
           .run();
         return hanko.flow.run(newState, stateHandler);
       },
-      login_init(state) {
+      async login_init(state) {
         setPage(<LoginInitPage state={state} />);
+        void (async function () {
+          if (state.payload.request_options) {
+            let assertionResponse: PublicKeyCredentialWithAssertionJSON;
+
+            try {
+              assertionResponse = await getWebauthnCredential({
+                publicKey: state.payload.request_options.publicKey,
+                mediation: "conditional" as CredentialMediationRequirement,
+                signal: _createAbortSignal(),
+              });
+            } catch (error) {
+              // We do not need to handle the error, because this is a conditional request, which can fail silently
+              return;
+            }
+
+            setLoadingAction("passkey-submit");
+            const nextState = await state.actions
+              .webauthn_verify_assertion_response({
+                assertion_response: assertionResponse,
+              })
+              .run();
+
+            setLoadingAction(null);
+            stateHandler[nextState.name](nextState);
+          }
+        })();
       },
       passcode_confirmation(state) {
         setPage(<PasscodePage state={state} />);
@@ -293,10 +312,11 @@ const AppProvider = ({
         setLoadingAction("passkey-submit");
 
         try {
-          assertionResponse = await getWebauthnCredential(
-            state.payload.request_options,
-          );
-        } catch {
+          assertionResponse = await getWebauthnCredential({
+            ...state.payload.request_options,
+            signal: _createAbortSignal(),
+          });
+        } catch (error) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
           return hanko.flow.run(prevState, stateHandler);
@@ -317,9 +337,10 @@ const AppProvider = ({
       async onboarding_verify_passkey_attestation(state) {
         let attestationResponse: PublicKeyCredentialWithAttestationJSON;
         try {
-          attestationResponse = await createWebauthnCredential(
-            state.payload.creation_options,
-          );
+          attestationResponse = await createWebauthnCredential({
+            ...state.payload.creation_options,
+            signal: _createAbortSignal(),
+          });
         } catch (e) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
@@ -338,9 +359,10 @@ const AppProvider = ({
       async webauthn_credential_verification(state) {
         let attestationResponse: PublicKeyCredentialWithAttestationJSON;
         try {
-          attestationResponse = await createWebauthnCredential(
-            state.payload.creation_options,
-          );
+          attestationResponse = await createWebauthnCredential({
+            ...state.payload.creation_options,
+            signal: _createAbortSignal(),
+          });
         } catch (e) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);

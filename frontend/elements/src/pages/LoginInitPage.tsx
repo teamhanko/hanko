@@ -1,10 +1,4 @@
-import {
-  Fragment,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "preact/compat";
+import { Fragment, useContext, useEffect, useMemo, useState, } from "preact/compat";
 
 import { WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
