@@ -2,6 +2,7 @@ package user_details
 
 import (
 	"fmt"
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -45,9 +46,9 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("user does not exists (id: %s)", userID.String())
 	}
 
-	user.Username = c.Input().Get("username").String()
+	user.Username = nulls.NewString(c.Input().Get("username").String())
 
-	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(user.Username)
+	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(user.Username.String)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}

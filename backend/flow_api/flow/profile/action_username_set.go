@@ -3,6 +3,7 @@ package profile
 import (
 	"errors"
 	"fmt"
+	"github.com/gobuffalo/nulls"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -52,9 +53,9 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	userModel.Username = username
+	userModel.Username = nulls.NewString(username)
 
-	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(userModel.Username)
+	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(userModel.Username.String)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}

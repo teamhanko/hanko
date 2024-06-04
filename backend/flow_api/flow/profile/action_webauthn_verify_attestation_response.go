@@ -65,7 +65,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		PublicKey:     c.Input().Get("public_key").String(),
 		UserID:        userModel.ID,
 		Email:         primaryEmailAddress,
-		Username:      userModel.Username,
+		Username:      userModel.Username.String,
 	}
 
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
