@@ -32,7 +32,7 @@ func ProfileDataFromUserModel(user *models.User) *ProfileData {
 		UserID:              user.ID,
 		WebauthnCredentials: webauthnCredentials,
 		Emails:              emails,
-		Username:            user.Username,
+		Username:            user.Username.String,
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
 	}

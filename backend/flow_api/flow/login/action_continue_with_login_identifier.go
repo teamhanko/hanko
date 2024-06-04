@@ -207,7 +207,7 @@ func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.Execu
 
 	userHasPassword := userModel.PasswordCredential != nil
 	userHasWebauthnCredential := len(userModel.WebauthnCredentials) > 0
-	userHasUsername := len(userModel.Username) > 0
+	userHasUsername := len(userModel.Username.String) > 0
 	userHasEmail := len(userModel.Emails) > 0
 
 	if err := c.Stash().Set("user_has_password", userHasPassword); err != nil {
