@@ -205,21 +205,21 @@ func (a ContinueWithLoginIdentifier) analyzeIdentifierInputs(c flowpilot.Executi
 func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.ExecutionContext, userModel *models.User) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 
-	userHasPassword := userModel.PasswordCredential != nil
-	userHasWebauthnCredential := len(userModel.WebauthnCredentials) > 0
-	userHasUsername := len(userModel.Username.String) > 0
+	userHasPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil
+	userHasPasskey := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+	userHasUsername := deps.Cfg.Username.Enabled && len(userModel.Username.String) > 0
 	userHasEmail := len(userModel.Emails) > 0
 
 	if err := c.Stash().Set("user_has_password", userHasPassword); err != nil {
 		return nil, fmt.Errorf("failed to set user_has_password to the stash: %w", err)
 	}
 
-	if err := c.Stash().Set("user_has_webauthn_credential", userHasWebauthnCredential); err != nil {
+	if err := c.Stash().Set("user_has_webauthn_credential", userHasPasskey); err != nil {
 		return nil, fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 
 	userDetailOnboardingStates := a.determineUserDetailOnboardingStates(deps.Cfg, userHasUsername, userHasEmail)
-	credentialOnboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, userHasWebauthnCredential, userHasPassword)
+	credentialOnboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, userHasPasskey, userHasPassword)
 
 	return append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...), nil
 }
@@ -227,7 +227,14 @@ func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.Execu
 func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg config.Config, hasPasskey, hasPassword bool) []flowpilot.StateName {
 	result := make([]flowpilot.StateName, 0)
 
-	if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "always" {
+	alwaysAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "always"
+	alwaysAcquirePassword := cfg.Password.Enabled && cfg.Password.AcquireOnLogin == "always"
+	conditionalAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "conditional"
+	conditionalAcquirePassword := cfg.Password.Enabled && cfg.Password.AcquireOnLogin == "conditional"
+	neverAcquirePasskey := !cfg.Passkey.Enabled || cfg.Passkey.AcquireOnLogin == "never"
+	neverAcquirePassword := !cfg.Password.Enabled || cfg.Password.AcquireOnLogin == "never"
+
+	if alwaysAcquirePasskey && alwaysAcquirePassword {
 		if !hasPasskey && !hasPassword {
 			result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
 		} else if hasPasskey && !hasPassword {
@@ -235,35 +242,35 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 		} else if !hasPasskey && hasPassword {
 			result = append(result, shared.StateOnboardingCreatePasskey)
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "conditional" {
+	} else if alwaysAcquirePasskey && conditionalAcquirePassword {
 		if !hasPasskey && !hasPassword {
 			result = append(result, shared.StateOnboardingCreatePasskey) // skip should lead to password onboarding
 		} else if !hasPasskey && hasPassword {
 			result = append(result, shared.StateOnboardingCreatePasskey)
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "always" {
+	} else if conditionalAcquirePasskey && alwaysAcquirePassword {
 		if !hasPasskey && !hasPassword {
 			result = append(result, shared.StatePasswordCreation) // skip should lead to passkey onboarding
 		} else if hasPasskey && !hasPassword {
 			result = append(result, shared.StatePasswordCreation)
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "conditional" {
+	} else if conditionalAcquirePasskey && conditionalAcquirePassword {
 		if !hasPasskey && !hasPassword {
 			result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "conditional" && cfg.Password.AcquireOnLogin == "never" {
+	} else if conditionalAcquirePasskey && neverAcquirePassword {
 		if !hasPasskey && !hasPassword {
 			result = append(result, shared.StateOnboardingCreatePasskey)
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "never" && cfg.Password.AcquireOnLogin == "conditional" {
+	} else if neverAcquirePasskey && conditionalAcquirePassword {
 		if !hasPasskey && !hasPassword {
 			result = append(result, shared.StatePasswordCreation)
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "never" && cfg.Password.AcquireOnLogin == "always" {
+	} else if neverAcquirePasskey && alwaysAcquirePassword {
 		if !hasPassword {
 			result = append(result, shared.StatePasswordCreation)
 		}
-	} else if cfg.Passkey.AcquireOnLogin == "always" && cfg.Password.AcquireOnLogin == "never" {
+	} else if alwaysAcquirePasskey && neverAcquirePassword {
 		if !hasPasskey {
 			result = append(result, shared.StateOnboardingCreatePasskey)
 		}
