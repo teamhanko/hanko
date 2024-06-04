@@ -70,15 +70,3 @@ email_delivery:
   smtp:
     host: localhost
     port: 2500
-third_party:
-  allowed_redirect_urls:
-    - http://localhost:8888**
-    - http://localhost:8000/flowpilot/generic_client.html
-  redirect_url: http://localhost:8000/thirdparty/callback
-  error_redirect_url: http://localhost:8000/flowpilot/generic_client.html
-  providers:
-    github:
-      client_id: aff9b2c56d89312152c1
-      secret: 2cc695209d15ab334e023c94a0289a83393b3cf9
-      enabled: false
-      allow_linking: true

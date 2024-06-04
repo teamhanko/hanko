@@ -27,19 +27,3 @@ server:
     cors:
       allow_origins:
         - "http://localhost:8888"
-third_party:
-  allowed_redirect_urls:
-    - http://localhost:8888**
-  redirect_url: http://localhost:8000/thirdparty/callback
-  error_redirect_url: http://localhost:8888
-  providers:
-    linkedin:
-      client_id: 784q78dncvrauv
-      secret: WPL_AP0.5r1Ldz9Ie497zCKy.NjM2NjE1NjU5
-      enabled: true
-      allow_linking: true
-    github:
-      client_id: 784q78dncvrauv
-      secret: WPL_AP0.5r1Ldz9Ie497zCKy.NjM2NjE1NjU5
-      enabled: true
-      allow_linking: true
