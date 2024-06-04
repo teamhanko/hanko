@@ -109,7 +109,7 @@ func (fb *defaultFlowBuilderBase) addStateIfNotExists(stateNames ...StateName) {
 
 // scanFlowStates iterates through each state in the provided flow and associates relevant information, also it checks
 // for uniqueness of state names.
-func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath FlowPath) error {
+func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath flowPath) error {
 	flowPath.add(flow.getName())
 
 	// Iterate through states in the flow.

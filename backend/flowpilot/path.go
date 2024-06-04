@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-type FlowPath interface {
+type flowPath interface {
 	add(fragment string)
 	remove()
-	copy() FlowPath
+	copy() flowPath
 	String() string
 	HasFragment(fragment string) bool
 }
@@ -17,11 +17,11 @@ type defaultFlowPath struct {
 	fragments []string
 }
 
-func newFlowPath() FlowPath {
+func newFlowPath() flowPath {
 	return &defaultFlowPath{fragments: make([]string, 0)}
 }
 
-func newFlowPathFromString(path string) FlowPath {
+func newFlowPathFromString(path string) flowPath {
 	return &defaultFlowPath{fragments: strings.Split(path, ".")}
 }
 
@@ -35,7 +35,7 @@ func (p *defaultFlowPath) remove() {
 	}
 }
 
-func (p *defaultFlowPath) copy() FlowPath {
+func (p *defaultFlowPath) copy() flowPath {
 	cp := make([]string, len(p.fragments))
 	copy(cp, p.fragments)
 	return &defaultFlowPath{fragments: cp}

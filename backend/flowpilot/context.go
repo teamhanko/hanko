@@ -21,7 +21,7 @@ type flowContext interface {
 	// GetPath returns the current path within the flow.
 	GetPath() string
 
-	GetFlowPath() FlowPath
+	GetFlowPath() flowPath
 	// Payload returns the JSONManager for accessing payload data.
 	Payload() Payload
 	// Stash returns the JSONManager for accessing stash data.
