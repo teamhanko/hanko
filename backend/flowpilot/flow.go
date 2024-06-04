@@ -58,7 +58,7 @@ type Action interface {
 type defaultActionDetail struct {
 	action   Action
 	flowName string
-	flowPath FlowPath
+	flowPath flowPath
 }
 
 // actions represents a list of action

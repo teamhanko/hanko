@@ -25,7 +25,7 @@ func (fc *defaultFlowContext) GetPath() string {
 }
 
 // GetFlowPath returns the current flowPath within the flow.
-func (fc *defaultFlowContext) GetFlowPath() FlowPath {
+func (fc *defaultFlowContext) GetFlowPath() flowPath {
 	return newFlowPathFromString(fc.stash.Get("_.flowPath").String())
 }
 

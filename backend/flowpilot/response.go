@@ -138,8 +138,8 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 	}
 
 	if debug {
-		flowPath := fc.GetFlowPath().String()
-		resp.FlowPath = &flowPath
+		fp := fc.GetFlowPath().String()
+		resp.FlowPath = &fp
 	}
 
 	// Include flow error if present.
@@ -179,9 +179,9 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
-			schema := er.getExecutionSchema(actionName)
+			schema := er.getExecutionSchema(fc, actionDetail)
 
-			if schema == nil || actionDetail.flowPath.String() != fc.GetFlowPath().String() {
+			if schema == nil {
 				// Create schema if not available.
 				if schema = er.createSchema(fc, actionDetail); schema == nil {
 					continue
@@ -240,8 +240,11 @@ func (er *executionResult) createSchema(fc defaultFlowContext, actionDetail defa
 }
 
 // getExecutionSchema gets the execution schema for a given method name.
-func (er *executionResult) getExecutionSchema(actionName ActionName) ExecutionSchema {
-	if er.actionExecutionResult == nil || actionName != er.actionExecutionResult.actionName {
+func (er *executionResult) getExecutionSchema(fc defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
+
+	if er.actionExecutionResult == nil ||
+		actionDetail.action.GetName() != er.actionExecutionResult.actionName ||
+		actionDetail.flowPath.String() != fc.GetFlowPath().String() || er.nextStateName != fc.GetCurrentState() {
 		return nil
 	}
 
