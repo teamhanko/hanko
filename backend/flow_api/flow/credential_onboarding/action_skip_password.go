@@ -24,6 +24,10 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 		if !deps.Cfg.Password.Optional {
 			c.SuspendAction()
 		}
+
+		if prev, _ := c.GetPreviousState(); prev != nil && *prev == shared.StateCredentialOnboardingChooser {
+			c.SuspendAction()
+		}
 	}
 }
 func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {

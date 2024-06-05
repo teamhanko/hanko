@@ -76,6 +76,7 @@ interface LoginPasskeyActions {
 interface OnboardingCreatePasskeyActions {
   readonly webauthn_generate_creation_options: Action<null>;
   readonly skip?: Action<null>;
+  readonly back?: Action<null>;
 }
 
 interface OnboardingVerifyPasskeyAttestationActions {
@@ -90,6 +91,7 @@ interface RegistrationInitActions {
 interface PasswordCreationActions {
   readonly register_password: Action<RegisterPasswordInputs>;
   readonly back?: Action<null>;
+  readonly skip?: Action<null>;
 }
 
 interface PasscodeConfirmationActions {
@@ -108,6 +110,13 @@ interface OnboardingUsernameActions {
   readonly skip: Action<null>;
 }
 
+interface CredentialOnboardingChooserActions {
+  readonly continue_to_passkey_registration: Action<null>;
+  readonly continue_to_password_registration: Action<null>;
+  readonly skip: Action<null>;
+  readonly back: Action<null>;
+}
+
 export type {
   Action,
   PreflightActions,
@@ -124,4 +133,5 @@ export type {
   PasscodeConfirmationActions,
   OnboardingEmailActions,
   OnboardingUsernameActions,
+  CredentialOnboardingChooserActions,
 };

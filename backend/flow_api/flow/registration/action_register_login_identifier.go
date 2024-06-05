@@ -179,7 +179,11 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 		} else if !alwaysPasskey && alwaysPassword {
 			stateNames = append(stateNames, shared.StatePasswordCreation)
 		} else if alwaysPassword && alwaysPasskey {
-			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+			if !deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
+				stateNames = append(stateNames, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
+			} else {
+				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+			}
 		}
 	} else if passkeyEnabled && (alwaysPasskey || conditionalPasskey) {
 		stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)

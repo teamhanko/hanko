@@ -1,6 +1,7 @@
 import { State } from "../State";
 
 import {
+  CredentialOnboardingChooserActions,
   LoginInitActions,
   LoginMethodChooserActions,
   LoginPasskeyActions,
@@ -43,7 +44,8 @@ export type StateName =
   | "success"
   | "webauthn_credential_verification"
   | "onboarding_email"
-  | "onboarding_username";
+  | "onboarding_username"
+  | "credential_onboarding_chooser";
 
 export interface Actions {
   readonly preflight: PreflightActions;
@@ -63,6 +65,7 @@ export interface Actions {
   readonly error: null;
   readonly onboarding_email: OnboardingEmailActions;
   readonly onboarding_username: OnboardingUsernameActions;
+  readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
 }
 
 export interface Payloads {
@@ -83,6 +86,7 @@ export interface Payloads {
   readonly error: null;
   readonly onboarding_email: null;
   readonly onboarding_username: null;
+  readonly credential_onboarding_chooser: null;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";

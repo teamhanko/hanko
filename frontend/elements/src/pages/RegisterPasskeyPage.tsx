@@ -43,6 +43,14 @@ const RegisterPasskeyPage = (props: Props) => {
     stateHandler[nextState.name](nextState);
   };
 
+  const onBackClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("back");
+    const nextState = await flowState.actions.back(null).run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
   return (
     <Fragment>
       <Content>
@@ -55,12 +63,20 @@ const RegisterPasskeyPage = (props: Props) => {
           </Button>
         </Form>
       </Content>
-      <Footer hidden={!flowState.actions.skip?.(null)}>
-        <span hidden />
+      <Footer hidden={!flowState.actions.skip?.(null) && !flowState.actions.back?.(null)}>
+        <Link
+          uiAction={"back"}
+          onClick={onBackClick}
+          loadingSpinnerPosition={"left"}
+          hidden={!flowState.actions.back?.(null)}
+        >
+          {t("labels.back")}
+        </Link>
         <Link
           uiAction={"skip"}
           onClick={onSkipClick}
-          loadingSpinnerPosition={"left"}
+          loadingSpinnerPosition={"right"}
+          hidden={!flowState.actions.skip?.(null)}
         >
           {t("labels.skip")}
         </Link>
