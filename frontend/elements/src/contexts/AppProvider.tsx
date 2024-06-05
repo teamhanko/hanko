@@ -53,6 +53,7 @@ import ErrorPage from "../pages/ErrorPage";
 import SignalLike = JSXInternal.SignalLike;
 import CreateEmailPage from "../pages/CreateEmailPage";
 import CreateUsernamePage from "../pages/CreateUsernamePage";
+import CredentialOnboardingChooserPage from "../pages/CredentialOnboardingChooser";
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -356,6 +357,7 @@ const AppProvider = ({
           })
           .run();
 
+        setLoadingAction(null);
         stateHandler[nextState.name](nextState);
       },
       async webauthn_credential_verification(state) {
@@ -420,6 +422,9 @@ const AppProvider = ({
       },
       onboarding_username(state) {
         setPage(<CreateUsernamePage state={state} />);
+      },
+      credential_onboarding_chooser(state) {
+        setPage(<CredentialOnboardingChooserPage state={state} />);
       },
     }),
     [

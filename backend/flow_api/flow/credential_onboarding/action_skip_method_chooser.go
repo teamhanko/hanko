@@ -19,8 +19,8 @@ func (a SkipCredentialOnboardingMethodChooser) GetDescription() string {
 
 func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-
-	if c.GetFlowName() == "registration" && !deps.Cfg.Email.UseForAuthentication {
+	exists := c.Stash().Get("email").Exists()
+	if c.GetFlowName() == "registration" && !(deps.Cfg.Email.UseForAuthentication && exists) {
 		c.SuspendAction()
 	}
 }
