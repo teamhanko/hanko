@@ -193,9 +193,12 @@ func (aec *defaultActionExecutionContext) Payload() Payload {
 func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
 	for _, inputName := range inputNames {
 		// Copy input values to the stash.
-		if err := aec.stash.Set(inputName, aec.input.Get(inputName).Value()); err != nil {
-			return err
+		if result := aec.input.Get(inputName); result.Exists() {
+			if err := aec.stash.Set(inputName, result.Value()); err != nil {
+				return err
+			}
 		}
+
 	}
 
 	return nil
