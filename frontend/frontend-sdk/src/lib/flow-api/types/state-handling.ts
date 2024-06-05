@@ -8,6 +8,7 @@ import {
   LoginPasswordRecoveryActions,
   OnboardingCreatePasskeyActions,
   OnboardingEmailActions,
+  OnboardingUsernameActions,
   OnboardingVerifyPasskeyAttestationActions,
   PasscodeConfirmationActions,
   PasswordCreationActions,
@@ -41,7 +42,8 @@ export type StateName =
   | "registration_init"
   | "success"
   | "webauthn_credential_verification"
-  | "onboarding_email";
+  | "onboarding_email"
+  | "onboarding_username";
 
 export interface Actions {
   readonly preflight: PreflightActions;
@@ -60,6 +62,7 @@ export interface Actions {
   readonly success: null;
   readonly error: null;
   readonly onboarding_email: OnboardingEmailActions;
+  readonly onboarding_username: OnboardingUsernameActions;
 }
 
 export interface Payloads {
@@ -79,6 +82,7 @@ export interface Payloads {
   readonly success: SuccessPayload;
   readonly error: null;
   readonly onboarding_email: null;
+  readonly onboarding_username: null;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";

@@ -17,6 +17,7 @@ export const ptBR: Translation = {
     isPrimaryEmail: "E-mail principal",
     setPrimaryEmail: "Definir o e-mail principal",
     createEmail: "[missing]",
+    createUsername: "[missing]",
     emailVerified: "Verificado",
     emailUnverified: "Não verificado",
     emailDelete: "Apagar",
