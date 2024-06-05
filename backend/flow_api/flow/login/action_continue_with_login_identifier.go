@@ -208,7 +208,7 @@ func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.Execu
 	userHasPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil
 	userHasPasskey := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
 	userHasUsername := deps.Cfg.Username.Enabled && len(userModel.Username.String) > 0
-	userHasEmail := len(userModel.Emails) > 0
+	userHasEmail := deps.Cfg.Email.Enabled && len(userModel.Emails) > 0
 
 	if err := c.Stash().Set("user_has_password", userHasPassword); err != nil {
 		return nil, fmt.Errorf("failed to set user_has_password to the stash: %w", err)
@@ -291,10 +291,6 @@ func (a ContinueWithLoginIdentifier) determineUserDetailOnboardingStates(cfg con
 		result = append(result, shared.StateOnboardingUsername)
 	} else if acquireEmail {
 		result = append(result, shared.StateOnboardingEmail)
-	}
-
-	if acquireEmail && cfg.Email.RequireVerification {
-		result = append(result, shared.StatePasscodeConfirmation)
 	}
 
 	return result

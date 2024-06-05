@@ -71,6 +71,7 @@ var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
 var UserDetailsSubFlow = flowpilot.NewSubFlow("user_details").
 	State(shared.StateOnboardingUsername, user_details.UsernameSet{}, user_details.SkipUsername{}).
 	State(shared.StateOnboardingEmail, user_details.EmailAddressSet{}, user_details.SkipEmail{}).
+	SubFlows(PasscodeSubFlow).
 	MustBuild()
 
 var LoginFlow = flowpilot.NewFlow("/login").
@@ -125,8 +126,7 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	SubFlows(
 		CapabilitiesSubFlow,
 		PasscodeSubFlow,
-		CredentialOnboardingSubFlow,
-		UserDetailsSubFlow).
+		CredentialOnboardingSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 

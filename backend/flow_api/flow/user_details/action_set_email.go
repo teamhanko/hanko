@@ -64,6 +64,10 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set email to the stash: %w", err)
 	}
 
+	if deps.Cfg.Email.RequireVerification {
+		return c.StartSubFlow(shared.StatePasscodeConfirmation)
+	}
+
 	return c.EndSubFlow()
 }
 
