@@ -16,6 +16,7 @@ export const zh: Translation = {
     profilePasskeys: "密钥",
     isPrimaryEmail: "主要电子邮件地址",
     setPrimaryEmail: "设定主要电子邮件地址",
+    createEmail: "[missing]",
     emailVerified: "已验证",
     emailUnverified: "未验证",
     emailDelete: "删除",

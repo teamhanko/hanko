@@ -39,6 +39,7 @@ const RegisterPasskeyPage = (props: Props) => {
     event.preventDefault();
     setLoadingAction("skip");
     const nextState = await flowState.actions.skip(null).run();
+    setLoadingAction(null);
     stateHandler[nextState.name](nextState);
   };
 

@@ -7,6 +7,7 @@ import {
   LoginPasswordActions,
   LoginPasswordRecoveryActions,
   OnboardingCreatePasskeyActions,
+  OnboardingEmailActions,
   OnboardingVerifyPasskeyAttestationActions,
   PasscodeConfirmationActions,
   PasswordCreationActions,
@@ -25,21 +26,22 @@ import {
 } from "./payload";
 
 export type StateName =
-  | "preflight"
+  | "error"
   | "login_init"
-  | "profile_init"
-  | "webauthn_credential_verification"
   | "login_method_chooser"
+  | "login_passkey"
   | "login_password"
   | "login_password_recovery"
-  | "passcode_confirmation"
-  | "login_passkey"
   | "onboarding_create_passkey"
   | "onboarding_verify_passkey_attestation"
-  | "registration_init"
+  | "passcode_confirmation"
   | "password_creation"
+  | "preflight"
+  | "profile_init"
+  | "registration_init"
   | "success"
-  | "error";
+  | "webauthn_credential_verification"
+  | "onboarding_email";
 
 export interface Actions {
   readonly preflight: PreflightActions;
@@ -57,6 +59,7 @@ export interface Actions {
   readonly password_creation: PasswordCreationActions;
   readonly success: null;
   readonly error: null;
+  readonly onboarding_email: OnboardingEmailActions;
 }
 
 export interface Payloads {
@@ -75,6 +78,7 @@ export interface Payloads {
   readonly password_creation: null;
   readonly success: SuccessPayload;
   readonly error: null;
+  readonly onboarding_email: null;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";
