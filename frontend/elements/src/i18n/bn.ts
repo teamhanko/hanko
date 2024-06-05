@@ -16,6 +16,7 @@ export const bn: Translation = {
     profilePasskeys: "পাসকি",
     isPrimaryEmail: "প্রাথমিক ইমেইল",
     setPrimaryEmail: "প্রাথমিক ইমেল সেট করুন",
+    createEmail: "[missing]",
     emailVerified: "যাচাইকৃত ",
     emailUnverified: "অযাচাইকৃত",
     emailDelete: "মুছে ফেলা",

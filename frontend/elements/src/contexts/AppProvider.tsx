@@ -51,6 +51,7 @@ import CreatePasswordPage from "../pages/CreatePasswordPage";
 import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
 import SignalLike = JSXInternal.SignalLike;
+import CreateEmailPage from "../pages/CreateEmailPage";
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -412,6 +413,9 @@ const AppProvider = ({
       error(state) {
         setLoadingAction(null);
         setPage(<ErrorPage state={state} />);
+      },
+      onboarding_email(state) {
+        setPage(<CreateEmailPage state={state} />);
       },
     }),
     [

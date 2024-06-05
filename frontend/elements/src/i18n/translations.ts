@@ -21,6 +21,7 @@ export interface Translation {
     profilePasskeys: string;
     isPrimaryEmail: string;
     setPrimaryEmail: string;
+    createEmail: string;
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;

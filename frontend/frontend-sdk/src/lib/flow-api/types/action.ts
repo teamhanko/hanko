@@ -98,6 +98,11 @@ interface PasscodeConfirmationActions {
   readonly back: Action<null>;
 }
 
+interface OnboardingEmailActions {
+  readonly email_address_set: Action<EmailCreateInputs>;
+  readonly skip: Action<null>;
+}
+
 export type {
   Action,
   PreflightActions,
@@ -112,4 +117,5 @@ export type {
   RegistrationInitActions,
   PasswordCreationActions,
   PasscodeConfirmationActions,
+  OnboardingEmailActions,
 };
