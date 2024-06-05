@@ -103,6 +103,11 @@ interface OnboardingEmailActions {
   readonly skip: Action<null>;
 }
 
+interface OnboardingUsernameActions {
+  readonly username_set: Action<UsernameSetInputs>;
+  readonly skip: Action<null>;
+}
+
 export type {
   Action,
   PreflightActions,
@@ -118,4 +123,5 @@ export type {
   PasswordCreationActions,
   PasscodeConfirmationActions,
   OnboardingEmailActions,
+  OnboardingUsernameActions,
 };

@@ -17,6 +17,7 @@ export const fr: Translation = {
     isPrimaryEmail: "Adresse e-mail principale",
     setPrimaryEmail: "Définir l'adresse e-mail principale",
     createEmail: "[missing]",
+    createUsername: "[missing]",
     emailVerified: "Vérifié",
     emailUnverified: "Non vérifié",
     emailDelete: "Supprimer",

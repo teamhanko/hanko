@@ -22,6 +22,7 @@ export interface Translation {
     isPrimaryEmail: string;
     setPrimaryEmail: string;
     createEmail: string;
+    createUsername: string;
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;

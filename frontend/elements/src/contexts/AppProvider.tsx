@@ -52,6 +52,7 @@ import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
 import SignalLike = JSXInternal.SignalLike;
 import CreateEmailPage from "../pages/CreateEmailPage";
+import CreateUsernamePage from "../pages/CreateUsernamePage";
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -416,6 +417,9 @@ const AppProvider = ({
       },
       onboarding_email(state) {
         setPage(<CreateEmailPage state={state} />);
+      },
+      onboarding_username(state) {
+        setPage(<CreateUsernamePage state={state} />);
       },
     }),
     [

@@ -17,6 +17,7 @@ export const zh: Translation = {
     isPrimaryEmail: "主要电子邮件地址",
     setPrimaryEmail: "设定主要电子邮件地址",
     createEmail: "[missing]",
+    createUsername: "[missing]",
     emailVerified: "已验证",
     emailUnverified: "未验证",
     emailDelete: "删除",

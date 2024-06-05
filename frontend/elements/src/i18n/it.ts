@@ -17,6 +17,7 @@ export const it: Translation = {
     isPrimaryEmail: "Indirizzo email principale",
     setPrimaryEmail: "Imposta indirizzo email principale",
     createEmail: "[missing]",
+    createUsername: "[missing]",
     emailVerified: "Verificata",
     emailUnverified: "Non verificata",
     emailDelete: "Rimuovi",

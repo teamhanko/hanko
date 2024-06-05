@@ -16,27 +16,25 @@ import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
 
 type Props = {
-  state: State<"onboarding_email">;
+  state: State<"onboarding_username">;
 };
 
-const CreateEmailPage = (props: Props) => {
+const CreateUsernamePage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const { stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-  const [email, setEmail] = useState<string>();
+  const [username, setUsername] = useState<string>();
 
-  const onEmailInput = async (event: Event) => {
+  const onUsernameInput = async (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
-      setEmail(event.target.value);
+      setUsername(event.target.value);
     }
   };
 
-  const onEmailSubmit = async (event: Event) => {
+  const onUsernameSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("email-submit");
-    const nextState = await flowState.actions
-      .email_address_set({ email })
-      .run();
+    setLoadingAction("username-set");
+    const nextState = await flowState.actions.username_set({ username }).run();
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
   };
@@ -52,20 +50,19 @@ const CreateEmailPage = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{t("headlines.createEmail")}</Headline1>
+        <Headline1>{t("headlines.createUsername")}</Headline1>
         <ErrorBox state={flowState} />
-        <Form onSubmit={onEmailSubmit}>
+        <Form onSubmit={onUsernameSubmit}>
           <Input
-            type={"email"}
-            autoComplete={"email"}
+            type={"text"}
+            autoComplete={"username"}
             autoCorrect={"off"}
-            flowInput={flowState.actions.email_address_set?.(null).inputs.email}
-            onInput={onEmailInput}
-            placeholder={t("labels.email")}
-            pattern={"^.*[^0-9]+$"}
-            value={email}
+            flowInput={flowState.actions.username_set?.(null).inputs.username}
+            onInput={onUsernameInput}
+            value={username}
+            placeholder={t("labels.username")}
           />
-          <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+          <Button uiAction={"username-set"}>{t("labels.continue")}</Button>
         </Form>
       </Content>
       <Footer hidden={!flowState.actions.skip?.(null)}>
@@ -82,4 +79,4 @@ const CreateEmailPage = (props: Props) => {
   );
 };
 
-export default CreateEmailPage;
+export default CreateUsernamePage;
