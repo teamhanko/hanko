@@ -134,7 +134,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	}
 
 	if user.Username.String != "" {
-		auditLogDetails = append(auditLogDetails, auditlog.Detail("username", user.Username))
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("username", user.Username.String))
 	}
 
 	auditLogDetails = append(auditLogDetails, auditlog.Detail("flow_id", c.GetFlowID()))
