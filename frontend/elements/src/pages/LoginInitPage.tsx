@@ -113,8 +113,24 @@ const LoginInitPage = (props: Props) => {
     }
   };
 
+  const onThirdpartySubmit = async (event: Event, name: string) => {
+    event.preventDefault();
+    setLoadingAction("thirdparty-submit");
+
+    const nextState = await flowState.actions
+      .thirdparty_oauth({
+        provider: name,
+        redirect_to: window.location.toString(),
+      })
+      .run();
+
+    stateHandler[nextState.name](nextState);
+  };
+
   const showDivider = useMemo(
-    () => !!flowState.actions.webauthn_generate_request_options?.(null),
+    () =>
+      !!flowState.actions.webauthn_generate_request_options?.(null) ||
+      !!flowState.actions.thirdparty_oauth?.(null),
     [flowState.actions],
   );
 
@@ -222,6 +238,26 @@ const LoginInitPage = (props: Props) => {
             </Button>
           </Form>
         ) : null}
+        {flowState.actions.thirdparty_oauth?.(null)
+          ? flowState.actions
+              .thirdparty_oauth(null)
+              .inputs.provider.allowed_values?.map((v) => {
+                return (
+                  <Form
+                    onSubmit={(event) => onThirdpartySubmit(event, v.value)}
+                  >
+                    <Button
+                      uiAction={"thirdparty-submit"}
+                      secondary
+                      // @ts-ignore
+                      icon={v.value}
+                    >
+                      {t("labels.signInWith", { provider: v.name })}
+                    </Button>
+                  </Form>
+                );
+              })
+          : null}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />

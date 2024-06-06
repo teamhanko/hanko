@@ -13,6 +13,7 @@ import {
   RegisterClientCapabilitiesInputs,
   RegisterLoginIdentifierInputs,
   RegisterPasswordInputs,
+  ThirdpartyOauthInputs,
   UsernameSetInputs,
   VerifyPasscodeInputs,
   WebauthnVerifyAssertionResponseInputs,
@@ -34,6 +35,7 @@ interface LoginInitActions {
   readonly continue_with_login_identifier: Action<ContinueWithLoginIdentifierInputs>;
   readonly webauthn_generate_request_options?: Action<null>;
   readonly webauthn_verify_assertion_response?: Action<WebauthnVerifyAssertionResponseInputs>;
+  readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
 }
 
 interface ProfileInitActions {
@@ -87,6 +89,7 @@ interface OnboardingVerifyPasskeyAttestationActions {
 
 interface RegistrationInitActions {
   readonly register_login_identifier: Action<RegisterLoginIdentifierInputs>;
+  readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
 }
 
 interface PasswordCreationActions {
