@@ -236,7 +236,11 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 
 	if alwaysAcquirePasskey && alwaysAcquirePassword {
 		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+			if !cfg.Password.Optional && cfg.Passkey.Optional {
+				result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
+			} else {
+				result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+			}
 		} else if hasPasskey && !hasPassword {
 			result = append(result, shared.StatePasswordCreation)
 		} else if !hasPasskey && hasPassword {

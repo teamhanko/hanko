@@ -6,6 +6,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"strings"
 )
 
 type EmailAddressSet struct {
@@ -45,7 +46,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("user does not exists (id: %s)", userID.String())
 	}
 
-	email := c.Input().Get("email").String()
+	email := strings.TrimSpace(c.Input().Get("email").String())
 	emailModel := models.NewEmail(&userID, email)
 
 	err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
