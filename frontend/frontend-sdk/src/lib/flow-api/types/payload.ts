@@ -62,3 +62,7 @@ export interface ProfilePayload {
 export interface SuccessPayload {
   readonly user: User;
 }
+
+export interface ThirdpartyOauthPayload {
+  readonly redirect_url: string
+}

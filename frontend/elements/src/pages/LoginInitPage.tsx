@@ -1,6 +1,6 @@
 import { Fragment, useContext, useEffect, useMemo, useState, } from "preact/compat";
 
-import { WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
+import { HankoError, WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { AppContext } from "../contexts/AppProvider";
@@ -38,6 +38,7 @@ const LoginInitPage = (props: Props) => {
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
   const { flowState } = useFlowState(props.state);
   const isWebAuthnSupported = WebauthnSupport.supported();
+  const [thirdPartyError, setThirdPartyError] = useState<HankoError | undefined>(undefined)
 
   const onIdentifierInput = (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
@@ -94,8 +95,20 @@ const LoginInitPage = (props: Props) => {
     init("registration");
   };
 
+  const onThirdpartySubmit = async (event: Event, name: string) => {
+    event.preventDefault()
+    setLoadingAction("thirdparty-submit")
+
+    const nextState = await flowState.actions.thirdparty_oauth({
+      provider: name,
+      redirect_to: window.location.toString()
+    }).run()
+
+    stateHandler[nextState.name](nextState)
+  };
+
   const showDivider = useMemo(
-    () => !!flowState.actions.webauthn_generate_request_options?.(null),
+    () => !!flowState.actions.webauthn_generate_request_options?.(null) || !!flowState.actions.thirdparty_oauth?.(null),
     [flowState.actions],
   );
 
@@ -112,11 +125,42 @@ const LoginInitPage = (props: Props) => {
     }
   }, [flowState]);
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search)
+
+    if (searchParams.get("error") == undefined || searchParams.get("error").length === 0) {
+      return
+    }
+
+    let errorCode = ""
+    switch (searchParams.get("error")) {
+      case "access_denied":
+        errorCode = "thirdPartyAccessDenied"
+        break;
+      default:
+        errorCode = "somethingWentWrong"
+        break;
+    }
+
+    const error: HankoError = {
+      name: errorCode,
+      code: errorCode,
+      message: searchParams.get("error_description")
+    }
+
+    setThirdPartyError(error)
+
+    searchParams.delete("error")
+    searchParams.delete("error_description")
+
+    history.replaceState(null, null, window.location.pathname + searchParams.toString())
+  }, []);
+
   return (
     <Fragment>
       <Content>
         <Headline1>{t("headlines.signIn")}</Headline1>
-        <ErrorBox state={flowState} />
+        <ErrorBox state={flowState} error={thirdPartyError} />
         <Form onSubmit={onEmailSubmit} maxWidth>
           {inputs.email ? (
             <Input
@@ -169,6 +213,20 @@ const LoginInitPage = (props: Props) => {
             </Button>
           </Form>
         ) : null}
+        {
+          flowState.actions.thirdparty_oauth?.(null) ? flowState.actions.thirdparty_oauth(null).inputs.provider.allowed_values?.map((v) => {
+            return <Form onSubmit={(event) => onThirdpartySubmit(event, v.value)}>
+              <Button
+                uiAction={"thirdparty-submit"}
+                secondary
+                // @ts-ignore
+                icon={v.value}
+              >
+                {t("labels.signInWith", { provider: v.name })}
+              </Button>
+            </Form>
+          }) : null
+        }
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />
