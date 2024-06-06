@@ -10,6 +10,7 @@ import (
 func NewPersister(
 	user []models.User,
 	passcodes []models.Passcode,
+	passlinks []models.Passlink,
 	jwks []models.Jwk,
 	credentials []models.WebauthnCredential,
 	sessionData []models.WebauthnSessionData,
@@ -27,6 +28,7 @@ func NewPersister(
 	return &persister{
 		userPersister:                NewUserPersister(user),
 		passcodePersister:            NewPasscodePersister(passcodes),
+		passlinkPersister:            NewPasslinkPersister(passlinks),
 		jwkPersister:                 NewJwkPersister(jwks),
 		webauthnCredentialPersister:  NewWebauthnCredentialPersister(credentials),
 		webauthnSessionDataPersister: NewWebauthnSessionDataPersister(sessionData),
@@ -45,6 +47,7 @@ func NewPersister(
 type persister struct {
 	userPersister                persistence.UserPersister
 	passcodePersister            persistence.PasscodePersister
+	passlinkPersister            persistence.PasslinkPersister
 	jwkPersister                 persistence.JwkPersister
 	webauthnCredentialPersister  persistence.WebauthnCredentialPersister
 	webauthnSessionDataPersister persistence.WebauthnSessionDataPersister
@@ -89,6 +92,14 @@ func (p *persister) GetPasscodePersister() persistence.PasscodePersister {
 
 func (p *persister) GetPasscodePersisterWithConnection(tx *pop.Connection) persistence.PasscodePersister {
 	return p.passcodePersister
+}
+
+func (p *persister) GetPasslinkPersister() persistence.PasslinkPersister {
+	return p.passlinkPersister
+}
+
+func (p *persister) GetPasslinkPersisterWithConnection(tx *pop.Connection) persistence.PasslinkPersister {
+	return p.passlinkPersister
 }
 
 func (p *persister) GetWebauthnCredentialPersister() persistence.WebauthnCredentialPersister {

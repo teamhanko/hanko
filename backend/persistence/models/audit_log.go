@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/gofrs/uuid"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 type AuditLog struct {
@@ -35,6 +36,11 @@ var (
 	AuditLogPasscodeLoginInitFailed     AuditLogType = "passcode_login_init_failed"
 	AuditLogPasscodeLoginFinalSucceeded AuditLogType = "passcode_login_final_succeeded"
 	AuditLogPasscodeLoginFinalFailed    AuditLogType = "passcode_login_final_failed"
+
+	AuditLogPasslinkLoginInitSucceeded  AuditLogType = "passlink_login_init_succeeded"
+	AuditLogPasslinkLoginInitFailed     AuditLogType = "passlink_login_init_failed"
+	AuditLogPasslinkLoginFinalSucceeded AuditLogType = "passlink_login_final_succeeded"
+	AuditLogPasslinkLoginFinalFailed    AuditLogType = "passlink_login_final_failed"
 
 	AuditLogWebAuthnRegistrationInitSucceeded  AuditLogType = "webauthn_registration_init_succeeded"
 	AuditLogWebAuthnRegistrationInitFailed     AuditLogType = "webauthn_registration_init_failed"

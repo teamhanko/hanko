@@ -2,10 +2,11 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter/httplimit"
-	"github.com/teamhanko/hanko/backend/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -109,9 +110,22 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if err != nil {
 		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
 	}
+
 	passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 	if err != nil {
 		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
+	}
+
+	if cfg.Passlink.Enabled {
+		passlinkHandler, err := NewPasslinkHandler(cfg, persister, sessionManager, mailer, auditLogger)
+		if err != nil {
+			panic(fmt.Errorf("failed to create public passlink handler: %w", err))
+		}
+
+		passlink := g.Group("/passlink")
+		passlinkLogin := passlink.Group("/login", webhookMiddlware)
+		passlinkLogin.POST("/initialize", passlinkHandler.Init).Name = "passlink_login_initialize"
+		passlinkLogin.POST("/finalize", passlinkHandler.Finish).Name = "passlink_login_finalize"
 	}
 
 	health := e.Group("/health")

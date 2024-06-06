@@ -1,9 +1,18 @@
 login_text:
   description: "The sign in content of the text email."
   other: "Enter the following passcode on your login screen:"
+passlink_login_text:
+  description: "The sign in content of the text email."
+  other: "Click the link below to securely log into your account at {{ .ServiceName }}:"
 ttl_text:
   description: "The length how long the passcode is valid."
   other: "The passcode is valid for {{ .TTL }} minutes."
+passlink_ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "This link is valid for {{ .TTL }} minutes and can only be used once. If you did not request this link, please ignore this email."
 email_subject_login:
   description: ""
   other: "Use passcode {{ .Code }} to sign in to {{ .ServiceName }}"
+email_subject_login_passlink:
+  description: ""
+  other: "Confirm your sign in request to {{ .ServiceName }}"
