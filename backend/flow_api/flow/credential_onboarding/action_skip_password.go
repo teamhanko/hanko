@@ -19,16 +19,15 @@ func (a SkipPassword) GetDescription() string {
 
 func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	switch c.GetFlowName() {
-	case "registration":
-		if !deps.Cfg.Password.Optional {
-			c.SuspendAction()
-		}
 
-		if prev, _ := c.GetPreviousState(); prev != nil && *prev == shared.StateCredentialOnboardingChooser {
-			c.SuspendAction()
-		}
+	if !deps.Cfg.Password.Optional {
+		c.SuspendAction()
 	}
+
+	if prev, _ := c.GetPreviousState(); prev != nil && *prev == shared.StateCredentialOnboardingChooser {
+		c.SuspendAction()
+	}
+
 }
 func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
