@@ -16,6 +16,10 @@ export interface OnboardingVerifyPasskeyAttestationPayload {
   readonly creation_options: CredentialCreationOptionsJSON;
 }
 
+export interface LoginInitPayload {
+  readonly request_options?: CredentialRequestOptionsJSON;
+}
+
 export interface Passkey {
   readonly id: string;
   readonly name?: string;

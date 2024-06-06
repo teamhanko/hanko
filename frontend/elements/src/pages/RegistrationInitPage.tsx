@@ -133,7 +133,7 @@ const RegistrationInitPage = (props: Props) => {
               markOptional={multipleInputsAvailable}
               markError={multipleInputsAvailable}
               type={"text"}
-              autoComplete={"username webauthn"}
+              autoComplete={"username"}
               autoCorrect={"off"}
               flowInput={inputs.username}
               onInput={onUsernameInput}
@@ -146,7 +146,7 @@ const RegistrationInitPage = (props: Props) => {
               markOptional={multipleInputsAvailable}
               markError={multipleInputsAvailable}
               type={"email"}
-              autoComplete={"username webauthn"}
+              autoComplete={"email"}
               autoCorrect={"off"}
               flowInput={inputs.email}
               onInput={onEmailInput}
