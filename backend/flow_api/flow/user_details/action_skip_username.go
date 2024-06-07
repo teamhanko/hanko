@@ -28,7 +28,3 @@ func (a SkipUsername) Execute(c flowpilot.ExecutionContext) error {
 	return c.EndSubFlow()
 
 }
-
-func (a SkipUsername) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

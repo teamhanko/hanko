@@ -28,7 +28,3 @@ func (a SkipEmail) Execute(c flowpilot.ExecutionContext) error {
 	return c.EndSubFlow()
 
 }
-
-func (a SkipEmail) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

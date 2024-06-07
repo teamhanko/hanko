@@ -92,7 +92,3 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 
 	return c.ContinueFlow(shared.StateProfileInit)
 }
-
-func (a WebauthnVerifyAttestationResponse) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

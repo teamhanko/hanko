@@ -22,5 +22,3 @@ func (a ContinueToPassword) Initialize(_ flowpilot.InitializationContext) {}
 func (a ContinueToPassword) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(shared.StatePasswordCreation)
 }
-
-func (a ContinueToPassword) Finalize(_ flowpilot.FinalizationContext) error { return nil }

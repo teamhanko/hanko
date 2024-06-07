@@ -163,10 +163,6 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("no authentication method enabled")))
 }
 
-func (a ContinueWithLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}
-
 // analyzeIdentifierInputs determines if an input value has been provided for 'identifier', 'email', or 'username',
 // according to the configuration. Also adds an input error to the expected input field, if the value is missing.
 // Returns the related input field name, the provided value, and a flag, indicating if the value should be treated as

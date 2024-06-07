@@ -69,14 +69,6 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(shared.StateProfileInit)
 }
 
-func (a WebauthnCredentialDelete) Finalize(c flowpilot.FinalizationContext) error {
-	if a.mustSuspend(c) {
-		c.SuspendAction()
-	}
-
-	return nil
-}
-
 func (a WebauthnCredentialDelete) mustSuspend(c flowpilot.Context) bool {
 	deps := a.GetDeps(c)
 

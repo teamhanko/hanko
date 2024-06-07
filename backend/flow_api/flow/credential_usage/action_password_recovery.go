@@ -79,7 +79,3 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.EndSubFlow()
 }
-
-func (a PasswordRecovery) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

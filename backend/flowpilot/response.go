@@ -179,14 +179,17 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
-			schema := er.getExecutionSchema(fc, actionDetail)
+			schema := er.getSchema(fc, actionDetail)
 
-			if schema == nil {
-				// Create schema if not available.
-				if schema = er.createSchema(fc, actionDetail); schema == nil {
-					continue
-				}
-			} else if er.isSuspended {
+			// (Re-)Initialize each action
+			aic := defaultActionInitializationContext{
+				schema:             schema.toInitializationSchema(),
+				defaultFlowContext: fc,
+			}
+
+			actionDetail.action.Initialize(&aic)
+
+			if aic.isSuspended {
 				continue
 			}
 
@@ -207,47 +210,13 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 	return publicActions
 }
 
-// createSchema creates an execution schema for a method if needed.
-func (er *executionResult) createSchema(fc defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
-	var schema ExecutionSchema
-
-	if er.actionExecutionResult != nil {
-		var err error
-
-		data := er.actionExecutionResult.schema.getOutputData()
-		schema, err = newSchemaWithOutputData(data)
-
-		if err != nil {
-			return nil
-		}
-	} else {
-		schema = newSchema()
-	}
-
-	// Initialize the action.
-	aic := defaultActionInitializationContext{
-		schema:             schema.toInitializationSchema(),
-		defaultFlowContext: fc,
-	}
-
-	actionDetail.action.Initialize(&aic)
-
-	if aic.isSuspended {
-		return nil
-	}
-
-	return schema
-}
-
-// getExecutionSchema gets the execution schema for a given method name.
-func (er *executionResult) getExecutionSchema(fc defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
-
+// getSchema returns the schema for a given method name.
+func (er *executionResult) getSchema(fc defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
 	if er.actionExecutionResult == nil ||
 		actionDetail.action.GetName() != er.actionExecutionResult.actionName ||
 		actionDetail.flowPath.String() != fc.GetFlowPath().String() || er.nextStateName != fc.GetCurrentState() {
-		return nil
+		return newSchema()
 	}
-
 	return er.actionExecutionResult.schema
 }
 

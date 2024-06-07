@@ -372,8 +372,7 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 	newPath := newFlowPathFromString(aec.stash.Get("_.flowPath").String())
 	newPath.remove()
 
-	scheduledSubflow := aec.flow.subFlows.getSubFlowFromStateName(*scheduledStateName)
-	if scheduledSubflow != nil {
+	if scheduledSubflow := aec.flow.subFlows.getSubFlowFromStateName(*scheduledStateName); scheduledSubflow != nil {
 		newPath.add(scheduledSubflow.getName())
 	}
 

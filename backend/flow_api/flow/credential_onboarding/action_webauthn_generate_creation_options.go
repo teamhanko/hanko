@@ -74,7 +74,3 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 
 	return c.ContinueFlow(shared.StateOnboardingVerifyPasskeyAttestation)
 }
-
-func (a WebauthnGenerateCreationOptions) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

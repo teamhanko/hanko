@@ -85,7 +85,3 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(StateThirdPartyOAuth)
 }
-
-func (a ThirdPartyOAuth) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

@@ -76,10 +76,6 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(StateSuccess)
 }
 
-func (a ExchangeToken) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}
-
 func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 	result := make([]flowpilot.StateName, 0)

@@ -125,7 +125,3 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlow(shared.StateProfileInit)
 	}
 }
-
-func (a EmailCreate) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

@@ -69,7 +69,3 @@ func (a WebauthnCredentialRename) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(shared.StateProfileInit)
 }
-
-func (a WebauthnCredentialRename) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

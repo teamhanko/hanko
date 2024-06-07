@@ -68,7 +68,3 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(c.GetCurrentState())
 }
-
-func (a ReSendPasscode) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

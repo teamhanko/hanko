@@ -48,11 +48,10 @@ type ActionName string
 
 // Action defines the interface for flow actions.
 type Action interface {
-	GetName() ActionName                // Get the action name.
-	GetDescription() string             // Get the action description.
-	Initialize(InitializationContext)   // Initialize the action.
-	Execute(ExecutionContext) error     // Execute the action.
-	Finalize(FinalizationContext) error // Finalize the action.
+	GetName() ActionName              // Get the action name.
+	GetDescription() string           // Get the action description.
+	Initialize(InitializationContext) // Initialize the action.
+	Execute(ExecutionContext) error   // Execute the action.
 }
 
 type defaultActionDetail struct {
