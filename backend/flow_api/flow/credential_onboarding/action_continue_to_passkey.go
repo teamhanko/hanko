@@ -22,5 +22,3 @@ func (a ContinueToPasskey) Initialize(_ flowpilot.InitializationContext) {}
 func (a ContinueToPasskey) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
 }
-
-func (a ContinueToPasskey) Finalize(_ flowpilot.FinalizationContext) error { return nil }

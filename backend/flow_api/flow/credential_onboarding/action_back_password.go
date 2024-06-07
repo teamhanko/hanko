@@ -25,7 +25,7 @@ func (a BackPassword) Initialize(c flowpilot.InitializationContext) {
 		userDetailsOnboardingDone := (*previousState == shared.StateOnboardingUsername && c.Stash().Get("username").Exists()) ||
 			(*previousState == shared.StateOnboardingEmail && c.Stash().Get("email").Exists())
 
-		if *previousState == shared.StatePasscodeConfirmation || passkeyOnboardingDone || userDetailsOnboardingDone {
+		if *previousState == shared.StatePasscodeConfirmation || *previousState == shared.StateLoginPassword || passkeyOnboardingDone || userDetailsOnboardingDone {
 			c.SuspendAction()
 		}
 	}
@@ -34,8 +34,4 @@ func (a BackPassword) Initialize(c flowpilot.InitializationContext) {
 
 func (a BackPassword) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueToPreviousState()
-}
-
-func (a BackPassword) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
 }

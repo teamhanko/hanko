@@ -89,14 +89,6 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(shared.StateProfileInit)
 }
 
-func (a EmailDelete) Finalize(c flowpilot.FinalizationContext) error {
-	if a.mustSuspend(c) {
-		c.SuspendAction()
-	}
-
-	return nil
-}
-
 func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
 	deps := a.GetDeps(c)
 

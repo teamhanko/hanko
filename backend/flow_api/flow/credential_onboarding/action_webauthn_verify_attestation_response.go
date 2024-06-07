@@ -80,7 +80,3 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 
 	return c.EndSubFlow()
 }
-
-func (a WebauthnVerifyAttestationResponse) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

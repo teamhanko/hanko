@@ -33,7 +33,3 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 
 	return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
 }
-
-func (a ContinueToPasscodeConfirmationRecovery) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

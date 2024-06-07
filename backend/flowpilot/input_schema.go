@@ -26,6 +26,15 @@ type ExecutionSchema interface {
 // inputs represents a collection of Input instances.
 type inputs []Input
 
+func (il *inputs) exists(input Input) bool {
+	for _, existingInput := range *il {
+		if existingInput.getName() == input.getName() {
+			return true
+		}
+	}
+	return false
+}
+
 // PublicSchema represents a collection of PublicInput instances.
 type PublicSchema map[string]*PublicInput
 
@@ -83,7 +92,9 @@ func (s *defaultSchema) Set(path string, value interface{}) error {
 // AddInputs adds input fields to the defaultSchema and returns the updated schema.
 func (s *defaultSchema) AddInputs(inputList ...Input) {
 	for _, input := range inputList {
-		s.inputs = append(s.inputs, input)
+		if !s.inputs.exists(input) {
+			s.inputs = append(s.inputs, input)
+		}
 	}
 }
 

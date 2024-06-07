@@ -82,7 +82,3 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.ContinueFlow(shared.StateProfileInit)
 }
-
-func (a PasswordSet) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

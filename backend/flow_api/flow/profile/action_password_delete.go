@@ -66,14 +66,6 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueFlow(shared.StateProfileInit)
 }
 
-func (a PasswordDelete) Finalize(c flowpilot.FinalizationContext) error {
-	if a.mustSuspend(c) {
-		c.SuspendAction()
-	}
-
-	return nil
-}
-
 func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 	deps := a.GetDeps(c)
 

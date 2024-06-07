@@ -303,18 +303,6 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		aec.executionResult = &er
 	}
 
-	afc := defaultActionFinalizationContext{
-		executionResult: aec.executionResult,
-		contextValues:   flow.contextValues,
-	}
-
-	err = actionDetail.action.Finalize(&afc)
-	if err != nil {
-		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
-	}
-
 	// Generate a response based on the execution result.
-	er := *afc.executionResult
-
-	return er.generateResponse(fc, flow.debug), nil
+	return aec.executionResult.generateResponse(fc, flow.debug), nil
 }

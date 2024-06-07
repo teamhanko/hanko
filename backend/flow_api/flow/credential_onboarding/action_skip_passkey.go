@@ -45,7 +45,3 @@ func (a SkipPasskey) Execute(c flowpilot.ExecutionContext) error {
 	return c.EndSubFlow()
 
 }
-
-func (a SkipPasskey) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

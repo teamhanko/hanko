@@ -57,7 +57,3 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 
 	return c.EndSubFlow()
 }
-
-func (a RegisterClientCapabilities) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

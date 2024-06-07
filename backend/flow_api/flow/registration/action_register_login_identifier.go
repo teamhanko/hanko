@@ -147,10 +147,6 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	return c.StartSubFlow(states[0], states[1:]...)
 }
 
-func (a RegisterLoginIdentifier) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}
-
 func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {
 	deps := a.GetDeps(c)
 

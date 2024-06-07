@@ -31,7 +31,3 @@ func (a BackCredentialOnboardingMethodChooser) Initialize(c flowpilot.Initializa
 func (a BackCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueToPreviousState()
 }
-
-func (a BackCredentialOnboardingMethodChooser) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

@@ -28,7 +28,3 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 
 	return c.ContinueFlow(shared.StatePasscodeConfirmation)
 }
-
-func (a ContinueToPasscodeConfirmation) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

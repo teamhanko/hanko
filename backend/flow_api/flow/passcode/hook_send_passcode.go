@@ -85,7 +85,3 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 
 	return nil
 }
-
-func (a SendPasscode) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

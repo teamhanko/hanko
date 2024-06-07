@@ -28,7 +28,3 @@ func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.Initializa
 func (a SkipCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionContext) error {
 	return c.EndSubFlow()
 }
-
-func (a SkipCredentialOnboardingMethodChooser) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

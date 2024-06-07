@@ -74,7 +74,3 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateProfileInit)
 }
-
-func (a EmailVerify) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

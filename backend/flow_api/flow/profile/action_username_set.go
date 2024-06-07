@@ -76,7 +76,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameChanged,
 		&models.User{ID: userModel.ID},
 		nil,
-		auditlog.Detail("username", userModel.Username),
+		auditlog.Detail("username", userModel.Username.String),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {
@@ -84,8 +84,4 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	return c.ContinueFlow(shared.StateProfileInit)
-}
-
-func (a UsernameSet) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
 }

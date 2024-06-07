@@ -62,7 +62,3 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.EndSubFlow()
 }
-
-func (a RegisterPassword) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

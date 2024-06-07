@@ -72,7 +72,3 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.EndSubFlow()
 }
-
-func (a UsernameSet) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

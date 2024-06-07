@@ -44,7 +44,3 @@ func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.EndSubFlow()
 }
-
-func (a SkipPassword) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}

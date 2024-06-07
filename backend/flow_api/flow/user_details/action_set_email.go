@@ -71,7 +71,3 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 
 	return c.EndSubFlow()
 }
-
-func (a EmailAddressSet) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
-}
