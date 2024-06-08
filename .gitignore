@@ -32,3 +32,12 @@ e2e/playwright-report/
 e2e/playwright/.cache/
 /backend/build_info/version.txt
 /backend/dist
+# Devenv
+.devenv*
+devenv.local.nix
+
+# direnv
+.direnv
+
+# pre-commit
+.pre-commit-config.yaml
