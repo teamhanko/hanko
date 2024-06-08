@@ -1,29 +1,44 @@
 { pkgs, lib, config, inputs, ... }:
 let 
-    goPkgs = import (builtins.fetchGit {
-         name = "go-1.20 Nixpkgs Version";
-         url = "https://github.com/NixOS/nixpkgs/";
-         ref = "refs/heads/nixpkgs-unstable";
-         rev = "336eda0d07dc5e2be1f923990ad9fdb6bc8e28e3";
-     }) {};
+    goPkgs = pkgs.callPackage inputs.go_1_20_revision { };
 in 
 {
   dotenv.enable = true;
+  dotenv.filename = ".env";
+
   name = "hanko";
 
-  languages = {
-      go.enable = true;
-      go.package = goPkgs.go_1_20;
-  };
+  packages = [
+    goPkgs.go_1_20
+    pkgs.cacert
+  ] ++ lib.optionals ( !config.container.isBuilding) [
+    pkgs.docker
+    pkgs.docker-compose
+  ];
+
+  enterShell = ''
+    if [[ ! -f .env ]]; then
+      cp .env.template .env
+      echo "Created a new .env file from .env.example"
+    fi
+  '';
 
   processes.serveBackend = {
-    exec = "cd backend && ${pkgs.go_1_20}/bin/go";
+    exec = "cd backend && ${goPkgs.go_1_20}/bin/go";
   };
 
   containers = {
     "hanko" = {
       copyToRoot = ./backend;
-      name = config.IMAGE_NAME;
+      name = config.env.IMAGE_NAME;
+      startupCommand = ''
+        export SSL_CERT_DIR="${pkgs.cacert}/certs/"
+        echo "This is a the DIR"
+        echo $SSL_CERT_DIR
+        ${goPkgs.go_1_20}/bin/go generate ./...
+        CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" ${goPkgs.go_1_20}/bin/go build -a -o hanko main.go
+        ./hanko
+      '';
     };
   };
 }
