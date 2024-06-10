@@ -10,16 +10,11 @@ in
 
   packages = [
     goPkgs.go_1_20
-    pkgs.cacert
     pkgs.git
-    pkgs.docker
-    pkgs.docker-compose
     pkgs.nixpacks
   ];
 
   enterShell = ''
-    export SSL_CERT_DIR=${pkgs.cacert}/etc/ssl/certs/
-
     if [[ ! -f .env ]]; then
       cp .env.template .env
       echo "Created a new .env file from .env.example"
