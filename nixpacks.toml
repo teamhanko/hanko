@@ -3,4 +3,4 @@
     nixPkgs = [ "go_1_20" ]
 
 [phases.build]
-    cmd = "go enerate ./... && CGO_ENABLED=0 GOOS=linux GOARCH='$TARGETARCH' go build -a -o hanko main.go"
+    cmd = "go generate ./... && CGO_ENABLED=0 GOOS=linux GOARCH='$TARGETARCH' go build -a -o hanko main.go"
