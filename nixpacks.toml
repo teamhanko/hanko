@@ -1,0 +1,6 @@
+[phases.setup]
+    nixpkgsArchive = '336eda0d07dc5e2be1f923990ad9fdb6bc8e28e3'
+    nixPkgs = [ "go_1_20" ]
+
+[phases.build]
+    cmd = "go enerate ./... && CGO_ENABLED=0 GOOS=linux GOARCH='$TARGETARCH' go build -a -o hanko main.go"
