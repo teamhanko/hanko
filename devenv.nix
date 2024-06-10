@@ -31,6 +31,6 @@ in
       nixpacks build ./backend \
         --name ${config.env.IMAGE_NAME}
     '';
-    push_image.exec = "devenv container --registry docker:// copy hanko";
+    build_push_image.exec = "build_image && docker push ${config.env.IMAGE_NAME}";
   };
 }
