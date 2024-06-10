@@ -14,6 +14,7 @@ in
   ] ++ lib.optionals ( !config.container.isBuilding) [
     pkgs.docker
     pkgs.docker-compose
+    pkgs.git
   ];
 
   enterShell = ''
@@ -32,9 +33,7 @@ in
       copyToRoot = ./backend;
       name = config.env.IMAGE_NAME;
       startupCommand = ''
-        export SSL_CERT_DIR="${pkgs.cacert}/certs/"
-        echo "This is a the DIR"
-        echo $SSL_CERT_DIR
+        export SSL_CERT_DIR=${pkgs.cacert}/etc/ssl/certs/
         ${goPkgs.go_1_20}/bin/go generate ./...
         CGO_ENABLED=0 GOOS=linux GOARCH="$TARGETARCH" ${goPkgs.go_1_20}/bin/go build -a -o hanko main.go
         ./hanko
