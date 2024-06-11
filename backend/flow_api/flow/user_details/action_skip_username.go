@@ -1,6 +1,7 @@
 package user_details
 
 import (
+	"fmt"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -25,6 +26,9 @@ func (a SkipUsername) Initialize(c flowpilot.InitializationContext) {
 	}
 }
 func (a SkipUsername) Execute(c flowpilot.ExecutionContext) error {
-	return c.EndSubFlow()
+	if err := c.Stash().Set("suspend_back_action", false); err != nil {
+		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
+	}
 
+	return c.EndSubFlow()
 }
