@@ -77,5 +77,10 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
+	err = c.Stash().Set("suspend_back_action", true)
+	if err != nil {
+		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
+	}
+
 	return c.EndSubFlow()
 }
