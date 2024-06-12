@@ -122,7 +122,7 @@ func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
 	count, err := flowDB.tx.
 		Where("id = ?", f.ID).
 		Where("version = ?", previousVersion).
-		UpdateQuery(f, "current_state", "stash_data", "version")
+		UpdateQuery(f, "current_state", "stash_data", "version", "csrf_token")
 	if err != nil {
 		return err
 	}

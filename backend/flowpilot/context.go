@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/crypto"
 	"time"
 )
 
@@ -170,7 +169,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to stash current flowPath: %w", err)
 	}
-	crypto.GenerateRandomStringURLSafe(32)
+
 	csrfToken, err := generateRandomString(32)
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate csrf token: %w", err)
@@ -245,6 +244,24 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	// Initialize JSONManagers for payload and flash data.
 	payload := NewPayload()
 
+	// Parse raw input data into JSONManager.
+	raw := options.inputData.getJSONStringOrDefault()
+	inputJSON, err := NewActionInputFromString(raw)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse input data: %w", err)
+	}
+	csrfTokenToValidate := inputJSON.Get("_csrf_token").String()
+
+	if len(flowModel.CSRFToken) <= 0 && flowModel.CSRFToken != csrfTokenToValidate {
+		err = errors.New("csrf token mismatch")
+		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
+	}
+
+	csrfToken, err := generateRandomString(32)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate csrf token: %w", err)
+	}
+
 	// Create a defaultFlowContext instance.
 	fc := defaultFlowContext{
 		flow:      flow,
@@ -252,23 +269,12 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		flowModel: *flowModel,
 		stash:     stash,
 		payload:   payload,
+		csrfToken: csrfToken,
 	}
 
 	state, err := flow.getState(flowModel.CurrentState)
 	if err != nil {
 		return nil, err
-	}
-
-	// Parse raw input data into JSONManager.
-	raw := options.inputData.getJSONStringOrDefault()
-	inputJSON, err := NewActionInputFromString(raw)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse input data: %w", err)
-	}
-
-	if inputJSON.Get("_csrf_token").String() != flowModel.CSRFToken {
-		err = errors.New("csrf token mismatch")
-		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
 	// Get the action associated with the actionParam name.
