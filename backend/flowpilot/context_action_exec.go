@@ -22,18 +22,24 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	newVersion := aec.flowModel.Version + 1
 	stashData := aec.stash.String()
 
+	csrfToken, err := generateRandomString(32)
+	if err != nil {
+		return fmt.Errorf("failed to generate csrf token: %w", err)
+	}
+
 	// Prepare parameters for updating the flow in the database.
 	flowUpdate := flowUpdateParam{
 		flowID:    aec.flowModel.ID,
 		nextState: executionResult.nextStateName,
 		stashData: stashData,
 		version:   newVersion,
+		csrfToken: csrfToken,
 		expiresAt: aec.flowModel.ExpiresAt,
 		createdAt: aec.flowModel.CreatedAt,
 	}
 
 	// Update the flow model in the database.
-	if _, err := aec.dbw.updateFlowWithParam(flowUpdate); err != nil {
+	if _, err = aec.dbw.updateFlowWithParam(flowUpdate); err != nil {
 		return fmt.Errorf("failed to store updated flow: %w", err)
 	}
 
@@ -51,7 +57,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	}
 
 	// Create a new Transition in the database.
-	if _, err := aec.dbw.createTransitionWithParam(transitionCreation); err != nil {
+	if _, err = aec.dbw.createTransitionWithParam(transitionCreation); err != nil {
 		return fmt.Errorf("failed to store a new transition: %w", err)
 	}
 

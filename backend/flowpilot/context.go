@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/crypto"
 	"time"
 )
 
@@ -158,20 +159,30 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
 	}
 
-	flowPath := newFlowPathFromString(flow.name)
+	fp := newFlowPathFromString(flow.name)
 
 	subflow := flow.subFlows.getSubFlowFromStateName(flow.initialStateName)
 	if subflow != nil {
-		flowPath.add(subflow.getName())
+		fp.add(subflow.getName())
 	}
 
-	err = stash.Set("_.flowPath", flowPath.String())
+	err = stash.Set("_.flowPath", fp.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to stash current flowPath: %w", err)
 	}
+	crypto.GenerateRandomStringURLSafe(32)
+	csrfToken, err := generateRandomString(32)
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate csrf token: %w", err)
+	}
 
 	// Create a new flow model with the provided parameters.
-	flowCreation := flowCreationParam{currentState: flow.initialStateName, stash: stash.String(), expiresAt: expiresAt}
+	flowCreation := flowCreationParam{
+		currentState: flow.initialStateName,
+		stash:        stash.String(),
+		csrfToken:    csrfToken,
+		expiresAt:    expiresAt,
+	}
 	flowModel, err := dbw.createFlowWithParam(flowCreation)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create flow: %w", err)
@@ -206,13 +217,13 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 // executeFlowAction processes the flow and returns a Response.
 func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions) (FlowResult, error) {
 	// Parse the actionParam parameter to get the actionParam name and flow ID.
-	actionParam, err := parseActionParam(options.action)
+	queryParam, err := parseQueryParam(options.action)
 	if err != nil {
 		return newFlowResultFromError(flow.errorStateName, ErrorActionParamInvalid.Wrap(err), flow.debug), nil
 	}
 
 	// Retrieve the flow model from the database using the flow ID.
-	flowModel, err := db.GetFlow(actionParam.flowID)
+	flowModel, err := db.GetFlow(queryParam.flowID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
@@ -255,11 +266,13 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
 
-	// Create a ActionName from the parsed actionParam name.
-	actionName := ActionName(actionParam.actionName)
+	if inputJSON.Get("_csrf_token").String() != flowModel.CSRFToken {
+		err = errors.New("csrf token mismatch")
+		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
+	}
 
 	// Get the action associated with the actionParam name.
-	actionDetail, err := state.getActionDetail(actionName)
+	actionDetail, err := state.getActionDetail(queryParam.actionName)
 	if err != nil {
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
@@ -273,7 +286,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Create a actionExecutionContext instance for action execution.
 	aec := defaultActionExecutionContext{
-		actionName:         actionName,
+		actionName:         queryParam.actionName,
 		input:              schema,
 		defaultFlowContext: fc,
 	}
