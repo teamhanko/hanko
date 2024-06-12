@@ -11,6 +11,7 @@ type FlowModel struct {
 	ID           uuid.UUID // Unique ID of the defaultFlow.
 	CurrentState StateName // Current state of the defaultFlow.
 	StashData    string    // Stash data associated with the defaultFlow.
+	CSRFToken    string    // Current CSRF token
 	Version      int       // Version of the defaultFlow.
 	ExpiresAt    time.Time // Expiry time of the defaultFlow.
 	CreatedAt    time.Time // Creation time of the defaultFlow.
@@ -64,6 +65,7 @@ func wrapDB(db FlowDB) flowDBWrapper {
 type flowCreationParam struct {
 	currentState StateName // Initial state  of the flow.
 	stash        string    //
+	csrfToken    string    // Current CSRF token
 	expiresAt    time.Time // Expiry time of the flow.
 }
 
@@ -81,6 +83,7 @@ func (w *defaultFlowDBWrapper) createFlowWithParam(p flowCreationParam) (*FlowMo
 		CurrentState: p.currentState,
 		StashData:    p.stash,
 		Version:      0,
+		CSRFToken:    p.csrfToken,
 		ExpiresAt:    p.expiresAt,
 		CreatedAt:    time.Now().UTC(),
 		UpdatedAt:    time.Now().UTC(),
@@ -101,6 +104,7 @@ type flowUpdateParam struct {
 	nextState StateName // Next state of the flow.
 	stashData string    // Updated stash data for the flow.
 	version   int       // Updated version of the flow.
+	csrfToken string    // Current CSRF tokens
 	expiresAt time.Time // Updated expiry time of the flow.
 	createdAt time.Time // Original creation time of the flow.
 }
@@ -113,6 +117,7 @@ func (w *defaultFlowDBWrapper) updateFlowWithParam(p flowUpdateParam) (*FlowMode
 		CurrentState: p.nextState,
 		StashData:    p.stashData,
 		Version:      p.version,
+		CSRFToken:    p.csrfToken,
 		ExpiresAt:    p.expiresAt,
 		UpdatedAt:    time.Now().UTC(),
 		CreatedAt:    p.createdAt,

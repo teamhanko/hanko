@@ -42,6 +42,7 @@ type PublicResponse struct {
 	FlowPath      *string       `json:"flow_path,omitempty"`
 	Status        int           `json:"status"`
 	Payload       interface{}   `json:"payload,omitempty"`
+	CSRFToken     string        `json:"csrf_token"`
 	PublicActions PublicActions `json:"actions"`
 	PublicError   *PublicError  `json:"error,omitempty"`
 	PublicLinks   PublicLinks   `json:"links"`
@@ -134,6 +135,7 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 		Payload:       payload,
 		PublicActions: actions,
 		PublicLinks:   links,
+		CSRFToken:     fc.flowModel.CSRFToken,
 	}
 
 	if debug {
@@ -221,6 +223,6 @@ func (er *executionResult) getSchema(fc defaultFlowContext, actionDetail default
 
 // createHref creates a link HREF based on the current flow context and method name.
 func (er *executionResult) createHref(fc defaultFlowContext, actionName ActionName) string {
-	action := createActionParam(string(actionName), fc.GetFlowID())
-	return fmt.Sprintf("%s?flowpilot_action=%s", fc.GetPath(), action)
+	queryParam := createQueryParam(string(actionName), fc.GetFlowID())
+	return fmt.Sprintf("%s?flowpilot_action=%s", fc.GetPath(), queryParam)
 }

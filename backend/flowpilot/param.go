@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-// parsedAction represents a parsed action from an input string.
-type parsedAction struct {
-	actionName string    // The name of the action extracted from the input string.
-	flowID     uuid.UUID // The UUID representing the flow ID extracted from the input string.
+// parsedQueryParam represents a parsed action from an input string.
+type parsedQueryParam struct {
+	actionName ActionName // The name of the action extracted from the input string.
+	flowID     uuid.UUID  // The UUID representing the flow ID extracted from the input string.
 }
 
-// parseActionParam parses an input string to extract action name and flow ID.
-func parseActionParam(inputString string) (*parsedAction, error) {
+// parseQueryParam parses an input string to extract action name and flow ID.
+func parseQueryParam(inputString string) (*parsedQueryParam, error) {
 	if inputString == "" {
 		return nil, fmt.Errorf("input string is empty")
 	}
@@ -36,11 +36,11 @@ func parseActionParam(inputString string) (*parsedAction, error) {
 		return nil, fmt.Errorf("failed to parse second part of the input string: %w", err)
 	}
 
-	// Return a parsedAction instance with extracted action name and flow ID.
-	return &parsedAction{actionName: action, flowID: flowID}, nil
+	// Return a parsedQueryParam instance with extracted action name and flow ID.
+	return &parsedQueryParam{actionName: ActionName(action), flowID: flowID}, nil
 }
 
-// createActionParam creates an input string from action name and flow ID.
-func createActionParam(action string, flowID uuid.UUID) string {
+// createQueryParam creates an input string from action name and flow ID.
+func createQueryParam(action string, flowID uuid.UUID) string {
 	return fmt.Sprintf("%s@%s", action, flowID)
 }

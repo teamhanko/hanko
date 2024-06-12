@@ -1,0 +1,1 @@
+add_column("flows", "csrf_token", "string", { "size": 32 })
