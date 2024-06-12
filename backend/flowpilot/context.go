@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"time"
 )
 
@@ -207,13 +206,13 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 // executeFlowAction processes the flow and returns a Response.
 func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions) (FlowResult, error) {
 	// Parse the actionParam parameter to get the actionParam name and flow ID.
-	actionParam, err := utils.ParseActionParam(options.action)
+	actionParam, err := parseActionParam(options.action)
 	if err != nil {
 		return newFlowResultFromError(flow.errorStateName, ErrorActionParamInvalid.Wrap(err), flow.debug), nil
 	}
 
 	// Retrieve the flow model from the database using the flow ID.
-	flowModel, err := db.GetFlow(actionParam.FlowID)
+	flowModel, err := db.GetFlow(actionParam.flowID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
@@ -257,7 +256,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Create a ActionName from the parsed actionParam name.
-	actionName := ActionName(actionParam.ActionName)
+	actionName := ActionName(actionParam.actionName)
 
 	// Get the action associated with the actionParam name.
 	actionDetail, err := state.getActionDetail(actionName)

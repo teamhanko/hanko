@@ -2,7 +2,6 @@ package flowpilot
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot/utils"
 	"net/http"
 )
 
@@ -222,6 +221,6 @@ func (er *executionResult) getSchema(fc defaultFlowContext, actionDetail default
 
 // createHref creates a link HREF based on the current flow context and method name.
 func (er *executionResult) createHref(fc defaultFlowContext, actionName ActionName) string {
-	action := utils.CreateActionParam(string(actionName), fc.GetFlowID())
+	action := createActionParam(string(actionName), fc.GetFlowID())
 	return fmt.Sprintf("%s?flowpilot_action=%s", fc.GetPath(), action)
 }
