@@ -86,7 +86,7 @@ func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
 	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
 	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication && (canUseEmailAsLoginIdentifier || canUseUsernameAsLoginIdentifier && len(userModel.Emails) > 0)
-	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled()
+	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled() || len(deps.SamlService.Providers()) > 0
 	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPasscode && !canDoThirdParty
 
 	if canUseNoOtherAuthMethod {

@@ -20,7 +20,7 @@ const (
 	StateProfileWebauthnCredentialVerification flowpilot.StateName = "webauthn_credential_verification"
 	StateRegistrationInit                      flowpilot.StateName = "registration_init"
 	StateSuccess                               flowpilot.StateName = "success"
-	StateThirdPartyOAuth                       flowpilot.StateName = "thirdparty_oauth"
+	StateThirdParty                            flowpilot.StateName = "thirdparty"
 	StateOnboardingEmail                       flowpilot.StateName = "onboarding_email"
 	StateOnboardingUsername                    flowpilot.StateName = "onboarding_username"
 )

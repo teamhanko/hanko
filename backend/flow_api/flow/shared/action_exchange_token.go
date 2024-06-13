@@ -44,7 +44,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return errors.New("token expired")
 	}
 
-	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(tokenModel.IdentityID)
+	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch identity from db: %w", err)
 	}
@@ -64,19 +64,23 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete token from db: %w", err)
 	}
 
-	onboardingStates, err := a.determineOnboardingStates(c, identity)
+	onboardingStates, err := a.determineOnboardingStates(c, identity, tokenModel.UserCreated)
 	if err != nil {
 		return fmt.Errorf("failed to determine onboarding stattes: %w", err)
 	}
 
 	if len(onboardingStates) > 0 {
-		return c.StartSubFlow(onboardingStates[0], onboardingStates[1:]...)
+		if len(onboardingStates) == 1 && onboardingStates[0] == StateSuccess {
+			return c.ContinueFlow(StateSuccess)
+		} else {
+			return c.StartSubFlow(onboardingStates[0], onboardingStates[1:]...)
+		}
 	}
 
 	return c.ContinueFlow(StateSuccess)
 }
 
-func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity) ([]flowpilot.StateName, error) {
+func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 	result := make([]flowpilot.StateName, 0)
 
@@ -93,8 +97,8 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 	}
 
 	if deps.Cfg.Username.Enabled && len(identity.Email.User.Username.String) == 0 {
-		if (c.GetFlowName() == "login" && deps.Cfg.Username.AcquireOnLogin) ||
-			(c.GetFlowName() == "registration" && deps.Cfg.Username.AcquireOnRegistration) {
+		if (!userCreated && deps.Cfg.Username.AcquireOnLogin) ||
+			(userCreated && deps.Cfg.Username.AcquireOnRegistration) {
 			result = append(result, StateOnboardingUsername)
 		}
 	}

@@ -13,9 +13,10 @@ type AccountLinkingResult struct {
 	Type         models.AuditLogType
 	User         *models.User
 	WebhookEvent *events.Event
+	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isFlow bool) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isSaml bool, isFlow bool) (*AccountLinkingResult, error) {
 	if !isFlow {
 		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
@@ -59,10 +60,16 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer(getIdentityFailure).WithCause(err)
 	}
 
+	u, terr := p.GetUserPersisterWithConnection(tx).Get(*email.UserID)
+	if terr != nil {
+		return nil, ErrorServer("could not get user").WithCause(terr)
+	}
+
 	return &AccountLinkingResult{
 		Type:         models.AuditLogThirdPartyLinkingSucceeded,
-		User:         user,
+		User:         u,
 		WebhookEvent: nil,
+		UserCreated:  false,
 	}, nil
 }
 
@@ -145,6 +152,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		Type:         models.AuditLogThirdPartySignInSucceeded,
 		User:         user,
 		WebhookEvent: &webhookEvent,
+		UserCreated:  false,
 	}
 
 	return linkingResult, nil
@@ -219,6 +227,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		Type:         models.AuditLogThirdPartySignUpSucceeded,
 		User:         u,
 		WebhookEvent: &evt,
+		UserCreated:  true,
 	}
 
 	return linkingResult, nil

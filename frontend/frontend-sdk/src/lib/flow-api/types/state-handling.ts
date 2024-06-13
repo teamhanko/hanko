@@ -16,6 +16,7 @@ import {
   PreflightActions,
   ProfileInitActions,
   RegistrationInitActions,
+  ThirdPartyActions,
 } from "./action";
 
 import {
@@ -25,6 +26,7 @@ import {
   PasscodeConfirmationPayload,
   ProfilePayload,
   SuccessPayload,
+  ThirdPartyPayload,
 } from "./payload";
 
 export type StateName =
@@ -45,7 +47,8 @@ export type StateName =
   | "webauthn_credential_verification"
   | "onboarding_email"
   | "onboarding_username"
-  | "credential_onboarding_chooser";
+  | "credential_onboarding_chooser"
+  | "thirdparty";
 
 export interface Actions {
   readonly preflight: PreflightActions;
@@ -66,6 +69,7 @@ export interface Actions {
   readonly onboarding_email: OnboardingEmailActions;
   readonly onboarding_username: OnboardingUsernameActions;
   readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
+  readonly thirdparty: ThirdPartyActions;
 }
 
 export interface Payloads {
@@ -87,6 +91,7 @@ export interface Payloads {
   readonly onboarding_email: null;
   readonly onboarding_username: null;
   readonly credential_onboarding_chooser: null;
+  readonly thirdparty: ThirdPartyPayload;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";

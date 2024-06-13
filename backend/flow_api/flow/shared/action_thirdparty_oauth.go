@@ -83,5 +83,5 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set redirect_url to payload: %w", err)
 	}
 
-	return c.ContinueFlow(StateThirdPartyOAuth)
+	return c.ContinueFlow(StateThirdParty)
 }

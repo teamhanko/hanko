@@ -4,6 +4,7 @@ import {
   EmailDeleteInputs,
   EmailSetPrimaryInputs,
   EmailVerifyInputs,
+  ExchangeTokenInputs,
   PasskeyCredentialDelete,
   PasskeyCredentialRename,
   PasswordLoginInputs,
@@ -15,7 +16,7 @@ import {
   UsernameSetInputs,
   VerifyPasscodeInputs,
   WebauthnVerifyAssertionResponseInputs,
-  WebauthnVerifyAttestationResponseInputs,
+  WebauthnVerifyAttestationResponseInputs
 } from "./input";
 
 interface Action<TInputs> {
@@ -117,6 +118,10 @@ interface CredentialOnboardingChooserActions {
   readonly back: Action<null>;
 }
 
+interface ThirdPartyActions {
+  readonly exchange_token: Action<ExchangeTokenInputs>;
+}
+
 export type {
   Action,
   PreflightActions,
@@ -134,4 +139,5 @@ export type {
   OnboardingEmailActions,
   OnboardingUsernameActions,
   CredentialOnboardingChooserActions,
+  ThirdPartyActions,
 };

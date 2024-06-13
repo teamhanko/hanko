@@ -6,6 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -88,6 +89,21 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if email != "" {
+		if deps.Cfg.Saml.Enabled {
+			domain := strings.Split(email, "@")[1]
+			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
+				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+
+				if err != nil {
+					return fmt.Errorf("failed to get auth url: %w", err)
+				}
+
+				_ = c.Payload().Set("redirect_url", authUrl)
+
+				return c.ContinueFlow(shared.StateThirdParty)
+			}
+		}
+
 		// Check that email is not already taken
 		// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
 		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(email)

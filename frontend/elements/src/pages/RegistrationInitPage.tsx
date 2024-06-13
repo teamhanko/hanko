@@ -1,5 +1,5 @@
 import { Fragment } from "preact";
-import { useContext } from "preact/compat";
+import { useContext, useEffect, useState } from "preact/compat";
 
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
@@ -15,6 +15,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Input from "../components/form/Input";
+import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
   state: State<"registration_init">;
@@ -33,6 +34,9 @@ const RegistrationInitPage = (props: Props) => {
   const { flowState } = useFlowState(props.state);
   const { inputs } = flowState.actions.register_login_identifier(null);
   const multipleInputsAvailable = !!(inputs.email && inputs.username);
+  const [thirdPartyError, setThirdPartyError] = useState<
+    HankoError | undefined
+  >(undefined);
 
   const onIdentifierSubmit = async (event: Event) => {
     event.preventDefault();
@@ -68,11 +72,49 @@ const RegistrationInitPage = (props: Props) => {
     init("login");
   };
 
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+
+    if (
+      searchParams.get("error") == undefined ||
+      searchParams.get("error").length === 0
+    ) {
+      return;
+    }
+
+    let errorCode = "";
+    switch (searchParams.get("error")) {
+      case "access_denied":
+        errorCode = "thirdPartyAccessDenied";
+        break;
+      default:
+        errorCode = "somethingWentWrong";
+        break;
+    }
+
+    const error: HankoError = {
+      name: errorCode,
+      code: errorCode,
+      message: searchParams.get("error_description"),
+    };
+
+    setThirdPartyError(error);
+
+    searchParams.delete("error");
+    searchParams.delete("error_description");
+
+    history.replaceState(
+      null,
+      null,
+      window.location.pathname + searchParams.toString(),
+    );
+  }, []);
+
   return (
     <Fragment>
       <Content>
         <Headline1>{t("headlines.signUp")}</Headline1>
-        <ErrorBox state={flowState} />
+        <ErrorBox state={flowState} error={thirdPartyError} />
         <Form onSubmit={onIdentifierSubmit} maxWidth>
           {inputs.username ? (
             <Input
