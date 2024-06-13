@@ -28,6 +28,20 @@ class Flow extends Client {
     await this.run(initState, handlers);
   }
 
+  public async fromString(init: string, handlers: ExtendedHandlers) {
+    const fetchNextState: FetchNextState = async (href: string, body?: any) => {
+      try {
+        const response = await this.client.post(href, body);
+        return new State(response.json(), fetchNextState);
+      } catch (e) {
+        handlers.onError?.(e);
+      }
+    };
+
+    const initState = new State(JSON.parse(init), fetchNextState);
+    await this.run(initState, handlers);
+  }
+
   /**
    * Runs a handler for a given state.
    *

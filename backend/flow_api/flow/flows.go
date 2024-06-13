@@ -84,7 +84,7 @@ var LoginFlow = flowpilot.NewFlow("/login").
 		login.WebauthnGenerateRequestOptions{},
 		login.WebauthnVerifyAssertionResponse{},
 		shared.ThirdPartyOAuth{}).
-	State(shared.StateThirdPartyOAuth,
+	State(shared.StateThirdParty,
 		shared.ExchangeToken{}).
 	State(shared.StateLoginPasskey,
 		login.WebauthnVerifyAssertionResponse{},
@@ -117,7 +117,7 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	State(shared.StateRegistrationInit,
 		registration.RegisterLoginIdentifier{},
 		shared.ThirdPartyOAuth{}).
-	State(shared.StateThirdPartyOAuth,
+	State(shared.StateThirdParty,
 		shared.ExchangeToken{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
@@ -130,7 +130,8 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	SubFlows(
 		CapabilitiesSubFlow,
 		PasscodeSubFlow,
-		CredentialOnboardingSubFlow).
+		CredentialOnboardingSubFlow,
+		UserDetailsSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
 

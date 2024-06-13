@@ -58,6 +58,8 @@ import CredentialOnboardingChooserPage from "../pages/CredentialOnboardingChoose
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
 
+const localStorageCacheStateKey = "flow-state";
+
 export type ComponentName =
   | "auth"
   | "login"
@@ -413,6 +415,37 @@ const AppProvider = ({
           />,
         );
       },
+      async thirdparty(state) {
+        const token = new URLSearchParams(window.location.search).get(
+          "hanko_token",
+        );
+        if (token && token.length > 0) {
+          const searchParams = new URLSearchParams(window.location.search);
+          const nextState = await state.actions
+            .exchange_token({ token: searchParams.get("hanko_token") })
+            .run();
+
+          searchParams.delete("hanko_token");
+
+          history.replaceState(
+            null,
+            null,
+            window.location.pathname + searchParams.toString(),
+          );
+
+          stateHandler[nextState.name](nextState);
+        } else {
+          setUIState((prev) => ({
+            ...prev,
+            lastAction: null,
+          }));
+          localStorage.setItem(
+            localStorageCacheStateKey,
+            JSON.stringify(state.toJSON()),
+          );
+          window.location.assign(state.payload.redirect_url);
+        }
+      },
       error(state) {
         setLoadingAction(null);
         setPage(<ErrorPage state={state} />);
@@ -439,7 +472,19 @@ const AppProvider = ({
   const flowInit = useCallback(
     async (path: FlowPath) => {
       setLoadingAction("switch-flow");
-      await hanko.flow.init(path, { ...stateHandler });
+      const token = new URLSearchParams(window.location.search).get(
+        "hanko_token",
+      );
+      const cachedState = localStorage.getItem(localStorageCacheStateKey);
+      if (cachedState && cachedState.length > 0 && token && token.length > 0) {
+        await hanko.flow.fromString(
+          localStorage.getItem(localStorageCacheStateKey),
+          { ...stateHandler },
+        );
+        localStorage.removeItem(localStorageCacheStateKey);
+      } else {
+        await hanko.flow.init(path, { ...stateHandler });
+      }
       setLoadingAction(null);
     },
     [stateHandler],

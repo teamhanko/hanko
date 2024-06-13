@@ -60,6 +60,14 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		AuditLogger:           auditLogger,
 	}
 
+	if cfg.Saml.Enabled {
+		samlService := saml.NewSamlService(cfg, persister)
+
+		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
+
+		flowAPIHandler.SamlService = samlService
+	}
+
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
@@ -195,10 +203,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)
-
-	if cfg.Saml.Enabled {
-		saml.CreateSamlRoutes(e, cfg, persister, sessionManager, auditLogger)
-	}
 
 	return e
 }

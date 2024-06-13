@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"regexp"
+	"strings"
 )
 
 type ContinueWithLoginIdentifier struct {
@@ -90,6 +91,21 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				if err != nil {
 					return fmt.Errorf("failed to set user_id to the stash: %w", err)
 				}
+			}
+		}
+
+		if deps.Cfg.Saml.Enabled {
+			domain := strings.Split(identifierInputValue, "@")[1]
+			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
+				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+
+				if err != nil {
+					return fmt.Errorf("failed to get auth url: %w", err)
+				}
+
+				_ = c.Payload().Set("redirect_url", authUrl)
+
+				return c.ContinueFlow(shared.StateThirdParty)
 			}
 		}
 	} else {

@@ -1,5 +1,6 @@
 add_column("tokens", "identity_id", "uuid", {"null":true})
 add_column("tokens", "is_flow", "bool", {"default":false})
+add_column("tokens", "user_created", "bool")
 
 add_foreign_key("tokens", "identity_id", {"identities": ["id"]}, {
     "on_delete": "cascade",

@@ -9,11 +9,12 @@ import (
 )
 
 type AccountLinkingResult struct {
-	Type models.AuditLogType
-	User *models.User
+	Type        models.AuditLogType
+	User        *models.User
+	UserCreated bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isFlow bool) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isSaml bool, isFlow bool) (*AccountLinkingResult, error) {
 	if !isFlow {
 		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
@@ -34,15 +35,15 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 		if user == nil {
 			return signUp(tx, cfg, p, userData, providerName)
 		} else {
-			return link(tx, cfg, p, userData, providerName, user)
+			return link(tx, cfg, p, userData, providerName, user, isSaml)
 		}
 	} else {
 		return signIn(tx, cfg, p, userData, identity)
 	}
 }
 
-func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, user *models.User) (*AccountLinkingResult, error) {
-	if !cfg.ThirdParty.Providers.Get(providerName).AllowLinking {
+func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, user *models.User, isSaml bool) (*AccountLinkingResult, error) {
+	if !isSaml && !cfg.ThirdParty.Providers.Get(providerName).AllowLinking {
 		return nil, ErrorUserConflict("third party account linking for existing user with same email disallowed")
 	}
 
@@ -57,9 +58,15 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
 
+	u, terr := p.GetUserPersisterWithConnection(tx).Get(*email.UserID)
+	if terr != nil {
+		return nil, ErrorServer("could not get user").WithCause(terr)
+	}
+
 	return &AccountLinkingResult{
-		Type: models.AuditLogThirdPartyLinkingSucceeded,
-		User: user,
+		Type:        models.AuditLogThirdPartyLinkingSucceeded,
+		User:        u,
+		UserCreated: false,
 	}, nil
 }
 
@@ -136,8 +143,9 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	}
 
 	linkingResult = &AccountLinkingResult{
-		Type: models.AuditLogThirdPartySignInSucceeded,
-		User: user,
+		Type:        models.AuditLogThirdPartySignInSucceeded,
+		User:        user,
+		UserCreated: false,
 	}
 
 	return linkingResult, nil
@@ -207,8 +215,9 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	}
 
 	linkingResult = &AccountLinkingResult{
-		Type: models.AuditLogThirdPartySignUpSucceeded,
-		User: u,
+		Type:        models.AuditLogThirdPartySignUpSucceeded,
+		User:        u,
+		UserCreated: true,
 	}
 
 	return linkingResult, nil

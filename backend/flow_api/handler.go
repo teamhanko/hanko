@@ -6,6 +6,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
@@ -22,6 +23,7 @@ type FlowPilotHandler struct {
 	PasscodeService       services.Passcode
 	PasswordService       services.Password
 	WebauthnService       services.WebauthnService
+	SamlService           saml.Service
 	SessionManager        session.Manager
 	RateLimiter           limiter.Store
 	AuthenticatorMetadata mapper.AuthenticatorMetadata
@@ -64,6 +66,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			PasscodeService:       h.PasscodeService,
 			PasswordService:       h.PasswordService,
 			WebauthnService:       h.WebauthnService,
+			SamlService:           h.SamlService,
 			AuthenticatorMetadata: h.AuthenticatorMetadata,
 			AuditLogger:           h.AuditLogger,
 		})

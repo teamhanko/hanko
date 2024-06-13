@@ -19,9 +19,16 @@ type State struct {
 	IssuedAt   time.Time `json:"issued_at"`
 	ExpiresAt  time.Time `json:"expires_at"`
 	Nonce      string    `json:"nonce"`
+	IsFlow     bool      `json:"is_flow"`
 }
 
-func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string) ([]byte, error) {
+func GenerateStateForFlowAPI(isFlow bool) func(*State) {
+	return func(state *State) {
+		state.IsFlow = isFlow
+	}
+}
+
+func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, options ...func(*State)) ([]byte, error) {
 	if strings.TrimSpace(provider) == "" {
 		return nil, errors.New("provider must be present")
 	}
@@ -42,6 +49,10 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 		IssuedAt:   now,
 		ExpiresAt:  now.Add(time.Minute * 5),
 		Nonce:      nonce,
+	}
+
+	for _, option := range options {
+		option(&state)
 	}
 
 	stateJson, err := json.Marshal(state)

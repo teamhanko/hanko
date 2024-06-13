@@ -87,3 +87,7 @@ export interface PasskeyCredentialRename {
 export interface PasskeyCredentialDelete {
   readonly passkey_id: Input<string>;
 }
+
+export interface ExchangeTokenInputs {
+  readonly token: Input<string>;
+}
