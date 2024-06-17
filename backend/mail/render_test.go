@@ -34,7 +34,7 @@ func TestRenderer_Render(t *testing.T) {
 			Name:     "Login text template",
 			Template: "loginTextMail",
 			Lang:     "en",
-			Expected: "Enter the following passcode on your login screen:\n\n123456\n\nThe passcode is valid for 5 minutes.",
+			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
 		},
 		{
@@ -48,14 +48,14 @@ func TestRenderer_Render(t *testing.T) {
 			Name:     "Login text template with unknown language",
 			Template: "loginTextMail",
 			Lang:     "xxx",
-			Expected: "Enter the following passcode on your login screen:\n\n123456\n\nThe passcode is valid for 5 minutes.",
+			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
 		},
 		{
 			Name:     "Login text template without translations for language",
 			Template: "loginTextMail",
 			Lang:     "es",
-			Expected: "Enter the following passcode on your login screen:\n\n123456\n\nThe passcode is valid for 5 minutes.",
+			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
 		},
 	}
@@ -95,7 +95,7 @@ func TestRenderer_Translate(t *testing.T) {
 				"ServiceName": "Test Service",
 				"Code":        "123456",
 			},
-			Expected: "Use passcode 123456 to sign in to Test Service",
+			Expected: "123456 is your passcode for Test Service",
 		},
 	}
 
