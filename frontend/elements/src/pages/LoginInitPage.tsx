@@ -42,6 +42,9 @@ const LoginInitPage = (props: Props) => {
   } = useContext(AppContext);
 
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
+  const [identifier, setIdentifier] = useState<string>(
+    uiState.username || uiState.email,
+  );
   const { flowState } = useFlowState(props.state);
   const isWebAuthnSupported = WebauthnSupport.supported();
   const [thirdPartyError, setThirdPartyError] = useState<
@@ -49,24 +52,11 @@ const LoginInitPage = (props: Props) => {
   >(undefined);
 
   const onIdentifierInput = (event: Event) => {
+    event.preventDefault();
     if (event.target instanceof HTMLInputElement) {
       const { value } = event.target;
-
-      switch (identifierType) {
-        case "email":
-          setUIState((prev) => ({ ...prev, email: value, username: null }));
-          break;
-        case "username":
-          setUIState((prev) => ({ ...prev, email: null, username: value }));
-          break;
-        case "identifier":
-          if (value.match(/^[^@]+@[^@]+\.[^@]+$/)) {
-            setUIState((prev) => ({ ...prev, email: value, username: null }));
-          } else {
-            setUIState((prev) => ({ ...prev, email: null, username: value }));
-          }
-          break;
-      }
+      setIdentifier(value);
+      setIdentifierToUIState(value);
     }
   };
 
@@ -76,13 +66,11 @@ const LoginInitPage = (props: Props) => {
     setLoadingAction("email-submit");
 
     const nextState = await flowState.actions
-      .continue_with_login_identifier({
-        [identifierType]: uiState.email || uiState.username,
-      })
+      .continue_with_login_identifier({ [identifierType]: identifier })
       .run();
 
+    setIdentifierToUIState(identifier);
     setLoadingAction(null);
-
     stateHandler[nextState.name](nextState);
   };
 
@@ -103,6 +91,28 @@ const LoginInitPage = (props: Props) => {
     init("registration");
   };
 
+  const setIdentifierToUIState = (value: string) => {
+    const setEmail = () =>
+      setUIState((prev) => ({ ...prev, email: value, username: null }));
+    const setUsername = () =>
+      setUIState((prev) => ({ ...prev, email: null, username: value }));
+    switch (identifierType) {
+      case "email":
+        setEmail();
+        break;
+      case "username":
+        setUsername();
+        break;
+      case "identifier":
+        if (value.match(/^[^@]+@[^@]+\.[^@]+$/)) {
+          setEmail();
+        } else {
+          setUsername();
+        }
+        break;
+    }
+  };
+
   const showDivider = useMemo(
     () => !!flowState.actions.webauthn_generate_request_options?.(null),
     [flowState.actions],
@@ -112,13 +122,9 @@ const LoginInitPage = (props: Props) => {
 
   useEffect(() => {
     const { inputs } = flowState.actions.continue_with_login_identifier(null);
-    if (inputs.email) {
-      setIdentifierType("email");
-    } else if (inputs.username) {
-      setIdentifierType("username");
-    } else {
-      setIdentifierType("identifier");
-    }
+    setIdentifierType(
+      inputs.email ? "email" : inputs.username ? "username" : "identifier",
+    );
   }, [flowState]);
 
   useEffect(() => {
@@ -172,7 +178,7 @@ const LoginInitPage = (props: Props) => {
               autoCorrect={"off"}
               flowInput={inputs.email}
               onInput={onIdentifierInput}
-              value={uiState.email}
+              value={identifier}
               placeholder={t("labels.email")}
               pattern={"^[^@]+@[^@]+\\.[^@]+$"}
             />
@@ -183,7 +189,7 @@ const LoginInitPage = (props: Props) => {
               autoCorrect={"off"}
               flowInput={inputs.username}
               onInput={onIdentifierInput}
-              value={uiState.username}
+              value={identifier}
               placeholder={t("labels.username")}
             />
           ) : (
@@ -193,7 +199,7 @@ const LoginInitPage = (props: Props) => {
               autoCorrect={"off"}
               flowInput={inputs.identifier}
               onInput={onIdentifierInput}
-              value={uiState.username || uiState.email}
+              value={identifier}
               placeholder={t("labels.emailOrUsername")}
             />
           )}
