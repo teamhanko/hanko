@@ -27,7 +27,7 @@ func (h PasswordSave) Execute(c flowpilot.HookExecutionContext) error {
 
 	err := deps.Persister.GetPasswordCredentialPersister().Create(passwordCredential)
 	if err != nil {
-		return fmt.Errorf("could not create passcode: %w", err)
+		return fmt.Errorf("could not create password: %w", err)
 	}
 	// TODO: add audit log?
 	return nil
