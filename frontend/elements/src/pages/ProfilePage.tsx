@@ -215,6 +215,7 @@ const ProfilePage = (props: Props) => {
           <Paragraph>
             <ChangeUsernameDropdown
               inputs={flowState.actions.username_set(null).inputs}
+              prefilledUsername={flowState.payload.user.username}
               onUsernameSubmit={onUsernameSubmit}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}

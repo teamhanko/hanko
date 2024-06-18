@@ -12,6 +12,7 @@ import ErrorMessage from "../error/ErrorMessage";
 
 interface Props {
   inputs: UsernameSetInputs;
+  prefilledUsername?: string;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
   onUsernameSubmit: (event: Event, username: string) => Promise<void>;
@@ -22,9 +23,10 @@ const ChangeUsernameDropdown = ({
   checkedItemID,
   setCheckedItemID,
   onUsernameSubmit,
+  prefilledUsername,
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const [username, setUsername] = useState<string>(inputs.username.value);
+  const [username, setUsername] = useState<string>(prefilledUsername);
 
   const onInputHandler = (event: Event) => {
     event.preventDefault();
