@@ -71,12 +71,6 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	// Set only for audit logging purposes.
-	err = c.Stash().Set("login_method", "password")
-	if err != nil {
-		return fmt.Errorf("failed to set login_method to the stash: %w", err)
-	}
-
 	err = c.Stash().Set("suspend_back_action", true)
 	if err != nil {
 		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
