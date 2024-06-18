@@ -139,6 +139,7 @@ interface Props {
   componentName: ComponentName;
   globalOptions: GlobalOptions;
   children?: ComponentChildren;
+  createWebauthnAbortSignal: () => AbortSignal;
 }
 
 const AppProvider = ({
@@ -147,6 +148,7 @@ const AppProvider = ({
   prefilledEmail,
   prefilledUsername,
   globalOptions,
+  createWebauthnAbortSignal,
   ...props
 }: Props) => {
   const {
@@ -179,7 +181,6 @@ const AppProvider = ({
     email: prefilledEmail,
     username: prefilledUsername,
   });
-  let abortController = new AbortController();
 
   const setLoadingAction = useCallback((loadingAction: UIAction) => {
     setUIState((prev) => ({
@@ -252,16 +253,6 @@ const AppProvider = ({
     );
   };
 
-  const _createAbortSignal = () => {
-    if (abortController) {
-      console.log("_createAbortSignal abort");
-      abortController.abort();
-    }
-
-    abortController = new AbortController();
-    return abortController.signal;
-  };
-
   const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
     () => ({
       onError: (e) => {
@@ -290,7 +281,7 @@ const AppProvider = ({
               assertionResponse = await getWebauthnCredential({
                 publicKey: state.payload.request_options.publicKey,
                 mediation: "conditional" as CredentialMediationRequirement,
-                signal: _createAbortSignal(),
+                signal: createWebauthnAbortSignal(),
               });
             } catch (error) {
               // We do not need to handle the error, because this is a conditional request, which can fail silently
@@ -319,7 +310,7 @@ const AppProvider = ({
         try {
           assertionResponse = await getWebauthnCredential({
             ...state.payload.request_options,
-            signal: _createAbortSignal(),
+            signal: createWebauthnAbortSignal(),
           });
         } catch (error) {
           const prevState = await state.actions.back(null).run();
@@ -344,7 +335,7 @@ const AppProvider = ({
         try {
           attestationResponse = await createWebauthnCredential({
             ...state.payload.creation_options,
-            signal: _createAbortSignal(),
+            signal: createWebauthnAbortSignal(),
           });
         } catch (e) {
           const prevState = await state.actions.back(null).run();
@@ -367,7 +358,7 @@ const AppProvider = ({
         try {
           attestationResponse = await createWebauthnCredential({
             ...state.payload.creation_options,
-            signal: _createAbortSignal(),
+            signal: createWebauthnAbortSignal(),
           });
         } catch (e) {
           const prevState = await state.actions.back(null).run();

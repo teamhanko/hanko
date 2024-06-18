@@ -165,11 +165,29 @@ const ProfilePage = (props: Props) => {
             : null
         }
       />
+      {flowState.actions.username_set?.(null) ? (
+        <Fragment>
+          <Headline1>{t("labels.username")}</Headline1>
+          {flowState.payload.user.username ? (
+            <Paragraph>
+              <b>{flowState.payload.user.username}</b>
+            </Paragraph>
+          ) : null}
+          <Paragraph>
+            <ChangeUsernameDropdown
+              inputs={flowState.actions.username_set(null).inputs}
+              hasUsername={!!flowState.payload.user.username}
+              onUsernameSubmit={onUsernameSubmit}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
+          </Paragraph>
+        </Fragment>
+      ) : null}
       {flowState.payload?.user?.emails ||
       flowState.actions.email_create?.(null) ? (
         <Fragment>
           <Headline1>{t("headlines.profileEmails")}</Headline1>
-          <Paragraph>{t("texts.manageEmails")}</Paragraph>
           <Paragraph>
             <ListEmailsAccordion
               emails={flowState.payload.user.emails}
@@ -193,30 +211,12 @@ const ProfilePage = (props: Props) => {
       {flowState.actions.password_set?.(null) ? (
         <Fragment>
           <Headline1>{t("headlines.profilePassword")}</Headline1>
-          <Paragraph>{t("texts.changePassword")}</Paragraph>
           <Paragraph>
             <ChangePasswordDropdown
-              hideDeletePasswordLink={
-                !flowState.actions.password_delete?.(null)
-              }
+              hasPassword={!!flowState.actions.password_delete?.(null)}
               inputs={flowState.actions.password_set(null).inputs}
               onPasswordSubmit={onPasswordSubmit}
               onPasswordDelete={onPasswordDelete}
-              checkedItemID={checkedItemID}
-              setCheckedItemID={setCheckedItemID}
-            />
-          </Paragraph>
-        </Fragment>
-      ) : null}
-      {flowState.actions.username_set?.(null) ? (
-        <Fragment>
-          <Headline1>{t("labels.username")}</Headline1>
-          <Paragraph>{t("texts.changeYourUsername")}</Paragraph>
-          <Paragraph>
-            <ChangeUsernameDropdown
-              inputs={flowState.actions.username_set(null).inputs}
-              prefilledUsername={flowState.payload.user.username}
-              onUsernameSubmit={onUsernameSubmit}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
             />
@@ -228,7 +228,6 @@ const ProfilePage = (props: Props) => {
         flowState.actions.webauthn_credential_create?.(null)) ? (
         <Fragment>
           <Headline1>{t("headlines.profilePasskeys")}</Headline1>
-          <Paragraph>{t("texts.managePasskeys")}</Paragraph>
           <Paragraph>
             <ListPasskeysAccordion
               onBack={onBack}

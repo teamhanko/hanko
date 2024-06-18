@@ -40,9 +40,6 @@ export const bn: Translation = {
     createAccount:
       '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই। আপনি একটি নতুন অ্যাকাউন্ট তৈরি করতে চান?',
     passwordFormatHint: "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
-    manageEmails: "পাসকোড প্রমাণীকরণের জন্য ব্যবহৃত হয়।",
-    changePassword: "একটি নতুন পাসওয়ার্ড সেট করুন।",
-    managePasskeys: "আপনার পাসকিগুলি আপনাকে এই অ্যাকাউন্টে সাইন ইন করতে দেয়৷",
     isPrimaryEmail:
       "এই ইমেলটি আপনার পাসকিগুলির জন্য ব্যবহারকারীর নাম হিসাবে ব্যবহার করা হবে৷",
     setPrimaryEmail:
@@ -57,7 +54,6 @@ export const bn: Translation = {
     deleteAccount:
       "আপনি কি এই অ্যাকাউন্টটি মুছে ফেলার বিষয়ে নিশ্চিত? সমস্ত ডেটা অবিলম্বে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।",
     noAccountExists: '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই।',
-    changeYourUsername: "আপনার ব্যবহারকারীর নাম পরিবর্তন করুন",
   },
   labels: {
     or: "বা",
@@ -89,7 +85,6 @@ export const bn: Translation = {
     rename: "নাম পরিবর্তন করুন",
     newPasskeyName: "নতুন পাসকি নাম",
     addEmail: "ইমেল যোগ করুন",
-    changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
     createPasskey: "একটি পাসকি তৈরি করুন",
     webauthnUnsupported: "পাসকিগুলি আপনার ব্রাউজার দ্বারা সমর্থিত নয়৷",
     signInWith: "{provider} দিয়ে সাইন ইন করুন",
@@ -100,6 +95,9 @@ export const bn: Translation = {
     dontHaveAnAccount: "একটি অ্যাকাউন্ট নেই?",
     alreadyHaveAnAccount: "ইতিমধ্যে অ্যাকাউন্ট আছে?",
     changeUsername: "ব্যবহারকারীর নাম পরিবর্তন করুন",
+    setUsername: "ব্যবহারকারীর নাম সেট করুন",
+    changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
+    setPassword: "পাসওয়ার্ড সেট করুন",
   },
   errors: {
     somethingWentWrong:
