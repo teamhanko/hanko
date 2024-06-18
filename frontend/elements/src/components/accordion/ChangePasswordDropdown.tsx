@@ -18,7 +18,7 @@ interface Props {
   setCheckedItemID: StateUpdater<string>;
   onPasswordSubmit: (event: Event, password: string) => Promise<void>;
   onPasswordDelete: (event: Event) => Promise<void>;
-  hideDeletePasswordLink?: boolean;
+  hasPassword?: boolean;
 }
 
 const ChangePasswordDropdown = ({
@@ -27,7 +27,7 @@ const ChangePasswordDropdown = ({
   setCheckedItemID,
   onPasswordSubmit,
   onPasswordDelete,
-  hideDeletePasswordLink,
+  hasPassword,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const [newPassword, setNewPassword] = useState<string>("");
@@ -42,7 +42,7 @@ const ChangePasswordDropdown = ({
   return (
     <Dropdown
       name={"password-edit-dropdown"}
-      title={t("labels.changePassword")}
+      title={t(hasPassword ? "labels.changePassword" : "labels.setPassword")}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}
     >
@@ -60,6 +60,7 @@ const ChangePasswordDropdown = ({
       >
         <Input
           markError
+          autoComplete={"new-password"}
           placeholder={t("labels.newPassword")}
           type={"password"}
           onInput={onInputHandler}
@@ -69,7 +70,7 @@ const ChangePasswordDropdown = ({
         <Button uiAction={"password-submit"}>{t("labels.save")}</Button>
       </Form>
       <Link
-        hidden={hideDeletePasswordLink}
+        hidden={!hasPassword}
         uiAction={"password-delete"}
         dangerous
         onClick={(event: Event) =>

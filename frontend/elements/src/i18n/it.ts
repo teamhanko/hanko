@@ -41,10 +41,6 @@ export const it: Translation = {
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
     passwordFormatHint:
       "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
-    manageEmails: "Used for passcode authentication.",
-    changePassword: "Imposta una nuova password",
-    managePasskeys:
-      "Le tue passkey ti consentono di accedere a questo account.",
     isPrimaryEmail:
       "Questo indirizzo email verrà utilizzato come nome utente per le tue passkeys.",
     setPrimaryEmail:
@@ -60,7 +56,6 @@ export const it: Translation = {
     deleteAccount:
       "Sei sicuro di voler cancellare questo account? Tutti i dati verranno immediatamente cancellati permanentemente e non potranno essere ripristinati.",
     noAccountExists: 'Non esiste alcun account per "{emailAddress}".',
-    changeYourUsername: "Cambia il tuo nome utente",
   },
   labels: {
     or: "o",
@@ -92,7 +87,6 @@ export const it: Translation = {
     rename: "Rinomina",
     newPasskeyName: "Nuovo nome passkey",
     addEmail: "Aggiungi email",
-    changePassword: "Cambia password",
     createPasskey: "Crea una passkey",
     webauthnUnsupported: "Le Passkeys non sono supportate dal tuo browser",
     signInWith: "Accedi con {provider}",
@@ -103,6 +97,9 @@ export const it: Translation = {
     dontHaveAnAccount: "Non hai un account?",
     alreadyHaveAnAccount: "Hai già un account?",
     changeUsername: "Cambia nome utente",
+    setUsername: "Imposta nome utente",
+    changePassword: "Cambia password",
+    setPassword: "Imposta password",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

@@ -42,11 +42,6 @@ export const fr: Translation = {
       'Aucun compte n\'existe pour "{emailAddress}". Voulez-vous créer un nouveau compte ?',
     passwordFormatHint:
       "Doit contenir entre {minLength} et {maxLength} caractères.",
-    manageEmails:
-      "Vos adresses e-mail sont utilisées pour la communication et l'authentification.",
-    changePassword: "Définir un nouveau mot de passe.",
-    managePasskeys:
-      "Vos clés d'identification vous permettent de vous connecter à ce compte.",
     isPrimaryEmail:
       "Utilisée pour la communication, les codes d'accès et comme nom d'utilisateur pour les clés d'identification. Pour changer l'adresse e-mail principale, ajoutez d'abord une autre adresse e-mail et définissez-la comme principale.",
     setPrimaryEmail:
@@ -64,7 +59,6 @@ export const fr: Translation = {
     deleteAccount:
       "Êtes-vous sûr de vouloir supprimer ce compte ? Toutes les données seront supprimées immédiatement et ne pourront pas être récupérées.",
     noAccountExists: 'Aucun compte n\'existe pour "{emailAddress}".',
-    changeYourUsername: "Changez votre nom d'utilisateur",
   },
   labels: {
     or: "ou",
@@ -96,7 +90,6 @@ export const fr: Translation = {
     rename: "Renommer",
     newPasskeyName: "Nouveau nom de clé d'identification",
     addEmail: "Ajouter une adresse e-mail",
-    changePassword: "Changer le mot de passe",
     createPasskey: "Créer une clé d'identification",
     webauthnUnsupported:
       "Les clés d'identification ne sont pas prises en charge par votre navigateur",
@@ -108,6 +101,9 @@ export const fr: Translation = {
     dontHaveAnAccount: "Vous n'avez pas de compte ?",
     alreadyHaveAnAccount: "Vous avez déjà un compte ?",
     changeUsername: "Changer le nom d'utilisateur",
+    setUsername: "Définir le nom d'utilisateur",
+    changePassword: "Changer le mot de passe",
+    setPassword: "Définir le mot de passe",
   },
   errors: {
     somethingWentWrong:

@@ -41,9 +41,6 @@ export const en: Translation = {
       'No account exists for "{emailAddress}". Do you want to create a new account?',
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
-    manageEmails: "Used for passcode authentication.",
-    changePassword: "Set a new password.",
-    managePasskeys: "Your passkeys allow you to sign in to this account.",
     isPrimaryEmail:
       "This email address will be used as username for your passkeys.",
     setPrimaryEmail: "Set this email to be used as username for new passkeys.",
@@ -57,7 +54,6 @@ export const en: Translation = {
     deleteAccount:
       "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
     noAccountExists: 'No account exists for "{emailAddress}".',
-    changeYourUsername: "Change your username",
   },
   labels: {
     or: "or",
@@ -89,7 +85,6 @@ export const en: Translation = {
     rename: "Rename",
     newPasskeyName: "New passkey name",
     addEmail: "Add email",
-    changePassword: "Change password",
     createPasskey: "Create a passkey",
     webauthnUnsupported: "Passkeys are not supported by your browser",
     signInWith: "Sign in with {provider}",
@@ -99,7 +94,10 @@ export const en: Translation = {
     optional: "optional",
     dontHaveAnAccount: "Don't have an account?",
     alreadyHaveAnAccount: "Already have an account?",
-    changeUsername: "Change username",
+    changeUsername: "Change Username",
+    setUsername: "Set Username",
+    changePassword: "Change Password",
+    setPassword: "Set Password",
   },
   errors: {
     somethingWentWrong:

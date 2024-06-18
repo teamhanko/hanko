@@ -42,10 +42,6 @@ export const ptBR: Translation = {
       'Nenhuma conta encontrada para o e-mail "{emailAddress}". Deseja criar uma nova conta?',
     passwordFormatHint:
       "Deve conter entre {minLength} e {maxLength} caracteres.",
-    manageEmails: "Usado para a autenticação com o código de acesso.",
-    changePassword: "Alterar senha.",
-    managePasskeys:
-      "As suas chaves de acesso permitem que você faça login nesta conta.",
     isPrimaryEmail:
       "Este e-mail será usado como seu nome de usuário para as suas chaves de acesso.",
     setPrimaryEmail:
@@ -60,7 +56,6 @@ export const ptBR: Translation = {
     deleteAccount:
       "Tem certeza que deseja apagar esta conta? Todos os dados serão apagados imediatamente e não poderão ser recuperados.",
     noAccountExists: 'Nenhuma conta encontrada para o e-mail "{emailAddress}".',
-    changeYourUsername: "Mude seu nome de usuário",
   },
   labels: {
     or: "ou",
@@ -92,7 +87,6 @@ export const ptBR: Translation = {
     rename: "Renomear",
     newPasskeyName: "Novo nome para a chave de acesso",
     addEmail: "Adicionar e-mail",
-    changePassword: "Mudar a senha",
     createPasskey: "Criar uma chave de acesso",
     webauthnUnsupported:
       "Chaves de acesso não são compatíveis com seu navegador",
@@ -104,6 +98,9 @@ export const ptBR: Translation = {
     dontHaveAnAccount: "Não tem uma conta?",
     alreadyHaveAnAccount: "Já tem uma conta?",
     changeUsername: "Alterar nome de usuário",
+    setUsername: "Definir nome de usuário",
+    changePassword: "Alterar senha",
+    setPassword: "Definir senha",
   },
   errors: {
     somethingWentWrong:
