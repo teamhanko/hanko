@@ -134,12 +134,14 @@ const LoginInitPage = (props: Props) => {
     [flowState.actions],
   );
 
-  const { inputs } = flowState.actions.continue_with_login_identifier(null);
+  const inputs =
+    flowState.actions.continue_with_login_identifier?.(null).inputs;
 
   useEffect(() => {
-    const { inputs } = flowState.actions.continue_with_login_identifier(null);
+    const inputs =
+      flowState.actions.continue_with_login_identifier?.(null).inputs;
     setIdentifierType(
-      inputs.email ? "email" : inputs.username ? "username" : "identifier",
+      inputs?.email ? "email" : inputs?.username ? "username" : "identifier",
     );
   }, [flowState]);
 
@@ -186,42 +188,46 @@ const LoginInitPage = (props: Props) => {
       <Content>
         <Headline1>{t("headlines.signIn")}</Headline1>
         <ErrorBox state={flowState} error={thirdPartyError} />
-        <Form onSubmit={onEmailSubmit} maxWidth>
-          {inputs.email ? (
-            <Input
-              type={"email"}
-              autoComplete={"username webauthn"}
-              autoCorrect={"off"}
-              flowInput={inputs.email}
-              onInput={onIdentifierInput}
-              value={identifier}
-              placeholder={t("labels.email")}
-              pattern={"^[^@]+@[^@]+\\.[^@]+$"}
-            />
-          ) : inputs.username ? (
-            <Input
-              type={"text"}
-              autoComplete={"username webauthn"}
-              autoCorrect={"off"}
-              flowInput={inputs.username}
-              onInput={onIdentifierInput}
-              value={identifier}
-              placeholder={t("labels.username")}
-            />
-          ) : (
-            <Input
-              type={"text"}
-              autoComplete={"username webauthn"}
-              autoCorrect={"off"}
-              flowInput={inputs.identifier}
-              onInput={onIdentifierInput}
-              value={identifier}
-              placeholder={t("labels.emailOrUsername")}
-            />
-          )}
-          <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
-        </Form>
-        <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+        {inputs ? (
+          <Fragment>
+            <Form onSubmit={onEmailSubmit} maxWidth>
+              {inputs.email ? (
+                <Input
+                  type={"email"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.email}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.email")}
+                  pattern={"^[^@]+@[^@]+\\.[^@]+$"}
+                />
+              ) : inputs.username ? (
+                <Input
+                  type={"text"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.username}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.username")}
+                />
+              ) : (
+                <Input
+                  type={"text"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.identifier}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.emailOrUsername")}
+                />
+              )}
+              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+            </Form>
+            <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+          </Fragment>
+        ) : null}
         {flowState.actions.webauthn_generate_request_options?.(null) &&
         !hidePasskeyButtonOnLogin ? (
           <Form onSubmit={(event) => onPasskeySubmit(event)}>
