@@ -25,8 +25,8 @@ import {
   OnboardingVerifyPasskeyAttestationPayload,
   PasscodeConfirmationPayload,
   ProfilePayload,
-  SuccessPayload,
   ThirdPartyPayload,
+  SuccessPayload,
 } from "./payload";
 
 export type StateName =

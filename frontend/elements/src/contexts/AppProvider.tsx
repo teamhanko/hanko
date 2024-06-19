@@ -96,7 +96,8 @@ export type UIAction =
   | "skip"
   | "back"
   | "account_delete"
-  | "retry";
+  | "retry"
+  | "thirdparty-submit";
 
 interface UIState {
   username?: string;
