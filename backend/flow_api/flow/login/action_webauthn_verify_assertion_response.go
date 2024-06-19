@@ -24,7 +24,9 @@ func (a WebauthnVerifyAssertionResponse) GetDescription() string {
 }
 
 func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	deps := a.GetDeps(c)
+
+	if !c.Stash().Get("webauthn_available").Bool() || !deps.Cfg.Passkey.Enabled {
 		c.SuspendAction()
 	}
 

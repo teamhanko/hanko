@@ -106,7 +106,7 @@ func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
 	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
 	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && !isLastEmail
 	canDoPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil && (canUseUsernameAsLoginIdentifier || canUseEmailAsLoginIdentifier)
-	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled() || len(deps.SamlService.Providers()) > 0
+	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled() || (deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0)
 	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPassword && !canDoThirdParty
 
 	if deps.Cfg.Email.Enabled && isLastEmail && (!deps.Cfg.Email.Optional || canUseNoOtherAuthMethod) {

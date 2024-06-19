@@ -50,6 +50,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
+	samlService := saml.NewSamlService(cfg, persister)
+
 	flowAPIHandler := flow_api.FlowPilotHandler{
 		Persister:             persister,
 		Cfg:                   *cfg,
@@ -60,14 +62,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		RateLimiter:           rateLimiter,
 		AuthenticatorMetadata: authenticatorMetadata,
 		AuditLogger:           auditLogger,
+		SamlService:           samlService,
 	}
 
 	if cfg.Saml.Enabled {
-		samlService := saml.NewSamlService(cfg, persister)
-
 		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
-
-		flowAPIHandler.SamlService = samlService
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)

@@ -33,8 +33,8 @@ const RegistrationInitPage = (props: Props) => {
     initialComponentName,
   } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-  const { inputs } = flowState.actions.register_login_identifier(null);
-  const multipleInputsAvailable = !!(inputs.email && inputs.username);
+  const inputs = flowState.actions.register_login_identifier?.(null).inputs;
+  const multipleInputsAvailable = !!(inputs?.email && inputs?.username);
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
   >(undefined);
@@ -135,39 +135,43 @@ const RegistrationInitPage = (props: Props) => {
       <Content>
         <Headline1>{t("headlines.signUp")}</Headline1>
         <ErrorBox state={flowState} error={thirdPartyError} />
-        <Form onSubmit={onIdentifierSubmit} maxWidth>
-          {inputs.username ? (
-            <Input
-              markOptional={multipleInputsAvailable}
-              markError={multipleInputsAvailable}
-              type={"text"}
-              autoComplete={"username"}
-              autoCorrect={"off"}
-              flowInput={inputs.username}
-              onInput={onUsernameInput}
-              value={uiState.username}
-              placeholder={t("labels.username")}
-            />
-          ) : null}
-          {inputs.email ? (
-            <Input
-              markOptional={multipleInputsAvailable}
-              markError={multipleInputsAvailable}
-              type={"email"}
-              autoComplete={"email"}
-              autoCorrect={"off"}
-              flowInput={inputs.email}
-              onInput={onEmailInput}
-              value={uiState.email}
-              placeholder={t("labels.email")}
-              pattern={"^.*[^0-9]+$"}
-            />
-          ) : null}
-          <Button uiAction={"email-submit"} autofocus>
-            {t("labels.continue")}
-          </Button>
-        </Form>
-        <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+        {inputs ? (
+          <Fragment>
+            <Form onSubmit={onIdentifierSubmit} maxWidth>
+              {inputs.username ? (
+                <Input
+                  markOptional={multipleInputsAvailable}
+                  markError={multipleInputsAvailable}
+                  type={"text"}
+                  autoComplete={"username"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.username}
+                  onInput={onUsernameInput}
+                  value={uiState.username}
+                  placeholder={t("labels.username")}
+                />
+              ) : null}
+              {inputs.email ? (
+                <Input
+                  markOptional={multipleInputsAvailable}
+                  markError={multipleInputsAvailable}
+                  type={"email"}
+                  autoComplete={"email"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.email}
+                  onInput={onEmailInput}
+                  value={uiState.email}
+                  placeholder={t("labels.email")}
+                  pattern={"^.*[^0-9]+$"}
+                />
+              ) : null}
+              <Button uiAction={"email-submit"} autofocus>
+                {t("labels.continue")}
+              </Button>
+            </Form>
+            <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+          </Fragment>
+        ) : null}
         {flowState.actions.thirdparty_oauth?.(null)
           ? flowState.actions
               .thirdparty_oauth(null)

@@ -50,7 +50,13 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 			Preserve(true))
 	}
 
-	if (!deps.Cfg.Password.Enabled && !deps.Cfg.Email.UseForAuthentication) || (!emailEnabled && !usernameEnabled) {
+	if !deps.Cfg.Password.Enabled &&
+		!deps.Cfg.Email.UseForAuthentication &&
+		!(emailEnabled && deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0) {
+		c.SuspendAction()
+	}
+
+	if !emailEnabled && !usernameEnabled {
 		c.SuspendAction()
 	}
 }

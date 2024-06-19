@@ -32,7 +32,7 @@ interface PreflightActions {
 }
 
 interface LoginInitActions {
-  readonly continue_with_login_identifier: Action<ContinueWithLoginIdentifierInputs>;
+  readonly continue_with_login_identifier?: Action<ContinueWithLoginIdentifierInputs>;
   readonly webauthn_generate_request_options?: Action<null>;
   readonly webauthn_verify_assertion_response?: Action<WebauthnVerifyAssertionResponseInputs>;
   readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;

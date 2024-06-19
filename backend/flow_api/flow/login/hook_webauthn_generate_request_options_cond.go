@@ -22,6 +22,10 @@ func (a WebauthnGenerateRequestOptionsForConditionalUi) Execute(c flowpilot.Hook
 
 	deps := a.GetDeps(c)
 
+	if !deps.Cfg.Passkey.Enabled {
+		return nil
+	}
+
 	params := services.GenerateRequestOptionsParams{Tx: deps.Tx}
 
 	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptions(params)
