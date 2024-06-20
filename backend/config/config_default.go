@@ -5,9 +5,19 @@ import "time"
 func DefaultConfig() *Config {
 	return &Config{
 		ConvertLegacyConfig: true,
+		Service: Service{
+			Name: "Hanko Authentication Service",
+		},
+		Secrets: Secrets{
+			Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+		},
 		Server: Server{
 			Public: ServerSettings{
 				Address: ":8000",
+				Cors: Cors{
+					AllowOrigins:                []string{"http://localhost:8888"},
+					UnsafeWildcardOriginAllowed: false,
+				},
 			},
 			Admin: ServerSettings{
 				Address: ":8001",
@@ -21,6 +31,10 @@ func DefaultConfig() *Config {
 			},
 			UserVerification: "preferred",
 			Timeout:          60000,
+			Timeouts: WebauthnTimeouts{
+				Registration: 60000,
+				Login:        60000,
+			},
 		},
 		Smtp: SMTP{
 			Port: "465",
@@ -28,6 +42,7 @@ func DefaultConfig() *Config {
 		EmailDelivery: EmailDelivery{
 			Enabled: true,
 			SMTP: SMTP{
+				Host: "localhost",
 				Port: "465",
 			},
 			FromAddress: "noreply@hanko.io",
@@ -40,14 +55,25 @@ func DefaultConfig() *Config {
 				FromName:    "Hanko",
 			},
 			Smtp: SMTP{
+				Host: "localhost",
 				Port: "465",
 			},
 		},
 		Password: Password{
-			MinLength: 8,
+			Enabled:               false,
+			Optional:              false,
+			AcquireOnRegistration: "always",
+			AcquireOnLogin:        "never",
+			Recovery:              true,
+			MinLength:             8,
 		},
 		Database: Database{
 			Database: "hanko",
+			User:     "hanko",
+			Password: "hanko",
+			Port:     "5432",
+			Dialect:  "postgres",
+			Host:     "localhost",
 		},
 		Session: Session{
 			Lifespan: "1h",
@@ -130,7 +156,7 @@ func DefaultConfig() *Config {
 			PasscodeTtl:           300,
 		},
 		Username: Username{
-			Enabled:               true,
+			Enabled:               false,
 			Optional:              true,
 			AcquireOnRegistration: true,
 			AcquireOnLogin:        true,
