@@ -191,8 +191,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	lang := c.Request().Header.Get("Accept-Language")
-	subject := h.renderer.Translate(lang, "email_subject_login", data)
-	bodyPlain, err := h.renderer.Render("loginTextMail", lang, data)
+	str, err := h.renderer.Render("login_text.tmpl", lang, data)
 	if err != nil {
 		return fmt.Errorf("failed to render email template: %w", err)
 	}

@@ -304,8 +304,8 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 func (a ContinueWithLoginIdentifier) determineUserDetailOnboardingStates(cfg config.Config, userHasUsername, userHasEmail bool) []flowpilot.StateName {
 	result := make([]flowpilot.StateName, 0)
 
-	acquireUsername := !userHasUsername && cfg.Username.AcquireOnLogin
-	acquireEmail := !userHasEmail && cfg.Email.AcquireOnLogin
+	acquireUsername := !userHasUsername && cfg.Username.Enabled && cfg.Username.AcquireOnLogin
+	acquireEmail := !userHasEmail && cfg.Email.Enabled && cfg.Email.AcquireOnLogin
 
 	if acquireUsername && acquireEmail {
 		result = append(result, shared.StateOnboardingUsername, shared.StateOnboardingEmail)

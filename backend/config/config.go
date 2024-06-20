@@ -25,13 +25,13 @@ type Config struct {
 	ConvertLegacyConfig bool             `yaml:"convert_legacy_config" json:"convert_legacy_config,omitempty" koanf:"convert_legacy_config" split_words:"true"`
 	Server              Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
 	Webauthn            WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
-	Smtp                SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
+	Smtp                SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"` // Deprecated, use EmailDelivery.SMTP instead
 	EmailDelivery       EmailDelivery    `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true"`
-	Passcode            Passcode         `yaml:"passcode" json:"passcode" koanf:"passcode"`
+	Passcode            Passcode         `yaml:"passcode" json:"passcode,omitempty" koanf:"passcode"` // Deprecated
 	Password            Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
-	Database            Database         `yaml:"database" json:"database" koanf:"database"`
-	Secrets             Secrets          `yaml:"secrets" json:"secrets" koanf:"secrets"`
-	Service             Service          `yaml:"service" json:"service" koanf:"service"`
+	Database            Database         `yaml:"database" json:"database,omitempty" koanf:"database"`
+	Secrets             Secrets          `yaml:"secrets" json:"secrets,omitempty" koanf:"secrets"`
+	Service             Service          `yaml:"service" json:"service,omitempty" koanf:"service"`
 	Session             Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
 	AuditLog            AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
 	Emails              Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
@@ -39,12 +39,12 @@ type Config struct {
 	ThirdParty          ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
 	Log                 LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
 	Account             Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-	SecondFactor        SecondFactor     `yaml:"second_factor" json:"second_factor" koanf:"second_factor" split_word:"true"`
-	Passkey             Passkey          `yaml:"passkey" json:"passkey" koanf:"passkey"`
+	SecondFactor        SecondFactor     `yaml:"second_factor" json:"second_factor,omitempty" koanf:"second_factor" split_word:"true"`
+	Passkey             Passkey          `yaml:"passkey" json:"passkey,omitempty" koanf:"passkey"`
 	Saml                config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
 	Webhooks            WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
-	Email               Email            `yaml:"email" json:"email" koanf:"email"`
-	Username            Username         `yaml:"username" json:"username" koanf:"username"`
+	Email               Email            `yaml:"email" json:"email,omitempty" koanf:"email"`
+	Username            Username         `yaml:"username" json:"username,omitempty" koanf:"username"`
 }
 
 var (
@@ -318,7 +318,7 @@ func (s *Server) Validate() error {
 }
 
 type Service struct {
-	Name string `yaml:"name" json:"name" koanf:"name"`
+	Name string `yaml:"name" json:"name,omitempty" koanf:"name"`
 }
 
 func (s *Service) Validate() error {
@@ -331,9 +331,9 @@ func (s *Service) Validate() error {
 type Password struct {
 	Enabled               bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	Optional              bool   `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
-	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=never,enum=always,enum=conditional,enum=never"`
-	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
-	Recovery              bool   `yaml:"recovery" json:"recovery" koanf:"recovery" jsonschema:"default=true"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration,omitempty" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=never,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	Recovery              bool   `yaml:"recovery" json:"recovery,omitempty" koanf:"recovery" jsonschema:"default=true"`
 	MinLength             int    `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
 }
 
@@ -365,7 +365,7 @@ type Cors struct {
 	// response header. This header defines a list of origins that may access the
 	// resource.  The wildcard characters '*' and '?' are supported and are
 	// converted to regex fragments '.*' and '.' accordingly.
-	AllowOrigins []string `yaml:"allow_origins" json:"allow_origins" koanf:"allow_origins" split_words:"true"`
+	AllowOrigins []string `yaml:"allow_origins" json:"allow_origins,omitempty" koanf:"allow_origins" split_words:"true"`
 
 	// UnsafeWildcardOriginWithAllowCredentials UNSAFE/INSECURE: allows wildcard '*' origin to be used with AllowCredentials
 	// flag. In that case we consider any origin allowed and send it back to the client with `Access-Control-Allow-Origin` header.
@@ -398,15 +398,17 @@ func (s *ServerSettings) Validate() error {
 }
 
 type WebauthnTimeouts struct {
-	Registration int `yaml:"registration" json:"registration" koanf:"registration"`
-	Login        int `yaml:"login" json:"login" koanf:"login"`
+	Registration int `yaml:"registration" json:"registration,omitempty" koanf:"registration"`
+	Login        int `yaml:"login" json:"login,omitempty" koanf:"login"`
 }
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
 type WebauthnSettings struct {
-	RelyingParty     RelyingParty          `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
-	Timeout          int                   `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
-	Timeouts         WebauthnTimeouts      `yaml:"timeouts" json:"timeouts,omitempty" koanf:"timeouts" split_words:"true"`
+	RelyingParty RelyingParty `yaml:"relying_party" json:"relying_party,omitempty" koanf:"relying_party" split_words:"true"`
+	// Deprecated, use Timeouts instead
+	Timeout  int              `yaml:"timeout" json:"timeout,omitempty" koanf:"timeout" jsonschema:"default=60000"`
+	Timeouts WebauthnTimeouts `yaml:"timeouts" json:"timeouts,omitempty" koanf:"timeouts" split_words:"true"`
+	// Deprecated, use Passkey.UserVerification instead
 	UserVerification string                `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 	Handler          *webauthnLib.WebAuthn `jsonschema:"-"`
 }
@@ -466,7 +468,7 @@ type RelyingParty struct {
 
 // SMTP Server Settings for sending passcodes
 type SMTP struct {
-	Host     string `yaml:"host" json:"host" koanf:"host"`
+	Host     string `yaml:"host" json:"host,omitempty" koanf:"host"`
 	Port     string `yaml:"port" json:"port,omitempty" koanf:"port" jsonschema:"default=465,oneof_type=string;integer"`
 	User     string `yaml:"user" json:"user,omitempty" koanf:"user"`
 	Password string `yaml:"password" json:"password,omitempty" koanf:"password"`
@@ -499,9 +501,8 @@ func (e *PasscodeEmail) Validate() error {
 }
 
 type Passcode struct {
-	Enabled bool          `yaml:"enabled" json:"enabled" koanf:"enabled"`
-	Email   PasscodeEmail `yaml:"email" json:"email,omitempty" koanf:"email"`
-	TTL     int           `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
+	Email PasscodeEmail `yaml:"email" json:"email,omitempty" koanf:"email"`
+	TTL   int           `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
 	//Deprecated: Use root level Smtp instead
 	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
 }
@@ -516,13 +517,13 @@ func (p *Passcode) Validate() error {
 
 // Database connection settings
 type Database struct {
-	Database string `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"default=hanko" jsonschema:"oneof_required=config"`
-	User     string `yaml:"user" json:"user,omitempty" koanf:"user" jsonschema:"oneof_required=config"`
-	Password string `yaml:"password" json:"password,omitempty" koanf:"password" jsonschema:"oneof_required=config"`
-	Host     string `yaml:"host" json:"host,omitempty" koanf:"host" jsonschema:"oneof_required=config"`
-	Port     string `yaml:"port" json:"port,omitempty" koanf:"port" jsonschema:"oneof_required=config,oneof_type=string;integer"`
-	Dialect  string `yaml:"dialect" json:"dialect,omitempty" koanf:"dialect" jsonschema:"oneof_required=config,enum=postgres,enum=mysql,enum=cockroach"`
-	Url      string `yaml:"url" json:"url,omitempty" koanf:"url" jsonschema:"oneof_required=url"`
+	Database string `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"default=hanko"`
+	User     string `yaml:"user" json:"user,omitempty" koanf:"user" jsonschema:"default=hanko"`
+	Password string `yaml:"password" json:"password,omitempty" koanf:"password" jsonschema:"default=hanko"`
+	Host     string `yaml:"host" json:"host,omitempty" koanf:"host" jsonschema:"default=localhost"`
+	Port     string `yaml:"port" json:"port,omitempty" koanf:"port" jsonschema:"default=\"5432\""`
+	Dialect  string `yaml:"dialect" json:"dialect,omitempty" koanf:"dialect" jsonschema:"default=postgres,enum=postgres,enum=mysql,enum=cockroach"`
+	Url      string `yaml:"url" json:"url,omitempty" koanf:"url"`
 }
 
 func (d *Database) Validate() error {
@@ -558,7 +559,7 @@ type Secrets struct {
 	// application startup will fail.
 	//
 	// Each key must be at least 16 characters long.
-	Keys []string `yaml:"keys" json:"keys" koanf:"keys" jsonschema:"minItems=1"`
+	Keys []string `yaml:"keys" json:"keys,omitempty" koanf:"keys" jsonschema:"minItems=1"`
 }
 
 func (s *Secrets) Validate() error {
@@ -864,11 +865,11 @@ type Account struct {
 // TODO: below structs need validation, e.g. only allowed names for enabled and also we should reject some configurations (e.g. passcode & passwords are disabled and passkey onboarding is also disabled)
 
 type SecondFactor struct {
-	Enabled       bool                   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	Optional      bool                   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	Onboarding    SecondFactorOnboarding `yaml:"onboarding" json:"onboarding" koanf:"onboarding"`
-	Methods       []string               `yaml:"methods" json:"methods" koanf:"methods"` // TODO: jsonschema only totp and security_key are allowed
-	RecoveryCodes RecoveryCodes          `yaml:"recovery_codes" json:"recovery_codes" koanf:"recovery_codes" split_words:"true"`
+	Enabled       bool                   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
+	Optional      bool                   `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
+	Onboarding    SecondFactorOnboarding `yaml:"onboarding" json:"onboarding,omitempty" koanf:"onboarding"`
+	Methods       []string               `yaml:"methods" json:"methods,omitempty" koanf:"methods" jsonschema:"enum=totp,enum=security_key"`
+	RecoveryCodes RecoveryCodes          `yaml:"recovery_codes" json:"recovery_codes,omitempty" koanf:"recovery_codes" split_words:"true"`
 }
 
 type SecondFactorOnboarding struct {
@@ -881,41 +882,41 @@ type RecoveryCodes struct {
 }
 
 type Passkey struct {
-	Enabled               bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	Optional              bool   `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
-	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	Enabled               bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool   `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration string `yaml:"acquire_on_registration" json:"acquire_on_registration,omitempty" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
+	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	UserVerification      string `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
-	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
-	Limit                 int    `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=100"`
+	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference,omitempty" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
+	Limit                 int    `yaml:"limit" json:"limit" koanf:"limit,omitempty" jsonschema:"default=100"`
 }
 
 type EmailDelivery struct {
-	Enabled     bool   `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	FromAddress string `yaml:"from_address" json:"from_address" koanf:"from_address" split_words:"true"`
-	FromName    string `yaml:"from_name" json:"from_name" koanf:"from_name" split_words:"true"`
-	SMTP        SMTP   `yaml:"smtp" json:"smtp" koanf:"smtp"`
+	Enabled     bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
+	FromAddress string `yaml:"from_address" json:"from_address,omitempty" koanf:"from_address" split_words:"true"`
+	FromName    string `yaml:"from_name" json:"from_name,omitempty" koanf:"from_name" split_words:"true"`
+	SMTP        SMTP   `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"`
 }
 
 type Email struct {
-	Enabled               bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	Optional              bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
-	AcquireOnLogin        bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
-	RequireVerification   bool `yaml:"require_verification" json:"require_verification" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
-	Limit                 int  `yaml:"limit" json:"limit" koanf:"limit" jsonschema:"default=100"`
-	UseAsLoginIdentifier  bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
-	MaxLength             int  `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
-	UseForAuthentication  bool `yaml:"use_for_authentication" json:"use_for_authentication" koanf:"use_for_authentication" jsonschema:"default=true"`
-	PasscodeTtl           int  `yaml:"passcode_ttl" json:"passcode_ttl" koanf:"passcode_ttl" jsonschema:"default=300"`
+	Enabled               bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration,omitempty" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=true"`
+	AcquireOnLogin        bool `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
+	RequireVerification   bool `yaml:"require_verification" json:"require_verification,omitempty" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
+	Limit                 int  `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
+	UseAsLoginIdentifier  bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier,omitempty" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+	MaxLength             int  `yaml:"max_length" json:"max_length,omitempty" koanf:"max_length" jsonschema:"default=100"`
+	UseForAuthentication  bool `yaml:"use_for_authentication" json:"use_for_authentication,omitempty" koanf:"use_for_authentication" jsonschema:"default=true"`
+	PasscodeTtl           int  `yaml:"passcode_ttl" json:"passcode_ttl,omitempty" koanf:"passcode_ttl" jsonschema:"default=300"`
 }
 
 type Username struct {
-	Enabled               bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
-	Optional              bool `yaml:"optional" json:"optional" koanf:"optional" jsonschema:"default=true"`
-	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=false"`
-	AcquireOnLogin        bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
-	UseAsLoginIdentifier  bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+	Enabled               bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
+	Optional              bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
+	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration,omitempty" koanf:"acquire_on_registration" split_words:"true" jsonschema:"default=false"`
+	AcquireOnLogin        bool `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=false"`
+	UseAsLoginIdentifier  bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier,omitempty" koanf:"use_as_login_identifier" jsonschema:"default=true"`
 	MinLength             int  `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
-	MaxLength             int  `yaml:"max_length" json:"max_length" koanf:"max_length" jsonschema:"default=100"`
+	MaxLength             int  `yaml:"max_length" json:"max_length,omitempty" koanf:"max_length" jsonschema:"default=100"`
 }
