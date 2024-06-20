@@ -23,26 +23,11 @@ func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext
 }
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
-	deps := a.GetDeps(c)
-
 	if valid := c.ValidateInputData(); !valid {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	webauthnAvailable := c.Input().Get("webauthn_available").String() == "true"
-
-	// Only passkeys are allowed, but webauthn is not available on the browser
-	if !webauthnAvailable && !deps.Cfg.Password.Enabled && !deps.Cfg.Passcode.Enabled {
-		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
-	}
-
-	// Only security keys are allowed as a second factor, but webauthn is not available on the browser
-	if !webauthnAvailable &&
-		deps.Cfg.SecondFactor.Enabled && !deps.Cfg.SecondFactor.Optional &&
-		len(deps.Cfg.SecondFactor.Methods) == 1 &&
-		deps.Cfg.SecondFactor.Methods[0] == "security_key" {
-		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
-	}
+	webauthnAvailable := c.Input().Get("webauthn_available").Bool()
 
 	err := c.Stash().Set("webauthn_available", webauthnAvailable)
 	if err != nil {
