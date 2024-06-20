@@ -88,15 +88,6 @@ func (emails *Emails) GetEmailById(emailId uuid.UUID) *Email {
 	return nil
 }
 
-func (emails *Emails) Delete(emailId uuid.UUID) {
-	for index, email := range *emails {
-		if email.ID.String() == emailId.String() {
-			*emails = slices.Delete(*emails, index, 1)
-			return
-		}
-	}
-}
-
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (email *Email) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
