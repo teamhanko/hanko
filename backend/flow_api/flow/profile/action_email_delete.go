@@ -84,7 +84,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	userModel.Emails.Delete(emailToBeDeletedId)
+	userModel.DeleteEmail(*emailToBeDeletedModel)
 
 	return c.ContinueFlow(shared.StateProfileInit)
 }

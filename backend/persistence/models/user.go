@@ -63,6 +63,15 @@ func (user *User) UpdateEmail(email Email) {
 	}
 }
 
+func (user *User) DeleteEmail(email Email) {
+	for i := range user.Emails {
+		if user.Emails[i].ID.String() == email.ID.String() {
+			user.Emails = slices.Delete(user.Emails, i, i+1)
+			return
+		}
+	}
+}
+
 func (user *User) GetEmailById(emailId uuid.UUID) *Email {
 	return user.Emails.GetEmailById(emailId)
 }
