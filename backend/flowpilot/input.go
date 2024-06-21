@@ -35,7 +35,7 @@ type Input interface {
 	shouldPersist() bool
 	shouldPreserve() bool
 	isIncludedOnState(stateName StateName) bool
-	validate(stateName StateName, inputData ReadOnlyActionInput, stashData Stash) bool
+	validate(stateName StateName, inputData ReadOnlyActionInput, stashData stash) bool
 	toPublicInput() *PublicInput
 }
 
@@ -222,7 +222,7 @@ func (i *DefaultInput) shouldPreserve() bool {
 }
 
 // validate performs validation on the input field.
-func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInput, stashData Stash) bool {
+func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInput, stashData stash) bool {
 	// TODO: Replace with more structured validation logic.
 
 	var inputValue *string

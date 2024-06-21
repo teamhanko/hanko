@@ -18,7 +18,7 @@ type ExecutionSchema interface {
 	getInput(name string) Input
 	getOutputData() ReadOnlyActionInput
 	getDataToPersist() ReadOnlyActionInput
-	validateInputData(stateName StateName, stash Stash) bool
+	validateInputData(stateName StateName, stash stash) bool
 	toInitializationSchema() InitializationSchema
 	toPublicSchema(stateName StateName) PublicSchema
 }
@@ -117,7 +117,7 @@ func (s *defaultSchema) SetError(inputName string, inputError InputError) {
 }
 
 // validateInputData validates the input data based on the input definitions in the schema.
-func (s *defaultSchema) validateInputData(stateName StateName, stash Stash) bool {
+func (s *defaultSchema) validateInputData(stateName StateName, stash stash) bool {
 	valid := true
 
 	for _, input := range s.inputs {
