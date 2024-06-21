@@ -22,9 +22,9 @@ type flowContext interface {
 
 	GetFlowPath() flowPath
 	// Payload returns the JSONManager for accessing payload data.
-	Payload() Payload
+	Payload() payload
 	// Stash returns the JSONManager for accessing stash data.
-	Stash() Stash
+	Stash() stash
 	// GetInitialState returns the initial state of the flow.
 	GetInitialState() StateName
 	// GetCurrentState returns the current state of the flow.
@@ -45,20 +45,18 @@ type flowContext interface {
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
 type actionInitializationContext interface {
+	flowContext
+	actionSuspender
+
 	// AddInputs adds input parameters to the schema.
 	AddInputs(inputs ...Input)
-	// Stash returns the ReadOnlyJSONManager for accessing stash data.
-	Stash() Stash
-	// CurrentStateEquals returns true, when one of the given states matches the current state.
-	CurrentStateEquals(stateNames ...StateName) bool
-	actionSuspender
-	flowContext
 }
 
 // actionExecutionContext represents the context for an action execution.
 type actionExecutionContext interface {
 	actionSuspender
 	flowContext
+
 	// Input returns the ExecutionSchema for the action.
 	Input() ExecutionSchema
 
@@ -92,10 +90,6 @@ type actionSuspender interface {
 	SuspendAction()
 }
 
-type actionFinalizationContext interface {
-	actionSuspender
-}
-
 type Context interface {
 	context
 }
@@ -112,11 +106,6 @@ type ExecutionContext interface {
 	actionExecutionContinuationContext
 }
 
-type FinalizationContext interface {
-	context
-	actionFinalizationContext
-}
-
 type HookExecutionContext interface {
 	context
 	actionExecutionContext
@@ -129,18 +118,6 @@ type BeforeEachActionExecutionContext interface {
 	actionExecutionContinuationContext
 }
 
-// TODO: The following interfaces are meant for a plugin system. #tbd
-
-// PluginBeforeActionExecutionContext represents the context for a plugin before an action execution.
-type PluginBeforeActionExecutionContext interface {
-	actionExecutionContinuationContext
-}
-
-// PluginAfterActionExecutionContext represents the context for a plugin after an action execution.
-type PluginAfterActionExecutionContext interface {
-	actionExecutionContext
-}
-
 // createAndInitializeFlow initializes the flow and returns a flow Response.
 func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	// Wrap the provided FlowDB with additional functionality.
@@ -149,7 +126,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	expiresAt := time.Now().Add(flow.ttl).UTC()
 
 	// Initialize JSONManagers for stash and payload.
-	stash := NewStash()
+	stash := newStash()
 	payload := NewPayload()
 
 	// Add the initial next states to the stash to be scheduled after the initial sub-flow.
@@ -236,7 +213,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Parse stash data from the flow model.
-	stash, err := NewStashFromString(flowModel.StashData)
+	stash, err := newStashFromString(flowModel.StashData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse stash from flow: %w", err)
 	}

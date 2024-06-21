@@ -185,8 +185,8 @@ func (aec *defaultActionExecutionContext) Input() ExecutionSchema {
 	return aec.input
 }
 
-// Payload returns the JSONManager for accessing payload data.
-func (aec *defaultActionExecutionContext) Payload() Payload {
+// payload returns the JSONManager for accessing payload data.
+func (aec *defaultActionExecutionContext) Payload() payload {
 	return aec.payload
 }
 

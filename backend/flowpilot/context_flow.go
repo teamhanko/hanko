@@ -7,8 +7,8 @@ import (
 
 // defaultFlowContext is the default implementation of the flowContext interface.
 type defaultFlowContext struct {
-	payload   Payload       // JSONManager for payload data.
-	stash     Stash         // JSONManager for stash data.
+	payload   payload       // JSONManager for payload data.
+	stash     stash         // JSONManager for stash data.
 	flow      defaultFlow   // The associated defaultFlow instance.
 	dbw       flowDBWrapper // Wrapped FlowDB instance with additional functionality.
 	flowModel FlowModel     // The current FlowModel.
@@ -63,7 +63,7 @@ func (fc *defaultFlowContext) GetErrorState() StateName {
 }
 
 // Stash returns the JSONManager for accessing stash data.
-func (fc *defaultFlowContext) Stash() Stash {
+func (fc *defaultFlowContext) Stash() stash {
 	return fc.stash
 }
 

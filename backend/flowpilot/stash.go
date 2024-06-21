@@ -5,7 +5,7 @@ import (
 )
 
 // Stash defines the interface for managing JSON data.
-type Stash interface {
+type stash interface {
 	stateHistoryStash
 	scheduledStatesStash
 	jsonmanager.JSONManager
@@ -18,8 +18,8 @@ type defaultStash struct {
 	jsonmanager.JSONManager
 }
 
-// newStashFromJSONManager creates a new instance of Stash with a given JSONManager.
-func newStashFromJSONManager(jm jsonmanager.JSONManager) Stash {
+// newStashFromJSONManager creates a new instance of stash with a given JSONManager.
+func newStashFromJSONManager(jm jsonmanager.JSONManager) stash {
 	return &defaultStash{
 		JSONManager:          jm,
 		stateHistoryStash:    &defaultStateHistoryStash{JSONManager: jm},
@@ -27,14 +27,14 @@ func newStashFromJSONManager(jm jsonmanager.JSONManager) Stash {
 	}
 }
 
-// NewStash creates a new instance of Stash with empty JSON data.
-func NewStash() Stash {
+// newStash creates a new instance of Stash with empty JSON data.
+func newStash() stash {
 	jm := jsonmanager.NewJSONManager()
 	return newStashFromJSONManager(jm)
 }
 
-// NewStashFromString creates a new instance of Stash with the given JSON data.
-func NewStashFromString(data string) (Stash, error) {
+// newStashFromString creates a new instance of Stash with the given JSON data.
+func newStashFromString(data string) (stash, error) {
 	jm, err := jsonmanager.NewJSONManagerFromString(data)
 	return newStashFromJSONManager(jm), err
 }

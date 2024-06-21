@@ -7,7 +7,7 @@ type defaultActionInitializationContext struct {
 	defaultFlowContext                      // Embedding the defaultFlowContext for common context fields.
 }
 
-func (aic *defaultActionInitializationContext) Payload() Payload {
+func (aic *defaultActionInitializationContext) Payload() payload {
 	return aic.payload
 }
 
@@ -26,7 +26,7 @@ func (aic *defaultActionInitializationContext) SuspendAction() {
 }
 
 // Stash returns the ReadOnlyJSONManager for accessing stash data.
-func (aic *defaultActionInitializationContext) Stash() Stash {
+func (aic *defaultActionInitializationContext) Stash() stash {
 	return aic.stash
 }
 
