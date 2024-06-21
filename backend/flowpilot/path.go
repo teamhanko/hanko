@@ -6,11 +6,12 @@ import (
 )
 
 type flowPath interface {
+	String() string
+	HasFragment(fragment string) bool
+
 	add(fragment string)
 	remove()
 	copy() flowPath
-	String() string
-	HasFragment(fragment string) bool
 }
 
 type defaultFlowPath struct {
