@@ -7,8 +7,8 @@ import (
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
 type defaultActionExecutionContext struct {
-	actionName          ActionName      // Name of the action being executed.
-	input               ExecutionSchema // JSONManager for accessing input data.
+	actionName          ActionName           // Name of the action being executed.
+	input               executionInputSchema // JSONManager for accessing input data.
 	flowError           FlowError
 	executionResult     *executionResult // Result of the action execution.
 	links               []Link           // TODO:
@@ -43,7 +43,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	aec.flowModel.CurrentState = executionResult.nextStateName
 	aec.flowModel.PreviousState = &previousState
 
-	// Get the data to persists from the executed action schema for recording.
+	// Get the data to persists from the executed action inputSchema for recording.
 	inputDataToPersist := aec.input.getDataToPersist().String()
 
 	// Prepare parameters for creating a new transition in the database.
@@ -110,7 +110,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 
 	actionResult := actionExecutionResult{
 		actionName:  aec.actionName,
-		schema:      aec.input,
+		inputSchema: aec.input,
 		isSuspended: aec.isSuspended,
 	}
 
@@ -185,8 +185,8 @@ func (aec *defaultActionExecutionContext) executeAfterEachActionHooks() error {
 	return nil
 }
 
-// Input returns the ExecutionSchema for accessing input data.
-func (aec *defaultActionExecutionContext) Input() ExecutionSchema {
+// Input returns the executionInputSchema for accessing input data.
+func (aec *defaultActionExecutionContext) Input() executionInputSchema {
 	return aec.input
 }
 
@@ -218,7 +218,7 @@ func (aec *defaultActionExecutionContext) GetFlowError() FlowError {
 	return aec.flowError
 }
 
-// ValidateInputData validates the input data against the schema.
+// ValidateInputData validates the input data against the inputSchema.
 func (aec *defaultActionExecutionContext) ValidateInputData() bool {
 	return aec.input.validateInputData(aec.flowModel.CurrentState, aec.stash)
 }

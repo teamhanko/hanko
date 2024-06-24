@@ -6,8 +6,8 @@ type allowedValue interface {
 }
 
 type defaultAllowedValue struct {
-	value interface{}
 	text  string
+	value interface{}
 }
 
 func (av *defaultAllowedValue) getValue() interface{} {
@@ -17,8 +17,8 @@ func (av *defaultAllowedValue) getValue() interface{} {
 // toPublicAllowedValue converts the allowedValue to a ResponseAllowedValue for public exposure.
 func (av *defaultAllowedValue) toPublicAllowedValue() *ResponseAllowedValue {
 	return &ResponseAllowedValue{
-		Value: av.value,
 		Text:  av.text,
+		Value: av.value,
 	}
 }
 
@@ -50,11 +50,11 @@ func (av *defaultAllowedValues) hasAny() bool {
 }
 
 func (av *defaultAllowedValues) getValues() []string {
-	l := make([]string, len(*av))
+	values := make([]string, len(*av))
 	for i, v := range *av {
-		l[i] = v.getValue().(string)
+		values[i] = v.getValue().(string)
 	}
-	return l
+	return values
 }
 
 func (av *defaultAllowedValues) toPublicAllowedValues() *ResponseAllowedValues {

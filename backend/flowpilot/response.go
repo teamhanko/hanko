@@ -7,10 +7,10 @@ import (
 
 // ResponseAction represents a link to an action.
 type ResponseAction struct {
-	Href         string       `json:"href"`
-	PublicSchema PublicSchema `json:"inputs"`
-	Name         ActionName   `json:"action"`
-	Description  string       `json:"description"`
+	Href        string         `json:"href"`
+	Inputs      ResponseInputs `json:"inputs"`
+	Name        ActionName     `json:"action"`
+	Description string         `json:"description"`
 }
 
 // ResponseActions is a collection of ResponseAction instances.
@@ -56,14 +56,14 @@ type ResponseLink struct {
 
 // Response represents the response of an action execution.
 type Response struct {
-	Name          StateName       `json:"name"`
-	FlowPath      *string         `json:"flow_path,omitempty"`
-	Status        int             `json:"status"`
-	Payload       interface{}     `json:"payload,omitempty"`
-	CSRFToken     string          `json:"csrf_token"`
-	PublicActions ResponseActions `json:"actions"`
-	PublicError   *ResponseError  `json:"error,omitempty"`
-	PublicLinks   ResponseLinks   `json:"links"`
+	Name      StateName       `json:"name"`
+	FlowPath  *string         `json:"flow_path,omitempty"`
+	Status    int             `json:"status"`
+	Payload   interface{}     `json:"payload,omitempty"`
+	CSRFToken string          `json:"csrf_token"`
+	Actions   ResponseActions `json:"actions"`
+	Error     *ResponseError  `json:"error,omitempty"`
+	Links     ResponseLinks   `json:"links"`
 }
 
 // flowResult interface defines methods for obtaining response and status.
@@ -84,14 +84,14 @@ func newFlowResultFromResponse(publicResponse Response) flowResult {
 
 // newFlowResultFromError creates a flowResult from a FlowError.
 func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) flowResult {
-	publicError := flowError.toPublicError(debug)
+	e := flowError.toPublicError(debug)
 	status := flowError.Status()
 
 	publicResponse := Response{
-		Name:          stateName,
-		Status:        status,
-		PublicError:   publicError,
-		PublicActions: ResponseActions{},
+		Name:    stateName,
+		Status:  status,
+		Error:   e,
+		Actions: ResponseActions{},
 	}
 
 	return defaultFlowResult{Response: publicResponse}
@@ -110,7 +110,7 @@ func (r defaultFlowResult) GetStatus() int {
 // actionExecutionResult holds the result of a method execution.
 type actionExecutionResult struct {
 	actionName  ActionName
-	schema      ExecutionSchema
+	inputSchema executionInputSchema
 	isSuspended bool
 }
 
@@ -136,12 +136,12 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 
 	// Create the response object.
 	resp := Response{
-		Name:          er.nextStateName,
-		Status:        http.StatusOK,
-		Payload:       p,
-		PublicActions: actions,
-		PublicLinks:   links,
-		CSRFToken:     fc.flowModel.CSRFToken,
+		Name:      er.nextStateName,
+		Status:    http.StatusOK,
+		Payload:   p,
+		Actions:   actions,
+		Links:     links,
+		CSRFToken: fc.flowModel.CSRFToken,
 	}
 
 	if debug {
@@ -152,29 +152,29 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 	// Include flow error if present.
 	if er.flowError != nil {
 		status := er.flowError.Status()
-		publicError := er.flowError.toPublicError(debug)
+		e := er.flowError.toPublicError(debug)
 
 		resp.Status = status
-		resp.PublicError = publicError
+		resp.Error = e
 	}
 
 	return newFlowResultFromResponse(resp)
 }
 
 func (er *executionResult) generateLinks() ResponseLinks {
-	var publicLinks ResponseLinks
+	var links ResponseLinks
 
 	for _, link := range er.links {
-		publicLink := link.toPublicLink()
-		publicLinks = append(publicLinks, publicLink)
+		l := link.toPublicLink()
+		links = append(links, l)
 	}
 
-	return publicLinks
+	return links
 }
 
 // generateActions generates a collection of links based on the execution result.
 func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActions {
-	var publicActions = make(ResponseActions)
+	var actions = make(ResponseActions)
 
 	// Get actions for the next addState.
 	state, _ := fc.flow.getState(er.nextStateName)
@@ -186,11 +186,11 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
-			schema := er.getSchema(fc, ad)
+			inputSchema := er.getInputSchema(fc, ad)
 
 			// (Re-)Initialize each action
 			aic := defaultActionInitializationContext{
-				schema:             schema.toInitializationSchema(),
+				inputSchema:        inputSchema.forInitializationContext(),
 				defaultFlowContext: fc,
 			}
 
@@ -200,31 +200,35 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 				continue
 			}
 
-			publicSchema := schema.toPublicSchema(er.nextStateName)
+			inputSchemaResponse := inputSchema.toResponse(er.nextStateName)
 
 			// Create the action instance.
-			publicAction := ResponseAction{
-				Href:         href,
-				PublicSchema: publicSchema,
-				Name:         actionName,
-				Description:  actionDescription,
+			action := ResponseAction{
+				Href:        href,
+				Inputs:      inputSchemaResponse,
+				Name:        actionName,
+				Description: actionDescription,
 			}
 
-			publicActions[actionName] = publicAction
+			actions[actionName] = action
 		}
 	}
 
-	return publicActions
+	return actions
 }
 
-// getSchema returns the schema for a given method name.
-func (er *executionResult) getSchema(fc *defaultFlowContext, actionDetail actionDetail) ExecutionSchema {
+// getInputSchema returns the inputSchema for a given method name.
+func (er *executionResult) getInputSchema(fc *defaultFlowContext, actionDetail actionDetail) executionInputSchema {
+	actionName := actionDetail.getAction().GetName()
+	actionFlowPath := actionDetail.getFlowPath().String()
+	currentFlowPath := fc.GetFlowPath().String()
+
 	if er.actionExecutionResult == nil ||
-		actionDetail.getAction().GetName() != er.actionExecutionResult.actionName ||
-		actionDetail.getFlowPath().String() != fc.GetFlowPath().String() || er.nextStateName != fc.GetCurrentState() {
+		actionName != er.actionExecutionResult.actionName ||
+		actionFlowPath != currentFlowPath || er.nextStateName != fc.flowModel.CurrentState {
 		return newSchema()
 	}
-	return er.actionExecutionResult.schema
+	return er.actionExecutionResult.inputSchema
 }
 
 // createHref creates a link HREF based on the current flow context and method name.
