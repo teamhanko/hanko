@@ -14,11 +14,11 @@ import (
 	"time"
 )
 
-var CapabilitiesSubFlow = flowpilot.NewSubFlow("capabilities").
+var CapabilitiesSubFlow = flowpilot.NewSubFlow(shared.FlowCapabilities).
 	State(shared.StatePreflight, capabilities.RegisterClientCapabilities{}).
 	MustBuild()
 
-var PasscodeSubFlow = flowpilot.NewSubFlow("passcode").
+var PasscodeSubFlow = flowpilot.NewSubFlow(shared.FlowPasscode).
 	State(shared.StatePasscodeConfirmation,
 		passcode.VerifyPasscode{},
 		passcode.ReSendPasscode{},
@@ -27,7 +27,7 @@ var PasscodeSubFlow = flowpilot.NewSubFlow("passcode").
 		passcode.SendPasscode{}).
 	MustBuild()
 
-var CredentialUsageSubFlow = flowpilot.NewSubFlow("credential_usage").
+var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
 	State(shared.StateLoginMethodChooser,
 		credential_usage.ContinueToPasswordLogin{},
 		credential_usage.ContinueToPasscodeConfirmation{},
@@ -49,7 +49,7 @@ var CredentialUsageSubFlow = flowpilot.NewSubFlow("credential_usage").
 	SubFlows(PasscodeSubFlow).
 	MustBuild()
 
-var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
+var CredentialOnboardingSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialOnboarding).
 	State(shared.StateCredentialOnboardingChooser,
 		credential_onboarding.ContinueToPasskey{},
 		credential_onboarding.ContinueToPassword{},
@@ -68,7 +68,7 @@ var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
 		credential_onboarding.SkipPassword{}).
 	MustBuild()
 
-var UserDetailsSubFlow = flowpilot.NewSubFlow("user_details").
+var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 	State(shared.StateOnboardingUsername,
 		user_details.UsernameSet{},
 		user_details.SkipUsername{}).
@@ -78,7 +78,7 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow("user_details").
 	SubFlows(PasscodeSubFlow).
 	MustBuild()
 
-var LoginFlow = flowpilot.NewFlow("/login").
+var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 	State(shared.StateLoginInit,
 		login.ContinueWithLoginIdentifier{},
 		login.WebauthnGenerateRequestOptions{},
@@ -113,7 +113,7 @@ var LoginFlow = flowpilot.NewFlow("/login").
 	TTL(10 * time.Minute).
 	Debug(true)
 
-var RegistrationFlow = flowpilot.NewFlow("/registration").
+var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 	State(shared.StateRegistrationInit,
 		registration.RegisterLoginIdentifier{},
 		shared.ThirdPartyOAuth{}).
@@ -135,7 +135,7 @@ var RegistrationFlow = flowpilot.NewFlow("/registration").
 	TTL(10 * time.Minute).
 	Debug(true)
 
-var ProfileFlow = flowpilot.NewFlow("/profile").
+var ProfileFlow = flowpilot.NewFlow(shared.FlowProfile).
 	State(shared.StateProfileInit,
 		profile.AccountDelete{},
 		profile.EmailCreate{},

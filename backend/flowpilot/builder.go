@@ -3,8 +3,6 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
-	"net/url"
-	"strings"
 	"time"
 )
 
@@ -25,7 +23,7 @@ type FlowBuilder interface {
 
 // defaultFlowBuilderBase is the base flow builder struct.
 type defaultFlowBuilderBase struct {
-	name                  string
+	name                  FlowName
 	flow                  stateActions
 	subFlows              SubFlows
 	stateDetails          stateDetails
@@ -48,7 +46,7 @@ type defaultFlowBuilder struct {
 }
 
 // newFlowBuilderBase creates a new defaultFlowBuilderBase instance.
-func newFlowBuilderBase(name string) defaultFlowBuilderBase {
+func newFlowBuilderBase(name FlowName) defaultFlowBuilderBase {
 	return defaultFlowBuilderBase{
 		name:             name,
 		flow:             make(stateActions),
@@ -60,12 +58,9 @@ func newFlowBuilderBase(name string) defaultFlowBuilderBase {
 }
 
 // NewFlow creates a new defaultFlowBuilder that builds a new flow available under the specified path.
-func NewFlow(path string) FlowBuilder {
-	u, _ := url.Parse(strings.TrimSpace(path))
-	fbBase := newFlowBuilderBase(strings.ReplaceAll(strings.TrimFunc(u.Path, func(r rune) bool {
-		return r == '/'
-	}), "/", "_"))
-
+func NewFlow(name FlowName) FlowBuilder {
+	path := fmt.Sprintf("/%s", name)
+	fbBase := newFlowBuilderBase(name)
 	return &defaultFlowBuilder{path: path, defaultFlowBuilderBase: fbBase}
 }
 

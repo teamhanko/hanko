@@ -64,11 +64,11 @@ func (a SkipPasskey) acquirePassword(c flowpilot.Context, acquireType string) bo
 		return false
 	}
 
-	if c.GetFlowName() == "login" && deps.Cfg.Password.AcquireOnLogin == acquireType {
+	if c.GetFlowName() == shared.FlowLogin && deps.Cfg.Password.AcquireOnLogin == acquireType {
 		return true
 	}
 
-	if c.GetFlowName() == "registration" && deps.Cfg.Password.AcquireOnRegistration == acquireType {
+	if c.GetFlowName() == shared.FlowRegistration && deps.Cfg.Password.AcquireOnRegistration == acquireType {
 		return true
 	}
 

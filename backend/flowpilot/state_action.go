@@ -2,13 +2,13 @@ package flowpilot
 
 type actionDetail interface {
 	getAction() Action
-	getFlowName() string
+	getFlowName() FlowName
 	getFlowPath() flowPath
 }
 
 type defaultActionDetail struct {
 	action   Action
-	flowName string
+	flowName FlowName
 	flowPath flowPath
 }
 
@@ -19,7 +19,7 @@ func (ad *defaultActionDetail) getAction() Action {
 	return ad.action
 }
 
-func (ad *defaultActionDetail) getFlowName() string {
+func (ad *defaultActionDetail) getFlowName() FlowName {
 	return ad.flowName
 }
 

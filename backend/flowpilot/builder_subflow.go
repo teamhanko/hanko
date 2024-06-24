@@ -15,7 +15,7 @@ type defaultSubFlowBuilder struct {
 }
 
 // NewSubFlow creates a new SubFlowBuilder.
-func NewSubFlow(name string) SubFlowBuilder {
+func NewSubFlow(name FlowName) SubFlowBuilder {
 	fbBase := newFlowBuilderBase(name)
 	return &defaultSubFlowBuilder{defaultFlowBuilderBase: fbBase}
 }

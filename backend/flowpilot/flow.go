@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+// FlowName represents the name of the flow.
+type FlowName string
+
 // InputData holds input data in JSON format.
 type InputData struct {
 	JSONString string `json:"input_data"`
@@ -113,7 +116,7 @@ func (sfs SubFlows) getSubFlowFromStateName(state StateName) subFlow {
 
 // flowBase represents the base of the flow interfaces.
 type flowBase interface {
-	getName() string
+	getName() FlowName
 	getSubFlows() SubFlows
 	getFlow() stateActions
 	getBeforeStateHooks() stateHooks
@@ -145,7 +148,7 @@ type subFlow interface {
 type contextValues map[string]interface{}
 
 type defaultFlowBase struct {
-	name                  string
+	name                  FlowName
 	flow                  stateActions // StateName to Actions mapping.
 	subFlows              SubFlows     // The sub-flows of the current flow.
 	beforeStateHooks      stateHooks   // StateName to hookActions mapping.
@@ -182,7 +185,7 @@ func (f *defaultFlow) getState(stateName StateName) (stateDetail, error) {
 }
 
 // getName returns the flow name.
-func (f *defaultFlowBase) getName() string {
+func (f *defaultFlowBase) getName() FlowName {
 	return f.name
 }
 

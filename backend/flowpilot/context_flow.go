@@ -27,7 +27,7 @@ func (fc *defaultFlowContext) GetPath() string {
 
 // GetFlowPath returns the current flowPath within the flow.
 func (fc *defaultFlowContext) GetFlowPath() flowPath {
-	return newFlowPathFromString(fc.stash.Get("_.flowPath").String())
+	return newFlowPathFromPath(fc.stash.Get("_.flowPath").String())
 }
 
 // GetInitialState returns the initial state of the flow.
@@ -87,7 +87,7 @@ func (fc *defaultFlowContext) Get(name string) interface{} {
 }
 
 // GetFlowName returns the name of the current flow.
-func (fc *defaultFlowContext) GetFlowName() string {
+func (fc *defaultFlowContext) GetFlowName() FlowName {
 	return fc.flow.name
 }
 

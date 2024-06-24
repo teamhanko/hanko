@@ -1,51 +1,58 @@
 package flowpilot
 
 import (
-	"golang.org/x/exp/slices"
 	"strings"
 )
 
 type flowPath interface {
 	String() string
-	HasFragment(fragment string) bool
 
-	add(fragment string)
+	add(FlowName)
 	remove()
 	copy() flowPath
 }
 
 type defaultFlowPath struct {
-	fragments []string
+	flowNames []FlowName
 }
 
 func newFlowPath() flowPath {
-	return &defaultFlowPath{fragments: make([]string, 0)}
+	return &defaultFlowPath{flowNames: make([]FlowName, 0)}
 }
 
-func newFlowPathFromString(path string) flowPath {
-	return &defaultFlowPath{fragments: strings.Split(path, ".")}
+func newFlowPathFromName(name FlowName) flowPath {
+	return &defaultFlowPath{flowNames: []FlowName{name}}
 }
 
-func (p *defaultFlowPath) add(fragment string) {
-	p.fragments = append(p.fragments, fragment)
+func newFlowPathFromPath(path string) flowPath {
+	parts := strings.Split(path, ".")
+	names := make([]FlowName, len(parts))
+	for i, _ := range names {
+		names[i] = FlowName(parts[i])
+	}
+	return &defaultFlowPath{flowNames: names}
+}
+
+func (p *defaultFlowPath) add(name FlowName) {
+	p.flowNames = append(p.flowNames, name)
 }
 
 func (p *defaultFlowPath) remove() {
-	if len(p.fragments) > 0 {
-		p.fragments = p.fragments[:len(p.fragments)-1]
+	if len(p.flowNames) > 0 {
+		p.flowNames = p.flowNames[:len(p.flowNames)-1]
 	}
 }
 
 func (p *defaultFlowPath) copy() flowPath {
-	cp := make([]string, len(p.fragments))
-	copy(cp, p.fragments)
-	return &defaultFlowPath{fragments: cp}
+	cp := make([]FlowName, len(p.flowNames))
+	copy(cp, p.flowNames)
+	return &defaultFlowPath{flowNames: cp}
 }
 
 func (p *defaultFlowPath) String() string {
-	return strings.Join(p.fragments, ".")
-}
-
-func (p *defaultFlowPath) HasFragment(fragment string) bool {
-	return slices.Contains(p.fragments, fragment)
+	parts := make([]string, len(p.flowNames))
+	for i, _ := range parts {
+		parts[i] = string(p.flowNames[i])
+	}
+	return strings.Join(parts, ".")
 }
