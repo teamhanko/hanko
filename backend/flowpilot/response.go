@@ -118,12 +118,12 @@ type executionResult struct {
 }
 
 // generateResponse generates a response based on the execution result.
-func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) FlowResult {
+func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) FlowResult {
 	// Generate actions for the response.
 	actions := er.generateActions(fc)
 
 	// Unmarshal the generated payload for the response.
-	payload := fc.payload.Unmarshal()
+	p := fc.payload.Unmarshal()
 
 	// Generate links for the response.
 	links := er.generateLinks()
@@ -132,7 +132,7 @@ func (er *executionResult) generateResponse(fc defaultFlowContext, debug bool) F
 	resp := PublicResponse{
 		Name:          er.nextStateName,
 		Status:        http.StatusOK,
-		Payload:       payload,
+		Payload:       p,
 		PublicActions: actions,
 		PublicLinks:   links,
 		CSRFToken:     fc.flowModel.CSRFToken,
@@ -167,7 +167,7 @@ func (er *executionResult) generateLinks() PublicLinks {
 }
 
 // generateActions generates a collection of links based on the execution result.
-func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions {
+func (er *executionResult) generateActions(fc *defaultFlowContext) PublicActions {
 	var publicActions = make(PublicActions)
 
 	// Get actions for the next addState.
@@ -212,7 +212,7 @@ func (er *executionResult) generateActions(fc defaultFlowContext) PublicActions 
 }
 
 // getSchema returns the schema for a given method name.
-func (er *executionResult) getSchema(fc defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
+func (er *executionResult) getSchema(fc *defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
 	if er.actionExecutionResult == nil ||
 		actionDetail.action.GetName() != er.actionExecutionResult.actionName ||
 		actionDetail.flowPath.String() != fc.GetFlowPath().String() || er.nextStateName != fc.GetCurrentState() {
@@ -222,7 +222,7 @@ func (er *executionResult) getSchema(fc defaultFlowContext, actionDetail default
 }
 
 // createHref creates a link HREF based on the current flow context and method name.
-func (er *executionResult) createHref(fc defaultFlowContext, actionName ActionName) string {
+func (er *executionResult) createHref(fc *defaultFlowContext, actionName ActionName) string {
 	queryParam := createQueryParam(string(actionName), fc.GetFlowID())
 	return fmt.Sprintf("%s?flowpilot_action=%s", fc.GetPath(), queryParam)
 }

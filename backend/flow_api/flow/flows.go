@@ -54,17 +54,17 @@ var CredentialOnboardingSubFlow = flowpilot.NewSubFlow("credential_onboarding").
 		credential_onboarding.ContinueToPasskey{},
 		credential_onboarding.ContinueToPassword{},
 		credential_onboarding.SkipCredentialOnboardingMethodChooser{},
-		credential_onboarding.Back{}).
+		shared.Back{}).
 	State(shared.StateOnboardingCreatePasskey,
 		credential_onboarding.WebauthnGenerateCreationOptions{},
 		credential_onboarding.SkipPasskey{},
-		credential_onboarding.Back{}).
+		shared.Back{}).
 	State(shared.StateOnboardingVerifyPasskeyAttestation,
 		credential_onboarding.WebauthnVerifyAttestationResponse{},
 		shared.Back{}).
 	State(shared.StatePasswordCreation,
 		credential_onboarding.RegisterPassword{},
-		credential_onboarding.Back{},
+		shared.Back{},
 		credential_onboarding.SkipPassword{}).
 	MustBuild()
 

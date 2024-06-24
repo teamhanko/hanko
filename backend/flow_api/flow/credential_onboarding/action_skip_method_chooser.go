@@ -20,15 +20,17 @@ func (a SkipCredentialOnboardingMethodChooser) GetDescription() string {
 
 func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	exists := c.Stash().Get("email").Exists()
-	if c.GetFlowName() == "registration" && !(deps.Cfg.Email.UseForAuthentication && exists) {
+	emailExists := c.Stash().Get("email").Exists()
+
+	if c.GetFlowName() == "registration" &&
+		!(deps.Cfg.Email.UseForAuthentication && emailExists) {
 		c.SuspendAction()
 	}
 }
 
 func (a SkipCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionContext) error {
-	if err := c.Stash().Set("suspend_back_action", false); err != nil {
-		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
+	if err := c.DeleteStateHistory(true); err != nil {
+		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
 	return c.EndSubFlow()

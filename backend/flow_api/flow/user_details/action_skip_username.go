@@ -26,8 +26,8 @@ func (a SkipUsername) Initialize(c flowpilot.InitializationContext) {
 	}
 }
 func (a SkipUsername) Execute(c flowpilot.ExecutionContext) error {
-	if err := c.Stash().Set("suspend_back_action", false); err != nil {
-		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
+	if err := c.DeleteStateHistory(true); err != nil {
+		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
 	return c.EndSubFlow()

@@ -1,1 +1,2 @@
 drop_column("flows", "csrf_token")
+drop_column("flows", "previous_state")

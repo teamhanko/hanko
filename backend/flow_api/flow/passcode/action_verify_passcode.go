@@ -104,9 +104,9 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	err = c.Stash().Set("suspend_back_action", true)
+	err = c.DeleteStateHistory(true)
 	if err != nil {
-		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
+		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
 	return c.EndSubFlow()

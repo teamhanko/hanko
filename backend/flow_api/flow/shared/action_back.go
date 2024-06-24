@@ -14,7 +14,11 @@ func (a Back) GetDescription() string {
 	return "Navigate one step back."
 }
 
-func (a Back) Initialize(_ flowpilot.InitializationContext) {}
+func (a Back) Initialize(c flowpilot.InitializationContext) {
+	if !c.StateHistoryAvailable() {
+		c.SuspendAction()
+	}
+}
 
 func (a Back) Execute(c flowpilot.ExecutionContext) error {
 	return c.ContinueToPreviousState()

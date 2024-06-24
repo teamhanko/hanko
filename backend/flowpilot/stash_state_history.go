@@ -10,7 +10,8 @@ type stateHistoryStash interface {
 	getLastStateFromHistory() (stateName, unscheduledState *StateName, numOfScheduledStates *int64, err error)
 	addStateToHistory(stateName StateName, unscheduledStateName *StateName, numOfScheduledStates *int64) error
 	removeLastStateFromHistory() error
-	deleteHistory() error
+	deleteStateHistory() error
+	stateHistoryAvailable() bool
 }
 
 type defaultStateHistoryStash struct {
@@ -117,6 +118,10 @@ func (s *defaultStateHistoryStash) getLastStateFromHistory() (stateName, unsched
 	return stateName, unscheduledStateName, numOfScheduledStates, nil
 }
 
-func (s *defaultStateHistoryStash) deleteHistory() error {
+func (s *defaultStateHistoryStash) deleteStateHistory() error {
 	return s.Delete("_.state_history")
+}
+
+func (s *defaultStateHistoryStash) stateHistoryAvailable() bool {
+	return len(s.Get("_.state_history").Array()) > 0
 }
