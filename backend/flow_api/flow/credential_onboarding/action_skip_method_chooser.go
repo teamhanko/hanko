@@ -22,7 +22,7 @@ func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.Initializa
 	deps := a.GetDeps(c)
 	emailExists := c.Stash().Get("email").Exists()
 
-	if c.GetFlowName() == "registration" &&
+	if c.GetFlowName() == shared.FlowRegistration &&
 		!(deps.Cfg.Email.UseForAuthentication && emailExists) {
 		c.SuspendAction()
 	}

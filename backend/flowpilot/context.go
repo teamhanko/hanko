@@ -11,7 +11,7 @@ import (
 type context interface {
 	// Get returns the context value with the given name.
 	Get(string) interface{}
-	GetFlowName() string
+	GetFlowName() FlowName
 }
 
 // flowContext represents the basic context for a flow.
@@ -137,7 +137,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
 		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
 	}
 
-	fp := newFlowPathFromString(flow.name)
+	fp := newFlowPathFromName(flow.name)
 
 	subflow := flow.subFlows.getSubFlowFromStateName(flow.initialStateName)
 	if subflow != nil {
