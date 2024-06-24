@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // flowpilotError defines the interface for custom error types in the Flowpilot package.
@@ -169,6 +170,6 @@ var (
 	ErrorValueTooShort = NewInputError("value_too_short_error", "Value is too short.")
 )
 
-func createMustBeOneOfError(values interface{}) InputError {
-	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %+v", values))
+func createMustBeOneOfError(values []string) InputError {
+	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %s", strings.Join(values, ",")))
 }
