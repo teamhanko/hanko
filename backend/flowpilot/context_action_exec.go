@@ -7,36 +7,41 @@ import (
 
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
 type defaultActionExecutionContext struct {
-	actionName      ActionName      // Name of the action being executed.
-	input           ExecutionSchema // JSONManager for accessing input data.
-	flowError       FlowError
-	executionResult *executionResult // Result of the action execution.
-	links           []Link           // TODO:
-	isSuspended     bool
-
-	defaultFlowContext // Embedding the defaultFlowContext for common context fields.
+	actionName          ActionName      // Name of the action being executed.
+	input               ExecutionSchema // JSONManager for accessing input data.
+	flowError           FlowError
+	executionResult     *executionResult // Result of the action execution.
+	links               []Link           // TODO:
+	isSuspended         bool
+	skipWriteHistory    bool
+	*defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
 // saveNextState updates the flow's state and stores data to the database.
 func (aec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
 	newVersion := aec.flowModel.Version + 1
 	stashData := aec.stash.String()
+	previousState := aec.flowModel.CurrentState
 
 	// Prepare parameters for updating the flow in the database.
 	flowUpdate := flowUpdateParam{
-		flowID:    aec.flowModel.ID,
-		nextState: executionResult.nextStateName,
-		stashData: stashData,
-		version:   newVersion,
-		csrfToken: aec.csrfToken,
-		expiresAt: aec.flowModel.ExpiresAt,
-		createdAt: aec.flowModel.CreatedAt,
+		flowID:        aec.flowModel.ID,
+		nextState:     executionResult.nextStateName,
+		previousState: previousState,
+		stashData:     stashData,
+		version:       newVersion,
+		csrfToken:     aec.csrfToken,
+		expiresAt:     aec.flowModel.ExpiresAt,
+		createdAt:     aec.flowModel.CreatedAt,
 	}
 
 	// Update the flow model in the database.
 	if _, err := aec.dbw.updateFlowWithParam(flowUpdate); err != nil {
 		return fmt.Errorf("failed to store updated flow: %w", err)
 	}
+
+	aec.flowModel.CurrentState = executionResult.nextStateName
+	aec.flowModel.PreviousState = &previousState
 
 	// Get the data to persists from the executed action schema for recording.
 	inputDataToPersist := aec.input.getDataToPersist().String()
@@ -45,7 +50,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult executio
 	transitionCreation := transitionCreationParam{
 		flowID:     aec.flowModel.ID,
 		actionName: aec.actionName,
-		fromState:  aec.flowModel.CurrentState,
+		fromState:  previousState,
 		toState:    executionResult.nextStateName,
 		inputData:  inputDataToPersist,
 		flowError:  executionResult.flowError,
@@ -75,7 +80,7 @@ func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName) 
 	}
 
 	// Add the current state to the execution history.
-	if currentState.name != nextStateName {
+	if currentState.name != nextStateName && !aec.skipWriteHistory {
 		err = aec.stash.addStateToHistory(currentState.name, nil, nil)
 		if err != nil {
 			return fmt.Errorf("failed to add the current state to the history: %w", err)
@@ -110,10 +115,10 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 	}
 
 	result := executionResult{
-		nextStateName:         nextStateName,
 		flowError:             aec.flowError,
 		actionExecutionResult: &actionResult,
 		links:                 aec.links,
+		nextStateName:         nextStateName,
 	}
 
 	aec.executionResult = &result
@@ -270,7 +275,7 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 	// last subflow fragment so that going back and restarting the subflow again does not repeatedly amass the same
 	// subflow name in the flowPath.
 	subFlowToGoBackTo := aec.flow.subFlows.getSubFlowFromStateName(*lastStateName)
-	currentSubFlow := aec.flow.subFlows.getSubFlowFromStateName(aec.GetCurrentState())
+	currentSubFlow := aec.flow.subFlows.getSubFlowFromStateName(aec.flowModel.CurrentState)
 	// If subFlowToGoBackTo is nil then we probably want to go back to a root flow state.
 	if subFlowToGoBackTo == nil && currentSubFlow != nil ||
 		(subFlowToGoBackTo != nil && currentSubFlow != nil) && subFlowToGoBackTo.getName() != currentSubFlow.getName() {
@@ -330,10 +335,12 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 
 	numOfScheduledStates := int64(len(scheduledStates))
 
-	// Add the current state to the execution history.
-	err = aec.stash.addStateToHistory(currentState.name, nil, &numOfScheduledStates)
-	if err != nil {
-		return fmt.Errorf("failed to add state to history: %w", err)
+	if !aec.skipWriteHistory {
+		// Add the current state to the execution history.
+		err = aec.stash.addStateToHistory(currentState.name, nil, &numOfScheduledStates)
+		if err != nil {
+			return fmt.Errorf("failed to add state to history: %w", err)
+		}
 	}
 
 	subFlow := currentState.subFlows.getSubFlowFromStateName(entryStateName)
@@ -362,7 +369,7 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 	// If no scheduled state is available, set it to the end state.
 	if scheduledStateName == nil {
 		return ErrorFlowDiscontinuity.Wrap(errors.New("can't progress the flow, because no scheduled states were available after the sub-flow ended"))
-	} else {
+	} else if !aec.skipWriteHistory {
 		// Add the current state to the execution history.
 		err = aec.stash.addStateToHistory(currentStateName, scheduledStateName, nil)
 		if err != nil {
@@ -396,4 +403,9 @@ func (aec *defaultActionExecutionContext) Set(key string, value interface{}) {
 
 func (aec *defaultActionExecutionContext) SuspendAction() {
 	aec.isSuspended = true
+}
+
+func (aec *defaultActionExecutionContext) DeleteStateHistory(skipWriteHistory bool) error {
+	aec.skipWriteHistory = skipWriteHistory
+	return aec.stash.deleteStateHistory()
 }

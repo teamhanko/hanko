@@ -2,9 +2,9 @@ package flowpilot
 
 // defaultActionInitializationContext is the default implementation of the actionInitializationContext interface.
 type defaultActionInitializationContext struct {
-	schema             InitializationSchema // InitializationSchema for action initialization.
-	isSuspended        bool                 // Flag indicating if the method is suspended.
-	defaultFlowContext                      // Embedding the defaultFlowContext for common context fields.
+	schema              InitializationSchema // InitializationSchema for action initialization.
+	isSuspended         bool                 // Flag indicating if the method is suspended.
+	*defaultFlowContext                      // Embedding the defaultFlowContext for common context fields.
 }
 
 func (aic *defaultActionInitializationContext) Payload() payload {
@@ -43,4 +43,8 @@ func (aic *defaultActionInitializationContext) CurrentStateEquals(stateNames ...
 	}
 
 	return false
+}
+
+func (aic *defaultActionInitializationContext) StateHistoryAvailable() bool {
+	return aic.stash.stateHistoryAvailable()
 }

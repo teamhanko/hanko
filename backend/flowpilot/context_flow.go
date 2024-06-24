@@ -11,7 +11,7 @@ type defaultFlowContext struct {
 	stash     stash         // JSONManager for stash data.
 	flow      defaultFlow   // The associated defaultFlow instance.
 	dbw       flowDBWrapper // Wrapped FlowDB instance with additional functionality.
-	flowModel FlowModel     // The current FlowModel.
+	flowModel *FlowModel    // The current FlowModel.
 	csrfToken string
 }
 
@@ -52,9 +52,12 @@ func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 }
 
 // GetPreviousState returns a pointer to the previous state of the flow.
-func (fc *defaultFlowContext) GetPreviousState() (*StateName, error) {
-	state, _, _, err := fc.stash.getLastStateFromHistory()
-	return state, err
+func (fc *defaultFlowContext) GetPreviousState() StateName {
+	if fc.flowModel.PreviousState != nil {
+		return *fc.flowModel.PreviousState
+	}
+
+	return ""
 }
 
 // GetErrorState returns the designated error state of the flow.

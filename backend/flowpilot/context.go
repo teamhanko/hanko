@@ -11,6 +11,7 @@ import (
 type context interface {
 	// Get returns the context value with the given name.
 	Get(string) interface{}
+	GetFlowName() string
 }
 
 // flowContext represents the basic context for a flow.
@@ -32,15 +33,13 @@ type flowContext interface {
 	// CurrentStateEquals returns true, when one of the given states matches the current state.
 	CurrentStateEquals(stateNames ...StateName) bool
 	// GetPreviousState returns the previous state of the flow.
-	GetPreviousState() (*StateName, error)
+	GetPreviousState() StateName
 	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
 	// StateExists checks if a given state exists within the flow.
 	StateExists(stateName StateName) bool
 	// Set sets a context value for the given key.
 	Set(string, interface{})
-
-	GetFlowName() string
 }
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
@@ -50,6 +49,7 @@ type actionInitializationContext interface {
 
 	// AddInputs adds input parameters to the schema.
 	AddInputs(inputs ...Input)
+	StateHistoryAvailable() bool
 }
 
 // actionExecutionContext represents the context for an action execution.
@@ -68,6 +68,8 @@ type actionExecutionContext interface {
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
+
+	DeleteStateHistory(skipWriteHistory bool) error
 }
 
 // actionExecutionContinuationContext represents the context within an action continuation.
@@ -125,12 +127,12 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	// Calculate the expiration time for the flow.
 	expiresAt := time.Now().Add(flow.ttl).UTC()
 
-	// Initialize JSONManagers for stash and payload.
-	stash := newStash()
-	payload := NewPayload()
+	// Initialize JSONManagers for s and payload.
+	s := newStash()
+	p := NewPayload()
 
-	// Add the initial next states to the stash to be scheduled after the initial sub-flow.
-	err := stash.addScheduledStates(flow.initialNextStateNames...)
+	// Add the initial next states to the s to be scheduled after the initial sub-flow.
+	err := s.addScheduledStates(flow.initialNextStateNames...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
 	}
@@ -142,7 +144,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		fp.add(subflow.getName())
 	}
 
-	err = stash.Set("_.flowPath", fp.String())
+	err = s.Set("_.flowPath", fp.String())
 	if err != nil {
 		return nil, fmt.Errorf("failed to stash current flowPath: %w", err)
 	}
@@ -155,7 +157,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	// Create a new flow model with the provided parameters.
 	flowCreation := flowCreationParam{
 		currentState: flow.initialStateName,
-		stash:        stash.String(),
+		stash:        s.String(),
 		csrfToken:    csrfToken,
 		expiresAt:    expiresAt,
 	}
@@ -165,12 +167,12 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	}
 
 	// Create a defaultFlowContext instance.
-	fc := defaultFlowContext{
+	fc := &defaultFlowContext{
 		flow:      flow,
 		dbw:       dbw,
-		flowModel: *flowModel,
-		stash:     stash,
-		payload:   payload,
+		flowModel: flowModel,
+		stash:     s,
+		payload:   p,
 	}
 
 	er := executionResult{nextStateName: flowModel.CurrentState}
@@ -213,13 +215,13 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Parse stash data from the flow model.
-	stash, err := newStashFromString(flowModel.StashData)
+	s, err := newStashFromString(flowModel.StashData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse stash from flow: %w", err)
 	}
 
 	// Initialize JSONManagers for payload and flash data.
-	payload := NewPayload()
+	p := NewPayload()
 
 	// Parse raw input data into JSONManager.
 	raw := options.inputData.getJSONStringOrDefault()
@@ -240,12 +242,12 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Create a defaultFlowContext instance.
-	fc := defaultFlowContext{
+	fc := &defaultFlowContext{
 		flow:      flow,
 		dbw:       wrapDB(db),
-		flowModel: *flowModel,
-		stash:     stash,
-		payload:   payload,
+		flowModel: flowModel,
+		stash:     s,
+		payload:   p,
 		csrfToken: csrfToken,
 	}
 
@@ -262,13 +264,13 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 
 	// Initialize the schema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
-	aic := defaultActionInitializationContext{
+	aic := &defaultActionInitializationContext{
 		schema:             schema.toInitializationSchema(),
 		defaultFlowContext: fc,
 	}
 
 	// Create a actionExecutionContext instance for action execution.
-	aec := defaultActionExecutionContext{
+	aec := &defaultActionExecutionContext{
 		actionName:         queryParam.actionName,
 		input:              schema,
 		defaultFlowContext: fc,
@@ -279,7 +281,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
 	}
 
-	actionDetail.action.Initialize(&aic)
+	actionDetail.action.Initialize(aic)
 
 	// Check if the action is suspended.
 	if aic.isSuspended {
@@ -287,7 +289,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Execute the action and handle any errors.
-	err = actionDetail.action.Execute(&aec)
+	err = actionDetail.action.Execute(aec)
 	if err != nil {
 		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
 	}

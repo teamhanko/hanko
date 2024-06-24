@@ -25,27 +25,54 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 
-	if prev, _ := c.GetPreviousState(); prev != nil && *prev == shared.StateCredentialOnboardingChooser {
+	if c.GetPreviousState() == shared.StateCredentialOnboardingChooser {
 		c.SuspendAction()
 	}
 
-}
-func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
-	deps := a.GetDeps(c)
+	emailExists := c.Stash().Get("email").Exists()
+	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
-	if err := c.Stash().Set("suspend_back_action", false); err != nil {
-		return fmt.Errorf("failed to set suspend_back_action to the stash: %w", err)
+	if c.GetPreviousState() == shared.StateOnboardingCreatePasskey &&
+		!c.Stash().Get("user_has_webauthn_credential").Bool() &&
+		!canLoginWithEmail {
+		c.SuspendAction()
 	}
 
-	if c.GetFlowName() == "login" {
-		if deps.Cfg.Passkey.Enabled && deps.Cfg.Passkey.AcquireOnLogin == "conditional" && !c.Stash().Get("user_has_webauthn_credential").Bool() && c.Stash().Get("webauthn_available").Bool() {
-			return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
-		}
-	} else if c.GetFlowName() == "registration" {
-		if deps.Cfg.Passkey.Enabled && deps.Cfg.Passkey.AcquireOnRegistration == "conditional" && !c.Stash().Get("user_has_webauthn_credential").Bool() && c.Stash().Get("webauthn_available").Bool() {
-			return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
-		}
+	if c.GetPreviousState() == shared.StatePasscodeConfirmation &&
+		!a.acquirePasskey(c, "always") &&
+		!canLoginWithEmail {
+		c.SuspendAction()
+	}
+}
+
+func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
+	if err := c.DeleteStateHistory(true); err != nil {
+		return fmt.Errorf("failed to delete the state history: %w", err)
+	}
+
+	if a.acquirePasskey(c, "conditional") &&
+		!c.Stash().Get("user_has_webauthn_credential").Bool() &&
+		c.Stash().Get("webauthn_available").Bool() {
+		return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
 	}
 
 	return c.EndSubFlow()
+}
+
+func (a SkipPassword) acquirePasskey(c flowpilot.Context, acquireType string) bool {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passkey.Enabled {
+		return false
+	}
+
+	if c.GetFlowName() == "login" && deps.Cfg.Passkey.AcquireOnLogin == acquireType {
+		return true
+	}
+
+	if c.GetFlowName() == "registration" && deps.Cfg.Passkey.AcquireOnRegistration == acquireType {
+		return true
+	}
+
+	return false
 }

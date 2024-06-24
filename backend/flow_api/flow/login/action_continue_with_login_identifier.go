@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -236,13 +235,15 @@ func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.Execu
 		return nil, fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 
-	userDetailOnboardingStates := a.determineUserDetailOnboardingStates(deps.Cfg, userHasUsername, userHasEmail)
-	credentialOnboardingStates := a.determineCredentialOnboardingStates(deps.Cfg, userHasPasskey, userHasPassword)
+	userDetailOnboardingStates := a.determineUserDetailOnboardingStates(c, userHasUsername, userHasEmail)
+	credentialOnboardingStates := a.determineCredentialOnboardingStates(c, userHasPasskey, userHasPassword)
 
 	return append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...), nil
 }
 
-func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg config.Config, hasPasskey, hasPassword bool) []flowpilot.StateName {
+func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(c flowpilot.ExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
+	deps := a.GetDeps(c)
+	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
 
 	alwaysAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "always"
@@ -301,9 +302,10 @@ func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(cfg con
 	return result
 }
 
-func (a ContinueWithLoginIdentifier) determineUserDetailOnboardingStates(cfg config.Config, userHasUsername, userHasEmail bool) []flowpilot.StateName {
+func (a ContinueWithLoginIdentifier) determineUserDetailOnboardingStates(c flowpilot.ExecutionContext, userHasUsername, userHasEmail bool) []flowpilot.StateName {
+	deps := a.GetDeps(c)
+	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
-
 	acquireUsername := !userHasUsername && cfg.Username.Enabled && cfg.Username.AcquireOnLogin
 	acquireEmail := !userHasEmail && cfg.Email.Enabled && cfg.Email.AcquireOnLogin
 

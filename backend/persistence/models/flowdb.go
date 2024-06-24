@@ -87,14 +87,15 @@ func (flowDB FlowDB) GetFlow(flowID uuid.UUID) (*flowpilot.FlowModel, error) {
 
 func (flowDB FlowDB) CreateFlow(flowModel flowpilot.FlowModel) error {
 	f := Flow{
-		ID:           flowModel.ID,
-		CurrentState: string(flowModel.CurrentState),
-		StashData:    flowModel.StashData,
-		Version:      flowModel.Version,
-		CSRFToken:    flowModel.CSRFToken,
-		ExpiresAt:    flowModel.ExpiresAt,
-		CreatedAt:    flowModel.CreatedAt,
-		UpdatedAt:    flowModel.UpdatedAt,
+		ID:            flowModel.ID,
+		CurrentState:  string(flowModel.CurrentState),
+		PreviousState: nil,
+		StashData:     flowModel.StashData,
+		Version:       flowModel.Version,
+		CSRFToken:     flowModel.CSRFToken,
+		ExpiresAt:     flowModel.ExpiresAt,
+		CreatedAt:     flowModel.CreatedAt,
+		UpdatedAt:     flowModel.UpdatedAt,
 	}
 
 	err := flowDB.tx.Create(&f)
@@ -106,15 +107,22 @@ func (flowDB FlowDB) CreateFlow(flowModel flowpilot.FlowModel) error {
 }
 
 func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
+	var prevState *string
+	if flowModel.PreviousState != nil {
+		ps := string(*flowModel.PreviousState)
+		prevState = &ps
+	}
+
 	f := &Flow{
-		ID:           flowModel.ID,
-		CurrentState: string(flowModel.CurrentState),
-		StashData:    flowModel.StashData,
-		Version:      flowModel.Version,
-		CSRFToken:    flowModel.CSRFToken,
-		ExpiresAt:    flowModel.ExpiresAt,
-		CreatedAt:    flowModel.CreatedAt,
-		UpdatedAt:    flowModel.UpdatedAt,
+		ID:            flowModel.ID,
+		CurrentState:  string(flowModel.CurrentState),
+		PreviousState: prevState,
+		StashData:     flowModel.StashData,
+		Version:       flowModel.Version,
+		CSRFToken:     flowModel.CSRFToken,
+		ExpiresAt:     flowModel.ExpiresAt,
+		CreatedAt:     flowModel.CreatedAt,
+		UpdatedAt:     flowModel.UpdatedAt,
 	}
 
 	previousVersion := flowModel.Version - 1
@@ -122,7 +130,7 @@ func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
 	count, err := flowDB.tx.
 		Where("id = ?", f.ID).
 		Where("version = ?", previousVersion).
-		UpdateQuery(f, "current_state", "stash_data", "version", "csrf_token")
+		UpdateQuery(f, "current_state", "previous_state", "stash_data", "version", "csrf_token")
 	if err != nil {
 		return err
 	}
