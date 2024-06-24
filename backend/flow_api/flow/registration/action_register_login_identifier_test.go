@@ -353,7 +353,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			s.Equal(currentTest.statusCode, result.Status())
 			s.Equal(currentTest.expectedState, result.Response().Name)
 			// TODO: check that the schema of the action returns the correct error_code e.g.
-			// result.Response().ResponseActions[0].PublicSchema[0].ResponseError.Code == ErrorValueInvalid
+			// result.Response().ResponseActions[0].ResponseInputs[0].ResponseError.Code == ErrorValueInvalid
 		})
 	}
 }

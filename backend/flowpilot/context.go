@@ -47,7 +47,7 @@ type actionInitializationContext interface {
 	flowContext
 	actionSuspender
 
-	// AddInputs adds input parameters to the schema.
+	// AddInputs adds input parameters to the inputSchema.
 	AddInputs(inputs ...Input)
 	StateHistoryAvailable() bool
 }
@@ -57,14 +57,14 @@ type actionExecutionContext interface {
 	actionSuspender
 	flowContext
 
-	// Input returns the ExecutionSchema for the action.
-	Input() ExecutionSchema
+	// Input returns the executionInputSchema for the action.
+	Input() executionInputSchema
 
 	// TODO: FetchActionInput (for a action name) is maybe useless and can be removed or replaced.
 
 	// FetchActionInput fetches input data for a specific action.
 	FetchActionInput(actionName ActionName) (readOnlyActionInput, error)
-	// ValidateInputData validates the input data against the schema.
+	// ValidateInputData validates the input data against the inputSchema.
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
@@ -262,10 +262,10 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
-	// Initialize the schema and action context for action execution.
+	// Initialize the inputSchema and action context for action execution.
 	schema := newSchemaWithInputData(inputJSON)
 	aic := &defaultActionInitializationContext{
-		schema:             schema.toInitializationSchema(),
+		inputSchema:        schema.forInitializationContext(),
 		defaultFlowContext: fc,
 	}
 
