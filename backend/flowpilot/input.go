@@ -4,17 +4,17 @@ import (
 	"regexp"
 )
 
-// InputType represents the type of the input field.
-type InputType string
+// inputType represents the type of the input field.
+type inputType string
 
 // Input types enumeration.
 const (
-	StringType   InputType = "string"
-	BooleanType  InputType = "boolean"
-	EmailType    InputType = "email"
-	NumberType   InputType = "number"
-	PasswordType InputType = "password"
-	JSONType     InputType = "json"
+	inputTypeString   inputType = "string"
+	inputTypeBoolean  inputType = "boolean"
+	inputTypeEmail    inputType = "email"
+	inputTypeNumber   inputType = "number"
+	inputTypePassword inputType = "password"
+	inputTypeJSON     inputType = "json"
 )
 
 // Input defines the interface for input fields.
@@ -35,7 +35,7 @@ type Input interface {
 	shouldPersist() bool
 	shouldPreserve() bool
 	isIncludedOnState(stateName StateName) bool
-	validate(stateName StateName, inputData ReadOnlyActionInput, stashData stash) bool
+	validate(stateName StateName, inputData readOnlyActionInput, stashData stash) bool
 	toPublicInput() *PublicInput
 }
 
@@ -47,31 +47,31 @@ type defaultExtraInputOptions struct {
 	compareWithStash bool
 }
 
-// DefaultInput represents an input field with its options.
-type DefaultInput struct {
+// defaultInput represents an input field with its options.
+type defaultInput struct {
 	name          string
-	dataType      InputType
+	dataType      inputType
 	value         interface{}
 	minLength     *int
 	maxLength     *int
 	required      *bool
 	hidden        *bool
 	error         InputError
-	allowedValues AllowedValues
+	allowedValues allowedValues
 
 	defaultExtraInputOptions
 }
 
-func (i *DefaultInput) AllowedValue(value interface{}, name string) Input {
-	i.allowedValues = append(i.allowedValues, AllowedValue{
-		Value: value,
-		Text:  name,
+func (i *defaultInput) AllowedValue(value interface{}, name string) Input {
+	i.allowedValues = append(i.allowedValues, &allowedValue{
+		value: value,
+		text:  name,
 	})
 	return i
 }
 
-// newInput creates a new DefaultInput instance with provided parameters.
-func newInput(name string, inputType InputType, persistValue bool) Input {
+// newInput creates a new input instance with provided parameters.
+func newInput(name string, inputType inputType, persistValue bool) Input {
 	extraOptions := defaultExtraInputOptions{
 		preserveValue:    false,
 		persistValue:     persistValue,
@@ -79,103 +79,119 @@ func newInput(name string, inputType InputType, persistValue bool) Input {
 		compareWithStash: false,
 	}
 
-	return &DefaultInput{
+	return &defaultInput{
 		name:                     name,
 		dataType:                 inputType,
 		defaultExtraInputOptions: extraOptions,
 	}
 }
 
-type AllowedValue struct {
-	Value interface{} `json:"value"`
-	Text  string      `json:"name"`
+type allowedValue struct {
+	value interface{}
+	text  string
 }
 
-type AllowedValues []AllowedValue
+// toPublicAllowedValue converts the allowedValue to a PublicAllowedValue for public exposure.
+func (av *allowedValue) toPublicAllowedValue() *PublicAllowedValue {
+	return &PublicAllowedValue{
+		Value: av.value,
+		Text:  av.text,
+	}
+}
 
-func (av AllowedValues) Values() []interface{} {
+type allowedValues []*allowedValue
+
+func (av *allowedValues) values() []interface{} {
 	var values []interface{}
-	for _, v := range av {
-		values = append(values, v.Value)
+	for _, v := range *av {
+		values = append(values, v.value)
 	}
 	return values
 }
 
+func (av *allowedValues) toPublicAllowedValues() *PublicAllowedValues {
+	var values PublicAllowedValues
+	for _, v := range *av {
+		values = append(values, v.toPublicAllowedValue())
+	}
+	return &values
+}
+
 // StringInput creates a new input field of string type.
 func StringInput(name string) Input {
-	return newInput(name, StringType, true)
+	return newInput(name, inputTypeString, true)
 }
 
 // EmailInput creates a new input field of email type.
 func EmailInput(name string) Input {
-	return newInput(name, EmailType, true)
+	return newInput(name, inputTypeEmail, true)
 }
 
 // NumberInput creates a new input field of number type.
 func NumberInput(name string) Input {
-	return newInput(name, NumberType, true)
+	return newInput(name, inputTypeNumber, true)
 }
 
 // BooleanInput creates a new input field of boolean type.
 func BooleanInput(name string) Input {
-	return newInput(name, BooleanType, true)
+	return newInput(name, inputTypeBoolean, true)
 }
 
 // PasswordInput creates a new input field of password type.
 func PasswordInput(name string) Input {
-	return newInput(name, PasswordType, false)
+	return newInput(name, inputTypePassword, false)
 }
 
 // JSONInput creates a new input field of JSON type.
 func JSONInput(name string) Input {
-	return newInput(name, JSONType, false)
+	return newInput(name, inputTypeJSON, false)
 }
 
 // MinLength sets the minimum length for the input field.
-func (i *DefaultInput) MinLength(minLength int) Input {
+func (i *defaultInput) MinLength(minLength int) Input {
 	i.minLength = &minLength
 	return i
 }
 
 // MaxLength sets the maximum length for the input field.
-func (i *DefaultInput) MaxLength(maxLength int) Input {
+func (i *defaultInput) MaxLength(maxLength int) Input {
 	i.maxLength = &maxLength
 	return i
 }
 
 // Required sets whether the input field is required.
-func (i *DefaultInput) Required(b bool) Input {
+func (i *defaultInput) Required(b bool) Input {
 	i.required = &b
 	return i
 }
 
 // Hidden sets whether the input field is hidden.
-func (i *DefaultInput) Hidden(b bool) Input {
+func (i *defaultInput) Hidden(b bool) Input {
 	i.hidden = &b
 	return i
 }
 
 // Preserve sets whether the input field value should be preserved, so that the value is included in the response
 // instead of being blanked out.
-func (i *DefaultInput) Preserve(b bool) Input {
+func (i *defaultInput) Preserve(b bool) Input {
 	i.preserveValue = b
 	return i
 }
 
 // Persist sets whether the input field value should be persisted.
-func (i *DefaultInput) Persist(b bool) Input {
+func (i *defaultInput) Persist(b bool) Input {
 	i.persistValue = b
 	return i
 }
 
 // ConditionalIncludeOnState sets the states where the input field is included.
-func (i *DefaultInput) ConditionalIncludeOnState(stateNames ...StateName) Input {
+func (i *defaultInput) ConditionalIncludeOnState(stateNames ...StateName) Input {
 	i.includeOnStates = stateNames
 	return i
 }
 
 // isIncludedOnState check if a conditional input field is included according to the given stateName.
-func (i *DefaultInput) isIncludedOnState(stateName StateName) bool {
+func (i *defaultInput) isIncludedOnState(stateName StateName) bool {
 	if len(i.includeOnStates) == 0 {
 		return true
 	}
@@ -190,39 +206,39 @@ func (i *DefaultInput) isIncludedOnState(stateName StateName) bool {
 }
 
 // CompareWithStash sets whether the input field is compared with stash values.
-func (i *DefaultInput) CompareWithStash(b bool) Input {
+func (i *defaultInput) CompareWithStash(b bool) Input {
 	i.compareWithStash = b
 	return i
 }
 
 // setValue sets the value for the input field for the current response.
-func (i *DefaultInput) setValue(value interface{}) Input {
+func (i *defaultInput) setValue(value interface{}) Input {
 	i.value = &value
 	return i
 }
 
 // getName returns the name of the input field.
-func (i *DefaultInput) getName() string {
+func (i *defaultInput) getName() string {
 	return i.name
 }
 
 // setError sets an error to the given input field.
-func (i *DefaultInput) setError(inputError InputError) {
+func (i *defaultInput) setError(inputError InputError) {
 	i.error = inputError
 }
 
 // shouldPersist indicates the value should be persisted.
-func (i *DefaultInput) shouldPersist() bool {
+func (i *defaultInput) shouldPersist() bool {
 	return i.persistValue
 }
 
 // shouldPersist indicates the value should be preserved.
-func (i *DefaultInput) shouldPreserve() bool {
+func (i *defaultInput) shouldPreserve() bool {
 	return i.preserveValue
 }
 
 // validate performs validation on the input field.
-func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInput, stashData stash) bool {
+func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInput, stashData stash) bool {
 	// TODO: Replace with more structured validation logic.
 
 	var inputValue *string
@@ -241,12 +257,12 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		return true
 	}
 
-	if i.dataType == JSONType {
+	if i.dataType == inputTypeJSON {
 		// skip further validation
 		return true
 	}
 
-	if i.dataType == BooleanType {
+	if i.dataType == inputTypeBoolean {
 		return true
 	}
 
@@ -277,7 +293,7 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		}
 	}
 
-	if i.dataType == EmailType && (isRequired || (!isRequired && !hasEmptyOrNilValue)) {
+	if i.dataType == inputTypeEmail && (isRequired || (!isRequired && !hasEmptyOrNilValue)) {
 		pattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 		if matched := pattern.MatchString(*inputValue); !matched {
 			i.error = ErrorEmailInvalid
@@ -285,21 +301,21 @@ func (i *DefaultInput) validate(stateName StateName, inputData ReadOnlyActionInp
 		}
 	}
 
-	if i.dataType == StringType && i.allowedValues != nil {
-		for _, v := range i.allowedValues.Values() {
+	if i.dataType == inputTypeString && i.allowedValues != nil {
+		for _, v := range i.allowedValues.values() {
 			if v.(string) == *inputValue {
 				return true
 			}
 		}
-		i.error = ErrorValueInvalidMustBeOneOf(i.allowedValues.Values())
+		i.error = createMustBeOneOfError(i.allowedValues.values())
 		return false
 	}
 
 	return true
 }
 
-// toPublicInput converts the DefaultInput to a PublicInput for public exposure.
-func (i *DefaultInput) toPublicInput() *PublicInput {
+// toPublicInput converts the defaultInput to a PublicInput for public exposure.
+func (i *defaultInput) toPublicInput() *PublicInput {
 	var publicError *PublicError
 
 	if i.error != nil {
@@ -316,6 +332,6 @@ func (i *DefaultInput) toPublicInput() *PublicInput {
 		Required:      i.required,
 		Hidden:        i.hidden,
 		PublicError:   publicError,
-		AllowedValues: i.allowedValues,
+		AllowedValues: i.allowedValues.toPublicAllowedValues(),
 	}
 }

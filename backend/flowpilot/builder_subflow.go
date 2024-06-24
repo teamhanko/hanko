@@ -4,12 +4,12 @@ type SubFlowBuilder interface {
 	State(stateName StateName, actions ...Action) SubFlowBuilder
 	BeforeState(stateName StateName, hooks ...HookAction) SubFlowBuilder
 	AfterState(stateName StateName, hooks ...HookAction) SubFlowBuilder
-	SubFlows(subFlows ...SubFlow) SubFlowBuilder
-	Build() (SubFlow, error)
-	MustBuild() SubFlow
+	SubFlows(subFlows ...subFlow) SubFlowBuilder
+	Build() (subFlow, error)
+	MustBuild() subFlow
 }
 
-// defaultFlowBuilder is a builder struct for creating a new SubFlow.
+// defaultFlowBuilder is a builder struct for creating a new subFlow.
 type defaultSubFlowBuilder struct {
 	defaultFlowBuilderBase
 }
@@ -20,7 +20,7 @@ func NewSubFlow(name string) SubFlowBuilder {
 	return &defaultSubFlowBuilder{defaultFlowBuilderBase: fbBase}
 }
 
-func (sfb *defaultSubFlowBuilder) SubFlows(subFlows ...SubFlow) SubFlowBuilder {
+func (sfb *defaultSubFlowBuilder) SubFlows(subFlows ...subFlow) SubFlowBuilder {
 	sfb.addSubFlows(subFlows...)
 	return sfb
 }
@@ -41,8 +41,8 @@ func (sfb *defaultSubFlowBuilder) AfterState(stateName StateName, hooks ...HookA
 	return sfb
 }
 
-// Build constructs and returns the SubFlow object.
-func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
+// Build constructs and returns the subFlow object.
+func (sfb *defaultSubFlowBuilder) Build() (subFlow, error) {
 	f := defaultFlowBase{
 		name:             sfb.name,
 		flow:             sfb.flow,
@@ -54,8 +54,8 @@ func (sfb *defaultSubFlowBuilder) Build() (SubFlow, error) {
 	return &f, nil
 }
 
-// MustBuild constructs and returns the SubFlow object, panics on error.
-func (sfb *defaultSubFlowBuilder) MustBuild() SubFlow {
+// MustBuild constructs and returns the subFlow object, panics on error.
+func (sfb *defaultSubFlowBuilder) MustBuild() subFlow {
 	sf, err := sfb.Build()
 
 	if err != nil {
