@@ -102,7 +102,7 @@ func (s *sendWaAttestationResponse) TestSendWaAttestationResponse_Execute() {
 			s.Equal(currentTest.expectedState, result.Response().Name)
 
 			// TODO: check that the schema of the action returns the correct error_code e.g.
-			// result.Response().PublicActions[0].PublicSchema[0].PublicError.Code == ErrorValueInvalid
+			// result.Response().ResponseActions[0].PublicSchema[0].ResponseError.Code == ErrorValueInvalid
 		})
 	}
 }

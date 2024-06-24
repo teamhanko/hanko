@@ -50,7 +50,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	err := c.Bind(&body)
 	if err != nil {
 		result := flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
-		return c.JSON(result.Status(), result.Response())
+		return c.JSON(result.GetStatus(), result.GetResponse())
 	}
 
 	err = h.Persister.Transaction(func(tx *pop.Connection) error {
@@ -76,14 +76,14 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			return flowPilotErr
 		}
 
-		return c.JSON(result.Status(), result.Response())
+		return c.JSON(result.GetStatus(), result.GetResponse())
 	})
 
 	if err != nil {
 		c.Logger().Errorf("tx error: %v", err)
 		result := flow.ResultFromError(err)
 
-		return c.JSON(result.Status(), result.Response())
+		return c.JSON(result.GetStatus(), result.GetResponse())
 	}
 
 	return nil // TODO: maybe return TechnicalError or something else
