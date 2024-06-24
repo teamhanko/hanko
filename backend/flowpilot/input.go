@@ -47,37 +47,6 @@ type defaultExtraInputOptions struct {
 	compareWithStash bool
 }
 
-type allowedValue struct {
-	value interface{}
-	text  string
-}
-
-// toPublicAllowedValue converts the allowedValue to a ResponseAllowedValue for public exposure.
-func (av *allowedValue) toPublicAllowedValue() *ResponseAllowedValue {
-	return &ResponseAllowedValue{
-		Value: av.value,
-		Text:  av.text,
-	}
-}
-
-type allowedValues []*allowedValue
-
-func (av *allowedValues) values() []interface{} {
-	var values []interface{}
-	for _, v := range *av {
-		values = append(values, v.value)
-	}
-	return values
-}
-
-func (av *allowedValues) toPublicAllowedValues() *ResponseAllowedValues {
-	var values ResponseAllowedValues
-	for _, v := range *av {
-		values = append(values, v.toPublicAllowedValue())
-	}
-	return &values
-}
-
 // defaultInput represents an input field with its options.
 type defaultInput struct {
 	name          string
@@ -94,7 +63,7 @@ type defaultInput struct {
 }
 
 func (i *defaultInput) AllowedValue(name string, value interface{}) Input {
-	i.allowedValues = append(i.allowedValues, &allowedValue{
+	i.allowedValues.add(&defaultAllowedValue{
 		value: value,
 		text:  name,
 	})
@@ -114,6 +83,7 @@ func newInput(name string, inputType inputType, persistValue bool) Input {
 		name:                     name,
 		dataType:                 inputType,
 		defaultExtraInputOptions: extraOptions,
+		allowedValues:            &defaultAllowedValues{},
 	}
 }
 
@@ -302,12 +272,11 @@ func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInp
 	}
 
 	if i.dataType == inputTypeString && i.allowedValues != nil {
-		for _, v := range i.allowedValues.values() {
-			if v.(string) == *inputValue {
-				return true
-			}
+		if i.allowedValues.isAllowed(*inputValue) {
+			return true
 		}
-		i.error = createMustBeOneOfError(i.allowedValues.values())
+
+		i.error = createMustBeOneOfError(i.allowedValues.getValues())
 		return false
 	}
 
@@ -323,7 +292,7 @@ func (i *defaultInput) toPublicInput() *ResponseInput {
 		e = i.error.toPublicError(true)
 	}
 
-	if i.allowedValues != nil {
+	if i.allowedValues != nil && i.allowedValues.hasAny() {
 		av = i.allowedValues.toPublicAllowedValues()
 	}
 
