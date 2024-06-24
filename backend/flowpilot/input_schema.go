@@ -35,8 +35,8 @@ func (il *inputs) exists(input Input) bool {
 	return false
 }
 
-// PublicSchema represents a collection of PublicInput instances.
-type PublicSchema map[string]*PublicInput
+// PublicSchema represents a collection of ResponseInput instances.
+type PublicSchema map[string]*ResponseInput
 
 // defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
 type defaultSchema struct {

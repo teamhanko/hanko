@@ -27,7 +27,7 @@ type Input interface {
 	Persist(b bool) Input
 	ConditionalIncludeOnState(stateNames ...StateName) Input
 	CompareWithStash(b bool) Input
-	AllowedValue(value interface{}, name string) Input
+	AllowedValue(name string, value interface{}) Input
 
 	setValue(value interface{}) Input
 	setError(inputError InputError)
@@ -36,7 +36,7 @@ type Input interface {
 	shouldPreserve() bool
 	isIncludedOnState(stateName StateName) bool
 	validate(stateName StateName, inputData readOnlyActionInput, stashData stash) bool
-	toPublicInput() *PublicInput
+	toPublicInput() *ResponseInput
 }
 
 // defaultExtraInputOptions holds additional input field options.
@@ -45,6 +45,37 @@ type defaultExtraInputOptions struct {
 	persistValue     bool
 	includeOnStates  []StateName
 	compareWithStash bool
+}
+
+type allowedValue struct {
+	value interface{}
+	text  string
+}
+
+// toPublicAllowedValue converts the allowedValue to a ResponseAllowedValue for public exposure.
+func (av *allowedValue) toPublicAllowedValue() *ResponseAllowedValue {
+	return &ResponseAllowedValue{
+		Value: av.value,
+		Text:  av.text,
+	}
+}
+
+type allowedValues []*allowedValue
+
+func (av *allowedValues) values() []interface{} {
+	var values []interface{}
+	for _, v := range *av {
+		values = append(values, v.value)
+	}
+	return values
+}
+
+func (av *allowedValues) toPublicAllowedValues() *ResponseAllowedValues {
+	var values ResponseAllowedValues
+	for _, v := range *av {
+		values = append(values, v.toPublicAllowedValue())
+	}
+	return &values
 }
 
 // defaultInput represents an input field with its options.
@@ -62,7 +93,7 @@ type defaultInput struct {
 	defaultExtraInputOptions
 }
 
-func (i *defaultInput) AllowedValue(value interface{}, name string) Input {
+func (i *defaultInput) AllowedValue(name string, value interface{}) Input {
 	i.allowedValues = append(i.allowedValues, &allowedValue{
 		value: value,
 		text:  name,
@@ -84,37 +115,6 @@ func newInput(name string, inputType inputType, persistValue bool) Input {
 		dataType:                 inputType,
 		defaultExtraInputOptions: extraOptions,
 	}
-}
-
-type allowedValue struct {
-	value interface{}
-	text  string
-}
-
-// toPublicAllowedValue converts the allowedValue to a PublicAllowedValue for public exposure.
-func (av *allowedValue) toPublicAllowedValue() *PublicAllowedValue {
-	return &PublicAllowedValue{
-		Value: av.value,
-		Text:  av.text,
-	}
-}
-
-type allowedValues []*allowedValue
-
-func (av *allowedValues) values() []interface{} {
-	var values []interface{}
-	for _, v := range *av {
-		values = append(values, v.value)
-	}
-	return values
-}
-
-func (av *allowedValues) toPublicAllowedValues() *PublicAllowedValues {
-	var values PublicAllowedValues
-	for _, v := range *av {
-		values = append(values, v.toPublicAllowedValue())
-	}
-	return &values
 }
 
 // StringInput creates a new input field of string type.
@@ -314,16 +314,20 @@ func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInp
 	return true
 }
 
-// toPublicInput converts the defaultInput to a PublicInput for public exposure.
-func (i *defaultInput) toPublicInput() *PublicInput {
-	var publicError *PublicError
+// toPublicInput converts the defaultInput to a ResponseInput for public exposure.
+func (i *defaultInput) toPublicInput() *ResponseInput {
+	var e *ResponseError
+	var av *ResponseAllowedValues
 
 	if i.error != nil {
-		e := i.error.toPublicError(true)
-		publicError = &e
+		e = i.error.toPublicError(true)
 	}
 
-	return &PublicInput{
+	if i.allowedValues != nil {
+		av = i.allowedValues.toPublicAllowedValues()
+	}
+
+	return &ResponseInput{
 		Name:          i.name,
 		Type:          i.dataType,
 		Value:         i.value,
@@ -331,7 +335,7 @@ func (i *defaultInput) toPublicInput() *PublicInput {
 		MaxLength:     i.maxLength,
 		Required:      i.required,
 		Hidden:        i.hidden,
-		PublicError:   publicError,
-		AllowedValues: i.allowedValues.toPublicAllowedValues(),
+		PublicError:   e,
+		AllowedValues: av,
 	}
 }

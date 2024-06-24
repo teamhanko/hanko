@@ -5,82 +5,81 @@ import (
 	"net/http"
 )
 
-// PublicAction represents a link to an action.
-type PublicAction struct {
+// ResponseAction represents a link to an action.
+type ResponseAction struct {
 	Href         string       `json:"href"`
 	PublicSchema PublicSchema `json:"inputs"`
 	Name         ActionName   `json:"action"`
 	Description  string       `json:"description"`
 }
 
-// PublicActions is a collection of PublicAction instances.
-type PublicActions map[ActionName]PublicAction
+// ResponseActions is a collection of ResponseAction instances.
+type ResponseActions map[ActionName]ResponseAction
 
-// PublicError represents an error for public exposure.
-type PublicError struct {
+// ResponseError represents an error for public exposure.
+type ResponseError struct {
 	Code    string  `json:"code"`
 	Message string  `json:"message"`
 	Cause   *string `json:"cause,omitempty"`
 }
 
-type PublicAllowedValue struct {
+type ResponseAllowedValue struct {
 	Value interface{} `json:"value"`
 	Text  string      `json:"name"`
 }
 
-type PublicAllowedValues []*PublicAllowedValue
+type ResponseAllowedValues []*ResponseAllowedValue
 
-// PublicInput represents an input field for public exposure.
-type PublicInput struct {
-	Name          string               `json:"name"`
-	Type          inputType            `json:"type"`
-	Value         interface{}          `json:"value,omitempty"`
-	MinLength     *int                 `json:"min_length,omitempty"`
-	MaxLength     *int                 `json:"max_length,omitempty"`
-	Required      *bool                `json:"required,omitempty"`
-	Hidden        *bool                `json:"hidden,omitempty"`
-	PublicError   *PublicError         `json:"error,omitempty"`
-	AllowedValues *PublicAllowedValues `json:"allowed_values,omitempty"`
+// ResponseInput represents an input field for public exposure.
+type ResponseInput struct {
+	Name          string                 `json:"name"`
+	Type          inputType              `json:"type"`
+	Value         interface{}            `json:"value,omitempty"`
+	MinLength     *int                   `json:"min_length,omitempty"`
+	MaxLength     *int                   `json:"max_length,omitempty"`
+	Required      *bool                  `json:"required,omitempty"`
+	Hidden        *bool                  `json:"hidden,omitempty"`
+	PublicError   *ResponseError         `json:"error,omitempty"`
+	AllowedValues *ResponseAllowedValues `json:"allowed_values,omitempty"`
 }
 
-// PublicResponse represents the response of an action execution.
-type PublicResponse struct {
-	Name          StateName     `json:"name"`
-	FlowPath      *string       `json:"flow_path,omitempty"`
-	Status        int           `json:"status"`
-	Payload       interface{}   `json:"payload,omitempty"`
-	CSRFToken     string        `json:"csrf_token"`
-	PublicActions PublicActions `json:"actions"`
-	PublicError   *PublicError  `json:"error,omitempty"`
-	PublicLinks   PublicLinks   `json:"links"`
-}
+// ResponseLinks is a collection of Link instances.
+type ResponseLinks []ResponseLink
 
-// PublicLinks is a collection of Link instances.
-type PublicLinks []PublicLink
-
-// PublicLink represents a link for public exposure.
-// A PublicLink can be a link to an oauth provider (e.g. google) or to the registration/login/tos/privacy page
-type PublicLink struct {
+// ResponseLink represents a link for public exposure.
+type ResponseLink struct {
 	Name     string       `json:"name"` // tos, privacy, google, apple, microsoft, login, registration ... // how can we insert custom oauth provider here
 	Href     string       `json:"href"`
 	Category LinkCategory `json:"category"` // oauth, legal, other, ...
 	Target   LinkTarget   `json:"target"`   // can be used to add the target of the a-tag e.g. _blank
 }
 
+// Response represents the response of an action execution.
+type Response struct {
+	Name          StateName       `json:"name"`
+	FlowPath      *string         `json:"flow_path,omitempty"`
+	Status        int             `json:"status"`
+	Payload       interface{}     `json:"payload,omitempty"`
+	CSRFToken     string          `json:"csrf_token"`
+	PublicActions ResponseActions `json:"actions"`
+	PublicError   *ResponseError  `json:"error,omitempty"`
+	PublicLinks   ResponseLinks   `json:"links"`
+}
+
 // flowResult interface defines methods for obtaining response and status.
 type flowResult interface {
-	Response() PublicResponse
-	Status() int
+	GetResponse() Response
+	GetStatus() int
 }
 
 // defaultFlowResult implements flowResult interface.
 type defaultFlowResult struct {
-	PublicResponse
+	Response
 }
 
-// newFlowResultFromResponse creates a flowResult from a PublicResponse.
-func newFlowResultFromResponse(publicResponse PublicResponse) flowResult {
-	return defaultFlowResult{PublicResponse: publicResponse}
+// newFlowResultFromResponse creates a flowResult from a Response.
+func newFlowResultFromResponse(publicResponse Response) flowResult {
+	return defaultFlowResult{Response: publicResponse}
 }
 
 // newFlowResultFromError creates a flowResult from a FlowError.
@@ -88,24 +87,24 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 	publicError := flowError.toPublicError(debug)
 	status := flowError.Status()
 
-	publicResponse := PublicResponse{
+	publicResponse := Response{
 		Name:          stateName,
 		Status:        status,
-		PublicError:   &publicError,
-		PublicActions: PublicActions{},
+		PublicError:   publicError,
+		PublicActions: ResponseActions{},
 	}
 
-	return defaultFlowResult{PublicResponse: publicResponse}
+	return defaultFlowResult{Response: publicResponse}
 }
 
-// Response returns the PublicResponse.
-func (r defaultFlowResult) Response() PublicResponse {
-	return r.PublicResponse
+// GetResponse returns the Response.
+func (r defaultFlowResult) GetResponse() Response {
+	return r.Response
 }
 
-// Status returns the HTTP status code.
-func (r defaultFlowResult) Status() int {
-	return r.PublicResponse.Status
+// GetStatus returns the HTTP status code.
+func (r defaultFlowResult) GetStatus() int {
+	return r.Response.Status
 }
 
 // actionExecutionResult holds the result of a method execution.
@@ -136,7 +135,7 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 	links := er.generateLinks()
 
 	// Create the response object.
-	resp := PublicResponse{
+	resp := Response{
 		Name:          er.nextStateName,
 		Status:        http.StatusOK,
 		Payload:       p,
@@ -156,14 +155,14 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 		publicError := er.flowError.toPublicError(debug)
 
 		resp.Status = status
-		resp.PublicError = &publicError
+		resp.PublicError = publicError
 	}
 
 	return newFlowResultFromResponse(resp)
 }
 
-func (er *executionResult) generateLinks() PublicLinks {
-	var publicLinks PublicLinks
+func (er *executionResult) generateLinks() ResponseLinks {
+	var publicLinks ResponseLinks
 
 	for _, link := range er.links {
 		publicLink := link.toPublicLink()
@@ -174,8 +173,8 @@ func (er *executionResult) generateLinks() PublicLinks {
 }
 
 // generateActions generates a collection of links based on the execution result.
-func (er *executionResult) generateActions(fc *defaultFlowContext) PublicActions {
-	var publicActions = make(PublicActions)
+func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActions {
+	var publicActions = make(ResponseActions)
 
 	// Get actions for the next addState.
 	state, _ := fc.flow.getState(er.nextStateName)
@@ -204,7 +203,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) PublicActions
 			publicSchema := schema.toPublicSchema(er.nextStateName)
 
 			// Create the action instance.
-			publicAction := PublicAction{
+			publicAction := ResponseAction{
 				Href:         href,
 				PublicSchema: publicSchema,
 				Name:         actionName,

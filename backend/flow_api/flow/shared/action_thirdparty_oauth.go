@@ -36,7 +36,7 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 		Required(true)
 
 	for _, provider := range enabledProviders {
-		providerInput.AllowedValue(strings.ToLower(provider.DisplayName), provider.DisplayName)
+		providerInput.AllowedValue(provider.DisplayName, strings.ToLower(provider.DisplayName))
 	}
 
 	c.AddInputs(flowpilot.StringInput("redirect_to").Hidden(true).Required(true), providerInput)

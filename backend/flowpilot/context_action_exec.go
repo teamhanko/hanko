@@ -19,8 +19,8 @@ type defaultActionExecutionContext struct {
 
 // saveNextState updates the flow's state and stores data to the database.
 func (aec *defaultActionExecutionContext) saveNextState(executionResult executionResult) error {
-	newVersion := aec.flowModel.Version + 1
 	stashData := aec.stash.String()
+	newVersion := aec.flowModel.Version + 1
 	previousState := aec.flowModel.CurrentState
 
 	// Prepare parameters for updating the flow in the database.
