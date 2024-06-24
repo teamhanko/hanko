@@ -304,7 +304,7 @@ func (i *defaultInput) toPublicInput() *ResponseInput {
 		MaxLength:     i.maxLength,
 		Required:      i.required,
 		Hidden:        i.hidden,
-		PublicError:   e,
+		Error:         e,
 		AllowedValues: av,
 	}
 }
