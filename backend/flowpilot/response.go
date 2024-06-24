@@ -39,7 +39,7 @@ type ResponseInput struct {
 	MaxLength     *int                   `json:"max_length,omitempty"`
 	Required      *bool                  `json:"required,omitempty"`
 	Hidden        *bool                  `json:"hidden,omitempty"`
-	PublicError   *ResponseError         `json:"error,omitempty"`
+	Error         *ResponseError         `json:"error,omitempty"`
 	AllowedValues *ResponseAllowedValues `json:"allowed_values,omitempty"`
 }
 
@@ -74,12 +74,12 @@ type flowResult interface {
 
 // defaultFlowResult implements flowResult interface.
 type defaultFlowResult struct {
-	Response
+	response Response
 }
 
 // newFlowResultFromResponse creates a flowResult from a Response.
-func newFlowResultFromResponse(publicResponse Response) flowResult {
-	return defaultFlowResult{Response: publicResponse}
+func newFlowResultFromResponse(response Response) flowResult {
+	return defaultFlowResult{response: response}
 }
 
 // newFlowResultFromError creates a flowResult from a FlowError.
@@ -87,24 +87,24 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 	e := flowError.toPublicError(debug)
 	status := flowError.Status()
 
-	publicResponse := Response{
+	response := Response{
 		Name:    stateName,
 		Status:  status,
 		Error:   e,
 		Actions: ResponseActions{},
 	}
 
-	return defaultFlowResult{Response: publicResponse}
+	return defaultFlowResult{response: response}
 }
 
 // GetResponse returns the Response.
 func (r defaultFlowResult) GetResponse() Response {
-	return r.Response
+	return r.response
 }
 
 // GetStatus returns the HTTP status code.
 func (r defaultFlowResult) GetStatus() int {
-	return r.Response.Status
+	return r.response.Status
 }
 
 // actionExecutionResult holds the result of a method execution.
