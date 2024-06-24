@@ -75,7 +75,7 @@ func (fc *defaultFlowContext) StateExists(stateName StateName) bool {
 	state, _ := fc.flow.getState(fc.flowModel.CurrentState)
 
 	if state != nil {
-		return state.flow.stateExists(stateName)
+		return state.getFlow().stateExists(stateName)
 	}
 
 	return false
@@ -92,7 +92,7 @@ func (fc *defaultFlowContext) GetFlowName() string {
 }
 
 // FetchActionInput fetches input data for a specific action.
-func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (ReadOnlyActionInput, error) {
+func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (readOnlyActionInput, error) {
 	// Find the last Transition with the specified method from the database wrapper.
 	t, err := fc.dbw.FindLastTransitionWithAction(fc.flowModel.ID, methodName)
 	if err != nil {
@@ -101,11 +101,11 @@ func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (ReadOnlyA
 
 	// If no Transition is found, return an empty JSONManager.
 	if t == nil {
-		return NewActionInput(), nil
+		return newActionInput(), nil
 	}
 
 	// Parse input data from the Transition.
-	inputData, err := NewActionInputFromString(t.InputData)
+	inputData, err := newActionInputFromString(t.InputData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode Transition data: %w", err)
 	}

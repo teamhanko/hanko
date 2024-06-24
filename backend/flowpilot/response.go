@@ -23,17 +23,24 @@ type PublicError struct {
 	Cause   *string `json:"cause,omitempty"`
 }
 
+type PublicAllowedValue struct {
+	Value interface{} `json:"value"`
+	Text  string      `json:"name"`
+}
+
+type PublicAllowedValues []*PublicAllowedValue
+
 // PublicInput represents an input field for public exposure.
 type PublicInput struct {
-	Name          string        `json:"name"`
-	Type          InputType     `json:"type"`
-	Value         interface{}   `json:"value,omitempty"`
-	MinLength     *int          `json:"min_length,omitempty"`
-	MaxLength     *int          `json:"max_length,omitempty"`
-	Required      *bool         `json:"required,omitempty"`
-	Hidden        *bool         `json:"hidden,omitempty"`
-	PublicError   *PublicError  `json:"error,omitempty"`
-	AllowedValues AllowedValues `json:"allowed_values,omitempty"`
+	Name          string               `json:"name"`
+	Type          inputType            `json:"type"`
+	Value         interface{}          `json:"value,omitempty"`
+	MinLength     *int                 `json:"min_length,omitempty"`
+	MaxLength     *int                 `json:"max_length,omitempty"`
+	Required      *bool                `json:"required,omitempty"`
+	Hidden        *bool                `json:"hidden,omitempty"`
+	PublicError   *PublicError         `json:"error,omitempty"`
+	AllowedValues *PublicAllowedValues `json:"allowed_values,omitempty"`
 }
 
 // PublicResponse represents the response of an action execution.
@@ -60,24 +67,24 @@ type PublicLink struct {
 	Target   LinkTarget   `json:"target"`   // can be used to add the target of the a-tag e.g. _blank
 }
 
-// FlowResult interface defines methods for obtaining response and status.
-type FlowResult interface {
+// flowResult interface defines methods for obtaining response and status.
+type flowResult interface {
 	Response() PublicResponse
 	Status() int
 }
 
-// DefaultFlowResult implements FlowResult interface.
-type DefaultFlowResult struct {
+// defaultFlowResult implements flowResult interface.
+type defaultFlowResult struct {
 	PublicResponse
 }
 
-// newFlowResultFromResponse creates a FlowResult from a PublicResponse.
-func newFlowResultFromResponse(publicResponse PublicResponse) FlowResult {
-	return DefaultFlowResult{PublicResponse: publicResponse}
+// newFlowResultFromResponse creates a flowResult from a PublicResponse.
+func newFlowResultFromResponse(publicResponse PublicResponse) flowResult {
+	return defaultFlowResult{PublicResponse: publicResponse}
 }
 
-// newFlowResultFromError creates a FlowResult from a FlowError.
-func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) FlowResult {
+// newFlowResultFromError creates a flowResult from a FlowError.
+func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) flowResult {
 	publicError := flowError.toPublicError(debug)
 	status := flowError.Status()
 
@@ -88,16 +95,16 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 		PublicActions: PublicActions{},
 	}
 
-	return DefaultFlowResult{PublicResponse: publicResponse}
+	return defaultFlowResult{PublicResponse: publicResponse}
 }
 
 // Response returns the PublicResponse.
-func (r DefaultFlowResult) Response() PublicResponse {
+func (r defaultFlowResult) Response() PublicResponse {
 	return r.PublicResponse
 }
 
 // Status returns the HTTP status code.
-func (r DefaultFlowResult) Status() int {
+func (r defaultFlowResult) Status() int {
 	return r.PublicResponse.Status
 }
 
@@ -118,7 +125,7 @@ type executionResult struct {
 }
 
 // generateResponse generates a response based on the execution result.
-func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) FlowResult {
+func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) flowResult {
 	// Generate actions for the response.
 	actions := er.generateActions(fc)
 
@@ -174,13 +181,13 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) PublicActions
 	state, _ := fc.flow.getState(er.nextStateName)
 
 	if state != nil {
-		for _, actionDetail := range state.actionDetails {
-			actionName := actionDetail.action.GetName()
-			actionDescription := actionDetail.action.GetDescription()
+		for _, ad := range state.getActionDetails() {
+			actionName := ad.getAction().GetName()
+			actionDescription := ad.getAction().GetDescription()
 
 			// Create action HREF based on the current flow context and method name.
 			href := er.createHref(fc, actionName)
-			schema := er.getSchema(fc, actionDetail)
+			schema := er.getSchema(fc, ad)
 
 			// (Re-)Initialize each action
 			aic := defaultActionInitializationContext{
@@ -188,7 +195,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) PublicActions
 				defaultFlowContext: fc,
 			}
 
-			actionDetail.action.Initialize(&aic)
+			ad.getAction().Initialize(&aic)
 
 			if aic.isSuspended {
 				continue
@@ -212,10 +219,10 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) PublicActions
 }
 
 // getSchema returns the schema for a given method name.
-func (er *executionResult) getSchema(fc *defaultFlowContext, actionDetail defaultActionDetail) ExecutionSchema {
+func (er *executionResult) getSchema(fc *defaultFlowContext, actionDetail actionDetail) ExecutionSchema {
 	if er.actionExecutionResult == nil ||
-		actionDetail.action.GetName() != er.actionExecutionResult.actionName ||
-		actionDetail.flowPath.String() != fc.GetFlowPath().String() || er.nextStateName != fc.GetCurrentState() {
+		actionDetail.getAction().GetName() != er.actionExecutionResult.actionName ||
+		actionDetail.getFlowPath().String() != fc.GetFlowPath().String() || er.nextStateName != fc.GetCurrentState() {
 		return newSchema()
 	}
 	return er.actionExecutionResult.schema

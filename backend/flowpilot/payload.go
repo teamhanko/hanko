@@ -6,7 +6,7 @@ type payload interface {
 	jsonmanager.JSONManager
 }
 
-// NewPayload creates a new instance of Payload with empty JSON data.
-func NewPayload() payload {
+// newPayload creates a new instance of Payload with empty JSON data.
+func newPayload() payload {
 	return jsonmanager.NewJSONManager()
 }

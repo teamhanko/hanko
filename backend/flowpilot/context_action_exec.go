@@ -72,7 +72,7 @@ func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName) 
 		return fmt.Errorf("invalid current state: %w", err)
 	}
 
-	nextStateAllowed := currentState.flow.stateExists(nextStateName)
+	nextStateAllowed := currentState.getFlow().stateExists(nextStateName)
 
 	// Check if the specified nextStateName is valid.
 	if !(nextStateAllowed || nextStateName == aec.flow.errorStateName) {
@@ -80,8 +80,8 @@ func (aec *defaultActionExecutionContext) continueFlow(nextStateName StateName) 
 	}
 
 	// Add the current state to the execution history.
-	if currentState.name != nextStateName && !aec.skipWriteHistory {
-		err = aec.stash.addStateToHistory(currentState.name, nil, nil)
+	if currentState.getName() != nextStateName && !aec.skipWriteHistory {
+		err = aec.stash.addStateToHistory(currentState.getName(), nil, nil)
 		if err != nil {
 			return fmt.Errorf("failed to add the current state to the history: %w", err)
 		}
@@ -137,10 +137,10 @@ func (aec *defaultActionExecutionContext) executeBeforeStateHooks(nextStateName 
 		return err
 	}
 
-	for _, hook := range nextState.beforeStateHooks.reverse() {
+	for _, hook := range nextState.getBeforeStateHooks().reverse() {
 		err = hook.Execute(aec)
 		if err != nil {
-			return fmt.Errorf("failed to execute hook action before state '%s': %w", nextState.name, err)
+			return fmt.Errorf("failed to execute hook action before state '%s': %w", nextState.getName(), err)
 		}
 	}
 
@@ -153,7 +153,7 @@ func (aec *defaultActionExecutionContext) executeAfterStateHooks() error {
 		return err
 	}
 
-	for _, hook := range currentState.afterStateHooks.reverse() {
+	for _, hook := range currentState.getAfterStateHooks().reverse() {
 		err = hook.Execute(aec)
 		if err != nil {
 			return fmt.Errorf("failed to execute hook action after state: %w", err)
@@ -299,7 +299,7 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 	}
 
 	// Ensure the specified entry state is associated with a sub-flow of the current flow.
-	if !currentState.subFlows.stateExists(entryStateName) {
+	if !currentState.getSubFlows().stateExists(entryStateName) {
 		return fmt.Errorf("the specified entry state '%s' is not associated with a sub-flow of the current flow", entryStateName)
 	}
 
@@ -307,8 +307,8 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 
 	// Append valid states to the list of scheduledStates.
 	for index, nextStateName := range nextStateNames {
-		stateExists := currentState.flow.stateExists(nextStateName)
-		subFlowStateExists := currentState.subFlows.stateExists(nextStateName)
+		stateExists := currentState.getFlow().stateExists(nextStateName)
+		subFlowStateExists := currentState.getSubFlows().stateExists(nextStateName)
 
 		// Validate the current next state.
 		if index == len(nextStateNames)-1 {
@@ -337,15 +337,15 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 
 	if !aec.skipWriteHistory {
 		// Add the current state to the execution history.
-		err = aec.stash.addStateToHistory(currentState.name, nil, &numOfScheduledStates)
+		err = aec.stash.addStateToHistory(currentState.getName(), nil, &numOfScheduledStates)
 		if err != nil {
 			return fmt.Errorf("failed to add state to history: %w", err)
 		}
 	}
 
-	subFlow := currentState.subFlows.getSubFlowFromStateName(entryStateName)
+	sf := currentState.getSubFlows().getSubFlowFromStateName(entryStateName)
 	newPath := newFlowPathFromString(aec.stash.Get("_.flowPath").String())
-	newPath.add(subFlow.getName())
+	newPath.add(sf.getName())
 	err = aec.stash.Set("_.flowPath", newPath.String())
 	if err != nil {
 		return fmt.Errorf("failed to stash new flowPath: %w", err)

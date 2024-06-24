@@ -16,7 +16,7 @@ type FlowBuilder interface {
 	BeforeState(stateName StateName, hooks ...HookAction) FlowBuilder
 	AfterState(stateName StateName, hooks ...HookAction) FlowBuilder
 	Debug(enabled bool) FlowBuilder
-	SubFlows(subFlows ...SubFlow) FlowBuilder
+	SubFlows(subFlows ...subFlow) FlowBuilder
 	Build() (Flow, error)
 	MustBuild() Flow
 	BeforeEachAction(hooks ...HookAction) FlowBuilder
@@ -31,8 +31,8 @@ type defaultFlowBuilderBase struct {
 	stateDetails          stateDetails
 	beforeStateHooks      stateHooks
 	afterStateHooks       stateHooks
-	beforeEachActionHooks HookActions
-	afterEachActionHooks  HookActions
+	beforeEachActionHooks hookActions
+	afterEachActionHooks  hookActions
 }
 
 // defaultFlowBuilder is a builder struct for creating a new Flow.
@@ -95,7 +95,7 @@ func (fb *defaultFlowBuilder) addAfterEachActionHooks(hooks ...HookAction) {
 	fb.afterEachActionHooks = append(fb.afterEachActionHooks, hooks...)
 }
 
-func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...SubFlow) {
+func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...subFlow) {
 	fb.subFlows = append(fb.subFlows, subFlows...)
 }
 
@@ -133,18 +133,26 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath flowPath) e
 		}
 
 		actionDetails := make(defaultActionDetails, 0)
+
 		for _, action := range actions {
 			flowName := flow.getName()
-			actionDetail := defaultActionDetail{action: action, flowName: flowName, flowPath: flowPath}
-			actionDetails = append(actionDetails, actionDetail)
+
+			ad := &defaultActionDetail{
+				action:   action,
+				flowName: flowName,
+				flowPath: flowPath,
+			}
+
+			actionDetails = append(actionDetails, ad)
 		}
 
 		// Create state details.
-		state := stateDetail{
+		state := defaultStateDetail{
 			name:             stateName,
 			actionDetails:    actionDetails,
 			flow:             f,
 			subFlows:         subFlows,
+			flowPath:         flowPath.copy(),
 			beforeStateHooks: beforeStateHooks,
 			afterStateHooks:  afterStateHooks,
 		}
@@ -254,7 +262,7 @@ func (fb *defaultFlowBuilder) ErrorState(stateName StateName) FlowBuilder {
 	return fb
 }
 
-func (fb *defaultFlowBuilder) SubFlows(subFlows ...SubFlow) FlowBuilder {
+func (fb *defaultFlowBuilder) SubFlows(subFlows ...subFlow) FlowBuilder {
 	fb.addSubFlows(subFlows...)
 	return fb
 }

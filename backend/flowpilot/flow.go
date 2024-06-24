@@ -54,15 +54,6 @@ type Action interface {
 	Execute(ExecutionContext) error   // Execute the action.
 }
 
-type defaultActionDetail struct {
-	action   Action
-	flowName string
-	flowPath flowPath
-}
-
-// actions represents a list of action
-type defaultActionDetails []defaultActionDetail
-
 // Actions represents a list of Action
 type Actions []Action
 
@@ -71,11 +62,11 @@ type HookAction interface {
 	Execute(HookExecutionContext) error
 }
 
-// HookActions represents a list of HookAction interfaces.
-type HookActions []HookAction
+// hookActions represents a list of HookAction interfaces.
+type hookActions []HookAction
 
-func (actions HookActions) reverse() HookActions {
-	a := make(HookActions, len(actions))
+func (actions hookActions) reverse() hookActions {
+	a := make(hookActions, len(actions))
 	copy(a, actions)
 	n := reflect.ValueOf(a).Len()
 	swap := reflect.Swapper(a)
@@ -85,39 +76,11 @@ func (actions HookActions) reverse() HookActions {
 	return a
 }
 
-type HookDetails map[string]HookActions
-
-// state represents details for a state, including the associated actions, available sub-flows and more.
-type stateDetail struct {
-	name             StateName
-	flow             stateActions
-	subFlows         SubFlows
-	actionDetails    defaultActionDetails
-	beforeStateHooks HookActions
-	afterStateHooks  HookActions
-}
-
-// getActionDetail returns the Action with the specified name.
-func (sd *stateDetail) getActionDetail(actionName ActionName) (*defaultActionDetail, error) {
-	for _, actionDetail := range sd.actionDetails {
-		currentActionName := actionDetail.action.GetName()
-
-		if currentActionName == actionName {
-			return &actionDetail, nil
-		}
-	}
-
-	return nil, fmt.Errorf("action '%s' not found", actionName)
-}
-
-// stateDetails maps states to associated Actions, flows and sub-flows.
-type stateDetails map[StateName]*stateDetail
-
 // stateActions maps state names to associated actions.
 type stateActions map[StateName]Actions
 
 // stateActions maps state names to associated hook actions.
-type stateHooks map[StateName]HookActions
+type stateHooks map[StateName]hookActions
 
 // stateExists checks if a state exists in the flow.
 func (st stateActions) stateExists(stateName StateName) bool {
@@ -126,7 +89,7 @@ func (st stateActions) stateExists(stateName StateName) bool {
 }
 
 // SubFlows represents a list of SubFlow interfaces.
-type SubFlows []SubFlow
+type SubFlows []subFlow
 
 // stateExists checks if the given state exists in a sub-flow of the current flow.
 func (sfs SubFlows) stateExists(state StateName) bool {
@@ -139,7 +102,7 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 	return false
 }
 
-func (sfs SubFlows) getSubFlowFromStateName(state StateName) SubFlow {
+func (sfs SubFlows) getSubFlowFromStateName(state StateName) subFlow {
 	for _, subFlow := range sfs {
 		if subFlow.getFlow().stateExists(state) {
 			return subFlow
@@ -161,21 +124,21 @@ type flowBase interface {
 type Flow interface {
 	// Execute executes the flow using the provided FlowDB and options.
 	// It returns the result of the flow execution and an error if any.
-	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error)
-	// ResultFromError converts an error into a FlowResult.
-	ResultFromError(err error) FlowResult
+	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (flowResult, error)
+	// ResultFromError converts an error into a flowResult.
+	ResultFromError(err error) flowResult
 	// Set sets a value with the given key in the flow context.
 	Set(string, interface{})
 	// setDefaults sets the default values for the flow.
 	setDefaults()
 	// getState retrieves the details of a specific state in the flow.
-	getState(stateName StateName) (*stateDetail, error)
+	getState(stateName StateName) (stateDetail, error)
 	// Embed the flowBase interface.
 	flowBase
 }
 
-// SubFlow represents a sub-flow.
-type SubFlow interface {
+// subFlow represents a sub-flow.
+type subFlow interface {
 	flowBase
 }
 
@@ -185,10 +148,10 @@ type defaultFlowBase struct {
 	name                  string
 	flow                  stateActions // StateName to Actions mapping.
 	subFlows              SubFlows     // The sub-flows of the current flow.
-	beforeStateHooks      stateHooks   // StateName to HookActions mapping.
-	afterStateHooks       stateHooks   // StateName to HookActions mapping.
-	beforeEachActionHooks HookActions  // List of HookActions that run before each action.
-	afterEachActionHooks  HookActions  // List of HookActions that run after each action.
+	beforeStateHooks      stateHooks   // StateName to hookActions mapping.
+	afterStateHooks       stateHooks   // StateName to hookActions mapping.
+	beforeEachActionHooks hookActions  // List of hookActions that run before each action.
+	afterEachActionHooks  hookActions  // List of hookActions that run after each action.
 }
 
 // defaultFlow defines a flow structure with states, actions, and settings.
@@ -210,7 +173,7 @@ func (f *defaultFlow) Set(name string, value interface{}) {
 }
 
 // getActionsForState returns state details for the specified state.
-func (f *defaultFlow) getState(stateName StateName) (*stateDetail, error) {
+func (f *defaultFlow) getState(stateName StateName) (stateDetail, error) {
 	if state, ok := f.stateDetails[stateName]; ok {
 		return state, nil
 	}
@@ -249,7 +212,7 @@ func (f *defaultFlow) setDefaults() {
 }
 
 // Execute handles the execution of actions for a defaultFlow.
-func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (FlowResult, error) {
+func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (flowResult, error) {
 	// Process execution options.
 	var executionOptions flowExecutionOptions
 
@@ -270,7 +233,7 @@ func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (F
 }
 
 // ResultFromError returns an error response for the defaultFlow.
-func (f *defaultFlow) ResultFromError(err error) FlowResult {
+func (f *defaultFlow) ResultFromError(err error) flowResult {
 	flowError := ErrorTechnical
 
 	if e, ok := err.(FlowError); ok {

@@ -63,7 +63,7 @@ type actionExecutionContext interface {
 	// TODO: FetchActionInput (for a action name) is maybe useless and can be removed or replaced.
 
 	// FetchActionInput fetches input data for a specific action.
-	FetchActionInput(actionName ActionName) (ReadOnlyActionInput, error)
+	FetchActionInput(actionName ActionName) (readOnlyActionInput, error)
 	// ValidateInputData validates the input data against the schema.
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
@@ -121,7 +121,7 @@ type BeforeEachActionExecutionContext interface {
 }
 
 // createAndInitializeFlow initializes the flow and returns a flow Response.
-func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
+func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
 	// Wrap the provided FlowDB with additional functionality.
 	dbw := wrapDB(db)
 	// Calculate the expiration time for the flow.
@@ -129,7 +129,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 
 	// Initialize JSONManagers for s and payload.
 	s := newStash()
-	p := NewPayload()
+	p := newPayload()
 
 	// Add the initial next states to the s to be scheduled after the initial sub-flow.
 	err := s.addScheduledStates(flow.initialNextStateNames...)
@@ -193,7 +193,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 }
 
 // executeFlowAction processes the flow and returns a Response.
-func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions) (FlowResult, error) {
+func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions) (flowResult, error) {
 	// Parse the actionParam parameter to get the actionParam name and flow ID.
 	queryParam, err := parseQueryParam(options.action)
 	if err != nil {
@@ -221,11 +221,11 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Initialize JSONManagers for payload and flash data.
-	p := NewPayload()
+	p := newPayload()
 
 	// Parse raw input data into JSONManager.
 	raw := options.inputData.getJSONStringOrDefault()
-	inputJSON, err := NewActionInputFromString(raw)
+	inputJSON, err := newActionInputFromString(raw)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
@@ -257,7 +257,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Get the action associated with the actionParam name.
-	actionDetail, err := state.getActionDetail(queryParam.actionName)
+	ad, err := state.getActionDetail(queryParam.actionName)
 	if err != nil {
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
@@ -281,7 +281,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted, flow.debug), nil
 	}
 
-	actionDetail.action.Initialize(aic)
+	ad.getAction().Initialize(aic)
 
 	// Check if the action is suspended.
 	if aic.isSuspended {
@@ -289,7 +289,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Execute the action and handle any errors.
-	err = actionDetail.action.Execute(aec)
+	err = ad.getAction().Execute(aec)
 	if err != nil {
 		return nil, fmt.Errorf("the action failed to handle the request: %w", err)
 	}

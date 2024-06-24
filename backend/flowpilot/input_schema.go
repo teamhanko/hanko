@@ -16,8 +16,8 @@ type ExecutionSchema interface {
 	SetError(inputName string, inputError InputError)
 
 	getInput(name string) Input
-	getOutputData() ReadOnlyActionInput
-	getDataToPersist() ReadOnlyActionInput
+	getOutputData() readOnlyActionInput
+	getDataToPersist() readOnlyActionInput
 	validateInputData(stateName StateName, stash stash) bool
 	toInitializationSchema() InitializationSchema
 	toPublicSchema(stateName StateName) PublicSchema
@@ -41,13 +41,13 @@ type PublicSchema map[string]*PublicInput
 // defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
 type defaultSchema struct {
 	inputs
-	inputData  ReadOnlyActionInput
-	outputData ActionInput
+	inputData  readOnlyActionInput
+	outputData actionInput
 }
 
 // newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithInputData(inputData ActionInput) ExecutionSchema {
-	outputData := NewActionInput()
+func newSchemaWithInputData(inputData actionInput) ExecutionSchema {
+	outputData := newActionInput()
 
 	return &defaultSchema{
 		inputData:  inputData,
@@ -56,8 +56,8 @@ func newSchemaWithInputData(inputData ActionInput) ExecutionSchema {
 }
 
 // newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithOutputData(outputData ReadOnlyActionInput) (ExecutionSchema, error) {
-	data, err := NewActionInputFromString(outputData.String())
+func newSchemaWithOutputData(outputData readOnlyActionInput) (ExecutionSchema, error) {
+	data, err := newActionInputFromString(outputData.String())
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +70,7 @@ func newSchemaWithOutputData(outputData ReadOnlyActionInput) (ExecutionSchema, e
 
 // newSchema creates a new ExecutionSchema with no input data.
 func newSchema() ExecutionSchema {
-	inputData := NewActionInput()
+	inputData := newActionInput()
 	return newSchemaWithInputData(inputData)
 }
 
@@ -130,8 +130,8 @@ func (s *defaultSchema) validateInputData(stateName StateName, stash stash) bool
 }
 
 // getDataToPersist filters and returns data that should be persisted based on schema definitions.
-func (s *defaultSchema) getDataToPersist() ReadOnlyActionInput {
-	toPersist := NewActionInput()
+func (s *defaultSchema) getDataToPersist() readOnlyActionInput {
+	toPersist := newActionInput()
 
 	for _, input := range s.inputs {
 		if v := s.inputData.Get(input.getName()); v.Exists() && input.shouldPersist() {
@@ -143,7 +143,7 @@ func (s *defaultSchema) getDataToPersist() ReadOnlyActionInput {
 }
 
 // getOutputData returns the output data from the schema.
-func (s *defaultSchema) getOutputData() ReadOnlyActionInput {
+func (s *defaultSchema) getOutputData() readOnlyActionInput {
 	return s.outputData
 }
 
