@@ -96,8 +96,8 @@ type SubFlows []subFlow
 
 // stateExists checks if the given state exists in a sub-flow of the current flow.
 func (sfs SubFlows) stateExists(state StateName) bool {
-	for _, subFlow := range sfs {
-		if subFlow.getFlow().stateExists(state) {
+	for _, sf := range sfs {
+		if sf.getFlow().stateExists(state) {
 			return true
 		}
 	}
@@ -106,9 +106,9 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 }
 
 func (sfs SubFlows) getSubFlowFromStateName(state StateName) subFlow {
-	for _, subFlow := range sfs {
-		if subFlow.getFlow().stateExists(state) {
-			return subFlow
+	for _, sf := range sfs {
+		if sf.getFlow().stateExists(state) {
+			return sf
 		}
 	}
 	return nil
