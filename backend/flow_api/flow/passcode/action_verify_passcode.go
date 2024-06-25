@@ -34,23 +34,23 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("passcode_id").Exists() {
+	if !c.Stash().Get(shared.StashPathPasscodeID).Exists() {
 		return errors.New("passcode_id does not exist in the stash")
 	}
 
-	passcodeID := uuid.FromStringOrNil(c.Stash().Get("passcode_id").String())
+	passcodeID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathPasscodeID).String())
 	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String())
 	if err != nil {
 		if errors.Is(err, services.ErrorPasscodeInvalid) ||
 			errors.Is(err, services.ErrorPasscodeNotFound) ||
 			errors.Is(err, services.ErrorPasscodeExpired) {
 
-			if c.Stash().Get("login_method").Exists() {
+			if c.Stash().Get(shared.StashPathLoginMethod).Exists() {
 				err = deps.AuditLogger.CreateWithConnection(
 					deps.Tx,
 					deps.HttpContext,
 					models.AuditLogLoginFailure,
-					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get("user_id").String())},
+					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())},
 					err,
 					auditlog.Detail("login_method", "passcode"),
 					auditlog.Detail("flow_id", c.GetFlowID()))
@@ -64,12 +64,12 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		if errors.Is(err, services.ErrorPasscodeMaxAttemptsReached) {
-			if c.Stash().Get("login_method").Exists() {
+			if c.Stash().Get(shared.StashPathLoginMethod).Exists() {
 				err = deps.AuditLogger.CreateWithConnection(
 					deps.Tx,
 					deps.HttpContext,
 					models.AuditLogLoginFailure,
-					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get("user_id").String())},
+					&models.User{ID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())},
 					err,
 					auditlog.Detail("login_method", "passcode"),
 					auditlog.Detail("flow_id", c.GetFlowID()))
@@ -95,11 +95,11 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete passcode_email from stash: %w", err)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
+	if !c.Stash().Get(shared.StashPathUserID).Exists() {
 		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("account does not exist")))
 	}
 
-	err = c.Stash().Set("email_verified", true) // TODO: maybe change attribute path
+	err = c.Stash().Set(shared.StashPathEmailVerified, true)
 	if err != nil {
 		return err
 	}

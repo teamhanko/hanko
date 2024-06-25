@@ -22,7 +22,7 @@ func (a WebauthnGenerateCreationOptions) GetDescription() string {
 }
 
 func (a WebauthnGenerateCreationOptions) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		c.SuspendAction()
 	}
 }
@@ -34,21 +34,21 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("user_id").Exists() {
+	if !c.Stash().Get(shared.StashPathUserID).Exists() {
 		return errors.New("user_id does not exist in the stash")
 	}
 
-	if !c.Stash().Get("email").Exists() && !c.Stash().Get("username").Exists() {
+	if !c.Stash().Get(shared.StashPathEmail).Exists() && !c.Stash().Get(shared.StashPathUsername).Exists() {
 		return errors.New("either email or username must exist in the stash")
 	}
 
-	userID, err := uuid.FromString(c.Stash().Get("user_id").String())
+	userID, err := uuid.FromString(c.Stash().Get(shared.StashPathUserID).String())
 	if err != nil {
 		return fmt.Errorf("failed to parse user id as a uuid: %w", err)
 	}
 
-	email := c.Stash().Get("email").String()
-	username := c.Stash().Get("username").String()
+	email := c.Stash().Get(shared.StashPathEmail).String()
+	username := c.Stash().Get(shared.StashPathUsername).String()
 
 	params := services.GenerateCreationOptionsParams{
 		Tx:       deps.Tx,
@@ -62,7 +62,7 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		return fmt.Errorf("failed to generate webauthn creation options: %w", err)
 	}
 
-	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
+	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
 	if err != nil {
 		return err
 	}

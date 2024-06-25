@@ -29,13 +29,13 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 
 	webauthnAvailable := c.Input().Get("webauthn_available").Bool()
 
-	err := c.Stash().Set("webauthn_available", webauthnAvailable)
+	err := c.Stash().Set(shared.StashPathWebauthnAvailable, webauthnAvailable)
 	if err != nil {
 		return err
 	}
 
 	conditionalMediationAvailable := c.Input().Get("webauthn_conditional_mediation_available").Bool()
-	err = c.Stash().Set("webauthn_conditional_mediation_available", conditionalMediationAvailable)
+	err = c.Stash().Set(shared.StashPathWebauthnConditionalMediationAvailable, conditionalMediationAvailable)
 	if err != nil {
 		return err
 	}

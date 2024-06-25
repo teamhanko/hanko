@@ -41,11 +41,11 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	newPassword := c.Input().Get("new_password").String()
 
-	if !c.Stash().Get("user_id").Exists() {
+	if !c.Stash().Get(shared.StashPathUserID).Exists() {
 		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("user_id does not exist")))
 	}
 
-	authUserID := c.Stash().Get("user_id").String()
+	authUserID := c.Stash().Get(shared.StashPathUserID).String()
 
 	err := deps.PasswordService.RecoverPassword(uuid.FromStringOrNil(authUserID), newPassword)
 

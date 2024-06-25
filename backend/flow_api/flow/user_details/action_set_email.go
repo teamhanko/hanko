@@ -36,7 +36,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	userID := uuid.FromStringOrNil(c.Stash().Get("user_id").String())
+	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
 	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userID)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
@@ -60,7 +60,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to create a new primary email: %w", err)
 	}
 
-	err = c.Stash().Set("email", email)
+	err = c.Stash().Set(shared.StashPathEmail, email)
 	if err != nil {
 		return fmt.Errorf("failed to set email to the stash: %w", err)
 	}

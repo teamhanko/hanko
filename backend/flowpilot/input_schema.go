@@ -81,12 +81,12 @@ func (s *defaultSchema) forInitializationContext() initializationInputSchema {
 
 // Get retrieves a value at the specified path in the input data.
 func (s *defaultSchema) Get(path string) gjson.Result {
-	return s.inputData.Get(path)
+	return s.inputData.Get(JSONManagerPath(path))
 }
 
 // Set updates the JSON data at the specified path with the provided value.
 func (s *defaultSchema) Set(path string, value interface{}) error {
-	return s.outputData.Set(path, value)
+	return s.outputData.Set(JSONManagerPath(path), value)
 }
 
 // AddInputs adds input fields to the defaultSchema and returns the updated inputSchema.
@@ -134,8 +134,8 @@ func (s *defaultSchema) getDataToPersist() readOnlyActionInput {
 	toPersist := newActionInput()
 
 	for _, input := range s.inputs {
-		if v := s.inputData.Get(input.getName()); v.Exists() && input.shouldPersist() {
-			_ = toPersist.Set(input.getName(), v.Value())
+		if v := s.inputData.Get(JSONManagerPath(input.getName())); v.Exists() && input.shouldPersist() {
+			_ = toPersist.Set(JSONManagerPath(input.getName()), v.Value())
 		}
 	}
 
@@ -156,8 +156,8 @@ func (s *defaultSchema) toResponse(stateName StateName) ResponseInputs {
 			continue
 		}
 
-		outputValue := s.outputData.Get(input.getName())
-		inputValue := s.inputData.Get(input.getName())
+		outputValue := s.outputData.Get(JSONManagerPath(input.getName()))
+		inputValue := s.inputData.Get(JSONManagerPath(input.getName()))
 
 		if outputValue.Exists() {
 			input.setValue(outputValue.Value())

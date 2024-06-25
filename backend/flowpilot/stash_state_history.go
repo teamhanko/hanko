@@ -3,7 +3,6 @@ package flowpilot
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 )
 
 type stateHistoryStash interface {
@@ -15,14 +14,14 @@ type stateHistoryStash interface {
 }
 
 type defaultStateHistoryStash struct {
-	jsonmanager.JSONManager
+	JSONManager
 }
 
 // addStateToHistory adds a stateDetail to the history. Specify the values for unscheduledState and numOfScheduledStates to
 // maintain the list of scheduled states if sub-flows are involved.
 func (s *defaultStateHistoryStash) addStateToHistory(stateName StateName, unscheduledStateName *StateName, numOfScheduledStates *int64) error {
 	// Create a new JSONManager to manage the history item
-	historyItem := jsonmanager.NewJSONManager()
+	historyItem := NewJSONManager()
 
 	// Get the last state from history
 	lastStateName, _, _, err := s.getLastStateFromHistory()
@@ -79,7 +78,7 @@ func (s *defaultStateHistoryStash) getLastStateFromHistory() (stateName, unsched
 	lastItemPosition := s.Get("_.state_history.#").Int() - 1
 
 	// Retrieve the last history item
-	lastHistoryItem := s.Get(fmt.Sprintf("_.state_history.%d", lastItemPosition))
+	lastHistoryItem := s.Get(JSONManagerPath(fmt.Sprintf("_.state_history.%d", lastItemPosition)))
 
 	// If the last history item doesn't exist, return nil values and no error
 	if !lastHistoryItem.Exists() {

@@ -50,12 +50,12 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	err = c.Stash().Set("new_password", string(hashedPassword))
+	err = c.Stash().Set(shared.StashPathNewPassword, string(hashedPassword))
 	if err != nil {
 		return fmt.Errorf("failed to set new_password to stash: %w", err)
 	}
 
-	err = c.Stash().Set("user_has_password", true)
+	err = c.Stash().Set(shared.StashPathUserHasPassword, true)
 	if err != nil {
 		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
 	}

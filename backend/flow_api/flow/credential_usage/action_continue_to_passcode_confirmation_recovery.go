@@ -21,17 +21,17 @@ func (a ContinueToPasscodeConfirmationRecovery) GetDescription() string {
 func (a ContinueToPasscodeConfirmationRecovery) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Password.Recovery || !c.Stash().Get("email").Exists() {
+	if !deps.Cfg.Password.Recovery || !c.Stash().Get(shared.StashPathEmail).Exists() {
 		c.SuspendAction()
 	}
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionContext) error {
-	if err := c.Stash().Set("passcode_template", "recovery"); err != nil {
+	if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "recovery"); err != nil {
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	if c.Stash().Get("user_has_password").Bool() {
+	if c.Stash().Get(shared.StashPathUserHasPassword).Bool() {
 		return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
 	}
 

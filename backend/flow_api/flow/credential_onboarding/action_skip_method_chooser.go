@@ -20,7 +20,7 @@ func (a SkipCredentialOnboardingMethodChooser) GetDescription() string {
 
 func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	emailExists := c.Stash().Get("email").Exists()
+	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
 
 	if c.GetFlowName() == shared.FlowRegistration &&
 		!(deps.Cfg.Email.UseForAuthentication && emailExists) {

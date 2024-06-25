@@ -122,7 +122,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return fmt.Errorf("failed to copy email to stash: %w", err)
 				}
 
-				err = c.Stash().Set("passcode_template", "email_registration_attempted")
+				err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted")
 				if err != nil {
 					return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 				}
@@ -142,13 +142,13 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to generate a new user id: %w", err)
 	}
 
-	err = c.Stash().Set("user_id", userID.String())
+	err = c.Stash().Set(shared.StashPathUserID, userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to stash user_id: %w", err)
 	}
 
 	if email != "" && deps.Cfg.Email.RequireVerification {
-		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 	}
@@ -173,7 +173,7 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 		stateNames = append(stateNames, shared.StatePasscodeConfirmation)
 	}
 
-	webauthnAvailable := c.Stash().Get("webauthn_available").Bool()
+	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
 	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
 	passwordEnabled := deps.Cfg.Password.Enabled
 	bothEnabled := passkeyEnabled && passwordEnabled

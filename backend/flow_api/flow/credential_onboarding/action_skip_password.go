@@ -29,11 +29,11 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 
-	emailExists := c.Stash().Get("email").Exists()
+	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
 	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
 	if c.GetPreviousState() == shared.StateOnboardingCreatePasskey &&
-		!c.Stash().Get("user_has_webauthn_credential").Bool() &&
+		!c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool() &&
 		!canLoginWithEmail {
 		c.SuspendAction()
 	}
@@ -51,8 +51,8 @@ func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if a.acquirePasskey(c, "conditional") &&
-		!c.Stash().Get("user_has_webauthn_credential").Bool() &&
-		c.Stash().Get("webauthn_available").Bool() {
+		!c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool() &&
+		c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
 	}
 

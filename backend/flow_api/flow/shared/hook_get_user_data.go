@@ -14,7 +14,7 @@ type GetUserData struct {
 func (h GetUserData) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	userId, err := uuid.FromString(c.Stash().Get("user_id").String())
+	userId, err := uuid.FromString(c.Stash().Get(StashPathUserID).String())
 	if err != nil {
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 	}
