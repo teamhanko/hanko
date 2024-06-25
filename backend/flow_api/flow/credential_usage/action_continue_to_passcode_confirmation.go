@@ -22,7 +22,7 @@ func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationCon
 
 func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) error {
 	// Set only for audit logging purposes.
-	if err := c.Stash().Set("login_method", "passcode"); err != nil {
+	if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
 		return fmt.Errorf("failed to set login_method to stash: %w", err)
 	}
 

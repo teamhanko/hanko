@@ -22,7 +22,7 @@ func (a WebauthnGenerateRequestOptions) GetDescription() string {
 func (a WebauthnGenerateRequestOptions) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !c.Stash().Get("webauthn_available").Bool() || !deps.Cfg.Passkey.Enabled {
+	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() || !deps.Cfg.Passkey.Enabled {
 		c.SuspendAction()
 	}
 }
@@ -37,12 +37,12 @@ func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to generate webauthn request options: %w", err)
 	}
 
-	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
+	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
 	if err != nil {
 		return fmt.Errorf("failed to stash webauthn_session_data_id: %w", err)
 	}
 
-	err = c.Stash().Set("user_id", sessionDataModel.UserId)
+	err = c.Stash().Set(shared.StashPathUserID, sessionDataModel.UserId)
 	if err != nil {
 		return fmt.Errorf("failed to stash user_id: %w", err)
 	}

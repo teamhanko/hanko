@@ -14,15 +14,15 @@ type PasswordSave struct {
 func (h PasswordSave) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	if !c.Stash().Get("new_password").Exists() {
+	if !c.Stash().Get(StashPathNewPassword).Exists() {
 		return nil
 	}
 
 	passwordId, _ := uuid.NewV4()
 	passwordCredential := models.PasswordCredential{
 		ID:       passwordId,
-		UserId:   uuid.FromStringOrNil(c.Stash().Get("user_id").String()),
-		Password: c.Stash().Get("new_password").String(),
+		UserId:   uuid.FromStringOrNil(c.Stash().Get(StashPathUserID).String()),
+		Password: c.Stash().Get(StashPathNewPassword).String(),
 	}
 
 	err := deps.Persister.GetPasswordCredentialPersister().Create(passwordCredential)

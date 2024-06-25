@@ -24,7 +24,7 @@ func (a WebauthnCredentialCreate) GetDescription() string {
 func (a WebauthnCredentialCreate) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get("webauthn_available").Bool() {
+	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		c.SuspendAction()
 	}
 }
@@ -59,7 +59,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to generate webauthn creation options: %w", err)
 	}
 
-	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
+	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
 	if err != nil {
 		return err
 	}

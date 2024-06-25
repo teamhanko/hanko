@@ -21,16 +21,16 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 		return nil
 	}
 
-	if !c.Stash().Get("email").Exists() {
+	if !c.Stash().Get(shared.StashPathEmail).Exists() {
 		return errors.New("email has not been stashed")
 	}
 
-	if !c.Stash().Get("passcode_template").Exists() {
+	if !c.Stash().Get(shared.StashPathPasscodeTemplate).Exists() {
 		return errors.New("passcode_template has not been stashed")
 	}
 
 	if deps.Cfg.RateLimiter.Enabled {
-		rateLimitKey := rate_limiter.CreateRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get("email").String())
+		rateLimitKey := rate_limiter.CreateRateLimitKey(deps.HttpContext.RealIP(), c.Stash().Get(shared.StashPathEmail).String())
 		resendAfterSeconds, ok, err := rate_limiter.Limit2(deps.RateLimiter, rateLimitKey)
 		if err != nil {
 			return fmt.Errorf("rate limiter failed: %w", err)
@@ -49,7 +49,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 
 	validationParams := services.ValidatePasscodeParams{
 		Tx:         deps.Tx,
-		PasscodeID: uuid.FromStringOrNil(c.Stash().Get("passcode_id").String()),
+		PasscodeID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathPasscodeID).String()),
 	}
 
 	passcodeIsValid, err := deps.PasscodeService.ValidatePasscode(validationParams)
@@ -57,13 +57,13 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to validate existing passcode: %w", err)
 	}
 
-	isDifferentEmailAddress := c.Stash().Get("email").String() != c.Stash().Get("passcode_email").String()
+	isDifferentEmailAddress := c.Stash().Get(shared.StashPathEmail).String() != c.Stash().Get(shared.StashPathPasscodeEmail).String()
 
 	if !passcodeIsValid || isDifferentEmailAddress {
 		sendParams := services.SendPasscodeParams{
 			FlowID:       c.GetFlowID(),
-			Template:     c.Stash().Get("passcode_template").String(),
-			EmailAddress: c.Stash().Get("email").String(),
+			Template:     c.Stash().Get(shared.StashPathPasscodeTemplate).String(),
+			EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 			Language:     deps.HttpContext.Request().Header.Get("Accept-Language"),
 		}
 
@@ -72,12 +72,12 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			return fmt.Errorf("passcode service failed: %w", err)
 		}
 
-		err = c.Stash().Set("passcode_id", passcodeID)
+		err = c.Stash().Set(shared.StashPathPasscodeID, passcodeID)
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_id to stash: %w", err)
 		}
 
-		err = c.Stash().Set("passcode_email", c.Stash().Get("email").String())
+		err = c.Stash().Set(shared.StashPathPasscodeEmail, c.Stash().Get(shared.StashPathEmail).String())
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_email to stash: %w", err)
 		}

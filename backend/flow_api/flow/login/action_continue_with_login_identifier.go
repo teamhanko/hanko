@@ -84,7 +84,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return err
 		}
 
-		if err = c.Stash().Set("email", identifierInputValue); err != nil {
+		if err = c.Stash().Set(shared.StashPathEmail, identifierInputValue); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 
@@ -92,7 +92,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			emailModel := userModel.GetEmailByAddress(identifierInputValue)
 
 			if emailModel != nil && emailModel.UserID != nil {
-				err := c.Stash().Set("user_id", emailModel.UserID.String())
+				err := c.Stash().Set(shared.StashPathUserID, emailModel.UserID.String())
 				if err != nil {
 					return fmt.Errorf("failed to set user_id to the stash: %w", err)
 				}
@@ -140,16 +140,16 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 		}
 
-		if err = c.Stash().Set("username", identifierInputValue); err != nil {
+		if err = c.Stash().Set(shared.StashPathUsername, identifierInputValue); err != nil {
 			return fmt.Errorf("failed to set username to stash: %w", err)
 		}
 
-		err = c.Stash().Set("user_id", userModel.ID.String())
+		err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 		if err != nil {
 			return fmt.Errorf("failed to set user_id to the stash: %w", err)
 		}
 		if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
-			if err = c.Stash().Set("email", primaryEmailModel.Address); err != nil {
+			if err = c.Stash().Set(shared.StashPathEmail, primaryEmailModel.Address); err != nil {
 				return fmt.Errorf("failed to set email to stash: %w", err)
 			}
 		}
@@ -172,7 +172,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		return c.StartSubFlow(shared.StateLoginPassword, onboardingStates...)
 	} else if deps.Cfg.Email.UseForAuthentication {
 		// Set only for audit logging purposes.
-		if err := c.Stash().Set("login_method", "passcode"); err != nil {
+		if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
 			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
 
@@ -227,11 +227,11 @@ func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.Execu
 	userHasUsername := deps.Cfg.Username.Enabled && len(userModel.Username.String) > 0
 	userHasEmail := deps.Cfg.Email.Enabled && len(userModel.Emails) > 0
 
-	if err := c.Stash().Set("user_has_password", userHasPassword); err != nil {
+	if err := c.Stash().Set(shared.StashPathUserHasPassword, userHasPassword); err != nil {
 		return nil, fmt.Errorf("failed to set user_has_password to the stash: %w", err)
 	}
 
-	if err := c.Stash().Set("user_has_webauthn_credential", userHasPasskey); err != nil {
+	if err := c.Stash().Set(shared.StashPathUserHasWebauthnCredential, userHasPasskey); err != nil {
 		return nil, fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 

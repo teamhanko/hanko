@@ -57,17 +57,17 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorNotFound)
 	}
 
-	err := c.Stash().Set("email", emailModel.Address)
+	err := c.Stash().Set(shared.StashPathEmail, emailModel.Address)
 	if err != nil {
 		return fmt.Errorf("failed to set email address to verify to stash: %w", err)
 	}
 
-	err = c.Stash().Set("user_id", userModel.ID.String())
+	err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to set user_id to stash: %w", err)
 	}
 
-	err = c.Stash().Set("passcode_template", "email_verification")
+	err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
 	if err != nil {
 		return fmt.Errorf("failed to set passcode_tempalte to stash %w", err)
 	}

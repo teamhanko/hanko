@@ -59,12 +59,12 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 				return fmt.Errorf("failed to copy email to stash: %w", err)
 			}
 
-			err = c.Stash().Set("user_id", userModel.ID.String())
+			err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 			if err != nil {
 				return fmt.Errorf("failed to set user_id to stash: %w", err)
 			}
 
-			err = c.Stash().Set("passcode_template", "email_registration_attempted")
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted")
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
@@ -77,12 +77,12 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to copy email to stash: %w", err)
 		}
 
-		err = c.Stash().Set("user_id", userModel.ID.String())
+		err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 		if err != nil {
 			return fmt.Errorf("failed to set user_id to stash: %w", err)
 		}
 
-		err = c.Stash().Set("passcode_template", "email_verification")
+		err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}

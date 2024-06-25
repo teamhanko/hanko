@@ -50,12 +50,12 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	// Set so the issue_session hook knows who to create the session for.
-	if err := c.Stash().Set("user_id", tokenModel.UserID.String()); err != nil {
+	if err := c.Stash().Set(StashPathUserID, tokenModel.UserID.String()); err != nil {
 		return fmt.Errorf("failed to set user_id to stash: %w", err)
 	}
 
 	// Set because the thirdparty/callback endpoint already creates a user.
-	if err := c.Stash().Set("skip_user_creation", true); err != nil {
+	if err := c.Stash().Set(StashPathSkipUserCreation, true); err != nil {
 		return fmt.Errorf("failed to set skip_user_creation to stash: %w", err)
 	}
 
@@ -85,11 +85,11 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 	result := make([]flowpilot.StateName, 0)
 
 	if deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified {
-		if err := c.Stash().Set("email", identity.Email.Address); err != nil {
+		if err := c.Stash().Set(StashPathEmail, identity.Email.Address); err != nil {
 			return nil, fmt.Errorf("failed to stash email: %w", err)
 		}
 
-		if err := c.Stash().Set("passcode_template", "email_verification"); err != nil {
+		if err := c.Stash().Set(StashPathPasscodeTemplate, "email_verification"); err != nil {
 			return nil, fmt.Errorf("failed to stash passcode_template: %w", err)
 		}
 

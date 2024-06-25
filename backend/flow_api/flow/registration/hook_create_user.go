@@ -22,7 +22,7 @@ type CreateUser struct {
 func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	// Set by shared thirdparty_oauth action because the third party callback endpoint already
 	// creates the user.
-	if c.Stash().Get("skip_user_creation").Bool() {
+	if c.Stash().Get(shared.StashPathSkipUserCreation).Bool() {
 		return nil
 	}
 
@@ -32,16 +32,16 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	if err != nil {
 		return err
 	}
-	if c.Stash().Get("user_id").Exists() {
-		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
+	if c.Stash().Get(shared.StashPathUserID).Exists() {
+		userId, err = uuid.FromString(c.Stash().Get(shared.StashPathUserID).String())
 		if err != nil {
 			return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 		}
 	}
 
 	var credentialModel *models.WebauthnCredential
-	if c.Stash().Get("webauthn_credential").Exists() {
-		webauthnCredentialStr := c.Stash().Get("webauthn_credential").String()
+	if c.Stash().Get(shared.StashPathWebauthnCredential).Exists() {
+		webauthnCredentialStr := c.Stash().Get(shared.StashPathWebauthnCredential).String()
 
 		var webauthnCredential webauthnLib.Credential
 		err = json.Unmarshal([]byte(webauthnCredentialStr), &webauthnCredential)
@@ -49,21 +49,17 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
 
-		// TODO: Who/what sets this? Do we need this?
-		passkeyBackupEligible := c.Stash().Get("passkey_backup_eligible").Bool()
-		passkeyBackupState := c.Stash().Get("passkey_backup_state").Bool()
-
-		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, passkeyBackupEligible, passkeyBackupState, deps.AuthenticatorMetadata)
+		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, deps.AuthenticatorMetadata)
 	}
 
 	err = h.createUser(
 		c,
 		userId,
-		c.Stash().Get("email").String(),
-		c.Stash().Get("email_verified").Bool(),
-		c.Stash().Get("username").String(),
+		c.Stash().Get(shared.StashPathEmail).String(),
+		c.Stash().Get(shared.StashPathEmailVerified).Bool(),
+		c.Stash().Get(shared.StashPathUsername).String(),
 		credentialModel,
-		c.Stash().Get("new_password").String(),
+		c.Stash().Get(shared.StashPathNewPassword).String(),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)

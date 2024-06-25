@@ -26,7 +26,7 @@ func (a WebauthnVerifyAssertionResponse) GetDescription() string {
 func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !c.Stash().Get("webauthn_available").Bool() || !deps.Cfg.Passkey.Enabled {
+	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() || !deps.Cfg.Passkey.Enabled {
 		c.SuspendAction()
 	}
 
@@ -34,7 +34,7 @@ func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationCo
 	// because at the time of the response/schema generation for the 'login_init' state the flow has not actually
 	// progressed to that state yet (i.e. it is still in the 'preflight' state).
 	if c.CurrentStateEquals("preflight") {
-		if !c.Stash().Get("webauthn_conditional_mediation_available").Bool() {
+		if !c.Stash().Get(shared.StashPathWebauthnConditionalMediationAvailable).Bool() {
 			c.SuspendAction()
 		}
 	}
@@ -49,11 +49,11 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	if !c.Stash().Get("webauthn_session_data_id").Exists() {
+	if !c.Stash().Get(shared.StashPathWebauthnSessionDataID).Exists() {
 		return errors.New("webauthn_session_data_id is not present in the stash")
 	}
 
-	sessionDataID := uuid.FromStringOrNil(c.Stash().Get("webauthn_session_data_id").String())
+	sessionDataID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathWebauthnSessionDataID).String())
 	assertionResponse := c.Input().Get("assertion_response").String()
 
 	params := services.VerifyAssertionResponseParams{
@@ -84,13 +84,13 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		return fmt.Errorf("failed to verify assertion response: %w", err)
 	}
 
-	err = c.Stash().Set("user_id", userModel.ID.String())
+	err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to set user_id to the stash: %w", err)
 	}
 
 	// Set only for audit logging purposes.
-	err = c.Stash().Set("login_method", "passkey")
+	err = c.Stash().Set(shared.StashPathLoginMethod, "passkey")
 	if err != nil {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}

@@ -11,12 +11,12 @@ type SelectPasscodeTemplate struct {
 }
 
 func (a SelectPasscodeTemplate) Execute(c flowpilot.HookExecutionContext) error {
-	if c.Stash().Get("user_id").Exists() {
-		if err := c.Stash().Set("passcode_template", "login"); err != nil {
+	if c.Stash().Get(shared.StashPathUserID).Exists() {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	} else {
-		if err := c.Stash().Set("passcode_template", "email_login_attempted"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_login_attempted"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	}

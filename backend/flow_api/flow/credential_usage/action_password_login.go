@@ -42,8 +42,8 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 
 	var userID uuid.UUID
 
-	if c.Stash().Get("email").Exists() {
-		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(c.Stash().Get("email").String())
+	if c.Stash().Get(shared.StashPathEmail).Exists() {
+		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(c.Stash().Get(shared.StashPathEmail).String())
 		if err != nil {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}
@@ -53,8 +53,8 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		userID = *emailModel.UserID
-	} else if c.Stash().Get("username").Exists() {
-		username := c.Stash().Get("username").String()
+	} else if c.Stash().Get(shared.StashPathUsername).Exists() {
+		username := c.Stash().Get(shared.StashPathUsername).String()
 		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
@@ -99,7 +99,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	// Set only for audit logging purposes.
-	err = c.Stash().Set("login_method", "password")
+	err = c.Stash().Set(shared.StashPathLoginMethod, "password")
 	if err != nil {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
