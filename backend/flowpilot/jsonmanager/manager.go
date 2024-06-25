@@ -1,4 +1,4 @@
-package flowpilot
+package jsonmanager
 
 import (
 	"errors"
@@ -6,21 +6,18 @@ import (
 	"github.com/tidwall/sjson"
 )
 
-// JSONManagerPath represents a stash path.
-type JSONManagerPath string
-
 // ReadJSONManager is the interface that allows read operations.
 type ReadJSONManager interface {
-	Get(path JSONManagerPath) gjson.Result // Get retrieves the value at the specified path in the JSON data.
-	String() string                        // String returns the JSON data as a string.
-	Unmarshal() interface{}                // Unmarshal parses the JSON data and returns it as an interface{}.
+	Get(path string) gjson.Result // Get retrieves the value at the specified path in the JSON data.
+	String() string               // String returns the JSON data as a string.
+	Unmarshal() interface{}       // Unmarshal parses the JSON data and returns it as an interface{}.
 }
 
 // JSONManager is the interface that defines methods for reading, writing, and deleting JSON data.
 type JSONManager interface {
 	ReadJSONManager
-	Set(path JSONManagerPath, value interface{}) error // Set updates the JSON data at the specified path with the provided value.
-	Delete(path JSONManagerPath) error                 // Delete removes a value from the JSON data at the specified path.
+	Set(path string, value interface{}) error // Set updates the JSON data at the specified path with the provided value.
+	Delete(path string) error                 // Delete removes a value from the JSON data at the specified path.
 }
 
 // ReadOnlyJSONManager is the interface that allows only read operations.
@@ -48,13 +45,13 @@ func NewJSONManagerFromString(data string) (JSONManager, error) {
 }
 
 // Get retrieves the value at the specified path in the JSON data.
-func (jm *DefaultJSONManager) Get(path JSONManagerPath) gjson.Result {
-	return gjson.Get(jm.data, string(path))
+func (jm *DefaultJSONManager) Get(path string) gjson.Result {
+	return gjson.Get(jm.data, path)
 }
 
 // Set updates the JSON data at the specified path with the provided value.
-func (jm *DefaultJSONManager) Set(path JSONManagerPath, value interface{}) error {
-	newData, err := sjson.Set(jm.data, string(path), value)
+func (jm *DefaultJSONManager) Set(path string, value interface{}) error {
+	newData, err := sjson.Set(jm.data, path, value)
 	if err != nil {
 		return err
 	}
@@ -63,7 +60,7 @@ func (jm *DefaultJSONManager) Set(path JSONManagerPath, value interface{}) error
 }
 
 // Delete removes a value from the JSON data at the specified path.
-func (jm *DefaultJSONManager) Delete(path JSONManagerPath) error {
+func (jm *DefaultJSONManager) Delete(path string) error {
 	newData, err := sjson.Delete(jm.data, string(path))
 	if err != nil {
 		return err

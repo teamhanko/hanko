@@ -1,19 +1,21 @@
 package flowpilot
 
+import "github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+
 type actionInput interface {
-	JSONManager
+	jsonmanager.JSONManager
 }
 
 type readOnlyActionInput interface {
-	ReadOnlyJSONManager
+	jsonmanager.ReadOnlyJSONManager
 }
 
 // newActionInput creates a new instance of actionInput with empty JSON data.
 func newActionInput() actionInput {
-	return NewJSONManager()
+	return jsonmanager.NewJSONManager()
 }
 
 // newActionInputFromString creates a new instance of actionInput with the given JSON data.
 func newActionInputFromString(data string) (actionInput, error) {
-	return NewJSONManagerFromString(data)
+	return jsonmanager.NewJSONManagerFromString(data)
 }

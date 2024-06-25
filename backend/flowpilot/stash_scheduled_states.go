@@ -2,6 +2,7 @@ package flowpilot
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 )
 
 type scheduledStatesStash interface {
@@ -10,7 +11,7 @@ type scheduledStatesStash interface {
 }
 
 type defaultScheduledStatesStash struct {
-	JSONManager
+	jsonmanager.JSONManager
 }
 
 // addScheduledStates adds scheduled states.
