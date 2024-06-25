@@ -12,6 +12,8 @@ type context interface {
 	// Get returns the context value with the given name.
 	Get(string) interface{}
 	GetFlowName() FlowName
+	// IsFlow returns true if the name matches the current flow name.
+	IsFlow(name FlowName) bool
 }
 
 // flowContext represents the basic context for a flow.
@@ -34,6 +36,8 @@ type flowContext interface {
 	CurrentStateEquals(stateNames ...StateName) bool
 	// GetPreviousState returns the previous state of the flow.
 	GetPreviousState() StateName
+	// IsPreviousState returns true if the previous state equals the given name.
+	IsPreviousState(name StateName) bool
 	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
 	// StateExists checks if a given state exists within the flow.

@@ -25,20 +25,20 @@ func (a SkipPasskey) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 
-	if c.GetPreviousState() == shared.StateCredentialOnboardingChooser {
+	if c.IsPreviousState(shared.StateCredentialOnboardingChooser) {
 		c.SuspendAction()
 	}
 
 	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
 	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
-	if c.GetPreviousState() == shared.StatePasswordCreation &&
+	if c.IsPreviousState(shared.StatePasswordCreation) &&
 		!c.Stash().Get(shared.StashPathUserHasPassword).Bool() &&
 		!canLoginWithEmail {
 		c.SuspendAction()
 	}
 
-	if c.GetPreviousState() == shared.StatePasscodeConfirmation &&
+	if c.IsPreviousState(shared.StatePasscodeConfirmation) &&
 		!a.acquirePassword(c, "always") &&
 		!canLoginWithEmail {
 		c.SuspendAction()
@@ -64,11 +64,11 @@ func (a SkipPasskey) acquirePassword(c flowpilot.Context, acquireType string) bo
 		return false
 	}
 
-	if c.GetFlowName() == shared.FlowLogin && deps.Cfg.Password.AcquireOnLogin == acquireType {
+	if c.IsFlow(shared.FlowLogin) && deps.Cfg.Password.AcquireOnLogin == acquireType {
 		return true
 	}
 
-	if c.GetFlowName() == shared.FlowRegistration && deps.Cfg.Password.AcquireOnRegistration == acquireType {
+	if c.IsFlow(shared.FlowRegistration) && deps.Cfg.Password.AcquireOnRegistration == acquireType {
 		return true
 	}
 

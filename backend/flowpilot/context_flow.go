@@ -60,6 +60,14 @@ func (fc *defaultFlowContext) GetPreviousState() StateName {
 	return ""
 }
 
+// IsPreviousState returns true if the previous state equals the given name
+func (fc *defaultFlowContext) IsPreviousState(name StateName) bool {
+	if fc.flowModel.PreviousState != nil {
+		return *fc.flowModel.PreviousState == name
+	}
+	return false
+}
+
 // GetErrorState returns the designated error state of the flow.
 func (fc *defaultFlowContext) GetErrorState() StateName {
 	return fc.flow.errorStateName
@@ -89,6 +97,11 @@ func (fc *defaultFlowContext) Get(name string) interface{} {
 // GetFlowName returns the name of the current flow.
 func (fc *defaultFlowContext) GetFlowName() FlowName {
 	return fc.flow.name
+}
+
+// IsFlow returns true if the name matches the current flow name.
+func (fc *defaultFlowContext) IsFlow(name FlowName) bool {
+	return fc.flow.name == name
 }
 
 // FetchActionInput fetches input data for a specific action.

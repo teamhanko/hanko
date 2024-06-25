@@ -64,8 +64,8 @@ var CredentialOnboardingSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialOnbo
 		shared.Back{}).
 	State(shared.StatePasswordCreation,
 		credential_onboarding.RegisterPassword{},
-		shared.Back{},
-		credential_onboarding.SkipPassword{}).
+		credential_onboarding.SkipPassword{},
+		shared.Back{}).
 	MustBuild()
 
 var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
