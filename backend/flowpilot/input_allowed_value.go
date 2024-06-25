@@ -33,11 +33,16 @@ type allowedValues interface {
 type defaultAllowedValues []allowedValue
 
 func (av *defaultAllowedValues) isAllowed(value string) bool {
+	if len(*av) == 0 {
+		return true
+	}
+
 	for _, v := range *av {
 		if v.getValue().(string) == value {
 			return true
 		}
 	}
+
 	return false
 }
 
