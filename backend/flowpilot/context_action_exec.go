@@ -200,7 +200,7 @@ func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...s
 	for _, inputName := range inputNames {
 		// Copy input values to the stash.
 		if result := aec.input.Get(inputName); result.Exists() {
-			if err := aec.stash.Set(JSONManagerPath(inputName), result.Value()); err != nil {
+			if err := aec.stash.Set(inputName, result.Value()); err != nil {
 				return err
 			}
 		}

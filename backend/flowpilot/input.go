@@ -214,11 +214,11 @@ func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInp
 	var inputValue *string
 	var stashValue *string
 
-	if v := inputData.Get(JSONManagerPath(i.name)); v.Exists() {
+	if v := inputData.Get(i.name); v.Exists() {
 		inputValue = &v.Str
 	}
 
-	if v := stashData.Get(JSONManagerPath(i.name)); v.Exists() {
+	if v := stashData.Get(i.name); v.Exists() {
 		stashValue = &v.Str
 	}
 
@@ -271,7 +271,7 @@ func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInp
 		}
 	}
 
-	if i.dataType == inputTypeString && i.allowedValues != nil {
+	if i.dataType == inputTypeString && inputValue != nil {
 		if i.allowedValues.isAllowed(*inputValue) {
 			return true
 		}

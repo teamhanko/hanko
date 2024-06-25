@@ -1,10 +1,12 @@
 package flowpilot
 
+import "github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+
 type payload interface {
-	JSONManager
+	jsonmanager.JSONManager
 }
 
 // newPayload creates a new instance of Payload with empty JSON data.
 func newPayload() payload {
-	return NewJSONManager()
+	return jsonmanager.NewJSONManager()
 }
