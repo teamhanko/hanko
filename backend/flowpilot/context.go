@@ -22,8 +22,6 @@ type flowContext interface {
 	GetFlowID() uuid.UUID
 	// GetPath returns the current path within the flow.
 	GetPath() string
-
-	GetFlowPath() flowPath
 	// Payload returns the JSONManager for accessing payload data.
 	Payload() payload
 	// Stash returns the JSONManager for accessing stash data.
@@ -139,18 +137,6 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
 	err := s.addScheduledStates(flow.initialNextStateNames...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
-	}
-
-	fp := newFlowPathFromName(flow.name)
-
-	subflow := flow.subFlows.getSubFlowFromStateName(flow.initialStateName)
-	if subflow != nil {
-		fp.add(subflow.getName())
-	}
-
-	err = s.Set("_.flowPath", fp.String())
-	if err != nil {
-		return nil, fmt.Errorf("failed to stash current flowPath: %w", err)
 	}
 
 	csrfToken, err := generateRandomString(32)

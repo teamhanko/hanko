@@ -271,19 +271,6 @@ func (aec *defaultActionExecutionContext) ContinueToPreviousState() error {
 		}
 	}
 
-	// If going to the previous state "crosses" subflow boundaries, update stashed flowPath accordingly, i.e. remove
-	// last subflow flowName so that going back and restarting the subflow again does not repeatedly amass the same
-	// subflow name in the flowPath.
-	subFlowToGoBackTo := aec.flow.subFlows.getSubFlowFromStateName(*lastStateName)
-	currentSubFlow := aec.flow.subFlows.getSubFlowFromStateName(aec.flowModel.CurrentState)
-	// If subFlowToGoBackTo is nil then we probably want to go back to a root flow state.
-	if subFlowToGoBackTo == nil && currentSubFlow != nil ||
-		(subFlowToGoBackTo != nil && currentSubFlow != nil) && subFlowToGoBackTo.getName() != currentSubFlow.getName() {
-		newPath := newFlowPathFromPath(aec.stash.Get("_.flowPath").String())
-		newPath.remove()
-		_ = aec.stash.Set("_.flowPath", newPath.String())
-	}
-
 	// Close the execution context with the last state.
 	return aec.closeExecutionContext(*lastStateName)
 }
@@ -343,10 +330,6 @@ func (aec *defaultActionExecutionContext) StartSubFlow(entryStateName StateName,
 		}
 	}
 
-	sf := currentState.getSubFlows().getSubFlowFromStateName(entryStateName)
-	newPath := newFlowPathFromPath(aec.stash.Get("_.flowPath").String())
-	newPath.add(sf.getName())
-	err = aec.stash.Set("_.flowPath", newPath.String())
 	if err != nil {
 		return fmt.Errorf("failed to stash new flowPath: %w", err)
 	}
@@ -375,18 +358,6 @@ func (aec *defaultActionExecutionContext) EndSubFlow() error {
 		if err != nil {
 			return fmt.Errorf("failed to add state to history: %w", err)
 		}
-	}
-
-	newPath := newFlowPathFromPath(aec.stash.Get("_.flowPath").String())
-	newPath.remove()
-
-	if scheduledSubflow := aec.flow.subFlows.getSubFlowFromStateName(*scheduledStateName); scheduledSubflow != nil {
-		newPath.add(scheduledSubflow.getName())
-	}
-
-	err = aec.stash.Set("_.flowPath", newPath.String())
-	if err != nil {
-		return fmt.Errorf("failed to stash new flowPath: %w", err)
 	}
 
 	// Close the execution context with the scheduled state.

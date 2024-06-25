@@ -5,7 +5,6 @@ import "fmt"
 type stateDetail interface {
 	getName() StateName
 	getFlow() stateActions
-	getFlowPath() flowPath
 	getSubFlows() SubFlows
 	getActionDetails() defaultActionDetails
 	getBeforeStateHooks() hookActions
@@ -17,7 +16,6 @@ type stateDetail interface {
 type defaultStateDetail struct {
 	name             StateName
 	flow             stateActions
-	flowPath         flowPath
 	subFlows         SubFlows
 	actionDetails    defaultActionDetails
 	beforeStateHooks hookActions
@@ -30,10 +28,6 @@ func (sd *defaultStateDetail) getName() StateName {
 
 func (sd *defaultStateDetail) getFlow() stateActions {
 	return sd.flow
-}
-
-func (sd *defaultStateDetail) getFlowPath() flowPath {
-	return sd.flowPath
 }
 
 func (sd *defaultStateDetail) getSubFlows() SubFlows {

@@ -104,8 +104,7 @@ func (fb *defaultFlowBuilderBase) addStateIfNotExists(stateNames ...StateName) {
 
 // scanFlowStates iterates through each state in the provided flow and associates relevant information, also it checks
 // for uniqueness of state names.
-func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath flowPath) error {
-	flowPath.add(flow.getName())
+func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 
 	// Iterate through states in the flow.
 	for stateName, actions := range flow.getFlow() {
@@ -135,7 +134,6 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath flowPath) e
 			ad := &defaultActionDetail{
 				action:   action,
 				flowName: flowName,
-				flowPath: flowPath,
 			}
 
 			actionDetails = append(actionDetails, ad)
@@ -147,7 +145,6 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath flowPath) e
 			actionDetails:    actionDetails,
 			flow:             f,
 			subFlows:         subFlows,
-			flowPath:         flowPath.copy(),
 			beforeStateHooks: beforeStateHooks,
 			afterStateHooks:  afterStateHooks,
 		}
@@ -158,7 +155,7 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, flowPath flowPath) e
 
 	// Recursively scan sub-flows.
 	for _, sf := range flow.getSubFlows() {
-		if err := fb.scanFlowStates(sf, flowPath.copy()); err != nil {
+		if err := fb.scanFlowStates(sf); err != nil {
 			return err
 		}
 	}
@@ -298,7 +295,7 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 
 	// Check if states were already scanned, if so, don't scan again
 	if len(fb.stateDetails) == 0 {
-		if err := fb.scanFlowStates(flow, newFlowPath()); err != nil {
+		if err := fb.scanFlowStates(flow); err != nil {
 			return nil, fmt.Errorf("failed to scan flow states: %w", err)
 		}
 	}
