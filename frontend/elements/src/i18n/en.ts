@@ -94,10 +94,10 @@ export const en: Translation = {
     optional: "optional",
     dontHaveAnAccount: "Don't have an account?",
     alreadyHaveAnAccount: "Already have an account?",
-    changeUsername: "Change Username",
-    setUsername: "Set Username",
-    changePassword: "Change Password",
-    setPassword: "Set Password",
+    changeUsername: "Change username",
+    setUsername: "Set username",
+    changePassword: "Change password",
+    setPassword: "Set password",
   },
   errors: {
     somethingWentWrong:
