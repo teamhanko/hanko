@@ -1,7 +1,7 @@
 package flowpilot
 
 type allowedValue interface {
-	toPublicAllowedValue() *ResponseAllowedValue
+	toResponseAllowedValue() *ResponseAllowedValue
 	getValue() interface{}
 }
 
@@ -14,8 +14,8 @@ func (av *defaultAllowedValue) getValue() interface{} {
 	return av.value
 }
 
-// toPublicAllowedValue converts the allowedValue to a ResponseAllowedValue for public exposure.
-func (av *defaultAllowedValue) toPublicAllowedValue() *ResponseAllowedValue {
+// toResponseAllowedValue converts the allowedValue to a ResponseAllowedValue for public exposure.
+func (av *defaultAllowedValue) toResponseAllowedValue() *ResponseAllowedValue {
 	return &ResponseAllowedValue{
 		Text:  av.text,
 		Value: av.value,
@@ -25,7 +25,7 @@ func (av *defaultAllowedValue) toPublicAllowedValue() *ResponseAllowedValue {
 type allowedValues interface {
 	isAllowed(value string) bool
 	add(allowedValue)
-	toPublicAllowedValues() *ResponseAllowedValues
+	toResponseAllowedValues() *ResponseAllowedValues
 	hasAny() bool
 	getValues() []string
 }
@@ -62,10 +62,10 @@ func (av *defaultAllowedValues) getValues() []string {
 	return values
 }
 
-func (av *defaultAllowedValues) toPublicAllowedValues() *ResponseAllowedValues {
+func (av *defaultAllowedValues) toResponseAllowedValues() *ResponseAllowedValues {
 	values := make(ResponseAllowedValues, len(*av))
 	for i, v := range *av {
-		values[i] = v.toPublicAllowedValue()
+		values[i] = v.toResponseAllowedValue()
 	}
 	return &values
 }

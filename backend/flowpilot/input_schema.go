@@ -20,7 +20,7 @@ type executionInputSchema interface {
 	getDataToPersist() readOnlyActionInput
 	validateInputData(stateName StateName, stash stash) bool
 	forInitializationContext() initializationInputSchema
-	toResponse(stateName StateName) ResponseInputs
+	toResponseInputs(stateName StateName) ResponseInputs
 }
 
 // inputs represents a collection of Input instances.
@@ -147,8 +147,8 @@ func (s *defaultSchema) getOutputData() readOnlyActionInput {
 	return s.outputData
 }
 
-// toPublicSchema converts defaultSchema to ResponseInputs for public exposure.
-func (s *defaultSchema) toResponse(stateName StateName) ResponseInputs {
+// toResponseInputs converts defaultSchema to ResponseInputs for public exposure.
+func (s *defaultSchema) toResponseInputs(stateName StateName) ResponseInputs {
 	var publicSchema = make(ResponseInputs)
 
 	for _, input := range s.inputs {
@@ -167,7 +167,7 @@ func (s *defaultSchema) toResponse(stateName StateName) ResponseInputs {
 			input.setValue(inputValue.Value())
 		}
 
-		publicSchema[input.getName()] = input.toPublicInput()
+		publicSchema[input.getName()] = input.toResponseInput()
 	}
 
 	return publicSchema
