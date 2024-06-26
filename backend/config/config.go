@@ -741,7 +741,7 @@ type Passkey struct {
 	AcquireOnLogin        string `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=always,enum=always,enum=conditional,enum=never"`
 	UserVerification      string `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
 	AttestationPreference string `yaml:"attestation_preference" json:"attestation_preference,omitempty" koanf:"attestation_preference" split_words:"true" jsonschema:"default=direct,enum=direct,enum=indirect,enum=none"`
-	Limit                 int    `yaml:"limit" json:"limit" koanf:"limit,omitempty" jsonschema:"default=100"`
+	Limit                 int    `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
 }
 
 type EmailDelivery struct {

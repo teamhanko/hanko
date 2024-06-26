@@ -515,10 +515,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "limit"
-      ]
+      "type": "object"
     },
     "Password": {
       "properties": {
