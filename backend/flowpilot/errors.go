@@ -14,7 +14,7 @@ type flowpilotError interface {
 	Code() string
 	Message() string
 
-	toPublicError(debug bool) *ResponseError
+	toResponseError(debug bool) *ResponseError
 }
 
 // FlowError is an interface representing flow-related errors.
@@ -60,8 +60,8 @@ func (e *defaultError) Error() string {
 	return e.errorText
 }
 
-// toPublicError converts the error to a ResponseError for public exposure.
-func (e *defaultError) toPublicError(debug bool) *ResponseError {
+// toResponseError converts the error to a ResponseError for public exposure.
+func (e *defaultError) toResponseError(debug bool) *ResponseError {
 	publicError := &ResponseError{
 		Code:    e.Code(),
 		Message: e.Message(),

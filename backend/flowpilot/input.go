@@ -36,7 +36,7 @@ type Input interface {
 	shouldPreserve() bool
 	isIncludedOnState(stateName StateName) bool
 	validate(stateName StateName, inputData readOnlyActionInput, stashData stash) bool
-	toPublicInput() *ResponseInput
+	toResponseInput() *ResponseInput
 }
 
 // defaultExtraInputOptions holds additional input field options.
@@ -283,17 +283,17 @@ func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInp
 	return true
 }
 
-// toPublicInput converts the defaultInput to a ResponseInput for public exposure.
-func (i *defaultInput) toPublicInput() *ResponseInput {
+// toResponseInput converts the defaultInput to a ResponseInput for public exposure.
+func (i *defaultInput) toResponseInput() *ResponseInput {
 	var e *ResponseError
 	var av *ResponseAllowedValues
 
 	if i.error != nil {
-		e = i.error.toPublicError(true)
+		e = i.error.toResponseError(true)
 	}
 
 	if i.allowedValues != nil && i.allowedValues.hasAny() {
-		av = i.allowedValues.toPublicAllowedValues()
+		av = i.allowedValues.toResponseAllowedValues()
 	}
 
 	return &ResponseInput{

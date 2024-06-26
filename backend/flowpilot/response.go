@@ -84,7 +84,7 @@ func newFlowResultFromResponse(response Response) flowResult {
 
 // newFlowResultFromError creates a flowResult from a FlowError.
 func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) flowResult {
-	e := flowError.toPublicError(debug)
+	e := flowError.toResponseError(debug)
 	status := flowError.Status()
 
 	response := Response{
@@ -152,7 +152,7 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 	// Include flow error if present.
 	if er.flowError != nil {
 		status := er.flowError.Status()
-		e := er.flowError.toPublicError(debug)
+		e := er.flowError.toResponseError(debug)
 
 		resp.Status = status
 		resp.Error = e
@@ -165,7 +165,7 @@ func (er *executionResult) generateLinks() ResponseLinks {
 	var links ResponseLinks
 
 	for _, link := range er.links {
-		l := link.toPublicLink()
+		l := link.toResponseLink()
 		links = append(links, l)
 	}
 
@@ -200,7 +200,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 				continue
 			}
 
-			inputSchemaResponse := inputSchema.toResponse(er.nextStateName)
+			inputSchemaResponse := inputSchema.toResponseInputs(er.nextStateName)
 
 			// Create the action instance.
 			action := ResponseAction{
