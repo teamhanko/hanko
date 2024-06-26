@@ -1,4 +1,4 @@
-package passcode
+package credential_usage
 
 import (
 	"fmt"

@@ -6,16 +6,11 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type DetermineOnboardingSteps struct {
+type ScheduleOnboardingStates struct {
 	shared.Action
 }
 
-func (h DetermineOnboardingSteps) Execute(c flowpilot.HookExecutionContext) error {
-	states, _ := h.determineOnboardingStates(c)
-	return c.ScheduleStates(states...)
-}
-
-func (h DetermineOnboardingSteps) determineOnboardingStates(c flowpilot.HookExecutionContext) ([]flowpilot.StateName, error) {
+func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
 	userHasPassword := deps.Cfg.Password.Enabled && c.Stash().Get(shared.StashPathUserHasPassword).Bool()
@@ -24,20 +19,20 @@ func (h DetermineOnboardingSteps) determineOnboardingStates(c flowpilot.HookExec
 	userHasEmail := deps.Cfg.Email.Enabled && c.Stash().Get(shared.StashPathUserHasEmails).Bool()
 
 	if err := c.Stash().Set(shared.StashPathUserHasPassword, userHasPassword); err != nil {
-		return nil, fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
 	}
 
 	if err := c.Stash().Set(shared.StashPathUserHasWebauthnCredential, userHasPasskey); err != nil {
-		return nil, fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
+		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c, userHasUsername, userHasEmail)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c, userHasPasskey, userHasPassword)
 
-	return append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...), nil
+	return c.ScheduleStates(append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...)...)
 }
 
-func (h DetermineOnboardingSteps) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
+func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
 	deps := h.GetDeps(c)
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
@@ -98,7 +93,7 @@ func (h DetermineOnboardingSteps) determineCredentialOnboardingStates(c flowpilo
 	return result
 }
 
-func (h DetermineOnboardingSteps) determineUserDetailOnboardingStates(c flowpilot.HookExecutionContext, userHasUsername, userHasEmail bool) []flowpilot.StateName {
+func (h ScheduleOnboardingStates) determineUserDetailOnboardingStates(c flowpilot.HookExecutionContext, userHasUsername, userHasEmail bool) []flowpilot.StateName {
 	deps := h.GetDeps(c)
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)

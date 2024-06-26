@@ -15,27 +15,42 @@ type defaultActionExecutionContext struct {
 	links            []Link           // TODO:
 	isSuspended      bool
 	skipWriteHistory bool
+	rewound          bool
 
 	*defaultFlowContext // Embedding the defaultFlowContext for common context fields.
 }
 
 // saveNextState updates the flow's state and stores data to the database.
 func (aec *defaultActionExecutionContext) saveNextState(executionResult *executionResult) error {
-	stashData := aec.stash.String()
-	newVersion := aec.flowModel.Version + 1
-	previousState := aec.flowModel.CurrentState
+	var err error
+	var previousState StateName
+
+	if aec.rewound {
+		lastState, _, _, _ := aec.stash.getLastStateFromHistory()
+		if lastState != nil {
+			previousState = *lastState
+		}
+	} else {
+		if aec.flowModel.CurrentState != executionResult.nextStateName {
+			previousState = aec.flowModel.CurrentState
+		} else {
+			previousState = *aec.flowModel.PreviousState
+		}
+	}
 
 	csrfToken, err := generateRandomString(32)
 	if err != nil {
 		return fmt.Errorf("failed to generate csrf token: %w", err)
 	}
 
+	newVersion := aec.flowModel.Version + 1
+
 	// Prepare parameters for updating the flow in the database.
 	flowUpdate := flowUpdateParam{
 		flowID:        aec.flowModel.ID,
 		nextState:     executionResult.nextStateName,
 		previousState: previousState,
-		stashData:     stashData,
+		stashData:     aec.stash.String(),
 		version:       newVersion,
 		csrfToken:     csrfToken,
 		expiresAt:     aec.flowModel.ExpiresAt,
@@ -43,7 +58,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult *executi
 	}
 
 	// Update the flow model in the database.
-	if _, err := aec.dbw.updateFlowWithParam(flowUpdate); err != nil {
+	if _, err = aec.dbw.updateFlowWithParam(flowUpdate); err != nil {
 		return fmt.Errorf("failed to store updated flow: %w", err)
 	}
 
@@ -66,33 +81,72 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult *executi
 	}
 
 	// Create a new Transition in the database.
-	if _, err := aec.dbw.createTransitionWithParam(transitionCreation); err != nil {
+	if _, err = aec.dbw.createTransitionWithParam(transitionCreation); err != nil {
 		return fmt.Errorf("failed to store a new transition: %w", err)
 	}
 
 	return nil
 }
 
-func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName StateName) error {
+func (aec *defaultActionExecutionContext) executeAllHooks(nextStateName *StateName) (*StateName, error) {
+	// Helper function to execute after flow hooks and handle state progression
+	executeAfterFlowHooks := func() (*StateName, error) {
+		// Execute after flow hooks
+		if err := aec.executeAfterFlowHooks(nextStateName); err != nil {
+			return nil, fmt.Errorf("error while executing after flow hook actions: %w", err)
+		}
+
+		// Check if next state is nil or empty and try to get the last scheduled state
+		if nextStateName == nil || len(*nextStateName) == 0 {
+			if nextState, _ := aec.stash.removeLastScheduledState(); nextState == nil {
+				return nil, ErrorFlowDiscontinuity.Wrap(errors.New("can't progress the flow because no scheduled states were available"))
+			} else {
+				nextStateName = nextState
+			}
+		}
+
+		return nextStateName, nil
+	}
+
+	var err error
+
+	// Execute the helper function to handle after flow hooks and state progression
+	if nextStateName, err = executeAfterFlowHooks(); err != nil {
+		return nil, err
+	}
+
+	// Execute after state hooks
+	if err = aec.executeAfterStateHooks(); err != nil {
+		return nil, fmt.Errorf("error while executing after state hook actions: %w", err)
+	}
+
+	// Execute after each action hooks
+	if err = aec.executeAfterEachActionHooks(); err != nil {
+		return nil, fmt.Errorf("error while executing after each action hook actions: %w", err)
+	}
+
+	// Execute before state hooks for the next state
+	if err = aec.executeBeforeStateHooks(*nextStateName); err != nil {
+		return nil, fmt.Errorf("error while executing before state hook actions: %w", err)
+	}
+
+	// Return the next state name
+	return nextStateName, nil
+}
+
+func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName *StateName) error {
+	var err error
+
 	if aec.executionResult != nil {
 		return errors.New("execution context is closed already")
 	}
 
-	if err := aec.executeAfterStateHooks(); err != nil {
-		return fmt.Errorf("error while executing after hook actions: %w", err)
+	ns, err := aec.executeAllHooks(nextStateName)
+	if err != nil {
+		return fmt.Errorf("hook execution error: %w", err)
 	}
 
-	if err := aec.executeAfterEachActionHooks(); err != nil {
-		return fmt.Errorf("error while executing after each action hook actions: %w", err)
-	}
-
-	if err := aec.executeBeforeStateHooks(nextStateName); err != nil {
-		return fmt.Errorf("error while executing before hook actions: %w", err)
-	}
-
-	if err := aec.executeAfterFlowHooks(); err != nil {
-		return fmt.Errorf("error while executing after flow hook actions: %w", err)
-	}
+	nextStateName = ns
 
 	actionResult := &actionExecutionResult{
 		actionName:  aec.actionName,
@@ -104,13 +158,13 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName St
 		flowError:             aec.flowError,
 		actionExecutionResult: actionResult,
 		links:                 aec.links,
-		nextStateName:         nextStateName,
+		nextStateName:         *nextStateName,
 	}
 
 	aec.executionResult = result
 
 	// Save the next state and transition data.
-	if err := aec.saveNextState(result); err != nil {
+	if err = aec.saveNextState(result); err != nil {
 		return fmt.Errorf("failed to save the transition data: %w", err)
 	}
 
@@ -141,14 +195,29 @@ func (aec *defaultActionExecutionContext) executeAfterStateHooks() error {
 	return nil
 }
 
-func (aec *defaultActionExecutionContext) executeAfterFlowHooks() error {
-	sd, _ := aec.flow.getState(aec.flowModel.CurrentState)
-	flowName := sd.getFlowName()
-	if actions := aec.flow.afterFlowHooks[flowName]; actions != nil {
-		for _, hook := range actions.reverse() {
-			if err := hook.Execute(aec); err != nil {
-				return fmt.Errorf("failed to execute hook after flow '%s': %w", flowName, err)
-			}
+func (aec *defaultActionExecutionContext) executeAfterFlowHooks(nextState *StateName) error {
+	sdc, _ := aec.flow.getState(aec.flowModel.CurrentState)
+	currentFlowName := sdc.getFlowName()
+
+	shouldExecute := nextState == nil || len(*nextState) == 0
+	if !shouldExecute && nextState != nil && len(*nextState) > 0 {
+		sdn, _ := aec.flow.getState(*nextState)
+		nextFlowName := sdn.getFlowName()
+		shouldExecute = currentFlowName != nextFlowName
+	}
+
+	if !shouldExecute {
+		return nil
+	}
+
+	actions := aec.flow.afterFlowHooks[currentFlowName]
+	if actions == nil {
+		return nil
+	}
+
+	for _, hook := range actions.reverse() {
+		if err := hook.Execute(aec); err != nil {
+			return fmt.Errorf("failed to execute hook after flow '%s': %w", currentFlowName, err)
 		}
 	}
 
@@ -196,7 +265,6 @@ func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...s
 				return err
 			}
 		}
-
 	}
 
 	return nil
@@ -264,13 +332,14 @@ func (aec *defaultActionExecutionContext) Back() error {
 		}
 	}
 
+	aec.rewound = true
+
 	// Close the execution context with the last state.
-	return aec.closeExecutionContext(*lastStateName)
+	return aec.closeExecutionContext(lastStateName)
 }
 
 func (aec *defaultActionExecutionContext) Continue(stateNames ...StateName) error {
-	var nextState StateName
-
+	var nextState *StateName
 	currentState := aec.flowModel.CurrentState
 
 	for _, stateName := range stateNames {
@@ -280,17 +349,16 @@ func (aec *defaultActionExecutionContext) Continue(stateNames ...StateName) erro
 	}
 
 	if len(stateNames) == 1 {
-		nextState = stateNames[0]
+		nextState = &stateNames[0]
 
 		// Add the current state to the execution history.
-		if currentState != nextState && !aec.skipWriteHistory {
+		if currentState != *nextState && !aec.skipWriteHistory {
 			if err := aec.stash.addStateToHistory(currentState, nil, nil); err != nil {
 				return fmt.Errorf("failed to add the current state to the history: %w", err)
 			}
 		}
-
 	} else if len(stateNames) > 1 {
-		nextState = stateNames[0]
+		nextState = &stateNames[0]
 		scheduledStates := stateNames[1:]
 
 		// Add the scheduled states to the stash.
@@ -301,6 +369,7 @@ func (aec *defaultActionExecutionContext) Continue(stateNames ...StateName) erro
 		if !aec.skipWriteHistory {
 			statesToBeScheduled := stateNames[1:]
 			numOfScheduledStated := int64(len(statesToBeScheduled))
+
 			// Add the current state to the execution history.
 			err := aec.stash.addStateToHistory(currentState, nil, &numOfScheduledStated)
 			if err != nil {
@@ -314,10 +383,7 @@ func (aec *defaultActionExecutionContext) Continue(stateNames ...StateName) erro
 			return fmt.Errorf("failed to end sub-flow: %w", err)
 		}
 
-		// If no scheduled state is available, set it to the end state.
-		if scheduledState == nil {
-			return ErrorFlowDiscontinuity.Wrap(errors.New("can't progress the flow, because no scheduled states were available after the sub-flow ended"))
-		} else if !aec.skipWriteHistory {
+		if !aec.skipWriteHistory && scheduledState != nil {
 			// Add the current state to the execution history.
 			err = aec.stash.addStateToHistory(currentState, scheduledState, nil)
 			if err != nil {
@@ -325,7 +391,7 @@ func (aec *defaultActionExecutionContext) Continue(stateNames ...StateName) erro
 			}
 		}
 
-		nextState = *scheduledState
+		nextState = scheduledState
 	}
 
 	return aec.closeExecutionContext(nextState)
@@ -340,12 +406,7 @@ func (aec *defaultActionExecutionContext) ScheduleStates(stateNames ...StateName
 	if err := aec.stash.addScheduledStates(stateNames...); err != nil {
 		return fmt.Errorf("failed to stash scheduled states: %w", err)
 	}
-	numOfScheduledStated := int64(len(stateNames))
-	// Add the current state to the execution history.
-	err := aec.stash.addStateToHistory(stateNames[0], nil, &numOfScheduledStated)
-	if err != nil {
-		return fmt.Errorf("failed to add state to history: %w", err)
-	}
+
 	return nil
 }
 

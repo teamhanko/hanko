@@ -5,7 +5,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/passcode"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -16,15 +15,6 @@ import (
 
 var CapabilitiesSubFlow = flowpilot.NewSubFlow(shared.FlowCapabilities).
 	State(shared.StatePreflight, capabilities.RegisterClientCapabilities{}).
-	MustBuild()
-
-var PasscodeSubFlow = flowpilot.NewSubFlow(shared.FlowPasscode).
-	State(shared.StatePasscodeConfirmation,
-		passcode.VerifyPasscode{},
-		passcode.ReSendPasscode{},
-		shared.Back{}).
-	BeforeState(shared.StatePasscodeConfirmation,
-		passcode.SendPasscode{}).
 	MustBuild()
 
 var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
@@ -41,12 +31,11 @@ var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
 	State(shared.StateLoginPasswordRecovery,
 		credential_usage.PasswordRecovery{}).
 	State(shared.StatePasscodeConfirmation,
-		passcode.VerifyPasscode{},
-		passcode.ReSendPasscode{},
+		credential_usage.VerifyPasscode{},
+		credential_usage.ReSendPasscode{},
 		shared.Back{}).
 	BeforeState(shared.StatePasscodeConfirmation,
-		passcode.SendPasscode{}).
-	SubFlows(PasscodeSubFlow).
+		credential_usage.SendPasscode{}).
 	MustBuild()
 
 var CredentialOnboardingSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialOnboarding).
@@ -75,7 +64,6 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 	State(shared.StateOnboardingEmail,
 		user_details.EmailAddressSet{},
 		user_details.SkipEmail{}).
-	SubFlows(PasscodeSubFlow).
 	MustBuild()
 
 var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
@@ -105,8 +93,7 @@ var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 		shared.EmailPersistVerifiedStatus{}).
 	AfterState(shared.StatePasswordCreation,
 		shared.PasswordSave{}).
-	// AfterFlow(shared.FlowCredentialUsage, login.DetermineOnboardingSteps{}).
-	AfterFlow(shared.FlowPasscode, login.DetermineOnboardingSteps{}).
+	AfterFlow(shared.FlowCredentialUsage, login.ScheduleOnboardingStates{}).
 	SubFlows(
 		CapabilitiesSubFlow,
 		CredentialUsageSubFlow,
@@ -131,7 +118,7 @@ var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 		shared.IssueSession{}).
 	SubFlows(
 		CapabilitiesSubFlow,
-		PasscodeSubFlow,
+		CredentialUsageSubFlow,
 		CredentialOnboardingSubFlow,
 		UserDetailsSubFlow).
 	TTL(10 * time.Minute).
@@ -163,6 +150,6 @@ var ProfileFlow = flowpilot.NewFlow(shared.FlowProfile).
 	AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 	SubFlows(
 		CapabilitiesSubFlow,
-		PasscodeSubFlow).
+		CredentialUsageSubFlow).
 	TTL(10 * time.Minute).
 	Debug(true)
