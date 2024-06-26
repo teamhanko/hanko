@@ -33,7 +33,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
@@ -66,7 +66,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if deps.Cfg.Email.RequireVerification {
-		return c.StartSubFlow(shared.StatePasscodeConfirmation)
+		return c.Continue(shared.StatePasscodeConfirmation)
 	}
 
 	err = c.DeleteStateHistory(true)
@@ -74,5 +74,5 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

@@ -39,12 +39,12 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	passwordCredential, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userModel.ID)
@@ -80,5 +80,5 @@ func (a PasswordSet) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.PasswordCredential = passwordCredential
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }

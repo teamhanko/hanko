@@ -24,7 +24,7 @@ func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	webauthnAvailable := c.Input().Get("webauthn_available").Bool()
@@ -40,5 +40,5 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 		return err
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

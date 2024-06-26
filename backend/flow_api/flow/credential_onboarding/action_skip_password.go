@@ -20,6 +20,8 @@ func (a SkipPassword) GetDescription() string {
 
 func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
+	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
+	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
 	if !deps.Cfg.Password.Optional {
 		c.SuspendAction()
@@ -28,9 +30,6 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	if c.IsPreviousState(shared.StateCredentialOnboardingChooser) {
 		c.SuspendAction()
 	}
-
-	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
-	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
 	if c.IsPreviousState(shared.StateOnboardingCreatePasskey) &&
 		!c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool() &&
@@ -53,10 +52,10 @@ func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
 	if a.acquirePasskey(c, "conditional") &&
 		!c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool() &&
 		c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
-		return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
+		return c.Continue(shared.StateOnboardingCreatePasskey)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }
 
 func (a SkipPassword) acquirePasskey(c flowpilot.Context, acquireType string) bool {

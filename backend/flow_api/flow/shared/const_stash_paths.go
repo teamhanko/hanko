@@ -11,6 +11,8 @@ const (
 	StashPathSkipUserCreation                      string = "skip_user_creation"
 	StashPathUserHasPassword                       string = "user_has_password"
 	StashPathUserHasWebauthnCredential             string = "user_has_webauthn_credential"
+	StashPathUserHasUsername                       string = "user_has_username"
+	StashPathUserHasEmails                         string = "user_has_emails"
 	StashPathUserID                                string = "user_id"
 	StashPathUsername                              string = "username"
 	StashPathWebauthnAvailable                     string = "webauthn_available"

@@ -42,7 +42,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 	newPassword := c.Input().Get("new_password").String()
 
 	if !c.Stash().Get(shared.StashPathUserID).Exists() {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("user_id does not exist")))
+		return c.Error(flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("user_id does not exist")))
 	}
 
 	authUserID := c.Stash().Get(shared.StashPathUserID).String()
@@ -52,7 +52,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {
 			c.Input().SetError("password", flowpilot.ErrorValueInvalid)
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
+			return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("could not recover password: %w", err)
@@ -71,10 +71,15 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
+	err = c.Stash().Set(shared.StashPathUserHasPassword, true)
+	if err != nil {
+		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	}
+
 	err = c.DeleteStateHistory(true)
 	if err != nil {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

@@ -46,7 +46,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 			if err != nil {
 				return fmt.Errorf("failed to set a value for resend_after to the payload: %w", err)
 			}
-			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
+			return c.Error(shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
 		}
 	}
 
@@ -66,5 +66,5 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set passcode_id to stash: %w", err)
 	}
 
-	return c.ContinueFlow(c.GetCurrentState())
+	return c.Continue(c.GetCurrentState())
 }

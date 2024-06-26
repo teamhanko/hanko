@@ -33,7 +33,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	if !c.Stash().Get(shared.StashPathWebauthnSessionDataID).Exists() {
@@ -62,7 +62,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
-			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasskeyInvalid.Wrap(err))
+			return c.Error(shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify attestation response: %w", err)
@@ -83,5 +83,5 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

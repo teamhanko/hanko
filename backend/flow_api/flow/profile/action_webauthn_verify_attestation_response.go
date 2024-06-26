@@ -36,12 +36,12 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	if !c.Stash().Get(shared.StashPathWebauthnSessionDataID).Exists() {
@@ -53,9 +53,8 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to parse webauthn_session_data_id: %w", err)
 	}
 
-	primaryEmailModel := userModel.Emails.GetPrimary()
 	var primaryEmailAddress string
-	if primaryEmailModel != nil {
+	if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
 		primaryEmailAddress = primaryEmailModel.Address
 	}
 
@@ -71,7 +70,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
-			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasskeyInvalid.Wrap(err))
+			return c.Error(shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify attestation response: %w", err)
@@ -90,5 +89,5 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to set user_id to the stash: %w", err)
 	}
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }

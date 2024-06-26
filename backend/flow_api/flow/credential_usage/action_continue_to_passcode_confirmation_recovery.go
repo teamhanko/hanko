@@ -32,8 +32,8 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 	}
 
 	if c.Stash().Get(shared.StashPathUserHasPassword).Bool() {
-		return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
+		return c.Continue(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
 	}
 
-	return c.StartSubFlow(shared.StatePasscodeConfirmation)
+	return c.Continue(shared.StatePasscodeConfirmation)
 }

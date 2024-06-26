@@ -12,7 +12,6 @@ type defaultFlowContext struct {
 	flow      defaultFlow   // The associated defaultFlow instance.
 	dbw       flowDBWrapper // Wrapped FlowDB instance with additional functionality.
 	flowModel *FlowModel    // The current FlowModel.
-	csrfToken string
 }
 
 // GetFlowID returns the unique ID of the current flow.

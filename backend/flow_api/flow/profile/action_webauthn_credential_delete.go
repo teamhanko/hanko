@@ -33,17 +33,17 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	webauthnCredentialModel := userModel.GetWebauthnCredentialById(c.Input().Get("passkey_id").String())
 	if webauthnCredentialModel == nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorNotFound)
+		return c.Error(shared.ErrorNotFound)
 	}
 
 	err := deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Delete(*webauthnCredentialModel)
@@ -66,7 +66,7 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.WebauthnCredentials.Delete(webauthnCredentialModel.ID)
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }
 
 func (a WebauthnCredentialDelete) mustSuspend(c flowpilot.Context) bool {

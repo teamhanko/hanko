@@ -37,7 +37,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	if !c.Stash().Get(shared.StashPathWebauthnSessionDataID).Exists() {
@@ -69,7 +69,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 				return fmt.Errorf("could not create audit log: %w", err)
 			}
 
-			return c.ContinueFlowWithError(shared.StateLoginInit, shared.ErrorPasskeyInvalid.Wrap(err))
+			return c.Error(shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify assertion response: %w", err)
@@ -90,5 +90,5 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	if err != nil {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
-	return c.ContinueFlow(shared.StateSuccess)
+	return c.Continue(shared.StateSuccess)
 }

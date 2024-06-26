@@ -31,7 +31,7 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	if !c.Stash().Get(shared.StashPathUserID).Exists() {
@@ -72,5 +72,5 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		return err
 	}
 
-	return c.ContinueFlow(shared.StateOnboardingVerifyPasskeyAttestation)
+	return c.Continue(shared.StateOnboardingVerifyPasskeyAttestation)
 }

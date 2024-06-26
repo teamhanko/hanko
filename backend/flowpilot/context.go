@@ -70,23 +70,19 @@ type actionExecutionContext interface {
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
-
+	SetFlowError(FlowError)
 	DeleteStateHistory(skipWriteHistory bool) error
 }
 
 // actionExecutionContinuationContext represents the context within an action continuation.
 type actionExecutionContinuationContext interface {
 	actionExecutionContext
-	// ContinueFlow continues the flow execution to the specified next state.
-	ContinueFlow(nextStateName StateName) error
-	// ContinueFlowWithError continues the flow execution to the specified next state with an error.
-	ContinueFlowWithError(nextStateName StateName, flowErr FlowError) error
-	// StartSubFlow starts a sub-flow and continues the flow execution to the specified next states after the sub-flow has been ended.
-	StartSubFlow(initStateName StateName, nextStateNames ...StateName) error
-	// EndSubFlow ends the sub-flow and continues the flow execution to the previously specified next states.
-	EndSubFlow() error
-	// ContinueToPreviousState rewinds the flow back to the previous state.
-	ContinueToPreviousState() error
+
+	Continue(stateNames ...StateName) error
+	// Error continues the flow execution to the specified next state with an error.
+	Error(flowErr FlowError) error
+	// Back rewinds the flow back to the previous state.
+	Back() error
 }
 
 type actionSuspender interface {
@@ -113,9 +109,10 @@ type ExecutionContext interface {
 type HookExecutionContext interface {
 	context
 	actionExecutionContext
-	SetFlowError(FlowError)
+
 	GetFlowError() FlowError
 	AddLink(...Link)
+	ScheduleStates(...StateName) error
 }
 
 type BeforeEachActionExecutionContext interface {
@@ -226,11 +223,6 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
-	csrfToken, err := generateRandomString(32)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate csrf token: %w", err)
-	}
-
 	// Create a defaultFlowContext instance.
 	fc := &defaultFlowContext{
 		flow:      flow,
@@ -238,7 +230,6 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		flowModel: flowModel,
 		stash:     s,
 		payload:   p,
-		csrfToken: csrfToken,
 	}
 
 	state, err := flow.getState(flowModel.CurrentState)
