@@ -53,9 +53,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
 
-	userModel.Username = nulls.NewString(username)
-
-	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(userModel.Username.String)
+	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
@@ -64,6 +62,8 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
 		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
 	}
+
+	userModel.Username = nulls.NewString(username)
 
 	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
 	if err != nil {
