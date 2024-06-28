@@ -30,5 +30,5 @@ func (a SkipUsername) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

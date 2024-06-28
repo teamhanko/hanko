@@ -21,5 +21,5 @@ func (a Back) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a Back) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueToPreviousState()
+	return c.Back()
 }

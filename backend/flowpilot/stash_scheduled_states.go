@@ -8,6 +8,7 @@ import (
 type scheduledStatesStash interface {
 	addScheduledStates(scheduledStateNames ...StateName) error
 	removeLastScheduledState() (*StateName, error)
+	getLastScheduledState() *StateName
 }
 
 type defaultScheduledStatesStash struct {
@@ -33,6 +34,16 @@ func (s *defaultScheduledStatesStash) addScheduledStates(scheduledStateNames ...
 	}
 
 	return nil
+}
+
+func (s *defaultScheduledStatesStash) getLastScheduledState() *StateName {
+	// retrieve the previously scheduled states form the stash
+	stack := s.Get("_.scheduled_states").Array()
+	if len(stack) == 0 {
+		return nil
+	}
+	nextStateName := StateName(stack[0].String())
+	return &nextStateName
 }
 
 // removeLastScheduledState removes and returns the last scheduled stateDetail if present.

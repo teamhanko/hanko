@@ -63,7 +63,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	email := c.Input().Get("email").String()
@@ -72,7 +72,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	// check that username only contains allowed characters
 	if !utf8.ValidString(username) {
 		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	if username != "" {
@@ -84,7 +84,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 		if userModel != nil {
 			c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
 	}
 
@@ -100,7 +100,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 				_ = c.Payload().Set("redirect_url", authUrl)
 
-				return c.ContinueFlow(shared.StateThirdParty)
+				return c.Continue(shared.StateThirdParty)
 			}
 		}
 
@@ -115,7 +115,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			// E-mail address already exists
 			if !deps.Cfg.Email.RequireVerification {
 				c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
-				return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+				return c.Error(flowpilot.ErrorFormDataInvalid)
 			} else {
 				err = c.CopyInputValuesToStash("email")
 				if err != nil {
@@ -127,7 +127,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 				}
 
-				return c.StartSubFlow(shared.StatePasscodeConfirmation)
+				return c.Continue(shared.StatePasscodeConfirmation)
 			}
 		}
 	}
@@ -155,12 +155,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 	states := a.generateRegistrationStates(c)
 
-	if len(states) == 0 {
-		return c.ContinueFlow(shared.StateSuccess)
-	}
-
-	states = append(states, shared.StateSuccess)
-	return c.StartSubFlow(states[0], states[1:]...)
+	return c.Continue(append(states, shared.StateSuccess)...)
 }
 
 func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {

@@ -52,23 +52,23 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailId := uuid.FromStringOrNil(c.Input().Get("email_id").String())
 	emailModel := userModel.GetEmailById(emailId)
 
 	if emailModel == nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorNotFound)
+		return c.Error(shared.ErrorNotFound)
 	}
 
 	if emailModel.IsPrimary() {
-		return c.ContinueFlow(shared.StateProfileInit)
+		return c.Continue(shared.StateProfileInit)
 	}
 
 	var primaryEmail *models.PrimaryEmail
@@ -105,5 +105,5 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.SetPrimaryEmail(primaryEmail)
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }

@@ -34,12 +34,12 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	newEmailAddress := c.Input().Get("email").String()
@@ -52,7 +52,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 	if existingEmailModel != nil {
 		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Email.RequireVerification {
 			c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
 		} else {
 			err = c.CopyInputValuesToStash("email")
 			if err != nil {
@@ -69,7 +69,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
 
-			return c.StartSubFlow(shared.StatePasscodeConfirmation)
+			return c.Continue(shared.StatePasscodeConfirmation)
 		}
 	} else if deps.Cfg.Email.RequireVerification {
 		err = c.CopyInputValuesToStash("email")
@@ -87,7 +87,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 
-		return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateProfileInit)
+		return c.Continue(shared.StatePasscodeConfirmation, shared.StateProfileInit)
 	} else {
 		emailModel := models.NewEmail(&userModel.ID, newEmailAddress)
 
@@ -122,6 +122,6 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		userModel.Emails = append(userModel.Emails, *emailModel)
 
-		return c.ContinueFlow(shared.StateProfileInit)
+		return c.Continue(shared.StateProfileInit)
 	}
 }

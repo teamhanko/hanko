@@ -33,5 +33,5 @@ func (a SkipCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionCont
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

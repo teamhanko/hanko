@@ -34,7 +34,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	primaryEmailModel := userModel.Emails.GetPrimary()
@@ -69,5 +69,5 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	return c.ContinueFlow(shared.StateProfileWebauthnCredentialVerification)
+	return c.Continue(shared.StateProfileWebauthnCredentialVerification)
 }

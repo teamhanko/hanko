@@ -57,7 +57,6 @@ type ResponseLink struct {
 // Response represents the response of an action execution.
 type Response struct {
 	Name      StateName       `json:"name"`
-	FlowPath  *string         `json:"flow_path,omitempty"`
 	Status    int             `json:"status"`
 	Payload   interface{}     `json:"payload,omitempty"`
 	CSRFToken string          `json:"csrf_token"`
@@ -144,11 +143,6 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 		CSRFToken: fc.flowModel.CSRFToken,
 	}
 
-	if debug {
-		fp := fc.GetFlowPath().String()
-		resp.FlowPath = &fp
-	}
-
 	// Include flow error if present.
 	if er.flowError != nil {
 		status := er.flowError.Status()
@@ -220,12 +214,10 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 // getInputSchema returns the inputSchema for a given method name.
 func (er *executionResult) getInputSchema(fc *defaultFlowContext, actionDetail actionDetail) executionInputSchema {
 	actionName := actionDetail.getAction().GetName()
-	actionFlowPath := actionDetail.getFlowPath().String()
-	currentFlowPath := fc.GetFlowPath().String()
 
 	if er.actionExecutionResult == nil ||
 		actionName != er.actionExecutionResult.actionName ||
-		actionFlowPath != currentFlowPath || er.nextStateName != fc.flowModel.CurrentState {
+		er.nextStateName != fc.flowModel.CurrentState {
 		return newSchema()
 	}
 	return er.actionExecutionResult.inputSchema

@@ -30,7 +30,7 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	newPassword := c.Input().Get("new_password").String()
@@ -38,14 +38,14 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	if utf8.RuneCountInString(newPassword) < deps.Cfg.Password.MinLength {
 		c.Input().SetError("new_password", flowpilot.ErrorValueInvalid)
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword(newPasswordBytes, 12)
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrPasswordTooLong) {
 			c.Input().SetError("new_password", flowpilot.ErrorValueTooLong)
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
@@ -65,5 +65,5 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

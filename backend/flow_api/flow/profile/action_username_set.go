@@ -37,12 +37,12 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	username := c.Input().Get("username").String()
@@ -50,7 +50,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	// check that username only contains allowed characters
 	if !utf8.ValidString(username) {
 		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
@@ -60,7 +60,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 
 	if duplicateUser != nil && duplicateUser.ID.String() != userModel.ID.String() {
 		c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel.Username = nulls.NewString(username)
@@ -83,5 +83,5 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }

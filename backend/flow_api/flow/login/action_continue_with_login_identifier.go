@@ -64,13 +64,13 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	identifierInputName, identifierInputValue, treatIdentifierAsEmail := a.analyzeIdentifierInputs(c)
 
 	if len(identifierInputValue) == 0 {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	var userModel *models.User
@@ -110,7 +110,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 				_ = c.Payload().Set("redirect_url", authUrl)
 
-				return c.ContinueFlow(shared.StateThirdParty)
+				return c.Continue(shared.StateThirdParty)
 			}
 		}
 	} else {
@@ -137,7 +137,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			}
 
 			c.Input().SetError(identifierInputName, flowInputError)
-			return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
 
 		if err = c.Stash().Set(shared.StashPathUsername, identifierInputValue); err != nil {
@@ -155,33 +155,29 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 	}
 
-	var onboardingStates []flowpilot.StateName
 	if userModel != nil {
-		var err error
-		onboardingStates, err = a.determineOnboardingStates(c, userModel)
-		if err != nil {
-			return fmt.Errorf("failed to determine onboarding states: %w", err)
-		}
+		_ = c.Stash().Set(shared.StashPathUserHasPassword, userModel.PasswordCredential != nil)
+		_ = c.Stash().Set(shared.StashPathUserHasWebauthnCredential, len(userModel.WebauthnCredentials) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasUsername, len(userModel.Username.String) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
 	}
 
 	if deps.Cfg.Email.UseForAuthentication && deps.Cfg.Password.Enabled {
 		if treatIdentifierAsEmail || (!treatIdentifierAsEmail && userModel != nil && userModel.Emails.GetPrimary() != nil) {
-			return c.StartSubFlow(shared.StateLoginMethodChooser, onboardingStates...)
+			return c.Continue(shared.StateLoginMethodChooser)
 		}
-
-		return c.StartSubFlow(shared.StateLoginPassword, onboardingStates...)
+		return c.Continue(shared.StateLoginPassword)
 	} else if deps.Cfg.Email.UseForAuthentication {
 		// Set only for audit logging purposes.
 		if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
 			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
-
-		return c.StartSubFlow(shared.StatePasscodeConfirmation, onboardingStates...)
+		return c.Continue(shared.StatePasscodeConfirmation)
 	} else if deps.Cfg.Password.Enabled {
-		return c.StartSubFlow(shared.StateLoginPassword, onboardingStates...)
+		return c.Continue(shared.StateLoginPassword)
 	}
 
-	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("no authentication method enabled")))
+	return c.Error(flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("no authentication method enabled")))
 }
 
 // analyzeIdentifierInputs determines if an input value has been provided for 'identifier', 'email', or 'username',
@@ -217,105 +213,4 @@ func (a ContinueWithLoginIdentifier) analyzeIdentifierInputs(c flowpilot.Executi
 	}
 
 	return name, value, treatAsEmail
-}
-
-func (a ContinueWithLoginIdentifier) determineOnboardingStates(c flowpilot.ExecutionContext, userModel *models.User) ([]flowpilot.StateName, error) {
-	deps := a.GetDeps(c)
-
-	userHasPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil
-	userHasPasskey := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
-	userHasUsername := deps.Cfg.Username.Enabled && len(userModel.Username.String) > 0
-	userHasEmail := deps.Cfg.Email.Enabled && len(userModel.Emails) > 0
-
-	if err := c.Stash().Set(shared.StashPathUserHasPassword, userHasPassword); err != nil {
-		return nil, fmt.Errorf("failed to set user_has_password to the stash: %w", err)
-	}
-
-	if err := c.Stash().Set(shared.StashPathUserHasWebauthnCredential, userHasPasskey); err != nil {
-		return nil, fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
-	}
-
-	userDetailOnboardingStates := a.determineUserDetailOnboardingStates(c, userHasUsername, userHasEmail)
-	credentialOnboardingStates := a.determineCredentialOnboardingStates(c, userHasPasskey, userHasPassword)
-
-	return append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...), nil
-}
-
-func (a ContinueWithLoginIdentifier) determineCredentialOnboardingStates(c flowpilot.ExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
-	deps := a.GetDeps(c)
-	cfg := deps.Cfg
-	result := make([]flowpilot.StateName, 0)
-
-	alwaysAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "always"
-	alwaysAcquirePassword := cfg.Password.Enabled && cfg.Password.AcquireOnLogin == "always"
-	conditionalAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "conditional"
-	conditionalAcquirePassword := cfg.Password.Enabled && cfg.Password.AcquireOnLogin == "conditional"
-	neverAcquirePasskey := !cfg.Passkey.Enabled || cfg.Passkey.AcquireOnLogin == "never"
-	neverAcquirePassword := !cfg.Password.Enabled || cfg.Password.AcquireOnLogin == "never"
-
-	if alwaysAcquirePasskey && alwaysAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			if !cfg.Password.Optional && cfg.Passkey.Optional {
-				result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
-			} else {
-				result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
-			}
-		} else if hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		} else if !hasPasskey && hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
-	} else if alwaysAcquirePasskey && conditionalAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey) // skip should lead to password onboarding
-		} else if !hasPasskey && hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
-	} else if conditionalAcquirePasskey && alwaysAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation) // skip should lead to passkey onboarding
-		} else if hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		}
-	} else if conditionalAcquirePasskey && conditionalAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
-		}
-	} else if conditionalAcquirePasskey && neverAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
-	} else if neverAcquirePasskey && conditionalAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		}
-	} else if neverAcquirePasskey && alwaysAcquirePassword {
-		if !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		}
-	} else if alwaysAcquirePasskey && neverAcquirePassword {
-		if !hasPasskey {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
-	}
-
-	return result
-}
-
-func (a ContinueWithLoginIdentifier) determineUserDetailOnboardingStates(c flowpilot.ExecutionContext, userHasUsername, userHasEmail bool) []flowpilot.StateName {
-	deps := a.GetDeps(c)
-	cfg := deps.Cfg
-	result := make([]flowpilot.StateName, 0)
-	acquireUsername := !userHasUsername && cfg.Username.Enabled && cfg.Username.AcquireOnLogin
-	acquireEmail := !userHasEmail && cfg.Email.Enabled && cfg.Email.AcquireOnLogin
-
-	if acquireUsername && acquireEmail {
-		result = append(result, shared.StateOnboardingUsername, shared.StateOnboardingEmail)
-	} else if acquireUsername {
-		result = append(result, shared.StateOnboardingUsername)
-	} else if acquireEmail {
-		result = append(result, shared.StateOnboardingEmail)
-	}
-
-	return result
 }
