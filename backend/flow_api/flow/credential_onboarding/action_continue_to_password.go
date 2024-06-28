@@ -20,5 +20,5 @@ func (a ContinueToPassword) GetDescription() string {
 func (a ContinueToPassword) Initialize(_ flowpilot.InitializationContext) {}
 
 func (a ContinueToPassword) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueFlow(shared.StatePasswordCreation)
+	return c.Continue(shared.StatePasswordCreation)
 }

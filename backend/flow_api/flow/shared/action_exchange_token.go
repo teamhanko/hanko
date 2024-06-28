@@ -26,7 +26,7 @@ func (a ExchangeToken) Initialize(c flowpilot.InitializationContext) {
 
 func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	deps := a.GetDeps(c)
@@ -69,15 +69,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to determine onboarding stattes: %w", err)
 	}
 
-	if len(onboardingStates) > 0 {
-		if len(onboardingStates) == 1 && onboardingStates[0] == StateSuccess {
-			return c.ContinueFlow(StateSuccess)
-		} else {
-			return c.StartSubFlow(onboardingStates[0], onboardingStates[1:]...)
-		}
-	}
-
-	return c.ContinueFlow(StateSuccess)
+	return c.Continue(onboardingStates...)
 }
 
 func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {

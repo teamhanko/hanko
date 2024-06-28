@@ -31,9 +31,5 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
-	if c.Stash().Get(shared.StashPathUserHasPassword).Bool() {
-		return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
-	}
-
-	return c.StartSubFlow(shared.StatePasscodeConfirmation)
+	return c.Continue(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
 }

@@ -37,7 +37,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	var userID uuid.UUID
@@ -108,10 +108,12 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
-	return c.EndSubFlow()
+
+	return c.Continue()
 }
 
 func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error {
 	c.Input().SetError("password", flowpilot.ErrorValueInvalid)
-	return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
+
+	return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
 }

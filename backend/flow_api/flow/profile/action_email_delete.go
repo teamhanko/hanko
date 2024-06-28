@@ -35,29 +35,23 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailToBeDeletedId := uuid.FromStringOrNil(c.Input().Get("email_id").String())
 	emailToBeDeletedModel := userModel.GetEmailById(emailToBeDeletedId)
 	if emailToBeDeletedModel == nil {
-		return c.ContinueFlowWithError(
-			c.GetCurrentState(),
-			flowpilot.ErrorFormDataInvalid.Wrap(errors.New("unknown email")),
-		)
+		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("unknown email")))
 	}
 
 	if emailToBeDeletedModel.IsPrimary() {
 		if !deps.Cfg.Email.Optional {
-			return c.ContinueFlowWithError(
-				c.GetCurrentState(),
-				flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("cannot delete primary email")),
-			)
+			return c.Error(flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("cannot delete primary email")))
 		} else {
 			err := deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Delete(*emailToBeDeletedModel.PrimaryEmail)
 			if err != nil {
@@ -86,7 +80,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.DeleteEmail(*emailToBeDeletedModel)
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }
 
 func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {

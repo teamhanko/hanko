@@ -34,7 +34,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
@@ -57,7 +57,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 
 	if duplicateUser != nil && duplicateUser.ID.String() != user.ID.String() {
 		c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	err = c.Stash().Set(shared.StashPathUsername, username)
@@ -75,5 +75,5 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

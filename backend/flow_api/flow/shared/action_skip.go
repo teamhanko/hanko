@@ -19,5 +19,5 @@ func (a Skip) GetDescription() string {
 func (a Skip) Initialize(c flowpilot.InitializationContext) {}
 
 func (a Skip) Execute(c flowpilot.ExecutionContext) error {
-	return c.EndSubFlow()
+	return c.Continue()
 }

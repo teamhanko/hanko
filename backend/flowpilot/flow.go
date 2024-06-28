@@ -68,6 +68,20 @@ type HookAction interface {
 // hookActions represents a list of HookAction interfaces.
 type hookActions []HookAction
 
+func (actions hookActions) makeUnique() hookActions {
+	seen := make(map[HookAction]bool)
+	var uniqueSlice []HookAction
+
+	for _, action := range actions {
+		if _, found := seen[action]; !found {
+			seen[action] = true
+			uniqueSlice = append(uniqueSlice, action)
+		}
+	}
+
+	return uniqueSlice
+}
+
 func (actions hookActions) reverse() hookActions {
 	a := make(hookActions, len(actions))
 	copy(a, actions)
@@ -85,6 +99,21 @@ type stateActions map[StateName]Actions
 // stateActions maps state names to associated hook actions.
 type stateHooks map[StateName]hookActions
 
+func (sh stateHooks) makeUnique() {
+	for stateName, actions := range sh {
+		sh[stateName] = actions.makeUnique()
+	}
+}
+
+// flowHooks maps state names to associated hook actions.
+type flowHooks map[FlowName]hookActions
+
+func (fh flowHooks) makeUnique() {
+	for stateName, actions := range fh {
+		fh[stateName] = actions.makeUnique()
+	}
+}
+
 // stateExists checks if a state exists in the flow.
 func (st stateActions) stateExists(stateName StateName) bool {
 	_, ok := st[stateName]
@@ -96,8 +125,8 @@ type SubFlows []subFlow
 
 // stateExists checks if the given state exists in a sub-flow of the current flow.
 func (sfs SubFlows) stateExists(state StateName) bool {
-	for _, subFlow := range sfs {
-		if subFlow.getFlow().stateExists(state) {
+	for _, sf := range sfs {
+		if sf.getFlow().stateExists(state) {
 			return true
 		}
 	}
@@ -106,9 +135,9 @@ func (sfs SubFlows) stateExists(state StateName) bool {
 }
 
 func (sfs SubFlows) getSubFlowFromStateName(state StateName) subFlow {
-	for _, subFlow := range sfs {
-		if subFlow.getFlow().stateExists(state) {
-			return subFlow
+	for _, sf := range sfs {
+		if sf.getFlow().stateExists(state) {
+			return sf
 		}
 	}
 	return nil
@@ -121,6 +150,7 @@ type flowBase interface {
 	getFlow() stateActions
 	getBeforeStateHooks() stateHooks
 	getAfterStateHooks() stateHooks
+	getAfterFlowHooks() hookActions
 }
 
 // Flow represents a flow.
@@ -155,6 +185,7 @@ type defaultFlowBase struct {
 	afterStateHooks       stateHooks   // StateName to hookActions mapping.
 	beforeEachActionHooks hookActions  // List of hookActions that run before each action.
 	afterEachActionHooks  hookActions  // List of hookActions that run after each action.
+	afterFlowHooks        flowHooks
 }
 
 // defaultFlow defines a flow structure with states, actions, and settings.
@@ -168,7 +199,7 @@ type defaultFlow struct {
 	debug                 bool          // Enables debug mode.
 	contextValues         contextValues // Values to be used within the flow context.
 
-	defaultFlowBase
+	*defaultFlowBase
 }
 
 func (f *defaultFlow) Set(name string, value interface{}) {
@@ -205,6 +236,10 @@ func (f *defaultFlowBase) getBeforeStateHooks() stateHooks {
 
 func (f *defaultFlowBase) getAfterStateHooks() stateHooks {
 	return f.afterStateHooks
+}
+
+func (f *defaultFlowBase) getAfterFlowHooks() hookActions {
+	return f.afterFlowHooks[f.name]
 }
 
 // setDefaults sets default values for defaultFlow settings.

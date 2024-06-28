@@ -32,7 +32,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	passwordCredentialModel, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userModel.ID)
@@ -41,7 +41,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if passwordCredentialModel == nil {
-		return c.ContinueFlow(shared.StateProfileInit)
+		return c.Continue(shared.StateProfileInit)
 	}
 
 	err = deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Delete(*passwordCredentialModel)
@@ -63,7 +63,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.PasswordCredential = nil
 
-	return c.ContinueFlow(shared.StateProfileInit)
+	return c.Continue(shared.StateProfileInit)
 }
 
 func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {

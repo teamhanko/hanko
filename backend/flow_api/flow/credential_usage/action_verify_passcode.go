@@ -1,4 +1,4 @@
-package passcode
+package credential_usage
 
 import (
 	"errors"
@@ -31,7 +31,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	if !c.Stash().Get(shared.StashPathPasscodeID).Exists() {
@@ -60,7 +60,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 				}
 			}
 
-			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeInvalid)
+			return c.Error(shared.ErrorPasscodeInvalid)
 		}
 
 		if errors.Is(err, services.ErrorPasscodeMaxAttemptsReached) {
@@ -79,7 +79,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 				}
 			}
 
-			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasscodeMaxAttemptsReached)
+			return c.Error(shared.ErrorPasscodeMaxAttemptsReached)
 		}
 
 		return fmt.Errorf("failed to verify passcode: %w", err)
@@ -96,7 +96,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if !c.Stash().Get(shared.StashPathUserID).Exists() {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("account does not exist")))
+		return c.Error(flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("account does not exist")))
 	}
 
 	err = c.Stash().Set(shared.StashPathEmailVerified, true)
@@ -109,5 +109,5 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }

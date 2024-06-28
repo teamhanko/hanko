@@ -12,6 +12,8 @@ type context interface {
 	// Get returns the context value with the given name.
 	Get(string) interface{}
 	GetFlowName() FlowName
+	// IsFlow returns true if the name matches the current flow name.
+	IsFlow(name FlowName) bool
 }
 
 // flowContext represents the basic context for a flow.
@@ -20,8 +22,6 @@ type flowContext interface {
 	GetFlowID() uuid.UUID
 	// GetPath returns the current path within the flow.
 	GetPath() string
-
-	GetFlowPath() flowPath
 	// Payload returns the JSONManager for accessing payload data.
 	Payload() payload
 	// Stash returns the JSONManager for accessing stash data.
@@ -34,6 +34,8 @@ type flowContext interface {
 	CurrentStateEquals(stateNames ...StateName) bool
 	// GetPreviousState returns the previous state of the flow.
 	GetPreviousState() StateName
+	// IsPreviousState returns true if the previous state equals the given name.
+	IsPreviousState(name StateName) bool
 	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
 	// StateExists checks if a given state exists within the flow.
@@ -68,23 +70,19 @@ type actionExecutionContext interface {
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
-
+	SetFlowError(FlowError)
 	DeleteStateHistory(skipWriteHistory bool) error
 }
 
 // actionExecutionContinuationContext represents the context within an action continuation.
 type actionExecutionContinuationContext interface {
 	actionExecutionContext
-	// ContinueFlow continues the flow execution to the specified next state.
-	ContinueFlow(nextStateName StateName) error
-	// ContinueFlowWithError continues the flow execution to the specified next state with an error.
-	ContinueFlowWithError(nextStateName StateName, flowErr FlowError) error
-	// StartSubFlow starts a sub-flow and continues the flow execution to the specified next states after the sub-flow has been ended.
-	StartSubFlow(initStateName StateName, nextStateNames ...StateName) error
-	// EndSubFlow ends the sub-flow and continues the flow execution to the previously specified next states.
-	EndSubFlow() error
-	// ContinueToPreviousState rewinds the flow back to the previous state.
-	ContinueToPreviousState() error
+
+	Continue(stateNames ...StateName) error
+	// Error continues the flow execution to the specified next state with an error.
+	Error(flowErr FlowError) error
+	// Back rewinds the flow back to the previous state.
+	Back() error
 }
 
 type actionSuspender interface {
@@ -111,9 +109,10 @@ type ExecutionContext interface {
 type HookExecutionContext interface {
 	context
 	actionExecutionContext
-	SetFlowError(FlowError)
+
 	GetFlowError() FlowError
 	AddLink(...Link)
+	ScheduleStates(...StateName) error
 }
 
 type BeforeEachActionExecutionContext interface {
@@ -135,18 +134,6 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
 	err := s.addScheduledStates(flow.initialNextStateNames...)
 	if err != nil {
 		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
-	}
-
-	fp := newFlowPathFromName(flow.name)
-
-	subflow := flow.subFlows.getSubFlowFromStateName(flow.initialStateName)
-	if subflow != nil {
-		fp.add(subflow.getName())
-	}
-
-	err = s.Set("_.flowPath", fp.String())
-	if err != nil {
-		return nil, fmt.Errorf("failed to stash current flowPath: %w", err)
 	}
 
 	csrfToken, err := generateRandomString(32)
@@ -236,11 +223,6 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
-	csrfToken, err := generateRandomString(32)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate csrf token: %w", err)
-	}
-
 	// Create a defaultFlowContext instance.
 	fc := &defaultFlowContext{
 		flow:      flow,
@@ -248,7 +230,6 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 		flowModel: flowModel,
 		stash:     s,
 		payload:   p,
-		csrfToken: csrfToken,
 	}
 
 	state, err := flow.getState(flowModel.CurrentState)

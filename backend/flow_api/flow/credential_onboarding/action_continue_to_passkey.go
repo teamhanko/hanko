@@ -20,5 +20,5 @@ func (a ContinueToPasskey) GetDescription() string {
 func (a ContinueToPasskey) Initialize(_ flowpilot.InitializationContext) {}
 
 func (a ContinueToPasskey) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueFlow(shared.StateOnboardingCreatePasskey)
+	return c.Continue(shared.StateOnboardingCreatePasskey)
 }

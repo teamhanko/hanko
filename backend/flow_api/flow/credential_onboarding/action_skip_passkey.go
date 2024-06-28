@@ -20,25 +20,24 @@ func (a SkipPasskey) GetDescription() string {
 
 func (a SkipPasskey) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
+	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
+	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
 	if !deps.Cfg.Passkey.Optional {
 		c.SuspendAction()
 	}
 
-	if c.GetPreviousState() == shared.StateCredentialOnboardingChooser {
+	if c.IsPreviousState(shared.StateCredentialOnboardingChooser) {
 		c.SuspendAction()
 	}
 
-	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
-	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
-
-	if c.GetPreviousState() == shared.StatePasswordCreation &&
+	if c.IsPreviousState(shared.StatePasswordCreation) &&
 		!c.Stash().Get(shared.StashPathUserHasPassword).Bool() &&
 		!canLoginWithEmail {
 		c.SuspendAction()
 	}
 
-	if c.GetPreviousState() == shared.StatePasscodeConfirmation &&
+	if c.IsPreviousState(shared.StatePasscodeConfirmation) &&
 		!a.acquirePassword(c, "always") &&
 		!canLoginWithEmail {
 		c.SuspendAction()
@@ -51,10 +50,10 @@ func (a SkipPasskey) Execute(c flowpilot.ExecutionContext) error {
 
 	if a.acquirePassword(c, "conditional") &&
 		!c.Stash().Get(shared.StashPathUserHasPassword).Bool() {
-		return c.ContinueFlow(shared.StatePasswordCreation)
+		return c.Continue(shared.StatePasswordCreation)
 	}
 
-	return c.EndSubFlow()
+	return c.Continue()
 }
 
 func (a SkipPasskey) acquirePassword(c flowpilot.Context, acquireType string) bool {
@@ -64,11 +63,11 @@ func (a SkipPasskey) acquirePassword(c flowpilot.Context, acquireType string) bo
 		return false
 	}
 
-	if c.GetFlowName() == shared.FlowLogin && deps.Cfg.Password.AcquireOnLogin == acquireType {
+	if c.IsFlow(shared.FlowLogin) && deps.Cfg.Password.AcquireOnLogin == acquireType {
 		return true
 	}
 
-	if c.GetFlowName() == shared.FlowRegistration && deps.Cfg.Password.AcquireOnRegistration == acquireType {
+	if c.IsFlow(shared.FlowRegistration) && deps.Cfg.Password.AcquireOnRegistration == acquireType {
 		return true
 	}
 

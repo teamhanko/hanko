@@ -44,17 +44,17 @@ func (a EmailVerify) Initialize(c flowpilot.InitializationContext) {
 
 func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailModel := userModel.GetEmailById(uuid.FromStringOrNil(c.Input().Get("email_id").String()))
 	if emailModel == nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorNotFound)
+		return c.Error(shared.ErrorNotFound)
 	}
 
 	err := c.Stash().Set(shared.StashPathEmail, emailModel.Address)
@@ -72,5 +72,5 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set passcode_tempalte to stash %w", err)
 	}
 
-	return c.StartSubFlow(shared.StatePasscodeConfirmation, shared.StateProfileInit)
+	return c.Continue(shared.StatePasscodeConfirmation, shared.StateProfileInit)
 }

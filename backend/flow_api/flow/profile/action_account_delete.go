@@ -33,7 +33,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
@@ -60,5 +60,5 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	deps.HttpContext.SetCookie(cookie)
 
-	return c.ContinueFlow(shared.StateProfileAccountDeleted)
+	return c.Continue(shared.StateProfileAccountDeleted)
 }

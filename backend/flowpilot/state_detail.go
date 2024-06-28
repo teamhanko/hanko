@@ -5,23 +5,19 @@ import "fmt"
 type stateDetail interface {
 	getName() StateName
 	getFlow() stateActions
-	getFlowPath() flowPath
+	getFlowName() FlowName
 	getSubFlows() SubFlows
 	getActionDetails() defaultActionDetails
-	getBeforeStateHooks() hookActions
-	getAfterStateHooks() hookActions
 	getActionDetail(actionName ActionName) (actionDetail, error)
 }
 
 // state represents details for a state, including the associated actions, available sub-flows and more.
 type defaultStateDetail struct {
-	name             StateName
-	flow             stateActions
-	flowPath         flowPath
-	subFlows         SubFlows
-	actionDetails    defaultActionDetails
-	beforeStateHooks hookActions
-	afterStateHooks  hookActions
+	name          StateName
+	flowName      FlowName
+	flow          stateActions
+	subFlows      SubFlows
+	actionDetails defaultActionDetails
 }
 
 func (sd *defaultStateDetail) getName() StateName {
@@ -32,8 +28,8 @@ func (sd *defaultStateDetail) getFlow() stateActions {
 	return sd.flow
 }
 
-func (sd *defaultStateDetail) getFlowPath() flowPath {
-	return sd.flowPath
+func (sd *defaultStateDetail) getFlowName() FlowName {
+	return sd.flowName
 }
 
 func (sd *defaultStateDetail) getSubFlows() SubFlows {
@@ -42,14 +38,6 @@ func (sd *defaultStateDetail) getSubFlows() SubFlows {
 
 func (sd *defaultStateDetail) getActionDetails() defaultActionDetails {
 	return sd.actionDetails
-}
-
-func (sd *defaultStateDetail) getBeforeStateHooks() hookActions {
-	return sd.beforeStateHooks
-}
-
-func (sd *defaultStateDetail) getAfterStateHooks() hookActions {
-	return sd.afterStateHooks
 }
 
 // getActionDetail returns the Action with the specified name.

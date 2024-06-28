@@ -26,5 +26,5 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set login_method to stash: %w", err)
 	}
 
-	return c.ContinueFlow(shared.StatePasscodeConfirmation)
+	return c.Continue(shared.StatePasscodeConfirmation)
 }
