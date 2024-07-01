@@ -285,7 +285,6 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	}
 
 	flow := &defaultFlow{
-		path:                  fb.path,
 		initialStateName:      fb.initialStateName,
 		initialNextStateNames: fb.initialNextStateNames,
 		errorStateName:        fb.errorStateName,

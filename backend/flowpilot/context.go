@@ -9,6 +9,8 @@ import (
 )
 
 type context interface {
+	// Set sets a context value for the given key.
+	Set(string, interface{})
 	// Get returns the context value with the given name.
 	Get(string) interface{}
 	GetFlowName() FlowName
@@ -20,8 +22,6 @@ type context interface {
 type flowContext interface {
 	// GetFlowID returns the unique ID of the current defaultFlow.
 	GetFlowID() uuid.UUID
-	// GetPath returns the current path within the flow.
-	GetPath() string
 	// Payload returns the JSONManager for accessing payload data.
 	Payload() payload
 	// Stash returns the JSONManager for accessing stash data.
@@ -40,8 +40,6 @@ type flowContext interface {
 	GetErrorState() StateName
 	// StateExists checks if a given state exists within the flow.
 	StateExists(stateName StateName) bool
-	// Set sets a context value for the given key.
-	Set(string, interface{})
 }
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
