@@ -7,9 +7,8 @@ import {
   ExchangeTokenInputs,
   PasskeyCredentialDelete,
   PasskeyCredentialRename,
-  PasswordLoginInputs,
   PasswordRecoveryInputs,
-  PasswordSetInputs,
+  PasswordInputs,
   RegisterClientCapabilitiesInputs,
   RegisterLoginIdentifierInputs,
   RegisterPasswordInputs,
@@ -44,7 +43,8 @@ interface ProfileInitActions {
   readonly email_delete?: Action<EmailDeleteInputs>;
   readonly email_verify?: Action<EmailVerifyInputs>;
   readonly email_set_primary?: Action<EmailSetPrimaryInputs>;
-  readonly password_set?: Action<PasswordSetInputs>;
+  readonly password_create?: Action<PasswordInputs>;
+  readonly password_update?: Action<PasswordInputs>;
   readonly password_delete?: Action<null>;
   readonly username_set?: Action<UsernameSetInputs>;
   readonly webauthn_credential_create?: Action<null>;
@@ -61,7 +61,7 @@ interface LoginMethodChooserActions {
 }
 
 interface LoginPasswordActions {
-  readonly password_login: Action<PasswordLoginInputs>;
+  readonly password_login: Action<PasswordInputs>;
   readonly continue_to_passcode_confirmation_recovery?: Action<null>;
   readonly continue_to_login_method_chooser: Action<null>;
   readonly back: Action<null>;
