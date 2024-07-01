@@ -172,6 +172,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
 			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
+
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
+			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+		}
+
 		return c.Continue(shared.StatePasscodeConfirmation)
 	} else if deps.Cfg.Password.Enabled {
 		return c.Continue(shared.StateLoginPassword)
