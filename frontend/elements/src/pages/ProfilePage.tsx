@@ -196,6 +196,9 @@ const ProfilePage = (props: Props) => {
               onEmailVerify={onEmailVerify}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
+              deletableEmailIDs={flowState.actions
+                .email_delete?.(null)
+                .inputs.email_id.allowed_values?.map((e) => e.value)}
             />
             {flowState.actions.email_create?.(null) ? (
               <AddEmailDropdown
