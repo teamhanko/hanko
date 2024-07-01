@@ -125,6 +125,7 @@ export const en: Translation = {
     signupDisabled: "Account registration is disabled.",
   },
   flowErrors: {
+    technical_error: "A technical error has occurred. Please try again later.",
     flow_expired_error:
       "The session has expired, please click the button to restart.",
     value_invalid_error: "The entered value is invalid.",

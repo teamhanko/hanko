@@ -134,6 +134,8 @@ export const de: Translation = {
     signupDisabled: "Die Kontoregistrierung ist deaktiviert.",
   },
   flowErrors: {
+    technical_error:
+      "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
     flow_expired_error:
       "Die Sitzung ist abgelaufen, bitte klicken Sie auf die Schaltfläche, um neu zu starten.",
     value_invalid_error: "Der eingegebene Wert ist ungültig.",

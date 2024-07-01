@@ -115,6 +115,7 @@ export interface Translation {
     signupDisabled: string;
   };
   flowErrors: {
+    technical_error: string;
     flow_expired_error: string;
     value_invalid_error: string;
     passcode_invalid: string;

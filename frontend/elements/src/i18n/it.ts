@@ -128,6 +128,7 @@ export const it: Translation = {
     signupDisabled: "La registrazione dell'account è disabilitata.",
   },
   flowErrors: {
+    technical_error: "Si è verificato un errore tecnico. Riprova più tardi.",
     flow_expired_error:
       "La sessione è scaduta, clicca sul pulsante per riavviare.",
     value_invalid_error: "Il valore inserito non è valido.",
