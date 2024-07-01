@@ -163,7 +163,7 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 
 	stateNames := make([]flowpilot.StateName, 0)
 
-	emailExists := c.Input().Get("email").Exists()
+	emailExists := len(c.Input().Get("email").String()) > 0
 	if emailExists && deps.Cfg.Email.RequireVerification {
 		stateNames = append(stateNames, shared.StatePasscodeConfirmation)
 	}
