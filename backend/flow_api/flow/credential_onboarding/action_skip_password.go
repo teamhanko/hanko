@@ -21,7 +21,10 @@ func (a SkipPassword) GetDescription() string {
 func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
-	canLoginWithEmail := emailExists && deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
+	canLoginWithEmail := emailExists &&
+		deps.Cfg.Email.Enabled &&
+		deps.Cfg.Email.UseForAuthentication &&
+		deps.Cfg.Email.UseAsLoginIdentifier
 
 	if !deps.Cfg.Password.Optional {
 		c.SuspendAction()
@@ -37,7 +40,7 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 
-	if c.IsPreviousState(shared.StatePasscodeConfirmation) &&
+	if (c.IsPreviousState(shared.StatePasscodeConfirmation) || c.IsPreviousState(shared.StateRegistrationInit)) &&
 		!a.acquirePasskey(c, "always") &&
 		!canLoginWithEmail {
 		c.SuspendAction()
@@ -45,8 +48,10 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
-	if err := c.DeleteStateHistory(true); err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
+	if !c.IsFlow(shared.FlowRegistration) {
+		if err := c.DeleteStateHistory(true); err != nil {
+			return fmt.Errorf("failed to delete state history: %w", err)
+		}
 	}
 
 	if a.acquirePasskey(c, "conditional") &&
