@@ -226,5 +226,5 @@ func (er *executionResult) getInputSchema(fc *defaultFlowContext, actionDetail a
 // createHref creates a link HREF based on the current flow context and method name.
 func (er *executionResult) createHref(fc *defaultFlowContext, actionName ActionName) string {
 	queryParam := createQueryParam(string(actionName), fc.GetFlowID())
-	return fmt.Sprintf("%s?flowpilot_action=%s", fc.GetPath(), queryParam)
+	return fmt.Sprintf("/%s?flowpilot_action=%s", fc.GetFlowName(), queryParam)
 }
