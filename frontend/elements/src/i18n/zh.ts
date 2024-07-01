@@ -120,6 +120,7 @@ export const zh: Translation = {
     signupDisabled: "帐户注册被禁用。",
   },
   flowErrors: {
+    technical_error: "发生技术错误。请稍后再试。",
     flow_expired_error: "会话已过期，请点击按钮重新启动。",
     value_invalid_error: "输入的值无效。",
     passcode_invalid: "提供的密码不正确。",
