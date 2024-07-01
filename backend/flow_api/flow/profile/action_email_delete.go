@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"golang.org/x/exp/slices"
 )
 
 type EmailDelete struct {
@@ -23,12 +24,33 @@ func (a EmailDelete) GetDescription() string {
 }
 
 func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
-	if a.mustSuspend(c) {
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
 		c.SuspendAction()
 		return
 	}
 
-	c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
+	input := flowpilot.StringInput("email_id").Required(true).Hidden(true)
+
+	if !a.emailDeletionAllowed(c, userModel) {
+		c.SuspendAction()
+		return
+	}
+
+	lastEmail := len(userModel.Emails) == 1
+	deletableEmails := make(models.Emails, len(userModel.Emails))
+
+	copy(deletableEmails, userModel.Emails)
+
+	slices.DeleteFunc(deletableEmails, func(email models.Email) bool {
+		return email.IsPrimary() && !lastEmail
+	})
+
+	for _, email := range deletableEmails {
+		input.AllowedValue(email.Address, email.ID.String())
+	}
+
+	c.AddInputs(input)
 }
 
 func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
@@ -83,16 +105,11 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(shared.StateProfileInit)
 }
 
-func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
+func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models.User) bool {
 	deps := a.GetDeps(c)
 
-	userModel, ok := c.Get("session_user").(*models.User)
-	if !ok {
-		return true
-	}
-
 	if len(userModel.Emails) == 0 {
-		return true
+		return false
 	}
 
 	isLastEmail := len(userModel.Emails) == 1
@@ -104,8 +121,8 @@ func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
 	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPassword && !canDoThirdParty
 
 	if deps.Cfg.Email.Enabled && isLastEmail && (!deps.Cfg.Email.Optional || canUseNoOtherAuthMethod) {
-		return true
+		return false
 	}
 
-	return false
+	return true
 }
