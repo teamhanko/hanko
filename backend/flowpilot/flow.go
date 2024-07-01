@@ -191,7 +191,6 @@ type defaultFlowBase struct {
 // defaultFlow defines a flow structure with states, actions, and settings.
 type defaultFlow struct {
 	stateDetails          stateDetails  // Maps state names to flow details.
-	path                  string        // flow path or identifier.
 	initialStateName      StateName     // Initial state of the flow.
 	initialNextStateNames []StateName   // A list of next states in case a sub-flow should be invoked initially.
 	errorStateName        StateName     // State representing errors.

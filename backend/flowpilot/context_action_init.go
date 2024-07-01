@@ -12,7 +12,7 @@ func (aic *defaultActionInitializationContext) Payload() payload {
 }
 
 func (aic *defaultActionInitializationContext) Set(s string, i interface{}) {
-	aic.Set(s, i)
+	aic.flow.Set(s, i)
 }
 
 // AddInputs adds input data to the initializationInputSchema.

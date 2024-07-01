@@ -19,11 +19,6 @@ func (fc *defaultFlowContext) GetFlowID() uuid.UUID {
 	return fc.flowModel.ID
 }
 
-// GetPath returns the current path within the flow.
-func (fc *defaultFlowContext) GetPath() string {
-	return fc.flow.path
-}
-
 // GetInitialState returns the initial state of the flow.
 func (fc *defaultFlowContext) GetInitialState() StateName {
 	return fc.flow.initialStateName
