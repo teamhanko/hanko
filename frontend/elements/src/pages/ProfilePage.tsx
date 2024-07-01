@@ -88,11 +88,18 @@ const ProfilePage = (props: Props) => {
       flowState.actions.email_verify({ email_id: emailID }).run,
     );
 
-  const onPasswordSubmit = async (event: Event, password: string) =>
+  const onPasswordCreate = async (event: Event, password: string) =>
     onAction(
       event,
       "password-submit",
-      flowState.actions.password_set({ password }).run,
+      flowState.actions.password_create({ password }).run,
+    );
+
+  const onPasswordUpdate = async (event: Event, password: string) =>
+    onAction(
+      event,
+      "password-submit",
+      flowState.actions.password_update({ password }).run,
     );
 
   const onPasswordDelete = async (event: Event) =>
@@ -211,17 +218,32 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.actions.password_set?.(null) ? (
+      {flowState.actions.password_create?.(null) ? (
         <Fragment>
           <Headline1>{t("headlines.profilePassword")}</Headline1>
           <Paragraph>
             <ChangePasswordDropdown
-              hasPassword={!!flowState.actions.password_delete?.(null)}
-              inputs={flowState.actions.password_set(null).inputs}
-              onPasswordSubmit={onPasswordSubmit}
+              inputs={flowState.actions.password_create(null).inputs}
+              onPasswordSubmit={onPasswordCreate}
               onPasswordDelete={onPasswordDelete}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
+            />
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.actions.password_update?.(null) ? (
+        <Fragment>
+          <Headline1>{t("headlines.profilePassword")}</Headline1>
+          <Paragraph>
+            <ChangePasswordDropdown
+              allowPasswordDelete={!!flowState.actions.password_delete?.(null)}
+              inputs={flowState.actions.password_update(null).inputs}
+              onPasswordSubmit={onPasswordUpdate}
+              onPasswordDelete={onPasswordDelete}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+              passwordExists
             />
           </Paragraph>
         </Fragment>

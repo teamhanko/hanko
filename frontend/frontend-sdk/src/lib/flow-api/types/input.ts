@@ -53,10 +53,6 @@ export interface ContinueWithLoginIdentifierInputs {
   readonly username?: Input<string>;
 }
 
-export interface PasswordLoginInputs {
-  readonly password: Input<string>;
-}
-
 export interface VerifyPasscodeInputs {
   readonly code: Input<string>;
 }
@@ -77,7 +73,7 @@ export interface EmailVerifyInputs {
   readonly email_id: Input<string>;
 }
 
-export interface PasswordSetInputs {
+export interface PasswordInputs {
   readonly password: Input<string>;
 }
 
