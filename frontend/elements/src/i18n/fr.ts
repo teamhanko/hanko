@@ -134,6 +134,8 @@ export const fr: Translation = {
     signupDisabled: "L'enregistrement du compte est désactivé.",
   },
   flowErrors: {
+    technical_error:
+      "Une erreur technique s'est produite. Veuillez réessayer ultérieurement.",
     flow_expired_error:
       "La session a expiré, veuillez cliquer sur le bouton pour redémarrer.",
     value_invalid_error: "La valeur saisie est invalide.",

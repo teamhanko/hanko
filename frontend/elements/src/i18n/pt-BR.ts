@@ -129,6 +129,8 @@ export const ptBR: Translation = {
     signupDisabled: "O registro da conta está desativado.",
   },
   flowErrors: {
+    technical_error:
+      "Ocorreu um erro técnico. Por favor, tente novamente mais tarde.",
     flow_expired_error:
       "A sessão expirou, por favor, clique no botão para reiniciar.",
     value_invalid_error: "O valor inserido é inválido.",
