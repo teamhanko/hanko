@@ -69,6 +69,11 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	email := c.Input().Get("email").String()
 	username := c.Input().Get("username").String()
 
+	if deps.Cfg.Email.Optional && len(email) == 0 &&
+		deps.Cfg.Username.Optional && len(username) == 0 {
+		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("either email or username must be provided")))
+	}
+
 	// check that username only contains allowed characters
 	if !utf8.ValidString(username) {
 		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
