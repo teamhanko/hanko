@@ -1,7 +1,6 @@
 package credential_onboarding
 
 import (
-	"fmt"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -48,12 +47,6 @@ func (a SkipPasskey) Initialize(c flowpilot.InitializationContext) {
 
 }
 func (a SkipPasskey) Execute(c flowpilot.ExecutionContext) error {
-	if !c.IsFlow(shared.FlowRegistration) {
-		if err := c.DeleteStateHistory(true); err != nil {
-			return fmt.Errorf("failed to delete the state history: %w", err)
-		}
-	}
-
 	if a.acquirePassword(c, "conditional") &&
 		!c.Stash().Get(shared.StashPathUserHasPassword).Bool() {
 		return c.Continue(shared.StatePasswordCreation)
