@@ -9,8 +9,6 @@ import (
 )
 
 type context interface {
-	// Set sets a context value for the given key.
-	Set(string, interface{})
 	// Get returns the context value with the given name.
 	Get(string) interface{}
 	GetFlowName() FlowName
@@ -20,6 +18,8 @@ type context interface {
 
 // flowContext represents the basic context for a flow.
 type flowContext interface {
+	// Set sets a context value for the given key.
+	Set(string, interface{})
 	// GetFlowID returns the unique ID of the current defaultFlow.
 	GetFlowID() uuid.UUID
 	// Payload returns the JSONManager for accessing payload data.
