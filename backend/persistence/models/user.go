@@ -72,6 +72,14 @@ func (user *User) DeleteEmail(email Email) {
 	}
 }
 
+func (user *User) GetIdentities() Identities {
+	var identities Identities
+	for _, email := range user.Emails {
+		identities = append(identities, email.Identities...)
+	}
+	return identities
+}
+
 func (user *User) GetEmailById(emailId uuid.UUID) *Email {
 	return user.Emails.GetEmailById(emailId)
 }

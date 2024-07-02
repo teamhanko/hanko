@@ -6,6 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"golang.org/x/exp/slices"
@@ -31,11 +32,11 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 	}
 
 	input := flowpilot.StringInput("email_id").Required(true).Hidden(true)
-
-	if !a.emailDeletionAllowed(c, userModel) {
-		c.SuspendAction()
-		return
-	}
+	//
+	//if !a.emailDeletionAllowed(c, userModel, nil) {
+	//	c.SuspendAction()
+	//	return
+	//}
 
 	lastEmail := len(userModel.Emails) == 1
 	deletableEmails := make(models.Emails, len(userModel.Emails))
@@ -47,7 +48,9 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 	})
 
 	for _, email := range deletableEmails {
-		input.AllowedValue(email.Address, email.ID.String())
+		if a.emailDeletionAllowed(c, userModel, &email.ID) {
+			input.AllowedValue(email.Address, email.ID.String())
+		}
 	}
 
 	c.AddInputs(input)
@@ -105,11 +108,19 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(shared.StateProfileInit)
 }
 
-func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models.User) bool {
+func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models.User, emailID *uuid.UUID) bool {
 	deps := a.GetDeps(c)
 
 	if len(userModel.Emails) == 0 {
 		return false
+	}
+
+	identities := userModel.GetIdentities()
+
+	if emailID != nil {
+		slices.DeleteFunc(identities, func(identity models.Identity) bool {
+			return identity.EmailID.String() == emailID.String()
+		})
 	}
 
 	isLastEmail := len(userModel.Emails) == 1
@@ -117,7 +128,7 @@ func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models
 	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
 	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && !isLastEmail
 	canDoPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil && (canUseUsernameAsLoginIdentifier || canUseEmailAsLoginIdentifier)
-	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled() || (deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0)
+	canDoThirdParty := services.UserCanDoThirdParty(deps.Cfg, identities) || (deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0)
 	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPassword && !canDoThirdParty
 
 	if deps.Cfg.Email.Enabled && isLastEmail && (!deps.Cfg.Email.Optional || canUseNoOtherAuthMethod) {
