@@ -26,10 +26,10 @@ type User struct {
 
 type WebauthnCredentials []WebauthnCredential
 
-func (creds *WebauthnCredentials) Delete(credentialId string) {
-	for index, cred := range *creds {
-		if cred.ID == credentialId {
-			*creds = slices.Delete(*creds, index, 1)
+func (user *User) DeleteWebauthnCredential(credentialId string) {
+	for i := range user.WebauthnCredentials {
+		if user.WebauthnCredentials[i].ID == credentialId {
+			user.WebauthnCredentials = slices.Delete(user.WebauthnCredentials, i, i+1)
 			return
 		}
 	}
