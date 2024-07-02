@@ -21,9 +21,12 @@ func (a ContinueToPasscodeConfirmation) GetDescription() string {
 func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationContext) {}
 
 func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) error {
-	// Set only for audit logging purposes.
 	if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
 		return fmt.Errorf("failed to set login_method to stash: %w", err)
+	}
+
+	if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
+		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 	}
 
 	return c.Continue(shared.StatePasscodeConfirmation)
