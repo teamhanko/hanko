@@ -44,6 +44,18 @@ func NewUser() User {
 	}
 }
 
+func (user *User) GetDeletableEmails() Emails {
+	deletableEmails := make(Emails, len(user.Emails))
+
+	copy(deletableEmails, user.Emails)
+
+	deletableEmails = slices.DeleteFunc(deletableEmails, func(email Email) bool {
+		return email.IsPrimary()
+	})
+
+	return deletableEmails
+}
+
 func (user *User) SetPrimaryEmail(primary *PrimaryEmail) {
 	for i := range user.Emails {
 		if user.Emails[i].ID.String() == primary.EmailID.String() {

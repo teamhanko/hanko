@@ -32,23 +32,9 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 	}
 
 	input := flowpilot.StringInput("email_id").Required(true).Hidden(true)
-	//
-	//if !a.emailDeletionAllowed(c, userModel, nil) {
-	//	c.SuspendAction()
-	//	return
-	//}
 
-	lastEmail := len(userModel.Emails) == 1
-	deletableEmails := make(models.Emails, len(userModel.Emails))
-
-	copy(deletableEmails, userModel.Emails)
-
-	slices.DeleteFunc(deletableEmails, func(email models.Email) bool {
-		return email.IsPrimary() && !lastEmail
-	})
-
-	for _, email := range deletableEmails {
-		if a.emailDeletionAllowed(c, userModel, &email.ID) {
+	for _, email := range userModel.GetDeletableEmails() {
+		if a.emailDeletionAllowed(c, userModel, email.ID) {
 			input.AllowedValue(email.Address, email.ID.String())
 		}
 	}
@@ -108,7 +94,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(shared.StateProfileInit)
 }
 
-func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models.User, emailID *uuid.UUID) bool {
+func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models.User, emailID uuid.UUID) bool {
 	deps := a.GetDeps(c)
 
 	if len(userModel.Emails) == 0 {
@@ -116,22 +102,19 @@ func (a EmailDelete) emailDeletionAllowed(c flowpilot.Context, userModel *models
 	}
 
 	identities := userModel.GetIdentities()
-
-	if emailID != nil {
-		slices.DeleteFunc(identities, func(identity models.Identity) bool {
-			return identity.EmailID.String() == emailID.String()
-		})
-	}
+	identities = slices.DeleteFunc(identities, func(identity models.Identity) bool {
+		return identity.EmailID.String() == emailID.String()
+	})
 
 	isLastEmail := len(userModel.Emails) == 1
 	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
 	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
-	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && !isLastEmail
+	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && deps.Cfg.Email.UseForAuthentication && !isLastEmail
 	canDoPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil && (canUseUsernameAsLoginIdentifier || canUseEmailAsLoginIdentifier)
 	canDoThirdParty := services.UserCanDoThirdParty(deps.Cfg, identities) || (deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0)
 	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPassword && !canDoThirdParty
 
-	if deps.Cfg.Email.Enabled && isLastEmail && (!deps.Cfg.Email.Optional || canUseNoOtherAuthMethod) {
+	if deps.Cfg.Email.Enabled && (!deps.Cfg.Email.Optional || canUseNoOtherAuthMethod) {
 		return false
 	}
 
