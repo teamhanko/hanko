@@ -262,6 +262,9 @@ const ProfilePage = (props: Props) => {
               setError={null}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
+              allowPasskeyDeletion={
+                !!flowState.actions.webauthn_credential_delete?.(null)
+              }
             />
             {flowState.actions.webauthn_credential_create?.(null) ? (
               <AddPasskeyDropdown
