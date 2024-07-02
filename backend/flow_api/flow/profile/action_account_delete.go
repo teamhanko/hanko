@@ -13,7 +13,7 @@ type AccountDelete struct {
 }
 
 func (a AccountDelete) GetName() flowpilot.ActionName {
-	return ActionAccountDelete
+	return shared.ActionAccountDelete
 }
 
 func (a AccountDelete) GetDescription() string {
@@ -33,7 +33,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Delete(*userModel)
@@ -60,9 +60,5 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	deps.HttpContext.SetCookie(cookie)
 
-	return c.ContinueFlow(StateProfileAccountDeleted)
-}
-
-func (a AccountDelete) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue(shared.StateProfileAccountDeleted)
 }

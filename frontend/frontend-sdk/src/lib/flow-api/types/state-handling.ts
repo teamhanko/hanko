@@ -1,19 +1,22 @@
 import { State } from "../State";
 
 import {
+  CredentialOnboardingChooserActions,
   LoginInitActions,
   LoginMethodChooserActions,
   LoginPasskeyActions,
   LoginPasswordActions,
   LoginPasswordRecoveryActions,
   OnboardingCreatePasskeyActions,
+  OnboardingEmailActions,
+  OnboardingUsernameActions,
   OnboardingVerifyPasskeyAttestationActions,
   PasscodeConfirmationActions,
   PasswordCreationActions,
   PreflightActions,
   ProfileInitActions,
   RegistrationInitActions,
-  ThirdpartyOauthActions,
+  ThirdPartyActions,
 } from "./action";
 
 import {
@@ -22,26 +25,30 @@ import {
   OnboardingVerifyPasskeyAttestationPayload,
   PasscodeConfirmationPayload,
   ProfilePayload,
-  SuccessPayload, ThirdpartyOauthPayload,
+  ThirdPartyPayload,
+  SuccessPayload,
 } from "./payload";
 
 export type StateName =
-  | "preflight"
+  | "error"
   | "login_init"
-  | "profile_init"
-  | "webauthn_credential_verification"
   | "login_method_chooser"
+  | "login_passkey"
   | "login_password"
   | "login_password_recovery"
-  | "passcode_confirmation"
-  | "login_passkey"
   | "onboarding_create_passkey"
   | "onboarding_verify_passkey_attestation"
-  | "registration_init"
+  | "passcode_confirmation"
   | "password_creation"
+  | "preflight"
+  | "profile_init"
+  | "registration_init"
   | "success"
-  | "error"
-  | "thirdparty_oauth";
+  | "webauthn_credential_verification"
+  | "onboarding_email"
+  | "onboarding_username"
+  | "credential_onboarding_chooser"
+  | "thirdparty";
 
 export interface Actions {
   readonly preflight: PreflightActions;
@@ -57,9 +64,12 @@ export interface Actions {
   readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationActions;
   readonly registration_init: RegistrationInitActions;
   readonly password_creation: PasswordCreationActions;
-  readonly thirdparty_oauth: ThirdpartyOauthActions;
   readonly success: null;
   readonly error: null;
+  readonly onboarding_email: OnboardingEmailActions;
+  readonly onboarding_username: OnboardingUsernameActions;
+  readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
+  readonly thirdparty: ThirdPartyActions;
 }
 
 export interface Payloads {
@@ -76,9 +86,12 @@ export interface Payloads {
   readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationPayload;
   readonly registration_init: null;
   readonly password_creation: null;
-  readonly thirdparty_oauth: ThirdpartyOauthPayload;
   readonly success: SuccessPayload;
   readonly error: null;
+  readonly onboarding_email: null;
+  readonly onboarding_username: null;
+  readonly credential_onboarding_chooser: null;
+  readonly thirdparty: ThirdPartyPayload;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";

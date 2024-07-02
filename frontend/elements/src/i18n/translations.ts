@@ -21,6 +21,8 @@ export interface Translation {
     profilePasskeys: string;
     isPrimaryEmail: string;
     setPrimaryEmail: string;
+    createEmail: string;
+    createUsername: string;
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;
@@ -40,9 +42,6 @@ export interface Translation {
     createAccount: string;
     noAccountExists: string;
     passwordFormatHint: string;
-    manageEmails: string;
-    changePassword: string;
-    managePasskeys: string;
     isPrimaryEmail: string;
     setPrimaryEmail: string;
     emailVerified: string;
@@ -52,7 +51,6 @@ export interface Translation {
     renamePasskey: string;
     deletePasskey: string;
     deleteAccount: string;
-    changeYourUsername: string;
   };
   labels: {
     or: string;
@@ -84,7 +82,6 @@ export interface Translation {
     rename: string;
     newPasskeyName: string;
     addEmail: string;
-    changePassword: string;
     createPasskey: string;
     webauthnUnsupported: string;
     signInWith: string;
@@ -94,7 +91,10 @@ export interface Translation {
     optional: string;
     dontHaveAnAccount: string;
     alreadyHaveAnAccount: string;
+    changePassword: string;
+    setPassword: string;
     changeUsername: string;
+    setUsername: string;
   };
   errors: {
     somethingWentWrong: string;
@@ -115,6 +115,7 @@ export interface Translation {
     signupDisabled: string;
   };
   flowErrors: {
+    technical_error: string;
     flow_expired_error: string;
     value_invalid_error: string;
     passcode_invalid: string;

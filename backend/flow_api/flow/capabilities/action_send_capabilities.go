@@ -10,7 +10,7 @@ type RegisterClientCapabilities struct {
 }
 
 func (a RegisterClientCapabilities) GetName() flowpilot.ActionName {
-	return ActionRegisterClientCapabilities
+	return shared.ActionRegisterClientCapabilities
 }
 
 func (a RegisterClientCapabilities) GetDescription() string {
@@ -18,47 +18,27 @@ func (a RegisterClientCapabilities) GetDescription() string {
 }
 
 func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.BooleanInput("webauthn_conditional_mediation_available").
-		Hidden(true))
+	c.AddInputs(flowpilot.BooleanInput("webauthn_conditional_mediation_available").Hidden(true))
 	c.AddInputs(flowpilot.BooleanInput("webauthn_available").Required(true).Hidden(true))
 }
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
-	deps := a.GetDeps(c)
-
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	webauthnAvailable := c.Input().Get("webauthn_available").String() == "true"
+	webauthnAvailable := c.Input().Get("webauthn_available").Bool()
 
-	// Only passkeys are allowed, but webauthn is not available on the browser
-	if !webauthnAvailable && !deps.Cfg.Password.Enabled && !deps.Cfg.Passcode.Enabled {
-		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
-	}
-
-	// Only security keys are allowed as a second factor, but webauthn is not available on the browser
-	if !webauthnAvailable &&
-		deps.Cfg.SecondFactor.Enabled && !deps.Cfg.SecondFactor.Optional &&
-		len(deps.Cfg.SecondFactor.Methods) == 1 &&
-		deps.Cfg.SecondFactor.Methods[0] == "security_key" {
-		return c.ContinueFlowWithError(shared.StateError, shared.ErrorDeviceNotCapable)
-	}
-
-	err := c.Stash().Set("webauthn_available", webauthnAvailable)
+	err := c.Stash().Set(shared.StashPathWebauthnAvailable, webauthnAvailable)
 	if err != nil {
 		return err
 	}
 
 	conditionalMediationAvailable := c.Input().Get("webauthn_conditional_mediation_available").Bool()
-	err = c.Stash().Set("webauthn_conditional_mediation_available", conditionalMediationAvailable)
+	err = c.Stash().Set(shared.StashPathWebauthnConditionalMediationAvailable, conditionalMediationAvailable)
 	if err != nil {
 		return err
 	}
 
-	return c.EndSubFlow()
-}
-
-func (a RegisterClientCapabilities) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue()
 }

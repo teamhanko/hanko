@@ -15,6 +15,7 @@ interface Props {
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
   onUsernameSubmit: (event: Event, username: string) => Promise<void>;
+  hasUsername?: boolean;
 }
 
 const ChangeUsernameDropdown = ({
@@ -22,9 +23,10 @@ const ChangeUsernameDropdown = ({
   checkedItemID,
   setCheckedItemID,
   onUsernameSubmit,
+  hasUsername,
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const [username, setUsername] = useState<string>(inputs.username.value);
+  const [username, setUsername] = useState<string>();
 
   const onInputHandler = (event: Event) => {
     event.preventDefault();
@@ -36,7 +38,7 @@ const ChangeUsernameDropdown = ({
   return (
     <Dropdown
       name={"username-edit-dropdown"}
-      title={t("labels.changeUsername")}
+      title={t(hasUsername ? "labels.changeUsername" : "labels.setUsername")}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}
     >

@@ -4,12 +4,14 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type IdentityPersister interface {
 	Get(userProviderID string, providerID string) (*models.Identity, error)
+	GetByID(identityID uuid.UUID) (*models.Identity, error)
 	Create(identity models.Identity) error
 	Update(identity models.Identity) error
 	Delete(identity models.Identity) error
@@ -17,6 +19,17 @@ type IdentityPersister interface {
 
 type identityPersister struct {
 	db *pop.Connection
+}
+
+func (p identityPersister) GetByID(identityID uuid.UUID) (*models.Identity, error) {
+	identity := &models.Identity{}
+	if err := p.db.EagerPreload("Email", "Email.User").Find(identity, identityID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("failed to get identity: %w", err)
+	}
+	return identity, nil
 }
 
 func (p identityPersister) Get(userProviderID string, providerID string) (*models.Identity, error) {

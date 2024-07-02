@@ -18,8 +18,8 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 
 	var userId uuid.UUID
 	var err error
-	if c.Stash().Get("user_id").Exists() {
-		userId, err = uuid.FromString(c.Stash().Get("user_id").String())
+	if c.Stash().Get(StashPathUserID).Exists() {
+		userId, err = uuid.FromString(c.Stash().Get(StashPathUserID).String())
 		if err != nil {
 			return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 		}
@@ -47,14 +47,14 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 
 	// Audit log logins only, because user creation on registration implies that the user is logged
 	// in after a registration. Only login actions should set the "login_method" stash entry.
-	if c.Stash().Get("login_method").Exists() {
+	if c.Stash().Get(StashPathLoginMethod).Exists() {
 		err = deps.AuditLogger.CreateWithConnection(
 			deps.Tx,
 			deps.HttpContext,
 			models.AuditLogLoginSuccess,
 			&models.User{ID: userId},
 			err,
-			auditlog.Detail("login_method", c.Stash().Get("login_method").String()),
+			auditlog.Detail("login_method", c.Stash().Get(StashPathLoginMethod).String()),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 
 		if err != nil {

@@ -25,6 +25,7 @@ interface Props {
     name: string,
   ) => Promise<void>;
   onPasskeyDelete: (event: Event, id: string) => Promise<void>;
+  allowPasskeyDeletion?: boolean;
 }
 
 const ListPasskeysAccordion = ({
@@ -34,6 +35,7 @@ const ListPasskeysAccordion = ({
   onBack,
   onPasskeyNameSubmit,
   onPasskeyDelete,
+  allowPasskeyDeletion,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const { setPage } = useContext(AppContext);
@@ -78,7 +80,7 @@ const ListPasskeysAccordion = ({
           {t("labels.rename")}
         </Link>
       </Paragraph>
-      <Paragraph>
+      <Paragraph hidden={!allowPasskeyDeletion}>
         <Headline2>{t("headlines.deletePasskey")}</Headline2>
         {t("texts.deletePasskey")}
         <br />

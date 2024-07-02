@@ -10,7 +10,13 @@ import (
 	"time"
 )
 
-func GenerateState(config *config.Config, provider string, redirectTo string) ([]byte, error) {
+func GenerateStateForFlowAPI(isFlow bool) func(*State) {
+	return func(state *State) {
+		state.IsFlow = isFlow
+	}
+}
+
+func GenerateState(config *config.Config, provider string, redirectTo string, options ...func(*State)) ([]byte, error) {
 	if provider == "" {
 		return nil, errors.New("provider must be present")
 	}
@@ -31,6 +37,10 @@ func GenerateState(config *config.Config, provider string, redirectTo string) ([
 		IssuedAt:   now,
 		ExpiresAt:  now.Add(time.Minute * 5),
 		Nonce:      nonce,
+	}
+
+	for _, option := range options {
+		option(&state)
 	}
 
 	stateJson, err := json.Marshal(state)
@@ -54,6 +64,7 @@ type State struct {
 	IssuedAt   time.Time `json:"issued_at"`
 	ExpiresAt  time.Time `json:"expires_at"`
 	Nonce      string    `json:"nonce"`
+	IsFlow     bool      `json:"is_flow"`
 }
 
 func VerifyState(config *config.Config, state string, expectedState string) (*State, error) {

@@ -16,6 +16,8 @@ export const en: Translation = {
     profilePasskeys: "Passkeys",
     isPrimaryEmail: "Primary email address",
     setPrimaryEmail: "Set primary email address",
+    createEmail: "Enter a new email",
+    createUsername: "Enter a new username",
     emailVerified: "Verified",
     emailUnverified: "Unverified",
     emailDelete: "Delete",
@@ -39,9 +41,6 @@ export const en: Translation = {
       'No account exists for "{emailAddress}". Do you want to create a new account?',
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
-    manageEmails: "Used for passcode authentication.",
-    changePassword: "Set a new password.",
-    managePasskeys: "Your passkeys allow you to sign in to this account.",
     isPrimaryEmail:
       "This email address will be used as username for your passkeys.",
     setPrimaryEmail: "Set this email to be used as username for new passkeys.",
@@ -55,7 +54,6 @@ export const en: Translation = {
     deleteAccount:
       "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
     noAccountExists: 'No account exists for "{emailAddress}".',
-    changeYourUsername: "Change your username",
   },
   labels: {
     or: "or",
@@ -87,7 +85,6 @@ export const en: Translation = {
     rename: "Rename",
     newPasskeyName: "New passkey name",
     addEmail: "Add email",
-    changePassword: "Change password",
     createPasskey: "Create a passkey",
     webauthnUnsupported: "Passkeys are not supported by your browser",
     signInWith: "Sign in with {provider}",
@@ -98,6 +95,9 @@ export const en: Translation = {
     dontHaveAnAccount: "Don't have an account?",
     alreadyHaveAnAccount: "Already have an account?",
     changeUsername: "Change username",
+    setUsername: "Set username",
+    changePassword: "Change password",
+    setPassword: "Set password",
   },
   errors: {
     somethingWentWrong:
@@ -125,6 +125,7 @@ export const en: Translation = {
     signupDisabled: "Account registration is disabled.",
   },
   flowErrors: {
+    technical_error: "A technical error has occurred. Please try again later.",
     flow_expired_error:
       "The session has expired, please click the button to restart.",
     value_invalid_error: "The entered value is invalid.",

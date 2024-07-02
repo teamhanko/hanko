@@ -61,7 +61,7 @@ func (jm *DefaultJSONManager) Set(path string, value interface{}) error {
 
 // Delete removes a value from the JSON data at the specified path.
 func (jm *DefaultJSONManager) Delete(path string) error {
-	newData, err := sjson.Delete(jm.data, path)
+	newData, err := sjson.Delete(jm.data, string(path))
 	if err != nil {
 		return err
 	}

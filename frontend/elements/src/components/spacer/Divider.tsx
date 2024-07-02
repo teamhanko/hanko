@@ -8,8 +8,8 @@ interface Props {
 }
 
 const Divider = ({ children, hidden }: Props) => {
-  return (
-    <section part={"divider"} className={styles.divider} hidden={hidden}>
+  return !hidden ? (
+    <section part={"divider"} className={styles.divider}>
       <div part={"divider-line"} className={styles.line} />
       {children ? (
         <div part={"divider-text"} class={styles.text}>
@@ -18,7 +18,7 @@ const Divider = ({ children, hidden }: Props) => {
       ) : null}
       <div part={"divider-line"} className={styles.line} />
     </section>
-  );
+  ) : null;
 };
 
 export default Divider;

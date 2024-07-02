@@ -48,6 +48,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
+	samlService := saml.NewSamlService(cfg, persister)
+
 	flowAPIHandler := flow_api.FlowPilotHandler{
 		Persister:             persister,
 		Cfg:                   *cfg,
@@ -58,6 +60,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		RateLimiter:           rateLimiter,
 		AuthenticatorMetadata: authenticatorMetadata,
 		AuditLogger:           auditLogger,
+		SamlService:           samlService,
+	}
+
+	if cfg.Saml.Enabled {
+		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
@@ -106,7 +113,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	mailer, err := mail.NewMailer(cfg.Smtp)
+	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
@@ -195,10 +202,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)
-
-	if cfg.Saml.Enabled {
-		saml.CreateSamlRoutes(e, cfg, persister, sessionManager, auditLogger)
-	}
 
 	return e
 }

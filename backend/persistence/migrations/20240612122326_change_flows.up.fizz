@@ -1,0 +1,2 @@
+add_column("flows", "csrf_token", "string", { "size": 32 })
+add_column("flows", "previous_state", "string", { "null": true })

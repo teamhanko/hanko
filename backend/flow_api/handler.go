@@ -6,9 +6,8 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
+	"github.com/teamhanko/hanko/backend/ee/saml"
+	"github.com/teamhanko/hanko/backend/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -24,6 +23,7 @@ type FlowPilotHandler struct {
 	PasscodeService       services.Passcode
 	PasswordService       services.Password
 	WebauthnService       services.WebauthnService
+	SamlService           saml.Service
 	SessionManager        session.Manager
 	RateLimiter           limiter.Store
 	AuthenticatorMetadata mapper.AuthenticatorMetadata
@@ -31,15 +31,16 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, registration.Flow.MustBuild())
+	flow := flow.RegistrationFlow.MustBuild()
+	return h.executeFlow(c, flow)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, login.Flow.MustBuild())
+	return h.executeFlow(c, flow.LoginFlow.MustBuild())
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, profile.Flow.MustBuild())
+	return h.executeFlow(c, flow.ProfileFlow.MustBuild())
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
@@ -49,7 +50,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	err := c.Bind(&body)
 	if err != nil {
 		result := flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
-		return c.JSON(result.Status(), result.Response())
+		return c.JSON(result.GetStatus(), result.GetResponse())
 	}
 
 	err = h.Persister.Transaction(func(tx *pop.Connection) error {
@@ -65,6 +66,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			PasscodeService:       h.PasscodeService,
 			PasswordService:       h.PasswordService,
 			WebauthnService:       h.WebauthnService,
+			SamlService:           h.SamlService,
 			AuthenticatorMetadata: h.AuthenticatorMetadata,
 			AuditLogger:           h.AuditLogger,
 		})
@@ -74,14 +76,14 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			return flowPilotErr
 		}
 
-		return c.JSON(result.Status(), result.Response())
+		return c.JSON(result.GetStatus(), result.GetResponse())
 	})
 
 	if err != nil {
 		c.Logger().Errorf("tx error: %v", err)
 		result := flow.ResultFromError(err)
 
-		return c.JSON(result.Status(), result.Response())
+		return c.JSON(result.GetStatus(), result.GetResponse())
 	}
 
 	return nil // TODO: maybe return TechnicalError or something else

@@ -2,18 +2,34 @@ import { JSXInternal } from "preact/src/jsx";
 import { ComponentChildren, createContext, h } from "preact";
 import { TranslateProvider } from "@denysvuika/preact-translate";
 
-import { Fragment, StateUpdater, useCallback, useEffect, useMemo, useRef, useState, } from "preact/compat";
+import {
+  Fragment,
+  StateUpdater,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/compat";
 
 import {
   create as createWebauthnCredential,
   get as getWebauthnCredential,
 } from "@github/webauthn-json";
 
-import { Hanko, TechnicalError, UnauthorizedError, WebauthnSupport, } from "@teamhanko/hanko-frontend-sdk";
+import {
+  Hanko,
+  TechnicalError,
+  UnauthorizedError,
+  WebauthnSupport,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { Translations } from "../i18n/translations";
 
-import { FlowPath, Handlers, } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
+import {
+  FlowPath,
+  Handlers,
+} from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
 
 import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
 
@@ -35,11 +51,14 @@ import CreatePasswordPage from "../pages/CreatePasswordPage";
 import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
 import SignalLike = JSXInternal.SignalLike;
+import CreateEmailPage from "../pages/CreateEmailPage";
+import CreateUsernamePage from "../pages/CreateUsernamePage";
+import CredentialOnboardingChooserPage from "../pages/CredentialOnboardingChooser";
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
 
-const localStorageCacheStateKey = "flow-state"
+const localStorageCacheStateKey = "flow-state";
 
 export type ComponentName =
   | "auth"
@@ -121,16 +140,18 @@ interface Props {
   componentName: ComponentName;
   globalOptions: GlobalOptions;
   children?: ComponentChildren;
+  createWebauthnAbortSignal: () => AbortSignal;
 }
 
 const AppProvider = ({
-                       lang,
-                       experimental = "",
-                       prefilledEmail,
-                       prefilledUsername,
-                       globalOptions,
-                       ...props
-                     }: Props) => {
+  lang,
+  experimental = "",
+  prefilledEmail,
+  prefilledUsername,
+  globalOptions,
+  createWebauthnAbortSignal,
+  ...props
+}: Props) => {
   const {
     hanko,
     injectStyles,
@@ -161,7 +182,6 @@ const AppProvider = ({
     email: prefilledEmail,
     username: prefilledUsername,
   });
-  let abortController = new AbortController();
 
   const setLoadingAction = useCallback((loadingAction: UIAction) => {
     setUIState((prev) => ({
@@ -234,16 +254,6 @@ const AppProvider = ({
     );
   };
 
-  const _createAbortSignal = () => {
-    if (abortController) {
-      console.log("_createAbortSignal abort");
-      abortController.abort();
-    }
-
-    abortController = new AbortController();
-    return abortController.signal;
-  };
-
   const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
     () => ({
       onError: (e) => {
@@ -272,7 +282,7 @@ const AppProvider = ({
               assertionResponse = await getWebauthnCredential({
                 publicKey: state.payload.request_options.publicKey,
                 mediation: "conditional" as CredentialMediationRequirement,
-                signal: _createAbortSignal(),
+                signal: createWebauthnAbortSignal(),
               });
             } catch (error) {
               // We do not need to handle the error, because this is a conditional request, which can fail silently
@@ -301,7 +311,7 @@ const AppProvider = ({
         try {
           assertionResponse = await getWebauthnCredential({
             ...state.payload.request_options,
-            signal: _createAbortSignal(),
+            signal: createWebauthnAbortSignal(),
           });
         } catch (error) {
           const prevState = await state.actions.back(null).run();
@@ -326,7 +336,7 @@ const AppProvider = ({
         try {
           attestationResponse = await createWebauthnCredential({
             ...state.payload.creation_options,
-            signal: _createAbortSignal(),
+            signal: createWebauthnAbortSignal(),
           });
         } catch (e) {
           const prevState = await state.actions.back(null).run();
@@ -341,6 +351,7 @@ const AppProvider = ({
           })
           .run();
 
+        setLoadingAction(null);
         stateHandler[nextState.name](nextState);
       },
       async webauthn_credential_verification(state) {
@@ -348,7 +359,7 @@ const AppProvider = ({
         try {
           attestationResponse = await createWebauthnCredential({
             ...state.payload.creation_options,
-            signal: _createAbortSignal(),
+            signal: createWebauthnAbortSignal(),
           });
         } catch (e) {
           const prevState = await state.actions.back(null).run();
@@ -396,29 +407,49 @@ const AppProvider = ({
           />,
         );
       },
-      async thirdparty_oauth(state) {
-        const token = new URLSearchParams(window.location.search).get("hanko_token")
+      async thirdparty(state) {
+        const token = new URLSearchParams(window.location.search).get(
+          "hanko_token",
+        );
         if (token && token.length > 0) {
-          const searchParams = new URLSearchParams(window.location.search)
-          const nextState = await state.actions.exchange_token({ token: searchParams.get("hanko_token") }).run()
+          const searchParams = new URLSearchParams(window.location.search);
+          const nextState = await state.actions
+            .exchange_token({ token: searchParams.get("hanko_token") })
+            .run();
 
-          searchParams.delete("hanko_token")
+          searchParams.delete("hanko_token");
 
-          history.replaceState(null, null, window.location.pathname + searchParams.toString())
+          history.replaceState(
+            null,
+            null,
+            window.location.pathname + searchParams.toString(),
+          );
 
-          stateHandler[nextState.name](nextState)
+          stateHandler[nextState.name](nextState);
         } else {
           setUIState((prev) => ({
             ...prev,
-            lastAction: null
-          }))
-          localStorage.setItem(localStorageCacheStateKey, JSON.stringify(state.toJSON()))
-          window.location.assign(state.payload.redirect_url)
+            lastAction: null,
+          }));
+          localStorage.setItem(
+            localStorageCacheStateKey,
+            JSON.stringify(state.toJSON()),
+          );
+          window.location.assign(state.payload.redirect_url);
         }
       },
       error(state) {
         setLoadingAction(null);
         setPage(<ErrorPage state={state} />);
+      },
+      onboarding_email(state) {
+        setPage(<CreateEmailPage state={state} />);
+      },
+      onboarding_username(state) {
+        setPage(<CreateUsernamePage state={state} />);
+      },
+      credential_onboarding_chooser(state) {
+        setPage(<CredentialOnboardingChooserPage state={state} />);
       },
     }),
     [
@@ -433,11 +464,16 @@ const AppProvider = ({
   const flowInit = useCallback(
     async (path: FlowPath) => {
       setLoadingAction("switch-flow");
-      const token = new URLSearchParams(window.location.search).get("hanko_token")
-      const cachedState = localStorage.getItem(localStorageCacheStateKey)
+      const token = new URLSearchParams(window.location.search).get(
+        "hanko_token",
+      );
+      const cachedState = localStorage.getItem(localStorageCacheStateKey);
       if (cachedState && cachedState.length > 0 && token && token.length > 0) {
-        await hanko.flow.fromString(localStorage.getItem(localStorageCacheStateKey), { ...stateHandler })
-        localStorage.removeItem(localStorageCacheStateKey)
+        await hanko.flow.fromString(
+          localStorage.getItem(localStorageCacheStateKey),
+          { ...stateHandler },
+        );
+        localStorage.removeItem(localStorageCacheStateKey);
       } else {
         await hanko.flow.init(path, { ...stateHandler });
       }

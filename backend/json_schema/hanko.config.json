@@ -128,6 +128,9 @@
     },
     "Config": {
       "properties": {
+        "convert_legacy_config": {
+          "type": "boolean"
+        },
         "server": {
           "$ref": "#/$defs/Server"
         },
@@ -135,10 +138,15 @@
           "$ref": "#/$defs/WebauthnSettings"
         },
         "smtp": {
-          "$ref": "#/$defs/SMTP"
+          "$ref": "#/$defs/SMTP",
+          "description": "Deprecated, use EmailDelivery.SMTP instead"
+        },
+        "email_delivery": {
+          "$ref": "#/$defs/EmailDelivery"
         },
         "passcode": {
-          "$ref": "#/$defs/Passcode"
+          "$ref": "#/$defs/Passcode",
+          "description": "Deprecated"
         },
         "password": {
           "$ref": "#/$defs/Password"
@@ -173,9 +181,6 @@
         "account": {
           "$ref": "#/$defs/Account"
         },
-        "identifier": {
-          "$ref": "#/$defs/Identifier"
-        },
         "second_factor": {
           "$ref": "#/$defs/SecondFactor"
         },
@@ -187,19 +192,16 @@
         },
         "webhooks": {
           "$ref": "#/$defs/WebhookSettings"
+        },
+        "email": {
+          "$ref": "#/$defs/Email"
+        },
+        "username": {
+          "$ref": "#/$defs/Username"
         }
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "passcode",
-        "database",
-        "secrets",
-        "service",
-        "identifier",
-        "second_factor",
-        "passkey"
-      ],
       "description": "Config is the central configuration type"
     },
     "Cookie": {
@@ -240,53 +242,29 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "allow_origins"
-      ]
+      "type": "object"
     },
     "Database": {
-      "oneOf": [
-        {
-          "required": [
-            "user",
-            "password",
-            "host",
-            "port",
-            "dialect"
-          ],
-          "title": "config"
-        },
-        {
-          "required": [
-            "url"
-          ],
-          "title": "url"
-        }
-      ],
       "properties": {
         "database": {
           "type": "string",
           "default": "hanko"
         },
         "user": {
-          "type": "string"
+          "type": "string",
+          "default": "hanko"
         },
         "password": {
-          "type": "string"
+          "type": "string",
+          "default": "hanko"
         },
         "host": {
-          "type": "string"
+          "type": "string",
+          "default": "localhost"
         },
         "port": {
-          "oneOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "integer"
-            }
-          ]
+          "type": "string",
+          "default": "\"5432\""
         },
         "dialect": {
           "type": "string",
@@ -294,7 +272,8 @@
             "postgres",
             "mysql",
             "cockroach"
-          ]
+          ],
+          "default": "postgres"
         },
         "url": {
           "type": "string"
@@ -306,13 +285,64 @@
     },
     "Email": {
       "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_registration": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_login": {
+          "type": "boolean",
+          "default": false
+        },
+        "require_verification": {
+          "type": "boolean",
+          "default": true
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100
+        },
+        "use_as_login_identifier": {
+          "type": "boolean",
+          "default": true
+        },
+        "max_length": {
+          "type": "integer",
+          "default": 100
+        },
+        "use_for_authentication": {
+          "type": "boolean",
+          "default": true
+        },
+        "passcode_ttl": {
+          "type": "integer",
+          "default": 300
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "EmailDelivery": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
         "from_address": {
-          "type": "string",
-          "default": "passcode@hanko.io"
+          "type": "string"
         },
         "from_name": {
-          "type": "string",
-          "default": "Hanko"
+          "type": "string"
+        },
+        "smtp": {
+          "$ref": "#/$defs/SMTP"
         }
       },
       "additionalProperties": false,
@@ -337,74 +367,6 @@
         "type": "string"
       },
       "type": "array"
-    },
-    "Identifier": {
-      "properties": {
-        "username": {
-          "$ref": "#/$defs/IdentifierUsername"
-        },
-        "email": {
-          "$ref": "#/$defs/IdentifierEmail"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "username",
-        "email"
-      ]
-    },
-    "IdentifierEmail": {
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": true
-        },
-        "optional": {
-          "type": "boolean",
-          "default": true
-        },
-        "verification": {
-          "type": "boolean"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled",
-        "optional",
-        "verification"
-      ]
-    },
-    "IdentifierUsername": {
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "default": true
-        },
-        "optional": {
-          "type": "boolean",
-          "default": true
-        },
-        "max_length": {
-          "type": "integer"
-        },
-        "min_length": {
-          "type": "integer"
-        },
-        "allowed_characters": {
-          "type": "string"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled",
-        "optional",
-        "max_length",
-        "min_length",
-        "allowed_characters"
-      ]
     },
     "IdentityProvider": {
       "properties": {
@@ -472,11 +434,8 @@
     },
     "Passcode": {
       "properties": {
-        "enabled": {
-          "type": "boolean"
-        },
         "email": {
-          "$ref": "#/$defs/Email"
+          "$ref": "#/$defs/PasscodeEmail"
         },
         "ttl": {
           "type": "integer",
@@ -488,34 +447,75 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled"
-      ]
+      "type": "object"
+    },
+    "PasscodeEmail": {
+      "properties": {
+        "from_address": {
+          "type": "string",
+          "default": "passcode@hanko.io"
+        },
+        "from_name": {
+          "type": "string",
+          "default": "Hanko"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "Passkey": {
       "properties": {
-        "onboarding": {
-          "$ref": "#/$defs/PasskeyOnboarding"
-        }
-      },
-      "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "onboarding"
-      ]
-    },
-    "PasskeyOnboarding": {
-      "properties": {
         "enabled": {
-          "type": "boolean"
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_registration": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "acquire_on_login": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "user_verification": {
+          "type": "string",
+          "enum": [
+            "required",
+            "preferred",
+            "discouraged"
+          ],
+          "default": "preferred"
+        },
+        "attestation_preference": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "indirect",
+            "none"
+          ],
+          "default": "direct"
+        },
+        "limit": {
+          "type": "integer",
+          "default": 100
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled"
-      ]
+      "type": "object"
     },
     "Password": {
       "properties": {
@@ -527,7 +527,29 @@
           "type": "boolean",
           "default": false
         },
-        "min_password_length": {
+        "acquire_on_registration": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "never"
+        },
+        "acquire_on_login": {
+          "type": "string",
+          "enum": [
+            "always",
+            "conditional",
+            "never"
+          ],
+          "default": "always"
+        },
+        "recovery": {
+          "type": "boolean",
+          "default": true
+        },
+        "min_length": {
           "type": "integer",
           "default": 8
         }
@@ -667,9 +689,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "host"
-      ],
       "description": "SMTP Server Settings for sending passcodes"
     },
     "Saml": {
@@ -721,24 +740,20 @@
         },
         "methods": {
           "items": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "totp",
+              "security_key"
+            ]
           },
-          "type": "array",
-          "description": "TODO: jsonschema only totp and security_key are allowed"
+          "type": "array"
         },
         "recovery_codes": {
           "$ref": "#/$defs/RecoveryCodes"
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "enabled",
-        "optional",
-        "onboarding",
-        "methods",
-        "recovery_codes"
-      ]
+      "type": "object"
     },
     "SecondFactorOnboarding": {
       "properties": {
@@ -764,10 +779,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "keys"
-      ]
+      "type": "object"
     },
     "Server": {
       "properties": {
@@ -802,10 +814,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "name"
-      ]
+      "type": "object"
     },
     "Session": {
       "properties": {
@@ -902,6 +911,40 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Username": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "default": true
+        },
+        "acquire_on_registration": {
+          "type": "boolean",
+          "default": false
+        },
+        "acquire_on_login": {
+          "type": "boolean",
+          "default": false
+        },
+        "use_as_login_identifier": {
+          "type": "boolean",
+          "default": true
+        },
+        "min_length": {
+          "type": "integer",
+          "default": 8
+        },
+        "max_length": {
+          "type": "integer",
+          "default": 100
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "WebauthnSettings": {
       "properties": {
         "relying_party": {
@@ -909,7 +952,11 @@
         },
         "timeout": {
           "type": "integer",
+          "description": "Deprecated, use Timeouts instead",
           "default": 60000
+        },
+        "timeouts": {
+          "$ref": "#/$defs/WebauthnTimeouts"
         },
         "user_verification": {
           "type": "string",
@@ -918,12 +965,25 @@
             "preferred",
             "discouraged"
           ],
+          "description": "Deprecated, use Passkey.UserVerification instead",
           "default": "preferred"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "description": "WebauthnSettings defines the settings for the webauthn authentication mechanism"
+    },
+    "WebauthnTimeouts": {
+      "properties": {
+        "registration": {
+          "type": "integer"
+        },
+        "login": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "Webhook": {
       "properties": {

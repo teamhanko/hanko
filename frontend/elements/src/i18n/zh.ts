@@ -16,6 +16,8 @@ export const zh: Translation = {
     profilePasskeys: "密钥",
     isPrimaryEmail: "主要电子邮件地址",
     setPrimaryEmail: "设定主要电子邮件地址",
+    createEmail: "[missing]",
+    createUsername: "[missing]",
     emailVerified: "已验证",
     emailUnverified: "未验证",
     emailDelete: "删除",
@@ -36,9 +38,6 @@ export const zh: Translation = {
       "使用密钥轻松安全地登录您的账户。注意：您的生物识别数据仅存储在您的设备上，永远不会与任何人共享。",
     createAccount: "没有“{emailAddress}”的账户存在。你想要创建一个新账户吗?",
     passwordFormatHint: "必须长在{minLength}和{maxLength}字符之间。",
-    manageEmails: "您的电子邮件地址用于通信和认证。",
-    changePassword: "设置新密码。",
-    managePasskeys: "您的密钥允许您登录此账户。",
     isPrimaryEmail:
       "用于通讯，验证码，以及作为密钥的用户名。要更改主要电子邮件地址，请先添加另一个电子邮件地址并设定为主要。",
     setPrimaryEmail:
@@ -54,7 +53,6 @@ export const zh: Translation = {
       "从您的账户中删除此密钥。请注意，密钥将继续存在于您的设备上，也需要在那里被删除。",
     deleteAccount: "您确定要删除此账号吗？所有数据将立即被删除，且无法恢复。",
     noAccountExists: '没有账户"{emailAddress}"。',
-    changeYourUsername: "更改您的用户名",
   },
   labels: {
     or: "或",
@@ -86,7 +84,6 @@ export const zh: Translation = {
     rename: "重命名",
     newPasskeyName: "新密钥名称",
     addEmail: "添加电子邮件",
-    changePassword: "更改密码",
     createPasskey: "创建密钥",
     webauthnUnsupported: "您的浏览器不支持密钥",
     signInWith: "通过 {provider} 登录",
@@ -97,6 +94,9 @@ export const zh: Translation = {
     dontHaveAnAccount: "没有账号？",
     alreadyHaveAnAccount: "已有账号？",
     changeUsername: "更改用户名",
+    setUsername: "设置用户名",
+    changePassword: "更改密码",
+    setPassword: "设置密码",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",
@@ -120,6 +120,7 @@ export const zh: Translation = {
     signupDisabled: "帐户注册被禁用。",
   },
   flowErrors: {
+    technical_error: "发生技术错误。请稍后再试。",
     flow_expired_error: "会话已过期，请点击按钮重新启动。",
     value_invalid_error: "输入的值无效。",
     passcode_invalid: "提供的密码不正确。",

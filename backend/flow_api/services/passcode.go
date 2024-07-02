@@ -123,7 +123,7 @@ func (s *passcode) SendPasscode(p SendPasscodeParams) (uuid.UUID, error) {
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
 		FlowID:    &p.FlowID,
-		Ttl:       s.cfg.Passcode.TTL,
+		Ttl:       s.cfg.Email.PasscodeTtl,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
 		CreatedAt: now,

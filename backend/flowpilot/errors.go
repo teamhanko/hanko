@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // flowpilotError defines the interface for custom error types in the Flowpilot package.
@@ -13,7 +14,7 @@ type flowpilotError interface {
 	Code() string
 	Message() string
 
-	toPublicError(debug bool) PublicError
+	toResponseError(debug bool) *ResponseError
 }
 
 // FlowError is an interface representing flow-related errors.
@@ -59,9 +60,9 @@ func (e *defaultError) Error() string {
 	return e.errorText
 }
 
-// toPublicError converts the error to a PublicError for public exposure.
-func (e *defaultError) toPublicError(debug bool) PublicError {
-	publicError := PublicError{
+// toResponseError converts the error to a ResponseError for public exposure.
+func (e *defaultError) toResponseError(debug bool) *ResponseError {
+	publicError := &ResponseError{
 		Code:    e.Code(),
 		Message: e.Message(),
 	}
@@ -169,6 +170,6 @@ var (
 	ErrorValueTooShort = NewInputError("value_too_short_error", "Value is too short.")
 )
 
-func ErrorValueInvalidMustBeOneOf(values interface{}) InputError {
-	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %+v", values))
+func createMustBeOneOfError(values []string) InputError {
+	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %s", strings.Join(values, ",")))
 }

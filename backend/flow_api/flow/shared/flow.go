@@ -6,23 +6,12 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/session"
-)
-
-const (
-	StateSuccess         flowpilot.StateName = "success"
-	StateError           flowpilot.StateName = "error"
-	StateThirdPartyOAuth flowpilot.StateName = "thirdparty_oauth"
-)
-
-const (
-	ActionBack            flowpilot.ActionName = "back"
-	ActionExchangeToken   flowpilot.ActionName = "exchange_token"
-	ActionThirdPartyOAuth flowpilot.ActionName = "thirdparty_oauth"
 )
 
 type Dependencies struct {
@@ -31,6 +20,7 @@ type Dependencies struct {
 	PasscodeService       services.Passcode
 	PasswordService       services.Password
 	WebauthnService       services.WebauthnService
+	SamlService           saml.Service
 	Persister             persistence.Persister
 	SessionManager        session.Manager
 	RateLimiter           limiter.Store

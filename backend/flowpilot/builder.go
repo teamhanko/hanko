@@ -13,8 +13,9 @@ type FlowBuilder interface {
 	ErrorState(stateName StateName) FlowBuilder
 	BeforeState(stateName StateName, hooks ...HookAction) FlowBuilder
 	AfterState(stateName StateName, hooks ...HookAction) FlowBuilder
+	AfterFlow(flowName FlowName, hooks ...HookAction) FlowBuilder
 	Debug(enabled bool) FlowBuilder
-	SubFlows(subFlows ...SubFlow) FlowBuilder
+	SubFlows(subFlows ...subFlow) FlowBuilder
 	Build() (Flow, error)
 	MustBuild() Flow
 	BeforeEachAction(hooks ...HookAction) FlowBuilder
@@ -23,13 +24,15 @@ type FlowBuilder interface {
 
 // defaultFlowBuilderBase is the base flow builder struct.
 type defaultFlowBuilderBase struct {
+	name                  FlowName
 	flow                  stateActions
 	subFlows              SubFlows
 	stateDetails          stateDetails
 	beforeStateHooks      stateHooks
 	afterStateHooks       stateHooks
-	beforeEachActionHooks HookActions
-	afterEachActionHooks  HookActions
+	beforeEachActionHooks hookActions
+	afterEachActionHooks  hookActions
+	afterFlowHooks        flowHooks
 }
 
 // defaultFlowBuilder is a builder struct for creating a new Flow.
@@ -45,20 +48,22 @@ type defaultFlowBuilder struct {
 }
 
 // newFlowBuilderBase creates a new defaultFlowBuilderBase instance.
-func newFlowBuilderBase() defaultFlowBuilderBase {
+func newFlowBuilderBase(name FlowName) defaultFlowBuilderBase {
 	return defaultFlowBuilderBase{
+		name:             name,
 		flow:             make(stateActions),
 		subFlows:         make(SubFlows, 0),
 		stateDetails:     make(stateDetails),
 		beforeStateHooks: make(stateHooks),
 		afterStateHooks:  make(stateHooks),
+		afterFlowHooks:   make(flowHooks),
 	}
 }
 
 // NewFlow creates a new defaultFlowBuilder that builds a new flow available under the specified path.
-func NewFlow(path string) FlowBuilder {
-	fbBase := newFlowBuilderBase()
-
+func NewFlow(name FlowName) FlowBuilder {
+	path := fmt.Sprintf("/%s", name)
+	fbBase := newFlowBuilderBase(name)
 	return &defaultFlowBuilder{path: path, defaultFlowBuilderBase: fbBase}
 }
 
@@ -80,6 +85,10 @@ func (fb *defaultFlowBuilderBase) addAfterStateHooks(stateName StateName, hooks 
 	fb.afterStateHooks[stateName] = append(fb.afterStateHooks[stateName], hooks...)
 }
 
+func (fb *defaultFlowBuilderBase) addAfterFlowHooks(flowName FlowName, hooks ...HookAction) {
+	fb.afterFlowHooks[flowName] = append(fb.afterFlowHooks[flowName], hooks...)
+}
+
 func (fb *defaultFlowBuilder) addBeforeEachActionHooks(hooks ...HookAction) {
 	fb.beforeEachActionHooks = append(fb.beforeEachActionHooks, hooks...)
 }
@@ -88,62 +97,62 @@ func (fb *defaultFlowBuilder) addAfterEachActionHooks(hooks ...HookAction) {
 	fb.afterEachActionHooks = append(fb.afterEachActionHooks, hooks...)
 }
 
-func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...SubFlow) {
+func (fb *defaultFlowBuilderBase) addSubFlows(subFlows ...subFlow) {
 	fb.subFlows = append(fb.subFlows, subFlows...)
 }
 
-func (fb *defaultFlowBuilderBase) addStateIfNotExists(stateNames ...StateName) {
-	for _, stateName := range stateNames {
-		if _, exists := fb.flow[stateName]; !exists {
-			fb.addState(stateName)
-		}
+func (fb *defaultFlowBuilderBase) addStateIfNotExists(stateName StateName) {
+	if _, exists := fb.flow[stateName]; !exists {
+		fb.addState(stateName)
 	}
 }
 
 // scanFlowStates iterates through each state in the provided flow and associates relevant information, also it checks
 // for uniqueness of state names.
-func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase, isRootFlow bool) error {
-	// Check if states were already scanned, if so, don't scan again
-	if len(fb.stateDetails) > 0 && isRootFlow {
-		return nil
-	}
+func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 	// Iterate through states in the flow.
 	for stateName, actions := range flow.getFlow() {
 		// Check if state name is already in use.
 		if _, ok := fb.stateDetails[stateName]; ok {
-			return fmt.Errorf("non-unique flow state '%s'", stateName)
+			continue
 		}
 
-		f := flow.getFlow()
-		subFlows := flow.getSubFlows()
-		beforeStateHooks := flow.getBeforeStateHooks()[stateName]
-		afterStateHooks := flow.getAfterStateHooks()[stateName]
+		actionDetails := make(defaultActionDetails, len(actions))
 
-		// Check if the current state belongs to a sub-flow.
-		if !fb.flow.stateExists(stateName) {
-			// If the main flow includes hook actions for a sub-flow state, add the hooks defined in the main flow to
-			// the list of hooks of the sub-flow state.
-			beforeStateHooks = append(beforeStateHooks, fb.beforeStateHooks[stateName]...)
-			afterStateHooks = append(afterStateHooks, fb.afterStateHooks[stateName]...)
+		for i, action := range actions {
+			actionDetails[i] = &defaultActionDetail{
+				action:   action,
+				flowName: flow.getName(),
+			}
 		}
 
 		// Create state details.
-		state := stateDetail{
-			name:             stateName,
-			actions:          actions,
-			flow:             f,
-			subFlows:         subFlows,
-			beforeStateHooks: beforeStateHooks,
-			afterStateHooks:  afterStateHooks,
+		state := &defaultStateDetail{
+			name:          stateName,
+			actionDetails: actionDetails,
+			flow:          flow.getFlow(),
+			subFlows:      flow.getSubFlows(),
+			flowName:      flow.getName(),
 		}
 
 		// Store state details.
-		fb.stateDetails[stateName] = &state
+		fb.stateDetails[stateName] = state
 	}
+
+	for stateName, actions := range flow.getBeforeStateHooks() {
+		fb.beforeStateHooks[stateName] = append(fb.beforeStateHooks[stateName], actions...)
+	}
+
+	for stateName, actions := range flow.getAfterStateHooks() {
+		fb.afterStateHooks[stateName] = append(fb.afterStateHooks[stateName], actions...)
+	}
+
+	actions := flow.getAfterFlowHooks()
+	fb.afterFlowHooks[flow.getName()] = append(fb.afterFlowHooks[flow.getName()], actions...)
 
 	// Recursively scan sub-flows.
 	for _, sf := range flow.getSubFlows() {
-		if err := fb.scanFlowStates(sf, false); err != nil {
+		if err := fb.scanFlowStates(sf); err != nil {
 			return err
 		}
 	}
@@ -215,6 +224,11 @@ func (fb *defaultFlowBuilder) AfterState(stateName StateName, hooks ...HookActio
 	return fb
 }
 
+func (fb *defaultFlowBuilder) AfterFlow(flowName FlowName, hooks ...HookAction) FlowBuilder {
+	fb.addAfterFlowHooks(flowName, hooks...)
+	return fb
+}
+
 func (fb *defaultFlowBuilder) BeforeEachAction(hooks ...HookAction) FlowBuilder {
 	fb.addBeforeEachActionHooks(hooks...)
 	return fb
@@ -242,7 +256,7 @@ func (fb *defaultFlowBuilder) ErrorState(stateName StateName) FlowBuilder {
 	return fb
 }
 
-func (fb *defaultFlowBuilder) SubFlows(subFlows ...SubFlow) FlowBuilder {
+func (fb *defaultFlowBuilder) SubFlows(subFlows ...subFlow) FlowBuilder {
 	fb.addSubFlows(subFlows...)
 	return fb
 }
@@ -259,17 +273,18 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		return nil, fmt.Errorf("flow validation failed: %w", err)
 	}
 
-	dfb := defaultFlowBase{
+	dfb := &defaultFlowBase{
+		name:                  fb.name,
 		flow:                  fb.flow,
 		subFlows:              fb.subFlows,
 		beforeStateHooks:      fb.beforeStateHooks,
 		afterStateHooks:       fb.afterStateHooks,
 		beforeEachActionHooks: fb.beforeEachActionHooks,
 		afterEachActionHooks:  fb.afterEachActionHooks,
+		afterFlowHooks:        fb.afterFlowHooks,
 	}
 
 	flow := &defaultFlow{
-		path:                  fb.path,
 		initialStateName:      fb.initialStateName,
 		initialNextStateNames: fb.initialNextStateNames,
 		errorStateName:        fb.errorStateName,
@@ -280,9 +295,16 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 		contextValues:         make(contextValues),
 	}
 
-	if err := fb.scanFlowStates(flow, true); err != nil {
-		return nil, fmt.Errorf("failed to scan flow states: %w", err)
+	// Check if states were already scanned, if so, don't scan again
+	if len(fb.stateDetails) == 0 {
+		if err := fb.scanFlowStates(flow); err != nil {
+			return nil, fmt.Errorf("failed to scan flow states: %w", err)
+		}
 	}
+
+	flow.defaultFlowBase.beforeStateHooks.makeUnique()
+	flow.defaultFlowBase.afterStateHooks.makeUnique()
+	flow.defaultFlowBase.afterFlowHooks.makeUnique()
 
 	return flow, nil
 }

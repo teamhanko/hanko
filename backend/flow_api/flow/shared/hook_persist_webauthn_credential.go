@@ -18,20 +18,20 @@ type WebauthnCredentialSave struct {
 func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	if !c.Stash().Get("user_id").Exists() {
+	if !c.Stash().Get(StashPathUserID).Exists() {
 		return nil
 	}
 
-	userId, err := uuid.FromString(c.Stash().Get("user_id").String())
+	userId, err := uuid.FromString(c.Stash().Get(StashPathUserID).String())
 	if err != nil {
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 	}
 
-	if !c.Stash().Get("webauthn_credential").Exists() {
+	if !c.Stash().Get(StashPathWebauthnCredential).Exists() {
 		return nil
 	}
 
-	webauthnCredentialJson := c.Stash().Get("webauthn_credential").String()
+	webauthnCredentialJson := c.Stash().Get(StashPathWebauthnCredential).String()
 
 	var webauthnCredential webauthnLib.Credential
 	err = json.Unmarshal([]byte(webauthnCredentialJson), &webauthnCredential)
@@ -56,6 +56,10 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
+	}
+
+	if userModel, ok := c.Get("session_user").(*models.User); ok {
+		userModel.WebauthnCredentials = append(userModel.WebauthnCredentials, *credentialModel)
 	}
 
 	return nil

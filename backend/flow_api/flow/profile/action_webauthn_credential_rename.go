@@ -12,7 +12,7 @@ type WebauthnCredentialRename struct {
 }
 
 func (a WebauthnCredentialRename) GetName() flowpilot.ActionName {
-	return ActionWebauthnCredentialRename
+	return shared.ActionWebauthnCredentialRename
 }
 
 func (a WebauthnCredentialRename) GetDescription() string {
@@ -20,6 +20,13 @@ func (a WebauthnCredentialRename) GetDescription() string {
 }
 
 func (a WebauthnCredentialRename) Initialize(c flowpilot.InitializationContext) {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passkey.Enabled {
+		c.SuspendAction()
+		return
+	}
+
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
 		c.SuspendAction()
@@ -39,17 +46,17 @@ func (a WebauthnCredentialRename) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	webauthnCredentialModel := userModel.GetWebauthnCredentialById(c.Input().Get("passkey_id").String())
 	if webauthnCredentialModel == nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorNotFound)
+		return c.Error(shared.ErrorNotFound)
 	}
 
 	webauthnCredentialName := c.Input().Get("passkey_name").String()
@@ -60,9 +67,5 @@ func (a WebauthnCredentialRename) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not update credential: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
-}
-
-func (a WebauthnCredentialRename) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue(shared.StateProfileInit)
 }

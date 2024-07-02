@@ -1,4 +1,10 @@
-import { Fragment, useContext, useEffect, useMemo, useState, } from "preact/compat";
+import {
+  Fragment,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "preact/compat";
 
 import { HankoError, WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
@@ -36,29 +42,21 @@ const LoginInitPage = (props: Props) => {
   } = useContext(AppContext);
 
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
+  const [identifier, setIdentifier] = useState<string>(
+    uiState.username || uiState.email,
+  );
   const { flowState } = useFlowState(props.state);
   const isWebAuthnSupported = WebauthnSupport.supported();
-  const [thirdPartyError, setThirdPartyError] = useState<HankoError | undefined>(undefined)
+  const [thirdPartyError, setThirdPartyError] = useState<
+    HankoError | undefined
+  >(undefined);
 
   const onIdentifierInput = (event: Event) => {
+    event.preventDefault();
     if (event.target instanceof HTMLInputElement) {
       const { value } = event.target;
-
-      switch (identifierType) {
-        case "email":
-          setUIState((prev) => ({ ...prev, email: value, username: null }));
-          break;
-        case "username":
-          setUIState((prev) => ({ ...prev, email: null, username: value }));
-          break;
-        case "identifier":
-          if (value.match(/^[^@]+@[^@]+\.[^@]+$/)) {
-            setUIState((prev) => ({ ...prev, email: value, username: null }));
-          } else {
-            setUIState((prev) => ({ ...prev, email: null, username: value }));
-          }
-          break;
-      }
+      setIdentifier(value);
+      setIdentifierToUIState(value);
     }
   };
 
@@ -68,13 +66,11 @@ const LoginInitPage = (props: Props) => {
     setLoadingAction("email-submit");
 
     const nextState = await flowState.actions
-      .continue_with_login_identifier({
-        [identifierType]: uiState.email || uiState.username,
-      })
+      .continue_with_login_identifier({ [identifierType]: identifier })
       .run();
 
+    setIdentifierToUIState(identifier);
     setLoadingAction(null);
-
     stateHandler[nextState.name](nextState);
   };
 
@@ -95,65 +91,96 @@ const LoginInitPage = (props: Props) => {
     init("registration");
   };
 
+  const setIdentifierToUIState = (value: string) => {
+    const setEmail = () =>
+      setUIState((prev) => ({ ...prev, email: value, username: null }));
+    const setUsername = () =>
+      setUIState((prev) => ({ ...prev, email: null, username: value }));
+    switch (identifierType) {
+      case "email":
+        setEmail();
+        break;
+      case "username":
+        setUsername();
+        break;
+      case "identifier":
+        if (value.match(/^[^@]+@[^@]+\.[^@]+$/)) {
+          setEmail();
+        } else {
+          setUsername();
+        }
+        break;
+    }
+  };
+
   const onThirdpartySubmit = async (event: Event, name: string) => {
-    event.preventDefault()
-    setLoadingAction("thirdparty-submit")
+    event.preventDefault();
+    setLoadingAction("thirdparty-submit");
 
-    const nextState = await flowState.actions.thirdparty_oauth({
-      provider: name,
-      redirect_to: window.location.toString()
-    }).run()
+    const nextState = await flowState.actions
+      .thirdparty_oauth({
+        provider: name,
+        redirect_to: window.location.toString(),
+      })
+      .run();
 
-    stateHandler[nextState.name](nextState)
+    stateHandler[nextState.name](nextState);
   };
 
   const showDivider = useMemo(
-    () => !!flowState.actions.webauthn_generate_request_options?.(null) || !!flowState.actions.thirdparty_oauth?.(null),
+    () =>
+      !!flowState.actions.webauthn_generate_request_options?.(null) ||
+      !!flowState.actions.thirdparty_oauth?.(null),
     [flowState.actions],
   );
 
-  const { inputs } = flowState.actions.continue_with_login_identifier(null);
+  const inputs =
+    flowState.actions.continue_with_login_identifier?.(null).inputs;
 
   useEffect(() => {
-    const { inputs } = flowState.actions.continue_with_login_identifier(null);
-    if (inputs.email) {
-      setIdentifierType("email");
-    } else if (inputs.username) {
-      setIdentifierType("username");
-    } else {
-      setIdentifierType("identifier");
-    }
+    const inputs =
+      flowState.actions.continue_with_login_identifier?.(null).inputs;
+    setIdentifierType(
+      inputs?.email ? "email" : inputs?.username ? "username" : "identifier",
+    );
   }, [flowState]);
 
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
+    const searchParams = new URLSearchParams(window.location.search);
 
-    if (searchParams.get("error") == undefined || searchParams.get("error").length === 0) {
-      return
+    if (
+      searchParams.get("error") == undefined ||
+      searchParams.get("error").length === 0
+    ) {
+      return;
     }
 
-    let errorCode = ""
+    let errorCode = "";
     switch (searchParams.get("error")) {
       case "access_denied":
-        errorCode = "thirdPartyAccessDenied"
+        errorCode = "thirdPartyAccessDenied";
         break;
       default:
-        errorCode = "somethingWentWrong"
+        errorCode = "somethingWentWrong";
         break;
     }
 
     const error: HankoError = {
       name: errorCode,
       code: errorCode,
-      message: searchParams.get("error_description")
-    }
+      message: searchParams.get("error_description"),
+    };
 
-    setThirdPartyError(error)
+    setThirdPartyError(error);
 
-    searchParams.delete("error")
-    searchParams.delete("error_description")
+    searchParams.delete("error");
+    searchParams.delete("error_description");
 
-    history.replaceState(null, null, window.location.pathname + searchParams.toString())
+    history.replaceState(
+      null,
+      null,
+      window.location.pathname + searchParams.toString(),
+    );
   }, []);
 
   return (
@@ -161,42 +188,46 @@ const LoginInitPage = (props: Props) => {
       <Content>
         <Headline1>{t("headlines.signIn")}</Headline1>
         <ErrorBox state={flowState} error={thirdPartyError} />
-        <Form onSubmit={onEmailSubmit} maxWidth>
-          {inputs.email ? (
-            <Input
-              type={"email"}
-              autoComplete={"username webauthn"}
-              autoCorrect={"off"}
-              flowInput={inputs.email}
-              onInput={onIdentifierInput}
-              value={uiState.email}
-              placeholder={t("labels.email")}
-              pattern={"^[^@]+@[^@]+\\.[^@]+$"}
-            />
-          ) : inputs.username ? (
-            <Input
-              type={"text"}
-              autoComplete={"username webauthn"}
-              autoCorrect={"off"}
-              flowInput={inputs.username}
-              onInput={onIdentifierInput}
-              value={uiState.username}
-              placeholder={t("labels.username")}
-            />
-          ) : (
-            <Input
-              type={"text"}
-              autoComplete={"username webauthn"}
-              autoCorrect={"off"}
-              flowInput={inputs.identifier}
-              onInput={onIdentifierInput}
-              value={uiState.username || uiState.email}
-              placeholder={t("labels.emailOrUsername")}
-            />
-          )}
-          <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
-        </Form>
-        <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+        {inputs ? (
+          <Fragment>
+            <Form onSubmit={onEmailSubmit} maxWidth>
+              {inputs.email ? (
+                <Input
+                  type={"email"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.email}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.email")}
+                  pattern={"^[^@]+@[^@]+\\.[^@]+$"}
+                />
+              ) : inputs.username ? (
+                <Input
+                  type={"text"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.username}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.username")}
+                />
+              ) : (
+                <Input
+                  type={"text"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.identifier}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.emailOrUsername")}
+                />
+              )}
+              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+            </Form>
+            <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+          </Fragment>
+        ) : null}
         {flowState.actions.webauthn_generate_request_options?.(null) &&
         !hidePasskeyButtonOnLogin ? (
           <Form onSubmit={(event) => onPasskeySubmit(event)}>
@@ -213,20 +244,26 @@ const LoginInitPage = (props: Props) => {
             </Button>
           </Form>
         ) : null}
-        {
-          flowState.actions.thirdparty_oauth?.(null) ? flowState.actions.thirdparty_oauth(null).inputs.provider.allowed_values?.map((v) => {
-            return <Form onSubmit={(event) => onThirdpartySubmit(event, v.value)}>
-              <Button
-                uiAction={"thirdparty-submit"}
-                secondary
-                // @ts-ignore
-                icon={v.value}
-              >
-                {t("labels.signInWith", { provider: v.name })}
-              </Button>
-            </Form>
-          }) : null
-        }
+        {flowState.actions.thirdparty_oauth?.(null)
+          ? flowState.actions
+              .thirdparty_oauth(null)
+              .inputs.provider.allowed_values?.map((v) => {
+                return (
+                  <Form
+                    onSubmit={(event) => onThirdpartySubmit(event, v.value)}
+                  >
+                    <Button
+                      uiAction={"thirdparty-submit"}
+                      secondary
+                      // @ts-ignore
+                      icon={v.value}
+                    >
+                      {t("labels.signInWith", { provider: v.name })}
+                    </Button>
+                  </Form>
+                );
+              })
+          : null}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />

@@ -16,6 +16,8 @@ export const de: Translation = {
     profilePasskeys: "Passkeys",
     isPrimaryEmail: "Primäre E-Mail-Adresse",
     setPrimaryEmail: "Als primäre E-Mail-Adresse festlegen",
+    createEmail: "Neue E-Mail eingeben",
+    createUsername: "Neuen Nutzernamen eingeben",
     emailVerified: "Verifiziert",
     emailUnverified: "Unverifiziert",
     emailDelete: "Löschen",
@@ -40,11 +42,6 @@ export const de: Translation = {
       'Es existiert kein Konto für "{emailAddress}". Möchten Sie ein neues Konto erstellen?',
     passwordFormatHint:
       "Das Passwort muss zwischen {minLength} und {maxLength} Zeichen lang sein.",
-    manageEmails:
-      "Ihre E-Mail-Adressen werden zur Kommunikation und Authentifizierung verwendet.",
-    changePassword: "Setze ein neues Passwort.",
-    managePasskeys:
-      "Passkeys können für die Anmeldung bei diesem Account verwendet werden.",
     isPrimaryEmail:
       "Wird für die Kommunikation, Passcodes und als Benutzername für Passkeys verwendet. Um die primäre E-Mail-Adresse zu ändern, fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie sie als primär fest.",
     setPrimaryEmail:
@@ -62,7 +59,6 @@ export const de: Translation = {
     deleteAccount:
       "Sind Sie sicher, dass Sie Ihr Konto löschen wollen? Alle Daten werden sofort gelöscht und können nicht wiederhergestellt werden.",
     noAccountExists: 'Es existiert kein Konto für "{emailAddress}".',
-    changeYourUsername: "Ändern Sie Ihren Benutzernamen",
   },
   labels: {
     or: "oder",
@@ -94,9 +90,8 @@ export const de: Translation = {
     rename: "Umbenennen",
     newPasskeyName: "Neuer Passkey Name",
     addEmail: "E-Mail-Adresse hinzufügen",
-    changePassword: "Password ändern",
     createPasskey: "Erstellen Sie einen passkey",
-    webauthnUnsupported: "Passkeys werden von ihrem Browser nicht unterrstützt",
+    webauthnUnsupported: "Passkeys werden von ihrem Browser nicht unterstützt",
     signInWith: "Anmelden mit {provider}",
     deleteAccount: "Ja, dieses Konto löschen.",
     emailOrUsername: "E-Mail oder Nutzername",
@@ -105,6 +100,9 @@ export const de: Translation = {
     dontHaveAnAccount: "Sie haben noch kein Konto?",
     alreadyHaveAnAccount: "Haben Sie bereits ein Konto?",
     changeUsername: "Benutzernamen ändern",
+    setUsername: "Benutzernamen setzen",
+    changePassword: "Passwort ändern",
+    setPassword: "Passwort setzen",
   },
   errors: {
     somethingWentWrong:
@@ -136,6 +134,8 @@ export const de: Translation = {
     signupDisabled: "Die Kontoregistrierung ist deaktiviert.",
   },
   flowErrors: {
+    technical_error:
+      "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
     flow_expired_error:
       "Die Sitzung ist abgelaufen, bitte klicken Sie auf die Schaltfläche, um neu zu starten.",
     value_invalid_error: "Der eingegebene Wert ist ungültig.",
