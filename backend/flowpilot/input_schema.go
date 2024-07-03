@@ -97,6 +97,7 @@ func (s *defaultSchema) AddInputs(inputList ...Input) {
 		} else {
 			for i, existingInput := range s.inputs {
 				if existingInput.getName() == input.getName() {
+					input.setError(existingInput.getError())
 					s.inputs[i] = input
 				}
 			}
