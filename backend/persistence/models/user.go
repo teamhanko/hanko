@@ -35,6 +35,14 @@ func (user *User) DeleteWebauthnCredential(credentialId string) {
 	}
 }
 
+func (user *User) GetIdentities() Identities {
+	var identities Identities
+	for _, email := range user.Emails {
+		identities = append(identities, email.Identities...)
+	}
+	return identities
+}
+
 func NewUser() User {
 	id, _ := uuid.NewV4()
 	return User{
