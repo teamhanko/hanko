@@ -4,6 +4,7 @@ import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -81,12 +82,14 @@ func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 	if userModel.PasswordCredential == nil {
 		return true
 	}
+	
+	identities := userModel.GetIdentities()
 
 	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
 	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
 	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
 	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication && (canUseEmailAsLoginIdentifier || canUseUsernameAsLoginIdentifier && len(userModel.Emails) > 0)
-	canDoThirdParty := deps.Cfg.ThirdParty.Providers.HasEnabled() || (deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0)
+	canDoThirdParty := services.UserCanDoThirdParty(deps.Cfg, identities) || services.UserCanDoSaml(deps.Cfg, identities)
 	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPasscode && !canDoThirdParty
 
 	if canUseNoOtherAuthMethod {

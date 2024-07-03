@@ -6,6 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -51,13 +52,10 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 						continue
 					}
 
-					for _, identity := range otherEmail.Identities {
-						if provider := deps.Cfg.ThirdParty.Providers.Get(identity.ProviderName); provider != nil {
-							if provider.Enabled {
-								input.AllowedValue(email.Address, email.ID.String())
-								break
-							}
-						}
+					if services.UserCanDoThirdParty(deps.Cfg, otherEmail.Identities) ||
+						services.UserCanDoSaml(deps.Cfg, otherEmail.Identities) {
+						input.AllowedValue(email.Address, email.ID.String())
+						break
 					}
 				}
 			} else {
