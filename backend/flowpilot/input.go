@@ -31,6 +31,7 @@ type Input interface {
 
 	setValue(value interface{}) Input
 	setError(inputError InputError)
+	getError() InputError
 	getName() string
 	shouldPersist() bool
 	shouldPreserve() bool
@@ -195,6 +196,11 @@ func (i *defaultInput) getName() string {
 // setError sets an error to the given input field.
 func (i *defaultInput) setError(inputError InputError) {
 	i.error = inputError
+}
+
+// getError returns the input error.
+func (i *defaultInput) getError() InputError {
+	return i.error
 }
 
 // shouldPersist indicates the value should be persisted.
