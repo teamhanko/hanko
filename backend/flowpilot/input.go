@@ -272,7 +272,7 @@ func (i *defaultInput) validate(stateName StateName, inputData readOnlyActionInp
 	if i.dataType == inputTypeEmail && (isRequired || (!isRequired && !hasEmptyOrNilValue)) {
 		pattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 		if matched := pattern.MatchString(*inputValue); !matched {
-			i.error = ErrorEmailInvalid
+			i.error = ErrorValueInvalid
 			return false
 		}
 	}
