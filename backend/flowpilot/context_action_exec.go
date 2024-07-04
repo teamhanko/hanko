@@ -280,6 +280,7 @@ func (aec *defaultActionExecutionContext) GetFlowError() FlowError {
 
 // ValidateInputData validates the input data against the inputSchema.
 func (aec *defaultActionExecutionContext) ValidateInputData() bool {
+	aec.inputSchema.preprocess()
 	return aec.inputSchema.validateInputData(aec.flowModel.CurrentState, aec.stash)
 }
 
