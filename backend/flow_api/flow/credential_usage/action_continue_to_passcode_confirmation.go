@@ -25,8 +25,14 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 		return fmt.Errorf("failed to set login_method to stash: %w", err)
 	}
 
-	if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
-		return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+	if len(c.Stash().Get(shared.StashPathUserID).String()) > 0 {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
+			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+		}
+	} else {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_login_attempted"); err != nil {
+			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+		}
 	}
 
 	return c.Continue(shared.StatePasscodeConfirmation)

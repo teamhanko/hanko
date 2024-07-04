@@ -23,7 +23,12 @@ func (a RegisterPassword) GetDescription() string {
 
 func (a RegisterPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	c.AddInputs(flowpilot.PasswordInput("new_password").Required(!deps.Cfg.Password.Optional).MinLength(deps.Cfg.Password.MinLength))
+
+	input := flowpilot.PasswordInput("new_password").
+		Required(!deps.Cfg.Password.Optional).
+		MinLength(deps.Cfg.Password.MinLength)
+
+	c.AddInputs(input)
 }
 
 func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {

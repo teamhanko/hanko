@@ -99,7 +99,7 @@ func (s *getWaCreationOptions) TestGetWaCreationOptions_Execute() {
 			db := models.NewFlowDB(tx)
 			actionParam := fmt.Sprintf("get_wa_creation_options@%s", currentTest.flowId)
 			inputData := flowpilot.InputData{JSONString: currentTest.input}
-			result, err := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(inputData))
+			result, err := flow.Execute(db, flowpilot.WithQueryParam(actionParam), flowpilot.WithInputData(inputData))
 			s.Require().NoError(err)
 
 			s.Equal(currentTest.statusCode, result.Status())
