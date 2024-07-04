@@ -42,7 +42,9 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 			MaxLength(deps.Cfg.Email.MaxLength).
 			Persist(true).
 			Preserve(true).
-			Required(!deps.Cfg.Email.Optional)
+			Required(!deps.Cfg.Email.Optional).
+			TrimSpace(true).
+			LowerCase(true)
 
 		c.AddInputs(input)
 	}
@@ -53,7 +55,8 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 			MaxLength(deps.Cfg.Username.MaxLength).
 			Persist(true).
 			Preserve(true).
-			Required(!deps.Cfg.Username.Optional)
+			Required(!deps.Cfg.Username.Optional).
+			TrimSpace(true)
 
 		c.AddInputs(input)
 	}
@@ -156,7 +159,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if email != "" && deps.Cfg.Email.RequireVerification {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification"); err != nil {
+		if err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 	}

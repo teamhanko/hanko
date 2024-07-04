@@ -26,7 +26,7 @@ func (a EmailCreate) Initialize(c flowpilot.InitializationContext) {
 	if !deps.Cfg.Email.Enabled {
 		c.SuspendAction()
 	} else {
-		c.AddInputs(flowpilot.EmailInput("email").Required(true))
+		c.AddInputs(flowpilot.EmailInput("email").Required(true).TrimSpace(true).LowerCase(true))
 	}
 }
 

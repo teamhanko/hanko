@@ -2,6 +2,7 @@ package flowpilot
 
 import (
 	"github.com/tidwall/gjson"
+	"strings"
 )
 
 // initializationInputSchema represents an interface for managing input data schemas.
@@ -18,6 +19,7 @@ type executionInputSchema interface {
 	getInput(name string) Input
 	getOutputData() readOnlyActionInput
 	getDataToPersist() readOnlyActionInput
+	preprocess()
 	validateInputData(stateName StateName, stash stash) bool
 	forInitializationContext() initializationInputSchema
 	toResponseInputs(stateName StateName) ResponseInputs
@@ -41,31 +43,17 @@ type ResponseInputs map[string]*ResponseInput
 // defaultSchema implements the initializationInputSchema interface and holds a collection of input fields.
 type defaultSchema struct {
 	inputs
-	inputData  readOnlyActionInput
+	inputData  actionInput
 	outputData actionInput
 }
 
 // newSchemaWithInputData creates a new executionInputSchema with input data.
 func newSchemaWithInputData(inputData actionInput) executionInputSchema {
 	outputData := newActionInput()
-
 	return &defaultSchema{
 		inputData:  inputData,
 		outputData: outputData,
 	}
-}
-
-// newSchemaWithInputData creates a new executionInputSchema with input data.
-func newSchemaWithOutputData(outputData readOnlyActionInput) (executionInputSchema, error) {
-	data, err := newActionInputFromString(outputData.String())
-	if err != nil {
-		return nil, err
-	}
-
-	return &defaultSchema{
-		inputData:  data,
-		outputData: data,
-	}, nil
 }
 
 // newSchema creates a new executionInputSchema with no input data.
@@ -152,6 +140,22 @@ func (s *defaultSchema) getDataToPersist() readOnlyActionInput {
 // getOutputData returns the output data from the inputSchema.
 func (s *defaultSchema) getOutputData() readOnlyActionInput {
 	return s.outputData
+}
+
+func (s *defaultSchema) preprocess() {
+	for _, input := range s.inputs {
+		name := input.getName()
+
+		if input.shouldTrimSpace() {
+			v := strings.TrimSpace(s.inputData.Get(name).String())
+			_ = s.inputData.Set(name, v)
+		}
+
+		if input.shouldConvertToLowerCase() {
+			v := strings.ToLower(s.inputData.Get(name).String())
+			_ = s.inputData.Set(name, v)
+		}
+	}
 }
 
 // toResponseInputs converts defaultSchema to ResponseInputs for public exposure.
