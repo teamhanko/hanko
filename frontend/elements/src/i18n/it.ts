@@ -141,5 +141,10 @@ export const it: Translation = {
     unknown_username_error: "Il nome utente è sconosciuto.",
     username_already_exists: "Il nome utente è già in uso.",
     email_already_taken: "L'indirizzo email è già in uso.",
+    not_found: "La risorsa richiesta non è stata trovata.",
+    operation_not_permitted_error: "L'operazione non è consentita.",
+    flow_discontinuity_error:
+      "Il processo non può essere continuato a causa delle impostazioni dell'utente o della configurazione del fornitore.",
+    form_data_invalid_error: "I dati del modulo inviato contengono errori.",
   },
 };
