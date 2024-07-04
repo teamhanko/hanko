@@ -158,12 +158,10 @@ var (
 	ErrorFlowDiscontinuity     = NewFlowError("flow_discontinuity_error", "The flow can't be continued.", http.StatusInternalServerError)
 	ErrorOperationNotPermitted = NewFlowError("operation_not_permitted_error", "The operation is not permitted.", http.StatusForbidden)
 	ErrorFormDataInvalid       = NewFlowError("form_data_invalid_error", "Form data invalid.", http.StatusBadRequest)
-	ErrorActionParamInvalid    = NewFlowError("action_param_invalid_error", "Action parameter is invalid.", http.StatusBadRequest)
 )
 
 // Predefined input error types
 var (
-	ErrorEmailInvalid  = NewInputError("email_invalid_error", "The email address is invalid.")
 	ErrorValueMissing  = NewInputError("value_missing_error", "Missing value.")
 	ErrorValueInvalid  = NewInputError("value_invalid_error", "The value is invalid.")
 	ErrorValueTooLong  = NewInputError("value_too_long_error", "Value is too long.")

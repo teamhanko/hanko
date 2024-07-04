@@ -274,7 +274,7 @@ func (f *defaultFlow) Execute(db FlowDB, opts ...func(flow *defaultFlow)) (FlowR
 	// Otherwise, update an existing flow...
 	q, err := newQueryParam(f.queryParamKey, f.queryParamValue)
 	if err != nil {
-		return newFlowResultFromError(f.errorStateName, ErrorActionParamInvalid.Wrap(err), f.debug), nil
+		return newFlowResultFromError(f.errorStateName, ErrorTechnical.Wrap(err), f.debug), nil
 	}
 
 	f.queryParam = q
