@@ -31,8 +31,7 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	flow := flow.RegistrationFlow.MustBuild()
-	return h.executeFlow(c, flow)
+	return h.executeFlow(c, flow.RegistrationFlow.MustBuild())
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
@@ -44,19 +43,14 @@ func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
-	actionParam := c.QueryParam("flowpilot_action")
+	const queryParamKey = "action"
 
-	var body flowpilot.InputData
-	err := c.Bind(&body)
-	if err != nil {
-		result := flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
-		return c.JSON(result.GetStatus(), result.GetResponse())
-	}
+	var err error
+	var inputData flowpilot.InputData
+	var flowResult flowpilot.FlowResult
 
-	err = h.Persister.Transaction(func(tx *pop.Connection) error {
-		db := models.NewFlowDB(tx)
-
-		flow.Set("dependencies", &shared.Dependencies{
+	txFunc := func(tx *pop.Connection) error {
+		deps := &shared.Dependencies{
 			Cfg:                   h.Cfg,
 			RateLimiter:           h.RateLimiter,
 			Tx:                    tx,
@@ -69,22 +63,28 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			SamlService:           h.SamlService,
 			AuthenticatorMetadata: h.AuthenticatorMetadata,
 			AuditLogger:           h.AuditLogger,
-		})
-
-		result, flowPilotErr := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(body))
-		if flowPilotErr != nil {
-			return flowPilotErr
 		}
 
-		return c.JSON(result.GetStatus(), result.GetResponse())
-	})
+		flow.Set("deps", deps)
 
-	if err != nil {
-		c.Logger().Errorf("tx error: %v", err)
-		result := flow.ResultFromError(err)
+		flowResult, err = flow.Execute(models.NewFlowDB(tx),
+			flowpilot.WithQueryParamKey(queryParamKey),
+			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
+			flowpilot.WithInputData(inputData))
 
-		return c.JSON(result.GetStatus(), result.GetResponse())
+		return err
 	}
 
-	return nil // TODO: maybe return TechnicalError or something else
+	err = c.Bind(&inputData)
+	if err != nil {
+		flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+	} else {
+		err = h.Persister.Transaction(txFunc)
+		if err != nil {
+			flowResult = flow.ResultFromError(err)
+			c.Logger().Errorf("failed to handle the request: %v", err)
+		}
+	}
+
+	return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 }

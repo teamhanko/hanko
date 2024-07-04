@@ -186,7 +186,7 @@ func (s *submitPasscodeActionSuite) TestSubmitPasscode_Execute() {
 			db := models.NewFlowDB(tx)
 			actionParam := fmt.Sprintf("submit_email_passcode@%s", currentTest.flowId)
 			inputData := flowpilot.InputData{JSONString: currentTest.input}
-			result, err := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(inputData))
+			result, err := flow.Execute(db, flowpilot.WithQueryParam(actionParam), flowpilot.WithInputData(inputData))
 			if currentTest.expectsFlowError {
 				s.Require().Error(err)
 			} else {
