@@ -148,5 +148,11 @@ export const fr: Translation = {
     unknown_username_error: "Le nom d'utilisateur est inconnu.",
     username_already_exists: "Le nom d'utilisateur est déjà pris.",
     email_already_taken: "L'adresse e-mail est déjà utilisée.",
+    not_found: "Die angeforderte Ressource wurde nicht gefunden.",
+    operation_not_permitted_error: "Der Vorgang ist nicht erlaubt.",
+    flow_discontinuity_error:
+      "Der Prozess kann aufgrund der Nutzereinstellungen oder der Konfiguration des Anbieters nicht fortgesetzt werden.",
+    form_data_invalid_error:
+      "Die übermittelten Formulardaten enthalten Fehler.",
   },
 };

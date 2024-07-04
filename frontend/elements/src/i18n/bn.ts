@@ -140,5 +140,10 @@ export const bn: Translation = {
     unknown_username_error: "ব্যবহারকারীর নাম অজানা।",
     username_already_exists: "ব্যবহারকারীর নাম ইতিমধ্যে নেওয়া হয়েছে।",
     email_already_taken: "ইমেলটি ইতিমধ্যে নেওয়া হয়েছে।",
+    not_found: "অনুরোধ করা রিসোর্সটি পাওয়া যায়নি।",
+    operation_not_permitted_error: "অপারেশন অনুমোদিত নয়।",
+    flow_discontinuity_error:
+      "ব্যবহারকারীর সেটিংস বা প্রদানকারীর কনফিগারেশনের কারণে প্রক্রিয়াটি চালিয়ে যাওয়া সম্ভব নয়।",
+    form_data_invalid_error: "জমা দেওয়া ফর্ম ডেটাতে ত্রুটি রয়েছে।",
   },
 };

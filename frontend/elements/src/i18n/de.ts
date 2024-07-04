@@ -148,5 +148,11 @@ export const de: Translation = {
     unknown_username_error: "Der Benutzername ist unbekannt.",
     username_already_exists: "Der Benutzername ist bereits vergeben.",
     email_already_taken: "Die E-Mail-Adresse ist bereits vergeben.",
+    not_found: "Die angeforderte Ressource wurde nicht gefunden.",
+    operation_not_permitted_error: "Der Vorgang ist nicht erlaubt.",
+    flow_discontinuity_error:
+      "Der Prozess kann aufgrund der Nutzereinstellungen oder der Konfiguration des Anbieters nicht fortgesetzt werden.",
+    form_data_invalid_error:
+      "Die übermittelten Formulardaten enthalten Fehler.",
   },
 };
