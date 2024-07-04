@@ -307,7 +307,7 @@
                   if (data.name === "login_init") {
                     abortController.abort()
                   }
-                  updateFlow(event, form)
+                  updateFlow(event, form, data.csrf_token)
                 })
 
                 form.appendChild(submitButton);
@@ -368,9 +368,14 @@
         return "/" + optionsEl.options[selectedIndex].value
     }
 
-    function updateFlow(event, form) {
+    function updateFlow(event, form, csrfToken) {
         event.preventDefault();
-        const body = JSON.stringify(serializeForm(form))
+        const data = serializeForm(form)
+
+        // Add the CSRF token to the next request
+        data["_csrf_token"] = csrfToken
+
+        const body = JSON.stringify(data)
 
         fetch(form.action, {
             headers: {
