@@ -731,6 +731,9 @@
         },
         "microsoft": {
           "$ref": "#/$defs/ThirdPartyProvider"
+        },
+        "linkedin": {
+          "$ref": "#/$defs/ThirdPartyProvider"
         }
       },
       "additionalProperties": false,
