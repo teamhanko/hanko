@@ -92,7 +92,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			emailModel := userModel.GetEmailByAddress(identifierInputValue)
 
 			if emailModel != nil && emailModel.UserID != nil {
-				err := c.Stash().Set(shared.StashPathUserID, emailModel.UserID.String())
+				err = c.Stash().Set(shared.StashPathUserID, emailModel.UserID.String())
 				if err != nil {
 					return fmt.Errorf("failed to set user_id to the stash: %w", err)
 				}
@@ -173,8 +173,14 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
 
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
-			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+		if c.Stash().Get(shared.StashPathUserID).Exists() {
+			if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
+				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+			}
+		} else {
+			if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_login_attempted"); err != nil {
+				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+			}
 		}
 
 		return c.Continue(shared.StatePasscodeConfirmation)

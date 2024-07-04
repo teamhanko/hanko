@@ -32,5 +32,5 @@ type Dependencies struct {
 type Action struct{}
 
 func (a *Action) GetDeps(c flowpilot.Context) *Dependencies {
-	return c.Get("dependencies").(*Dependencies)
+	return c.Get("deps").(*Dependencies)
 }

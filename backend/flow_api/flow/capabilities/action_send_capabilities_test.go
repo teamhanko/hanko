@@ -103,7 +103,7 @@ func (s *sendCapabilitiesActionSuite) TestSendCapabilities_Execute() {
 			db := models.NewFlowDB(tx)
 			actionParam := "send_capabilities@0b41f4dd-8e46-4a7c-bb4d-d60843113431"
 			inputData := flowpilot.InputData{JSONString: currentTest.input}
-			result, err := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(inputData))
+			result, err := flow.Execute(db, flowpilot.WithQueryParam(actionParam), flowpilot.WithInputData(inputData))
 
 			if s.NoError(err) {
 				s.Equal(currentTest.statusCode, result.Status())

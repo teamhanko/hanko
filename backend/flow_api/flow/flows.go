@@ -85,8 +85,6 @@ var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 		login.WebauthnGenerateRequestOptionsForConditionalUi{}).
 	BeforeState(shared.StateSuccess,
 		shared.IssueSession{}).
-	BeforeState(shared.StatePasscodeConfirmation,
-		login.SelectPasscodeTemplate{}).
 	AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
 		shared.WebauthnCredentialSave{}).
 	AfterState(shared.StatePasscodeConfirmation,

@@ -347,7 +347,7 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			db := models.NewFlowDB(tx)
 			actionParam := "submit_registration_identifier@0b41f4dd-8e46-4a7c-bb4d-d60843113431"
 			inputData := flowpilot.InputData{JSONString: currentTest.input}
-			result, err := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(inputData))
+			result, err := flow.Execute(db, flowpilot.WithQueryParam(actionParam), flowpilot.WithInputData(inputData))
 			s.Require().NoError(err)
 
 			s.Equal(currentTest.statusCode, result.Status())
