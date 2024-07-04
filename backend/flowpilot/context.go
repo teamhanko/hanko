@@ -118,7 +118,7 @@ type BeforeEachActionExecutionContext interface {
 }
 
 // createAndInitializeFlow initializes the flow and returns a flow Response.
-func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
+func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	// Wrap the provided FlowDB with additional functionality.
 	dbw := wrapDB(db)
 	// Calculate the expiration time for the flow.
@@ -164,7 +164,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
 
 	aec := defaultActionExecutionContext{
 		actionName:         "",
-		input:              nil,
+		inputSchema:        nil,
 		executionResult:    &er,
 		defaultFlowContext: fc,
 	}
@@ -174,19 +174,15 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (flowResult, error) {
 		return nil, fmt.Errorf("failed to execute before hook actions: %w", err)
 	}
 
-	return er.generateResponse(fc, flow.debug), nil
+	return er.generateResponse(fc), nil
 }
 
 // executeFlowAction processes the flow and returns a Response.
-func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions) (flowResult, error) {
-	// Parse the actionParam parameter to get the actionParam name and flow ID.
-	queryParam, err := parseQueryParam(options.action)
-	if err != nil {
-		return newFlowResultFromError(flow.errorStateName, ErrorActionParamInvalid.Wrap(err), flow.debug), nil
-	}
+func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
+	actionName := flow.queryParam.getActionName()
 
 	// Retrieve the flow model from the database using the flow ID.
-	flowModel, err := db.GetFlow(queryParam.flowID)
+	flowModel, err := db.GetFlow(flow.queryParam.getFlowID())
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
@@ -209,14 +205,14 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	p := newPayload()
 
 	// Parse raw input data into JSONManager.
-	raw := options.inputData.getJSONStringOrDefault()
+	raw := flow.inputData.getJSONStringOrDefault()
 	inputJSON, err := newActionInputFromString(raw)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
 	csrfTokenToValidate := inputJSON.Get("_csrf_token").String()
 
-	if len(flowModel.CSRFToken) <= 0 && flowModel.CSRFToken != csrfTokenToValidate {
+	if len(flowModel.CSRFToken) <= 0 || flowModel.CSRFToken != csrfTokenToValidate {
 		err = errors.New("csrf token mismatch")
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
@@ -236,22 +232,22 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Get the action associated with the actionParam name.
-	ad, err := state.getActionDetail(queryParam.actionName)
+	ad, err := state.getActionDetail(actionName)
 	if err != nil {
 		return newFlowResultFromError(flow.errorStateName, ErrorOperationNotPermitted.Wrap(err), flow.debug), nil
 	}
 
 	// Initialize the inputSchema and action context for action execution.
-	schema := newSchemaWithInputData(inputJSON)
+	inputSchema := newSchemaWithInputData(inputJSON)
 	aic := &defaultActionInitializationContext{
-		inputSchema:        schema.forInitializationContext(),
+		inputSchema:        inputSchema.forInitializationContext(),
 		defaultFlowContext: fc,
 	}
 
 	// Create a actionExecutionContext instance for action execution.
 	aec := &defaultActionExecutionContext{
-		actionName:         queryParam.actionName,
-		input:              schema,
+		actionName:         actionName,
+		inputSchema:        inputSchema,
 		defaultFlowContext: fc,
 	}
 
@@ -280,5 +276,5 @@ func executeFlowAction(db FlowDB, flow defaultFlow, options flowExecutionOptions
 	}
 
 	// Generate a response based on the execution result.
-	return aec.executionResult.generateResponse(fc, flow.debug), nil
+	return aec.executionResult.generateResponse(fc), nil
 }
