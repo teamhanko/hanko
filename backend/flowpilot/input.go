@@ -28,6 +28,8 @@ type Input interface {
 	ConditionalIncludeOnState(stateNames ...StateName) Input
 	CompareWithStash(b bool) Input
 	AllowedValue(name string, value interface{}) Input
+	TrimSpace(b bool) Input
+	LowerCase(b bool) Input
 
 	setValue(value interface{}) Input
 	setError(inputError InputError)
@@ -35,6 +37,8 @@ type Input interface {
 	getName() string
 	shouldPersist() bool
 	shouldPreserve() bool
+	shouldTrimSpace() bool
+	shouldConvertToLowerCase() bool
 	isIncludedOnState(stateName StateName) bool
 	validate(stateName StateName, inputData readOnlyActionInput, stashData stash) bool
 	toResponseInput() *ResponseInput
@@ -46,6 +50,8 @@ type defaultExtraInputOptions struct {
 	persistValue     bool
 	includeOnStates  []StateName
 	compareWithStash bool
+	trimSpace        bool
+	lowerCase        bool
 }
 
 // defaultInput represents an input field with its options.
@@ -78,6 +84,8 @@ func newInput(name string, inputType inputType, persistValue bool) Input {
 		persistValue:     persistValue,
 		includeOnStates:  []StateName{},
 		compareWithStash: false,
+		trimSpace:        false,
+		lowerCase:        false,
 	}
 
 	return &defaultInput{
@@ -149,6 +157,18 @@ func (i *defaultInput) Preserve(b bool) Input {
 	return i
 }
 
+// TrimSpace sets whether the leading and trailing whitespaces should be trimmed.
+func (i *defaultInput) TrimSpace(b bool) Input {
+	i.trimSpace = b
+	return i
+}
+
+// LowerCase sets whether the value should be converted to lower case.
+func (i *defaultInput) LowerCase(b bool) Input {
+	i.lowerCase = b
+	return i
+}
+
 // Persist sets whether the input field value should be persisted.
 func (i *defaultInput) Persist(b bool) Input {
 	i.persistValue = b
@@ -211,6 +231,16 @@ func (i *defaultInput) shouldPersist() bool {
 // shouldPersist indicates the value should be preserved.
 func (i *defaultInput) shouldPreserve() bool {
 	return i.preserveValue
+}
+
+// shouldPersist indicates the value should be preserved.
+func (i *defaultInput) shouldTrimSpace() bool {
+	return i.trimSpace
+}
+
+// shouldConvertToLowerCase indicates the value should be converted to lower case.
+func (i *defaultInput) shouldConvertToLowerCase() bool {
+	return i.lowerCase
 }
 
 // validate performs validation on the input field.
