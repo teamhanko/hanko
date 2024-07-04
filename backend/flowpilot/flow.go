@@ -23,22 +23,23 @@ func (i InputData) getJSONStringOrDefault() string {
 	return i.JSONString
 }
 
-// flowExecutionOptions represents options for executing a flow.
-type flowExecutionOptions struct {
-	action    string
-	inputData InputData
+// WithQueryParamKey sets the ActionName for flowExecutionOptions.
+func WithQueryParamKey(key string) func(*defaultFlow) {
+	return func(f *defaultFlow) {
+		f.queryParamKey = key
+	}
 }
 
-// WithActionParam sets the ActionName for flowExecutionOptions.
-func WithActionParam(action string) func(*flowExecutionOptions) {
-	return func(f *flowExecutionOptions) {
-		f.action = action
+// WithQueryParamValue sets the ActionName for flowExecutionOptions.
+func WithQueryParamValue(value string) func(*defaultFlow) {
+	return func(f *defaultFlow) {
+		f.queryParamValue = value
 	}
 }
 
 // WithInputData sets the InputData for flowExecutionOptions.
-func WithInputData(inputData InputData) func(*flowExecutionOptions) {
-	return func(f *flowExecutionOptions) {
+func WithInputData(inputData InputData) func(*defaultFlow) {
+	return func(f *defaultFlow) {
 		f.inputData = inputData
 	}
 }
@@ -157,9 +158,9 @@ type flowBase interface {
 type Flow interface {
 	// Execute executes the flow using the provided FlowDB and options.
 	// It returns the result of the flow execution and an error if any.
-	Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (flowResult, error)
-	// ResultFromError converts an error into a flowResult.
-	ResultFromError(err error) flowResult
+	Execute(db FlowDB, opts ...func(*defaultFlow)) (FlowResult, error)
+	// ResultFromError converts an error into a FlowResult.
+	ResultFromError(err error) FlowResult
 	// Set sets a value with the given key in the flow context.
 	Set(string, interface{})
 	// setDefaults sets the default values for the flow.
@@ -196,7 +197,11 @@ type defaultFlow struct {
 	errorStateName        StateName     // State representing errors.
 	ttl                   time.Duration // Time-to-live for the flow.
 	debug                 bool          // Enables debug mode.
+	queryParam            queryParam    // TODO
 	contextValues         contextValues // Values to be used within the flow context.
+	inputData             InputData
+	queryParamKey         string
+	queryParamValue       string
 
 	*defaultFlowBase
 }
@@ -246,31 +251,39 @@ func (f *defaultFlow) setDefaults() {
 	if f.ttl.Seconds() == 0 {
 		f.ttl = time.Minute * 60
 	}
+
+	if len(f.queryParamKey) == 0 {
+		f.queryParamKey = "flowpilot_action"
+	}
 }
 
 // Execute handles the execution of actions for a defaultFlow.
-func (f *defaultFlow) Execute(db FlowDB, opts ...func(*flowExecutionOptions)) (flowResult, error) {
-	// Process execution options.
-	var executionOptions flowExecutionOptions
-
+func (f *defaultFlow) Execute(db FlowDB, opts ...func(flow *defaultFlow)) (FlowResult, error) {
 	for _, option := range opts {
-		option(&executionOptions)
+		option(f)
 	}
 
 	// Set default values for flow settings.
 	f.setDefaults()
 
-	if len(executionOptions.action) == 0 {
-		// If the action is empty, create a new flow.
+	// If the action is empty, create a new flow.
+	if len(f.queryParamValue) == 0 {
 		return createAndInitializeFlow(db, *f)
 	}
 
-	// Otherwise, update an existing flow.
-	return executeFlowAction(db, *f, executionOptions)
+	// Otherwise, update an existing flow...
+	q, err := newQueryParam(f.queryParamKey, f.queryParamValue)
+	if err != nil {
+		return newFlowResultFromError(f.errorStateName, ErrorActionParamInvalid.Wrap(err), f.debug), nil
+	}
+
+	f.queryParam = q
+
+	return executeFlowAction(db, *f)
 }
 
 // ResultFromError returns an error response for the defaultFlow.
-func (f *defaultFlow) ResultFromError(err error) flowResult {
+func (f *defaultFlow) ResultFromError(err error) FlowResult {
 	flowError := ErrorTechnical
 
 	if e, ok := err.(FlowError); ok {
