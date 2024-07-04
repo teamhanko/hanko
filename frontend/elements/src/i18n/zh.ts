@@ -131,5 +131,9 @@ export const zh: Translation = {
     unknown_username_error: "用户名未知。",
     username_already_exists: "用户名已被使用。",
     email_already_taken: "电子邮件已被使用。",
+    not_found: "未找到请求的资源。",
+    operation_not_permitted_error: "不允许此操作。",
+    flow_discontinuity_error: "由于用户设置或提供商配置，流程无法继续。",
+    form_data_invalid_error: "提交的表单数据包含错误。",
   },
 };

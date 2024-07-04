@@ -133,10 +133,16 @@ export const en: Translation = {
     passkey_invalid: "This passkey cannot be used anymore",
     passcode_max_attempts_reached:
       "The passcode was entered incorrectly too many times. Please request a new code.",
+
     rate_limit_exceeded:
       "Too many requests have been made. Please wait to repeat the requested operation.",
     unknown_username_error: "The username is unknown.",
     username_already_exists: "The username is already taken.",
     email_already_taken: "The email is already taken.",
+    not_found: "The requested resource was not found.",
+    operation_not_permitted_error: "The operation is not permitted.",
+    flow_discontinuity_error:
+      "The process cannot be continued due to user settings or the provider's configuration.",
+    form_data_invalid_error: "The submitted form data contains errors.",
   },
 };

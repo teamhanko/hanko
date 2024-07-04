@@ -125,6 +125,10 @@ export interface Translation {
     unknown_username_error: string;
     username_already_exists: string;
     email_already_taken: string;
+    not_found: string;
+    flow_discontinuity_error: string;
+    operation_not_permitted_error: string;
+    form_data_invalid_error: string;
   };
 }
 

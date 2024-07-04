@@ -143,5 +143,10 @@ export const ptBR: Translation = {
     unknown_username_error: "O nome de usuário é desconhecido.",
     username_already_exists: "O nome de usuário já está em uso.",
     email_already_taken: "O e-mail já está em uso.",
+    not_found: "O recurso solicitado não foi encontrado.",
+    operation_not_permitted_error: "A operação não é permitida.",
+    flow_discontinuity_error:
+      "O processo não pode ser continuado devido às configurações do usuário ou do provedor.",
+    form_data_invalid_error: "Os dados do formulário submetido contêm erros.",
   },
 };
