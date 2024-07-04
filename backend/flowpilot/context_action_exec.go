@@ -9,7 +9,7 @@ import (
 // defaultActionExecutionContext is the default implementation of the actionExecutionContext interface.
 type defaultActionExecutionContext struct {
 	actionName       ActionName           // Name of the action being executed.
-	input            executionInputSchema // JSONManager for accessing input data.
+	inputSchema      executionInputSchema // JSONManager for accessing input data.
 	flowError        FlowError
 	executionResult  *executionResult // Result of the action execution.
 	links            []Link           // TODO:
@@ -68,7 +68,7 @@ func (aec *defaultActionExecutionContext) saveNextState(executionResult *executi
 	aec.flowModel.CSRFToken = csrfToken
 
 	// Get the data to persists from the executed action inputSchema for recording.
-	inputDataToPersist := aec.input.getDataToPersist().String()
+	inputDataToPersist := aec.inputSchema.getDataToPersist().String()
 
 	// Prepare parameters for creating a new transition in the database.
 	transitionCreation := transitionCreationParam{
@@ -150,7 +150,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName *S
 
 	actionResult := &actionExecutionResult{
 		actionName:  aec.actionName,
-		inputSchema: aec.input,
+		inputSchema: aec.inputSchema,
 		isSuspended: aec.isSuspended,
 	}
 
@@ -173,7 +173,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName *S
 
 func (aec *defaultActionExecutionContext) executeBeforeStateHooks(nextStateName StateName) error {
 	if actions := aec.flow.beforeStateHooks[nextStateName]; actions != nil {
-		for _, hook := range actions.reverse() {
+		for _, hook := range actions {
 			if err := hook.Execute(aec); err != nil {
 				return fmt.Errorf("failed to execute hook action before state '%s': %w", nextStateName, err)
 			}
@@ -248,7 +248,7 @@ func (aec *defaultActionExecutionContext) executeAfterEachActionHooks() error {
 
 // Input returns the executionInputSchema for accessing input data.
 func (aec *defaultActionExecutionContext) Input() executionInputSchema {
-	return aec.input
+	return aec.inputSchema
 }
 
 // payload returns the JSONManager for accessing payload data.
@@ -260,7 +260,7 @@ func (aec *defaultActionExecutionContext) Payload() payload {
 func (aec *defaultActionExecutionContext) CopyInputValuesToStash(inputNames ...string) error {
 	for _, inputName := range inputNames {
 		// Copy input values to the stash.
-		if result := aec.input.Get(inputName); result.Exists() {
+		if result := aec.inputSchema.Get(inputName); result.Exists() {
 			if err := aec.stash.Set(inputName, result.Value()); err != nil {
 				return err
 			}
@@ -280,7 +280,7 @@ func (aec *defaultActionExecutionContext) GetFlowError() FlowError {
 
 // ValidateInputData validates the input data against the inputSchema.
 func (aec *defaultActionExecutionContext) ValidateInputData() bool {
-	return aec.input.validateInputData(aec.flowModel.CurrentState, aec.stash)
+	return aec.inputSchema.validateInputData(aec.flowModel.CurrentState, aec.stash)
 }
 
 // Error continues the flow execution to the current state, if it's a bad request error or to the error state otherwise.

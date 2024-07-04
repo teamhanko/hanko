@@ -65,24 +65,24 @@ type Response struct {
 	Links     ResponseLinks   `json:"links"`
 }
 
-// flowResult interface defines methods for obtaining response and status.
-type flowResult interface {
+// FlowResult interface defines methods for obtaining response and status.
+type FlowResult interface {
 	GetResponse() Response
 	GetStatus() int
 }
 
-// defaultFlowResult implements flowResult interface.
+// defaultFlowResult implements FlowResult interface.
 type defaultFlowResult struct {
 	response Response
 }
 
-// newFlowResultFromResponse creates a flowResult from a Response.
-func newFlowResultFromResponse(response Response) flowResult {
+// newFlowResultFromResponse creates a FlowResult from a Response.
+func newFlowResultFromResponse(response Response) FlowResult {
 	return defaultFlowResult{response: response}
 }
 
-// newFlowResultFromError creates a flowResult from a FlowError.
-func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) flowResult {
+// newFlowResultFromError creates a FlowResult from a FlowError.
+func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool) FlowResult {
 	e := flowError.toResponseError(debug)
 	status := flowError.Status()
 
@@ -123,7 +123,7 @@ type executionResult struct {
 }
 
 // generateResponse generates a response based on the execution result.
-func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) flowResult {
+func (er *executionResult) generateResponse(fc *defaultFlowContext) FlowResult {
 	// Generate actions for the response.
 	actions := er.generateActions(fc)
 
@@ -146,7 +146,7 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext, debug bool) 
 	// Include flow error if present.
 	if er.flowError != nil {
 		status := er.flowError.Status()
-		e := er.flowError.toResponseError(debug)
+		e := er.flowError.toResponseError(fc.flow.debug)
 
 		resp.Status = status
 		resp.Error = e
@@ -179,7 +179,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 			actionDescription := ad.getAction().GetDescription()
 
 			// Create action HREF based on the current flow context and method name.
-			href := er.createHref(fc, actionName)
+			href, _ := er.createHref(fc, actionName)
 			inputSchema := er.getInputSchema(fc, ad)
 
 			// (Re-)Initialize each action
@@ -224,7 +224,7 @@ func (er *executionResult) getInputSchema(fc *defaultFlowContext, actionDetail a
 }
 
 // createHref creates a link HREF based on the current flow context and method name.
-func (er *executionResult) createHref(fc *defaultFlowContext, actionName ActionName) string {
-	queryParam := createQueryParam(string(actionName), fc.GetFlowID())
-	return fmt.Sprintf("/%s?flowpilot_action=%s", fc.GetFlowName(), queryParam)
+func (er *executionResult) createHref(fc *defaultFlowContext, actionName ActionName) (string, error) {
+	q, err := newQueryParam(fc.flow.queryParamKey, createQueryParamValue(actionName, fc.GetFlowID()))
+	return fmt.Sprintf("/%s?%s", fc.GetFlowName(), q.getURLValues().Encode()), err
 }
