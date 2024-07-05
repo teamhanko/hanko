@@ -65,6 +65,11 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
+	_ = c.Stash().Delete(shared.StashPathUserID)
+	_ = c.Stash().Delete(shared.StashPathEmail)
+	_ = c.Stash().Delete(shared.StashPathUsername)
+	_ = c.Stash().Delete(shared.StashPathPasscodeTemplate)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
