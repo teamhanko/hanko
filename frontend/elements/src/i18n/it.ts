@@ -140,7 +140,7 @@ export const it: Translation = {
       "Troppe richieste sono state effettuate. Si prega di attendere per ripetere l'operazione richiesta.",
     unknown_username_error: "Il nome utente è sconosciuto.",
     username_already_exists: "Il nome utente è già in uso.",
-    email_already_taken: "L'indirizzo email è già in uso.",
+    email_already_exists: "L'indirizzo email è già in uso.",
     not_found: "La risorsa richiesta non è stata trovata.",
     operation_not_permitted_error: "L'operazione non è consentita.",
     flow_discontinuity_error:
