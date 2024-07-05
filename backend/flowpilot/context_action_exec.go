@@ -173,7 +173,7 @@ func (aec *defaultActionExecutionContext) closeExecutionContext(nextStateName *S
 
 func (aec *defaultActionExecutionContext) executeBeforeStateHooks(nextStateName StateName) error {
 	if actions := aec.flow.beforeStateHooks[nextStateName]; actions != nil {
-		for _, hook := range actions {
+		for _, hook := range actions.reverse() {
 			if err := hook.Execute(aec); err != nil {
 				return fmt.Errorf("failed to execute hook action before state '%s': %w", nextStateName, err)
 			}
