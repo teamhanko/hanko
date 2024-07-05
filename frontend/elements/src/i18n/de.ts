@@ -147,7 +147,7 @@ export const de: Translation = {
       "Zu viele Anfragen wurden gestellt. Bitte warten Sie, um die angeforderte Operation zu wiederholen.",
     unknown_username_error: "Der Benutzername ist unbekannt.",
     username_already_exists: "Der Benutzername ist bereits vergeben.",
-    email_already_taken: "Die E-Mail-Adresse ist bereits vergeben.",
+    email_already_exists: "Die E-Mail-Adresse ist bereits vergeben.",
     not_found: "Die angeforderte Ressource wurde nicht gefunden.",
     operation_not_permitted_error: "Der Vorgang ist nicht erlaubt.",
     flow_discontinuity_error:

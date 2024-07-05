@@ -139,7 +139,7 @@ export const bn: Translation = {
       "অনেকগুলি অনুরোধ করা হয়েছে। অনুরোধকৃত অপারেশন পুনরায় প্রয়াত করতে অপেক্ষা করুন।",
     unknown_username_error: "ব্যবহারকারীর নাম অজানা।",
     username_already_exists: "ব্যবহারকারীর নাম ইতিমধ্যে নেওয়া হয়েছে।",
-    email_already_taken: "ইমেলটি ইতিমধ্যে নেওয়া হয়েছে।",
+    email_already_exists: "ইমেলটি ইতিমধ্যে নেওয়া হয়েছে।",
     not_found: "অনুরোধ করা রিসোর্সটি পাওয়া যায়নি।",
     operation_not_permitted_error: "অপারেশন অনুমোদিত নয়।",
     flow_discontinuity_error:
