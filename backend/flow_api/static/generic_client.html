@@ -160,7 +160,7 @@
     }
 
     function generateUI(data) {
-        if (data.state === "login_init" && data.payload && data.payload.request_options) {
+        if (data.name === "login_init" && data.payload && data.payload.request_options) {
           awaitAssertionResponseForConditionalUi(data.payload)
         }
 
@@ -168,7 +168,7 @@
         container.innerHTML = '';
 
         const stateHeadline = document.createElement('h2');
-        stateHeadline.innerHTML = "📌 State: " + data.state;
+        stateHeadline.innerHTML = "📌 State: " + data.name;
         container.appendChild(stateHeadline);
 
         const errorHeadline = document.createElement('h3');
@@ -203,12 +203,12 @@
         executeHandlerButton.type = 'button';
         executeHandlerButton.textContent = "☝ Execute handler";
 
-        if (!stateHandler[data.state]) {
+        if (!stateHandler[data.name]) {
             executeHandlerButton.disabled = true
         } else {
             executeHandlerButton.addEventListener('click', (event) => {
                 event.preventDefault();
-                stateHandler[data.state](data.payload);
+                stateHandler[data.name](data.payload);
             });
         }
 
@@ -283,7 +283,7 @@
                             inputListItem.appendChild(error);
                         }
 
-                        if (data.state === "login_init" && action.action === "webauthn_verify_assertion_response") {
+                        if (data.name === "login_init" && action.action === "webauthn_verify_assertion_response") {
                           if (webauthnAssertionForConditionalUI) {
                             inputElement.value = webauthnAssertionForConditionalUI
                           }
@@ -304,7 +304,7 @@
                 submitButton.type = 'submit';
                 submitButton.textContent = "📡 Submit";
                 submitButton.addEventListener('click', (event) => {
-                  if (data.state === "login_init") {
+                  if (data.name === "login_init") {
                     abortController.abort()
                   }
                   updateFlow(event, form, data.csrf_token)
@@ -386,7 +386,7 @@
         })
             .then(response => response.json())
             .then((data) => {
-              if (data.state === 'thirdparty_oauth') {
+              if (data.name === 'thirdparty_oauth') {
                 localStorage.setItem('thirdparty_oauth_state', JSON.stringify(data))
               }
               return data
