@@ -61,7 +61,7 @@ class State<TStateName extends StateName>
       payload: this.payload,
       error: this.error,
       status: this.status,
-      csrfToken: this.csrf_token,
+      csrf_token: this.csrf_token,
       actions: this.#actionDefinitions,
     };
   }
