@@ -56,13 +56,13 @@ type ResponseLink struct {
 
 // Response represents the response of an action execution.
 type Response struct {
-	Name      StateName       `json:"name"`
+	State     StateName       `json:"state"`
 	Status    int             `json:"status"`
 	Payload   interface{}     `json:"payload,omitempty"`
-	CSRFToken string          `json:"csrf_token"`
+	CSRFToken string          `json:"csrf_token,omitempty"`
 	Actions   ResponseActions `json:"actions"`
 	Error     *ResponseError  `json:"error,omitempty"`
-	Links     ResponseLinks   `json:"links"`
+	Links     ResponseLinks   `json:"links,omitempty"`
 }
 
 // FlowResult interface defines methods for obtaining response and status.
@@ -87,7 +87,7 @@ func newFlowResultFromError(stateName StateName, flowError FlowError, debug bool
 	status := flowError.Status()
 
 	response := Response{
-		Name:    stateName,
+		State:   stateName,
 		Status:  status,
 		Error:   e,
 		Actions: ResponseActions{},
@@ -135,7 +135,7 @@ func (er *executionResult) generateResponse(fc *defaultFlowContext) FlowResult {
 
 	// Create the response object.
 	resp := Response{
-		Name:      er.nextStateName,
+		State:     er.nextStateName,
 		Status:    http.StatusOK,
 		Payload:   p,
 		Actions:   actions,
