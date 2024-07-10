@@ -44,16 +44,13 @@ export const fr: Translation = {
       'Aucun compte n\'existe pour "{emailAddress}". Voulez-vous créer un nouveau compte ?',
     passwordFormatHint:
       "Doit contenir entre {minLength} et {maxLength} caractères.",
+    setPrimaryEmail: "Définir cette adresse e-mail comme adresse de contact.",
     isPrimaryEmail:
-      "Utilisée pour la communication, les codes d'accès et comme nom d'utilisateur pour les clés d'identification. Pour changer l'adresse e-mail principale, ajoutez d'abord une autre adresse e-mail et définissez-la comme principale.",
-    setPrimaryEmail:
-      "Définissez cette adresse e-mail comme adresse e-mail principale afin qu'elle soit utilisée pour les communications, les codes d'accès et comme nom d'utilisateur pour les clés d'identification.",
+      "Cette adresse e-mail sera utilisée pour vous contacter si nécessaire.",
     emailVerified: "Cette adresse e-mail a été vérifiée.",
     emailUnverified: "Cette adresse e-mail n'a pas été vérifiée.",
     emailDelete:
       "Si vous supprimez cette adresse e-mail, elle ne pourra plus être utilisée pour vous connecter à votre compte. Les clés d'identification qui ont pu être créées avec cette adresse e-mail resteront intactes.",
-    emailDeletePrimary:
-      "L'adresse e-mail principale ne peut pas être supprimée. Ajoutez d'abord une autre adresse e-mail et définissez-la comme adresse e-mail principale.",
     renamePasskey:
       "Définissez un nom pour la clé d'identification qui vous aide à identifier où elle est stockée.",
     deletePasskey:

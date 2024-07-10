@@ -43,16 +43,14 @@ export const it: Translation = {
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
     passwordFormatHint:
       "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
-    isPrimaryEmail:
-      "Questo indirizzo email verrà utilizzato come nome utente per le tue passkeys.",
     setPrimaryEmail:
-      "Imposa questo indirizzo email per essere usato come nome utente per le tue nuove passkeys.",
+      "Imposta questo indirizzo email per essere utilizzato per contattarti.",
+    isPrimaryEmail:
+      "Questo indirizzo email verrà utilizzato per contattarti se necessario.",
     emailVerified: "Questo indirizzo email è stato verificato.",
     emailUnverified: "Questo indirizzo email non è stato verificato.",
     emailDelete:
       "Se cancelli questo indirizzo email, non potrà più essere utilizzato per accedere.",
-    emailDeletePrimary:
-      "L'indirizzo email principale non può essere eliminato.",
     renamePasskey: "Imposta un nome per la passkey.",
     deletePasskey: "Cancella questa passkey dal tuo account.",
     deleteAccount:

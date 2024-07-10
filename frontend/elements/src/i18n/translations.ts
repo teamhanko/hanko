@@ -49,7 +49,6 @@ export interface Translation {
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;
-    emailDeletePrimary: string;
     renamePasskey: string;
     deletePasskey: string;
     deleteAccount: string;

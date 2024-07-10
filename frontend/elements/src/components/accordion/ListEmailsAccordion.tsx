@@ -126,14 +126,7 @@ const ListEmailsAccordion = ({
             </Link>
           </Paragraph>
         </Fragment>
-      ) : (
-        <Fragment>
-          <Paragraph>
-            <Headline2>{t("headlines.emailDelete")}</Headline2>
-            {t("texts.emailDeletePrimary")}
-          </Paragraph>
-        </Fragment>
-      )}
+      ) : null}
       {email.identities?.length > 0 ? (
         <Fragment>
           <Paragraph>

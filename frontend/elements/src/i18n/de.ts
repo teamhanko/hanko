@@ -44,16 +44,13 @@ export const de: Translation = {
       'Es existiert kein Konto für "{emailAddress}". Möchten Sie ein neues Konto erstellen?',
     passwordFormatHint:
       "Das Passwort muss zwischen {minLength} und {maxLength} Zeichen lang sein.",
+    setPrimaryEmail: "Setzen Sie diese E-Mail-Adresse als Kontaktadresse.",
     isPrimaryEmail:
-      "Wird für die Kommunikation, Passcodes und als Benutzername für Passkeys verwendet. Um die primäre E-Mail-Adresse zu ändern, fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie sie als primär fest.",
-    setPrimaryEmail:
-      "Legen Sie diese E-Mail-Adresse als primär fest, damit sie für die Kommunikation, für Passcodes und als Benutzername für Passkeys genutzt wird.",
+      "Diese E-Mail-Adresse wird verwendet, um Sie bei Bedarf zu kontaktieren.",
     emailVerified: "Diese E-Mail-Adresse wurde verifiziert.",
     emailUnverified: "Diese E-Mail-Adresse wurde noch nicht verifiziert.",
     emailDelete:
       "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
-    emailDeletePrimary:
-      "Die primäre E-Mail-Adresse kann nicht gelöscht werden. Fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie diese als primär fest.",
     renamePasskey:
       "Legen Sie einen Namen für den Passkey fest, anhand dessen Sie erkennen können, wo er gespeichert ist.",
     deletePasskey:
