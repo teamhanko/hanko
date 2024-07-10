@@ -16,8 +16,8 @@ export const fr: Translation = {
     profilePasskeys: "Clés d'identification",
     isPrimaryEmail: "Adresse e-mail principale",
     setPrimaryEmail: "Définir l'adresse e-mail principale",
-    createEmail: "[missing]",
-    createUsername: "[missing]",
+    createEmail: "Entrer un nouvel e-mail",
+    createUsername: "Entrer un nouveau nom d'utilisateur",
     emailVerified: "Vérifié",
     emailUnverified: "Non vérifié",
     emailDelete: "Supprimer",
@@ -30,6 +30,8 @@ export const fr: Translation = {
     accountNotFound: "Compte non trouvé",
     signIn: "Se connecter",
     signUp: "S'inscrire",
+    selectLoginMethod: "Sélectionner la méthode de connexion",
+    setupLoginMethod: "Configurer la méthode de connexion",
   },
   texts: {
     enterPasscode:
@@ -59,6 +61,9 @@ export const fr: Translation = {
     deleteAccount:
       "Êtes-vous sûr de vouloir supprimer ce compte ? Toutes les données seront supprimées immédiatement et ne pourront pas être récupérées.",
     noAccountExists: 'Aucun compte n\'existe pour "{emailAddress}".',
+    selectLoginMethodForFutureLogins:
+      "Sélectionnez l'une des méthodes de connexion suivantes à utiliser pour les connexions futures.",
+    howDoYouWantToLogin: "Comment souhaitez-vous vous connecter ?",
   },
   labels: {
     or: "ou",
@@ -69,6 +74,8 @@ export const fr: Translation = {
     skip: "Passer",
     save: "Enregistrer",
     password: "Mot de passe",
+    passkey: "Clé d'identification",
+    passcode: "Code d'accès",
     signInPassword: "Se connecter avec un mot de passe",
     signInPasscode: "Se connecter avec un code d'accès",
     forgotYourPassword: "Mot de passe oublié ?",
@@ -148,11 +155,14 @@ export const fr: Translation = {
     unknown_username_error: "Le nom d'utilisateur est inconnu.",
     username_already_exists: "Le nom d'utilisateur est déjà pris.",
     email_already_exists: "L'adresse e-mail est déjà utilisée.",
-    not_found: "Die angeforderte Ressource wurde nicht gefunden.",
-    operation_not_permitted_error: "Der Vorgang ist nicht erlaubt.",
+    not_found: "La ressource demandée n'a pas été trouvée.",
+    operation_not_permitted_error: "L'opération n'est pas autorisée.",
     flow_discontinuity_error:
-      "Der Prozess kann aufgrund der Nutzereinstellungen oder der Konfiguration des Anbieters nicht fortgesetzt werden.",
+      "Le processus ne peut pas continuer en raison des paramètres utilisateur ou de la configuration du fournisseur.",
     form_data_invalid_error:
-      "Die übermittelten Formulardaten enthalten Fehler.",
+      "Les données du formulaire soumises contiennent des erreurs.",
+    value_missing_error: "La valeur est manquante.",
+    value_too_long_error: "La valeur est trop longue.",
+    value_too_short_error: "La valeur est trop courte.",
   },
 };

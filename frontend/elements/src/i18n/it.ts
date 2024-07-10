@@ -16,8 +16,8 @@ export const it: Translation = {
     profilePasskeys: "Passkeys",
     isPrimaryEmail: "Indirizzo email principale",
     setPrimaryEmail: "Imposta indirizzo email principale",
-    createEmail: "[missing]",
-    createUsername: "[missing]",
+    createEmail: "Inserisci una nuova email",
+    createUsername: "Inserisci un nuovo nome utente",
     emailVerified: "Verificata",
     emailUnverified: "Non verificata",
     emailDelete: "Rimuovi",
@@ -30,6 +30,8 @@ export const it: Translation = {
     accountNotFound: "Account non trovato",
     signIn: "Accedi",
     signUp: "Registrati",
+    selectLoginMethod: "Seleziona il metodo di accesso",
+    setupLoginMethod: "Imposta il metodo di accesso",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -56,6 +58,9 @@ export const it: Translation = {
     deleteAccount:
       "Sei sicuro di voler cancellare questo account? Tutti i dati verranno immediatamente cancellati permanentemente e non potranno essere ripristinati.",
     noAccountExists: 'Non esiste alcun account per "{emailAddress}".',
+    selectLoginMethodForFutureLogins:
+      "Seleziona uno dei seguenti metodi di accesso da utilizzare per i futuri accessi.",
+    howDoYouWantToLogin: "Come desideri effettuare l'accesso?",
   },
   labels: {
     or: "o",
@@ -66,6 +71,8 @@ export const it: Translation = {
     skip: "Salta",
     save: "Salva",
     password: "Password",
+    passkey: "Chiave di accesso",
+    passcode: "Codice di accesso",
     signInPassword: "Accedi con password",
     signInPasscode: "Accedi con codice di accesso",
     forgotYourPassword: "Password dimenticata?",
@@ -146,5 +153,8 @@ export const it: Translation = {
     flow_discontinuity_error:
       "Il processo non può essere continuato a causa delle impostazioni dell'utente o della configurazione del fornitore.",
     form_data_invalid_error: "I dati del modulo inviato contengono errori.",
+    value_missing_error: "Il valore è mancante.",
+    value_too_long_error: "Il valore è troppo lungo.",
+    value_too_short_error: "Il valore è troppo corto.",
   },
 };

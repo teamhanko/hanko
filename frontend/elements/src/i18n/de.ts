@@ -16,8 +16,8 @@ export const de: Translation = {
     profilePasskeys: "Passkeys",
     isPrimaryEmail: "Primäre E-Mail-Adresse",
     setPrimaryEmail: "Als primäre E-Mail-Adresse festlegen",
-    createEmail: "Neue E-Mail eingeben",
-    createUsername: "Neuen Nutzernamen eingeben",
+    createEmail: "Geben Sie eine neue E-Mail-Adresse ein",
+    createUsername: "Geben Sie einen neuen Benutzernamen ein",
     emailVerified: "Verifiziert",
     emailUnverified: "Unverifiziert",
     emailDelete: "Löschen",
@@ -30,6 +30,8 @@ export const de: Translation = {
     accountNotFound: "Konto nicht gefunden",
     signIn: "Anmelden",
     signUp: "Registrieren",
+    selectLoginMethod: "Wähle die Anmelde-Methode",
+    setupLoginMethod: "Anmelde-Methode einrichten",
   },
   texts: {
     enterPasscode:
@@ -59,6 +61,9 @@ export const de: Translation = {
     deleteAccount:
       "Sind Sie sicher, dass Sie Ihr Konto löschen wollen? Alle Daten werden sofort gelöscht und können nicht wiederhergestellt werden.",
     noAccountExists: 'Es existiert kein Konto für "{emailAddress}".',
+    selectLoginMethodForFutureLogins:
+      "Wählen Sie eine der folgenden Anmelde-Methoden aus, um sie für zukünftige Anmeldungen zu verwenden.",
+    howDoYouWantToLogin: "Wie möchten Sie sich anmelden?",
   },
   labels: {
     or: "oder",
@@ -69,6 +74,8 @@ export const de: Translation = {
     skip: "Überspringen",
     save: "Speichern",
     password: "Passwort",
+    passkey: "Passwort",
+    passcode: "Passcode",
     signInPassword: "Mit einem Passwort anmelden",
     signInPasscode: "Mit einem Passcode anmelden",
     forgotYourPassword: "Passwort vergessen?",
@@ -154,5 +161,8 @@ export const de: Translation = {
       "Der Prozess kann aufgrund der Nutzereinstellungen oder der Konfiguration des Anbieters nicht fortgesetzt werden.",
     form_data_invalid_error:
       "Die übermittelten Formulardaten enthalten Fehler.",
+    value_missing_error: "Der Wert fehlt.",
+    value_too_long_error: "Der Wert ist zu lang.",
+    value_too_short_error: "Der Wert ist zu kurz.",
   },
 };

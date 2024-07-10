@@ -14,6 +14,7 @@ import Link from "../components/link/Link";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { useFlowState } from "../contexts/FlowState";
+import Paragraph from "../components/paragraph/Paragraph";
 
 interface Props {
   state: State<"credential_onboarding_chooser">;
@@ -63,14 +64,15 @@ const CredentialOnboardingChooserPage = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{"Choose a method"}</Headline1>
+        <Headline1>{t("headlines.setupLoginMethod")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
+        <Paragraph>{t("texts.selectLoginMethodForFutureLogins")}</Paragraph>
         <Form
           hidden={!flowState.actions.continue_to_passkey_registration?.(null)}
           onSubmit={onPasskeySelectSubmit}
         >
           <Button secondary={true} uiAction={"passkey-submit"} icon={"passkey"}>
-            {"Passkey"}
+            {t("labels.passkey")}
           </Button>
         </Form>
         <Form
@@ -80,9 +82,9 @@ const CredentialOnboardingChooserPage = (props: Props) => {
           <Button
             secondary={true}
             uiAction={"password-submit"}
-            icon={"passkey"}
+            icon={"password"}
           >
-            {"Password"}
+            {t("labels.password")}
           </Button>
         </Form>
       </Content>

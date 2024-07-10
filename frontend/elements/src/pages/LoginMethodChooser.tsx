@@ -14,6 +14,7 @@ import Link from "../components/link/Link";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { useFlowState } from "../contexts/FlowState";
+import Paragraph from "../components/paragraph/Paragraph";
 
 interface Props {
   state: State<"login_method_chooser">;
@@ -23,16 +24,6 @@ const LoginMethodChooserPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const { setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-
-  const onPasskeySelectSubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("passkey-submit");
-    const nextState = await flowState.actions
-      .webauthn_generate_request_options(null)
-      .run();
-    setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
-  };
 
   const onPasswordSelectSubmit = async (event: Event) => {
     event.preventDefault();
@@ -65,26 +56,15 @@ const LoginMethodChooserPage = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{"Choose a method"}</Headline1>
+        <Headline1>{t("headlines.selectLoginMethod")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
-        <Form
-          hidden={!flowState.actions.webauthn_generate_request_options?.(null)}
-          onSubmit={onPasskeySelectSubmit}
-        >
-          <Button secondary={true} uiAction={"passkey-submit"} icon={"passkey"}>
-            {"Passkey"}
-          </Button>
-        </Form>
+        <Paragraph>{t("texts.howDoYouWantToLogin")}</Paragraph>
         <Form
           hidden={!flowState.actions.continue_to_passcode_confirmation?.(null)}
           onSubmit={onPasscodeSelectSubmit}
         >
-          <Button
-            secondary={true}
-            uiAction={"passcode-submit"}
-            icon={"passkey"}
-          >
-            {"Passcode"}
+          <Button secondary={true} uiAction={"passcode-submit"} icon={"mail"}>
+            {t("labels.passcode")}
           </Button>
         </Form>
         <Form
@@ -94,9 +74,9 @@ const LoginMethodChooserPage = (props: Props) => {
           <Button
             secondary={true}
             uiAction={"password-submit"}
-            icon={"passkey"}
+            icon={"password"}
           >
-            {"Password"}
+            {t("labels.password")}
           </Button>
         </Form>
       </Content>

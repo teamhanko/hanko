@@ -16,8 +16,8 @@ export const bn: Translation = {
     profilePasskeys: "পাসকি",
     isPrimaryEmail: "প্রাথমিক ইমেইল",
     setPrimaryEmail: "প্রাথমিক ইমেল সেট করুন",
-    createEmail: "[missing]",
-    createUsername: "[missing]",
+    createEmail: "নতুন ইমেইল লিখুন",
+    createUsername: "নতুন ব্যবহারকারী নাম লিখুন",
     emailVerified: "যাচাইকৃত ",
     emailUnverified: "অযাচাইকৃত",
     emailDelete: "মুছে ফেলা",
@@ -30,6 +30,8 @@ export const bn: Translation = {
     accountNotFound: "অ্যাকাউন্ট পাওয়া যাচ্ছে না",
     signIn: "সাইন ইন",
     signUp: "নিবন্ধন করুন",
+    selectLoginMethod: "লগইন পদ্ধতি নির্বাচন করুন",
+    setupLoginMethod: "লগইন পদ্ধতি সেটআপ করুন",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
@@ -54,6 +56,9 @@ export const bn: Translation = {
     deleteAccount:
       "আপনি কি এই অ্যাকাউন্টটি মুছে ফেলার বিষয়ে নিশ্চিত? সমস্ত ডেটা অবিলম্বে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।",
     noAccountExists: '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই।',
+    selectLoginMethodForFutureLogins:
+      "ভবিষ্যতে লগইনের জন্য একটি প্রয়োজনীয় লগইন পদ্ধতি নির্বাচন করুন।",
+    howDoYouWantToLogin: "আপনি কিভাবে লগইন করতে চান?",
   },
   labels: {
     or: "বা",
@@ -63,6 +68,8 @@ export const bn: Translation = {
     continue: "চালিয়ে যান",
     skip: "এড়িয়ে যান",
     save: "সংরক্ষণ",
+    passkey: "পাসওয়ার্ড",
+    passcode: "পাসকোড",
     password: "পাসওয়ার্ড",
     signInPassword: "একটি পাসওয়ার্ড দিয়ে সাইন ইন",
     signInPasscode: "একটি পাসকোড দিয়ে সাইন ইন করুন",
@@ -145,5 +152,8 @@ export const bn: Translation = {
     flow_discontinuity_error:
       "ব্যবহারকারীর সেটিংস বা প্রদানকারীর কনফিগারেশনের কারণে প্রক্রিয়াটি চালিয়ে যাওয়া সম্ভব নয়।",
     form_data_invalid_error: "জমা দেওয়া ফর্ম ডেটাতে ত্রুটি রয়েছে।",
+    value_missing_error: "মান অনুপস্থিত।",
+    value_too_long_error: "মানটি খুব দীর্ঘ।",
+    value_too_short_error: "মানটি খুব ছোট।",
   },
 };

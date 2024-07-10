@@ -16,8 +16,8 @@ export const ptBR: Translation = {
     profilePasskeys: "Chave de acesso",
     isPrimaryEmail: "E-mail principal",
     setPrimaryEmail: "Definir o e-mail principal",
-    createEmail: "[missing]",
-    createUsername: "[missing]",
+    createEmail: "Digite um novo e-mail",
+    createUsername: "Digite um novo nome de usuário",
     emailVerified: "Verificado",
     emailUnverified: "Não verificado",
     emailDelete: "Apagar",
@@ -30,6 +30,8 @@ export const ptBR: Translation = {
     accountNotFound: "Conta não encontrada",
     signIn: "Entrar",
     signUp: "Registrar",
+    selectLoginMethod: "Selecionar método de login",
+    setupLoginMethod: "Configurar método de login",
   },
   texts: {
     enterPasscode:
@@ -56,6 +58,9 @@ export const ptBR: Translation = {
     deleteAccount:
       "Tem certeza que deseja apagar esta conta? Todos os dados serão apagados imediatamente e não poderão ser recuperados.",
     noAccountExists: 'Nenhuma conta encontrada para o e-mail "{emailAddress}".',
+    selectLoginMethodForFutureLogins:
+      "Selecione um dos métodos de login a seguir para usar em logins futuros.",
+    howDoYouWantToLogin: "Como você deseja fazer login?",
   },
   labels: {
     or: "ou",
@@ -66,6 +71,8 @@ export const ptBR: Translation = {
     skip: "Pular",
     save: "Salvar",
     password: "Senha",
+    passkey: "Chave de acesso",
+    passcode: "Código de acesso",
     signInPassword: "Entre com uma senha",
     signInPasscode: "Entre com um código de acesso",
     forgotYourPassword: "Esqueceu a sua senha?",
@@ -148,5 +155,8 @@ export const ptBR: Translation = {
     flow_discontinuity_error:
       "O processo não pode ser continuado devido às configurações do usuário ou do provedor.",
     form_data_invalid_error: "Os dados do formulário submetido contêm erros.",
+    value_missing_error: "O valor está ausente.",
+    value_too_long_error: "O valor é muito longo.",
+    value_too_short_error: "O valor é muito curto.",
   },
 };

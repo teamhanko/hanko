@@ -162,10 +162,10 @@ var (
 
 // Predefined input error types
 var (
-	ErrorValueMissing  = NewInputError("value_missing_error", "Missing value.")
+	ErrorValueMissing  = NewInputError("value_missing_error", "The value is missing.")
 	ErrorValueInvalid  = NewInputError("value_invalid_error", "The value is invalid.")
-	ErrorValueTooLong  = NewInputError("value_too_long_error", "Value is too long.")
-	ErrorValueTooShort = NewInputError("value_too_short_error", "Value is too short.")
+	ErrorValueTooLong  = NewInputError("value_too_long_error", "The value is too long.")
+	ErrorValueTooShort = NewInputError("value_too_short_error", "The value is too short.")
 )
 
 func createMustBeOneOfError(values []string) InputError {
