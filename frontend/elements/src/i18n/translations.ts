@@ -34,6 +34,8 @@ export interface Translation {
     deleteAccount: string;
     signIn: string;
     signUp: string;
+    selectLoginMethod: string;
+    setupLoginMethod: string;
   };
   texts: {
     enterPasscode: string;
@@ -51,6 +53,8 @@ export interface Translation {
     renamePasskey: string;
     deletePasskey: string;
     deleteAccount: string;
+    selectLoginMethodForFutureLogins: string;
+    howDoYouWantToLogin: string;
   };
   labels: {
     or: string;
@@ -61,6 +65,8 @@ export interface Translation {
     skip: string;
     save: string;
     password: string;
+    passkey: string;
+    passcode: string;
     signInPassword: string;
     signInPasscode: string;
     forgotYourPassword: string;
@@ -129,6 +135,9 @@ export interface Translation {
     flow_discontinuity_error: string;
     operation_not_permitted_error: string;
     form_data_invalid_error: string;
+    value_missing_error: string;
+    value_too_long_error: string;
+    value_too_short_error: string;
   };
 }
 

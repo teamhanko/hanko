@@ -16,8 +16,8 @@ export const zh: Translation = {
     profilePasskeys: "密钥",
     isPrimaryEmail: "主要电子邮件地址",
     setPrimaryEmail: "设定主要电子邮件地址",
-    createEmail: "[missing]",
-    createUsername: "[missing]",
+    createEmail: "输入新电子邮件",
+    createUsername: "输入新用户名",
     emailVerified: "已验证",
     emailUnverified: "未验证",
     emailDelete: "删除",
@@ -30,6 +30,8 @@ export const zh: Translation = {
     accountNotFound: "未找到帐户",
     signIn: "登录",
     signUp: "注册",
+    selectLoginMethod: "选择登录方法",
+    setupLoginMethod: "设置登录方法",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -53,6 +55,9 @@ export const zh: Translation = {
       "从您的账户中删除此密钥。请注意，密钥将继续存在于您的设备上，也需要在那里被删除。",
     deleteAccount: "您确定要删除此账号吗？所有数据将立即被删除，且无法恢复。",
     noAccountExists: '没有账户"{emailAddress}"。',
+    selectLoginMethodForFutureLogins:
+      "请选择以下登录方法之一以供将来登录使用。",
+    howDoYouWantToLogin: "您想如何登录？",
   },
   labels: {
     or: "或",
@@ -62,6 +67,8 @@ export const zh: Translation = {
     continue: "继续",
     skip: "跳过",
     save: "保存",
+    passkey: "密码",
+    passcode: "访问码",
     password: "密码",
     signInPassword: "使用密码登录",
     signInPasscode: "使用验证码登录",
@@ -135,5 +142,8 @@ export const zh: Translation = {
     operation_not_permitted_error: "不允许此操作。",
     flow_discontinuity_error: "由于用户设置或提供商配置，流程无法继续。",
     form_data_invalid_error: "提交的表单数据包含错误。",
+    value_missing_error: "值丢失。",
+    value_too_long_error: "值太长。",
+    value_too_short_error: "值太短。",
   },
 };

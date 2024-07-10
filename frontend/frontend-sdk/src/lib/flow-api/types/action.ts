@@ -54,7 +54,6 @@ interface ProfileInitActions {
 }
 
 interface LoginMethodChooserActions {
-  readonly webauthn_generate_request_options?: Action<null>;
   readonly continue_to_password_login?: Action<null>;
   readonly continue_to_passcode_confirmation?: Action<null>;
   readonly back: Action<null>;

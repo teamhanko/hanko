@@ -30,6 +30,8 @@ export const en: Translation = {
     accountNotFound: "Account not found",
     signIn: "Sign in",
     signUp: "Sign up",
+    selectLoginMethod: "Select login method",
+    setupLoginMethod: "Set up login method",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -54,6 +56,9 @@ export const en: Translation = {
     deleteAccount:
       "Are you sure you want to delete this account? All data will be deleted immediately and cannot be recovered.",
     noAccountExists: 'No account exists for "{emailAddress}".',
+    selectLoginMethodForFutureLogins:
+      "Select one of the following login methods to use for future logins.",
+    howDoYouWantToLogin: "How do you want to login?",
   },
   labels: {
     or: "or",
@@ -64,6 +69,8 @@ export const en: Translation = {
     skip: "Skip",
     save: "Save",
     password: "Password",
+    passkey: "Passkey",
+    passcode: "Passcode",
     signInPassword: "Sign in with a password",
     signInPasscode: "Sign in with a passcode",
     forgotYourPassword: "Forgot your password?",
@@ -133,7 +140,6 @@ export const en: Translation = {
     passkey_invalid: "This passkey cannot be used anymore",
     passcode_max_attempts_reached:
       "The passcode was entered incorrectly too many times. Please request a new code.",
-
     rate_limit_exceeded:
       "Too many requests have been made. Please wait to repeat the requested operation.",
     unknown_username_error: "The username is unknown.",
@@ -144,5 +150,8 @@ export const en: Translation = {
     flow_discontinuity_error:
       "The process cannot be continued due to user settings or the provider's configuration.",
     form_data_invalid_error: "The submitted form data contains errors.",
+    value_missing_error: "The value is missing.",
+    value_too_long_error: "Value is too long.",
+    value_too_short_error: "The value is too short.",
   },
 };
