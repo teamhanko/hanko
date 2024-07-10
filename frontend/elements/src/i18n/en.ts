@@ -43,14 +43,13 @@ export const en: Translation = {
       'No account exists for "{emailAddress}". Do you want to create a new account?',
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
+    setPrimaryEmail: "Set this email address to be used for contacting you.",
     isPrimaryEmail:
-      "This email address will be used as username for your passkeys.",
-    setPrimaryEmail: "Set this email to be used as username for new passkeys.",
+      "This email address will be used to contact you if necessary.",
     emailVerified: "This email address has been verified.",
     emailUnverified: "This email address has not been verified.",
     emailDelete:
       "If you delete this email address, it can no longer be used to sign in.",
-    emailDeletePrimary: "The primary email address cannot be deleted.",
     renamePasskey: "Set a name for the passkey.",
     deletePasskey: "Delete this passkey from your account.",
     deleteAccount:

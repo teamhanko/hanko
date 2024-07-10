@@ -40,16 +40,12 @@ export const zh: Translation = {
       "使用密钥轻松安全地登录您的账户。注意：您的生物识别数据仅存储在您的设备上，永远不会与任何人共享。",
     createAccount: "没有“{emailAddress}”的账户存在。你想要创建一个新账户吗?",
     passwordFormatHint: "必须长在{minLength}和{maxLength}字符之间。",
-    isPrimaryEmail:
-      "用于通讯，验证码，以及作为密钥的用户名。要更改主要电子邮件地址，请先添加另一个电子邮件地址并设定为主要。",
-    setPrimaryEmail:
-      "设定此电子邮件地址为主要，它将被用于通讯，验证码，以及作为密钥的用户名。",
+    setPrimaryEmail: "将此电子邮件地址设置为用于联系您。",
+    isPrimaryEmail: "如有必要，此电子邮件地址将用于联系您。",
     emailVerified: "此电子邮件地址已经过验证。",
     emailUnverified: "此电子邮件地址尚未验证。",
     emailDelete:
       "如果您删除此电子邮件地址，将无法再用于登录您的账户。可能已经用此电子邮件地址创建的密钥将保持完整。",
-    emailDeletePrimary:
-      "主要电子邮件地址不能被删除。请先添加另一个电子邮件地址并设定为主要电子邮件地址。",
     renamePasskey: "为密钥设定名称，帮助您识别其所存储的位置。",
     deletePasskey:
       "从您的账户中删除此密钥。请注意，密钥将继续存在于您的设备上，也需要在那里被删除。",

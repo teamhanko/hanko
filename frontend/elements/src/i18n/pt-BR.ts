@@ -44,15 +44,14 @@ export const ptBR: Translation = {
       'Nenhuma conta encontrada para o e-mail "{emailAddress}". Deseja criar uma nova conta?',
     passwordFormatHint:
       "Deve conter entre {minLength} e {maxLength} caracteres.",
-    isPrimaryEmail:
-      "Este e-mail será usado como seu nome de usuário para as suas chaves de acesso.",
     setPrimaryEmail:
-      "Definir este e-mail como nome de usuário para novas chaves de acesso.",
+      "Defina este endereço de e-mail para ser usado para entrar em contato com você.",
+    isPrimaryEmail:
+      "Este endereço de e-mail será usado para entrar em contato com você, se necessário.",
     emailVerified: "Este e-mail foi verificado.",
     emailUnverified: "Este e-mail não foi verificado.",
     emailDelete:
       "Se você apagar esse e-mail, não poderá mais usá-lo para entrar em sua conta.",
-    emailDeletePrimary: "O seu e-mail principal não pode ser apagado.",
     renamePasskey: "Defina um nome para a chave de acesso.",
     deletePasskey: "Remova essa chave de acesso da sua conta.",
     deleteAccount:
