@@ -1016,6 +1016,10 @@ webhooks:
     #
     # Callback - Endpoint URL to which the change data will be sent
     #
+    # NOTE: When using environment variables hooks must be defined as in the following example:
+    #
+    # WEBHOOKS_HOOKS={"callback":"http://app.com/usercb","events":["user"]};{"callback":"http://app.com/emailcb","events":["email.send"]}
+    #
     - callback: "<YOUR WEBHOOK ENDPOINT URL>"
       ##
       #
