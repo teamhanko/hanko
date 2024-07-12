@@ -47,6 +47,7 @@ interface ProfileInitActions {
   readonly password_update?: Action<PasswordInputs>;
   readonly password_delete?: Action<null>;
   readonly username_set?: Action<UsernameSetInputs>;
+  readonly username_delete?: Action<null>;
   readonly webauthn_credential_create?: Action<null>;
   readonly webauthn_credential_rename?: Action<PasskeyCredentialRename>;
   readonly webauthn_credential_delete?: Action<PasskeyCredentialDelete>;
