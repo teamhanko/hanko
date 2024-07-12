@@ -1,9 +1,11 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"net/url"
+	"strings"
 )
 
 type WebhookSettings struct {
@@ -26,6 +28,25 @@ func (ws *WebhookSettings) Validate() error {
 }
 
 type Webhooks []Webhook
+
+// Decode is an implementation of the envconfig.Decoder interface.
+// Assumes that environment variables (for the WEBHOOKS_HOOKS key) have the following format:
+// {"callback":"http://app.com/usercb","events":["user"]};{"callback":"http://app.com/emailcb","events":["email.send"]}
+func (wd *Webhooks) Decode(value string) error {
+	webhooks := Webhooks{}
+	hooks := strings.Split(value, ";")
+	for _, hook := range hooks {
+		webhook := Webhook{}
+		err := json.Unmarshal([]byte(hook), &webhook)
+		if err != nil {
+			return fmt.Errorf("invalid map json: %w", err)
+		}
+		webhooks = append(webhooks, webhook)
+
+	}
+	*wd = webhooks
+	return nil
+}
 
 type Webhook struct {
 	Callback string        `yaml:"callback" json:"callback,omitempty" koanf:"callback"`
