@@ -28,6 +28,7 @@ const (
 	ActionSkip                                   flowpilot.ActionName = "skip"
 	ActionThirdPartyOAuth                        flowpilot.ActionName = "thirdparty_oauth"
 	ActionUsernameSet                            flowpilot.ActionName = "username_set"
+	ActionUsernameDelete                         flowpilot.ActionName = "username_delete"
 	ActionEmailAddressSet                        flowpilot.ActionName = "email_address_set"
 	ActionVerifyPasscode                         flowpilot.ActionName = "verify_passcode"
 	ActionWebauthnCredentialCreate               flowpilot.ActionName = "webauthn_credential_create"

@@ -116,6 +116,13 @@ const ProfilePage = (props: Props) => {
       flowState.actions.username_set({ username }).run,
     );
 
+  const onUsernameDelete = async (event: Event) =>
+    onAction(
+      event,
+      "username-delete",
+      flowState.actions.username_delete(null).run,
+    );
+
   const onPasskeyNameSubmit = async (event: Event, id: string, name: string) =>
     onAction(
       event,
@@ -184,7 +191,11 @@ const ProfilePage = (props: Props) => {
             <ChangeUsernameDropdown
               inputs={flowState.actions.username_set(null).inputs}
               hasUsername={!!flowState.payload.user.username}
+              allowUsernameDeletion={
+                !!flowState.actions.username_delete?.(null)
+              }
               onUsernameSubmit={onUsernameSubmit}
+              onUsernameDelete={onUsernameDelete}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
             />

@@ -133,6 +133,7 @@ var ProfileFlow = flowpilot.NewFlow(shared.FlowProfile).
 		profile.PasswordUpdate{},
 		profile.PasswordDelete{},
 		profile.UsernameSet{},
+		profile.UsernameDelete{},
 		profile.WebauthnCredentialRename{},
 		profile.WebauthnCredentialCreate{},
 		profile.WebauthnCredentialDelete{},

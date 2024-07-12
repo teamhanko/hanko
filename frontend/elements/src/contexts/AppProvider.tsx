@@ -93,6 +93,7 @@ export type UIAction =
   | "email-delete"
   | "email-verify"
   | "username-set"
+  | "username-delete"
   | "skip"
   | "back"
   | "account_delete"
