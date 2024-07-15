@@ -30,10 +30,12 @@ func (a UsernameDelete) Initialize(c flowpilot.InitializationContext) {
 		return
 	}
 
+	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+
 	if !deps.Cfg.Username.Enabled ||
 		!deps.Cfg.Username.Optional ||
 		!userModel.Username.Valid ||
-		len(userModel.Emails) < 1 {
+		(len(userModel.Emails) == 0 && !canDoWebauthn) {
 		c.SuspendAction()
 	}
 }
