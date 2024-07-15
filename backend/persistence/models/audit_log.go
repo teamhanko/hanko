@@ -117,6 +117,7 @@ var (
 	AuditLogPasskeyCreated  AuditLogType = "passkey_created"
 	AuditLogPasskeyDeleted  AuditLogType = "passkey_deleted"
 	AuditLogUsernameChanged AuditLogType = "username_changed"
+	AuditLogUsernameDeleted AuditLogType = "username_deleted"
 	AuditLogPasswordChanged AuditLogType = "password_changed"
 	AuditLogPasswordDeleted AuditLogType = "password_deleted"
 )
