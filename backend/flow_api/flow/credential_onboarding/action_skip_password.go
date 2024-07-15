@@ -19,7 +19,7 @@ func (a SkipPassword) GetDescription() string {
 
 func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	emailExists := len(c.Stash().Get(shared.StashPathEmail).String()) > 0
+	emailExists := c.Stash().Get(shared.StashPathEmail).Exists()
 	canLoginWithEmail := emailExists &&
 		deps.Cfg.Email.Enabled &&
 		deps.Cfg.Email.UseForAuthentication &&
