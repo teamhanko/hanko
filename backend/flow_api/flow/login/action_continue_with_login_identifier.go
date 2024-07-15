@@ -176,13 +176,27 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
 	}
 
+	if !treatIdentifierAsEmail && userModel != nil && !deps.Cfg.Password.Enabled && userModel.Emails.GetPrimary() == nil {
+		// The user has entered a username of an existing user, but passwords are disabled, and the user does not have
+		// an email address to send the passcode.
+		return c.Error(flowpilot.ErrorFlowDiscontinuity.Wrap(errors.New("user has no email address and passwords are disabled")))
+	}
+
 	if deps.Cfg.Email.UseForAuthentication && deps.Cfg.Password.Enabled {
+		// Both passcode and password authentication are enabled.
 		if treatIdentifierAsEmail || (!treatIdentifierAsEmail && userModel != nil && userModel.Emails.GetPrimary() != nil) {
+			// The user has entered either an email address, or a username for an existing user who has an email address.
 			return c.Continue(shared.StateLoginMethodChooser)
 		}
+
+		// Either no email was entered or the username does not correspond to an email, passwords are enabled.
 		return c.Continue(shared.StateLoginPassword)
-	} else if deps.Cfg.Email.UseForAuthentication {
-		// Set only for audit logging purposes.
+	}
+
+	if deps.Cfg.Email.UseForAuthentication {
+		// Only passcode authentication is enabled; the user must use a passcode.
+
+		// Set the login method for audit logging purposes.
 		if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
 			return fmt.Errorf("failed to set login_method to stash: %w", err)
 		}
@@ -198,7 +212,10 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 
 		return c.Continue(shared.StatePasscodeConfirmation)
-	} else if deps.Cfg.Password.Enabled {
+	}
+
+	if deps.Cfg.Password.Enabled {
+		// Only password authentication is enabled; the user must use a password.
 		return c.Continue(shared.StateLoginPassword)
 	}
 
