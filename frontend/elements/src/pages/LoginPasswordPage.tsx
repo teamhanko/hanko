@@ -78,7 +78,7 @@ const LoginPasswordPage = (props: Props) => {
         }
         uiAction={"password-recovery"}
         onClick={onRecoveryClick}
-        loadingSpinnerPosition={"right"}
+        loadingSpinnerPosition={"left"}
       >
         {t("labels.forgotYourPassword")}
       </Link>
