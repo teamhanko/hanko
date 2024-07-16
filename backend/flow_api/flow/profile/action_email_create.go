@@ -28,7 +28,7 @@ func (a EmailCreate) Initialize(c flowpilot.InitializationContext) {
 	if !deps.Cfg.Email.Enabled || (ok && len(userModel.Emails) >= deps.Cfg.Email.Limit) {
 		c.SuspendAction()
 	} else {
-		c.AddInputs(flowpilot.EmailInput("email").Required(true).TrimSpace(true).LowerCase(true))
+		c.AddInputs(flowpilot.EmailInput("email").Required(true).MaxLength(deps.Cfg.Email.MaxLength).TrimSpace(true).LowerCase(true))
 	}
 }
 
