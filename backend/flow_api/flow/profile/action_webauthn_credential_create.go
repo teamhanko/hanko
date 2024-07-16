@@ -24,7 +24,9 @@ func (a WebauthnCredentialCreate) GetDescription() string {
 func (a WebauthnCredentialCreate) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
+	userModel, ok := c.Get("session_user").(*models.User)
+
+	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() || (ok && len(userModel.WebauthnCredentials) >= deps.Cfg.Passkey.Limit) {
 		c.SuspendAction()
 	}
 }
