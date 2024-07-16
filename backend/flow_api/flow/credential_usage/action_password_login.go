@@ -41,8 +41,20 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	if err := a.rateLimit(c, deps, c.Stash().Get(shared.StashPathUserIdentification).String()); err != nil {
-		return err
+	if deps.Cfg.RateLimiter.Enabled {
+		rateLimitKey := rate_limiter.CreateRateLimitPasswordKey(deps.HttpContext.RealIP(), c.Stash().Get(shared.StashPathUserIdentification).String())
+		retryAfterSeconds, ok, err := rate_limiter.Limit2(deps.PasswordRateLimiter, rateLimitKey)
+		if err != nil {
+			return fmt.Errorf("rate limiter failed: %w", err)
+		}
+
+		if !ok {
+			err = c.Payload().Set("retry_after", retryAfterSeconds)
+			if err != nil {
+				return fmt.Errorf("failed to set a value for retry_after to the payload: %w", err)
+			}
+			return c.Error(shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
+		}
 	}
 
 	var userID uuid.UUID
@@ -113,23 +125,4 @@ func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error
 	c.Input().SetError("password", flowpilot.ErrorValueInvalid)
 
 	return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
-}
-
-func (a PasswordLogin) rateLimit(c flowpilot.ExecutionContext, deps *shared.Dependencies, userIdentifier string) error {
-	if deps.Cfg.RateLimiter.Enabled {
-		rateLimitKey := rate_limiter.CreateRateLimitPasswordKey(deps.HttpContext.RealIP(), userIdentifier)
-		retryAfterSeconds, ok, err := rate_limiter.Limit2(deps.PasswordRateLimiter, rateLimitKey)
-		if err != nil {
-			return fmt.Errorf("rate limiter failed: %w", err)
-		}
-
-		if !ok {
-			err = c.Payload().Set("retry_after", retryAfterSeconds)
-			if err != nil {
-				return fmt.Errorf("failed to set a value for retry_after to the payload: %w", err)
-			}
-			return c.Error(shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
-		}
-	}
-	return nil
 }
