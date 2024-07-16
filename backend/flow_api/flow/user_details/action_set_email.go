@@ -81,6 +81,11 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if deps.Cfg.Email.RequireVerification {
+		err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+		if err != nil {
+			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+		}
+
 		return c.Continue(shared.StatePasscodeConfirmation)
 	}
 

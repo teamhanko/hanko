@@ -1,4 +1,4 @@
-package login
+package credential_usage
 
 import (
 	"github.com/teamhanko/hanko/backend/config"
