@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"time"
 )
 
@@ -30,6 +31,10 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	deps := a.GetDeps(c)
+
+	if err := a.rateLimit(c, deps); err != nil {
+		return err
+	}
 
 	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String())
 	if err != nil {
@@ -96,4 +101,23 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 	}
 
 	return append(result, StateSuccess), nil
+}
+
+func (a ExchangeToken) rateLimit(c flowpilot.ExecutionContext, deps *Dependencies) error {
+	if deps.Cfg.RateLimiter.Enabled {
+		rateLimitKey := rate_limiter.CreateRateLimitTokenExchangeKey(deps.HttpContext.RealIP())
+		retryAfterSeconds, ok, err := rate_limiter.Limit2(deps.TokenExchangeRateLimiter, rateLimitKey)
+		if err != nil {
+			return fmt.Errorf("rate limiter failed: %w", err)
+		}
+
+		if !ok {
+			err = c.Payload().Set("retry_after", retryAfterSeconds)
+			if err != nil {
+				return fmt.Errorf("failed to set a value for retry_after to the payload: %w", err)
+			}
+			return c.Error(ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
+		}
+	}
+	return nil
 }
