@@ -31,15 +31,15 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.RegistrationFlow.MustBuild())
+	return h.executeFlow(c, flow.RegistrationFlow.Debug(h.Cfg.Debug).MustBuild())
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.LoginFlow.MustBuild())
+	return h.executeFlow(c, flow.LoginFlow.Debug(h.Cfg.Debug).MustBuild())
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.ProfileFlow.MustBuild())
+	return h.executeFlow(c, flow.ProfileFlow.Debug(h.Cfg.Debug).MustBuild())
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
