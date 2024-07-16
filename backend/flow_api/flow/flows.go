@@ -18,6 +18,16 @@ var CapabilitiesSubFlow = flowpilot.NewSubFlow(shared.FlowCapabilities).
 	MustBuild()
 
 var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
+	State(shared.StateLoginInit,
+		credential_usage.ContinueWithLoginIdentifier{},
+		credential_usage.WebauthnGenerateRequestOptions{},
+		credential_usage.WebauthnVerifyAssertionResponse{},
+		shared.ThirdPartyOAuth{}).
+	State(shared.StateLoginPasskey,
+		credential_usage.WebauthnVerifyAssertionResponse{},
+		shared.Back{}).
+	State(shared.StateThirdParty,
+		shared.ExchangeToken{}).
 	State(shared.StateLoginMethodChooser,
 		credential_usage.ContinueToPasswordLogin{},
 		credential_usage.ContinueToPasscodeConfirmation{},
@@ -67,16 +77,6 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 	MustBuild()
 
 var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
-	State(shared.StateLoginInit,
-		login.ContinueWithLoginIdentifier{},
-		login.WebauthnGenerateRequestOptions{},
-		login.WebauthnVerifyAssertionResponse{},
-		shared.ThirdPartyOAuth{}).
-	State(shared.StateThirdParty,
-		shared.ExchangeToken{}).
-	State(shared.StateLoginPasskey,
-		login.WebauthnVerifyAssertionResponse{},
-		shared.Back{}).
 	State(shared.StateSuccess).
 	State(shared.StateError).
 	InitialState(shared.StatePreflight, shared.StateLoginInit).

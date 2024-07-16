@@ -1,4 +1,4 @@
-package login
+package credential_usage
 
 import (
 	"errors"
@@ -86,9 +86,17 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
+	if userModel != nil {
+		_ = c.Stash().Set(shared.StashPathUserHasPassword, userModel.PasswordCredential != nil)
+		_ = c.Stash().Set(shared.StashPathUserHasWebauthnCredential, len(userModel.WebauthnCredentials) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasUsername, len(userModel.Username.String) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
+	}
+
 	err = c.DeleteStateHistory(true)
 	if err != nil {
 		return fmt.Errorf("failed to delete the state history: %w", err)
 	}
-	return c.Continue(shared.StateSuccess)
+
+	return c.Continue()
 }
