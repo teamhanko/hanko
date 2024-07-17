@@ -67,9 +67,12 @@ func (e *defaultError) toResponseError(debug bool) *ResponseError {
 		Message: e.Message(),
 	}
 
-	if debug && e.cause != nil {
+	if e.cause != nil {
 		cause := e.cause.Error()
-		publicError.Cause = &cause
+		publicError.Internal = &cause
+		if debug {
+			publicError.Cause = &cause
+		}
 	}
 
 	return publicError

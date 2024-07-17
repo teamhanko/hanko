@@ -1,8 +1,11 @@
 package flow_api
 
 import (
+	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
@@ -15,6 +18,8 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
+	"strconv"
+	"time"
 )
 
 type FlowPilotHandler struct {
@@ -86,5 +91,24 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		}
 	}
 
+	log := zeroLogger.Info().
+		Str("time_unix", strconv.FormatInt(time.Now().Unix(), 10)).
+		Str("id", c.Response().Header().Get(echo.HeaderXRequestID)).
+		Str("remote_ip", c.RealIP()).Str("host", c.Request().Host).
+		Str("method", c.Request().Method).Str("uri", c.Request().RequestURI).
+		Str("user_agent", c.Request().UserAgent()).Int("status", flowResult.GetStatus()).
+		Str("referer", c.Request().Referer())
+	if flowResult.GetResponse().Error != nil {
+		log.Str("error", fmt.Sprintf(flowResult.GetResponse().Error.Code))
+		if flowResult.GetResponse().Error.Internal != nil {
+			log.Str("error_internal", *flowResult.GetResponse().Error.Internal)
+		}
+	}
+	log.Send()
+
 	return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+}
+
+func init() {
+	zerolog.TimeFieldFormat = time.RFC3339Nano
 }
