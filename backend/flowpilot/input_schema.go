@@ -146,16 +146,11 @@ func (s *defaultSchema) toResponseInputs() ResponseInputs {
 	var publicSchema = make(ResponseInputs)
 
 	for _, input := range s.inputs {
-		//outputValue := s.outputData.Get(input.getName())
-		//inputValue := s.inputData.Get(input.getName())
-		//
-		//if outputValue.Exists() {
-		//	input.setValue(outputValue.Value())
-		//}
-		//
-		//if input.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
-		//	input.setValue(inputValue.Value())
-		//}
+		if s.outputData.Get(input.getName()).Exists() {
+			input.setValue(s.outputData.Get(input.getName()).Value())
+		} else if input.shouldPreserve() {
+			input.setValue(s.inputData.Get(input.getName()).Value())
+		}
 
 		publicSchema[input.getName()] = input.toResponseInput()
 	}
