@@ -40,7 +40,6 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
 		input := flowpilot.EmailInput("email").
 			MaxLength(deps.Cfg.Email.MaxLength).
-			Persist(true).
 			Preserve(true).
 			Required(!deps.Cfg.Email.Optional).
 			TrimSpace(true).
@@ -53,7 +52,6 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 		input := flowpilot.StringInput("username").
 			MinLength(deps.Cfg.Username.MinLength).
 			MaxLength(deps.Cfg.Username.MaxLength).
-			Persist(true).
 			Preserve(true).
 			Required(!deps.Cfg.Username.Optional).
 			TrimSpace(true)

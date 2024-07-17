@@ -9,7 +9,7 @@ import (
 type FlowBuilder interface {
 	TTL(ttl time.Duration) FlowBuilder
 	State(stateName StateName, actions ...Action) FlowBuilder
-	InitialState(stateName StateName, nextStateNames ...StateName) FlowBuilder
+	InitialState(stateNames ...StateName) FlowBuilder
 	ErrorState(stateName StateName) FlowBuilder
 	BeforeState(stateName StateName, hooks ...HookAction) FlowBuilder
 	AfterState(stateName StateName, hooks ...HookAction) FlowBuilder
@@ -37,12 +37,11 @@ type defaultFlowBuilderBase struct {
 
 // defaultFlowBuilder is a builder struct for creating a new Flow.
 type defaultFlowBuilder struct {
-	path                  string
-	ttl                   time.Duration
-	initialStateName      StateName
-	initialNextStateNames []StateName
-	errorStateName        StateName
-	debug                 bool
+	path              string
+	ttl               time.Duration
+	initialStateNames []StateName
+	errorStateName    StateName
+	debug             bool
 
 	defaultFlowBuilderBase
 }
@@ -163,46 +162,17 @@ func (fb *defaultFlowBuilder) scanFlowStates(flow flowBase) error {
 // validate performs validation checks on the flow configuration.
 func (fb *defaultFlowBuilder) validate() error {
 	// Validate fixed states and their presence in the flow.
-	if len(fb.initialStateName) == 0 {
+	if len(fb.initialStateNames) == 0 {
 		return errors.New("fixed state 'initialState' is not set")
 	}
 	if len(fb.errorStateName) == 0 {
 		return errors.New("fixed state 'errorState' is not set")
 	}
-	if !fb.flow.stateExists(fb.initialStateName) && !fb.subFlows.stateExists(fb.initialStateName) {
-		return fmt.Errorf("initial state '%s' does not belong to the flow or a sub-flow", fb.initialStateName)
+	if !fb.flow.stateExists(fb.initialStateNames[0]) && !fb.subFlows.stateExists(fb.initialStateNames[0]) {
+		return fmt.Errorf("initial state '%s' does not belong to the flow or a sub-flow", fb.initialStateNames[0])
 	}
 	if !fb.flow.stateExists(fb.errorStateName) {
 		return fmt.Errorf("error state '%s' does not belong to the flow", fb.errorStateName)
-	}
-	if !fb.subFlows.stateExists(fb.initialStateName) && len(fb.initialNextStateNames) > 0 {
-		return fmt.Errorf("initial state '%s' is not a sub-flow state, but next states have been provided", fb.initialStateName)
-	}
-
-	// Validate the specified next states, when the flow starts with a sub-flow.
-	if err := fb.validateNextStateNames(); err != nil {
-		return fmt.Errorf("failed to validate the specified next states: %w", err)
-	}
-
-	return nil
-}
-
-func (fb *defaultFlowBuilder) validateNextStateNames() error {
-	for index, nextStateName := range fb.initialNextStateNames {
-		stateExists := fb.flow.stateExists(nextStateName)
-		subFlowStateExists := fb.subFlows.stateExists(nextStateName)
-
-		if index == len(fb.initialNextStateNames)-1 {
-			// The last state must be a member of the current flow or a sub-flow.
-			if !stateExists && !subFlowStateExists {
-				return fmt.Errorf("the last next state '%s' specified is not a sub-flow state or another state associated with the current flow", nextStateName)
-			}
-		} else {
-			// Every other state must be a sub-flow state.
-			if !subFlowStateExists {
-				return fmt.Errorf("the specified next state '%s' is not a sub-flow state of the current flow", nextStateName)
-			}
-		}
 	}
 
 	return nil
@@ -239,14 +209,8 @@ func (fb *defaultFlowBuilder) AfterEachAction(hooks ...HookAction) FlowBuilder {
 	return fb
 }
 
-func (fb *defaultFlowBuilder) InitialState(stateName StateName, nextStateNames ...StateName) FlowBuilder {
-	fb.initialStateName = stateName
-	fb.initialNextStateNames = nextStateNames
-
-	if len(fb.initialNextStateNames) == 0 {
-		fb.addStateIfNotExists(stateName)
-	}
-
+func (fb *defaultFlowBuilder) InitialState(nextStateNames ...StateName) FlowBuilder {
+	fb.initialStateNames = nextStateNames
 	return fb
 }
 
@@ -285,14 +249,13 @@ func (fb *defaultFlowBuilder) Build() (Flow, error) {
 	}
 
 	flow := &defaultFlow{
-		initialStateName:      fb.initialStateName,
-		initialNextStateNames: fb.initialNextStateNames,
-		errorStateName:        fb.errorStateName,
-		stateDetails:          fb.stateDetails,
-		ttl:                   fb.ttl,
-		debug:                 fb.debug,
-		defaultFlowBase:       dfb,
-		contextValues:         make(contextValues),
+		initialStateNames: fb.initialStateNames,
+		errorStateName:    fb.errorStateName,
+		stateDetails:      fb.stateDetails,
+		ttl:               fb.ttl,
+		debug:             fb.debug,
+		defaultFlowBase:   dfb,
+		contextValues:     make(contextValues),
 	}
 
 	// Check if states were already scanned, if so, don't scan again

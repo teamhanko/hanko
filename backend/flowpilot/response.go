@@ -195,7 +195,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 				continue
 			}
 
-			inputSchemaResponse := inputSchema.toResponseInputs(er.nextStateName)
+			inputSchemaResponse := inputSchema.toResponseInputs()
 
 			// Create the action instance.
 			action := ResponseAction{
@@ -215,10 +215,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 // getInputSchema returns the inputSchema for a given method name.
 func (er *executionResult) getInputSchema(fc *defaultFlowContext, actionDetail actionDetail) executionInputSchema {
 	actionName := actionDetail.getAction().GetName()
-
-	if er.actionExecutionResult == nil ||
-		actionName != er.actionExecutionResult.actionName ||
-		er.nextStateName != fc.flowModel.CurrentState {
+	if er.actionExecutionResult == nil || actionName != er.actionExecutionResult.actionName {
 		return newSchema()
 	}
 	return er.actionExecutionResult.inputSchema

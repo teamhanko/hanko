@@ -30,7 +30,7 @@ func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationCo
 		c.SuspendAction()
 	}
 
-	c.AddInputs(flowpilot.JSONInput("assertion_response").Required(true).Persist(false))
+	c.AddInputs(flowpilot.JSONInput("assertion_response").Required(true))
 }
 
 func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) error {
@@ -93,10 +93,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
 	}
 
-	err = c.DeleteStateHistory(true)
-	if err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }

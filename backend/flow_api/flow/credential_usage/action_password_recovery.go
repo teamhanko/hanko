@@ -76,10 +76,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
 	}
 
-	err = c.DeleteStateHistory(true)
-	if err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }
