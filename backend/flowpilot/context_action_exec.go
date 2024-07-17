@@ -173,14 +173,20 @@ func (aec *defaultActionExecutionContext) ValidateInputData() bool {
 func (aec *defaultActionExecutionContext) Error(flowErr FlowError) error {
 	aec.flowError = flowErr
 	statusStr := strconv.Itoa(aec.flowError.Status())
+
+	var nextStateName StateName
 	if strings.HasPrefix(statusStr, "4") {
-		if err := aec.stash.pushErrorState(aec.stash.getStateName()); err != nil {
-			return err
-		}
+		nextStateName = aec.stash.getStateName()
 	} else {
-		if err := aec.stash.pushErrorState(aec.flow.errorStateName); err != nil {
-			return err
-		}
+		nextStateName = aec.flow.errorStateName
+	}
+
+	if err := aec.executeBeforeStateHooks(nextStateName); err != nil {
+		return err
+	}
+
+	if err := aec.stash.pushErrorState(nextStateName); err != nil {
+		return err
 	}
 
 	return aec.closeExecutionContext()

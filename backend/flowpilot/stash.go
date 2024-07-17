@@ -106,7 +106,7 @@ func (h *defaultStash) Unmarshal() interface{} {
 }
 
 func (h *defaultStash) pushState(revertible bool) error {
-	return h.push(h.data.String(), revertible, true)
+	return h.push(h.data.String(), revertible, h.getStateName() != h.getNextStateName())
 }
 
 func (h *defaultStash) pushErrorState(nextState StateName) error {

@@ -6,7 +6,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"strings"
 )
 
 type UsernameSet struct {
@@ -27,7 +26,8 @@ func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("username").
 		Required(!deps.Cfg.Username.Optional).
 		MinLength(deps.Cfg.Username.MinLength).
-		MaxLength(deps.Cfg.Username.MaxLength))
+		MaxLength(deps.Cfg.Username.MaxLength).
+		TrimSpace(true))
 }
 
 func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
@@ -47,7 +47,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("user does not exists (id: %s)", userID.String())
 	}
 
-	username := strings.TrimSpace(c.Input().Get("username").String())
+	username := c.Input().Get("username").String()
 	user.Username = nulls.NewString(username)
 
 	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(user.Username.String)
@@ -58,11 +58,6 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	if duplicateUser != nil && duplicateUser.ID.String() != user.ID.String() {
 		c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
-	}
-
-	err = c.Stash().Set(shared.StashPathUsername, username)
-	if err != nil {
-		return fmt.Errorf("failed to set username to the stash: %w", err)
 	}
 
 	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*user)
