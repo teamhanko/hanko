@@ -35,16 +35,6 @@ func (aic *defaultActionInitializationContext) Get(key string) interface{} {
 	return aic.flow.contextValues[key]
 }
 
-func (aic *defaultActionInitializationContext) CurrentStateEquals(stateNames ...StateName) bool {
-	for _, s := range stateNames {
-		if s == aic.flowModel.CurrentState {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (aic *defaultActionInitializationContext) StateHistoryAvailable() bool {
-	return aic.stash.stateHistoryAvailable()
+func (aic *defaultActionInitializationContext) StateIsRevertible() bool {
+	return aic.stash.isRevertible()
 }

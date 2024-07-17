@@ -78,7 +78,6 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 
 var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 	State(shared.StateSuccess).
-	State(shared.StateError).
 	InitialState(shared.StatePreflight, shared.StateLoginInit).
 	ErrorState(shared.StateError).
 	BeforeState(shared.StateLoginInit,
@@ -106,7 +105,6 @@ var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 	State(shared.StateThirdParty,
 		shared.ExchangeToken{}).
 	State(shared.StateSuccess).
-	State(shared.StateError).
 	InitialState(shared.StatePreflight,
 		shared.StateRegistrationInit).
 	ErrorState(shared.StateError).

@@ -15,11 +15,11 @@ func (a Back) GetDescription() string {
 }
 
 func (a Back) Initialize(c flowpilot.InitializationContext) {
-	if !c.StateHistoryAvailable() {
+	if !c.StateIsRevertible() {
 		c.SuspendAction()
 	}
 }
 
 func (a Back) Execute(c flowpilot.ExecutionContext) error {
-	return c.Back()
+	return c.Revert()
 }

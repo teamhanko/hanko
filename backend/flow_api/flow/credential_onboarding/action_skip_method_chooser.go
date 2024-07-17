@@ -1,7 +1,6 @@
 package credential_onboarding
 
 import (
-	"fmt"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -29,9 +28,7 @@ func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.Initializa
 }
 
 func (a SkipCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionContext) error {
-	if err := c.DeleteStateHistory(true); err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }

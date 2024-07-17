@@ -89,10 +89,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.Continue(shared.StatePasscodeConfirmation)
 	}
 
-	err = c.DeleteStateHistory(true)
-	if err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }

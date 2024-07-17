@@ -37,9 +37,7 @@ func (a PasswordUpdate) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("password").
 		Required(true).
 		MinLength(deps.Cfg.Password.MinLength).
-		MaxLength(72).
-		Persist(false),
-	)
+		MaxLength(72))
 }
 
 func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {

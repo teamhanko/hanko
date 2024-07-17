@@ -70,10 +70,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to update user: %w", err)
 	}
 
-	err = c.DeleteStateHistory(true)
-	if err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }

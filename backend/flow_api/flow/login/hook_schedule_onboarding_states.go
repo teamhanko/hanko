@@ -29,7 +29,9 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c, userHasUsername, userHasEmail)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c, userHasPasskey, userHasPassword)
 
-	return c.ScheduleStates(append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...)...)
+	c.ScheduleStates(append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...)...)
+
+	return nil
 }
 
 func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
