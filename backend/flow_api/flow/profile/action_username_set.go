@@ -29,7 +29,7 @@ func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 	if !deps.Cfg.Username.Enabled {
 		c.SuspendAction()
 	} else {
-		c.AddInputs(flowpilot.StringInput("username").Required(true).TrimSpace(true))
+		c.AddInputs(flowpilot.StringInput("username").Preserve(true).Required(true).TrimSpace(true))
 	}
 }
 

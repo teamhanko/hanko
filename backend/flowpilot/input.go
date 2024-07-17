@@ -179,12 +179,12 @@ func (i *defaultInput) getError() InputError {
 	return i.error
 }
 
-// shouldPersist indicates the value should be preserved.
+// shouldPreserve indicates the value should be preserved.
 func (i *defaultInput) shouldPreserve() bool {
 	return i.preserveValue
 }
 
-// shouldPersist indicates the value should be preserved.
+// shouldTrimSpace indicates the value should be trimmed.
 func (i *defaultInput) shouldTrimSpace() bool {
 	return i.trimSpace
 }

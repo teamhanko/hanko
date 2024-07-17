@@ -40,7 +40,6 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 	if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
 		input := flowpilot.EmailInput("email").
 			MaxLength(deps.Cfg.Email.MaxLength).
-			Preserve(true).
 			Required(!deps.Cfg.Email.Optional).
 			TrimSpace(true).
 			LowerCase(true)
@@ -52,7 +51,6 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 		input := flowpilot.StringInput("username").
 			MinLength(deps.Cfg.Username.MinLength).
 			MaxLength(deps.Cfg.Username.MaxLength).
-			Preserve(true).
 			Required(!deps.Cfg.Username.Optional).
 			TrimSpace(true)
 
@@ -62,11 +60,6 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 
 func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
-
-	_ = c.Stash().Delete(shared.StashPathUserID)
-	_ = c.Stash().Delete(shared.StashPathEmail)
-	_ = c.Stash().Delete(shared.StashPathUsername)
-	_ = c.Stash().Delete(shared.StashPathPasscodeTemplate)
 
 	if valid := c.ValidateInputData(); !valid {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
