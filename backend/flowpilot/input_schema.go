@@ -18,11 +18,9 @@ type executionInputSchema interface {
 
 	getInput(name string) Input
 	getOutputData() readOnlyActionInput
-	getDataToPersist() readOnlyActionInput
-	preprocess()
-	validateInputData(stateName StateName, stash stash) bool
+	validateInputData() bool
 	forInitializationContext() initializationInputSchema
-	toResponseInputs(stateName StateName) ResponseInputs
+	toResponseInputs() ResponseInputs
 }
 
 // inputs represents a collection of Input instances.
@@ -112,37 +110,7 @@ func (s *defaultSchema) SetError(inputName string, inputError InputError) {
 }
 
 // validateInputData validates the input data based on the input definitions in the inputSchema.
-func (s *defaultSchema) validateInputData(stateName StateName, stash stash) bool {
-	valid := true
-
-	for _, input := range s.inputs {
-		if !input.validate(stateName, s.inputData, stash) && valid {
-			valid = false
-		}
-	}
-
-	return valid
-}
-
-// getDataToPersist filters and returns data that should be persisted based on inputSchema definitions.
-func (s *defaultSchema) getDataToPersist() readOnlyActionInput {
-	toPersist := newActionInput()
-
-	for _, input := range s.inputs {
-		if v := s.inputData.Get(input.getName()); v.Exists() && input.shouldPersist() {
-			_ = toPersist.Set(input.getName(), v.Value())
-		}
-	}
-
-	return toPersist
-}
-
-// getOutputData returns the output data from the inputSchema.
-func (s *defaultSchema) getOutputData() readOnlyActionInput {
-	return s.outputData
-}
-
-func (s *defaultSchema) preprocess() {
+func (s *defaultSchema) validateInputData() bool {
 	for _, input := range s.inputs {
 		name := input.getName()
 
@@ -156,27 +124,38 @@ func (s *defaultSchema) preprocess() {
 			_ = s.inputData.Set(name, v)
 		}
 	}
+
+	valid := true
+
+	for _, input := range s.inputs {
+		if !input.validate(s.inputData) && valid {
+			valid = false
+		}
+	}
+
+	return valid
+}
+
+// getOutputData returns the output data from the inputSchema.
+func (s *defaultSchema) getOutputData() readOnlyActionInput {
+	return s.outputData
 }
 
 // toResponseInputs converts defaultSchema to ResponseInputs for public exposure.
-func (s *defaultSchema) toResponseInputs(stateName StateName) ResponseInputs {
+func (s *defaultSchema) toResponseInputs() ResponseInputs {
 	var publicSchema = make(ResponseInputs)
 
 	for _, input := range s.inputs {
-		if !input.isIncludedOnState(stateName) {
-			continue
-		}
-
-		outputValue := s.outputData.Get(input.getName())
-		inputValue := s.inputData.Get(input.getName())
-
-		if outputValue.Exists() {
-			input.setValue(outputValue.Value())
-		}
-
-		if input.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
-			input.setValue(inputValue.Value())
-		}
+		//outputValue := s.outputData.Get(input.getName())
+		//inputValue := s.inputData.Get(input.getName())
+		//
+		//if outputValue.Exists() {
+		//	input.setValue(outputValue.Value())
+		//}
+		//
+		//if input.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
+		//	input.setValue(inputValue.Value())
+		//}
 
 		publicSchema[input.getName()] = input.toResponseInput()
 	}

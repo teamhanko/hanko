@@ -113,16 +113,12 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	err = c.DeleteStateHistory(true)
-	if err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }
 
 func (a PasswordLogin) wrongCredentialsError(c flowpilot.ExecutionContext) error {
 	c.Input().SetError("password", flowpilot.ErrorValueInvalid)
-
 	return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("wrong credentials")))
 }

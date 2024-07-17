@@ -30,57 +30,48 @@ type flowContext interface {
 	GetInitialState() StateName
 	// GetCurrentState returns the current state of the flow.
 	GetCurrentState() StateName
-	// CurrentStateEquals returns true, when one of the given states matches the current state.
-	CurrentStateEquals(stateNames ...StateName) bool
 	// GetPreviousState returns the previous state of the flow.
 	GetPreviousState() StateName
 	// IsPreviousState returns true if the previous state equals the given name.
 	IsPreviousState(name StateName) bool
 	// GetErrorState returns the designated error state of the flow.
 	GetErrorState() StateName
-	// StateExists checks if a given state exists within the flow.
-	StateExists(stateName StateName) bool
 }
 
 // actionInitializationContext represents the basic context for a flow action's initialization.
 type actionInitializationContext interface {
-	flowContext
-	actionSuspender
-
 	// AddInputs adds input parameters to the inputSchema.
 	AddInputs(inputs ...Input)
-	StateHistoryAvailable() bool
+	StateIsRevertible() bool
+
+	flowContext
+	actionSuspender
 }
 
 // actionExecutionContext represents the context for an action execution.
 type actionExecutionContext interface {
-	actionSuspender
-	flowContext
-
 	// Input returns the executionInputSchema for the action.
 	Input() executionInputSchema
-
-	// TODO: FetchActionInput (for a action name) is maybe useless and can be removed or replaced.
-
-	// FetchActionInput fetches input data for a specific action.
-	FetchActionInput(actionName ActionName) (readOnlyActionInput, error)
 	// ValidateInputData validates the input data against the inputSchema.
 	ValidateInputData() bool
 	// CopyInputValuesToStash copies specified inputs to the stash.
 	CopyInputValuesToStash(inputNames ...string) error
 	SetFlowError(FlowError)
-	DeleteStateHistory(skipWriteHistory bool) error
+	PreventRevert()
+
+	actionSuspender
+	flowContext
 }
 
 // actionExecutionContinuationContext represents the context within an action continuation.
 type actionExecutionContinuationContext interface {
-	actionExecutionContext
-
 	Continue(stateNames ...StateName) error
 	// Error continues the flow execution to the specified next state with an error.
 	Error(flowErr FlowError) error
-	// Back rewinds the flow back to the previous state.
-	Back() error
+	// Revert reverts the flow back to the previous state.
+	Revert() error
+
+	actionExecutionContext
 }
 
 type actionSuspender interface {
@@ -110,7 +101,7 @@ type HookExecutionContext interface {
 
 	GetFlowError() FlowError
 	AddLink(...Link)
-	ScheduleStates(...StateName) error
+	ScheduleStates(...StateName)
 }
 
 type BeforeEachActionExecutionContext interface {
@@ -124,15 +115,13 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	// Calculate the expiration time for the flow.
 	expiresAt := time.Now().Add(flow.ttl).UTC()
 
-	// Initialize JSONManagers for s and payload.
-	s := newStash()
-	p := newPayload()
-
-	// Add the initial next states to the s to be scheduled after the initial sub-flow.
-	err := s.addScheduledStates(flow.initialNextStateNames...)
+	// Initialize the stash and add initial next states.
+	s, err := newStash(flow.initialStateNames...)
 	if err != nil {
-		return nil, fmt.Errorf("failed to stash scheduled states: %w", err)
+		return nil, fmt.Errorf("failed to initialize a new stash: %w", err)
 	}
+
+	p := newPayload()
 
 	csrfToken, err := generateRandomString(32)
 	if err != nil {
@@ -141,10 +130,9 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 
 	// Create a new flow model with the provided parameters.
 	flowCreation := flowCreationParam{
-		currentState: flow.initialStateName,
-		stash:        s.String(),
-		csrfToken:    csrfToken,
-		expiresAt:    expiresAt,
+		data:      s.String(),
+		csrfToken: csrfToken,
+		expiresAt: expiresAt,
 	}
 	flowModel, err := dbw.createFlowWithParam(flowCreation)
 	if err != nil {
@@ -160,7 +148,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		payload:   p,
 	}
 
-	er := executionResult{nextStateName: flowModel.CurrentState}
+	er := executionResult{nextStateName: s.getStateName()}
 
 	aec := defaultActionExecutionContext{
 		actionName:         "",
@@ -169,7 +157,7 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		defaultFlowContext: fc,
 	}
 
-	err = aec.executeBeforeStateHooks(flow.initialStateName)
+	err = aec.executeBeforeStateHooks(aec.stash.getStateName())
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute before hook actions: %w", err)
 	}
@@ -196,7 +184,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	}
 
 	// Parse stash data from the flow model.
-	s, err := newStashFromString(flowModel.StashData)
+	s, err := newStashFromString(flowModel.Data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse stash from flow: %w", err)
 	}
@@ -226,7 +214,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		payload:   p,
 	}
 
-	state, err := flow.getState(flowModel.CurrentState)
+	state, err := flow.getState(s.getStateName())
 	if err != nil {
 		return nil, err
 	}
@@ -271,7 +259,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 
 	// Ensure that the action has set a result object.
 	if aec.executionResult == nil {
-		er := executionResult{nextStateName: flowModel.CurrentState}
+		er := executionResult{nextStateName: s.getStateName()}
 		aec.executionResult = &er
 	}
 

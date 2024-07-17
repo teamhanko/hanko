@@ -191,17 +191,16 @@ type defaultFlowBase struct {
 
 // defaultFlow defines a flow structure with states, actions, and settings.
 type defaultFlow struct {
-	stateDetails          stateDetails  // Maps state names to flow details.
-	initialStateName      StateName     // Initial state of the flow.
-	initialNextStateNames []StateName   // A list of next states in case a sub-flow should be invoked initially.
-	errorStateName        StateName     // State representing errors.
-	ttl                   time.Duration // Time-to-live for the flow.
-	debug                 bool          // Enables debug mode.
-	queryParam            queryParam    // TODO
-	contextValues         contextValues // Values to be used within the flow context.
-	inputData             InputData
-	queryParamKey         string
-	queryParamValue       string
+	stateDetails      stateDetails  // Maps state names to flow details.
+	initialStateNames []StateName   // A list of next states in case a sub-flow should be invoked initially.
+	errorStateName    StateName     // State representing errors.
+	ttl               time.Duration // Time-to-live for the flow.
+	debug             bool          // Enables debug mode.
+	queryParam        queryParam    // TODO
+	contextValues     contextValues // Values to be used within the flow context.
+	inputData         InputData
+	queryParamKey     string
+	queryParamValue   string
 
 	*defaultFlowBase
 }

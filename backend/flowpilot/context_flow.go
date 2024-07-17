@@ -1,7 +1,6 @@
 package flowpilot
 
 import (
-	"fmt"
 	"github.com/gofrs/uuid"
 )
 
@@ -21,18 +20,18 @@ func (fc *defaultFlowContext) GetFlowID() uuid.UUID {
 
 // GetInitialState returns the initial state of the flow.
 func (fc *defaultFlowContext) GetInitialState() StateName {
-	return fc.flow.initialStateName
+	return fc.flow.initialStateNames[0]
 }
 
 // GetCurrentState returns the current state of the flow.
 func (fc *defaultFlowContext) GetCurrentState() StateName {
-	return fc.flowModel.CurrentState
+	return fc.stash.getStateName()
 }
 
 // CurrentStateEquals returns true, when one of the given stateNames matches the current state name.
 func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	for _, s := range stateNames {
-		if s == fc.flowModel.CurrentState {
+		if s == fc.stash.getStateName() {
 			return true
 		}
 	}
@@ -40,21 +39,14 @@ func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	return false
 }
 
-// GetPreviousState returns a pointer to the previous state of the flow.
+// GetPreviousState returns the previous state of the flow.
 func (fc *defaultFlowContext) GetPreviousState() StateName {
-	if fc.flowModel.PreviousState != nil {
-		return *fc.flowModel.PreviousState
-	}
-
-	return ""
+	return fc.stash.getPreviousStateName()
 }
 
 // IsPreviousState returns true if the previous state equals the given name
 func (fc *defaultFlowContext) IsPreviousState(name StateName) bool {
-	if fc.flowModel.PreviousState != nil {
-		return *fc.flowModel.PreviousState == name
-	}
-	return false
+	return fc.stash.getPreviousStateName() == name
 }
 
 // GetErrorState returns the designated error state of the flow.
@@ -65,17 +57,6 @@ func (fc *defaultFlowContext) GetErrorState() StateName {
 // Stash returns the JSONManager for accessing stash data.
 func (fc *defaultFlowContext) Stash() stash {
 	return fc.stash
-}
-
-// StateExists checks if a given state exists within the current (sub-)flow.
-func (fc *defaultFlowContext) StateExists(stateName StateName) bool {
-	state, _ := fc.flow.getState(fc.flowModel.CurrentState)
-
-	if state != nil {
-		return state.getFlow().stateExists(stateName)
-	}
-
-	return false
 }
 
 // Get returns the context value with the given name.
@@ -91,26 +72,4 @@ func (fc *defaultFlowContext) GetFlowName() FlowName {
 // IsFlow returns true if the name matches the current flow name.
 func (fc *defaultFlowContext) IsFlow(name FlowName) bool {
 	return fc.flow.name == name
-}
-
-// FetchActionInput fetches input data for a specific action.
-func (fc *defaultFlowContext) FetchActionInput(methodName ActionName) (readOnlyActionInput, error) {
-	// Find the last Transition with the specified method from the database wrapper.
-	t, err := fc.dbw.FindLastTransitionWithAction(fc.flowModel.ID, methodName)
-	if err != nil {
-		return nil, fmt.Errorf("failed to get last Transition from dbw: %w", err)
-	}
-
-	// If no Transition is found, return an empty JSONManager.
-	if t == nil {
-		return newActionInput(), nil
-	}
-
-	// Parse input data from the Transition.
-	inputData, err := newActionInputFromString(t.InputData)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode Transition data: %w", err)
-	}
-
-	return inputData, nil
 }

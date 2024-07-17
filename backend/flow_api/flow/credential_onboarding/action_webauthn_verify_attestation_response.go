@@ -26,7 +26,7 @@ func (a WebauthnVerifyAttestationResponse) Initialize(c flowpilot.Initialization
 		c.SuspendAction()
 	}
 
-	c.AddInputs(flowpilot.JSONInput("public_key").Required(true).Persist(false))
+	c.AddInputs(flowpilot.JSONInput("public_key"))
 }
 
 func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
@@ -78,10 +78,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 
-	err = c.DeleteStateHistory(true)
-	if err != nil {
-		return fmt.Errorf("failed to delete the state history: %w", err)
-	}
+	c.PreventRevert()
 
 	return c.Continue()
 }

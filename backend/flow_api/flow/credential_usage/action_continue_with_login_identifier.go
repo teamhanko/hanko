@@ -61,15 +61,6 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
-	_ = c.Stash().Delete(shared.StashPathEmail)
-	_ = c.Stash().Delete(shared.StashPathUserID)
-	_ = c.Stash().Delete(shared.StashPathUsername)
-	_ = c.Stash().Delete(shared.StashPathUserHasPassword)
-	_ = c.Stash().Delete(shared.StashPathUserHasWebauthnCredential)
-	_ = c.Stash().Delete(shared.StashPathUserHasUsername)
-	_ = c.Stash().Delete(shared.StashPathUserHasEmails)
-	_ = c.Stash().Delete(shared.StashPathPasscodeTemplate)
-
 	if valid := c.ValidateInputData(); !valid {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
