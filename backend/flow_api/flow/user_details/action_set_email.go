@@ -49,6 +49,16 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 	email := strings.TrimSpace(c.Input().Get("email").String())
 	emailModel := models.NewEmail(&userID, email)
 
+	existingEmail, err := deps.Persister.GetEmailPersister().FindByAddress(email)
+	if err != nil {
+		return fmt.Errorf("failed to get email from db: %w", err)
+	}
+
+	if existingEmail != nil {
+		c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
+	}
+
 	err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 	if err != nil {
 		return fmt.Errorf("failed to create a new email: %w", err)
