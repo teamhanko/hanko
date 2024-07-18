@@ -18,9 +18,10 @@ type ResponseActions map[ActionName]ResponseAction
 
 // ResponseError represents an error for public exposure.
 type ResponseError struct {
-	Code    string  `json:"code"`
-	Message string  `json:"message"`
-	Cause   *string `json:"cause,omitempty"`
+	Code     string  `json:"code"`
+	Message  string  `json:"message"`
+	Cause    *string `json:"cause,omitempty"`
+	Internal *string `json:"-"`
 }
 
 type ResponseAllowedValue struct {
