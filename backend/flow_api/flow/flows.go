@@ -90,6 +90,8 @@ var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 		shared.EmailPersistVerifiedStatus{}).
 	AfterState(shared.StatePasswordCreation,
 		shared.PasswordSave{}).
+	AfterState(shared.StateOnboardingEmail, login.CreateEmail{}).
+	AfterState(shared.StatePasscodeConfirmation, login.CreateEmail{}).
 	AfterFlow(shared.FlowCredentialUsage, login.ScheduleOnboardingStates{}).
 	SubFlows(
 		CapabilitiesSubFlow,
