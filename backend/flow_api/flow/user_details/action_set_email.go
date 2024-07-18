@@ -2,11 +2,8 @@ package user_details
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"strings"
 )
 
 type EmailAddressSet struct {
@@ -26,7 +23,10 @@ func (a EmailAddressSet) Initialize(c flowpilot.InitializationContext) {
 
 	c.AddInputs(flowpilot.StringInput("email").
 		Required(!deps.Cfg.Email.Optional).
-		MaxLength(deps.Cfg.Email.MaxLength))
+		MaxLength(deps.Cfg.Email.MaxLength).
+		Preserve(true).
+		TrimSpace(true).
+		LowerCase(true))
 }
 
 func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
@@ -36,57 +36,49 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
-	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userID)
+	email := c.Input().Get("email").String()
+
+	err := c.Stash().Set(shared.StashPathEmail, email)
 	if err != nil {
-		return fmt.Errorf("failed to get user from db: %w", err)
+		return fmt.Errorf("failed to stash email address: %w", err)
 	}
-
-	if user == nil {
-		return fmt.Errorf("user does not exists (id: %s)", userID.String())
-	}
-
-	email := strings.TrimSpace(c.Input().Get("email").String())
-	emailModel := models.NewEmail(&userID, email)
 
 	existingEmail, err := deps.Persister.GetEmailPersister().FindByAddress(email)
 	if err != nil {
 		return fmt.Errorf("failed to get email from db: %w", err)
 	}
 
+	if deps.Cfg.Email.RequireVerification {
+		// Email verification is enabled. Send an email regardless of whether the email address exists, but select the
+		// appropriate passcode template beforehand.
+		if existingEmail != nil {
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted") // "email_verification"
+			if err != nil {
+				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+			}
+		} else {
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+			if err != nil {
+				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+			}
+		}
+
+		if err = c.Stash().Set(shared.StashPathLoginOnboardingCreateEmail, true); err != nil {
+			return fmt.Errorf("failed to set login_onboarding_create_email to the stash: %w", err)
+		}
+
+		return c.Continue(shared.StatePasscodeConfirmation)
+	}
+
+	// Email verification is turned off, hence we can display an error if the email already exists, or continue the flow
+	// without passcode verification otherwise.
 	if existingEmail != nil {
 		c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
-	if err != nil {
-		return fmt.Errorf("failed to create a new email: %w", err)
-	}
-
-	primaryEmail := models.NewPrimaryEmail(emailModel.ID, userID)
-	err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
-	if err != nil {
-		return fmt.Errorf("failed to create a new primary email: %w", err)
-	}
-
-	err = c.Stash().Set(shared.StashPathEmail, email)
-	if err != nil {
-		return fmt.Errorf("failed to set email to the stash: %w", err)
-	}
-
-	err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
-	if err != nil {
-		return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
-	}
-
-	if deps.Cfg.Email.RequireVerification {
-		err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
-		if err != nil {
-			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
-		}
-
-		return c.Continue(shared.StatePasscodeConfirmation)
+	if err = c.Stash().Set(shared.StashPathLoginOnboardingCreateEmail, true); err != nil {
+		return fmt.Errorf("failed to set login_onboarding_create_email to the stash: %w", err)
 	}
 
 	c.PreventRevert()
