@@ -97,8 +97,7 @@ var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 		CredentialUsageSubFlow,
 		CredentialOnboardingSubFlow,
 		UserDetailsSubFlow).
-	TTL(10 * time.Minute).
-	Debug(true)
+	TTL(24 * time.Hour)
 
 var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 	State(shared.StateRegistrationInit,
@@ -119,8 +118,7 @@ var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 		CredentialUsageSubFlow,
 		CredentialOnboardingSubFlow,
 		UserDetailsSubFlow).
-	TTL(10 * time.Minute).
-	Debug(true)
+	TTL(24 * time.Hour)
 
 var ProfileFlow = flowpilot.NewFlow(shared.FlowProfile).
 	State(shared.StateProfileInit,
@@ -151,5 +149,4 @@ var ProfileFlow = flowpilot.NewFlow(shared.FlowProfile).
 	SubFlows(
 		CapabilitiesSubFlow,
 		CredentialUsageSubFlow).
-	TTL(10 * time.Minute).
-	Debug(true)
+	TTL(24 * time.Hour)

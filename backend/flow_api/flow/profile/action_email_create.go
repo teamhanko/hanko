@@ -23,10 +23,12 @@ func (a EmailCreate) GetDescription() string {
 func (a EmailCreate) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Email.Enabled {
+	userModel, ok := c.Get("session_user").(*models.User)
+
+	if !deps.Cfg.Email.Enabled || (ok && len(userModel.Emails) >= deps.Cfg.Email.Limit) {
 		c.SuspendAction()
 	} else {
-		c.AddInputs(flowpilot.EmailInput("email").Required(true).TrimSpace(true).LowerCase(true))
+		c.AddInputs(flowpilot.EmailInput("email").Required(true).MaxLength(deps.Cfg.Email.MaxLength).TrimSpace(true).LowerCase(true))
 	}
 }
 

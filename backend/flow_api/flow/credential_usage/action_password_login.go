@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 )
 
 type PasswordLogin struct {
@@ -40,6 +41,22 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
+	if deps.Cfg.RateLimiter.Enabled {
+		rateLimitKey := rate_limiter.CreateRateLimitPasswordKey(deps.HttpContext.RealIP(), c.Stash().Get(shared.StashPathUserIdentification).String())
+		retryAfterSeconds, ok, err := rate_limiter.Limit2(deps.PasswordRateLimiter, rateLimitKey)
+		if err != nil {
+			return fmt.Errorf("rate limiter failed: %w", err)
+		}
+
+		if !ok {
+			err = c.Payload().Set("retry_after", retryAfterSeconds)
+			if err != nil {
+				return fmt.Errorf("failed to set a value for retry_after to the payload: %w", err)
+			}
+			return c.Error(shared.ErrorRateLimitExceeded.Wrap(fmt.Errorf("rate limit exceeded for: %s", rateLimitKey)))
+		}
+	}
+
 	var userID uuid.UUID
 
 	if c.Stash().Get(shared.StashPathEmail).Exists() {
@@ -68,14 +85,6 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	} else {
 		return a.wrongCredentialsError(c)
 	}
-
-	// TODO
-	//if h.rateLimiter != nil {
-	//	err := rate_limiter.Limit(h.rateLimiter, userId, c)
-	//	if err != nil {
-	//		return err
-	//	}
-	//}
 
 	err := deps.PasswordService.VerifyPassword(userID, c.Input().Get("password").String())
 	if err != nil {

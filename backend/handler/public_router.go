@@ -41,9 +41,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
-	var rateLimiter limiter.Store
+	var passcodeRateLimiter limiter.Store
+	var passwordRateLimiter limiter.Store
+	var tokenExchangeRateLimiter limiter.Store
 	if cfg.RateLimiter.Enabled {
-		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
+		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
 	}
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
@@ -51,16 +55,18 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	samlService := saml.NewSamlService(cfg, persister)
 
 	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:             persister,
-		Cfg:                   *cfg,
-		PasscodeService:       passcodeService,
-		PasswordService:       passwordService,
-		WebauthnService:       webauthnService,
-		SessionManager:        sessionManager,
-		RateLimiter:           rateLimiter,
-		AuthenticatorMetadata: authenticatorMetadata,
-		AuditLogger:           auditLogger,
-		SamlService:           samlService,
+		Persister:                persister,
+		Cfg:                      *cfg,
+		PasscodeService:          passcodeService,
+		PasswordService:          passwordService,
+		WebauthnService:          webauthnService,
+		SessionManager:           sessionManager,
+		PasscodeRateLimiter:      passcodeRateLimiter,
+		PasswordRateLimiter:      passwordRateLimiter,
+		TokenExchangeRateLimiter: tokenExchangeRateLimiter,
+		AuthenticatorMetadata:    authenticatorMetadata,
+		AuditLogger:              auditLogger,
+		SamlService:              samlService,
 	}
 
 	if cfg.Saml.Enabled {

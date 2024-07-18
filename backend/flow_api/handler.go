@@ -23,28 +23,30 @@ import (
 )
 
 type FlowPilotHandler struct {
-	Persister             persistence.Persister
-	Cfg                   config.Config
-	PasscodeService       services.Passcode
-	PasswordService       services.Password
-	WebauthnService       services.WebauthnService
-	SamlService           saml.Service
-	SessionManager        session.Manager
-	RateLimiter           limiter.Store
-	AuthenticatorMetadata mapper.AuthenticatorMetadata
-	AuditLogger           auditlog.Logger
+	Persister                persistence.Persister
+	Cfg                      config.Config
+	PasscodeService          services.Passcode
+	PasswordService          services.Password
+	WebauthnService          services.WebauthnService
+	SamlService              saml.Service
+	SessionManager           session.Manager
+	PasscodeRateLimiter      limiter.Store
+	PasswordRateLimiter      limiter.Store
+	TokenExchangeRateLimiter limiter.Store
+	AuthenticatorMetadata    mapper.AuthenticatorMetadata
+	AuditLogger              auditlog.Logger
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.RegistrationFlow.MustBuild())
+	return h.executeFlow(c, flow.RegistrationFlow.Debug(h.Cfg.Debug).MustBuild())
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.LoginFlow.MustBuild())
+	return h.executeFlow(c, flow.LoginFlow.Debug(h.Cfg.Debug).MustBuild())
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.ProfileFlow.MustBuild())
+	return h.executeFlow(c, flow.ProfileFlow.Debug(h.Cfg.Debug).MustBuild())
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
@@ -56,18 +58,20 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
-			Cfg:                   h.Cfg,
-			RateLimiter:           h.RateLimiter,
-			Tx:                    tx,
-			Persister:             h.Persister,
-			HttpContext:           c,
-			SessionManager:        h.SessionManager,
-			PasscodeService:       h.PasscodeService,
-			PasswordService:       h.PasswordService,
-			WebauthnService:       h.WebauthnService,
-			SamlService:           h.SamlService,
-			AuthenticatorMetadata: h.AuthenticatorMetadata,
-			AuditLogger:           h.AuditLogger,
+			Cfg:                      h.Cfg,
+			PasscodeRateLimiter:      h.PasscodeRateLimiter,
+			PasswordRateLimiter:      h.PasswordRateLimiter,
+			TokenExchangeRateLimiter: h.TokenExchangeRateLimiter,
+			Tx:                       tx,
+			Persister:                h.Persister,
+			HttpContext:              c,
+			SessionManager:           h.SessionManager,
+			PasscodeService:          h.PasscodeService,
+			PasswordService:          h.PasswordService,
+			WebauthnService:          h.WebauthnService,
+			SamlService:              h.SamlService,
+			AuthenticatorMetadata:    h.AuthenticatorMetadata,
+			AuditLogger:              h.AuditLogger,
 		}
 
 		flow.Set("deps", deps)
