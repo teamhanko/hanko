@@ -87,7 +87,6 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		err = h.Persister.Transaction(txFunc)
 		if err != nil {
 			flowResult = flow.ResultFromError(err)
-			c.Logger().Errorf("failed to handle the request: %v", err)
 		}
 	}
 
