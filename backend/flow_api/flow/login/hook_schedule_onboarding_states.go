@@ -13,6 +13,14 @@ type ScheduleOnboardingStates struct {
 func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
+	if c.Stash().Get(shared.StashPathLoginOnboardingScheduled).Bool() {
+		return nil
+	}
+
+	if err := c.Stash().Set(shared.StashPathLoginOnboardingScheduled, true); err != nil {
+		return fmt.Errorf("failed to set login_onboarding_scheduled to the stash: %w", err)
+	}
+
 	userHasPassword := deps.Cfg.Password.Enabled && c.Stash().Get(shared.StashPathUserHasPassword).Bool()
 	userHasPasskey := deps.Cfg.Passkey.Enabled && c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	userHasUsername := deps.Cfg.Username.Enabled && c.Stash().Get(shared.StashPathUserHasUsername).Bool()
