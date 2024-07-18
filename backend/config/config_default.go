@@ -164,5 +164,6 @@ func DefaultConfig() *Config {
 			MinLength:             3,
 			MaxLength:             40,
 		},
+		Debug: false,
 	}
 }

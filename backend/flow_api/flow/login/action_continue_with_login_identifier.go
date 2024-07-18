@@ -76,6 +76,10 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 	identifierInputName, identifierInputValue, treatIdentifierAsEmail := a.analyzeIdentifierInputs(c)
 
+	if err := c.Stash().Set(shared.StashPathUserIdentification, identifierInputValue); err != nil {
+		return fmt.Errorf("failed to set user_identification to stash: %w", err)
+	}
+
 	if len(identifierInputValue) == 0 {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}

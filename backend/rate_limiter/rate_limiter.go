@@ -80,6 +80,14 @@ func Limit2(store limiter.Store, key string) (int, bool, error) {
 	return retryAfterSeconds, ok, nil
 }
 
-func CreateRateLimitKey(realIP, email string) string {
-	return fmt.Sprintf("%s/%s", realIP, email)
+func CreateRateLimitPasscodeKey(realIP, email string) string {
+	return fmt.Sprintf("passcode/%s/%s", realIP, email)
+}
+
+func CreateRateLimitPasswordKey(realIP, userId string) string {
+	return fmt.Sprintf("password/%s/%s", realIP, userId)
+}
+
+func CreateRateLimitTokenExchangeKey(realIP string) string {
+	return fmt.Sprintf("token_exchange/%s", realIP)
 }

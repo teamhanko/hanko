@@ -19,4 +19,5 @@ const (
 	StashPathWebauthnConditionalMediationAvailable string = "webauthn_conditional_mediation_available"
 	StashPathWebauthnCredential                    string = "webauthn_credential"
 	StashPathWebauthnSessionDataID                 string = "webauthn_session_data_id"
+	StashPathUserIdentification                    string = "user_identification"
 )

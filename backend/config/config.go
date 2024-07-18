@@ -45,6 +45,7 @@ type Config struct {
 	Webhooks            WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 	Email               Email            `yaml:"email" json:"email,omitempty" koanf:"email"`
 	Username            Username         `yaml:"username" json:"username,omitempty" koanf:"username"`
+	Debug               bool             `yaml:"debug" json:"debug,omitempty" koanf:"debug"`
 }
 
 var (

@@ -15,18 +15,20 @@ import (
 )
 
 type Dependencies struct {
-	Cfg                   config.Config
-	HttpContext           echo.Context
-	PasscodeService       services.Passcode
-	PasswordService       services.Password
-	WebauthnService       services.WebauthnService
-	SamlService           saml.Service
-	Persister             persistence.Persister
-	SessionManager        session.Manager
-	RateLimiter           limiter.Store
-	Tx                    *pop.Connection
-	AuthenticatorMetadata mapper.AuthenticatorMetadata
-	AuditLogger           auditlog.Logger
+	Cfg                      config.Config
+	HttpContext              echo.Context
+	PasscodeService          services.Passcode
+	PasswordService          services.Password
+	WebauthnService          services.WebauthnService
+	SamlService              saml.Service
+	Persister                persistence.Persister
+	SessionManager           session.Manager
+	PasscodeRateLimiter      limiter.Store
+	PasswordRateLimiter      limiter.Store
+	TokenExchangeRateLimiter limiter.Store
+	Tx                       *pop.Connection
+	AuthenticatorMetadata    mapper.AuthenticatorMetadata
+	AuditLogger              auditlog.Logger
 }
 
 type Action struct{}
