@@ -193,8 +193,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	p := newPayload()
 
 	// Parse raw input data into JSONManager.
-	raw := flow.inputData.getJSONStringOrDefault()
-	inputJSON, err := newActionInputFromString(raw)
+	inputJSON, err := newActionInputFromInputData(flow.inputData)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}

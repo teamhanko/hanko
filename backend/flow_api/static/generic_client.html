@@ -375,14 +375,12 @@
         // Add the CSRF token to the next request
         data["csrf_token"] = csrfToken
 
-        const body = JSON.stringify(data)
-
         fetch(form.action, {
             headers: {
                 "Content-Type": "application/json"
             },
             method: form.method,
-            body: JSON.stringify({input_data: body}),
+            body: JSON.stringify({input_data: data}),
         })
             .then(response => response.json())
             .then((data) => {
