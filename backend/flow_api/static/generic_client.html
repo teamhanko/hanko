@@ -373,7 +373,7 @@
         const data = serializeForm(form)
 
         // Add the CSRF token to the next request
-        data["_csrf_token"] = csrfToken
+        data["csrf_token"] = csrfToken
 
         const body = JSON.stringify(data)
 

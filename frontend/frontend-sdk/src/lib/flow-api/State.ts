@@ -243,7 +243,7 @@ class State<TStateName extends StateName>
       }
     }
 
-    data["_csrf_token"] = csrfToken;
+    data["csrf_token"] = csrfToken;
 
     // (Possibly add more input types here?)
 
