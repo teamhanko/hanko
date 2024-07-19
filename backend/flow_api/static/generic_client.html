@@ -380,7 +380,7 @@
                 "Content-Type": "application/json"
             },
             method: form.method,
-            body: {input_data: data},
+            body: JSON.stringify({input_data: data}),
         })
             .then(response => response.json())
             .then((data) => {
