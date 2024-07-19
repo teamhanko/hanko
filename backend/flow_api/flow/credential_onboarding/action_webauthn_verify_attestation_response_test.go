@@ -94,7 +94,7 @@ func (s *sendWaAttestationResponse) TestSendWaAttestationResponse_Execute() {
 			tx := s.Storage.GetConnection()
 			db := models.NewFlowDB(tx)
 			actionParam := fmt.Sprintf("send_wa_attestation_response@%s", currentTest.flowId)
-			inputData := flowpilot.InputData{JSONString: currentTest.input}
+			inputData := flowpilot.InputData{InputDataMap: currentTest.input}
 			result, err := flow.Execute(db, flowpilot.WithQueryParam(actionParam), flowpilot.WithInputData(inputData))
 			s.Require().NoError(err)
 
