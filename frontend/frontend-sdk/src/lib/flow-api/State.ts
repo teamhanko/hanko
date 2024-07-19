@@ -249,7 +249,7 @@ class State<TStateName extends StateName>
 
     // Use the fetch function to perform the action
     return this.fetchNextState(action.href, {
-      input_data: JSON.stringify(data),
+      input_data: data,
     });
   }
 

@@ -11,16 +11,7 @@ type FlowName string
 
 // InputData holds input data in JSON format.
 type InputData struct {
-	JSONString string `json:"input_data"`
-}
-
-// getJSONStringOrDefault returns the JSON string or a default "{}" value.
-func (i InputData) getJSONStringOrDefault() string {
-	if len(i.JSONString) == 0 {
-		return "{}"
-	}
-
-	return i.JSONString
+	InputDataMap map[string]interface{} `json:"input_data"`
 }
 
 // WithQueryParamKey sets the ActionName for flowExecutionOptions.
