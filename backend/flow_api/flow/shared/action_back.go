@@ -14,12 +14,12 @@ func (a Back) GetDescription() string {
 	return "Navigate one step back."
 }
 
-func (a Back) Initialize(_ flowpilot.InitializationContext) {}
-
-func (a Back) Execute(c flowpilot.ExecutionContext) error {
-	return c.ContinueToPreviousState()
+func (a Back) Initialize(c flowpilot.InitializationContext) {
+	if !c.StateIsRevertible() {
+		c.SuspendAction()
+	}
 }
 
-func (a Back) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+func (a Back) Execute(c flowpilot.ExecutionContext) error {
+	return c.Revert()
 }

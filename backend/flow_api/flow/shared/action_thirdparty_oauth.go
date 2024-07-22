@@ -36,7 +36,7 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 		Required(true)
 
 	for _, provider := range enabledProviders {
-		providerInput.AllowedValue(strings.ToLower(provider.DisplayName), provider.DisplayName)
+		providerInput.AllowedValue(provider.DisplayName, strings.ToLower(provider.DisplayName))
 	}
 
 	c.AddInputs(flowpilot.StringInput("redirect_to").Hidden(true).Required(true), providerInput)
@@ -51,22 +51,22 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	redirectTo := c.Input().Get("redirect_to").String()
 	if ok := thirdparty.IsAllowedRedirect(deps.Cfg.ThirdParty, redirectTo); !ok {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	provider, err := thirdparty.GetProvider(deps.Cfg.ThirdParty, c.Input().Get("provider").String())
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid.Wrap(err))
+		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	state, err := thirdparty.GenerateState(&deps.Cfg, provider.Name(), redirectTo)
+	state, err := thirdparty.GenerateState(&deps.Cfg, provider.Name(), redirectTo, thirdparty.GenerateStateForFlowAPI(true))
 	if err != nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorTechnical.Wrap(err))
+		return c.Error(flowpilot.ErrorTechnical.Wrap(err))
 	}
 
 	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
@@ -83,9 +83,5 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set redirect_url to payload: %w", err)
 	}
 
-	return c.ContinueFlow(StateThirdPartyOAuth)
-}
-
-func (a ThirdPartyOAuth) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue(StateThirdParty)
 }

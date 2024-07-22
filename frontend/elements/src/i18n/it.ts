@@ -16,6 +16,8 @@ export const it: Translation = {
     profilePasskeys: "Passkeys",
     isPrimaryEmail: "Indirizzo email principale",
     setPrimaryEmail: "Imposta indirizzo email principale",
+    createEmail: "Inserisci una nuova email",
+    createUsername: "Inserisci un nuovo nome utente",
     emailVerified: "Verificata",
     emailUnverified: "Non verificata",
     emailDelete: "Rimuovi",
@@ -28,6 +30,8 @@ export const it: Translation = {
     accountNotFound: "Account non trovato",
     signIn: "Accedi",
     signUp: "Registrati",
+    selectLoginMethod: "Seleziona il metodo di accesso",
+    setupLoginMethod: "Imposta il metodo di accesso",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -39,26 +43,22 @@ export const it: Translation = {
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
     passwordFormatHint:
       "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
-    manageEmails: "Used for passcode authentication.",
-    changePassword: "Imposta una nuova password",
-    managePasskeys:
-      "Le tue passkey ti consentono di accedere a questo account.",
-    isPrimaryEmail:
-      "Questo indirizzo email verrà utilizzato come nome utente per le tue passkeys.",
     setPrimaryEmail:
-      "Imposa questo indirizzo email per essere usato come nome utente per le tue nuove passkeys.",
+      "Imposta questo indirizzo email per essere utilizzato per contattarti.",
+    isPrimaryEmail:
+      "Questo indirizzo email verrà utilizzato per contattarti se necessario.",
     emailVerified: "Questo indirizzo email è stato verificato.",
     emailUnverified: "Questo indirizzo email non è stato verificato.",
     emailDelete:
       "Se cancelli questo indirizzo email, non potrà più essere utilizzato per accedere.",
-    emailDeletePrimary:
-      "L'indirizzo email principale non può essere eliminato.",
     renamePasskey: "Imposta un nome per la passkey.",
     deletePasskey: "Cancella questa passkey dal tuo account.",
     deleteAccount:
       "Sei sicuro di voler cancellare questo account? Tutti i dati verranno immediatamente cancellati permanentemente e non potranno essere ripristinati.",
     noAccountExists: 'Non esiste alcun account per "{emailAddress}".',
-    changeYourUsername: "Cambia il tuo nome utente",
+    selectLoginMethodForFutureLogins:
+      "Seleziona uno dei seguenti metodi di accesso da utilizzare per i futuri accessi.",
+    howDoYouWantToLogin: "Come desideri effettuare l'accesso?",
   },
   labels: {
     or: "o",
@@ -69,6 +69,8 @@ export const it: Translation = {
     skip: "Salta",
     save: "Salva",
     password: "Password",
+    passkey: "Chiave di accesso",
+    passcode: "Codice di accesso",
     signInPassword: "Accedi con password",
     signInPasscode: "Accedi con codice di accesso",
     forgotYourPassword: "Password dimenticata?",
@@ -90,7 +92,6 @@ export const it: Translation = {
     rename: "Rinomina",
     newPasskeyName: "Nuovo nome passkey",
     addEmail: "Aggiungi email",
-    changePassword: "Cambia password",
     createPasskey: "Crea una passkey",
     webauthnUnsupported: "Le Passkeys non sono supportate dal tuo browser",
     signInWith: "Accedi con {provider}",
@@ -101,6 +102,9 @@ export const it: Translation = {
     dontHaveAnAccount: "Non hai un account?",
     alreadyHaveAnAccount: "Hai già un account?",
     changeUsername: "Cambia nome utente",
+    setUsername: "Imposta nome utente",
+    changePassword: "Cambia password",
+    setPassword: "Imposta password",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",
@@ -129,6 +133,7 @@ export const it: Translation = {
     signupDisabled: "La registrazione dell'account è disabilitata.",
   },
   flowErrors: {
+    technical_error: "Si è verificato un errore tecnico. Riprova più tardi.",
     flow_expired_error:
       "La sessione è scaduta, clicca sul pulsante per riavviare.",
     value_invalid_error: "Il valore inserito non è valido.",
@@ -140,6 +145,15 @@ export const it: Translation = {
       "Troppe richieste sono state effettuate. Si prega di attendere per ripetere l'operazione richiesta.",
     unknown_username_error: "Il nome utente è sconosciuto.",
     username_already_exists: "Il nome utente è già in uso.",
-    email_already_taken: "L'indirizzo email è già in uso.",
+    email_already_exists: "L'indirizzo email è già in uso.",
+    not_found: "La risorsa richiesta non è stata trovata.",
+    operation_not_permitted_error: "L'operazione non è consentita.",
+    flow_discontinuity_error:
+      "Il processo non può essere continuato a causa delle impostazioni dell'utente o della configurazione del fornitore.",
+    form_data_invalid_error: "I dati del modulo inviato contengono errori.",
+    unauthorized: "La sessione è scaduta. Riprova ad accedere.",
+    value_missing_error: "Il valore è mancante.",
+    value_too_long_error: "Il valore è troppo lungo.",
+    value_too_short_error: "Il valore è troppo corto.",
   },
 };

@@ -69,6 +69,7 @@ const createHankoComponent = (
   <AppProvider
     componentName={componentName}
     globalOptions={globalOptions}
+    createWebauthnAbortSignal={createWebauthnAbortSignal}
     {...props}
   />
 );
@@ -87,6 +88,17 @@ const HankoProfile = (props: HankoProfileElementProps) =>
 
 const HankoEvents = (props: HankoEventsElementProps) =>
   createHankoComponent("events", props);
+
+let webauthnAbortController = new AbortController();
+
+const createWebauthnAbortSignal = () => {
+  if (webauthnAbortController) {
+    webauthnAbortController.abort();
+  }
+
+  webauthnAbortController = new AbortController();
+  return webauthnAbortController.signal;
+};
 
 const _register = async ({
   tagName,

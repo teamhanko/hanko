@@ -11,25 +11,24 @@ import (
 
 // Flow is used by pop to map your flows database table to your go code.
 type Flow struct {
-	ID           uuid.UUID `json:"id" db:"id"`
-	CurrentState string    `json:"current_state" db:"current_state"`
-	StashData    string    `json:"stash_data" db:"stash_data"`
-	Version      int       `json:"version" db:"version"`
-	ExpiresAt    time.Time `json:"expires_at" db:"expires_at"`
-	UpdatedAt    time.Time `json:"updated_at" db:"updated_at"`
-	CreatedAt    time.Time `json:"created_at" db:"created_at"`
-	// transitions  transitions `json:"transitions" has_many:"transitions" order_by:"created_at desc"`
+	ID        uuid.UUID `json:"id" db:"id"`
+	Data      string    `json:"data" db:"data"`
+	Version   int       `json:"version" db:"version"`
+	CSRFToken string    `json:"csrf_token" db:"csrf_token"`
+	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
 
 func (f *Flow) ToFlowpilotModel() *flowpilot.FlowModel {
 	flow := flowpilot.FlowModel{
-		ID:           f.ID,
-		CurrentState: flowpilot.StateName(f.CurrentState),
-		StashData:    f.StashData,
-		Version:      f.Version,
-		ExpiresAt:    f.ExpiresAt,
-		CreatedAt:    f.CreatedAt,
-		UpdatedAt:    f.UpdatedAt,
+		ID:        f.ID,
+		Data:      f.Data,
+		Version:   f.Version,
+		CSRFToken: f.CSRFToken,
+		ExpiresAt: f.ExpiresAt,
+		CreatedAt: f.CreatedAt,
+		UpdatedAt: f.UpdatedAt,
 	}
 
 	return &flow

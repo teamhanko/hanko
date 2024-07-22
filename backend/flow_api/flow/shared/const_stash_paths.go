@@ -1,0 +1,25 @@
+package shared
+
+const (
+	StashPathEmail                                 = "email"
+	StashPathEmailVerified                         = "email_verified"
+	StashPathLoginMethod                           = "login_method"
+	StashPathNewPassword                           = "new_password"
+	StashPathPasscodeEmail                         = "sticky.passcode_email"
+	StashPathPasscodeID                            = "sticky.passcode_id"
+	StashPathPasscodeTemplate                      = "passcode_template"
+	StashPathSkipUserCreation                      = "skip_user_creation"
+	StashPathUserHasPassword                       = "user_has_password"
+	StashPathUserHasWebauthnCredential             = "user_has_webauthn_credential"
+	StashPathUserHasUsername                       = "user_has_username"
+	StashPathUserHasEmails                         = "user_has_emails"
+	StashPathUserID                                = "user_id"
+	StashPathUsername                              = "username"
+	StashPathWebauthnAvailable                     = "webauthn_available"
+	StashPathWebauthnConditionalMediationAvailable = "webauthn_conditional_mediation_available"
+	StashPathWebauthnCredential                    = "webauthn_credential"
+	StashPathWebauthnSessionDataID                 = "webauthn_session_data_id"
+	StashPathUserIdentification                    = "user_identification"
+	StashPathLoginOnboardingScheduled              = "login_onboarding_scheduled"
+	StashPathLoginOnboardingCreateEmail            = "login_onboarding_create_email"
+)

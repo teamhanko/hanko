@@ -4,22 +4,43 @@ import (
 	"encoding/base64"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
+	"golang.org/x/exp/slices"
 	"time"
 )
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
-	ID                  uuid.UUID            `db:"id" json:"id"`
-	WebauthnCredentials []WebauthnCredential `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
-	Emails              Emails               `has_many:"emails" json:"-"`
-	Username            string               `db:"username" json:"username,omitempty"`
-	CreatedAt           time.Time            `db:"created_at" json:"created_at"`
-	UpdatedAt           time.Time            `db:"updated_at" json:"updated_at"`
-	PasswordCredential  *PasswordCredential  `has_one:"password_credentials" json:"-"`
+	ID                  uuid.UUID           `db:"id" json:"id"`
+	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
+	Emails              Emails              `has_many:"emails" json:"-"`
+	Username            nulls.String        `db:"username" json:"username,omitempty"`
+	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
+	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
+	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
+}
+
+type WebauthnCredentials []WebauthnCredential
+
+func (user *User) DeleteWebauthnCredential(credentialId string) {
+	for i := range user.WebauthnCredentials {
+		if user.WebauthnCredentials[i].ID == credentialId {
+			user.WebauthnCredentials = slices.Delete(user.WebauthnCredentials, i, i+1)
+			return
+		}
+	}
+}
+
+func (user *User) GetIdentities() Identities {
+	var identities Identities
+	for _, email := range user.Emails {
+		identities = append(identities, email.Identities...)
+	}
+	return identities
 }
 
 func NewUser() User {
@@ -28,6 +49,34 @@ func NewUser() User {
 		ID:        id,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
+	}
+}
+
+func (user *User) SetPrimaryEmail(primary *PrimaryEmail) {
+	for i := range user.Emails {
+		if user.Emails[i].ID.String() == primary.EmailID.String() {
+			user.Emails[i].PrimaryEmail = primary
+		} else {
+			user.Emails[i].PrimaryEmail = nil
+		}
+	}
+}
+
+func (user *User) UpdateEmail(email Email) {
+	for i := range user.Emails {
+		if user.Emails[i].ID.String() == email.ID.String() {
+			user.Emails[i] = email
+			return
+		}
+	}
+}
+
+func (user *User) DeleteEmail(email Email) {
+	for i := range user.Emails {
+		if user.Emails[i].ID.String() == email.ID.String() {
+			user.Emails = slices.Delete(user.Emails, i, i+1)
+			return
+		}
 	}
 }
 

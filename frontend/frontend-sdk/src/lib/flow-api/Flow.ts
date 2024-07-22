@@ -38,8 +38,8 @@ class Flow extends Client {
       }
     };
 
-    const initState = new State(JSON.parse(init), fetchNextState)
-    await this.run(initState, handlers)
+    const initState = new State(JSON.parse(init), fetchNextState);
+    await this.run(initState, handlers);
   }
 
   /**

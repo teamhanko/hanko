@@ -35,6 +35,7 @@ interface StateResponse<TStateName extends StateName> {
   status: number;
   payload?: Payloads[TStateName];
   actions?: Actions[TStateName];
+  csrf_token: string;
   error: Error;
 }
 
@@ -47,6 +48,7 @@ class State<TStateName extends StateName>
   readonly payload?: Payloads[TStateName];
   readonly error: Error;
   readonly status: number;
+  readonly csrf_token: string;
 
   readonly #actionDefinitions: Actions[TStateName];
   readonly actions: ActionFunctions[TStateName];
@@ -59,19 +61,21 @@ class State<TStateName extends StateName>
       payload: this.payload,
       error: this.error,
       status: this.status,
+      csrf_token: this.csrf_token,
       actions: this.#actionDefinitions,
     };
   }
 
   // eslint-disable-next-line require-jsdoc
   constructor(
-    { name, payload, error, status, actions }: StateResponse<TStateName>,
+    { name, payload, error, status, actions, csrf_token }: StateResponse<TStateName>,
     fetchNextState: FetchNextState
   ) {
     this.name = name;
     this.payload = payload;
     this.error = error;
     this.status = status;
+    this.csrf_token = csrf_token;
     this.#actionDefinitions = actions;
 
     // We're doing something really hacky here, but hear me out
@@ -93,7 +97,7 @@ class State<TStateName extends StateName>
     //
     // Okay, there's one difference, the function call creates a copy of the action, so it's not mutating the original object.
     // The newly created action is returned. It also has a `run` method, which sends the action to the server (fetchNextState)
-    this.actions = this.#createActionsProxy(actions);
+    this.actions = this.#createActionsProxy(actions, csrf_token);
 
     // Do not remove! `this.fetchNextState` has to be set for `this.#runAction` to work
     this.fetchNextState = fetchNextState;
@@ -126,8 +130,8 @@ class State<TStateName extends StateName>
    *
    * Additionally, helper methods like `run` (to send the action to the server) and `validate` (to validate the inputs; the `inputs` object also contains validation rules)
    */
-  #createActionsProxy(actions: Actions[TStateName]) {
-    const runAction = (action: Action<any>) => this.runAction(action);
+  #createActionsProxy(actions: Actions[TStateName], csrfToken: string) {
+    const runAction = (action: Action<any>) => this.runAction(action, csrfToken);
     const validateAction = (action: Action<any>) => this.validateAction(action);
 
     return new Proxy(actions, {
@@ -206,7 +210,7 @@ class State<TStateName extends StateName>
     }) satisfies Actions[TStateName] as any;
   }
 
-  runAction(action: Action<any>): Promise<State<any>> {
+  runAction(action: Action<any>, csrfToken: string): Promise<State<any>> {
     const data: Record<string, any> = {};
 
     // Deal with object-type inputs
@@ -243,7 +247,8 @@ class State<TStateName extends StateName>
 
     // Use the fetch function to perform the action
     return this.fetchNextState(action.href, {
-      input_data: JSON.stringify(data),
+      input_data: data,
+      csrf_token: csrfToken,
     });
   }
 

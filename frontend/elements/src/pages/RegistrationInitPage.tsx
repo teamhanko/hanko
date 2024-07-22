@@ -1,5 +1,6 @@
 import { Fragment } from "preact";
-import { useContext, useEffect, useMemo, useState } from "preact/compat";
+
+import { useContext, useEffect, useState, useMemo } from "preact/compat";
 
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
@@ -33,9 +34,11 @@ const RegistrationInitPage = (props: Props) => {
     initialComponentName,
   } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-  const { inputs } = flowState.actions.register_login_identifier(null);
-  const multipleInputsAvailable = !!(inputs.email && inputs.username);
-  const [thirdPartyError, setThirdPartyError] = useState<HankoError | undefined>(undefined)
+  const inputs = flowState.actions.register_login_identifier?.(null).inputs;
+  const multipleInputsAvailable = !!(inputs?.email && inputs?.username);
+  const [thirdPartyError, setThirdPartyError] = useState<
+    HankoError | undefined
+  >(undefined);
 
   const onIdentifierSubmit = async (event: Event) => {
     event.preventDefault();
@@ -71,109 +74,125 @@ const RegistrationInitPage = (props: Props) => {
     init("login");
   };
 
-  const onThirdpartySubmit = async (event: Event, name: string) => {
-    event.preventDefault()
-    setLoadingAction("thirdparty-submit")
-
-    const nextState = await flowState.actions.thirdparty_oauth({
-      provider: name,
-      redirect_to: window.location.toString()
-    }).run()
-
-    stateHandler[nextState.name](nextState)
-  };
-
-
-  const showDivider = useMemo(
-    () => !!flowState.actions.thirdparty_oauth?.(null),
-    [flowState.actions],
-  );
-
-  console.log("showDivider", showDivider)
-
   useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search)
+    const searchParams = new URLSearchParams(window.location.search);
 
-    if (searchParams.get("error") == undefined || searchParams.get("error").length === 0) {
-      return
+    if (
+      searchParams.get("error") == undefined ||
+      searchParams.get("error").length === 0
+    ) {
+      return;
     }
 
-    let errorCode = ""
+    let errorCode = "";
     switch (searchParams.get("error")) {
       case "access_denied":
-        errorCode = "thirdPartyAccessDenied"
+        errorCode = "thirdPartyAccessDenied";
         break;
       default:
-        errorCode = "somethingWentWrong"
+        errorCode = "somethingWentWrong";
         break;
     }
 
     const error: HankoError = {
       name: errorCode,
       code: errorCode,
-      message: searchParams.get("error_description")
-    }
+      message: searchParams.get("error_description"),
+    };
 
-    setThirdPartyError(error)
+    setThirdPartyError(error);
 
-    searchParams.delete("error")
-    searchParams.delete("error_description")
+    searchParams.delete("error");
+    searchParams.delete("error_description");
 
-    history.replaceState(null, null, window.location.pathname + searchParams.toString())
+    history.replaceState(
+      null,
+      null,
+      window.location.pathname + searchParams.toString(),
+    );
   }, []);
+
+  const onThirdpartySubmit = async (event: Event, name: string) => {
+    event.preventDefault();
+    setLoadingAction("thirdparty-submit");
+
+    const nextState = await flowState.actions
+      .thirdparty_oauth({
+        provider: name,
+        redirect_to: window.location.toString(),
+      })
+      .run();
+
+    stateHandler[nextState.name](nextState);
+  };
+
+  const showDivider = useMemo(
+    () => !!flowState.actions.thirdparty_oauth?.(null),
+    [flowState.actions],
+  );
 
   return (
     <Fragment>
       <Content>
         <Headline1>{t("headlines.signUp")}</Headline1>
         <ErrorBox state={flowState} error={thirdPartyError} />
-        <Form onSubmit={onIdentifierSubmit} maxWidth>
-          {inputs.username ? (
-            <Input
-              markOptional={multipleInputsAvailable}
-              markError={multipleInputsAvailable}
-              type={"text"}
-              autoComplete={"username"}
-              autoCorrect={"off"}
-              flowInput={inputs.username}
-              onInput={onUsernameInput}
-              value={uiState.username}
-              placeholder={t("labels.username")}
-            />
-          ) : null}
-          {inputs.email ? (
-            <Input
-              markOptional={multipleInputsAvailable}
-              markError={multipleInputsAvailable}
-              type={"email"}
-              autoComplete={"email"}
-              autoCorrect={"off"}
-              flowInput={inputs.email}
-              onInput={onEmailInput}
-              value={uiState.email}
-              placeholder={t("labels.email")}
-              pattern={"^.*[^0-9]+$"}
-            />
-          ) : null}
-          <Button uiAction={"email-submit"} autofocus>
-            {t("labels.continue")}
-          </Button>
-        </Form>
-        <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
-        {
-          flowState.actions.thirdparty_oauth?.(null) ? flowState.actions.thirdparty_oauth(null).inputs.provider.allowed_values?.map((v) => {
-            return <Form onSubmit={(event) => onThirdpartySubmit(event, v.value)}>
-              <Button
-                uiAction={"thirdparty-submit"}
-                secondary
-                // @ts-ignore
-                icon={v.value}
-              >
-                {t("labels.signInWith", { provider: v.name })}
+        {inputs ? (
+          <Fragment>
+            <Form onSubmit={onIdentifierSubmit} maxWidth>
+              {inputs.username ? (
+                <Input
+                  markOptional={multipleInputsAvailable}
+                  markError={multipleInputsAvailable}
+                  type={"text"}
+                  autoComplete={"username"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.username}
+                  onInput={onUsernameInput}
+                  value={uiState.username}
+                  placeholder={t("labels.username")}
+                />
+              ) : null}
+              {inputs.email ? (
+                <Input
+                  markOptional={multipleInputsAvailable}
+                  markError={multipleInputsAvailable}
+                  type={"email"}
+                  autoComplete={"email"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.email}
+                  onInput={onEmailInput}
+                  value={uiState.email}
+                  placeholder={t("labels.email")}
+                  pattern={"^.*[^0-9]+$"}
+                />
+              ) : null}
+              <Button uiAction={"email-submit"} autofocus>
+                {t("labels.continue")}
               </Button>
             </Form>
-          }) : null
-        }
+            <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
+          </Fragment>
+        ) : null}
+        {flowState.actions.thirdparty_oauth?.(null)
+          ? flowState.actions
+              .thirdparty_oauth(null)
+              .inputs.provider.allowed_values?.map((v) => {
+                return (
+                  <Form
+                    onSubmit={(event) => onThirdpartySubmit(event, v.value)}
+                  >
+                    <Button
+                      uiAction={"thirdparty-submit"}
+                      secondary
+                      // @ts-ignore
+                      icon={v.value}
+                    >
+                      {t("labels.signInWith", { provider: v.name })}
+                    </Button>
+                  </Form>
+                );
+              })
+          : null}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />

@@ -18,6 +18,7 @@ interface Props {
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
   emails?: Email[];
+  deletableEmailIDs?: string[];
 }
 
 const ListEmailsAccordion = ({
@@ -27,6 +28,7 @@ const ListEmailsAccordion = ({
   checkedItemID,
   setCheckedItemID,
   emails = [],
+  deletableEmailIDs = [],
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const isDisabled = useMemo(() => false, []);
@@ -107,7 +109,7 @@ const ListEmailsAccordion = ({
           </Paragraph>
         </Fragment>
       )}
-      {!email.is_primary ? (
+      {deletableEmailIDs.includes(email.id) ? (
         <Fragment>
           <Paragraph>
             <Headline2>{t("headlines.emailDelete")}</Headline2>
@@ -124,14 +126,7 @@ const ListEmailsAccordion = ({
             </Link>
           </Paragraph>
         </Fragment>
-      ) : (
-        <Fragment>
-          <Paragraph>
-            <Headline2>{t("headlines.emailDelete")}</Headline2>
-            {t("texts.emailDeletePrimary")}
-          </Paragraph>
-        </Fragment>
-      )}
+      ) : null}
       {email.identities?.length > 0 ? (
         <Fragment>
           <Paragraph>

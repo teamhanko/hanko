@@ -1,21 +1,29 @@
 package flowpilot
 
-import "github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+import (
+	"encoding/json"
+	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+)
 
-type ActionInput interface {
+type actionInput interface {
 	jsonmanager.JSONManager
 }
 
-type ReadOnlyActionInput interface {
+type readOnlyActionInput interface {
 	jsonmanager.ReadOnlyJSONManager
 }
 
-// NewActionInput creates a new instance of ActionInput with empty JSON data.
-func NewActionInput() ActionInput {
+// newActionInput creates a new instance of actionInput with empty JSON data.
+func newActionInput() actionInput {
 	return jsonmanager.NewJSONManager()
 }
 
-// NewActionInputFromString creates a new instance of ActionInput with the given JSON data.
-func NewActionInputFromString(data string) (ActionInput, error) {
-	return jsonmanager.NewJSONManagerFromString(data)
+// newActionInputFromInputData creates a new instance of actionInput with the given JSON data
+// which was previously unmarshalled into a generic map.
+func newActionInputFromInputData(data InputData) (actionInput, error) {
+	dataBytes, err := json.Marshal(data.InputDataMap)
+	if err != nil {
+		return nil, err
+	}
+	return jsonmanager.NewJSONManagerFromString(string(dataBytes))
 }

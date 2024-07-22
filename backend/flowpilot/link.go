@@ -18,7 +18,7 @@ const (
 type Link interface {
 	Target(LinkTarget) Link
 
-	toPublicLink() PublicLink
+	toResponseLink() ResponseLink
 }
 
 // defaultLink represents a link with its options.
@@ -35,8 +35,8 @@ func (l *defaultLink) Target(target LinkTarget) Link {
 	return l
 }
 
-func (l *defaultLink) toPublicLink() PublicLink {
-	return PublicLink{
+func (l *defaultLink) toResponseLink() ResponseLink {
+	return ResponseLink{
 		Name:     l.name,
 		Href:     l.href,
 		Category: l.category,

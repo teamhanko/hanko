@@ -1,10 +1,10 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -14,7 +14,7 @@ type PasswordDelete struct {
 }
 
 func (a PasswordDelete) GetName() flowpilot.ActionName {
-	return ActionPasswordDelete
+	return shared.ActionPasswordDelete
 }
 
 func (a PasswordDelete) GetDescription() string {
@@ -33,14 +33,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
-	}
-
-	if !deps.Cfg.Passcode.Enabled && len(userModel.WebauthnCredentials) == 0 {
-		return c.ContinueFlowWithError(
-			c.GetCurrentState(),
-			flowpilot.ErrorFlowDiscontinuity.
-				Wrap(errors.New("cannot delete password when recovery not possible and no webauthn credential is available")))
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	passwordCredentialModel, err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).GetByUserID(userModel.ID)
@@ -49,7 +42,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if passwordCredentialModel == nil {
-		return c.ContinueFlow(StateProfileInit)
+		return c.Continue(shared.StateProfileInit)
 	}
 
 	err = deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Delete(*passwordCredentialModel)
@@ -69,15 +62,9 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
-}
+	userModel.PasswordCredential = nil
 
-func (a PasswordDelete) Finalize(c flowpilot.FinalizationContext) error {
-	if a.mustSuspend(c) {
-		c.SuspendAction()
-	}
-
-	return nil
+	return c.Continue(shared.StateProfileInit)
 }
 
 func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
@@ -93,6 +80,19 @@ func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 	}
 
 	if userModel.PasswordCredential == nil {
+		return true
+	}
+	
+	identities := userModel.GetIdentities()
+
+	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
+	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
+	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication && (canUseEmailAsLoginIdentifier || canUseUsernameAsLoginIdentifier && len(userModel.Emails) > 0)
+	canDoThirdParty := services.UserCanDoThirdParty(deps.Cfg, identities) || services.UserCanDoSaml(deps.Cfg, identities)
+	canUseNoOtherAuthMethod := !canDoWebauthn && !canDoPasscode && !canDoThirdParty
+
+	if canUseNoOtherAuthMethod {
 		return true
 	}
 

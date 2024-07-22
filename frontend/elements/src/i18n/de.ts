@@ -16,6 +16,8 @@ export const de: Translation = {
     profilePasskeys: "Passkeys",
     isPrimaryEmail: "Primäre E-Mail-Adresse",
     setPrimaryEmail: "Als primäre E-Mail-Adresse festlegen",
+    createEmail: "Geben Sie eine neue E-Mail-Adresse ein",
+    createUsername: "Geben Sie einen neuen Benutzernamen ein",
     emailVerified: "Verifiziert",
     emailUnverified: "Unverifiziert",
     emailDelete: "Löschen",
@@ -28,6 +30,8 @@ export const de: Translation = {
     accountNotFound: "Konto nicht gefunden",
     signIn: "Anmelden",
     signUp: "Registrieren",
+    selectLoginMethod: "Wähle die Anmelde-Methode",
+    setupLoginMethod: "Anmelde-Methode einrichten",
   },
   texts: {
     enterPasscode:
@@ -40,21 +44,13 @@ export const de: Translation = {
       'Es existiert kein Konto für "{emailAddress}". Möchten Sie ein neues Konto erstellen?',
     passwordFormatHint:
       "Das Passwort muss zwischen {minLength} und {maxLength} Zeichen lang sein.",
-    manageEmails:
-      "Ihre E-Mail-Adressen werden zur Kommunikation und Authentifizierung verwendet.",
-    changePassword: "Setze ein neues Passwort.",
-    managePasskeys:
-      "Passkeys können für die Anmeldung bei diesem Account verwendet werden.",
+    setPrimaryEmail: "Setzen Sie diese E-Mail-Adresse als Kontaktadresse.",
     isPrimaryEmail:
-      "Wird für die Kommunikation, Passcodes und als Benutzername für Passkeys verwendet. Um die primäre E-Mail-Adresse zu ändern, fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie sie als primär fest.",
-    setPrimaryEmail:
-      "Legen Sie diese E-Mail-Adresse als primär fest, damit sie für die Kommunikation, für Passcodes und als Benutzername für Passkeys genutzt wird.",
+      "Diese E-Mail-Adresse wird verwendet, um Sie bei Bedarf zu kontaktieren.",
     emailVerified: "Diese E-Mail-Adresse wurde verifiziert.",
     emailUnverified: "Diese E-Mail-Adresse wurde noch nicht verifiziert.",
     emailDelete:
       "Wenn Sie diese E-Mail-Adresse löschen, kann sie nicht mehr für die Anmeldung bei Ihrem Konto verwendet werden. Passkeys, die möglicherweise mit dieser E-Mail-Adresse erstellt wurden, funktionieren weiterhin.",
-    emailDeletePrimary:
-      "Die primäre E-Mail-Adresse kann nicht gelöscht werden. Fügen Sie zuerst eine andere E-Mail-Adresse hinzu und legen Sie diese als primär fest.",
     renamePasskey:
       "Legen Sie einen Namen für den Passkey fest, anhand dessen Sie erkennen können, wo er gespeichert ist.",
     deletePasskey:
@@ -62,7 +58,9 @@ export const de: Translation = {
     deleteAccount:
       "Sind Sie sicher, dass Sie Ihr Konto löschen wollen? Alle Daten werden sofort gelöscht und können nicht wiederhergestellt werden.",
     noAccountExists: 'Es existiert kein Konto für "{emailAddress}".',
-    changeYourUsername: "Ändern Sie Ihren Benutzernamen",
+    selectLoginMethodForFutureLogins:
+      "Wählen Sie eine der folgenden Anmelde-Methoden aus, um sie für zukünftige Anmeldungen zu verwenden.",
+    howDoYouWantToLogin: "Wie möchten Sie sich anmelden?",
   },
   labels: {
     or: "oder",
@@ -73,6 +71,8 @@ export const de: Translation = {
     skip: "Überspringen",
     save: "Speichern",
     password: "Passwort",
+    passkey: "Passwort",
+    passcode: "Passcode",
     signInPassword: "Mit einem Passwort anmelden",
     signInPasscode: "Mit einem Passcode anmelden",
     forgotYourPassword: "Passwort vergessen?",
@@ -94,9 +94,8 @@ export const de: Translation = {
     rename: "Umbenennen",
     newPasskeyName: "Neuer Passkey Name",
     addEmail: "E-Mail-Adresse hinzufügen",
-    changePassword: "Password ändern",
     createPasskey: "Erstellen Sie einen passkey",
-    webauthnUnsupported: "Passkeys werden von ihrem Browser nicht unterrstützt",
+    webauthnUnsupported: "Passkeys werden von ihrem Browser nicht unterstützt",
     signInWith: "Anmelden mit {provider}",
     deleteAccount: "Ja, dieses Konto löschen.",
     emailOrUsername: "E-Mail oder Nutzername",
@@ -105,6 +104,9 @@ export const de: Translation = {
     dontHaveAnAccount: "Sie haben noch kein Konto?",
     alreadyHaveAnAccount: "Haben Sie bereits ein Konto?",
     changeUsername: "Benutzernamen ändern",
+    setUsername: "Benutzernamen setzen",
+    changePassword: "Passwort ändern",
+    setPassword: "Passwort setzen",
   },
   errors: {
     somethingWentWrong:
@@ -136,6 +138,8 @@ export const de: Translation = {
     signupDisabled: "Die Kontoregistrierung ist deaktiviert.",
   },
   flowErrors: {
+    technical_error:
+      "Ein technischer Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.",
     flow_expired_error:
       "Die Sitzung ist abgelaufen, bitte klicken Sie auf die Schaltfläche, um neu zu starten.",
     value_invalid_error: "Der eingegebene Wert ist ungültig.",
@@ -147,6 +151,17 @@ export const de: Translation = {
       "Zu viele Anfragen wurden gestellt. Bitte warten Sie, um die angeforderte Operation zu wiederholen.",
     unknown_username_error: "Der Benutzername ist unbekannt.",
     username_already_exists: "Der Benutzername ist bereits vergeben.",
-    email_already_taken: "Die E-Mail-Adresse ist bereits vergeben.",
+    email_already_exists: "Die E-Mail-Adresse ist bereits vergeben.",
+    not_found: "Die angeforderte Ressource wurde nicht gefunden.",
+    operation_not_permitted_error: "Der Vorgang ist nicht erlaubt.",
+    flow_discontinuity_error:
+      "Der Prozess kann aufgrund der Nutzereinstellungen oder der Konfiguration des Anbieters nicht fortgesetzt werden.",
+    form_data_invalid_error:
+      "Die übermittelten Formulardaten enthalten Fehler.",
+    unauthorized:
+      "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+    value_missing_error: "Der Wert fehlt.",
+    value_too_long_error: "Der Wert ist zu lang.",
+    value_too_short_error: "Der Wert ist zu kurz.",
   },
 };

@@ -21,7 +21,7 @@ var DefaultConfig = config.Config{
 		Port: "2500",
 	},
 	Passcode: config.Passcode{
-		Email: config.Email{
+		Email: config.PasscodeEmail{
 			FromAddress: "test@hanko.io",
 			FromName:    "Hanko Test",
 		},

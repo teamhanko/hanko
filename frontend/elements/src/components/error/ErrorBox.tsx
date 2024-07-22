@@ -23,14 +23,20 @@ const ErrorBox = ({ state, error, flowError }: Props) => {
       for (const action of Object.values(state?.actions)) {
         // @ts-ignore
         const a = action?.(null);
+        let relatedInputFound = false;
         // @ts-ignore
         for (const input of Object.values(a?.inputs)) {
           // @ts-ignore
           if (input.error?.code) {
             // @ts-ignore
             setUIState({ ...uiState, error: input.error });
+            relatedInputFound = true;
             return;
           }
+        }
+
+        if (!relatedInputFound) {
+          setUIState({ ...uiState, error: state.error });
         }
       }
     } else if (state?.error) {

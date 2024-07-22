@@ -1,5 +1,8 @@
 import { Error } from "./error";
-import { PublicKeyCredentialWithAssertionJSON, PublicKeyCredentialWithAttestationJSON, } from "@github/webauthn-json";
+import {
+  PublicKeyCredentialWithAssertionJSON,
+  PublicKeyCredentialWithAttestationJSON,
+} from "@github/webauthn-json";
 
 export interface Input<TValue> {
   readonly name: string;
@@ -10,12 +13,12 @@ export interface Input<TValue> {
   readonly required?: boolean;
   readonly hidden?: boolean;
   readonly error?: Error;
-  readonly allowed_values?: AllowedInputValues[]
+  readonly allowed_values?: AllowedInputValues[];
 }
 
 export interface AllowedInputValues {
-  readonly name: string
-  readonly value: string
+  readonly name: string;
+  readonly value: string;
 }
 
 export interface PasswordRecoveryInputs {
@@ -50,10 +53,6 @@ export interface ContinueWithLoginIdentifierInputs {
   readonly username?: Input<string>;
 }
 
-export interface PasswordLoginInputs {
-  readonly password: Input<string>;
-}
-
 export interface VerifyPasscodeInputs {
   readonly code: Input<string>;
 }
@@ -74,7 +73,7 @@ export interface EmailVerifyInputs {
   readonly email_id: Input<string>;
 }
 
-export interface PasswordSetInputs {
+export interface PasswordInputs {
   readonly password: Input<string>;
 }
 
@@ -91,11 +90,11 @@ export interface PasskeyCredentialDelete {
   readonly passkey_id: Input<string>;
 }
 
-export interface ThirdpartyOauthInputs {
-  readonly provider: Input<string>
-  readonly redirect_to: Input<string>
+export interface ExchangeTokenInputs {
+  readonly token: Input<string>;
 }
 
-export interface ExchangeTokenInputs {
-  readonly token: Input<string>
+export interface ThirdpartyOauthInputs {
+  readonly provider: Input<string>;
+  readonly redirect_to: Input<string>;
 }

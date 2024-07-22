@@ -50,6 +50,14 @@ const CreatePasswordPage = (props: Props) => {
     stateHandler[nextState.name](nextState);
   };
 
+  const onSkipClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("skip");
+    const nextState = await flowState.actions.skip(null).run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
   return (
     <Fragment>
       <Content>
@@ -77,15 +85,27 @@ const CreatePasswordPage = (props: Props) => {
           <Button uiAction={"password-submit"}>{t("labels.continue")}</Button>
         </Form>
       </Content>
-      <Footer hidden={!flowState.actions.back?.(null)}>
+      <Footer
+        hidden={
+          !flowState.actions.back?.(null) && !flowState.actions.skip?.(null)
+        }
+      >
         <Link
           uiAction={"back"}
           onClick={onBackClick}
           loadingSpinnerPosition={"right"}
+          hidden={!flowState.actions.back?.(null)}
         >
           {t("labels.back")}
         </Link>
-        <span hidden />
+        <Link
+          uiAction={"skip"}
+          onClick={onSkipClick}
+          loadingSpinnerPosition={"left"}
+          hidden={!flowState.actions.skip?.(null)}
+        >
+          {t("labels.skip")}
+        </Link>
       </Footer>
     </Fragment>
   );

@@ -2,16 +2,22 @@ package flowpilot
 
 // defaultActionInitializationContext is the default implementation of the actionInitializationContext interface.
 type defaultActionInitializationContext struct {
-	schema        InitializationSchema // InitializationSchema for action initialization.
-	isSuspended   bool                 // Flag indicating if the method is suspended.
-	stash         Stash                // ReadOnlyJSONManager for accessing stash data.
-	contextValues contextValues        // Values to be used within the flow context.
-	flowModel     FlowModel
+	inputSchema         initializationInputSchema // initializationInputSchema for action initialization.
+	isSuspended         bool                      // Flag indicating if the method is suspended.
+	*defaultFlowContext                           // Embedding the defaultFlowContext for common context fields.
 }
 
-// AddInputs adds input data to the InitializationSchema.
+func (aic *defaultActionInitializationContext) Payload() payload {
+	return aic.payload
+}
+
+func (aic *defaultActionInitializationContext) Set(s string, i interface{}) {
+	aic.flow.Set(s, i)
+}
+
+// AddInputs adds input data to the initializationInputSchema.
 func (aic *defaultActionInitializationContext) AddInputs(inputs ...Input) {
-	aic.schema.AddInputs(inputs...)
+	aic.inputSchema.AddInputs(inputs...)
 }
 
 // SuspendAction sets the isSuspended flag to indicate the action is suspended.
@@ -20,21 +26,15 @@ func (aic *defaultActionInitializationContext) SuspendAction() {
 }
 
 // Stash returns the ReadOnlyJSONManager for accessing stash data.
-func (aic *defaultActionInitializationContext) Stash() Stash {
+func (aic *defaultActionInitializationContext) Stash() stash {
 	return aic.stash
 }
 
 // Get returns the context value with the given name.
 func (aic *defaultActionInitializationContext) Get(key string) interface{} {
-	return aic.contextValues[key]
+	return aic.flow.contextValues[key]
 }
 
-func (aic *defaultActionInitializationContext) CurrentStateEquals(stateNames ...StateName) bool {
-	for _, s := range stateNames {
-		if s == aic.flowModel.CurrentState {
-			return true
-		}
-	}
-
-	return false
+func (aic *defaultActionInitializationContext) StateIsRevertible() bool {
+	return aic.stash.isRevertible()
 }

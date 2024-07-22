@@ -100,7 +100,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf("failed to count user emails: %w", err)
 	}
 
-	if emailCount >= h.cfg.Emails.MaxNumOfAddresses {
+	if emailCount >= h.cfg.Email.Limit {
 		return echo.NewHTTPError(http.StatusConflict).SetInternal(errors.New("max number of email addresses reached"))
 	}
 

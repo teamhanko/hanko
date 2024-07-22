@@ -14,7 +14,7 @@ type EmailSetPrimary struct {
 }
 
 func (a EmailSetPrimary) GetName() flowpilot.ActionName {
-	return ActionEmailSetPrimary
+	return shared.ActionEmailSetPrimary
 }
 
 func (a EmailSetPrimary) GetDescription() string {
@@ -24,7 +24,7 @@ func (a EmailSetPrimary) GetDescription() string {
 func (a EmailSetPrimary) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Identifier.Email.Enabled {
+	if !deps.Cfg.Email.Enabled {
 		c.SuspendAction()
 		return
 	}
@@ -52,23 +52,23 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailId := uuid.FromStringOrNil(c.Input().Get("email_id").String())
 	emailModel := userModel.GetEmailById(emailId)
 
 	if emailModel == nil {
-		return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorNotFound)
+		return c.Error(shared.ErrorNotFound)
 	}
 
 	if emailModel.IsPrimary() {
-		return c.ContinueFlow(StateProfileInit)
+		return c.Continue(shared.StateProfileInit)
 	}
 
 	var primaryEmail *models.PrimaryEmail
@@ -103,9 +103,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
-}
+	userModel.SetPrimaryEmail(primaryEmail)
 
-func (a EmailSetPrimary) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue(shared.StateProfileInit)
 }

@@ -362,7 +362,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		})
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
-	cfg.Emails.RequireVerification = true
+	cfg.Email.RequireVerification = true
 
 	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
 	s.NoError(err)

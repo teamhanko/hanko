@@ -12,15 +12,19 @@ type WebauthnGenerateRequestOptionsForConditionalUi struct {
 }
 
 func (a WebauthnGenerateRequestOptionsForConditionalUi) Execute(c flowpilot.HookExecutionContext) error {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		return nil
 	}
 
-	if !c.Stash().Get("webauthn_conditional_mediation_available").Bool() {
+	if !c.Stash().Get(shared.StashPathWebauthnConditionalMediationAvailable).Bool() {
 		return nil
 	}
 
 	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passkey.Enabled {
+		return nil
+	}
 
 	params := services.GenerateRequestOptionsParams{Tx: deps.Tx}
 
@@ -29,7 +33,7 @@ func (a WebauthnGenerateRequestOptionsForConditionalUi) Execute(c flowpilot.Hook
 		return fmt.Errorf("failed to generate webauthn request options: %w", err)
 	}
 
-	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
+	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
 	if err != nil {
 		return fmt.Errorf("failed to stash webauthn_session_data_id: %w", err)
 	}

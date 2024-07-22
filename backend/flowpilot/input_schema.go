@@ -2,71 +2,66 @@ package flowpilot
 
 import (
 	"github.com/tidwall/gjson"
+	"strings"
 )
 
-// InitializationSchema represents an interface for managing input data schemas.
-type InitializationSchema interface {
+// initializationInputSchema represents an interface for managing input data schemas.
+type initializationInputSchema interface {
 	AddInputs(inputList ...Input)
 }
 
-// ExecutionSchema represents an interface for managing method execution schemas.
-type ExecutionSchema interface {
+// executionInputSchema represents an interface for managing method execution schemas.
+type executionInputSchema interface {
 	Get(path string) gjson.Result
 	Set(path string, value interface{}) error
 	SetError(inputName string, inputError InputError)
 
 	getInput(name string) Input
-	getOutputData() ReadOnlyActionInput
-	getDataToPersist() ReadOnlyActionInput
-	validateInputData(stateName StateName, stash Stash) bool
-	toInitializationSchema() InitializationSchema
-	toPublicSchema(stateName StateName) PublicSchema
+	getOutputData() readOnlyActionInput
+	validateInputData() bool
+	forInitializationContext() initializationInputSchema
+	toResponseInputs() ResponseInputs
 }
 
 // inputs represents a collection of Input instances.
 type inputs []Input
 
-// PublicSchema represents a collection of PublicInput instances.
-type PublicSchema map[string]*PublicInput
-
-// defaultSchema implements the InitializationSchema interface and holds a collection of input fields.
-type defaultSchema struct {
-	inputs
-	inputData  ReadOnlyActionInput
-	outputData ActionInput
+func (il *inputs) exists(input Input) bool {
+	for _, existingInput := range *il {
+		if existingInput.getName() == input.getName() {
+			return true
+		}
+	}
+	return false
 }
 
-// newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithInputData(inputData ActionInput) ExecutionSchema {
-	outputData := NewActionInput()
+// ResponseInputs represents a collection of ResponseInput instances.
+type ResponseInputs map[string]*ResponseInput
 
+// defaultSchema implements the initializationInputSchema interface and holds a collection of input fields.
+type defaultSchema struct {
+	inputs
+	inputData  actionInput
+	outputData actionInput
+}
+
+// newSchemaWithInputData creates a new executionInputSchema with input data.
+func newSchemaWithInputData(inputData actionInput) executionInputSchema {
+	outputData := newActionInput()
 	return &defaultSchema{
 		inputData:  inputData,
 		outputData: outputData,
 	}
 }
 
-// newSchemaWithInputData creates a new ExecutionSchema with input data.
-func newSchemaWithOutputData(outputData ReadOnlyActionInput) (ExecutionSchema, error) {
-	data, err := NewActionInputFromString(outputData.String())
-	if err != nil {
-		return nil, err
-	}
-
-	return &defaultSchema{
-		inputData:  data,
-		outputData: data,
-	}, nil
-}
-
-// newSchema creates a new ExecutionSchema with no input data.
-func newSchema() ExecutionSchema {
-	inputData := NewActionInput()
+// newSchema creates a new executionInputSchema with no input data.
+func newSchema() executionInputSchema {
+	inputData := newActionInput()
 	return newSchemaWithInputData(inputData)
 }
 
-// toInitializationSchema converts ExecutionSchema to InitializationSchema.
-func (s *defaultSchema) toInitializationSchema() InitializationSchema {
+// toInitializationSchema converts executionInputSchema to initializationInputSchema.
+func (s *defaultSchema) forInitializationContext() initializationInputSchema {
 	return s
 }
 
@@ -80,14 +75,23 @@ func (s *defaultSchema) Set(path string, value interface{}) error {
 	return s.outputData.Set(path, value)
 }
 
-// AddInputs adds input fields to the defaultSchema and returns the updated schema.
+// AddInputs adds input fields to the defaultSchema and returns the updated inputSchema.
 func (s *defaultSchema) AddInputs(inputList ...Input) {
 	for _, input := range inputList {
-		s.inputs = append(s.inputs, input)
+		if !s.inputs.exists(input) {
+			s.inputs = append(s.inputs, input)
+		} else {
+			for i, existingInput := range s.inputs {
+				if existingInput.getName() == input.getName() {
+					input.setError(existingInput.getError())
+					s.inputs[i] = input
+				}
+			}
+		}
 	}
 }
 
-// getInput retrieves an input field from the schema based on its name.
+// getInput retrieves an input field from the inputSchema based on its name.
 func (s *defaultSchema) getInput(name string) Input {
 	for _, input := range s.inputs {
 		if input.getName() == name {
@@ -98,19 +102,33 @@ func (s *defaultSchema) getInput(name string) Input {
 	return nil
 }
 
-// SetError sets an error for an input field in the schema.
+// SetError sets an error for an input field in the inputSchema.
 func (s *defaultSchema) SetError(inputName string, inputError InputError) {
 	if input := s.getInput(inputName); input != nil {
 		input.setError(inputError)
 	}
 }
 
-// validateInputData validates the input data based on the input definitions in the schema.
-func (s *defaultSchema) validateInputData(stateName StateName, stash Stash) bool {
+// validateInputData validates the input data based on the input definitions in the inputSchema.
+func (s *defaultSchema) validateInputData() bool {
+	for _, input := range s.inputs {
+		name := input.getName()
+
+		if input.shouldTrimSpace() {
+			v := strings.TrimSpace(s.inputData.Get(name).String())
+			_ = s.inputData.Set(name, v)
+		}
+
+		if input.shouldConvertToLowerCase() {
+			v := strings.ToLower(s.inputData.Get(name).String())
+			_ = s.inputData.Set(name, v)
+		}
+	}
+
 	valid := true
 
 	for _, input := range s.inputs {
-		if !input.validate(stateName, s.inputData, stash) && valid {
+		if !input.validate(s.inputData) && valid {
 			valid = false
 		}
 	}
@@ -118,45 +136,23 @@ func (s *defaultSchema) validateInputData(stateName StateName, stash Stash) bool
 	return valid
 }
 
-// getDataToPersist filters and returns data that should be persisted based on schema definitions.
-func (s *defaultSchema) getDataToPersist() ReadOnlyActionInput {
-	toPersist := NewActionInput()
-
-	for _, input := range s.inputs {
-		if v := s.inputData.Get(input.getName()); v.Exists() && input.shouldPersist() {
-			_ = toPersist.Set(input.getName(), v.Value())
-		}
-	}
-
-	return toPersist
-}
-
-// getOutputData returns the output data from the schema.
-func (s *defaultSchema) getOutputData() ReadOnlyActionInput {
+// getOutputData returns the output data from the inputSchema.
+func (s *defaultSchema) getOutputData() readOnlyActionInput {
 	return s.outputData
 }
 
-// toPublicSchema converts defaultSchema to PublicSchema for public exposure.
-func (s *defaultSchema) toPublicSchema(stateName StateName) PublicSchema {
-	var publicSchema = make(PublicSchema)
+// toResponseInputs converts defaultSchema to ResponseInputs for public exposure.
+func (s *defaultSchema) toResponseInputs() ResponseInputs {
+	var publicSchema = make(ResponseInputs)
 
 	for _, input := range s.inputs {
-		if !input.isIncludedOnState(stateName) {
-			continue
+		if s.outputData.Get(input.getName()).Exists() {
+			input.setValue(s.outputData.Get(input.getName()).Value())
+		} else if input.shouldPreserve() {
+			input.setValue(s.inputData.Get(input.getName()).Value())
 		}
 
-		outputValue := s.outputData.Get(input.getName())
-		inputValue := s.inputData.Get(input.getName())
-
-		if outputValue.Exists() {
-			input.setValue(outputValue.Value())
-		}
-
-		if input.shouldPreserve() && inputValue.Exists() && !outputValue.Exists() {
-			input.setValue(inputValue.Value())
-		}
-
-		publicSchema[input.getName()] = input.toPublicInput()
+		publicSchema[input.getName()] = input.toResponseInput()
 	}
 
 	return publicSchema

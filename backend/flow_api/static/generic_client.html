@@ -155,6 +155,7 @@
         "passkey_registration": passkeyRegisterHandler,
         "onboarding_verify_passkey_attestation": passkeyRegisterHandler,
         "webauthn_credential_verification": passkeyRegisterHandler,
+        "register_passkey": passkeyRegisterHandler,
         "thirdparty_oauth": thirdpartyOAuthHandler
     }
 
@@ -306,7 +307,7 @@
                   if (data.name === "login_init") {
                     abortController.abort()
                   }
-                  updateFlow(event, form)
+                  updateFlow(event, form, data.csrf_token)
                 })
 
                 form.appendChild(submitButton);
@@ -367,16 +368,19 @@
         return "/" + optionsEl.options[selectedIndex].value
     }
 
-    function updateFlow(event, form) {
+    function updateFlow(event, form, csrfToken) {
         event.preventDefault();
-        const body = JSON.stringify(serializeForm(form))
+        const data = serializeForm(form)
 
         fetch(form.action, {
             headers: {
                 "Content-Type": "application/json"
             },
             method: form.method,
-            body: JSON.stringify({input_data: body}),
+            body: JSON.stringify({
+              input_data: data,
+              csrf_token: csrfToken
+            }),
         })
             .then(response => response.json())
             .then((data) => {

@@ -4,179 +4,234 @@ import (
 	"errors"
 	"fmt"
 	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/tidwall/gjson"
+	"github.com/tidwall/sjson"
 )
 
-// Stash defines the interface for managing JSON data.
-type Stash interface {
-	getLastStateFromHistory() (stateName, unscheduledState *StateName, numOfScheduledStates *int64, err error)
-	addStateToHistory(stateName StateName, unscheduledStateName *StateName, numOfScheduledStates *int64) error
-	removeLastStateFromHistory() error
-	addScheduledStates(scheduledStateNames ...StateName) error
-	removeLastScheduledState() (*StateName, error)
+const (
+	stashKeyState           = "state"
+	stashKeyPreviousState   = "prev_state"
+	stashKeyScheduledStates = "scheduled"
+	stashKeyData            = "data"
+	stashKeyHistory         = "hist"
+	stashKeyRevertible      = "revertible"
+	stashKeySticky          = "sticky"
+)
+
+type stash interface {
+	pushState(bool) error
+	pushErrorState(StateName) error
+	revertState() error
+	isRevertible() bool
+	getStateName() StateName
+	getPreviousStateName() StateName
+	addScheduledStateNames(...StateName)
+	getNextStateName() StateName
 
 	jsonmanager.JSONManager
 }
 
-// defaultStash implements the Stash interface.
 type defaultStash struct {
-	jsonmanager.JSONManager
+	jm                  jsonmanager.JSONManager
+	data                jsonmanager.JSONManager
+	scheduledStateNames []StateName
 }
 
-// NewStash creates a new instance of Stash with empty JSON data.
-func NewStash() Stash {
-	return &defaultStash{JSONManager: jsonmanager.NewJSONManager()}
+// newStashFromJSONManager creates a new instance of stash with a given JSONManager.
+func newStashFromJSONManager(jm jsonmanager.JSONManager) stash {
+	data, _ := jsonmanager.NewJSONManagerFromString(jm.Get(stashKeyData).String())
+	return &defaultStash{
+		jm:                  jm,
+		data:                data,
+		scheduledStateNames: make([]StateName, 0),
+	}
 }
 
-// NewStashFromString creates a new instance of Stash with the given JSON data.
-func NewStashFromString(data string) (Stash, error) {
+// newStash creates a new instance of Stash with empty JSON data.
+func newStash(nextStates ...StateName) (stash, error) {
+	jm := jsonmanager.NewJSONManager()
+
+	if err := jm.Set(stashKeyState, nextStates[0]); err != nil {
+		return nil, err
+	}
+
+	if err := jm.Set(stashKeyScheduledStates, reverseStateNames(nextStates[1:])); err != nil {
+		return nil, err
+	}
+
+	if err := jm.Set(stashKeyData, "{}"); err != nil {
+		return nil, err
+	}
+
+	return newStashFromJSONManager(jm), nil
+}
+
+// newStashFromString creates a new instance of Stash with the given JSON data.
+func newStashFromString(data string) (stash, error) {
 	jm, err := jsonmanager.NewJSONManagerFromString(data)
-	return &defaultStash{JSONManager: jm}, err
+	return newStashFromJSONManager(jm), err
 }
 
-// addStateToHistory adds a stateDetail to the history. Specify the values for unscheduledState and numOfScheduledStates to
-// maintain the list of scheduled states if sub-flows are involved.
-func (s *defaultStash) addStateToHistory(stateName StateName, unscheduledStateName *StateName, numOfScheduledStates *int64) error {
-	// Create a new JSONManager to manage the history item
-	historyItem := jsonmanager.NewJSONManager()
+func reverseStateNames(slice []StateName) []StateName {
+	reversed := make([]StateName, len(slice))
+	for i, v := range slice {
+		reversed[len(slice)-1-i] = v
+	}
+	return reversed
+}
 
-	// Get the last state from history
-	lastStateName, _, _, err := s.getLastStateFromHistory()
-	if err != nil {
-		return err
+// Get retrieves the value at the specified path in the JSON data.
+func (h *defaultStash) Get(path string) gjson.Result {
+	return h.data.Get(path)
+}
+
+// Set updates the JSON data at the specified path with the provided value.
+func (h *defaultStash) Set(path string, value interface{}) error {
+	return h.data.Set(path, value)
+}
+
+// Delete removes a value from the JSON data at the specified path.
+func (h *defaultStash) Delete(path string) error {
+	return h.data.Delete(path)
+}
+
+// String returns the JSON data as a string.
+func (h *defaultStash) String() string {
+	return h.jm.String()
+}
+
+// Unmarshal parses the JSON data and returns it as an interface{}.
+func (h *defaultStash) Unmarshal() interface{} {
+	return h.jm.Unmarshal()
+}
+
+func (h *defaultStash) pushState(revertible bool) error {
+	return h.push(h.data.String(), revertible, h.getStateName() != h.getNextStateName())
+}
+
+func (h *defaultStash) pushErrorState(nextState StateName) error {
+	return h.push(h.jm.Get(stashKeyData).String(), h.isRevertible(), false, nextState)
+}
+
+func (h *defaultStash) push(newData string, revertible, writeHistory bool, nextStates ...StateName) error {
+	var err error
+
+	data := h.jm.Get(stashKeyData)
+	scheduledStates := h.jm.Get(stashKeyScheduledStates)
+	scheduledStatesArr := scheduledStates.Array()
+	stateStr := h.jm.Get(stashKeyState).String()
+	prevStateStr := h.jm.Get(stashKeyPreviousState).String()
+
+	scheduledStatesUpdated := make([]StateName, len(scheduledStatesArr))
+	maxIndex := len(scheduledStatesUpdated) - 1
+	for index := range scheduledStatesUpdated {
+		scheduledStatesUpdated[maxIndex-index] = StateName(scheduledStatesArr[index].String())
 	}
 
-	// If the last state is the same as the current state, do not add it again
-	if lastStateName != nil && *lastStateName == stateName {
-		return nil
+	scheduledStatesUpdated = append(nextStates, append(h.scheduledStateNames, scheduledStatesUpdated...)...)
+	if len(scheduledStatesUpdated) == 0 {
+		return errors.New("no state left to be used as the next state")
 	}
 
-	// Set the stateDetail in the history item
-	if err = historyItem.Set("s", stateName); err != nil {
-		return fmt.Errorf("failed to set state: %w", err)
-	}
+	nextStateName := scheduledStatesUpdated[0]
+	scheduledStatesUpdated = reverseStateNames(scheduledStatesUpdated[1:])
 
-	// If numOfScheduledStates is provided and greater than 0, set it in the history item
-	if numOfScheduledStates != nil && *numOfScheduledStates > 0 {
-		if err = historyItem.Set("n", *numOfScheduledStates); err != nil {
-			return fmt.Errorf("failed to set num_of_scheduled_states: %w", err)
+	if writeHistory {
+		histItem := "{}"
+		for key, value := range map[string]interface{}{
+			stashKeyState:           stateStr,
+			stashKeyPreviousState:   prevStateStr,
+			stashKeyData:            data.Value(),
+			stashKeyRevertible:      revertible,
+			stashKeyScheduledStates: scheduledStates.Value(),
+		} {
+			if histItem, err = sjson.Set(histItem, key, value); err != nil {
+				return err
+			}
+		}
+
+		stashKeyNewHistItem := fmt.Sprintf("%s.-1", stashKeyHistory)
+		if err = h.jm.Set(stashKeyNewHistItem, gjson.Parse(histItem).Value()); err != nil {
+			return err
 		}
 	}
 
-	// If unscheduledStateName is provided, set it in the history item
-	if unscheduledStateName != nil {
-		if err = historyItem.Set("u", *unscheduledStateName); err != nil {
-			return fmt.Errorf("failed to set unscheduled_state: %w", err)
+	for key, value := range map[string]interface{}{
+		stashKeyState:           nextStateName,
+		stashKeyPreviousState:   stateStr,
+		stashKeyData:            gjson.Parse(newData).Value(),
+		stashKeyScheduledStates: scheduledStatesUpdated,
+	} {
+		if err = h.jm.Set(key, value); err != nil {
+			return err
 		}
 	}
 
-	// Add the new history item to the history
-	if err = s.Set("_.state_history.-1", historyItem.Unmarshal()); err != nil {
-		return fmt.Errorf("failed to update stashed history: %w", err)
-	}
-
 	return nil
 }
 
-// removeLastStateFromHistory removes the last stateDetail from history.
-func (s *defaultStash) removeLastStateFromHistory() error {
-	if err := s.Delete("_.state_history.-1"); err != nil {
+func (h *defaultStash) revertState() error {
+	var err error
+
+	lastHistItemIndex := h.jm.Get(fmt.Sprintf("%s.#", stashKeyHistory)).Int() - 1
+	lastHistItem := h.jm.Get(fmt.Sprintf("%s.%d", stashKeyHistory, lastHistItemIndex))
+
+	if !lastHistItem.Exists() {
+		return errors.New("no state to revert to")
+	}
+
+	if !lastHistItem.Get(stashKeyRevertible).Bool() {
+		return errors.New("state is not revertible")
+	}
+
+	dataUpdated := lastHistItem.Get(stashKeyData)
+	h.data.Get(stashKeySticky).ForEach(func(key, value gjson.Result) bool {
+		path := fmt.Sprintf("%s.%s", stashKeySticky, key.String())
+		updated, _ := sjson.Set(dataUpdated.String(), path, value.Value())
+		dataUpdated = gjson.Parse(updated)
+		return true
+	})
+
+	if err = h.jm.Delete(fmt.Sprintf("%s.-1", stashKeyHistory)); err != nil {
 		return err
 	}
 
-	return nil
-}
-
-// getLastStateFromHistory returns the last stateDetail, as well as the values for unscheduledState and numOfScheduledStates.
-// These values indicate that further states have been added or removed from the list of scheduled states during the
-// last stateDetail.
-func (s *defaultStash) getLastStateFromHistory() (stateName, unscheduledStateName *StateName, numOfScheduledStates *int64, err error) {
-	// Get the index of the last history item
-	lastItemPosition := s.Get("_.state_history.#").Int() - 1
-
-	// Retrieve the last history item
-	lastHistoryItem := s.Get(fmt.Sprintf("_.state_history.%d", lastItemPosition))
-
-	// If the last history item doesn't exist, return nil values and no error
-	if !lastHistoryItem.Exists() {
-		return nil, nil, nil, nil
-	}
-
-	// Check if the last history item is an object
-	if !lastHistoryItem.IsObject() {
-		return nil, nil, nil, errors.New("last history item is not an object")
-	}
-
-	// Check if the 's' field exists in the last history item
-	if !lastHistoryItem.Get("s").Exists() {
-		return nil, nil, nil, errors.New("last history item is missing a value for 'state'")
-	}
-
-	// Parse 's' field and assign it to the 'stateDetail' variable
-	sn := StateName(lastHistoryItem.Get("s").String())
-	stateName = &sn
-
-	// Check if 'u' field exists in the last history item
-	if lastHistoryItem.Get("u").Exists() {
-		// Parse 'u' field and assign it to the 'unscheduledState' variable
-		usn := StateName(lastHistoryItem.Get("u").String())
-		unscheduledStateName = &usn
-	}
-
-	// Check if 'n' field exists in the last history item
-	if lastHistoryItem.Get("n").Exists() {
-		// Parse 'n' field and assign it to the 'numOfScheduledStates' variable
-		n := lastHistoryItem.Get("n").Int()
-		numOfScheduledStates = &n
-	}
-
-	// Return the parsed values
-	return stateName, unscheduledStateName, numOfScheduledStates, nil
-}
-
-// addScheduledStates adds scheduled states.
-func (s *defaultStash) addScheduledStates(scheduledStateNames ...StateName) error {
-	// get the current sub-flow stack from the stash
-	stack := s.Get("_.scheduled_states").Array()
-
-	newStack := make([]StateName, len(stack))
-
-	for index := range newStack {
-		newStack[index] = StateName(stack[index].String())
-	}
-
-	// prepend the scheduledStates to the list of previously defined scheduled states
-	newStack = append(scheduledStateNames, newStack...)
-
-	if err := s.Set("_.scheduled_states", newStack); err != nil {
-		return fmt.Errorf("failed to set scheduled_states: %w", err)
+	for key, value := range map[string]interface{}{
+		stashKeyScheduledStates: lastHistItem.Get(stashKeyScheduledStates).Value(),
+		stashKeyState:           lastHistItem.Get(stashKeyState).Value(),
+		stashKeyPreviousState:   lastHistItem.Get(stashKeyPreviousState).Value(),
+		stashKeyData:            dataUpdated.Value(),
+	} {
+		if err = h.jm.Set(key, value); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-// removeLastScheduledState removes and returns the last scheduled stateDetail if present.
-func (s *defaultStash) removeLastScheduledState() (*StateName, error) {
-	// retrieve the previously scheduled states form the stash
-	stack := s.Get("_.scheduled_states").Array()
+func (h *defaultStash) getStateName() StateName {
+	return StateName(h.jm.Get(stashKeyState).String())
+}
 
-	newStack := make([]StateName, len(stack))
+func (h *defaultStash) getPreviousStateName() StateName {
+	return StateName(h.jm.Get(stashKeyPreviousState).String())
+}
 
-	for index := range newStack {
-		newStack[index] = StateName(stack[index].String())
+func (h *defaultStash) addScheduledStateNames(names ...StateName) {
+	h.scheduledStateNames = append(h.scheduledStateNames, names...)
+}
+
+func (h *defaultStash) getNextStateName() StateName {
+	if len(h.scheduledStateNames) > 0 {
+		return h.scheduledStateNames[0]
 	}
 
-	if len(newStack) == 0 {
-		return nil, nil
-	}
+	lastScheduledIndex := h.jm.Get(fmt.Sprintf("%s.#", stashKeyScheduledStates)).Int() - 1
+	return StateName(h.jm.Get(fmt.Sprintf("%s.%d", stashKeyScheduledStates, lastScheduledIndex)).String())
+}
 
-	// get and remove first stack item
-	nextStateName := newStack[0]
-	newStack = newStack[1:]
-
-	// stash the updated list of scheduled states
-	if err := s.Set("_.scheduled_states", newStack); err != nil {
-		return nil, fmt.Errorf("failed to stash scheduled states while ending the sub-flow: %w", err)
-	}
-
-	return &nextStateName, nil
+func (h *defaultStash) isRevertible() bool {
+	lastHistItemIndex := h.jm.Get(fmt.Sprintf("%s.#", stashKeyHistory)).Int() - 1
+	return h.jm.Get(fmt.Sprintf("%s.%d.%s", stashKeyHistory, lastHistItemIndex, stashKeyRevertible)).Bool()
 }

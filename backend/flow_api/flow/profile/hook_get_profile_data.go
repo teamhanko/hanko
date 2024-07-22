@@ -14,19 +14,22 @@ type GetProfileData struct {
 }
 
 func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
+	deps := h.GetDeps(c)
+
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
 		return errors.New("no valid session")
 	}
 
-	err := c.Payload().Set("user", dto.ProfileDataFromUserModel(userModel))
-	if err != nil {
-		return fmt.Errorf("failed to set user payload: %w", err)
+	profileData := dto.ProfileDataFromUserModel(userModel)
+
+	if !deps.Cfg.Passkey.Enabled {
+		profileData.WebauthnCredentials = nil
 	}
 
-	err = c.Input().Set("username", userModel.Username)
+	err := c.Payload().Set("user", profileData)
 	if err != nil {
-		return fmt.Errorf("failed to set username as input value: %w", err)
+		return fmt.Errorf("failed to set user payload: %w", err)
 	}
 
 	return nil

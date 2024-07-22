@@ -21,6 +21,16 @@ type Saml struct {
 	IdentityProviders []IdentityProvider `yaml:"identity_providers" json:"identity_providers,omitempty" koanf:"identity_providers"`
 }
 
+func (s Saml) GetProviderByDomain(domain string) *IdentityProvider {
+	for _, ip := range s.IdentityProviders {
+		if ip.Domain == domain {
+			return &ip
+		}
+	}
+
+	return nil
+}
+
 type Options struct {
 	SignAuthnRequests bool `yaml:"sign_authn_requests" json:"sign_authn_requests,omitempty" koanf:"sign_authn_requests" jsonschema:"default=true"`
 	// Forces the IDP to show login window every time

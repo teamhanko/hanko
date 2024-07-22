@@ -346,14 +346,14 @@ func (s *submitRegistrationIdentifierActionSuite) TestSubmitRegistrationIdentifi
 			tx := s.Storage.GetConnection()
 			db := models.NewFlowDB(tx)
 			actionParam := "submit_registration_identifier@0b41f4dd-8e46-4a7c-bb4d-d60843113431"
-			inputData := flowpilot.InputData{JSONString: currentTest.input}
-			result, err := flow.Execute(db, flowpilot.WithActionParam(actionParam), flowpilot.WithInputData(inputData))
+			inputData := flowpilot.InputData{InputDataMap: currentTest.input}
+			result, err := flow.Execute(db, flowpilot.WithQueryParam(actionParam), flowpilot.WithInputData(inputData))
 			s.Require().NoError(err)
 
 			s.Equal(currentTest.statusCode, result.Status())
 			s.Equal(currentTest.expectedState, result.Response().Name)
 			// TODO: check that the schema of the action returns the correct error_code e.g.
-			// result.Response().PublicActions[0].PublicSchema[0].PublicError.Code == ErrorValueInvalid
+			// result.Response().ResponseActions[0].ResponseInputs[0].ResponseError.Code == ErrorValueInvalid
 		})
 	}
 }

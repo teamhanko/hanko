@@ -3,15 +3,16 @@ import {
   EmailCreateInputs,
   EmailDeleteInputs,
   EmailSetPrimaryInputs,
-  EmailVerifyInputs, ExchangeTokenInputs,
+  EmailVerifyInputs,
+  ExchangeTokenInputs,
   PasskeyCredentialDelete,
   PasskeyCredentialRename,
-  PasswordLoginInputs,
   PasswordRecoveryInputs,
-  PasswordSetInputs,
+  PasswordInputs,
   RegisterClientCapabilitiesInputs,
   RegisterLoginIdentifierInputs,
-  RegisterPasswordInputs, ThirdpartyOauthInputs,
+  RegisterPasswordInputs,
+  ThirdpartyOauthInputs,
   UsernameSetInputs,
   VerifyPasscodeInputs,
   WebauthnVerifyAssertionResponseInputs,
@@ -30,7 +31,7 @@ interface PreflightActions {
 }
 
 interface LoginInitActions {
-  readonly continue_with_login_identifier: Action<ContinueWithLoginIdentifierInputs>;
+  readonly continue_with_login_identifier?: Action<ContinueWithLoginIdentifierInputs>;
   readonly webauthn_generate_request_options?: Action<null>;
   readonly webauthn_verify_assertion_response?: Action<WebauthnVerifyAssertionResponseInputs>;
   readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
@@ -42,9 +43,11 @@ interface ProfileInitActions {
   readonly email_delete?: Action<EmailDeleteInputs>;
   readonly email_verify?: Action<EmailVerifyInputs>;
   readonly email_set_primary?: Action<EmailSetPrimaryInputs>;
-  readonly password_set?: Action<PasswordSetInputs>;
+  readonly password_create?: Action<PasswordInputs>;
+  readonly password_update?: Action<PasswordInputs>;
   readonly password_delete?: Action<null>;
   readonly username_set?: Action<UsernameSetInputs>;
+  readonly username_delete?: Action<null>;
   readonly webauthn_credential_create?: Action<null>;
   readonly webauthn_credential_rename?: Action<PasskeyCredentialRename>;
   readonly webauthn_credential_delete?: Action<PasskeyCredentialDelete>;
@@ -52,14 +55,13 @@ interface ProfileInitActions {
 }
 
 interface LoginMethodChooserActions {
-  readonly webauthn_generate_request_options?: Action<null>;
   readonly continue_to_password_login?: Action<null>;
   readonly continue_to_passcode_confirmation?: Action<null>;
   readonly back: Action<null>;
 }
 
 interface LoginPasswordActions {
-  readonly password_login: Action<PasswordLoginInputs>;
+  readonly password_login: Action<PasswordInputs>;
   readonly continue_to_passcode_confirmation_recovery?: Action<null>;
   readonly continue_to_login_method_chooser: Action<null>;
   readonly back: Action<null>;
@@ -77,6 +79,7 @@ interface LoginPasskeyActions {
 interface OnboardingCreatePasskeyActions {
   readonly webauthn_generate_creation_options: Action<null>;
   readonly skip?: Action<null>;
+  readonly back?: Action<null>;
 }
 
 interface OnboardingVerifyPasskeyAttestationActions {
@@ -92,6 +95,7 @@ interface RegistrationInitActions {
 interface PasswordCreationActions {
   readonly register_password: Action<RegisterPasswordInputs>;
   readonly back?: Action<null>;
+  readonly skip?: Action<null>;
 }
 
 interface PasscodeConfirmationActions {
@@ -100,7 +104,24 @@ interface PasscodeConfirmationActions {
   readonly back: Action<null>;
 }
 
-interface ThirdpartyOauthActions {
+interface OnboardingEmailActions {
+  readonly email_address_set: Action<EmailCreateInputs>;
+  readonly skip: Action<null>;
+}
+
+interface OnboardingUsernameActions {
+  readonly username_set: Action<UsernameSetInputs>;
+  readonly skip: Action<null>;
+}
+
+interface CredentialOnboardingChooserActions {
+  readonly continue_to_passkey_registration: Action<null>;
+  readonly continue_to_password_registration: Action<null>;
+  readonly skip: Action<null>;
+  readonly back: Action<null>;
+}
+
+interface ThirdPartyActions {
   readonly exchange_token: Action<ExchangeTokenInputs>;
 }
 
@@ -118,5 +139,8 @@ export type {
   RegistrationInitActions,
   PasswordCreationActions,
   PasscodeConfirmationActions,
-  ThirdpartyOauthActions
+  OnboardingEmailActions,
+  OnboardingUsernameActions,
+  CredentialOnboardingChooserActions,
+  ThirdPartyActions,
 };

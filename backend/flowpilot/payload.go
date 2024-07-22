@@ -2,11 +2,11 @@ package flowpilot
 
 import "github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 
-type Payload interface {
+type payload interface {
 	jsonmanager.JSONManager
 }
 
-// NewPayload creates a new instance of Payload with empty JSON data.
-func NewPayload() Payload {
+// newPayload creates a new instance of Payload with empty JSON data.
+func newPayload() payload {
 	return jsonmanager.NewJSONManager()
 }

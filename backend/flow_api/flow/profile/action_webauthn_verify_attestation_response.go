@@ -15,7 +15,7 @@ type WebauthnVerifyAttestationResponse struct {
 }
 
 func (a WebauthnVerifyAttestationResponse) GetName() flowpilot.ActionName {
-	return ActionWebauthnVerifyAttestationResponse
+	return shared.ActionWebauthnVerifyAttestationResponse
 }
 
 func (a WebauthnVerifyAttestationResponse) GetDescription() string {
@@ -23,37 +23,38 @@ func (a WebauthnVerifyAttestationResponse) GetDescription() string {
 }
 
 func (a WebauthnVerifyAttestationResponse) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	deps := a.GetDeps(c)
+
+	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		c.SuspendAction()
 	}
 
-	c.AddInputs(flowpilot.JSONInput("public_key").Required(true).Persist(false))
+	c.AddInputs(flowpilot.JSONInput("public_key").Required(true))
 }
 
 func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	if !c.Stash().Get("webauthn_session_data_id").Exists() {
+	if !c.Stash().Get(shared.StashPathWebauthnSessionDataID).Exists() {
 		return errors.New("webauthn_session_data_id does not exist in the stash")
 	}
 
-	sessionDataID, err := uuid.FromString(c.Stash().Get("webauthn_session_data_id").String())
+	sessionDataID, err := uuid.FromString(c.Stash().Get(shared.StashPathWebauthnSessionDataID).String())
 	if err != nil {
 		return fmt.Errorf("failed to parse webauthn_session_data_id: %w", err)
 	}
 
-	primaryEmailModel := userModel.Emails.GetPrimary()
 	var primaryEmailAddress string
-	if primaryEmailModel != nil {
+	if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
 		primaryEmailAddress = primaryEmailModel.Address
 	}
 
@@ -63,19 +64,19 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		PublicKey:     c.Input().Get("public_key").String(),
 		UserID:        userModel.ID,
 		Email:         primaryEmailAddress,
-		Username:      userModel.Username,
+		Username:      userModel.Username.String,
 	}
 
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
 	if err != nil {
 		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
-			return c.ContinueFlowWithError(c.GetCurrentState(), shared.ErrorPasskeyInvalid.Wrap(err))
+			return c.Error(shared.ErrorPasskeyInvalid.Wrap(err))
 		}
 
 		return fmt.Errorf("failed to verify attestation response: %w", err)
 	}
 
-	err = c.Stash().Set("webauthn_credential", credential)
+	err = c.Stash().Set(shared.StashPathWebauthnCredential, credential)
 	if err != nil {
 		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)
 	}
@@ -83,14 +84,10 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 	// Set user_id explicitly because persisting the credential is now part of a shared hook which has
 	// to work in multiple flows, e.g. the login flow, which does not work with the session_user in the
 	// context like the profile does
-	err = c.Stash().Set("user_id", userModel.ID.String())
+	err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to set user_id to the stash: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
-}
-
-func (a WebauthnVerifyAttestationResponse) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue(shared.StateProfileInit)
 }

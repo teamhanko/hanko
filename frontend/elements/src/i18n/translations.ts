@@ -21,6 +21,8 @@ export interface Translation {
     profilePasskeys: string;
     isPrimaryEmail: string;
     setPrimaryEmail: string;
+    createEmail: string;
+    createUsername: string;
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;
@@ -32,6 +34,8 @@ export interface Translation {
     deleteAccount: string;
     signIn: string;
     signUp: string;
+    selectLoginMethod: string;
+    setupLoginMethod: string;
   };
   texts: {
     enterPasscode: string;
@@ -40,19 +44,16 @@ export interface Translation {
     createAccount: string;
     noAccountExists: string;
     passwordFormatHint: string;
-    manageEmails: string;
-    changePassword: string;
-    managePasskeys: string;
     isPrimaryEmail: string;
     setPrimaryEmail: string;
     emailVerified: string;
     emailUnverified: string;
     emailDelete: string;
-    emailDeletePrimary: string;
     renamePasskey: string;
     deletePasskey: string;
     deleteAccount: string;
-    changeYourUsername: string;
+    selectLoginMethodForFutureLogins: string;
+    howDoYouWantToLogin: string;
   };
   labels: {
     or: string;
@@ -63,6 +64,8 @@ export interface Translation {
     skip: string;
     save: string;
     password: string;
+    passkey: string;
+    passcode: string;
     signInPassword: string;
     signInPasscode: string;
     forgotYourPassword: string;
@@ -84,7 +87,6 @@ export interface Translation {
     rename: string;
     newPasskeyName: string;
     addEmail: string;
-    changePassword: string;
     createPasskey: string;
     webauthnUnsupported: string;
     signInWith: string;
@@ -94,7 +96,10 @@ export interface Translation {
     optional: string;
     dontHaveAnAccount: string;
     alreadyHaveAnAccount: string;
+    changePassword: string;
+    setPassword: string;
     changeUsername: string;
+    setUsername: string;
   };
   errors: {
     somethingWentWrong: string;
@@ -115,6 +120,7 @@ export interface Translation {
     signupDisabled: string;
   };
   flowErrors: {
+    technical_error: string;
     flow_expired_error: string;
     value_invalid_error: string;
     passcode_invalid: string;
@@ -123,7 +129,15 @@ export interface Translation {
     rate_limit_exceeded: string;
     unknown_username_error: string;
     username_already_exists: string;
-    email_already_taken: string;
+    email_already_exists: string;
+    not_found: string;
+    flow_discontinuity_error: string;
+    operation_not_permitted_error: string;
+    form_data_invalid_error: string;
+    unauthorized: string;
+    value_missing_error: string;
+    value_too_long_error: string;
+    value_too_short_error: string;
   };
 }
 

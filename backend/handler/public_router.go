@@ -41,30 +41,43 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
-	var rateLimiter limiter.Store
+	var passcodeRateLimiter limiter.Store
+	var passwordRateLimiter limiter.Store
+	var tokenExchangeRateLimiter limiter.Store
 	if cfg.RateLimiter.Enabled {
-		rateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
+		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
 	}
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
+	samlService := saml.NewSamlService(cfg, persister)
+
 	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:             persister,
-		Cfg:                   *cfg,
-		PasscodeService:       passcodeService,
-		PasswordService:       passwordService,
-		WebauthnService:       webauthnService,
-		SessionManager:        sessionManager,
-		RateLimiter:           rateLimiter,
-		AuthenticatorMetadata: authenticatorMetadata,
-		AuditLogger:           auditLogger,
+		Persister:                persister,
+		Cfg:                      *cfg,
+		PasscodeService:          passcodeService,
+		PasswordService:          passwordService,
+		WebauthnService:          webauthnService,
+		SessionManager:           sessionManager,
+		PasscodeRateLimiter:      passcodeRateLimiter,
+		PasswordRateLimiter:      passwordRateLimiter,
+		TokenExchangeRateLimiter: tokenExchangeRateLimiter,
+		AuthenticatorMetadata:    authenticatorMetadata,
+		AuditLogger:              auditLogger,
+		SamlService:              samlService,
+	}
+
+	if cfg.Saml.Enabled {
+		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
 	e.POST("/login", flowAPIHandler.LoginFlowHandler)
-	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, sessionMiddleware)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler)
 
 	e.Renderer = template.NewTemplateRenderer()
 
@@ -106,7 +119,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	mailer, err := mail.NewMailer(cfg.Smtp)
+	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
@@ -195,10 +208,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)
-
-	if cfg.Saml.Enabled {
-		saml.CreateSamlRoutes(e, cfg, persister, sessionManager, auditLogger)
-	}
 
 	return e
 }

@@ -88,11 +88,18 @@ const ProfilePage = (props: Props) => {
       flowState.actions.email_verify({ email_id: emailID }).run,
     );
 
-  const onPasswordSubmit = async (event: Event, password: string) =>
+  const onPasswordCreate = async (event: Event, password: string) =>
     onAction(
       event,
       "password-submit",
-      flowState.actions.password_set({ password }).run,
+      flowState.actions.password_create({ password }).run,
+    );
+
+  const onPasswordUpdate = async (event: Event, password: string) =>
+    onAction(
+      event,
+      "password-submit",
+      flowState.actions.password_update({ password }).run,
     );
 
   const onPasswordDelete = async (event: Event) =>
@@ -107,6 +114,13 @@ const ProfilePage = (props: Props) => {
       event,
       "username-set",
       flowState.actions.username_set({ username }).run,
+    );
+
+  const onUsernameDelete = async (event: Event) =>
+    onAction(
+      event,
+      "username-delete",
+      flowState.actions.username_delete(null).run,
     );
 
   const onPasskeyNameSubmit = async (event: Event, id: string, name: string) =>
@@ -165,11 +179,33 @@ const ProfilePage = (props: Props) => {
             : null
         }
       />
+      {flowState.actions.username_set?.(null) ? (
+        <Fragment>
+          <Headline1>{t("labels.username")}</Headline1>
+          {flowState.payload.user.username ? (
+            <Paragraph>
+              <b>{flowState.payload.user.username}</b>
+            </Paragraph>
+          ) : null}
+          <Paragraph>
+            <ChangeUsernameDropdown
+              inputs={flowState.actions.username_set(null).inputs}
+              hasUsername={!!flowState.payload.user.username}
+              allowUsernameDeletion={
+                !!flowState.actions.username_delete?.(null)
+              }
+              onUsernameSubmit={onUsernameSubmit}
+              onUsernameDelete={onUsernameDelete}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
+          </Paragraph>
+        </Fragment>
+      ) : null}
       {flowState.payload?.user?.emails ||
       flowState.actions.email_create?.(null) ? (
         <Fragment>
           <Headline1>{t("headlines.profileEmails")}</Headline1>
-          <Paragraph>{t("texts.manageEmails")}</Paragraph>
           <Paragraph>
             <ListEmailsAccordion
               emails={flowState.payload.user.emails}
@@ -178,6 +214,9 @@ const ProfilePage = (props: Props) => {
               onEmailVerify={onEmailVerify}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
+              deletableEmailIDs={flowState.actions
+                .email_delete?.(null)
+                .inputs.email_id.allowed_values?.map((e) => e.value)}
             />
             {flowState.actions.email_create?.(null) ? (
               <AddEmailDropdown
@@ -190,17 +229,13 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.actions.password_set?.(null) ? (
+      {flowState.actions.password_create?.(null) ? (
         <Fragment>
           <Headline1>{t("headlines.profilePassword")}</Headline1>
-          <Paragraph>{t("texts.changePassword")}</Paragraph>
           <Paragraph>
             <ChangePasswordDropdown
-              hideDeletePasswordLink={
-                !flowState.actions.password_delete?.(null)
-              }
-              inputs={flowState.actions.password_set(null).inputs}
-              onPasswordSubmit={onPasswordSubmit}
+              inputs={flowState.actions.password_create(null).inputs}
+              onPasswordSubmit={onPasswordCreate}
               onPasswordDelete={onPasswordDelete}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
@@ -208,16 +243,18 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.actions.username_set?.(null) ? (
+      {flowState.actions.password_update?.(null) ? (
         <Fragment>
-          <Headline1>{t("labels.username")}</Headline1>
-          <Paragraph>{t("texts.changeYourUsername")}</Paragraph>
+          <Headline1>{t("headlines.profilePassword")}</Headline1>
           <Paragraph>
-            <ChangeUsernameDropdown
-              inputs={flowState.actions.username_set(null).inputs}
-              onUsernameSubmit={onUsernameSubmit}
+            <ChangePasswordDropdown
+              allowPasswordDelete={!!flowState.actions.password_delete?.(null)}
+              inputs={flowState.actions.password_update(null).inputs}
+              onPasswordSubmit={onPasswordUpdate}
+              onPasswordDelete={onPasswordDelete}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
+              passwordExists
             />
           </Paragraph>
         </Fragment>
@@ -227,7 +264,6 @@ const ProfilePage = (props: Props) => {
         flowState.actions.webauthn_credential_create?.(null)) ? (
         <Fragment>
           <Headline1>{t("headlines.profilePasskeys")}</Headline1>
-          <Paragraph>{t("texts.managePasskeys")}</Paragraph>
           <Paragraph>
             <ListPasskeysAccordion
               onBack={onBack}
@@ -237,6 +273,9 @@ const ProfilePage = (props: Props) => {
               setError={null}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
+              allowPasskeyDeletion={
+                !!flowState.actions.webauthn_credential_delete?.(null)
+              }
             />
             {flowState.actions.webauthn_credential_create?.(null) ? (
               <AddPasskeyDropdown

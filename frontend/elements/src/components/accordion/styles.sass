@@ -13,6 +13,9 @@
     margin: .25rem 0
     overflow: hidden
 
+    &.dropdown
+      margin: 0
+
     .label
       border-radius: variables.$border-radius
       border-style: none
@@ -38,9 +41,9 @@
           color: variables.$color-shade-1
 
       &.dropdown
+        margin: 0
         color: variables.$link-color
         justify-content: flex-start
-        width: fit-content
 
       &:hover
         color: variables.$brand-contrast-color
@@ -56,12 +59,6 @@
       &:not(.dropdown)::after
         content: "\276F"
         width: 1rem
-        text-align: center
-        transition: all .35s
-
-      &.dropdown::before
-        content: "\002B"
-        width: 1em
         text-align: center
         transition: all .35s
 
@@ -84,9 +81,6 @@
 
           &:not(.dropdown)::after
             transform: rotate(90deg)
-
-          &.dropdown::before
-            content: "\002D"
 
           ~ .accordionContent
             margin: .25rem 1rem

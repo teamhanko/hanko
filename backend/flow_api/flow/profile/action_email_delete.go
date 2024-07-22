@@ -6,6 +6,7 @@ import (
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -15,7 +16,7 @@ type EmailDelete struct {
 }
 
 func (a EmailDelete) GetName() flowpilot.ActionName {
-	return ActionEmailDelete
+	return shared.ActionEmailDelete
 }
 
 func (a EmailDelete) GetDescription() string {
@@ -23,41 +24,70 @@ func (a EmailDelete) GetDescription() string {
 }
 
 func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
-	if a.mustSuspend(c) {
+	deps := a.GetDeps(c)
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
 		c.SuspendAction()
 		return
 	}
 
-	c.AddInputs(flowpilot.StringInput("email_id").Required(true).Hidden(true))
+	input := flowpilot.StringInput("email_id").Required(true).Hidden(true)
+
+	lastEmail := len(userModel.Emails) == 1
+
+	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+	canDoPWLogin := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil
+	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
+
+	for _, email := range userModel.Emails {
+		if email.IsPrimary() {
+			canDoPWLoginWithUsername := canDoPWLogin && deps.Cfg.Username.UseAsLoginIdentifier && len(userModel.Username.String) > 0
+			if lastEmail && deps.Cfg.Email.Optional && (canDoWebauthn || canDoPWLoginWithUsername) {
+				input.AllowedValue(email.Address, email.ID.String())
+			}
+		} else {
+			if !canDoWebauthn && !canDoPWLogin && !canDoPasscode {
+				for _, otherEmail := range userModel.Emails {
+					if otherEmail.ID.String() == email.ID.String() {
+						continue
+					}
+
+					if services.UserCanDoThirdParty(deps.Cfg, otherEmail.Identities) ||
+						services.UserCanDoSaml(deps.Cfg, otherEmail.Identities) {
+						input.AllowedValue(email.Address, email.ID.String())
+						break
+					}
+				}
+			} else {
+				input.AllowedValue(email.Address, email.ID.String())
+			}
+		}
+	}
+
+	c.AddInputs(input)
 }
 
 func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
-		return c.ContinueFlowWithError(c.GetCurrentState(), flowpilot.ErrorFormDataInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	emailToBeDeletedId := uuid.FromStringOrNil(c.Input().Get("email_id").String())
 	emailToBeDeletedModel := userModel.GetEmailById(emailToBeDeletedId)
 	if emailToBeDeletedModel == nil {
-		return c.ContinueFlowWithError(
-			c.GetCurrentState(),
-			flowpilot.ErrorFormDataInvalid.Wrap(errors.New("unknown email")),
-		)
+		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("unknown email")))
 	}
 
 	if emailToBeDeletedModel.IsPrimary() {
-		if !deps.Cfg.Identifier.Email.Optional {
-			return c.ContinueFlowWithError(
-				c.GetCurrentState(),
-				flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("cannot delete primary email")),
-			)
+		if !deps.Cfg.Email.Optional {
+			return c.Error(flowpilot.ErrorOperationNotPermitted.Wrap(errors.New("cannot delete primary email")))
 		} else {
 			err := deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Delete(*emailToBeDeletedModel.PrimaryEmail)
 			if err != nil {
@@ -84,42 +114,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
-	return c.ContinueFlow(StateProfileInit)
-}
+	userModel.DeleteEmail(*emailToBeDeletedModel)
 
-func (a EmailDelete) Finalize(c flowpilot.FinalizationContext) error {
-	if a.mustSuspend(c) {
-		c.SuspendAction()
-	}
-
-	return nil
-}
-
-func (a EmailDelete) mustSuspend(c flowpilot.Context) bool {
-	deps := a.GetDeps(c)
-
-	userModel, ok := c.Get("session_user").(*models.User)
-	if !ok {
-		return true
-	}
-
-	if len(userModel.Emails) == 1 {
-		if deps.Cfg.Identifier.Email.Enabled {
-			if !deps.Cfg.Identifier.Email.Optional {
-				return true
-			}
-
-			if len(userModel.WebauthnCredentials) == 0 {
-				if !deps.Cfg.Password.Enabled || userModel.PasswordCredential == nil {
-					return true
-				}
-			}
-		}
-	}
-
-	if len(userModel.Emails) == 0 {
-		return true
-	}
-
-	return false
+	return c.Continue(shared.StateProfileInit)
 }

@@ -3,6 +3,7 @@ package flowpilot
 import (
 	"fmt"
 	"net/http"
+	"strings"
 )
 
 // flowpilotError defines the interface for custom error types in the Flowpilot package.
@@ -13,7 +14,7 @@ type flowpilotError interface {
 	Code() string
 	Message() string
 
-	toPublicError(debug bool) PublicError
+	toResponseError(debug bool) *ResponseError
 }
 
 // FlowError is an interface representing flow-related errors.
@@ -59,16 +60,19 @@ func (e *defaultError) Error() string {
 	return e.errorText
 }
 
-// toPublicError converts the error to a PublicError for public exposure.
-func (e *defaultError) toPublicError(debug bool) PublicError {
-	publicError := PublicError{
+// toResponseError converts the error to a ResponseError for public exposure.
+func (e *defaultError) toResponseError(debug bool) *ResponseError {
+	publicError := &ResponseError{
 		Code:    e.Code(),
 		Message: e.Message(),
 	}
 
-	if debug && e.cause != nil {
+	if e.cause != nil {
 		cause := e.cause.Error()
-		publicError.Cause = &cause
+		publicError.Internal = &cause
+		if debug {
+			publicError.Cause = &cause
+		}
 	}
 
 	return publicError
@@ -157,18 +161,16 @@ var (
 	ErrorFlowDiscontinuity     = NewFlowError("flow_discontinuity_error", "The flow can't be continued.", http.StatusInternalServerError)
 	ErrorOperationNotPermitted = NewFlowError("operation_not_permitted_error", "The operation is not permitted.", http.StatusForbidden)
 	ErrorFormDataInvalid       = NewFlowError("form_data_invalid_error", "Form data invalid.", http.StatusBadRequest)
-	ErrorActionParamInvalid    = NewFlowError("action_param_invalid_error", "Action parameter is invalid.", http.StatusBadRequest)
 )
 
 // Predefined input error types
 var (
-	ErrorEmailInvalid  = NewInputError("email_invalid_error", "The email address is invalid.")
-	ErrorValueMissing  = NewInputError("value_missing_error", "Missing value.")
+	ErrorValueMissing  = NewInputError("value_missing_error", "The value is missing.")
 	ErrorValueInvalid  = NewInputError("value_invalid_error", "The value is invalid.")
-	ErrorValueTooLong  = NewInputError("value_too_long_error", "Value is too long.")
-	ErrorValueTooShort = NewInputError("value_too_short_error", "Value is too short.")
+	ErrorValueTooLong  = NewInputError("value_too_long_error", "The value is too long.")
+	ErrorValueTooShort = NewInputError("value_too_short_error", "The value is too short.")
 )
 
-func ErrorValueInvalidMustBeOneOf(values interface{}) InputError {
-	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %+v", values))
+func createMustBeOneOfError(values []string) InputError {
+	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %s", strings.Join(values, ",")))
 }

@@ -14,7 +14,7 @@ type WebauthnCredentialCreate struct {
 }
 
 func (a WebauthnCredentialCreate) GetName() flowpilot.ActionName {
-	return ActionWebauthnCredentialCreate
+	return shared.ActionWebauthnCredentialCreate
 }
 
 func (a WebauthnCredentialCreate) GetDescription() string {
@@ -22,7 +22,11 @@ func (a WebauthnCredentialCreate) GetDescription() string {
 }
 
 func (a WebauthnCredentialCreate) Initialize(c flowpilot.InitializationContext) {
-	if !c.Stash().Get("webauthn_available").Bool() {
+	deps := a.GetDeps(c)
+
+	userModel, ok := c.Get("session_user").(*models.User)
+
+	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() || (ok && len(userModel.WebauthnCredentials) >= deps.Cfg.Passkey.Limit) {
 		c.SuspendAction()
 	}
 }
@@ -32,11 +36,11 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
-		return c.ContinueFlowWithError(c.GetErrorState(), flowpilot.ErrorOperationNotPermitted)
+		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
 	primaryEmailModel := userModel.Emails.GetPrimary()
-	if primaryEmailModel == nil && userModel.Username == "" {
+	if primaryEmailModel == nil && userModel.Username.String == "" {
 		return errors.New("user must have either email or username")
 	}
 
@@ -49,7 +53,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		Tx:       deps.Tx,
 		UserID:   userModel.ID,
 		Email:    primaryEmailAddress,
-		Username: userModel.Username,
+		Username: userModel.Username.String,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptions(params)
@@ -57,7 +61,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to generate webauthn creation options: %w", err)
 	}
 
-	err = c.Stash().Set("webauthn_session_data_id", sessionDataModel.ID)
+	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
 	if err != nil {
 		return err
 	}
@@ -67,9 +71,5 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	return c.ContinueFlow(StateProfileWebauthnCredentialVerification)
-}
-
-func (a WebauthnCredentialCreate) Finalize(c flowpilot.FinalizationContext) error {
-	return nil
+	return c.Continue(shared.StateProfileWebauthnCredentialVerification)
 }

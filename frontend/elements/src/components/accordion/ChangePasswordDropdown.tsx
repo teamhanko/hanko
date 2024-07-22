@@ -1,6 +1,6 @@
 import { h } from "preact";
 import { StateUpdater, useContext, useState } from "preact/compat";
-import { PasswordSetInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
+import { PasswordInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
@@ -13,12 +13,13 @@ import Link from "../link/Link";
 import ErrorMessage from "../error/ErrorMessage";
 
 interface Props {
-  inputs: PasswordSetInputs;
+  inputs: PasswordInputs;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
   onPasswordSubmit: (event: Event, password: string) => Promise<void>;
   onPasswordDelete: (event: Event) => Promise<void>;
-  hideDeletePasswordLink?: boolean;
+  allowPasswordDelete?: boolean;
+  passwordExists?: boolean;
 }
 
 const ChangePasswordDropdown = ({
@@ -27,7 +28,8 @@ const ChangePasswordDropdown = ({
   setCheckedItemID,
   onPasswordSubmit,
   onPasswordDelete,
-  hideDeletePasswordLink,
+  allowPasswordDelete,
+  passwordExists,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const [newPassword, setNewPassword] = useState<string>("");
@@ -42,7 +44,7 @@ const ChangePasswordDropdown = ({
   return (
     <Dropdown
       name={"password-edit-dropdown"}
-      title={t("labels.changePassword")}
+      title={t(passwordExists ? "labels.changePassword" : "labels.setPassword")}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}
     >
@@ -60,6 +62,7 @@ const ChangePasswordDropdown = ({
       >
         <Input
           markError
+          autoComplete={"new-password"}
           placeholder={t("labels.newPassword")}
           type={"password"}
           onInput={onInputHandler}
@@ -69,7 +72,7 @@ const ChangePasswordDropdown = ({
         <Button uiAction={"password-submit"}>{t("labels.save")}</Button>
       </Form>
       <Link
-        hidden={hideDeletePasswordLink}
+        hidden={!allowPasswordDelete}
         uiAction={"password-delete"}
         dangerous
         onClick={(event: Event) =>
