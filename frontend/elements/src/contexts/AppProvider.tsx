@@ -244,15 +244,7 @@ const AppProvider = ({
 
   const handleError = (e: any) => {
     setLoadingAction(null);
-    setPage(
-      <ErrorPage
-        error={
-          hanko.flow.client.response?.status === 401
-            ? new UnauthorizedError(e)
-            : new TechnicalError(e)
-        }
-      />,
-    );
+    setPage(<ErrorPage error={new TechnicalError(e)} />);
   };
 
   const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
