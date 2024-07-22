@@ -372,15 +372,15 @@
         event.preventDefault();
         const data = serializeForm(form)
 
-        // Add the CSRF token to the next request
-        data["csrf_token"] = csrfToken
-
         fetch(form.action, {
             headers: {
                 "Content-Type": "application/json"
             },
             method: form.method,
-            body: JSON.stringify({input_data: data}),
+            body: JSON.stringify({
+              input_data: data,
+              csrf_token: csrfToken
+            }),
         })
             .then(response => response.json())
             .then((data) => {

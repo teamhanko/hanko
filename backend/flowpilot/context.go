@@ -197,7 +197,7 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse input data: %w", err)
 	}
-	csrfTokenToValidate := inputJSON.Get("csrf_token").String()
+	csrfTokenToValidate := flow.inputData.CSRFToken
 
 	if len(flowModel.CSRFToken) <= 0 || flowModel.CSRFToken != csrfTokenToValidate {
 		err = errors.New("csrf token mismatch")
