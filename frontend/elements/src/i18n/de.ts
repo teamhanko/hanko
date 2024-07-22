@@ -158,6 +158,8 @@ export const de: Translation = {
       "Der Prozess kann aufgrund der Nutzereinstellungen oder der Konfiguration des Anbieters nicht fortgesetzt werden.",
     form_data_invalid_error:
       "Die übermittelten Formulardaten enthalten Fehler.",
+    unauthorized:
+      "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
     value_missing_error: "Der Wert fehlt.",
     value_too_long_error: "Der Wert ist zu lang.",
     value_too_short_error: "Der Wert ist zu kurz.",

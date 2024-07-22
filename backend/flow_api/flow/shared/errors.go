@@ -11,6 +11,7 @@ var (
 	ErrorPasscodeMaxAttemptsReached = flowpilot.NewFlowError("passcode_max_attempts_reached", "The passcode was entered wrong too many times.", http.StatusUnauthorized)
 	ErrorRateLimitExceeded          = flowpilot.NewFlowError("rate_limit_exceeded", "The rate limit has been exceeded.", http.StatusTooManyRequests)
 	ErrorNotFound                   = flowpilot.NewFlowError("not_found", "The requested resource was not found.", http.StatusNotFound)
+	ErrorUnauthorized               = flowpilot.NewFlowError("unauthorized", "The session is invalid.", http.StatusUnauthorized)
 )
 
 var (

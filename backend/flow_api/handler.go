@@ -3,6 +3,7 @@ package flow_api
 import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
+	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
 	zeroLogger "github.com/rs/zerolog/log"
@@ -46,7 +47,51 @@ func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.ProfileFlow.Debug(h.Cfg.Debug).MustBuild())
+	profileFlow := flow.ProfileFlow.Debug(h.Cfg.Debug).MustBuild()
+
+	if err := h.validateSession(c); err != nil {
+		flowResult := profileFlow.ResultFromError(err)
+		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+	}
+
+	return h.executeFlow(c, profileFlow)
+}
+
+func (h *FlowPilotHandler) validateSession(c echo.Context) error {
+	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.Cfg.Session.Cookie.GetName())
+	extractors, err := echojwt.CreateExtractors(lookup)
+
+	if err != nil {
+		return flowpilot.ErrorTechnical.Wrap(err)
+	}
+
+	var lastExtractorErr, lastTokenErr error
+	for _, extractor := range extractors {
+		auths, extractorErr := extractor(c)
+		if extractorErr != nil {
+			lastExtractorErr = extractorErr
+			continue
+		}
+		for _, auth := range auths {
+			token, tokenErr := h.SessionManager.Verify(auth)
+			if tokenErr != nil {
+				lastTokenErr = tokenErr
+				continue
+			}
+
+			c.Set("session", token)
+
+			return nil
+		}
+	}
+
+	if lastTokenErr != nil {
+		return shared.ErrorUnauthorized.Wrap(lastTokenErr)
+	} else if lastExtractorErr != nil {
+		return shared.ErrorUnauthorized.Wrap(lastExtractorErr)
+	}
+
+	return nil
 }
 
 func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
