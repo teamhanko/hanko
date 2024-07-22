@@ -151,6 +151,7 @@ export const it: Translation = {
     flow_discontinuity_error:
       "Il processo non può essere continuato a causa delle impostazioni dell'utente o della configurazione del fornitore.",
     form_data_invalid_error: "I dati del modulo inviato contengono errori.",
+    unauthorized: "La sessione è scaduta. Riprova ad accedere.",
     value_missing_error: "Il valore è mancante.",
     value_too_long_error: "Il valore è troppo lungo.",
     value_too_short_error: "Il valore è troppo corto.",

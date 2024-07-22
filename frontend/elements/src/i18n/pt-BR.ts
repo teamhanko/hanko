@@ -154,6 +154,7 @@ export const ptBR: Translation = {
     flow_discontinuity_error:
       "O processo não pode ser continuado devido às configurações do usuário ou do provedor.",
     form_data_invalid_error: "Os dados do formulário submetido contêm erros.",
+    unauthorized: "A sua sessão expirou. Inicie uma nova sessão.",
     value_missing_error: "O valor está ausente.",
     value_too_long_error: "O valor é muito longo.",
     value_too_short_error: "O valor é muito curto.",

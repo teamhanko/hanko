@@ -77,7 +77,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
 	e.POST("/login", flowAPIHandler.LoginFlowHandler)
-	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, sessionMiddleware)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler)
 
 	e.Renderer = template.NewTemplateRenderer()
 

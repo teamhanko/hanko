@@ -149,6 +149,7 @@ export const en: Translation = {
     flow_discontinuity_error:
       "The process cannot be continued due to user settings or the provider's configuration.",
     form_data_invalid_error: "The submitted form data contains errors.",
+    unauthorized: "Your session has expired. Please log in again.",
     value_missing_error: "The value is missing.",
     value_too_long_error: "Value is too long.",
     value_too_short_error: "The value is too short.",
