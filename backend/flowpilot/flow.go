@@ -12,6 +12,7 @@ type FlowName string
 // InputData holds input data in JSON format.
 type InputData struct {
 	InputDataMap map[string]interface{} `json:"input_data"`
+	CSRFToken    string                 `json:"csrf_token"`
 }
 
 // WithQueryParamKey sets the ActionName for flowExecutionOptions.

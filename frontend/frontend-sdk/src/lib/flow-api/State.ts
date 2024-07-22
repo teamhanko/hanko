@@ -243,13 +243,12 @@ class State<TStateName extends StateName>
       }
     }
 
-    data["csrf_token"] = csrfToken;
-
     // (Possibly add more input types here?)
 
     // Use the fetch function to perform the action
     return this.fetchNextState(action.href, {
       input_data: data,
+      csrf_token: csrfToken,
     });
   }
 
