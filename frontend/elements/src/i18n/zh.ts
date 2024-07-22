@@ -138,6 +138,7 @@ export const zh: Translation = {
     operation_not_permitted_error: "不允许此操作。",
     flow_discontinuity_error: "由于用户设置或提供商配置，流程无法继续。",
     form_data_invalid_error: "提交的表单数据包含错误。",
+    unauthorized: "您的会话已过期。请再次登录。",
     value_missing_error: "值丢失。",
     value_too_long_error: "值太长。",
     value_too_short_error: "值太短。",

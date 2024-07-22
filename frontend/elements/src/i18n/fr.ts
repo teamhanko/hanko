@@ -158,6 +158,7 @@ export const fr: Translation = {
       "Le processus ne peut pas continuer en raison des paramètres utilisateur ou de la configuration du fournisseur.",
     form_data_invalid_error:
       "Les données du formulaire soumises contiennent des erreurs.",
+    unauthorized: "Votre session a expiré. Veuillez vous connecter à nouveau.",
     value_missing_error: "La valeur est manquante.",
     value_too_long_error: "La valeur est trop longue.",
     value_too_short_error: "La valeur est trop courte.",

@@ -134,6 +134,7 @@ export interface Translation {
     flow_discontinuity_error: string;
     operation_not_permitted_error: string;
     form_data_invalid_error: string;
+    unauthorized: string;
     value_missing_error: string;
     value_too_long_error: string;
     value_too_short_error: string;

@@ -151,6 +151,8 @@ export const bn: Translation = {
     flow_discontinuity_error:
       "ব্যবহারকারীর সেটিংস বা প্রদানকারীর কনফিগারেশনের কারণে প্রক্রিয়াটি চালিয়ে যাওয়া সম্ভব নয়।",
     form_data_invalid_error: "জমা দেওয়া ফর্ম ডেটাতে ত্রুটি রয়েছে।",
+    unauthorized:
+      "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ পূর্বক আরো একবার প্রবেশ করুন.",
     value_missing_error: "মান অনুপস্থিত।",
     value_too_long_error: "মানটি খুব দীর্ঘ।",
     value_too_short_error: "মানটি খুব ছোট।",
