@@ -16,7 +16,7 @@ import {
   UsernameSetInputs,
   VerifyPasscodeInputs,
   WebauthnVerifyAssertionResponseInputs,
-  WebauthnVerifyAttestationResponseInputs
+  WebauthnVerifyAttestationResponseInputs,
 } from "./input";
 
 interface Action<TInputs> {
