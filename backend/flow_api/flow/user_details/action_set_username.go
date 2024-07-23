@@ -5,6 +5,7 @@ import (
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
@@ -27,7 +28,8 @@ func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 		Required(!deps.Cfg.Username.Optional).
 		MinLength(deps.Cfg.Username.MinLength).
 		MaxLength(deps.Cfg.Username.MaxLength).
-		TrimSpace(true))
+		TrimSpace(true).
+		LowerCase(true))
 }
 
 func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
@@ -48,8 +50,13 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	username := c.Input().Get("username").String()
-	user.Username = nulls.NewString(username)
 
+	if !services.ValidateUsername(username) {
+		c.Input().SetError("username", shared.ErrorInvalidUsername)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
+	}
+
+	user.Username = nulls.NewString(username)
 	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(user.Username.String)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)

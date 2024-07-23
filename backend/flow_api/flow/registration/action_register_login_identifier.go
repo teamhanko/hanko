@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"strings"
-	"unicode/utf8"
 )
 
 // RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
@@ -52,7 +52,8 @@ func (a RegisterLoginIdentifier) Initialize(c flowpilot.InitializationContext) {
 			MinLength(deps.Cfg.Username.MinLength).
 			MaxLength(deps.Cfg.Username.MaxLength).
 			Required(!deps.Cfg.Username.Optional).
-			TrimSpace(true)
+			TrimSpace(true).
+			LowerCase(true)
 
 		c.AddInputs(input)
 	}
@@ -76,13 +77,12 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	// check that username only contains allowed characters
-	if !utf8.ValidString(username) {
-		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
-		return c.Error(flowpilot.ErrorFormDataInvalid)
-	}
-
 	if username != "" {
+		if !services.ValidateUsername(username) {
+			c.Input().SetError("username", shared.ErrorInvalidUsername)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
+		}
+
 		// Check that username is not already taken
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
 		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
@@ -160,9 +160,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	states := a.generateRegistrationStates(c)
-
-	return c.Continue(append(states, shared.StateSuccess)...)
+	return c.Continue(append(a.generateRegistrationStates(c), shared.StateSuccess)...)
 }
 
 func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {

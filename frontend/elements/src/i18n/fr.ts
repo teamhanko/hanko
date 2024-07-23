@@ -151,6 +151,8 @@ export const fr: Translation = {
       "Trop de demandes ont été effectuées. Veuillez patienter pour répéter l'opération demandée.",
     unknown_username_error: "Le nom d'utilisateur est inconnu.",
     username_already_exists: "Le nom d'utilisateur est déjà pris.",
+    invalid_username_error:
+      "Le nom d'utilisateur ne doit contenir que des lettres, des chiffres et des traits de soulignement.",
     email_already_exists: "L'adresse e-mail est déjà utilisée.",
     not_found: "La ressource demandée n'a pas été trouvée.",
     operation_not_permitted_error: "L'opération n'est pas autorisée.",

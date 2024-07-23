@@ -44,7 +44,10 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 	}
 
 	if input != nil {
-		c.AddInputs(input.Required(true).TrimSpace(true))
+		c.AddInputs(input.
+			Required(true).
+			TrimSpace(true).
+			LowerCase(true))
 	}
 
 	if !deps.Cfg.Password.Enabled &&
@@ -82,19 +85,17 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		var err error
 
-		emailAddress := strings.ToLower(identifierInputValue)
-
-		userModel, err = deps.Persister.GetUserPersister().GetByEmailAddress(emailAddress)
+		userModel, err = deps.Persister.GetUserPersister().GetByEmailAddress(identifierInputValue)
 		if err != nil {
 			return err
 		}
 
-		if err = c.Stash().Set(shared.StashPathEmail, emailAddress); err != nil {
+		if err = c.Stash().Set(shared.StashPathEmail, identifierInputValue); err != nil {
 			return fmt.Errorf("failed to set email to stash: %w", err)
 		}
 
 		if userModel != nil {
-			emailModel := userModel.GetEmailByAddress(emailAddress)
+			emailModel := userModel.GetEmailByAddress(identifierInputValue)
 
 			if emailModel != nil && emailModel.UserID != nil {
 				err = c.Stash().Set(shared.StashPathUserID, emailModel.UserID.String())
@@ -105,7 +106,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 
 		if deps.Cfg.Saml.Enabled {
-			domain := strings.Split(emailAddress, "@")[1]
+			domain := strings.Split(identifierInputValue, "@")[1]
 			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
 				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
@@ -120,11 +121,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		}
 	} else {
 		// User has submitted a username.
-
 		var err error
+
 		userModel, err = deps.Persister.GetUserPersister().GetByUsername(identifierInputValue)
 		if err != nil {
-			return err
+			return fmt.Errorf("failed to get user by username from db: %w", err)
 		}
 
 		if userModel == nil {

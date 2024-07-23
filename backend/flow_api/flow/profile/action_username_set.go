@@ -1,14 +1,13 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gobuffalo/nulls"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"unicode/utf8"
 )
 
 type UsernameSet struct {
@@ -28,9 +27,14 @@ func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 
 	if !deps.Cfg.Username.Enabled {
 		c.SuspendAction()
-	} else {
-		c.AddInputs(flowpilot.StringInput("username").Preserve(true).Required(true).TrimSpace(true))
+		return
 	}
+
+	c.AddInputs(flowpilot.StringInput("username").
+		Preserve(true).
+		Required(true).
+		TrimSpace(true).
+		LowerCase(true))
 }
 
 func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
@@ -47,9 +51,8 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 
 	username := c.Input().Get("username").String()
 
-	// check that username only contains allowed characters
-	if !utf8.ValidString(username) {
-		c.Input().SetError("username", flowpilot.ErrorValueInvalid.Wrap(errors.New("username contains invalid characters")))
+	if !services.ValidateUsername(username) {
+		c.Input().SetError("username", shared.ErrorInvalidUsername)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 

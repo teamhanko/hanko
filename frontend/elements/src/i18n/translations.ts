@@ -129,6 +129,7 @@ export interface Translation {
     rate_limit_exceeded: string;
     unknown_username_error: string;
     username_already_exists: string;
+    invalid_username_error: string;
     email_already_exists: string;
     not_found: string;
     flow_discontinuity_error: string;

@@ -3,6 +3,7 @@ package services
 import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"regexp"
 )
 
 func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {
@@ -23,4 +24,9 @@ func UserCanDoSaml(cfg config.Config, identities models.Identities) bool {
 	}
 
 	return false
+}
+
+func ValidateUsername(name string) bool {
+	re := regexp.MustCompile(`^\w+$`)
+	return re.MatchString(name)
 }

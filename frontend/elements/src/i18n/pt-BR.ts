@@ -148,6 +148,8 @@ export const ptBR: Translation = {
       "Foram feitas muitas solicitações. Por favor, aguarde para repetir a operação solicitada.",
     unknown_username_error: "O nome de usuário é desconhecido.",
     username_already_exists: "O nome de usuário já está em uso.",
+    invalid_username_error:
+      "O nome de usuário deve conter apenas letras, números e sublinhados.",
     email_already_exists: "O e-mail já está em uso.",
     not_found: "O recurso solicitado não foi encontrado.",
     operation_not_permitted_error: "A operação não é permitida.",

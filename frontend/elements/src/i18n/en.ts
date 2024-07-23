@@ -143,6 +143,8 @@ export const en: Translation = {
       "Too many requests have been made. Please wait to repeat the requested operation.",
     unknown_username_error: "The username is unknown.",
     username_already_exists: "The username is already taken.",
+    invalid_username_error:
+      "The username must contain only letters, numbers, and underscores.",
     email_already_exists: "The email is already taken.",
     not_found: "The requested resource was not found.",
     operation_not_permitted_error: "The operation is not permitted.",
