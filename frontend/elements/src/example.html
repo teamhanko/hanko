@@ -181,12 +181,12 @@ after the user completes the authentication flow), while other events are option
     // Uncomment the following two lines if you want to import the local build, which can be created by changing to
     // the "/frontend" directory and running "npm run build:elements".
     //
-    import {register} from "../dist/elements.js";
-    import {all} from "../dist/i18n/all.js";
+    // import {register} from "../dist/elements.js";
+    // import {all} from "../dist/i18n/all.js";
 
     // Comment the following two lines if you don't want to import Hanko Elements from the CDN, see comment above.
-    //import {register} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
-    //import {all} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/all.js";
+    import {register} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
+    import {all} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/all.js";
 
     // Change `apiUrl` to the URL where your Hanko-API instance is running.
     const apiUrl = "http://localhost:8000";
