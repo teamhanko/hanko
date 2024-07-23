@@ -69,16 +69,16 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 }
 
 func (h *PasscodeHandler) Init(c echo.Context) error {
-	var body dto.PasscodeInitRequest
-	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+	var request dto.PasscodeInitRequest
+	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
 		return dto.ToHttpError(err)
 	}
 
-	if err := c.Validate(body); err != nil {
+	if err := c.Validate(request); err != nil {
 		return dto.ToHttpError(err)
 	}
 
-	userId, err := uuid.FromString(body.UserId)
+	userId, err := uuid.FromString(request.UserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
@@ -103,8 +103,8 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	var emailId uuid.UUID
-	if body.EmailId != nil {
-		emailId, err = uuid.FromString(*body.EmailId)
+	if request.EmailId != nil {
+		emailId, err = uuid.FromString(*request.EmailId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
 		}
@@ -146,7 +146,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	sessionToken := h.GetSessionToken(c)
 	if sessionToken != nil && sessionToken.Subject() != user.ID.String() {
-		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
+		// if the user is logged in and the requested user in the request does not match the user from the session then sending and finalizing passcodes is not allowed
 		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
 	}
 
@@ -191,14 +191,17 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	lang := c.Request().Header.Get("Accept-Language")
-	str, err := h.renderer.Render("login_text.tmpl", lang, data)
+
+	subject := h.renderer.Translate(lang, "email_subject_login", data)
+
+	body, err := h.renderer.Render("login_text.tmpl", lang, data)
 	if err != nil {
 		return fmt.Errorf("failed to render email template: %w", err)
 	}
 
 	webhookData := webhook.EmailSend{
 		Subject:          subject,
-		BodyPlain:        bodyPlain,
+		BodyPlain:        body,
 		ToEmailAddress:   email.Address,
 		DeliveredByHanko: true,
 		AcceptLanguage:   lang,
@@ -218,7 +221,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 		message.SetHeader("Subject", subject)
 
-		message.SetBody("text/plain", bodyPlain)
+		message.SetBody("text/plain", body)
 
 		err = h.mailer.Send(message)
 		if err != nil {
@@ -394,11 +397,11 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		}
 
 		var emailJwt *dto.EmailJwt
-		if e := user.Emails.GetPrimary(); e != nil {
+		if e := userModel.Emails.GetPrimary(); e != nil {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		token, err := h.sessionManager.GenerateJWT(passcode.UserId, emailJwt)
+		token, err := h.sessionManager.GenerateJWT(*passcode.UserId, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

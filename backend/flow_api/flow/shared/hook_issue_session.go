@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -27,7 +28,18 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("user_id not found in stash")
 	}
 
-	sessionToken, err := deps.SessionManager.GenerateJWT(userId)
+	emails, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(userId)
+	if err != nil {
+		return fmt.Errorf("failed to fetch emails from db: %w", err)
+	}
+
+	var emailDTO *dto.EmailJwt
+
+	if email := emails.GetPrimary(); email != nil {
+		emailDTO = dto.JwtFromEmailModel(email)
+	}
+
+	sessionToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
