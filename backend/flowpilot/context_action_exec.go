@@ -77,7 +77,7 @@ func (aec *defaultActionExecutionContext) executeBeforeStateHooks(nextStateName 
 	if actions := aec.flow.beforeStateHooks[nextStateName]; actions != nil {
 		for _, hook := range actions.reverse() {
 			if err := hook.Execute(aec); err != nil {
-				return fmt.Errorf("failed to execute hook action before state '%s': %w", nextStateName, err)
+				return fmt.Errorf("failed to execute before state hook (state: %s): %w", nextStateName, err)
 			}
 		}
 	}
@@ -88,7 +88,7 @@ func (aec *defaultActionExecutionContext) executeBeforeEachActionHooks() error {
 	for _, hook := range aec.flow.beforeEachActionHooks {
 		err := hook.Execute(aec)
 		if err != nil {
-			return fmt.Errorf("failed to execute hook before action '%s'", aec.actionName)
+			return fmt.Errorf("failed to execute before each action (action: %s): %w", aec.actionName, err)
 		}
 	}
 	return nil
@@ -108,7 +108,7 @@ func (aec *defaultActionExecutionContext) executeAfterHooks() error {
 	if len(nextFlowName) == 0 || currentFlowName != nextFlowName {
 		for _, hook := range aec.flow.afterFlowHooks[currentFlowName].reverse() {
 			if err := hook.Execute(aec); err != nil {
-				return fmt.Errorf("failed to execute hook after flow '%s': %w", currentFlowName, err)
+				return fmt.Errorf("failed to execute hook after flow hook (flow: %s): %w", currentFlowName, err)
 			}
 		}
 	}
@@ -116,7 +116,7 @@ func (aec *defaultActionExecutionContext) executeAfterHooks() error {
 	if actions := aec.flow.afterStateHooks[currentStateName]; actions != nil {
 		for _, hook := range actions.reverse() {
 			if err := hook.Execute(aec); err != nil {
-				return fmt.Errorf("failed to execute hook action after flow '%s': %w", currentStateName, err)
+				return fmt.Errorf("failed to execute after state hook (state: %s): %w", currentStateName, err)
 			}
 		}
 	}
@@ -124,7 +124,7 @@ func (aec *defaultActionExecutionContext) executeAfterHooks() error {
 	for _, hook := range aec.flow.afterEachActionHooks {
 		err := hook.Execute(aec)
 		if err != nil {
-			return fmt.Errorf("failed to execute hook before action '%s'", aec.actionName)
+			return fmt.Errorf("failed to execute after each action hook (action: %s): %w", aec.actionName, err)
 		}
 	}
 
