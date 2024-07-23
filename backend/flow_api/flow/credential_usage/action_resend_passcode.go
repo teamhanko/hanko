@@ -51,7 +51,6 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	sendParams := services.SendPasscodeParams{
-		FlowID:       c.GetFlowID(),
 		Template:     c.Stash().Get(shared.StashPathPasscodeTemplate).String(),
 		EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 		Language:     deps.HttpContext.Request().Header.Get("Accept-Language"),

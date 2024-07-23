@@ -61,7 +61,6 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 
 	if !passcodeIsValid || isDifferentEmailAddress {
 		sendParams := services.SendPasscodeParams{
-			FlowID:       c.GetFlowID(),
 			Template:     c.Stash().Get(shared.StashPathPasscodeTemplate).String(),
 			EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 			Language:     deps.HttpContext.Request().Header.Get("Accept-Language"),

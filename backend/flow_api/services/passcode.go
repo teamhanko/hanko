@@ -23,7 +23,6 @@ var (
 )
 
 type SendPasscodeParams struct {
-	FlowID       uuid.UUID
 	Template     string
 	EmailAddress string
 	Language     string
@@ -122,7 +121,6 @@ func (s *passcode) SendPasscode(p SendPasscodeParams) (uuid.UUID, error) {
 	now := time.Now().UTC()
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
-		FlowID:    &p.FlowID,
 		Ttl:       s.cfg.Email.PasscodeTtl,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
