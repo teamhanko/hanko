@@ -30,6 +30,8 @@ import {
 } from "./payload";
 
 export type StateName =
+  | "account_deleted"
+  | "credential_onboarding_chooser"
   | "error"
   | "login_init"
   | "login_method_chooser"
@@ -37,6 +39,8 @@ export type StateName =
   | "login_password"
   | "login_password_recovery"
   | "onboarding_create_passkey"
+  | "onboarding_email"
+  | "onboarding_username"
   | "onboarding_verify_passkey_attestation"
   | "passcode_confirmation"
   | "password_creation"
@@ -44,56 +48,53 @@ export type StateName =
   | "profile_init"
   | "registration_init"
   | "success"
-  | "webauthn_credential_verification"
-  | "onboarding_email"
-  | "onboarding_username"
-  | "credential_onboarding_chooser"
-  | "thirdparty";
+  | "thirdparty"
+  | "webauthn_credential_verification";
 
 export interface Actions {
-  readonly preflight: PreflightActions;
+  readonly account_deleted: null;
+  readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
+  readonly error: null;
   readonly login_init: LoginInitActions;
-  readonly profile_init: ProfileInitActions;
-  readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationActions;
   readonly login_method_chooser: LoginMethodChooserActions;
+  readonly login_passkey: LoginPasskeyActions;
   readonly login_password: LoginPasswordActions;
   readonly login_password_recovery: LoginPasswordRecoveryActions;
-  readonly passcode_confirmation: PasscodeConfirmationActions;
-  readonly login_passkey: LoginPasskeyActions;
   readonly onboarding_create_passkey: OnboardingCreatePasskeyActions;
-  readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationActions;
-  readonly registration_init: RegistrationInitActions;
-  readonly password_creation: PasswordCreationActions;
-  readonly thirdparty_oauth: ThirdPartyActions;
-  readonly success: null;
-  readonly error: null;
   readonly onboarding_email: OnboardingEmailActions;
   readonly onboarding_username: OnboardingUsernameActions;
-  readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
+  readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationActions;
+  readonly passcode_confirmation: PasscodeConfirmationActions;
+  readonly password_creation: PasswordCreationActions;
+  readonly preflight: PreflightActions;
+  readonly profile_init: ProfileInitActions;
+  readonly registration_init: RegistrationInitActions;
+  readonly success: null;
   readonly thirdparty: ThirdPartyActions;
+  readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationActions;
 }
 
 export interface Payloads {
-  readonly preflight: null;
+  readonly account_deleted: null;
+  readonly credential_onboarding_chooser: null;
+  readonly error: null;
   readonly login_init: LoginInitPayload;
-  readonly profile_init: ProfilePayload;
-  readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationPayload;
   readonly login_method_chooser: null;
+  readonly login_passkey: LoginPasskeyPayload;
   readonly login_password: null;
   readonly login_password_recovery: null;
-  readonly passcode_confirmation: PasscodeConfirmationPayload;
-  readonly login_passkey: LoginPasskeyPayload;
   readonly onboarding_create_passkey: null;
-  readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationPayload;
-  readonly registration_init: null;
-  readonly password_creation: null;
-  readonly thirdparty_oauth: ThirdPartyPayload;
-  readonly success: SuccessPayload;
-  readonly error: null;
   readonly onboarding_email: null;
   readonly onboarding_username: null;
-  readonly credential_onboarding_chooser: null;
+  readonly onboarding_verify_passkey_attestation: OnboardingVerifyPasskeyAttestationPayload;
+  readonly passcode_confirmation: PasscodeConfirmationPayload;
+  readonly password_creation: null;
+  readonly preflight: null;
+  readonly profile_init: ProfilePayload;
+  readonly registration_init: null;
+  readonly success: SuccessPayload;
   readonly thirdparty: ThirdPartyPayload;
+  readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationPayload;
 }
 
 export type FlowPath = "/login" | "/registration" | "/profile";
