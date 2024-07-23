@@ -134,7 +134,7 @@
       document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
     }
 
-    const thirdpartyOAuthHandler = (payload) => {
+    const thirdPartyHandler = (payload) => {
       window.location.href = payload.redirect_url;
     }
 
@@ -145,7 +145,7 @@
         "onboarding_verify_passkey_attestation": passkeyRegisterHandler,
         "webauthn_credential_verification": passkeyRegisterHandler,
         "register_passkey": passkeyRegisterHandler,
-        "thirdparty_oauth": thirdpartyOAuthHandler
+        "thirdparty": thirdPartyHandler
     }
 
     function generateUI(data) {
