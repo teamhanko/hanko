@@ -2,7 +2,6 @@ package profile
 
 import (
 	"fmt"
-	"github.com/gobuffalo/nulls"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
@@ -10,22 +9,28 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
-type UsernameSet struct {
+type UsernameUpdate struct {
 	shared.Action
 }
 
-func (a UsernameSet) GetName() flowpilot.ActionName {
-	return shared.ActionUsernameSet
+func (a UsernameUpdate) GetName() flowpilot.ActionName {
+	return shared.ActionUsernameUpdate
 }
 
-func (a UsernameSet) GetDescription() string {
-	return "Set the username of a user."
+func (a UsernameUpdate) GetDescription() string {
+	return "Update an existing username."
 }
 
-func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
+func (a UsernameUpdate) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Username.Enabled {
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		c.SuspendAction()
+		return
+	}
+
+	if !deps.Cfg.Username.Enabled || userModel.Username == nil {
 		c.SuspendAction()
 		return
 	}
@@ -37,7 +42,7 @@ func (a UsernameSet) Initialize(c flowpilot.InitializationContext) {
 		LowerCase(true))
 }
 
-func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
+func (a UsernameUpdate) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -56,22 +61,27 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
+	duplicateUsername, err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).GetByName(username)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	if duplicateUser != nil && duplicateUser.ID.String() != userModel.ID.String() {
+	if duplicateUsername != nil && duplicateUsername.ID.String() != userModel.ID.String() {
 		c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	userModel.Username = nulls.NewString(username)
-
-	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
-	if err != nil {
-		return fmt.Errorf("could not update user: %w", err)
+	usernameModel := &models.Username{
+		ID:       userModel.Username.ID,
+		UserId:   userModel.ID,
+		Username: username,
 	}
+
+	err = deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Update(usernameModel)
+	if err != nil {
+		return fmt.Errorf("failed to update username: %w", err)
+	}
+	userModel.SetUsername(usernameModel)
 
 	err = deps.AuditLogger.CreateWithConnection(
 		deps.Tx,
@@ -79,7 +89,7 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameChanged,
 		&models.User{ID: userModel.ID},
 		nil,
-		auditlog.Detail("username", userModel.Username.String),
+		auditlog.Detail("username", userModel.GetUsername()),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {

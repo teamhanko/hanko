@@ -89,7 +89,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	if userModel != nil {
 		_ = c.Stash().Set(shared.StashPathUserHasPassword, userModel.PasswordCredential != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasWebauthnCredential, len(userModel.WebauthnCredentials) > 0)
-		_ = c.Stash().Set(shared.StashPathUserHasUsername, len(userModel.Username.String) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasUsername, len(userModel.GetUsername()) > 0)
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
 	}
 

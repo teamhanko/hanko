@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"strings"
 	"time"
 )
 
@@ -76,11 +74,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	var auditLogDetails []auditlog.DetailOption
 
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
-		ID: id,
-		Username: nulls.String{
-			String: username,
-			Valid:  len(strings.TrimSpace(username)) > 0,
-		},
+		ID:        id,
 		CreatedAt: now,
 		UpdatedAt: now,
 	})
@@ -129,8 +123,13 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		return err
 	}
 
-	if user.Username.String != "" {
-		auditLogDetails = append(auditLogDetails, auditlog.Detail("username", user.Username.String))
+	if username != "" {
+		usernameModel := models.NewUsername(user.ID, username)
+		err = deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Create(*usernameModel)
+		if err != nil {
+			return err
+		}
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("username", username))
 	}
 
 	auditLogDetails = append(auditLogDetails, auditlog.Detail("flow_id", c.GetFlowID()))

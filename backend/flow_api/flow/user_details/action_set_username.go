@@ -2,11 +2,11 @@ package user_details
 
 import (
 	"fmt"
-	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type UsernameSet struct {
@@ -14,7 +14,7 @@ type UsernameSet struct {
 }
 
 func (a UsernameSet) GetName() flowpilot.ActionName {
-	return shared.ActionUsernameSet
+	return shared.ActionUsernameCreate
 }
 
 func (a UsernameSet) GetDescription() string {
@@ -40,15 +40,6 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
-	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userID)
-	if err != nil {
-		return fmt.Errorf("failed to get user from db: %w", err)
-	}
-
-	if user == nil {
-		return fmt.Errorf("user does not exists (id: %s)", userID.String())
-	}
-
 	username := c.Input().Get("username").String()
 
 	if !services.ValidateUsername(username) {
@@ -56,20 +47,20 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	user.Username = nulls.NewString(username)
-	duplicateUser, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(user.Username.String)
+	duplicateUsername, err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).GetByName(username)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	if duplicateUser != nil && duplicateUser.ID.String() != user.ID.String() {
+	if duplicateUsername != nil && duplicateUsername.ID.String() != userID.String() {
 		c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*user)
+	usernameModel := models.NewUsername(userID, username)
+	err = deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Create(*usernameModel)
 	if err != nil {
-		return fmt.Errorf("failed to update user: %w", err)
+		return fmt.Errorf("failed to create username: %w", err)
 	}
 
 	c.PreventRevert()

@@ -40,7 +40,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	primaryEmailModel := userModel.Emails.GetPrimary()
-	if primaryEmailModel == nil && userModel.Username.String == "" {
+	if primaryEmailModel == nil && userModel.Username == nil {
 		return errors.New("user must have either email or username")
 	}
 
@@ -53,7 +53,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		Tx:       deps.Tx,
 		UserID:   userModel.ID,
 		Email:    primaryEmailAddress,
-		Username: userModel.Username.String,
+		Username: userModel.GetUsername(),
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptions(params)

@@ -33,6 +33,14 @@ export interface Passkey {
   readonly backup_state: string;
 }
 
+export interface Username {
+  id: string;
+  user_id: string;
+  username: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Identity {
   readonly id: string;
   readonly provider: string;
@@ -50,7 +58,7 @@ export interface User {
   readonly user_id: string;
   readonly passkeys?: Passkey[];
   readonly emails?: Email[];
-  readonly username?: string;
+  readonly username?: Username;
   readonly created_at: string;
   readonly updated_at: string;
 }

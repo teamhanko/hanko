@@ -34,7 +34,9 @@ const CreateUsernamePage = (props: Props) => {
   const onUsernameSubmit = async (event: Event) => {
     event.preventDefault();
     setLoadingAction("username-set");
-    const nextState = await flowState.actions.username_set({ username }).run();
+    const nextState = await flowState.actions
+      .username_create({ username })
+      .run();
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
   };
@@ -57,7 +59,9 @@ const CreateUsernamePage = (props: Props) => {
             type={"text"}
             autoComplete={"username"}
             autoCorrect={"off"}
-            flowInput={flowState.actions.username_set?.(null).inputs.username}
+            flowInput={
+              flowState.actions.username_create?.(null).inputs.username
+            }
             onInput={onUsernameInput}
             value={username}
             placeholder={t("labels.username")}

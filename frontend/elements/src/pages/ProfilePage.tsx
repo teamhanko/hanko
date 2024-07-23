@@ -109,11 +109,18 @@ const ProfilePage = (props: Props) => {
       flowState.actions.password_delete(null).run,
     );
 
-  const onUsernameSubmit = async (event: Event, username: string) =>
+  const onUsernameCreate = async (event: Event, username: string) =>
     onAction(
       event,
       "username-set",
-      flowState.actions.username_set({ username }).run,
+      flowState.actions.username_create({ username }).run,
+    );
+
+  const onUsernameUpdate = async (event: Event, username: string) =>
+    onAction(
+      event,
+      "username-set",
+      flowState.actions.username_update({ username }).run,
     );
 
   const onUsernameDelete = async (event: Event) =>
@@ -179,26 +186,43 @@ const ProfilePage = (props: Props) => {
             : null
         }
       />
-      {flowState.actions.username_set?.(null) ? (
+      {flowState.actions.username_create?.(null) ||
+      flowState.actions.username_update?.(null) ||
+      flowState.actions.username_delete?.(null) ? (
         <Fragment>
           <Headline1>{t("labels.username")}</Headline1>
           {flowState.payload.user.username ? (
             <Paragraph>
-              <b>{flowState.payload.user.username}</b>
+              <b>{flowState.payload.user.username.username}</b>
             </Paragraph>
           ) : null}
           <Paragraph>
-            <ChangeUsernameDropdown
-              inputs={flowState.actions.username_set(null).inputs}
-              hasUsername={!!flowState.payload.user.username}
-              allowUsernameDeletion={
-                !!flowState.actions.username_delete?.(null)
-              }
-              onUsernameSubmit={onUsernameSubmit}
-              onUsernameDelete={onUsernameDelete}
-              checkedItemID={checkedItemID}
-              setCheckedItemID={setCheckedItemID}
-            />
+            {flowState.actions.username_create?.(null) ? (
+              <ChangeUsernameDropdown
+                inputs={flowState.actions.username_create(null).inputs}
+                hasUsername={!!flowState.payload.user.username}
+                allowUsernameDeletion={
+                  !!flowState.actions.username_delete?.(null)
+                }
+                onUsernameSubmit={onUsernameCreate}
+                onUsernameDelete={onUsernameDelete}
+                checkedItemID={checkedItemID}
+                setCheckedItemID={setCheckedItemID}
+              />
+            ) : null}
+            {flowState.actions.username_update?.(null) ? (
+              <ChangeUsernameDropdown
+                inputs={flowState.actions.username_update(null).inputs}
+                hasUsername={!!flowState.payload.user.username}
+                allowUsernameDeletion={
+                  !!flowState.actions.username_delete?.(null)
+                }
+                onUsernameSubmit={onUsernameUpdate}
+                onUsernameDelete={onUsernameDelete}
+                checkedItemID={checkedItemID}
+                setCheckedItemID={setCheckedItemID}
+              />
+            ) : null}
           </Paragraph>
         </Fragment>
       ) : null}

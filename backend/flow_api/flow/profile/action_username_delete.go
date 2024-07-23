@@ -2,7 +2,6 @@ package profile
 
 import (
 	"fmt"
-	"github.com/gobuffalo/nulls"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -34,7 +33,7 @@ func (a UsernameDelete) Initialize(c flowpilot.InitializationContext) {
 
 	if !deps.Cfg.Username.Enabled ||
 		!deps.Cfg.Username.Optional ||
-		!userModel.Username.Valid ||
+		userModel.Username == nil ||
 		(len(userModel.Emails) == 0 && !canDoWebauthn) {
 		c.SuspendAction()
 	}
@@ -52,12 +51,13 @@ func (a UsernameDelete) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	username := userModel.Username.String
-	userModel.Username = nulls.String{Valid: false}
-	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Update(*userModel)
+	usernameModel := &models.Username{ID: userModel.Username.ID}
+	err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Delete(usernameModel)
 	if err != nil {
-		return fmt.Errorf("failed to get user from db: %w", err)
+		return fmt.Errorf("failed to delete username from db: %w", err)
 	}
+	deletedUsername := userModel.GetUsername()
+	userModel.DeleteUsername()
 
 	err = deps.AuditLogger.CreateWithConnection(
 		deps.Tx,
@@ -65,7 +65,7 @@ func (a UsernameDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
-		auditlog.Detail("username", username),
+		auditlog.Detail("username", deletedUsername),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {

@@ -46,8 +46,9 @@ interface ProfileInitActions {
   readonly password_create?: Action<PasswordInputs>;
   readonly password_update?: Action<PasswordInputs>;
   readonly password_delete?: Action<null>;
-  readonly username_set?: Action<UsernameSetInputs>;
+  readonly username_create?: Action<UsernameSetInputs>;
   readonly username_delete?: Action<null>;
+  readonly username_update?: Action<UsernameSetInputs>;
   readonly webauthn_credential_create?: Action<null>;
   readonly webauthn_credential_rename?: Action<PasskeyCredentialRename>;
   readonly webauthn_credential_delete?: Action<PasskeyCredentialDelete>;
@@ -110,7 +111,7 @@ interface OnboardingEmailActions {
 }
 
 interface OnboardingUsernameActions {
-  readonly username_set: Action<UsernameSetInputs>;
+  readonly username_create: Action<UsernameSetInputs>;
   readonly skip: Action<null>;
 }
 

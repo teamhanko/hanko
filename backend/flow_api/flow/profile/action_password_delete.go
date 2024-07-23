@@ -82,11 +82,11 @@ func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 	if userModel.PasswordCredential == nil {
 		return true
 	}
-	
+
 	identities := userModel.GetIdentities()
 
 	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
-	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username.String != ""
+	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username != nil
 	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
 	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication && (canUseEmailAsLoginIdentifier || canUseUsernameAsLoginIdentifier && len(userModel.Emails) > 0)
 	canDoThirdParty := services.UserCanDoThirdParty(deps.Cfg, identities) || services.UserCanDoSaml(deps.Cfg, identities)

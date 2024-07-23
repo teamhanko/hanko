@@ -41,7 +41,7 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 
 	for _, email := range userModel.Emails {
 		if email.IsPrimary() {
-			canDoPWLoginWithUsername := canDoPWLogin && deps.Cfg.Username.UseAsLoginIdentifier && len(userModel.Username.String) > 0
+			canDoPWLoginWithUsername := canDoPWLogin && deps.Cfg.Username.UseAsLoginIdentifier && len(userModel.GetUsername()) > 0
 			if lastEmail && deps.Cfg.Email.Optional && (canDoWebauthn || canDoPWLoginWithUsername) {
 				input.AllowedValue(email.Address, email.ID.String())
 			}

@@ -10,7 +10,7 @@ type ProfileData struct {
 	UserID              uuid.UUID                    `json:"user_id"`
 	WebauthnCredentials []WebauthnCredentialResponse `json:"passkeys,omitempty"`
 	Emails              []EmailResponse              `json:"emails,omitempty"`
-	Username            string                       `json:"username,omitempty"`
+	Username            *Username                    `json:"username,omitempty"`
 	CreatedAt           time.Time                    `json:"created_at"`
 	UpdatedAt           time.Time                    `json:"updated_at"`
 }
@@ -32,7 +32,7 @@ func ProfileDataFromUserModel(user *models.User) *ProfileData {
 		UserID:              user.ID,
 		WebauthnCredentials: webauthnCredentials,
 		Emails:              emails,
-		Username:            user.Username.String,
+		Username:            FromUsernameModel(user.Username),
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
 	}

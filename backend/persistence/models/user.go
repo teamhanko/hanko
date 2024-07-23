@@ -4,7 +4,6 @@ import (
 	"encoding/base64"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
-	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -18,9 +17,9 @@ type User struct {
 	ID                  uuid.UUID           `db:"id" json:"id"`
 	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
 	Emails              Emails              `has_many:"emails" json:"-"`
-	Username            nulls.String        `db:"username" json:"username,omitempty"`
 	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
+	Username            *Username           `has_one:"username" json:"username,omitempty"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 }
 
@@ -50,6 +49,21 @@ func NewUser() User {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+}
+
+func (user *User) GetUsername() string {
+	if user.Username != nil {
+		return user.Username.Username
+	}
+	return ""
+}
+
+func (user *User) SetUsername(username *Username) {
+	user.Username = username
+}
+
+func (user *User) DeleteUsername() {
+	user.Username = nil
 }
 
 func (user *User) SetPrimaryEmail(primary *PrimaryEmail) {

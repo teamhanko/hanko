@@ -39,6 +39,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"Emails.Identities",
 		"WebauthnCredentials",
 		"WebauthnCredentials.Transports",
+		"Username",
 		"PasswordCredential"}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
@@ -73,7 +74,16 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 
 func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	user := models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials", "PasswordCredential").Where("username = (?)", username).First(&user)
+	err := p.db.EagerPreload(
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"PasswordCredential",
+		"Username").
+		LeftJoin("usernames", "usernames.user_id = users.id").
+		Where("usernames.username = (?)", username).
+		First(&user)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -125,7 +135,8 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 	query := p.db.
 		Q().
 		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").
-		LeftJoin("emails", "emails.user_id = users.id")
+		LeftJoin("emails", "emails.user_id = users.id").
+		LeftJoin("usernames", "usernames.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	err := query.GroupBy("users.id").
 		Having("count(emails.id) > 0").
@@ -145,7 +156,7 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 
 func (p *userPersister) All() ([]models.User, error) {
 	users := []models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials").All(&users)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials", "Usernames").All(&users)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}
