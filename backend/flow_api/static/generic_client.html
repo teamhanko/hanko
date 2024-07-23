@@ -55,15 +55,6 @@
 <script type="module">
     import {
         parseCreationOptionsFromJSON,
-        create
-    } from 'https://cdn.jsdelivr.net/npm/@github/webauthn-json@2.1.1/browser-ponyfill/+esm'
-
-    console.log(parseCreationOptionsFromJSON)
-    console.log(create)
-</script>
-<script type="module">
-    import {
-        parseCreationOptionsFromJSON,
         parseRequestOptionsFromJSON,
         create,
         get
@@ -136,12 +127,10 @@
     }
 
     const passkeyRegisterHandler = async (payload) => {
-        console.log(payload)
         document.getElementsByName("public_key")[0].value = await webauthnCreate(payload.creation_options)
     }
 
     const passkeyLoginHandler = async (payload) => {
-      console.log(payload)
       document.getElementsByName("assertion_response")[0].value = await webauthnGet(payload.request_options)
     }
 
