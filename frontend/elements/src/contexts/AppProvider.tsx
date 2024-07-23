@@ -444,6 +444,10 @@ const AppProvider = ({
       credential_onboarding_chooser(state) {
         setPage(<CredentialOnboardingChooserPage state={state} />);
       },
+      async account_deleted(state) {
+        await hanko.user.logout();
+        hanko.relay.dispatchUserDeletedEvent();
+      },
     }),
     [
       emitSuccessEvent,

@@ -31,11 +31,9 @@ func (h RefreshSessionUser) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to fetch user: %w", err)
 	}
 
-	if userModel == nil {
-		return errors.New("user not found")
+	if userModel != nil {
+		c.Set("session_user", userModel)
 	}
-
-	c.Set("session_user", userModel)
 
 	return nil
 }
