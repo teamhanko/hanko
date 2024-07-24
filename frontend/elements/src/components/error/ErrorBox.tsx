@@ -51,7 +51,7 @@ const ErrorBox = ({ state, error, flowError }: Props) => {
       hidden={!uiState.error?.code && !flowError?.code && !error}
     >
       <span>
-        <Icon name={"exclamation"} />
+        <Icon name={"exclamation"} size={15} />
       </span>
       <span id="errorMessage" part={"error-text"}>
         {error
