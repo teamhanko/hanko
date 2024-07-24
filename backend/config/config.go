@@ -22,30 +22,30 @@ import (
 
 // Config is the central configuration type
 type Config struct {
+	Account             Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
+	AuditLog            AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
 	ConvertLegacyConfig bool             `yaml:"convert_legacy_config" json:"convert_legacy_config,omitempty" koanf:"convert_legacy_config" split_words:"true"`
-	Server              Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
-	Webauthn            WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
-	Smtp                SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"` // Deprecated, use EmailDelivery.SMTP instead
-	EmailDelivery       EmailDelivery    `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true"`
-	Passcode            Passcode         `yaml:"passcode" json:"passcode,omitempty" koanf:"passcode"` // Deprecated
-	Password            Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
 	Database            Database         `yaml:"database" json:"database,omitempty" koanf:"database"`
+	Debug               bool             `yaml:"debug" json:"debug,omitempty" koanf:"debug"`
+	Email               Email            `yaml:"email" json:"email,omitempty" koanf:"email"`
+	EmailDelivery       EmailDelivery    `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true"`
+	Emails              Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
+	Log                 LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
+	Passcode            Passcode         `yaml:"passcode" json:"passcode,omitempty" koanf:"passcode"` // Deprecated
+	Passkey             Passkey          `yaml:"passkey" json:"passkey,omitempty" koanf:"passkey"`
+	Password            Password         `yaml:"password" json:"password,omitempty" koanf:"password"`
+	RateLimiter         RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
+	Saml                config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
+	SecondFactor        SecondFactor     `yaml:"second_factor" json:"second_factor,omitempty" koanf:"second_factor" split_word:"true"`
 	Secrets             Secrets          `yaml:"secrets" json:"secrets,omitempty" koanf:"secrets"`
+	Server              Server           `yaml:"server" json:"server,omitempty" koanf:"server"`
 	Service             Service          `yaml:"service" json:"service,omitempty" koanf:"service"`
 	Session             Session          `yaml:"session" json:"session,omitempty" koanf:"session"`
-	AuditLog            AuditLog         `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true"`
-	Emails              Emails           `yaml:"emails" json:"emails,omitempty" koanf:"emails"`
-	RateLimiter         RateLimiter      `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true"`
+	Smtp                SMTP             `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp"` // Deprecated, use EmailDelivery.SMTP instead
 	ThirdParty          ThirdParty       `yaml:"third_party" json:"third_party,omitempty" koanf:"third_party" split_words:"true"`
-	Log                 LoggerConfig     `yaml:"log" json:"log,omitempty" koanf:"log"`
-	Account             Account          `yaml:"account" json:"account,omitempty" koanf:"account"`
-	SecondFactor        SecondFactor     `yaml:"second_factor" json:"second_factor,omitempty" koanf:"second_factor" split_word:"true"`
-	Passkey             Passkey          `yaml:"passkey" json:"passkey,omitempty" koanf:"passkey"`
-	Saml                config.Saml      `yaml:"saml" json:"saml,omitempty" koanf:"saml"`
-	Webhooks            WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
-	Email               Email            `yaml:"email" json:"email,omitempty" koanf:"email"`
 	Username            Username         `yaml:"username" json:"username,omitempty" koanf:"username"`
-	Debug               bool             `yaml:"debug" json:"debug,omitempty" koanf:"debug"`
+	Webauthn            WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn"`
+	Webhooks            WebhookSettings  `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks"`
 }
 
 var (
