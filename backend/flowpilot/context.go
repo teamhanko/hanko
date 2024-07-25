@@ -121,6 +121,8 @@ func createAndInitializeFlow(db FlowDB, flow defaultFlow) (FlowResult, error) {
 		return nil, fmt.Errorf("failed to initialize a new stash: %w", err)
 	}
 
+	s.useCompression(flow.useCompression)
+
 	p := newPayload()
 
 	csrfToken, err := generateRandomString(32)
@@ -188,6 +190,8 @@ func executeFlowAction(db FlowDB, flow defaultFlow) (FlowResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse stash from flow: %w", err)
 	}
+
+	s.useCompression(flow.useCompression)
 
 	// Initialize JSONManagers for payload and flash data.
 	p := newPayload()

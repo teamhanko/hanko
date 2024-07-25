@@ -124,7 +124,8 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		flowResult, err = flow.Execute(models.NewFlowDB(tx),
 			flowpilot.WithQueryParamKey(queryParamKey),
 			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
-			flowpilot.WithInputData(inputData))
+			flowpilot.WithInputData(inputData),
+			flowpilot.UseCompression(!h.Cfg.Debug))
 
 		return err
 	}
