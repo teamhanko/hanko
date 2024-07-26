@@ -17,7 +17,7 @@ type userPersister struct {
 func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	var found *models.User
 	for _, data := range p.users {
-		if data.Username == username {
+		if data.GetUsername() == username {
 			d := data
 			found = &d
 		}
