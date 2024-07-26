@@ -16,12 +16,12 @@ var DefaultConfig = config.Config{
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
 	},
-	Smtp: config.SMTP{
-		Host: "localhost",
-		Port: "2500",
-	},
 	EmailDelivery: config.EmailDelivery{
 		Enabled: true,
+		SMTP: config.SMTP{
+			Host: "localhost",
+			Port: "2500",
+		},
 	},
 	Passcode: config.Passcode{
 		Email: config.PasscodeEmail{
