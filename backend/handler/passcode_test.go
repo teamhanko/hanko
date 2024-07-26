@@ -146,10 +146,11 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		UpdatedAt: now,
 	}
 
+	emailIdNotAssigned := uuid.FromStringOrNil("7c4473b8-ddcc-480b-b01f-df89e99f74c9")
 	passcodeForNonAssignedEmail := models.Passcode{
 		ID:        uuid.FromStringOrNil("494129d5-76de-4fae-b07d-f2a521e1804d"),
-		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
-		EmailID:   uuid.FromStringOrNil("7c4473b8-ddcc-480b-b01f-df89e99f74c9"),
+		UserId:    &userId,
+		EmailID:   &emailIdNotAssigned,
 		Ttl:       300,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
