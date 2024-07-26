@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type UsernamePersister interface {
 	Create(username models.Username) error
-	GetByUserID(userId uuid.UUID) (*models.Username, error)
 	GetByName(name string) (*models.Username, error)
 	Update(username *models.Username) error
 	Delete(username *models.Username) error
@@ -36,19 +34,6 @@ func (p *usernamePersister) Create(username models.Username) error {
 	}
 
 	return nil
-}
-
-func (p *usernamePersister) GetByUserID(userId uuid.UUID) (*models.Username, error) {
-	pw := models.Username{}
-	query := p.db.Where("user_id = (?)", userId.String())
-	err := query.First(&pw)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, fmt.Errorf("failed to get credential: %w", err)
-	}
-	return &pw, nil
 }
 
 func (p *usernamePersister) GetByName(username string) (*models.Username, error) {
