@@ -2,12 +2,11 @@ database:
   user: hanko
   password: hanko
   host: localhost
-  port: 5432
+  port: "5432"
   dialect: postgres
 smtp:
-    host: smtp.example.com
-    user: example
-    password: example
+  host: localhost
+  port: 2500
 server:
   public:
     cors:
@@ -29,27 +28,23 @@ webauthn:
       - http://localhost:63342
       - http://localhost:8000
 password:
-  enabled: false
-  optional: true
-  acquire_on_registration: always
-  acquire_on_login: always
+  enabled: true
+  optional: false
+  acquire_on_registration: conditional
+  acquire_on_login: conditional
   recovery: true
-emails:
-  require_verification: true
 passkey:
   enabled: true
-  optional: true
-  acquire_on_registration: always
-  acquire_on_login: always
+  optional: false
+  acquire_on_registration: conditional
+  acquire_on_login: conditional
   attestation_preference: direct
   limit: 100
-  onboarding:
-    enabled: true
 email:
   enabled: true
   optional: false
   acquire_on_registration: true
-  acquire_on_login: false
+  acquire_on_login: true
   require_verification: true
   limit: 100
   use_as_login_identifier: true
@@ -70,3 +65,4 @@ email_delivery:
   smtp:
     host: localhost
     port: 2500
+convert_legacy_config: false
