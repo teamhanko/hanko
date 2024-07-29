@@ -89,6 +89,11 @@ func (a WebauthnCredentialDelete) mustSuspend(c flowpilot.Context) bool {
 	identities := userModel.GetIdentities()
 
 	isLastWebauthnCredential := len(userModel.WebauthnCredentials) == 1
+
+	if isLastWebauthnCredential && !deps.Cfg.Passkey.Optional {
+		return true
+	}
+
 	canUseUsernameAsLoginIdentifier := deps.Cfg.Username.UseAsLoginIdentifier && userModel.Username != nil
 	canUseEmailAsLoginIdentifier := deps.Cfg.Email.UseAsLoginIdentifier && len(userModel.Emails) > 0
 	canDoPassword := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil && (canUseUsernameAsLoginIdentifier || canUseEmailAsLoginIdentifier)

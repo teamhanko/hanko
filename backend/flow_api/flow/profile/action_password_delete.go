@@ -79,7 +79,7 @@ func (a PasswordDelete) mustSuspend(c flowpilot.Context) bool {
 		return true
 	}
 
-	if userModel.PasswordCredential == nil {
+	if userModel.PasswordCredential == nil || !deps.Cfg.Password.Optional {
 		return true
 	}
 
