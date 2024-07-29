@@ -8,7 +8,6 @@ import (
 
 type Username struct {
 	ID        uuid.UUID `json:"id"`
-	UserId    uuid.UUID `json:"user_id"`
 	Username  string    `json:"username"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -20,7 +19,6 @@ func FromUsernameModel(u *models.Username) *Username {
 	}
 	return &Username{
 		ID:        u.ID,
-		UserId:    u.UserId,
 		Username:  u.Username,
 		CreatedAt: u.CreatedAt,
 		UpdatedAt: u.UpdatedAt,
