@@ -83,7 +83,8 @@ var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
 	BeforeState(shared.StateLoginInit,
 		login.WebauthnGenerateRequestOptionsForConditionalUi{}).
 	BeforeState(shared.StateSuccess,
-		shared.IssueSession{}).
+		shared.IssueSession{},
+		shared.GetUserData{}).
 	AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
 		shared.WebauthnCredentialSave{}).
 	AfterState(shared.StatePasscodeConfirmation,
@@ -112,7 +113,8 @@ var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 	ErrorState(shared.StateError).
 	BeforeState(shared.StateSuccess,
 		registration.CreateUser{},
-		shared.IssueSession{}).
+		shared.IssueSession{},
+		shared.GetUserData{}).
 	SubFlows(
 		CapabilitiesSubFlow,
 		CredentialUsageSubFlow,
