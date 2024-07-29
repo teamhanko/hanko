@@ -386,11 +386,11 @@ const AppProvider = ({
       },
       success(state) {
         hanko.flow.client.processResponseHeadersOnLogin(
-          "uuid", // TODO: replace, when the success-state payload includes the user details
+          state.payload.user.user_id,
           hanko.flow.client.response,
         );
         lastActionSucceeded();
-        emitSuccessEvent("uuid");
+        emitSuccessEvent(state.payload.user.user_id);
       },
       profile_init(state) {
         setPage(
