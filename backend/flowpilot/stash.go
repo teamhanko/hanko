@@ -1,11 +1,15 @@
 package flowpilot
 
 import (
+	"bytes"
+	"compress/gzip"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
+	"io"
 )
 
 const (
@@ -27,6 +31,7 @@ type stash interface {
 	getPreviousStateName() StateName
 	addScheduledStateNames(...StateName)
 	getNextStateName() StateName
+	useCompression(bool)
 
 	jsonmanager.JSONManager
 }
@@ -35,6 +40,7 @@ type defaultStash struct {
 	jm                  jsonmanager.JSONManager
 	data                jsonmanager.JSONManager
 	scheduledStateNames []StateName
+	compressionEnabled  bool
 }
 
 // newStashFromJSONManager creates a new instance of stash with a given JSONManager.
@@ -44,12 +50,17 @@ func newStashFromJSONManager(jm jsonmanager.JSONManager) stash {
 		jm:                  jm,
 		data:                data,
 		scheduledStateNames: make([]StateName, 0),
+		compressionEnabled:  false,
 	}
 }
 
 // newStash creates a new instance of Stash with empty JSON data.
 func newStash(nextStates ...StateName) (stash, error) {
 	jm := jsonmanager.NewJSONManager()
+
+	if len(nextStates) == 0 {
+		return nil, errors.New("can't create a new stash without a state name")
+	}
 
 	if err := jm.Set(stashKeyState, nextStates[0]); err != nil {
 		return nil, err
@@ -68,6 +79,14 @@ func newStash(nextStates ...StateName) (stash, error) {
 
 // newStashFromString creates a new instance of Stash with the given JSON data.
 func newStashFromString(data string) (stash, error) {
+	var err error
+
+	if len(data) > 0 && !startsWithCurlyBrace(data) {
+		if data, err = decodeData(data); err != nil {
+			return nil, fmt.Errorf("faiiled to decode stash data: %w", err)
+		}
+	}
+
 	jm, err := jsonmanager.NewJSONManagerFromString(data)
 	return newStashFromJSONManager(jm), err
 }
@@ -78,6 +97,53 @@ func reverseStateNames(slice []StateName) []StateName {
 		reversed[len(slice)-1-i] = v
 	}
 	return reversed
+}
+
+func startsWithCurlyBrace(s string) bool {
+	// Check if the string is not empty
+	if len(s) == 0 {
+		return false
+	}
+	// Check if the first character is '{'
+	return s[0] == '{'
+}
+
+func encodeData(jsonData string) (string, error) {
+	var buf bytes.Buffer
+	gw := gzip.NewWriter(&buf)
+	if _, err := gw.Write([]byte(jsonData)); err != nil {
+		return "", err
+	}
+
+	if err := gw.Close(); err != nil {
+		return "", err
+	}
+
+	gzippedData := buf.Bytes()
+	base64GzippedData := base64.StdEncoding.EncodeToString(gzippedData)
+	return base64GzippedData, nil
+}
+
+func decodeData(base64GzippedData string) (string, error) {
+	gzippedData, err := base64.StdEncoding.DecodeString(base64GzippedData)
+	if err != nil {
+		return "", err
+	}
+
+	buf := bytes.NewBuffer(gzippedData)
+	gr, err := gzip.NewReader(buf)
+	if err != nil {
+		return "", err
+	}
+
+	defer gr.Close()
+
+	decompressedData, err := io.ReadAll(gr)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decompressedData), nil
 }
 
 // Get retrieves the value at the specified path in the JSON data.
@@ -97,6 +163,10 @@ func (h *defaultStash) Delete(path string) error {
 
 // String returns the JSON data as a string.
 func (h *defaultStash) String() string {
+	if h.compressionEnabled {
+		s, _ := encodeData(h.jm.String())
+		return s
+	}
 	return h.jm.String()
 }
 
@@ -234,4 +304,8 @@ func (h *defaultStash) getNextStateName() StateName {
 func (h *defaultStash) isRevertible() bool {
 	lastHistItemIndex := h.jm.Get(fmt.Sprintf("%s.#", stashKeyHistory)).Int() - 1
 	return h.jm.Get(fmt.Sprintf("%s.%d.%s", stashKeyHistory, lastHistItemIndex, stashKeyRevertible)).Bool()
+}
+
+func (h *defaultStash) useCompression(b bool) {
+	h.compressionEnabled = b
 }

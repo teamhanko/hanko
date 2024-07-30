@@ -36,6 +36,13 @@ func WithInputData(inputData InputData) func(*defaultFlow) {
 	}
 }
 
+// UseCompression causes the flow data to be compressed before stored to the db.
+func UseCompression(b bool) func(*defaultFlow) {
+	return func(f *defaultFlow) {
+		f.useCompression = b
+	}
+}
+
 // StateName represents the name of a state in a flow.
 type StateName string
 
@@ -191,6 +198,7 @@ type defaultFlow struct {
 	queryParam        queryParam    // TODO
 	contextValues     contextValues // Values to be used within the flow context.
 	inputData         InputData
+	useCompression    bool
 	queryParamKey     string
 	queryParamValue   string
 
