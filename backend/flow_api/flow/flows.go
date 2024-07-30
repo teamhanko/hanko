@@ -112,9 +112,9 @@ var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
 		shared.StateRegistrationInit).
 	ErrorState(shared.StateError).
 	BeforeState(shared.StateSuccess,
+		shared.GetUserData{},
 		registration.CreateUser{},
-		shared.IssueSession{},
-		shared.GetUserData{}).
+		shared.IssueSession{}).
 	SubFlows(
 		CapabilitiesSubFlow,
 		CredentialUsageSubFlow,
