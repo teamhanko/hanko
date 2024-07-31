@@ -232,6 +232,8 @@ type Password struct {
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	// `min_length` determines the minimum password length.
 	MinLength int `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
+	// Deprecated. Use `min_length` instead.
+	MinPasswordLength int `yaml:"min_password_length" json:"min_password_length,omitempty" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
 	// `optional` determines whether users must have a password set. It controls whether password creation can be
 	// skipped if prompted for. It also takes part in determining the order of password and passkey acquisition
 	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`).
@@ -873,6 +875,8 @@ func (c *Config) convertLegacyConfig() {
 	c.EmailDelivery.SMTP = c.Smtp
 	c.EmailDelivery.FromName = c.Passcode.Email.FromName
 	c.EmailDelivery.FromAddress = c.Passcode.Email.FromAddress
+
+	c.Password.MinLength = c.Password.MinPasswordLength
 
 	c.Passkey.UserVerification = c.Webauthn.UserVerification
 
