@@ -211,8 +211,8 @@ func (s *Server) Validate() error {
 }
 
 type Service struct {
-	// `service` determines the name of the service.
-	// This value will is used, e.g. in the subject header of outgoing emails.
+	// `name` determines the name of the service.
+	// This value is used, e.g. in the subject header of outgoing emails.
 	Name string `yaml:"name" json:"name,omitempty" koanf:"name"`
 }
 
@@ -421,7 +421,7 @@ type RelyingParty struct {
 	// `origins` is a list of origins for which passkeys/WebAuthn credentials will be accepted by the server. Must
 	// include the protocol and can only be the effective domain, or a registrable domain suffix of the effective
 	// domain, as specified in the [`id`](#id). Except for `localhost`, the protocol **must** always be `https` for
-	// passkeys/ WebAuthn to work. IP Addresses will not work.
+	// passkeys/WebAuthn to work. IP Addresses will not work.
 	//
 	// For an Android application the origin must be the base64 url encoded SHA256 fingerprint of the signing
 	// certificate.
@@ -622,7 +622,7 @@ type RateLimiter struct {
 	// `redis_config` configures connection to a redis instance.
 	// Required if `store` is set to `redis`
 	Redis *RedisConfig `yaml:"redis_config" json:"redis_config,omitempty" koanf:"redis_config"`
-	// `passcode_limits` controls rate limits specific to the password/login endpoint.
+	// `passcode_limits` controls rate limits specific to the passcode/login endpoint.
 	PasscodeLimits RateLimits `yaml:"passcode_limits" json:"passcode_limits,omitempty" koanf:"passcode_limits" split_words:"true"`
 	// `password_limits` controls rate limits specific to the password/login endpoint.
 	PasswordLimits RateLimits `yaml:"password_limits" json:"password_limits,omitempty" koanf:"password_limits" split_words:"true"`
@@ -683,7 +683,7 @@ type ThirdParty struct {
 	// Required if any of the [`providers`](#providers) are `enabled`.
 	RedirectURL string `yaml:"redirect_url" json:"redirect_url,omitempty" koanf:"redirect_url" split_words:"true" jsonschema:"example=https://yourinstance.com/thirdparty/callback"`
 	// `error_redirect_url` is the URL the backend redirects to if an error occurs during third party sign-in.
-	// Errors are provided  as 'error' and 'error_description' query params in the redirect location URL.
+	// Errors are provided as 'error' and 'error_description' query params in the redirect location URL.
 	//
 	// When using the Hanko web components it should be the URL of the page that embeds the web component such that
 	// errors can be processed properly by the web component.
