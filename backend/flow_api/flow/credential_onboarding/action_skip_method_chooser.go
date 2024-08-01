@@ -25,6 +25,10 @@ func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.Initializa
 		!(deps.Cfg.Email.UseForAuthentication && emailExists) {
 		c.SuspendAction()
 	}
+
+	if !deps.Cfg.Password.Optional && !deps.Cfg.Passkey.Optional {
+		c.SuspendAction()
+	}
 }
 
 func (a SkipCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionContext) error {
