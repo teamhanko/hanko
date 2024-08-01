@@ -182,8 +182,8 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 	conditionalAcquirePasskey := deps.Cfg.Passkey.AcquireOnRegistration == "conditional"
 	alwaysAcquirePassword := deps.Cfg.Password.AcquireOnRegistration == "always"
 	conditionalAcquirePassword := deps.Cfg.Password.AcquireOnRegistration == "conditional"
-	neverAcquirePasskey := deps.Cfg.Passkey.AcquireOnLogin == "never"
-	neverAcquirePassword := deps.Cfg.Password.AcquireOnLogin == "never"
+	neverAcquirePasskey := deps.Cfg.Passkey.AcquireOnRegistration == "never"
+	neverAcquirePassword := deps.Cfg.Password.AcquireOnRegistration == "never"
 
 	if passwordAndPasskeyEnabled {
 		if alwaysAcquirePasskey && alwaysAcquirePassword {
