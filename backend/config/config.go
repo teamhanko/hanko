@@ -810,7 +810,7 @@ func (p *ThirdPartyProvider) Validate() error {
 }
 
 type ThirdPartyProviders struct {
-	// `apple` contains the provider configuration for Sign in with Apple.
+	// `apple` contains the provider configuration for Apple.
 	Apple ThirdPartyProvider `yaml:"apple" json:"apple,omitempty" koanf:"apple"`
 	// `discord` contains the provider configuration for Discord.
 	Discord ThirdPartyProvider `yaml:"discord" json:"discord,omitempty" koanf:"discord"`
