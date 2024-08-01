@@ -40,7 +40,7 @@ func (a SkipPassword) Initialize(c flowpilot.InitializationContext) {
 	}
 
 	if (c.IsPreviousState(shared.StatePasscodeConfirmation) || c.IsPreviousState(shared.StateRegistrationInit)) &&
-		!a.acquirePasskey(c, "always") &&
+		a.acquirePasskey(c, "never") &&
 		!canLoginWithEmail {
 		c.SuspendAction()
 	}
