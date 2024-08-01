@@ -234,8 +234,8 @@ type Password struct {
 	MinLength int `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
 	// Deprecated. Use `min_length` instead.
 	MinPasswordLength int `yaml:"min_password_length" json:"min_password_length,omitempty" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
-	// `optional` determines whether users must have a password set. It controls whether password creation can be
-	// skipped if prompted for.
+	// `optional` determines whether users must set a password when prompted. The password cannot be deleted if
+	// passwords are required (`optional: false`).
 	//
 	// It also takes part in determining the order of password and passkey acquisition
 	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
@@ -953,8 +953,8 @@ type Passkey struct {
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 	// `limit` defines the maximum number of passkeys a user can have.
 	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
-	// `optional` determines whether users must have registered at least one passkey. It controls whether passkey
-	// creation can be skipped if prompted for.
+	// `optional` determines whether users must create a passkey when prompted. The last remaining passkey cannot be
+	// deleted if passkeys are required (`optional: false`).
 	//
 	// It also takes part in determining the order of password and passkey acquisition
 	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
@@ -1035,8 +1035,9 @@ type Email struct {
 	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
 	// `max_length` specifies the maximum allowed length of an email address.
 	MaxLength int `yaml:"max_length" json:"max_length,omitempty" koanf:"max_length" jsonschema:"default=100"`
-	// `optional` determines whether an email address must be provided when an input for this identifier is available.
-	// If set to `true` this action can be skipped.
+	// `optional` determines whether users must provide an email when prompted.
+	// There must always be at least one email address associated with an account. The primary email address cannot be
+	// deleted if emails are required (`optional`: false`).
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
 	// `passcode_ttl` specifies, in seconds, how long a passcode is valid for.
 	PasscodeTtl int `yaml:"passcode_ttl" json:"passcode_ttl,omitempty" koanf:"passcode_ttl" jsonschema:"default=300"`
@@ -1064,8 +1065,8 @@ type Username struct {
 	MaxLength int `yaml:"max_length" json:"max_length,omitempty" koanf:"max_length" jsonschema:"default=100"`
 	// `min_length` specifies the minimum length of a username.
 	MinLength int `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
-	// `optional` determines whether a username must be provided when an input for this identifier is available.
-	// If set to `true` this action can be skipped.
+	// `optional` determines whether users must provide a username when prompted. The username can only be changed but
+	// not deleted if usernames are required (`optional: false`).
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
 	// `use_as_login_identifier` determines whether usernames, if enabled, can be used for logging in.
 	UseAsLoginIdentifier bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier,omitempty" koanf:"use_as_login_identifier" jsonschema:"default=true"`
