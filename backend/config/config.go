@@ -765,6 +765,9 @@ func (t *ThirdParty) PostProcess() error {
 
 type ThirdPartyProvider struct {
 	// `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
+	//
+	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
+	// email address of the third party provider account.
 	AllowLinking bool `yaml:"allow_linking" json:"allow_linking,omitempty" koanf:"allow_linking" split_words:"true"`
 	// `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
 	//
