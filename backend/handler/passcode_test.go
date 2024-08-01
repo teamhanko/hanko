@@ -38,8 +38,8 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 
 	cfg := func() *config.Config {
 		cfg := &test.DefaultConfig
-		cfg.Smtp.Host = s.EmailServer.SmtpHost
-		cfg.Smtp.Port = s.EmailServer.SmtpPort
+		cfg.EmailDelivery.SMTP.Host = s.EmailServer.SmtpHost
+		cfg.EmailDelivery.SMTP.Port = s.EmailServer.SmtpPort
 		return cfg
 	}
 
