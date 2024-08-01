@@ -392,7 +392,7 @@
         },
         "optional": {
           "type": "boolean",
-          "description": "`optional` determines whether an email address must be provided when an input for this identifier is available.\nIf set to `true` this action can be skipped.",
+          "description": "`optional` determines whether users must provide an email when prompted.\nThere must always be at least one email address associated with an account. The primary email address cannot be\ndeleted if emails are required (`optional`: false`).",
           "default": true
         },
         "passcode_ttl": {
@@ -627,7 +627,7 @@
         },
         "optional": {
           "type": "boolean",
-          "description": "`optional` determines whether users must have registered at least one passkey. It controls whether passkey\ncreation can be skipped if prompted for. It also takes part in determining\nthe order of passkey and password acquisition on login and registration (see also `acquire_on_login` and\n`acquire_on_registration`).",
+          "description": "`optional` determines whether users must create a passkey when prompted. The last remaining passkey cannot be\ndeleted if passkeys are required (`optional: false`).\n\nIt also takes part in determining the order of password and passkey acquisition\non login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is\nrequired (`optional: false`) then that one takes precedence, i.e. is acquired first.",
           "default": true
         },
         "user_verification": {
@@ -698,7 +698,7 @@
         },
         "optional": {
           "type": "boolean",
-          "description": "`optional` determines whether users must have a password set. It controls whether password creation can be\nskipped if prompted for. It also takes part in determining the order of password and passkey acquisition\non login and registration (see also `acquire_on_login` and `acquire_on_registration`).",
+          "description": "`optional` determines whether users must set a password when prompted. The password cannot be deleted if\npasswords are required (`optional: false`).\n\nIt also takes part in determining the order of password and passkey acquisition\non login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is\nrequired (`optional: false`) then that one takes precedence, i.e. is acquired first.",
           "default": false
         },
         "recovery": {
@@ -732,15 +732,15 @@
         },
         "passcode_limits": {
           "$ref": "#/$defs/RateLimits",
-          "description": "`passcode_limits` controls rate limits specific to the password/login endpoint."
+          "description": "`passcode_limits` controls rate limits for passcode operations."
         },
         "password_limits": {
           "$ref": "#/$defs/RateLimits",
-          "description": "`password_limits` controls rate limits specific to the password/login endpoint."
+          "description": "`password_limits` controls rate limits for password login operations."
         },
         "token_limits": {
           "$ref": "#/$defs/RateLimits",
-          "description": "`token_limits` controls rate limits specific to the token endpoint."
+          "description": "`token_limits` controls rate limits for token exchange operations."
         }
       },
       "additionalProperties": false,
@@ -801,7 +801,7 @@
           },
           "type": "array",
           "minItems": 1,
-          "description": "`origins` is a list of origins for which passkeys/WebAuthn credentials will be accepted by the server. Must\ninclude the protocol and can only be the effective domain, or a registrable domain suffix of the effective\ndomain, as specified in the [`id`](#id). Except for `localhost`, the protocol **must** always be `https` for\npasskeys/ WebAuthn to work. IP Addresses will not work.\n\nFor an Android application the origin must be the base64 url encoded SHA256 fingerprint of the signing\ncertificate.",
+          "description": "`origins` is a list of origins for which passkeys/WebAuthn credentials will be accepted by the server. Must\ninclude the protocol and can only be the effective domain, or a registrable domain suffix of the effective\ndomain, as specified in the [`id`](#id). Except for `localhost`, the protocol **must** always be `https` for\npasskeys/WebAuthn to work. IP Addresses will not work.\n\nFor an Android application the origin must be the base64 url encoded SHA256 fingerprint of the signing\ncertificate.",
           "default": [
             "http://localhost:8888"
           ]
@@ -917,7 +917,7 @@
       "properties": {
         "name": {
           "type": "string",
-          "description": "`service` determines the name of the service.\nThis value will is used, e.g. in the subject header of outgoing emails."
+          "description": "`name` determines the name of the service.\nThis value is used, e.g. in the subject header of outgoing emails."
         }
       },
       "additionalProperties": false,
@@ -970,7 +970,7 @@
         },
         "error_redirect_url": {
           "type": "string",
-          "description": "`error_redirect_url` is the URL the backend redirects to if an error occurs during third party sign-in.\nErrors are provided  as 'error' and 'error_description' query params in the redirect location URL.\n\nWhen using the Hanko web components it should be the URL of the page that embeds the web component such that\nerrors can be processed properly by the web component.\n\nYou do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when validating\nredirect URLs.\n\nRequired if any of the [`providers`](#providers) are `enabled`. Must not have trailing slash."
+          "description": "`error_redirect_url` is the URL the backend redirects to if an error occurs during third party sign-in.\nErrors are provided as 'error' and 'error_description' query params in the redirect location URL.\n\nWhen using the Hanko web components it should be the URL of the page that embeds the web component such that\nerrors can be processed properly by the web component.\n\nYou do not have to add this URL to the 'allowed_redirect_urls', it is automatically included when validating\nredirect URLs.\n\nRequired if any of the [`providers`](#providers) are `enabled`. Must not have trailing slash."
         },
         "default_redirect_url": {
           "type": "string",
@@ -1009,7 +1009,7 @@
       "properties": {
         "allow_linking": {
           "type": "boolean",
-          "description": "`allow_linking` indicates whether existing accounts can be automatically linked with this provider."
+          "description": "`allow_linking` indicates whether existing accounts can be automatically linked with this provider.\n\nLinking is based on matching one of the email addresses of an existing user account with the (primary)\nemail address of the third party provider account."
         },
         "client_id": {
           "type": "string",
@@ -1033,7 +1033,7 @@
       "properties": {
         "apple": {
           "$ref": "#/$defs/ThirdPartyProvider",
-          "description": "`apple` contains the provider configuration for Sign in with Apple."
+          "description": "`apple` contains the provider configuration for Apple."
         },
         "discord": {
           "$ref": "#/$defs/ThirdPartyProvider",
@@ -1088,7 +1088,7 @@
         },
         "optional": {
           "type": "boolean",
-          "description": "`optional` determines whether a username must be provided when an input for this identifier is available.\nIf set to `true` this action can be skipped.",
+          "description": "`optional` determines whether users must provide a username when prompted. The username can only be changed but\nnot deleted if usernames are required (`optional: false`).",
           "default": true
         },
         "use_as_login_identifier": {
