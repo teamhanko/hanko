@@ -47,57 +47,68 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
 
-	alwaysAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "always"
-	alwaysAcquirePassword := cfg.Password.Enabled && cfg.Password.AcquireOnLogin == "always"
-	conditionalAcquirePasskey := cfg.Passkey.Enabled && cfg.Passkey.AcquireOnLogin == "conditional"
-	conditionalAcquirePassword := cfg.Password.Enabled && cfg.Password.AcquireOnLogin == "conditional"
-	neverAcquirePasskey := !cfg.Passkey.Enabled || cfg.Passkey.AcquireOnLogin == "never"
-	neverAcquirePassword := !cfg.Password.Enabled || cfg.Password.AcquireOnLogin == "never"
+	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
+	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
+	passwordEnabled := deps.Cfg.Password.Enabled
+	passwordAndPasskeyEnabled := passkeyEnabled && passwordEnabled
 
-	if alwaysAcquirePasskey && alwaysAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			if !cfg.Password.Optional && cfg.Passkey.Optional {
-				result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
-			} else {
-				result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+	alwaysAcquirePasskey := cfg.Passkey.AcquireOnLogin == "always"
+	alwaysAcquirePassword := cfg.Password.AcquireOnLogin == "always"
+	conditionalAcquirePasskey := cfg.Passkey.AcquireOnLogin == "conditional"
+	conditionalAcquirePassword := cfg.Password.AcquireOnLogin == "conditional"
+	neverAcquirePasskey := cfg.Passkey.AcquireOnLogin == "never"
+	neverAcquirePassword := cfg.Password.AcquireOnLogin == "never"
+
+	if passwordAndPasskeyEnabled {
+		if alwaysAcquirePasskey && alwaysAcquirePassword {
+			if !hasPasskey && !hasPassword {
+				if !cfg.Password.Optional && cfg.Passkey.Optional {
+					result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
+				} else {
+					result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+				}
+			} else if hasPasskey && !hasPassword {
+				result = append(result, shared.StatePasswordCreation)
+			} else if !hasPasskey && hasPassword {
+				result = append(result, shared.StateOnboardingCreatePasskey)
 			}
-		} else if hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		} else if !hasPasskey && hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey)
+		} else if alwaysAcquirePasskey && conditionalAcquirePassword {
+			if !hasPasskey && !hasPassword {
+				result = append(result, shared.StateOnboardingCreatePasskey) // skip should lead to password onboarding
+			} else if !hasPasskey && hasPassword {
+				result = append(result, shared.StateOnboardingCreatePasskey)
+			}
+		} else if conditionalAcquirePasskey && alwaysAcquirePassword {
+			if !hasPasskey && !hasPassword {
+				result = append(result, shared.StatePasswordCreation) // skip should lead to passkey onboarding
+			} else if hasPasskey && !hasPassword {
+				result = append(result, shared.StatePasswordCreation)
+			}
+		} else if conditionalAcquirePasskey && conditionalAcquirePassword {
+			if !hasPasskey && !hasPassword {
+				result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
+			}
+		} else if conditionalAcquirePasskey && neverAcquirePassword {
+			if !hasPasskey && !hasPassword {
+				result = append(result, shared.StateOnboardingCreatePasskey)
+			}
+		} else if neverAcquirePasskey && conditionalAcquirePassword {
+			if !hasPasskey && !hasPassword {
+				result = append(result, shared.StatePasswordCreation)
+			}
+		} else if neverAcquirePasskey && alwaysAcquirePassword {
+			if !hasPassword {
+				result = append(result, shared.StatePasswordCreation)
+			}
+		} else if alwaysAcquirePasskey && neverAcquirePassword {
+			if !hasPasskey {
+				result = append(result, shared.StateOnboardingCreatePasskey)
+			}
 		}
-	} else if alwaysAcquirePasskey && conditionalAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey) // skip should lead to password onboarding
-		} else if !hasPasskey && hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
-	} else if conditionalAcquirePasskey && alwaysAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation) // skip should lead to passkey onboarding
-		} else if hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		}
-	} else if conditionalAcquirePasskey && conditionalAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateCredentialOnboardingChooser) // credential_onboarding_chooser can be skipped
-		}
-	} else if conditionalAcquirePasskey && neverAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
-	} else if neverAcquirePasskey && conditionalAcquirePassword {
-		if !hasPasskey && !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		}
-	} else if neverAcquirePasskey && alwaysAcquirePassword {
-		if !hasPassword {
-			result = append(result, shared.StatePasswordCreation)
-		}
-	} else if alwaysAcquirePasskey && neverAcquirePassword {
-		if !hasPasskey {
-			result = append(result, shared.StateOnboardingCreatePasskey)
-		}
+	} else if passkeyEnabled && (alwaysAcquirePasskey || conditionalAcquirePasskey) {
+		result = append(result, shared.StateOnboardingCreatePasskey)
+	} else if passwordEnabled && (alwaysAcquirePassword || conditionalAcquirePassword) {
+		result = append(result, shared.StatePasswordCreation)
 	}
 
 	return result
