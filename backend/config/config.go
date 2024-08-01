@@ -622,11 +622,11 @@ type RateLimiter struct {
 	// `redis_config` configures connection to a redis instance.
 	// Required if `store` is set to `redis`
 	Redis *RedisConfig `yaml:"redis_config" json:"redis_config,omitempty" koanf:"redis_config"`
-	// `passcode_limits` controls rate limits specific to the passcode/login endpoint.
+	// `passcode_limits` controls rate limits for passcode operations.
 	PasscodeLimits RateLimits `yaml:"passcode_limits" json:"passcode_limits,omitempty" koanf:"passcode_limits" split_words:"true"`
-	// `password_limits` controls rate limits specific to the password/login endpoint.
+	// `password_limits` controls rate limits for password login operations.
 	PasswordLimits RateLimits `yaml:"password_limits" json:"password_limits,omitempty" koanf:"password_limits" split_words:"true"`
-	// `token_limits` controls rate limits specific to the token endpoint.
+	// `token_limits` controls rate limits for token exchange operations.
 	TokenLimits RateLimits `yaml:"token_limits" json:"token_limits,omitempty" koanf:"token_limits" split_words:"true" jsonschema:"default=token=3;interval=1m"`
 }
 
