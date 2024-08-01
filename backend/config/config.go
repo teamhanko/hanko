@@ -235,8 +235,11 @@ type Password struct {
 	// Deprecated. Use `min_length` instead.
 	MinPasswordLength int `yaml:"min_password_length" json:"min_password_length,omitempty" koanf:"min_password_length" split_words:"true" jsonschema:"default=8"`
 	// `optional` determines whether users must have a password set. It controls whether password creation can be
-	// skipped if prompted for. It also takes part in determining the order of password and passkey acquisition
-	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`).
+	// skipped if prompted for.
+	//
+	// It also takes part in determining the order of password and passkey acquisition
+	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
+	// required (`optional: false`) then that one takes precedence, i.e. is acquired first.
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
 	// `recovery` determines whether users can start a recovery process, e.g. in case of a forgotten password.
 	Recovery bool `yaml:"recovery" json:"recovery,omitempty" koanf:"recovery" jsonschema:"default=true"`
@@ -948,9 +951,11 @@ type Passkey struct {
 	// `limit` defines the maximum number of passkeys a user can have.
 	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
 	// `optional` determines whether users must have registered at least one passkey. It controls whether passkey
-	// creation can be skipped if prompted for. It also takes part in determining
-	// the order of passkey and password acquisition on login and registration (see also `acquire_on_login` and
-	// `acquire_on_registration`).
+	// creation can be skipped if prompted for.
+	//
+	// It also takes part in determining the order of password and passkey acquisition
+	// on login and registration (see also `acquire_on_login` and `acquire_on_registration`): if one credential type is
+	// required (`optional: false`) then that one takes precedence, i.e. is acquired first.
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
 	// `user_verification` specifies the requirements regarding local authorization with an authenticator through
 	//  various authorization gesture modalities; for example, through a touch plus pin code,
