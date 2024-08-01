@@ -12,7 +12,7 @@ type Saml struct {
 	// `enabled` determines whether the SAML API endpoints are available.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	// `endpoint` is URL at which the SAML endpoints like metadata, callback, etc. are available
-	// (e.g. `http://example.com/api`).
+	// (e.g. `{YOUR_BACKEND_INSTANCE}/api`).
 	//
 	// Will be provided as metadata for IdP.
 	Endpoint string `yaml:"endpoint_url" json:"endpoint_url,omitempty" koanf:"endpoint_url"`
@@ -76,7 +76,7 @@ type IdentityProvider struct {
 	// At login the domain will be extracted from the users email address and then used to identify the idp to use.
 	// This tag defines for which domain the idp is used.
 	Domain string `yaml:"domain" json:"domain,omitempty" koanf:"domain"`
-	// `metadata_url` is the URL the API can IdP metadata from.
+	// `metadata_url` is the URL the API can retrieve IdP metadata from.
 	MetadataUrl string `yaml:"metadata_url" json:"metadata_url,omitempty" koanf:"metadata_url"`
 	// `skip_email_verification` determines whether the check if the `email_verified` attribute in the IdP response
 	// will be skipped.
