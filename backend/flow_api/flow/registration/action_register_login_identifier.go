@@ -166,42 +166,50 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {
 	deps := a.GetDeps(c)
 
-	stateNames := make([]flowpilot.StateName, 0)
+	result := make([]flowpilot.StateName, 0)
 
 	emailExists := len(c.Input().Get("email").String()) > 0
 	if emailExists && deps.Cfg.Email.RequireVerification {
-		stateNames = append(stateNames, shared.StatePasscodeConfirmation)
+		result = append(result, shared.StatePasscodeConfirmation)
 	}
 
 	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
 	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
 	passwordEnabled := deps.Cfg.Password.Enabled
-	bothEnabled := passkeyEnabled && passwordEnabled
+	passwordAndPasskeyEnabled := passkeyEnabled && passwordEnabled
 
-	alwaysPasskey := deps.Cfg.Passkey.AcquireOnRegistration == "always"
-	conditionalPasskey := deps.Cfg.Passkey.AcquireOnRegistration == "conditional"
-	alwaysPassword := deps.Cfg.Password.AcquireOnRegistration == "always"
-	conditionalPassword := deps.Cfg.Password.AcquireOnRegistration == "conditional"
+	alwaysAcquirePasskey := deps.Cfg.Passkey.AcquireOnRegistration == "always"
+	conditionalAcquirePasskey := deps.Cfg.Passkey.AcquireOnRegistration == "conditional"
+	alwaysAcquirePassword := deps.Cfg.Password.AcquireOnRegistration == "always"
+	conditionalAcquirePassword := deps.Cfg.Password.AcquireOnRegistration == "conditional"
+	neverAcquirePasskey := deps.Cfg.Passkey.AcquireOnLogin == "never"
+	neverAcquirePassword := deps.Cfg.Password.AcquireOnLogin == "never"
 
-	if bothEnabled {
-		if conditionalPasskey && conditionalPassword {
-			stateNames = append(stateNames, shared.StateCredentialOnboardingChooser)
-		} else if alwaysPasskey && !alwaysPassword {
-			stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
-		} else if !alwaysPasskey && alwaysPassword {
-			stateNames = append(stateNames, shared.StatePasswordCreation)
-		} else if alwaysPassword && alwaysPasskey {
+	if passwordAndPasskeyEnabled {
+		if alwaysAcquirePasskey && alwaysAcquirePassword {
 			if !deps.Cfg.Password.Optional && deps.Cfg.Passkey.Optional {
-				stateNames = append(stateNames, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
+				result = append(result, shared.StatePasswordCreation, shared.StateOnboardingCreatePasskey)
 			} else {
-				stateNames = append(stateNames, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
+				result = append(result, shared.StateOnboardingCreatePasskey, shared.StatePasswordCreation)
 			}
+		} else if alwaysAcquirePasskey && conditionalAcquirePassword {
+			result = append(result, shared.StateOnboardingCreatePasskey)
+		} else if conditionalAcquirePasskey && alwaysAcquirePassword {
+			result = append(result, shared.StatePasswordCreation)
+		} else if conditionalAcquirePasskey && conditionalAcquirePassword {
+			result = append(result, shared.StateCredentialOnboardingChooser)
+		} else if conditionalAcquirePasskey && neverAcquirePassword {
+			result = append(result, shared.StateOnboardingCreatePasskey)
+		} else if neverAcquirePasskey && (alwaysAcquirePassword || conditionalAcquirePassword) {
+			result = append(result, shared.StatePasswordCreation)
+		} else if (alwaysAcquirePasskey || conditionalAcquirePasskey) && neverAcquirePassword {
+			result = append(result, shared.StateOnboardingCreatePasskey)
 		}
-	} else if passkeyEnabled && (alwaysPasskey || conditionalPasskey) {
-		stateNames = append(stateNames, shared.StateOnboardingCreatePasskey)
-	} else if passwordEnabled && (alwaysPassword || conditionalPassword) {
-		stateNames = append(stateNames, shared.StatePasswordCreation)
+	} else if passkeyEnabled && (alwaysAcquirePasskey || conditionalAcquirePasskey) {
+		result = append(result, shared.StateOnboardingCreatePasskey)
+	} else if passwordEnabled && (alwaysAcquirePassword || conditionalAcquirePassword) {
+		result = append(result, shared.StatePasswordCreation)
 	}
 
-	return stateNames
+	return result
 }
