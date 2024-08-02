@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { StateUpdater } from "preact/compat";
+import { SetStateAction } from "preact/compat";
 
 import cx from "classnames";
 
@@ -12,7 +12,7 @@ interface Props<T> {
   columnSelector: Selector<T>;
   contentSelector: Selector<T>;
   checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  setCheckedItemIndex: SetStateAction<number>;
   data: Array<T>;
   dropdown?: boolean;
 }

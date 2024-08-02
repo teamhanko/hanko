@@ -1,5 +1,5 @@
 import {
-  StateUpdater,
+  SetStateAction,
   useCallback,
   useContext,
   useMemo,
@@ -26,7 +26,7 @@ import ProfilePage from "../../pages/ProfilePage";
 interface Props {
   setError: (e: HankoError) => void;
   checkedItemIndex?: number;
-  setCheckedItemIndex: StateUpdater<number>;
+  setCheckedItemIndex: SetStateAction<number>;
 }
 
 const AddEmailDropdown = ({
