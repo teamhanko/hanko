@@ -31,7 +31,7 @@ type Config struct {
 	// `convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration
 	// options, to new ones. If set to `false`, these values have to be set manually if non-default values should be
 	// used.
-	ConvertLegacyConfig bool `yaml:"convert_legacy_config" json:"convert_legacy_config,omitempty" koanf:"convert_legacy_config" split_words:"true" jsonschema:"default=true"`
+	ConvertLegacyConfig bool `yaml:"convert_legacy_config" json:"convert_legacy_config,omitempty" koanf:"convert_legacy_config" split_words:"true" jsonschema:"default=false"`
 	// `database configures database connection settings.
 	Database Database `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"title=database"`
 	// `debug`, if set to `true`, adds additional debugging information to flow API responses.
@@ -139,12 +139,6 @@ func (c *Config) Validate() error {
 	err = c.Webauthn.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
-	}
-	if c.EmailDelivery.Enabled {
-		err = c.Smtp.Validate()
-		if err != nil {
-			return fmt.Errorf("failed to validate smtp settings: %w", err)
-		}
 	}
 	if c.EmailDelivery.Enabled {
 		err = c.Smtp.Validate()
