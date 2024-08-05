@@ -278,7 +278,10 @@ type Cookie struct {
 	// more details.
 	SameSite string `yaml:"same_site" json:"same_site,omitempty" koanf:"same_site" split_words:"true" jsonschema:"default=strict,enum=strict,enum=lax,enum=none"`
 	// `secure` indicates whether the cookie is sent to the server only when a request is made with the https: scheme
-	// (except on localhost)
+	// (except on localhost).
+	//
+	// NOTE: `secure` must be set to `false` when working on `localhost` and with the Safari browser because it does
+	// not store secure cookies on `localhost`.
 	Secure bool `yaml:"secure" json:"secure,omitempty" koanf:"secure" jsonschema:"default=true"`
 }
 
