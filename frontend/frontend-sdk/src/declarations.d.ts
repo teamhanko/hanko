@@ -1,12 +1,10 @@
 import {
   CustomEventWithDetail,
   SessionDetail,
-  AuthFlowCompletedDetail,
   sessionCreatedType,
   sessionExpiredType,
   userLoggedOutType,
   userDeletedType,
-  authFlowCompletedType,
 } from "./lib/events/CustomEvents";
 
 declare global {
@@ -16,7 +14,6 @@ declare global {
     [sessionExpiredType]: CustomEventWithDetail<null>;
     [userLoggedOutType]: CustomEventWithDetail<null>;
     [userDeletedType]: CustomEventWithDetail<null>;
-    [authFlowCompletedType]: CustomEventWithDetail<AuthFlowCompletedDetail>;
   }
 }
 

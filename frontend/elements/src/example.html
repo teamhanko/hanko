@@ -228,9 +228,9 @@ after the user completes the authentication flow), while other events are option
     // Function to add event listeners
     function addEventListeners() {
         hankoEventsEl.addEventListener("onSessionCreated", () => {
-            // A session has been created through the hanko-auth component, but the authentication flow might not be
-            // finished yet, so we don't want to hide the hanko-auth component at this time. However, we can show the
-            // logout button, since the user is logged in.
+            // The user has completed the authentication flow through the hanko-auth component, so we can display the
+            // hanko-profile and hide the hanko-auth component.
+            showAuthComponent(false); // Show profile component
             setVisibility(logoutButtonEl, true); // Show the logout button
 
             // When the dialog was initially opened due to the session expiring in the past, and it has not been closed
@@ -238,12 +238,6 @@ after the user completes the authentication flow), while other events are option
             if (dialogEl.open) {
                 dialogEl.close(); // Close the dialog when it is still open and a new session was created
             }
-        });
-
-        hankoEventsEl.addEventListener("onAuthFlowCompleted", () => {
-            // The user has completed the authentication flow through the hanko-auth component, so we can display the
-            // hanko-profile and hide the hanko-auth component.
-            showAuthComponent(false); // Show profile component
         });
 
         hankoEventsEl.addEventListener("onSessionExpired", () => {

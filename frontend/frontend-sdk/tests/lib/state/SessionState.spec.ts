@@ -9,30 +9,6 @@ describe("sessionState.read()", () => {
   });
 });
 
-describe("sessionState.getUserID()", () => {
-  it("should return the user id", async () => {
-    const ls = decodedLSContent();
-    const state = new SessionState({ localStorageKey: "hanko" });
-
-    state.ls = ls;
-
-    expect(state.getUserID()).toEqual(ls.session.userID);
-  });
-});
-
-describe("sessionState.setUserID()", () => {
-  it("should set the id of the current user", async () => {
-    const ls = decodedLSContent();
-    const state = new SessionState({ localStorageKey: "hanko" });
-    const userID = "test_id_1";
-
-    state.ls = ls;
-
-    expect(state.setUserID(userID)).toEqual(state);
-    expect(state.ls.session.userID).toEqual(userID);
-  });
-});
-
 describe("sessionState.reset()", () => {
   it("should reset information about the current session", async () => {
     const ls = decodedLSContent();
@@ -41,7 +17,6 @@ describe("sessionState.reset()", () => {
     state.ls = ls;
 
     expect(state.reset()).toEqual(state);
-    expect(state.ls.session.userID).toBeUndefined();
     expect(state.ls.session.expiry).toBeUndefined();
   });
 });
@@ -64,7 +39,7 @@ describe("sessionState.setExpirationSeconds()", () => {
 
     expect(state.setExpirationSeconds(seconds)).toEqual(state);
     expect(state.ls.session.expiry).toEqual(
-      Math.floor(Date.now() / 1000) + seconds
+      Math.floor(Date.now() / 1000) + seconds,
     );
   });
 });

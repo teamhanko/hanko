@@ -1,6 +1,5 @@
 import { RequestTimeoutError, TechnicalError } from "../Errors";
 import { SessionState } from "../state/session/SessionState";
-import { PasscodeState } from "../state/users/PasscodeState";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
 
@@ -142,17 +141,14 @@ class HttpClient {
   timeout: number;
   api: string;
   sessionState: SessionState;
-  passcodeState: PasscodeState;
   dispatcher: Dispatcher;
   cookie: Cookie;
-  response: Response;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options: HttpClientOptions) {
     this.api = api;
     this.timeout = options.timeout;
     this.sessionState = new SessionState({ ...options });
-    this.passcodeState = new PasscodeState(options.cookieName);
     this.dispatcher = new Dispatcher({ ...options });
     this.cookie = new Cookie({ ...options });
   }
@@ -176,7 +172,8 @@ class HttpClient {
       xhr.timeout = timeout;
       xhr.withCredentials = true;
       xhr.onload = () => {
-        resolve((self.response = new Response(xhr)));
+        self.processHeaders(xhr);
+        resolve(new Response(xhr));
       };
 
       xhr.onerror = () => {
@@ -192,26 +189,24 @@ class HttpClient {
   }
 
   /**
-   * Processes the response headers on login and extracts the JWT and expiration time. Also, the passcode state will be
-   * removed, the session state updated und a `hanko-session-created` event will be dispatched.
+   * Processes the response headers on login and extracts the JWT and expiration time.
    *
-   * @param {string} userID - The user ID.
-   * @param {Response} response - The HTTP response object.
+   * @param {XMLHttpRequest} xhr - The xhr object.
    */
-  processResponseHeadersOnLogin(userID: string, response: Response) {
+  processHeaders(xhr: XMLHttpRequest) {
     let jwt = "";
     let expirationSeconds = 0;
 
-    response.xhr
+    xhr
       .getAllResponseHeaders()
       .split("\r\n")
       .forEach((h) => {
         const header = h.toLowerCase();
         if (header.startsWith("x-auth-token")) {
-          jwt = response.headers.getResponseHeader("X-Auth-Token");
+          jwt = xhr.getResponseHeader("X-Auth-Token");
         } else if (header.startsWith("x-session-lifetime")) {
           expirationSeconds = parseInt(
-            response.headers.getResponseHeader("X-Session-Lifetime"),
+            xhr.getResponseHeader("X-Session-Lifetime"),
             10,
           );
         }
@@ -225,19 +220,11 @@ class HttpClient {
       this.cookie.setAuthCookie(jwt, { secure, expires });
     }
 
-    this.passcodeState.read().reset(userID).write();
-
     if (expirationSeconds > 0) {
       this.sessionState.read();
       this.sessionState.setExpirationSeconds(expirationSeconds);
-      this.sessionState.setUserID(userID);
       this.sessionState.setAuthFlowCompleted(false);
       this.sessionState.write();
-      this.dispatcher.dispatchSessionCreatedEvent({
-        jwt,
-        userID,
-        expirationSeconds,
-      });
     }
   }
 
