@@ -199,7 +199,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 	for _, currentTest := range tests {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
-			cfg.Emails.MaxNumOfAddresses = currentTest.maxNumberOfAddresses
+			cfg.Email.Limit = currentTest.maxNumberOfAddresses
 
 			e := NewAdminRouter(&cfg, s.Storage, nil)
 
