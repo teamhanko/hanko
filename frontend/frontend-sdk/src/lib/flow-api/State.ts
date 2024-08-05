@@ -160,9 +160,6 @@ class State<TStateName extends StateName>
               validateAction(action);
               return action;
             },
-            /**
-             * Safe version of `validate` that returns
-             */
             tryValidate() {
               try {
                 validateAction(action);

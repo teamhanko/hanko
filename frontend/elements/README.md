@@ -74,7 +74,7 @@ pnpm install @teamhanko/hanko-elements
 
 To integrate Hanko, you need to import and call the `register()` function from the `hanko-elements` module. Once this is
 done, you can use the web components in your HTML code. For a functioning page, at least the `<hanko-auth>` element
-should be placed, so the users can sign in, and also, a handler for the "onAuthFlowCompleted" event should be added, to
+should be placed, so the users can sign in, and also, a handler for the "onSessionCreated" event should be added, to
 customize the behaviour after the authentication flow has been completed (e.g. redirect to another page). These steps
 will be described in the following sections.
 
@@ -149,7 +149,7 @@ of your HTML. A minimal example would look like this:
   await register("https://hanko.yourdomain.com");
 
   const authComponent = document.getElementById("authComponent");
-  authComponent.addEventListener("onAuthFlowCompleted", () => {
+  authComponent.addEventListener("onSessionCreated", () => {
     // redirect to a different page
   });
 </script>
@@ -219,7 +219,7 @@ handler via the `frontend-sdk` (see next section).
 <script>
   document
     .getElementById("events")
-    .addEventListener("onAuthFlowCompleted", console.log);
+    .addEventListener("onSessionCreated", console.log);
   // more events are available (see "frontend-sdk" docs)...
 </script>
 ```
@@ -243,25 +243,11 @@ const hanko = new Hanko("https://hanko.yourdomain.com");
 It is possible to bind callbacks to different custom events in use of the SDKs event listener functions.
 The callback function will be called when the event happens and an object will be passed in, containing event details.
 
-##### Auth Flow Completed
-
-Will be triggered after a session has been created and the user has completed possible
-additional steps (e.g. passkey registration or password recovery) via the `<hanko-auth>` element.
-
-```js
-hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
-  // Login, registration or recovery has been completed successfully. You can now take control and redirect the
-  // user to protected pages.
-  console.info(
-    `User successfully completed the registration or authorization process (user-id: "${authFlowCompletedDetail.userID}")`
-  );
-});
-```
-
 ##### Session Created
 
-Will be triggered before the "hanko-auth-flow-completed" happens, as soon as the user is technically logged in. It will
-also be triggered when the user logs in via another browser window. The event can be used to obtain the JWT.
+Will be triggered after a session has been created and the user has completed possible additional steps (e.g. passkey
+registration or password recovery). It will also be triggered when the user logs in via another browser window. The
+event can be used to obtain the JWT.
 
 Please note, that the JWT is only available, when the Hanko-API configuration allows to obtain the JWT. When using
 Hanko-Cloud the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the
@@ -276,7 +262,7 @@ frontend.
 hanko.onSessionCreated((sessionDetail) => {
   // A new JWT has been issued.
   console.info(
-    `Session created or updated (user-id: "${sessionDetail.userID}", jwt: ${sessionDetail.jwt})`
+    `Session created or updated (jwt: ${sessionDetail.jwt})`
   );
 });
 ```

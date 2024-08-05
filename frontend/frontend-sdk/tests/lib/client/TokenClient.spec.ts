@@ -79,7 +79,7 @@ describe("tokenClient.validate()", () => {
       expect(window.history.replaceState).toHaveBeenCalledWith(
         null,
         null,
-        "/callback"
+        "/callback",
       );
     });
   });

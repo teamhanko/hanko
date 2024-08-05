@@ -26,14 +26,14 @@ export class ThirdPartyClient extends Client {
     if (!provider) {
       throw new ThirdPartyError(
         "somethingWentWrong",
-        new Error("provider missing from request")
+        new Error("provider missing from request"),
       );
     }
 
     if (!redirectTo) {
       throw new ThirdPartyError(
         "somethingWentWrong",
-        new Error("redirectTo missing from request")
+        new Error("redirectTo missing from request"),
       );
     }
 

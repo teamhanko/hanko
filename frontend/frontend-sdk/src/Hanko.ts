@@ -1,9 +1,5 @@
-import { ConfigClient } from "./lib/client/ConfigClient";
 import { EnterpriseClient } from "./lib/client/EnterpriseClient";
-import { PasscodeClient } from "./lib/client/PasscodeClient";
-import { PasswordClient } from "./lib/client/PasswordClient";
 import { UserClient } from "./lib/client/UserClient";
-import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 import { TokenClient } from "./lib/client/TokenClient";
@@ -40,11 +36,7 @@ export interface HankoOptions {
  */
 class Hanko extends Listener {
   api: string;
-  config: ConfigClient;
   user: UserClient;
-  webauthn: WebauthnClient;
-  password: PasswordClient;
-  passcode: PasscodeClient;
   email: EmailClient;
   thirdParty: ThirdPartyClient;
   enterprise: EnterpriseClient;
@@ -80,29 +72,9 @@ class Hanko extends Listener {
     this.api = api;
     /**
      *  @public
-     *  @type {ConfigClient}
-     */
-    this.config = new ConfigClient(api, opts);
-    /**
-     *  @public
      *  @type {UserClient}
      */
     this.user = new UserClient(api, opts);
-    /**
-     *  @public
-     *  @type {WebauthnClient}
-     */
-    this.webauthn = new WebauthnClient(api, opts);
-    /**
-     *  @public
-     *  @type {PasswordClient}
-     */
-    this.password = new PasswordClient(api, opts);
-    /**
-     *  @public
-     *  @type {PasscodeClient}
-     */
-    this.passcode = new PasscodeClient(api, opts);
     /**
      *  @public
      *  @type {EmailClient}

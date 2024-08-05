@@ -49,7 +49,7 @@ export class Relay extends Dispatcher {
     this._scheduler.scheduleTask(
       sessionExpiredType,
       () => this.dispatchSessionExpiredEvent(),
-      detail.expirationSeconds
+      detail.expirationSeconds,
     );
   };
 
@@ -78,11 +78,6 @@ export class Relay extends Dispatcher {
 
     if (!sessionDetail) {
       this.dispatchSessionExpiredEvent();
-      return;
-    }
-
-    if (this._session.isAuthFlowCompleted()) {
-      this.dispatchAuthFlowCompletedEvent({ userID: sessionDetail.userID });
       return;
     }
 

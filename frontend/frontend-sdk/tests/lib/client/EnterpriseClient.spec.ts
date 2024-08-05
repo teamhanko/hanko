@@ -1,4 +1,9 @@
-import {EnterpriseClient, NotFoundError, TechnicalError, ThirdPartyError} from '../../../src';
+import {
+  EnterpriseClient,
+  NotFoundError,
+  TechnicalError,
+  ThirdPartyError,
+} from "../../../src";
 import { Response } from "../../../src/lib/client/HttpClient";
 
 let enterpriseClient: EnterpriseClient;

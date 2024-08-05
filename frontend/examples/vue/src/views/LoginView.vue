@@ -12,6 +12,6 @@ const redirectToTodos = () => {
 <template>
   <main class="content">
     <div class="error">{{ error?.message }}</div>
-    <hanko-auth @onAuthFlowCompleted="redirectToTodos()" />
+    <hanko-auth @onSessionCreated="redirectToTodos()" />
   </main>
 </template>

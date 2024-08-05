@@ -118,7 +118,6 @@ interface Context {
   componentName: ComponentName;
   setComponentName: StateUpdater<ComponentName>;
   experimentalFeatures?: ExperimentalFeatures;
-  emitSuccessEvent: (userID: string) => void;
   lang: string;
   hidePasskeyButtonOnLogin: boolean;
   prefilledEmail?: string;
@@ -225,22 +224,6 @@ const AppProvider = ({
       }),
     );
   };
-
-  const emitSuccessEvent = useCallback(
-    (userID: string) => {
-      const event = new Event("hankoAuthSuccess", {
-        bubbles: true,
-        composed: true,
-      });
-      const fn = setTimeout(() => {
-        hanko.relay.dispatchAuthFlowCompletedEvent({ userID });
-        ref.current.dispatchEvent(event);
-      }, 500);
-
-      return () => clearTimeout(fn);
-    },
-    [hanko],
-  );
 
   const handleError = (e: any) => {
     setLoadingAction(null);
@@ -385,12 +368,8 @@ const AppProvider = ({
         setPage(<CreatePasswordPage state={state} />);
       },
       success(state) {
-        hanko.flow.client.processResponseHeadersOnLogin(
-          state.payload.user.user_id,
-          hanko.flow.client.response,
-        );
+        hanko.relay.dispatchSessionCreatedEvent(hanko.session.get());
         lastActionSucceeded();
-        emitSuccessEvent(state.payload.user.user_id);
       },
       profile_init(state) {
         setPage(
@@ -450,7 +429,6 @@ const AppProvider = ({
       },
     }),
     [
-      emitSuccessEvent,
       globalOptions.enablePasskeys,
       hanko,
       lastActionSucceeded,
@@ -506,10 +484,6 @@ const AppProvider = ({
   useEffect(() => init(componentName), []);
 
   useEffect(() => {
-    hanko.onAuthFlowCompleted((detail) => {
-      dispatchEvent("onAuthFlowCompleted", detail);
-    });
-
     hanko.onUserDeleted(() => {
       dispatchEvent("onUserDeleted");
     });
@@ -559,7 +533,6 @@ const AppProvider = ({
         componentName,
         setComponentName,
         experimentalFeatures,
-        emitSuccessEvent,
         hidePasskeyButtonOnLogin,
         page,
         setPage,

@@ -18,6 +18,6 @@
   {#if error}
     <div class="error">{ error?.message }</div>
   {/if}
-  <hanko-auth on:onAuthFlowCompleted={redirectToTodos}></hanko-auth>
+  <hanko-auth on:onSessionCreated={redirectToTodos}></hanko-auth>
 </div>
 

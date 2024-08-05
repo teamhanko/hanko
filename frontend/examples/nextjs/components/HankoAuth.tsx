@@ -22,7 +22,7 @@ function HankoAuth({ setError }: Props) {
     register(api).catch(setError);
   }, [setError]);
 
-  useEffect(() => hankoClient?.onAuthFlowCompleted(() => {
+  useEffect(() => hankoClient?.onSessionCreated(() => {
     redirectToTodos()
   }), [hankoClient, redirectToTodos]);
 
