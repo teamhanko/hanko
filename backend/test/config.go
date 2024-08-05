@@ -45,4 +45,7 @@ var DefaultConfig = config.Config{
 		AllowSignup:   true,
 		AllowDeletion: false,
 	},
+	Passkey: config.Passkey{
+		UserVerification: "preferred",
+	},
 }
