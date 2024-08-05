@@ -146,12 +146,6 @@ func (c *Config) Validate() error {
 			return fmt.Errorf("failed to validate smtp settings: %w", err)
 		}
 	}
-	if c.EmailDelivery.Enabled {
-		err = c.Smtp.Validate()
-		if err != nil {
-			return fmt.Errorf("failed to validate smtp settings: %w", err)
-		}
-	}
 	err = c.Passcode.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate passcode settings: %w", err)
