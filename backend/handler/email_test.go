@@ -169,8 +169,8 @@ func (s *emailSuite) TestEmailHandler_Create() {
 		s.Run(currentTest.name, func() {
 			cfg := test.DefaultConfig
 			cfg.AuditLog.Storage.Enabled = true
-			cfg.Emails.RequireVerification = currentTest.requiresVerification
-			cfg.Emails.MaxNumOfAddresses = currentTest.maxNumberOfAddresses
+			cfg.Email.RequireVerification = currentTest.requiresVerification
+			cfg.Email.Limit = currentTest.maxNumberOfAddresses
 			e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 			jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
 			s.Require().NoError(err)
