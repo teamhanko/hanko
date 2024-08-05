@@ -56,57 +56,49 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 
 func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirectURLs []string) *config.Config {
 	s.T().Helper()
-	cfg := &config.Config{
-		ThirdParty: config.ThirdParty{
-			Providers: config.ThirdPartyProviders{
-				Apple: config.ThirdPartyProvider{
-					Enabled:      false,
-					ClientID:     "fakeClientID",
-					Secret:       "fakeClientSecret",
-					AllowLinking: true,
-				},
-				Google: config.ThirdPartyProvider{
-					Enabled:      false,
-					ClientID:     "fakeClientID",
-					Secret:       "fakeClientSecret",
-					AllowLinking: true,
-				},
-				GitHub: config.ThirdPartyProvider{
-					Enabled:      false,
-					ClientID:     "fakeClientID",
-					Secret:       "fakeClientSecret",
-					AllowLinking: true,
-				},
-				Discord: config.ThirdPartyProvider{
-					Enabled:      false,
-					ClientID:     "fakeClientID",
-					Secret:       "fakeClientSecret",
-					AllowLinking: true,
-				},
-				Microsoft: config.ThirdPartyProvider{
-					Enabled:      false,
-					ClientID:     "fakeClientID",
-					Secret:       "fakeClientSecret",
-					AllowLinking: false,
-				},
+	cfg := config.DefaultConfig()
+	cfg.ThirdParty = config.ThirdParty{
+		Providers: config.ThirdPartyProviders{
+			Apple: config.ThirdPartyProvider{
+				Enabled:      false,
+				ClientID:     "fakeClientID",
+				Secret:       "fakeClientSecret",
+				AllowLinking: true,
 			},
-			ErrorRedirectURL:    "https://error.test.example",
-			RedirectURL:         "https://api.test.example/callback",
-			AllowedRedirectURLS: allowedRedirectURLs,
+			Google: config.ThirdPartyProvider{
+				Enabled:      false,
+				ClientID:     "fakeClientID",
+				Secret:       "fakeClientSecret",
+				AllowLinking: true,
+			},
+			GitHub: config.ThirdPartyProvider{
+				Enabled:      false,
+				ClientID:     "fakeClientID",
+				Secret:       "fakeClientSecret",
+				AllowLinking: true,
+			},
+			Discord: config.ThirdPartyProvider{
+				Enabled:      false,
+				ClientID:     "fakeClientID",
+				Secret:       "fakeClientSecret",
+				AllowLinking: true,
+			},
+			Microsoft: config.ThirdPartyProvider{
+				Enabled:      false,
+				ClientID:     "fakeClientID",
+				Secret:       "fakeClientSecret",
+				AllowLinking: false,
+			},
 		},
-		Secrets: config.Secrets{
-			Keys: []string{"thirty-two-byte-long-test-secret"},
-		},
-		AuditLog: config.AuditLog{
-			Storage: config.AuditLogStorage{Enabled: true},
-		},
-		Email: config.Email{
-			Limit: 5,
-		},
-		Account: config.Account{
-			AllowSignup: true,
-		},
+		ErrorRedirectURL:    "https://error.test.example",
+		RedirectURL:         "https://api.test.example/callback",
+		AllowedRedirectURLS: allowedRedirectURLs,
 	}
+
+	cfg.AuditLog.Storage.Enabled = true
+	cfg.AuditLog.Mask = false
+	cfg.Email.Limit = 5
+	cfg.Account.AllowSignup = true
 
 	for _, provider := range enabledProviders {
 		switch provider {
