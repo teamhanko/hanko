@@ -353,16 +353,18 @@ Then run:
 
 > **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
 
-`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
-the `server.public.address` option.
+`8000` is the default port for the public API. It can
+be [customized](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-public#address) in the
+configuration through the `server.public.address` option.
 
 The service is now available at `localhost:8000`.
 
 #### Start the admin API
 
 In the usage section above we only started the public API. Use the command below to start the admin API. The default
-port is `8001`, but can be [customized](./docs/Config.md) in the configuration through the
-`server.admin.address` option.
+port is `8001`, but can be
+[customized](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-admin) in the configuration
+through the `server.admin.address` option.
 
 ```shell
 serve admin
