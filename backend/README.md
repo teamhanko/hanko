@@ -171,7 +171,8 @@ a user/password, so a minimal configuration in your configuration file (`backend
 your own `*.yaml` file) could contain the following:
 
 ```yaml
-passcode:
+email_delivery:
+  enabled: true
   email:
     from_address: no-reply@example.com
     from_name: Example Application
@@ -189,13 +190,8 @@ service:
 ```
 
 In a production setting you would rather use a self-hosted SMTP server or a managed service like AWS SES. In that case
-you need to supply the `passcode.smtp.host`, `passcode.smtp.port` as well as the `passcode.smtp.user`,
-`passcode.smtp.password` settings according to your server/service settings.
-
-> **Note** The `passcode.smtp.host` configuration entry is required for the service to start up.
-> Only a check for a non-empty string value will be performed. Also: SMTP-connection related values are not
-> verified, i.e. the application may start but no emails will be sent and your users might not be able to log in if
-> the provided values do not describe an existing SMTP server.
+you need to supply the `email_delivery.smtp.host`, `email_delivery.smtp.port` as well as the `email_delivery.smtp.user`,
+`email_delivery.smtp.password` settings according to your server/service settings.
 
 ### Configure JSON Web Key Set generation
 
