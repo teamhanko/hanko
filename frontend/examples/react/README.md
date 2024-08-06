@@ -13,7 +13,8 @@ This is a [React](https://reactjs.org/) project bootstrapped with [Create React 
 
 In the `.env` file set up the correct environment variables:
 
-- `REACT_APP_HANKO_API`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the `server.public.address` option in the [configuration file](../../../backend/docs/Config.md))
+- `REACT_APP_HANKO_API`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using
+  the `server.public.address` option in the [backend configuration](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-public#address))
 - `REACT_APP_TODO_API`: this is the URL of the [express](../express) backend (default: `http://localhost:8002`)
 
 ### Run development server

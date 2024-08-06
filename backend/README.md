@@ -437,7 +437,8 @@ Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide addition
 ### Social Logins
 
 Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
-party provider logins. See the `third_party` option in the [configuration reference](./docs/Config.md) on how to
+party provider logins. See the `third_party` option in
+the [configuration reference](https://github.com/teamhanko/hanko/wiki/hanko-properties-third_party) on how to
 configure them. All provider configurations require provider credentials. See the guides in the official
 documentation for instructions on how to obtain these:
 
@@ -555,7 +556,8 @@ webhooks:
 
 ## Configuration reference
 
-[Configuration reference](./docs/Config.md)
+- [Configuration reference](https://github.com/teamhanko/hanko/wiki/hanko)
+- [On using environment variables](https://github.com/teamhanko/hanko/wiki/On-using-environment-variables)
 
 ## License
 
