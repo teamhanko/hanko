@@ -16,6 +16,10 @@ var DefaultConfig = config.Config{
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
 	},
+	Email: config.Email{
+		Enabled:              true,
+		UseForAuthentication: true,
+	},
 	EmailDelivery: config.EmailDelivery{
 		Enabled: true,
 		SMTP: config.SMTP{
@@ -46,6 +50,7 @@ var DefaultConfig = config.Config{
 		AllowDeletion: false,
 	},
 	Passkey: config.Passkey{
+		Enabled:          true,
 		UserVerification: "preferred",
 	},
 }
