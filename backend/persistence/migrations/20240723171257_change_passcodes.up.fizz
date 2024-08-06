@@ -1,0 +1,2 @@
+drop_foreign_key("passcodes", "passcodes_flows_id_fk")
+drop_column("passcodes", "flow_id")

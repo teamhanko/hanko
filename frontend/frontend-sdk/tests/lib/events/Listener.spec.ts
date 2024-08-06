@@ -1,6 +1,5 @@
 import { Listener } from "../../../src/lib/events/Listener";
 import {
-  authFlowCompletedType,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
@@ -39,7 +38,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         sessionCreatedType,
         expect.any(Function),
-        { once: false }
+        { once: false },
       );
 
       expect(mockThrottleFunc).toHaveBeenCalledWith(
@@ -48,7 +47,7 @@ describe("Listener()", () => {
         {
           leading: true,
           trailing: false,
-        }
+        },
       );
 
       const mockEvent = new CustomEvent(sessionCreatedType, {
@@ -80,7 +79,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         sessionCreatedType,
         expect.any(Function),
-        { once: true }
+        { once: true },
       );
 
       document.dispatchEvent(mockEvent);
@@ -117,7 +116,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         sessionExpiredType,
         expect.any(Function),
-        { once: false }
+        { once: false },
       );
 
       expect(mockThrottleFunc).toHaveBeenCalledWith(
@@ -126,7 +125,7 @@ describe("Listener()", () => {
         {
           leading: true,
           trailing: false,
-        }
+        },
       );
 
       const mockEvent = new CustomEvent(sessionExpiredType, {});
@@ -147,7 +146,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         sessionExpiredType,
         expect.any(Function),
-        { once: true }
+        { once: true },
       );
 
       document.dispatchEvent(mockEvent);
@@ -169,75 +168,6 @@ describe("Listener()", () => {
     });
   });
 
-  describe("onAuthFlowCompleted()", () => {
-    it("should add an event listener for auth flow completed events", async () => {
-      const mockDetail = {
-        userID: "testUser",
-      };
-
-      listener.onAuthFlowCompleted(mockCallback);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        authFlowCompletedType,
-        expect.any(Function),
-        { once: false }
-      );
-
-      expect(mockThrottleFunc).toBeCalledTimes(0);
-
-      const mockEvent = new CustomEvent(authFlowCompletedType, {
-        detail: mockDetail,
-      });
-
-      document.dispatchEvent(mockEvent);
-      document.dispatchEvent(mockEvent);
-      document.dispatchEvent(mockEvent);
-
-      expect(mockCallback).toHaveBeenCalledWith(mockDetail);
-      expect(mockCallback).toHaveBeenCalledTimes(3);
-    });
-
-    it("should only execute the callback once", async () => {
-      const mockDetail = {
-        userID: "testUser",
-      };
-
-      const mockEvent = new CustomEvent(authFlowCompletedType, {
-        detail: mockDetail,
-      });
-
-      listener.onAuthFlowCompleted(mockCallback, true);
-
-      expect(addEventListenerSpy).toHaveBeenCalledWith(
-        authFlowCompletedType,
-        expect.any(Function),
-        { once: true }
-      );
-
-      document.dispatchEvent(mockEvent);
-      document.dispatchEvent(mockEvent);
-
-      expect(mockCallback).toBeCalledTimes(1);
-    });
-
-    it("should clean up the event listener", async () => {
-      const mockDetail = {
-        userID: "testUser",
-      };
-
-      const mockEvent = new CustomEvent(authFlowCompletedType, {
-        detail: mockDetail,
-      });
-
-      const cleanup = listener.onAuthFlowCompleted(mockCallback, true);
-
-      cleanup();
-
-      document.dispatchEvent(mockEvent);
-      expect(mockCallback).toBeCalledTimes(0);
-    });
-  });
-
   describe("onUserLogged()", () => {
     it("should add an event listener for user logged out events", async () => {
       listener.onUserLoggedOut(mockCallback);
@@ -245,7 +175,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         userLoggedOutType,
         expect.any(Function),
-        { once: false }
+        { once: false },
       );
 
       expect(mockThrottleFunc).toBeCalledTimes(0);
@@ -267,7 +197,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         userLoggedOutType,
         expect.any(Function),
-        { once: true }
+        { once: true },
       );
 
       document.dispatchEvent(mockEvent);
@@ -295,7 +225,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         userDeletedType,
         expect.any(Function),
-        { once: false }
+        { once: false },
       );
 
       expect(mockThrottleFunc).toBeCalledTimes(0);
@@ -317,7 +247,7 @@ describe("Listener()", () => {
       expect(addEventListenerSpy).toHaveBeenCalledWith(
         userDeletedType,
         expect.any(Function),
-        { once: true }
+        { once: true },
       );
 
       document.dispatchEvent(mockEvent);

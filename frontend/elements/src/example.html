@@ -130,9 +130,13 @@ You can find more details and functionality explanations within the code comment
 
     <!-- Dropdown for selecting the language -->
     <select id="langSelect">
+        <option value="bn">Bengali</option>
         <option value="de">German</option>
         <option value="en" selected>English</option>
         <option value="fr">French</option>
+        <option value="it">Italian</option>
+        <option value="ptBR">Brazilian Portuguese</option>
+        <option value="zh">Chinese</option>
     </select>
 </nav>
 
@@ -140,7 +144,7 @@ You can find more details and functionality explanations within the code comment
 <main>
     <section>
         <!-- Hanko Authentication Component -->
-        <hanko-auth id="hankoAuth" class="hankoComponent" lang="en"></hanko-auth>
+        <hanko-auth  id="hankoAuth" class="hankoComponent" lang="en"></hanko-auth>
 
         <!-- Hanko Profile Component -->
         <hanko-profile id="hankoProfile" class="hankoComponent" lang="en" hidden></hanko-profile>
@@ -175,12 +179,13 @@ after the user completes the authentication flow), while other events are option
 <script type="module">
     // Uncomment the following two lines if you want to import the local build, which can be created by changing to
     // the "/frontend" directory and running "npm run build:elements".
-    // import {register} from "../dist/elements.js";
-    // import {all} from "../dist/i18n/all.js";
+    //
+    import {register} from "../dist/elements.js";
+    import {all} from "../dist/i18n/all.js";
 
     // Comment the following two lines if you don't want to import Hanko Elements from the CDN, see comment above.
-    import {register} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
-    import {all} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/all.js";
+    // import {register} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/elements.js";
+    // import {all} from "https://cdn.jsdelivr.net/npm/@teamhanko/hanko-elements/dist/i18n/all.js";
 
     // Change `apiUrl` to the URL where your Hanko-API instance is running.
     const apiUrl = "http://localhost:8000";
@@ -223,9 +228,9 @@ after the user completes the authentication flow), while other events are option
     // Function to add event listeners
     function addEventListeners() {
         hankoEventsEl.addEventListener("onSessionCreated", () => {
-            // A session has been created through the hanko-auth component, but the authentication flow might not be
-            // finished yet, so we don't want to hide the hanko-auth component at this time. However, we can show the
-            // logout button, since the user is logged in.
+            // The user has completed the authentication flow through the hanko-auth component, so we can display the
+            // hanko-profile and hide the hanko-auth component.
+            showAuthComponent(false); // Show profile component
             setVisibility(logoutButtonEl, true); // Show the logout button
 
             // When the dialog was initially opened due to the session expiring in the past, and it has not been closed
@@ -233,12 +238,6 @@ after the user completes the authentication flow), while other events are option
             if (dialogEl.open) {
                 dialogEl.close(); // Close the dialog when it is still open and a new session was created
             }
-        });
-
-        hankoEventsEl.addEventListener("onAuthFlowCompleted", () => {
-            // The user has completed the authentication flow through the hanko-auth component, so we can display the
-            // hanko-profile and hide the hanko-auth component.
-            showAuthComponent(false); // Show profile component
         });
 
         hankoEventsEl.addEventListener("onSessionExpired", () => {

@@ -1,25 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import dynamic from "next/dynamic";
 import styles from "../styles/Todo.module.css";
 
-import { SessionExpiredModal } from "../components/SessionExpiredModal";
 import { Hanko } from "@teamhanko/hanko-elements";
+import { SessionExpiredModal } from "../components/SessionExpiredModal";
+import HankoProfile from "../components/HankoProfile";
 
-const hankoAPI = process.env.NEXT_PUBLIC_HANKO_API!;
-const HankoProfile = dynamic(() => import("../components/HankoProfile"), {
-  ssr: false,
-});
+const api = process.env.NEXT_PUBLIC_HANKO_API!;
 
 const Profile: NextPage = () => {
   const router = useRouter();
   const [hankoClient, setHankoClient] = useState<Hanko>();
-
-  useEffect(() => {
-    import("@teamhanko/hanko-elements").then(({ Hanko }) => setHankoClient(new Hanko(hankoAPI)));
-  }, []);
-
   const modalRef = useRef<HTMLDialogElement>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -49,6 +41,7 @@ const Profile: NextPage = () => {
     }
   }, [hankoClient, redirectToLogin]);
 
+  useEffect(() => setHankoClient(new Hanko(api)), []);
 
   useEffect(() => hankoClient?.onUserLoggedOut(() => {
     redirectToLogin();

@@ -61,12 +61,10 @@ export class Session {
   public _get(): SessionDetail {
     this._sessionState.read();
 
-    const userID = this._sessionState.getUserID();
     const expirationSeconds = this._sessionState.getExpirationSeconds();
     const jwt = this._cookie.getAuthCookie();
 
     return {
-      userID,
       expirationSeconds,
       jwt,
     };
@@ -87,9 +85,9 @@ export class Session {
 
    @private
    @param {SessionDetail} detail - The session details to validate.
-   @returns {boolean} true if the session details are valid, false otherwise.
+   @returns {boolean} true if the session is valid, false otherwise.
    */
   private static validate(detail: SessionDetail): boolean {
-    return !!(detail.expirationSeconds > 0 && detail.userID?.length);
+    return detail.expirationSeconds > 0;
   }
 }

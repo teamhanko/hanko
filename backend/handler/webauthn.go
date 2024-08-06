@@ -59,11 +59,11 @@ func NewWebauthnHandler(cfg *config.Config, persister persistence.Persister, ses
 		Debug: false,
 		Timeouts: webauthn.TimeoutsConfig{
 			Login: webauthn.TimeoutConfig{
-				Timeout: time.Duration(cfg.Webauthn.Timeout) * time.Millisecond,
+				Timeout: time.Duration(cfg.Webauthn.Timeouts.Login) * time.Millisecond,
 				Enforce: true,
 			},
 			Registration: webauthn.TimeoutConfig{
-				Timeout: time.Duration(cfg.Webauthn.Timeout) * time.Millisecond,
+				Timeout: time.Duration(cfg.Webauthn.Timeouts.Registration) * time.Millisecond,
 				Enforce: true,
 			},
 		},
@@ -111,9 +111,10 @@ func (h *WebauthnHandler) BeginRegistration(c echo.Context) error {
 		webauthn.WithAuthenticatorSelection(protocol.AuthenticatorSelection{
 			RequireResidentKey: &t,
 			ResidentKey:        protocol.ResidentKeyRequirementRequired,
-			UserVerification:   protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification),
+			UserVerification:   protocol.UserVerificationRequirement(h.cfg.Passkey.UserVerification),
 		}),
-		webauthn.WithConveyancePreference(protocol.PreferDirectAttestation),
+
+		webauthn.WithConveyancePreference(protocol.ConveyancePreference(h.cfg.Passkey.AttestationPreference)),
 		// don't set the excludeCredentials list, so an already registered device can be re-registered
 	)
 
@@ -271,7 +272,7 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 		if len(webauthnUser.WebAuthnCredentials()) > 0 {
 			options, sessionData, err = h.webauthn.BeginLogin(
 				webauthnUser,
-				webauthn.WithUserVerification(protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification)),
+				webauthn.WithUserVerification(protocol.UserVerificationRequirement(h.cfg.Passkey.UserVerification)),
 			)
 			if err != nil {
 				return fmt.Errorf("failed to create webauthn assertion options: %w", err)
@@ -281,7 +282,7 @@ func (h *WebauthnHandler) BeginAuthentication(c echo.Context) error {
 	if options == nil && sessionData == nil {
 		var err error
 		options, sessionData, err = h.webauthn.BeginDiscoverableLogin(
-			webauthn.WithUserVerification(protocol.UserVerificationRequirement(h.cfg.Webauthn.UserVerification)),
+			webauthn.WithUserVerification(protocol.UserVerificationRequirement(h.cfg.Passkey.UserVerification)),
 		)
 		if err != nil {
 			return fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)

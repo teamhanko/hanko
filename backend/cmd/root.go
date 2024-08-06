@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/cmd/jwk"
 	"github.com/teamhanko/hanko/backend/cmd/jwt"
 	"github.com/teamhanko/hanko/backend/cmd/migrate"
+	"github.com/teamhanko/hanko/backend/cmd/schema"
 	"github.com/teamhanko/hanko/backend/cmd/serve"
 	"github.com/teamhanko/hanko/backend/cmd/siwa"
 	"github.com/teamhanko/hanko/backend/cmd/user"
@@ -29,6 +30,7 @@ func NewRootCmd() *cobra.Command {
 	version.RegisterCommands(cmd)
 	user.RegisterCommands(cmd)
 	siwa.RegisterCommands(cmd)
+	schema.RegisterCommands(cmd)
 
 	return cmd
 }

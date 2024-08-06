@@ -1,9 +1,5 @@
-import { ConfigClient } from "./lib/client/ConfigClient";
 import { EnterpriseClient } from "./lib/client/EnterpriseClient";
-import { PasscodeClient } from "./lib/client/PasscodeClient";
-import { PasswordClient } from "./lib/client/PasswordClient";
 import { UserClient } from "./lib/client/UserClient";
-import { WebauthnClient } from "./lib/client/WebauthnClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 import { TokenClient } from "./lib/client/TokenClient";
@@ -11,6 +7,7 @@ import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
 import { Session } from "./lib/Session";
 import { CookieSameSite } from "./lib/Cookie";
+import { Flow } from "./lib/flow-api/Flow";
 
 /**
  * The options for the Hanko class
@@ -39,17 +36,14 @@ export interface HankoOptions {
  */
 class Hanko extends Listener {
   api: string;
-  config: ConfigClient;
   user: UserClient;
-  webauthn: WebauthnClient;
-  password: PasswordClient;
-  passcode: PasscodeClient;
   email: EmailClient;
   thirdParty: ThirdPartyClient;
   enterprise: EnterpriseClient;
   token: TokenClient;
   relay: Relay;
   session: Session;
+  flow: Flow;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
@@ -78,29 +72,9 @@ class Hanko extends Listener {
     this.api = api;
     /**
      *  @public
-     *  @type {ConfigClient}
-     */
-    this.config = new ConfigClient(api, opts);
-    /**
-     *  @public
      *  @type {UserClient}
      */
     this.user = new UserClient(api, opts);
-    /**
-     *  @public
-     *  @type {WebauthnClient}
-     */
-    this.webauthn = new WebauthnClient(api, opts);
-    /**
-     *  @public
-     *  @type {PasswordClient}
-     */
-    this.password = new PasswordClient(api, opts);
-    /**
-     *  @public
-     *  @type {PasscodeClient}
-     */
-    this.passcode = new PasscodeClient(api, opts);
     /**
      *  @public
      *  @type {EmailClient}
@@ -131,6 +105,11 @@ class Hanko extends Listener {
      *  @type {Session}
      */
     this.session = new Session({ ...opts });
+    /**
+     *  @public
+     *  @type {Flow}
+     */
+    this.flow = new Flow(api, opts);
   }
 }
 

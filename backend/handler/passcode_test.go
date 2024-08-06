@@ -38,8 +38,8 @@ func (s *passcodeSuite) TestPasscodeHandler_Init() {
 
 	cfg := func() *config.Config {
 		cfg := &test.DefaultConfig
-		cfg.Smtp.Host = s.EmailServer.SmtpHost
-		cfg.Smtp.Port = s.EmailServer.SmtpPort
+		cfg.EmailDelivery.SMTP.Host = s.EmailServer.SmtpHost
+		cfg.EmailDelivery.SMTP.Port = s.EmailServer.SmtpPort
 		return cfg
 	}
 
@@ -122,10 +122,12 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte("123456"), 12)
 
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+	emailId := uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84")
 	passcode := models.Passcode{
 		ID:        uuid.FromStringOrNil("a2383922-dea3-46c8-be17-85b267c0d135"),
-		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
-		EmailID:   uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		UserId:    &userId,
+		EmailID:   &emailId,
 		Ttl:       300,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
@@ -135,8 +137,8 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 
 	passcodeWithExpiredTimeout := models.Passcode{
 		ID:        uuid.FromStringOrNil("a2383922-dea3-46c8-be17-85b267c0d135"),
-		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
-		EmailID:   uuid.FromStringOrNil("51b7c175-ceb6-45ba-aae6-0092221c1b84"),
+		UserId:    &userId,
+		EmailID:   &emailId,
 		Ttl:       300,
 		Code:      string(hashedPasscode),
 		TryCount:  0,
@@ -144,10 +146,11 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 		UpdatedAt: now,
 	}
 
+	emailIdNotAssigned := uuid.FromStringOrNil("7c4473b8-ddcc-480b-b01f-df89e99f74c9")
 	passcodeForNonAssignedEmail := models.Passcode{
 		ID:        uuid.FromStringOrNil("494129d5-76de-4fae-b07d-f2a521e1804d"),
-		UserId:    uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"),
-		EmailID:   uuid.FromStringOrNil("7c4473b8-ddcc-480b-b01f-df89e99f74c9"),
+		UserId:    &userId,
+		EmailID:   &emailIdNotAssigned,
 		Ttl:       300,
 		Code:      string(hashedPasscode),
 		TryCount:  0,

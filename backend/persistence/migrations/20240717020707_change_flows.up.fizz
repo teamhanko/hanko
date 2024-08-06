@@ -1,0 +1,4 @@
+add_column("flows", "data", "string", {"size": 65536})
+drop_column("flows", "stash_data")
+drop_column("flows", "current_state")
+drop_column("flows", "previous_state")

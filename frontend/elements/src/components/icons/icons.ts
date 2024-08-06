@@ -8,6 +8,8 @@ import { default as apple } from "./Apple";
 import { default as discord } from "./Discord";
 import { default as microsoft } from "./Microsoft";
 import { default as linkedin } from "./LinkedIn";
+import { default as mail } from "./Mail";
+import { default as password } from "./Password";
 
 export {
   passkey,
@@ -20,4 +22,6 @@ export {
   discord,
   microsoft,
   linkedin,
+  mail,
+  password,
 };

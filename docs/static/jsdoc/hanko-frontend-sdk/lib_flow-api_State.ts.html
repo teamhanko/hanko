@@ -1,0 +1,478 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title> lib/flow-api/State.ts</title>
+
+  <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="./build/entry.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,400,700|Inconsolata,700" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link type="text/css" rel="stylesheet" href="https://jmblog.github.io/color-themes-for-google-code-prettify/themes/tomorrow-night.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/app.min.css">
+  <link type="text/css" rel="stylesheet" href="styles/iframe.css">
+  <link type="text/css" rel="stylesheet" href="">
+  <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+  
+</head>
+
+
+
+<body class="layout small-header">
+    <div id="stickyNavbarOverlay"></div>
+    
+
+<div class="top-nav">
+    <div class="inner">
+        <a id="hamburger" role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </a>
+        <div class="logo">
+            
+            
+        </div>
+        <div class="menu">
+            
+            <div class="navigation">
+                <a
+                    href="index.html"
+                    class="link"
+                >
+                    Documentation
+                </a>
+                
+                
+                
+            </div>
+        </div>
+    </div>
+</div>
+    <div id="main">
+        <div
+            class="sidebar "
+            id="sidebarNav"
+        >
+            
+            <nav>
+                
+                    <h2><a href="index.html">Documentation</a></h2><div class="category"><h3>Classes</h3><ul><li><a href="Hanko.html">Hanko</a></li></ul><h3>Interfaces</h3><ul><li><a href="HankoOptions.html">HankoOptions</a></li></ul></div><div class="category"><h2>SDK</h2><h3>Classes / Internal</h3><ul><li><a href="Client.html">Client</a></li><li><a href="Cookie.html">Cookie</a></li><li><a href="Dispatcher.html">Dispatcher</a></li><li><a href="Headers.html">Headers</a></li><li><a href="HttpClient.html">HttpClient</a></li><li><a href="Relay.html">Relay</a></li><li><a href="Response.html">Response</a></li><li><a href="Scheduler.html">Scheduler</a></li><li><a href="SessionState.html">SessionState</a></li><li><a href="State.html">State</a></li><li><a href="Throttle.html">Throttle</a></li></ul><h3>Classes / Errors</h3><ul><li><a href="ConflictError.html">ConflictError</a></li><li><a href="EmailAddressAlreadyExistsError.html">EmailAddressAlreadyExistsError</a></li><li><a href="ForbiddenError.html">ForbiddenError</a></li><li><a href="HankoError.html">HankoError</a></li><li><a href="InvalidPasscodeError.html">InvalidPasscodeError</a></li><li><a href="InvalidPasswordError.html">InvalidPasswordError</a></li><li><a href="InvalidWebauthnCredentialError.html">InvalidWebauthnCredentialError</a></li><li><a href="MaxNumOfEmailAddressesReachedError.html">MaxNumOfEmailAddressesReachedError</a></li><li><a href="MaxNumOfPasscodeAttemptsReachedError.html">MaxNumOfPasscodeAttemptsReachedError</a></li><li><a href="NotFoundError.html">NotFoundError</a></li><li><a href="PasscodeExpiredError.html">PasscodeExpiredError</a></li><li><a href="RequestTimeoutError.html">RequestTimeoutError</a></li><li><a href="TechnicalError.html">TechnicalError</a></li><li><a href="ThirdPartyError.html">ThirdPartyError</a></li><li><a href="TooManyRequestsError.html">TooManyRequestsError</a></li><li><a href="UnauthorizedError.html">UnauthorizedError</a></li><li><a href="UserVerificationError.html">UserVerificationError</a></li><li><a href="WebauthnRequestCancelledError.html">WebauthnRequestCancelledError</a></li></ul><h3>Classes / Clients</h3><ul><li><a href="EmailClient.html">EmailClient</a></li><li><a href="EnterpriseClient.html">EnterpriseClient</a></li><li><a href="ThirdPartyClient.html">ThirdPartyClient</a></li><li><a href="TokenClient.html">TokenClient</a></li><li><a href="UserClient.html">UserClient</a></li></ul><h3>Classes / Events</h3><ul><li><a href="Listener.html">Listener</a></li></ul><h3>Classes / Session</h3><ul><li><a href="Session.html">Session</a></li></ul><h3>Classes / Utilities</h3><ul><li><a href="WebauthnSupport.html">WebauthnSupport</a></li></ul><h3>Interfaces / DTO</h3><ul><li><a href="AccountConfig.html">AccountConfig</a></li><li><a href="Config.html">Config</a></li><li><a href="Credential.html">Credential</a></li><li><a href="Email.html">Email</a></li><li><a href="EmailConfig.html">EmailConfig</a></li><li><a href="Emails.html">Emails</a></li><li><a href="Identity.html">Identity</a></li><li><a href="Passcode.html">Passcode</a></li><li><a href="PasswordConfig.html">PasswordConfig</a></li><li><a href="TokenFinalized.html">TokenFinalized</a></li><li><a href="User.html">User</a></li><li><a href="UserCreated.html">UserCreated</a></li><li><a href="UserInfo.html">UserInfo</a></li><li><a href="WebauthnCredential.html">WebauthnCredential</a></li><li><a href="WebauthnCredentials.html">WebauthnCredentials</a></li><li><a href="WebauthnFinalized.html">WebauthnFinalized</a></li><li><a href="WebauthnTransports.html">WebauthnTransports</a></li></ul><h3>Interfaces / Internal</h3><ul><li><a href="CookieOptions.html">CookieOptions</a></li><li><a href="DispatcherOptions.html">DispatcherOptions</a></li><li><a href="HttpClientOptions.html">HttpClientOptions</a></li><li><a href="LocalStorage.html">LocalStorage</a></li><li><a href="LocalStorageSession.html">LocalStorageSession</a></li><li><a href="RelayOptions.html">RelayOptions</a></li><li><a href="SessionOptions.html">SessionOptions</a></li><li><a href="SessionStateOptions.html">SessionStateOptions</a></li><li><a href="ThrottleOptions.html">ThrottleOptions</a></li></ul><h3>Interfaces / Events</h3><ul><li><a href="SessionDetail.html">SessionDetail</a></li></ul></div>
+                
+            </nav>
+        </div>
+        <div class="core" id="main-content-wrapper">
+            <div class="content">
+                <header class="page-title">
+                    <p>Source</p>
+                    <h1>lib/flow-api/State.ts</h1>
+                </header>
+                
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>import {
+  FetchNextState,
+  StateName,
+  Actions,
+  Payloads,
+} from "./types/state-handling";
+import { Error } from "./types/error";
+import { Action } from "./types/action";
+import { Input } from "./types/input";
+
+type InputValues&lt;TInput extends Record&lt;string, Input&lt;any>>> = {
+  [K in keyof TInput]?: TInput[K]["value"];
+};
+
+type CreateAction&lt;TAction extends Action&lt;any>> = (
+  inputs: InputValues&lt;TAction["inputs"]>
+) => TAction &amp; {
+  run: () => Promise&lt;State&lt;any>>;
+  validate: () => TAction;
+  tryValidate: () => ValidationError | void;
+};
+
+type ActionFunctions = {
+  [TStateName in keyof Actions]: {
+    [TActionName in keyof Actions[TStateName]]: Actions[TStateName][TActionName] extends Action&lt;
+      infer Inputs
+    >
+      ? CreateAction&lt;Action&lt;Inputs>>
+      : never;
+  };
+};
+
+interface StateResponse&lt;TStateName extends StateName> {
+  name: StateName;
+  status: number;
+  payload?: Payloads[TStateName];
+  actions?: Actions[TStateName];
+  csrf_token: string;
+  error: Error;
+}
+
+// State class represents a state in the flow
+// eslint-disable-next-line require-jsdoc
+class State&lt;TStateName extends StateName>
+  implements Omit&lt;StateResponse&lt;TStateName>, "actions">
+{
+  readonly name: StateName;
+  readonly payload?: Payloads[TStateName];
+  readonly error: Error;
+  readonly status: number;
+  readonly csrf_token: string;
+
+  readonly #actionDefinitions: Actions[TStateName];
+  readonly actions: ActionFunctions[TStateName];
+
+  private readonly fetchNextState: FetchNextState;
+
+  toJSON() {
+    return {
+      name: this.name,
+      payload: this.payload,
+      error: this.error,
+      status: this.status,
+      csrf_token: this.csrf_token,
+      actions: this.#actionDefinitions,
+    };
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  constructor(
+    { name, payload, error, status, actions, csrf_token }: StateResponse&lt;TStateName>,
+    fetchNextState: FetchNextState
+  ) {
+    this.name = name;
+    this.payload = payload;
+    this.error = error;
+    this.status = status;
+    this.csrf_token = csrf_token;
+    this.#actionDefinitions = actions;
+
+    // We're doing something really hacky here, but hear me out
+    //
+    // `actions` is an object like this:
+    //
+    //     { login_password_recovery: { inputs: { new_password: { min_length: 8, value: "this still needs to be set" } } } }
+    //
+    // However, we don't want users to have to mutate the `actions` object manually.
+    // They WOULD have to do this:
+    //
+    //     actions.login_password_recovery.inputs.new_password.value = "password";
+    //
+    // Instead, we're going to wrap the `actions` object in a Proxy.
+    // This Proxy transforms the manual mutation you're seeing above into a function call.
+    // The following is doing the same thing as the manual mutation above:
+    //
+    //     actions.login_password_recovery({ new_password: "password" });
+    //
+    // Okay, there's one difference, the function call creates a copy of the action, so it's not mutating the original object.
+    // The newly created action is returned. It also has a `run` method, which sends the action to the server (fetchNextState)
+    this.actions = this.#createActionsProxy(actions, csrf_token);
+
+    // Do not remove! `this.fetchNextState` has to be set for `this.#runAction` to work
+    this.fetchNextState = fetchNextState;
+  }
+
+  /**
+   * We get the `actions` object from the server. That object is essentially a definition of actions that can be performed in the current state.
+   *
+   * For example:
+   *
+   *     actions = {
+   *       login_password_recovery: {
+   *         inputs: {
+   *           email: { value: undefined, required: true, ... },
+   *           password: { value: undefined, required: true, min_length: 8, ... }
+   *         }
+   *       },
+   *       create_account: { inputs: ... },
+   *       some_other_action: { inputs: ... },
+   *     };
+   *
+   * The proxy returned by this method creates "action functions".
+   *
+   * Each action function copies the original definition (`{ inputs: ... }`) and modifies that copy with the inputs provided by the user.
+   *
+   * In practice, it looks like this:
+   *
+   *     actions.login_password_recovery({ new_password: "very-secure-123" });
+   *     // => { inputs: { password: { value: "very-secure-123", min_length: 8, ... }}}
+   *
+   * Additionally, helper methods like `run` (to send the action to the server) and `validate` (to validate the inputs; the `inputs` object also contains validation rules)
+   */
+  #createActionsProxy(actions: Actions[TStateName], csrfToken: string) {
+    const runAction = (action: Action&lt;any>) => this.runAction(action, csrfToken);
+    const validateAction = (action: Action&lt;any>) => this.validateAction(action);
+
+    return new Proxy(actions, {
+      get(target, prop): CreateAction&lt;Action&lt;unknown>> | undefined {
+        if (typeof prop === "symbol") return (target as any)[prop];
+
+        type Original = Actions[TStateName][keyof Actions[TStateName]];
+        type Prop = keyof typeof target;
+
+        /**
+         * This is the action defintion.
+         * Running the function returned by this getter creates a **deep copy**
+         * with values set by the user.
+         */
+        const originalAction = target[
+          prop as Prop
+        ] satisfies Original as Action&lt;unknown>;
+
+        if (originalAction == null) {
+          return null;
+        }
+
+        return (newInputs: any) => {
+          const action = Object.assign(deepCopy(originalAction), {
+            validate() {
+              validateAction(action);
+              return action;
+            },
+            tryValidate() {
+              try {
+                validateAction(action);
+              } catch (e) {
+                if (e instanceof ValidationError) return e;
+
+                // We still want to throw non-ValidationErrors since they're unexpected (and indicate a bug on our side)
+                throw e;
+              }
+            },
+            run() {
+              return runAction(action);
+            },
+          });
+
+          // If `actions` is an object that has inputs,
+          //
+          // Transform this:
+          // actions.login_password_recovery({ new_password: "password" });
+          //                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+          // Into this:
+          // action.inputs = { new_password: { min_length: 8, value: "password", ... }}
+          if (
+            action !== null &amp;&amp;
+            typeof action === "object" &amp;&amp;
+            "inputs" in action
+          ) {
+            for (const inputName in newInputs) {
+              const actionInputs = action.inputs as Record&lt;
+                string,
+                Input&lt;unknown>
+              >;
+
+              if (!actionInputs[inputName]) {
+                actionInputs[inputName] = { name: inputName, type: "" };
+              }
+
+              actionInputs[inputName].value = newInputs[inputName];
+            }
+          }
+
+          return action;
+        };
+      },
+    }) satisfies Actions[TStateName] as any;
+  }
+
+  runAction(action: Action&lt;any>, csrfToken: string): Promise&lt;State&lt;any>> {
+    const data: Record&lt;string, any> = {};
+
+    // Deal with object-type inputs
+    // i.e. actions.some_action({ ... })
+    //                          ^^^^^^^
+    // Other input types would look like this:
+    //
+    // actions.another_action(1234);
+    // actions.yet_another_action("foo");
+    //
+    // Meaning
+    if (
+      "inputs" in action &amp;&amp;
+      typeof action.inputs === "object" &amp;&amp;
+      action.inputs !== null
+    ) {
+      // This looks horrible, but at this point we're sure that `action.inputs` is a Record&lt;string, Input>
+      // Because there are no object-type inputs that AREN'T a Record&lt;string, Input>
+      const inputs = action.inputs satisfies object as Record&lt;
+        string,
+        Input&lt;unknown>
+      >;
+
+      for (const inputName in action.inputs) {
+        const input = inputs[inputName];
+
+        if (input &amp;&amp; "value" in input) {
+          data[inputName] = input.value;
+        }
+      }
+    }
+
+    // (Possibly add more input types here?)
+
+    // Use the fetch function to perform the action
+    return this.fetchNextState(action.href, {
+      input_data: data,
+      csrf_token: csrfToken,
+    });
+  }
+
+  validateAction(action: Action&lt;{ [key: string]: Input&lt;unknown> }>) {
+    if (!("inputs" in action)) return;
+
+    for (const inputName in action.inputs) {
+      const input = action.inputs[inputName];
+
+      function reject&lt;T>(
+        reason: ValidationReason,
+        message: string,
+        wanted?: T,
+        actual?: T
+      ) {
+        throw new ValidationError({
+          reason,
+          inputName,
+          wanted,
+          actual,
+          message,
+        });
+      }
+
+      const value = input.value as any; // TS gets in the way here
+
+      // TODO is !input.value right here? this will also reject empty strings, `0`, ... and will never reject an empty array/object
+      if (input.required &amp;&amp; !value) {
+        reject(ValidationReason.Required, "is required");
+      }
+
+      const hasLengthRequirement =
+        input.min_length != null || input.max_length != null;
+
+      if (hasLengthRequirement) {
+        if (!("length" in value)) {
+          reject(
+            ValidationReason.InvalidInputDefinition,
+            'has min/max length requirement, but is missing "length" property',
+            "string",
+            typeof value
+          );
+        }
+
+        if (input.min_length != null &amp;&amp; value &lt; input.min_length) {
+          reject(
+            ValidationReason.MinLength,
+            `too short (min ${input.min_length})`,
+            input.min_length,
+            value.length
+          );
+        }
+
+        if (input.max_length != null &amp;&amp; value > input.max_length) {
+          reject(
+            ValidationReason.MaxLength,
+            `too long (max ${input.max_length})`,
+            input.max_length,
+            value.length
+          );
+        }
+      }
+    }
+  }
+}
+
+export enum ValidationReason {
+  InvalidInputDefinition,
+  MinLength,
+  MaxLength,
+  Required,
+}
+
+export class ValidationError&lt;TWanted = undefined> extends Error {
+  reason: ValidationReason;
+  inputName: string;
+  wanted: TWanted;
+  actual: TWanted;
+
+  constructor(opts: {
+    reason: ValidationReason;
+    inputName: string;
+    wanted: TWanted;
+    actual: TWanted;
+    message: string;
+  }) {
+    super(`"${opts.inputName}" ${opts.message}`);
+
+    this.name = "ValidationError";
+    this.reason = opts.reason;
+    this.inputName = opts.inputName;
+    this.wanted = opts.wanted;
+    this.actual = opts.actual;
+  }
+}
+
+function deepCopy&lt;T>(obj: T): T {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+export function isState(x: any): x is State&lt;any> {
+  return (
+    typeof x === "object" &amp;&amp;
+    x !== null &amp;&amp;
+    "status" in x &amp;&amp;
+    "error" in x &amp;&amp;
+    "name" in x &amp;&amp;
+    Boolean(x.name) &amp;&amp;
+    Boolean(x.status)
+  );
+}
+
+export { State };
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+            </div>
+            
+            <footer class="footer">
+                <div class="content has-text-centered">
+                    <p>Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.11</a></p>
+                    <p class="sidebar-created-by">
+                        <a href="https://github.com/SoftwareBrothers/better-docs" target="_blank">BetterDocs theme</a> provided with <i class="fas fa-heart"></i> by
+                        <a href="http://softwarebrothers.co" target="_blank">SoftwareBrothers - JavaScript Development Agency</a>
+                    </p>
+                </div>
+            </footer>
+            
+        </div>
+        <div id="side-nav" class="side-nav">
+        </div>
+    </div>
+<script src="scripts/app.min.js"></script>
+<script>PR.prettyPrint();</script>
+<script src="scripts/linenumber.js"> </script>
+
+
+</body>
+</html>

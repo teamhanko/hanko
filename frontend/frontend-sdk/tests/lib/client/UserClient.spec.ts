@@ -95,7 +95,7 @@ describe("UserClient.getCurrent()", () => {
     expect(userClient.client.get).toHaveBeenNthCalledWith(1, "/me");
     expect(userClient.client.get).toHaveBeenNthCalledWith(
       2,
-      `/users/${userID}`
+      `/users/${userID}`,
     );
   });
 
@@ -127,7 +127,7 @@ describe("UserClient.getCurrent()", () => {
 
       const user = userClient.getCurrent();
       await expect(user).rejects.toThrow(error);
-    }
+    },
   );
 
   it("should throw error on API communication failure", async () => {
@@ -240,7 +240,7 @@ describe("UserClient.logout()", () => {
       await expect(userClient.logout()).rejects.toThrow(error);
 
       expect(userClient.client.post).toHaveBeenCalledWith("/logout");
-    }
+    },
   );
 });
 
@@ -273,6 +273,6 @@ describe("UserClient.delete()", () => {
       await expect(userClient.delete()).rejects.toThrow(error);
 
       expect(userClient.client.delete).toHaveBeenCalledWith("/user");
-    }
+    },
   );
 });

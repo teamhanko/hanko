@@ -1,4 +1,3 @@
-import { LocalStorageUsers } from "./users/UserState";
 import { LocalStorageSession } from "./session/SessionState";
 
 /**
@@ -8,7 +7,6 @@ import { LocalStorageSession } from "./session/SessionState";
  * @property {LocalStorageUsers=} users - The user states.
  */
 interface LocalStorage {
-  users?: LocalStorageUsers;
   session?: LocalStorageSession;
 }
 

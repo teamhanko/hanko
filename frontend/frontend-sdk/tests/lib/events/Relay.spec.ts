@@ -28,11 +28,11 @@ describe("Relay", () => {
     };
     const sessionCreatedEventMock = new CustomEventWithDetail(
       sessionCreatedType,
-      mockSessionCreatedDetail
+      mockSessionCreatedDetail,
     );
     const sessionExpiredEventMock = new CustomEventWithDetail(
       sessionExpiredType,
-      null
+      null,
     );
 
     document.dispatchEvent(sessionCreatedEventMock);
@@ -61,11 +61,11 @@ describe("Relay", () => {
     };
     const sessionCreatedEventMock = new CustomEventWithDetail(
       sessionCreatedType,
-      mockSessionCreatedDetail
+      mockSessionCreatedDetail,
     );
     const userDeletedEventMock = new CustomEventWithDetail(
       userDeletedType,
-      null
+      null,
     );
 
     document.dispatchEvent(sessionCreatedEventMock);
@@ -88,7 +88,6 @@ describe("Relay", () => {
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-expired' if the session is expired", () => {
-    jest.spyOn(relay._session._sessionState, "getUserID").mockReturnValue("");
     jest.spyOn(relay._session._cookie, "getAuthCookie").mockReturnValue("");
     jest
       .spyOn(relay._session._sessionState, "getExpirationSeconds")
@@ -97,7 +96,7 @@ describe("Relay", () => {
     window.dispatchEvent(
       new StorageEvent("storage", {
         key: "hanko_session",
-      })
+      }),
     );
 
     expect(dispatcherSpy).toHaveBeenCalled();
@@ -105,9 +104,6 @@ describe("Relay", () => {
   });
 
   it("should listen to 'storage' events and dispatch 'hanko-session-created' if session is active", () => {
-    jest
-      .spyOn(relay._session._sessionState, "getUserID")
-      .mockReturnValue("test-user");
     jest
       .spyOn(relay._session._cookie, "getAuthCookie")
       .mockReturnValue("test-jwt");
@@ -118,7 +114,7 @@ describe("Relay", () => {
     window.dispatchEvent(
       new StorageEvent("storage", {
         key: "hanko_session",
-      })
+      }),
     );
 
     expect(dispatcherSpy).toHaveBeenCalled();

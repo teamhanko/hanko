@@ -4,10 +4,11 @@ import styles from "./styles.sass";
 
 interface Props {
   children?: ComponentChildren;
+  hidden?: boolean;
 }
 
-const Divider = ({ children }: Props) => {
-  return (
+const Divider = ({ children, hidden }: Props) => {
+  return !hidden ? (
     <section part={"divider"} className={styles.divider}>
       <div part={"divider-line"} className={styles.line} />
       {children ? (
@@ -17,7 +18,7 @@ const Divider = ({ children }: Props) => {
       ) : null}
       <div part={"divider-line"} className={styles.line} />
     </section>
-  );
+  ) : null;
 };
 
 export default Divider;

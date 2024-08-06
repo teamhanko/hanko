@@ -26,21 +26,21 @@ describe("thirdPartyClient.auth()", () => {
 
   it("should throw if provider is empty", async () => {
     await expect(
-      thirdPartyClient.auth("", "http://test.example")
+      thirdPartyClient.auth("", "http://test.example"),
     ).rejects.toThrow(ThirdPartyError);
     expect(window.location.assign).not.toHaveBeenCalled();
   });
 
   it("should throw if redirectTo is empty", async () => {
     await expect(thirdPartyClient.auth("testProvider", "")).rejects.toThrow(
-      ThirdPartyError
+      ThirdPartyError,
     );
     expect(window.location.assign).not.toHaveBeenCalled();
   });
 
   it("should construct correct redirect url with provider", async () => {
     await expect(
-      thirdPartyClient.auth("testProvider", "http://test.example")
+      thirdPartyClient.auth("testProvider", "http://test.example"),
     ).resolves.not.toThrow();
     const expectedUrl =
       "http://test.api/thirdparty/auth?provider=testProvider&redirect_to=http%3A%2F%2Ftest.example";

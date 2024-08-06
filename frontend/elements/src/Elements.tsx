@@ -10,6 +10,7 @@ import { defaultTranslations, Translations } from "./i18n/translations";
 export interface HankoAuthAdditionalProps {
   experimental?: string;
   prefilledEmail?: string;
+  prefilledUsername?: string;
 }
 
 export declare interface HankoAuthElementProps
@@ -28,6 +29,8 @@ declare global {
     // eslint-disable-next-line no-unused-vars
     interface IntrinsicElements {
       "hanko-auth": HankoAuthElementProps;
+      "hanko-login": HankoAuthElementProps;
+      "hanko-registration": HankoAuthElementProps;
       "hanko-profile": HankoProfileElementProps;
       "hanko-events": HankoEventsElementProps;
     }
@@ -66,6 +69,7 @@ const createHankoComponent = (
   <AppProvider
     componentName={componentName}
     globalOptions={globalOptions}
+    createWebauthnAbortSignal={createWebauthnAbortSignal}
     {...props}
   />
 );
@@ -73,11 +77,28 @@ const createHankoComponent = (
 const HankoAuth = (props: HankoAuthElementProps) =>
   createHankoComponent("auth", props);
 
+const HankoLogin = (props: HankoAuthElementProps) =>
+  createHankoComponent("login", props);
+
+const HankoRegistration = (props: HankoProfileElementProps) =>
+  createHankoComponent("registration", props);
+
 const HankoProfile = (props: HankoProfileElementProps) =>
   createHankoComponent("profile", props);
 
 const HankoEvents = (props: HankoEventsElementProps) =>
   createHankoComponent("events", props);
+
+let webauthnAbortController = new AbortController();
+
+const createWebauthnAbortSignal = () => {
+  if (webauthnAbortController) {
+    webauthnAbortController.abort();
+  }
+
+  webauthnAbortController = new AbortController();
+  return webauthnAbortController.signal;
+};
 
 const _register = async ({
   tagName,
@@ -96,6 +117,14 @@ export const register = async (
   api: string,
   options: RegisterOptions = {},
 ): Promise<RegisterResult> => {
+  const observedAttributes = [
+    "api",
+    "lang",
+    "experimental",
+    "prefilled-email",
+    "entry",
+  ];
+
   options = {
     shadow: true,
     injectStyles: true,
@@ -119,19 +148,32 @@ export const register = async (
   globalOptions.translations = options.translations || defaultTranslations;
   globalOptions.translationsLocation = options.translationsLocation;
   globalOptions.fallbackLanguage = options.fallbackLanguage;
-
   await Promise.all([
     _register({
       ...options,
       tagName: "hanko-auth",
       entryComponent: HankoAuth,
-      observedAttributes: ["api", "lang", "experimental", "prefilled-email"],
+      observedAttributes,
+    }),
+    _register({
+      ...options,
+      tagName: "hanko-login",
+      entryComponent: HankoLogin,
+      observedAttributes,
+    }),
+    _register({
+      ...options,
+      tagName: "hanko-registration",
+      entryComponent: HankoRegistration,
+      observedAttributes,
     }),
     _register({
       ...options,
       tagName: "hanko-profile",
       entryComponent: HankoProfile,
-      observedAttributes: ["api", "lang"],
+      observedAttributes: observedAttributes.filter((attribute) =>
+        ["api", "lang"].includes(attribute),
+      ),
     }),
     _register({
       ...options,

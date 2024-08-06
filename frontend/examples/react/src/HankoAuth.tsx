@@ -24,7 +24,7 @@ function HankoAuth() {
   }, []);
 
   useEffect(
-    () => hankoClient.onAuthFlowCompleted(() => redirectToTodos()),
+    () => hankoClient.onSessionCreated(() => redirectToTodos()),
     [hankoClient, redirectToTodos]
   );
 

@@ -143,13 +143,20 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.Name(), false)
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.Name(), false, state.IsFlow)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		token, terr := models.NewToken(linkingResult.User.ID)
+		emailModel := linkingResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
+		identityModel := emailModel.Identities.GetIdentity(provider.Name(), userData.Metadata.Subject)
+
+		token, terr := models.NewToken(
+			linkingResult.User.ID,
+			models.TokenForFlowAPI(state.IsFlow),
+			models.TokenWithIdentityID(identityModel.ID),
+			models.TokenUserCreated(linkingResult.UserCreated))
 		if terr != nil {
 			return thirdparty.ErrorServer("could not create token").WithCause(terr)
 		}

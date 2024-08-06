@@ -19,7 +19,6 @@ interface SessionStateOptions {
  */
 export interface LocalStorageSession {
   expiry: number;
-  userID: string;
   authFlowCompleted: boolean;
 }
 
@@ -55,7 +54,7 @@ class SessionState extends State {
    * @return {LocalStorageSession}
    */
   getState(): LocalStorageSession {
-    this.ls.session ||= { expiry: 0, userID: "", authFlowCompleted: false };
+    this.ls.session ||= { expiry: 0, authFlowCompleted: false };
     return this.ls.session;
   }
 
@@ -76,24 +75,6 @@ class SessionState extends State {
    */
   setExpirationSeconds(seconds: number): SessionState {
     this.getState().expiry = State.remainingSecondsToTime(seconds);
-    return this;
-  }
-
-  /**
-   * Gets the user id.
-   */
-  getUserID(): string {
-    return this.getState().userID;
-  }
-
-  /**
-   * Sets the user id.
-   *
-   * @param {string} userID - The user id
-   * @return {SessionState}
-   */
-  setUserID(userID: string): SessionState {
-    this.getState().userID = userID;
     return this;
   }
 
@@ -124,7 +105,6 @@ class SessionState extends State {
     const session = this.getState();
 
     delete session.expiry;
-    delete session.userID;
 
     return this;
   }
