@@ -152,14 +152,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	healthHandler := NewHealthHandler()
-	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
-	}
-	passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
-	}
 
 	health := e.Group("/health")
 	health.GET("/alive", healthHandler.Alive)
@@ -175,24 +167,36 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	emailHandler := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 
-	webauthn := g.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
-	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
-	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
+	if cfg.Passkey.Enabled {
+		webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
+		if err != nil {
+			panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
+		}
+		webauthn := g.Group("/webauthn")
+		webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
+		webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
+		webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
-	webauthnLogin := webauthn.Group("/login")
-	webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
-	webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
+		webauthnLogin := webauthn.Group("/login")
+		webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
+		webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
 
-	webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
-	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
-	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
-	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+		webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
+		webauthnCredentials.GET("", webauthnHandler.ListCredentials)
+		webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
+		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+	}
 
-	passcode := g.Group("/passcode")
-	passcodeLogin := passcode.Group("/login", webhookMiddlware)
-	passcodeLogin.POST("/initialize", passcodeHandler.Init)
-	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	if cfg.Email.UseForAuthentication {
+		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
+		if err != nil {
+			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
+		}
+		passcode := g.Group("/passcode")
+		passcodeLogin := passcode.Group("/login", webhookMiddlware)
+		passcodeLogin.POST("/initialize", passcodeHandler.Init)
+		passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	}
 
 	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)
