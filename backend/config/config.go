@@ -34,7 +34,7 @@ type Config struct {
 	// `database` configures database connection settings.
 	Database Database `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"title=database"`
 	// `debug`, if set to `true`, adds additional debugging information to flow API responses.
-	Debug bool `yaml:"debug" json:"debug,omitempty" koanf:"debug"`
+	Debug bool `yaml:"debug" json:"debug,omitempty" koanf:"debug" jsonschema:"default=false"`
 	// `email` configures how email addresses of user accounts are acquired and used.
 	Email Email `yaml:"email" json:"email,omitempty" koanf:"email" jsonschema:"title=email"`
 	// `email_delivery` configures how outgoing mails are delivered.

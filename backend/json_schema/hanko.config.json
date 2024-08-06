@@ -158,7 +158,8 @@
         },
         "debug": {
           "type": "boolean",
-          "description": "`debug`, if set to `true`, adds additional debugging information to flow API responses."
+          "description": "`debug`, if set to `true`, adds additional debugging information to flow API responses.",
+          "default": false
         },
         "email": {
           "$ref": "#/$defs/Email",
