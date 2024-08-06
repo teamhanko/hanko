@@ -51,14 +51,6 @@ func DefaultConfig() *Config {
 		},
 		Passcode: Passcode{
 			TTL: 300,
-			Email: PasscodeEmail{
-				FromAddress: "passcode@hanko.io",
-				FromName:    "Hanko",
-			},
-			Smtp: SMTP{
-				Host: "localhost",
-				Port: "465",
-			},
 		},
 		Password: Password{
 			Enabled:               false,

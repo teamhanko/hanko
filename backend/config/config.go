@@ -17,7 +17,6 @@ import (
 	"github.com/knadh/koanf"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
-	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
 	"golang.org/x/exp/slices"
 )
@@ -115,13 +114,13 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	if err := envconfig.Process("", c); err != nil {
-		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
-	}
-
 	err = c.PostProcess()
 	if err != nil {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
+	}
+
+	if err := envconfig.Process("", c); err != nil {
+		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 
 	if err = c.Validate(); err != nil {
@@ -145,10 +144,6 @@ func (c *Config) Validate() error {
 		if err != nil {
 			return fmt.Errorf("failed to validate smtp settings: %w", err)
 		}
-	}
-	err = c.Passcode.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate passcode settings: %w", err)
 	}
 	err = c.Database.Validate()
 	if err != nil {
@@ -443,35 +438,9 @@ func (s *SMTP) Validate() error {
 	return nil
 }
 
-type PasscodeEmail struct {
-	// Deprecated. Use `email_delivery.from_address` instead.
-	FromAddress string `yaml:"from_address" json:"from_address,omitempty" koanf:"from_address" split_words:"true" jsonschema:"default=passcode@hanko.io"`
-	// Deprecated. Use `email_delivery.from_name` instead.
-	FromName string `yaml:"from_name" json:"from_name,omitempty" koanf:"from_name" split_words:"true" jsonschema:"default=Hanko"`
-}
-
-func (e *PasscodeEmail) Validate() error {
-	if len(strings.TrimSpace(e.FromAddress)) == 0 {
-		return errors.New("from_address must not be empty")
-	}
-	return nil
-}
-
 type Passcode struct {
-	// Deprecated. See child properties for suggested replacements.
-	Email PasscodeEmail `yaml:"email" json:"email,omitempty" koanf:"email"`
 	// Deprecated. Use `email.passcode_ttl` instead.
 	TTL int `yaml:"ttl" json:"ttl,omitempty" koanf:"ttl" jsonschema:"default=300"`
-	// Deprecated. Use `email_delivery.smtp` instead.
-	Smtp SMTP `yaml:"smtp" json:"smtp,omitempty" koanf:"smtp,omitempty" required:"false" envconfig:"smtp,omitempty"`
-}
-
-func (p *Passcode) Validate() error {
-	err := p.Email.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate email settings: %w", err)
-	}
-	return nil
 }
 
 type Database struct {
@@ -876,8 +845,6 @@ func (c *Config) convertLegacyConfig() {
 	c.Email.PasscodeTtl = c.Passcode.TTL
 
 	c.EmailDelivery.SMTP = c.Smtp
-	c.EmailDelivery.FromName = c.Passcode.Email.FromName
-	c.EmailDelivery.FromAddress = c.Passcode.Email.FromAddress
 
 	c.Password.MinLength = c.Password.MinPasswordLength
 
@@ -888,8 +855,6 @@ func (c *Config) convertLegacyConfig() {
 }
 
 func (c *Config) PostProcess() error {
-	c.arrangeSmtpSettings()
-
 	if c.ConvertLegacyConfig {
 		c.convertLegacyConfig()
 	}
@@ -910,20 +875,6 @@ func (c *Config) PostProcess() error {
 	}
 
 	return nil
-}
-
-func (c *Config) arrangeSmtpSettings() {
-	if !c.EmailDelivery.Enabled {
-		return
-	}
-	if c.Passcode.Smtp.Validate() == nil {
-		if c.Smtp.Validate() == nil {
-			zeroLogger.Warn().Msg("Both root smtp and passcode.smtp are set. Using smtp settings from root configuration")
-			return
-		}
-
-		c.Smtp = c.Passcode.Smtp
-	}
 }
 
 type LoggerConfig struct {
