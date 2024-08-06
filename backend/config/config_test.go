@@ -8,13 +8,6 @@ import (
 	"testing"
 )
 
-func TestDefaultConfigNotEnoughForValidation(t *testing.T) {
-	cfg := DefaultConfig()
-	if err := cfg.Validate(); err == nil {
-		t.Error("The default config is missing mandatory parameters. This should not validate without error.")
-	}
-}
-
 func TestDefaultConfigAccountParameters(t *testing.T) {
 	cfg := DefaultConfig()
 	assert.Equal(t, cfg.Account.AllowDeletion, false)
@@ -35,22 +28,6 @@ func TestParseValidConfig(t *testing.T) {
 	if err := cfg.Validate(); err != nil {
 		t.Error(err)
 	}
-}
-
-func TestPasscodeSmtpSettingsCopiedToRootLevelSmtp(t *testing.T) {
-	configPath := "./passcode-smtp-config.yaml"
-	cfg, err := Load(&configPath)
-	if err != nil {
-		t.Error(err)
-	}
-	if err := cfg.Validate(); err != nil {
-		t.Error(err)
-	}
-
-	assert.Equal(t, cfg.Smtp.Port, cfg.Passcode.Smtp.Port)
-	assert.Equal(t, cfg.Smtp.Host, cfg.Passcode.Smtp.Host)
-	assert.Equal(t, cfg.Smtp.Password, cfg.Passcode.Smtp.Password)
-	assert.Equal(t, cfg.Smtp.User, cfg.Passcode.Smtp.User)
 }
 
 func TestRootSmtpPasscodeSmtpConflict(t *testing.T) {

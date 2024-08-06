@@ -30,10 +30,6 @@ var DefaultConfig = config.Config{
 		FromName:    "Hanko Test",
 	},
 	Passcode: config.Passcode{
-		Email: config.PasscodeEmail{
-			FromAddress: "test@hanko.io",
-			FromName:    "Hanko Test",
-		},
 		TTL: 300,
 	},
 	Session: config.Session{
