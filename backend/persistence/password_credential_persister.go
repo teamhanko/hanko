@@ -13,6 +13,7 @@ type PasswordCredentialPersister interface {
 	Create(password models.PasswordCredential) error
 	GetByUserID(userId uuid.UUID) (*models.PasswordCredential, error)
 	Update(password models.PasswordCredential) error
+	Delete(password models.PasswordCredential) error
 }
 
 type passwordCredentialPersister struct {
@@ -57,6 +58,15 @@ func (p *passwordCredentialPersister) Update(password models.PasswordCredential)
 
 	if vErr != nil && vErr.HasAny() {
 		return fmt.Errorf("password object validation failed: %w", vErr)
+	}
+
+	return nil
+}
+
+func (p *passwordCredentialPersister) Delete(password models.PasswordCredential) error {
+	err := p.db.Destroy(&password)
+	if err != nil {
+		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
 	return nil

@@ -10,11 +10,7 @@ type Props = {
 
 const Headline2 = ({ children }: Props) => {
   return (
-    <h2
-      // @ts-ignore
-      part={"headline2"}
-      className={cx(styles.headline, styles.grade2)}
-    >
+    <h2 part={"headline2"} className={cx(styles.headline, styles.grade2)}>
       {children}
     </h2>
   );

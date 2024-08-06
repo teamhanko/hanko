@@ -21,7 +21,7 @@ const Todo: NextPage = () => {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    import("@teamhanko/hanko-elements").then(({ Hanko }) => setHankoClient(new Hanko(hankoAPI)));
+    setHankoClient(new Hanko(hankoAPI));
   }, []);
 
   const redirectToProfile = () => {

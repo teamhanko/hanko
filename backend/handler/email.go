@@ -83,7 +83,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 		return fmt.Errorf("failed to count user emails: %w", err)
 	}
 
-	if emailCount >= h.cfg.Emails.MaxNumOfAddresses {
+	if emailCount >= h.cfg.Email.Limit {
 		return echo.NewHTTPError(http.StatusConflict).SetInternal(errors.New("max number of email addresses reached"))
 	}
 
@@ -107,7 +107,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusBadRequest).SetInternal(errors.New("email address already exists"))
 			}
 
-			if !h.cfg.Emails.RequireVerification {
+			if !h.cfg.Email.RequireVerification {
 				// Email verification is currently not required and there is no user assigned to the existing email
 				// address. This can happen, when email verification was turned on before, because then the email
 				// address will be assigned to the user only after passcode verification. The email was left unassigned
@@ -121,7 +121,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			}
 		} else {
 			// The email address has not been registered so far.
-			if h.cfg.Emails.RequireVerification {
+			if h.cfg.Email.RequireVerification {
 				// The email address will be assigned to the user only after passcode verification.
 				email = models.NewEmail(nil, newEmailAddress)
 			} else {
@@ -140,7 +140,7 @@ func (h *EmailHandler) Create(c echo.Context) error {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
-		if !h.cfg.Emails.RequireVerification {
+		if !h.cfg.Email.RequireVerification {
 			var evt events.Event
 
 			if len(user.Emails) >= 1 {

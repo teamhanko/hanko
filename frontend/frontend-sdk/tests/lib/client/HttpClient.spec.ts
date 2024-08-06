@@ -162,7 +162,6 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
   describe("when the x-auth-token is available in the response header", () => {
     const jwt = "test-jwt";
     const expirationSeconds = 7;
-    const userID = "test-user";
     const realLocation = window.location;
 
     beforeEach(() => {
@@ -219,34 +218,25 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
         };
 
         jest.spyOn(response.xhr, "getResponseHeader");
-        jest.spyOn(client.passcodeState, "read");
-        jest.spyOn(client.passcodeState, "reset");
-        jest.spyOn(client.passcodeState, "write");
         jest.spyOn(client.sessionState, "read");
         jest.spyOn(client.cookie, "setAuthCookie");
         jest.spyOn(client.sessionState, "setExpirationSeconds");
-        jest.spyOn(client.sessionState, "setUserID");
         jest.spyOn(client.sessionState, "write");
 
-        client.processResponseHeadersOnLogin(userID, response);
+        client.processHeaders(xhr);
 
         expect(response.xhr.getResponseHeader).toBeCalledTimes(2);
-        expect(client.passcodeState.read).toBeCalledTimes(1);
-        expect(client.passcodeState.reset).toBeCalledTimes(1);
-        expect(client.passcodeState.write).toBeCalledTimes(1);
 
         expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
         expect(client.sessionState.read).toHaveBeenCalledTimes(1);
         expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledTimes(
           1,
         );
-        expect(client.sessionState.setUserID).toHaveBeenCalledTimes(1);
         expect(client.sessionState.write).toHaveBeenCalledTimes(1);
 
         expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledWith(
           expirationSeconds,
         );
-        expect(client.sessionState.setUserID).toHaveBeenCalledWith(userID);
 
         expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, {
           secure,

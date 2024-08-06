@@ -19,6 +19,7 @@ type UserPersister interface {
 	List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error)
 	All() ([]models.User, error)
 	Count(userId uuid.UUID, email string) (int, error)
+	GetByUsername(username string) (*models.User, error)
 }
 
 type userPersister struct {
@@ -31,7 +32,17 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 
 func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	user := models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials").Find(&user, id)
+
+	eagerPreloadFields := []string{
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"WebauthnCredentials.Transports",
+		"Username",
+		"PasswordCredential"}
+
+	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -59,6 +70,28 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 	}
 
 	return p.Get(*email.UserID)
+}
+
+func (p *userPersister) GetByUsername(username string) (*models.User, error) {
+	user := models.User{}
+	err := p.db.EagerPreload(
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"PasswordCredential",
+		"Username").
+		LeftJoin("usernames", "usernames.user_id = users.id").
+		Where("usernames.username = (?)", username).
+		First(&user)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
 }
 
 func (p *userPersister) Create(user models.User) error {
@@ -102,7 +135,8 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 	query := p.db.
 		Q().
 		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").
-		LeftJoin("emails", "emails.user_id = users.id")
+		LeftJoin("emails", "emails.user_id = users.id").
+		LeftJoin("usernames", "usernames.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userId, email)
 	err := query.GroupBy("users.id").
 		Having("count(emails.id) > 0").
@@ -122,7 +156,7 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 
 func (p *userPersister) All() ([]models.User, error) {
 	users := []models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials").All(&users)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials", "Usernames").All(&users)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}

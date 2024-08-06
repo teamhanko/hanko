@@ -32,7 +32,7 @@ func TestRenderer_Render(t *testing.T) {
 	}{
 		{
 			Name:     "Login text template",
-			Template: "loginTextMail",
+			Template: "login_text.tmpl",
 			Lang:     "en",
 			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
@@ -46,14 +46,14 @@ func TestRenderer_Render(t *testing.T) {
 		},
 		{
 			Name:     "Login text template with unknown language",
-			Template: "loginTextMail",
+			Template: "login_text.tmpl",
 			Lang:     "xxx",
 			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
 		},
 		{
 			Name:     "Login text template without translations for language",
-			Template: "loginTextMail",
+			Template: "login_text.tmpl",
 			Lang:     "es",
 			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,

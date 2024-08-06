@@ -1,0 +1,56 @@
+name: Generate config reference markdown
+
+on:
+  workflow_dispatch:
+
+jobs:
+  config:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.16.0'
+          registry-url: https://registry.npmjs.org/
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          path: hanko
+
+      - name: Checkout backend wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository}}.wiki
+          path: wiki
+
+      - name: Generate config docs
+        working-directory: ./hanko/backend
+        run: |
+          go generate ./...
+          go run main.go schema json2md
+
+      - name: Clean md file endings
+        working-directory: ./hanko/backend
+        run: |
+          find ./docs/.generated/config/md -type f -name "*.md" -exec sed -i "s/\.md//g" "{}" \;
+
+      - name: Copy generated files
+        working-directory: ./hanko/backend
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/wiki/reference/config
+          rm $GITHUB_WORKSPACE/wiki/reference/config/*.md 2>/dev/null || true
+          cp ./docs/.generated/config/md/*.md $GITHUB_WORKSPACE/wiki/reference/config
+
+      - name: Commit and push to wiki
+        working-directory: ./wiki
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "action: Autogenerate config reference docs"
+          git push origin HEAD

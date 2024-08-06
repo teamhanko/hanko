@@ -2,12 +2,17 @@ database:
   user: hanko
   password: hanko
   host: localhost
-  port: 5432
+  port: "5432"
   dialect: postgres
 smtp:
-    host: smtp.example.com
-    user: example
-    password: example
+  host: localhost
+  port: 2500
+server:
+  public:
+    cors:
+      allow_origins:
+        - http://localhost:63342
+        - http://localhost:8000/
 passcode:
   email:
     from_address: no-reply@hanko.io
@@ -16,3 +21,48 @@ secrets:
     - abcedfghijklmnopqrstuvwxyz
 service:
   name: Hanko Authentication Service
+webauthn:
+  relying_party:
+    id: localhost
+    origins:
+      - http://localhost:63342
+      - http://localhost:8000
+password:
+  enabled: true
+  optional: false
+  acquire_on_registration: conditional
+  acquire_on_login: conditional
+  recovery: true
+passkey:
+  enabled: true
+  optional: false
+  acquire_on_registration: conditional
+  acquire_on_login: conditional
+  attestation_preference: direct
+  limit: 100
+email:
+  enabled: true
+  optional: false
+  acquire_on_registration: true
+  acquire_on_login: true
+  require_verification: true
+  limit: 100
+  use_as_login_identifier: true
+  max_length: 100
+  use_for_authentication: true
+  passcode_ttl: 300
+username:
+  enabled: true
+  optional: true
+  acquire_on_registration: true
+  acquire_on_login: true
+  use_as_login_identifier: true
+  max_length: 100
+rate_limiter:
+  enabled: false
+email_delivery:
+  from_address: no-reply@hanko.io
+  smtp:
+    host: localhost
+    port: 2500
+convert_legacy_config: false

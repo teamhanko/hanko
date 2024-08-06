@@ -2,11 +2,9 @@ import { Throttle } from "../Throttle";
 import {
   CustomEventWithDetail,
   SessionDetail,
-  AuthFlowCompletedDetail,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType,
   userLoggedOutType,
 } from "./CustomEvents";
 
@@ -84,7 +82,7 @@ export class Listener {
    */
   private wrapCallback<T>(
     callback: CallbackFunc<T>,
-    throttle: boolean
+    throttle: boolean,
   ): WrappedCallback<T> {
     // The function that will be called when the event is triggered.
     const wrappedCallback = (event: CustomEventWithDetail<T>) => {
@@ -134,7 +132,7 @@ export class Listener {
   private static mapAddEventListenerParams<T>(
     type: string,
     { once, callback }: EventListenerParams<T>,
-    throttle?: boolean
+    throttle?: boolean,
   ): EventListenerWithTypeParams<T> {
     return {
       type,
@@ -156,10 +154,10 @@ export class Listener {
   private addEventListener<T>(
     type: string,
     params: EventListenerParams<T>,
-    throttle?: boolean
+    throttle?: boolean,
   ) {
     return this.addEventListenerWithType(
-      Listener.mapAddEventListenerParams(type, params, throttle)
+      Listener.mapAddEventListenerParams(type, params, throttle),
     );
   }
 
@@ -173,7 +171,7 @@ export class Listener {
    */
   public onSessionCreated(
     callback: CallbackFunc<SessionDetail>,
-    once?: boolean
+    once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(sessionCreatedType, { callback, once }, true);
   }
@@ -189,7 +187,7 @@ export class Listener {
    */
   public onSessionExpired(
     callback: CallbackFunc<null>,
-    once?: boolean
+    once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(sessionExpiredType, { callback, once }, true);
   }
@@ -204,7 +202,7 @@ export class Listener {
    */
   public onUserLoggedOut(
     callback: CallbackFunc<null>,
-    once?: boolean
+    once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(userLoggedOutType, { callback, once });
   }
@@ -218,22 +216,8 @@ export class Listener {
    */
   public onUserDeleted(
     callback: CallbackFunc<null>,
-    once?: boolean
+    once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(userDeletedType, { callback, once });
-  }
-
-  /**
-   * Adds an event listener for hanko-auth-flow-completed events. Will be triggered after the login or registration flow has been completed.
-   *
-   * @param {CallbackFunc<AuthFlowCompletedDetail>} callback - The function to be called when the event is triggered.
-   * @param {boolean=} once - Whether the event listener should be removed after being called once.
-   * @returns {CleanupFunc} This function can be called to remove the event listener.
-   */
-  public onAuthFlowCompleted(
-    callback: CallbackFunc<AuthFlowCompletedDetail>,
-    once?: boolean
-  ): CleanupFunc {
-    return this.addEventListener(authFlowCompletedType, { callback, once });
   }
 }

@@ -1,12 +1,6 @@
 import { Fragment } from "preact";
 import { useContext, useEffect, useMemo, useState } from "preact/compat";
 
-import {
-  HankoError,
-  TooManyRequestsError,
-  UserInfo,
-} from "@teamhanko/hanko-frontend-sdk";
-
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
@@ -15,34 +9,22 @@ import Footer from "../components/wrapper/Footer";
 import Form from "../components/form/Form";
 import Input from "../components/form/Input";
 import Button from "../components/form/Button";
-import ErrorMessage from "../components/error/ErrorMessage";
+import ErrorBox from "../components/error/ErrorBox";
 import Link from "../components/link/Link";
 import Headline1 from "../components/headline/Headline1";
+import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
+import { useFlowState } from "../contexts/FlowState";
 
 type Props = {
-  userInfo: UserInfo;
-  onRecovery: () => Promise<void>;
-  onSuccess: () => void;
-  onBack: () => void;
+  state: State<"login_password">;
 };
 
-const LoginPasswordPage = ({ onSuccess, onRecovery, onBack }: Props) => {
+const LoginPasswordPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, userInfo } = useContext(AppContext);
-
+  const { stateHandler, setLoadingAction } = useContext(AppContext);
+  const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
-  const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>(
-    hanko.password.getRetryAfter(userInfo.id)
-  );
-  const [isPasswordLoading, setIsPasswordLoading] = useState<boolean>();
-  const [isPasscodeLoading, setIsPasscodeLoading] = useState<boolean>();
-  const [isSuccess, setIsSuccess] = useState<boolean>();
-  const [error, setError] = useState<HankoError>(null);
-
-  const disabled = useMemo(
-    () => isPasswordLoading || isPasscodeLoading || isSuccess,
-    [isPasscodeLoading, isPasswordLoading, isSuccess]
-  );
+  const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>();
 
   const onPasswordInput = async (event: Event) => {
     if (event.target instanceof HTMLInputElement) {
@@ -50,42 +32,72 @@ const LoginPasswordPage = ({ onSuccess, onRecovery, onBack }: Props) => {
     }
   };
 
-  const onPasswordSubmit = (event: Event) => {
+  const onPasswordSubmit = async (event: Event) => {
     event.preventDefault();
-    setIsPasswordLoading(true);
+    setLoadingAction("password-submit");
+    const nextState = await flowState.actions
+      .password_login({ password })
+      .run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
 
-    hanko.password
-      .login(userInfo.id, password)
-      .then(() => setIsSuccess(true))
-      .then(onSuccess)
-      .finally(() => setIsPasswordLoading(false))
-      .catch((e) => {
-        if (e instanceof TooManyRequestsError) {
-          setPasswordRetryAfter(e.retryAfter);
+  const onRecoveryClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("password-recovery");
+    const nextState = await flowState.actions
+      .continue_to_passcode_confirmation_recovery(null)
+      .run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
+  const onBackClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("back");
+    const nextState = await flowState.actions.back(null).run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
+  const onChooseMethodClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("choose-login-method");
+    const nextState = await flowState.actions
+      .continue_to_login_method_chooser(null)
+      .run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
+  const recoveryLink = useMemo(
+    () => (
+      <Link
+        hidden={
+          !flowState.actions.continue_to_passcode_confirmation_recovery?.(null)
         }
-        setError(e);
-      });
-  };
+        uiAction={"password-recovery"}
+        onClick={onRecoveryClick}
+        loadingSpinnerPosition={"left"}
+      >
+        {t("labels.forgotYourPassword")}
+      </Link>
+    ),
+    [onRecoveryClick, t],
+  );
 
-  const onRecoveryHandler = (event: Event) => {
-    event.preventDefault();
-    setIsPasscodeLoading(true);
-    onRecovery()
-      .finally(() => setIsPasscodeLoading(false))
-      .catch(setError);
-  };
-
-  const onBackHandler = (event: Event) => {
-    event.preventDefault();
-    onBack();
-  };
-
-  // Automatically clear the too many requests error message
-  useEffect(() => {
-    if (error instanceof TooManyRequestsError && passwordRetryAfter <= 0) {
-      setError(null);
-    }
-  }, [error, passwordRetryAfter]);
+  const loginMethodChooserLink = useMemo(
+    () => (
+      <Link
+        uiAction={"choose-login-method"}
+        onClick={onChooseMethodClick}
+        loadingSpinnerPosition={"left"}
+      >
+        {"Choose another method"}
+      </Link>
+    ),
+    [onChooseMethodClick],
+  );
 
   // Count down the retry after countdown
   useEffect(() => {
@@ -100,45 +112,40 @@ const LoginPasswordPage = ({ onSuccess, onRecovery, onBack }: Props) => {
     <Fragment>
       <Content>
         <Headline1>{t("headlines.loginPassword")}</Headline1>
-        <ErrorMessage error={error} />
+        <ErrorBox state={flowState} />
         <Form onSubmit={onPasswordSubmit}>
           <Input
             type={"password"}
-            name={"password"}
+            flowInput={flowState.actions.password_login(null).inputs.password}
             autocomplete={"current-password"}
             placeholder={t("labels.password")}
-            required={true}
             onInput={onPasswordInput}
-            disabled={disabled}
             autofocus
           />
           <Button
-            isSuccess={isSuccess}
-            isLoading={isPasswordLoading}
-            disabled={passwordRetryAfter > 0 || disabled}
+            uiAction={"password-submit"}
+            disabled={passwordRetryAfter > 0}
           >
             {passwordRetryAfter > 0
               ? t("labels.passwordRetryAfter", { passwordRetryAfter })
               : t("labels.signIn")}
           </Button>
         </Form>
+        {flowState.actions.continue_to_login_method_chooser?.(null)
+          ? recoveryLink
+          : null}
       </Content>
       <Footer>
         <Link
-          disabled={disabled}
-          onClick={onBackHandler}
+          uiAction={"back"}
+          onClick={onBackClick}
           loadingSpinnerPosition={"right"}
         >
           {t("labels.back")}
         </Link>
-        <Link
-          disabled={disabled}
-          onClick={onRecoveryHandler}
-          isLoading={isPasscodeLoading}
-          loadingSpinnerPosition={"left"}
-        >
-          {t("labels.forgotYourPassword")}
-        </Link>
+        {flowState.actions.continue_to_login_method_chooser?.(null)
+          ? loginMethodChooserLink
+          : recoveryLink}
       </Footer>
     </Fragment>
   );

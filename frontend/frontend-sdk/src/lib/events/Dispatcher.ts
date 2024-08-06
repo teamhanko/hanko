@@ -1,11 +1,9 @@
 import {
   SessionDetail,
   CustomEventWithDetail,
-  AuthFlowCompletedDetail,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
-  authFlowCompletedType,
   userLoggedOutType,
 } from "./CustomEvents";
 import { SessionState } from "../state/session/SessionState";
@@ -76,15 +74,5 @@ export class Dispatcher {
    */
   public dispatchUserDeletedEvent() {
     this.dispatch(userDeletedType, null);
-  }
-
-  /**
-   * Dispatches a "hanko-auth-flow-completed" event to the document with the specified detail.
-   *
-   * @param {AuthFlowCompletedDetail} detail - The event detail.
-   */
-  public dispatchAuthFlowCompletedEvent(detail: AuthFlowCompletedDetail) {
-    this._sessionState.read().setAuthFlowCompleted(true).write();
-    this.dispatch(authFlowCompletedType, detail);
   }
 }

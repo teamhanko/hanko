@@ -12,16 +12,12 @@ describe("Session", () => {
     it("should return session details if valid", () => {
       // Prepare
       const expectedDetails = {
-        userID: "12345",
         expirationSeconds: 3600,
         jwt: "some.jwt.token",
       };
 
       // Mock dependencies
       jest.spyOn(session._sessionState, "read").mockImplementation();
-      jest
-        .spyOn(session._sessionState, "getUserID")
-        .mockReturnValue(expectedDetails.userID);
       jest
         .spyOn(session._sessionState, "getExpirationSeconds")
         .mockReturnValue(expectedDetails.expirationSeconds);
@@ -39,16 +35,12 @@ describe("Session", () => {
     it("should return null if session details are invalid", () => {
       // Prepare
       const invalidDetails: SessionDetail = {
-        userID: "",
         expirationSeconds: 0,
         jwt: null,
       };
 
       // Mock dependencies
       jest.spyOn(session._sessionState, "read").mockImplementation();
-      jest
-        .spyOn(session._sessionState, "getUserID")
-        .mockReturnValue(invalidDetails.userID);
       jest
         .spyOn(session._sessionState, "getExpirationSeconds")
         .mockReturnValue(invalidDetails.expirationSeconds);
@@ -86,7 +78,6 @@ describe("Session", () => {
     it("should return false if the user is not logged in", () => {
       // Prepare
       const notLoggedInDetails: SessionDetail = {
-        userID: "",
         expirationSeconds: 0,
         jwt: null,
       };

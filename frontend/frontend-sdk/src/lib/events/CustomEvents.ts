@@ -30,12 +30,18 @@ export const userLoggedOutType: "hanko-user-logged-out" =
 export const userDeletedType: "hanko-user-deleted" = "hanko-user-deleted";
 
 /**
- * The type of the `hanko-auth-flow-completed` event.
- * @typedef {string} authFlowCompletedType
+ * The type of the `hanko-user-logged-in` event.
+ * @typedef {string} userLoggedInType
  * @memberOf Listener
  */
-export const authFlowCompletedType: "hanko-auth-flow-completed" =
-  "hanko-auth-flow-completed";
+export const userLoggedInType: "hanko-user-logged-in" = "hanko-user-logged-in";
+
+/**
+ * The type of the `hanko-user-created` event.
+ * @typedef {string} userCreatedType
+ * @memberOf Listener
+ */
+export const userCreatedType: "hanko-user-created" = "hanko-user-created";
 
 /**
  * The data passed in the `hanko-session-created` or `hanko-session-resumed` event.
@@ -45,24 +51,10 @@ export const authFlowCompletedType: "hanko-auth-flow-completed" =
  * @subcategory Events
  * @property {string=} jwt - The JSON web token associated with the session. Only present when the Hanko-API allows the JWT to be accessible client-side.
  * @property {number} expirationSeconds - The number of seconds until the JWT expires.
- * @property {string} userID - The user associated with the session.
  */
 export interface SessionDetail {
   jwt?: string;
   expirationSeconds: number;
-  userID: string;
-}
-
-/**
- * The data passed in the `hanko-auth-flow-completed` event.
- *
- * @interface
- * @category SDK
- * @subcategory Events
- * @property {string} userID - The user associated with the removed session.
- */
-export interface AuthFlowCompletedDetail {
-  userID: string;
 }
 
 /**

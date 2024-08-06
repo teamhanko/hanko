@@ -1,0 +1,28 @@
+- id: 0b41f4dd-8e46-4a7c-bb4d-d60843113431
+  current_state: onboarding_create_passkey
+  stash_data: "{\"webauthn_available\":\"true\",\"email\":\"example@example.com\",\"username\":\"john.doe\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: de87cfc6-a6e2-434d-bbe8-5e5004c9deda
+  current_state: onboarding_create_passkey
+  stash_data: "{\"webauthn_available\":\"true\",\"username\":\"john.doe\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: a77e23b2-7ca5-4c76-a20b-c17b7dbcb117
+  current_state: onboarding_create_passkey
+  stash_data: "{\"webauthn_available\":\"true\",\"email\":\"example@example.com\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00
+- id: be57518c-6bd5-4b3e-a91a-6c082e212a58
+  current_state: onboarding_create_passkey
+  stash_data: "{\"webauthn_available\":\"false\",\"email\":\"example@example.com\"}"
+  version: 0
+  expires_at: 2099-12-31 23:59:59
+  created_at: 2023-01-01 00:00:00
+  updated_at: 2023-01-01 00:00:00

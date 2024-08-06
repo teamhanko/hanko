@@ -16,6 +16,8 @@ export const bn: Translation = {
     profilePasskeys: "পাসকি",
     isPrimaryEmail: "প্রাথমিক ইমেইল",
     setPrimaryEmail: "প্রাথমিক ইমেল সেট করুন",
+    createEmail: "নতুন ইমেইল লিখুন",
+    createUsername: "নতুন ব্যবহারকারী নাম লিখুন",
     emailVerified: "যাচাইকৃত ",
     emailUnverified: "অযাচাইকৃত",
     emailDelete: "মুছে ফেলা",
@@ -26,37 +28,36 @@ export const bn: Translation = {
     connectedAccounts: "সংযুক্ত অ্যাকাউন্ট",
     deleteAccount: "অ্যাকাউন্ট মুছে ফেলুন",
     accountNotFound: "অ্যাকাউন্ট পাওয়া যাচ্ছে না",
+    signIn: "সাইন ইন",
+    signUp: "নিবন্ধন করুন",
+    selectLoginMethod: "লগইন পদ্ধতি নির্বাচন করুন",
+    setupLoginMethod: "লগইন পদ্ধতি সেটআপ করুন",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
+    enterPasscodeNoEmail:
+      "আপনার প্রাথমিক ইমেল ঠিকানায় প্রেরিত পাসকোডটি লিখুন।",
     setupPasskey:
       "একটি পাসকি দিয়ে সহজে এবং নিরাপদে আপনার অ্যাকাউন্টে সাইন ইন করুন। দ্রষ্টব্য: আপনার বায়োমেট্রিক ডেটা শুধুমাত্র আপনার ডিভাইসে সংরক্ষিত থাকে এবং কখনই কারো সাথে শেয়ার করা হবে না।",
     createAccount:
       '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই। আপনি একটি নতুন অ্যাকাউন্ট তৈরি করতে চান?',
-    passwordFormatHint:
-      "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
-    manageEmails:
-      "পাসকোড প্রমাণীকরণের জন্য ব্যবহৃত হয়।",
-    changePassword: "একটি নতুন পাসওয়ার্ড সেট করুন।",
-    managePasskeys: "আপনার পাসকিগুলি আপনাকে এই অ্যাকাউন্টে সাইন ইন করতে দেয়৷",
-    isPrimaryEmail:
-      "এই ইমেলটি আপনার পাসকিগুলির জন্য ব্যবহারকারীর নাম হিসাবে ব্যবহার করা হবে৷",
+    passwordFormatHint: "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
     setPrimaryEmail:
-      "নতুন পাসকিগুলির জন্য ব্যবহারকারীর নাম হিসাবে ব্যবহার করার জন্য এই ইমেলটি সেট করুন৷",
+      "এই ইমেইল ঠিকানা আপনার সাথে যোগাযোগ করার জন্য নির্ধারণ করুন।",
+    isPrimaryEmail:
+      "প্রয়োজন হলে এই ইমেল ঠিকানা ব্যবহার করা হবে আপনার সাথে যোগাযোগ করার জন্য।",
     emailVerified: "এই ইমেল ঠিকানা যাচাই করা হয়েছে.",
     emailUnverified: "এই ইমেল ঠিকানা যাচাই করা হয়নি.",
     emailDelete:
       "আপনি এই ইমেল ঠিকানা মুছে ফেললে, এটি আর সাইন ইন করতে ব্যবহার করা যাবে না.",
-    emailDeletePrimary:
-      "প্রাথমিক ইমেল ঠিকানা মুছে ফেলা যাবে না.",
-    renamePasskey:
-      "পাসকির জন্য একটি নাম সেট করুন।",
-    deletePasskey:
-      "আপনার অ্যাকাউন্ট থেকে এই পাসকি মুছুন.",
+    renamePasskey: "পাসকির জন্য একটি নাম সেট করুন।",
+    deletePasskey: "আপনার অ্যাকাউন্ট থেকে এই পাসকি মুছুন.",
     deleteAccount:
       "আপনি কি এই অ্যাকাউন্টটি মুছে ফেলার বিষয়ে নিশ্চিত? সমস্ত ডেটা অবিলম্বে মুছে ফেলা হবে এবং পুনরুদ্ধার করা যাবে না।",
-    noAccountExists:
-      '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই।',
+    noAccountExists: '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই।',
+    selectLoginMethodForFutureLogins:
+      "ভবিষ্যতে লগইনের জন্য একটি প্রয়োজনীয় লগইন পদ্ধতি নির্বাচন করুন।",
+    howDoYouWantToLogin: "আপনি কিভাবে লগইন করতে চান?",
   },
   labels: {
     or: "বা",
@@ -66,6 +67,8 @@ export const bn: Translation = {
     continue: "চালিয়ে যান",
     skip: "এড়িয়ে যান",
     save: "সংরক্ষণ",
+    passkey: "পাসওয়ার্ড",
+    passcode: "পাসকোড",
     password: "পাসওয়ার্ড",
     signInPassword: "একটি পাসওয়ার্ড দিয়ে সাইন ইন",
     signInPasscode: "একটি পাসকোড দিয়ে সাইন ইন করুন",
@@ -88,11 +91,19 @@ export const bn: Translation = {
     rename: "নাম পরিবর্তন করুন",
     newPasskeyName: "নতুন পাসকি নাম",
     addEmail: "ইমেল যোগ করুন",
-    changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
     createPasskey: "একটি পাসকি তৈরি করুন",
     webauthnUnsupported: "পাসকিগুলি আপনার ব্রাউজার দ্বারা সমর্থিত নয়৷",
     signInWith: "{provider} দিয়ে সাইন ইন করুন",
     deleteAccount: "হ্যাঁ, এই অ্যাকাউন্টটি মুছুন.",
+    emailOrUsername: "ইমেল বা ব্যবহারকারীর নাম",
+    username: "ব্যবহারকারীর নাম",
+    optional: "ঐচ্ছিক",
+    dontHaveAnAccount: "একটি অ্যাকাউন্ট নেই?",
+    alreadyHaveAnAccount: "ইতিমধ্যে অ্যাকাউন্ট আছে?",
+    changeUsername: "ব্যবহারকারীর নাম পরিবর্তন করুন",
+    setUsername: "ব্যবহারকারীর নাম সেট করুন",
+    changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
+    setPassword: "পাসওয়ার্ড সেট করুন",
   },
   errors: {
     somethingWentWrong:
@@ -104,7 +115,8 @@ export const bn: Translation = {
       "পাসকোডটি অনেকবার ভুলভাবে প্রবেশ করানো হয়েছে৷ একটি নতুন কোড অনুরোধ করুন.",
     tooManyRequests:
       "অনেক অনুরোধ করা হয়েছে. অনুগ্রহ করে অনুরোধকৃত অপারেশন পুনরাবৃত্তি করার জন্য অপেক্ষা করুন।",
-    unauthorized: "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ পূর্বক আরো একবার প্রবেশ করুন.",
+    unauthorized:
+      "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ পূর্বক আরো একবার প্রবেশ করুন.",
     invalidWebauthnCredential: "এই পাসকি আর ব্যবহার করা যাবে না।",
     passcodeExpired: "পাসকোড মেয়াদ শেষ হয়েছে. একটি নতুন অনুরোধ করুন.",
     userVerification:
@@ -118,5 +130,33 @@ export const bn: Translation = {
     thirdPartyUnverifiedEmail:
       "ইমেল যাচাইকরণ প্রয়োজন. অনুগ্রহ করে আপনার প্রদানকারীর সাথে ব্যবহৃত ইমেল ঠিকানা যাচাই করুন।",
     signupDisabled: "অ্যাকাউন্ট নিবন্ধন নিষ্ক্রিয় করা হয়েছে",
+  },
+  flowErrors: {
+    technical_error:
+      "একটি প্রযুক্তিগত ত্রুটি ঘটেছে. অনুগ্রহ করে একটু পরে আবার চেষ্টা করুন.",
+    flow_expired_error:
+      "সেশনটি মেয়াদ উত্তীর্ণ হয়েছে, দয়া করে পুনরায় শুরু করতে বাটনটি ক্লিক করুন।",
+    value_invalid_error: "প্রবেশিত মান অবৈধ।",
+    passcode_invalid: "প্রদত্ত পাসকোড সঠিক নয়।",
+    passkey_invalid: "এই পাসকী আর ব্যবহার করা যাবে না",
+    passcode_max_attempts_reached:
+      "পাসকোডটি অনেকবার ভুল ভাবে প্রবেশ করা হয়েছে। দয়া করে নতুন কোড অনুরোধ করুন।",
+    rate_limit_exceeded:
+      "অনেকগুলি অনুরোধ করা হয়েছে। অনুরোধকৃত অপারেশন পুনরায় প্রয়াত করতে অপেক্ষা করুন।",
+    unknown_username_error: "ব্যবহারকারীর নাম অজানা।",
+    username_already_exists: "ব্যবহারকারীর নাম ইতিমধ্যে নেওয়া হয়েছে।",
+    invalid_username_error:
+      "ব্যবহারকারীর নাম শুধুমাত্র অক্ষর, সংখ্যা এবং আন্ডারস্কোর থাকতে পারে।",
+    email_already_exists: "ইমেলটি ইতিমধ্যে নেওয়া হয়েছে।",
+    not_found: "অনুরোধ করা রিসোর্সটি পাওয়া যায়নি।",
+    operation_not_permitted_error: "অপারেশন অনুমোদিত নয়।",
+    flow_discontinuity_error:
+      "ব্যবহারকারীর সেটিংস বা প্রদানকারীর কনফিগারেশনের কারণে প্রক্রিয়াটি চালিয়ে যাওয়া সম্ভব নয়।",
+    form_data_invalid_error: "জমা দেওয়া ফর্ম ডেটাতে ত্রুটি রয়েছে।",
+    unauthorized:
+      "আপনার সেশনের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ পূর্বক আরো একবার প্রবেশ করুন.",
+    value_missing_error: "মান অনুপস্থিত।",
+    value_too_long_error: "মানটি খুব দীর্ঘ।",
+    value_too_short_error: "মানটি খুব ছোট।",
   },
 };
