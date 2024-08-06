@@ -154,7 +154,7 @@
         "database": {
           "$ref": "#/$defs/Database",
           "title": "database",
-          "description": "`database configures database connection settings."
+          "description": "`database` configures database connection settings."
         },
         "debug": {
           "type": "boolean",
@@ -659,7 +659,7 @@
             "never"
           ],
           "description": "`acquire_on_registration` configures how users are prompted creating a password on registration.",
-          "default": "never",
+          "default": "always",
           "meta:enum": {
             "always": "Indicates that users are always prompted to create a password on registration.",
             "conditional": "Indicates that users are prompted to create a password on registration as long as the user does\n\t\t\t\t\t\tnot have a passkey.\n\n\t\t\t\t\t\tIf passkeys are also conditionally acquired on registration, then users are given a choice as\n\t\t\t\t\t\tto what type of credential to register.",
@@ -674,7 +674,7 @@
             "never"
           ],
           "description": "`acquire_on_login` configures how users are prompted creating a password on login.",
-          "default": "always",
+          "default": "never",
           "meta:enum": {
             "always": "Indicates that users are always prompted to create a password on login\n\t\t\t\t\tprovided that they do not already have a password.",
             "conditional": "Indicates that users are prompted to create a password on login provided that\n\t\t\t\t\t\tthey do not already have a password and do not have a passkey.\n\n\t\t\t\t\t\tIf passkeys are also conditionally acquired on login then users are given a choice as to what\n\t\t\t\t\t\ttype of credential to register.",
@@ -814,7 +814,8 @@
     "SMTP": {
       "properties": {
         "host": {
-          "type": "string"
+          "type": "string",
+          "default": "localhost"
         },
         "port": {
           "type": "string",
@@ -1064,27 +1065,27 @@
         "acquire_on_login": {
           "type": "boolean",
           "description": "`acquire_on_login` determines whether users, provided that they do not already have set a username,\n\tare prompted to provide a username on login.",
-          "default": false
+          "default": true
         },
         "acquire_on_registration": {
           "type": "boolean",
           "description": "`acquire_on_registration` determines whether users are prompted to provide a username on registration.",
-          "default": false
+          "default": true
         },
         "enabled": {
           "type": "boolean",
           "description": "`enabled` determines whether users can set a unique username.\n\nUsernames can contain letters (a-z,A-Z), numbers (0-9), and underscores.",
-          "default": true
+          "default": false
         },
         "max_length": {
           "type": "integer",
           "description": "`max_length` specifies the maximum allowed length of a username.",
-          "default": 100
+          "default": 32
         },
         "min_length": {
           "type": "integer",
           "description": "`min_length` specifies the minimum length of a username.",
-          "default": 8
+          "default": 3
         },
         "optional": {
           "type": "boolean",

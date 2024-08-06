@@ -37,6 +37,7 @@ func DefaultConfig() *Config {
 			},
 		},
 		Smtp: SMTP{
+			Host: "localhost",
 			Port: "465",
 		},
 		EmailDelivery: EmailDelivery{
@@ -160,9 +161,9 @@ func DefaultConfig() *Config {
 			Optional:              true,
 			AcquireOnRegistration: true,
 			AcquireOnLogin:        true,
-			UseAsLoginIdentifier:  false,
+			UseAsLoginIdentifier:  true,
 			MinLength:             3,
-			MaxLength:             40,
+			MaxLength:             32,
 		},
 		Debug: false,
 	}
