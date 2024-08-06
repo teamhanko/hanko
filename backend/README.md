@@ -556,8 +556,10 @@ webhooks:
 
 ## Configuration reference
 
+- [Using configuration file](https://github.com/teamhanko/hanko/wiki/Using-configuration-file)
+- [Using environment variables](https://github.com/teamhanko/hanko/wiki/Using-environment-variables)
 - [Configuration reference](https://github.com/teamhanko/hanko/wiki/hanko)
-- [On using environment variables](https://github.com/teamhanko/hanko/wiki/On-using-environment-variables)
+
 
 ## License
 
