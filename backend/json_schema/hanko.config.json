@@ -535,34 +535,10 @@
     },
     "Passcode": {
       "properties": {
-        "email": {
-          "$ref": "#/$defs/PasscodeEmail",
-          "description": "Deprecated. See child properties for suggested replacements."
-        },
         "ttl": {
           "type": "integer",
           "description": "Deprecated. Use `email.passcode_ttl` instead.",
           "default": 300
-        },
-        "smtp": {
-          "$ref": "#/$defs/SMTP",
-          "description": "Deprecated. Use `email_delivery.smtp` instead."
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
-    "PasscodeEmail": {
-      "properties": {
-        "from_address": {
-          "type": "string",
-          "description": "Deprecated. Use `email_delivery.from_address` instead.",
-          "default": "passcode@hanko.io"
-        },
-        "from_name": {
-          "type": "string",
-          "description": "Deprecated. Use `email_delivery.from_name` instead.",
-          "default": "Hanko"
         }
       },
       "additionalProperties": false,
