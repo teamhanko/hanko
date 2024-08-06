@@ -187,7 +187,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 	}
 
-	if cfg.Email.UseForAuthentication {
+	if cfg.Email.Enabled && cfg.Email.UseForAuthentication {
 		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 		if err != nil {
 			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
