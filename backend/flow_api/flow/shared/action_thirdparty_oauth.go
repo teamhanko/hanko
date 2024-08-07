@@ -71,11 +71,22 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 
 	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
 
-	cookie := utils.GenerateStateCookie(&deps.Cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
-		MaxAge:   300,
+	//cookie := utils.GenerateStateCookie(&deps.Cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
+	//	MaxAge:   300,
+	//	Path:     "/",
+	//	SameSite: http.SameSiteLaxMode,
+	//})
+
+	cookie := &http.Cookie{
+		Name:     utils.HankoThirdpartyStateCookie,
+		Value:    string(state),
 		Path:     "/",
-		SameSite: http.SameSiteLaxMode,
-	})
+		Domain:   deps.Cfg.Session.Cookie.Domain,
+		MaxAge:   300,
+		Secure:   true,
+		HttpOnly: deps.Cfg.Session.Cookie.HttpOnly,
+		SameSite: http.SameSiteNoneMode,
+	}
 
 	deps.HttpContext.SetCookie(cookie)
 
