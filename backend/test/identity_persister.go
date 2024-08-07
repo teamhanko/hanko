@@ -1,6 +1,7 @@
 package test
 
 import (
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -19,6 +20,15 @@ type identityPersister struct {
 func (i identityPersister) Get(userProviderID string, providerName string) (*models.Identity, error) {
 	for _, identity := range i.identities {
 		if identity.ProviderID == userProviderID && identity.ProviderName == providerName {
+			return &identity, nil
+		}
+	}
+	return nil, nil
+}
+
+func (i identityPersister) GetByID(identityID uuid.UUID) (*models.Identity, error) {
+	for _, identity := range i.identities {
+		if identity.ID == identityID {
 			return &identity, nil
 		}
 	}

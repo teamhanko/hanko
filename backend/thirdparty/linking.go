@@ -13,15 +13,18 @@ type AccountLinkingResult struct {
 	Type         models.AuditLogType
 	User         *models.User
 	WebhookEvent *events.Event
+	UserCreated  bool
 }
 
 const (
 	getIdentityFailure = "could not get identity"
 )
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isSaml bool) (*AccountLinkingResult, error) {
-	if cfg.Emails.RequireVerification && !userData.Metadata.EmailVerified {
-		return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isSaml bool, isFlow bool) (*AccountLinkingResult, error) {
+	if !isFlow {
+		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
+			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
+		}
 	}
 
 	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerName)
@@ -61,10 +64,16 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer(getIdentityFailure).WithCause(err)
 	}
 
+	u, terr := p.GetUserPersisterWithConnection(tx).Get(*email.UserID)
+	if terr != nil {
+		return nil, ErrorServer("could not get user").WithCause(terr)
+	}
+
 	return &AccountLinkingResult{
 		Type:         models.AuditLogThirdPartyLinkingSucceeded,
-		User:         user,
+		User:         u,
 		WebhookEvent: nil,
+		UserCreated:  false,
 	}, nil
 }
 
@@ -116,7 +125,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 				return nil, ErrorServer("failed to count user emails").WithCause(err)
 			}
 
-			if emailCount >= cfg.Emails.MaxNumOfAddresses {
+			if emailCount >= cfg.Email.Limit {
 				return nil, ErrorMaxNumberOfAddresses("max number of email addresses reached")
 			}
 
@@ -147,6 +156,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		Type:         models.AuditLogThirdPartySignInSucceeded,
 		User:         user,
 		WebhookEvent: &webhookEvent,
+		UserCreated:  false,
 	}
 
 	return linkingResult, nil
@@ -221,6 +231,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		Type:         models.AuditLogThirdPartySignUpSucceeded,
 		User:         u,
 		WebhookEvent: &evt,
+		UserCreated:  true,
 	}
 
 	return linkingResult, nil

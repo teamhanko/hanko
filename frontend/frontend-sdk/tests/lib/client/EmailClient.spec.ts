@@ -47,7 +47,7 @@ describe("EmailClient.list()", () => {
 
       const email = emailClient.list();
       await expect(email).rejects.toThrow(error);
-    }
+    },
   );
 
   it("should throw error on API communication failure", async () => {
@@ -98,7 +98,7 @@ describe("EmailClient.create()", () => {
 
       const email = emailClient.create(emailAddress);
       await expect(email).rejects.toThrow(error);
-    }
+    },
   );
 
   it("should throw error on API communication failure", async () => {
@@ -119,7 +119,7 @@ describe("EmailClient.setPrimaryEmail()", () => {
     jest.spyOn(emailClient.client, "post").mockResolvedValue(response);
     const update = await emailClient.setPrimaryEmail(emailID);
     expect(emailClient.client.post).toHaveBeenCalledWith(
-      `/emails/${emailID}/set_primary`
+      `/emails/${emailID}/set_primary`,
     );
     expect(update).toEqual(undefined);
   });
@@ -139,7 +139,7 @@ describe("EmailClient.setPrimaryEmail()", () => {
 
       const email = emailClient.setPrimaryEmail(emailID);
       await expect(email).rejects.toThrow(error);
-    }
+    },
   );
 
   it("should throw error on API communication failure", async () => {
@@ -160,7 +160,7 @@ describe("EmailClient.delete()", () => {
     jest.spyOn(emailClient.client, "delete").mockResolvedValue(response);
     const deleteResponse = await emailClient.delete(emailID);
     expect(emailClient.client.delete).toHaveBeenCalledWith(
-      `/emails/${emailID}`
+      `/emails/${emailID}`,
     );
     expect(deleteResponse).toEqual(undefined);
   });
@@ -180,7 +180,7 @@ describe("EmailClient.delete()", () => {
 
       const deleteResponse = emailClient.delete(emailID);
       await expect(deleteResponse).rejects.toThrow(error);
-    }
+    },
   );
 
   it("should throw error on API communication failure", async () => {

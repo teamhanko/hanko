@@ -5,13 +5,14 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
+	"golang.org/x/exp/slices"
 	"time"
 )
 
 // Email is used by pop to map your users database table to your go code.
 type Email struct {
 	ID           uuid.UUID     `db:"id" json:"id"`
-	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"`
+	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"` // TODO: should not be a pointer anymore
 	Address      string        `db:"address" json:"address"`
 	Verified     bool          `db:"verified" json:"verified"`
 	PrimaryEmail *PrimaryEmail `has_one:"primary_emails" json:"primary_emails,omitempty"`
@@ -44,9 +45,9 @@ func (email *Email) IsPrimary() bool {
 	return false
 }
 
-func (emails Emails) GetVerified() Emails {
+func (emails *Emails) GetVerified() Emails {
 	var list Emails
-	for _, email := range emails {
+	for _, email := range *emails {
 		if email.Verified {
 			list = append(list, email)
 		}
@@ -54,8 +55,14 @@ func (emails Emails) GetVerified() Emails {
 	return list
 }
 
-func (emails Emails) GetPrimary() *Email {
-	for _, email := range emails {
+func (emails *Emails) HasUnverified() bool {
+	return slices.ContainsFunc(*emails, func(e Email) bool {
+		return !e.Verified
+	})
+}
+
+func (emails *Emails) GetPrimary() *Email {
+	for _, email := range *emails {
 		if email.IsPrimary() {
 			return &email
 		}
@@ -63,18 +70,8 @@ func (emails Emails) GetPrimary() *Email {
 	return nil
 }
 
-func (emails Emails) SetPrimary(primary *PrimaryEmail) {
-	for i := range emails {
-		if emails[i].ID.String() == primary.EmailID.String() {
-			emails[i].PrimaryEmail = primary
-			return
-		}
-	}
-	return
-}
-
-func (emails Emails) GetEmailByAddress(address string) *Email {
-	for _, email := range emails {
+func (emails *Emails) GetEmailByAddress(address string) *Email {
+	for _, email := range *emails {
 		if email.Address == address {
 			return &email
 		}
@@ -82,8 +79,8 @@ func (emails Emails) GetEmailByAddress(address string) *Email {
 	return nil
 }
 
-func (emails Emails) GetEmailById(emailId uuid.UUID) *Email {
-	for _, email := range emails {
+func (emails *Emails) GetEmailById(emailId uuid.UUID) *Email {
+	for _, email := range *emails {
 		if email.ID.String() == emailId.String() {
 			return &email
 		}

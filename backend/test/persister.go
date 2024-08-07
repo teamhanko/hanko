@@ -35,6 +35,7 @@ func NewPersister(
 		passwordCredentialPersister:  NewPasswordCredentialPersister(passwords),
 		auditLogPersister:            NewAuditLogPersister(auditLogs),
 		emailPersister:               NewEmailPersister(emails),
+		usernamePersister:            NewUsernamePersister(nil),
 		primaryEmailPersister:        NewPrimaryEmailPersister(primaryEmails),
 		identityPersister:            NewIdentityPersister(identities),
 		tokenPersister:               NewTokenPersister(tokens),
@@ -54,6 +55,7 @@ type persister struct {
 	passwordCredentialPersister  persistence.PasswordCredentialPersister
 	auditLogPersister            persistence.AuditLogPersister
 	emailPersister               persistence.EmailPersister
+	usernamePersister            persistence.UsernamePersister
 	primaryEmailPersister        persistence.PrimaryEmailPersister
 	identityPersister            persistence.IdentityPersister
 	tokenPersister               persistence.TokenPersister
@@ -140,6 +142,14 @@ func (p *persister) GetEmailPersister() persistence.EmailPersister {
 
 func (p *persister) GetEmailPersisterWithConnection(tx *pop.Connection) persistence.EmailPersister {
 	return p.emailPersister
+}
+
+func (p *persister) GetUsernamePersister() persistence.UsernamePersister {
+	return p.usernamePersister
+}
+
+func (p *persister) GetUsernamePersisterWithConnection(tx *pop.Connection) persistence.UsernamePersister {
+	return p.usernamePersister
 }
 
 func (p *persister) GetPrimaryEmailPersister() persistence.PrimaryEmailPersister {

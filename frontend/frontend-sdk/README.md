@@ -62,11 +62,7 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 
 ### Client Classes
 
-- `ConfigClient` - A class to fetch configurations.
 - `UserClient` - A class to manage users.
-- `WebauthnClient` - A class to handle WebAuthn-related functionalities.
-- `PasswordClient` - A class to manage passwords and password logins.
-- `PasscodeClient` - A class to handle passcode logins.
 - `ThirdPartyClient` - A class to handle social logins.
 - `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
 
@@ -99,12 +95,10 @@ To see the latest documentation, please click [here](https://docs.hanko.io/jsdoc
 ### Event Interfaces
 
 - `SessionDetail`
-- `AuthFlowCompletedDetail`
 
 ### Event Types
 
 - `CustomEventWithDetail`
-- `authFlowCompletedType`
 - `sessionCreatedType`
 - `sessionExpiredType`
 - `userLoggedOutType`
@@ -152,36 +146,6 @@ try {
 }
 ```
 
-### Register a WebAuthn credential
-
-There are a number of situations where you may want the user to register a WebAuthn credential. For example, after user
-creation, when a user logs in to a new browser/device, or to take advantage of the "caBLE" support and pair a smartphone
-with a desktop computer:
-
-```typescript
-import { Hanko, UnauthorizedError, WebauthnRequestCancelledError } from "@teamhanko/hanko-frontend-sdk"
-
-const hanko = new Hanko("https://[HANKO_API_URL]")
-
-// By passing the user object (see example above) to `hanko.webauthn.shouldRegister(user)` you get an indication of
-// whether a WebAuthn credential registration should be performed on the current browser. This is useful if the user has
-// logged in using a method other than WebAuthn, and you then want to display a UI that allows the user to register a
-// credential when possibly none exists.
-
-try {
-    // Will cause the browser to present a dialog with various options depending on the WebAuthn implemention.
-    await hanko.webauthn.register()
-
-    // Credential has been registered.
-} catch(e) {
-    if (e instanceof WebauthnRequestCancelledError) {
-        // The WebAuthn API failed. Usually in this case the user cancelled the WebAuthn dialog.
-    } else if (e instanceof UnauthorizedError) {
-        // The user needs to login to perform this action.
-    }
-}
-```
-
 ### Custom Events
 
 You can bind callback functions to different custom events. The callback function will be called when the event happens
@@ -198,19 +162,9 @@ const removeEventListener = hanko.onSessionCreated((eventDetail) => {
 
 The following events are available:
 
-- "hanko-auth-flow-completed": Will be triggered after a session has been created and the user has completed possible
-  additional steps (e.g. passkey registration or password recovery) via the `<hanko-auth>` element.
-
-```js
-hanko.onAuthFlowCompleted((authFlowCompletedDetail) => {
-  // Login, registration or recovery has been completed successfully. You can now take control and redirect the
-  // user to protected pages.
-  console.info(`User successfully completed the registration or authorization process (user-id: "${authFlowCompletedDetail.userID}")`);
-})
-```
-
-- "hanko-session-created": Will be triggered before the "hanko-auth-flow-completed" happens, as soon as the user is technically logged in.
-  It will also be triggered when the user logs in via another browser window. The event can be used to obtain the JWT. Please note, that the
+- "hanko-session-created": Will be triggered after a session has been created and the user has completed possible
+  additional steps (e.g. passkey registration or password recovery). It will also be triggered when the user logs in via
+  another browser window. The event can be used to obtain the JWT. Please note, that the
   JWT is only available, when the Hanko API configuration allows to obtain the JWT. When using Hanko-Cloud
   the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the backend only, as long as
   your backend runs under the same domain as your frontend. To do so, make sure the config parameter "session.enable_auth_token_header"

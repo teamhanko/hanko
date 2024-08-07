@@ -90,23 +90,27 @@ Watch our releases, leave a star, join our [Discord community](https://www.hanko
 |⚙️| Passkey-only and OAuth-only configurations |
 |⚙️| Username support (non-email) |
 |⚙️| Optional / user-deleteable passwords |
-|⚙️| OIDC Enterprise SSO |
-|⚙️| 2FA (TOTP, security keys) |
-| | Email templates & i18n |
-| | Refresh tokens / sessions |
+|⚙️| Privacy mode (prevents email enumeration) |
 | | 📢 Hanko 1.0 Release |
+|⚙️| 2FA (TOTP, security keys) |
+|⚙️| iOS SDK |
+| | Refresh tokens / sessions |
 | | `<hanko-menu>` web component |
-| | Custom Social SSO connections (OIDC/OAuth2) |
+| | Email templates & i18n |
 | | Email security notifications |
 | | Custom JWT claims |
-| | Mobile SDKs |
-| | SMS passcodes |
+| | Android, React Native, Flutter SDKs |
 
 Additional features that have been requested or that we would like to build but are currently not on the roadmap:
 - Custom user data / fields
+- OIDC Enterprise SSO
 - Privileged sessions & step-up authentication
 - Bot protection / CAPTCHA
+- Custom Social SSO connections (OIDC/OAuth2)
 - Hosted auth pages / OIDC provider
+- SMS passcodes
+
+You can find more information about the planned features on our public [roadmap](https://www.hanko.io/roadmap) page.
 
 # Community
 ## Questions, bugs, ideas

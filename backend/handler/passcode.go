@@ -33,7 +33,7 @@ type PasscodeHandler struct {
 	renderer          *mail.Renderer
 	passcodeGenerator crypto.PasscodeGenerator
 	persister         persistence.Persister
-	emailConfig       config.Email
+	emailConfig       config.EmailDelivery
 	serviceConfig     config.Service
 	TTL               int
 	sessionManager    session.Manager
@@ -58,9 +58,9 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 		renderer:          renderer,
 		passcodeGenerator: crypto.NewPasscodeGenerator(),
 		persister:         persister,
-		emailConfig:       cfg.Passcode.Email,
+		emailConfig:       cfg.EmailDelivery,
 		serviceConfig:     cfg.Service,
-		TTL:               cfg.Passcode.TTL,
+		TTL:               cfg.Email.PasscodeTtl,
 		sessionManager:    sessionManager,
 		cfg:               cfg,
 		auditLogger:       auditLogger,
@@ -69,16 +69,16 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 }
 
 func (h *PasscodeHandler) Init(c echo.Context) error {
-	var body dto.PasscodeInitRequest
-	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+	var request dto.PasscodeInitRequest
+	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
 		return dto.ToHttpError(err)
 	}
 
-	if err := c.Validate(body); err != nil {
+	if err := c.Validate(request); err != nil {
 		return dto.ToHttpError(err)
 	}
 
-	userId, err := uuid.FromString(body.UserId)
+	userId, err := uuid.FromString(request.UserId)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
@@ -103,8 +103,8 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	var emailId uuid.UUID
-	if body.EmailId != nil {
-		emailId, err = uuid.FromString(*body.EmailId)
+	if request.EmailId != nil {
+		emailId, err = uuid.FromString(*request.EmailId)
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "failed to parse emailId as uuid").SetInternal(err)
 		}
@@ -146,7 +146,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 	sessionToken := h.GetSessionToken(c)
 	if sessionToken != nil && sessionToken.Subject() != user.ID.String() {
-		// if the user is logged in and the requested user in the body does not match the user from the session then sending and finalizing passcodes is not allowed
+		// if the user is logged in and the requested user in the request does not match the user from the session then sending and finalizing passcodes is not allowed
 		return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("session.userId does not match requested userId"))
 	}
 
@@ -170,8 +170,8 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
-		UserId:    userId,
-		EmailID:   email.ID,
+		UserId:    &userId,
+		EmailID:   &email.ID,
 		Ttl:       h.TTL,
 		Code:      string(hashedPasscode),
 		CreatedAt: now,
@@ -191,15 +191,17 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	}
 
 	lang := c.Request().Header.Get("Accept-Language")
+
 	subject := h.renderer.Translate(lang, "email_subject_login", data)
-	bodyPlain, err := h.renderer.Render("loginTextMail", lang, data)
+
+	body, err := h.renderer.Render("login_text.tmpl", lang, data)
 	if err != nil {
 		return fmt.Errorf("failed to render email template: %w", err)
 	}
 
 	webhookData := webhook.EmailSend{
 		Subject:          subject,
-		BodyPlain:        bodyPlain,
+		BodyPlain:        body,
 		ToEmailAddress:   email.Address,
 		DeliveredByHanko: true,
 		AcceptLanguage:   lang,
@@ -219,7 +221,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 		message.SetHeader("Subject", subject)
 
-		message.SetBody("text/plain", bodyPlain)
+		message.SetBody("text/plain", body)
 
 		err = h.mailer.Send(message)
 		if err != nil {
@@ -288,14 +290,14 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return nil
 		}
 
-		user, err := userPersister.Get(passcode.UserId)
+		userModel, err := userPersister.Get(*passcode.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
 
 		lastVerificationTime := passcode.CreatedAt.Add(time.Duration(passcode.Ttl) * time.Second)
 		if lastVerificationTime.Before(startTime) {
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("timed out passcode"))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, userModel, fmt.Errorf("timed out passcode"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -312,7 +314,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				if err != nil {
 					return fmt.Errorf("failed to delete passcode: %w", err)
 				}
-				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("max attempts reached"))
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, userModel, fmt.Errorf("max attempts reached"))
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
@@ -325,7 +327,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to update passcode: %w", err)
 			}
 
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, user, fmt.Errorf("passcode invalid"))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalFailed, userModel, fmt.Errorf("passcode invalid"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -338,12 +340,12 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			return fmt.Errorf("failed to delete passcode: %w", err)
 		}
 
-		if passcode.Email.User != nil && passcode.Email.User.ID.String() != user.ID.String() {
+		if passcode.Email.User != nil && passcode.Email.User.ID.String() != userModel.ID.String() {
 			return echo.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 
 		emailExistsForUser := false
-		for _, email := range user.Emails {
+		for _, email := range userModel.Emails {
 			emailExistsForUser = email.ID == passcode.Email.ID
 			if emailExistsForUser {
 				break
@@ -353,53 +355,53 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 		existingSessionToken := h.GetSessionToken(c)
 		// return forbidden when none of these cases matches
 		if !((existingSessionToken == nil && emailExistsForUser) || // normal login: when user logs in and the email used is associated with the user
-			(existingSessionToken == nil && len(user.Emails) == 0) || // register: when user register and the user has no emails
-			(existingSessionToken != nil && existingSessionToken.Subject() == user.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passcode and the one in the session matches
+			(existingSessionToken == nil && len(userModel.Emails) == 0) || // register: when user register and the user has no emails
+			(existingSessionToken != nil && existingSessionToken.Subject() == userModel.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passcode and the one in the session matches
 			return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passcode finalization not allowed"))
 		}
 
 		wasUnverified := false
-		hasEmails := len(user.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a UserEmailCreate one
+		hasEmails := len(userModel.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a EmailCreate one
 
 		if !passcode.Email.Verified {
 			wasUnverified = true
 
 			// Update email verified status and assign the email address to the user.
 			passcode.Email.Verified = true
-			passcode.Email.UserID = &user.ID
+			passcode.Email.UserID = &userModel.ID
 
 			err = emailPersister.Update(passcode.Email)
 			if err != nil {
 				return fmt.Errorf("failed to update the email verified status: %w", err)
 			}
 
-			if user.Emails.GetPrimary() == nil {
-				primaryEmail := models.NewPrimaryEmail(passcode.Email.ID, user.ID)
+			if userModel.Emails.GetPrimary() == nil {
+				primaryEmail := models.NewPrimaryEmail(passcode.Email.ID, userModel.ID)
 				err = primaryEmailPersister.Create(*primaryEmail)
 				if err != nil {
 					return fmt.Errorf("failed to create primary email: %w", err)
 				}
 
-				user.Emails = models.Emails{passcode.Email}
-				user.Emails.SetPrimary(primaryEmail)
-				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPrimaryEmailChanged, user, nil)
+				userModel.Emails = models.Emails{passcode.Email}
+				userModel.SetPrimaryEmail(primaryEmail)
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPrimaryEmailChanged, userModel, nil)
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
 			}
 
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailVerified, user, nil)
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailVerified, userModel, nil)
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
 		}
 
 		var emailJwt *dto.EmailJwt
-		if e := user.Emails.GetPrimary(); e != nil {
+		if e := userModel.Emails.GetPrimary(); e != nil {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		token, err := h.sessionManager.GenerateJWT(passcode.UserId, emailJwt)
+		token, err := h.sessionManager.GenerateJWT(*passcode.UserId, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}
@@ -417,13 +419,13 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			c.SetCookie(cookie)
 		}
 
-		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalSucceeded, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasscodeLoginFinalSucceeded, userModel, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
 
 		// notify about email verification result. Last step to prevent a trigger and rollback scenario
-		if h.cfg.Emails.RequireVerification && wasUnverified {
+		if h.cfg.Email.RequireVerification && wasUnverified {
 			var evt events.Event
 
 			if hasEmails {
@@ -432,7 +434,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 				evt = events.UserCreate
 			}
 
-			utils.NotifyUserChange(c, tx, h.persister, evt, user.ID)
+			utils.NotifyUserChange(c, tx, h.persister, evt, userModel.ID)
 		}
 
 		return c.JSON(http.StatusOK, dto.PasscodeReturn{

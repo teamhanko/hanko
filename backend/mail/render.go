@@ -49,7 +49,8 @@ func NewRenderer() (*Renderer, error) {
 
 // translate is a helper function to translate texts in a template
 func (r *Renderer) translate(messageID string, templateData map[string]interface{}) string {
-	return r.localizer.MustLocalize(&i18n.LocalizeConfig{
+	localizer := i18n.NewLocalizer(r.bundle, templateData["renderer_lang"].(string))
+	return localizer.MustLocalize(&i18n.LocalizeConfig{
 		MessageID:    messageID,
 		TemplateData: templateData,
 	})
@@ -59,6 +60,7 @@ func (r *Renderer) translate(messageID string, templateData map[string]interface
 // The lang can be the contents of Accept-Language headers as defined in http://www.ietf.org/rfc/rfc2616.txt.
 func (r *Renderer) Render(templateName string, lang string, data map[string]interface{}) (string, error) {
 	r.localizer = i18n.NewLocalizer(r.bundle, lang) // set the localizer, so the test will be translated to the given language
+	data["renderer_lang"] = lang
 	templateBuffer := &bytes.Buffer{}
 	err := r.template.ExecuteTemplate(templateBuffer, templateName, data)
 	if err != nil {

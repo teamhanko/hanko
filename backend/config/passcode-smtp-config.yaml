@@ -7,12 +7,11 @@ database:
 passcode:
   email:
     from_address: no-reply@hanko.io
-  smtp:
-    host: smtp.example.com
-    user: example
-    password: example
 secrets:
   keys:
     - abcedfghijklmnopqrstuvwxyz
 service:
   name: Hanko Authentication Service
+email_delivery:
+  enabled: true
+convert_legacy_config: true

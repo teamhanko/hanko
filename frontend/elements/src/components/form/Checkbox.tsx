@@ -11,7 +11,6 @@ const Checkbox = ({ label, ...props }: Props) => {
     <div className={styles.inputWrapper}>
       <label className={styles.checkboxWrapper}>
         <input
-          // @ts-ignore
           part={"input checkbox-input"}
           type={"checkbox"}
           aria-label={label}

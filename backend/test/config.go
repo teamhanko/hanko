@@ -16,18 +16,20 @@ var DefaultConfig = config.Config{
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
 	},
-	Smtp: config.SMTP{
-		Host: "localhost",
-		Port: "2500",
+	Email: config.Email{
+		Enabled:              true,
+		UseForAuthentication: true,
 	},
 	EmailDelivery: config.EmailDelivery{
 		Enabled: true,
+		SMTP: config.SMTP{
+			Host: "localhost",
+			Port: "2500",
+		},
+		FromAddress: "test@hanko.io",
+		FromName:    "Hanko Test",
 	},
 	Passcode: config.Passcode{
-		Email: config.Email{
-			FromAddress: "test@hanko.io",
-			FromName:    "Hanko Test",
-		},
 		TTL: 300,
 	},
 	Session: config.Session{
@@ -42,5 +44,9 @@ var DefaultConfig = config.Config{
 	Account: config.Account{
 		AllowSignup:   true,
 		AllowDeletion: false,
+	},
+	Passkey: config.Passkey{
+		Enabled:          true,
+		UserVerification: "preferred",
 	},
 }

@@ -14,10 +14,10 @@ func NewAuditLogger() auditlog.Logger {
 type auditLogger struct {
 }
 
-func (a *auditLogger) Create(context echo.Context, logType models.AuditLogType, user *models.User, err error) error {
+func (a *auditLogger) Create(context echo.Context, logType models.AuditLogType, user *models.User, err error, opts ...auditlog.DetailOption) error {
 	return nil
 }
 
-func (a *auditLogger) CreateWithConnection(tx *pop.Connection, context echo.Context, logType models.AuditLogType, user *models.User, err error) error {
+func (a *auditLogger) CreateWithConnection(tx *pop.Connection, context echo.Context, logType models.AuditLogType, user *models.User, err error, opts ...auditlog.DetailOption) error {
 	return nil
 }

@@ -9,34 +9,81 @@ import (
 )
 
 type Saml struct {
-	Enabled               bool                 `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	Endpoint              string               `yaml:"endpoint_url" json:"endpoint_url,omitempty" koanf:"endpoint_url"`
-	AudienceUri           string               `yaml:"audience_uri" json:"audience_uri,omitempty" koanf:"audience_uri"`
-	DefaultRedirectUrl    string               `yaml:"default_redirect_url" json:"default_redirect_url,omitempty" koanf:"default_redirect_url"`
+	// `enabled` determines whether the SAML API endpoints are available.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `endpoint` is URL at which the SAML endpoints like metadata, callback, etc. are available
+	// (e.g. `{YOUR_BACKEND_INSTANCE}/api`).
+	//
+	// Will be provided as metadata for IdP.
+	Endpoint string `yaml:"endpoint_url" json:"endpoint_url,omitempty" koanf:"endpoint_url"`
+	// `audience_uri` determines the intended recipient or audience for the SAML Assertion.
+	AudienceUri string `yaml:"audience_uri" json:"audience_uri,omitempty" koanf:"audience_uri"`
+	// `default_redirect_url` is the URL to redirect to in case of errors or when no `allowed_redirect_url` is provided.
+	DefaultRedirectUrl string `yaml:"default_redirect_url" json:"default_redirect_url,omitempty" koanf:"default_redirect_url"`
+	// `allowed_redirect_urls` is a list of URLs the backend is allowed to redirect to after third party sign-in was
+	// successful.
+	//
+	// Supports wildcard matching through globbing. e.g. `https://*.example.com` will allow `https://foo.example.com`
+	// and `https://bar.example.com` to be accepted.
+	//
+	// Globbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`
+	// and `https://foo.example.com/page2`.
+	//
+	// A double asterisk (`**`) acts as a "super"-wildcard/match-all.
+	//
+	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbinh.
 	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
 	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
 
-	Options Options `yaml:"options" json:"options,omitempty" koanf:"options"`
+	// `options` allows setting optional features for service provider operations.
+	Options Options `yaml:"options" json:"options,omitempty" koanf:"options" jsonschema:"title=options"`
 
+	// `identity_providers` is a list of SAML identity providers.
 	IdentityProviders []IdentityProvider `yaml:"identity_providers" json:"identity_providers,omitempty" koanf:"identity_providers"`
 }
 
+func (s Saml) GetProviderByDomain(domain string) *IdentityProvider {
+	for _, ip := range s.IdentityProviders {
+		if ip.Domain == domain {
+			return &ip
+		}
+	}
+
+	return nil
+}
+
 type Options struct {
+	// `sign_authn_requests` determines whether initial requests should be signed.
 	SignAuthnRequests bool `yaml:"sign_authn_requests" json:"sign_authn_requests,omitempty" koanf:"sign_authn_requests" jsonschema:"default=true"`
-	// Forces the IDP to show login window every time
-	ForceLogin                    bool `yaml:"force_login" json:"force_login,omitempty" koanf:"force_login" jsonschema:"default=false"`
+	// `force_login` forces the IdP to always show a login (even if there is an active session with the IdP).
+	ForceLogin bool `yaml:"force_login" json:"force_login,omitempty" koanf:"force_login" jsonschema:"default=false"`
+	// `validate_encryption_cert` determines whether the certificate used for the encryption of the IdP responses should
+	// be checked for validity.
 	ValidateEncryptionCertificate bool `yaml:"validate_encryption_cert" json:"validate_encryption_cert,omitempty" koanf:"validate_encryption_cert" jsonschema:"default=true"`
-	SkipSignatureValidation       bool `yaml:"skip_signature_validation" json:"skip_signature_validation,omitempty" koanf:"skip_signature_validation" jsonschema:"default=false"`
-	AllowMissingAttributes        bool `yaml:"allow_missing_attributes" json:"allow_missing_attributes,omitempty" koanf:"allow_missing_attributes" jsonschema:"default=false"`
+	// `skip_signature_validation` determines whether the validity check of an IdP response's signature
+	// should be skipped.
+	SkipSignatureValidation bool `yaml:"skip_signature_validation" json:"skip_signature_validation,omitempty" koanf:"skip_signature_validation" jsonschema:"default=false"`
+	// `allow_missing_attributes` determines whether missing attributes are allowed (e.g. the IdP specifies a phone
+	// attribute in the metadata but does not send it with a SAML Assertion Response).
+	AllowMissingAttributes bool `yaml:"allow_missing_attributes" json:"allow_missing_attributes,omitempty" koanf:"allow_missing_attributes" jsonschema:"default=false"`
 }
 
 type IdentityProvider struct {
-	Enabled               bool         `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	Name                  string       `yaml:"name" json:"name,omitempty" koanf:"name"`
-	Domain                string       `yaml:"domain" json:"domain,omitempty" koanf:"domain"`
-	MetadataUrl           string       `yaml:"metadata_url" json:"metadata_url,omitempty" koanf:"metadata_url"`
-	SkipEmailVerification bool         `yaml:"skip_email_verification" json:"skip_email_verification,omitempty" koanf:"skip_email_verification"`
-	AttributeMap          AttributeMap `yaml:"attribute_map" json:"attribute_map,omitempty" koanf:"attribute_map"`
+	// `enabled` activates or deactivates the identity provider.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `name` is the name given for the identity provider.
+	Name string `yaml:"name" json:"name,omitempty" koanf:"name"`
+	// At login the domain will be extracted from the users email address and then used to identify the idp to use.
+	// This tag defines for which domain the idp is used.
+	Domain string `yaml:"domain" json:"domain,omitempty" koanf:"domain"`
+	// `metadata_url` is the URL the API can retrieve IdP metadata from.
+	MetadataUrl string `yaml:"metadata_url" json:"metadata_url,omitempty" koanf:"metadata_url"`
+	// `skip_email_verification` determines whether the check if the `email_verified` attribute in the IdP response
+	// will be skipped.
+	SkipEmailVerification bool `yaml:"skip_email_verification" json:"skip_email_verification,omitempty" koanf:"skip_email_verification"`
+	// `attribute_map` is a map of attributes used to map attributes in IdP response to custom attributes at
+	// Hanko.
+	AttributeMap AttributeMap `yaml:"attribute_map" json:"attribute_map,omitempty" koanf:"attribute_map" jsonschema:"title=attribute_map"`
 }
 
 type AttributeMap struct {

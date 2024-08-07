@@ -21,6 +21,9 @@
     flex-grow: 1
     flex-basis: min-content
 
+    &.maxWidth
+      min-width: 100%
+
 // Button Styles
 .button
   @include mixins.font
@@ -106,6 +109,9 @@
   color: variables.$color
   border-color: variables.$color-shade-1
   background: variables.$background-color
+
+  &.error
+    border-color: variables.$error-color
 
   padding: 0 .5rem
   outline: none

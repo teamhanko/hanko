@@ -5,23 +5,83 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/sethvargo/go-limiter"
 	"github.com/sethvargo/go-limiter/httplimit"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml"
+	"github.com/teamhanko/hanko/backend/flow_api"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/mail"
 	"github.com/teamhanko/hanko/backend/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
 	e := echo.New()
+
 	e.Renderer = template.NewTemplateRenderer()
+
+	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
+
+	emailService, err := services.NewEmailService(*cfg)
+	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+	passwordService := services.NewPasswordService(*cfg, persister)
+	webauthnService := services.NewWebauthnService(*cfg, persister)
+
+	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	if err != nil {
+		panic(fmt.Errorf("failed to create jwk manager: %w", err))
+	}
+	sessionManager, err := session.NewManager(jwkManager, *cfg)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
+
+	var passcodeRateLimiter limiter.Store
+	var passwordRateLimiter limiter.Store
+	var tokenExchangeRateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
+		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
+	}
+
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
+
+	samlService := saml.NewSamlService(cfg, persister)
+
+	flowAPIHandler := flow_api.FlowPilotHandler{
+		Persister:                persister,
+		Cfg:                      *cfg,
+		PasscodeService:          passcodeService,
+		PasswordService:          passwordService,
+		WebauthnService:          webauthnService,
+		SessionManager:           sessionManager,
+		PasscodeRateLimiter:      passcodeRateLimiter,
+		PasswordRateLimiter:      passwordRateLimiter,
+		TokenExchangeRateLimiter: tokenExchangeRateLimiter,
+		AuthenticatorMetadata:    authenticatorMetadata,
+		AuditLogger:              auditLogger,
+		SamlService:              samlService,
+	}
+
+	if cfg.Saml.Enabled {
+		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
+	}
+
+	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
+
+	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
+	e.POST("/login", flowAPIHandler.LoginFlowHandler)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler)
+
 	e.HideBanner = true
 	g := e.Group("")
 
@@ -60,23 +120,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-
-	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
-
-	mailer, err := mail.NewMailer(cfg.Smtp)
+	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
 	if err != nil {
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
-
-	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	if cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
@@ -106,15 +153,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	healthHandler := NewHealthHandler()
-	webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
-	}
-
-	passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
-	if err != nil {
-		panic(fmt.Errorf("failed to create public passcode handler: %w", err))
-	}
 
 	if cfg.Passlink.Enabled {
 		passlinkHandler, err := NewPasslinkHandler(cfg, persister, sessionManager, mailer, auditLogger)
@@ -142,24 +180,36 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	emailHandler := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
 
-	webauthn := g.Group("/webauthn")
-	webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
-	webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
-	webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
+	if cfg.Passkey.Enabled {
+		webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
+		if err != nil {
+			panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
+		}
+		webauthn := g.Group("/webauthn")
+		webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
+		webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
+		webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
 
-	webauthnLogin := webauthn.Group("/login")
-	webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
-	webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
+		webauthnLogin := webauthn.Group("/login")
+		webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
+		webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
 
-	webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
-	webauthnCredentials.GET("", webauthnHandler.ListCredentials)
-	webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
-	webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+		webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
+		webauthnCredentials.GET("", webauthnHandler.ListCredentials)
+		webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
+		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
+	}
 
-	passcode := g.Group("/passcode")
-	passcodeLogin := passcode.Group("/login", webhookMiddlware)
-	passcodeLogin.POST("/initialize", passcodeHandler.Init)
-	passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	if cfg.Email.Enabled && cfg.Email.UseForAuthentication {
+		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
+		if err != nil {
+			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
+		}
+		passcode := g.Group("/passcode")
+		passcodeLogin := passcode.Group("/login", webhookMiddlware)
+		passcodeLogin.POST("/initialize", passcodeHandler.Init)
+		passcodeLogin.POST("/finalize", passcodeHandler.Finish)
+	}
 
 	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
 	email.GET("", emailHandler.List)
@@ -175,10 +225,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)
-
-	if cfg.Saml.Enabled {
-		saml.CreateSamlRoutes(e, cfg, persister, sessionManager, auditLogger)
-	}
 
 	return e
 }

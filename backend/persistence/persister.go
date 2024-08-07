@@ -47,6 +47,8 @@ type Persister interface {
 	GetSamlCertificatePersister() SamlCertificatePersister
 	GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister
 	GetWebhookPersister(tx *pop.Connection) WebhookPersister
+	GetUsernamePersister() UsernamePersister
+	GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister
 }
 
 type Migrator interface {
@@ -159,6 +161,14 @@ func (p *persister) GetPasswordCredentialPersister() PasswordCredentialPersister
 
 func (p *persister) GetPasswordCredentialPersisterWithConnection(tx *pop.Connection) PasswordCredentialPersister {
 	return NewPasswordCredentialPersister(tx)
+}
+
+func (p *persister) GetUsernamePersister() UsernamePersister {
+	return NewUsernamePersister(p.DB)
+}
+
+func (p *persister) GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister {
+	return NewUsernamePersister(tx)
 }
 
 func (p *persister) GetWebauthnCredentialPersister() WebauthnCredentialPersister {

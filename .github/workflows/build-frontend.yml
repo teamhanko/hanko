@@ -15,7 +15,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: v18.14.2
+          node-version: v20.16.0
 
       - name: Install dependencies
         working-directory: ./frontend

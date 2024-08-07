@@ -27,7 +27,7 @@
 
     const { hanko } = await register("{{.HankoUrl}}");
 
-    hanko.onAuthFlowCompleted(() => {
+    hanko.onSessionCreated(() => {
         document.location.href = "/secured"
     })
 </script>

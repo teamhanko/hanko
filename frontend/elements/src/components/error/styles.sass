@@ -1,25 +1,33 @@
 @use '../../variables'
 @use '../../mixins'
 
-.errorMessage
+.errorBox
   @include mixins.font
   @include mixins.border
 
   color: variables.$error-color
   background: variables.$background-color
-
-  padding: .5rem
   margin: variables.$item-margin
-  min-height: variables.$item-height
 
   display: flex
   align-items: start
   box-sizing: border-box
 
-  line-height: 1.4
+  line-height: 1.5rem
+  padding: .25em
+  gap: .2em
+
+  &>span
+    display: inline-flex
 
   &>span:first-child
-    display: inline-flex
+    padding: .25em 0 .25em .19em
 
   &[hidden]
     display: none
+
+.errorMessage
+  color: variables.$error-color
+
+
+

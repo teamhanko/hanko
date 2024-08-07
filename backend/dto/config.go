@@ -8,23 +8,47 @@ import (
 
 // PublicConfig is the part of the configuration that will be shared with the frontend
 type PublicConfig struct {
-	Password                config.Password `json:"password"`
-	Passlink                bool            `json:"passlink"`
-	Emails                  config.Emails   `json:"emails"`
-	Providers               []string        `json:"providers"`
-	Account                 config.Account  `json:"account"`
-	UseEnterpriseConnection bool            `json:"use_enterprise"`
+	Password                Password `json:"password"`
+	Passlink                bool     `json:"passlink"`
+	Emails                  Emails   `json:"emails"`
+	Providers               []string `json:"providers"`
+	Account                 Account  `json:"account"`
+	UseEnterpriseConnection bool     `json:"use_enterprise"`
+}
+
+type Password struct {
+	Enabled   bool `json:"enabled"`
+	MinLength int  `json:"min_password_length"`
+}
+
+type Emails struct {
+	RequireVerification bool `json:"require_verification"`
+	MaxNumOfAddresses   int  `json:"max_num_of_addresses"`
+}
+
+type Account struct {
+	AllowDeletion bool `json:"allow_deletion"`
+	AllowSignup   bool `json:"allow_signup"`
 }
 
 // FromConfig Returns a PublicConfig from the Application configuration
-func FromConfig(config config.Config) PublicConfig {
+func FromConfig(cfg config.Config) PublicConfig {
 	return PublicConfig{
-		Password:                config.Password,
-		Passlink:                config.Passlink.Enabled,
-		Emails:                  config.Emails,
-		Providers:               GetEnabledProviders(config.ThirdParty.Providers),
-		Account:                 config.Account,
-		UseEnterpriseConnection: UseEnterpriseConnection(&config.Saml),
+		Password: Password{
+			Enabled:   cfg.Password.Enabled,
+			MinLength: cfg.Password.MinLength,
+		},
+		Passlink: cfg.Passlink.Enabled,
+		Emails: Emails{
+			RequireVerification: cfg.Email.RequireVerification,
+			MaxNumOfAddresses:   cfg.Email.Limit,
+		},
+		Providers: GetEnabledProviders(cfg.ThirdParty.Providers),
+		Account: Account{
+			AllowDeletion: cfg.Account.AllowDeletion,
+			AllowSignup:   cfg.Account.AllowSignup,
+		},
+		UseEnterpriseConnection: UseEnterpriseConnection(&cfg.Saml),
 	}
 }
 

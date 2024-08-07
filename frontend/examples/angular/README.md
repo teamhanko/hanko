@@ -12,7 +12,8 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
 
 In the `src/environments/environment.ts` file set up the correct environment variables:
 
-- `hankoApi`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the `server.public.address` option in the [configuration file](../../../backend/docs/Config.md))
+- `hankoApi`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the 
+  `server.public.address` option in the [backend configuration](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-public#address))
 - `todoApi`: this is the URL of the [express](../express) backend (default: `http://localhost:8002`)
 
 ### Run development server
