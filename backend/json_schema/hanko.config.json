@@ -394,7 +394,7 @@
         "optional": {
           "type": "boolean",
           "description": "`optional` determines whether users must provide an email when prompted.\nThere must always be at least one email address associated with an account. The primary email address cannot be\ndeleted if emails are required (`optional`: false`).",
-          "default": true
+          "default": false
         },
         "passcode_ttl": {
           "type": "integer",
@@ -661,7 +661,7 @@
         "enabled": {
           "type": "boolean",
           "description": "`enabled` determines whether passwords are enabled or disabled.",
-          "default": false
+          "default": true
         },
         "min_length": {
           "type": "integer",

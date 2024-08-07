@@ -53,7 +53,7 @@ func DefaultConfig() *Config {
 			TTL: 300,
 		},
 		Password: Password{
-			Enabled:               false,
+			Enabled:               true,
 			Optional:              false,
 			AcquireOnRegistration: "always",
 			AcquireOnLogin:        "never",
