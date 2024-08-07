@@ -30,8 +30,6 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
-// TODO: garbage collect passlinks
-
 type PasslinkHandler struct {
 	mailer            mail.Mailer
 	renderer          *mail.Renderer
@@ -186,7 +184,7 @@ func (h *PasslinkHandler) Init(c echo.Context) error {
 
 	passlinkModel := models.Passlink{
 		ID:         id,
-		UserId:     userId,
+		UserID:     userId,
 		EmailID:    email.ID,
 		IP:         c.RealIP(),
 		TTL:        h.TTL,
@@ -316,7 +314,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			return nil
 		}
 
-		userModel, err := userPersister.Get(passlink.UserId)
+		userModel, err := userPersister.Get(passlink.UserID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -427,7 +425,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		token, err := h.sessionManager.GenerateJWT(passlink.UserId, emailJwt)
+		token, err := h.sessionManager.GenerateJWT(passlink.UserID, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}
@@ -466,7 +464,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 		return c.JSON(http.StatusOK, dto.PasslinkReturn{
 			ID:        passlink.ID.String(),
 			CreatedAt: passlink.CreatedAt,
-			UserID:    passlink.UserId.String(),
+			UserID:    passlink.UserID.String(),
 		})
 	})
 

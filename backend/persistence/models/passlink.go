@@ -12,7 +12,7 @@ import (
 // Passlink is used by pop to map your passlink database table to your go code.
 type Passlink struct {
 	ID         uuid.UUID `db:"id"`
-	UserId     uuid.UUID `db:"user_id"`
+	UserID     uuid.UUID `db:"user_id"`
 	EmailID    uuid.UUID `db:"email_id"`
 	TTL        int       `db:"ttl"` // in seconds
 	IP         string    `db:"ip"`
@@ -28,7 +28,7 @@ type Passlink struct {
 func (passlink *Passlink) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	tests := []validate.Validator{
 		&validators.UUIDIsPresent{Name: "ID", Field: passlink.ID},
-		&validators.UUIDIsPresent{Name: "UserID", Field: passlink.UserId},
+		&validators.UUIDIsPresent{Name: "UserID", Field: passlink.UserID},
 		&validators.StringLengthInRange{Name: "Token", Field: passlink.Token, Min: 16},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: passlink.CreatedAt},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: passlink.UpdatedAt},
