@@ -114,13 +114,14 @@ func Load(cfgFile *string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	err = envconfig.Process("", c)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
+	}
+
 	err = c.PostProcess()
 	if err != nil {
 		return nil, fmt.Errorf("failed to post process config: %w", err)
-	}
-
-	if err := envconfig.Process("", c); err != nil {
-		return nil, fmt.Errorf("failed to load config from env vars: %w", err)
 	}
 
 	if err = c.Validate(); err != nil {
