@@ -384,7 +384,7 @@
         "limit": {
           "type": "integer",
           "description": "'limit' determines the maximum number of emails a user can register.",
-          "default": 100
+          "default": 5
         },
         "max_length": {
           "type": "integer",
@@ -600,7 +600,7 @@
         "limit": {
           "type": "integer",
           "description": "`limit` defines the maximum number of passkeys a user can have.",
-          "default": 100
+          "default": 10
         },
         "optional": {
           "type": "boolean",
@@ -926,7 +926,7 @@
         "lifespan": {
           "type": "string",
           "description": "`lifespan` determines how long a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal\nnumbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
-          "default": "1h"
+          "default": "12h"
         }
       },
       "additionalProperties": false,
@@ -1114,12 +1114,12 @@
         "registration": {
           "type": "integer",
           "description": "`registration` determines the time, in milliseconds, that the client is willing to wait for the credential\ncreation request to the WebAuthn API to complete.",
-          "default": 60000
+          "default": 600000
         },
         "login": {
           "type": "integer",
           "description": "`login` determines the time, in milliseconds, that the client is willing to wait for the credential\n request to the WebAuthn API to complete.",
-          "default": 60000
+          "default": 600000
         }
       },
       "additionalProperties": false,

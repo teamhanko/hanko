@@ -338,10 +338,10 @@ func (s *ServerSettings) Validate() error {
 type WebauthnTimeouts struct {
 	// `registration` determines the time, in milliseconds, that the client is willing to wait for the credential
 	// creation request to the WebAuthn API to complete.
-	Registration int `yaml:"registration" json:"registration,omitempty" koanf:"registration" jsonschema:"default=60000"`
+	Registration int `yaml:"registration" json:"registration,omitempty" koanf:"registration" jsonschema:"default=600000"`
 	// `login` determines the time, in milliseconds, that the client is willing to wait for the credential
 	//  request to the WebAuthn API to complete.
-	Login int `yaml:"login" json:"login,omitempty" koanf:"login" jsonschema:"default=60000"`
+	Login int `yaml:"login" json:"login,omitempty" koanf:"login" jsonschema:"default=600000"`
 }
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism
@@ -531,7 +531,7 @@ type Session struct {
 	// `lifespan` determines how long a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal
 	// numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-	Lifespan string `yaml:"lifespan" json:"lifespan,omitempty" koanf:"lifespan" jsonschema:"default=1h"`
+	Lifespan string `yaml:"lifespan" json:"lifespan,omitempty" koanf:"lifespan" jsonschema:"default=12h"`
 }
 
 func (s *Session) Validate() error {
@@ -900,7 +900,7 @@ type Passkey struct {
 	// `enabled` determines whether users can create or authenticate with passkeys.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 	// `limit` defines the maximum number of passkeys a user can have.
-	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
+	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=10"`
 	// `optional` determines whether users must create a passkey when prompted. The last remaining passkey cannot be
 	// deleted if passkeys are required (`optional: false`).
 	//
@@ -980,7 +980,7 @@ type Email struct {
 	// `enabled` determines whether emails are enabled.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 	// 'limit' determines the maximum number of emails a user can register.
-	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
+	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=5"`
 	// `max_length` specifies the maximum allowed length of an email address.
 	MaxLength int `yaml:"max_length" json:"max_length,omitempty" koanf:"max_length" jsonschema:"default=100"`
 	// `optional` determines whether users must provide an email when prompted.

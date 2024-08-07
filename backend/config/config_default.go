@@ -30,10 +30,10 @@ func DefaultConfig() *Config {
 				Origins:     []string{"http://localhost:8888"},
 			},
 			UserVerification: "preferred",
-			Timeout:          60000,
+			Timeout:          600000,
 			Timeouts: WebauthnTimeouts{
-				Registration: 60000,
-				Login:        60000,
+				Registration: 600000,
+				Login:        600000,
 			},
 		},
 		Smtp: SMTP{
@@ -69,7 +69,7 @@ func DefaultConfig() *Config {
 			Host:     "localhost",
 		},
 		Session: Session{
-			Lifespan: "1h",
+			Lifespan: "12h",
 			Cookie: Cookie{
 				HttpOnly: true,
 				SameSite: "strict",
@@ -134,7 +134,7 @@ func DefaultConfig() *Config {
 			AcquireOnLogin:        "always",
 			UserVerification:      "preferred",
 			AttestationPreference: "direct",
-			Limit:                 100,
+			Limit:                 10,
 		},
 		Email: Email{
 			Enabled:               true,

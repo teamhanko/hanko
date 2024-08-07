@@ -15,7 +15,7 @@ email:
   acquire_on_registration: true
   acquire_on_login: false
   require_verification: true
-  limit: 100
+  limit: 5
   use_as_login_identifier: true
   max_length: 100
   use_for_authentication: true
@@ -26,7 +26,7 @@ email_delivery:
   from_name: Hanko
   smtp:
     host: localhost
-    port: "465"
+    port: "2500"
 log:
   log_health_and_metrics: true
 passkey:
@@ -36,7 +36,7 @@ passkey:
   acquire_on_login: always
   attestation_preference: direct
   user_verification: preferred
-  limit: 100
+  limit: 10
 password:
   enabled: true
   optional: false
@@ -71,7 +71,7 @@ server:
 service:
   name: Hanko Authentication Service
 session:
-  lifespan: 1h
+  lifespan: 12h
   enable_auth_token_header: false
 third_party:
   providers:
@@ -97,8 +97,8 @@ username:
   max_length: 32
 webauthn:
   timeouts:
-    registration: 60000
-    login: 60000
+    registration: 600000
+    login: 600000
   relying_party:
     id: localhost
     origins:
