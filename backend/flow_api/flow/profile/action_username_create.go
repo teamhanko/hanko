@@ -38,6 +38,8 @@ func (a UsernameCreate) Initialize(c flowpilot.InitializationContext) {
 	c.AddInputs(flowpilot.StringInput("username").
 		Preserve(true).
 		Required(true).
+		MinLength(deps.Cfg.Username.MinLength).
+		MaxLength(deps.Cfg.Username.MaxLength).
 		TrimSpace(true).
 		LowerCase(true))
 }
