@@ -37,7 +37,7 @@ type PasslinkHandler struct {
 	renderer          *mail.Renderer
 	passlinkGenerator crypto.PasslinkGenerator
 	persister         persistence.Persister
-	emailConfig       config.Email
+	emailConfig       config.EmailDelivery
 	serviceConfig     config.Service
 	URL               string
 	TTL               int
@@ -62,10 +62,10 @@ func NewPasslinkHandler(cfg *config.Config, persister persistence.Persister, ses
 		renderer:          renderer,
 		passlinkGenerator: crypto.NewPasslinkGenerator(),
 		persister:         persister,
-		emailConfig:       cfg.Passlink.Email,
+		emailConfig:       cfg.EmailDelivery,
 		serviceConfig:     cfg.Service,
 		URL:               cfg.Passlink.URL,
-		TTL:               cfg.Passlink.TTL,
+		TTL:               cfg.Email.PasslinkTtl,
 		Strictness:        cfg.Passlink.Strictness,
 		sessionManager:    sessionManager,
 		cfg:               cfg,
@@ -322,7 +322,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			return nil
 		}
 
-		user, err := userPersister.Get(passlink.UserId)
+		userModel, err := userPersister.Get(passlink.UserId)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -334,7 +334,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 				return fmt.Errorf("failed to delete passlink: %w", err)
 			}
 
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasslinkLoginFinalFailed, user, fmt.Errorf("timed out passlink: createdAt: %s -> lastVerificationTime: %s", passlink.CreatedAt, lastVerificationTime))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasslinkLoginFinalFailed, userModel, fmt.Errorf("timed out passlink: createdAt: %s -> lastVerificationTime: %s", passlink.CreatedAt, lastVerificationTime))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -351,7 +351,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to delete passlink: %w", err)
 			}
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasslinkLoginFinalFailed, user, fmt.Errorf("invalid token"))
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasslinkLoginFinalFailed, userModel, fmt.Errorf("invalid token"))
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
@@ -375,12 +375,12 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			}
 		}
 
-		if passlink.Email.User != nil && passlink.Email.User.ID.String() != user.ID.String() {
+		if passlink.Email.User != nil && passlink.Email.User.ID.String() != userModel.ID.String() {
 			return echo.NewHTTPError(http.StatusForbidden, "email address has been claimed by another user")
 		}
 
 		emailExistsForUser := false
-		for _, email := range user.Emails {
+		for _, email := range userModel.Emails {
 			emailExistsForUser = email.ID == passlink.Email.ID
 			if emailExistsForUser {
 				break
@@ -390,49 +390,49 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 		existingSessionToken := h.GetSessionToken(c)
 		// return forbidden when none of these cases matches
 		if !((existingSessionToken == nil && emailExistsForUser) || // normal login: when user logs in and the email used is associated with the user
-			(existingSessionToken == nil && len(user.Emails) == 0) || // register: when user register and the user has no emails
-			(existingSessionToken != nil && existingSessionToken.Subject() == user.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passlink and the one in the session matches
+			(existingSessionToken == nil && len(userModel.Emails) == 0) || // register: when user register and the user has no emails
+			(existingSessionToken != nil && existingSessionToken.Subject() == userModel.ID.String())) { // add email through profile: when the user adds an email while having a session and the userIds requested in the passlink and the one in the session matches
 			return echo.NewHTTPError(http.StatusForbidden).SetInternal(errors.New("passlink finalization not allowed"))
 		}
 
 		wasUnverified := false
-		hasEmails := len(user.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a UserEmailCreate one
+		hasEmails := len(userModel.Emails) >= 1 // check if we need to trigger a UserCreate webhook or a UserEmailCreate one
 
 		if !passlink.Email.Verified {
 			wasUnverified = true
 
 			// Update email verified status and assign the email address to the user.
 			passlink.Email.Verified = true
-			passlink.Email.UserID = &user.ID
+			passlink.Email.UserID = &userModel.ID
 
 			err = emailPersister.Update(passlink.Email)
 			if err != nil {
 				return fmt.Errorf("failed to update the email verified status: %w", err)
 			}
 
-			if user.Emails.GetPrimary() == nil {
-				primaryEmail := models.NewPrimaryEmail(passlink.Email.ID, user.ID)
+			if userModel.Emails.GetPrimary() == nil {
+				primaryEmail := models.NewPrimaryEmail(passlink.Email.ID, userModel.ID)
 				err = primaryEmailPersister.Create(*primaryEmail)
 				if err != nil {
 					return fmt.Errorf("failed to create primary email: %w", err)
 				}
 
-				user.Emails = models.Emails{passlink.Email}
-				user.Emails.SetPrimary(primaryEmail)
-				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPrimaryEmailChanged, user, nil)
+				userModel.Emails = models.Emails{passlink.Email}
+				userModel.SetPrimaryEmail(primaryEmail)
+				err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPrimaryEmailChanged, userModel, nil)
 				if err != nil {
 					return fmt.Errorf("failed to create audit log: %w", err)
 				}
 			}
 
-			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailVerified, user, nil)
+			err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogEmailVerified, userModel, nil)
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
 		}
 
 		var emailJwt *dto.EmailJwt
-		if e := user.Emails.GetPrimary(); e != nil {
+		if e := userModel.Emails.GetPrimary(); e != nil {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
@@ -454,7 +454,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			c.SetCookie(cookie)
 		}
 
-		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasslinkLoginFinalSucceeded, user, nil)
+		err = h.auditLogger.CreateWithConnection(tx, c, models.AuditLogPasslinkLoginFinalSucceeded, userModel, nil)
 		if err != nil {
 			return fmt.Errorf("failed to create audit log: %w", err)
 		}
@@ -469,7 +469,7 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 				evt = events.UserCreate
 			}
 
-			utils.NotifyUserChange(c, tx, h.persister, evt, user.ID)
+			utils.NotifyUserChange(c, tx, h.persister, evt, userModel.ID)
 		}
 
 		return c.JSON(http.StatusOK, dto.PasslinkReturn{
