@@ -106,9 +106,13 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 			}
 		}
 	} else if passkeyEnabled && (alwaysAcquirePasskey || conditionalAcquirePasskey) {
-		result = append(result, shared.StateOnboardingCreatePasskey)
+		if !hasPasskey {
+			result = append(result, shared.StateOnboardingCreatePasskey)
+		}
 	} else if passwordEnabled && (alwaysAcquirePassword || conditionalAcquirePassword) {
-		result = append(result, shared.StatePasswordCreation)
+		if !hasPassword {
+			result = append(result, shared.StatePasswordCreation)
+		}
 	}
 
 	return result
