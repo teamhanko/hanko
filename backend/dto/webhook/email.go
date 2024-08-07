@@ -1,7 +1,5 @@
 package webhook
 
-import "github.com/teamhanko/hanko/backend/persistence/models"
-
 type EmailSend struct {
 	Subject          string    `json:"subject"`        // subject
 	BodyPlain        string    `json:"body_plain"`     // used for string templates
@@ -22,14 +20,13 @@ type PasscodeData struct {
 }
 
 type PasslinkData struct {
-	ServiceName  string                    `json:"service_name"`
-	Token        string                    `json:"token"`
-	URL          string                    `json:"url"`
-	TTL          int                       `json:"ttl"`
-	ValidUntil   int64                     `json:"valid_until"` // UnixTimestamp
-	RedirectPath string                    `json:"redirect_path"`
-	RetryLimit   int                       `json:"retry_limit"`
-	Strictness   models.PasslinkStrictness `json:"strictness"`
+	ServiceName  string `json:"service_name"`
+	Token        string `json:"token"`
+	URL          string `json:"url"`
+	TTL          int    `json:"ttl"`
+	ValidUntil   int64  `json:"valid_until"` // UnixTimestamp
+	RedirectPath string `json:"redirect_path"`
+	RetryLimit   int    `json:"retry_limit"`
 }
 
 type EmailType string
