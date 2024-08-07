@@ -218,7 +218,7 @@ type Password struct {
 	// `acquire_on_login` configures how users are prompted creating a password on login.
 	AcquireOnLogin string `yaml:"acquire_on_login" json:"acquire_on_login,omitempty" koanf:"acquire_on_login" split_words:"true" jsonschema:"default=never,enum=always,enum=conditional,enum=never"`
 	// `enabled` determines whether passwords are enabled or disabled.
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 	// `min_length` determines the minimum password length.
 	MinLength int `yaml:"min_length" json:"min_length,omitempty" koanf:"min_length" split_words:"true" jsonschema:"default=8"`
 	// Deprecated. Use `min_length` instead.
@@ -986,7 +986,7 @@ type Email struct {
 	// `optional` determines whether users must provide an email when prompted.
 	// There must always be at least one email address associated with an account. The primary email address cannot be
 	// deleted if emails are required (`optional`: false`).
-	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
+	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
 	// `passcode_ttl` specifies, in seconds, how long a passcode is valid for.
 	PasscodeTtl int `yaml:"passcode_ttl" json:"passcode_ttl,omitempty" koanf:"passcode_ttl" jsonschema:"default=300"`
 	// `require_verification` determines whether newly created emails must be verified by providing a passcode sent

@@ -11,7 +11,7 @@ database:
 debug: false
 email:
   enabled: true
-  optional: true
+  optional: false
   acquire_on_registration: true
   acquire_on_login: false
   require_verification: true
@@ -31,7 +31,7 @@ log:
   log_health_and_metrics: true
 passkey:
   enabled: true
-  optional: false
+  optional: true
   acquire_on_registration: always
   acquire_on_login: always
   attestation_preference: direct
