@@ -20,7 +20,6 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 	"golang.org/x/exp/slices"
 )
 
@@ -1031,9 +1030,8 @@ type Username struct {
 }
 
 type Passlink struct {
-	Enabled    bool                      `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	URL        string                    `yaml:"url" json:"url,omitempty" koanf:"url"`
-	Strictness models.PasslinkStrictness `yaml:"strictness" json:"strictness,omitempty" koanf:"strictness" jsonschema:"default=none,enum=browser,enum=device,enum=none"`
+	Enabled bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	URL     string `yaml:"url" json:"url,omitempty" koanf:"url"`
 }
 
 func (p *Passlink) Validate() error {
@@ -1044,9 +1042,6 @@ func (p *Passlink) Validate() error {
 		return fmt.Errorf("failed to parse url: %w", err)
 	} else if url.Scheme == "" || url.Host == "" {
 		return errors.New("url must be a valid URL")
-	}
-	if !p.Strictness.Valid() {
-		return fmt.Errorf("invalid passlink strictness: %s", p.Strictness)
 	}
 	return nil
 }

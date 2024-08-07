@@ -15,7 +15,6 @@ type Passlink struct {
 	UserId     uuid.UUID `db:"user_id"`
 	EmailID    uuid.UUID `db:"email_id"`
 	TTL        int       `db:"ttl"` // in seconds
-	Strictness string    `db:"strictness"`
 	IP         string    `db:"ip"`
 	Token      string    `db:"token"`
 	LoginCount int       `db:"login_count"`
@@ -35,34 +34,4 @@ func (passlink *Passlink) Validate(tx *pop.Connection) (*validate.Errors, error)
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: passlink.UpdatedAt},
 	}
 	return validate.Validate(tests...), nil
-}
-
-type PasslinkStrictness string
-
-const (
-	PasslinkStrictnessBrowser PasslinkStrictness = "browser" // only allow passlink usage in the same browser based on a session cookie
-	PasslinkStrictnessDevice  PasslinkStrictness = "device"  // only allow passlink usage on the same device based on the ip address
-	PasslinkStrictnessNone    PasslinkStrictness = ""        // no strictness, allow passlink usage from any device
-)
-
-// AllPasslinkStrictness represents the list of all valid types
-var AllPasslinkStrictness = []PasslinkStrictness{
-	PasslinkStrictnessBrowser,
-	PasslinkStrictnessDevice,
-	PasslinkStrictnessNone,
-}
-
-// String returns the string representation
-func (ps PasslinkStrictness) String() string {
-	return string(ps)
-}
-
-// Valid check if the given value is included
-func (ps PasslinkStrictness) Valid() bool {
-	for _, v := range AllPasslinkStrictness {
-		if v == ps {
-			return true
-		}
-	}
-	return false
 }

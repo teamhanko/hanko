@@ -41,7 +41,6 @@ type PasslinkHandler struct {
 	serviceConfig     config.Service
 	URL               string
 	TTL               int
-	Strictness        models.PasslinkStrictness
 	sessionManager    session.Manager
 	cfg               *config.Config
 	auditLogger       auditlog.Logger
@@ -66,7 +65,6 @@ func NewPasslinkHandler(cfg *config.Config, persister persistence.Persister, ses
 		serviceConfig:     cfg.Service,
 		URL:               cfg.Passlink.URL,
 		TTL:               cfg.Email.PasslinkTtl,
-		Strictness:        cfg.Passlink.Strictness,
 		sessionManager:    sessionManager,
 		cfg:               cfg,
 		auditLogger:       auditLogger,
@@ -190,7 +188,6 @@ func (h *PasslinkHandler) Init(c echo.Context) error {
 		ID:         id,
 		UserId:     userId,
 		EmailID:    email.ID,
-		Strictness: h.Strictness.String(),
 		IP:         c.RealIP(),
 		TTL:        h.TTL,
 		LoginCount: 0,
@@ -240,7 +237,6 @@ func (h *PasslinkHandler) Init(c echo.Context) error {
 			ValidUntil:   passlinkModel.CreatedAt.Add(time.Duration(h.TTL) * time.Second).UTC().Unix(),
 			RedirectPath: redirectPath,
 			RetryLimit:   1,
-			Strictness:   h.Strictness,
 		},
 	}
 
@@ -276,8 +272,6 @@ func (h *PasslinkHandler) Init(c echo.Context) error {
 	if err != nil {
 		return fmt.Errorf("failed to create audit log: %w", err)
 	}
-
-	// TODO: set cookie based on the passlink strictness
 
 	return c.JSON(http.StatusOK, dto.PasslinkReturn{
 		ID:        id.String(),
@@ -341,9 +335,6 @@ func (h *PasslinkHandler) Finish(c echo.Context) error {
 			businessError = echo.NewHTTPError(http.StatusRequestTimeout, "passlink request timed out").SetInternal(fmt.Errorf("createdAt: %s -> lastVerificationTime: %s", passlink.CreatedAt, lastVerificationTime)) // TODO: maybe we should use BadRequest, because RequestTimeout might be too technical and can refer to different error
 			return nil
 		}
-
-		// TODO: handle passlink strictness
-		// TODO: check IP address if strictness is device
 
 		err = bcrypt.CompareHashAndPassword([]byte(passlink.Token), []byte(body.Token))
 		if err != nil {
