@@ -353,16 +353,18 @@ Then run:
 
 > **Note** The `<PATH-TO-CONFIG-FILE>` must be an absolute path to your config file created above.
 
-`8000` is the default port for the public API. It can be [customized](./docs/Config.md) in the configuration through
-the `server.public.address` option.
+`8000` is the default port for the public API. It can
+be [customized](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-public#address) in the
+configuration through the `server.public.address` option.
 
 The service is now available at `localhost:8000`.
 
 #### Start the admin API
 
 In the usage section above we only started the public API. Use the command below to start the admin API. The default
-port is `8001`, but can be [customized](./docs/Config.md) in the configuration through the
-`server.admin.address` option.
+port is `8001`, but can be
+[customized](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-admin) in the configuration
+through the `server.admin.address` option.
 
 ```shell
 serve admin
@@ -437,7 +439,8 @@ Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide addition
 ### Social Logins
 
 Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
-party provider logins. See the `third_party` option in the [configuration reference](./docs/Config.md) on how to
+party provider logins. See the `third_party` option in
+the [configuration reference](https://github.com/teamhanko/hanko/wiki/hanko-properties-third_party) on how to
 configure them. All provider configurations require provider credentials. See the guides in the official
 documentation for instructions on how to obtain these:
 
@@ -555,7 +558,10 @@ webhooks:
 
 ## Configuration reference
 
-[Configuration reference](./docs/Config.md)
+- [Using configuration file](https://github.com/teamhanko/hanko/wiki/Using-configuration-file)
+- [Using environment variables](https://github.com/teamhanko/hanko/wiki/Using-environment-variables)
+- [Configuration reference](https://github.com/teamhanko/hanko/wiki/hanko)
+
 
 ## License
 

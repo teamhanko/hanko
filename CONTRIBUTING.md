@@ -93,18 +93,15 @@ To submit your code:
    Commit messages should follow the [Commit Message Guidelines](#commit-message-guidelines).
 6. Make sure to update, or add to any tests where appropriate. Try to run tests locally first (`go test ./...` for the
    `backend`, see the [README](./e2e/README.md) for the `e2e`tests on how to run them).
-7. If you added or changed a feature, make sure to document it in the README.md file. If your change
-   affects the `backend` API update the [Open API spec(s)](./docs/static/spec).
-   If your changes affect the `backend` configuration, update the [Config.md](./backend/docs/Config.md).
-8. Push your feature branch up to your fork:
+7. Push your feature branch up to your fork:
    ```
    git push origin <feature-branch-name>
    ```
-9. [Create a pull request from your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
-10. Submit the pull request by filling out the [pull request template](./.github/PULL_REQUEST_TEMPLATE.md)
+8. [Create a pull request from your fork](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/creating-a-pull-request-from-a-fork).
+9. Submit the pull request by filling out the [pull request template](./.github/PULL_REQUEST_TEMPLATE.md)
     (note: the template should be displayed automatically once you open a pull request; take account of the comments in
     the displayed template).
-11. If a pull request is not ready to be reviewed it should be marked as a "Draft".
+10. If a pull request is not ready to be reviewed it should be marked as a "Draft".
 
 
 When pull requests fail test checks, authors are expected to update

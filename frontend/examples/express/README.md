@@ -10,7 +10,8 @@ updating "todos".
 
 In the `.env` file set up the correct environment variables:
 
-- `HANKO_API_URL`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the `server.public.address` option in the [configuration file](../../../backend/docs/Config.md))
+- `HANKO_API_URL`: this is the URL of the Hanko API (default: `http://localhost:8000`, can be customized using the
+  `server.public.address` option in the [backend configuration](https://github.com/teamhanko/hanko/wiki/hanko-properties-server-properties-public#address))
 
 ### Run the server
 
