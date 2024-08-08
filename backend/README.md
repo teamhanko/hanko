@@ -444,6 +444,7 @@ documentation for instructions on how to obtain these:
 - [Discord](https://docs.hanko.io/guides/authentication-methods/oauth/discord)
 - [GitHub](https://docs.hanko.io/guides/authentication-methods/oauth/github)
 - [Google](https://docs.hanko.io/guides/authentication-methods/oauth/google)
+- [LinkedIn](https://docs.hanko.io/guides/authentication-methods/oauth/linkedin)
 - [Microsoft](https://docs.hanko.io/guides/authentication-methods/oauth/microsoft)
 
 #### Account linking
