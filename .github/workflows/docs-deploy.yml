@@ -30,4 +30,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           # Build output to publish to the `gh-pages` branch:
           publish_dir: ./docs/build
-          cname: docs.hanko.io
