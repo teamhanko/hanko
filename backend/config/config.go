@@ -3,11 +3,13 @@ package config
 import (
 	"errors"
 	"fmt"
-	"github.com/invopop/jsonschema"
-	orderedmap "github.com/wk8/go-ordered-map/v2"
 	"log"
+	"net/url"
 	"strings"
 	"time"
+
+	"github.com/invopop/jsonschema"
+	orderedmap "github.com/wk8/go-ordered-map/v2"
 
 	"github.com/fatih/structs"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -45,8 +47,10 @@ type Config struct {
 	Log LoggerConfig `yaml:"log" json:"log,omitempty" koanf:"log" jsonschema:"title=log"`
 	// Deprecated. See child properties for suggested replacements.
 	Passcode Passcode `yaml:"passcode" json:"passcode,omitempty" koanf:"passcode" jsonschema:"title=passcode"`
-	// `passkey` configures how passkeys  are acquired and used.
+	// `passkey` configures how passkeys are acquired and used.
 	Passkey Passkey `yaml:"passkey" json:"passkey,omitempty" koanf:"passkey" jsonschema:"title=passkey"`
+	// `passlink` congigures how passlinks are acquired and used.
+	Passlink Passlink `yaml:"passlink" json:"passlink,omitempty" koanf:"passlink"`
 	// `password` configures how passwords are acquired and used.
 	Password Password `yaml:"password" json:"password,omitempty" koanf:"password" jsonschema:"title=password"`
 	// `rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data.
@@ -591,6 +595,8 @@ type RateLimiter struct {
 	Redis *RedisConfig `yaml:"redis_config" json:"redis_config,omitempty" koanf:"redis_config"`
 	// `passcode_limits` controls rate limits for passcode operations.
 	PasscodeLimits RateLimits `yaml:"passcode_limits" json:"passcode_limits,omitempty" koanf:"passcode_limits" split_words:"true"`
+	// `passlink_limits` controls rate limits for passlink operations.
+	PasslinkLimits RateLimits `yaml:"passlink_limits" json:"passlink_limits,omitempty" koanf:"passlink_limits" split_words:"true"`
 	// `password_limits` controls rate limits for password login operations.
 	PasswordLimits RateLimits `yaml:"password_limits" json:"password_limits,omitempty" koanf:"password_limits" split_words:"true"`
 	// `token_limits` controls rate limits for token exchange operations.
@@ -611,7 +617,7 @@ type RateLimiterStoreType string
 
 const (
 	RATE_LIMITER_STORE_IN_MEMORY RateLimiterStoreType = "in_memory"
-	RATE_LIMITER_STORE_REDIS                          = "redis"
+	RATE_LIMITER_STORE_REDIS     RateLimiterStoreType = "redis"
 )
 
 func (r *RateLimiter) Validate() error {
@@ -831,7 +837,7 @@ func (p *ThirdPartyProviders) GetEnabled() []ThirdPartyProvider {
 func (p *ThirdPartyProviders) Get(provider string) *ThirdPartyProvider {
 	s := structs.New(p)
 	for _, field := range s.Fields() {
-		if strings.ToLower(field.Name()) == strings.ToLower(provider) {
+		if strings.EqualFold(field.Name(), provider) {
 			p := field.Value().(ThirdPartyProvider)
 			return &p
 		}
@@ -990,6 +996,8 @@ type Email struct {
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
 	// `passcode_ttl` specifies, in seconds, how long a passcode is valid for.
 	PasscodeTtl int `yaml:"passcode_ttl" json:"passcode_ttl,omitempty" koanf:"passcode_ttl" jsonschema:"default=300"`
+	// `passlink_ttl` specifies, in seconds, how long a passlink is valid for.
+	PasslinkTtl int `yaml:"passlink_ttl" json:"passlink_ttl,omitempty" koanf:"passlink_ttl" jsonschema:"default=300"`
 	// `require_verification` determines whether newly created emails must be verified by providing a passcode sent
 	// to respective address.
 	RequireVerification bool `yaml:"require_verification" json:"require_verification,omitempty" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
@@ -1019,4 +1027,21 @@ type Username struct {
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=true"`
 	// `use_as_login_identifier` determines whether usernames, if enabled, can be used for logging in.
 	UseAsLoginIdentifier bool `yaml:"use_as_login_identifier" json:"use_as_login_identifier,omitempty" koanf:"use_as_login_identifier" jsonschema:"default=true"`
+}
+
+type Passlink struct {
+	Enabled bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	URL     string `yaml:"url" json:"url,omitempty" koanf:"url"`
+}
+
+func (p *Passlink) Validate() error {
+	if len(strings.TrimSpace(p.URL)) == 0 {
+		return errors.New("url must not be empty")
+	}
+	if url, err := url.Parse(p.URL); err != nil {
+		return fmt.Errorf("failed to parse url: %w", err)
+	} else if url.Scheme == "" || url.Host == "" {
+		return errors.New("url must be a valid URL")
+	}
+	return nil
 }

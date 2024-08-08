@@ -19,8 +19,19 @@ type PasscodeData struct {
 	ValidUntil  int64  `json:"valid_until"` // UnixTimestamp
 }
 
+type PasslinkData struct {
+	ServiceName  string `json:"service_name"`
+	Token        string `json:"token"`
+	URL          string `json:"url"`
+	TTL          int    `json:"ttl"`
+	ValidUntil   int64  `json:"valid_until"` // UnixTimestamp
+	RedirectPath string `json:"redirect_path"`
+	RetryLimit   int    `json:"retry_limit"`
+}
+
 type EmailType string
 
 var (
 	EmailTypePasscode EmailType = "passcode"
+	EmailTypePasslink EmailType = "passlink"
 )
