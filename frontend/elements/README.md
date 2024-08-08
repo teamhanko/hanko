@@ -747,7 +747,7 @@ To learn more about how to integrate the Hanko elements into frontend frameworks
 ## Exports
 
 The `@teamhanko/hanko-elements` package exports the functions and interfaces listed below and additionally every
-declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
+declaration provided by the [frontend-sdk](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
 
 ### Functions
 
