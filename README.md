@@ -86,12 +86,12 @@ Watch our releases, leave a star, join our [Discord community](https://www.hanko
 |✅| User export |
 |✅| SAML Enterprise SSO |
 |✅| Webhooks |
-|⚙️| API-supported auth flows |
-|⚙️| Passkey-only and OAuth-only configurations |
-|⚙️| Username support (non-email) |
-|⚙️| Optional / user-deleteable passwords |
-|⚙️| Privacy mode (prevents email enumeration) |
-| | 📢 Hanko 1.0 Release |
+|✅| API-supported auth flows |
+|✅| Passkey-only and OAuth-only configurations |
+|✅| Username support (non-email) |
+|✅| Optional / user-deleteable passwords |
+|✅| Email enumeration protection |
+|✅| 📢 Hanko 1.0 Release |
 |⚙️| 2FA (TOTP, security keys) |
 |⚙️| iOS SDK |
 | | Refresh tokens / sessions |

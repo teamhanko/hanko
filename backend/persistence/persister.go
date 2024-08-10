@@ -5,6 +5,7 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/teamhanko/hanko/backend/config"
+	"time"
 )
 
 //go:embed migrations/*
@@ -64,8 +65,10 @@ type Storage interface {
 // New return a new Persister Object with given configuration
 func New(config config.Database) (Storage, error) {
 	connectionDetails := &pop.ConnectionDetails{
-		Pool:     5,
-		IdlePool: 0,
+		Pool:            5,
+		IdlePool:        0,
+		ConnMaxIdleTime: 5 * time.Minute,
+		ConnMaxLifetime: 1 * time.Hour,
 	}
 	if len(config.Url) > 0 {
 		connectionDetails.URL = config.Url

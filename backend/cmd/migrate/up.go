@@ -1,6 +1,7 @@
 package migrate
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -31,6 +32,11 @@ func NewMigrateUpCommand() *cobra.Command {
 			err = persister.MigrateUp()
 			if err != nil {
 				log.Fatal(err)
+			}
+
+			err = persister.GetConnection().Close()
+			if err != nil {
+				log.Println(fmt.Errorf("failed to close db connection: %w", err))
 			}
 		},
 	}
