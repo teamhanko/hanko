@@ -60,6 +60,10 @@ func DefaultConfig() *Config {
 			Recovery:              true,
 			MinLength:             8,
 		},
+		Passlink: Passlink{
+			Enabled: false,
+			URL:     "http://localhost:8888",
+		},
 		Database: Database{
 			Database: "hanko",
 			User:     "hanko",
@@ -95,6 +99,10 @@ func DefaultConfig() *Config {
 				Interval: 1 * time.Minute,
 			},
 			PasscodeLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
+			PasslinkLimits: RateLimits{
 				Tokens:   3,
 				Interval: 1 * time.Minute,
 			},
