@@ -182,6 +182,10 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate webhook settings: %w", err)
 	}
+	err = c.Passlink.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate passlink settings: %w", err)
+	}
 	return nil
 }
 
