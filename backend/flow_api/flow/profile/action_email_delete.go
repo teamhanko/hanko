@@ -9,6 +9,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type EmailDelete struct {
@@ -115,6 +117,8 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	userModel.DeleteEmail(*emailToBeDeletedModel)
+
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserEmailDelete, userModel.ID)
 
 	return c.Continue(shared.StateProfileInit)
 }

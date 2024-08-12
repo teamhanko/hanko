@@ -7,6 +7,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type EmailSetPrimary struct {
@@ -104,6 +106,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	userModel.SetPrimaryEmail(primaryEmail)
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserEmailPrimary, userModel.ID)
 
 	return c.Continue(shared.StateProfileInit)
 }
