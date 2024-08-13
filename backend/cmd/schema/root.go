@@ -1,6 +1,8 @@
 package schema
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 func NewSchemaCommand() *cobra.Command {
 	return &cobra.Command{
@@ -12,6 +14,7 @@ func NewSchemaCommand() *cobra.Command {
 
 func RegisterCommands(parent *cobra.Command) {
 	cmd := NewSchemaCommand()
+	cmd.AddCommand(NewGenerateCommand())
+	cmd.AddCommand(NewMarkdownCommand())
 	parent.AddCommand(cmd)
-	cmd.AddCommand(NewJson2MdCommand())
 }
