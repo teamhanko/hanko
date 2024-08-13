@@ -13,20 +13,20 @@ type EmailSend struct {
 }
 
 type PasscodeData struct {
-	ServiceName string `json:"service_name"`
-	OtpCode     string `json:"otp_code"`
-	TTL         int    `json:"ttl"`
-	ValidUntil  int64  `json:"valid_until"` // UnixTimestamp
+	ServiceName string `json:"service_name" mapstructure:"service_name"`
+	OtpCode     string `json:"otp_code" mapstructure:"otp_code"`
+	TTL         int    `json:"ttl" mapstructure:"ttl"`
+	ValidUntil  int64  `json:"valid_until" mapstructure:"valid_until"` // UnixTimestamp
 }
 
 type PasslinkData struct {
-	ServiceName  string `json:"service_name"`
-	Token        string `json:"token"`
-	URL          string `json:"url"`
-	TTL          int    `json:"ttl"`
-	ValidUntil   int64  `json:"valid_until"` // UnixTimestamp
-	RedirectPath string `json:"redirect_path"`
-	RetryLimit   int    `json:"retry_limit"`
+	ServiceName  string `json:"service_name" mapstructure:"service_name"`
+	Token        string `json:"token" mapstructure:"token"`
+	URL          string `json:"url" mapstructure:"url"`
+	TTL          int    `json:"ttl" mapstructure:"ttl"`
+	ValidUntil   int64  `json:"valid_until" mapstructure:"valid_until"` // UnixTimestamp
+	RedirectPath string `json:"redirect_path" mapstructure:"redirect_path"`
+	RetryLimit   int    `json:"retry_limit" mapstructure:"retry_limit"`
 }
 
 type EmailType string
