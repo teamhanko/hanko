@@ -153,9 +153,11 @@ func (s *passcode) SendPasscode(p SendPasscodeParams) (*SendPasscodeResult, erro
 		return nil, err
 	}
 
-	err = s.emailService.SendEmail(p.EmailAddress, subject, body)
-	if err != nil {
-		return nil, err
+	if s.cfg.EmailDelivery.Enabled {
+		err = s.emailService.SendEmail(p.EmailAddress, subject, body)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &SendPasscodeResult{
