@@ -89,7 +89,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			Subject:          passcodeResult.Subject,
 			BodyPlain:        passcodeResult.Body,
 			ToEmailAddress:   sendParams.EmailAddress,
-			DeliveredByHanko: true,
+			DeliveredByHanko: deps.Cfg.EmailDelivery.Enabled,
 			AcceptLanguage:   sendParams.Language,
 			Type:             webhook.EmailTypePasscode,
 			Data: webhook.PasscodeData{
