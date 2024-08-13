@@ -4,10 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/dto/webhook"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/rate_limiter"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
+	"time"
 )
 
 type SendPasscode struct {
@@ -66,12 +70,12 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			Language:     deps.HttpContext.Request().Header.Get("Accept-Language"),
 		}
 
-		passcodeID, err := deps.PasscodeService.SendPasscode(sendParams)
+		passcodeResult, err := deps.PasscodeService.SendPasscode(sendParams)
 		if err != nil {
 			return fmt.Errorf("passcode service failed: %w", err)
 		}
 
-		err = c.Stash().Set(shared.StashPathPasscodeID, passcodeID)
+		err = c.Stash().Set(shared.StashPathPasscodeID, passcodeResult.PasscodeModel.ID)
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_id to stash: %w", err)
 		}
@@ -79,6 +83,26 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 		err = c.Stash().Set(shared.StashPathPasscodeEmail, c.Stash().Get(shared.StashPathEmail).String())
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_email to stash: %w", err)
+		}
+
+		webhookData := webhook.EmailSend{
+			Subject:          passcodeResult.Subject,
+			BodyPlain:        passcodeResult.Body,
+			ToEmailAddress:   sendParams.EmailAddress,
+			DeliveredByHanko: true,
+			AcceptLanguage:   sendParams.Language,
+			Type:             webhook.EmailTypePasscode,
+			Data: webhook.PasscodeData{
+				ServiceName: deps.Cfg.Service.Name,
+				OtpCode:     passcodeResult.Code,
+				TTL:         deps.Cfg.Email.PasscodeTtl,
+				ValidUntil:  passcodeResult.PasscodeModel.CreatedAt.Add(time.Duration(deps.Cfg.Email.PasscodeTtl) * time.Second).UTC().Unix(),
+			},
+		}
+
+		err = utils.TriggerWebhooks(deps.HttpContext, events.EmailSend, webhookData)
+		if err != nil {
+			return fmt.Errorf("failed to trigger webhook: %w", err)
 		}
 	}
 
