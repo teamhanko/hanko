@@ -1,11 +1,11 @@
   Portions of this software are licensed as follows:
 
   All content that resides under the "elements" directory
-(https://github.com/teamhanko/hanko/tree/main/elements) of this repository is
+(https://github.com/teamhanko/hanko/tree/main/frontend/elements) of this repository is
 licensed under the license defined in "elements/LICENSE".
 
   All content that resides under the "frontend-sdk" directory
-(https://github.com/teamhanko/hanko/tree/main/frontend-sdk) of this repository is
+(https://github.com/teamhanko/hanko/tree/main/frontend/frontend-sdk) of this repository is
 licensed under the license defined in "frontend-sdk/LICENSE".
 
   All content that resides under the "backend/ee" directory
