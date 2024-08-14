@@ -62,7 +62,10 @@ func parseQueryParamValue(value string) (*parsedQueryParamValue, error) {
 
 func newQueryParam(key, value string) (queryParam, error) {
 	v, err := parseQueryParamValue(value)
-	return &defaultQueryParam{key: key, parsedQueryParamValue: v}, err
+	if err != nil {
+		return nil, err
+	}
+	return &defaultQueryParam{key: key, parsedQueryParamValue: v}, nil
 }
 
 func (q *defaultQueryParam) getKey() string {

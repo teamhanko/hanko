@@ -181,7 +181,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 
 			// Create action HREF based on the current flow context and method name.
 			href, _ := er.createHref(fc, actionName)
-			inputSchema := er.getInputSchema(fc, ad)
+			inputSchema := er.getInputSchema(ad)
 
 			// (Re-)Initialize each action
 			aic := defaultActionInitializationContext{
@@ -213,7 +213,7 @@ func (er *executionResult) generateActions(fc *defaultFlowContext) ResponseActio
 }
 
 // getInputSchema returns the inputSchema for a given method name.
-func (er *executionResult) getInputSchema(fc *defaultFlowContext, actionDetail actionDetail) executionInputSchema {
+func (er *executionResult) getInputSchema(actionDetail actionDetail) executionInputSchema {
 	actionName := actionDetail.getAction().GetName()
 	if er.actionExecutionResult == nil || actionName != er.actionExecutionResult.actionName {
 		return newSchema()
