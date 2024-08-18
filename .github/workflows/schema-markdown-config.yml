@@ -1,6 +1,10 @@
 name: Generate config reference markdown
+run-name: Generate config reference markdown for ${{ github.ref_name }}
 
 on:
+  push:
+    tags:
+      - 'backend/*'
   workflow_dispatch:
 
 jobs:
@@ -28,23 +32,34 @@ jobs:
           repository: ${{github.repository}}.wiki
           path: wiki
 
-      - name: Generate config docs
+      - name: Generate config markdown
         working-directory: ./hanko/backend
         run: |
           go generate ./...
-          go run main.go schema json2md
+          go run main.go schema markdown config
 
-      - name: Clean md file endings
+      - name: Strip links of .md file endings
         working-directory: ./hanko/backend
         run: |
-          find ./docs/.generated/config/md -type f -name "*.md" -exec sed -i "s/\.md//g" "{}" \;
+          find ./.generated/docs/config -type f -name "*.md" -exec sed -i "s/\.md//g" "{}" \;
+
+      - name: Prepend version information
+        working-directory: ./hanko/backend
+        run: |
+          version=$(echo $GITHUB_REF_NAME | cut -f2 -d'/')
+          find ./.generated/docs/config -type f -name '*.md' -exec sed -i "1i\\
+          ## Version\\
+          \\
+          \`$version\`\\
+          \\
+          " {} \;
 
       - name: Copy generated files
         working-directory: ./hanko/backend
         run: |
           mkdir -p $GITHUB_WORKSPACE/wiki/reference/config
           rm $GITHUB_WORKSPACE/wiki/reference/config/*.md 2>/dev/null || true
-          cp ./docs/.generated/config/md/*.md $GITHUB_WORKSPACE/wiki/reference/config
+          cp .generated/docs/config/*.md $GITHUB_WORKSPACE/wiki/reference/config
 
       - name: Commit and push to wiki
         working-directory: ./wiki
@@ -52,5 +67,11 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add .
-          git commit -m "action: Autogenerate config reference docs"
-          git push origin HEAD
+          if ! git diff-index --quiet HEAD; then
+            version=$(echo $GITHUB_REF_NAME | cut -f2 -d'/')
+            git commit -m "chore: autogenerate config reference for $version"
+            git pull origin master --rebase
+            git push origin HEAD
+          else
+            echo "No changes detected, skipping commit and push."
+          fi
