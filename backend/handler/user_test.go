@@ -572,7 +572,7 @@ func (s *userSuite) TestUserHandler_Delete() {
 		s.Equal("Max-Age=0", strings.TrimSpace(split[2]))
 	}
 
-	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
 	s.NoError(err)
 	s.Equal(0, count)
 }
