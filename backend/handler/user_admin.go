@@ -177,7 +177,9 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		}
 	}
 
-	if primaryEmails > 1 {
+	if primaryEmails == 0 && len(body.Emails) > 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "at least one primary email must be provided")
+	} else if primaryEmails > 1 {
 		return echo.NewHTTPError(http.StatusBadRequest, "only one primary email is allowed")
 	}
 
