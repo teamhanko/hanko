@@ -38,7 +38,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 
 	s.Equal(http.StatusNoContent, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
 	s.Require().NoError(err)
 	s.Equal(2, count)
 }
@@ -59,7 +59,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 
 	s.Equal(http.StatusNotFound, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
 	s.Require().NoError(err)
 	s.Equal(3, count)
 }
