@@ -51,11 +51,11 @@ func NewUser() User {
 	}
 }
 
-func (user *User) GetUsername() string {
+func (user *User) GetUsername() *string {
 	if user.Username != nil {
-		return user.Username.Username
+		return &user.Username.Username
 	}
-	return ""
+	return nil
 }
 
 func (user *User) SetUsername(username *Username) {
