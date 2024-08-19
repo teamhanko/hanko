@@ -52,7 +52,7 @@ func (s *userSuite) TestUserHandler_Create_TokenInCookie() {
 		s.NoError(err)
 		s.False(user.UserID.IsNil())
 
-		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
 		s.NoError(err)
 		s.Equal(1, count)
 
@@ -97,7 +97,7 @@ func (s *userSuite) TestUserHandler_Create_TokenInHeader() {
 		s.NoError(err)
 		s.False(user.UserID.IsNil())
 
-		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
 		s.NoError(err)
 		s.Equal(1, count)
 
@@ -137,7 +137,7 @@ func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
 		s.NoError(err)
 		s.False(user.UserID.IsNil())
 
-		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "")
+		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
 		s.NoError(err)
 		s.Equal(1, count)
 
