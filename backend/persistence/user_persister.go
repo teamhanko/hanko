@@ -16,9 +16,9 @@ type UserPersister interface {
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
-	List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error)
+	List(page int, perPage int, userId uuid.UUID, email string, username string, sortDirection string) ([]models.User, error)
 	All() ([]models.User, error)
-	Count(userId uuid.UUID, email string) (int, error)
+	Count(userId uuid.UUID, email string, username string) (int, error)
 	GetByUsername(username string) (*models.User, error)
 }
 
@@ -129,17 +129,17 @@ func (p *userPersister) Delete(user models.User) error {
 	return nil
 }
 
-func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string, sortDirection string) ([]models.User, error) {
+func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email string, username string, sortDirection string) ([]models.User, error) {
 	users := []models.User{}
 
 	query := p.db.
 		Q().
-		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials").
+		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials", "Username").
 		LeftJoin("emails", "emails.user_id = users.id").
 		LeftJoin("usernames", "usernames.user_id = users.id")
-	query = p.addQueryParamsToSqlQuery(query, userId, email)
+	query = p.addQueryParamsToSqlQuery(query, userId, email, username)
 	err := query.GroupBy("users.id").
-		Having("count(emails.id) > 0").
+		Having("count(emails.id) > 0 OR count(usernames.id) > 0").
 		Order(fmt.Sprintf("users.created_at %s", sortDirection)).
 		Paginate(page, perPage).
 		All(&users)
@@ -156,7 +156,7 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 
 func (p *userPersister) All() ([]models.User, error) {
 	users := []models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials", "Usernames").All(&users)
+	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials", "Username").All(&users)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}
@@ -167,13 +167,14 @@ func (p *userPersister) All() ([]models.User, error) {
 	return users, nil
 }
 
-func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
+func (p *userPersister) Count(userId uuid.UUID, email string, username string) (int, error) {
 	query := p.db.
 		Q().
-		LeftJoin("emails", "emails.user_id = users.id")
-	query = p.addQueryParamsToSqlQuery(query, userId, email)
+		LeftJoin("emails", "emails.user_id = users.id").
+		LeftJoin("usernames", "usernames.user_id = users.id")
+	query = p.addQueryParamsToSqlQuery(query, userId, email, username)
 	count, err := query.GroupBy("users.id").
-		Having("count(emails.id) > 0").
+		Having("count(emails.id) > 0 OR count(usernames.id) > 0").
 		Count(&models.User{})
 	if err != nil {
 		return 0, fmt.Errorf("failed to get user count: %w", err)
@@ -182,10 +183,15 @@ func (p *userPersister) Count(userId uuid.UUID, email string) (int, error) {
 	return count, nil
 }
 
-func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userId uuid.UUID, email string) *pop.Query {
-	if email != "" {
+func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userId uuid.UUID, email string, username string) *pop.Query {
+	if email != "" && username != "" {
+		query = query.Where("emails.address LIKE ? OR usernames.username LIKE ?", "%"+email+"%", "%"+username+"%")
+	} else if email != "" {
 		query = query.Where("emails.address LIKE ?", "%"+email+"%")
+	} else if username != "" {
+		query = query.Where("usernames.username LIKE ?", "%"+username+"%")
 	}
+
 	if !userId.IsNil() {
 		query = query.Where("users.id = ?", userId)
 	}
