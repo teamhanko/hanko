@@ -118,14 +118,14 @@ export interface Credential {
  * @category SDK
  * @subcategory DTO
  * @property {string} id - The user's UUID.
- * @property {string} email - The user's email.
- * @property {string} username - The user's username.
+ * @property {string=} email - The user's email.
+ * @property {string=} username - The user's username.
  * @property {Credential[]} webauthn_credentials - A list of credentials that have been registered.
  */
 export interface User {
   id: string;
-  email: string;
-  username: string;
+  email?: string;
+  username?: string;
   webauthn_credentials: Credential[];
 }
 
