@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
-      - backend/config/config.go
+      - 'backend/config/*.go'
+      - '!backend/config/config_default.go'
+      - '!backend/config/**test.go'
 
 jobs:
   config:
