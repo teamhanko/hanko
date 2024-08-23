@@ -15,6 +15,7 @@ type CreateUserResponse struct {
 type GetUserResponse struct {
 	ID                  uuid.UUID                   `json:"id"`
 	Email               *string                     `json:"email,omitempty"`
+	Username            *string                     `json:"username,omitempty"`
 	WebauthnCredentials []models.WebauthnCredential `json:"webauthn_credentials"` // deprecated
 	UpdatedAt           time.Time                   `json:"updated_at"`
 	CreatedAt           time.Time                   `json:"created_at"`

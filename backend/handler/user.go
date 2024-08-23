@@ -198,6 +198,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 		ID:                  user.ID,
 		WebauthnCredentials: user.WebauthnCredentials,
 		Email:               emailAddress,
+		Username:            user.GetUsername(),
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
 	})

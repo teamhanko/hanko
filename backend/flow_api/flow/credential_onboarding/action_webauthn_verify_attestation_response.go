@@ -50,13 +50,16 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to parse user_id into a uuid: %w", err)
 	}
 
+	username := c.Stash().Get(shared.StashPathUsername).String()
+	email := c.Stash().Get(shared.StashPathEmail).String()
+
 	params := services.VerifyAttestationResponseParams{
 		Tx:            deps.Tx,
 		SessionDataID: sessionDataID,
 		PublicKey:     c.Input().Get("public_key").String(),
 		UserID:        userID,
-		Email:         c.Stash().Get(shared.StashPathEmail).String(),
-		Username:      c.Stash().Get(shared.StashPathUsername).String(),
+		Email:         &email,
+		Username:      &username,
 	}
 
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)

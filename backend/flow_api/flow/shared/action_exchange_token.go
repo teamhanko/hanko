@@ -105,7 +105,7 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 		result = append(result, StatePasscodeConfirmation)
 	}
 
-	if deps.Cfg.Username.Enabled && len(identity.Email.User.GetUsername()) == 0 {
+	if deps.Cfg.Username.Enabled && identity.Email.User.GetUsername() == nil {
 		if (!userCreated && deps.Cfg.Username.AcquireOnLogin) ||
 			(userCreated && deps.Cfg.Username.AcquireOnRegistration) {
 			result = append(result, StateOnboardingUsername)
