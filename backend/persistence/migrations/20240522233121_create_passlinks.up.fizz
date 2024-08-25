@@ -1,0 +1,14 @@
+create_table("passlinks") {
+    t.Column("id", "uuid", {primary: true})
+    t.Column("user_id", "uuid", {})
+    t.Column("email_id", "uuid", {null: true})
+    t.Column("ttl", "integer", {})
+    t.Column("strictness", "string", {})
+    t.Column("ip", "string", {})
+    t.Column("token", "string", {})
+    t.Column("login_count", "integer", {})
+    t.Column("reusable", "bool", {})
+    t.Timestamps()
+    t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+    t.ForeignKey("email_id", {"emails": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}

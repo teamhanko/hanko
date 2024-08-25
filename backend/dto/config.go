@@ -9,6 +9,7 @@ import (
 // PublicConfig is the part of the configuration that will be shared with the frontend
 type PublicConfig struct {
 	Password                Password `json:"password"`
+	Passlink                bool     `json:"passlink"`
 	Emails                  Emails   `json:"emails"`
 	Providers               []string `json:"providers"`
 	Account                 Account  `json:"account"`
@@ -37,6 +38,7 @@ func FromConfig(cfg config.Config) PublicConfig {
 			Enabled:   cfg.Password.Enabled,
 			MinLength: cfg.Password.MinLength,
 		},
+		Passlink: cfg.Passlink.Enabled,
 		Emails: Emails{
 			RequireVerification: cfg.Email.RequireVerification,
 			MaxNumOfAddresses:   cfg.Email.Limit,
