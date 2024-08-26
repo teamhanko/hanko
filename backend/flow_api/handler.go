@@ -39,15 +39,17 @@ type FlowPilotHandler struct {
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.RegistrationFlow.Debug(h.Cfg.Debug).MustBuild())
+	registrationFlow := flow.NewRegistrationFlow(h.Cfg.Debug)
+	return h.executeFlow(c, registrationFlow)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
-	return h.executeFlow(c, flow.LoginFlow.Debug(h.Cfg.Debug).MustBuild())
+	loginFlow := flow.NewLoginFlow(h.Cfg.Debug)
+	return h.executeFlow(c, loginFlow)
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
-	profileFlow := flow.ProfileFlow.Debug(h.Cfg.Debug).MustBuild()
+	profileFlow := flow.NewProfileFlow(h.Cfg.Debug)
 
 	if err := h.validateSession(c); err != nil {
 		flowResult := profileFlow.ResultFromError(err)

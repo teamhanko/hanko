@@ -76,80 +76,92 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 		user_details.SkipEmail{}).
 	MustBuild()
 
-var LoginFlow = flowpilot.NewFlow(shared.FlowLogin).
-	State(shared.StateSuccess).
-	InitialState(shared.StatePreflight, shared.StateLoginInit).
-	ErrorState(shared.StateError).
-	BeforeState(shared.StateLoginInit,
-		login.WebauthnGenerateRequestOptionsForConditionalUi{}).
-	BeforeState(shared.StateSuccess,
-		shared.IssueSession{},
-		shared.GetUserData{}).
-	AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
-		shared.WebauthnCredentialSave{}).
-	AfterState(shared.StatePasscodeConfirmation,
-		shared.EmailPersistVerifiedStatus{}).
-	AfterState(shared.StatePasswordCreation,
-		shared.PasswordSave{}).
-	AfterState(shared.StateOnboardingEmail, login.CreateEmail{}).
-	AfterState(shared.StatePasscodeConfirmation, login.CreateEmail{}).
-	AfterFlow(shared.FlowCredentialUsage, login.ScheduleOnboardingStates{}).
-	SubFlows(
-		CapabilitiesSubFlow,
-		CredentialUsageSubFlow,
-		CredentialOnboardingSubFlow,
-		UserDetailsSubFlow).
-	TTL(24 * time.Hour)
+func NewLoginFlow(debug bool) flowpilot.Flow {
+	return flowpilot.NewFlow(shared.FlowLogin).
+		State(shared.StateSuccess).
+		InitialState(shared.StatePreflight, shared.StateLoginInit).
+		ErrorState(shared.StateError).
+		BeforeState(shared.StateLoginInit,
+			login.WebauthnGenerateRequestOptionsForConditionalUi{}).
+		BeforeState(shared.StateSuccess,
+			shared.IssueSession{},
+			shared.GetUserData{}).
+		AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
+			shared.WebauthnCredentialSave{}).
+		AfterState(shared.StatePasscodeConfirmation,
+			shared.EmailPersistVerifiedStatus{}).
+		AfterState(shared.StatePasswordCreation,
+			shared.PasswordSave{}).
+		AfterState(shared.StateOnboardingEmail, login.CreateEmail{}).
+		AfterState(shared.StatePasscodeConfirmation, login.CreateEmail{}).
+		AfterFlow(shared.FlowCredentialUsage, login.ScheduleOnboardingStates{}).
+		SubFlows(
+			CapabilitiesSubFlow,
+			CredentialUsageSubFlow,
+			CredentialOnboardingSubFlow,
+			UserDetailsSubFlow).
+		TTL(24 * time.Hour).
+		Debug(debug).
+		MustBuild()
+}
 
-var RegistrationFlow = flowpilot.NewFlow(shared.FlowRegistration).
-	State(shared.StateRegistrationInit,
-		registration.RegisterLoginIdentifier{},
-		shared.ThirdPartyOAuth{}).
-	State(shared.StateThirdParty,
-		shared.ExchangeToken{}).
-	State(shared.StateSuccess).
-	InitialState(shared.StatePreflight,
-		shared.StateRegistrationInit).
-	ErrorState(shared.StateError).
-	BeforeState(shared.StateSuccess,
-		shared.GetUserData{},
-		registration.CreateUser{},
-		shared.IssueSession{}).
-	SubFlows(
-		CapabilitiesSubFlow,
-		CredentialUsageSubFlow,
-		CredentialOnboardingSubFlow,
-		UserDetailsSubFlow).
-	TTL(24 * time.Hour)
+func NewRegistrationFlow(debug bool) flowpilot.Flow {
+	return flowpilot.NewFlow(shared.FlowRegistration).
+		State(shared.StateRegistrationInit,
+			registration.RegisterLoginIdentifier{},
+			shared.ThirdPartyOAuth{}).
+		State(shared.StateThirdParty,
+			shared.ExchangeToken{}).
+		State(shared.StateSuccess).
+		InitialState(shared.StatePreflight,
+			shared.StateRegistrationInit).
+		ErrorState(shared.StateError).
+		BeforeState(shared.StateSuccess,
+			shared.GetUserData{},
+			registration.CreateUser{},
+			shared.IssueSession{}).
+		SubFlows(
+			CapabilitiesSubFlow,
+			CredentialUsageSubFlow,
+			CredentialOnboardingSubFlow,
+			UserDetailsSubFlow).
+		TTL(24 * time.Hour).
+		Debug(debug).
+		MustBuild()
+}
 
-var ProfileFlow = flowpilot.NewFlow(shared.FlowProfile).
-	State(shared.StateProfileInit,
-		profile.AccountDelete{},
-		profile.EmailCreate{},
-		profile.EmailDelete{},
-		profile.EmailSetPrimary{},
-		profile.EmailVerify{},
-		profile.PasswordCreate{},
-		profile.PasswordUpdate{},
-		profile.PasswordDelete{},
-		profile.UsernameCreate{},
-		profile.UsernameUpdate{},
-		profile.UsernameDelete{},
-		profile.WebauthnCredentialRename{},
-		profile.WebauthnCredentialCreate{},
-		profile.WebauthnCredentialDelete{},
-	).
-	State(shared.StateProfileWebauthnCredentialVerification,
-		profile.WebauthnVerifyAttestationResponse{},
-		shared.Back{}).
-	State(shared.StateProfileAccountDeleted).
-	InitialState(shared.StatePreflight, shared.StateProfileInit).
-	ErrorState(shared.StateError).
-	BeforeEachAction(profile.RefreshSessionUser{}).
-	BeforeState(shared.StateProfileInit, profile.GetProfileData{}).
-	AfterState(shared.StateProfileWebauthnCredentialVerification, shared.WebauthnCredentialSave{}).
-	AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
-	SubFlows(
-		CapabilitiesSubFlow,
-		CredentialUsageSubFlow).
-	TTL(24 * time.Hour)
+func NewProfileFlow(debug bool) flowpilot.Flow {
+	return flowpilot.NewFlow(shared.FlowProfile).
+		State(shared.StateProfileInit,
+			profile.AccountDelete{},
+			profile.EmailCreate{},
+			profile.EmailDelete{},
+			profile.EmailSetPrimary{},
+			profile.EmailVerify{},
+			profile.PasswordCreate{},
+			profile.PasswordUpdate{},
+			profile.PasswordDelete{},
+			profile.UsernameCreate{},
+			profile.UsernameUpdate{},
+			profile.UsernameDelete{},
+			profile.WebauthnCredentialRename{},
+			profile.WebauthnCredentialCreate{},
+			profile.WebauthnCredentialDelete{},
+		).
+		State(shared.StateProfileWebauthnCredentialVerification,
+			profile.WebauthnVerifyAttestationResponse{},
+			shared.Back{}).
+		State(shared.StateProfileAccountDeleted).
+		InitialState(shared.StatePreflight, shared.StateProfileInit).
+		ErrorState(shared.StateError).
+		BeforeEachAction(profile.RefreshSessionUser{}).
+		BeforeState(shared.StateProfileInit, profile.GetProfileData{}).
+		AfterState(shared.StateProfileWebauthnCredentialVerification, shared.WebauthnCredentialSave{}).
+		AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
+		SubFlows(
+			CapabilitiesSubFlow,
+			CredentialUsageSubFlow).
+		TTL(24 * time.Hour).
+		Debug(debug).
+		MustBuild()
+}
