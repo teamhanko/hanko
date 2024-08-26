@@ -501,12 +501,16 @@ func (h *PasslinkHandler) createRedirectURL(c echo.Context, id uuid.UUID, token 
 		return "", fmt.Errorf("failed to parse URL for passlink finalization: %w", err)
 	}
 
-	redirect.Path = path
+	upath, err := url.Parse(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse URL for passlink finalization: %w", err)
+	}
 
-	queryValues := redirect.Query()
-	queryValues.Add("plid", id.String())
-	queryValues.Add("pltk", token)
-	redirect.RawQuery = queryValues.Encode()
+	redirect.Path = upath.Path
+	pqueryValues := upath.Query()
+	pqueryValues.Set("plid", id.String())
+	pqueryValues.Set("pltk", token)
+	redirect.RawQuery = pqueryValues.Encode()
 
 	return redirect.String(), nil
 }
