@@ -23,6 +23,7 @@ type WebauthnCredential struct {
 	Transports      Transports `has_many:"webauthn_credential_transports" json:"-"`
 	BackupEligible  bool       `db:"backup_eligible" json:"-"`
 	BackupState     bool       `db:"backup_state" json:"-"`
+	MFAOnly         bool       `db:"mfa_only" json:"-"`
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
