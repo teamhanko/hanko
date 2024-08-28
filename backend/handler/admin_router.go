@@ -49,7 +49,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
 
-	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 
 	userHandler := NewUserHandlerAdmin(persister)
 	emailHandler := NewEmailAdminHandler(cfg, persister)

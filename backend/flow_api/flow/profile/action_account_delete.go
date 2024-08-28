@@ -63,7 +63,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	deps.HttpContext.SetCookie(cookie)
 
-	err = utils.TriggerWebhooks(deps.HttpContext, events.UserDelete, admin.FromUserModel(*userModel))
+	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.UserDelete, admin.FromUserModel(*userModel))
 	if err != nil {
 		return fmt.Errorf("failed to trrigger webhook: %w", err)
 	}
