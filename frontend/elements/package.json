@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "private": false,
   "publishConfig": {
@@ -132,7 +132,7 @@
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.5.0",
-    "@teamhanko/hanko-frontend-sdk": "^1.0.1",
+    "@teamhanko/hanko-frontend-sdk": "^1.0.2",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
     "preact": "^10.13.1"
