@@ -1,7 +1,7 @@
 import { HANKO_API_URL } from "../config.ts";
 
 const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@1.0.1';
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@1.0.2';
   register('${HANKO_API_URL}', { shadow: true });
 `;
 
