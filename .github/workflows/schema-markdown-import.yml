@@ -61,6 +61,25 @@ jobs:
           rm $GITHUB_WORKSPACE/wiki/reference/import/*.md 2>/dev/null || true
           cp .generated/docs/import/*.md $GITHUB_WORKSPACE/wiki/reference/import
 
+      - name: Delay check
+        run: |
+          OWNER=${{ github.repository_owner }}
+          NAME="$(cut -f2 -d'/' <<< ${{ github.repository }})"
+          HEAD_SHA="${{ github.sha }}"
+          STATUS="in_progress"
+          BASE="/repos/${OWNER}/${NAME}/actions/workflows/schema-markdown-config.yml/runs"
+          REQUEST_URL="${BASE}?head_sha=${HEAD_SHA}&status=${STATUS}"
+          SHOULD_DELAY=$(gh api "$REQUEST_URL" --jq '.total_count > 0')
+          if [ "$SHOULD_DELAY" = "true" ]; then
+            echo "Config markdown generation job in progress, delaying to avoid conflicts"
+            sleep 60s
+          else
+            echo "No config markdown generation job in progress, continuing"
+          fi
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Commit and push to wiki
         working-directory: ./wiki
         run: |
