@@ -158,7 +158,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 		}
 
 		if !h.cfg.Email.RequireVerification {
-			err = utils.TriggerWebhooks(c, events.UserCreate, admin.FromUserModel(newUser))
+			err = utils.TriggerWebhooks(c, tx, events.UserCreate, admin.FromUserModel(newUser))
 			if err != nil {
 				c.Logger().Warn(err)
 			}
@@ -288,7 +288,7 @@ func (h *UserHandler) Delete(c echo.Context) error {
 
 		c.SetCookie(cookie)
 
-		err = utils.TriggerWebhooks(c, events.UserDelete, admin.FromUserModel(*user))
+		err = utils.TriggerWebhooks(c, tx, events.UserDelete, admin.FromUserModel(*user))
 		if err != nil {
 			c.Logger().Warn(err)
 		}

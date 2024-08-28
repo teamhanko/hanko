@@ -70,7 +70,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			Language:     deps.HttpContext.Request().Header.Get("Accept-Language"),
 		}
 
-		passcodeResult, err := deps.PasscodeService.SendPasscode(sendParams)
+		passcodeResult, err := deps.PasscodeService.SendPasscode(deps.Tx, sendParams)
 		if err != nil {
 			return fmt.Errorf("passcode service failed: %w", err)
 		}
@@ -100,7 +100,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			},
 		}
 
-		err = utils.TriggerWebhooks(deps.HttpContext, events.EmailSend, webhookData)
+		err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.EmailSend, webhookData)
 		if err != nil {
 			return fmt.Errorf("failed to trigger webhook: %w", err)
 		}

@@ -8,7 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/webhooks"
 )
 
-func WebhookMiddleware(cfg *config.Config, jwkManager hankoJwk.Manager, persister persistence.WebhookPersister) echo.MiddlewareFunc {
+func WebhookMiddleware(cfg *config.Config, jwkManager hankoJwk.Manager, persister persistence.Persister) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 

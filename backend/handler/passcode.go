@@ -228,14 +228,14 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 			return fmt.Errorf("failed to send passcode: %w", err)
 		}
 
-		err = utils.TriggerWebhooks(c, events.EmailSend, webhookData)
+		err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.EmailSend, webhookData)
 
 		if err != nil {
 			zeroLogger.Warn().Err(err).Msg("failed to trigger webhook")
 		}
 	} else {
 		webhookData.DeliveredByHanko = false
-		err = utils.TriggerWebhooks(c, events.EmailSend, webhookData)
+		err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.EmailSend, webhookData)
 
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("failed to trigger webhook: %s", err))
