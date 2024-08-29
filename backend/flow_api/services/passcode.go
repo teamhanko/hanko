@@ -42,7 +42,7 @@ type SendPasscodeResult struct {
 
 type Passcode interface {
 	ValidatePasscode(ValidatePasscodeParams) (bool, error)
-	SendPasscode(SendPasscodeParams) (*SendPasscodeResult, error)
+	SendPasscode(*pop.Connection, SendPasscodeParams) (*SendPasscodeResult, error)
 	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string) error
 }
 
@@ -110,7 +110,7 @@ func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, 
 	return nil
 }
 
-func (s *passcode) SendPasscode(p SendPasscodeParams) (*SendPasscodeResult, error) {
+func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*SendPasscodeResult, error) {
 	code, err := s.passcodeGenerator.Generate()
 	if err != nil {
 		return nil, err
@@ -135,7 +135,7 @@ func (s *passcode) SendPasscode(p SendPasscodeParams) (*SendPasscodeResult, erro
 		UpdatedAt: now,
 	}
 
-	err = s.persister.GetPasscodePersister().Create(passcodeModel)
+	err = s.persister.GetPasscodePersisterWithConnection(tx).Create(passcodeModel)
 	if err != nil {
 		return nil, err
 	}

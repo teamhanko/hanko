@@ -77,7 +77,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
-	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 
 	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
 	e.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)

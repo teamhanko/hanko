@@ -69,7 +69,9 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 				return fmt.Errorf("could not create audit log: %w", err)
 			}
 
-			return c.Error(shared.ErrorPasskeyInvalid.Wrap(err))
+			c.SetFlowError(shared.ErrorPasskeyInvalid.Wrap(err))
+
+			return c.Continue(shared.StateError)
 		}
 
 		return fmt.Errorf("failed to verify assertion response: %w", err)
@@ -89,7 +91,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	if userModel != nil {
 		_ = c.Stash().Set(shared.StashPathUserHasPassword, userModel.PasswordCredential != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasWebauthnCredential, len(userModel.WebauthnCredentials) > 0)
-		_ = c.Stash().Set(shared.StashPathUserHasUsername, len(userModel.GetUsername()) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasUsername, userModel.GetUsername() != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
 	}
 

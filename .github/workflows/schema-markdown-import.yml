@@ -1,0 +1,77 @@
+name: Generate user import reference markdown
+run-name: Generate config reference markdown for ${{ github.ref_name }}
+
+on:
+  push:
+    tags:
+      - 'backend/*'
+  workflow_dispatch:
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.16.0'
+          registry-url: https://registry.npmjs.org/
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          path: hanko
+
+      - name: Checkout backend wiki
+        uses: actions/checkout@v4
+        with:
+          repository: ${{github.repository}}.wiki
+          path: wiki
+
+      - name: Generate import markdown
+        working-directory: ./hanko/backend
+        run: |
+          go generate ./...
+          go run main.go schema markdown import
+
+      - name: Strip links of .md file endings
+        working-directory: ./hanko/backend
+        run: |
+          find ./.generated/docs/import -type f -name "*.md" -exec sed -i "s/\.md//g" "{}" \;
+
+      - name: Prepend version information
+        working-directory: ./hanko/backend
+        run: |
+          version=$(echo $GITHUB_REF_NAME | cut -f2 -d'/')
+          find ./.generated/docs/import -type f -name '*.md' -exec sed -i "1i\\
+          ## Version\\
+          \\
+          \`$version\`\\
+          \\
+          " {} \;
+
+      - name: Copy generated files
+        working-directory: ./hanko/backend
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/wiki/reference/import
+          rm $GITHUB_WORKSPACE/wiki/reference/import/*.md 2>/dev/null || true
+          cp .generated/docs/import/*.md $GITHUB_WORKSPACE/wiki/reference/import
+
+      - name: Commit and push to wiki
+        working-directory: ./wiki
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          if ! git diff-index --quiet HEAD; then
+            version=$(echo $GITHUB_REF_NAME | cut -f2 -d'/')
+            git commit -m "chore: autogenerate import reference for $version"
+            git pull origin master --rebase
+            git push origin HEAD
+          else
+            echo "No changes detected, skipping commit and push."
+          fi

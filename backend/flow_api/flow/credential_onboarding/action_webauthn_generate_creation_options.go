@@ -53,8 +53,8 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 	params := services.GenerateCreationOptionsParams{
 		Tx:       deps.Tx,
 		UserID:   userID,
-		Email:    email,
-		Username: username,
+		Email:    &email,
+		Username: &username,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptions(params)

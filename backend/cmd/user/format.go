@@ -3,6 +3,7 @@ package user
 import (
 	"errors"
 	"fmt"
+	"github.com/invopop/jsonschema"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -11,11 +12,15 @@ import (
 // ImportOrExportEmail The import/export format for a user's email
 type ImportOrExportEmail struct {
 	// Address Valid email address
-	Address string `json:"address" yaml:"address"`
+	Address string `json:"address" yaml:"address" jsonschema:"format=email"`
 	// IsPrimary indicates if this is the primary email of the users. In the Emails array there has to be exactly one primary email.
 	IsPrimary bool `json:"is_primary" yaml:"is_primary"`
 	// IsVerified indicates if the email address was previously verified.
 	IsVerified bool `json:"is_verified" yaml:"is_verified"`
+}
+
+func (ImportOrExportEmail) JSONSchemaExtend(schema *jsonschema.Schema) {
+	schema.Title = "ImportEmail"
 }
 
 // Emails Array of email addresses
@@ -33,8 +38,38 @@ type ImportOrExportEntry struct {
 	UpdatedAt *time.Time `json:"updated_at,omitempty" yaml:"updated_at"`
 }
 
+func (ImportOrExportEntry) JSONSchemaExtend(schema *jsonschema.Schema) {
+	schema.Title = "ImportEntry"
+}
+
 // ImportOrExportList a list of ImportEntries
 type ImportOrExportList []ImportOrExportEntry
+
+func (ImportOrExportList) JSONSchemaExtend(schema *jsonschema.Schema) {
+	date := time.Date(2024, 8, 17, 12, 5, 15, 651387237, time.UTC)
+	schema.Examples = []any{
+		[]ImportOrExportEntry{
+			{
+				UserID: "a9ae6bc8-d829-43de-b672-f50230833877",
+				Emails: Emails{
+					{"test@example.com", true, true},
+					{"test+1@example.com", false, false},
+				},
+				CreatedAt: &date,
+				UpdatedAt: &date,
+			},
+			{
+				UserID: "2f0649cf-c71e-48a5-92c3-210addb80281",
+				Emails: Emails{
+					{"test2@example.com", true, true},
+					{"test2+1@example.com", false, false},
+				},
+				CreatedAt: &date,
+				UpdatedAt: &date,
+			},
+		},
+	}
+}
 
 func (entry *ImportOrExportEntry) validate() error {
 	if len(entry.Emails) == 0 {

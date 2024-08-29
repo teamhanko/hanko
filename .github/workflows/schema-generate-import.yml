@@ -1,0 +1,42 @@
+name: Generate import JSON schema
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - backend/cmd/user/format.go
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.20'
+
+      - name: Checkout backend
+        uses: actions/checkout@v4
+        with:
+          path: hanko
+
+      - name: Generate import JSON schema
+        working-directory: ./hanko/backend
+        run: |
+          go generate ./...
+          go run main.go schema generate import
+
+      - name: Commit and push to repo
+        working-directory: ./hanko
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: autogenerate import JSON schema"
+            git pull origin main --rebase
+            git push origin HEAD
+          else
+            echo "No changes detected, skipping commit and push."
+          fi

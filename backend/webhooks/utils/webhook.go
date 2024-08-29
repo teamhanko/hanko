@@ -11,17 +11,16 @@ import (
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 )
 
-func TriggerWebhooks(ctx echo.Context, evt events.Event, data interface{}) error {
+func TriggerWebhooks(ctx echo.Context, tx *pop.Connection, evt events.Event, data interface{}) error {
 	webhookCtx := ctx.Get("webhook_manager")
 	if webhookCtx == nil {
 		return fmt.Errorf("unable to load webhooks manager from webhook middleware")
 	}
 
 	webhookManager := webhookCtx.(webhooks.Manager)
-	webhookManager.Trigger(evt, data)
+	webhookManager.Trigger(tx, evt, data)
 
 	return nil
-
 }
 
 func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistence.Persister, event events.Event, userId uuid.UUID) {
@@ -31,7 +30,7 @@ func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistenc
 		return
 	}
 
-	err = TriggerWebhooks(ctx, event, admin.FromUserModel(*updatedUser))
+	err = TriggerWebhooks(ctx, tx, event, admin.FromUserModel(*updatedUser))
 	if err != nil {
 		ctx.Logger().Warn(err)
 	}

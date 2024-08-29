@@ -60,7 +60,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	var userID uuid.UUID
 
 	if c.Stash().Get(shared.StashPathEmail).Exists() {
-		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(c.Stash().Get(shared.StashPathEmail).String())
+		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(c.Stash().Get(shared.StashPathEmail).String())
 		if err != nil {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}

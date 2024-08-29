@@ -63,7 +63,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		SessionDataID: sessionDataID,
 		PublicKey:     c.Input().Get("public_key").String(),
 		UserID:        userModel.ID,
-		Email:         primaryEmailAddress,
+		Email:         &primaryEmailAddress,
 		Username:      userModel.GetUsername(),
 	}
 
