@@ -117,9 +117,9 @@ func NewRegistrationFlow(debug bool) flowpilot.Flow {
 			shared.StateRegistrationInit).
 		ErrorState(shared.StateError).
 		BeforeState(shared.StateSuccess,
+			shared.IssueSession{},
 			shared.GetUserData{},
-			registration.CreateUser{},
-			shared.IssueSession{}).
+			registration.CreateUser{}).
 		SubFlows(
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,
