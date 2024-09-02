@@ -44,6 +44,9 @@ password:
   acquire_on_login: never
   recovery: true
   min_length: 8
+passlink:
+  enabled: true
+  url: http://localhost:3000
 rate_limiter:
   enabled: true
   store: in_memory

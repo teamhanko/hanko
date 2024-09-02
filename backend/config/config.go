@@ -1034,8 +1034,12 @@ type Username struct {
 }
 
 type Passlink struct {
-	Enabled bool   `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	URL     string `yaml:"url" json:"url,omitempty" koanf:"url"`
+	// `enabled` determines whether users can authenticate via a link containing a short-living token send by mail.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `url` is the redirect target URL for passlinks to your frontend.
+	// Frontend must be able to handle the passlink token and call the passlink finalize endpoint to complete the authentication.
+	// The passlink id (plid) and the token (pltk) are added as query parameters to that URL.
+	URL string `yaml:"url" json:"url,omitempty" koanf:"url"`
 }
 
 func (p *Passlink) Validate() error {
