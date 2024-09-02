@@ -52,7 +52,7 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 	params := services.GenerateCreationOptionsParams{
 		Tx:       deps.Tx,
 		UserID:   userModel.ID,
-		Email:    primaryEmailAddress,
+		Email:    &primaryEmailAddress,
 		Username: userModel.GetUsername(),
 	}
 

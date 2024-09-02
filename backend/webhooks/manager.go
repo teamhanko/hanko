@@ -2,6 +2,7 @@ package webhooks
 
 import (
 	"fmt"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
@@ -13,7 +14,7 @@ import (
 )
 
 type Manager interface {
-	Trigger(evt events.Event, data interface{})
+	Trigger(tx *pop.Connection, evt events.Event, data interface{})
 	GenerateJWT(data interface{}, event events.Event) (string, error)
 }
 
@@ -22,11 +23,11 @@ type manager struct {
 	webhooks        Webhooks
 	jwtGenerator    hankoJwt.Generator
 	audience        []string
-	persister       persistence.WebhookPersister
+	persister       persistence.Persister
 	canExpireAtTime bool
 }
 
-func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkManager hankoJwk.Manager, logger echo.Logger) (Manager, error) {
+func NewManager(cfg *config.Config, persister persistence.Persister, jwkManager hankoJwk.Manager, logger echo.Logger) (Manager, error) {
 	hooks := make(Webhooks, 0)
 
 	if cfg.Webhooks.Enabled {
@@ -73,9 +74,9 @@ func NewManager(cfg *config.Config, persister persistence.WebhookPersister, jwkM
 	}, nil
 }
 
-func (m *manager) Trigger(evt events.Event, data interface{}) {
+func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}) {
 	// add db hooks - Done here to prevent a restart in case a hook is added or removed from the database
-	dbHooks, err := m.persister.List(false)
+	dbHooks, err := m.persister.GetWebhookPersister(tx).List(false)
 	if err != nil {
 		m.logger.Error(fmt.Errorf("unable to get database webhooks: %w", err))
 		return
@@ -83,7 +84,7 @@ func (m *manager) Trigger(evt events.Event, data interface{}) {
 
 	hooks := m.webhooks
 	for _, dbHook := range dbHooks {
-		hooks = append(hooks, NewDatabaseHook(dbHook, m.persister, m.logger))
+		hooks = append(hooks, NewDatabaseHook(dbHook, m.persister.GetWebhookPersister(nil), m.logger))
 	}
 
 	dataToken, err := m.GenerateJWT(data, evt)

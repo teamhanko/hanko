@@ -51,7 +51,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
 
-	err = utils.TriggerWebhooks(c, events.UserDelete, admin.FromUserModel(*user))
+	err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserDelete, admin.FromUserModel(*user))
 	if err != nil {
 		c.Logger().Warn(err)
 	}
@@ -64,6 +64,7 @@ type UserListRequest struct {
 	Page          int    `query:"page"`
 	Email         string `query:"email"`
 	UserId        string `query:"user_id"`
+	Username      string `query:"username"`
 	SortDirection string `query:"sort_direction"`
 }
 
@@ -101,13 +102,14 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	}
 
 	email := strings.ToLower(request.Email)
+	username := strings.ToLower(request.Username)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email, request.SortDirection)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email, username, request.SortDirection)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}
 
-	userCount, err := h.persister.GetUserPersister().Count(userId, email)
+	userCount, err := h.persister.GetUserPersister().Count(userId, email, username)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of users: %w", err)
 	}
@@ -154,6 +156,10 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	if len(body.Emails) == 0 && (body.Username == nil || *body.Username == "") {
+		return echo.NewHTTPError(http.StatusBadRequest, "at least one of [Emails, Username] must be set")
+	}
+
 	// if no userID is provided, create a new one
 	if body.ID.IsNil() {
 		userId, err := uuid.NewV4()
@@ -171,7 +177,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		}
 	}
 
-	if primaryEmails == 0 {
+	if primaryEmails == 0 && len(body.Emails) > 0 {
 		return echo.NewHTTPError(http.StatusBadRequest, "at least one primary email must be provided")
 	} else if primaryEmails > 1 {
 		return echo.NewHTTPError(http.StatusBadRequest, "only one primary email is allowed")
@@ -238,6 +244,25 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 				}
 			}
 		}
+
+		if body.Username != nil {
+			username := models.NewUsername(u.ID, *body.Username)
+			err = tx.Create(username)
+			if err != nil {
+				var pgErr *pgconn.PgError
+				var mysqlErr *mysql.MySQLError
+				if errors.As(err, &pgErr) {
+					if pgErr.Code == "23505" {
+						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
+					}
+				} else if errors.As(err, &mysqlErr) {
+					if mysqlErr.Number == 1062 {
+						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
+					}
+				}
+				return fmt.Errorf("failed to create email '%s' for user '%v': %w", username.Username, u.ID, err)
+			}
+		}
 		return nil
 	})
 
@@ -259,7 +284,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 	userDto := admin.FromUserModel(*user)
 
-	err = utils.TriggerWebhooks(c, events.UserCreate, userDto)
+	err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserCreate, userDto)
 	if err != nil {
 		c.Logger().Warn(err)
 	}

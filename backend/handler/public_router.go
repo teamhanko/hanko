@@ -78,9 +78,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
 
-	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler)
-	e.POST("/login", flowAPIHandler.LoginFlowHandler)
-	e.POST("/profile", flowAPIHandler.ProfileFlowHandler)
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
+
+	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
+	e.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
 
 	e.HideBanner = true
 	g := e.Group("")
@@ -139,9 +141,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.GET("/", statusHandler.Status)
 	g.GET("/me", userHandler.Me, sessionMiddleware)
 
-	webhookMiddlware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister.GetWebhookPersister(nil))
-
-	user := g.Group("/users", webhookMiddlware)
+	user := g.Group("/users", webhookMiddleware)
 	user.POST("", userHandler.Create)
 	user.GET("/:id", userHandler.Get, sessionMiddleware)
 
@@ -149,7 +149,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	g.POST("/logout", userHandler.Logout, sessionMiddleware)
 
 	if cfg.Account.AllowDeletion {
-		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddlware)
+		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddleware)
 	}
 
 	healthHandler := NewHealthHandler()
@@ -161,7 +161,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		}
 
 		passlink := g.Group("/passlink")
-		passlinkLogin := passlink.Group("/login", webhookMiddlware)
+		passlinkLogin := passlink.Group("/login", webhookMiddleware)
 		passlinkLogin.POST("/initialize", passlinkHandler.Init).Name = "passlink_login_initialize"
 		passlinkLogin.POST("/finalize", passlinkHandler.Finish).Name = "passlink_login_finalize"
 	}
@@ -206,12 +206,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
 		}
 		passcode := g.Group("/passcode")
-		passcodeLogin := passcode.Group("/login", webhookMiddlware)
+		passcodeLogin := passcode.Group("/login", webhookMiddleware)
 		passcodeLogin.POST("/initialize", passcodeHandler.Init)
 		passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 	}
 
-	email := g.Group("/emails", sessionMiddleware, webhookMiddlware)
+	email := g.Group("/emails", sessionMiddleware, webhookMiddleware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.DELETE("/:id", emailHandler.Delete)
@@ -220,8 +220,8 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
 	thirdparty := g.Group("thirdparty")
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
-	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddlware)
-	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddlware)
+	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
+	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
 
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)

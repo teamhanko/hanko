@@ -9,6 +9,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type EmailDelete struct {
@@ -41,7 +43,7 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 
 	for _, email := range userModel.Emails {
 		if email.IsPrimary() {
-			canDoPWLoginWithUsername := canDoPWLogin && deps.Cfg.Username.UseAsLoginIdentifier && len(userModel.GetUsername()) > 0
+			canDoPWLoginWithUsername := canDoPWLogin && deps.Cfg.Username.UseAsLoginIdentifier && userModel.GetUsername() != nil
 			if lastEmail && deps.Cfg.Email.Optional && (canDoWebauthn || canDoPWLoginWithUsername) {
 				input.AllowedValue(email.Address, email.ID.String())
 			}
@@ -115,6 +117,8 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	userModel.DeleteEmail(*emailToBeDeletedModel)
+
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserEmailDelete, userModel.ID)
 
 	return c.Continue(shared.StateProfileInit)
 }

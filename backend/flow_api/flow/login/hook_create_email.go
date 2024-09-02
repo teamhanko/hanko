@@ -6,6 +6,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type CreateEmail struct {
@@ -40,6 +42,8 @@ func (h CreateEmail) Execute(c flowpilot.HookExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to create a new primary email: %w", err)
 	}
+
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserEmailCreate, userID)
 
 	return nil
 }

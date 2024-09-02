@@ -28,8 +28,8 @@ type VerifyAssertionResponseParams struct {
 type GenerateCreationOptionsParams struct {
 	Tx       *pop.Connection
 	UserID   uuid.UUID
-	Email    string
-	Username string
+	Email    *string
+	Username *string
 }
 
 type VerifyAttestationResponseParams struct {
@@ -37,8 +37,8 @@ type VerifyAttestationResponseParams struct {
 	SessionDataID uuid.UUID
 	PublicKey     string
 	UserID        uuid.UUID
-	Email         string
-	Username      string
+	Email         *string
+	Username      *string
 }
 
 type WebauthnService interface {
@@ -50,8 +50,8 @@ type WebauthnService interface {
 
 type webauthnUser struct {
 	id       uuid.UUID
-	email    string
-	username string
+	email    *string
+	username *string
 }
 
 func (user webauthnUser) WebAuthnID() []byte {
@@ -59,19 +59,27 @@ func (user webauthnUser) WebAuthnID() []byte {
 }
 
 func (user webauthnUser) WebAuthnName() string {
-	if len(user.email) > 0 {
-		return user.email
+	if user.email != nil && len(*user.email) > 0 {
+		return *user.email
 	}
 
-	return user.username
+	if user.username != nil {
+		return *user.username
+	}
+
+	return ""
 }
 
 func (user webauthnUser) WebAuthnDisplayName() string {
-	if len(user.username) > 0 {
-		return user.username
+	if user.username != nil && len(*user.username) > 0 {
+		return *user.username
 	}
 
-	return user.email
+	if user.email != nil {
+		return *user.email
+	}
+
+	return ""
 }
 
 func (user webauthnUser) WebAuthnCredentials() []webauthn.Credential {

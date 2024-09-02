@@ -33,9 +33,16 @@ type ValidatePasscodeParams struct {
 	PasscodeID uuid.UUID
 }
 
+type SendPasscodeResult struct {
+	PasscodeModel models.Passcode
+	Subject       string
+	Body          string
+	Code          string
+}
+
 type Passcode interface {
 	ValidatePasscode(ValidatePasscodeParams) (bool, error)
-	SendPasscode(SendPasscodeParams) (uuid.UUID, error)
+	SendPasscode(*pop.Connection, SendPasscodeParams) (*SendPasscodeResult, error)
 	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string) error
 }
 
@@ -103,19 +110,19 @@ func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, 
 	return nil
 }
 
-func (s *passcode) SendPasscode(p SendPasscodeParams) (uuid.UUID, error) {
+func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*SendPasscodeResult, error) {
 	code, err := s.passcodeGenerator.Generate()
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 	hashedPasscode, err := bcrypt.GenerateFromPassword([]byte(code), 12)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	passcodeId, err := uuid.NewV4()
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	now := time.Now().UTC()
@@ -128,9 +135,9 @@ func (s *passcode) SendPasscode(p SendPasscodeParams) (uuid.UUID, error) {
 		UpdatedAt: now,
 	}
 
-	err = s.persister.GetPasscodePersister().Create(passcodeModel)
+	err = s.persister.GetPasscodePersisterWithConnection(tx).Create(passcodeModel)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
 	durationTTL := time.Duration(passcodeModel.Ttl) * time.Second
@@ -140,12 +147,25 @@ func (s *passcode) SendPasscode(p SendPasscodeParams) (uuid.UUID, error) {
 		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
 	}
 
-	err = s.emailService.SendEmail(p.Template, p.Language, data, p.EmailAddress)
+	subject := s.emailService.RenderSubject(p.Language, p.Template, data)
+	body, err := s.emailService.RenderBody(p.Language, p.Template, data)
 	if err != nil {
-		return uuid.Nil, err
+		return nil, err
 	}
 
-	return passcodeId, nil
+	if s.cfg.EmailDelivery.Enabled {
+		err = s.emailService.SendEmail(p.EmailAddress, subject, body)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &SendPasscodeResult{
+		PasscodeModel: passcodeModel,
+		Subject:       subject,
+		Body:          body,
+		Code:          code,
+	}, nil
 }
 
 func (s *passcode) getPasscode(tx *pop.Connection, passcodeID uuid.UUID) (*models.Passcode, error) {

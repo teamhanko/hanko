@@ -76,7 +76,7 @@ func (sp *BaseSamlProvider) GetUserData(assertionInfo *saml2.AssertionInfo) *thi
 
 	email := thirdparty.Email{
 		Email:    emailAddress,
-		Verified: assertionValues.Get(attributeMap.EmailVerified) != "",
+		Verified: assertionValues.Get(attributeMap.EmailVerified) == "true",
 		Primary:  true,
 	}
 

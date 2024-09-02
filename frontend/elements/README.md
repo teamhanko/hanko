@@ -253,7 +253,7 @@ Please note, that the JWT is only available, when the Hanko-API configuration al
 Hanko-Cloud the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the
 backend only, as long as your backend runs under the same domain as your frontend. To do so, make sure the config
 parameter "session.enable_auth_token_header" is turned off via the
-[Hanko-API configuration](https://github.com/teamhanko/hanko/blob/main/backend/docs/Config.md). If you want the JWT to
+[Hanko-API configuration](https://github.com/teamhanko/hanko/wiki). If you want the JWT to
 be contained in the event details, you need to turn on "session.enable_auth_token_header" when using a cross-domain
 setup. When it's a same-domain setup you need to turn off "session.cookie.http_only" to make the JWT accessible to the
 frontend.
@@ -343,7 +343,7 @@ await hanko.user.logout();
 ```
 
 To learn how error handling works and what else you can do with SDK, take a look into
-the [frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
+the [frontend-sdk docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
 
 ## UI Customization
 
@@ -747,7 +747,7 @@ To learn more about how to integrate the Hanko elements into frontend frameworks
 ## Exports
 
 The `@teamhanko/hanko-elements` package exports the functions and interfaces listed below and additionally every
-declaration provided by the [frontend-sdk](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/).
+declaration provided by the [frontend-sdk](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
 
 ### Functions
 

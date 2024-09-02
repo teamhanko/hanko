@@ -113,7 +113,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 		// Check that email is not already taken
 		// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
-		emailModel, err := deps.Persister.GetEmailPersister().FindByAddress(email)
+		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
 		if err != nil {
 			return err
 		}

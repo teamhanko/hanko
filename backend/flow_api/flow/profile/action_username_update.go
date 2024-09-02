@@ -91,7 +91,7 @@ func (a UsernameUpdate) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameChanged,
 		&models.User{ID: userModel.ID},
 		nil,
-		auditlog.Detail("username", userModel.GetUsername()),
+		auditlog.Detail("username", usernameModel.Username),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {

@@ -201,7 +201,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
-		err = webhookUtils.TriggerWebhooks(c, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
+		err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
 		if err != nil {
 			c.Logger().Warn(err)
 		}
