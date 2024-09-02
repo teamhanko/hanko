@@ -157,6 +157,22 @@ func DefaultConfig() *Config {
 			MinLength:             3,
 			MaxLength:             32,
 		},
+		MFA: MFA{
+			AcquireOnLogin:        false,
+			AcquireOnRegistration: true,
+			Enabled:               true,
+			Optional:              true,
+			SecurityKeys: SecurityKeys{
+				AttestationPreference:   "direct",
+				AuthenticatorAttachment: "cross-platform",
+				Enabled:                 true,
+				Limit:                   10,
+				UserVerification:        "discouraged",
+			},
+			TOTP: TOTP{
+				Enabled: true,
+			},
+		},
 		Debug: false,
 	}
 }
