@@ -165,6 +165,14 @@ func (p *persister) GetUsernamePersisterWithConnection(tx *pop.Connection) Usern
 	return NewUsernamePersister(tx)
 }
 
+func (p *persister) GetOTPSecretPersister() OTPSecretPersister {
+	return NewOTPSecretPersister(p.DB)
+}
+
+func (p *persister) GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister {
+	return NewOTPSecretPersister(tx)
+}
+
 func (p *persister) GetWebauthnCredentialPersister() WebauthnCredentialPersister {
 	return NewWebauthnCredentialPersister(p.DB)
 }

@@ -20,6 +20,7 @@ type User struct {
 	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
 	Username            *Username           `has_one:"username" json:"username,omitempty"`
+	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 }
 
