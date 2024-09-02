@@ -31,6 +31,7 @@ type FlowPilotHandler struct {
 	WebauthnService          services.WebauthnService
 	SamlService              saml.Service
 	SessionManager           session.Manager
+	OTPRateLimiter           limiter.Store
 	PasscodeRateLimiter      limiter.Store
 	PasswordRateLimiter      limiter.Store
 	TokenExchangeRateLimiter limiter.Store
@@ -106,6 +107,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
 			Cfg:                      h.Cfg,
+			OTPRateLimiter:           h.OTPRateLimiter,
 			PasscodeRateLimiter:      h.PasscodeRateLimiter,
 			PasswordRateLimiter:      h.PasswordRateLimiter,
 			TokenExchangeRateLimiter: h.TokenExchangeRateLimiter,

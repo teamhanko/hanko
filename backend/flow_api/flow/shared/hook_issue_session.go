@@ -67,6 +67,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			&models.User{ID: userId},
 			err,
 			auditlog.Detail("login_method", c.Stash().Get(StashPathLoginMethod).String()),
+			auditlog.Detail("mfa_method", c.Stash().Get(StashPathMFAMethod).String()),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 
 		if err != nil {

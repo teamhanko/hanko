@@ -23,6 +23,7 @@ type Dependencies struct {
 	SamlService              saml.Service
 	Persister                persistence.Persister
 	SessionManager           session.Manager
+	OTPRateLimiter           limiter.Store
 	PasscodeRateLimiter      limiter.Store
 	PasswordRateLimiter      limiter.Store
 	TokenExchangeRateLimiter limiter.Store

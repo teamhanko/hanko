@@ -10,4 +10,5 @@ const (
 	FlowCredentialUsage      flowpilot.FlowName = "credential_usage"
 	FlowCredentialOnboarding flowpilot.FlowName = "credential_onboarding"
 	FlowUserDetails          flowpilot.FlowName = "user_details"
+	FlowMFAUsage             flowpilot.FlowName = "mfa_usage"
 )
