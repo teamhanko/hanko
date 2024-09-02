@@ -29,6 +29,19 @@ email_delivery:
     port: "2500"
 log:
   log_health_and_metrics: true
+mfa:
+  acquire_on_login: false
+  acquire_on_registration: true
+  enabled: true
+  optional: true
+  security_keys:
+    attestation_preference: direct
+    authenticator_attachment: cross-platform
+    enabled: true
+    limit: 10
+    user_verification: discouraged
+  totp:
+    enabled: true
 passkey:
   enabled: true
   optional: true
