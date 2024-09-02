@@ -40,7 +40,9 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"WebauthnCredentials",
 		"WebauthnCredentials.Transports",
 		"Username",
-		"PasswordCredential"}
+		"PasswordCredential",
+		"OTPSecret",
+	}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
