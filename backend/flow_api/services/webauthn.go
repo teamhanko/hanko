@@ -128,7 +128,7 @@ func (s *webauthnService) generateRequestOptions(tx *pop.Connection, opts ...web
 	return webAuthnSessionDataModel, options, nil
 }
 
-func (s *webauthnService) GenerateRequestOptionsPasscode(p GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+func (s *webauthnService) GenerateRequestOptionsPasskey(p GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
 	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
 
 	return s.generateRequestOptions(p.Tx,
