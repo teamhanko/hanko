@@ -32,7 +32,7 @@ func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) er
 
 	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx}
 
-	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasscode(params)
+	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasskey(params)
 	if err != nil {
 		return fmt.Errorf("failed to generate webauthn request options: %w", err)
 	}
