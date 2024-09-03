@@ -4,6 +4,7 @@ const (
 	StashPathEmail                                  = "email"
 	StashPathEmailVerified                          = "email_verified"
 	StashPathLoginMethod                            = "login_method"
+	StashPathMFAMethod                              = "mfa_method"
 	StashPathNewPassword                            = "new_password"
 	StashPathPasscodeEmail                          = "sticky.passcode_email"
 	StashPathPasscodeID                             = "sticky.passcode_id"

@@ -9,6 +9,8 @@ const (
 	StateLoginPasskey                          flowpilot.StateName = "login_passkey"
 	StateLoginPassword                         flowpilot.StateName = "login_password"
 	StateLoginPasswordRecovery                 flowpilot.StateName = "login_password_recovery"
+	StateLoginSecurityKey                      flowpilot.StateName = "login_security_key"
+	StateLoginOTP                              flowpilot.StateName = "login_otp"
 	StateOnboardingCreatePasskey               flowpilot.StateName = "onboarding_create_passkey"
 	StateCredentialOnboardingChooser           flowpilot.StateName = "credential_onboarding_chooser"
 	StateOnboardingVerifyPasskeyAttestation    flowpilot.StateName = "onboarding_verify_passkey_attestation"
