@@ -15,8 +15,13 @@ import (
 	"time"
 )
 
-type GenerateRequestOptionsParams struct {
+type GenerateRequestOptionsPasskeyParams struct {
 	Tx *pop.Connection
+}
+
+type GenerateRequestOptionsSecurityKeyParams struct {
+	Tx     *pop.Connection
+	UserID uuid.UUID
 }
 
 type VerifyAssertionResponseParams struct {
@@ -42,7 +47,8 @@ type VerifyAttestationResponseParams struct {
 }
 
 type WebauthnService interface {
-	GenerateRequestOptions(GenerateRequestOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
+	GenerateRequestOptionsPasskey(GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
+	GenerateRequestOptionsSecurityKey(GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
 	VerifyAssertionResponse(VerifyAssertionResponseParams) (*models.User, error)
 	GenerateCreationOptions(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
 	VerifyAttestationResponse(VerifyAttestationResponseParams) (*webauthn.Credential, error)
@@ -103,11 +109,8 @@ func NewWebauthnService(cfg config.Config, persister persistence.Persister) Weba
 	return &webauthnService{cfg: cfg, persister: persister}
 }
 
-func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
-	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
-	options, sessionData, err := s.cfg.Webauthn.Handler.BeginDiscoverableLogin(
-		webauthn.WithUserVerification(userVerificationRequirement),
-	)
+func (s *webauthnService) generateRequestOptions(tx *pop.Connection, opts ...webauthn.LoginOption) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+	options, sessionData, err := s.cfg.Webauthn.Handler.BeginDiscoverableLogin(opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 	}
@@ -117,12 +120,34 @@ func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams)
 		return nil, nil, fmt.Errorf("failed to generate a new webauthn session data model: %w", err)
 	}
 
-	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Create(*webAuthnSessionDataModel)
+	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(tx).Create(*webAuthnSessionDataModel)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to store webauthn assertion session data: %w", err)
 	}
 
 	return webAuthnSessionDataModel, options, nil
+}
+
+func (s *webauthnService) GenerateRequestOptionsPasskey(p GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
+
+	return s.generateRequestOptions(p.Tx,
+		webauthn.WithUserVerification(userVerificationRequirement),
+	)
+}
+
+func (s *webauthnService) GenerateRequestOptionsSecurityKey(p GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification)
+
+	credentialModels, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).GetFromUser(p.UserID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get webauthn credentials from db: %w", err)
+	}
+
+	return s.generateRequestOptions(p.Tx,
+		webauthn.WithUserVerification(userVerificationRequirement),
+		webauthn.WithAllowedCredentials(credentialModels.GetWebauthnDescriptors()),
+	)
 }
 
 func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParams) (*models.User, error) {

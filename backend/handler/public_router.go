@@ -43,10 +43,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
+	var otpRateLimiter limiter.Store
 	var passcodeRateLimiter limiter.Store
 	var passwordRateLimiter limiter.Store
 	var tokenExchangeRateLimiter limiter.Store
 	if cfg.RateLimiter.Enabled {
+		otpRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.OTPLimits)
 		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
 		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
 		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
@@ -63,6 +65,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		PasswordService:          passwordService,
 		WebauthnService:          webauthnService,
 		SessionManager:           sessionManager,
+		OTPRateLimiter:           otpRateLimiter,
 		PasscodeRateLimiter:      passcodeRateLimiter,
 		PasswordRateLimiter:      passwordRateLimiter,
 		TokenExchangeRateLimiter: tokenExchangeRateLimiter,

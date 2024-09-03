@@ -49,6 +49,8 @@ type Persister interface {
 	GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister
 	GetSessionPersister() SessionPersister
 	GetSessionPersisterWithConnection(tx *pop.Connection) SessionPersister
+	GetOTPSecretPersister() OTPSecretPersister
+	GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister
 }
 
 type Migrator interface {
