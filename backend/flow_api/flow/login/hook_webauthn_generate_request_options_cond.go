@@ -26,9 +26,9 @@ func (a WebauthnGenerateRequestOptionsForConditionalUi) Execute(c flowpilot.Hook
 		return nil
 	}
 
-	params := services.GenerateRequestOptionsParams{Tx: deps.Tx}
+	params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx}
 
-	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptions(params)
+	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasskey(params)
 	if err != nil {
 		return fmt.Errorf("failed to generate webauthn request options: %w", err)
 	}

@@ -47,6 +47,8 @@ type Persister interface {
 	GetWebhookPersister(tx *pop.Connection) WebhookPersister
 	GetUsernamePersister() UsernamePersister
 	GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister
+	GetOTPSecretPersister() OTPSecretPersister
+	GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister
 }
 
 type Migrator interface {

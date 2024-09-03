@@ -90,6 +90,10 @@ func DefaultConfig() *Config {
 		RateLimiter: RateLimiter{
 			Enabled: true,
 			Store:   RATE_LIMITER_STORE_IN_MEMORY,
+			OTPLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
 			PasswordLimits: RateLimits{
 				Tokens:   5,
 				Interval: 1 * time.Minute,

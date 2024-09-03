@@ -5,6 +5,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_usage"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -76,6 +77,15 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 		user_details.SkipEmail{}).
 	MustBuild()
 
+var MFAUsageSubFlow = flowpilot.NewSubFlow(shared.FlowMFAUsage).
+	State(shared.StateLoginSecurityKey,
+		mfa_usage.WebauthnGenerateRequestOptionsSecurityKey{},
+		mfa_usage.ContinueToLoginOTP{}).
+	State(shared.StateLoginOTP,
+		mfa_usage.OTPCodeValidate{},
+		mfa_usage.ContinueToLoginSecurityKey{}).
+	MustBuild()
+
 func NewLoginFlow(debug bool) flowpilot.Flow {
 	return flowpilot.NewFlow(shared.FlowLogin).
 		State(shared.StateSuccess).
@@ -99,7 +109,8 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,
 			CredentialOnboardingSubFlow,
-			UserDetailsSubFlow).
+			UserDetailsSubFlow,
+			MFAUsageSubFlow).
 		TTL(24 * time.Hour).
 		Debug(debug).
 		MustBuild()

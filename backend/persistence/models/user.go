@@ -24,8 +24,6 @@ type User struct {
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 }
 
-type WebauthnCredentials []WebauthnCredential
-
 func (user *User) DeleteWebauthnCredential(credentialId string) {
 	for i := range user.WebauthnCredentials {
 		if user.WebauthnCredentials[i].ID == credentialId {

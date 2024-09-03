@@ -1,6 +1,7 @@
 package models
 
 import (
+	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
@@ -26,6 +27,8 @@ type WebauthnCredential struct {
 	MFAOnly         bool       `db:"mfa_only" json:"-"`
 }
 
+type WebauthnCredentials []WebauthnCredential
+
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (credential *WebauthnCredential) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
@@ -36,4 +39,29 @@ func (credential *WebauthnCredential) Validate(tx *pop.Connection) (*validate.Er
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: credential.CreatedAt},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: credential.UpdatedAt},
 	), nil
+}
+
+func (credential *WebauthnCredential) GetWebauthnTransports() []protocol.AuthenticatorTransport {
+	transports := make([]protocol.AuthenticatorTransport, len(credential.Transports))
+	for i, transport := range credential.Transports {
+		transports[i] = protocol.AuthenticatorTransport(transport.Name)
+	}
+	return transports
+}
+
+func (credential *WebauthnCredential) GetWebauthnDescriptor() protocol.CredentialDescriptor {
+	return protocol.CredentialDescriptor{
+		Type:            protocol.PublicKeyCredentialType,
+		CredentialID:    []byte(credential.ID),
+		Transport:       credential.GetWebauthnTransports(),
+		AttestationType: credential.AttestationType,
+	}
+}
+
+func (credentials WebauthnCredentials) GetWebauthnDescriptors() []protocol.CredentialDescriptor {
+	descriptors := make([]protocol.CredentialDescriptor, len(credentials))
+	for i, credential := range credentials {
+		descriptors[i] = credential.GetWebauthnDescriptor()
+	}
+	return descriptors
 }
