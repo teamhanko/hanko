@@ -47,7 +47,7 @@ type VerifyAttestationResponseParams struct {
 }
 
 type WebauthnService interface {
-	GenerateRequestOptionsPasscode(GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
+	GenerateRequestOptionsPasskey(GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
 	GenerateRequestOptionsSecurityKey(GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
 	VerifyAssertionResponse(VerifyAssertionResponseParams) (*models.User, error)
 	GenerateCreationOptions(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
