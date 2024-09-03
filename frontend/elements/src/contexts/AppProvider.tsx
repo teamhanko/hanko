@@ -238,12 +238,15 @@ const AppProvider = ({
       async preflight(state) {
         const conditionalMediationAvailable =
           await WebauthnSupport.isConditionalMediationAvailable();
-
+        const platformAuthenticatorAvailable =
+          await WebauthnSupport.isPlatformAuthenticatorAvailable();
         const newState = await state.actions
           .register_client_capabilities({
             webauthn_available: isWebAuthnSupported,
             webauthn_conditional_mediation_available:
               conditionalMediationAvailable,
+            webauthn_platform_authenticator_available:
+              platformAuthenticatorAvailable,
           })
           .run();
         return hanko.flow.run(newState, stateHandler);
