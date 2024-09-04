@@ -6,5 +6,4 @@ create_table("saml_certificates") {
     t.Timestamps()
 
     t.PrimaryKey("id")
-    t.Index("cert_data", {"unique": "true"})
 }
