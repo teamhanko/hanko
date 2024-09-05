@@ -71,7 +71,12 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to verify attestation response: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathWebauthnCredential, credential)
+	if c.Stash().Get(shared.StashPathMFAMethod).String() == "security_key" {
+		err = c.Stash().Set(shared.StashPathSecurityKey, credential)
+	} else {
+		err = c.Stash().Set(shared.StashPathWebauthnCredential, credential)
+	}
+
 	if err != nil {
 		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)
 	}

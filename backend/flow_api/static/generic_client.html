@@ -145,7 +145,7 @@
         "onboarding_verify_passkey_attestation": passkeyRegisterHandler,
         "webauthn_credential_verification": passkeyRegisterHandler,
         "register_passkey": passkeyRegisterHandler,
-        "thirdparty": thirdPartyHandler
+        "thirdparty": thirdPartyHandler,
     }
 
     function generateUI(data) {
@@ -182,6 +182,12 @@
             const pre = document.createElement('pre');
             pre.textContent = "\n" + JSON.stringify(data.payload, null, 2)
             container.appendChild(pre);
+
+            if (data.name === "mfa_otp_secret_creation") {
+              const img = document.createElement("img")
+              img.src = data.payload.otp_image_source
+              container.appendChild(img)
+            }
         } else {
             const notAvailable = document.createElement('p');
             notAvailable.textContent = "[n/a]";

@@ -12,6 +12,7 @@ var (
 	ErrorRateLimitExceeded          = flowpilot.NewFlowError("rate_limit_exceeded", "The rate limit has been exceeded.", http.StatusTooManyRequests)
 	ErrorNotFound                   = flowpilot.NewFlowError("not_found", "The requested resource was not found.", http.StatusNotFound)
 	ErrorUnauthorized               = flowpilot.NewFlowError("unauthorized", "The session is invalid.", http.StatusUnauthorized)
+	ErrorMFAIncompatibility         = flowpilot.NewFlowError("mfa_incompatibility", "The client is not capable of providing the required second authentication factor.", http.StatusInternalServerError)
 )
 
 var (

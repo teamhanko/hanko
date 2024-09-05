@@ -16,6 +16,21 @@ type OTPSecret struct {
 	UpdatedAt time.Time `db:"updated_at"`
 }
 
+func (otpSecret OTPSecret) TableName() string {
+	return "otp_secrets"
+}
+
+func NewOTPSecret(userID uuid.UUID, secret string) *OTPSecret {
+	id, _ := uuid.NewV4()
+	return &OTPSecret{
+		ID:        id,
+		UserID:    userID,
+		Secret:    secret,
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
+}
+
 func (otpSecret *OTPSecret) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(
 		&validators.UUIDIsPresent{Name: "ID", Field: otpSecret.ID},
