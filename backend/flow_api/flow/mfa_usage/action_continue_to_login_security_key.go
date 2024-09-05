@@ -20,11 +20,9 @@ func (a ContinueToLoginSecurityKey) GetDescription() string {
 func (a ContinueToLoginSecurityKey) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.MFA.SecurityKeys.Enabled {
+	if !deps.Cfg.MFA.SecurityKeys.Enabled || !c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool() {
 		c.SuspendAction()
 	}
-
-	// TODO: suspend if the user does not have an security key or the client is not capable to use a security key that suits the current config
 }
 
 func (a ContinueToLoginSecurityKey) Execute(c flowpilot.ExecutionContext) error {

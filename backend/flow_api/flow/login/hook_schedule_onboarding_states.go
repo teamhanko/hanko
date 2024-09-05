@@ -11,8 +11,6 @@ type ScheduleOnboardingStates struct {
 }
 
 func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) error {
-	deps := h.GetDeps(c)
-
 	if c.Stash().Get(shared.StashPathLoginOnboardingScheduled).Bool() {
 		return nil
 	}
@@ -21,32 +19,49 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 		return fmt.Errorf("failed to set login_onboarding_scheduled to the stash: %w", err)
 	}
 
-	userHasPassword := deps.Cfg.Password.Enabled && c.Stash().Get(shared.StashPathUserHasPassword).Bool()
-	userHasPasskey := deps.Cfg.Passkey.Enabled && c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
-	userHasUsername := deps.Cfg.Username.Enabled && c.Stash().Get(shared.StashPathUserHasUsername).Bool()
-	userHasEmail := deps.Cfg.Email.Enabled && c.Stash().Get(shared.StashPathUserHasEmails).Bool()
+	mfaUsageStates := h.determineMFAUsageStates(c)
+	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
+	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
-	if err := c.Stash().Set(shared.StashPathUserHasPassword, userHasPassword); err != nil {
-		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
-	}
+	states := append(mfaUsageStates, userDetailOnboardingStates...)
+	states = append(states, credentialOnboardingStates...)
+	states = append(states, shared.StateSuccess)
 
-	if err := c.Stash().Set(shared.StashPathUserHasWebauthnCredential, userHasPasskey); err != nil {
-		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
-	}
-
-	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c, userHasUsername, userHasEmail)
-	credentialOnboardingStates := h.determineCredentialOnboardingStates(c, userHasPasskey, userHasPassword)
-
-	c.ScheduleStates(append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...)...)
+	c.ScheduleStates(states...)
 
 	return nil
 }
 
-func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
+func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
 	deps := h.GetDeps(c)
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
 
+	userHasSecurityKeys := c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool()
+	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
+	platformAuthenticatorAvailable := c.Stash().Get(shared.StashPathWebauthnPlatformAuthenticatorAvailable).Bool()
+	userCanUseSecurityKey := !(platformAuthenticatorAvailable && cfg.MFA.SecurityKeys.AuthenticatorAttachment == "platform")
+
+	if cfg.MFA.SecurityKeys.Enabled && userHasSecurityKeys {
+		if userCanUseSecurityKey {
+			result = append(result, shared.StateLoginSecurityKey)
+		} else {
+			// TODO: show error?
+		}
+	} else if cfg.MFA.TOTP.Enabled && userHasOTPSecret {
+		result = append(result, shared.StateLoginOTP)
+	}
+
+	return result
+}
+
+func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
+	deps := h.GetDeps(c)
+	cfg := deps.Cfg
+	result := make([]flowpilot.StateName, 0)
+
+	hasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
+	hasPasskey := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
 	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
 	passwordEnabled := deps.Cfg.Password.Enabled
@@ -118,10 +133,13 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	return result
 }
 
-func (h ScheduleOnboardingStates) determineUserDetailOnboardingStates(c flowpilot.HookExecutionContext, userHasUsername, userHasEmail bool) []flowpilot.StateName {
+func (h ScheduleOnboardingStates) determineUserDetailOnboardingStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
 	deps := h.GetDeps(c)
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
+
+	userHasUsername := c.Stash().Get(shared.StashPathUserHasUsername).Bool()
+	userHasEmail := c.Stash().Get(shared.StashPathUserHasEmails).Bool()
 	acquireUsername := !userHasUsername && cfg.Username.Enabled && cfg.Username.AcquireOnLogin
 	acquireEmail := !userHasEmail && cfg.Email.Enabled && cfg.Email.AcquireOnLogin
 
