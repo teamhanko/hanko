@@ -16,34 +16,33 @@ type persister struct {
 }
 
 type Persister interface {
+	GetAuditLogPersister() AuditLogPersister
+	GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister
 	GetConnection() *pop.Connection
-	Transaction(func(tx *pop.Connection) error) error
+	GetEmailPersister() EmailPersister
+	GetEmailPersisterWithConnection(tx *pop.Connection) EmailPersister
 	GetIdentityPersister() IdentityPersister
 	GetIdentityPersisterWithConnection(tx *pop.Connection) IdentityPersister
-	GetUserPersister() UserPersister
-	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
+	GetJwkPersister() JwkPersister
+	GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister
 	GetPasscodePersister() PasscodePersister
 	GetPasscodePersisterWithConnection(tx *pop.Connection) PasscodePersister
 	GetPasswordCredentialPersister() PasswordCredentialPersister
 	GetPasswordCredentialPersisterWithConnection(tx *pop.Connection) PasswordCredentialPersister
+	GetPrimaryEmailPersister() PrimaryEmailPersister
+	GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) PrimaryEmailPersister
+	GetSamlCertificatePersister() SamlCertificatePersister
+	GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister
+	GetSamlStatePersister() SamlStatePersister
+	GetSamlStatePersisterWithConnection(tx *pop.Connection) SamlStatePersister
+	GetTokenPersister() TokenPersister
+	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
+	GetUserPersister() UserPersister
+	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
 	GetWebauthnCredentialPersister() WebauthnCredentialPersister
 	GetWebauthnCredentialPersisterWithConnection(tx *pop.Connection) WebauthnCredentialPersister
 	GetWebauthnSessionDataPersister() WebauthnSessionDataPersister
 	GetWebauthnSessionDataPersisterWithConnection(tx *pop.Connection) WebauthnSessionDataPersister
-	GetJwkPersister() JwkPersister
-	GetJwkPersisterWithConnection(tx *pop.Connection) JwkPersister
-	GetAuditLogPersister() AuditLogPersister
-	GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister
-	GetEmailPersister() EmailPersister
-	GetEmailPersisterWithConnection(tx *pop.Connection) EmailPersister
-	GetPrimaryEmailPersister() PrimaryEmailPersister
-	GetPrimaryEmailPersisterWithConnection(tx *pop.Connection) PrimaryEmailPersister
-	GetTokenPersister() TokenPersister
-	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
-	GetSamlStatePersister() SamlStatePersister
-	GetSamlStatePersisterWithConnection(tx *pop.Connection) SamlStatePersister
-	GetSamlCertificatePersister() SamlCertificatePersister
-	GetSamlCertificatePersisterWithConnection(tx *pop.Connection) SamlCertificatePersister
 	GetWebhookPersister(tx *pop.Connection) WebhookPersister
 	GetUsernamePersister() UsernamePersister
 	GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister
@@ -51,6 +50,7 @@ type Persister interface {
 	GetSessionPersisterWithConnection(tx *pop.Connection) SessionPersister
 	GetOTPSecretPersister() OTPSecretPersister
 	GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister
+	Transaction(func(tx *pop.Connection) error) error
 }
 
 type Migrator interface {

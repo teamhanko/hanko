@@ -1,4 +1,4 @@
-package credential_onboarding
+package mfa_creation
 
 import (
 	"errors"
@@ -9,25 +9,25 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
-type WebauthnGenerateCreationOptions struct {
+type WebauthnGenerateCreationOptionsForSecurityKeys struct {
 	shared.Action
 }
 
-func (a WebauthnGenerateCreationOptions) GetName() flowpilot.ActionName {
+func (a WebauthnGenerateCreationOptionsForSecurityKeys) GetName() flowpilot.ActionName {
 	return shared.ActionWebauthnGenerateCreationOptions
 }
 
-func (a WebauthnGenerateCreationOptions) GetDescription() string {
-	return "Get creation options to create a webauthn credential."
+func (a WebauthnGenerateCreationOptionsForSecurityKeys) GetDescription() string {
+	return "Get WebAuthn creation options to register a WebAuthn credential."
 }
 
-func (a WebauthnGenerateCreationOptions) Initialize(c flowpilot.InitializationContext) {
+func (a WebauthnGenerateCreationOptionsForSecurityKeys) Initialize(c flowpilot.InitializationContext) {
 	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		c.SuspendAction()
 	}
 }
 
-func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) error {
+func (a WebauthnGenerateCreationOptionsForSecurityKeys) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
 
 	if valid := c.ValidateInputData(); !valid {
@@ -57,12 +57,17 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		Username: &username,
 	}
 
-	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsPasskey(params)
+	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsSecurityKey(params)
 	if err != nil {
 		return fmt.Errorf("failed to generate webauthn creation options: %w", err)
 	}
 
 	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
+	if err != nil {
+		return err
+	}
+
+	err = c.Stash().Set(shared.StashPathMFAMethod, "security_key")
 	if err != nil {
 		return err
 	}

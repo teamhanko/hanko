@@ -50,7 +50,8 @@ type WebauthnService interface {
 	GenerateRequestOptionsPasskey(GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
 	GenerateRequestOptionsSecurityKey(GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
 	VerifyAssertionResponse(VerifyAssertionResponseParams) (*models.User, error)
-	GenerateCreationOptions(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
+	GenerateCreationOptionsPasskey(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
+	GenerateCreationOptionsSecurityKey(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
 	VerifyAttestationResponse(VerifyAttestationResponseParams) (*webauthn.Credential, error)
 }
 
@@ -213,22 +214,10 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	return userModel, nil
 }
 
-func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
+func (s *webauthnService) generateCreationOptions(p GenerateCreationOptionsParams, opts ...webauthn.RegistrationOption) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
 	user := webauthnUser{id: p.UserID, email: p.Email, username: p.Username}
 
-	requireResidentKey := true
-	authenticatorSelection := protocol.AuthenticatorSelection{
-		RequireResidentKey: &requireResidentKey,
-		ResidentKey:        protocol.ResidentKeyRequirementRequired,
-		UserVerification:   protocol.VerificationRequired,
-	}
-
-	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
-	options, sessionData, err := s.cfg.Webauthn.Handler.BeginRegistration(
-		user,
-		webauthn.WithConveyancePreference(attestationPreference),
-		webauthn.WithAuthenticatorSelection(authenticatorSelection),
-	)
+	options, sessionData, err := s.cfg.Webauthn.Handler.BeginRegistration(user, opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
@@ -244,6 +233,44 @@ func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParam
 	}
 
 	return sessionDataModel, options, nil
+
+}
+
+func (s *webauthnService) GenerateCreationOptionsSecurityKey(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
+	requireResidentKey := true
+	authenticatorSelection := protocol.AuthenticatorSelection{
+		RequireResidentKey: &requireResidentKey,
+		ResidentKey:        protocol.ResidentKeyRequirementRequired,
+		UserVerification:   protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification),
+	}
+
+	authenticatorAttachment := s.cfg.MFA.SecurityKeys.AuthenticatorAttachment
+	if authenticatorAttachment == "platform" || authenticatorAttachment == "cross-platform" {
+		authenticatorSelection.AuthenticatorAttachment = protocol.AuthenticatorAttachment(authenticatorAttachment)
+	}
+
+	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
+
+	return s.generateCreationOptions(p,
+		webauthn.WithAuthenticatorSelection(authenticatorSelection),
+		webauthn.WithConveyancePreference(attestationPreference),
+	)
+}
+
+func (s *webauthnService) GenerateCreationOptionsPasskey(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
+	requireResidentKey := true
+	authenticatorSelection := protocol.AuthenticatorSelection{
+		RequireResidentKey: &requireResidentKey,
+		ResidentKey:        protocol.ResidentKeyRequirementRequired,
+		UserVerification:   protocol.VerificationRequired,
+	}
+
+	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
+
+	return s.generateCreationOptions(p,
+		webauthn.WithAuthenticatorSelection(authenticatorSelection),
+		webauthn.WithConveyancePreference(attestationPreference),
+	)
 }
 
 func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseParams) (*webauthn.Credential, error) {

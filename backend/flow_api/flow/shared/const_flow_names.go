@@ -3,12 +3,13 @@ package shared
 import "github.com/teamhanko/hanko/backend/flowpilot"
 
 const (
-	FlowLogin                flowpilot.FlowName = "login"
-	FlowRegistration         flowpilot.FlowName = "registration"
 	FlowCapabilities         flowpilot.FlowName = "capabilities"
-	FlowProfile              flowpilot.FlowName = "profile"
-	FlowCredentialUsage      flowpilot.FlowName = "credential_usage"
 	FlowCredentialOnboarding flowpilot.FlowName = "credential_onboarding"
+	FlowCredentialUsage      flowpilot.FlowName = "credential_usage"
+	FlowLogin                flowpilot.FlowName = "login"
+	FlowMFACreation          flowpilot.FlowName = "mfa_creation"
+	FlowProfile              flowpilot.FlowName = "profile"
+	FlowRegistration         flowpilot.FlowName = "registration"
 	FlowUserDetails          flowpilot.FlowName = "user_details"
 	FlowMFAUsage             flowpilot.FlowName = "mfa_usage"
 )
