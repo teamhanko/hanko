@@ -211,7 +211,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 
 		backupEligible := request.Response.AttestationObject.AuthData.Flags.HasBackupEligible()
 		backupState := request.Response.AttestationObject.AuthData.Flags.HasBackupState()
-		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState, h.authenticatorMetadata)
+		model := intern.WebauthnCredentialToModel(credential, sessionData.UserId, backupEligible, backupState, false, h.authenticatorMetadata)
 		err = h.persister.GetWebauthnCredentialPersisterWithConnection(tx).Create(*model)
 		if err != nil {
 			return fmt.Errorf("failed to store webauthn credential: %w", err)
