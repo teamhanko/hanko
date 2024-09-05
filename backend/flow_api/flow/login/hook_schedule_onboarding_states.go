@@ -37,10 +37,14 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
 
+	if !cfg.MFA.Enabled {
+		return result
+	}
+
 	userHasSecurityKeys := c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 	platformAuthenticatorAvailable := c.Stash().Get(shared.StashPathWebauthnPlatformAuthenticatorAvailable).Bool()
-	userCanUseSecurityKey := !(platformAuthenticatorAvailable && cfg.MFA.SecurityKeys.AuthenticatorAttachment == "platform")
+	userCanUseSecurityKey := platformAuthenticatorAvailable || cfg.MFA.SecurityKeys.AuthenticatorAttachment != "platform"
 
 	if cfg.MFA.SecurityKeys.Enabled && userHasSecurityKeys {
 		if userCanUseSecurityKey {
