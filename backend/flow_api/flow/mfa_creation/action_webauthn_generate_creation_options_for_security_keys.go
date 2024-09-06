@@ -77,5 +77,9 @@ func (a WebauthnGenerateCreationOptionsForSecurityKeys) Execute(c flowpilot.Exec
 		return err
 	}
 
+	if c.GetFlowName() == shared.FlowProfile {
+		return c.Continue(shared.StateProfileWebauthnCredentialVerification)
+	}
+
 	return c.Continue(shared.StateOnboardingVerifyPasskeyAttestation)
 }
