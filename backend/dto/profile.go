@@ -7,19 +7,24 @@ import (
 )
 
 type ProfileData struct {
-	UserID              uuid.UUID                    `json:"user_id"`
-	WebauthnCredentials []WebauthnCredentialResponse `json:"passkeys,omitempty"`
-	Emails              []EmailResponse              `json:"emails,omitempty"`
-	Username            *Username                    `json:"username,omitempty"`
-	CreatedAt           time.Time                    `json:"created_at"`
-	UpdatedAt           time.Time                    `json:"updated_at"`
+	UserID       uuid.UUID                    `json:"user_id"`
+	Passkeys     []WebauthnCredentialResponse `json:"passkeys,omitempty"`
+	SecurityKeys []WebauthnCredentialResponse `json:"security_keys,omitempty"`
+	Emails       []EmailResponse              `json:"emails,omitempty"`
+	Username     *Username                    `json:"username,omitempty"`
+	CreatedAt    time.Time                    `json:"created_at"`
+	UpdatedAt    time.Time                    `json:"updated_at"`
 }
 
 func ProfileDataFromUserModel(user *models.User) *ProfileData {
-	var webauthnCredentials []WebauthnCredentialResponse
+	var webauthnCredentials, securityKeys []WebauthnCredentialResponse
 	for _, webauthnCredentialModel := range user.WebauthnCredentials {
 		webauthnCredential := FromWebauthnCredentialModel(&webauthnCredentialModel)
-		webauthnCredentials = append(webauthnCredentials, *webauthnCredential)
+		if webauthnCredentialModel.MFAOnly {
+			securityKeys = append(securityKeys, *webauthnCredential)
+		} else {
+			webauthnCredentials = append(webauthnCredentials, *webauthnCredential)
+		}
 	}
 
 	var emails []EmailResponse
@@ -29,11 +34,12 @@ func ProfileDataFromUserModel(user *models.User) *ProfileData {
 	}
 
 	return &ProfileData{
-		UserID:              user.ID,
-		WebauthnCredentials: webauthnCredentials,
-		Emails:              emails,
-		Username:            FromUsernameModel(user.Username),
-		CreatedAt:           user.CreatedAt,
-		UpdatedAt:           user.UpdatedAt,
+		UserID:       user.ID,
+		Passkeys:     webauthnCredentials,
+		SecurityKeys: securityKeys,
+		Emails:       emails,
+		Username:     FromUsernameModel(user.Username),
+		CreatedAt:    user.CreatedAt,
+		UpdatedAt:    user.UpdatedAt,
 	}
 }

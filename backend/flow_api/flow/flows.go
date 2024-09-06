@@ -163,19 +163,23 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 	return flowpilot.NewFlow(shared.FlowProfile).
 		State(shared.StateProfileInit,
 			profile.AccountDelete{},
+			profile.ContinueToOTPSecretCreation{},
+			profile.ContinueToSecurityKeyCreation{},
 			profile.EmailCreate{},
 			profile.EmailDelete{},
 			profile.EmailSetPrimary{},
 			profile.EmailVerify{},
+			profile.OTPSecretDelete{},
 			profile.PasswordCreate{},
-			profile.PasswordUpdate{},
 			profile.PasswordDelete{},
+			profile.PasswordUpdate{},
+			profile.SecurityKeyDelete{},
 			profile.UsernameCreate{},
-			profile.UsernameUpdate{},
 			profile.UsernameDelete{},
-			profile.WebauthnCredentialRename{},
+			profile.UsernameUpdate{},
 			profile.WebauthnCredentialCreate{},
 			profile.WebauthnCredentialDelete{},
+			profile.WebauthnCredentialRename{},
 		).
 		State(shared.StateProfileWebauthnCredentialVerification,
 			profile.WebauthnVerifyAttestationResponse{},
@@ -189,6 +193,7 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 		AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 		SubFlows(
 			CapabilitiesSubFlow,
+			CredentialOnboardingSubFlow,
 			CredentialUsageSubFlow,
 			MFACreationSubFlow).
 		TTL(24 * time.Hour).

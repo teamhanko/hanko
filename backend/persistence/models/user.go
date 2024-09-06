@@ -93,6 +93,10 @@ func (user *User) DeleteEmail(email Email) {
 	}
 }
 
+func (user *User) DeleteOTPSecret() {
+	user.OTPSecret = nil
+}
+
 func (user *User) GetEmailById(emailId uuid.UUID) *Email {
 	return user.Emails.GetEmailById(emailId)
 }
@@ -114,6 +118,16 @@ func (user *User) GetPasskeys() WebauthnCredentials {
 	credentials := make(WebauthnCredentials, 0)
 	for _, credential := range user.WebauthnCredentials {
 		if credential.MFAOnly == false {
+			credentials = append(credentials, credential)
+		}
+	}
+	return credentials
+}
+
+func (user *User) GetSecurityKeys() WebauthnCredentials {
+	credentials := make(WebauthnCredentials, 0)
+	for _, credential := range user.WebauthnCredentials {
+		if credential.MFAOnly == true {
 			credentials = append(credentials, credential)
 		}
 	}
