@@ -24,7 +24,7 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 	profileData := dto.ProfileDataFromUserModel(userModel)
 
 	if !deps.Cfg.Passkey.Enabled {
-		profileData.WebauthnCredentials = nil
+		profileData.Passkeys = nil
 	}
 
 	err := c.Payload().Set("user", profileData)
