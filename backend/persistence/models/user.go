@@ -110,6 +110,16 @@ func (user *User) GetWebauthnCredentialById(credentialId string) *WebauthnCreden
 	return nil
 }
 
+func (user *User) GetPasskeys() WebauthnCredentials {
+	credentials := make(WebauthnCredentials, 0)
+	for _, credential := range user.WebauthnCredentials {
+		if credential.MFAOnly == false {
+			credentials = append(credentials, credential)
+		}
+	}
+	return credentials
+}
+
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.
 func (user *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.Validate(

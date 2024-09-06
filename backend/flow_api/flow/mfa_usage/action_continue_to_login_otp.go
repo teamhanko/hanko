@@ -20,11 +20,9 @@ func (a ContinueToLoginOTP) GetDescription() string {
 func (a ContinueToLoginOTP) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.MFA.TOTP.Enabled {
+	if !deps.Cfg.MFA.TOTP.Enabled || !c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool() {
 		c.SuspendAction()
 	}
-
-	// TODO: suspend if the user does not have an OTP credential
 }
 
 func (a ContinueToLoginOTP) Execute(c flowpilot.ExecutionContext) error {
