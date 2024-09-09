@@ -4,9 +4,14 @@ import {
   CredentialOnboardingChooserActions,
   LoginInitActions,
   LoginMethodChooserActions,
+  LoginOTPActions,
   LoginPasskeyActions,
   LoginPasswordActions,
   LoginPasswordRecoveryActions,
+  LoginSecurityKeyActions,
+  MFAAOTPSecretCreationActions,
+  MFAMethodChooserActions,
+  MFASecurityKeyCreationActions,
   OnboardingCreatePasskeyActions,
   OnboardingEmailActions,
   OnboardingUsernameActions,
@@ -22,6 +27,7 @@ import {
 import {
   LoginInitPayload,
   LoginPasskeyPayload,
+  MFAOTPSecretCreationPayload,
   OnboardingVerifyPasskeyAttestationPayload,
   PasscodeConfirmationPayload,
   ProfilePayload,
@@ -35,9 +41,14 @@ export type StateName =
   | "error"
   | "login_init"
   | "login_method_chooser"
+  | "login_otp"
   | "login_passkey"
   | "login_password"
   | "login_password_recovery"
+  | "login_security_key"
+  | "mfa_method_chooser"
+  | "mfa_otp_secret_creation"
+  | "mfa_security_key_creation"
   | "onboarding_create_passkey"
   | "onboarding_email"
   | "onboarding_username"
@@ -57,9 +68,14 @@ export interface Actions {
   readonly error: null;
   readonly login_init: LoginInitActions;
   readonly login_method_chooser: LoginMethodChooserActions;
+  readonly login_otp: LoginOTPActions;
   readonly login_passkey: LoginPasskeyActions;
   readonly login_password: LoginPasswordActions;
   readonly login_password_recovery: LoginPasswordRecoveryActions;
+  readonly login_security_key: LoginSecurityKeyActions;
+  readonly mfa_method_chooser: MFAMethodChooserActions;
+  readonly mfa_otp_secret_creation: MFAAOTPSecretCreationActions;
+  readonly mfa_security_key_creation: MFASecurityKeyCreationActions;
   readonly onboarding_create_passkey: OnboardingCreatePasskeyActions;
   readonly onboarding_email: OnboardingEmailActions;
   readonly onboarding_username: OnboardingUsernameActions;
@@ -80,9 +96,14 @@ export interface Payloads {
   readonly error: null;
   readonly login_init: LoginInitPayload;
   readonly login_method_chooser: null;
+  readonly login_otp: null;
   readonly login_passkey: LoginPasskeyPayload;
   readonly login_password: null;
   readonly login_password_recovery: null;
+  readonly login_security_key: null;
+  readonly mfa_method_chooser: null;
+  readonly mfa_otp_secret_creation: MFAOTPSecretCreationPayload;
+  readonly mfa_security_key_creation: null;
   readonly onboarding_create_passkey: null;
   readonly onboarding_email: null;
   readonly onboarding_username: null;
