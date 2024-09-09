@@ -12,6 +12,11 @@ export interface LoginPasskeyPayload {
   readonly request_options: CredentialRequestOptionsJSON;
 }
 
+export interface MFAOTPSecretCreationPayload {
+  readonly otp_secret: string;
+  readonly otp_image_source: string;
+}
+
 export interface OnboardingVerifyPasskeyAttestationPayload {
   readonly creation_options: CredentialCreationOptionsJSON;
 }
