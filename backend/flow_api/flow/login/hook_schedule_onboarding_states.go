@@ -20,11 +20,13 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	}
 
 	mfaUsageStates := h.determineMFAUsageStates(c)
+	mfaCreationStates := h.determineMFACreationStates(c)
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
 	states := append(mfaUsageStates, userDetailOnboardingStates...)
 	states = append(states, credentialOnboardingStates...)
+	states = append(states, mfaCreationStates...)
 	states = append(states, shared.StateSuccess)
 
 	c.ScheduleStates(states...)
@@ -54,6 +56,25 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 		}
 	} else if cfg.MFA.TOTP.Enabled && userHasOTPSecret {
 		result = append(result, shared.StateLoginOTP)
+	}
+
+	return result
+}
+
+func (h ScheduleOnboardingStates) determineMFACreationStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
+	deps := h.GetDeps(c)
+	cfg := deps.Cfg
+	result := make([]flowpilot.StateName, 0)
+
+	if !cfg.MFA.Enabled {
+		return result
+	}
+
+	userHasSecurityKeys := c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool()
+	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
+
+	if cfg.MFA.Enabled && !userHasOTPSecret && !userHasSecurityKeys {
+		result = append(result, shared.StateMFAMethodChooser)
 	}
 
 	return result

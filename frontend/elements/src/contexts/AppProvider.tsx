@@ -54,6 +54,11 @@ import SignalLike = JSXInternal.SignalLike;
 import CreateEmailPage from "../pages/CreateEmailPage";
 import CreateUsernamePage from "../pages/CreateUsernamePage";
 import CredentialOnboardingChooserPage from "../pages/CredentialOnboardingChooser";
+import LoginOTPPage from "../pages/LoginOTPPage";
+import LoginSecurityKeyPage from "../pages/LoginSecurityKeyPage";
+import MFAMethodChooserPage from "../pages/MFAMethodChooserPage";
+import CreateOTPSecretPage from "../pages/CreateOTPSecretPage";
+import CreateSecurityKeyPage from "../pages/CreateSecurityKeyPage";
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -283,6 +288,9 @@ const AppProvider = ({
       passcode_confirmation(state) {
         setPage(<PasscodePage state={state} />);
       },
+      async login_otp(state) {
+        setPage(<LoginOTPPage state={state} />);
+      },
       async login_passkey(state) {
         let assertionResponse: PublicKeyCredentialWithAssertionJSON;
         setLoadingAction("passkey-submit");
@@ -360,6 +368,18 @@ const AppProvider = ({
       },
       login_password_recovery(state) {
         setPage(<EditPasswordPage state={state} />);
+      },
+      async login_security_key(state) {
+        setPage(<LoginSecurityKeyPage state={state} />);
+      },
+      async mfa_method_chooser(state) {
+        setPage(<MFAMethodChooserPage state={state} />);
+      },
+      async mfa_otp_secret_creation(state) {
+        setPage(<CreateOTPSecretPage state={state} />);
+      },
+      async mfa_security_key_creation(state) {
+        setPage(<CreateSecurityKeyPage state={state} />);
       },
       login_method_chooser(state) {
         setPage(<LoginMethodChooserPage state={state} />);

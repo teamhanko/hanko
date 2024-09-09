@@ -82,12 +82,12 @@ export interface UsernameSetInputs {
   readonly username: Input<string>;
 }
 
-export interface PasskeyCredentialRename {
+export interface PasskeyCredentialRenameInputs {
   readonly passkey_id: Input<string>;
   readonly passkey_name: Input<string>;
 }
 
-export interface PasskeyCredentialDelete {
+export interface PasskeyCredentialDeleteInputs {
   readonly passkey_id: Input<string>;
 }
 
@@ -98,4 +98,8 @@ export interface ExchangeTokenInputs {
 export interface ThirdpartyOauthInputs {
   readonly provider: Input<string>;
   readonly redirect_to: Input<string>;
+}
+
+export interface OTPCodeInputs {
+  readonly otp_code: Input<string>;
 }
