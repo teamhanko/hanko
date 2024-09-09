@@ -33,6 +33,7 @@ const (
 	ActionRegisterLoginIdentifier                flowpilot.ActionName = "register_login_identifier"
 	ActionRegisterPassword                       flowpilot.ActionName = "register_password"
 	ActionResendPasscode                         flowpilot.ActionName = "resend_passcode"
+	ActionSecurityKeyCreate                      flowpilot.ActionName = "security_key_create"
 	ActionSecurityKeyDelete                      flowpilot.ActionName = "security_key_delete"
 	ActionSkip                                   flowpilot.ActionName = "skip"
 	ActionThirdPartyOAuth                        flowpilot.ActionName = "thirdparty_oauth"
