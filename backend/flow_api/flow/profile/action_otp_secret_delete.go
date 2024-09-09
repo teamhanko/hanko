@@ -33,7 +33,7 @@ func (a OTPSecretDelete) Initialize(c flowpilot.InitializationContext) {
 		return
 	}
 
-	if deps.Cfg.MFA.Enabled && !deps.Cfg.MFA.Optional && len(userModel.GetSecurityKeys()) > 0 {
+	if deps.Cfg.MFA.Enabled && !deps.Cfg.MFA.Optional && len(userModel.GetSecurityKeys()) <= 0 {
 		c.SuspendAction()
 		return
 	}
