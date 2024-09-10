@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/pquerna/otp/totp"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -58,6 +59,20 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 		err := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
 		if err != nil {
 			return fmt.Errorf("could not create OTP secret: %w", err)
+		}
+
+		err = deps.AuditLogger.CreateWithConnection(
+			deps.Tx,
+			deps.HttpContext,
+			models.AuditLogOTPCreated,
+			&models.User{ID: userID},
+			nil,
+			auditlog.Detail("otp_secret", otpSecretModel.ID),
+			auditlog.Detail("flow_id", c.GetFlowID()),
+		)
+
+		if err != nil {
+			return fmt.Errorf("could not create audit log: %w", err)
 		}
 	}
 
