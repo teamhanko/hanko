@@ -40,8 +40,10 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 	}
 
 	var mfaOnly bool
+	auditLogType := models.AuditLogPasskeyCreated
 	if c.Stash().Get(StashPathMFAMethod).String() == "security_key" {
 		mfaOnly = true
+		auditLogType = models.AuditLogSecurityKeyCreated
 	}
 
 	credentialModel := intern.WebauthnCredentialToModel(&webauthnCredential, userId, webauthnCredential.Flags.BackupEligible, webauthnCredential.Flags.BackupState, mfaOnly, deps.AuthenticatorMetadata)
@@ -53,7 +55,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 	err = deps.AuditLogger.CreateWithConnection(
 		deps.Tx,
 		deps.HttpContext,
-		models.AuditLogPasskeyCreated,
+		auditLogType,
 		&models.User{ID: userId},
 		nil,
 		auditlog.Detail("credential_id", credentialModel.ID),
