@@ -3,13 +3,17 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/sethvargo/go-limiter"
-	"github.com/teamhanko/hanko/backend/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -23,9 +27,6 @@ import (
 	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type PasscodeHandler struct {
@@ -229,14 +230,12 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		}
 
 		err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.EmailSend, webhookData)
-
 		if err != nil {
 			zeroLogger.Warn().Err(err).Msg("failed to trigger webhook")
 		}
 	} else {
 		webhookData.DeliveredByHanko = false
 		err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.EmailSend, webhookData)
-
 		if err != nil {
 			return fmt.Errorf(fmt.Sprintf("failed to trigger webhook: %s", err))
 		}
@@ -453,7 +452,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 
 func (h *PasscodeHandler) GetSessionToken(c echo.Context) jwt.Token {
 	var token jwt.Token
-	sessionCookie, _ := c.Cookie("hanko")
+	sessionCookie, _ := c.Cookie(h.cfg.Session.Cookie.GetName())
 	// we don't need to check the error, because when the cookie can not be found, the user is not logged in
 	if sessionCookie != nil {
 		token, _ = h.sessionManager.Verify(sessionCookie.Value)
