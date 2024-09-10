@@ -71,5 +71,7 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to stash mfa_method: %w", err)
 	}
 
+	c.PreventRevert()
+
 	return c.Continue()
 }

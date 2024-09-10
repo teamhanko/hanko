@@ -11,6 +11,7 @@ export const en: Translation = {
     registerAuthenticator: "Create a passkey",
     registerConfirm: "Create account?",
     registerPassword: "Set new password",
+    otpSetUp: "Set up authenticator app",
     profileEmails: "Emails",
     profilePassword: "Password",
     profilePasskeys: "Passkeys",
@@ -32,6 +33,10 @@ export const en: Translation = {
     signUp: "Create account",
     selectLoginMethod: "Select login method",
     setupLoginMethod: "Set up login method",
+    mfaSetUp: "Set up 2FA",
+    securityKeySetUp: "Add Security Key",
+    securityKeyLogin: "Security Key",
+    otpLogin: "Authentication code",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -41,8 +46,15 @@ export const en: Translation = {
       "Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.",
     createAccount:
       'No account exists for "{emailAddress}". Do you want to create a new account?',
+    otpEnterVerificationCode:
+      "Keep your OTP Secret Key secure. If lost, you may need to reset your OTP settings. Enter the code from your Authenticator app below:",
+    otpScanQRCode:
+      "Scan the QR code with your Authenticator app (Google Authenticator and other TOTP apps):",
+    otpSecretKey: "OTP Secret Key",
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
+    securityKeySetUp:
+      "Use a dedicated Security Key via USB, Bluetooth, or NFC, or your mobile phone or device’s built-in options like Touch ID, Face ID, or Windows Hello. Connect or activate your Security Key, then click the button below and follow the prompts to complete the registration.",
     setPrimaryEmail: "Set this email address to be used for contacting you.",
     isPrimaryEmail:
       "This email address will be used to contact you if necessary.",
@@ -58,6 +70,12 @@ export const en: Translation = {
     selectLoginMethodForFutureLogins:
       "Select one of the following login methods to use for future logins.",
     howDoYouWantToLogin: "How do you want to login?",
+    mfaSetUp:
+      "Protect your account with Multi-Factor Authentication (MFA). MFA adds an additional step to your login process, ensuring that even if your password or email account is compromised, your account stays secure.",
+    securityKeyLogin:
+      "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone, or built-in options like Touch ID, Face ID, or Windows Hello. Follow the prompts to complete the login process.",
+    otpLogin:
+      "Open your authenticator app to obtain the one-time password (OTP). Enter the code in the field below to complete your login.",
   },
   labels: {
     or: "or",
@@ -65,6 +83,7 @@ export const en: Translation = {
     yes: "yes",
     email: "Email",
     continue: "Continue",
+    copied: "copied",
     skip: "Skip",
     save: "Save",
     password: "Password",
@@ -104,6 +123,9 @@ export const en: Translation = {
     setUsername: "Set username",
     changePassword: "Change password",
     setPassword: "Set password",
+    authenticatorApp: "Authenticator app",
+    securityKey: "Security key",
+    securityKeyUse: "Use Security Key",
   },
   errors: {
     somethingWentWrong:

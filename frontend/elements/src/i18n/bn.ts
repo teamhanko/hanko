@@ -11,6 +11,7 @@ export const bn: Translation = {
     registerAuthenticator: "একটি পাসকি তৈরি করুন",
     registerConfirm: "অ্যাকাউন্ট তৈরি করুন",
     registerPassword: "নতুন পাসওয়ার্ড সেট করুন",
+    otpSetUp: "[TRANSLATION MISSING]",
     profileEmails: "ইমেইল",
     profilePassword: "পাসওয়ার্ড",
     profilePasskeys: "পাসকি",
@@ -32,6 +33,10 @@ export const bn: Translation = {
     signUp: "নিবন্ধন করুন",
     selectLoginMethod: "লগইন পদ্ধতি নির্বাচন করুন",
     setupLoginMethod: "লগইন পদ্ধতি সেটআপ করুন",
+    mfaSetUp: "[TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
@@ -41,6 +46,9 @@ export const bn: Translation = {
       "একটি পাসকি দিয়ে সহজে এবং নিরাপদে আপনার অ্যাকাউন্টে সাইন ইন করুন। দ্রষ্টব্য: আপনার বায়োমেট্রিক ডেটা শুধুমাত্র আপনার ডিভাইসে সংরক্ষিত থাকে এবং কখনই কারো সাথে শেয়ার করা হবে না।",
     createAccount:
       '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই। আপনি একটি নতুন অ্যাকাউন্ট তৈরি করতে চান?',
+    otpEnterVerificationCode: "[TRANSLATION MISSING]",
+    otpScanQRCode: "[TRANSLATION MISSING]",
+    otpSecretKey: "[TRANSLATION MISSING]",
     passwordFormatHint: "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
     setPrimaryEmail:
       "এই ইমেইল ঠিকানা আপনার সাথে যোগাযোগ করার জন্য নির্ধারণ করুন।",
@@ -58,6 +66,10 @@ export const bn: Translation = {
     selectLoginMethodForFutureLogins:
       "ভবিষ্যতে লগইনের জন্য একটি প্রয়োজনীয় লগইন পদ্ধতি নির্বাচন করুন।",
     howDoYouWantToLogin: "আপনি কিভাবে লগইন করতে চান?",
+    mfaSetUp: "TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "বা",
@@ -65,6 +77,7 @@ export const bn: Translation = {
     yes: "হ্যাঁ",
     email: "ইমেইল",
     continue: "চালিয়ে যান",
+    copied: "[TRANSLATION MISSING]",
     skip: "এড়িয়ে যান",
     save: "সংরক্ষণ",
     passkey: "পাসওয়ার্ড",
@@ -104,6 +117,9 @@ export const bn: Translation = {
     setUsername: "ব্যবহারকারীর নাম সেট করুন",
     changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
     setPassword: "পাসওয়ার্ড সেট করুন",
+    authenticatorApp: "[TRANSLATION MISSING]",
+    securityKey: "[TRANSLATION MISSING]",
+    securityKeyUse: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong:

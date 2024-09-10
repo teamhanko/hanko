@@ -12,6 +12,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
+import OTPCreationDetails from "../components/otp/OTPCreationDetails";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 import { useFlowState } from "../contexts/FlowState";
 
@@ -68,19 +69,21 @@ const CreateOTPSecretPage = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{t(`headlines.create_otp_secret`)}</Headline1>
+        <Headline1>{t(`headlines.otpSetUp`)}</Headline1>
         <ErrorBox state={flowState} />
-        <Paragraph>{t("texts.create_otp_secret")}</Paragraph>
-        <img src={flowState.payload.otp_image_source} />
+        <Paragraph>{t("texts.otpScanQRCode")}</Paragraph>
+        <OTPCreationDetails
+          src={flowState.payload.otp_image_source}
+          secret={flowState.payload.otp_secret}
+        />
+        <Paragraph>{t("texts.otpEnterVerificationCode")}</Paragraph>
         <Form onSubmit={onPasscodeSubmit}>
           <CodeInput
             onInput={onPasscodeInput}
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
           />
-          <Button uiAction={"passcode-submit"}>
-            {t("labels.create_otp_secret")}
-          </Button>
+          <Button uiAction={"passcode-submit"}>{t("labels.continue")}</Button>
         </Form>
       </Content>
       <Footer>

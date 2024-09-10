@@ -11,6 +11,7 @@ export const fr: Translation = {
     registerAuthenticator: "Créer une clé d'identification",
     registerConfirm: "Créer un compte ?",
     registerPassword: "Définir un nouveau mot de passe",
+    otpSetUp: "[TRANSLATION MISSING]",
     profileEmails: "Adresses e-mail",
     profilePassword: "Mot de passe",
     profilePasskeys: "Clés d'identification",
@@ -32,6 +33,10 @@ export const fr: Translation = {
     signUp: "S'inscrire",
     selectLoginMethod: "Sélectionner la méthode de connexion",
     setupLoginMethod: "Configurer la méthode de connexion",
+    mfaSetUp: "[TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode:
@@ -42,6 +47,9 @@ export const fr: Translation = {
       "Connectez-vous à votre compte facilement et en toute sécurité avec une clé d'identification. Remarque : Vos données biométriques sont uniquement stockées sur vos appareils et ne seront jamais partagées avec qui que ce soit.",
     createAccount:
       'Aucun compte n\'existe pour "{emailAddress}". Voulez-vous créer un nouveau compte ?',
+    otpEnterVerificationCode: "[TRANSLATION MISSING]",
+    otpScanQRCode: "[TRANSLATION MISSING]",
+    otpSecretKey: "[TRANSLATION MISSING]",
     passwordFormatHint:
       "Doit contenir entre {minLength} et {maxLength} caractères.",
     setPrimaryEmail: "Définir cette adresse e-mail comme adresse de contact.",
@@ -61,6 +69,10 @@ export const fr: Translation = {
     selectLoginMethodForFutureLogins:
       "Sélectionnez l'une des méthodes de connexion suivantes à utiliser pour les connexions futures.",
     howDoYouWantToLogin: "Comment souhaitez-vous vous connecter ?",
+    mfaSetUp: "TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "ou",
@@ -68,6 +80,7 @@ export const fr: Translation = {
     yes: "oui",
     email: "E-mail",
     continue: "Continuer",
+    copied: "[TRANSLATION MISSING]",
     skip: "Passer",
     save: "Enregistrer",
     password: "Mot de passe",
@@ -108,6 +121,9 @@ export const fr: Translation = {
     setUsername: "Définir le nom d'utilisateur",
     changePassword: "Changer le mot de passe",
     setPassword: "Définir le mot de passe",
+    authenticatorApp: "[TRANSLATION MISSING]",
+    securityKey: "[TRANSLATION MISSING]",
+    securityKeyUse: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong:

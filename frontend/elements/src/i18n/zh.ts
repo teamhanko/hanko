@@ -11,6 +11,7 @@ export const zh: Translation = {
     registerAuthenticator: "创建密钥",
     registerConfirm: "创建账号？",
     registerPassword: "设置新密码",
+    otpSetUp: "[TRANSLATION MISSING]",
     profileEmails: "电子邮件",
     profilePassword: "密码",
     profilePasskeys: "密钥",
@@ -32,6 +33,10 @@ export const zh: Translation = {
     signUp: "注册",
     selectLoginMethod: "选择登录方法",
     setupLoginMethod: "设置登录方法",
+    mfaSetUp: "[TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -39,6 +44,9 @@ export const zh: Translation = {
     setupPasskey:
       "使用密钥轻松安全地登录您的账户。注意：您的生物识别数据仅存储在您的设备上，永远不会与任何人共享。",
     createAccount: "没有“{emailAddress}”的账户存在。你想要创建一个新账户吗?",
+    otpEnterVerificationCode: "[TRANSLATION MISSING]",
+    otpScanQRCode: "[TRANSLATION MISSING]",
+    otpSecretKey: "[TRANSLATION MISSING]",
     passwordFormatHint: "必须长在{minLength}和{maxLength}字符之间。",
     setPrimaryEmail: "将此电子邮件地址设置为用于联系您。",
     isPrimaryEmail: "如有必要，此电子邮件地址将用于联系您。",
@@ -54,6 +62,10 @@ export const zh: Translation = {
     selectLoginMethodForFutureLogins:
       "请选择以下登录方法之一以供将来登录使用。",
     howDoYouWantToLogin: "您想如何登录？",
+    mfaSetUp: "TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "或",
@@ -61,6 +73,7 @@ export const zh: Translation = {
     yes: "是",
     email: "电子邮件",
     continue: "继续",
+    copied: "[TRANSLATION MISSING]",
     skip: "跳过",
     save: "保存",
     passkey: "密码",
@@ -100,6 +113,9 @@ export const zh: Translation = {
     setUsername: "设置用户名",
     changePassword: "更改密码",
     setPassword: "设置密码",
+    authenticatorApp: "[TRANSLATION MISSING]",
+    securityKey: "[TRANSLATION MISSING]",
+    securityKeyUse: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",
