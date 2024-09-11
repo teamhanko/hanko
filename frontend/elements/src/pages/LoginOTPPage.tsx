@@ -23,7 +23,7 @@ const LoginOTPPAge = (props: Props) => {
   const numberOfDigits = 6;
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
-  const { uiState, setLoadingAction, stateHandler } = useContext(AppContext);
+  const { setLoadingAction, stateHandler } = useContext(AppContext);
   const [passcodeDigits, setPasscodeDigits] = useState<string[]>([]);
 
   const submitPasscode = useCallback(
@@ -70,9 +70,9 @@ const LoginOTPPAge = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{t(`headlines.login_otp`)}</Headline1>
+        <Headline1>{t(`headlines.otpLogin`)}</Headline1>
         <ErrorBox state={flowState} />
-        <Paragraph>{t("texts.login_otp")}</Paragraph>
+        <Paragraph>{t("texts.otpLogin")}</Paragraph>
         <Form onSubmit={onPasscodeSubmit}>
           <CodeInput
             onInput={onPasscodeInput}

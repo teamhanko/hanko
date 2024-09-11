@@ -11,6 +11,7 @@ export const it: Translation = {
     registerAuthenticator: "Crea una passkey",
     registerConfirm: "Vuoi creare un account?",
     registerPassword: "Imposta una nuova password",
+    otpSetUp: "[TRANSLATION MISSING]",
     profileEmails: "Emails",
     profilePassword: "Password",
     profilePasskeys: "Passkeys",
@@ -36,6 +37,10 @@ export const it: Translation = {
     ipAddress: "Indirizzo IP",
     revokeSession: "Revoca sessione",
     profileSessions: "Sessioni",
+    mfaSetUp: "[TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -45,6 +50,9 @@ export const it: Translation = {
       "Accedi al tuo account in modo semplice e sicuro con una passkey. Nota: I tuoi dati biometrici sono archiviati solo sui tuoi dispositivi e non saranno condivisi con nessuno.",
     createAccount:
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
+    otpEnterVerificationCode: "[TRANSLATION MISSING]",
+    otpScanQRCode: "[TRANSLATION MISSING]",
+    otpSecretKey: "[TRANSLATION MISSING]",
     passwordFormatHint:
       "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
     setPrimaryEmail:
@@ -63,6 +71,10 @@ export const it: Translation = {
     selectLoginMethodForFutureLogins:
       "Seleziona uno dei seguenti metodi di accesso da utilizzare per i futuri accessi.",
     howDoYouWantToLogin: "Come desideri effettuare l'accesso?",
+    mfaSetUp: "TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "o",
@@ -70,6 +82,7 @@ export const it: Translation = {
     yes: "si",
     email: "Email",
     continue: "Continua",
+    copied: "[TRANSLATION MISSING]",
     skip: "Salta",
     save: "Salva",
     password: "Password",
@@ -111,6 +124,9 @@ export const it: Translation = {
     setPassword: "Imposta password",
     revoke: "Revoca",
     currentSession: "Sessione corrente",
+    authenticatorApp: "[TRANSLATION MISSING]",
+    securityKey: "[TRANSLATION MISSING]",
+    securityKeyUse: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

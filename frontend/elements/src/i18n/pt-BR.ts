@@ -11,6 +11,7 @@ export const ptBR: Translation = {
     registerAuthenticator: "Criar uma chave de acesso",
     registerConfirm: "Concluir cadastro?",
     registerPassword: "Redefina sua senha",
+    otpSetUp: "[TRANSLATION MISSING]",
     profileEmails: "E-mails",
     profilePassword: "Senha",
     profilePasskeys: "Chave de acesso",
@@ -36,6 +37,10 @@ export const ptBR: Translation = {
     ipAddress: "Endereço IP",
     revokeSession: "Revogar sessão",
     profileSessions: "Sessões",
+    mfaSetUp: "[TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode:
@@ -46,6 +51,9 @@ export const ptBR: Translation = {
       "Entre na sua conta de forma fácil e segura com uma chave de acesso. Nota: Os seus dados biométricos são apenas guardados no seu aparelho e nunca serão compartilhados com ninguém.",
     createAccount:
       'Nenhuma conta encontrada para o e-mail "{emailAddress}". Deseja criar uma nova conta?',
+    otpEnterVerificationCode: "[TRANSLATION MISSING]",
+    otpScanQRCode: "[TRANSLATION MISSING]",
+    otpSecretKey: "[TRANSLATION MISSING]",
     passwordFormatHint:
       "Deve conter entre {minLength} e {maxLength} caracteres.",
     setPrimaryEmail:
@@ -64,6 +72,10 @@ export const ptBR: Translation = {
     selectLoginMethodForFutureLogins:
       "Selecione um dos métodos de login a seguir para usar em logins futuros.",
     howDoYouWantToLogin: "Como você deseja fazer login?",
+    mfaSetUp: "TRANSLATION MISSING]",
+    securityKeySetUp: "[TRANSLATION MISSING]",
+    securityKeyLogin: "[TRANSLATION MISSING]",
+    otpLogin: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "ou",
@@ -71,6 +83,7 @@ export const ptBR: Translation = {
     yes: "sim",
     email: "E-mail",
     continue: "Continuar",
+    copied: "[TRANSLATION MISSING]",
     skip: "Pular",
     save: "Salvar",
     password: "Senha",
@@ -113,6 +126,9 @@ export const ptBR: Translation = {
     setPassword: "Definir senha",
     revoke: "Revogar",
     currentSession: "Sessão atual",
+    authenticatorApp: "[TRANSLATION MISSING]",
+    securityKey: "[TRANSLATION MISSING]",
+    securityKeyUse: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong:

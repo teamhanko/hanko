@@ -46,12 +46,12 @@ const CreateSecurityKeyPage = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{t("headlines.create_security_key")}</Headline1>
+        <Headline1>{t("headlines.securityKeySetUp")}</Headline1>
         <ErrorBox state={flowState} />
-        <Paragraph>{t("texts.create_security_key")}</Paragraph>
+        <Paragraph>{t("texts.securityKeySetUp")}</Paragraph>
         <Form onSubmit={onPasskeySubmit}>
-          <Button uiAction={"passkey-submit"} autofocus icon={"passkey"}>
-            {t("labels.create_security_key")}
+          <Button uiAction={"passkey-submit"} autofocus icon={"securityKey"}>
+            {t("labels.securityKeyUse")}
           </Button>
         </Form>
       </Content>
