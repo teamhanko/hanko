@@ -86,7 +86,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 			return fmt.Errorf("failed to user from db: %w", err)
 		}
 
-		err = deps.AuditLogger.CreateWithConnection(deps.Tx, deps.HttpContext, models.AuditLogUserCreated,
+		err = deps.AuditLogger.CreateWithConnection(deps.Tx, deps.HttpContext, models.AuditLogSecurityKeyCreated,
 			userModel,
 			nil,
 			auditlog.Detail("security_key", credential.ID),
