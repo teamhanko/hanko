@@ -145,9 +145,14 @@ func (s *webauthnService) GenerateRequestOptionsSecurityKey(p GenerateRequestOpt
 		return nil, nil, fmt.Errorf("failed to get webauthn credentials from db: %w", err)
 	}
 
+	descriptors, err := credentialModels.GetWebauthnDescriptors()
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return s.generateRequestOptions(p.Tx,
 		webauthn.WithUserVerification(userVerificationRequirement),
-		webauthn.WithAllowedCredentials(credentialModels.GetWebauthnDescriptors()),
+		webauthn.WithAllowedCredentials(descriptors),
 	)
 }
 
