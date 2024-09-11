@@ -16,6 +16,11 @@ export interface Translation {
     registerAuthenticator: string;
     registerConfirm: string;
     registerPassword: string;
+    securityKeyLogin: string;
+    securityKeySetUp: string;
+    mfaSetUp: string;
+    otpLogin: string;
+    otpSetUp: string;
     profileEmails: string;
     profilePassword: string;
     profilePasskeys: string;
@@ -42,9 +47,16 @@ export interface Translation {
     enterPasscodeNoEmail: string;
     setupPasskey: string;
     createAccount: string;
+    mfaSetUp: string;
     noAccountExists: string;
+    otpEnterVerificationCode: string;
+    otpLogin: string;
+    otpScanQRCode: string;
+    otpSecretKey: string;
     passwordFormatHint: string;
+    securityKeyLogin: string;
     isPrimaryEmail: string;
+    securityKeySetUp: string;
     setPrimaryEmail: string;
     emailVerified: string;
     emailUnverified: string;
@@ -56,11 +68,13 @@ export interface Translation {
     howDoYouWantToLogin: string;
   };
   labels: {
+    authenticatorApp: string;
     or: string;
     no: string;
     yes: string;
     email: string;
     continue: string;
+    copied: string;
     skip: string;
     save: string;
     password: string;
@@ -70,9 +84,11 @@ export interface Translation {
     signInPasscode: string;
     forgotYourPassword: string;
     back: string;
-    signInPasskey: string;
     registerAuthenticator: string;
+    securityKey: string;
+    securityKeyUse: string;
     signIn: string;
+    signInPasskey: string;
     signUp: string;
     sendNewPasscode: string;
     passwordRetryAfter: string;

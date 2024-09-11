@@ -1,5 +1,5 @@
 import { Fragment } from "preact";
-import { useContext } from "preact/compat";
+import { useContext, useMemo } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";
 
@@ -25,7 +25,7 @@ const MFAMMethodChooserPage = (props: Props) => {
 
   const onSecurityKeySubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("password-submit");
+    setLoadingAction("passcode-submit");
     const nextState = await flowState.actions
       .continue_to_security_key_creation(null)
       .run();
@@ -35,7 +35,7 @@ const MFAMMethodChooserPage = (props: Props) => {
 
   const onTOTPSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("passcode-submit");
+    setLoadingAction("password-submit");
     const nextState = await flowState.actions
       .continue_to_otp_secret_creation(null)
       .run();
@@ -43,32 +43,68 @@ const MFAMMethodChooserPage = (props: Props) => {
     stateHandler[nextState.name](nextState);
   };
 
+  const singleAction = useMemo(() => {
+    const { actions } = flowState;
+
+    if (
+      actions.continue_to_security_key_creation &&
+      !actions.continue_to_otp_secret_creation
+    ) {
+      return onSecurityKeySubmit;
+    }
+
+    if (
+      !actions.continue_to_security_key_creation &&
+      actions.continue_to_otp_secret_creation
+    ) {
+      return onTOTPSubmit;
+    }
+
+    return undefined;
+  }, [flowState, onSecurityKeySubmit, onTOTPSubmit]);
+
   return (
     <Fragment>
       <Content>
-        <Headline1>{t("headlines.choose_mfa_method")}</Headline1>
+        <Headline1>{t("headlines.mfaSetUp")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
-        <Paragraph>{t("texts.choose_mfa_method")}</Paragraph>
-        <Form
-          hidden={!flowState.actions.continue_to_security_key_creation?.(null)}
-          onSubmit={onSecurityKeySubmit}
-        >
-          <Button secondary={true} uiAction={"passcode-submit"} icon={"mail"}>
-            {t("labels.use_security_key")}
-          </Button>
-        </Form>
-        <Form
-          hidden={!flowState.actions.continue_to_otp_secret_creation?.(null)}
-          onSubmit={onTOTPSubmit}
-        >
-          <Button
-            secondary={true}
-            uiAction={"password-submit"}
-            icon={"password"}
-          >
-            {t("labels.use_authenticator_app")}
-          </Button>
-        </Form>
+        <Paragraph>{t("texts.mfaSetUp")}</Paragraph>
+        {singleAction ? (
+          <Form onSubmit={singleAction}>
+            <Button uiAction={"passcode-submit"}>{t("labels.continue")}</Button>
+          </Form>
+        ) : (
+          <Fragment>
+            <Form
+              hidden={
+                !flowState.actions.continue_to_security_key_creation?.(null)
+              }
+              onSubmit={onSecurityKeySubmit}
+            >
+              <Button
+                secondary
+                uiAction={"passcode-submit"}
+                icon={"securityKey"}
+              >
+                {t("labels.securityKey")}
+              </Button>
+            </Form>
+            <Form
+              hidden={
+                !flowState.actions.continue_to_otp_secret_creation?.(null)
+              }
+              onSubmit={onTOTPSubmit}
+            >
+              <Button
+                secondary
+                uiAction={"password-submit"}
+                icon={"qrCodeScanner"}
+              >
+                {t("labels.authenticatorApp")}
+              </Button>
+            </Form>
+          </Fragment>
+        )}
       </Content>
     </Fragment>
   );
