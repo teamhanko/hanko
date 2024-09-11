@@ -50,7 +50,7 @@ const LoginSecurityKeyPage = (props: Props) => {
         <ErrorBox state={flowState} />
         <Paragraph>{t("texts.securityKeyLogin")}</Paragraph>
         <Form onSubmit={onSubmit}>
-          <Button uiAction={"passkey-submit"} autofocus icon={"passkey"}>
+          <Button uiAction={"passkey-submit"} autofocus icon={"securityKey"}>
             {t("labels.securityKeyUse")}
           </Button>
         </Form>

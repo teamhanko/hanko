@@ -59,7 +59,5 @@ func (a WebauthnGenerateRequestOptionsSecurityKey) Execute(c flowpilot.Execution
 		return fmt.Errorf("failed to set request_options payload: %w", err)
 	}
 
-	c.PreventRevert()
-
 	return c.Continue(shared.StateLoginPasskey)
 }
