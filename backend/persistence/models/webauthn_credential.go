@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/base64"
+	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
@@ -49,19 +51,29 @@ func (credential *WebauthnCredential) GetWebauthnTransports() []protocol.Authent
 	return transports
 }
 
-func (credential *WebauthnCredential) GetWebauthnDescriptor() protocol.CredentialDescriptor {
-	return protocol.CredentialDescriptor{
+func (credential *WebauthnCredential) GetWebauthnDescriptor() (*protocol.CredentialDescriptor, error) {
+	id, err := base64.RawURLEncoding.DecodeString(credential.ID)
+	if err != nil {
+		fmt.Println("failed to decode the credential id", err)
+		return nil, err
+	}
+
+	return &protocol.CredentialDescriptor{
 		Type:            protocol.PublicKeyCredentialType,
-		CredentialID:    []byte(credential.ID),
+		CredentialID:    id,
 		Transport:       credential.GetWebauthnTransports(),
 		AttestationType: credential.AttestationType,
-	}
+	}, nil
 }
 
-func (credentials WebauthnCredentials) GetWebauthnDescriptors() []protocol.CredentialDescriptor {
+func (credentials WebauthnCredentials) GetWebauthnDescriptors() ([]protocol.CredentialDescriptor, error) {
 	descriptors := make([]protocol.CredentialDescriptor, len(credentials))
 	for i, credential := range credentials {
-		descriptors[i] = credential.GetWebauthnDescriptor()
+		descriptor, err := credential.GetWebauthnDescriptor()
+		if err != nil {
+			return nil, err
+		}
+		descriptors[i] = *descriptor
 	}
-	return descriptors
+	return descriptors, nil
 }
