@@ -12,24 +12,26 @@ import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
-import { Passkey } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
+import { WebauthnCredential } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 
 type Props = {
   oldName: string;
-  passkey: Passkey;
+  credential: WebauthnCredential;
+  credentialType: "passkey" | "security-key";
   onBack: (event: Event) => Promise<void>;
-  onPasskeyNameSubmit: (
+  onCredentialNameSubmit: (
     event: Event,
     id: string,
     name: string,
   ) => Promise<void>;
 };
 
-const RenamePasskeyPage = ({
-  onPasskeyNameSubmit,
+const RenameWebauthnCredentialPage = ({
+  onCredentialNameSubmit,
   oldName,
   onBack,
-  passkey,
+  credential,
+  credentialType,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const [newName, setNewName] = useState<string>(oldName);
@@ -43,26 +45,42 @@ const RenamePasskeyPage = ({
   return (
     <Fragment>
       <Content>
-        <Headline1>{t("headlines.renamePasskey")}</Headline1>
+        <Headline1>
+          {credentialType === "security-key"
+            ? "headlines.renameSecurityKey"
+            : t("headlines.renamePasskey")}
+        </Headline1>
         <ErrorBox flowError={null} />
-        <Paragraph>{t("texts.renamePasskey")}</Paragraph>
+        <Paragraph>
+          {credentialType === "security-key"
+            ? t("texts.renameSecurityKey")
+            : t("texts.renamePasskey")}
+        </Paragraph>
         <Form
           onSubmit={(event: Event) =>
-            onPasskeyNameSubmit(event, passkey.id, newName)
+            onCredentialNameSubmit(event, credential.id, newName)
           }
         >
           <Input
             type={"text"}
-            name={"passkey"}
+            name={
+              credentialType === "security-key" ? credentialType : "passkey"
+            }
             value={newName}
             minLength={3}
             maxLength={32}
             required={true}
-            placeholder={t("labels.newPasskeyName")}
+            placeholder={
+              credentialType === "security-key"
+                ? t("labels.newSecurityKeyName")
+                : t("labels.newPasskeyName")
+            }
             onInput={onInput}
             autofocus
           />
-          <Button uiAction={"passkey-rename"}>{t("labels.save")}</Button>
+          <Button uiAction={"webauthn-credential-rename"}>
+            {t("labels.save")}
+          </Button>
         </Form>
       </Content>
       <Footer>
@@ -74,4 +92,4 @@ const RenamePasskeyPage = ({
   );
 };
 
-export default RenamePasskeyPage;
+export default RenameWebauthnCredentialPage;

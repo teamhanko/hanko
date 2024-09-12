@@ -84,8 +84,8 @@ export interface GlobalOptions {
 
 export type UIAction =
   | "email-submit"
+  | "webauthn-credential-rename"
   | "passkey-submit"
-  | "passkey-rename"
   | "passkey-delete"
   | "passcode-resend"
   | "passcode-submit"
@@ -99,6 +99,9 @@ export type UIAction =
   | "email-verify"
   | "username-set"
   | "username-delete"
+  | "security-key-delete"
+  | "security-key-rename"
+  | "security-key-submit"
   | "skip"
   | "back"
   | "account_delete"

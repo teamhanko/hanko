@@ -25,7 +25,7 @@ export interface LoginInitPayload {
   readonly request_options?: CredentialRequestOptionsJSON;
 }
 
-export interface Passkey {
+export interface WebauthnCredential {
   readonly id: string;
   readonly name?: string;
   readonly public_key: string;
@@ -60,7 +60,8 @@ export interface Email {
 
 export interface User {
   readonly user_id: string;
-  readonly passkeys?: Passkey[];
+  readonly passkeys?: WebauthnCredential[];
+  readonly security_keys?: WebauthnCredential[];
   readonly emails?: Email[];
   readonly username?: Username;
   readonly created_at: string;

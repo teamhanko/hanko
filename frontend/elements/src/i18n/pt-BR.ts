@@ -37,6 +37,9 @@ export const ptBR: Translation = {
     securityKeySetUp: "[TRANSLATION MISSING]",
     securityKeyLogin: "[TRANSLATION MISSING]",
     otpLogin: "[TRANSLATION MISSING]",
+    renameSecurityKey: "[TRANSLATION MISSING]",
+    deleteSecurityKey: "[TRANSLATION MISSING]",
+    securityKeys: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode:
@@ -72,6 +75,9 @@ export const ptBR: Translation = {
     securityKeySetUp: "[TRANSLATION MISSING]",
     securityKeyLogin: "[TRANSLATION MISSING]",
     otpLogin: "[TRANSLATION MISSING]",
+    renameSecurityKey: "[TRANSLATION MISSING]",
+    setupSecurityKey: "[TRANSLATION MISSING]",
+    deleteSecurityKey: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "ou",
@@ -123,6 +129,8 @@ export const ptBR: Translation = {
     authenticatorApp: "[TRANSLATION MISSING]",
     securityKey: "[TRANSLATION MISSING]",
     securityKeyUse: "[TRANSLATION MISSING]",
+    newSecurityKeyName: "[TRANSLATION MISSING]",
+    createSecurityKey: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong:
