@@ -173,6 +173,7 @@ export interface Translation {
     value_missing_error: string;
     value_too_long_error: string;
     value_too_short_error: string;
+    webauthn_credential_invalid_mfa_only: string;
   };
 }
 
