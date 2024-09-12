@@ -82,6 +82,10 @@ export interface UsernameSetInputs {
   readonly username: Input<string>;
 }
 
+export interface SecurityKeyDeleteInputs {
+  readonly security_key_id: Input<string>;
+}
+
 export interface PasskeyCredentialRenameInputs {
   readonly passkey_id: Input<string>;
   readonly passkey_name: Input<string>;

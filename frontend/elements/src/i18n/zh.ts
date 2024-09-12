@@ -41,6 +41,9 @@ export const zh: Translation = {
     securityKeySetUp: "[TRANSLATION MISSING]",
     securityKeyLogin: "[TRANSLATION MISSING]",
     otpLogin: "[TRANSLATION MISSING]",
+    renameSecurityKey: "[TRANSLATION MISSING]",
+    deleteSecurityKey: "[TRANSLATION MISSING]",
+    securityKeys: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -70,6 +73,9 @@ export const zh: Translation = {
     securityKeySetUp: "[TRANSLATION MISSING]",
     securityKeyLogin: "[TRANSLATION MISSING]",
     otpLogin: "[TRANSLATION MISSING]",
+    renameSecurityKey: "[TRANSLATION MISSING]",
+    setupSecurityKey: "[TRANSLATION MISSING]",
+    deleteSecurityKey: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "或",
@@ -122,6 +128,8 @@ export const zh: Translation = {
     authenticatorApp: "[TRANSLATION MISSING]",
     securityKey: "[TRANSLATION MISSING]",
     securityKeyUse: "[TRANSLATION MISSING]",
+    newSecurityKeyName: "[TRANSLATION MISSING]",
+    createSecurityKey: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",
