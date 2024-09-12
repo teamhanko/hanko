@@ -47,7 +47,7 @@ const RenameWebauthnCredentialPage = ({
       <Content>
         <Headline1>
           {credentialType === "security-key"
-            ? "headlines.renameSecurityKey"
+            ? t("headlines.renameSecurityKey")
             : t("headlines.renamePasskey")}
         </Headline1>
         <ErrorBox flowError={null} />
@@ -63,9 +63,7 @@ const RenameWebauthnCredentialPage = ({
         >
           <Input
             type={"text"}
-            name={
-              credentialType === "security-key" ? credentialType : "passkey"
-            }
+            name={credentialType}
             value={newName}
             minLength={3}
             maxLength={32}
