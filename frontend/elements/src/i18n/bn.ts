@@ -192,5 +192,6 @@ export const bn: Translation = {
     value_missing_error: "মান অনুপস্থিত।",
     value_too_long_error: "মানটি খুব দীর্ঘ।",
     value_too_short_error: "মানটি খুব ছোট।",
+    webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
   },
 };

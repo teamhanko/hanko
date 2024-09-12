@@ -194,5 +194,6 @@ export const ptBR: Translation = {
     value_missing_error: "O valor está ausente.",
     value_too_long_error: "O valor é muito longo.",
     value_too_short_error: "O valor é muito curto.",
+    webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
   },
 };
