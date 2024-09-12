@@ -199,5 +199,6 @@ export const de: Translation = {
     value_missing_error: "Der Wert fehlt.",
     value_too_long_error: "Der Wert ist zu lang.",
     value_too_short_error: "Der Wert ist zu kurz.",
+    webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
   },
 };

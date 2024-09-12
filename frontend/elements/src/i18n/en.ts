@@ -197,5 +197,7 @@ export const en: Translation = {
     value_missing_error: "The value is missing.",
     value_too_long_error: "Value is too long.",
     value_too_short_error: "The value is too short.",
+    webauthn_credential_invalid_mfa_only:
+      "This credential can be used as a second factor security key only.",
   },
 };
