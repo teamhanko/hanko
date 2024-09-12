@@ -28,6 +28,7 @@ type VerifyAssertionResponseParams struct {
 	Tx                *pop.Connection
 	SessionDataID     uuid.UUID
 	AssertionResponse string
+	IsMFA             bool
 }
 
 type GenerateCreationOptionsParams struct {
@@ -98,7 +99,8 @@ func (user webauthnUser) WebAuthnIcon() string {
 }
 
 var (
-	ErrInvalidWebauthnCredential = errors.New("this passkey cannot be used anymore")
+	ErrInvalidWebauthnCredential        = errors.New("this passkey cannot be used anymore")
+	ErrInvalidWebauthnCredentialMFAOnly = errors.New("this credential can be used as a second factor security key only")
 )
 
 type webauthnService struct {
@@ -179,6 +181,11 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 
 	if userModel == nil {
 		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
+	}
+
+	cred := userModel.GetWebauthnCredentialById(credentialAssertionData.ID)
+	if cred != nil && (!p.IsMFA && cred.MFAOnly) {
+		return nil, ErrInvalidWebauthnCredentialMFAOnly
 	}
 
 	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {

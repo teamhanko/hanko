@@ -49,11 +49,20 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		Tx:                deps.Tx,
 		SessionDataID:     sessionDataID,
 		AssertionResponse: assertionResponse,
+		IsMFA:             c.Stash().Get(shared.StashPathMFAMethod).String() == "security_key",
 	}
 
 	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
 	if err != nil {
-		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
+		if errors.Is(err, services.ErrInvalidWebauthnCredential) ||
+			errors.Is(err, services.ErrInvalidWebauthnCredentialMFAOnly) {
+
+			if errors.Is(err, services.ErrInvalidWebauthnCredentialMFAOnly) {
+				c.SetFlowError(shared.ErrorWebauthnCredentialInvalidMFAOnly)
+			} else {
+				c.SetFlowError(shared.ErrorPasskeyInvalid.Wrap(err))
+			}
+
 			err = deps.AuditLogger.CreateWithConnection(
 				deps.Tx,
 				deps.HttpContext,
@@ -66,8 +75,6 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 			if err != nil {
 				return fmt.Errorf("could not create audit log: %w", err)
 			}
-
-			c.SetFlowError(shared.ErrorPasskeyInvalid.Wrap(err))
 
 			return c.Continue(shared.StateError)
 		}
