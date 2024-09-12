@@ -18,6 +18,7 @@ import {
   WebauthnVerifyAssertionResponseInputs,
   WebauthnVerifyAttestationResponseInputs,
   OTPCodeInputs,
+  SecurityKeyDeleteInputs,
 } from "./input";
 
 export interface Action<TInputs> {
@@ -40,13 +41,17 @@ export interface LoginInitActions {
 
 export interface ProfileInitActions {
   readonly account_delete?: Action<null>;
+  readonly continue_to_otp_secret_creation?: Action<null>;
   readonly email_create?: Action<EmailCreateInputs>;
   readonly email_delete?: Action<EmailDeleteInputs>;
   readonly email_verify?: Action<EmailVerifyInputs>;
   readonly email_set_primary?: Action<EmailSetPrimaryInputs>;
+  readonly otp_secret_delete?: Action<null>;
   readonly password_create?: Action<PasswordInputs>;
   readonly password_update?: Action<PasswordInputs>;
   readonly password_delete?: Action<null>;
+  readonly security_key_create?: Action<null>;
+  readonly security_key_delete?: Action<SecurityKeyDeleteInputs>;
   readonly username_create?: Action<UsernameSetInputs>;
   readonly username_delete?: Action<null>;
   readonly username_update?: Action<UsernameSetInputs>;

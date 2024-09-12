@@ -41,6 +41,9 @@ export interface Translation {
     signUp: string;
     selectLoginMethod: string;
     setupLoginMethod: string;
+    renameSecurityKey: string;
+    deleteSecurityKey: string;
+    securityKeys: string;
   };
   texts: {
     enterPasscode: string;
@@ -66,6 +69,9 @@ export interface Translation {
     deleteAccount: string;
     selectLoginMethodForFutureLogins: string;
     howDoYouWantToLogin: string;
+    deleteSecurityKey: string;
+    renameSecurityKey: string;
+    setupSecurityKey: string;
   };
   labels: {
     authenticatorApp: string;
@@ -116,6 +122,8 @@ export interface Translation {
     setPassword: string;
     changeUsername: string;
     setUsername: string;
+    newSecurityKeyName: string;
+    createSecurityKey: string;
   };
   errors: {
     somethingWentWrong: string;

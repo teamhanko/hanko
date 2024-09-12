@@ -10,10 +10,10 @@ import Content from "../components/wrapper/Content";
 import Headline1 from "../components/headline/Headline1";
 import Paragraph from "../components/paragraph/Paragraph";
 import ListEmailsAccordion from "../components/accordion/ListEmailsAccordion";
-import ListPasskeysAccordion from "../components/accordion/ListPasskeysAccordion";
+import ListWebauthnCredentialsAccordion from "../components/accordion/ListWebauthnCredentialsAccordion";
 import AddEmailDropdown from "../components/accordion/AddEmailDropdown";
 import ChangePasswordDropdown from "../components/accordion/ChangePasswordDropdown";
-import AddPasskeyDropdown from "../components/accordion/AddPasskeyDropdown";
+import AddWebauthnCredentialDropdown from "../components/accordion/AddWebauthnCredentialDropdown";
 import Divider from "../components/spacer/Divider";
 import Button from "../components/form/Button";
 import Form from "../components/form/Form";
@@ -130,10 +130,14 @@ const ProfilePage = (props: Props) => {
       flowState.actions.username_delete(null).run,
     );
 
-  const onPasskeyNameSubmit = async (event: Event, id: string, name: string) =>
+  const onWebauthnCredentialNameSubmit = async (
+    event: Event,
+    id: string,
+    name: string,
+  ) =>
     onAction(
       event,
-      "passkey-rename",
+      "webauthn-credential-rename",
       flowState.actions.webauthn_credential_rename({
         passkey_id: id,
         passkey_name: name,
@@ -152,6 +156,20 @@ const ProfilePage = (props: Props) => {
       event,
       "passkey-submit",
       flowState.actions.webauthn_credential_create(null).run,
+    );
+
+  const onSecurityKeyDelete = async (event: Event, id: string) =>
+    onAction(
+      event,
+      "security-key-delete",
+      flowState.actions.security_key_delete({ security_key_id: id }).run,
+    );
+
+  const onSecurityKeySubmit = async (event: Event) =>
+    onAction(
+      event,
+      "security-key-submit",
+      flowState.actions.security_key_create(null).run,
     );
 
   const onAccountDelete = async (event: Event) =>
@@ -289,21 +307,53 @@ const ProfilePage = (props: Props) => {
         <Fragment>
           <Headline1>{t("headlines.profilePasskeys")}</Headline1>
           <Paragraph>
-            <ListPasskeysAccordion
+            <ListWebauthnCredentialsAccordion
               onBack={onBack}
-              onPasskeyNameSubmit={onPasskeyNameSubmit}
-              onPasskeyDelete={onPasskeyDelete}
-              passkeys={flowState.payload.user.passkeys}
+              onCredentialNameSubmit={onWebauthnCredentialNameSubmit}
+              onCredentialDelete={onPasskeyDelete}
+              credentials={flowState.payload.user.passkeys}
               setError={null}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
-              allowPasskeyDeletion={
+              allowCredentialDeletion={
                 !!flowState.actions.webauthn_credential_delete?.(null)
               }
+              credentialType={"passkey"}
             />
             {flowState.actions.webauthn_credential_create?.(null) ? (
-              <AddPasskeyDropdown
-                onPasskeySubmit={onPasskeySubmit}
+              <AddWebauthnCredentialDropdown
+                credentialType={"passkey"}
+                onCredentialSubmit={onPasskeySubmit}
+                setError={null}
+                checkedItemID={checkedItemID}
+                setCheckedItemID={setCheckedItemID}
+              />
+            ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.payload?.user?.security_keys ||
+      flowState.actions.security_key_create?.(null) ? (
+        <Fragment>
+          <Headline1>{t("headlines.securityKeys")}</Headline1>
+          <Paragraph>
+            <ListWebauthnCredentialsAccordion
+              onBack={onBack}
+              onCredentialNameSubmit={onWebauthnCredentialNameSubmit}
+              onCredentialDelete={onSecurityKeyDelete}
+              credentials={flowState.payload.user.security_keys}
+              setError={null}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+              allowCredentialDeletion={
+                !!flowState.actions.security_key_delete?.(null)
+              }
+              credentialType={"security-key"}
+            />
+            {flowState.actions.security_key_create?.(null) ? (
+              <AddWebauthnCredentialDropdown
+                credentialType={"security-key"}
+                onCredentialSubmit={onSecurityKeySubmit}
                 setError={null}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}

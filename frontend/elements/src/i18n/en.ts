@@ -37,6 +37,9 @@ export const en: Translation = {
     securityKeySetUp: "Add security key",
     securityKeyLogin: "Security key",
     otpLogin: "Authentication code",
+    renameSecurityKey: "Rename security key",
+    deleteSecurityKey: "Delete security key",
+    securityKeys: "Security keys",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -76,6 +79,9 @@ export const en: Translation = {
       "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone, or built-in options like Touch ID, Face ID, or Windows Hello. Follow the prompts to complete the login process.",
     otpLogin:
       "Open your authenticator app to obtain the one-time password (OTP). Enter the code in the field below to complete your login.",
+    renameSecurityKey: "Set a name for the security key.",
+    setupSecurityKey: "Set up a security key.",
+    deleteSecurityKey: "Delete this security key from your account.",
   },
   labels: {
     or: "or",
@@ -126,6 +132,8 @@ export const en: Translation = {
     authenticatorApp: "Authenticator app",
     securityKey: "Security key",
     securityKeyUse: "Use security key",
+    newSecurityKeyName: "New security key name",
+    createSecurityKey: "Create a security key",
   },
   errors: {
     somethingWentWrong:
