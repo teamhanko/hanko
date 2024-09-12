@@ -13,6 +13,8 @@ import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { useFlowState } from "../contexts/FlowState";
 import Paragraph from "../components/paragraph/Paragraph";
+import Footer from "../components/wrapper/Footer";
+import Link from "../components/link/Link";
 
 interface Props {
   state: State<"mfa_method_chooser">;
@@ -39,6 +41,14 @@ const MFAMMethodChooserPage = (props: Props) => {
     const nextState = await flowState.actions
       .continue_to_otp_secret_creation(null)
       .run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
+  const onSkipClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("skip");
+    const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
   };
@@ -106,6 +116,17 @@ const MFAMMethodChooserPage = (props: Props) => {
           </Fragment>
         )}
       </Content>
+      <Footer>
+        <span />
+        <Link
+          uiAction={"skip"}
+          onClick={onSkipClick}
+          loadingSpinnerPosition={"left"}
+          hidden={!flowState.actions.skip?.(null)}
+        >
+          {t("labels.skip")}
+        </Link>
+      </Footer>
     </Fragment>
   );
 };
