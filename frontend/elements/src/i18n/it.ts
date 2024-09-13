@@ -40,6 +40,9 @@ export const it: Translation = {
     renameSecurityKey: "[TRANSLATION MISSING]",
     deleteSecurityKey: "[TRANSLATION MISSING]",
     securityKeys: "[TRANSLATION MISSING]",
+    authenticatorApp: "[TRANSLATION MISSING]",
+    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING",
+    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -77,6 +80,8 @@ export const it: Translation = {
     renameSecurityKey: "[TRANSLATION MISSING]",
     setupSecurityKey: "[TRANSLATION MISSING]",
     deleteSecurityKey: "[TRANSLATION MISSING]",
+    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING]",
+    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
   },
   labels: {
     or: "o",
@@ -129,6 +134,10 @@ export const it: Translation = {
     securityKeyUse: "[TRANSLATION MISSING]",
     newSecurityKeyName: "[TRANSLATION MISSING]",
     createSecurityKey: "[TRANSLATION MISSING]",
+    authenticatorAppManage: "[TRANSLATION MISSING]",
+    authenticatorAppAdd: "[TRANSLATION MISSING]",
+    authenticatorAppRemove: "[TRANSLATION MISSING]",
+    configured: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

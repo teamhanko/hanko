@@ -40,6 +40,9 @@ export const en: Translation = {
     renameSecurityKey: "Rename security key",
     deleteSecurityKey: "Delete security key",
     securityKeys: "Security keys",
+    authenticatorApp: "Authenticator app",
+    authenticatorAppAlreadySetUp: "Authenticator app is set up",
+    authenticatorAppNotSetUp: "Set up authenticator app",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -82,6 +85,10 @@ export const en: Translation = {
     renameSecurityKey: "Set a name for the security key.",
     setupSecurityKey: "Set up a security key.",
     deleteSecurityKey: "Delete this security key from your account.",
+    authenticatorAppAlreadySetUp:
+      "Your account is secured with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
+    authenticatorAppNotSetUp:
+      "Secure your account with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
   },
   labels: {
     or: "or",
@@ -134,6 +141,10 @@ export const en: Translation = {
     securityKeyUse: "Use security key",
     newSecurityKeyName: "New security key name",
     createSecurityKey: "Create a security key",
+    authenticatorAppManage: "Manage authenticator app",
+    authenticatorAppAdd: "Set up",
+    authenticatorAppRemove: "Delete OTP secret",
+    configured: "configured",
   },
   errors: {
     somethingWentWrong:
