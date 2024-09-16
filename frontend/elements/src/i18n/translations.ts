@@ -108,6 +108,7 @@ export interface Translation {
     sendNewPasscode: string;
     passwordRetryAfter: string;
     passcodeResendAfter: string;
+    useAnotherMethod: string;
     unverifiedEmail: string;
     primaryEmail: string;
     setAsPrimaryEmail: string;

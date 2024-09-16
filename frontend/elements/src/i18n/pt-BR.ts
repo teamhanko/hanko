@@ -140,6 +140,7 @@ export const ptBR: Translation = {
     authenticatorAppAdd: "[TRANSLATION MISSING]",
     authenticatorAppRemove: "[TRANSLATION MISSING]",
     configured: "[TRANSLATION MISSING]",
+    useAnotherMethod: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong:

@@ -88,10 +88,10 @@ const LoginOTPPAge = (props: Props) => {
         <Link
           uiAction={"skip"}
           onClick={onClick}
-          loadingSpinnerPosition={"left"}
+          loadingSpinnerPosition={"right"}
           hidden={!flowState.actions.continue_to_login_security_key?.(null)}
         >
-          {t("labels.use_another_method")}
+          {t("labels.useAnotherMethod")}
         </Link>
       </Footer>
     </Fragment>
