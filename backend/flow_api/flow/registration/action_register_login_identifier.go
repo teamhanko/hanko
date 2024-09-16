@@ -211,11 +211,5 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 		result = append(result, shared.StatePasswordCreation)
 	}
 
-	if deps.Cfg.MFA.Enabled && deps.Cfg.MFA.AcquireOnRegistration {
-		if deps.Cfg.MFA.SecurityKeys.Enabled || deps.Cfg.MFA.TOTP.Enabled {
-			result = append(result, shared.StateMFAMethodChooser)
-		}
-	}
-
 	return result
 }
