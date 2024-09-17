@@ -178,5 +178,6 @@ export const zh: Translation = {
     value_too_long_error: "值太长。",
     value_too_short_error: "值太短。",
     webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
+    webauthn_credential_already_exists: "[TRANSLATION MISSING]",
   },
 };
