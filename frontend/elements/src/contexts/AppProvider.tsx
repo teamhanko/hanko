@@ -335,6 +335,13 @@ const AppProvider = ({
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
           stateHandler[prevState.name](prevState);
+          setUIState((prev) => ({
+            ...prev,
+            error: {
+              code: "webauthn_credential_already_exists",
+              message: "Webauthn credential already exists",
+            },
+          }));
           return;
         }
 
@@ -358,6 +365,13 @@ const AppProvider = ({
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
           stateHandler[prevState.name](prevState);
+          setUIState((prev) => ({
+            ...prev,
+            error: {
+              code: "webauthn_credential_already_exists",
+              message: "Webauthn credential already exists",
+            },
+          }));
           return;
         }
 
