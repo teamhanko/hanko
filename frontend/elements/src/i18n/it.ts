@@ -192,5 +192,6 @@ export const it: Translation = {
     value_too_long_error: "Il valore è troppo lungo.",
     value_too_short_error: "Il valore è troppo corto.",
     webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
+    webauthn_credential_already_exists: "[TRANSLATION MISSING]",
   },
 };

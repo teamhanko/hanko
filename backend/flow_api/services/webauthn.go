@@ -229,6 +229,21 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 func (s *webauthnService) generateCreationOptions(p GenerateCreationOptionsParams, opts ...webauthn.RegistrationOption) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
 	user := webauthnUser{id: p.UserID, email: p.Email, username: p.Username}
 
+	userModel, err := s.persister.GetUserPersisterWithConnection(p.Tx).Get(user.id)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get user from db: %w", err)
+	}
+
+	// Assemble exclude list only if user already exists (i.e. the current flow is not a registration flow).
+	if userModel != nil {
+		credentialDescriptors, err := userModel.WebauthnCredentials.GetWebauthnDescriptors()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get credential descriptors from webauthn credentials: %w", err)
+		}
+
+		opts = append(opts, webauthn.WithExclusions(credentialDescriptors))
+	}
+
 	options, sessionData, err := s.cfg.Webauthn.Handler.BeginRegistration(user, opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
