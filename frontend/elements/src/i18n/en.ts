@@ -199,5 +199,7 @@ export const en: Translation = {
     value_too_short_error: "The value is too short.",
     webauthn_credential_invalid_mfa_only:
       "This credential can be used as a second factor security key only.",
+    webauthn_credential_already_exists:
+      "The request either timed out, was canceled or the device is already registered. Please try again or try using another device.",
   },
 };
