@@ -7,6 +7,7 @@ const (
 	StashPathLoginOnboardingCreateEmail             = "login_onboarding_create_email"
 	StashPathLoginOnboardingScheduled               = "login_onboarding_scheduled"
 	StashPathMFAMethod                              = "mfa_method"
+	StashPathCreateMFAOnlyCredential                = "create_mfa_only_credential"
 	StashPathNewPassword                            = "new_password"
 	StashPathOTPSecret                              = "otp_secret"
 	StashPathPasscodeEmail                          = "sticky.passcode_email"

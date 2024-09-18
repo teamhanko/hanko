@@ -75,7 +75,8 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 	}
 
 	if c.GetFlowName() == shared.FlowLogin {
-		credentialModel := intern.WebauthnCredentialToModel(credential, userID, false, false, true, deps.AuthenticatorMetadata)
+		mfaOnly := c.Stash().Get(shared.StashPathCreateMFAOnlyCredential).Bool()
+		credentialModel := intern.WebauthnCredentialToModel(credential, userID, false, false, mfaOnly, deps.AuthenticatorMetadata)
 		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*credentialModel)
 		if err != nil {
 			return fmt.Errorf("failed to persist the webauthn credential: %w", err)
