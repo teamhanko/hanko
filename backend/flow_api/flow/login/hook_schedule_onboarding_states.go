@@ -43,6 +43,10 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 		return result
 	}
 
+	if c.Stash().Get(shared.StashPathLoginMethod).String() == "passkey" {
+		return result
+	}
+
 	userHasWebauthnCredential := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 	platformAuthenticatorAvailable := c.Stash().Get(shared.StashPathWebauthnPlatformAuthenticatorAvailable).Bool()
