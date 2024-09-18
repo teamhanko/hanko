@@ -24,9 +24,7 @@ func (a WebauthnVerifyAssertionResponse) GetDescription() string {
 }
 
 func (a WebauthnVerifyAssertionResponse) Initialize(c flowpilot.InitializationContext) {
-	deps := a.GetDeps(c)
-
-	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() || !deps.Cfg.Passkey.Enabled {
+	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		c.SuspendAction()
 	}
 
@@ -77,11 +75,6 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		return fmt.Errorf("failed to verify assertion response: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
-	if err != nil {
-		return fmt.Errorf("failed to set user_id to the stash: %w", err)
-	}
-
 	// Set only for audit logging purposes.
 	err = c.Stash().Set(shared.StashPathLoginMethod, "passkey")
 	if err != nil {
@@ -89,10 +82,18 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	}
 
 	if userModel != nil {
+		_ = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
+		_ = c.Stash().Set(shared.StashPathUsername, userModel.GetUsername())
+		_ = c.Stash().Set(shared.StashPathUserHasPasskey, len(userModel.GetPasskeys()) > 0)
 		_ = c.Stash().Set(shared.StashPathUserHasPassword, userModel.PasswordCredential != nil)
-		_ = c.Stash().Set(shared.StashPathUserHasWebauthnCredential, len(userModel.GetPasskeys()) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasWebauthnCredential, len(userModel.WebauthnCredentials) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasOTPSecret, userModel.OTPSecret != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasUsername, userModel.GetUsername() != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
+
+		if primary := userModel.Emails.GetPrimary(); primary != nil {
+			_ = c.Stash().Set(shared.StashPathEmail, primary.Address)
+		}
 	}
 
 	c.PreventRevert()

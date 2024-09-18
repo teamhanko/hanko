@@ -8,6 +8,9 @@ export interface Translation {
   headlines: {
     error: string;
     accountNotFound: string;
+    authenticatorApp: string;
+    authenticatorAppAlreadySetUp: string;
+    authenticatorAppNotSetUp: string;
     loginEmail: string;
     loginEmailNoSignup: string;
     loginFinished: string;
@@ -46,6 +49,8 @@ export interface Translation {
     securityKeys: string;
   };
   texts: {
+    authenticatorAppAlreadySetUp: string;
+    authenticatorAppNotSetUp: string;
     enterPasscode: string;
     enterPasscodeNoEmail: string;
     setupPasskey: string;
@@ -75,12 +80,16 @@ export interface Translation {
   };
   labels: {
     authenticatorApp: string;
+    authenticatorAppAdd: string;
+    authenticatorAppManage: string;
+    authenticatorAppRemove: string;
     or: string;
     no: string;
     yes: string;
     email: string;
     continue: string;
     copied: string;
+    configured: string;
     skip: string;
     save: string;
     password: string;
@@ -99,6 +108,7 @@ export interface Translation {
     sendNewPasscode: string;
     passwordRetryAfter: string;
     passcodeResendAfter: string;
+    useAnotherMethod: string;
     unverifiedEmail: string;
     primaryEmail: string;
     setAsPrimaryEmail: string;

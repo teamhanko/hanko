@@ -58,10 +58,16 @@ export interface Email {
   readonly identities?: Identity[];
 }
 
+export interface MFAConfig {
+  readonly enabled: boolean;
+  readonly authenticator_app_connected: boolean;
+}
+
 export interface User {
   readonly user_id: string;
   readonly passkeys?: WebauthnCredential[];
   readonly security_keys?: WebauthnCredential[];
+  readonly mfa_config?: MFAConfig;
   readonly emails?: Email[];
   readonly username?: Username;
   readonly created_at: string;

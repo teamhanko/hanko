@@ -43,12 +43,16 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 		return result
 	}
 
-	userHasSecurityKeys := c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool()
+	if c.Stash().Get(shared.StashPathLoginMethod).String() == "passkey" {
+		return result
+	}
+
+	userHasWebauthnCredential := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 	platformAuthenticatorAvailable := c.Stash().Get(shared.StashPathWebauthnPlatformAuthenticatorAvailable).Bool()
 	userCanUseSecurityKey := platformAuthenticatorAvailable || cfg.MFA.SecurityKeys.AuthenticatorAttachment != "platform"
 
-	if cfg.MFA.SecurityKeys.Enabled && userHasSecurityKeys {
+	if cfg.MFA.SecurityKeys.Enabled && userHasWebauthnCredential {
 		if userCanUseSecurityKey {
 			result = append(result, shared.StateLoginSecurityKey)
 		} else {
@@ -70,10 +74,10 @@ func (h ScheduleOnboardingStates) determineMFACreationStates(c flowpilot.HookExe
 		return result
 	}
 
-	userHasSecurityKeys := c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool()
+	userHasWebauthnCredential := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 
-	if cfg.MFA.Enabled && !userHasOTPSecret && !userHasSecurityKeys {
+	if cfg.MFA.Enabled && !userHasOTPSecret && !userHasWebauthnCredential {
 		result = append(result, shared.StateMFAMethodChooser)
 	}
 
@@ -86,7 +90,7 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	result := make([]flowpilot.StateName, 0)
 
 	hasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
-	hasPasskey := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
+	hasPasskey := c.Stash().Get(shared.StashPathUserHasPasskey).Bool()
 	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
 	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
 	passwordEnabled := deps.Cfg.Password.Enabled
