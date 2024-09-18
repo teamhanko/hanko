@@ -90,7 +90,7 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	result := make([]flowpilot.StateName, 0)
 
 	hasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
-	hasPasskey := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
+	hasPasskey := c.Stash().Get(shared.StashPathUserHasPasskey).Bool()
 	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
 	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
 	passwordEnabled := deps.Cfg.Password.Enabled
