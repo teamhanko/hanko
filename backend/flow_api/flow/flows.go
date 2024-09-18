@@ -148,6 +148,8 @@ func NewRegistrationFlow(debug bool) flowpilot.Flow {
 			shared.IssueSession{},
 			shared.GetUserData{},
 			registration.CreateUser{}).
+		AfterFlow(shared.FlowCredentialOnboarding,
+			registration.ScheduleMFACreationStates{}).
 		SubFlows(
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,

@@ -20,7 +20,7 @@ func (a ContinueToLoginSecurityKey) GetDescription() string {
 func (a ContinueToLoginSecurityKey) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.MFA.SecurityKeys.Enabled || !c.Stash().Get(shared.StashPathUserHasSecurityKeys).Bool() {
+	if !deps.Cfg.MFA.SecurityKeys.Enabled || !c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool() {
 		c.SuspendAction()
 	}
 }

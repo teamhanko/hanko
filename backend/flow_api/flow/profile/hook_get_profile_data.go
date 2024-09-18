@@ -22,6 +22,7 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	profileData := dto.ProfileDataFromUserModel(userModel)
+	profileData.MFAConfig.Enabled = deps.Cfg.MFA.Enabled
 
 	if !deps.Cfg.Passkey.Enabled {
 		profileData.Passkeys = nil

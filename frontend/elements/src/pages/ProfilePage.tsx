@@ -22,6 +22,7 @@ import ChangeUsernameDropdown from "../components/accordion/ChangeUsernameDropdo
 import DeleteAccountPage from "./DeleteAccountPage";
 import ErrorBox from "../components/error/ErrorBox";
 import ListSessionsAccordion from "../components/accordion/ListSessionsAccordion";
+import ManageAuthAppDropdown from "../components/accordion/ManageAuthAppDropdown";
 
 interface Props {
   state: State<"profile_init">;
@@ -203,6 +204,20 @@ const ProfilePage = (props: Props) => {
     return Promise.resolve();
   };
 
+  const onAuthAppSetUp = async (event: Event) =>
+    onAction(
+      event,
+      "auth-app-add",
+      flowState.actions.continue_to_otp_secret_creation(null).run,
+    );
+
+  const onAuthAppRemove = async (event: Event) =>
+    onAction(
+      event,
+      "auth-app-remove",
+      flowState.actions.otp_secret_delete(null).run,
+    );
+
   return (
     <Content>
       <ErrorBox
@@ -340,8 +355,7 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.payload?.user?.security_keys ||
-      flowState.actions.security_key_create?.(null) ? (
+      {flowState.payload.user.mfa_config.enabled ? (
         <Fragment>
           <Headline1>{t("headlines.securityKeys")}</Headline1>
           <Paragraph>
@@ -367,6 +381,22 @@ const ProfilePage = (props: Props) => {
                 setCheckedItemID={setCheckedItemID}
               />
             ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.payload.user.mfa_config.enabled ? (
+        <Fragment>
+          <Headline1>{t("headlines.authenticatorApp")}</Headline1>
+          <Paragraph>
+            <ManageAuthAppDropdown
+              onConnect={onAuthAppSetUp}
+              onDelete={onAuthAppRemove}
+              appConnected={
+                flowState.payload.user.mfa_config.authenticator_app_connected
+              }
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
           </Paragraph>
         </Fragment>
       ) : null}

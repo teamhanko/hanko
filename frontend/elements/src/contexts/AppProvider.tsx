@@ -107,7 +107,9 @@ export type UIAction =
   | "account_delete"
   | "retry"
   | "thirdparty-submit"
-  | "session-delete";
+  | "session-delete"
+  | "auth-app-add"
+  | "auth-app-remove";
 
 interface UIState {
   username?: string;
