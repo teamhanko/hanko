@@ -44,7 +44,7 @@ func (a WebauthnGenerateRequestOptionsSecurityKey) Execute(c flowpilot.Execution
 		return fmt.Errorf("failed to stash webauthn_session_data_id: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathMFAMethod, "security_key")
+	err = c.Stash().Set(shared.StashPathMFAUsageMethod, "security_key")
 	if err != nil {
 		return fmt.Errorf("failed to stash mfa_method: %w", err)
 	}
