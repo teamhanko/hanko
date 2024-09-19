@@ -1,11 +1,8 @@
 package profile
 
 import (
-	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
@@ -33,8 +30,6 @@ func (a WebauthnVerifyAttestationResponse) Initialize(c flowpilot.Initialization
 }
 
 func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext) error {
-	deps := a.GetDeps(c)
-
 	if valid := c.ValidateInputData(); !valid {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
@@ -44,49 +39,29 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	if !c.Stash().Get(shared.StashPathWebauthnSessionDataID).Exists() {
-		return errors.New("webauthn_session_data_id does not exist in the stash")
-	}
-
-	sessionDataID, err := uuid.FromString(c.Stash().Get(shared.StashPathWebauthnSessionDataID).String())
-	if err != nil {
-		return fmt.Errorf("failed to parse webauthn_session_data_id: %w", err)
-	}
-
-	var primaryEmailAddress string
+	var email string
 	if primaryEmailModel := userModel.Emails.GetPrimary(); primaryEmailModel != nil {
-		primaryEmailAddress = primaryEmailModel.Address
+		email = primaryEmailModel.Address
 	}
 
-	params := services.VerifyAttestationResponseParams{
-		Tx:            deps.Tx,
-		SessionDataID: sessionDataID,
-		PublicKey:     c.Input().Get("public_key").String(),
-		UserID:        userModel.ID,
-		Email:         &primaryEmailAddress,
-		Username:      userModel.GetUsername(),
-	}
-
-	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
+	err := c.Stash().Set(shared.StashPathEmail, email)
 	if err != nil {
-		if errors.Is(err, services.ErrInvalidWebauthnCredential) {
-			return c.Error(shared.ErrorPasskeyInvalid.Wrap(err))
-		}
-
-		return fmt.Errorf("failed to verify attestation response: %w", err)
+		return fmt.Errorf("failed to set user_id to the stash: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathWebauthnCredential, credential)
-	if err != nil {
-		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)
-	}
-
-	// Set user_id explicitly because persisting the credential is now part of a shared hook which has
-	// to work in multiple flows, e.g. the login flow, which does not work with the session_user in the
-	// context like the profile does
 	err = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to set user_id to the stash: %w", err)
+	}
+
+	err = c.Stash().Set(shared.StashPathUsername, userModel.GetUsername())
+	if err != nil {
+		return fmt.Errorf("failed to set user_id to the stash: %w", err)
+	}
+
+	err = c.ExecuteHook(shared.VerifyAttestationResponse{})
+	if err != nil {
+		return err
 	}
 
 	return c.Continue(shared.StateProfileInit)

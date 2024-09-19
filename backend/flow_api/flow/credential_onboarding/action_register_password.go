@@ -3,6 +3,7 @@ package credential_onboarding
 import (
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"golang.org/x/crypto/bcrypt"
@@ -66,6 +67,10 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	c.PreventRevert()
+
+	if err = c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
+		return err
+	}
 
 	return c.Continue()
 }

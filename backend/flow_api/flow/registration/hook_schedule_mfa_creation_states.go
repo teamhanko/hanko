@@ -11,11 +11,17 @@ type ScheduleMFACreationStates struct {
 
 func (h ScheduleMFACreationStates) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
-
-	userHasWebauthn := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	mfaConfig := deps.Cfg.MFA
 
-	if !userHasWebauthn && mfaConfig.Enabled && mfaConfig.AcquireOnRegistration &&
+	if !mfaConfig.Enabled {
+		return nil
+	}
+
+	passcodeLoginEligible := c.Stash().Get(shared.StashPathEmail).Exists() && deps.Cfg.Email.UseForAuthentication
+	useHasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
+
+	if (useHasPassword || passcodeLoginEligible) &&
+		mfaConfig.AcquireOnRegistration &&
 		(mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled) {
 		c.ScheduleStates(shared.StateMFAMethodChooser)
 	}

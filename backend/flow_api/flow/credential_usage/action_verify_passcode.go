@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -105,6 +106,21 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	c.PreventRevert()
+
+	passwordCreationScheduled := false
+
+	for _, state := range c.GetScheduledStates() {
+		if state == shared.StatePasswordCreation {
+			passwordCreationScheduled = true
+			break
+		}
+	}
+
+	if c.GetFlowName() == shared.FlowRegistration && !passwordCreationScheduled {
+		if err = c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
+			return err
+		}
+	}
 
 	return c.Continue()
 }

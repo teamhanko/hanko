@@ -74,10 +74,13 @@ func (h ScheduleOnboardingStates) determineMFACreationStates(c flowpilot.HookExe
 		return result
 	}
 
-	userHasWebauthnCredential := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
+	passcodeLoginEligible := c.Stash().Get(shared.StashPathUserHasEmails).Bool() && deps.Cfg.Email.UseForAuthentication
+	useHasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
+	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 
-	if cfg.MFA.Enabled && !userHasOTPSecret && !userHasWebauthnCredential {
+	if (useHasPassword || passcodeLoginEligible) &&
+		!userHasOTPSecret && !userHasSecurityKey {
 		result = append(result, shared.StateMFAMethodChooser)
 	}
 

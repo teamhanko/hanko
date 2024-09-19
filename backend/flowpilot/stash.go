@@ -29,8 +29,9 @@ type stash interface {
 	isRevertible() bool
 	getStateName() StateName
 	getPreviousStateName() StateName
-	addScheduledStateNames(...StateName)
 	getNextStateName() StateName
+	addScheduledStateNames(...StateName)
+	getScheduledStateNames() []StateName
 	useCompression(bool)
 
 	jsonmanager.JSONManager
@@ -290,6 +291,14 @@ func (h *defaultStash) getPreviousStateName() StateName {
 
 func (h *defaultStash) addScheduledStateNames(names ...StateName) {
 	h.scheduledStateNames = append(h.scheduledStateNames, names...)
+}
+func (h *defaultStash) getScheduledStateNames() []StateName {
+	values := h.jm.Get(stashKeyScheduledStates).Array()
+	result := make([]StateName, len(values))
+	for i, value := range values {
+		result[i] = StateName(value.String())
+	}
+	return result
 }
 
 func (h *defaultStash) getNextStateName() StateName {

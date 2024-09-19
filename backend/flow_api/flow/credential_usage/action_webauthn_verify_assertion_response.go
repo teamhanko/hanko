@@ -101,6 +101,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		_ = c.Stash().Set(shared.StashPathUserHasOTPSecret, userModel.OTPSecret != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasUsername, userModel.GetUsername() != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
+		_ = c.Stash().Set(shared.StashPathUserHasSecurityKey, len(userModel.GetSecurityKeys()) > 0)
 
 		if primary := userModel.Emails.GetPrimary(); primary != nil {
 			_ = c.Stash().Set(shared.StashPathEmail, primary.Address)
