@@ -49,11 +49,8 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
 
-		if c.Stash().Get(shared.StashPathCreateMFAOnlyCredential).Bool() {
-			credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, true, deps.AuthenticatorMetadata)
-		} else {
-			credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, false, deps.AuthenticatorMetadata)
-		}
+		mfaOnly := c.Stash().Get(shared.StashPathCreateMFAOnlyCredential).Bool()
+		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, mfaOnly, deps.AuthenticatorMetadata)
 	}
 
 	err = h.createUser(
