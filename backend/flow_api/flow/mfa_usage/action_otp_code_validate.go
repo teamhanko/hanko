@@ -66,7 +66,7 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(shared.ErrorPasscodeInvalid)
 	}
 
-	err = c.Stash().Set(shared.StashPathMFAMethod, "totp")
+	err = c.Stash().Set(shared.StashPathMFAUsageMethod, "totp")
 	if err != nil {
 		return fmt.Errorf("failed to stash mfa_method: %w", err)
 	}

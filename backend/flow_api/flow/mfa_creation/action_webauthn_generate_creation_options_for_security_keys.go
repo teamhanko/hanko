@@ -67,11 +67,6 @@ func (a WebauthnGenerateCreationOptionsForSecurityKeys) Execute(c flowpilot.Exec
 		return err
 	}
 
-	err = c.Stash().Set(shared.StashPathMFAMethod, "security_key")
-	if err != nil {
-		return err
-	}
-
 	err = c.Stash().Set(shared.StashPathCreateMFAOnlyCredential, true)
 	if err != nil {
 		return err
