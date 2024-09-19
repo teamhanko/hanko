@@ -45,11 +45,13 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	sessionDataID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathWebauthnSessionDataID).String())
 	assertionResponse := c.Input().Get("assertion_response").String()
 
+	isMFA := c.Stash().Get(shared.StashPathMFAUsageMethod).String() == "security_key"
+
 	params := services.VerifyAssertionResponseParams{
 		Tx:                deps.Tx,
 		SessionDataID:     sessionDataID,
 		AssertionResponse: assertionResponse,
-		IsMFA:             c.Stash().Get(shared.StashPathMFAMethod).String() == "security_key",
+		IsMFA:             isMFA,
 	}
 
 	userModel, err := deps.WebauthnService.VerifyAssertionResponse(params)
@@ -83,9 +85,11 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 	}
 
 	// Set only for audit logging purposes.
-	err = c.Stash().Set(shared.StashPathLoginMethod, "passkey")
-	if err != nil {
-		return fmt.Errorf("failed to set login_method to the stash: %w", err)
+	if !isMFA {
+		err = c.Stash().Set(shared.StashPathLoginMethod, "passkey")
+		if err != nil {
+			return fmt.Errorf("failed to set login_method to the stash: %w", err)
+		}
 	}
 
 	if userModel != nil {

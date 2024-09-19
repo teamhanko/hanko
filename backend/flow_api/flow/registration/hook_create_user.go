@@ -49,20 +49,11 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
 
-		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, false, deps.AuthenticatorMetadata)
-	}
-
-	var securityKeyModel *models.WebauthnCredential
-	if c.Stash().Get(shared.StashPathSecurityKey).Exists() {
-		securityKeyStr := c.Stash().Get(shared.StashPathSecurityKey).String()
-
-		var webauthnCredential webauthnLib.Credential
-		err = json.Unmarshal([]byte(securityKeyStr), &webauthnCredential)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal stashed security_key: %w", err)
+		if c.Stash().Get(shared.StashPathCreateMFAOnlyCredential).Bool() {
+			credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, true, deps.AuthenticatorMetadata)
+		} else {
+			credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, false, deps.AuthenticatorMetadata)
 		}
-
-		securityKeyModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, true, deps.AuthenticatorMetadata)
 	}
 
 	err = h.createUser(
@@ -72,7 +63,6 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		c.Stash().Get(shared.StashPathEmailVerified).Bool(),
 		c.Stash().Get(shared.StashPathUsername).String(),
 		credentialModel,
-		securityKeyModel,
 		c.Stash().Get(shared.StashPathNewPassword).String(),
 		c.Stash().Get(shared.StashPathOTPSecret).String(),
 	)
@@ -85,7 +75,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, passkey, securityKey *models.WebauthnCredential, password, otpSecret string) error {
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredential *models.WebauthnCredential, password, otpSecret string) error {
 	deps := h.GetDeps(c)
 
 	now := time.Now().UTC()
@@ -116,13 +106,17 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		}
 	}
 
-	if passkey != nil {
-		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*passkey)
+	if webauthnCredential != nil {
+		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*webauthnCredential)
 		if err != nil {
 			return err
 		}
 
-		auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", passkey.ID))
+		if webauthnCredential.MFAOnly {
+			auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", webauthnCredential.ID))
+		} else {
+			auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", webauthnCredential.ID))
+		}
 	}
 
 	if password != "" {
@@ -135,15 +129,6 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		}
 
 		auditLogDetails = append(auditLogDetails, auditlog.Detail("password", true))
-	}
-
-	if securityKey != nil {
-		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*securityKey)
-		if err != nil {
-			return err
-		}
-
-		auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", securityKey.ID))
 	}
 
 	if otpSecret != "" {
