@@ -4,12 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type WebauthnVerifyAttestationResponse struct {
@@ -74,34 +71,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 		return fmt.Errorf("failed to verify attestation response: %w", err)
 	}
 
-	if c.GetFlowName() == shared.FlowLogin {
-		mfaOnly := c.Stash().Get(shared.StashPathCreateMFAOnlyCredential).Bool()
-		credentialModel := intern.WebauthnCredentialToModel(credential, userID, false, false, mfaOnly, deps.AuthenticatorMetadata)
-		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*credentialModel)
-		if err != nil {
-			return fmt.Errorf("failed to persist the webauthn credential: %w", err)
-		}
-
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userID)
-		if err != nil {
-			return fmt.Errorf("failed to user from db: %w", err)
-		}
-
-		err = deps.AuditLogger.CreateWithConnection(deps.Tx, deps.HttpContext, models.AuditLogSecurityKeyCreated,
-			userModel,
-			nil,
-			auditlog.Detail("security_key", credential.ID),
-		)
-		if err != nil {
-			return fmt.Errorf("failed to persist audit log entry: %w", err)
-		}
-	} else {
-		if c.Stash().Get(shared.StashPathMFAMethod).String() == "security_key" {
-			err = c.Stash().Set(shared.StashPathSecurityKey, credential)
-		} else {
-			err = c.Stash().Set(shared.StashPathWebauthnCredential, credential)
-		}
-	}
+	err = c.Stash().Set(shared.StashPathWebauthnCredential, credential)
 
 	if err != nil {
 		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)

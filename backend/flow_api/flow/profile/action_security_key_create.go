@@ -79,7 +79,7 @@ func (a SecurityKeyCreate) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
-	err = c.Stash().Set(shared.StashPathMFAMethod, "security_key")
+	err = c.Stash().Set(shared.StashPathCreateMFAOnlyCredential, true)
 	if err != nil {
 		return err
 	}

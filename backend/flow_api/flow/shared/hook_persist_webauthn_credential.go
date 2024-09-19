@@ -41,7 +41,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 
 	var mfaOnly bool
 	auditLogType := models.AuditLogPasskeyCreated
-	if c.Stash().Get(StashPathMFAMethod).String() == "security_key" {
+	if c.Stash().Get(StashPathCreateMFAOnlyCredential).Bool() {
 		mfaOnly = true
 		auditLogType = models.AuditLogSecurityKeyCreated
 	}
@@ -52,22 +52,26 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		return fmt.Errorf("failed so save credential: %w", err)
 	}
 
+	auditLogDetails := []auditlog.DetailOption{
+		auditlog.Detail("flow_id", c.GetFlowID()),
+	}
+
+	if credentialModel.MFAOnly {
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", credentialModel.ID))
+	} else {
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", credentialModel.ID))
+	}
+
 	err = deps.AuditLogger.CreateWithConnection(
 		deps.Tx,
 		deps.HttpContext,
 		auditLogType,
 		&models.User{ID: userId},
 		nil,
-		auditlog.Detail("credential_id", credentialModel.ID),
-		auditlog.Detail("flow_id", c.GetFlowID()))
+		auditLogDetails...)
 
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
-	}
-
-	err = c.Stash().Delete(StashPathMFAMethod)
-	if err != nil {
-		return fmt.Errorf("could not delete mfa_method from stash: %w", err)
 	}
 
 	if userModel, ok := c.Get("session_user").(*models.User); ok {

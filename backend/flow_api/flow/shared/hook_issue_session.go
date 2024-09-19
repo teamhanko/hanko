@@ -60,15 +60,25 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	// Audit log logins only, because user creation on registration implies that the user is logged
 	// in after a registration. Only login actions should set the "login_method" stash entry.
 	if c.Stash().Get(StashPathLoginMethod).Exists() {
+		auditLogDetails := []auditlog.DetailOption{
+			auditlog.Detail("login_method", c.Stash().Get(StashPathLoginMethod).String()),
+			auditlog.Detail("flow_id", c.GetFlowID()),
+		}
+
+		if c.Stash().Get(StashPathMFAUsageMethod).Exists() {
+			auditLogDetails = append(
+				auditLogDetails,
+				auditlog.Detail("mfa_method", c.Stash().Get(StashPathMFAUsageMethod).String()),
+			)
+		}
+
 		err = deps.AuditLogger.CreateWithConnection(
 			deps.Tx,
 			deps.HttpContext,
 			models.AuditLogLoginSuccess,
 			&models.User{ID: userId},
 			err,
-			auditlog.Detail("login_method", c.Stash().Get(StashPathLoginMethod).String()),
-			auditlog.Detail("mfa_method", c.Stash().Get(StashPathMFAMethod).String()),
-			auditlog.Detail("flow_id", c.GetFlowID()))
+			auditLogDetails...)
 
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
