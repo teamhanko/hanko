@@ -11,12 +11,17 @@ type ScheduleMFACreationStates struct {
 
 func (h ScheduleMFACreationStates) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
-
-	userHasWebauthn := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
 	mfaConfig := deps.Cfg.MFA
+	passwordsEnabled := deps.Cfg.Password.Enabled
+	passcodeEmailsEnabled := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
+	userHasEmail := c.Stash().Get(shared.StashPathEmail).Exists() || c.Stash().Get(shared.StashPathUserHasEmails).Bool()
+	userHasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
+	mfaLoginEnabled := (passwordsEnabled && userHasPassword) || (passcodeEmailsEnabled && userHasEmail)
+	mfaMethodsEnabled := mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled
+	acquireMFAMethod := (c.GetFlowName() == shared.FlowLogin && mfaConfig.AcquireOnLogin) ||
+		(c.GetFlowName() == shared.FlowRegistration && mfaConfig.AcquireOnRegistration)
 
-	if !userHasWebauthn && mfaConfig.Enabled && mfaConfig.AcquireOnRegistration &&
-		(mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled) {
+	if mfaConfig.Enabled && mfaLoginEnabled && acquireMFAMethod && mfaMethodsEnabled {
 		c.ScheduleStates(shared.StateMFAMethodChooser)
 	}
 

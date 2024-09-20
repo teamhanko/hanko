@@ -67,6 +67,11 @@ func (a WebauthnGenerateCreationOptions) Execute(c flowpilot.ExecutionContext) e
 		return err
 	}
 
+	err = c.Stash().Set(shared.StashPathCreateMFAOnlyCredential, false)
+	if err != nil {
+		return err
+	}
+
 	err = c.Payload().Set("creation_options", creationOptions)
 	if err != nil {
 		return err

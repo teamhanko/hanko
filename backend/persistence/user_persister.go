@@ -82,7 +82,8 @@ func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 		"Emails.Identities",
 		"WebauthnCredentials",
 		"PasswordCredential",
-		"Username").
+		"Username",
+		"OTPSecret").
 		LeftJoin("usernames", "usernames.user_id = users.id").
 		Where("usernames.username = (?)", username).
 		First(&user)

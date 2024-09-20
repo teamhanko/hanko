@@ -28,6 +28,11 @@ func (a SecurityKeyDelete) Initialize(c flowpilot.InitializationContext) {
 		return
 	}
 
+	if !deps.Cfg.MFA.Enabled || !deps.Cfg.MFA.SecurityKeys.Enabled {
+		c.SuspendAction()
+		return
+	}
+
 	if len(userModel.GetSecurityKeys()) <= 0 {
 		c.SuspendAction()
 		return

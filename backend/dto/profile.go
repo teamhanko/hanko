@@ -7,8 +7,9 @@ import (
 )
 
 type MFAConfig struct {
-	Enabled                   bool `json:"enabled"`
-	AuthenticatorAppConnected bool `json:"authenticator_app_connected"`
+	AuthAppSetUp        bool `json:"auth_app_set_up"`
+	TOTPEnabled         bool `json:"totp_enabled"`
+	SecurityKeysEnabled bool `json:"security_keys_enabled"`
 }
 
 type ProfileData struct {
@@ -43,7 +44,7 @@ func ProfileDataFromUserModel(user *models.User) *ProfileData {
 		UserID:       user.ID,
 		Passkeys:     webauthnCredentials,
 		SecurityKeys: securityKeys,
-		MFAConfig:    MFAConfig{AuthenticatorAppConnected: user.OTPSecret != nil},
+		MFAConfig:    MFAConfig{AuthAppSetUp: user.OTPSecret != nil},
 		Emails:       emails,
 		Username:     FromUsernameModel(user.Username),
 		CreatedAt:    user.CreatedAt,

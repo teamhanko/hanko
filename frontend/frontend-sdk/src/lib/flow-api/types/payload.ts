@@ -59,8 +59,9 @@ export interface Email {
 }
 
 export interface MFAConfig {
-  readonly enabled: boolean;
-  readonly authenticator_app_connected: boolean;
+  readonly auth_app_set_up: boolean;
+  readonly totp_enabled: boolean;
+  readonly security_keys_enabled: boolean;
 }
 
 export interface User {

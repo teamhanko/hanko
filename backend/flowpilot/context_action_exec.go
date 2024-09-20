@@ -210,6 +210,10 @@ func (aec *defaultActionExecutionContext) Revert() error {
 }
 
 func (aec *defaultActionExecutionContext) Continue(stateNames ...StateName) error {
+	if aec.flowError != nil {
+		return aec.Error(aec.flowError)
+	}
+
 	for _, stateName := range stateNames {
 		if _, ok := aec.flow.stateDetails[stateName]; !ok {
 			return fmt.Errorf("cannot continue, state does not exist: %s", stateName)
@@ -255,4 +259,8 @@ func (aec *defaultActionExecutionContext) SuspendAction() {
 
 func (aec *defaultActionExecutionContext) PreventRevert() {
 	aec.preventRevert = true
+}
+
+func (aec *defaultActionExecutionContext) ExecuteHook(a HookAction) error {
+	return a.Execute(aec)
 }

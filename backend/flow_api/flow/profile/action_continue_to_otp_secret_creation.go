@@ -42,7 +42,9 @@ func (a ContinueToOTPSecretCreation) Execute(c flowpilot.ExecutionContext) error
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	_ = c.Stash().Set(shared.StashPathEmail, userModel.Emails.GetPrimary().Address)
+	if userModel.Emails != nil {
+		_ = c.Stash().Set(shared.StashPathEmail, userModel.Emails.GetPrimary().Address)
+	}
 	_ = c.Stash().Set(shared.StashPathUsername, userModel.Username)
 
 	return c.Continue(shared.StateMFAOTPSecretCreation, shared.StateProfileInit)
