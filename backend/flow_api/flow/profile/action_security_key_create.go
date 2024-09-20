@@ -30,6 +30,10 @@ func (a SecurityKeyCreate) Initialize(c flowpilot.InitializationContext) {
 		return
 	}
 
+	if !deps.Cfg.MFA.Enabled || !deps.Cfg.MFA.SecurityKeys.Enabled {
+		c.SuspendAction()
+	}
+
 	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		c.SuspendAction()
 	}

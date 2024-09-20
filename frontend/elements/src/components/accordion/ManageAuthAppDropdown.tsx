@@ -14,7 +14,7 @@ interface Props {
   setCheckedItemID: StateUpdater<string>;
   onDelete: (event: Event) => Promise<void>;
   onConnect: (event: Event) => Promise<void>;
-  appConnected: boolean;
+  authAppSetUp: boolean;
 }
 
 const ManageAuthAppDropdown = ({
@@ -22,13 +22,13 @@ const ManageAuthAppDropdown = ({
   setCheckedItemID,
   onDelete,
   onConnect,
-  appConnected,
+  authAppSetUp,
 }: Props) => {
   const { t } = useContext(TranslateContext);
 
   const configuredLabel = (
     <span className={styles.description}>
-      {appConnected ? (
+      {authAppSetUp ? (
         <Fragment>
           {" -"} {t("labels.configured")}
         </Fragment>
@@ -51,19 +51,19 @@ const ManageAuthAppDropdown = ({
     >
       <Headline2>
         {t(
-          appConnected
+          authAppSetUp
             ? "headlines.authenticatorAppAlreadySetUp"
             : "headlines.authenticatorAppNotSetUp",
         )}
       </Headline2>
       <Paragraph>
         {t(
-          appConnected
+          authAppSetUp
             ? "texts.authenticatorAppAlreadySetUp"
             : "texts.authenticatorAppNotSetUp",
         )}
         <br />
-        {appConnected ? (
+        {authAppSetUp ? (
           <Link
             uiAction={"auth-app-remove"}
             onClick={(event: Event) => onDelete(event)}
