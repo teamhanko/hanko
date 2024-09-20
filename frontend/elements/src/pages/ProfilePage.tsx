@@ -355,7 +355,7 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.payload.user.mfa_config.enabled ? (
+      {flowState.payload.user.mfa_config.security_keys_enabled ? (
         <Fragment>
           <Headline1>{t("headlines.securityKeys")}</Headline1>
           <Paragraph>
@@ -384,16 +384,14 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.payload.user.mfa_config.enabled ? (
+      {flowState.payload.user.mfa_config.totp_enabled ? (
         <Fragment>
           <Headline1>{t("headlines.authenticatorApp")}</Headline1>
           <Paragraph>
             <ManageAuthAppDropdown
               onConnect={onAuthAppSetUp}
               onDelete={onAuthAppRemove}
-              appConnected={
-                flowState.payload.user.mfa_config.authenticator_app_connected
-              }
+              authAppSetUp={flowState.payload.user.mfa_config.auth_app_set_up}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
             />

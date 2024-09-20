@@ -22,10 +22,15 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	profileData := dto.ProfileDataFromUserModel(userModel)
-	profileData.MFAConfig.Enabled = deps.Cfg.MFA.Enabled
+	profileData.MFAConfig.TOTPEnabled = deps.Cfg.MFA.Enabled && deps.Cfg.MFA.TOTP.Enabled
+	profileData.MFAConfig.SecurityKeysEnabled = deps.Cfg.MFA.Enabled && deps.Cfg.MFA.SecurityKeys.Enabled
 
 	if !deps.Cfg.Passkey.Enabled {
 		profileData.Passkeys = nil
+	}
+
+	if !profileData.MFAConfig.SecurityKeysEnabled {
+		profileData.SecurityKeys = nil
 	}
 
 	err := c.Payload().Set("user", profileData)

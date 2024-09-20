@@ -18,6 +18,7 @@ const (
 	StashPathUserHasOTPSecret                       = "user_hat_otp_secret"
 	StashPathUserHasPasskey                         = "user_has_passkey"
 	StashPathUserHasPassword                        = "user_has_password"
+	StashPathUserHasSecurityKey                     = "user_has_security_key"
 	StashPathUserHasUsername                        = "user_has_username"
 	StashPathUserHasWebauthnCredential              = "user_has_webauthn_credential"
 	StashPathUserID                                 = "user_id"
@@ -25,7 +26,7 @@ const (
 	StashPathUsername                               = "username"
 	StashPathWebauthnAvailable                      = "webauthn_available"
 	StashPathWebauthnConditionalMediationAvailable  = "webauthn_conditional_mediation_available"
-	StashPathWebauthnCredential                     = "webauthn_credential"
+	StashPathWebauthnCredentials                    = "webauthn_credentials"
 	StashPathWebauthnPlatformAuthenticatorAvailable = "webauthn_platform_authenticator_available"
 	StashPathWebauthnSessionDataID                  = "webauthn_session_data_id"
 )

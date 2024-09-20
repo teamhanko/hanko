@@ -14,19 +14,19 @@ import (
 // WebauthnCredential is used by pop to map your webauthn_credentials database table to your go code.
 type WebauthnCredential struct {
 	ID              string     `db:"id" json:"id"`
-	Name            *string    `db:"name" json:"-"`
-	UserId          uuid.UUID  `db:"user_id" json:"-"`
-	PublicKey       string     `db:"public_key" json:"-"`
-	AttestationType string     `db:"attestation_type" json:"-"`
-	AAGUID          uuid.UUID  `db:"aaguid" json:"-"`
-	SignCount       int        `db:"sign_count" json:"-"`
-	LastUsedAt      *time.Time `db:"last_used_at" json:"-"`
-	CreatedAt       time.Time  `db:"created_at" json:"-"`
-	UpdatedAt       time.Time  `db:"updated_at" json:"-"`
-	Transports      Transports `has_many:"webauthn_credential_transports" json:"-"`
-	BackupEligible  bool       `db:"backup_eligible" json:"-"`
-	BackupState     bool       `db:"backup_state" json:"-"`
-	MFAOnly         bool       `db:"mfa_only" json:"-"`
+	Name            *string    `db:"name" json:"name"`
+	UserId          uuid.UUID  `db:"user_id" json:"user_id"`
+	PublicKey       string     `db:"public_key" json:"public_key"`
+	AttestationType string     `db:"attestation_type" json:"attestation_type"`
+	AAGUID          uuid.UUID  `db:"aaguid" json:"aaguid"`
+	SignCount       int        `db:"sign_count" json:"sign_count"`
+	LastUsedAt      *time.Time `db:"last_used_at" json:"last_used_at"`
+	CreatedAt       time.Time  `db:"created_at" json:"created_at"`
+	UpdatedAt       time.Time  `db:"updated_at" json:"updated_at"`
+	Transports      Transports `has_many:"webauthn_credential_transports" json:"transports"`
+	BackupEligible  bool       `db:"backup_eligible" json:"backup_eligible"`
+	BackupState     bool       `db:"backup_state" json:"backup_state"`
+	MFAOnly         bool       `db:"mfa_only" json:"mfa_only"`
 }
 
 type WebauthnCredentials []WebauthnCredential
