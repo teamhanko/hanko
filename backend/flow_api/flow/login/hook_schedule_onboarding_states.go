@@ -24,9 +24,9 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
-	states := append(mfaUsageStates, userDetailOnboardingStates...)
+	states := append(mfaUsageStates, mfaCreationStates...)
 	states = append(states, credentialOnboardingStates...)
-	states = append(states, mfaCreationStates...)
+	states = append(states, userDetailOnboardingStates...)
 	states = append(states, shared.StateSuccess)
 
 	c.ScheduleStates(states...)
@@ -67,20 +67,19 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 
 func (h ScheduleOnboardingStates) determineMFACreationStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
 	deps := h.GetDeps(c)
-	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
 
-	if !cfg.MFA.Enabled {
-		return result
-	}
+	mfaConfig := deps.Cfg.MFA
+	passwordsEnabled := deps.Cfg.Password.Enabled
+	passcodeEmailsEnabled := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
+	userHasEmail := c.Stash().Get(shared.StashPathEmail).Exists() || c.Stash().Get(shared.StashPathUserHasEmails).Bool()
+	userHasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
+	mfaLoginEnabled := (passwordsEnabled && userHasPassword) || (passcodeEmailsEnabled && userHasEmail)
+	mfaMethodsEnabled := mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled
+	acquireMFAMethod := (c.GetFlowName() == shared.FlowLogin && mfaConfig.AcquireOnLogin) ||
+		(c.GetFlowName() == shared.FlowRegistration && mfaConfig.AcquireOnRegistration)
 
-	passcodeLoginEligible := c.Stash().Get(shared.StashPathUserHasEmails).Bool() && deps.Cfg.Email.UseForAuthentication
-	useHasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
-	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
-	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
-
-	if (useHasPassword || passcodeLoginEligible) &&
-		!userHasOTPSecret && !userHasSecurityKey {
+	if mfaConfig.Enabled && mfaLoginEnabled && acquireMFAMethod && mfaMethodsEnabled {
 		result = append(result, shared.StateMFAMethodChooser)
 	}
 
