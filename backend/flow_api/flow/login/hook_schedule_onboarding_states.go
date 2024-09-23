@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -23,11 +24,15 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
-	states := append(mfaUsageStates, credentialOnboardingStates...)
-	states = append(states, userDetailOnboardingStates...)
-	states = append(states, shared.StateSuccess)
+	c.ScheduleStates(append(mfaUsageStates, credentialOnboardingStates...)...)
 
-	c.ScheduleStates(states...)
+	if len(userDetailOnboardingStates) == 0 {
+		_ = c.ExecuteHook(registration.ScheduleMFACreationStates{})
+	} else {
+		c.ScheduleStates(userDetailOnboardingStates...)
+	}
+
+	c.ScheduleStates(shared.StateSuccess)
 
 	return nil
 }
