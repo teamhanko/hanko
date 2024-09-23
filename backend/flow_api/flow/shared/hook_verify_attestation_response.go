@@ -64,5 +64,12 @@ func (h VerifyAttestationResponse) Execute(c flowpilot.HookExecutionContext) err
 		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
 	}
 
+	if mfaOnly {
+		err = c.Stash().Set(StashPathUserHasSecurityKey, true)
+		if err != nil {
+			return fmt.Errorf("failed to set user_has_security_key to the stash: %w", err)
+		}
+	}
+
 	return nil
 }

@@ -20,12 +20,10 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	}
 
 	mfaUsageStates := h.determineMFAUsageStates(c)
-	mfaCreationStates := h.determineMFACreationStates(c)
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
-	states := append(mfaUsageStates, mfaCreationStates...)
-	states = append(states, credentialOnboardingStates...)
+	states := append(mfaUsageStates, credentialOnboardingStates...)
 	states = append(states, userDetailOnboardingStates...)
 	states = append(states, shared.StateSuccess)
 
@@ -60,31 +58,6 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 		}
 	} else if cfg.MFA.TOTP.Enabled && userHasOTPSecret {
 		result = append(result, shared.StateLoginOTP)
-	}
-
-	return result
-}
-
-func (h ScheduleOnboardingStates) determineMFACreationStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
-	deps := h.GetDeps(c)
-	result := make([]flowpilot.StateName, 0)
-
-	mfaConfig := deps.Cfg.MFA
-	passwordsEnabled := deps.Cfg.Password.Enabled
-	passcodeEmailsEnabled := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
-	userHasEmail := c.Stash().Get(shared.StashPathEmail).Exists() || c.Stash().Get(shared.StashPathUserHasEmails).Bool()
-	userHasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
-	mfaLoginEnabled := (passwordsEnabled && userHasPassword) || (passcodeEmailsEnabled && userHasEmail)
-	mfaMethodsEnabled := mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled
-	acquireMFAMethod := (c.GetFlowName() == shared.FlowLogin && mfaConfig.AcquireOnLogin) ||
-		(c.GetFlowName() == shared.FlowRegistration && mfaConfig.AcquireOnRegistration)
-	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
-	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
-
-	if !userHasSecurityKey && !userHasOTPSecret &&
-		mfaConfig.Enabled && mfaLoginEnabled &&
-		acquireMFAMethod && mfaMethodsEnabled {
-		result = append(result, shared.StateMFAMethodChooser)
 	}
 
 	return result
