@@ -97,6 +97,7 @@ export interface MFAMethodChooserActions {
   readonly continue_to_otp_secret_creation?: Action<null>;
   readonly continue_to_security_key_creation?: Action<null>;
   readonly skip?: Action<null>;
+  readonly back?: Action<null>;
 }
 
 export interface MFAAOTPSecretCreationActions {

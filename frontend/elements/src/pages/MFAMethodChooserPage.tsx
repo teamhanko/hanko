@@ -53,6 +53,14 @@ const MFAMMethodChooserPage = (props: Props) => {
     stateHandler[nextState.name](nextState);
   };
 
+  const onBackClick = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("back");
+    const nextState = await flowState.actions.back(null).run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
   const singleAction = useMemo(() => {
     const { actions } = flowState;
 
@@ -117,7 +125,14 @@ const MFAMMethodChooserPage = (props: Props) => {
         )}
       </Content>
       <Footer>
-        <span />
+        <Link
+          uiAction={"back"}
+          onClick={onBackClick}
+          loadingSpinnerPosition={"right"}
+          hidden={!flowState.actions.back?.(null)}
+        >
+          {t("labels.back")}
+        </Link>
         <Link
           uiAction={"skip"}
           onClick={onSkipClick}

@@ -82,7 +82,8 @@ var MFACreationSubFlow = flowpilot.NewSubFlow(shared.FlowMFACreation).
 	State(shared.StateMFAMethodChooser,
 		mfa_creation.ContinueToOTPSecretCreation{},
 		mfa_creation.ContinueToSecurityKeyCreation{},
-		mfa_creation.SkipMFA{}).
+		mfa_creation.SkipMFA{},
+		shared.Back{}).
 	BeforeState(shared.StateMFAOTPSecretCreation,
 		mfa_creation.OTPSecretGenerate{}).
 	State(shared.StateMFAOTPSecretCreation,
