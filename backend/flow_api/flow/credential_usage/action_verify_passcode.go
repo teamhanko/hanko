@@ -105,6 +105,11 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 		return err
 	}
 
+	err = c.Stash().Set(shared.StashPathUserHasEmails, true)
+	if err != nil {
+		return err
+	}
+
 	c.PreventRevert()
 
 	passwordCreationScheduled := false
