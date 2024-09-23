@@ -94,10 +94,11 @@ export interface LoginSecurityKeyActions {
 }
 
 export interface MFAMethodChooserActions {
+  readonly back?: Action<null>;
   readonly continue_to_otp_secret_creation?: Action<null>;
   readonly continue_to_security_key_creation?: Action<null>;
   readonly skip?: Action<null>;
-  readonly back?: Action<null>;
+  readonly use_passkey_for_mfa?: Action<null>;
 }
 
 export interface MFAAOTPSecretCreationActions {

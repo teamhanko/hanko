@@ -80,6 +80,7 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 
 var MFACreationSubFlow = flowpilot.NewSubFlow(shared.FlowMFACreation).
 	State(shared.StateMFAMethodChooser,
+		mfa_creation.UsePasskeyForMFA{},
 		mfa_creation.ContinueToOTPSecretCreation{},
 		mfa_creation.ContinueToSecurityKeyCreation{},
 		mfa_creation.SkipMFA{},

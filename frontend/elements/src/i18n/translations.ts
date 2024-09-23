@@ -134,6 +134,7 @@ export interface Translation {
     setUsername: string;
     newSecurityKeyName: string;
     createSecurityKey: string;
+    useMyPasskey: string;
   };
   errors: {
     somethingWentWrong: string;

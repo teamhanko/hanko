@@ -40,6 +40,7 @@ const (
 	ActionUsernameCreate                         flowpilot.ActionName = "username_create"
 	ActionUsernameDelete                         flowpilot.ActionName = "username_delete"
 	ActionUsernameUpdate                         flowpilot.ActionName = "username_update"
+	ActionUsePasskeyForMFA                       flowpilot.ActionName = "use_passkey_for_mfa"
 	ActionVerifyPasscode                         flowpilot.ActionName = "verify_passcode"
 	ActionWebauthnCredentialCreate               flowpilot.ActionName = "webauthn_credential_create"
 	ActionWebauthnCredentialDelete               flowpilot.ActionName = "webauthn_credential_delete"

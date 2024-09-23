@@ -111,15 +111,10 @@ func (p *userPersister) Create(user models.User) error {
 }
 
 func (p *userPersister) Update(user models.User) error {
-	vErr, err := p.db.ValidateAndUpdate(&user)
+	err := p.db.Update(&user)
 	if err != nil {
 		return fmt.Errorf("failed to update user: %w", err)
 	}
-
-	if vErr != nil && vErr.HasAny() {
-		return fmt.Errorf("user object validation failed: %w", vErr)
-	}
-
 	return nil
 }
 

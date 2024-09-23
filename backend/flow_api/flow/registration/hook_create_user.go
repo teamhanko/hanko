@@ -47,6 +47,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		c.Stash().Get(shared.StashPathWebauthnCredentials).Array(),
 		c.Stash().Get(shared.StashPathNewPassword).String(),
 		c.Stash().Get(shared.StashPathOTPSecret).String(),
+		c.Stash().Get(shared.StashPathUsePasskeyForMFA).Bool(),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
@@ -57,7 +58,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string) error {
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string, usePasskeyForMFA bool) error {
 	deps := h.GetDeps(c)
 
 	now := time.Now().UTC()
@@ -65,9 +66,10 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	var auditLogDetails []auditlog.DetailOption
 
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
-		ID:        id,
-		CreatedAt: now,
-		UpdatedAt: now,
+		ID:               id,
+		UsePasskeyForMFA: usePasskeyForMFA,
+		CreatedAt:        now,
+		UpdatedAt:        now,
 	})
 	if err != nil {
 		return err

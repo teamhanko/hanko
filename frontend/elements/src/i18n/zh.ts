@@ -134,6 +134,7 @@ export const zh: Translation = {
     authenticatorAppRemove: "[TRANSLATION MISSING]",
     configured: "[TRANSLATION MISSING]",
     useAnotherMethod: "[TRANSLATION MISSING]",
+    useMyPasskey: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",

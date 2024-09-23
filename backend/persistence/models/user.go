@@ -21,6 +21,7 @@ type User struct {
 	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
 	Username            *Username           `has_one:"username" json:"username,omitempty"`
 	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
+	UsePasskeyForMFA    bool                `db:"use_passkey_for_mfa" json:"use_passkey_for_mfa"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 }
 

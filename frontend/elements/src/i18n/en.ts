@@ -146,6 +146,7 @@ export const en: Translation = {
     authenticatorAppRemove: "Delete OTP secret",
     configured: "configured",
     useAnotherMethod: "Use another method",
+    useMyPasskey: "Use my passkey",
   },
   errors: {
     somethingWentWrong:

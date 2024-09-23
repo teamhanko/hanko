@@ -22,8 +22,12 @@ func (h ScheduleMFACreationStates) Execute(c flowpilot.HookExecutionContext) err
 		(c.GetFlowName() == shared.FlowRegistration && mfaConfig.AcquireOnRegistration)
 	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
+	usePasskeyForMFA := c.GetFlowName() == shared.FlowLogin &&
+		c.Stash().Get(shared.StashPathUsePasskeyForMFA).Bool() &&
+		c.Stash().Get(shared.StashPathUserHasPasskey).Bool()
 
-	if !userHasSecurityKey && !userHasOTPSecret &&
+	if !usePasskeyForMFA &&
+		!userHasSecurityKey && !userHasOTPSecret &&
 		mfaConfig.Enabled && mfaLoginEnabled &&
 		acquireMFAMethod && mfaMethodsEnabled {
 		c.ScheduleStates(shared.StateMFAMethodChooser)

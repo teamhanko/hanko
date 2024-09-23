@@ -53,6 +53,14 @@ const MFAMMethodChooserPage = (props: Props) => {
     stateHandler[nextState.name](nextState);
   };
 
+  const onUsePasskeySubmit = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("passkey-submit");
+    const nextState = await flowState.actions.use_passkey_for_mfa(null).run();
+    setLoadingAction(null);
+    stateHandler[nextState.name](nextState);
+  };
+
   const onBackClick = async (event: Event) => {
     event.preventDefault();
     setLoadingAction("back");
@@ -93,6 +101,14 @@ const MFAMMethodChooserPage = (props: Props) => {
           </Form>
         ) : (
           <Fragment>
+            <Form
+              hidden={!flowState.actions.use_passkey_for_mfa?.(null)}
+              onSubmit={onUsePasskeySubmit}
+            >
+              <Button secondary uiAction={"passkey-submit"} icon={"passkey"}>
+                {t("labels.useMyPasskey")}
+              </Button>
+            </Form>
             <Form
               hidden={
                 !flowState.actions.continue_to_security_key_creation?.(null)

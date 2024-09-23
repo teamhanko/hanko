@@ -169,6 +169,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		_ = c.Stash().Set(shared.StashPathUserHasEmails, len(userModel.Emails) > 0)
 		_ = c.Stash().Set(shared.StashPathUserHasOTPSecret, userModel.OTPSecret != nil)
 		_ = c.Stash().Set(shared.StashPathUserHasSecurityKey, len(userModel.GetSecurityKeys()) > 0)
+		_ = c.Stash().Set(shared.StashPathUsePasskeyForMFA, userModel.UsePasskeyForMFA)
 	}
 
 	if !treatIdentifierAsEmail && userModel != nil && !deps.Cfg.Password.Enabled && userModel.Emails.GetPrimary() == nil {

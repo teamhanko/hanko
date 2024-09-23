@@ -69,6 +69,11 @@ func (h VerifyAttestationResponse) Execute(c flowpilot.HookExecutionContext) err
 		if err != nil {
 			return fmt.Errorf("failed to set user_has_security_key to the stash: %w", err)
 		}
+	} else {
+		err = c.Stash().Set(StashPathUserHasPasskey, true)
+		if err != nil {
+			return fmt.Errorf("failed to set user_has_passkey to the stash: %w", err)
+		}
 	}
 
 	return nil

@@ -139,6 +139,7 @@ export const it: Translation = {
     authenticatorAppRemove: "[TRANSLATION MISSING]",
     configured: "[TRANSLATION MISSING]",
     useAnotherMethod: "[TRANSLATION MISSING]",
+    useMyPasskey: "[TRANSLATION MISSING]",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

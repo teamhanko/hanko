@@ -24,6 +24,7 @@ const (
 	StashPathUserID                                 = "user_id"
 	StashPathUserIdentification                     = "user_identification"
 	StashPathUsername                               = "username"
+	StashPathUsePasskeyForMFA                       = "use_passkey_for_mfa"
 	StashPathWebauthnAvailable                      = "webauthn_available"
 	StashPathWebauthnConditionalMediationAvailable  = "webauthn_conditional_mediation_available"
 	StashPathWebauthnCredentials                    = "webauthn_credentials"
