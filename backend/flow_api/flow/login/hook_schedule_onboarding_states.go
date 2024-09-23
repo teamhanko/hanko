@@ -78,8 +78,12 @@ func (h ScheduleOnboardingStates) determineMFACreationStates(c flowpilot.HookExe
 	mfaMethodsEnabled := mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled
 	acquireMFAMethod := (c.GetFlowName() == shared.FlowLogin && mfaConfig.AcquireOnLogin) ||
 		(c.GetFlowName() == shared.FlowRegistration && mfaConfig.AcquireOnRegistration)
+	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
+	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 
-	if mfaConfig.Enabled && mfaLoginEnabled && acquireMFAMethod && mfaMethodsEnabled {
+	if !userHasSecurityKey && !userHasOTPSecret &&
+		mfaConfig.Enabled && mfaLoginEnabled &&
+		acquireMFAMethod && mfaMethodsEnabled {
 		result = append(result, shared.StateMFAMethodChooser)
 	}
 
