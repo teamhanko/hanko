@@ -18,7 +18,16 @@ type OTPSecretGenerate struct {
 func (h OTPSecretGenerate) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	if !deps.Cfg.MFA.TOTP.Enabled {
+	if c.GetCurrentState() == shared.StateMFAOTPSecretCreation &&
+		c.Stash().Get(shared.StashPathOTPSecret).Exists() &&
+		c.Stash().Get(shared.StashPathOTPImageSource).Exists() {
+
+		otpSecret := c.Stash().Get(shared.StashPathOTPSecret).String()
+		otpImageSource := c.Stash().Get(shared.StashPathOTPImageSource).String()
+
+		_ = c.Payload().Set("otp_secret", otpSecret)
+		_ = c.Payload().Set("otp_image_source", otpImageSource)
+
 		return nil
 	}
 
@@ -54,11 +63,15 @@ func (h OTPSecretGenerate) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("could not PNG encode OTP image: %w", err)
 	}
 
-	_ = c.Stash().Set(shared.StashPathOTPSecret, otpKey.Secret())
-	_ = c.Payload().Set("otp_secret", otpKey.Secret())
-
 	otpImageSource := fmt.Sprintf(
 		"data:image/png;base64,%s", base64.StdEncoding.EncodeToString(otpImagePNGBuffer.Bytes()))
+
+	otpSecret := otpKey.Secret()
+
+	_ = c.Stash().Set(shared.StashPathOTPSecret, otpSecret)
+	_ = c.Stash().Set(shared.StashPathOTPImageSource, otpImageSource)
+
+	_ = c.Payload().Set("otp_secret", otpSecret)
 	_ = c.Payload().Set("otp_image_source", otpImageSource)
 
 	return nil
