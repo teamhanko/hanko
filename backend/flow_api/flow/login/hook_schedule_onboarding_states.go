@@ -50,12 +50,12 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 		return result
 	}
 
-	userHasWebauthnCredential := c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
+	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
 	platformAuthenticatorAvailable := c.Stash().Get(shared.StashPathWebauthnPlatformAuthenticatorAvailable).Bool()
 	userCanUseSecurityKey := platformAuthenticatorAvailable || cfg.MFA.SecurityKeys.AuthenticatorAttachment != "platform"
 
-	if cfg.MFA.SecurityKeys.Enabled && userHasWebauthnCredential {
+	if cfg.MFA.SecurityKeys.Enabled && userHasSecurityKey {
 		if userCanUseSecurityKey {
 			result = append(result, shared.StateLoginSecurityKey)
 		} else {
