@@ -134,7 +134,12 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 
 	query := p.db.
 		Q().
-		EagerPreload("Emails", "Emails.PrimaryEmail", "WebauthnCredentials", "Username").
+		EagerPreload(
+			"Emails",
+			"Emails.PrimaryEmail",
+			"WebauthnCredentials",
+			"WebauthnCredentials.Transports",
+			"Username").
 		LeftJoin("emails", "emails.user_id = users.id").
 		LeftJoin("usernames", "usernames.user_id = users.id")
 	query = p.addQueryParamsToSqlQuery(query, userId, email, username)
@@ -156,10 +161,20 @@ func (p *userPersister) List(page int, perPage int, userId uuid.UUID, email stri
 
 func (p *userPersister) All() ([]models.User, error) {
 	users := []models.User{}
-	err := p.db.EagerPreload("Emails", "Emails.PrimaryEmail", "Emails.Identities", "WebauthnCredentials", "Username").All(&users)
+
+	err := p.db.EagerPreload(
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"WebauthnCredentials.Transports",
+		"Username",
+	).All(&users)
+
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch users: %w", err)
 	}
