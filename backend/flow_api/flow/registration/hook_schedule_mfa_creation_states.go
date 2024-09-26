@@ -11,6 +11,12 @@ type ScheduleMFACreationStates struct {
 
 func (h ScheduleMFACreationStates) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
+
+	if c.IsStateScheduled(shared.StatePasswordCreation) {
+		// Delay MFA onboarding until a password has eventually been created
+		return nil
+	}
+
 	mfaConfig := deps.Cfg.MFA
 	passwordsEnabled := deps.Cfg.Password.Enabled
 	passcodeEmailsEnabled := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication

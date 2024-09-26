@@ -43,6 +43,15 @@ func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	return false
 }
 
+func (fc *defaultFlowContext) IsStateScheduled(name StateName) bool {
+	for _, state := range fc.stash.getScheduledStateNames() {
+		if state == name {
+			return true
+		}
+	}
+	return false
+}
+
 // GetPreviousState returns the previous state of the flow.
 func (fc *defaultFlowContext) GetPreviousState() StateName {
 	return fc.stash.getPreviousStateName()
