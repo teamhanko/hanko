@@ -63,7 +63,7 @@ type UserListRequest struct {
 	PerPage       int    `query:"per_page"`
 	Page          int    `query:"page"`
 	Email         string `query:"email"`
-	UserId        string `query:"user_id"`
+	UserID        string `query:"user_id"`
 	Username      string `query:"username"`
 	SortDirection string `query:"sort_direction"`
 }
@@ -83,11 +83,14 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 		request.PerPage = 20
 	}
 
-	userId := uuid.Nil
-	if request.UserId != "" {
-		userId, err = uuid.FromString(request.UserId)
-		if err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "failed to parse user_id as uuid").SetInternal(err)
+	var userIDs []uuid.UUID
+	if request.UserID != "" {
+		for _, userIDString := range strings.Split(request.UserID, ",") {
+			userID, err := uuid.FromString(userIDString)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusBadRequest, "failed to parse user_id as uuid").SetInternal(err)
+			}
+			userIDs = append(userIDs, userID)
 		}
 	}
 
@@ -104,12 +107,12 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	email := strings.ToLower(request.Email)
 	username := strings.ToLower(request.Username)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userId, email, username, request.SortDirection)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userIDs, email, username, request.SortDirection)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}
 
-	userCount, err := h.persister.GetUserPersister().Count(userId, email, username)
+	userCount, err := h.persister.GetUserPersister().Count(userIDs, email, username)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of users: %w", err)
 	}

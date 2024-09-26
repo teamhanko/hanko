@@ -52,7 +52,7 @@ func (s *userSuite) TestUserHandler_Create_TokenInCookie() {
 		s.NoError(err)
 		s.False(user.UserID.IsNil())
 
-		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
+		count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 		s.NoError(err)
 		s.Equal(1, count)
 
@@ -97,7 +97,7 @@ func (s *userSuite) TestUserHandler_Create_TokenInHeader() {
 		s.NoError(err)
 		s.False(user.UserID.IsNil())
 
-		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
+		count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 		s.NoError(err)
 		s.Equal(1, count)
 
@@ -137,7 +137,7 @@ func (s *userSuite) TestUserHandler_Create_CaseInsensitive() {
 		s.NoError(err)
 		s.False(user.UserID.IsNil())
 
-		count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
+		count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 		s.NoError(err)
 		s.Equal(1, count)
 
@@ -572,7 +572,7 @@ func (s *userSuite) TestUserHandler_Delete() {
 		s.Equal("Max-Age=0", strings.TrimSpace(split[2]))
 	}
 
-	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 	s.NoError(err)
 	s.Equal(0, count)
 }

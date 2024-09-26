@@ -38,7 +38,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 
 	s.Equal(http.StatusNoContent, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 	s.Require().NoError(err)
 	s.Equal(2, count)
 }
@@ -59,7 +59,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 
 	s.Equal(http.StatusNotFound, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count(uuid.Nil, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 	s.Require().NoError(err)
 	s.Equal(3, count)
 }
@@ -141,6 +141,33 @@ func (s *userAdminSuite) TestUserHandlerAdmin_List_NoUsers() {
 
 		s.Equal(0, len(got))
 		s.Equal("<http://example.com/users?page=1&per_page=20>; rel=\"first\"", rec.Header().Get("Link"))
+	}
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_List_MultipleUserIDs() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/user_admin")
+	s.Require().NoError(err)
+
+	e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+	req := httptest.NewRequest(http.MethodGet, "/users?user_id=b5dd5267-b462-48be-b70d-bcd6f1bbe7a5,e0282f3f-b211-4f0e-b777-6fabc69287c9", nil)
+	rec := httptest.NewRecorder()
+
+	e.ServeHTTP(rec, req)
+
+	if s.Equal(http.StatusOK, rec.Code) {
+		s.Equal("2", rec.Header().Get("X-Total-Count"))
+
+		var got []models.User
+		err := json.Unmarshal(rec.Body.Bytes(), &got)
+		s.Require().NoError(err)
+
+		s.Equal(2, len(got))
+		s.Equal("<http://example.com/users?page=1&per_page=20&user_id=b5dd5267-b462-48be-b70d-bcd6f1bbe7a5%2Ce0282f3f-b211-4f0e-b777-6fabc69287c9>; rel=\"first\"", rec.Header().Get("Link"))
 	}
 }
 
