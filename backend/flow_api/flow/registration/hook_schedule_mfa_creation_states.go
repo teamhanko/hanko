@@ -17,6 +17,11 @@ func (h ScheduleMFACreationStates) Execute(c flowpilot.HookExecutionContext) err
 		return nil
 	}
 
+	if c.StateVisited(shared.StateMFAMethodChooser) {
+		// Show MFA onboarding only once within a flow unless states have been reverted.
+		return nil
+	}
+
 	mfaConfig := deps.Cfg.MFA
 	passwordsEnabled := deps.Cfg.Password.Enabled
 	passcodeEmailsEnabled := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
