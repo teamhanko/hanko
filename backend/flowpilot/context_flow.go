@@ -52,6 +52,10 @@ func (fc *defaultFlowContext) IsStateScheduled(name StateName) bool {
 	return false
 }
 
+func (fc *defaultFlowContext) StateVisited(name StateName) bool {
+	return fc.stash.stateVisited(name)
+}
+
 // GetPreviousState returns the previous state of the flow.
 func (fc *defaultFlowContext) GetPreviousState() StateName {
 	return fc.stash.getPreviousStateName()
