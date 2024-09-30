@@ -30,6 +30,8 @@ type flowContext interface {
 	GetInitialState() StateName
 	// GetCurrentState returns the current state of the flow.
 	GetCurrentState() StateName
+	IsStateScheduled(StateName) bool
+	StateVisited(name StateName) bool
 	GetScheduledStates() []StateName
 	// GetPreviousState returns the previous state of the flow.
 	GetPreviousState() StateName

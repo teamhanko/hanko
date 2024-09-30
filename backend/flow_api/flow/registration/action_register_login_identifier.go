@@ -160,7 +160,16 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	return c.Continue(append(a.generateRegistrationStates(c), shared.StateSuccess)...)
+	states := a.generateRegistrationStates(c)
+
+	if len(states) == 0 {
+		err = c.ExecuteHook(ScheduleMFACreationStates{})
+		if err != nil {
+			return err
+		}
+	}
+
+	return c.Continue(append(states, shared.StateSuccess)...)
 }
 
 func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {

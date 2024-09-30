@@ -33,6 +33,7 @@ type stash interface {
 	addScheduledStateNames(...StateName)
 	getScheduledStateNames() []StateName
 	useCompression(bool)
+	stateVisited(name StateName) bool
 
 	jsonmanager.JSONManager
 }
@@ -239,6 +240,18 @@ func (h *defaultStash) push(newData string, revertible, writeHistory bool, nextS
 	}
 
 	return nil
+}
+
+func (h *defaultStash) stateVisited(name StateName) bool {
+	visited := false
+	h.jm.Get(stashKeyHistory).ForEach(func(key, value gjson.Result) bool {
+		if StateName(value.Get(stashKeyState).String()) == name {
+			visited = true
+			return false
+		}
+		return true
+	})
+	return visited
 }
 
 func (h *defaultStash) revertState() error {
