@@ -25,6 +25,11 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
 	c.ScheduleStates(mfaUsageStates...)
+
+	if c.Stash().Get(shared.StashPathPasswordRecoveryPending).Bool() {
+		c.ScheduleStates(shared.StateLoginPasswordRecovery)
+	}
+
 	c.ScheduleStates(userDetailOnboardingStates...)
 
 	if len(credentialOnboardingStates) == 0 {
@@ -89,6 +94,11 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	conditionalAcquirePassword := cfg.Password.AcquireOnLogin == "conditional"
 	neverAcquirePasskey := cfg.Passkey.AcquireOnLogin == "never"
 	neverAcquirePassword := cfg.Password.AcquireOnLogin == "never"
+
+	if c.Stash().Get(shared.StashPathPasswordRecoveryPending).Bool() {
+		// never acquire password, when recovery has been initiated
+		neverAcquirePassword = true
+	}
 
 	if passwordAndPasskeyEnabled {
 		if alwaysAcquirePasskey && alwaysAcquirePassword {

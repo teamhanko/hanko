@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
@@ -74,6 +75,16 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 	err = c.Stash().Set(shared.StashPathUserHasPassword, true)
 	if err != nil {
 		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	}
+
+	err = c.Stash().Set(shared.StashPathPasswordRecoveryPending, false)
+	if err != nil {
+		return fmt.Errorf("failed to set pw_recovery_pending to the stash: %w", err)
+	}
+
+	err = c.ExecuteHook(registration.ScheduleMFACreationStates{})
+	if err != nil {
+		return err
 	}
 
 	c.PreventRevert()
