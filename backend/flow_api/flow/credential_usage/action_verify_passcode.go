@@ -112,19 +112,8 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 
 	c.PreventRevert()
 
-	passwordCreationScheduled := false
-
-	for _, state := range c.GetScheduledStates() {
-		if state == shared.StatePasswordCreation {
-			passwordCreationScheduled = true
-			break
-		}
-	}
-
-	if c.GetFlowName() == shared.FlowRegistration && !passwordCreationScheduled {
-		if err = c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
-			return err
-		}
+	if err = c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
+		return err
 	}
 
 	return c.Continue()

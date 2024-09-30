@@ -24,12 +24,15 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
-	c.ScheduleStates(append(mfaUsageStates, credentialOnboardingStates...)...)
+	c.ScheduleStates(mfaUsageStates...)
+	c.ScheduleStates(userDetailOnboardingStates...)
 
-	if len(userDetailOnboardingStates) == 0 {
-		_ = c.ExecuteHook(registration.ScheduleMFACreationStates{})
+	if len(credentialOnboardingStates) == 0 {
+		if err := c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
+			return err
+		}
 	} else {
-		c.ScheduleStates(userDetailOnboardingStates...)
+		c.ScheduleStates(credentialOnboardingStates...)
 	}
 
 	c.ScheduleStates(shared.StateSuccess)

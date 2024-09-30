@@ -122,7 +122,6 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 		AfterState(shared.StateOnboardingEmail, login.CreateEmail{}).
 		AfterState(shared.StatePasscodeConfirmation, login.CreateEmail{}).
 		AfterFlow(shared.FlowCredentialUsage, login.ScheduleOnboardingStates{}).
-		AfterFlow(shared.FlowUserDetails, registration.ScheduleMFACreationStates{}).
 		SubFlows(
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,

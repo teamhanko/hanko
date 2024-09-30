@@ -1,6 +1,7 @@
 package credential_onboarding
 
 import (
+	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -51,6 +52,10 @@ func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
 		!c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool() &&
 		c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
 		return c.Continue(shared.StateOnboardingCreatePasskey)
+	}
+
+	if err := c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
+		return err
 	}
 
 	return c.Continue()

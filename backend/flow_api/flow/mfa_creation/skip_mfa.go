@@ -24,6 +24,7 @@ func (a SkipMFA) Initialize(c flowpilot.InitializationContext) {
 		c.SuspendAction()
 	}
 }
+
 func (a SkipMFA) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue()
 }
