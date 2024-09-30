@@ -163,7 +163,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	states := a.generateRegistrationStates(c)
 
 	if len(states) == 0 {
-		err = c.ExecuteHook(ScheduleMFACreationStates{})
+		err = c.ExecuteHook(shared.ScheduleMFACreationStates{})
 		if err != nil {
 			return err
 		}
