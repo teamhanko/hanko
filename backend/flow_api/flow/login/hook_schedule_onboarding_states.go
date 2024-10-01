@@ -2,7 +2,6 @@ package login
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -25,16 +24,13 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
 	c.ScheduleStates(mfaUsageStates...)
-	c.ScheduleStates(userDetailOnboardingStates...)
 
-	if len(credentialOnboardingStates) == 0 {
-		if err := c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
-			return err
-		}
-	} else {
-		c.ScheduleStates(credentialOnboardingStates...)
+	if c.Stash().Get(shared.StashPathPasswordRecoveryPending).Bool() {
+		c.ScheduleStates(shared.StateLoginPasswordRecovery)
 	}
 
+	c.ScheduleStates(userDetailOnboardingStates...)
+	c.ScheduleStates(credentialOnboardingStates...)
 	c.ScheduleStates(shared.StateSuccess)
 
 	return nil
@@ -89,6 +85,11 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	conditionalAcquirePassword := cfg.Password.AcquireOnLogin == "conditional"
 	neverAcquirePasskey := cfg.Passkey.AcquireOnLogin == "never"
 	neverAcquirePassword := cfg.Password.AcquireOnLogin == "never"
+
+	if c.Stash().Get(shared.StashPathPasswordRecoveryPending).Bool() {
+		// never acquire password, when recovery has been initiated
+		neverAcquirePassword = true
+	}
 
 	if passwordAndPasskeyEnabled {
 		if alwaysAcquirePasskey && alwaysAcquirePassword {
