@@ -14,6 +14,7 @@ const (
 	StashPathPasscodeEmail                          = "sticky.passcode_email"
 	StashPathPasscodeID                             = "sticky.passcode_id"
 	StashPathPasscodeTemplate                       = "passcode_template"
+	StashPathPasswordRecoveryPending                = "pw_recovery_pending"
 	StashPathSkipUserCreation                       = "skip_user_creation"
 	StashPathUserHasEmails                          = "user_has_emails"
 	StashPathUserHasOTPSecret                       = "user_hat_otp_secret"

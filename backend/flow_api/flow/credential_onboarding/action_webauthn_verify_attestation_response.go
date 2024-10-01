@@ -1,7 +1,6 @@
 package credential_onboarding
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
@@ -37,7 +36,7 @@ func (a WebauthnVerifyAttestationResponse) Execute(c flowpilot.ExecutionContext)
 
 	c.PreventRevert()
 
-	if err := c.ExecuteHook(registration.ScheduleMFACreationStates{}); err != nil {
+	if err := c.ExecuteHook(shared.ScheduleMFACreationStates{}); err != nil {
 		return err
 	}
 

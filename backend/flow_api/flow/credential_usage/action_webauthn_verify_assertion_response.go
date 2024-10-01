@@ -108,6 +108,11 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		}
 	}
 
+	err = c.ExecuteHook(shared.ScheduleMFACreationStates{})
+	if err != nil {
+		return err
+	}
+
 	c.PreventRevert()
 
 	return c.Continue()

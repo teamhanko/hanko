@@ -37,5 +37,7 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 		}
 	}
 
-	return c.Continue(shared.StatePasscodeConfirmation, shared.StateLoginPasswordRecovery)
+	_ = c.Stash().Set(shared.StashPathPasswordRecoveryPending, true)
+
+	return c.Continue(shared.StatePasscodeConfirmation)
 }
