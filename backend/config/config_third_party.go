@@ -3,11 +3,12 @@ package config
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/fatih/structs"
 	"github.com/gobwas/glob"
 	"github.com/invopop/jsonschema"
 	orderedmap "github.com/wk8/go-ordered-map/v2"
-	"strings"
 )
 
 type ThirdParty struct {
@@ -113,6 +114,8 @@ type ThirdPartyProviders struct {
 	LinkedIn ThirdPartyProvider `yaml:"linkedin" json:"linkedin,omitempty" koanf:"linkedin"`
 	// `microsoft` contains the provider configuration for Microsoft.
 	Microsoft ThirdPartyProvider `yaml:"microsoft" json:"microsoft,omitempty" koanf:"microsoft"`
+	// `facebook` contains the provider configuration for Facebook.
+	Facebook ThirdPartyProvider `yaml:"facebook" json:"facebook,omitempty" koanf:"facebook"`
 }
 
 func (p *ThirdPartyProviders) Validate() error {
