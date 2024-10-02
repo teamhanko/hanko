@@ -104,6 +104,7 @@ export const en: Translation = {
     setUsername: "Set username",
     changePassword: "Change password",
     setPassword: "Set password",
+    rememberMe: "Remember me",
   },
   errors: {
     somethingWentWrong:

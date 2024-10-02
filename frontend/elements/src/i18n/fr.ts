@@ -108,6 +108,7 @@ export const fr: Translation = {
     setUsername: "Définir le nom d'utilisateur",
     changePassword: "Changer le mot de passe",
     setPassword: "Définir le mot de passe",
+    rememberMe: "Rester connecté",
   },
   errors: {
     somethingWentWrong:
