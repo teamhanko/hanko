@@ -22,6 +22,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Footer from "../components/wrapper/Footer";
+import LastUsed from "../components/form/LastUsed";
 
 interface Props {
   state: State<"login_init">;
@@ -41,6 +42,8 @@ const LoginInitPage = (props: Props) => {
     hidePasskeyButtonOnLogin,
   } = useContext(AppContext);
 
+  const localStorage = window.localStorage;
+
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
   const [identifier, setIdentifier] = useState<string>(
     uiState.username || uiState.email,
@@ -50,6 +53,12 @@ const LoginInitPage = (props: Props) => {
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
   >(undefined);
+  const [lastUsed, setLastUsed] = useState<string | undefined>(undefined);
+
+  const setLocalStorageLastUsed = (value: string) => {
+    setLastUsed(value);
+    localStorage.setItem("last_hanko_login", value);
+  };
 
   const onIdentifierInput = (event: Event) => {
     event.preventDefault();
@@ -72,6 +81,7 @@ const LoginInitPage = (props: Props) => {
     setIdentifierToUIState(identifier);
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
+    setLocalStorageLastUsed("email");
   };
 
   const onPasskeySubmit = async (event: Event) => {
@@ -84,6 +94,7 @@ const LoginInitPage = (props: Props) => {
       .run();
 
     stateHandler[nextState.name](nextState);
+    setLocalStorageLastUsed("passkey");
   };
 
   const onRegisterClick = async (event: Event) => {
@@ -125,6 +136,7 @@ const LoginInitPage = (props: Props) => {
       .run();
 
     stateHandler[nextState.name](nextState);
+    setLocalStorageLastUsed(name);
   };
 
   const showDivider = useMemo(
@@ -147,7 +159,7 @@ const LoginInitPage = (props: Props) => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-
+    setLastUsed(localStorage.getItem("last_hanko_login"));
     if (
       searchParams.get("error") == undefined ||
       searchParams.get("error").length === 0
@@ -191,39 +203,41 @@ const LoginInitPage = (props: Props) => {
         {inputs ? (
           <Fragment>
             <Form onSubmit={onEmailSubmit} maxWidth>
-              {inputs.email ? (
-                <Input
-                  type={"email"}
-                  autoComplete={"username webauthn"}
-                  autoCorrect={"off"}
-                  flowInput={inputs.email}
-                  onInput={onIdentifierInput}
-                  value={identifier}
-                  placeholder={t("labels.email")}
-                  pattern={"^[^@]+@[^@]+\\.[^@]+$"}
-                />
-              ) : inputs.username ? (
-                <Input
-                  type={"text"}
-                  autoComplete={"username webauthn"}
-                  autoCorrect={"off"}
-                  flowInput={inputs.username}
-                  onInput={onIdentifierInput}
-                  value={identifier}
-                  placeholder={t("labels.username")}
-                />
-              ) : (
-                <Input
-                  type={"text"}
-                  autoComplete={"username webauthn"}
-                  autoCorrect={"off"}
-                  flowInput={inputs.identifier}
-                  onInput={onIdentifierInput}
-                  value={identifier}
-                  placeholder={t("labels.emailOrUsername")}
-                />
-              )}
-              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+              <LastUsed>
+                {inputs.email ? (
+                  <Input
+                    type={"email"}
+                    autoComplete={"username webauthn"}
+                    autoCorrect={"off"}
+                    flowInput={inputs.email}
+                    onInput={onIdentifierInput}
+                    value={identifier}
+                    placeholder={t("labels.email")}
+                    pattern={"^[^@]+@[^@]+\\.[^@]+$"}
+                  />
+                ) : inputs.username ? (
+                  <Input
+                    type={"text"}
+                    autoComplete={"username webauthn"}
+                    autoCorrect={"off"}
+                    flowInput={inputs.username}
+                    onInput={onIdentifierInput}
+                    value={identifier}
+                    placeholder={t("labels.username")}
+                  />
+                ) : (
+                  <Input
+                    type={"text"}
+                    autoComplete={"username webauthn"}
+                    autoCorrect={"off"}
+                    flowInput={inputs.identifier}
+                    onInput={onIdentifierInput}
+                    value={identifier}
+                    placeholder={t("labels.emailOrUsername")}
+                  />
+                )}
+              </LastUsed>
+              <Button uiAction={"email-submit"}>{t("labels.continue")} </Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
