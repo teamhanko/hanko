@@ -58,7 +58,7 @@ func (a PasswordCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	passwordCredential := models.NewPasswordCredential(userModel.ID, password) // ?
 
-	err := deps.PasswordService.CreatePassword(userModel.ID, password) // ?
+	err := deps.PasswordService.CreatePassword(deps.Tx, userModel.ID, password) // ?
 	if err != nil {
 		return fmt.Errorf("could not set password: %w", err)
 	}

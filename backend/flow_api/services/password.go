@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"fmt"
+	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -16,10 +17,10 @@ var (
 )
 
 type Password interface {
-	VerifyPassword(userId uuid.UUID, password string) error
-	RecoverPassword(userId uuid.UUID, newPassword string) error
-	CreatePassword(userId uuid.UUID, newPassword string) error
-	UpdatePassword(passwordCredentialModel *models.PasswordCredential, newPassword string) error
+	VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string) error
+	RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error
+	CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error
+	UpdatePassword(tx *pop.Connection, passwordCredentialModel *models.PasswordCredential, newPassword string) error
 }
 
 type password struct {
@@ -34,8 +35,8 @@ func NewPasswordService(cfg config.Config, persister persistence.Persister) Pass
 	}
 }
 
-func (s password) VerifyPassword(userId uuid.UUID, password string) error {
-	user, err := s.persister.GetUserPersister().Get(userId)
+func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string) error {
+	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -44,7 +45,7 @@ func (s password) VerifyPassword(userId uuid.UUID, password string) error {
 		return ErrorPasswordInvalid
 	}
 
-	pw, err := s.persister.GetPasswordCredentialPersister().GetByUserID(userId)
+	pw, err := s.persister.GetPasswordCredentialPersisterWithConnection(tx).GetByUserID(userId)
 	if err != nil {
 		return fmt.Errorf("error retrieving password credential: %w", err)
 	}
@@ -60,8 +61,8 @@ func (s password) VerifyPassword(userId uuid.UUID, password string) error {
 	return nil
 }
 
-func (s password) RecoverPassword(userId uuid.UUID, newPassword string) error {
-	passwordPersister := s.persister.GetPasswordCredentialPersister()
+func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error {
+	passwordPersister := s.persister.GetPasswordCredentialPersisterWithConnection(tx)
 
 	passwordCredentialModel, err := passwordPersister.GetByUserID(userId)
 	if err != nil {
@@ -69,9 +70,9 @@ func (s password) RecoverPassword(userId uuid.UUID, newPassword string) error {
 	}
 
 	if passwordCredentialModel == nil {
-		err = s.CreatePassword(userId, newPassword)
+		err = s.CreatePassword(tx, userId, newPassword)
 	} else {
-		err = s.UpdatePassword(passwordCredentialModel, newPassword)
+		err = s.UpdatePassword(tx, passwordCredentialModel, newPassword)
 	}
 
 	if err != nil {
@@ -81,7 +82,7 @@ func (s password) RecoverPassword(userId uuid.UUID, newPassword string) error {
 	return nil
 }
 
-func (s password) CreatePassword(userId uuid.UUID, newPassword string) error {
+func (s password) CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return ErrorPasswordInvalid
@@ -89,7 +90,7 @@ func (s password) CreatePassword(userId uuid.UUID, newPassword string) error {
 
 	passwordCredentialModel := models.NewPasswordCredential(userId, string(hashedPassword))
 
-	err = s.persister.GetPasswordCredentialPersister().Create(*passwordCredentialModel)
+	err = s.persister.GetPasswordCredentialPersisterWithConnection(tx).Create(*passwordCredentialModel)
 	if err != nil {
 		return fmt.Errorf("failed to set password: %w", err)
 	}
@@ -97,7 +98,7 @@ func (s password) CreatePassword(userId uuid.UUID, newPassword string) error {
 	return nil
 }
 
-func (s password) UpdatePassword(passwordCredentialModel *models.PasswordCredential, newPassword string) error {
+func (s password) UpdatePassword(tx *pop.Connection, passwordCredentialModel *models.PasswordCredential, newPassword string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return ErrorPasswordInvalid
@@ -106,7 +107,7 @@ func (s password) UpdatePassword(passwordCredentialModel *models.PasswordCredent
 	passwordCredentialModel.Password = string(hashedPassword)
 	passwordCredentialModel.UpdatedAt = time.Now().UTC()
 
-	err = s.persister.GetPasswordCredentialPersister().Update(*passwordCredentialModel)
+	err = s.persister.GetPasswordCredentialPersisterWithConnection(tx).Update(*passwordCredentialModel)
 	if err != nil {
 		return fmt.Errorf("failed to update password: %w", err)
 	}

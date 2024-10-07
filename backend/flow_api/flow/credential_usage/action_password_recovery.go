@@ -47,7 +47,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	authUserID := c.Stash().Get(shared.StashPathUserID).String()
 
-	err := deps.PasswordService.RecoverPassword(uuid.FromStringOrNil(authUserID), newPassword)
+	err := deps.PasswordService.RecoverPassword(deps.Tx, uuid.FromStringOrNil(authUserID), newPassword)
 
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {
