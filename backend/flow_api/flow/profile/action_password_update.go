@@ -54,9 +54,7 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 
 	password := c.Input().Get("password").String()
 
-	passwordCredential := models.NewPasswordCredential(userModel.ID, password) // ?
-
-	err := deps.PasswordService.UpdatePassword(passwordCredential, password)
+	err := deps.PasswordService.UpdatePassword(userModel.PasswordCredential, password)
 	if err != nil {
 		return fmt.Errorf("could not udate password: %w", err)
 	}
@@ -73,8 +71,6 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
-
-	userModel.PasswordCredential = passwordCredential
 
 	return c.Continue(shared.StateProfileInit)
 }
