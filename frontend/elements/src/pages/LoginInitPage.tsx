@@ -30,6 +30,8 @@ interface Props {
 
 type IdentifierTypes = "username" | "email" | "identifier";
 
+const LOCAL_STORAGE_LAST_USED_KEY = "last_hanko_login";
+
 const LoginInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const {
@@ -57,7 +59,7 @@ const LoginInitPage = (props: Props) => {
 
   const setLocalStorageLastUsed = (value: string) => {
     setLastUsed(value);
-    localStorage.setItem("last_hanko_login", value);
+    localStorage.setItem(LOCAL_STORAGE_LAST_USED_KEY, value);
   };
 
   const onIdentifierInput = (event: Event) => {
@@ -159,7 +161,7 @@ const LoginInitPage = (props: Props) => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-    setLastUsed(localStorage.getItem("last_hanko_login"));
+    setLastUsed(localStorage.getItem(LOCAL_STORAGE_LAST_USED_KEY));
     if (
       searchParams.get("error") == undefined ||
       searchParams.get("error").length === 0
@@ -203,41 +205,44 @@ const LoginInitPage = (props: Props) => {
         {inputs ? (
           <Fragment>
             <Form onSubmit={onEmailSubmit} maxWidth>
-              <LastUsed>
-                {inputs.email ? (
-                  <Input
-                    type={"email"}
-                    autoComplete={"username webauthn"}
-                    autoCorrect={"off"}
-                    flowInput={inputs.email}
-                    onInput={onIdentifierInput}
-                    value={identifier}
-                    placeholder={t("labels.email")}
-                    pattern={"^[^@]+@[^@]+\\.[^@]+$"}
-                  />
-                ) : inputs.username ? (
-                  <Input
-                    type={"text"}
-                    autoComplete={"username webauthn"}
-                    autoCorrect={"off"}
-                    flowInput={inputs.username}
-                    onInput={onIdentifierInput}
-                    value={identifier}
-                    placeholder={t("labels.username")}
-                  />
-                ) : (
-                  <Input
-                    type={"text"}
-                    autoComplete={"username webauthn"}
-                    autoCorrect={"off"}
-                    flowInput={inputs.identifier}
-                    onInput={onIdentifierInput}
-                    value={identifier}
-                    placeholder={t("labels.emailOrUsername")}
-                  />
-                )}
-              </LastUsed>
-              <Button uiAction={"email-submit"}>{t("labels.continue")} </Button>
+              {inputs.email ? (
+                <Input
+                  type={"email"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.email}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.email")}
+                  pattern={"^[^@]+@[^@]+\\.[^@]+$"}
+                />
+              ) : inputs.username ? (
+                <Input
+                  type={"text"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.username}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.username")}
+                />
+              ) : (
+                <Input
+                  type={"text"}
+                  autoComplete={"username webauthn"}
+                  autoCorrect={"off"}
+                  flowInput={inputs.identifier}
+                  onInput={onIdentifierInput}
+                  value={identifier}
+                  placeholder={t("labels.emailOrUsername")}
+                />
+              )}
+              <Button uiAction={"email-submit"}>
+                {t("labels.continue")}
+                {lastUsed === "email" ? (
+                  <LastUsed value={t("labels.lastUsed")} />
+                ) : null}
+              </Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
@@ -255,6 +260,9 @@ const LoginInitPage = (props: Props) => {
               icon={"passkey"}
             >
               {t("labels.signInPasskey")}
+              {lastUsed === "passkey" ? (
+                <LastUsed value={t("labels.lastUsed")} />
+              ) : null}
             </Button>
           </Form>
         ) : null}
@@ -273,6 +281,9 @@ const LoginInitPage = (props: Props) => {
                       icon={v.value}
                     >
                       {t("labels.signInWith", { provider: v.name })}
+                      {lastUsed === v.name ? (
+                        <LastUsed value={t("labels.lastUsed")} />
+                      ) : null}
                     </Button>
                   </Form>
                 );

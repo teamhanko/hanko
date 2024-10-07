@@ -1,12 +1,12 @@
-import { ComponentChildren } from "preact";
+import cx from "classnames";
 import styles from "./styles.sass";
 
-interface Props {
-  children: ComponentChildren;
-}
+type Props = {
+  value: string;
+};
 
-const LastUsed = (props: Props) => {
-  return <div className={styles.lastUsed}>{props.children}</div>;
+const LastUsed = ({ value, ...props }: Props) => {
+  return <span className={cx(styles.lastUsed)}>{value}</span>;
 };
 
 export default LastUsed;
