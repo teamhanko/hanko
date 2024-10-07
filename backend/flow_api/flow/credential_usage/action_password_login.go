@@ -86,7 +86,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		return a.wrongCredentialsError(c)
 	}
 
-	err := deps.PasswordService.VerifyPassword(userID, c.Input().Get("password").String())
+	err := deps.PasswordService.VerifyPassword(deps.Tx, userID, c.Input().Get("password").String())
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {
 			err = deps.AuditLogger.CreateWithConnection(

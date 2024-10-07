@@ -54,7 +54,7 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 
 	password := c.Input().Get("password").String()
 
-	err := deps.PasswordService.UpdatePassword(userModel.PasswordCredential, password)
+	err := deps.PasswordService.UpdatePassword(deps.Tx, userModel.PasswordCredential, password)
 	if err != nil {
 		return fmt.Errorf("could not udate password: %w", err)
 	}
