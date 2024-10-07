@@ -3,11 +3,14 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/dto/admin"
@@ -16,8 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"github.com/teamhanko/hanko/backend/webhooks/utils"
-	"net/http"
-	"strings"
 )
 
 type UserHandler struct {
@@ -201,43 +202,6 @@ func (h *UserHandler) Get(c echo.Context) error {
 		Username:            user.GetUsername(),
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
-	})
-}
-
-type UserGetByEmailBody struct {
-	Email string `json:"email" validate:"required,email"`
-}
-
-func (h *UserHandler) GetUserIdByEmail(c echo.Context) error {
-	var request UserGetByEmailBody
-	if err := (&echo.DefaultBinder{}).BindBody(c, &request); err != nil {
-		return dto.ToHttpError(err)
-	}
-
-	if err := c.Validate(request); err != nil {
-		return dto.ToHttpError(err)
-	}
-
-	emailAddress := strings.ToLower(request.Email)
-	email, err := h.persister.GetEmailPersister().FindByAddress(emailAddress)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-
-	if email == nil || email.UserID == nil {
-		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("user not found"))
-	}
-
-	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(*email.UserID)
-	if err != nil {
-		return fmt.Errorf("failed to get webauthn credentials: %w", err)
-	}
-
-	return c.JSON(http.StatusOK, dto.UserInfoResponse{
-		ID:                    *email.UserID,
-		Verified:              email.Verified,
-		EmailID:               email.ID,
-		HasWebauthnCredential: len(credentials) > 0,
 	})
 }
 

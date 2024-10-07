@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
@@ -13,10 +18,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"golang.org/x/exp/slices"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestUserSuite(t *testing.T) {
@@ -351,109 +352,6 @@ func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
 	e.ServeHTTP(rec, req)
 
 	s.Equal(http.StatusForbidden, rec.Code)
-}
-
-func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidEmail() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
-
-	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "123"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-
-	e.ServeHTTP(rec, req)
-
-	s.Equal(http.StatusBadRequest, rec.Code)
-}
-
-func (s *userSuite) TestUserHandler_GetUserIdByEmail_InvalidJson() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
-
-	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`"email": "123}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-
-	e.ServeHTTP(rec, req)
-
-	s.Equal(http.StatusBadRequest, rec.Code)
-}
-
-func (s *userSuite) TestUserHandler_GetUserIdByEmail_UserNotFound() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
-
-	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "unknownAddress@example.com"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-
-	e.ServeHTTP(rec, req)
-
-	s.Equal(http.StatusNotFound, rec.Code)
-}
-
-func (s *userSuite) TestUserHandler_GetUserIdByEmail() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	err := s.LoadFixtures("../test/fixtures/user_with_webauthn_credential")
-	s.Require().NoError(err)
-
-	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
-
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
-
-	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "john.doe@example.com"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-
-	e.ServeHTTP(rec, req)
-
-	if s.Equal(http.StatusOK, rec.Code) {
-		response := struct {
-			UserId   string `json:"id"`
-			Verified bool   `json:"verified"`
-		}{}
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		s.NoError(err)
-		s.Equal(userId, response.UserId)
-		s.Equal(true, response.Verified)
-	}
-}
-
-func (s *userSuite) TestUserHandler_GetUserIdByEmail_CaseInsensitive() {
-	if testing.Short() {
-		s.T().Skip("skipping test in short mode.")
-	}
-	err := s.LoadFixtures("../test/fixtures/user_with_webauthn_credential")
-	s.Require().NoError(err)
-
-	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
-
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
-
-	req := httptest.NewRequest(http.MethodPost, "/user", strings.NewReader(`{"email": "JOHN.DOE@EXAMPLE.COM"}`))
-	req.Header.Set("Content-Type", "application/json")
-	rec := httptest.NewRecorder()
-
-	e.ServeHTTP(rec, req)
-
-	if s.Equal(http.StatusOK, rec.Code) {
-		response := struct {
-			UserId   string `json:"id"`
-			Verified bool   `json:"verified"`
-		}{}
-		err := json.Unmarshal(rec.Body.Bytes(), &response)
-		s.NoError(err)
-		s.Equal(userId, response.UserId)
-		s.Equal(true, response.Verified)
-	}
 }
 
 func (s *userSuite) TestUserHandler_Me() {
