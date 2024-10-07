@@ -35,5 +35,10 @@ func (h RefreshSessionUser) Execute(c flowpilot.HookExecutionContext) error {
 		c.Set("session_user", userModel)
 	}
 
+	sessionId, found := sessionToken.Get("session_id")
+	if found {
+		c.Set("session_id", sessionId)
+	}
+
 	return nil
 }

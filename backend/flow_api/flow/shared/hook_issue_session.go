@@ -39,12 +39,46 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		emailDTO = dto.JwtFromEmailModel(email)
 	}
 
-	sessionToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO)
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	cookie, err := deps.SessionManager.GenerateCookie(sessionToken)
+	activeSessions, err := deps.Persister.GetSessionPersister(deps.Tx).ListActive(userId)
+	if err != nil {
+		return fmt.Errorf("failed to list active sessions: %w", err)
+	}
+
+	// remove all server side sessions that exceed the limit
+	if deps.Cfg.Session.ServerSide.Enabled && len(activeSessions) > deps.Cfg.Session.ServerSide.Limit {
+		for i := deps.Cfg.Session.ServerSide.Limit; i < len(activeSessions); i++ {
+			err = deps.Persister.GetSessionPersister(deps.Tx).Delete(activeSessions[i])
+			if err != nil {
+				return fmt.Errorf("failed to remove latest session: %w", err)
+			}
+		}
+	}
+
+	// TODO: should the identifier be stored in the DB although server-side sessions are disabled???
+
+	sessionID, _ := rawToken.Get("session_id")
+
+	sessionModel := models.Session{
+		ID:        uuid.FromStringOrNil(sessionID.(string)),
+		UserID:    userId,
+		UserAgent: deps.HttpContext.Request().UserAgent(),
+		IpAddress: deps.HttpContext.RealIP(),
+		CreatedAt: rawToken.IssuedAt(),
+		UpdatedAt: rawToken.IssuedAt(),
+		ExpiresAt: rawToken.Expiration(),
+	}
+
+	err = deps.Persister.GetSessionPersister(deps.Tx).Create(sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to store session: %w", err)
+	}
+
+	cookie, err := deps.SessionManager.GenerateCookie(signedSessionToken)
 	if err != nil {
 		return fmt.Errorf("failed to generate auth cookie, %w", err)
 	}
@@ -52,7 +86,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	deps.HttpContext.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
 
 	if deps.Cfg.Session.EnableAuthTokenHeader {
-		deps.HttpContext.Response().Header().Set("X-Auth-Token", sessionToken)
+		deps.HttpContext.Response().Header().Set("X-Auth-Token", signedSessionToken)
 	} else {
 		deps.HttpContext.SetCookie(cookie)
 	}

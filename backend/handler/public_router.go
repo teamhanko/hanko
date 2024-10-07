@@ -213,5 +213,9 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
 	g.POST("/token", tokenHandler.Validate)
 
+	sessionHandler := NewSessionHandler(persister, sessionManager, *cfg)
+	sessions := g.Group("sessions")
+	sessions.POST("/check", sessionHandler.ValidateSession)
+
 	return e
 }

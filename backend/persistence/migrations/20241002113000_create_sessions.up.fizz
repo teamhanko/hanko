@@ -1,0 +1,9 @@
+create_table("sessions") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("user_id", "uuid", { "null": false })
+	t.Column("user_agent", "string", { "null": false })
+	t.Column("ip_address", "string", { "null": false })
+	t.Column("expires_at", "timestamp", { "null": false })
+	t.Timestamps()
+	t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+}

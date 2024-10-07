@@ -147,6 +147,7 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 			profile.WebauthnCredentialRename{},
 			profile.WebauthnCredentialCreate{},
 			profile.WebauthnCredentialDelete{},
+			profile.SessionDelete{},
 		).
 		State(shared.StateProfileWebauthnCredentialVerification,
 			profile.WebauthnVerifyAttestationResponse{},
@@ -155,7 +156,7 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 		InitialState(shared.StatePreflight, shared.StateProfileInit).
 		ErrorState(shared.StateError).
 		BeforeEachAction(profile.RefreshSessionUser{}).
-		BeforeState(shared.StateProfileInit, profile.GetProfileData{}).
+		BeforeState(shared.StateProfileInit, profile.GetProfileData{}, profile.GetSessions{}).
 		AfterState(shared.StateProfileWebauthnCredentialVerification, shared.WebauthnCredentialSave{}).
 		AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 		SubFlows(

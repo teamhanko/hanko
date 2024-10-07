@@ -13,7 +13,7 @@ import (
 )
 
 type Manager interface {
-	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt) (string, error)
+	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt) (string, jwt.Token, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
@@ -90,7 +90,11 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt) (string, error) {
+func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt) (string, jwt.Token, error) {
+	sessionID, err := uuid.NewV4()
+	if err != nil {
+		return "", nil, err
+	}
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(m.sessionLength)
 
@@ -99,6 +103,7 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt) (string, er
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
 	_ = token.Set(jwt.AudienceKey, m.audience)
+	_ = token.Set("session_id", sessionID.String())
 
 	if email != nil {
 		_ = token.Set("email", &email)
@@ -110,10 +115,10 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt) (string, er
 
 	signed, err := m.jwtGenerator.Sign(token)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return string(signed), nil
+	return string(signed), token, nil
 }
 
 // Verify verifies the given JWT and returns a parsed one if verification was successful

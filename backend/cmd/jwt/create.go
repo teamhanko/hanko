@@ -66,7 +66,7 @@ func NewCreateCommand() *cobra.Command {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
-			token, err := sessionManager.GenerateJWT(userId, emailJwt)
+			token, _, err := sessionManager.GenerateJWT(userId, emailJwt)
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return
