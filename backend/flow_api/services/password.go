@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 var (
@@ -103,6 +104,7 @@ func (s password) UpdatePassword(passwordCredentialModel *models.PasswordCredent
 	}
 
 	passwordCredentialModel.Password = string(hashedPassword)
+	passwordCredentialModel.UpdatedAt = time.Now().UTC()
 
 	err = s.persister.GetPasswordCredentialPersister().Update(*passwordCredentialModel)
 	if err != nil {

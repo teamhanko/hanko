@@ -22,8 +22,8 @@ func NewPasswordCredential(userId uuid.UUID, password string) *PasswordCredentia
 		ID:        id,
 		UserId:    userId,
 		Password:  password,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		CreatedAt: time.Now().UTC(),
+		UpdatedAt: time.Now().UTC(),
 	}
 }
 
