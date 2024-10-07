@@ -95,7 +95,6 @@ const Button = ({
         ) : null}
         {children}
       </LoadingSpinner>
-      {/* {lastUsed} */}
     </button>
   );
 };
