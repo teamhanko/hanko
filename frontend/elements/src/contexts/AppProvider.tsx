@@ -32,6 +32,7 @@ import {
 } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
 
 import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
+import { LastLogin } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 
 import {
   PublicKeyCredentialWithAssertionJSON,
@@ -50,7 +51,6 @@ import RegistrationInitPage from "../pages/RegistrationInitPage";
 import CreatePasswordPage from "../pages/CreatePasswordPage";
 import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
-import SignalLike = JSXInternal.SignalLike;
 import CreateEmailPage from "../pages/CreateEmailPage";
 import CreateUsernamePage from "../pages/CreateUsernamePage";
 import CredentialOnboardingChooserPage from "../pages/CredentialOnboardingChooser";
@@ -59,6 +59,8 @@ import LoginSecurityKeyPage from "../pages/LoginSecurityKeyPage";
 import MFAMethodChooserPage from "../pages/MFAMethodChooserPage";
 import CreateOTPSecretPage from "../pages/CreateOTPSecretPage";
 import CreateSecurityKeyPage from "../pages/CreateSecurityKeyPage";
+
+import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -80,6 +82,7 @@ export interface GlobalOptions {
   translations?: Translations;
   translationsLocation?: string;
   fallbackLanguage?: string;
+  storageKey?: string;
 }
 
 export type UIAction =
@@ -138,6 +141,7 @@ interface Context {
   uiState: UIState;
   setUIState: StateUpdater<UIState>;
   initialComponentName: ComponentName;
+  lastLogin?: LastLogin;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -173,6 +177,11 @@ const AppProvider = ({
 
   const ref = useRef<HTMLElement>(null);
 
+  const storageKeyLastLogin = useMemo(
+    () => `${globalOptions.storageKey}_last_login`,
+    [globalOptions.storageKey],
+  );
+
   const [componentName, setComponentName] = useState<ComponentName>(
     props.componentName,
   );
@@ -188,6 +197,7 @@ const AppProvider = ({
 
   const initComponent = useMemo(() => <InitPage />, []);
   const [page, setPage] = useState<h.JSX.Element>(initComponent);
+  const [lastLogin, setLastLogin] = useState<LastLogin>();
   const [uiState, setUIState] = useState<UIState>({
     email: prefilledEmail,
     username: prefilledUsername,
@@ -410,6 +420,10 @@ const AppProvider = ({
         setPage(<CreatePasswordPage state={state} />);
       },
       success(state) {
+        localStorage.setItem(
+          storageKeyLastLogin,
+          JSON.stringify(state.payload.last_login),
+        );
         hanko.relay.dispatchSessionCreatedEvent(hanko.session.get());
         lastActionSucceeded();
       },
@@ -481,6 +495,10 @@ const AppProvider = ({
   const flowInit = useCallback(
     async (path: FlowPath) => {
       setLoadingAction("switch-flow");
+      const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
+      if (lastLoginEncoded) {
+        setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
+      }
       const token = new URLSearchParams(window.location.search).get(
         "hanko_token",
       );
@@ -579,6 +597,7 @@ const AppProvider = ({
         page,
         setPage,
         stateHandler,
+        lastLogin,
       }}
     >
       <TranslateProvider
