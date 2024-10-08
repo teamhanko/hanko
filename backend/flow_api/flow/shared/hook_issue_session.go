@@ -57,18 +57,22 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		deps.HttpContext.SetCookie(cookie)
 	}
 
+	loginMethod := c.Stash().Get(StashPathLoginMethod)
+	mfaMethod := c.Stash().Get(StashPathMFAUsageMethod)
+	thirdPartyProvider := c.Stash().Get(StashPathThirdPartyProvider)
+
 	// Audit log logins only, because user creation on registration implies that the user is logged
 	// in after a registration. Only login actions should set the "login_method" stash entry.
-	if c.Stash().Get(StashPathLoginMethod).Exists() {
+	if loginMethod.Exists() {
 		auditLogDetails := []auditlog.DetailOption{
-			auditlog.Detail("login_method", c.Stash().Get(StashPathLoginMethod).String()),
+			auditlog.Detail("login_method", loginMethod.String()),
 			auditlog.Detail("flow_id", c.GetFlowID()),
 		}
 
-		if c.Stash().Get(StashPathMFAUsageMethod).Exists() {
+		if mfaMethod.Exists() {
 			auditLogDetails = append(
 				auditLogDetails,
-				auditlog.Detail("mfa_method", c.Stash().Get(StashPathMFAUsageMethod).String()),
+				auditlog.Detail("mfa_method", mfaMethod.String()),
 			)
 		}
 
@@ -82,6 +86,22 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
+		}
+	}
+
+	if err := c.Payload().Set("last_login.login_method", loginMethod.String()); err != nil {
+		return fmt.Errorf("failed to set login_method to the payload: %w", err)
+	}
+
+	if thirdPartyProvider.Exists() {
+		if err := c.Payload().Set("last_login.third_party_provider", thirdPartyProvider.String()); err != nil {
+			return fmt.Errorf("failed to set third_party_provider to the payload: %w", err)
+		}
+	}
+
+	if mfaMethod.Exists() {
+		if err := c.Payload().Set("last_login.mfa_method", mfaMethod.String()); err != nil {
+			return fmt.Errorf("failed to set mfa_method to the payload: %w", err)
 		}
 	}
 

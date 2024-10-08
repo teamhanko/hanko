@@ -16,6 +16,7 @@ const (
 	StashPathPasscodeTemplate                       = "passcode_template"
 	StashPathPasswordRecoveryPending                = "pw_recovery_pending"
 	StashPathSkipUserCreation                       = "skip_user_creation"
+	StashPathThirdPartyProvider                     = "third_party_provider"
 	StashPathUserHasEmails                          = "user_has_emails"
 	StashPathUserHasOTPSecret                       = "user_hat_otp_secret"
 	StashPathUserHasPasskey                         = "user_has_passkey"

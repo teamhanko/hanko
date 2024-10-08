@@ -79,8 +79,15 @@ export interface ProfilePayload {
   readonly user: User;
 }
 
+export interface LastLogin {
+  readonly login_method: string;
+  readonly mfa_method?: string;
+  readonly third_party_provider?: string;
+}
+
 export interface SuccessPayload {
   readonly user: User;
+  readonly last_login: LastLogin;
 }
 
 export interface ThirdPartyPayload {
