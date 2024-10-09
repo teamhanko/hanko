@@ -27,6 +27,10 @@ func (a ContinueToPasscodeConfirmationRecovery) Initialize(c flowpilot.Initializ
 }
 
 func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionContext) error {
+	if err := c.Stash().Set(shared.StashPathLoginMethod, "password"); err != nil {
+		return fmt.Errorf("failed to set login_method to stash: %w", err)
+	}
+
 	if len(c.Stash().Get(shared.StashPathUserID).String()) > 0 {
 		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "recovery"); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)

@@ -2,6 +2,7 @@ package dto
 
 import (
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"time"
 )
@@ -23,13 +24,13 @@ type ProfileData struct {
 	UpdatedAt    time.Time                    `json:"updated_at"`
 }
 
-func ProfileDataFromUserModel(user *models.User) *ProfileData {
+func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileData {
 	var webauthnCredentials, securityKeys []WebauthnCredentialResponse
 	for _, webauthnCredentialModel := range user.WebauthnCredentials {
 		webauthnCredential := FromWebauthnCredentialModel(&webauthnCredentialModel)
-		if webauthnCredentialModel.MFAOnly {
+		if cfg.MFA.SecurityKeys.Enabled && webauthnCredentialModel.MFAOnly {
 			securityKeys = append(securityKeys, *webauthnCredential)
-		} else {
+		} else if cfg.Passkey.Enabled {
 			webauthnCredentials = append(webauthnCredentials, *webauthnCredential)
 		}
 	}
@@ -44,10 +45,14 @@ func ProfileDataFromUserModel(user *models.User) *ProfileData {
 		UserID:       user.ID,
 		Passkeys:     webauthnCredentials,
 		SecurityKeys: securityKeys,
-		MFAConfig:    MFAConfig{AuthAppSetUp: user.OTPSecret != nil},
-		Emails:       emails,
-		Username:     FromUsernameModel(user.Username),
-		CreatedAt:    user.CreatedAt,
-		UpdatedAt:    user.UpdatedAt,
+		MFAConfig: MFAConfig{
+			AuthAppSetUp:        user.OTPSecret != nil,
+			TOTPEnabled:         cfg.MFA.Enabled && cfg.MFA.TOTP.Enabled,
+			SecurityKeysEnabled: cfg.MFA.Enabled && cfg.MFA.SecurityKeys.Enabled,
+		},
+		Emails:    emails,
+		Username:  FromUsernameModel(user.Username),
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
 	}
 }
