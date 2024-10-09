@@ -49,35 +49,35 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
 
-	// remove all server side sessions that exceed the limit
-	if deps.Cfg.Session.ServerSide.Enabled && len(activeSessions) > deps.Cfg.Session.ServerSide.Limit {
-		for i := deps.Cfg.Session.ServerSide.Limit; i < len(activeSessions); i++ {
-			err = deps.Persister.GetSessionPersister(deps.Tx).Delete(activeSessions[i])
-			if err != nil {
-				return fmt.Errorf("failed to remove latest session: %w", err)
+	if deps.Cfg.Session.ServerSide.Enabled {
+		// remove all server side sessions that exceed the limit
+		if len(activeSessions) >= deps.Cfg.Session.ServerSide.Limit {
+			for i := deps.Cfg.Session.ServerSide.Limit - 1; i < len(activeSessions); i++ {
+				err = deps.Persister.GetSessionPersister(deps.Tx).Delete(activeSessions[i])
+				if err != nil {
+					return fmt.Errorf("failed to remove latest session: %w", err)
+				}
 			}
 		}
-	}
 
-	// TODO: should the identifier be stored in the DB although server-side sessions are disabled???
+		sessionID, _ := rawToken.Get("session_id")
 
-	sessionID, _ := rawToken.Get("session_id")
+		expirationTime := rawToken.Expiration()
+		sessionModel := models.Session{
+			ID:        uuid.FromStringOrNil(sessionID.(string)),
+			UserID:    userId,
+			UserAgent: deps.HttpContext.Request().UserAgent(),
+			IpAddress: deps.HttpContext.RealIP(),
+			CreatedAt: rawToken.IssuedAt(),
+			UpdatedAt: rawToken.IssuedAt(),
+			ExpiresAt: &expirationTime,
+			LastUsed:  rawToken.IssuedAt(),
+		}
 
-	expirationTime := rawToken.Expiration()
-	sessionModel := models.Session{
-		ID:        uuid.FromStringOrNil(sessionID.(string)),
-		UserID:    userId,
-		UserAgent: deps.HttpContext.Request().UserAgent(),
-		IpAddress: deps.HttpContext.RealIP(),
-		CreatedAt: rawToken.IssuedAt(),
-		UpdatedAt: rawToken.IssuedAt(),
-		ExpiresAt: &expirationTime,
-		LastUsed:  rawToken.IssuedAt(),
-	}
-
-	err = deps.Persister.GetSessionPersister(deps.Tx).Create(sessionModel)
-	if err != nil {
-		return fmt.Errorf("failed to store session: %w", err)
+		err = deps.Persister.GetSessionPersister(deps.Tx).Create(sessionModel)
+		if err != nil {
+			return fmt.Errorf("failed to store session: %w", err)
+		}
 	}
 
 	cookie, err := deps.SessionManager.GenerateCookie(signedSessionToken)
