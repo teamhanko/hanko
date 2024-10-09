@@ -19,12 +19,12 @@ interface Props {
 }
 
 const ListSessionsAccordion = ({
-                                 sessions = [],
-                                 checkedItemID,
-                                 setCheckedItemID,
-                                 onSessionDelete,
-                                 deletableSessionIDs,
-                               }: Props) => {
+  sessions = [],
+  checkedItemID,
+  setCheckedItemID,
+  onSessionDelete,
+  deletableSessionIDs,
+}: Props) => {
   const { t } = useContext(TranslateContext);
 
   const labels = (session: Session) => {
@@ -68,16 +68,14 @@ const ListSessionsAccordion = ({
       </Paragraph>
       {deletableSessionIDs?.includes(session.id) ? (
         <Paragraph>
-          <Headline2>{t("headlines.deleteSession")}</Headline2>
-          {t("texts.deleteSession")}
-          <br />
+          <Headline2>{t("headlines.revokeSession")}</Headline2>
           <Link
             uiAction={"session-delete"}
             dangerous
             onClick={(event) => onSessionDelete(event, session.id)}
             loadingSpinnerPosition={"right"}
           >
-            {t("labels.delete")}
+            {t("labels.revoke")}
           </Link>
         </Paragraph>
       ) : null}

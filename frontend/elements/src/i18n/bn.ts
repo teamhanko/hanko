@@ -32,6 +32,9 @@ export const bn: Translation = {
     signUp: "নিবন্ধন করুন",
     selectLoginMethod: "লগইন পদ্ধতি নির্বাচন করুন",
     setupLoginMethod: "লগইন পদ্ধতি সেটআপ করুন",
+    lastUsed: "সর্বশেষ দেখা হয়েছে",
+    ipAddress: "আইপি ঠিকানা",
+    revokeSession: "সেশন বাতিল করুন",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
@@ -104,6 +107,8 @@ export const bn: Translation = {
     setUsername: "ব্যবহারকারীর নাম সেট করুন",
     changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
     setPassword: "পাসওয়ার্ড সেট করুন",
+    revoke: "বাতিল করুন",
+    currentSession: "বর্তমান সেশন",
   },
   errors: {
     somethingWentWrong:
