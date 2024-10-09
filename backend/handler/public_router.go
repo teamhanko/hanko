@@ -129,7 +129,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
 
-	if cfg.Password.Enabled {
+	if !cfg.MFA.Enabled && cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := g.Group("/password")
@@ -190,7 +190,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 	}
 
-	if cfg.Email.Enabled && cfg.Email.UseForAuthentication {
+	if !cfg.MFA.Enabled && cfg.Email.Enabled && cfg.Email.UseForAuthentication {
 		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 		if err != nil {
 			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
