@@ -79,8 +79,19 @@ export interface ProfilePayload {
   readonly user: User;
 }
 
+export type LoginMethod = "password" | "passkey" | "passcode" | "third_party";
+
+export type MFAMethod = "totp" | "security_key";
+
+export interface LastLogin {
+  readonly login_method: LoginMethod;
+  readonly mfa_method?: MFAMethod;
+  readonly third_party_provider?: string;
+}
+
 export interface SuccessPayload {
   readonly user: User;
+  readonly last_login?: LastLogin;
 }
 
 export interface ThirdPartyPayload {
