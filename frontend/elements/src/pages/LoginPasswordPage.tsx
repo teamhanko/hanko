@@ -14,6 +14,7 @@ import Link from "../components/link/Link";
 import Headline1 from "../components/headline/Headline1";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 import { useFlowState } from "../contexts/FlowState";
+import Checkbox from "../components/form/Checkbox";
 
 type Props = {
   state: State<"login_password">;
@@ -24,6 +25,7 @@ const LoginPasswordPage = (props: Props) => {
   const { stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>();
 
   const onPasswordInput = async (event: Event) => {
@@ -32,11 +34,15 @@ const LoginPasswordPage = (props: Props) => {
     }
   };
 
+  const onRememberMeChange = async (event: Event) => {
+    setRememberMe(!rememberMe);
+  };
+
   const onPasswordSubmit = async (event: Event) => {
     event.preventDefault();
     setLoadingAction("password-submit");
     const nextState = await flowState.actions
-      .password_login({ password })
+      .password_login({ password, remember_me: rememberMe })
       .run();
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
@@ -121,6 +127,13 @@ const LoginPasswordPage = (props: Props) => {
             placeholder={t("labels.password")}
             onInput={onPasswordInput}
             autofocus
+          />
+          <Checkbox
+            required={false}
+            type={"checkbox"}
+            label={t("labels.rememberMe")}
+            checked={rememberMe}
+            onChange={onRememberMeChange}
           />
           <Button
             uiAction={"password-submit"}
