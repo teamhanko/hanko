@@ -30,8 +30,8 @@ type ValidateSessionRequest struct {
 }
 
 type ValidateSessionResponse struct {
-	IsValid        bool      `json:"is_valid"`
-	ExpirationTime time.Time `json:"expiration_time,omitempty"`
+	IsValid        bool       `json:"is_valid"`
+	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
 }
 
 func (h *SessionHandlerAdmin) ValidateSession(c echo.Context) error {
@@ -74,8 +74,9 @@ func (h *SessionHandlerAdmin) ValidateSession(c echo.Context) error {
 		}
 	}
 
+	expirationTime := token.Expiration()
 	return c.JSON(http.StatusOK, ValidateSessionResponse{
 		IsValid:        true,
-		ExpirationTime: token.Expiration(),
+		ExpirationTime: &expirationTime,
 	})
 }

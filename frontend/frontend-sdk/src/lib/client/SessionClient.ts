@@ -19,7 +19,7 @@ export class SessionClient extends Client {
    * @throws {TechnicalError}
    */
   async isValid(): Promise<SessionCheckResponse> {
-    const response = await this.client.get("/session/check");
+    const response = await this.client.get("/sessions/check");
 
     if (!response.ok) {
       throw new TechnicalError();
