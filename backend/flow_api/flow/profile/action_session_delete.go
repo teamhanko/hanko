@@ -5,6 +5,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 type SessionDelete struct {
@@ -24,8 +25,28 @@ func (a SessionDelete) Initialize(c flowpilot.InitializationContext) {
 	if !deps.Cfg.Session.ServerSide.Enabled {
 		c.SuspendAction()
 	}
+	userModel, ok := c.Get("session_user").(*models.User)
+	if !ok {
+		c.SuspendAction()
+		return
+	}
 
-	c.AddInputs(flowpilot.StringInput("session_id").Required(true).Hidden(true))
+	input := flowpilot.StringInput("session_id").Required(true).Hidden(true)
+
+	currentSessionID := uuid.FromStringOrNil(c.Get("session_id").(string))
+	sessions, err := deps.Persister.GetSessionPersister(deps.Tx).ListActive(userModel.ID)
+	if err != nil {
+		c.SuspendAction()
+		return
+	}
+
+	for _, session := range sessions {
+		if session.ID != currentSessionID {
+			input.AllowedValue(session.ID.String(), session.ID.String())
+		}
+	}
+
+	c.AddInputs(input)
 }
 
 func (a SessionDelete) Execute(c flowpilot.ExecutionContext) error {

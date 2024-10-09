@@ -12,6 +12,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -103,6 +104,13 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				if sessionModel == nil {
 					lastTokenErr = fmt.Errorf("session id not found in database")
 					continue
+				}
+
+				// Update lastUsed field
+				sessionModel.LastUsed = time.Now().UTC()
+				err = h.Persister.GetSessionPersister(nil).Update(*sessionModel)
+				if err != nil {
+					return dto.ToHttpError(err)
 				}
 			}
 

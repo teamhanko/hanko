@@ -13,6 +13,7 @@ import (
 type SessionPersister interface {
 	Create(session models.Session) error
 	Get(id uuid.UUID) (*models.Session, error)
+	Update(session models.Session) error
 	List(userID uuid.UUID) ([]models.Session, error)
 	ListActive(userID uuid.UUID) ([]models.Session, error)
 	Delete(session models.Session) error
@@ -49,6 +50,19 @@ func (p *sessionPersister) Get(id uuid.UUID) (*models.Session, error) {
 	}
 
 	return &session, nil
+}
+
+func (p *sessionPersister) Update(session models.Session) error {
+	vErr, err := p.db.ValidateAndUpdate(&session)
+	if err != nil {
+		return err
+	}
+
+	if vErr != nil && vErr.HasAny() {
+		return fmt.Errorf("session object validation failed: %w", vErr)
+	}
+
+	return nil
 }
 
 func (p *sessionPersister) List(userID uuid.UUID) ([]models.Session, error) {

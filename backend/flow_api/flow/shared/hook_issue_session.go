@@ -63,6 +63,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 
 	sessionID, _ := rawToken.Get("session_id")
 
+	expirationTime := rawToken.Expiration()
 	sessionModel := models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
 		UserID:    userId,
@@ -70,7 +71,8 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		IpAddress: deps.HttpContext.RealIP(),
 		CreatedAt: rawToken.IssuedAt(),
 		UpdatedAt: rawToken.IssuedAt(),
-		ExpiresAt: rawToken.Expiration(),
+		ExpiresAt: &expirationTime,
+		LastUsed:  rawToken.IssuedAt(),
 	}
 
 	err = deps.Persister.GetSessionPersister(deps.Tx).Create(sessionModel)
