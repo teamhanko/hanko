@@ -91,7 +91,7 @@ export interface LastLogin {
 
 export interface SuccessPayload {
   readonly user: User;
-  readonly last_login: LastLogin;
+  readonly last_login?: LastLogin;
 }
 
 export interface ThirdPartyPayload {

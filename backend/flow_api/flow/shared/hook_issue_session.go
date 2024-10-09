@@ -89,19 +89,21 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	if err := c.Payload().Set("last_login.login_method", loginMethod.String()); err != nil {
-		return fmt.Errorf("failed to set login_method to the payload: %w", err)
-	}
-
-	if thirdPartyProvider.Exists() {
-		if err := c.Payload().Set("last_login.third_party_provider", thirdPartyProvider.String()); err != nil {
-			return fmt.Errorf("failed to set third_party_provider to the payload: %w", err)
+	if loginMethod.Exists() {
+		if err := c.Payload().Set("last_login.login_method", loginMethod.String()); err != nil {
+			return fmt.Errorf("failed to set login_method to the payload: %w", err)
 		}
-	}
 
-	if mfaMethod.Exists() {
-		if err := c.Payload().Set("last_login.mfa_method", mfaMethod.String()); err != nil {
-			return fmt.Errorf("failed to set mfa_method to the payload: %w", err)
+		if thirdPartyProvider.Exists() {
+			if err := c.Payload().Set("last_login.third_party_provider", thirdPartyProvider.String()); err != nil {
+				return fmt.Errorf("failed to set third_party_provider to the payload: %w", err)
+			}
+		}
+
+		if mfaMethod.Exists() {
+			if err := c.Payload().Set("last_login.mfa_method", mfaMethod.String()); err != nil {
+				return fmt.Errorf("failed to set mfa_method to the payload: %w", err)
+			}
 		}
 	}
 

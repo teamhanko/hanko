@@ -420,10 +420,12 @@ const AppProvider = ({
         setPage(<CreatePasswordPage state={state} />);
       },
       success(state) {
-        localStorage.setItem(
-          storageKeyLastLogin,
-          JSON.stringify(state.payload.last_login),
-        );
+        if (state.payload?.last_login) {
+          localStorage.setItem(
+            storageKeyLastLogin,
+            JSON.stringify(state.payload.last_login),
+          );
+        }
         hanko.relay.dispatchSessionCreatedEvent(hanko.session.get());
         lastActionSucceeded();
       },
