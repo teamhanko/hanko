@@ -8,6 +8,7 @@ import { Relay } from "./lib/events/Relay";
 import { Session } from "./lib/Session";
 import { CookieSameSite } from "./lib/Cookie";
 import { Flow } from "./lib/flow-api/Flow";
+import { SessionClient } from "./lib/client/SessionClient";
 
 /**
  * The options for the Hanko class
@@ -41,6 +42,7 @@ class Hanko extends Listener {
   thirdParty: ThirdPartyClient;
   enterprise: EnterpriseClient;
   token: TokenClient;
+  sessionClient: SessionClient;
   relay: Relay;
   session: Session;
   flow: Flow;
@@ -95,6 +97,11 @@ class Hanko extends Listener {
      *  @type {TokenClient}
      */
     this.token = new TokenClient(api, opts);
+    /**
+     *  @public
+     *  @type {SessionClient}
+     */
+    this.sessionClient = new SessionClient(api, opts);
     /**
      *  @public
      *  @type {Relay}

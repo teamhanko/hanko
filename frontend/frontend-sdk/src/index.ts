@@ -11,6 +11,7 @@ import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 import { TokenClient } from "./lib/client/TokenClient";
 import { EnterpriseClient } from "./lib/client/EnterpriseClient";
+import { SessionClient } from "./lib/client/SessionClient";
 
 export {
   UserClient,
@@ -18,6 +19,7 @@ export {
   ThirdPartyClient,
   TokenClient,
   EnterpriseClient,
+  SessionClient,
 };
 
 // Utils
@@ -48,6 +50,7 @@ import {
   WebauthnCredential,
   WebauthnCredentials,
   Identity,
+  SessionCheckResponse,
 } from "./lib/Dto";
 
 export type {
@@ -70,6 +73,7 @@ export type {
   WebauthnCredential,
   WebauthnCredentials,
   Identity,
+  SessionCheckResponse,
 };
 
 // Errors
