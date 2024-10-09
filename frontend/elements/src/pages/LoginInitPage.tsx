@@ -22,12 +22,15 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Footer from "../components/wrapper/Footer";
+import LastUsed from "../components/form/LastUsed";
 
 interface Props {
   state: State<"login_init">;
 }
 
 type IdentifierTypes = "username" | "email" | "identifier";
+
+const LOCAL_STORAGE_LAST_USED_KEY = "last_hanko_login";
 
 const LoginInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
@@ -41,6 +44,8 @@ const LoginInitPage = (props: Props) => {
     hidePasskeyButtonOnLogin,
   } = useContext(AppContext);
 
+  const localStorage = window.localStorage;
+
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
   const [identifier, setIdentifier] = useState<string>(
     uiState.username || uiState.email,
@@ -50,6 +55,12 @@ const LoginInitPage = (props: Props) => {
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
   >(undefined);
+  const [lastUsed, setLastUsed] = useState<string | undefined>(undefined);
+
+  const setLocalStorageLastUsed = (value: string) => {
+    setLastUsed(value);
+    localStorage.setItem(LOCAL_STORAGE_LAST_USED_KEY, value);
+  };
 
   const onIdentifierInput = (event: Event) => {
     event.preventDefault();
@@ -72,6 +83,7 @@ const LoginInitPage = (props: Props) => {
     setIdentifierToUIState(identifier);
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
+    setLocalStorageLastUsed("email");
   };
 
   const onPasskeySubmit = async (event: Event) => {
@@ -84,6 +96,7 @@ const LoginInitPage = (props: Props) => {
       .run();
 
     stateHandler[nextState.name](nextState);
+    setLocalStorageLastUsed("passkey");
   };
 
   const onRegisterClick = async (event: Event) => {
@@ -125,6 +138,7 @@ const LoginInitPage = (props: Props) => {
       .run();
 
     stateHandler[nextState.name](nextState);
+    setLocalStorageLastUsed(name);
   };
 
   const showDivider = useMemo(
@@ -147,7 +161,7 @@ const LoginInitPage = (props: Props) => {
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
-
+    setLastUsed(localStorage.getItem(LOCAL_STORAGE_LAST_USED_KEY));
     if (
       searchParams.get("error") == undefined ||
       searchParams.get("error").length === 0
@@ -223,7 +237,12 @@ const LoginInitPage = (props: Props) => {
                   placeholder={t("labels.emailOrUsername")}
                 />
               )}
-              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+              <Button uiAction={"email-submit"}>
+                {t("labels.continue")}
+                {lastUsed === "email" ? (
+                  <LastUsed value={t("labels.lastUsed")} />
+                ) : null}
+              </Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
@@ -241,6 +260,9 @@ const LoginInitPage = (props: Props) => {
               icon={"passkey"}
             >
               {t("labels.signInPasskey")}
+              {lastUsed === "passkey" ? (
+                <LastUsed value={t("labels.lastUsed")} />
+              ) : null}
             </Button>
           </Form>
         ) : null}
@@ -259,6 +281,9 @@ const LoginInitPage = (props: Props) => {
                       icon={v.value}
                     >
                       {t("labels.signInWith", { provider: v.name })}
+                      {lastUsed === v.name ? (
+                        <LastUsed value={t("labels.lastUsed")} />
+                      ) : null}
                     </Button>
                   </Form>
                 );

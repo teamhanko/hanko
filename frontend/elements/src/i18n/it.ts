@@ -105,6 +105,7 @@ export const it: Translation = {
     setUsername: "Imposta nome utente",
     changePassword: "Cambia password",
     setPassword: "Imposta password",
+    lastUsed: "Ultimo utilizzo",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

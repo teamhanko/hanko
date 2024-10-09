@@ -107,6 +107,7 @@ export const ptBR: Translation = {
     setUsername: "Definir nome de usuário",
     changePassword: "Alterar senha",
     setPassword: "Definir senha",
+    lastUsed: "Último uso",
   },
   errors: {
     somethingWentWrong:

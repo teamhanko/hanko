@@ -100,6 +100,7 @@ export const zh: Translation = {
     setUsername: "设置用户名",
     changePassword: "更改密码",
     setPassword: "设置密码",
+    lastUsed: "最后使用",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",

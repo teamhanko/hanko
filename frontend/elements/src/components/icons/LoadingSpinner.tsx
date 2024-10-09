@@ -25,11 +25,23 @@ const LoadingSpinner = ({
   return (
     <Fragment>
       {isLoading ? (
-        <div className={cx(styles.loadingSpinnerWrapper, styles.centerContent, maxWidth && styles.maxWidth)}>
+        <div
+          className={cx(
+            styles.loadingSpinnerWrapper,
+            styles.centerContent,
+            maxWidth && styles.maxWidth,
+          )}
+        >
           <Icon name={"spinner"} secondary={secondary} />
         </div>
       ) : isSuccess ? (
-        <div className={cx(styles.loadingSpinnerWrapper, styles.centerContent,  maxWidth && styles.maxWidth)}>
+        <div
+          className={cx(
+            styles.loadingSpinnerWrapper,
+            styles.centerContent,
+            maxWidth && styles.maxWidth,
+          )}
+        >
           <Icon name={"checkmark"} secondary={secondary} fadeOut={fadeOut} />
         </div>
       ) : (
