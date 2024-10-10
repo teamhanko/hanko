@@ -23,6 +23,7 @@ func NewPersister(
 	samlCertificates []*models.SamlCertificate,
 	webhooks models.Webhooks,
 	webhookEvents models.WebhookEvents,
+	sessions []models.Session,
 ) persistence.Persister {
 	return &persister{
 		userPersister:                NewUserPersister(user),
@@ -40,6 +41,7 @@ func NewPersister(
 		samlStatePersister:           NewSamlStatePersister(samlStates),
 		samlCertificatePersister:     NewSamlCertificatePersister(samlCertificates),
 		webhookPersister:             NewWebhookPersister(webhooks, webhookEvents),
+		sessionPersister:             NewSessionPersister(sessions),
 	}
 }
 
@@ -59,6 +61,7 @@ type persister struct {
 	samlStatePersister           persistence.SamlStatePersister
 	samlCertificatePersister     persistence.SamlCertificatePersister
 	webhookPersister             persistence.WebhookPersister
+	sessionPersister             persistence.SessionPersister
 }
 
 func (p *persister) GetPasswordCredentialPersister() persistence.PasswordCredentialPersister {
@@ -184,4 +187,8 @@ func (p *persister) GetSamlCertificatePersisterWithConnection(tx *pop.Connection
 
 func (p *persister) GetWebhookPersister(_ *pop.Connection) persistence.WebhookPersister {
 	return p.webhookPersister
+}
+
+func (p *persister) GetSessionPersister(_ *pop.Connection) persistence.SessionPersister {
+	return p.sessionPersister
 }

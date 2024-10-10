@@ -62,8 +62,19 @@ export interface User {
   readonly updated_at: string;
 }
 
+export interface Session {
+  readonly id: string;
+  readonly user_agent: string;
+  readonly user_agent_raw: string;
+  readonly ip_address: string;
+  readonly created_at: string;
+  readonly last_used: string;
+  readonly current: boolean;
+}
+
 export interface ProfilePayload {
   readonly user: User;
+  readonly sessions?: Session[];
 }
 
 export interface SuccessPayload {

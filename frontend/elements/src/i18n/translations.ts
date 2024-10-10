@@ -36,6 +36,9 @@ export interface Translation {
     signUp: string;
     selectLoginMethod: string;
     setupLoginMethod: string;
+    lastUsed: string;
+    ipAddress: string;
+    revokeSession: string;
   };
   texts: {
     enterPasscode: string;
@@ -100,6 +103,8 @@ export interface Translation {
     setPassword: string;
     changeUsername: string;
     setUsername: string;
+    revoke: string;
+    currentSession: string;
   };
   errors: {
     somethingWentWrong: string;

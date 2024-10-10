@@ -19,10 +19,12 @@ type Session struct {
 	// `issuer` is a string that identifies the principal (human user, an organization, or a service)
 	// that issued the JWT. Its value is set in the `iss` claim of a JWT.
 	Issuer string `yaml:"issuer" json:"issuer,omitempty" koanf:"issuer"`
-	// `lifespan` determines how long a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal
+	// `lifespan` determines the maximum duration for which a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal
 	// numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	Lifespan string `yaml:"lifespan" json:"lifespan,omitempty" koanf:"lifespan" jsonschema:"default=12h"`
+	// `server_side` contains configuration for server-side sessions.
+	ServerSide ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
 }
 
 func (s *Session) Validate() error {
@@ -60,4 +62,14 @@ func (c *Cookie) GetName() string {
 	}
 
 	return "hanko"
+}
+
+type ServerSide struct {
+	// `enabled` determines whether server-side sessions are enabled.
+	//
+	// NOTE: When enabled the session endpoint must be used in order to check if a session is still valid.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,
+	// older sessions are invalidated.
+	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
 }

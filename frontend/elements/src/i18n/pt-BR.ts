@@ -32,6 +32,9 @@ export const ptBR: Translation = {
     signUp: "Registrar",
     selectLoginMethod: "Selecionar método de login",
     setupLoginMethod: "Configurar método de login",
+    lastUsed: "Última vez visto",
+    ipAddress: "Endereço IP",
+    revokeSession: "Revogar sessão",
   },
   texts: {
     enterPasscode:
@@ -107,6 +110,8 @@ export const ptBR: Translation = {
     setUsername: "Definir nome de usuário",
     changePassword: "Alterar senha",
     setPassword: "Definir senha",
+    revoke: "Revogar",
+    currentSession: "Sessão atual",
   },
   errors: {
     somethingWentWrong:

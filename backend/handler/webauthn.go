@@ -423,7 +423,7 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		token, err := h.sessionManager.GenerateJWT(webauthnUser.UserId, emailJwt)
+		token, _, err := h.sessionManager.GenerateJWT(webauthnUser.UserId, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

@@ -243,3 +243,8 @@ export interface Identity {
   id: string;
   provider: string;
 }
+
+export interface SessionCheckResponse {
+  is_valid: boolean;
+  expiration_time?: string;
+}

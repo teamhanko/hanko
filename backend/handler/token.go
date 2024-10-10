@@ -92,7 +92,7 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		jwtToken, err := h.sessionManager.GenerateJWT(token.UserID, emailJwt)
+		jwtToken, _, err := h.sessionManager.GenerateJWT(token.UserID, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

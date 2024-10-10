@@ -21,6 +21,7 @@ import Spacer from "../components/spacer/Spacer";
 import ChangeUsernameDropdown from "../components/accordion/ChangeUsernameDropdown";
 import DeleteAccountPage from "./DeleteAccountPage";
 import ErrorBox from "../components/error/ErrorBox";
+import ListSessionsAccordion from "../components/accordion/ListSessionsAccordion";
 
 interface Props {
   state: State<"profile_init">;
@@ -152,6 +153,13 @@ const ProfilePage = (props: Props) => {
       event,
       "passkey-submit",
       flowState.actions.webauthn_credential_create(null).run,
+    );
+
+  const onSessionDelete = async (event: Event, id: string) =>
+    onAction(
+      event,
+      "session-delete",
+      flowState.actions.session_delete({ session_id: id }).run,
     );
 
   const onAccountDelete = async (event: Event) =>
@@ -309,6 +317,23 @@ const ProfilePage = (props: Props) => {
                 setCheckedItemID={setCheckedItemID}
               />
             ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.payload.sessions ? (
+        <Fragment>
+          <Headline1>{t("headlines.profileSessions")}</Headline1>
+          <Paragraph>
+            <ListSessionsAccordion
+              sessions={flowState.payload.sessions}
+              setError={null}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+              onSessionDelete={onSessionDelete}
+              deletableSessionIDs={flowState.actions
+                .session_delete?.(null)
+                .inputs.session_id.allowed_values?.map((e) => e.value)}
+            />
           </Paragraph>
         </Fragment>
       ) : null}
