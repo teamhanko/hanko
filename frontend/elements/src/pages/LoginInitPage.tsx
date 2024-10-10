@@ -33,6 +33,7 @@ const LoginInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const {
     init,
+    hanko,
     initialComponentName,
     setLoadingAction,
     uiState,
@@ -71,7 +72,7 @@ const LoginInitPage = (props: Props) => {
 
     setIdentifierToUIState(identifier);
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onPasskeySubmit = async (event: Event) => {
@@ -83,7 +84,7 @@ const LoginInitPage = (props: Props) => {
       .webauthn_generate_request_options(null)
       .run();
 
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onRegisterClick = async (event: Event) => {
@@ -124,7 +125,7 @@ const LoginInitPage = (props: Props) => {
       })
       .run();
 
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const showDivider = useMemo(

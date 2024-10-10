@@ -26,6 +26,7 @@ const RegistrationInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const {
     init,
+    hanko,
     uiState,
     setUIState,
     stateHandler,
@@ -49,7 +50,7 @@ const RegistrationInitPage = (props: Props) => {
       })
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onUsernameInput = (event: Event) => {
@@ -83,8 +84,7 @@ const RegistrationInitPage = (props: Props) => {
         redirect_to: window.location.toString(),
       })
       .run();
-
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const showDivider = useMemo(

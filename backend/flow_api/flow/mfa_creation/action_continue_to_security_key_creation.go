@@ -19,8 +19,9 @@ func (a ContinueToSecurityKeyCreation) GetDescription() string {
 
 func (a ContinueToSecurityKeyCreation) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
+	attachmentSupported := c.Stash().Get(shared.StashPathSecurityKeyAttachmentSupported).Bool()
 
-	if !deps.Cfg.MFA.Enabled || !deps.Cfg.MFA.SecurityKeys.Enabled {
+	if !deps.Cfg.MFA.Enabled || !deps.Cfg.MFA.SecurityKeys.Enabled || !attachmentSupported {
 		c.SuspendAction()
 		return
 	}

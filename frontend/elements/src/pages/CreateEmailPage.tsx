@@ -21,7 +21,7 @@ type Props = {
 
 const CreateEmailPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { stateHandler, setLoadingAction } = useContext(AppContext);
+  const { hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [email, setEmail] = useState<string>();
 
@@ -38,7 +38,7 @@ const CreateEmailPage = (props: Props) => {
       .email_address_set({ email })
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onSkipClick = async (event: Event) => {
@@ -46,7 +46,7 @@ const CreateEmailPage = (props: Props) => {
     setLoadingAction("skip");
     const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

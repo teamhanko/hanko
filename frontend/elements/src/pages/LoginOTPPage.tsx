@@ -23,7 +23,7 @@ const LoginOTPPAge = (props: Props) => {
   const numberOfDigits = 6;
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
-  const { setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const [passcodeDigits, setPasscodeDigits] = useState<string[]>([]);
 
   const submitPasscode = useCallback(
@@ -35,9 +35,9 @@ const LoginOTPPAge = (props: Props) => {
         .run();
 
       setLoadingAction(null);
-      stateHandler[nextState.name](nextState);
+      await hanko.flow.run(nextState, stateHandler);
     },
-    [flowState, setLoadingAction, stateHandler],
+    [hanko, flowState, setLoadingAction, stateHandler],
   );
 
   const onPasscodeInput = (digits: string[]) => {
@@ -60,7 +60,7 @@ const LoginOTPPAge = (props: Props) => {
       .continue_to_login_security_key(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   useEffect(() => {

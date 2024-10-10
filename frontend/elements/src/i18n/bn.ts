@@ -164,6 +164,7 @@ export const bn: Translation = {
     thirdPartyUnverifiedEmail:
       "ইমেল যাচাইকরণ প্রয়োজন. অনুগ্রহ করে আপনার প্রদানকারীর সাথে ব্যবহৃত ইমেল ঠিকানা যাচাই করুন।",
     signupDisabled: "অ্যাকাউন্ট নিবন্ধন নিষ্ক্রিয় করা হয়েছে",
+    handlerNotFoundError: "[TRANSLATION MISSING]",
   },
   flowErrors: {
     technical_error:
@@ -194,5 +195,6 @@ export const bn: Translation = {
     value_too_short_error: "মানটি খুব ছোট।",
     webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
     webauthn_credential_already_exists: "[TRANSLATION MISSING]",
+    platform_authenticator_required: "[TRANSLATION MISSING]",
   },
 };

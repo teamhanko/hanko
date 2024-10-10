@@ -167,6 +167,7 @@ export const ptBR: Translation = {
     thirdPartyUnverifiedEmail:
       "Verificação de e-mail necessária. Por favor, verifique o e-mail utilizado com o seu provedor.",
     signupDisabled: "O registro da conta está desativado.",
+    handlerNotFoundError: "[TRANSLATION MISSING]",
   },
   flowErrors: {
     technical_error:
@@ -196,5 +197,6 @@ export const ptBR: Translation = {
     value_too_short_error: "O valor é muito curto.",
     webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
     webauthn_credential_already_exists: "[TRANSLATION MISSING]",
+    platform_authenticator_required: "[TRANSLATION MISSING]",
   },
 };

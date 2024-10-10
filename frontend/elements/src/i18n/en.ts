@@ -171,6 +171,8 @@ export const en: Translation = {
     thirdPartyUnverifiedEmail:
       "Email verification required. Please verify the used email address with your provider.",
     signupDisabled: "Account registration is disabled.",
+    handlerNotFoundError:
+      "The current step in your process is not supported by this application version. Please try again later or contact support if the issue persists.",
   },
   flowErrors: {
     technical_error: "A technical error has occurred. Please try again later.",
@@ -201,5 +203,7 @@ export const en: Translation = {
       "This credential can be used as a second factor security key only.",
     webauthn_credential_already_exists:
       "The request either timed out, was canceled or the device is already registered. Please try again or try using another device.",
+    platform_authenticator_required:
+      "Your account is configured to use platform authenticators, but your current device or browser does not support this feature. Please try again with a compatible device or browser.",
   },
 };
