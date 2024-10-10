@@ -28,16 +28,31 @@ func (h ScheduleMFACreationStates) Execute(c flowpilot.HookExecutionContext) err
 	userHasEmail := c.Stash().Get(StashPathEmail).Exists() || c.Stash().Get(StashPathUserHasEmails).Bool()
 	userHasPassword := c.Stash().Get(StashPathUserHasPassword).Bool()
 	mfaLoginEnabled := (passwordsEnabled && userHasPassword) || (passcodeEmailsEnabled && userHasEmail)
-	mfaMethodsEnabled := mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled
-	acquireMFAMethod := (c.GetFlowName() == FlowLogin && mfaConfig.AcquireOnLogin) ||
-		(c.GetFlowName() == FlowRegistration && mfaConfig.AcquireOnRegistration)
+	mfaAcquireConfigured := mfaConfig.Enabled &&
+		(mfaConfig.SecurityKeys.Enabled || mfaConfig.TOTP.Enabled) &&
+		((c.GetFlowName() == FlowLogin && mfaConfig.AcquireOnLogin) ||
+			(c.GetFlowName() == FlowRegistration && mfaConfig.AcquireOnRegistration))
 	userHasSecurityKey := c.Stash().Get(StashPathUserHasSecurityKey).Bool()
+	attachmentSupported := c.Stash().Get(StashPathSecurityKeyAttachmentSupported).Bool()
 	userHasOTPSecret := c.Stash().Get(StashPathUserHasOTPSecret).Bool()
 
-	if !userHasSecurityKey && !userHasOTPSecret &&
-		mfaConfig.Enabled && mfaLoginEnabled &&
-		acquireMFAMethod && mfaMethodsEnabled {
-		c.ScheduleStates(StateMFAMethodChooser)
+	if !userHasSecurityKey && !userHasOTPSecret && mfaLoginEnabled && mfaAcquireConfigured {
+		// The user has no MFA methods set up but MFA is enabled and configured for acquisition.
+
+		deviceSupportsMFAMethod := mfaConfig.TOTP.Enabled || attachmentSupported
+
+		if !deviceSupportsMFAMethod {
+			// The device or browser does not support a suitable MFA method.
+
+			if !mfaConfig.Optional {
+				// Show error when onboarding is required.
+				c.SetFlowError(ErrorPlatformAuthenticatorRequired)
+			} else {
+				// Skip onboarding, when optional.
+			}
+		} else {
+			c.ScheduleStates(StateMFAMethodChooser)
+		}
 	}
 
 	return nil

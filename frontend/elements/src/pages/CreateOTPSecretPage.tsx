@@ -24,7 +24,8 @@ const CreateOTPSecretPage = (props: Props) => {
   const numberOfDigits = 6;
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
-  const { uiState, setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, uiState, setLoadingAction, stateHandler } =
+    useContext(AppContext);
   const [passcodeDigits, setPasscodeDigits] = useState<string[]>([]);
 
   const submitPasscode = useCallback(
@@ -36,7 +37,7 @@ const CreateOTPSecretPage = (props: Props) => {
         .run();
 
       setLoadingAction(null);
-      stateHandler[nextState.name](nextState);
+      await hanko.flow.run(nextState, stateHandler);
     },
     [flowState, setLoadingAction, stateHandler],
   );
@@ -59,7 +60,7 @@ const CreateOTPSecretPage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   useEffect(() => {

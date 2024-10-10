@@ -51,16 +51,20 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 
 	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
 	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
-	platformAuthenticatorAvailable := c.Stash().Get(shared.StashPathWebauthnPlatformAuthenticatorAvailable).Bool()
-	userCanUseSecurityKey := platformAuthenticatorAvailable || cfg.MFA.SecurityKeys.AuthenticatorAttachment != "platform"
+	attachmentSupported := c.Stash().Get(shared.StashPathSecurityKeyAttachmentSupported).Bool()
+	userCanUseOTP := cfg.MFA.TOTP.Enabled && userHasOTPSecret
 
 	if cfg.MFA.SecurityKeys.Enabled && userHasSecurityKey {
-		if userCanUseSecurityKey {
+		switch {
+		case !attachmentSupported && !userCanUseOTP:
+			c.SetFlowError(shared.ErrorPlatformAuthenticatorRequired)
+			result = append(result, shared.StateError)
+		case attachmentSupported:
 			result = append(result, shared.StateLoginSecurityKey)
-		} else {
-			// TODO: show error?
+		case userCanUseOTP:
+			result = append(result, shared.StateLoginOTP)
 		}
-	} else if cfg.MFA.TOTP.Enabled && userHasOTPSecret {
+	} else if userCanUseOTP {
 		result = append(result, shared.StateLoginOTP)
 	}
 

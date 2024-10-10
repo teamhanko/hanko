@@ -165,6 +165,7 @@ export const it: Translation = {
     thirdPartyUnverifiedEmail:
       "Verifica email richiesta. Verifica l'indirizzo email utilizzato con il tuo provider.",
     signupDisabled: "La registrazione dell'account è disabilitata.",
+    handlerNotFoundError: "[TRANSLATION MISSING]",
   },
   flowErrors: {
     technical_error: "Si è verificato un errore tecnico. Riprova più tardi.",
@@ -193,5 +194,6 @@ export const it: Translation = {
     value_too_short_error: "Il valore è troppo corto.",
     webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
     webauthn_credential_already_exists: "[TRANSLATION MISSING]",
+    platform_authenticator_required: "[TRANSLATION MISSING]",
   },
 };

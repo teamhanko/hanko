@@ -13,6 +13,7 @@ var (
 	ErrorRateLimitExceeded                = flowpilot.NewFlowError("rate_limit_exceeded", "The rate limit has been exceeded.", http.StatusTooManyRequests)
 	ErrorUnauthorized                     = flowpilot.NewFlowError("unauthorized", "The session is invalid.", http.StatusUnauthorized)
 	ErrorWebauthnCredentialInvalidMFAOnly = flowpilot.NewFlowError("webauthn_credential_invalid_mfa_only", "This credential can be used as a second factor security key only.", http.StatusUnauthorized)
+	ErrorPlatformAuthenticatorRequired    = flowpilot.NewFlowError("platform_authenticator_required", "The device or browser does not support the required platform authenticators.", http.StatusUnauthorized)
 )
 
 var (

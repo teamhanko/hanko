@@ -20,7 +20,7 @@ type Props = {
 
 const EditPasswordPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { stateHandler, setLoadingAction } = useContext(AppContext);
+  const { hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
 
@@ -37,7 +37,7 @@ const EditPasswordPage = (props: Props) => {
       .password_recovery({ new_password: password })
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

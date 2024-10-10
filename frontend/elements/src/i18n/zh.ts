@@ -155,6 +155,7 @@ export const zh: Translation = {
     thirdPartyUnverifiedEmail:
       "需要电子邮件验证。请与您的提供商验证使用的电子邮件地址。",
     signupDisabled: "帐户注册被禁用。",
+    handlerNotFoundError: "[TRANSLATION MISSING]",
   },
   flowErrors: {
     technical_error: "发生技术错误。请稍后再试。",
@@ -179,5 +180,6 @@ export const zh: Translation = {
     value_too_short_error: "值太短。",
     webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
     webauthn_credential_already_exists: "[TRANSLATION MISSING]",
+    platform_authenticator_required: "[TRANSLATION MISSING]",
   },
 };

@@ -30,6 +30,7 @@ const PasscodePage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
   const {
+    hanko,
     uiState,
     setUIState,
     setLoadingAction,
@@ -54,9 +55,9 @@ const PasscodePage = (props: Props) => {
       const nextState = await flowState.actions.verify_passcode({ code }).run();
 
       setLoadingAction(null);
-      stateHandler[nextState.name](nextState);
+      await hanko.flow.run(nextState, stateHandler);
     },
-    [flowState, setLoadingAction, stateHandler],
+    [hanko, flowState, setLoadingAction, stateHandler],
   );
 
   const onPasscodeInput = (digits: string[]) => {
@@ -77,7 +78,7 @@ const PasscodePage = (props: Props) => {
     setLoadingAction("passcode-resend");
     const nextState = await flowState.actions.resend_passcode(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onBackClick = async (event: Event) => {
@@ -85,7 +86,7 @@ const PasscodePage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   useEffect(() => {

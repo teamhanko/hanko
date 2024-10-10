@@ -22,7 +22,7 @@ interface Props {
 
 const LoginMethodChooserPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
   const onPasswordSelectSubmit = async (event: Event) => {
@@ -32,7 +32,7 @@ const LoginMethodChooserPage = (props: Props) => {
       .continue_to_password_login(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onPasscodeSelectSubmit = async (event: Event) => {
@@ -42,7 +42,7 @@ const LoginMethodChooserPage = (props: Props) => {
       .continue_to_passcode_confirmation(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onBackClick = async (event: Event) => {
@@ -50,7 +50,7 @@ const LoginMethodChooserPage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

@@ -21,7 +21,7 @@ interface Props {
 
 const RegisterPasskeyPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
   const onPasskeySubmit = async (event: Event) => {
@@ -31,8 +31,7 @@ const RegisterPasskeyPage = (props: Props) => {
     const nextState = await flowState.actions
       .webauthn_generate_creation_options(null)
       .run();
-
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onSkipClick = async (event: Event) => {
@@ -40,7 +39,7 @@ const RegisterPasskeyPage = (props: Props) => {
     setLoadingAction("skip");
     const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onBackClick = async (event: Event) => {
@@ -48,7 +47,7 @@ const RegisterPasskeyPage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (
@@ -63,7 +62,11 @@ const RegisterPasskeyPage = (props: Props) => {
           </Button>
         </Form>
       </Content>
-      <Footer hidden={!flowState.actions.skip?.(null) && !flowState.actions.back?.(null)}>
+      <Footer
+        hidden={
+          !flowState.actions.skip?.(null) && !flowState.actions.back?.(null)
+        }
+      >
         <Link
           uiAction={"back"}
           onClick={onBackClick}
