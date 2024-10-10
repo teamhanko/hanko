@@ -76,13 +76,11 @@ export interface Translation {
     howDoYouWantToLogin: string;
     deleteSecurityKey: string;
     renameSecurityKey: string;
-    setupSecurityKey: string;
   };
   labels: {
     authenticatorApp: string;
     authenticatorAppAdd: string;
     authenticatorAppManage: string;
-    authenticatorAppRemove: string;
     or: string;
     no: string;
     yes: string;
