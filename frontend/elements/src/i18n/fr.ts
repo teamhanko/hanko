@@ -11,7 +11,7 @@ export const fr: Translation = {
     registerAuthenticator: "Créer une clé d'identification",
     registerConfirm: "Créer un compte ?",
     registerPassword: "Définir un nouveau mot de passe",
-    otpSetUp: "[TRANSLATION MISSING]",
+    otpSetUp: "Configurer l'application d'authentification",
     profileEmails: "Adresses e-mail",
     profilePassword: "Mot de passe",
     profilePasskeys: "Clés d'identification",
@@ -33,16 +33,17 @@ export const fr: Translation = {
     signUp: "S'inscrire",
     selectLoginMethod: "Sélectionner la méthode de connexion",
     setupLoginMethod: "Configurer la méthode de connexion",
-    mfaSetUp: "[TRANSLATION MISSING]",
-    securityKeySetUp: "[TRANSLATION MISSING]",
-    securityKeyLogin: "[TRANSLATION MISSING]",
-    otpLogin: "[TRANSLATION MISSING]",
-    renameSecurityKey: "[TRANSLATION MISSING]",
-    deleteSecurityKey: "[TRANSLATION MISSING]",
-    securityKeys: "[TRANSLATION MISSING]",
-    authenticatorApp: "[TRANSLATION MISSING]",
-    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING",
-    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
+    mfaSetUp: "Configurer MFA",
+    securityKeySetUp: "Ajouter une clé de sécurité",
+    securityKeyLogin: "Clé de sécurité",
+    otpLogin: "Code d'authentification",
+    renameSecurityKey: "Renommer la clé de sécurité",
+    deleteSecurityKey: "Supprimer la clé de sécurité",
+    securityKeys: "Clés de sécurité",
+    authenticatorApp: "Application d'authentification",
+    authenticatorAppAlreadySetUp:
+      "L'application d'authentification est configurée",
+    authenticatorAppNotSetUp: "Configurer l'application d'authentification",
   },
   texts: {
     enterPasscode:
@@ -53,9 +54,11 @@ export const fr: Translation = {
       "Connectez-vous à votre compte facilement et en toute sécurité avec une clé d'identification. Remarque : Vos données biométriques sont uniquement stockées sur vos appareils et ne seront jamais partagées avec qui que ce soit.",
     createAccount:
       'Aucun compte n\'existe pour "{emailAddress}". Voulez-vous créer un nouveau compte ?',
-    otpEnterVerificationCode: "[TRANSLATION MISSING]",
-    otpScanQRCode: "[TRANSLATION MISSING]",
-    otpSecretKey: "[TRANSLATION MISSING]",
+    otpEnterVerificationCode:
+      "Entrez le mot de passe à usage unique (OTP) obtenu à partir de votre application d'authentification ci-dessous :",
+    otpScanQRCode:
+      "Scannez le code QR en utilisant votre application d'authentification (comme Google Authenticator ou toute autre application TOTP). Alternativement, vous pouvez entrer manuellement la clé secrète OTP dans l'application.",
+    otpSecretKey: "Clé secrète OTP",
     passwordFormatHint:
       "Doit contenir entre {minLength} et {maxLength} caractères.",
     setPrimaryEmail: "Définir cette adresse e-mail comme adresse de contact.",
@@ -75,15 +78,20 @@ export const fr: Translation = {
     selectLoginMethodForFutureLogins:
       "Sélectionnez l'une des méthodes de connexion suivantes à utiliser pour les connexions futures.",
     howDoYouWantToLogin: "Comment souhaitez-vous vous connecter ?",
-    mfaSetUp: "TRANSLATION MISSING]",
-    securityKeySetUp: "[TRANSLATION MISSING]",
-    securityKeyLogin: "[TRANSLATION MISSING]",
-    otpLogin: "[TRANSLATION MISSING]",
-    renameSecurityKey: "[TRANSLATION MISSING]",
-    setupSecurityKey: "[TRANSLATION MISSING]",
-    deleteSecurityKey: "[TRANSLATION MISSING]",
-    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING]",
-    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
+    mfaSetUp:
+      "Protégez votre compte avec l'authentification à plusieurs facteurs (MFA). La MFA ajoute une étape supplémentaire à votre processus de connexion, garantissant que même si votre mot de passe ou votre compte e-mail est compromis, votre compte reste sécurisé.",
+    securityKeyLogin:
+      "Connectez ou activez votre clé de sécurité, puis cliquez sur le bouton ci-dessous. Une fois prêt, utilisez-le via USB, NFC ou votre téléphone mobile. Suivez les instructions pour terminer le processus de connexion.",
+    otpLogin:
+      "Ouvrez votre application d'authentification pour obtenir le mot de passe à usage unique (OTP). Entrez le code dans le champ ci-dessous pour terminer votre connexion.",
+    renameSecurityKey: "Définissez un nom pour la clé de sécurité.",
+    deleteSecurityKey: "Supprimez cette clé de sécurité de votre compte.",
+    authenticatorAppAlreadySetUp:
+      "Votre compte est sécurisé avec une application d'authentification qui génère des mots de passe à usage unique basés sur le temps (TOTP) pour l'authentification à plusieurs facteurs.",
+    authenticatorAppNotSetUp:
+      "Sécurisez votre compte avec une application d'authentification qui génère des mots de passe à usage unique basés sur le temps (TOTP) pour l'authentification à plusieurs facteurs.",
+    securityKeySetUp:
+      "Utilisez une clé de sécurité dédiée via USB, Bluetooth ou NFC, ou votre téléphone mobile. Connectez ou activez votre clé de sécurité, puis cliquez sur le bouton ci-dessous et suivez les instructions pour terminer l'enregistrement.",
   },
   labels: {
     or: "ou",
@@ -91,7 +99,7 @@ export const fr: Translation = {
     yes: "oui",
     email: "E-mail",
     continue: "Continuer",
-    copied: "[TRANSLATION MISSING]",
+    copied: "copié",
     skip: "Passer",
     save: "Enregistrer",
     password: "Mot de passe",
@@ -132,16 +140,15 @@ export const fr: Translation = {
     setUsername: "Définir le nom d'utilisateur",
     changePassword: "Changer le mot de passe",
     setPassword: "Définir le mot de passe",
-    authenticatorApp: "[TRANSLATION MISSING]",
-    securityKey: "[TRANSLATION MISSING]",
-    securityKeyUse: "[TRANSLATION MISSING]",
-    newSecurityKeyName: "[TRANSLATION MISSING]",
-    createSecurityKey: "[TRANSLATION MISSING]",
-    authenticatorAppManage: "[TRANSLATION MISSING]",
-    authenticatorAppAdd: "[TRANSLATION MISSING]",
-    authenticatorAppRemove: "[TRANSLATION MISSING]",
-    configured: "[TRANSLATION MISSING]",
-    useAnotherMethod: "[TRANSLATION MISSING]",
+    authenticatorApp: "Application d'authentification",
+    securityKey: "Clé de sécurité",
+    securityKeyUse: "Utiliser la clé de sécurité",
+    newSecurityKeyName: "Nouveau nom de clé de sécurité",
+    createSecurityKey: "Créer une clé de sécurité",
+    authenticatorAppManage: "Gérer l'application d'authentification",
+    authenticatorAppAdd: "Configurer",
+    configured: "configuré",
+    useAnotherMethod: "Utiliser une autre méthode",
   },
   errors: {
     somethingWentWrong:
@@ -170,7 +177,7 @@ export const fr: Translation = {
     thirdPartyUnverifiedEmail:
       "Vérification de l'adresse e-mail requise. Veuillez vérifier l'adresse e-mail utilisée avec votre fournisseur.",
     signupDisabled: "L'enregistrement du compte est désactivé.",
-    handlerNotFoundError: "[TRANSLATION MISSING]",
+    handlerNotFoundError: "L'étape actuelle n'est pas prise en charge dans cette version de l'application. Veuillez réessayer plus tard ou contacter l'équipe d'assistance pour obtenir de l'aide.",
   },
   flowErrors: {
     technical_error:
@@ -199,8 +206,11 @@ export const fr: Translation = {
     value_missing_error: "La valeur est manquante.",
     value_too_long_error: "La valeur est trop longue.",
     value_too_short_error: "La valeur est trop courte.",
-    webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
-    webauthn_credential_already_exists: "[TRANSLATION MISSING]",
-    platform_authenticator_required: "[TRANSLATION MISSING]",
+    webauthn_credential_invalid_mfa_only:
+      "Cette identité peut être utilisée uniquement comme clé de sécurité de deuxième facteur.",
+    webauthn_credential_already_exists:
+      "La demande a expiré, a été annulée ou le dispositif est déjà enregistré. Veuillez réessayer ou essayer d'utiliser un autre dispositif.",
+    platform_authenticator_required:
+      "Votre compte est configuré pour utiliser des authentificateurs de plate-forme, mais votre appareil ou navigateur actuel ne prend pas en charge cette fonctionnalité. Veuillez réessayer avec un appareil ou un navigateur compatible.",
   },
 };
