@@ -60,7 +60,7 @@ export const en: Translation = {
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
     securityKeySetUp:
-      "Use a dedicated security key via USB, Bluetooth, or NFC, or your mobile phone or device’s built-in options like Touch ID, Face ID, or Windows Hello. Connect or activate your security key, then click the button below and follow the prompts to complete the registration.",
+      "Use a dedicated security key via USB, Bluetooth, or NFC, or your mobile phone. Connect or activate your security key, then click the button below and follow the prompts to complete the registration.",
     setPrimaryEmail: "Set this email address to be used for contacting you.",
     isPrimaryEmail:
       "This email address will be used to contact you if necessary.",
@@ -79,11 +79,10 @@ export const en: Translation = {
     mfaSetUp:
       "Protect your account with Multi-Factor Authentication (MFA). MFA adds an additional step to your login process, ensuring that even if your password or email account is compromised, your account stays secure.",
     securityKeyLogin:
-      "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone, or built-in options like Touch ID, Face ID, or Windows Hello. Follow the prompts to complete the login process.",
+      "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone. Follow the prompts to complete the login process.",
     otpLogin:
       "Open your authenticator app to obtain the one-time password (OTP). Enter the code in the field below to complete your login.",
     renameSecurityKey: "Set a name for the security key.",
-    setupSecurityKey: "Set up a security key.",
     deleteSecurityKey: "Delete this security key from your account.",
     authenticatorAppAlreadySetUp:
       "Your account is secured with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
@@ -143,7 +142,6 @@ export const en: Translation = {
     createSecurityKey: "Create a security key",
     authenticatorAppManage: "Manage authenticator app",
     authenticatorAppAdd: "Set up",
-    authenticatorAppRemove: "Delete OTP secret",
     configured: "configured",
     useAnotherMethod: "Use another method",
   },
