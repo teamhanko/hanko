@@ -60,7 +60,7 @@ export const en: Translation = {
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
     securityKeySetUp:
-      "Use a dedicated security key via USB, Bluetooth, or NFC, or your mobile phone or device’s built-in options like Touch ID, Face ID, or Windows Hello. Connect or activate your security key, then click the button below and follow the prompts to complete the registration.",
+      "Use a dedicated security key via USB, Bluetooth, or NFC, or your mobile phone. Connect or activate your security key, then click the button below and follow the prompts to complete the registration.",
     setPrimaryEmail: "Set this email address to be used for contacting you.",
     isPrimaryEmail:
       "This email address will be used to contact you if necessary.",
@@ -79,11 +79,10 @@ export const en: Translation = {
     mfaSetUp:
       "Protect your account with Multi-Factor Authentication (MFA). MFA adds an additional step to your login process, ensuring that even if your password or email account is compromised, your account stays secure.",
     securityKeyLogin:
-      "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone, or built-in options like Touch ID, Face ID, or Windows Hello. Follow the prompts to complete the login process.",
+      "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone. Follow the prompts to complete the login process.",
     otpLogin:
       "Open your authenticator app to obtain the one-time password (OTP). Enter the code in the field below to complete your login.",
     renameSecurityKey: "Set a name for the security key.",
-    setupSecurityKey: "Set up a security key.",
     deleteSecurityKey: "Delete this security key from your account.",
     authenticatorAppAlreadySetUp:
       "Your account is secured with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
@@ -143,7 +142,6 @@ export const en: Translation = {
     createSecurityKey: "Create a security key",
     authenticatorAppManage: "Manage authenticator app",
     authenticatorAppAdd: "Set up",
-    authenticatorAppRemove: "Delete OTP secret",
     configured: "configured",
     useAnotherMethod: "Use another method",
   },
@@ -171,6 +169,8 @@ export const en: Translation = {
     thirdPartyUnverifiedEmail:
       "Email verification required. Please verify the used email address with your provider.",
     signupDisabled: "Account registration is disabled.",
+    handlerNotFoundError:
+      "The current step in your process is not supported by this application version. Please try again later or contact support if the issue persists.",
   },
   flowErrors: {
     technical_error: "A technical error has occurred. Please try again later.",
@@ -201,5 +201,7 @@ export const en: Translation = {
       "This credential can be used as a second factor security key only.",
     webauthn_credential_already_exists:
       "The request either timed out, was canceled or the device is already registered. Please try again or try using another device.",
+    platform_authenticator_required:
+      "Your account is configured to use platform authenticators, but your current device or browser does not support this feature. Please try again with a compatible device or browser.",
   },
 };

@@ -11,7 +11,7 @@ export const zh: Translation = {
     registerAuthenticator: "创建密钥",
     registerConfirm: "创建账号？",
     registerPassword: "设置新密码",
-    otpSetUp: "[TRANSLATION MISSING]",
+    otpSetUp: "设置身份验证应用",
     profileEmails: "电子邮件",
     profilePassword: "密码",
     profilePasskeys: "密钥",
@@ -33,16 +33,16 @@ export const zh: Translation = {
     signUp: "注册",
     selectLoginMethod: "选择登录方法",
     setupLoginMethod: "设置登录方法",
-    mfaSetUp: "[TRANSLATION MISSING]",
-    securityKeySetUp: "[TRANSLATION MISSING]",
-    securityKeyLogin: "[TRANSLATION MISSING]",
-    otpLogin: "[TRANSLATION MISSING]",
-    renameSecurityKey: "[TRANSLATION MISSING]",
-    deleteSecurityKey: "[TRANSLATION MISSING]",
-    securityKeys: "[TRANSLATION MISSING]",
-    authenticatorApp: "[TRANSLATION MISSING]",
-    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING",
-    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
+    mfaSetUp: "设置 MFA",
+    securityKeySetUp: "添加安全密钥",
+    securityKeyLogin: "安全密钥",
+    otpLogin: "验证码",
+    renameSecurityKey: "重命名安全密钥",
+    deleteSecurityKey: "删除安全密钥",
+    securityKeys: "安全密钥",
+    authenticatorApp: "身份验证应用",
+    authenticatorAppAlreadySetUp: "身份验证应用已设置",
+    authenticatorAppNotSetUp: "设置身份验证应用",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -50,9 +50,11 @@ export const zh: Translation = {
     setupPasskey:
       "使用密钥轻松安全地登录您的账户。注意：您的生物识别数据仅存储在您的设备上，永远不会与任何人共享。",
     createAccount: "没有“{emailAddress}”的账户存在。你想要创建一个新账户吗?",
-    otpEnterVerificationCode: "[TRANSLATION MISSING]",
-    otpScanQRCode: "[TRANSLATION MISSING]",
-    otpSecretKey: "[TRANSLATION MISSING]",
+    otpEnterVerificationCode:
+      "在下面输入从身份验证应用获取的一次性密码 (OTP)：",
+    otpScanQRCode:
+      "使用您的身份验证应用扫描二维码（例如 Google Authenticator 或任何其他 TOTP 应用）。另外，您也可以手动输入 OTP 秘密密钥到应用中。",
+    otpSecretKey: "OTP 秘密密钥",
     passwordFormatHint: "必须长在{minLength}和{maxLength}字符之间。",
     setPrimaryEmail: "将此电子邮件地址设置为用于联系您。",
     isPrimaryEmail: "如有必要，此电子邮件地址将用于联系您。",
@@ -68,15 +70,20 @@ export const zh: Translation = {
     selectLoginMethodForFutureLogins:
       "请选择以下登录方法之一以供将来登录使用。",
     howDoYouWantToLogin: "您想如何登录？",
-    mfaSetUp: "TRANSLATION MISSING]",
-    securityKeySetUp: "[TRANSLATION MISSING]",
-    securityKeyLogin: "[TRANSLATION MISSING]",
-    otpLogin: "[TRANSLATION MISSING]",
-    renameSecurityKey: "[TRANSLATION MISSING]",
-    setupSecurityKey: "[TRANSLATION MISSING]",
-    deleteSecurityKey: "[TRANSLATION MISSING]",
-    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING]",
-    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
+    mfaSetUp:
+      "通过多因素认证（MFA）保护您的账户。MFA 在您的登录过程中增加了额外的一步，确保即使您的密码或电子邮件账户被泄露，您的账户仍然安全。",
+    securityKeyLogin:
+      "连接或激活您的安全密钥，然后点击下面的按钮。准备好后，通过 USB、NFC 或手机使用它。按照提示完成登录过程。",
+    otpLogin:
+      "打开您的身份验证应用以获取一次性密码（OTP）。在下面的字段中输入代码以完成登录。",
+    renameSecurityKey: "为安全密钥设置名称。",
+    deleteSecurityKey: "从您的账户中删除此安全密钥。",
+    authenticatorAppAlreadySetUp:
+      "您的账户通过身份验证应用保护，该应用生成基于时间的一次性密码 (TOTP) 以实现多因素认证。",
+    authenticatorAppNotSetUp:
+      "使用生成基于时间的一次性密码 (TOTP) 的身份验证应用保护您的账户以实现多因素认证。",
+    securityKeySetUp:
+      "通过 USB、蓝牙或 NFC 使用专用安全密钥，或使用手机。连接或激活您的安全密钥，然后点击下面的按钮，按照提示完成注册。",
   },
   labels: {
     or: "或",
@@ -84,7 +91,7 @@ export const zh: Translation = {
     yes: "是",
     email: "电子邮件",
     continue: "继续",
-    copied: "[TRANSLATION MISSING]",
+    copied: "已复制",
     skip: "跳过",
     save: "保存",
     passkey: "密码",
@@ -124,16 +131,15 @@ export const zh: Translation = {
     setUsername: "设置用户名",
     changePassword: "更改密码",
     setPassword: "设置密码",
-    authenticatorApp: "[TRANSLATION MISSING]",
-    securityKey: "[TRANSLATION MISSING]",
-    securityKeyUse: "[TRANSLATION MISSING]",
-    newSecurityKeyName: "[TRANSLATION MISSING]",
-    createSecurityKey: "[TRANSLATION MISSING]",
-    authenticatorAppManage: "[TRANSLATION MISSING]",
-    authenticatorAppAdd: "[TRANSLATION MISSING]",
-    authenticatorAppRemove: "[TRANSLATION MISSING]",
-    configured: "[TRANSLATION MISSING]",
-    useAnotherMethod: "[TRANSLATION MISSING]",
+    authenticatorApp: "身份验证应用",
+    securityKey: "安全密钥",
+    securityKeyUse: "使用安全密钥",
+    newSecurityKeyName: "新安全密钥名称",
+    createSecurityKey: "创建安全密钥",
+    authenticatorAppManage: "管理身份验证应用",
+    authenticatorAppAdd: "设置",
+    configured: "已配置",
+    useAnotherMethod: "使用其他方法",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",
@@ -155,6 +161,8 @@ export const zh: Translation = {
     thirdPartyUnverifiedEmail:
       "需要电子邮件验证。请与您的提供商验证使用的电子邮件地址。",
     signupDisabled: "帐户注册被禁用。",
+    handlerNotFoundError:
+      "当前步骤在此应用程序版本中不受支持。请稍后再试，或联系支持团队以获取帮助。",
   },
   flowErrors: {
     technical_error: "发生技术错误。请稍后再试。",
@@ -177,7 +185,11 @@ export const zh: Translation = {
     value_missing_error: "值丢失。",
     value_too_long_error: "值太长。",
     value_too_short_error: "值太短。",
-    webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
-    webauthn_credential_already_exists: "[TRANSLATION MISSING]",
+    webauthn_credential_invalid_mfa_only:
+      "此凭证仅可作为第二因素安全密钥使用。",
+    webauthn_credential_already_exists:
+      "请求已超时、被取消或设备已注册。请重试或尝试使用其他设备。",
+    platform_authenticator_required:
+      "您的账户配置为使用平台身份验证器，但您当前的设备或浏览器不支持该功能。请尝试使用兼容的设备或浏览器重新进行尝试。",
   },
 };

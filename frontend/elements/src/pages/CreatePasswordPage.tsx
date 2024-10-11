@@ -22,7 +22,7 @@ type Props = {
 
 const CreatePasswordPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { stateHandler, setLoadingAction } = useContext(AppContext);
+  const { hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
 
@@ -39,7 +39,7 @@ const CreatePasswordPage = (props: Props) => {
       .register_password({ new_password: password })
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onBackClick = async (event: Event) => {
@@ -47,7 +47,7 @@ const CreatePasswordPage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onSkipClick = async (event: Event) => {
@@ -55,7 +55,7 @@ const CreatePasswordPage = (props: Props) => {
     setLoadingAction("skip");
     const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

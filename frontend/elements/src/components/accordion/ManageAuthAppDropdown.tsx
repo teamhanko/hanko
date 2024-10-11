@@ -70,7 +70,7 @@ const ManageAuthAppDropdown = ({
             loadingSpinnerPosition={"right"}
             dangerous
           >
-            {t("labels.authenticatorAppRemove")}
+            {t("labels.delete")}
           </Link>
         ) : (
           <Link

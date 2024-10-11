@@ -24,6 +24,8 @@ func (a RegisterClientCapabilities) Initialize(c flowpilot.InitializationContext
 }
 
 func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error {
+	deps := a.GetDeps(c)
+
 	if valid := c.ValidateInputData(); !valid {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
@@ -42,6 +44,13 @@ func (a RegisterClientCapabilities) Execute(c flowpilot.ExecutionContext) error 
 
 	platformAuthenticatorAvailable := c.Input().Get("webauthn_platform_authenticator_available").Bool()
 	err = c.Stash().Set(shared.StashPathWebauthnPlatformAuthenticatorAvailable, platformAuthenticatorAvailable)
+	if err != nil {
+		return err
+	}
+
+	attachmentSupported := platformAuthenticatorAvailable ||
+		deps.Cfg.MFA.SecurityKeys.AuthenticatorAttachment != "platform"
+	err = c.Stash().Set(shared.StashPathSecurityKeyAttachmentSupported, attachmentSupported)
 	if err != nil {
 		return err
 	}

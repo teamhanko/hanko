@@ -11,7 +11,7 @@ export const bn: Translation = {
     registerAuthenticator: "একটি পাসকি তৈরি করুন",
     registerConfirm: "অ্যাকাউন্ট তৈরি করুন",
     registerPassword: "নতুন পাসওয়ার্ড সেট করুন",
-    otpSetUp: "[TRANSLATION MISSING]",
+    otpSetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করুন",
     profileEmails: "ইমেইল",
     profilePassword: "পাসওয়ার্ড",
     profilePasskeys: "পাসকি",
@@ -33,16 +33,16 @@ export const bn: Translation = {
     signUp: "নিবন্ধন করুন",
     selectLoginMethod: "লগইন পদ্ধতি নির্বাচন করুন",
     setupLoginMethod: "লগইন পদ্ধতি সেটআপ করুন",
-    mfaSetUp: "[TRANSLATION MISSING]",
-    securityKeySetUp: "[TRANSLATION MISSING]",
-    securityKeyLogin: "[TRANSLATION MISSING]",
-    otpLogin: "[TRANSLATION MISSING]",
-    renameSecurityKey: "[TRANSLATION MISSING]",
-    deleteSecurityKey: "[TRANSLATION MISSING]",
-    securityKeys: "[TRANSLATION MISSING]",
-    authenticatorApp: "[TRANSLATION MISSING]",
-    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING",
-    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
+    mfaSetUp: "MFA সেট আপ করুন",
+    securityKeySetUp: "সিকিউরিটি কি যোগ করুন",
+    securityKeyLogin: "সিকিউরিটি কি",
+    otpLogin: "প্রমাণীকরণ কোড",
+    renameSecurityKey: "সিকিউরিটি কি এর নামকরণ করুন",
+    deleteSecurityKey: "সিকিউরিটি কি মুছুন",
+    securityKeys: "সিকিউরিটি কিগুলি",
+    authenticatorApp: "প্রমাণীকরণ অ্যাপ",
+    authenticatorAppAlreadySetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করা হয়েছে",
+    authenticatorAppNotSetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করুন",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
@@ -52,9 +52,11 @@ export const bn: Translation = {
       "একটি পাসকি দিয়ে সহজে এবং নিরাপদে আপনার অ্যাকাউন্টে সাইন ইন করুন। দ্রষ্টব্য: আপনার বায়োমেট্রিক ডেটা শুধুমাত্র আপনার ডিভাইসে সংরক্ষিত থাকে এবং কখনই কারো সাথে শেয়ার করা হবে না।",
     createAccount:
       '"{emailAddress}"-এর জন্য কোনো অ্যাকাউন্ট বিদ্যমান নেই। আপনি একটি নতুন অ্যাকাউন্ট তৈরি করতে চান?',
-    otpEnterVerificationCode: "[TRANSLATION MISSING]",
-    otpScanQRCode: "[TRANSLATION MISSING]",
-    otpSecretKey: "[TRANSLATION MISSING]",
+    otpEnterVerificationCode:
+      "আপনার প্রমাণীকরণ অ্যাপ থেকে প্রাপ্ত একবারের পাসওয়ার্ড (OTP) নিচে লিখুন:",
+    otpScanQRCode:
+      "আপনার প্রমাণীকরণ অ্যাপ দিয়ে QR কোড স্ক্যান করুন (যেমন Google Authenticator বা অন্য কোনো TOTP অ্যাপ)। বিকল্পভাবে, আপনি অ্যাপে OTP গোপন কী ম্যানুয়ালি লিখতে পারেন।",
+    otpSecretKey: "OTP গোপন কী",
     passwordFormatHint: "{minLength} এবং {maxLength} অক্ষরের মধ্যে হতে হবে।",
     setPrimaryEmail:
       "এই ইমেইল ঠিকানা আপনার সাথে যোগাযোগ করার জন্য নির্ধারণ করুন।",
@@ -72,15 +74,19 @@ export const bn: Translation = {
     selectLoginMethodForFutureLogins:
       "ভবিষ্যতে লগইনের জন্য একটি প্রয়োজনীয় লগইন পদ্ধতি নির্বাচন করুন।",
     howDoYouWantToLogin: "আপনি কিভাবে লগইন করতে চান?",
-    mfaSetUp: "TRANSLATION MISSING]",
-    securityKeySetUp: "[TRANSLATION MISSING]",
-    securityKeyLogin: "[TRANSLATION MISSING]",
-    otpLogin: "[TRANSLATION MISSING]",
-    renameSecurityKey: "[TRANSLATION MISSING]",
-    setupSecurityKey: "[TRANSLATION MISSING]",
-    deleteSecurityKey: "[TRANSLATION MISSING]",
-    authenticatorAppAlreadySetUp: "[TRANSLATION MISSING]",
-    authenticatorAppNotSetUp: "[TRANSLATION MISSING]",
+    mfaSetUp:
+      "মাল্টি-ফ্যাক্টর প্রমাণীকরণের (MFA) মাধ্যমে আপনার অ্যাকাউন্ট সুরক্ষিত করুন। MFA আপনার লগইন প্রক্রিয়ায় একটি অতিরিক্ত পদক্ষেপ যোগ করে, নিশ্চিত করে যে আপনার পাসওয়ার্ড বা ইমেইল অ্যাকাউন্ট ক্ষতিগ্রস্ত হলে আপনার অ্যাকাউন্ট সুরক্ষিত থাকে।",
+    securityKeyLogin:
+      "আপনার নিরাপত্তা কী সংযুক্ত বা সক্রিয় করুন, তারপর নীচের বোতামটিতে ক্লিক করুন। প্রস্তুত হলে, USB, NFC, আপনার মোবাইল ফোনের মাধ্যমে এটি ব্যবহার করুন। লগইন প্রক্রিয়া সম্পূর্ণ করতে নির্দেশাবলীর অনুসরণ করুন।",
+    otpLogin:
+      "এককালীন পাসওয়ার্ড (OTP) প্রাপ্ত করতে আপনার প্রমাণীকরণ অ্যাপ খুলুন। আপনার লগইন সম্পূর্ণ করতে নীচের ক্ষেত্রে কোড প্রবেশ করুন।",
+    renameSecurityKey: "নিরাপত্তা কী জন্য একটি নাম সেট করুন।",
+    deleteSecurityKey: "এই নিরাপত্তা কীটি আপনার অ্যাকাউন্ট থেকে মুছে ফেলুন।",
+    authenticatorAppAlreadySetUp:
+      "আপনার অ্যাকাউন্ট একটি প্রমাণীকরণ অ্যাপ দ্বারা সুরক্ষিত যা মাল্টি-ফ্যাক্টর প্রমাণীকরণের জন্য সময়-ভিত্তিক এককালীন পাসওয়ার্ড (TOTP) তৈরি করে।",
+    authenticatorAppNotSetUp:
+      "মাল্টি-ফ্যাক্টর প্রমাণীকরণের জন্য সময়-ভিত্তিক এককালীন পাসওয়ার্ড (TOTP) তৈরি করার জন্য একটি প্রমাণীকরণ অ্যাপ দ্বারা আপনার অ্যাকাউন্টটি সুরক্ষিত করুন।",
+    securityKeySetUp: "নিরাপত্তা কী যুক্ত করুন",
   },
   labels: {
     or: "বা",
@@ -88,7 +94,7 @@ export const bn: Translation = {
     yes: "হ্যাঁ",
     email: "ইমেইল",
     continue: "চালিয়ে যান",
-    copied: "[TRANSLATION MISSING]",
+    copied: "নকল করা হয়েছে",
     skip: "এড়িয়ে যান",
     save: "সংরক্ষণ",
     passkey: "পাসওয়ার্ড",
@@ -128,16 +134,15 @@ export const bn: Translation = {
     setUsername: "ব্যবহারকারীর নাম সেট করুন",
     changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
     setPassword: "পাসওয়ার্ড সেট করুন",
-    authenticatorApp: "[TRANSLATION MISSING]",
-    securityKey: "[TRANSLATION MISSING]",
-    securityKeyUse: "[TRANSLATION MISSING]",
-    newSecurityKeyName: "[TRANSLATION MISSING]",
-    createSecurityKey: "[TRANSLATION MISSING]",
-    authenticatorAppManage: "[TRANSLATION MISSING]",
-    authenticatorAppAdd: "[TRANSLATION MISSING]",
-    authenticatorAppRemove: "[TRANSLATION MISSING]",
-    configured: "[TRANSLATION MISSING]",
-    useAnotherMethod: "[TRANSLATION MISSING]",
+    authenticatorApp: "প্রমাণীকরণ অ্যাপ",
+    securityKey: "নিরাপত্তা কী",
+    securityKeyUse: "নিরাপত্তা কী ব্যবহার করুন",
+    newSecurityKeyName: "নতুন নিরাপত্তা কী নাম",
+    createSecurityKey: "নিরাপত্তা কী তৈরি করুন",
+    authenticatorAppManage: "প্রমাণীকরণ অ্যাপ পরিচালনা করুন",
+    authenticatorAppAdd: "সেট আপ করুন",
+    configured: "কনফিগার করা হয়েছে",
+    useAnotherMethod: "আরেকটি পদ্ধতি ব্যবহার করুন",
   },
   errors: {
     somethingWentWrong:
@@ -164,6 +169,7 @@ export const bn: Translation = {
     thirdPartyUnverifiedEmail:
       "ইমেল যাচাইকরণ প্রয়োজন. অনুগ্রহ করে আপনার প্রদানকারীর সাথে ব্যবহৃত ইমেল ঠিকানা যাচাই করুন।",
     signupDisabled: "অ্যাকাউন্ট নিবন্ধন নিষ্ক্রিয় করা হয়েছে",
+    handlerNotFoundError: "কার্যকরী পদক্ষেপ পাওয়া যায়নি",
   },
   flowErrors: {
     technical_error:
@@ -192,7 +198,11 @@ export const bn: Translation = {
     value_missing_error: "মান অনুপস্থিত।",
     value_too_long_error: "মানটি খুব দীর্ঘ।",
     value_too_short_error: "মানটি খুব ছোট।",
-    webauthn_credential_invalid_mfa_only: "[TRANSLATION MISSING]",
-    webauthn_credential_already_exists: "[TRANSLATION MISSING]",
+    webauthn_credential_invalid_mfa_only:
+      "এই প্রমাণপত্রটি কেবল দ্বিতীয় ফ্যাক্টর নিরাপত্তা কী হিসাবে ব্যবহার করা যেতে পারে।",
+    webauthn_credential_already_exists:
+      "অনুরোধটি সময়সীমা শেষ হয়ে গেছে, বাতিল হয়েছে অথবা ডিভাইসটি ইতিমধ্যে নিবন্ধিত। পুনরায় চেষ্টা করুন অথবা অন্য একটি ডিভাইস ব্যবহার করে চেষ্টা করুন।",
+    platform_authenticator_required:
+      "আপনার অ্যাকাউন্ট প্ল্যাটফর্ম প্রমাণীকরণকারীদের ব্যবহার করতে কনফিগার করা হয়েছে, তবে আপনার বর্তমান ডিভাইস বা ব্রাউজার এই বৈশিষ্ট্য সমর্থন করে না। দয়া করে একটি সামঞ্জস্যপূর্ণ ডিভাইস বা ব্রাউজার ব্যবহার করে আবার চেষ্টা করুন।",
   },
 };
