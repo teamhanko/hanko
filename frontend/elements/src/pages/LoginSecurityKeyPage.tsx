@@ -21,7 +21,7 @@ interface Props {
 
 const LoginSecurityKeyPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
   const onSubmit = async (event: Event) => {
@@ -32,7 +32,7 @@ const LoginSecurityKeyPage = (props: Props) => {
       .webauthn_generate_request_options(null)
       .run();
 
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onClick = async (event: Event) => {
@@ -40,7 +40,7 @@ const LoginSecurityKeyPage = (props: Props) => {
     setLoadingAction("skip");
     const nextState = await flowState.actions.continue_to_login_otp(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

@@ -80,13 +80,11 @@ export interface Translation {
     howDoYouWantToLogin: string;
     deleteSecurityKey: string;
     renameSecurityKey: string;
-    setupSecurityKey: string;
   };
   labels: {
     authenticatorApp: string;
     authenticatorAppAdd: string;
     authenticatorAppManage: string;
-    authenticatorAppRemove: string;
     or: string;
     no: string;
     yes: string;
@@ -158,6 +156,7 @@ export interface Translation {
     thirdPartyMultipleAccounts: string;
     thirdPartyUnverifiedEmail: string;
     signupDisabled: string;
+    handlerNotFoundError: string;
   };
   flowErrors: {
     technical_error: string;
@@ -174,6 +173,7 @@ export interface Translation {
     not_found: string;
     flow_discontinuity_error: string;
     operation_not_permitted_error: string;
+    platform_authenticator_required: string;
     form_data_invalid_error: string;
     unauthorized: string;
     value_missing_error: string;

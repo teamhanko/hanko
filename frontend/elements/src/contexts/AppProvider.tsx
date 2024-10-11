@@ -19,6 +19,7 @@ import {
 
 import {
   Hanko,
+  HankoError,
   TechnicalError,
   UnauthorizedError,
   WebauthnSupport,
@@ -248,7 +249,9 @@ const AppProvider = ({
 
   const handleError = (e: any) => {
     setLoadingAction(null);
-    setPage(<ErrorPage error={new TechnicalError(e)} />);
+    setPage(
+      <ErrorPage error={e instanceof HankoError ? e : new TechnicalError(e)} />,
+    );
   };
 
   const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
@@ -297,7 +300,7 @@ const AppProvider = ({
               .run();
 
             setLoadingAction(null);
-            stateHandler[nextState.name](nextState);
+            await hanko.flow.run(nextState, stateHandler);
           }
         })();
       },
@@ -329,7 +332,7 @@ const AppProvider = ({
           .run();
 
         setLoadingAction(null);
-        stateHandler[nextState.name](nextState);
+        await hanko.flow.run(nextState, stateHandler);
       },
       onboarding_create_passkey(state) {
         setPage(<RegisterPasskeyPage state={state} />);
@@ -344,7 +347,7 @@ const AppProvider = ({
         } catch (e) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
-          stateHandler[prevState.name](prevState);
+          await hanko.flow.run(prevState, stateHandler);
           setUIState((prev) => ({
             ...prev,
             error: {
@@ -362,7 +365,7 @@ const AppProvider = ({
           .run();
 
         setLoadingAction(null);
-        stateHandler[nextState.name](nextState);
+        await hanko.flow.run(nextState, stateHandler);
       },
       async webauthn_credential_verification(state) {
         let attestationResponse: PublicKeyCredentialWithAttestationJSON;
@@ -374,7 +377,7 @@ const AppProvider = ({
         } catch (e) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
-          stateHandler[prevState.name](prevState);
+          await hanko.flow.run(prevState, stateHandler);
           setUIState((prev) => ({
             ...prev,
             error: {
@@ -391,7 +394,7 @@ const AppProvider = ({
           })
           .run();
 
-        stateHandler[nextState.name](nextState);
+        await hanko.flow.run(nextState, stateHandler);
       },
       login_password(state) {
         setPage(<LoginPasswordPage state={state} />);
@@ -456,7 +459,7 @@ const AppProvider = ({
             window.location.pathname + searchParams.toString(),
           );
 
-          stateHandler[nextState.name](nextState);
+          await hanko.flow.run(nextState, stateHandler);
         } else {
           setUIState((prev) => ({
             ...prev,

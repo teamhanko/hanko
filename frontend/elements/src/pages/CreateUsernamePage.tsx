@@ -21,7 +21,7 @@ type Props = {
 
 const CreateUsernamePage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { stateHandler, setLoadingAction } = useContext(AppContext);
+  const {  hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [username, setUsername] = useState<string>();
 
@@ -38,7 +38,7 @@ const CreateUsernamePage = (props: Props) => {
       .username_create({ username })
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onSkipClick = async (event: Event) => {
@@ -46,7 +46,7 @@ const CreateUsernamePage = (props: Props) => {
     setLoadingAction("skip");
     const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

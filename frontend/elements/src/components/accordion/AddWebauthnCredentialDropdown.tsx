@@ -46,7 +46,7 @@ const AddWebauthnCredentialDropdown = ({
     >
       <Paragraph>
         {credentialType === "security-key"
-          ? t("texts.setupSecurityKey")
+          ? t("texts.securityKeySetUp")
           : t("texts.setupPasskey")}
       </Paragraph>
       <Form onSubmit={onCredentialSubmit}>
