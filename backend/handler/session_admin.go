@@ -32,6 +32,7 @@ type ValidateSessionRequest struct {
 type ValidateSessionResponse struct {
 	IsValid        bool       `json:"is_valid"`
 	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
+	UserID         *uuid.UUID `json:"user_id,omitempty"`
 }
 
 func (h *SessionHandlerAdmin) ValidateSession(c echo.Context) error {
@@ -75,8 +76,10 @@ func (h *SessionHandlerAdmin) ValidateSession(c echo.Context) error {
 	}
 
 	expirationTime := token.Expiration()
+	userID := uuid.FromStringOrNil(token.Subject())
 	return c.JSON(http.StatusOK, ValidateSessionResponse{
 		IsValid:        true,
 		ExpirationTime: &expirationTime,
+		UserID:         &userID,
 	})
 }

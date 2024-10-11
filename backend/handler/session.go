@@ -82,9 +82,11 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 
 	if token != nil {
 		expirationTime := token.Expiration()
+		userID := uuid.FromStringOrNil(token.Subject())
 		return c.JSON(http.StatusOK, ValidateSessionResponse{
 			IsValid:        true,
 			ExpirationTime: &expirationTime,
+			UserID:         &userID,
 		})
 	} else {
 		return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
