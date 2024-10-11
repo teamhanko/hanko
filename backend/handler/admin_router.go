@@ -87,7 +87,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	sessionHandler := NewSessionHandlerAdmin(persister, sessionManager, *cfg)
 	sessions := g.Group("sessions")
-	sessions.POST("/check", sessionHandler.ValidateSession)
+	sessions.POST("/validate", sessionHandler.ValidateSession)
 
 	return e
 }

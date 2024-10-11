@@ -215,7 +215,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	sessionHandler := NewSessionHandler(persister, sessionManager, *cfg)
 	sessions := g.Group("sessions")
-	sessions.GET("/check", sessionHandler.ValidateSession)
+	sessions.GET("/validate", sessionHandler.ValidateSession)
 
 	return e
 }
