@@ -100,6 +100,7 @@ export interface Translation {
     setPassword: string;
     changeUsername: string;
     setUsername: string;
+    lastUsed: string;
   };
   errors: {
     somethingWentWrong: string;

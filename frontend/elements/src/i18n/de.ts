@@ -107,6 +107,7 @@ export const de: Translation = {
     setUsername: "Benutzernamen setzen",
     changePassword: "Passwort ändern",
     setPassword: "Passwort setzen",
+    lastUsed: "Zuletzt verwendet",
   },
   errors: {
     somethingWentWrong:
