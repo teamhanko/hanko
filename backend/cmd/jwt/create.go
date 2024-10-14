@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"log"
 )
@@ -66,10 +67,32 @@ func NewCreateCommand() *cobra.Command {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
-			token, _, err := sessionManager.GenerateJWT(userId, emailJwt)
+			token, rawToken, err := sessionManager.GenerateJWT(userId, emailJwt)
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return
+			}
+
+			if cfg.Session.ServerSide.Enabled {
+				sessionID, _ := rawToken.Get("session_id")
+
+				expirationTime := rawToken.Expiration()
+				sessionModel := models.Session{
+					ID:        uuid.FromStringOrNil(sessionID.(string)),
+					UserID:    userId,
+					UserAgent: "",
+					IpAddress: "",
+					CreatedAt: rawToken.IssuedAt(),
+					UpdatedAt: rawToken.IssuedAt(),
+					ExpiresAt: &expirationTime,
+					LastUsed:  rawToken.IssuedAt(),
+				}
+
+				err = persister.GetSessionPersister().Create(sessionModel)
+				if err != nil {
+					fmt.Printf("failed to store session: %s", err)
+					return
+				}
 			}
 
 			fmt.Printf("token: %s", token)
