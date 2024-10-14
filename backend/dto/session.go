@@ -32,3 +32,13 @@ func FromSessionModel(model models.Session, current bool) SessionData {
 		LastUsed:     model.LastUsed,
 	}
 }
+
+type ValidateSessionResponse struct {
+	IsValid        bool       `json:"is_valid"`
+	ExpirationTime *time.Time `json:"expiration_time"`
+	UserID         *uuid.UUID `json:"user_id"`
+}
+
+type ValidateSessionRequest struct {
+	SessionToken string `json:"session_token"`
+}

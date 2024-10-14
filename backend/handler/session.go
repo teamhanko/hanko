@@ -33,7 +33,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 	extractors, err := echojwt.CreateExtractors(lookup)
 
 	if err != nil {
-		return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
 	var token jwt.Token
@@ -83,18 +83,18 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 	if token != nil {
 		expirationTime := token.Expiration()
 		userID := uuid.FromStringOrNil(token.Subject())
-		return c.JSON(http.StatusOK, ValidateSessionResponse{
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 			IsValid:        true,
 			ExpirationTime: &expirationTime,
 			UserID:         &userID,
 		})
 	} else {
-		return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 }
 
 func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
-	var request ValidateSessionRequest
+	var request dto.ValidateSessionRequest
 	err := (&echo.DefaultBinder{}).BindBody(c, &request)
 	if err != nil {
 		return dto.ToHttpError(err)
@@ -102,18 +102,18 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 
 	token, err := h.sessionManager.Verify(request.SessionToken)
 	if err != nil {
-		return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
 	if h.cfg.Session.ServerSide.Enabled {
 		// check that the session id is stored in the database
 		sessionId, ok := token.Get("session_id")
 		if !ok {
-			return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
+			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 		}
 		sessionID, err := uuid.FromString(sessionId.(string))
 		if err != nil {
-			return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
+			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 		}
 
 		sessionModel, err := h.persister.GetSessionPersister(nil).Get(sessionID)
@@ -122,7 +122,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		}
 
 		if sessionModel == nil {
-			return c.JSON(http.StatusOK, ValidateSessionResponse{IsValid: false})
+			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 		}
 
 		// update lastUsed field
@@ -135,7 +135,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 
 	expirationTime := token.Expiration()
 	userID := uuid.FromStringOrNil(token.Subject())
-	return c.JSON(http.StatusOK, ValidateSessionResponse{
+	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 		IsValid:        true,
 		ExpirationTime: &expirationTime,
 		UserID:         &userID,
