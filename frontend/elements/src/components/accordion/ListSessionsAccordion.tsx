@@ -32,7 +32,7 @@ const ListSessionsAccordion = ({
       <span className={styles.description}>
         {session.current ? (
           <Fragment>
-            {" -"} {t("labels.current")}
+            {" -"} {t("labels.currentSession")}
           </Fragment>
         ) : null}
       </span>
