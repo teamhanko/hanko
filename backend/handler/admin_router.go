@@ -10,7 +10,6 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/template"
 )
 
@@ -49,10 +48,6 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 
@@ -84,10 +79,6 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.GET("/:id", webhookHandler.Get)
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
-
-	sessionHandler := NewSessionHandlerAdmin(persister, sessionManager, *cfg)
-	sessions := g.Group("sessions")
-	sessions.POST("/validate", sessionHandler.ValidateSession)
 
 	return e
 }
