@@ -59,7 +59,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 					continue
 				}
 
-				sessionModel, err := h.persister.GetSessionPersister(nil).Get(sessionID)
+				sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
 				if err != nil {
 					return fmt.Errorf("failed to get session from database: %w", err)
 				}
@@ -69,7 +69,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 
 				// Update lastUsed field
 				sessionModel.LastUsed = time.Now().UTC()
-				err = h.persister.GetSessionPersister(nil).Update(*sessionModel)
+				err = h.persister.GetSessionPersister().Update(*sessionModel)
 				if err != nil {
 					return dto.ToHttpError(err)
 				}
@@ -116,7 +116,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 		}
 
-		sessionModel, err := h.persister.GetSessionPersister(nil).Get(sessionID)
+		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
 		if err != nil {
 			return dto.ToHttpError(err)
 		}
@@ -127,7 +127,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 
 		// update lastUsed field
 		sessionModel.LastUsed = time.Now().UTC()
-		err = h.persister.GetSessionPersister(nil).Update(*sessionModel)
+		err = h.persister.GetSessionPersister().Update(*sessionModel)
 		if err != nil {
 			return dto.ToHttpError(err)
 		}

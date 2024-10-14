@@ -44,7 +44,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	activeSessions, err := deps.Persister.GetSessionPersister(deps.Tx).ListActive(userId)
+	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userId)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
@@ -53,7 +53,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		// remove all server side sessions that exceed the limit
 		if len(activeSessions) >= deps.Cfg.Session.ServerSide.Limit {
 			for i := deps.Cfg.Session.ServerSide.Limit - 1; i < len(activeSessions); i++ {
-				err = deps.Persister.GetSessionPersister(deps.Tx).Delete(activeSessions[i])
+				err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Delete(activeSessions[i])
 				if err != nil {
 					return fmt.Errorf("failed to remove latest session: %w", err)
 				}
@@ -74,7 +74,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			LastUsed:  rawToken.IssuedAt(),
 		}
 
-		err = deps.Persister.GetSessionPersister(deps.Tx).Create(sessionModel)
+		err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Create(sessionModel)
 		if err != nil {
 			return fmt.Errorf("failed to store session: %w", err)
 		}

@@ -97,7 +97,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 					continue
 				}
 
-				sessionModel, err := h.Persister.GetSessionPersister(nil).Get(sessionID)
+				sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
 				if err != nil {
 					return fmt.Errorf("failed to get session from database: %w", err)
 				}
@@ -108,7 +108,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 
 				// Update lastUsed field
 				sessionModel.LastUsed = time.Now().UTC()
-				err = h.Persister.GetSessionPersister(nil).Update(*sessionModel)
+				err = h.Persister.GetSessionPersister().Update(*sessionModel)
 				if err != nil {
 					return dto.ToHttpError(err)
 				}

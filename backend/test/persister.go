@@ -189,6 +189,10 @@ func (p *persister) GetWebhookPersister(_ *pop.Connection) persistence.WebhookPe
 	return p.webhookPersister
 }
 
-func (p *persister) GetSessionPersister(_ *pop.Connection) persistence.SessionPersister {
+func (p *persister) GetSessionPersister() persistence.SessionPersister {
+	return p.sessionPersister
+}
+
+func (p *persister) GetSessionPersisterWithConnection(_ *pop.Connection) persistence.SessionPersister {
 	return p.sessionPersister
 }

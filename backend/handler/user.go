@@ -317,12 +317,12 @@ func (h *UserHandler) Logout(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to convert session id to uuid: %w", err)
 		}
-		sessionModel, err := h.persister.GetSessionPersister(nil).Get(sessionID)
+		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
 		if err != nil {
 			return fmt.Errorf("failed to get session from database: %w", err)
 		}
 		if sessionModel != nil {
-			err = h.persister.GetSessionPersister(nil).Delete(*sessionModel)
+			err = h.persister.GetSessionPersister().Delete(*sessionModel)
 			if err != nil {
 				return fmt.Errorf("failed to delete session from database: %w", err)
 			}
