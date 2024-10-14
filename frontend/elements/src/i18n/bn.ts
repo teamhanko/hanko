@@ -35,6 +35,7 @@ export const bn: Translation = {
     lastUsed: "সর্বশেষ দেখা হয়েছে",
     ipAddress: "আইপি ঠিকানা",
     revokeSession: "সেশন বাতিল করুন",
+    profileSessions: "সেশন",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',

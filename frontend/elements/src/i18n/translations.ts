@@ -39,6 +39,7 @@ export interface Translation {
     lastUsed: string;
     ipAddress: string;
     revokeSession: string;
+    profileSessions: string
   };
   texts: {
     enterPasscode: string;

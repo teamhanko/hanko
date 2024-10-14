@@ -35,6 +35,7 @@ export const fr: Translation = {
     lastUsed: "Dernière vue",
     ipAddress: "Adresse IP",
     revokeSession: "Révoquer la session",
+    profileSessions: "Sessions"
   },
   texts: {
     enterPasscode:

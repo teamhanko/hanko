@@ -35,6 +35,7 @@ export const zh: Translation = {
     lastUsed: "最后一次查看",
     ipAddress: "IP 地址",
     revokeSession: "撤销会话",
+    profileSessions: "会话",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",

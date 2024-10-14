@@ -35,6 +35,7 @@ export const ptBR: Translation = {
     lastUsed: "Última vez visto",
     ipAddress: "Endereço IP",
     revokeSession: "Revogar sessão",
+    profileSessions: "Sessões",
   },
   texts: {
     enterPasscode:

@@ -35,6 +35,7 @@ export const it: Translation = {
     lastUsed: "Ultima visualizzazione",
     ipAddress: "Indirizzo IP",
     revokeSession: "Revoca sessione",
+    profileSessions: "Sessioni",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
