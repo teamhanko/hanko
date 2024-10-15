@@ -39,4 +39,5 @@ const (
 	ActionWebauthnGenerateRequestOptions         flowpilot.ActionName = "webauthn_generate_request_options"
 	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_assertion_response"
 	ActionWebauthnVerifyAttestationResponse      flowpilot.ActionName = "webauthn_verify_attestation_response"
+	ActionSessionDelete                          flowpilot.ActionName = "session_delete"
 )

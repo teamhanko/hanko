@@ -75,6 +75,10 @@ func DefaultConfig() *Config {
 				SameSite: "strict",
 				Secure:   true,
 			},
+			ServerSide: ServerSide{
+				Enabled: false,
+				Limit:   100,
+			},
 		},
 		AuditLog: AuditLog{
 			ConsoleOutput: AuditLogConsole{

@@ -32,6 +32,10 @@ export const it: Translation = {
     signUp: "Registrati",
     selectLoginMethod: "Seleziona il metodo di accesso",
     setupLoginMethod: "Imposta il metodo di accesso",
+    lastUsed: "Ultima visualizzazione",
+    ipAddress: "Indirizzo IP",
+    revokeSession: "Revoca sessione",
+    profileSessions: "Sessioni",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -105,6 +109,8 @@ export const it: Translation = {
     setUsername: "Imposta nome utente",
     changePassword: "Cambia password",
     setPassword: "Imposta password",
+    revoke: "Revoca",
+    currentSession: "Sessione corrente",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",
