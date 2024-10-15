@@ -1,8 +1,10 @@
 package flow_api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog"
@@ -10,6 +12,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/ee/saml"
 	"github.com/teamhanko/hanko/backend/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -79,6 +82,36 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 			if tokenErr != nil {
 				lastTokenErr = tokenErr
 				continue
+			}
+
+			if h.Cfg.Session.ServerSide.Enabled {
+				// check that the session id is stored in the database
+				sessionId, ok := token.Get("session_id")
+				if !ok {
+					lastTokenErr = errors.New("no session id found in token")
+					continue
+				}
+				sessionID, err := uuid.FromString(sessionId.(string))
+				if err != nil {
+					lastTokenErr = errors.New("session id has wrong format")
+					continue
+				}
+
+				sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
+				if err != nil {
+					return fmt.Errorf("failed to get session from database: %w", err)
+				}
+				if sessionModel == nil {
+					lastTokenErr = fmt.Errorf("session id not found in database")
+					continue
+				}
+
+				// Update lastUsed field
+				sessionModel.LastUsed = time.Now().UTC()
+				err = h.Persister.GetSessionPersister().Update(*sessionModel)
+				if err != nil {
+					return dto.ToHttpError(err)
+				}
 			}
 
 			c.Set("session", token)

@@ -32,6 +32,10 @@ export const en: Translation = {
     signUp: "Create account",
     selectLoginMethod: "Select login method",
     setupLoginMethod: "Set up login method",
+    lastUsed: "Last seen",
+    ipAddress: "IP address",
+    revokeSession: "Revoke session",
+    profileSessions: "Sessions"
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -104,6 +108,8 @@ export const en: Translation = {
     setUsername: "Set username",
     changePassword: "Change password",
     setPassword: "Set password",
+    revoke: "Revoke",
+    currentSession: "Current session",
   },
   errors: {
     somethingWentWrong:

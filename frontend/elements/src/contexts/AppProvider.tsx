@@ -98,7 +98,8 @@ export type UIAction =
   | "back"
   | "account_delete"
   | "retry"
-  | "thirdparty-submit";
+  | "thirdparty-submit"
+  | "session-delete";
 
 interface UIState {
   username?: string;

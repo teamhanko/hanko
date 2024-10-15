@@ -50,7 +50,7 @@ func (s *webauthnSuite) TestWebauthnHandler_BeginRegistration() {
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
+	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -91,7 +91,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration() {
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
+	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -137,7 +137,7 @@ func (s *webauthnSuite) TestWebauthnHandler_FinalizeRegistration_SessionDataExpi
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
 	sessionManager := s.GetDefaultSessionManager()
-	token, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
+	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
 	s.Require().NoError(err)
 	cookie, err := sessionManager.GenerateCookie(token)
 	s.Require().NoError(err)
@@ -332,8 +332,8 @@ var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 type sessionManager struct {
 }
 
-func (s sessionManager) GenerateJWT(_ uuid.UUID, _ *dto.EmailJwt) (string, error) {
-	return userId, nil
+func (s sessionManager) GenerateJWT(_ uuid.UUID, _ *dto.EmailJwt) (string, jwt.Token, error) {
+	return userId, nil, nil
 }
 
 func (s sessionManager) GenerateCookie(token string) (*http.Cookie, error) {

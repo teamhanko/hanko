@@ -115,7 +115,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
-			token, err := h.sessionManager.GenerateJWT(newUser.ID, emailJwt)
+			token, _, err := h.sessionManager.GenerateJWT(newUser.ID, emailJwt)
 
 			if err != nil {
 				return fmt.Errorf("failed to generate jwt: %w", err)
@@ -308,6 +308,25 @@ func (h *UserHandler) Logout(c echo.Context) error {
 	user, err := h.persister.GetUserPersister().Get(userId)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
+	}
+
+	sID, ok := sessionToken.Get("session_id")
+	if ok {
+		sessionIDString := sID.(string)
+		sessionID, err := uuid.FromString(sessionIDString)
+		if err != nil {
+			return fmt.Errorf("failed to convert session id to uuid: %w", err)
+		}
+		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
+		if err != nil {
+			return fmt.Errorf("failed to get session from database: %w", err)
+		}
+		if sessionModel != nil {
+			err = h.persister.GetSessionPersister().Delete(*sessionModel)
+			if err != nil {
+				return fmt.Errorf("failed to delete session from database: %w", err)
+			}
+		}
 	}
 
 	err = h.auditLogger.Create(c, models.AuditLogUserLoggedOut, user, nil)
