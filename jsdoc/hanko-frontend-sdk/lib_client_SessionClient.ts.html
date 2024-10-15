@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> lib/client/Client.ts</title>
+  <title> lib/client/SessionClient.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -76,7 +76,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>lib/client/Client.ts</h1>
+                    <h1>lib/client/SessionClient.ts</h1>
                 </header>
                 
 
@@ -85,31 +85,36 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import { HttpClient, HttpClientOptions } from "./HttpClient";
+            <pre class="prettyprint source linenums"><code>import { Client } from "./Client";
+import { SessionCheckResponse } from "../Dto";
+import { TechnicalError } from "../Errors";
 
 /**
- * A class to be extended by the other client classes.
+ * A class that handles communication with the Hanko API for the purposes
+ * of sessions.
  *
- * @abstract
+ * @constructor
  * @category SDK
- * @subcategory Internal
- * @param {string} api - The URL of your Hanko API instance
- * @param {HttpClientOptions} options - The options that can be used
+ * @subcategory Clients
+ * @extends {Client}
  */
-abstract class Client {
-  client: HttpClient;
+export class SessionClient extends Client {
+  /**
+   * Checks if the current session is still valid.
+   *
+   * @return {Promise&lt;SessionCheckResponse>}
+   * @throws {TechnicalError}
+   */
+  async isValid(): Promise&lt;SessionCheckResponse> {
+    const response = await this.client.get("/sessions/validate");
 
-  // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: HttpClientOptions) {
-    /**
-     *  @public
-     *  @type {HttpClient}
-     */
-    this.client = new HttpClient(api, options);
+    if (!response.ok) {
+      throw new TechnicalError();
+    }
+
+    return response.json();
   }
 }
-
-export { Client };
 </code></pre>
         </article>
     </section>
