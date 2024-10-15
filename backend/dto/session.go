@@ -35,10 +35,10 @@ func FromSessionModel(model models.Session, current bool) SessionData {
 
 type ValidateSessionResponse struct {
 	IsValid        bool       `json:"is_valid"`
-	ExpirationTime *time.Time `json:"expiration_time"`
-	UserID         *uuid.UUID `json:"user_id"`
+	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
+	UserID         *uuid.UUID `json:"user_id,omitempty"`
 }
 
 type ValidateSessionRequest struct {
-	SessionToken string `json:"session_token"`
+	SessionToken string `json:"session_token" validate:"required"`
 }

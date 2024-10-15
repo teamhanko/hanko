@@ -100,6 +100,11 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	err = c.Validate(request)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
 	token, err := h.sessionManager.Verify(request.SessionToken)
 	if err != nil {
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
