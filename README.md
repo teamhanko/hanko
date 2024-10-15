@@ -14,7 +14,7 @@
 # About Hanko
 Hanko is an open-source authentication and user management solution with a focus on moving the login beyond passwords while being 100% deployable today.
 
-- Supports all modern auth methods, incl. [passkeys](https://www.passkeys.io), social logins, and SAML SSO
+- Supports all modern authentication methods, incl. [passkeys](https://www.passkeys.io), social logins, and SAML SSO
 - Highly flexible configuration options (e.g. optional/user-deletable passwords, passkey-only, OAuth-only)
 - Fast integration with Hanko Elements web components (embeddable components for login/registration and account profile)
 - API-first, small footprint, cloud-native
