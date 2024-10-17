@@ -144,7 +144,7 @@ export const bn: Translation = {
     securityKey: "নিরাপত্তা কী",
     securityKeyUse: "নিরাপত্তা কী ব্যবহার করুন",
     newSecurityKeyName: "নতুন নিরাপত্তা কী নাম",
-    createSecurityKey: "নিরাপত্তা কী তৈরি করুন",
+    createSecurityKey: "নিরাপত্তা কী যোগ করুন",
     authenticatorAppManage: "প্রমাণীকরণ অ্যাপ পরিচালনা করুন",
     authenticatorAppAdd: "সেট আপ করুন",
     configured: "কনফিগার করা হয়েছে",

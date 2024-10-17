@@ -149,7 +149,7 @@ export const ptBR: Translation = {
     securityKey: "Chave de segurança",
     securityKeyUse: "Usar chave de segurança",
     newSecurityKeyName: "Novo nome da chave de segurança",
-    createSecurityKey: "Criar chave de segurança",
+    createSecurityKey: "Adicionar uma chave de segurança",
     authenticatorAppManage: "Gerenciar aplicativo de autenticação",
     authenticatorAppAdd: "Configurar",
     configured: "configurado",
