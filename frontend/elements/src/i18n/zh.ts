@@ -135,7 +135,7 @@ export const zh: Translation = {
     securityKey: "安全密钥",
     securityKeyUse: "使用安全密钥",
     newSecurityKeyName: "新安全密钥名称",
-    createSecurityKey: "创建安全密钥",
+    createSecurityKey: "添加安全密钥",
     authenticatorAppManage: "管理身份验证应用",
     authenticatorAppAdd: "设置",
     configured: "已配置",
