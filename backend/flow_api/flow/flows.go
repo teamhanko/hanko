@@ -1,6 +1,8 @@
 package flow
 
 import (
+	"time"
+
 	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
@@ -10,7 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/user_details"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"time"
 )
 
 var CapabilitiesSubFlow = flowpilot.NewSubFlow(shared.FlowCapabilities).
@@ -22,6 +23,7 @@ var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
 		credential_usage.ContinueWithLoginIdentifier{},
 		credential_usage.WebauthnGenerateRequestOptions{},
 		credential_usage.WebauthnVerifyAssertionResponse{},
+		credential_usage.RememberMe{},
 		shared.ThirdPartyOAuth{}).
 	State(shared.StateLoginPasskey,
 		credential_usage.WebauthnVerifyAssertionResponse{},

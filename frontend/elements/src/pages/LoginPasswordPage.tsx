@@ -25,7 +25,6 @@ const LoginPasswordPage = (props: Props) => {
   const { stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
   const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>();
 
   const onPasswordInput = async (event: Event) => {
@@ -34,15 +33,11 @@ const LoginPasswordPage = (props: Props) => {
     }
   };
 
-  const onRememberMeChange = async (event: Event) => {
-    setRememberMe(!rememberMe);
-  };
-
   const onPasswordSubmit = async (event: Event) => {
     event.preventDefault();
     setLoadingAction("password-submit");
     const nextState = await flowState.actions
-      .password_login({ password, remember_me: rememberMe })
+      .password_login({ password })
       .run();
     setLoadingAction(null);
     stateHandler[nextState.name](nextState);
@@ -127,13 +122,6 @@ const LoginPasswordPage = (props: Props) => {
             placeholder={t("labels.password")}
             onInput={onPasswordInput}
             autofocus
-          />
-          <Checkbox
-            required={false}
-            type={"checkbox"}
-            label={t("labels.rememberMe")}
-            checked={rememberMe}
-            onChange={onRememberMeChange}
           />
           <Button
             uiAction={"password-submit"}

@@ -75,7 +75,10 @@ export interface EmailVerifyInputs {
 
 export interface PasswordInputs {
   readonly password: Input<string>;
-  readonly remember_me?: Input<boolean>;
+}
+
+export interface RememberMeInputs {
+  readonly remember_me: Input<boolean>;
 }
 
 export interface UsernameSetInputs {

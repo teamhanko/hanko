@@ -22,6 +22,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Footer from "../components/wrapper/Footer";
+import Checkbox from "../components/form/Checkbox";
 
 interface Props {
   state: State<"login_init">;
@@ -50,6 +51,7 @@ const LoginInitPage = (props: Props) => {
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
   >(undefined);
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   const onIdentifierInput = (event: Event) => {
     event.preventDefault();
@@ -58,6 +60,12 @@ const LoginInitPage = (props: Props) => {
       setIdentifier(value);
       setIdentifierToUIState(value);
     }
+  };
+
+  const onRememberMeChange = async (event: Event) => {
+    setRememberMe(!rememberMe);
+
+    await flowState.actions.remember_me({ remember_me: rememberMe }).run();
   };
 
   const onEmailSubmit = async (event: Event) => {
@@ -223,6 +231,16 @@ const LoginInitPage = (props: Props) => {
                   placeholder={t("labels.emailOrUsername")}
                 />
               )}
+              {flowState.actions.remember_me?.(null) && (
+                <Checkbox
+                  required={false}
+                  type={"checkbox"}
+                  label={t("labels.rememberMe")}
+                  checked={rememberMe}
+                  onChange={onRememberMeChange}
+                />
+              )}
+
               <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
