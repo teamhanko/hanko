@@ -319,18 +319,21 @@
 }
 
 .hanko_loadingSpinnerWrapperIcon {
-    justify-content: flex-start;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
     width: 100%;
-    column-gap: 10px;
-    margin-left: 10px
+    margin: 0;
 }
 
 .hanko_loadingSpinnerWrapper,
 .hanko_loadingSpinnerWrapperIcon {
-    display: inline-flex;
+    display: flex; 
+    justify-content: center; 
     align-items: center;
     height: 100%;
-    margin: 0 5px
+    width: 100%; 
+    margin: 0;
 }
 
 .hanko_loadingSpinnerWrapper .hanko_loadingSpinner,
