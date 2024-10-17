@@ -109,6 +109,7 @@ export const it: Translation = {
     setUsername: "Imposta nome utente",
     changePassword: "Cambia password",
     setPassword: "Imposta password",
+    rememberMe: "Ricordami",
     revoke: "Revoca",
     currentSession: "Sessione corrente",
   },

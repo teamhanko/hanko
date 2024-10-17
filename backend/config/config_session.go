@@ -25,6 +25,10 @@ type Session struct {
 	Lifespan string `yaml:"lifespan" json:"lifespan,omitempty" koanf:"lifespan" jsonschema:"default=12h"`
 	// `server_side` contains configuration for server-side sessions.
 	ServerSide ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
+	// `enable_remember_me` determines whether remember me functionality should be enable in hanko element ui
+	// which allows users to control the session duration whether the JWT should be store in session cookie and deleted
+	// when browser is closed or not.
+	EnableRememberMe bool `yaml:"enable_remember_me" json:"enable_remember_me,omitempty" koanf:"enable_remember_me" split_words:"true" jsonschema:"default=false"`
 }
 
 func (s *Session) Validate() error {

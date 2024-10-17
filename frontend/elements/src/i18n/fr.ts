@@ -35,7 +35,7 @@ export const fr: Translation = {
     lastUsed: "Dernière vue",
     ipAddress: "Adresse IP",
     revokeSession: "Révoquer la session",
-    profileSessions: "Sessions"
+    profileSessions: "Sessions",
   },
   texts: {
     enterPasscode:
@@ -112,6 +112,7 @@ export const fr: Translation = {
     setUsername: "Définir le nom d'utilisateur",
     changePassword: "Changer le mot de passe",
     setPassword: "Définir le mot de passe",
+    rememberMe: "Rester connecté",
     revoke: "Révoquer",
     currentSession: "Session en cours",
   },

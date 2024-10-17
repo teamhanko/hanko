@@ -16,7 +16,9 @@ import {
   UsernameSetInputs,
   VerifyPasscodeInputs,
   WebauthnVerifyAssertionResponseInputs,
-  WebauthnVerifyAttestationResponseInputs, SessionDeleteInputs,
+  WebauthnVerifyAttestationResponseInputs,
+  RememberMeInputs,
+  SessionDeleteInputs,
 } from "./input";
 
 interface Action<TInputs> {
@@ -35,6 +37,7 @@ interface LoginInitActions {
   readonly webauthn_generate_request_options?: Action<null>;
   readonly webauthn_verify_assertion_response?: Action<WebauthnVerifyAssertionResponseInputs>;
   readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
+  readonly remember_me?: Action<RememberMeInputs>;
 }
 
 interface ProfileInitActions {

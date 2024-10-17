@@ -104,6 +104,7 @@ export const zh: Translation = {
     setUsername: "设置用户名",
     changePassword: "更改密码",
     setPassword: "设置密码",
+    rememberMe: "记住我",
     revoke: "撤销",
     currentSession: "当前会话",
   },
