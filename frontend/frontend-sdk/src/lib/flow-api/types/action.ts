@@ -18,6 +18,7 @@ import {
   WebauthnVerifyAssertionResponseInputs,
   WebauthnVerifyAttestationResponseInputs,
   RememberMeInputs,
+  SessionDeleteInputs,
 } from "./input";
 
 interface Action<TInputs> {
@@ -55,6 +56,7 @@ interface ProfileInitActions {
   readonly webauthn_credential_rename?: Action<PasskeyCredentialRename>;
   readonly webauthn_credential_delete?: Action<PasskeyCredentialDelete>;
   readonly webauthn_verify_attestation_response?: Action<WebauthnVerifyAttestationResponseInputs>;
+  readonly session_delete?: Action<SessionDeleteInputs>;
 }
 
 interface LoginMethodChooserActions {

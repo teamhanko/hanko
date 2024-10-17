@@ -91,7 +91,7 @@ func (s *passwordSuite) TestPasswordHandler_Set_Create() {
 			s.Require().NoError(err)
 
 			sessionManager := s.GetDefaultSessionManager()
-			token, err := sessionManager.GenerateJWT(currentTest.userId, nil)
+			token, _, err := sessionManager.GenerateJWT(currentTest.userId, nil)
 			s.Require().NoError(err)
 			cookie, err := sessionManager.GenerateCookie(token)
 			s.Require().NoError(err)

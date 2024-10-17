@@ -32,6 +32,10 @@ export const zh: Translation = {
     signUp: "注册",
     selectLoginMethod: "选择登录方法",
     setupLoginMethod: "设置登录方法",
+    lastUsed: "最后一次查看",
+    ipAddress: "IP 地址",
+    revokeSession: "撤销会话",
+    profileSessions: "会话",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -101,6 +105,8 @@ export const zh: Translation = {
     changePassword: "更改密码",
     setPassword: "设置密码",
     rememberMe: "记住我",
+    revoke: "撤销",
+    currentSession: "当前会话",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",

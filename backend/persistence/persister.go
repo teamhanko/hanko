@@ -47,6 +47,8 @@ type Persister interface {
 	GetWebhookPersister(tx *pop.Connection) WebhookPersister
 	GetUsernamePersister() UsernamePersister
 	GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister
+	GetSessionPersister() SessionPersister
+	GetSessionPersisterWithConnection(tx *pop.Connection) SessionPersister
 }
 
 type Migrator interface {
@@ -245,4 +247,12 @@ func (p *persister) GetWebhookPersister(tx *pop.Connection) WebhookPersister {
 	}
 
 	return NewWebhookPersister(p.DB)
+}
+
+func (p *persister) GetSessionPersister() SessionPersister {
+	return NewSessionPersister(p.DB)
+}
+
+func (p *persister) GetSessionPersisterWithConnection(tx *pop.Connection) SessionPersister {
+	return NewSessionPersister(tx)
 }

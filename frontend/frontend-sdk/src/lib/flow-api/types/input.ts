@@ -102,3 +102,7 @@ export interface ThirdpartyOauthInputs {
   readonly provider: Input<string>;
   readonly redirect_to: Input<string>;
 }
+
+export interface SessionDeleteInputs {
+  readonly session_id: Input<string>;
+}

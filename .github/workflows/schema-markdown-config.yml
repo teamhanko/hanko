@@ -1,5 +1,4 @@
 name: Generate config reference markdown
-run-name: Generate config reference markdown for ${{ github.ref_name }}
 
 on:
   push:

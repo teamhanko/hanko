@@ -32,6 +32,10 @@ export const de: Translation = {
     signUp: "Registrieren",
     selectLoginMethod: "Wähle die Anmelde-Methode",
     setupLoginMethod: "Anmelde-Methode einrichten",
+    lastUsed: "Zuletzt gesehen",
+    ipAddress: "IP Adresse",
+    revokeSession: "Sitzung beenden",
+    profileSessions: "Sitzungen",
   },
   texts: {
     enterPasscode:
@@ -108,6 +112,8 @@ export const de: Translation = {
     changePassword: "Passwort ändern",
     setPassword: "Passwort setzen",
     rememberMe: "Angemeldet bleiben",
+    revoke: "Beenden",
+    currentSession: "Aktuelle Sitzung",
   },
   errors: {
     somethingWentWrong:

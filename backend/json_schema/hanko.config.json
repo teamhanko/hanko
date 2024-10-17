@@ -472,23 +472,29 @@
       "properties": {
         "enabled": {
           "type": "boolean",
+          "description": "`enabled` activates or deactivates the identity provider.",
           "default": false
         },
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "`name` is the name given for the identity provider."
         },
         "domain": {
-          "type": "string"
+          "type": "string",
+          "description": "At login the domain will be extracted from the users email address and then used to identify the idp to use.\nThis tag defines for which domain the idp is used."
         },
         "metadata_url": {
-          "type": "string"
+          "type": "string",
+          "description": "`metadata_url` is the URL the API can retrieve IdP metadata from."
         },
         "skip_email_verification": {
-          "type": "boolean"
+          "type": "boolean",
+          "description": "`skip_email_verification` determines whether the check if the `email_verified` attribute in the IdP response\nwill be skipped."
         },
         "attribute_map": {
           "$ref": "#/$defs/AttributeMap",
-          "title": "attribute_map"
+          "title": "attribute_map",
+          "description": "`attribute_map` is a map of attributes used to map attributes in IdP response to custom attributes at\nHanko."
         }
       },
       "additionalProperties": false,
@@ -512,22 +518,27 @@
       "properties": {
         "sign_authn_requests": {
           "type": "boolean",
+          "description": "`sign_authn_requests` determines whether initial requests should be signed.",
           "default": true
         },
         "force_login": {
           "type": "boolean",
+          "description": "`force_login` forces the IdP to always show a login (even if there is an active session with the IdP).",
           "default": false
         },
         "validate_encryption_cert": {
           "type": "boolean",
+          "description": "`validate_encryption_cert` determines whether the certificate used for the encryption of the IdP responses should\nbe checked for validity.",
           "default": true
         },
         "skip_signature_validation": {
           "type": "boolean",
+          "description": "`skip_signature_validation` determines whether the validity check of an IdP response's signature\nshould be skipped.",
           "default": false
         },
         "allow_missing_attributes": {
           "type": "boolean",
+          "description": "`allow_missing_attributes` determines whether missing attributes are allowed (e.g. the IdP specifies a phone\nattribute in the metadata but does not send it with a SAML Assertion Response).",
           "default": false
         }
       },
@@ -813,32 +824,39 @@
       "properties": {
         "enabled": {
           "type": "boolean",
+          "description": "`enabled` determines whether the SAML API endpoints are available.",
           "default": false
         },
         "endpoint_url": {
-          "type": "string"
+          "type": "string",
+          "description": "`endpoint` is URL at which the SAML endpoints like metadata, callback, etc. are available\n(e.g. `{YOUR_BACKEND_INSTANCE}/api`).\n\nWill be provided as metadata for IdP."
         },
         "audience_uri": {
-          "type": "string"
+          "type": "string",
+          "description": "`audience_uri` determines the intended recipient or audience for the SAML Assertion."
         },
         "default_redirect_url": {
-          "type": "string"
+          "type": "string",
+          "description": "`default_redirect_url` is the URL to redirect to in case of errors or when no `allowed_redirect_url` is provided."
         },
         "allowed_redirect_urls": {
           "items": {
             "type": "string"
           },
-          "type": "array"
+          "type": "array",
+          "description": "`allowed_redirect_urls` is a list of URLs the backend is allowed to redirect to after third party sign-in was\nsuccessful.\n\nSupports wildcard matching through globbing. e.g. `https://*.example.com` will allow `https://foo.example.com`\nand `https://bar.example.com` to be accepted.\n\nGlobbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`\nand `https://foo.example.com/page2`.\n\nA double asterisk (`**`) acts as a \"super\"-wildcard/match-all.\n\nSee [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbinh."
         },
         "options": {
           "$ref": "#/$defs/Options",
-          "title": "options"
+          "title": "options",
+          "description": "`options` allows setting optional features for service provider operations."
         },
         "identity_providers": {
           "items": {
             "$ref": "#/$defs/IdentityProvider"
           },
-          "type": "array"
+          "type": "array",
+          "description": "`identity_providers` is a list of SAML identity providers."
         }
       },
       "additionalProperties": false,
@@ -891,6 +909,22 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "ServerSide": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether server-side sessions are enabled.\n\nNOTE: When enabled the session endpoint must be used in order to check if a session is still valid.",
+          "default": false
+        },
+        "limit": {
+          "type": "integer",
+          "description": "`limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,\nolder sessions are invalidated.",
+          "default": 100
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Service": {
       "properties": {
         "name": {
@@ -925,12 +959,19 @@
         },
         "lifespan": {
           "type": "string",
-          "description": "`lifespan` determines how long a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal\nnumbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
+          "description": "`lifespan` determines the maximum duration for which a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal\nnumbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
           "default": "12h"
+        },
+        "server_side": {
+          "$ref": "#/$defs/ServerSide",
+          "description": "`server_side` contains configuration for server-side sessions."
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "server_side"
+      ]
     },
     "ThirdParty": {
       "properties": {
@@ -1194,5 +1235,6 @@
       },
       "type": "array"
     }
-  }
+  },
+  "title": "Config"
 }

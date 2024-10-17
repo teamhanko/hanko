@@ -234,7 +234,7 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 		err = persister.Update(*webhook)
 		if err != nil {
 			ctx.Logger().Error(err)
-			return fmt.Errorf("unable to udpate webhook: %w", err)
+			return fmt.Errorf("unable to update webhook: %w", err)
 		}
 
 		return ctx.JSON(http.StatusOK, webhook)
