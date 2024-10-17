@@ -51,7 +51,7 @@ const CreateSecurityKeyPage = (props: Props) => {
         <Paragraph>{t("texts.securityKeySetUp")}</Paragraph>
         <Form onSubmit={onPasskeySubmit}>
           <Button uiAction={"passkey-submit"} autofocus icon={"securityKey"}>
-            {t("labels.securityKeyUse")}
+            {t("labels.createSecurityKey")}
           </Button>
         </Form>
       </Content>

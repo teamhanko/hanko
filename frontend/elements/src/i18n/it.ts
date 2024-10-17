@@ -140,7 +140,7 @@ export const it: Translation = {
     securityKey: "Chiave di sicurezza",
     securityKeyUse: "Usa chiave di sicurezza",
     newSecurityKeyName: "Nuovo nome chiave di sicurezza",
-    createSecurityKey: "Crea chiave di sicurezza",
+    createSecurityKey: "Aggiungi una chiave di sicurezza",
     authenticatorAppManage: "Gestisci app di autenticazione",
     authenticatorAppAdd: "Imposta",
     configured: "configurato",

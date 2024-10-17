@@ -139,7 +139,7 @@ export const en: Translation = {
     securityKey: "Security key",
     securityKeyUse: "Use security key",
     newSecurityKeyName: "New security key name",
-    createSecurityKey: "Create a security key",
+    createSecurityKey: "Add a security key",
     authenticatorAppManage: "Manage authenticator app",
     authenticatorAppAdd: "Set up",
     configured: "configured",

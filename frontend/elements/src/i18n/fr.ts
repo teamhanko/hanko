@@ -144,7 +144,7 @@ export const fr: Translation = {
     securityKey: "Clé de sécurité",
     securityKeyUse: "Utiliser la clé de sécurité",
     newSecurityKeyName: "Nouveau nom de clé de sécurité",
-    createSecurityKey: "Créer une clé de sécurité",
+    createSecurityKey: "Ajouter une clé de sécurité",
     authenticatorAppManage: "Gérer l'application d'authentification",
     authenticatorAppAdd: "Configurer",
     configured: "configuré",
