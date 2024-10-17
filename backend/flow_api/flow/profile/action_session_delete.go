@@ -40,10 +40,20 @@ func (a SessionDelete) Initialize(c flowpilot.InitializationContext) {
 		return
 	}
 
+	var deletableSessions []string
 	for _, session := range sessions {
 		if session.ID != currentSessionID {
-			input.AllowedValue(session.ID.String(), session.ID.String())
+			deletableSessions = append(deletableSessions, session.ID.String())
 		}
+	}
+
+	if len(deletableSessions) < 1 {
+		c.SuspendAction()
+		return
+	}
+
+	for _, deletableSession := range deletableSessions {
+		input.AllowedValue(deletableSession, deletableSession)
 	}
 
 	c.AddInputs(input)
@@ -51,6 +61,10 @@ func (a SessionDelete) Initialize(c flowpilot.InitializationContext) {
 
 func (a SessionDelete) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
+
+	if valid := c.ValidateInputData(); !valid {
+		return c.Error(flowpilot.ErrorFormDataInvalid)
+	}
 
 	sessionToBeDeleted := uuid.FromStringOrNil(c.Input().Get("session_id").String())
 
