@@ -22,7 +22,7 @@ func (a WebauthnVerifyAttestationResponse) GetDescription() string {
 func (a WebauthnVerifyAttestationResponse) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	if !deps.Cfg.Passkey.Enabled || !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() {
+	if !c.Stash().Get(shared.StashPathWebauthnAvailable).Bool() || (!deps.Cfg.Passkey.Enabled && !(deps.Cfg.MFA.Enabled && deps.Cfg.MFA.SecurityKeys.Enabled)) {
 		c.SuspendAction()
 	}
 
