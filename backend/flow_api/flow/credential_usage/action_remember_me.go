@@ -39,5 +39,5 @@ func (a RememberMe) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set remember_me to stash: %w", err)
 	}
 
-	return nil
+	return c.Continue(shared.StateLoginInit)
 }

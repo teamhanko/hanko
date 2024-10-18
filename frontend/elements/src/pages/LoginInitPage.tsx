@@ -65,7 +65,11 @@ const LoginInitPage = (props: Props) => {
   const onRememberMeChange = async (event: Event) => {
     setRememberMe((prev) => !prev);
 
-    await flowState.actions.remember_me({ remember_me: !rememberMe }).run();
+    const nextState = await flowState.actions
+      .remember_me({ remember_me: !rememberMe })
+      .run();
+
+    stateHandler[nextState.name](nextState);
   };
 
   const onEmailSubmit = async (event: Event) => {
