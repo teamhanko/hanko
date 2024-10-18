@@ -22,4 +22,5 @@ const (
 	StashPathUserIdentification                    = "user_identification"
 	StashPathLoginOnboardingScheduled              = "login_onboarding_scheduled"
 	StashPathLoginOnboardingCreateEmail            = "login_onboarding_create_email"
+	StashPathRememberMe                            = "remember_me"
 )

@@ -108,6 +108,7 @@ export const bn: Translation = {
     setUsername: "ব্যবহারকারীর নাম সেট করুন",
     changePassword: "পাসওয়ার্ড পরিবর্তন করুন",
     setPassword: "পাসওয়ার্ড সেট করুন",
+    rememberMe: "আমাকে মনে রাখুন",
     revoke: "বাতিল করুন",
     currentSession: "বর্তমান সেশন",
   },

@@ -35,7 +35,7 @@ export const en: Translation = {
     lastUsed: "Last seen",
     ipAddress: "IP address",
     revokeSession: "Revoke session",
-    profileSessions: "Sessions"
+    profileSessions: "Sessions",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -108,6 +108,7 @@ export const en: Translation = {
     setUsername: "Set username",
     changePassword: "Change password",
     setPassword: "Set password",
+    rememberMe: "Remember me",
     revoke: "Revoke",
     currentSession: "Current session",
   },

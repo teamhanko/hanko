@@ -77,6 +77,10 @@ export interface PasswordInputs {
   readonly password: Input<string>;
 }
 
+export interface RememberMeInputs {
+  readonly remember_me: Input<boolean>;
+}
+
 export interface UsernameSetInputs {
   readonly username: Input<string>;
 }

@@ -2,20 +2,23 @@ package session
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
 	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
 	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
 	"github.com/teamhanko/hanko/backend/dto"
-	"net/http"
-	"time"
 )
+
+type CookieOption func(*http.Cookie)
 
 type Manager interface {
 	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt) (string, jwt.Token, error)
 	Verify(string) (jwt.Token, error)
-	GenerateCookie(token string) (*http.Cookie, error)
+	GenerateCookie(token string, opts ...CookieOption) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
 }
 
@@ -132,8 +135,9 @@ func (m *manager) Verify(token string) (jwt.Token, error) {
 }
 
 // GenerateCookie creates a new session cookie for the given user
-func (m *manager) GenerateCookie(token string) (*http.Cookie, error) {
-	return &http.Cookie{
+func (m *manager) GenerateCookie(token string, opts ...CookieOption) (*http.Cookie, error) {
+
+	cookie := &http.Cookie{
 		Name:     m.cookieConfig.Name,
 		Value:    token,
 		Domain:   m.cookieConfig.Domain,
@@ -142,7 +146,13 @@ func (m *manager) GenerateCookie(token string) (*http.Cookie, error) {
 		HttpOnly: m.cookieConfig.HttpOnly,
 		SameSite: m.cookieConfig.SameSite,
 		MaxAge:   int(m.sessionLength.Seconds()),
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(cookie)
+	}
+
+	return cookie, nil
 }
 
 // DeleteCookie returns a cookie that will expire the cookie on the frontend

@@ -69,7 +69,8 @@ func DefaultConfig() *Config {
 			Host:     "localhost",
 		},
 		Session: Session{
-			Lifespan: "12h",
+			Lifespan:         "12h",
+			EnableRememberMe: false,
 			Cookie: Cookie{
 				HttpOnly: true,
 				SameSite: "strict",

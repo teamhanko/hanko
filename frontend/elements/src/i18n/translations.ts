@@ -39,7 +39,7 @@ export interface Translation {
     lastUsed: string;
     ipAddress: string;
     revokeSession: string;
-    profileSessions: string
+    profileSessions: string;
   };
   texts: {
     enterPasscode: string;
@@ -104,6 +104,7 @@ export interface Translation {
     setPassword: string;
     changeUsername: string;
     setUsername: string;
+    rememberMe: string;
     revoke: string;
     currentSession: string;
   };
