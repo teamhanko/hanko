@@ -5,3 +5,5 @@ Use Hanko API and Elements as auth provider in your application. Then write a te
 **Points**: 1500 points
 
 **Proof:** Open a PR including the link to your application and blog post.
+
+19-October-2024 by Naprila
