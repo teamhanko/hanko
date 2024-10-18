@@ -3,6 +3,8 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -18,6 +20,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
 	var userId uuid.UUID
+	var rememberMe bool
 	var err error
 	if c.Stash().Get(StashPathUserID).Exists() {
 		userId, err = uuid.FromString(c.Stash().Get(StashPathUserID).String())
@@ -26,6 +29,12 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	} else {
 		return errors.New("user_id not found in stash")
+	}
+
+	if c.Stash().Get(StashPathRememberMe).Exists() {
+		rememberMe = c.Stash().Get(StashPathRememberMe).Bool()
+	} else {
+		rememberMe = false
 	}
 
 	emails, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(userId)
@@ -80,12 +89,18 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	cookie, err := deps.SessionManager.GenerateCookie(signedSessionToken)
+	cookie, err := deps.SessionManager.GenerateCookie(signedSessionToken, func(c *http.Cookie) {
+		if rememberMe {
+			c.MaxAge = 0
+		}
+	})
+
 	if err != nil {
 		return fmt.Errorf("failed to generate auth cookie, %w", err)
 	}
 
 	deps.HttpContext.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
+	deps.HttpContext.Response().Header().Set("X-Remember-Me", fmt.Sprintf("%t", rememberMe))
 
 	if deps.Cfg.Session.EnableAuthTokenHeader {
 		deps.HttpContext.Response().Header().Set("X-Auth-Token", signedSessionToken)
@@ -111,4 +126,5 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	return nil
+
 }

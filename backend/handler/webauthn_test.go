@@ -3,6 +3,11 @@ package handler
 import (
 	"encoding/base64"
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
@@ -13,10 +18,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
-	"net/http"
-	"net/http/httptest"
-	"strings"
-	"testing"
 )
 
 func TestWebauthnSuite(t *testing.T) {
@@ -336,7 +337,7 @@ func (s sessionManager) GenerateJWT(_ uuid.UUID, _ *dto.EmailJwt) (string, jwt.T
 	return userId, nil, nil
 }
 
-func (s sessionManager) GenerateCookie(token string) (*http.Cookie, error) {
+func (s sessionManager) GenerateCookie(token string, opts ...session.CookieOption) (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "hanko",
 		Value:    token,

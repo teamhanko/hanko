@@ -24,7 +24,7 @@ func (a RememberMe) Initialize(c flowpilot.InitializationContext) {
 
 	c.AddInputs(flowpilot.BooleanInput("remember_me").Required(true))
 
-	if deps.Cfg.Session.EnableRememberMe == true {
+	if deps.Cfg.Session.EnableRememberMe {
 		c.SuspendAction()
 	}
 }
@@ -32,7 +32,6 @@ func (a RememberMe) Initialize(c flowpilot.InitializationContext) {
 func (a RememberMe) Execute(c flowpilot.ExecutionContext) error {
 
 	if valid := c.ValidateInputData(); !valid {
-		// c.Input().SetError(shared.StashPathRememberMe, flowInputError)
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
