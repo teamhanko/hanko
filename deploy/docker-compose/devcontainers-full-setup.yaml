@@ -1,0 +1,119 @@
+version: '3.9'
+services:
+  hanko-migrate:
+    build: ../../backend
+    volumes:
+      - type: bind
+        source: ./config-devcontainer.yaml
+        target: /etc/config/config.yaml
+    command: --config /etc/config/config.yaml migrate up
+    restart: on-failure
+    depends_on:
+      postgresd:
+        condition: service_healthy
+    networks:
+      - intranet
+  hanko:
+    depends_on:
+      hanko-migrate:
+        condition: service_completed_successfully
+    build: ../../backend
+    ports:
+      - '8000:8000' # public
+      - '8001:8001' # admin
+    restart: unless-stopped
+    command: serve --config /etc/config/config.yaml all
+    volumes:
+      - type: bind
+        source: ./config-devcontainer.yaml
+        target: /etc/config/config.yaml
+    networks:
+      - intranet
+    environment:
+      - PASSWORD_ENABLED
+  postgresd:
+    image: postgres:12-alpine
+    ports:
+      - "5442:5432"
+    environment:
+      - POSTGRES_USER=hanko
+      - POSTGRES_PASSWORD=hanko
+      - POSTGRES_DB=hanko
+      - DB_PORT=5442
+    healthcheck:
+      test: pg_isready -U hanko -d hanko
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - intranet
+  elements:
+    image: node:18.14-alpine
+    working_dir: /workspace
+    entrypoint: /bin/sh -c
+    command:
+      - npm install && npm run build:elements:dev
+    volumes:
+      - type: bind
+        source: ../../frontend/
+        target: /workspace
+    networks:
+      - intranet
+  elements-nginx:
+    image: nginx:1-alpine
+    depends_on:
+      elements:
+        condition: service_started
+    ports:
+      - 8089:80
+    networks:
+      - intranet
+    volumes:
+      - ../../frontend/elements/dist/:/usr/share/nginx/html/elements/
+      - ../../frontend/frontend-sdk/dist/:/usr/share/nginx/html/frontend-sdk/
+  quickstart:
+    build: ../../quickstart
+    ports:
+      - "8888:8080"
+    environment:
+      - HANKO_URL=/backend
+      - HANKO_URL_INTERNAL=http://hanko:8000
+      - HANKO_FRONTEND_SDK_URL=/sdk.modern.js
+      - HANKO_ELEMENT_URL=/elements.js
+    networks:
+      - intranet
+  mail:
+    image: mailhog/mailhog:latest
+    restart: always
+    ports:
+      - 2500:1025
+      - 8025:8025
+    networks:
+      - intranet
+  entry:
+    image: nginx
+    volumes:
+      - ./devcontainer-nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      hanko:
+        condition: service_started
+      elements-nginx:
+        condition: service_started
+      mail:
+        condition: service_started
+      quickstart:
+        condition: service_started
+    ports:
+      - '80:80'
+    networks:
+      - intranet
+  devcontainer:
+    image: mcr.microsoft.com/devcontainers/base:ubuntu
+    volumes:
+      - ../..:/workspaces:cached
+    command: sleep infinity
+    networks:
+      - intranet
+networks:
+  intranet:

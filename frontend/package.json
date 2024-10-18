@@ -13,7 +13,7 @@
     "test": "turbo run test",
     "start": "turbo run start",
     "build:elements": "turbo build --filter=./frontend-sdk --filter=./elements",
-    "build:elements:dev": "turbo build:dev --filter=./elements"
+    "build:elements:dev": "turbo build:dev --filter=@teamhanko/hanko-elements"
   },
   "devDependencies": {
     "turbo": "^1.10.7"
