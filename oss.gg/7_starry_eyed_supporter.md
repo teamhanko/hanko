@@ -21,5 +21,6 @@ Your turn 👇
 ////////////////////////////
 
 » 01-October-2024 by YOUR NAME
+» 20-October-2024 by [@Khaan25](https://github.com/Khaan25)
 
 ---
