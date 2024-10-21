@@ -383,6 +383,7 @@ const ProfilePage = (props: Props) => {
             <ManageAuthAppDropdown
               onConnect={onAuthAppSetUp}
               onDelete={onAuthAppRemove}
+              allowDeletion={!!flowState.actions.otp_secret_delete?.(null)}
               authAppSetUp={flowState.payload.user.mfa_config?.auth_app_set_up}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
