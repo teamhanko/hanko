@@ -70,7 +70,7 @@ const RegisterPasskeyPage = (props: Props) => {
         <Link
           uiAction={"back"}
           onClick={onBackClick}
-          loadingSpinnerPosition={"left"}
+          loadingSpinnerPosition={"right"}
           hidden={!flowState.actions.back?.(null)}
         >
           {t("labels.back")}
@@ -78,7 +78,7 @@ const RegisterPasskeyPage = (props: Props) => {
         <Link
           uiAction={"skip"}
           onClick={onSkipClick}
-          loadingSpinnerPosition={"right"}
+          loadingSpinnerPosition={"left"}
           hidden={!flowState.actions.skip?.(null)}
         >
           {t("labels.skip")}
