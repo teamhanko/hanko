@@ -115,6 +115,11 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 
 	c.PreventRevert()
 
+	err = c.ExecuteHook(shared.ScheduleMFACreationStates{})
+	if err != nil {
+		return err
+	}
+
 	return c.Continue()
 }
 

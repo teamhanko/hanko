@@ -34,5 +34,9 @@ func (a SkipCredentialOnboardingMethodChooser) Initialize(c flowpilot.Initializa
 func (a SkipCredentialOnboardingMethodChooser) Execute(c flowpilot.ExecutionContext) error {
 	c.PreventRevert()
 
+	if err := c.ExecuteHook(shared.ScheduleMFACreationStates{}); err != nil {
+		return err
+	}
+
 	return c.Continue()
 }

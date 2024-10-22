@@ -28,6 +28,10 @@ func (fc *defaultFlowContext) GetCurrentState() StateName {
 	return fc.stash.getStateName()
 }
 
+func (fc *defaultFlowContext) GetScheduledStates() []StateName {
+	return fc.stash.getScheduledStateNames()
+}
+
 // CurrentStateEquals returns true, when one of the given stateNames matches the current state name.
 func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	for _, s := range stateNames {
@@ -37,6 +41,19 @@ func (fc *defaultFlowContext) CurrentStateEquals(stateNames ...StateName) bool {
 	}
 
 	return false
+}
+
+func (fc *defaultFlowContext) IsStateScheduled(name StateName) bool {
+	for _, state := range fc.stash.getScheduledStateNames() {
+		if state == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (fc *defaultFlowContext) StateVisited(name StateName) bool {
+	return fc.stash.stateVisited(name)
 }
 
 // GetPreviousState returns the previous state of the flow.

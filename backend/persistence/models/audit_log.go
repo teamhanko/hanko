@@ -112,12 +112,14 @@ var (
 	AuditLogUserDeleted         AuditLogType = "user_deleted"
 
 	// New/flow API types
-	AuditLogLoginSuccess    AuditLogType = "login_success"
-	AuditLogLoginFailure    AuditLogType = "login_failure"
-	AuditLogPasskeyCreated  AuditLogType = "passkey_created"
-	AuditLogPasskeyDeleted  AuditLogType = "passkey_deleted"
-	AuditLogUsernameChanged AuditLogType = "username_changed"
-	AuditLogUsernameDeleted AuditLogType = "username_deleted"
-	AuditLogPasswordChanged AuditLogType = "password_changed"
-	AuditLogPasswordDeleted AuditLogType = "password_deleted"
+	AuditLogLoginSuccess       AuditLogType = "login_success"
+	AuditLogLoginFailure       AuditLogType = "login_failure"
+	AuditLogOTPCreated         AuditLogType = "otp_created"
+	AuditLogPasskeyCreated     AuditLogType = "passkey_created"
+	AuditLogPasskeyDeleted     AuditLogType = "passkey_deleted"
+	AuditLogSecurityKeyCreated AuditLogType = "security_key_created"
+	AuditLogUsernameChanged    AuditLogType = "username_changed"
+	AuditLogUsernameDeleted    AuditLogType = "username_deleted"
+	AuditLogPasswordChanged    AuditLogType = "password_changed"
+	AuditLogPasswordDeleted    AuditLogType = "password_deleted"
 )

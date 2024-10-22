@@ -25,7 +25,5 @@ func (a SkipUsername) Initialize(c flowpilot.InitializationContext) {
 	}
 }
 func (a SkipUsername) Execute(c flowpilot.ExecutionContext) error {
-	c.PreventRevert()
-
 	return c.Continue()
 }

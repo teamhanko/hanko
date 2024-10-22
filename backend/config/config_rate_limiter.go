@@ -16,6 +16,8 @@ type RateLimiter struct {
 	Redis *RedisConfig `yaml:"redis_config" json:"redis_config,omitempty" koanf:"redis_config"`
 	// `passcode_limits` controls rate limits for passcode operations.
 	PasscodeLimits RateLimits `yaml:"passcode_limits" json:"passcode_limits,omitempty" koanf:"passcode_limits" split_words:"true"`
+	// `otp_limits` controls rate limits for OTP login attempts.
+	OTPLimits RateLimits `yaml:"otp_limits" json:"otp_limits,omitempty" koanf:"otp_limits" split_words:"true"`
 	// `password_limits` controls rate limits for password login operations.
 	PasswordLimits RateLimits `yaml:"password_limits" json:"password_limits,omitempty" koanf:"password_limits" split_words:"true"`
 	// `token_limits` controls rate limits for token exchange operations.

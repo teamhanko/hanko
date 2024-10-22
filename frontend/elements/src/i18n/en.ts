@@ -11,6 +11,7 @@ export const en: Translation = {
     registerAuthenticator: "Create a passkey",
     registerConfirm: "Create account?",
     registerPassword: "Set new password",
+    otpSetUp: "Set up authenticator app",
     profileEmails: "Emails",
     profilePassword: "Password",
     profilePasskeys: "Passkeys",
@@ -35,7 +36,17 @@ export const en: Translation = {
     lastUsed: "Last seen",
     ipAddress: "IP address",
     revokeSession: "Revoke session",
-    profileSessions: "Sessions"
+    profileSessions: "Sessions",
+    mfaSetUp: "Set up MFA",
+    securityKeySetUp: "Add security key",
+    securityKeyLogin: "Security key",
+    otpLogin: "Authentication code",
+    renameSecurityKey: "Rename security key",
+    deleteSecurityKey: "Delete security key",
+    securityKeys: "Security keys",
+    authenticatorApp: "Authenticator app",
+    authenticatorAppAlreadySetUp: "Authenticator app is set up",
+    authenticatorAppNotSetUp: "Set up authenticator app",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -45,8 +56,15 @@ export const en: Translation = {
       "Sign in to your account easily and securely with a passkey. Note: Your biometric data is only stored on your devices and will never be shared with anyone.",
     createAccount:
       'No account exists for "{emailAddress}". Do you want to create a new account?',
+    otpEnterVerificationCode:
+      "Enter the one-time password (OTP) obtained from your authenticator app below:",
+    otpScanQRCode:
+      "Scan the QR code using your authenticator app (such as Google Authenticator or any other TOTP app). Alternatively, you can manually enter the OTP secret key into the app.",
+    otpSecretKey: "OTP secret key",
     passwordFormatHint:
       "Must be between {minLength} and {maxLength} characters long.",
+    securityKeySetUp:
+      "Use a dedicated security key via USB, Bluetooth, or NFC, or your mobile phone. Connect or activate your security key, then click the button below and follow the prompts to complete the registration.",
     setPrimaryEmail: "Set this email address to be used for contacting you.",
     isPrimaryEmail:
       "This email address will be used to contact you if necessary.",
@@ -62,6 +80,18 @@ export const en: Translation = {
     selectLoginMethodForFutureLogins:
       "Select one of the following login methods to use for future logins.",
     howDoYouWantToLogin: "How do you want to login?",
+    mfaSetUp:
+      "Protect your account with Multi-Factor Authentication (MFA). MFA adds an additional step to your login process, ensuring that even if your password or email account is compromised, your account stays secure.",
+    securityKeyLogin:
+      "Connect or activate your security key, then click the button below. Once ready, use it via USB, NFC, your mobile phone. Follow the prompts to complete the login process.",
+    otpLogin:
+      "Open your authenticator app to obtain the one-time password (OTP). Enter the code in the field below to complete your login.",
+    renameSecurityKey: "Set a name for the security key.",
+    deleteSecurityKey: "Delete this security key from your account.",
+    authenticatorAppAlreadySetUp:
+      "Your account is secured with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
+    authenticatorAppNotSetUp:
+      "Secure your account with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
   },
   labels: {
     or: "or",
@@ -69,6 +99,7 @@ export const en: Translation = {
     yes: "yes",
     email: "Email",
     continue: "Continue",
+    copied: "copied",
     skip: "Skip",
     save: "Save",
     password: "Password",
@@ -110,6 +141,15 @@ export const en: Translation = {
     setPassword: "Set password",
     revoke: "Revoke",
     currentSession: "Current session",
+    authenticatorApp: "Authenticator app",
+    securityKey: "Security key",
+    securityKeyUse: "Use security key",
+    newSecurityKeyName: "New security key name",
+    createSecurityKey: "Add a security key",
+    authenticatorAppManage: "Manage authenticator app",
+    authenticatorAppAdd: "Set up",
+    configured: "configured",
+    useAnotherMethod: "Use another method",
   },
   errors: {
     somethingWentWrong:
@@ -135,6 +175,8 @@ export const en: Translation = {
     thirdPartyUnverifiedEmail:
       "Email verification required. Please verify the used email address with your provider.",
     signupDisabled: "Account registration is disabled.",
+    handlerNotFoundError:
+      "The current step in your process is not supported by this application version. Please try again later or contact support if the issue persists.",
   },
   flowErrors: {
     technical_error: "A technical error has occurred. Please try again later.",
@@ -161,5 +203,11 @@ export const en: Translation = {
     value_missing_error: "The value is missing.",
     value_too_long_error: "Value is too long.",
     value_too_short_error: "The value is too short.",
+    webauthn_credential_invalid_mfa_only:
+      "This credential can be used as a second factor security key only.",
+    webauthn_credential_already_exists:
+      "The request either timed out, was canceled or the device is already registered. Please try again or try using another device.",
+    platform_authenticator_required:
+      "Your account is configured to use platform authenticators, but your current device or browser does not support this feature. Please try again with a compatible device or browser.",
   },
 };

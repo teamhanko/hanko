@@ -20,10 +20,9 @@ type User struct {
 	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
 	UpdatedAt           time.Time           `db:"updated_at" json:"updated_at"`
 	Username            *Username           `has_one:"username" json:"username,omitempty"`
+	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 }
-
-type WebauthnCredentials []WebauthnCredential
 
 func (user *User) DeleteWebauthnCredential(credentialId string) {
 	for i := range user.WebauthnCredentials {
@@ -94,6 +93,10 @@ func (user *User) DeleteEmail(email Email) {
 	}
 }
 
+func (user *User) DeleteOTPSecret() {
+	user.OTPSecret = nil
+}
+
 func (user *User) GetEmailById(emailId uuid.UUID) *Email {
 	return user.Emails.GetEmailById(emailId)
 }
@@ -109,6 +112,26 @@ func (user *User) GetWebauthnCredentialById(credentialId string) *WebauthnCreden
 		}
 	}
 	return nil
+}
+
+func (user *User) GetPasskeys() WebauthnCredentials {
+	credentials := make(WebauthnCredentials, 0)
+	for _, credential := range user.WebauthnCredentials {
+		if credential.MFAOnly == false {
+			credentials = append(credentials, credential)
+		}
+	}
+	return credentials
+}
+
+func (user *User) GetSecurityKeys() WebauthnCredentials {
+	credentials := make(WebauthnCredentials, 0)
+	for _, credential := range user.WebauthnCredentials {
+		if credential.MFAOnly == true {
+			credentials = append(credentials, credential)
+		}
+	}
+	return credentials
 }
 
 // Validate gets run every time you call a "pop.Validate*" (pop.ValidateAndSave, pop.ValidateAndCreate, pop.ValidateAndUpdate) method.

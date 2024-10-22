@@ -11,8 +11,6 @@ type ScheduleOnboardingStates struct {
 }
 
 func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) error {
-	deps := h.GetDeps(c)
-
 	if c.Stash().Get(shared.StashPathLoginOnboardingScheduled).Bool() {
 		return nil
 	}
@@ -21,32 +19,65 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 		return fmt.Errorf("failed to set login_onboarding_scheduled to the stash: %w", err)
 	}
 
-	userHasPassword := deps.Cfg.Password.Enabled && c.Stash().Get(shared.StashPathUserHasPassword).Bool()
-	userHasPasskey := deps.Cfg.Passkey.Enabled && c.Stash().Get(shared.StashPathUserHasWebauthnCredential).Bool()
-	userHasUsername := deps.Cfg.Username.Enabled && c.Stash().Get(shared.StashPathUserHasUsername).Bool()
-	userHasEmail := deps.Cfg.Email.Enabled && c.Stash().Get(shared.StashPathUserHasEmails).Bool()
+	mfaUsageStates := h.determineMFAUsageStates(c)
+	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c)
+	credentialOnboardingStates := h.determineCredentialOnboardingStates(c)
 
-	if err := c.Stash().Set(shared.StashPathUserHasPassword, userHasPassword); err != nil {
-		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
+	c.ScheduleStates(mfaUsageStates...)
+
+	if c.Stash().Get(shared.StashPathPasswordRecoveryPending).Bool() {
+		c.ScheduleStates(shared.StateLoginPasswordRecovery)
 	}
 
-	if err := c.Stash().Set(shared.StashPathUserHasWebauthnCredential, userHasPasskey); err != nil {
-		return fmt.Errorf("failed to set user_has_webauthn_credential to the stash: %w", err)
-	}
-
-	userDetailOnboardingStates := h.determineUserDetailOnboardingStates(c, userHasUsername, userHasEmail)
-	credentialOnboardingStates := h.determineCredentialOnboardingStates(c, userHasPasskey, userHasPassword)
-
-	c.ScheduleStates(append(userDetailOnboardingStates, append(credentialOnboardingStates, shared.StateSuccess)...)...)
+	c.ScheduleStates(userDetailOnboardingStates...)
+	c.ScheduleStates(credentialOnboardingStates...)
+	c.ScheduleStates(shared.StateSuccess)
 
 	return nil
 }
 
-func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext, hasPasskey, hasPassword bool) []flowpilot.StateName {
+func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
 	deps := h.GetDeps(c)
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
 
+	if !cfg.MFA.Enabled {
+		return result
+	}
+
+	if c.Stash().Get(shared.StashPathLoginMethod).String() == "passkey" {
+		return result
+	}
+
+	userHasSecurityKey := c.Stash().Get(shared.StashPathUserHasSecurityKey).Bool()
+	userHasOTPSecret := c.Stash().Get(shared.StashPathUserHasOTPSecret).Bool()
+	attachmentSupported := c.Stash().Get(shared.StashPathSecurityKeyAttachmentSupported).Bool()
+	userCanUseOTP := cfg.MFA.TOTP.Enabled && userHasOTPSecret
+
+	if cfg.MFA.SecurityKeys.Enabled && userHasSecurityKey {
+		switch {
+		case !attachmentSupported && !userCanUseOTP:
+			c.SetFlowError(shared.ErrorPlatformAuthenticatorRequired)
+			result = append(result, shared.StateError)
+		case attachmentSupported:
+			result = append(result, shared.StateLoginSecurityKey)
+		case userCanUseOTP:
+			result = append(result, shared.StateLoginOTP)
+		}
+	} else if userCanUseOTP {
+		result = append(result, shared.StateLoginOTP)
+	}
+
+	return result
+}
+
+func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
+	deps := h.GetDeps(c)
+	cfg := deps.Cfg
+	result := make([]flowpilot.StateName, 0)
+
+	hasPassword := c.Stash().Get(shared.StashPathUserHasPassword).Bool()
+	hasPasskey := c.Stash().Get(shared.StashPathUserHasPasskey).Bool()
 	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()
 	passkeyEnabled := webauthnAvailable && deps.Cfg.Passkey.Enabled
 	passwordEnabled := deps.Cfg.Password.Enabled
@@ -58,6 +89,11 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	conditionalAcquirePassword := cfg.Password.AcquireOnLogin == "conditional"
 	neverAcquirePasskey := cfg.Passkey.AcquireOnLogin == "never"
 	neverAcquirePassword := cfg.Password.AcquireOnLogin == "never"
+
+	if c.Stash().Get(shared.StashPathPasswordRecoveryPending).Bool() {
+		// never acquire password, when recovery has been initiated
+		neverAcquirePassword = true
+	}
 
 	if passwordAndPasskeyEnabled {
 		if alwaysAcquirePasskey && alwaysAcquirePassword {
@@ -118,10 +154,13 @@ func (h ScheduleOnboardingStates) determineCredentialOnboardingStates(c flowpilo
 	return result
 }
 
-func (h ScheduleOnboardingStates) determineUserDetailOnboardingStates(c flowpilot.HookExecutionContext, userHasUsername, userHasEmail bool) []flowpilot.StateName {
+func (h ScheduleOnboardingStates) determineUserDetailOnboardingStates(c flowpilot.HookExecutionContext) []flowpilot.StateName {
 	deps := h.GetDeps(c)
 	cfg := deps.Cfg
 	result := make([]flowpilot.StateName, 0)
+
+	userHasUsername := c.Stash().Get(shared.StashPathUserHasUsername).Bool()
+	userHasEmail := c.Stash().Get(shared.StashPathUserHasEmails).Bool()
 	acquireUsername := !userHasUsername && cfg.Username.Enabled && cfg.Username.AcquireOnLogin
 	acquireEmail := !userHasEmail && cfg.Email.Enabled && cfg.Email.AcquireOnLogin
 

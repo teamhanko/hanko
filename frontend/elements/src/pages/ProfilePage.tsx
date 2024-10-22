@@ -10,10 +10,10 @@ import Content from "../components/wrapper/Content";
 import Headline1 from "../components/headline/Headline1";
 import Paragraph from "../components/paragraph/Paragraph";
 import ListEmailsAccordion from "../components/accordion/ListEmailsAccordion";
-import ListPasskeysAccordion from "../components/accordion/ListPasskeysAccordion";
+import ListWebauthnCredentialsAccordion from "../components/accordion/ListWebauthnCredentialsAccordion";
 import AddEmailDropdown from "../components/accordion/AddEmailDropdown";
 import ChangePasswordDropdown from "../components/accordion/ChangePasswordDropdown";
-import AddPasskeyDropdown from "../components/accordion/AddPasskeyDropdown";
+import AddWebauthnCredentialDropdown from "../components/accordion/AddWebauthnCredentialDropdown";
 import Divider from "../components/spacer/Divider";
 import Button from "../components/form/Button";
 import Form from "../components/form/Form";
@@ -22,6 +22,7 @@ import ChangeUsernameDropdown from "../components/accordion/ChangeUsernameDropdo
 import DeleteAccountPage from "./DeleteAccountPage";
 import ErrorBox from "../components/error/ErrorBox";
 import ListSessionsAccordion from "../components/accordion/ListSessionsAccordion";
+import ManageAuthAppDropdown from "../components/accordion/ManageAuthAppDropdown";
 
 interface Props {
   state: State<"profile_init">;
@@ -131,10 +132,14 @@ const ProfilePage = (props: Props) => {
       flowState.actions.username_delete(null).run,
     );
 
-  const onPasskeyNameSubmit = async (event: Event, id: string, name: string) =>
+  const onWebauthnCredentialNameSubmit = async (
+    event: Event,
+    id: string,
+    name: string,
+  ) =>
     onAction(
       event,
-      "passkey-rename",
+      "webauthn-credential-rename",
       flowState.actions.webauthn_credential_rename({
         passkey_id: id,
         passkey_name: name,
@@ -162,6 +167,20 @@ const ProfilePage = (props: Props) => {
       flowState.actions.session_delete({ session_id: id }).run,
     );
 
+  const onSecurityKeyDelete = async (event: Event, id: string) =>
+    onAction(
+      event,
+      "security-key-delete",
+      flowState.actions.security_key_delete({ security_key_id: id }).run,
+    );
+
+  const onSecurityKeySubmit = async (event: Event) =>
+    onAction(
+      event,
+      "security-key-submit",
+      flowState.actions.security_key_create(null).run,
+    );
+
   const onAccountDelete = async (event: Event) =>
     onAction(
       event,
@@ -184,6 +203,20 @@ const ProfilePage = (props: Props) => {
     );
     return Promise.resolve();
   };
+
+  const onAuthAppSetUp = async (event: Event) =>
+    onAction(
+      event,
+      "auth-app-add",
+      flowState.actions.continue_to_otp_secret_creation(null).run,
+    );
+
+  const onAuthAppRemove = async (event: Event) =>
+    onAction(
+      event,
+      "auth-app-remove",
+      flowState.actions.otp_secret_delete(null).run,
+    );
 
   return (
     <Content>
@@ -297,26 +330,72 @@ const ProfilePage = (props: Props) => {
         <Fragment>
           <Headline1>{t("headlines.profilePasskeys")}</Headline1>
           <Paragraph>
-            <ListPasskeysAccordion
+            <ListWebauthnCredentialsAccordion
               onBack={onBack}
-              onPasskeyNameSubmit={onPasskeyNameSubmit}
-              onPasskeyDelete={onPasskeyDelete}
-              passkeys={flowState.payload.user.passkeys}
+              onCredentialNameSubmit={onWebauthnCredentialNameSubmit}
+              onCredentialDelete={onPasskeyDelete}
+              credentials={flowState.payload.user.passkeys}
               setError={null}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
-              allowPasskeyDeletion={
+              allowCredentialDeletion={
                 !!flowState.actions.webauthn_credential_delete?.(null)
               }
+              credentialType={"passkey"}
             />
             {flowState.actions.webauthn_credential_create?.(null) ? (
-              <AddPasskeyDropdown
-                onPasskeySubmit={onPasskeySubmit}
+              <AddWebauthnCredentialDropdown
+                credentialType={"passkey"}
+                onCredentialSubmit={onPasskeySubmit}
                 setError={null}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />
             ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.payload.user.mfa_config?.security_keys_enabled ? (
+        <Fragment>
+          <Headline1>{t("headlines.securityKeys")}</Headline1>
+          <Paragraph>
+            <ListWebauthnCredentialsAccordion
+              onBack={onBack}
+              onCredentialNameSubmit={onWebauthnCredentialNameSubmit}
+              onCredentialDelete={onSecurityKeyDelete}
+              credentials={flowState.payload.user.security_keys}
+              setError={null}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+              allowCredentialDeletion={
+                !!flowState.actions.security_key_delete?.(null)
+              }
+              credentialType={"security-key"}
+            />
+            {flowState.actions.security_key_create?.(null) ? (
+              <AddWebauthnCredentialDropdown
+                credentialType={"security-key"}
+                onCredentialSubmit={onSecurityKeySubmit}
+                setError={null}
+                checkedItemID={checkedItemID}
+                setCheckedItemID={setCheckedItemID}
+              />
+            ) : null}
+          </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.payload.user.mfa_config?.totp_enabled ? (
+        <Fragment>
+          <Headline1>{t("headlines.authenticatorApp")}</Headline1>
+          <Paragraph>
+            <ManageAuthAppDropdown
+              onConnect={onAuthAppSetUp}
+              onDelete={onAuthAppRemove}
+              allowDeletion={!!flowState.actions.otp_secret_delete?.(null)}
+              authAppSetUp={flowState.payload.user.mfa_config?.auth_app_set_up}
+              checkedItemID={checkedItemID}
+              setCheckedItemID={setCheckedItemID}
+            />
           </Paragraph>
         </Fragment>
       ) : null}

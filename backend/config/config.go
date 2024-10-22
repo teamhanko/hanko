@@ -32,6 +32,8 @@ type Config struct {
 	Emails Emails `yaml:"emails" json:"emails,omitempty" koanf:"emails" jsonschema:"title=emails"`
 	// `log` configures application logging.
 	Log LoggerConfig `yaml:"log" json:"log,omitempty" koanf:"log" jsonschema:"title=log"`
+	// `mfa` configures how multi-factor-authentication behaves.
+	MFA MFA `yaml:"mfa" json:"mfa,omitempty" koanf:"mfa" jsonschema:"title=mfa"`
 	// Deprecated. See child properties for suggested replacements.
 	Passcode Passcode `yaml:"passcode" json:"passcode,omitempty" koanf:"passcode" jsonschema:"title=passcode"`
 	// `passkey` configures how passkeys  are acquired and used.

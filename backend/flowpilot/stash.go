@@ -29,9 +29,11 @@ type stash interface {
 	isRevertible() bool
 	getStateName() StateName
 	getPreviousStateName() StateName
-	addScheduledStateNames(...StateName)
 	getNextStateName() StateName
+	addScheduledStateNames(...StateName)
+	getScheduledStateNames() []StateName
 	useCompression(bool)
+	stateVisited(name StateName) bool
 
 	jsonmanager.JSONManager
 }
@@ -240,6 +242,18 @@ func (h *defaultStash) push(newData string, revertible, writeHistory bool, nextS
 	return nil
 }
 
+func (h *defaultStash) stateVisited(name StateName) bool {
+	visited := false
+	h.jm.Get(stashKeyHistory).ForEach(func(key, value gjson.Result) bool {
+		if StateName(value.Get(stashKeyState).String()) == name {
+			visited = true
+			return false
+		}
+		return true
+	})
+	return visited
+}
+
 func (h *defaultStash) revertState() error {
 	var err error
 
@@ -290,6 +304,14 @@ func (h *defaultStash) getPreviousStateName() StateName {
 
 func (h *defaultStash) addScheduledStateNames(names ...StateName) {
 	h.scheduledStateNames = append(h.scheduledStateNames, names...)
+}
+func (h *defaultStash) getScheduledStateNames() []StateName {
+	values := h.jm.Get(stashKeyScheduledStates).Array()
+	result := make([]StateName, len(values))
+	for i, value := range values {
+		result[i] = StateName(value.String())
+	}
+	return result
 }
 
 func (h *defaultStash) getNextStateName() StateName {

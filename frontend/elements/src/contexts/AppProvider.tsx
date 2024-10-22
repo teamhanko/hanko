@@ -19,6 +19,7 @@ import {
 
 import {
   Hanko,
+  HankoError,
   TechnicalError,
   UnauthorizedError,
   WebauthnSupport,
@@ -32,6 +33,7 @@ import {
 } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
 
 import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
+import { LastLogin } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 
 import {
   PublicKeyCredentialWithAssertionJSON,
@@ -50,10 +52,16 @@ import RegistrationInitPage from "../pages/RegistrationInitPage";
 import CreatePasswordPage from "../pages/CreatePasswordPage";
 import ProfilePage from "../pages/ProfilePage";
 import ErrorPage from "../pages/ErrorPage";
-import SignalLike = JSXInternal.SignalLike;
 import CreateEmailPage from "../pages/CreateEmailPage";
 import CreateUsernamePage from "../pages/CreateUsernamePage";
 import CredentialOnboardingChooserPage from "../pages/CredentialOnboardingChooser";
+import LoginOTPPage from "../pages/LoginOTPPage";
+import LoginSecurityKeyPage from "../pages/LoginSecurityKeyPage";
+import MFAMethodChooserPage from "../pages/MFAMethodChooserPage";
+import CreateOTPSecretPage from "../pages/CreateOTPSecretPage";
+import CreateSecurityKeyPage from "../pages/CreateSecurityKeyPage";
+
+import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
@@ -75,12 +83,13 @@ export interface GlobalOptions {
   translations?: Translations;
   translationsLocation?: string;
   fallbackLanguage?: string;
+  storageKey?: string;
 }
 
 export type UIAction =
   | "email-submit"
+  | "webauthn-credential-rename"
   | "passkey-submit"
-  | "passkey-rename"
   | "passkey-delete"
   | "passcode-resend"
   | "passcode-submit"
@@ -94,12 +103,17 @@ export type UIAction =
   | "email-verify"
   | "username-set"
   | "username-delete"
+  | "security-key-delete"
+  | "security-key-rename"
+  | "security-key-submit"
   | "skip"
   | "back"
   | "account_delete"
   | "retry"
   | "thirdparty-submit"
-  | "session-delete";
+  | "session-delete"
+  | "auth-app-add"
+  | "auth-app-remove";
 
 interface UIState {
   username?: string;
@@ -129,6 +143,7 @@ interface Context {
   uiState: UIState;
   setUIState: StateUpdater<UIState>;
   initialComponentName: ComponentName;
+  lastLogin?: LastLogin;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -164,6 +179,11 @@ const AppProvider = ({
 
   const ref = useRef<HTMLElement>(null);
 
+  const storageKeyLastLogin = useMemo(
+    () => `${globalOptions.storageKey}_last_login`,
+    [globalOptions.storageKey],
+  );
+
   const [componentName, setComponentName] = useState<ComponentName>(
     props.componentName,
   );
@@ -179,6 +199,7 @@ const AppProvider = ({
 
   const initComponent = useMemo(() => <InitPage />, []);
   const [page, setPage] = useState<h.JSX.Element>(initComponent);
+  const [lastLogin, setLastLogin] = useState<LastLogin>();
   const [uiState, setUIState] = useState<UIState>({
     email: prefilledEmail,
     username: prefilledUsername,
@@ -228,7 +249,9 @@ const AppProvider = ({
 
   const handleError = (e: any) => {
     setLoadingAction(null);
-    setPage(<ErrorPage error={new TechnicalError(e)} />);
+    setPage(
+      <ErrorPage error={e instanceof HankoError ? e : new TechnicalError(e)} />,
+    );
   };
 
   const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
@@ -239,12 +262,15 @@ const AppProvider = ({
       async preflight(state) {
         const conditionalMediationAvailable =
           await WebauthnSupport.isConditionalMediationAvailable();
-
+        const platformAuthenticatorAvailable =
+          await WebauthnSupport.isPlatformAuthenticatorAvailable();
         const newState = await state.actions
           .register_client_capabilities({
             webauthn_available: isWebAuthnSupported,
             webauthn_conditional_mediation_available:
               conditionalMediationAvailable,
+            webauthn_platform_authenticator_available:
+              platformAuthenticatorAvailable,
           })
           .run();
         return hanko.flow.run(newState, stateHandler);
@@ -274,12 +300,15 @@ const AppProvider = ({
               .run();
 
             setLoadingAction(null);
-            stateHandler[nextState.name](nextState);
+            await hanko.flow.run(nextState, stateHandler);
           }
         })();
       },
       passcode_confirmation(state) {
         setPage(<PasscodePage state={state} />);
+      },
+      async login_otp(state) {
+        setPage(<LoginOTPPage state={state} />);
       },
       async login_passkey(state) {
         let assertionResponse: PublicKeyCredentialWithAssertionJSON;
@@ -303,7 +332,7 @@ const AppProvider = ({
           .run();
 
         setLoadingAction(null);
-        stateHandler[nextState.name](nextState);
+        await hanko.flow.run(nextState, stateHandler);
       },
       onboarding_create_passkey(state) {
         setPage(<RegisterPasskeyPage state={state} />);
@@ -318,7 +347,14 @@ const AppProvider = ({
         } catch (e) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
-          stateHandler[prevState.name](prevState);
+          await hanko.flow.run(prevState, stateHandler);
+          setUIState((prev) => ({
+            ...prev,
+            error: {
+              code: "webauthn_credential_already_exists",
+              message: "Webauthn credential already exists",
+            },
+          }));
           return;
         }
 
@@ -329,7 +365,7 @@ const AppProvider = ({
           .run();
 
         setLoadingAction(null);
-        stateHandler[nextState.name](nextState);
+        await hanko.flow.run(nextState, stateHandler);
       },
       async webauthn_credential_verification(state) {
         let attestationResponse: PublicKeyCredentialWithAttestationJSON;
@@ -341,7 +377,14 @@ const AppProvider = ({
         } catch (e) {
           const prevState = await state.actions.back(null).run();
           setLoadingAction(null);
-          stateHandler[prevState.name](prevState);
+          await hanko.flow.run(prevState, stateHandler);
+          setUIState((prev) => ({
+            ...prev,
+            error: {
+              code: "webauthn_credential_already_exists",
+              message: "Webauthn credential already exists",
+            },
+          }));
           return;
         }
 
@@ -351,13 +394,25 @@ const AppProvider = ({
           })
           .run();
 
-        stateHandler[nextState.name](nextState);
+        await hanko.flow.run(nextState, stateHandler);
       },
       login_password(state) {
         setPage(<LoginPasswordPage state={state} />);
       },
       login_password_recovery(state) {
         setPage(<EditPasswordPage state={state} />);
+      },
+      async login_security_key(state) {
+        setPage(<LoginSecurityKeyPage state={state} />);
+      },
+      async mfa_method_chooser(state) {
+        setPage(<MFAMethodChooserPage state={state} />);
+      },
+      async mfa_otp_secret_creation(state) {
+        setPage(<CreateOTPSecretPage state={state} />);
+      },
+      async mfa_security_key_creation(state) {
+        setPage(<CreateSecurityKeyPage state={state} />);
       },
       login_method_chooser(state) {
         setPage(<LoginMethodChooserPage state={state} />);
@@ -369,6 +424,12 @@ const AppProvider = ({
         setPage(<CreatePasswordPage state={state} />);
       },
       success(state) {
+        if (state.payload?.last_login) {
+          localStorage.setItem(
+            storageKeyLastLogin,
+            JSON.stringify(state.payload.last_login),
+          );
+        }
         hanko.relay.dispatchSessionCreatedEvent(hanko.session.get());
         lastActionSucceeded();
       },
@@ -398,7 +459,7 @@ const AppProvider = ({
             window.location.pathname + searchParams.toString(),
           );
 
-          stateHandler[nextState.name](nextState);
+          await hanko.flow.run(nextState, stateHandler);
         } else {
           setUIState((prev) => ({
             ...prev,
@@ -440,6 +501,10 @@ const AppProvider = ({
   const flowInit = useCallback(
     async (path: FlowPath) => {
       setLoadingAction("switch-flow");
+      const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
+      if (lastLoginEncoded) {
+        setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
+      }
       const token = new URLSearchParams(window.location.search).get(
         "hanko_token",
       );
@@ -538,6 +603,7 @@ const AppProvider = ({
         page,
         setPage,
         stateHandler,
+        lastLogin,
       }}
     >
       <TranslateProvider

@@ -133,6 +133,7 @@ export const register = async (
     translations: null,
     translationsLocation: "/i18n",
     fallbackLanguage: "en",
+    storageKey: "hanko",
     ...options,
   };
 
@@ -148,6 +149,7 @@ export const register = async (
   globalOptions.translations = options.translations || defaultTranslations;
   globalOptions.translationsLocation = options.translationsLocation;
   globalOptions.fallbackLanguage = options.fallbackLanguage;
+  globalOptions.storageKey = options.storageKey;
   await Promise.all([
     _register({
       ...options,

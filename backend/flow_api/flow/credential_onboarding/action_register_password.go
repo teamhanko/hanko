@@ -67,5 +67,9 @@ func (a RegisterPassword) Execute(c flowpilot.ExecutionContext) error {
 
 	c.PreventRevert()
 
+	if err = c.ExecuteHook(shared.ScheduleMFACreationStates{}); err != nil {
+		return err
+	}
+
 	return c.Continue()
 }
