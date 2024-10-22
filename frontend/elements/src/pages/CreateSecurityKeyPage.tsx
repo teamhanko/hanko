@@ -59,7 +59,7 @@ const CreateSecurityKeyPage = (props: Props) => {
         <Link
           uiAction={"back"}
           onClick={onBackClick}
-          loadingSpinnerPosition={"left"}
+          loadingSpinnerPosition={"right"}
           hidden={!flowState.actions.back?.(null)}
         >
           {t("labels.back")}

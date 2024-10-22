@@ -88,7 +88,6 @@ const LoginMethodChooserPage = (props: Props) => {
         >
           {t("labels.back")}
         </Link>
-        <span hidden />
       </Footer>
     </Fragment>
   );

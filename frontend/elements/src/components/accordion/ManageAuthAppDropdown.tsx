@@ -15,6 +15,7 @@ interface Props {
   onDelete: (event: Event) => Promise<void>;
   onConnect: (event: Event) => Promise<void>;
   authAppSetUp: boolean;
+  allowDeletion: boolean;
 }
 
 const ManageAuthAppDropdown = ({
@@ -23,6 +24,7 @@ const ManageAuthAppDropdown = ({
   onDelete,
   onConnect,
   authAppSetUp,
+  allowDeletion,
 }: Props) => {
   const { t } = useContext(TranslateContext);
 
@@ -65,6 +67,7 @@ const ManageAuthAppDropdown = ({
         <br />
         {authAppSetUp ? (
           <Link
+            hidden={!allowDeletion}
             uiAction={"auth-app-remove"}
             onClick={(event: Event) => onDelete(event)}
             loadingSpinnerPosition={"right"}
