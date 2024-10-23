@@ -129,6 +129,10 @@ func DefaultConfig() *Config {
 					DisplayName:  "Discord",
 					AllowLinking: true,
 				},
+				Facebook: ThirdPartyProvider{
+					DisplayName:  "Facebook",
+					AllowLinking: true,
+				},
 			},
 		},
 		Passkey: Passkey{
