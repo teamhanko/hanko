@@ -1406,6 +1406,10 @@
         "microsoft": {
           "$ref": "#/$defs/ThirdPartyProvider",
           "description": "`microsoft` contains the provider configuration for Microsoft."
+        },
+        "facebook": {
+          "$ref": "#/$defs/ThirdPartyProvider",
+          "description": "`facebook` contains the provider configuration for Facebook."
         }
       },
       "additionalProperties": false,

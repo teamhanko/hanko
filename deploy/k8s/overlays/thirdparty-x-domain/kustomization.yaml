@@ -23,3 +23,6 @@ secretGenerator:
   - name: apple
     envs:
       - apple.env
+  - name: facebook
+    envs:
+      - facebook.env

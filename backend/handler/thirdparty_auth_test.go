@@ -67,6 +67,15 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			expectedBaseURL:     thirdparty.MicrosoftOAuthAuthEndpoint,
 		},
 		{
+			name:                "successful redirect to facebook",
+			referer:             "https://login.test.example",
+			enabledProviders:    []string{"facebook"},
+			allowedRedirectURLs: []string{"https://*.test.example"},
+			requestedProvider:   "facebook",
+			requestedRedirectTo: "https://app.test.example",
+			expectedBaseURL:     thirdparty.FacebookOauthAuthEndpoint,
+		},
+		{
 			name:                     "error redirect on missing provider",
 			referer:                  "https://login.test.example",
 			requestedRedirectTo:      "https://app.test.example",
