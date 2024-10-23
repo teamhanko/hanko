@@ -10,6 +10,7 @@
 [![GoDoc](https://godoc.org/github.com/teamhanko/hanko?status.svg)](https://godoc.org/github.com/teamhanko/hanko)
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-elements?label=hanko-elements)](https://www.npmjs.com/package/@teamhanko/hanko-elements)
 [![npm (scoped)](https://img.shields.io/npm/v/@teamhanko/hanko-frontend-sdk?label=hanko-frontend-sdk)](https://www.npmjs.com/package/@teamhanko/hanko-frontend-sdk)
+[![Gurubase](https://img.shields.io/badge/Gurubase-Ask%20Hanko%20Guru-006BFF)](https://gurubase.io/g/hanko)
 
 # About Hanko
 Hanko is an open-source authentication and user management solution with a focus on moving the login beyond passwords while being 100% deployable today.
@@ -78,7 +79,7 @@ If you want to use the Hanko backend API but prefer to build your own UI, you ca
 
 # Community
 ## Questions, bugs, ideas
-If you have any questions or issues, please check this project's [Q&A section in discussions](https://github.com/teamhanko/hanko/discussions/categories/q-a) and the [open issues](https://github.com/teamhanko/hanko/issues). Feel free to comment on existing issues or create a new issue if you encounter any bugs or have a feature request. For yet unanswered questions, feedback, or new ideas, please open a new discussion.
+If you have any questions or issues, please check this project's [Q&A section in discussions](https://github.com/teamhanko/hanko/discussions/categories/q-a) and the [open issues](https://github.com/teamhanko/hanko/issues). Feel free to comment on existing issues or create a new issue if you encounter any bugs or have a feature request. For yet unanswered questions, feedback, or new ideas, please open a new discussion. You can also [Ask Hanko Guru](https://gurubase.io/g/hanko), it is a Hanko-focused AI to answer your questions.
 
 ## Discord community & X
 We invite you to join our growing [Discord Community](https://www.hanko.io/community) if you want to get the latest updates on passkeys, WebAuthn, and this project or if you just want to chat with us. You can also [follow us on X](https://x.com/hanko_io).
