@@ -2,12 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowedForProvider() {
@@ -414,6 +415,57 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 	cfg.Emails.RequireVerification = true
 
 	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+		location, err := rec.Result().Location()
+		s.NoError(err)
+
+		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
+		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_FacebookUnverifiedEmail() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	gock.New(thirdparty.FacebookOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.FacebookUserInfoEndpoint).
+		Get("/me").
+		Reply(200).
+		JSON(map[string]interface{}{
+			"id":       "facebook_abcde",
+			"email":    "test-facebook@example.com",
+			"verified": false,
+		})
+
+	cfg := s.setUpConfig([]string{"facebook"}, []string{"https://example.com"})
+	cfg.Email.RequireVerification = true
+
+	state, err := thirdparty.GenerateState(cfg, "facebook", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)

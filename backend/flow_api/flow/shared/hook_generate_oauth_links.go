@@ -2,9 +2,10 @@ package shared
 
 import (
 	"fmt"
+	"net/url"
+
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/flowpilot"
-	"net/url"
 )
 
 type GenerateOAuthLinks struct {
@@ -37,6 +38,9 @@ func (h GenerateOAuthLinks) Execute(c flowpilot.HookExecutionContext) error {
 	}
 	if deps.Cfg.ThirdParty.Providers.Apple.Enabled {
 		c.AddLink(OAuthLink("apple", h.generateHref(deps.HttpContext, "apple", returnToUrl)))
+	}
+	if deps.Cfg.ThirdParty.Providers.Facebook.Enabled {
+		c.AddLink(OAuthLink("facebook", h.generateHref(deps.HttpContext, "facebook", returnToUrl)))
 	}
 
 	return nil
