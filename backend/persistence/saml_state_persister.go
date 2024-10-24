@@ -1,8 +1,6 @@
 package persistence
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -39,9 +37,6 @@ func (s samlStatePersister) GetByNonce(nonce string) (*models.SamlState, error) 
 	state := models.SamlState{}
 
 	err := s.db.Where("nonce = ?", nonce).First(&state)
-	if err != nil && errors.Is(err, sql.ErrNoRows) {
-		return nil, nil
-	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get state by nonce: %w", err)
 	}
