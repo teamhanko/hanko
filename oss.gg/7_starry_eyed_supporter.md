@@ -20,6 +20,6 @@ Your turn 👇
 
 ////////////////////////////
 
-» 01-October-2024 by YOUR NAME
+» 27-October-2024 by [shivamkumarsingh](https://github.com/shivamkumarsingh28)  #1845
 
 ---
