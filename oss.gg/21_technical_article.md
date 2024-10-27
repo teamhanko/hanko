@@ -10,4 +10,4 @@ Just as a general direction for the content. Most of the above can be tried out 
 
 **Points**: 750 points
 
-» 27-October-2024 by [Harsh Bhat](https://oss.gg/harshsbhat) [Article Link](https://www.harshbhat.me/blog/passkey-mfa-hanko)
+» 27-October-2024 by [Harsh Bhat](https://oss.gg/harshsbhat) Article: [Link](https://www.harshbhat.me/blog/passkey-mfa-hanko)
