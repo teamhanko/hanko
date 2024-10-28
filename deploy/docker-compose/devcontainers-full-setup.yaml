@@ -53,7 +53,7 @@ services:
     working_dir: /workspace
     entrypoint: /bin/sh -c
     command:
-      - npm install && npm run build:elements:dev
+      - npm install && npm run build:dev
     volumes:
       - type: bind
         source: ../../frontend/

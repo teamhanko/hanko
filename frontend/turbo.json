@@ -6,7 +6,6 @@
       "outputs": ["dist/**"]
     },
     "build:dev": {
-      "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
     "start": {
