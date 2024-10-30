@@ -10,6 +10,10 @@ type SecurityKeys struct {
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// 'limit' determines the maximum number of security keys a user can register.
 	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=10"`
+	// `user_verification` specifies the requirements regarding local authorization with an authenticator through
+	//  various authorization gesture modalities; for example, through a touch plus pin code,
+	//  password entry, or biometric recognition.
+	//
 	// The setting applies to both WebAuthn registration and authentication ceremonies.
 	UserVerification string `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=discouraged,enum=required,enum=preferred,enum=discouraged"`
 }
