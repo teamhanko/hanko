@@ -88,6 +88,10 @@ func CreateRateLimitPasswordKey(realIP, userId string) string {
 	return fmt.Sprintf("password/%s/%s", realIP, userId)
 }
 
+func CreateRateLimitOTPKey(realIP, userId string) string {
+	return fmt.Sprintf("otp/%s/%s", realIP, userId)
+}
+
 func CreateRateLimitTokenExchangeKey(realIP string) string {
 	return fmt.Sprintf("token_exchange/%s", realIP)
 }

@@ -40,7 +40,7 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
 
 	if deps.Cfg.RateLimiter.Enabled {
-		rateLimitKey := rate_limiter.CreateRateLimitPasswordKey(deps.HttpContext.RealIP(), userID.String())
+		rateLimitKey := rate_limiter.CreateRateLimitOTPKey(deps.HttpContext.RealIP(), userID.String())
 		retryAfterSeconds, ok, err := rate_limiter.Limit2(deps.OTPRateLimiter, rateLimitKey)
 		if err != nil {
 			return fmt.Errorf("rate limiter failed: %w", err)
