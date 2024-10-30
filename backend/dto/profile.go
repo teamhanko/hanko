@@ -30,7 +30,7 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileDat
 		webauthnCredential := FromWebauthnCredentialModel(&webauthnCredentialModel)
 		if cfg.MFA.SecurityKeys.Enabled && webauthnCredentialModel.MFAOnly {
 			securityKeys = append(securityKeys, *webauthnCredential)
-		} else if cfg.Passkey.Enabled {
+		} else if cfg.Passkey.Enabled && !webauthnCredentialModel.MFAOnly {
 			webauthnCredentials = append(webauthnCredentials, *webauthnCredential)
 		}
 	}
