@@ -60,6 +60,9 @@ password:
 rate_limiter:
   enabled: true
   store: in_memory
+  otp_limits:
+    tokens: 3
+    interval: 1m
   passcode_limits:
     tokens: 3
     interval: 1m
