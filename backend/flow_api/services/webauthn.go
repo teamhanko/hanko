@@ -264,10 +264,10 @@ func (s *webauthnService) generateCreationOptions(p GenerateCreationOptionsParam
 }
 
 func (s *webauthnService) GenerateCreationOptionsSecurityKey(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
-	requireResidentKey := true
+	requireResidentKey := false
 	authenticatorSelection := protocol.AuthenticatorSelection{
 		RequireResidentKey: &requireResidentKey,
-		ResidentKey:        protocol.ResidentKeyRequirementRequired,
+		ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
 		UserVerification:   protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification),
 	}
 
