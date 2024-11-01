@@ -5,6 +5,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_creation"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_usage"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
@@ -76,6 +78,31 @@ var UserDetailsSubFlow = flowpilot.NewSubFlow(shared.FlowUserDetails).
 		user_details.SkipEmail{}).
 	MustBuild()
 
+var MFACreationSubFlow = flowpilot.NewSubFlow(shared.FlowMFACreation).
+	State(shared.StateMFAMethodChooser,
+		mfa_creation.ContinueToOTPSecretCreation{},
+		mfa_creation.ContinueToSecurityKeyCreation{},
+		mfa_creation.SkipMFA{},
+		shared.Back{}).
+	BeforeState(shared.StateMFAOTPSecretCreation,
+		mfa_creation.OTPSecretGenerate{}).
+	State(shared.StateMFAOTPSecretCreation,
+		mfa_creation.OTPCodeVerify{},
+		shared.Back{}).
+	State(shared.StateMFASecurityKeyCreation,
+		mfa_creation.WebauthnGenerateCreationOptionsForSecurityKeys{},
+		shared.Back{}).
+	MustBuild()
+
+var MFAUsageSubFlow = flowpilot.NewSubFlow(shared.FlowMFAUsage).
+	State(shared.StateLoginSecurityKey,
+		mfa_usage.WebauthnGenerateRequestOptionsSecurityKey{},
+		mfa_usage.ContinueToLoginOTP{}).
+	State(shared.StateLoginOTP,
+		mfa_usage.OTPCodeValidate{},
+		mfa_usage.ContinueToLoginSecurityKey{}).
+	MustBuild()
+
 func NewLoginFlow(debug bool) flowpilot.Flow {
 	return flowpilot.NewFlow(shared.FlowLogin).
 		State(shared.StateSuccess).
@@ -99,7 +126,9 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,
 			CredentialOnboardingSubFlow,
-			UserDetailsSubFlow).
+			UserDetailsSubFlow,
+			MFACreationSubFlow,
+			MFAUsageSubFlow).
 		TTL(24 * time.Hour).
 		Debug(debug).
 		MustBuild()
@@ -124,7 +153,8 @@ func NewRegistrationFlow(debug bool) flowpilot.Flow {
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,
 			CredentialOnboardingSubFlow,
-			UserDetailsSubFlow).
+			UserDetailsSubFlow,
+			MFACreationSubFlow).
 		TTL(24 * time.Hour).
 		Debug(debug).
 		MustBuild()
@@ -134,20 +164,24 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 	return flowpilot.NewFlow(shared.FlowProfile).
 		State(shared.StateProfileInit,
 			profile.AccountDelete{},
+			profile.ContinueToOTPSecretCreation{},
 			profile.EmailCreate{},
 			profile.EmailDelete{},
 			profile.EmailSetPrimary{},
 			profile.EmailVerify{},
+			profile.OTPSecretDelete{},
 			profile.PasswordCreate{},
-			profile.PasswordUpdate{},
 			profile.PasswordDelete{},
+			profile.PasswordUpdate{},
+			profile.SecurityKeyCreate{},
+			profile.SecurityKeyDelete{},
 			profile.UsernameCreate{},
-			profile.UsernameUpdate{},
 			profile.UsernameDelete{},
-			profile.WebauthnCredentialRename{},
+			profile.UsernameUpdate{},
 			profile.WebauthnCredentialCreate{},
 			profile.WebauthnCredentialDelete{},
 			profile.SessionDelete{},
+			profile.WebauthnCredentialRename{},
 		).
 		State(shared.StateProfileWebauthnCredentialVerification,
 			profile.WebauthnVerifyAttestationResponse{},
@@ -161,7 +195,9 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 		AfterState(shared.StatePasscodeConfirmation, shared.EmailPersistVerifiedStatus{}).
 		SubFlows(
 			CapabilitiesSubFlow,
-			CredentialUsageSubFlow).
+			CredentialOnboardingSubFlow,
+			CredentialUsageSubFlow,
+			MFACreationSubFlow).
 		TTL(24 * time.Hour).
 		Debug(debug).
 		MustBuild()

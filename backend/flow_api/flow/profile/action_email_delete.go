@@ -37,18 +37,18 @@ func (a EmailDelete) Initialize(c flowpilot.InitializationContext) {
 
 	lastEmail := len(userModel.Emails) == 1
 
-	canDoWebauthn := deps.Cfg.Passkey.Enabled && len(userModel.WebauthnCredentials) > 0
+	canDoPasskeyLogin := deps.Cfg.Passkey.Enabled && len(userModel.GetPasskeys()) > 0
 	canDoPWLogin := deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil
 	canDoPasscode := deps.Cfg.Email.Enabled && deps.Cfg.Email.UseForAuthentication
 
 	for _, email := range userModel.Emails {
 		if email.IsPrimary() {
 			canDoPWLoginWithUsername := canDoPWLogin && deps.Cfg.Username.UseAsLoginIdentifier && userModel.GetUsername() != nil
-			if lastEmail && deps.Cfg.Email.Optional && (canDoWebauthn || canDoPWLoginWithUsername) {
+			if lastEmail && deps.Cfg.Email.Optional && (canDoPasskeyLogin || canDoPWLoginWithUsername) {
 				input.AllowedValue(email.Address, email.ID.String())
 			}
 		} else {
-			if !canDoWebauthn && !canDoPWLogin && !canDoPasscode {
+			if !canDoPasskeyLogin && !canDoPWLogin && !canDoPasscode {
 				for _, otherEmail := range userModel.Emails {
 					if otherEmail.ID.String() == email.ID.String() {
 						continue

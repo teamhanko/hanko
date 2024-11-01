@@ -21,7 +21,7 @@ type Props = {
 
 const LoginPasswordPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { stateHandler, setLoadingAction } = useContext(AppContext);
+  const { hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
   const [passwordRetryAfter, setPasswordRetryAfter] = useState<number>();
@@ -39,7 +39,7 @@ const LoginPasswordPage = (props: Props) => {
       .password_login({ password })
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onRecoveryClick = async (event: Event) => {
@@ -49,7 +49,7 @@ const LoginPasswordPage = (props: Props) => {
       .continue_to_passcode_confirmation_recovery(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onBackClick = async (event: Event) => {
@@ -57,7 +57,7 @@ const LoginPasswordPage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onChooseMethodClick = async (event: Event) => {
@@ -67,7 +67,7 @@ const LoginPasswordPage = (props: Props) => {
       .continue_to_login_method_chooser(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const recoveryLink = useMemo(

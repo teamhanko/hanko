@@ -3,15 +3,14 @@ package registration
 import (
 	"encoding/json"
 	"fmt"
-	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/dto/intern"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"github.com/teamhanko/hanko/backend/webhooks/utils"
+	"github.com/tidwall/gjson"
 	"time"
 )
 
@@ -39,27 +38,15 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	var credentialModel *models.WebauthnCredential
-	if c.Stash().Get(shared.StashPathWebauthnCredential).Exists() {
-		webauthnCredentialStr := c.Stash().Get(shared.StashPathWebauthnCredential).String()
-
-		var webauthnCredential webauthnLib.Credential
-		err = json.Unmarshal([]byte(webauthnCredentialStr), &webauthnCredential)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
-		}
-
-		credentialModel = intern.WebauthnCredentialToModel(&webauthnCredential, userId, false, false, deps.AuthenticatorMetadata)
-	}
-
 	err = h.createUser(
 		c,
 		userId,
 		c.Stash().Get(shared.StashPathEmail).String(),
 		c.Stash().Get(shared.StashPathEmailVerified).Bool(),
 		c.Stash().Get(shared.StashPathUsername).String(),
-		credentialModel,
+		c.Stash().Get(shared.StashPathWebauthnCredentials).Array(),
 		c.Stash().Get(shared.StashPathNewPassword).String(),
+		c.Stash().Get(shared.StashPathOTPSecret).String(),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
@@ -70,7 +57,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, passkey *models.WebauthnCredential, password string) error {
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string) error {
 	deps := h.GetDeps(c)
 
 	now := time.Now().UTC()
@@ -101,13 +88,23 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		}
 	}
 
-	if passkey != nil {
-		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(*passkey)
+	for _, webauthnCredential := range webauthnCredentials {
+		var credentialModel models.WebauthnCredential
+		err = json.Unmarshal([]byte(webauthnCredential.String()), &credentialModel)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
+		}
+
+		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(credentialModel)
 		if err != nil {
 			return err
 		}
 
-		auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", passkey.ID))
+		if credentialModel.MFAOnly {
+			auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", credentialModel.ID))
+		} else {
+			auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", credentialModel.ID))
+		}
 	}
 
 	if password != "" {
@@ -120,6 +117,16 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		}
 
 		auditLogDetails = append(auditLogDetails, auditlog.Detail("password", true))
+	}
+
+	if otpSecret != "" {
+		otpSecretModel := models.NewOTPSecret(id, otpSecret)
+		err = deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
+		if err != nil {
+			return err
+		}
+
+		auditLogDetails = append(auditLogDetails, auditlog.Detail("otp_secret", otpSecretModel.ID))
 	}
 
 	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(id)

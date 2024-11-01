@@ -45,6 +45,7 @@ export interface RegisterPasswordInputs {
 export interface RegisterClientCapabilitiesInputs {
   readonly webauthn_available: Input<boolean>;
   readonly webauthn_conditional_mediation_available: Input<boolean>;
+  readonly webauthn_platform_authenticator_available: Input<boolean>;
 }
 
 export interface ContinueWithLoginIdentifierInputs {
@@ -81,12 +82,16 @@ export interface UsernameSetInputs {
   readonly username: Input<string>;
 }
 
-export interface PasskeyCredentialRename {
+export interface SecurityKeyDeleteInputs {
+  readonly security_key_id: Input<string>;
+}
+
+export interface PasskeyCredentialRenameInputs {
   readonly passkey_id: Input<string>;
   readonly passkey_name: Input<string>;
 }
 
-export interface PasskeyCredentialDelete {
+export interface PasskeyCredentialDeleteInputs {
   readonly passkey_id: Input<string>;
 }
 
@@ -101,4 +106,8 @@ export interface ThirdpartyOauthInputs {
 
 export interface SessionDeleteInputs {
   readonly session_id: Input<string>;
+}
+
+export interface OTPCodeInputs {
+  readonly otp_code: Input<string>;
 }

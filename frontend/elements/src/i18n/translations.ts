@@ -8,6 +8,9 @@ export interface Translation {
   headlines: {
     error: string;
     accountNotFound: string;
+    authenticatorApp: string;
+    authenticatorAppAlreadySetUp: string;
+    authenticatorAppNotSetUp: string;
     loginEmail: string;
     loginEmailNoSignup: string;
     loginFinished: string;
@@ -16,6 +19,11 @@ export interface Translation {
     registerAuthenticator: string;
     registerConfirm: string;
     registerPassword: string;
+    securityKeyLogin: string;
+    securityKeySetUp: string;
+    mfaSetUp: string;
+    otpLogin: string;
+    otpSetUp: string;
     profileEmails: string;
     profilePassword: string;
     profilePasskeys: string;
@@ -39,16 +47,28 @@ export interface Translation {
     lastUsed: string;
     ipAddress: string;
     revokeSession: string;
-    profileSessions: string
+    profileSessions: string;
+    renameSecurityKey: string;
+    deleteSecurityKey: string;
+    securityKeys: string;
   };
   texts: {
+    authenticatorAppAlreadySetUp: string;
+    authenticatorAppNotSetUp: string;
     enterPasscode: string;
     enterPasscodeNoEmail: string;
     setupPasskey: string;
     createAccount: string;
+    mfaSetUp: string;
     noAccountExists: string;
+    otpEnterVerificationCode: string;
+    otpLogin: string;
+    otpScanQRCode: string;
+    otpSecretKey: string;
     passwordFormatHint: string;
+    securityKeyLogin: string;
     isPrimaryEmail: string;
+    securityKeySetUp: string;
     setPrimaryEmail: string;
     emailVerified: string;
     emailUnverified: string;
@@ -58,13 +78,20 @@ export interface Translation {
     deleteAccount: string;
     selectLoginMethodForFutureLogins: string;
     howDoYouWantToLogin: string;
+    deleteSecurityKey: string;
+    renameSecurityKey: string;
   };
   labels: {
+    authenticatorApp: string;
+    authenticatorAppAdd: string;
+    authenticatorAppManage: string;
     or: string;
     no: string;
     yes: string;
     email: string;
     continue: string;
+    copied: string;
+    configured: string;
     skip: string;
     save: string;
     password: string;
@@ -74,13 +101,16 @@ export interface Translation {
     signInPasscode: string;
     forgotYourPassword: string;
     back: string;
-    signInPasskey: string;
     registerAuthenticator: string;
+    securityKey: string;
+    securityKeyUse: string;
     signIn: string;
+    signInPasskey: string;
     signUp: string;
     sendNewPasscode: string;
     passwordRetryAfter: string;
     passcodeResendAfter: string;
+    useAnotherMethod: string;
     unverifiedEmail: string;
     primaryEmail: string;
     setAsPrimaryEmail: string;
@@ -106,6 +136,8 @@ export interface Translation {
     setUsername: string;
     revoke: string;
     currentSession: string;
+    newSecurityKeyName: string;
+    createSecurityKey: string;
   };
   errors: {
     somethingWentWrong: string;
@@ -124,6 +156,7 @@ export interface Translation {
     thirdPartyMultipleAccounts: string;
     thirdPartyUnverifiedEmail: string;
     signupDisabled: string;
+    handlerNotFoundError: string;
   };
   flowErrors: {
     technical_error: string;
@@ -140,11 +173,14 @@ export interface Translation {
     not_found: string;
     flow_discontinuity_error: string;
     operation_not_permitted_error: string;
+    platform_authenticator_required: string;
     form_data_invalid_error: string;
     unauthorized: string;
     value_missing_error: string;
     value_too_long_error: string;
     value_too_short_error: string;
+    webauthn_credential_invalid_mfa_only: string;
+    webauthn_credential_already_exists: string;
   };
 }
 

@@ -15,14 +15,20 @@ import (
 	"time"
 )
 
-type GenerateRequestOptionsParams struct {
+type GenerateRequestOptionsPasskeyParams struct {
 	Tx *pop.Connection
+}
+
+type GenerateRequestOptionsSecurityKeyParams struct {
+	Tx     *pop.Connection
+	UserID uuid.UUID
 }
 
 type VerifyAssertionResponseParams struct {
 	Tx                *pop.Connection
 	SessionDataID     uuid.UUID
 	AssertionResponse string
+	IsMFA             bool
 }
 
 type GenerateCreationOptionsParams struct {
@@ -42,9 +48,11 @@ type VerifyAttestationResponseParams struct {
 }
 
 type WebauthnService interface {
-	GenerateRequestOptions(GenerateRequestOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
+	GenerateRequestOptionsPasskey(GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
+	GenerateRequestOptionsSecurityKey(GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error)
 	VerifyAssertionResponse(VerifyAssertionResponseParams) (*models.User, error)
-	GenerateCreationOptions(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
+	GenerateCreationOptionsPasskey(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
+	GenerateCreationOptionsSecurityKey(GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error)
 	VerifyAttestationResponse(VerifyAttestationResponseParams) (*webauthn.Credential, error)
 }
 
@@ -91,7 +99,8 @@ func (user webauthnUser) WebAuthnIcon() string {
 }
 
 var (
-	ErrInvalidWebauthnCredential = errors.New("this passkey cannot be used anymore")
+	ErrInvalidWebauthnCredential        = errors.New("this passkey cannot be used anymore")
+	ErrInvalidWebauthnCredentialMFAOnly = errors.New("this credential can be used as a second factor security key only")
 )
 
 type webauthnService struct {
@@ -103,11 +112,8 @@ func NewWebauthnService(cfg config.Config, persister persistence.Persister) Weba
 	return &webauthnService{cfg: cfg, persister: persister}
 }
 
-func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
-	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
-	options, sessionData, err := s.cfg.Webauthn.Handler.BeginDiscoverableLogin(
-		webauthn.WithUserVerification(userVerificationRequirement),
-	)
+func (s *webauthnService) generateRequestOptions(tx *pop.Connection, opts ...webauthn.LoginOption) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+	options, sessionData, err := s.cfg.Webauthn.Handler.BeginDiscoverableLogin(opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 	}
@@ -117,12 +123,39 @@ func (s *webauthnService) GenerateRequestOptions(p GenerateRequestOptionsParams)
 		return nil, nil, fmt.Errorf("failed to generate a new webauthn session data model: %w", err)
 	}
 
-	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Create(*webAuthnSessionDataModel)
+	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(tx).Create(*webAuthnSessionDataModel)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to store webauthn assertion session data: %w", err)
 	}
 
 	return webAuthnSessionDataModel, options, nil
+}
+
+func (s *webauthnService) GenerateRequestOptionsPasskey(p GenerateRequestOptionsPasskeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
+
+	return s.generateRequestOptions(p.Tx,
+		webauthn.WithUserVerification(userVerificationRequirement),
+	)
+}
+
+func (s *webauthnService) GenerateRequestOptionsSecurityKey(p GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification)
+
+	credentialModels, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).GetFromUser(p.UserID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get webauthn credentials from db: %w", err)
+	}
+
+	descriptors, err := credentialModels.GetWebauthnDescriptors()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return s.generateRequestOptions(p.Tx,
+		webauthn.WithUserVerification(userVerificationRequirement),
+		webauthn.WithAllowedCredentials(descriptors),
+	)
 }
 
 func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParams) (*models.User, error) {
@@ -148,6 +181,11 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 
 	if userModel == nil {
 		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
+	}
+
+	cred := userModel.GetWebauthnCredentialById(credentialAssertionData.ID)
+	if cred != nil && (!p.IsMFA && cred.MFAOnly) {
+		return nil, ErrInvalidWebauthnCredentialMFAOnly
 	}
 
 	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
@@ -188,22 +226,25 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	return userModel, nil
 }
 
-func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
+func (s *webauthnService) generateCreationOptions(p GenerateCreationOptionsParams, opts ...webauthn.RegistrationOption) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
 	user := webauthnUser{id: p.UserID, email: p.Email, username: p.Username}
 
-	requireResidentKey := true
-	authenticatorSelection := protocol.AuthenticatorSelection{
-		RequireResidentKey: &requireResidentKey,
-		ResidentKey:        protocol.ResidentKeyRequirementRequired,
-		UserVerification:   protocol.VerificationRequired,
+	userModel, err := s.persister.GetUserPersisterWithConnection(p.Tx).Get(user.id)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
-	options, sessionData, err := s.cfg.Webauthn.Handler.BeginRegistration(
-		user,
-		webauthn.WithConveyancePreference(attestationPreference),
-		webauthn.WithAuthenticatorSelection(authenticatorSelection),
-	)
+	// Assemble exclude list only if user already exists (i.e. the current flow is not a registration flow).
+	if userModel != nil {
+		credentialDescriptors, err := userModel.WebauthnCredentials.GetWebauthnDescriptors()
+		if err != nil {
+			return nil, nil, fmt.Errorf("failed to get credential descriptors from webauthn credentials: %w", err)
+		}
+
+		opts = append(opts, webauthn.WithExclusions(credentialDescriptors))
+	}
+
+	options, sessionData, err := s.cfg.Webauthn.Handler.BeginRegistration(user, opts...)
 	if err != nil {
 		return nil, nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
@@ -219,6 +260,44 @@ func (s *webauthnService) GenerateCreationOptions(p GenerateCreationOptionsParam
 	}
 
 	return sessionDataModel, options, nil
+
+}
+
+func (s *webauthnService) GenerateCreationOptionsSecurityKey(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
+	requireResidentKey := false
+	authenticatorSelection := protocol.AuthenticatorSelection{
+		RequireResidentKey: &requireResidentKey,
+		ResidentKey:        protocol.ResidentKeyRequirementDiscouraged,
+		UserVerification:   protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification),
+	}
+
+	authenticatorAttachment := s.cfg.MFA.SecurityKeys.AuthenticatorAttachment
+	if authenticatorAttachment == "platform" || authenticatorAttachment == "cross-platform" {
+		authenticatorSelection.AuthenticatorAttachment = protocol.AuthenticatorAttachment(authenticatorAttachment)
+	}
+
+	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
+
+	return s.generateCreationOptions(p,
+		webauthn.WithAuthenticatorSelection(authenticatorSelection),
+		webauthn.WithConveyancePreference(attestationPreference),
+	)
+}
+
+func (s *webauthnService) GenerateCreationOptionsPasskey(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
+	requireResidentKey := true
+	authenticatorSelection := protocol.AuthenticatorSelection{
+		RequireResidentKey: &requireResidentKey,
+		ResidentKey:        protocol.ResidentKeyRequirementRequired,
+		UserVerification:   protocol.VerificationRequired,
+	}
+
+	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
+
+	return s.generateCreationOptions(p,
+		webauthn.WithAuthenticatorSelection(authenticatorSelection),
+		webauthn.WithConveyancePreference(attestationPreference),
+	)
 }
 
 func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseParams) (*webauthn.Credential, error) {

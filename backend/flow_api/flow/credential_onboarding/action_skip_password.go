@@ -53,6 +53,10 @@ func (a SkipPassword) Execute(c flowpilot.ExecutionContext) error {
 		return c.Continue(shared.StateOnboardingCreatePasskey)
 	}
 
+	if err := c.ExecuteHook(shared.ScheduleMFACreationStates{}); err != nil {
+		return err
+	}
+
 	return c.Continue()
 }
 

@@ -43,10 +43,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create session generator: %w", err))
 	}
 
+	var otpRateLimiter limiter.Store
 	var passcodeRateLimiter limiter.Store
 	var passwordRateLimiter limiter.Store
 	var tokenExchangeRateLimiter limiter.Store
 	if cfg.RateLimiter.Enabled {
+		otpRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.OTPLimits)
 		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
 		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
 		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
@@ -63,6 +65,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		PasswordService:          passwordService,
 		WebauthnService:          webauthnService,
 		SessionManager:           sessionManager,
+		OTPRateLimiter:           otpRateLimiter,
 		PasscodeRateLimiter:      passcodeRateLimiter,
 		PasswordRateLimiter:      passwordRateLimiter,
 		TokenExchangeRateLimiter: tokenExchangeRateLimiter,
@@ -126,7 +129,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		panic(fmt.Errorf("failed to create mailer: %w", err))
 	}
 
-	if cfg.Password.Enabled {
+	if !cfg.MFA.Enabled && cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
 		password := g.Group("/password")
@@ -187,7 +190,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
 	}
 
-	if cfg.Email.Enabled && cfg.Email.UseForAuthentication {
+	if !cfg.MFA.Enabled && cfg.Email.Enabled && cfg.Email.UseForAuthentication {
 		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
 		if err != nil {
 			panic(fmt.Errorf("failed to create public passcode handler: %w", err))

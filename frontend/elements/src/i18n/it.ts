@@ -11,6 +11,7 @@ export const it: Translation = {
     registerAuthenticator: "Crea una passkey",
     registerConfirm: "Vuoi creare un account?",
     registerPassword: "Imposta una nuova password",
+    otpSetUp: "Imposta l'app di autenticazione",
     profileEmails: "Emails",
     profilePassword: "Password",
     profilePasskeys: "Passkeys",
@@ -36,6 +37,16 @@ export const it: Translation = {
     ipAddress: "Indirizzo IP",
     revokeSession: "Revoca sessione",
     profileSessions: "Sessioni",
+    mfaSetUp: "Imposta MFA",
+    securityKeySetUp: "Aggiungi una chiave di sicurezza",
+    securityKeyLogin: "Chiave di sicurezza",
+    otpLogin: "Codice di autenticazione",
+    renameSecurityKey: "Rinomina la chiave di sicurezza",
+    deleteSecurityKey: "Elimina la chiave di sicurezza",
+    securityKeys: "Chiavi di sicurezza",
+    authenticatorApp: "App di autenticazione",
+    authenticatorAppAlreadySetUp: "L'app di autenticazione è già configurata",
+    authenticatorAppNotSetUp: "Imposta l'app di autenticazione",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -45,6 +56,11 @@ export const it: Translation = {
       "Accedi al tuo account in modo semplice e sicuro con una passkey. Nota: I tuoi dati biometrici sono archiviati solo sui tuoi dispositivi e non saranno condivisi con nessuno.",
     createAccount:
       'Nessun account trovato per "{emailAddress}". Vuoi creare un nuovo account?',
+    otpEnterVerificationCode:
+      "Inserisci il codice di verifica generato dalla tua app di autenticazione:",
+    otpScanQRCode:
+      "Scansiona il codice QR con la tua app di autenticazione (come Google Authenticator o un'altra app TOTP). In alternativa, puoi inserire manualmente la chiave segreta OTP nell'app.",
+    otpSecretKey: "Chiave segreta OTP",
     passwordFormatHint:
       "La lunghezza della password deve essere compresa tra i {minLength} e {maxLength} caratteri.",
     setPrimaryEmail:
@@ -63,6 +79,20 @@ export const it: Translation = {
     selectLoginMethodForFutureLogins:
       "Seleziona uno dei seguenti metodi di accesso da utilizzare per i futuri accessi.",
     howDoYouWantToLogin: "Come desideri effettuare l'accesso?",
+    mfaSetUp:
+      "Proteggi il tuo account con l'autenticazione a più fattori (MFA). La MFA aggiunge un ulteriore livello di sicurezza al tuo processo di accesso e garantisce che il tuo account rimanga protetto anche se la tua password o il tuo indirizzo email vengono compromessi.",
+    securityKeyLogin:
+      "Collega la tua chiave di sicurezza o attivala, quindi fai clic sul pulsante qui sotto. Una volta pronto, usala tramite USB, NFC o il tuo telefono. Segui le istruzioni per completare il processo di accesso.",
+    otpLogin:
+      "Apri la tua app di autenticazione per ottenere il codice OTP. Inserisci il codice nel campo qui sotto per completare il tuo accesso.",
+    renameSecurityKey: "Imposta un nome per la chiave di sicurezza.",
+    deleteSecurityKey: "Elimina questa chiave di sicurezza dal tuo account.",
+    authenticatorAppAlreadySetUp:
+      "Il tuo account è protetto da un'app di autenticazione che genera codici monouso (TOTP) per l'autenticazione a più fattori.",
+    authenticatorAppNotSetUp:
+      "Proteggi il tuo account con un'app di autenticazione che genera codici monouso (TOTP) per l'autenticazione a più fattori.",
+    securityKeySetUp:
+      "Utilizza una chiave di sicurezza dedicata tramite USB, Bluetooth o NFC oppure il tuo telefono. Collega la tua chiave di sicurezza o attivala, quindi fai clic sul pulsante qui sotto e segui le istruzioni per completare la registrazione.",
   },
   labels: {
     or: "o",
@@ -70,6 +100,7 @@ export const it: Translation = {
     yes: "si",
     email: "Email",
     continue: "Continua",
+    copied: "copiato",
     skip: "Salta",
     save: "Salva",
     password: "Password",
@@ -111,6 +142,15 @@ export const it: Translation = {
     setPassword: "Imposta password",
     revoke: "Revoca",
     currentSession: "Sessione corrente",
+    authenticatorApp: "App di autenticazione",
+    securityKey: "Chiave di sicurezza",
+    securityKeyUse: "Usa chiave di sicurezza",
+    newSecurityKeyName: "Nuovo nome chiave di sicurezza",
+    createSecurityKey: "Aggiungi una chiave di sicurezza",
+    authenticatorAppManage: "Gestisci app di autenticazione",
+    authenticatorAppAdd: "Imposta",
+    configured: "configurato",
+    useAnotherMethod: "Usa un altro metodo",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",
@@ -137,6 +177,8 @@ export const it: Translation = {
     thirdPartyUnverifiedEmail:
       "Verifica email richiesta. Verifica l'indirizzo email utilizzato con il tuo provider.",
     signupDisabled: "La registrazione dell'account è disabilitata.",
+    handlerNotFoundError:
+      "Il passaggio corrente non è supportato in questa versione dell'applicazione. Per favore riprova più tardi o contatta il team di supporto per ricevere assistenza.",
   },
   flowErrors: {
     technical_error: "Si è verificato un errore tecnico. Riprova più tardi.",
@@ -163,5 +205,11 @@ export const it: Translation = {
     value_missing_error: "Il valore è mancante.",
     value_too_long_error: "Il valore è troppo lungo.",
     value_too_short_error: "Il valore è troppo corto.",
+    webauthn_credential_invalid_mfa_only:
+      "Questa identità può essere utilizzata solo come secondo fattore di autenticazione.",
+    webauthn_credential_already_exists:
+      "La richiesta è scaduta, è stata annullata o il dispositivo è già registrato. Prova di nuovo o usa un altro dispositivo.",
+    platform_authenticator_required:
+      "Il tuo account è configurato per utilizzare gli autenticatori di piattaforma. Tuttavia, il tuo dispositivo o browser corrente non supporta questa funzione. Prova di nuovo con un dispositivo o un browser compatibile.",
   },
 };

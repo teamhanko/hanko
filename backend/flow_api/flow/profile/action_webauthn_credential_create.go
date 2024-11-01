@@ -56,12 +56,17 @@ func (a WebauthnCredentialCreate) Execute(c flowpilot.ExecutionContext) error {
 		Username: userModel.GetUsername(),
 	}
 
-	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptions(params)
+	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsPasskey(params)
 	if err != nil {
 		return fmt.Errorf("failed to generate webauthn creation options: %w", err)
 	}
 
 	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
+	if err != nil {
+		return err
+	}
+
+	err = c.Stash().Set(shared.StashPathCreateMFAOnlyCredential, false)
 	if err != nil {
 		return err
 	}

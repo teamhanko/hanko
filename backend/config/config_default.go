@@ -94,6 +94,10 @@ func DefaultConfig() *Config {
 		RateLimiter: RateLimiter{
 			Enabled: true,
 			Store:   RATE_LIMITER_STORE_IN_MEMORY,
+			OTPLimits: RateLimits{
+				Tokens:   3,
+				Interval: 1 * time.Minute,
+			},
 			PasswordLimits: RateLimits{
 				Tokens:   5,
 				Interval: 1 * time.Minute,
@@ -160,6 +164,22 @@ func DefaultConfig() *Config {
 			UseAsLoginIdentifier:  true,
 			MinLength:             3,
 			MaxLength:             32,
+		},
+		MFA: MFA{
+			AcquireOnLogin:        false,
+			AcquireOnRegistration: true,
+			Enabled:               true,
+			Optional:              true,
+			SecurityKeys: SecurityKeys{
+				AttestationPreference:   "direct",
+				AuthenticatorAttachment: "cross-platform",
+				Enabled:                 true,
+				Limit:                   10,
+				UserVerification:        "discouraged",
+			},
+			TOTP: TOTP{
+				Enabled: true,
+			},
 		},
 		Debug: false,
 	}

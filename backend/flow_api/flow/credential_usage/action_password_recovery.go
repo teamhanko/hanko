@@ -76,6 +76,16 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user_has_password to the stash: %w", err)
 	}
 
+	err = c.Stash().Set(shared.StashPathPasswordRecoveryPending, false)
+	if err != nil {
+		return fmt.Errorf("failed to set pw_recovery_pending to the stash: %w", err)
+	}
+
+	err = c.ExecuteHook(shared.ScheduleMFACreationStates{})
+	if err != nil {
+		return err
+	}
+
 	c.PreventRevert()
 
 	return c.Continue()

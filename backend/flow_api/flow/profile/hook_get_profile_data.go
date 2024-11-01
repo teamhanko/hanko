@@ -21,11 +21,7 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("no valid session")
 	}
 
-	profileData := dto.ProfileDataFromUserModel(userModel)
-
-	if !deps.Cfg.Passkey.Enabled {
-		profileData.WebauthnCredentials = nil
-	}
+	profileData := dto.ProfileDataFromUserModel(userModel, &deps.Cfg)
 
 	err := c.Payload().Set("user", profileData)
 	if err != nil {

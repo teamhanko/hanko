@@ -22,7 +22,7 @@ interface Props {
 
 const CredentialOnboardingChooserPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
   const onPasskeySelectSubmit = async (event: Event) => {
@@ -32,7 +32,7 @@ const CredentialOnboardingChooserPage = (props: Props) => {
       .continue_to_passkey_registration(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onPasswordSelectSubmit = async (event: Event) => {
@@ -42,7 +42,7 @@ const CredentialOnboardingChooserPage = (props: Props) => {
       .continue_to_password_registration(null)
       .run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onBackClick = async (event: Event) => {
@@ -50,7 +50,7 @@ const CredentialOnboardingChooserPage = (props: Props) => {
     setLoadingAction("back");
     const nextState = await flowState.actions.back(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   const onSkipClick = async (event: Event) => {
@@ -58,7 +58,7 @@ const CredentialOnboardingChooserPage = (props: Props) => {
     setLoadingAction("skip");
     const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
-    stateHandler[nextState.name](nextState);
+    await hanko.flow.run(nextState, stateHandler);
   };
 
   return (

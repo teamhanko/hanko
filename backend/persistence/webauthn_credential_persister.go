@@ -14,7 +14,7 @@ type WebauthnCredentialPersister interface {
 	Create(models.WebauthnCredential) error
 	Update(models.WebauthnCredential) error
 	Delete(models.WebauthnCredential) error
-	GetFromUser(uuid.UUID) ([]models.WebauthnCredential, error)
+	GetFromUser(uuid.UUID) (models.WebauthnCredentials, error)
 }
 
 type webauthnCredentialPersister struct {
@@ -86,7 +86,7 @@ func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 	return nil
 }
 
-func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) ([]models.WebauthnCredential, error) {
+func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID) (models.WebauthnCredentials, error) {
 	var credentials []models.WebauthnCredential
 	err := p.db.Eager().Where("user_id = ?", &userId).Order("created_at asc").All(&credentials)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

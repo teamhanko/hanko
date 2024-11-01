@@ -26,8 +26,6 @@ func (a SkipEmail) Initialize(c flowpilot.InitializationContext) {
 }
 
 func (a SkipEmail) Execute(c flowpilot.ExecutionContext) error {
-	c.PreventRevert()
-
 	return c.Continue()
 
 }
