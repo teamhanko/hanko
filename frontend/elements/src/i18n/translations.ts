@@ -138,6 +138,7 @@ export interface Translation {
     currentSession: string;
     newSecurityKeyName: string;
     createSecurityKey: string;
+    lastUsed: string;
   };
   errors: {
     somethingWentWrong: string;

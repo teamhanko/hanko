@@ -151,6 +151,7 @@ export const it: Translation = {
     authenticatorAppAdd: "Imposta",
     configured: "configurato",
     useAnotherMethod: "Usa un altro metodo",
+    lastUsed: "Ultimo utilizzo",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

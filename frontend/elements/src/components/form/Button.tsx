@@ -8,6 +8,7 @@ import styles from "./styles.sass";
 import LoadingSpinner from "../icons/LoadingSpinner";
 import Icon, { IconName } from "../icons/Icon";
 import { AppContext, UIAction } from "../../contexts/AppProvider";
+import LastUsed from "./LastUsed";
 
 type Props = {
   uiAction?: UIAction;
@@ -19,6 +20,7 @@ type Props = {
   isSuccess?: boolean;
   disabled?: boolean;
   autofocus?: boolean;
+  showLastUsed?: boolean;
   onClick?: (event: Event) => void;
   icon?: IconName;
 };
@@ -30,6 +32,7 @@ const Button = ({
   secondary,
   dangerous,
   autofocus,
+  showLastUsed,
   onClick,
   icon,
   ...props
@@ -93,7 +96,10 @@ const Button = ({
         {icon ? (
           <Icon name={icon} secondary={secondary} disabled={disabled} />
         ) : null}
-        {children}
+        <div className={styles.caption}>
+          <span>{children}</span>
+          {showLastUsed ? <LastUsed /> : null}
+        </div>
       </LoadingSpinner>
     </button>
   );

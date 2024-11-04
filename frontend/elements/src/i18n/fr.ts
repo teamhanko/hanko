@@ -155,6 +155,7 @@ export const fr: Translation = {
     authenticatorAppAdd: "Configurer",
     configured: "configuré",
     useAnotherMethod: "Utiliser une autre méthode",
+    lastUsed: "Dernière utilisation",
   },
   errors: {
     somethingWentWrong:

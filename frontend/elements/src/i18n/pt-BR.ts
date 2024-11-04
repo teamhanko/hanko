@@ -154,6 +154,7 @@ export const ptBR: Translation = {
     authenticatorAppAdd: "Configurar",
     configured: "configurado",
     useAnotherMethod: "Usar outro método",
+    lastUsed: "Último uso",
   },
   errors: {
     somethingWentWrong:
