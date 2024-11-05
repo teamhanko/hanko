@@ -34,15 +34,15 @@ To follow the development of this project, watch our releases, leave a star, sig
 |✅| SAML Enterprise SSO |
 |✅| Webhooks |
 |✅| Server-side sessions & remote session revocation |
-|⚙️| MFA (TOTP, security keys) |
-| | Custom Social SSO connections (OIDC/OAuth2) |
-| | Privileged sessions & step-up authentication |
+|✅| MFA (TOTP, security keys) |
+|⚙️| Custom Social SSO connections (OIDC/OAuth2) |
+|⚙️| Privileged sessions & step-up authentication |
 | | User impersonation |
 | | Improved email templates & i18n |
 | | `<hanko-menu>` web component |
 | | Email security notifications |
-| | Custom JWT claims |
-| | Custom user data / fields |
+| | Refresh tokens |
+| | Custom user metadata / JWT claims |
 | | iOS, Android, React Native, Flutter SDKs |
 
 Visit our [Roadmap](https://www.hanko.io/roadmap) for more information.
