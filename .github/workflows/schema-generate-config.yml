@@ -41,7 +41,6 @@ jobs:
             git push origin HEAD
             gh pr create \
               -B main \
-              -r teamhanko/developers \
               -H "chore-autogenerate-config-json-schema-${{ github.run_id }}" \
               -t "chore: autogenerate config JSON schema" \
               -b '# Description
