@@ -39,7 +39,6 @@ jobs:
             git push origin HEAD
             gh pr create \
               -B main \
-              -r teamhanko/developers \
               -H "chore-autogenerate-import-json-schema-${{ github.run_id }}" \
               -t "chore: autogenerate import JSON schema" \
               -b '# Description
