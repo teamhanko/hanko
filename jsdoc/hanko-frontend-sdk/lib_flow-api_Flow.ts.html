@@ -89,6 +89,7 @@
 import { State, isState } from "./State";
 import { Action } from "./types/action";
 import { FetchNextState, FlowPath, Handlers } from "./types/state-handling";
+import { HankoError } from "../Errors";
 
 type MaybePromise&lt;T> = T | Promise&lt;T>;
 
@@ -180,7 +181,8 @@ class Flow extends Client {
   };
 }
 
-export class HandlerNotFoundError extends Error {
+export class HandlerNotFoundError extends HankoError {
+  // eslint-disable-next-line require-jsdoc
   constructor(public state: State&lt;any>) {
     super(
       `No handler found for state: ${
@@ -188,7 +190,9 @@ export class HandlerNotFoundError extends Error {
           ? `"${state.name}"`
           : `(${typeof state.name})`
       }`,
+      "handlerNotFoundError",
     );
+    Object.setPrototypeOf(this, HandlerNotFoundError.prototype);
   }
 }
 
