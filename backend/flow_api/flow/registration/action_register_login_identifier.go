@@ -160,19 +160,15 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	states := a.generateRegistrationStates(c)
-
-	if len(states) == 0 {
-		err = c.ExecuteHook(shared.ScheduleMFACreationStates{})
-		if err != nil {
-			return err
-		}
+	states, err := a.generateRegistrationStates(c)
+	if err != nil {
+		return err
 	}
 
 	return c.Continue(append(states, shared.StateSuccess)...)
 }
 
-func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) []flowpilot.StateName {
+func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.ExecutionContext) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 
 	result := make([]flowpilot.StateName, 0)
@@ -220,5 +216,12 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 		result = append(result, shared.StatePasswordCreation)
 	}
 
-	return result
+	if len(result) == 0 {
+		err := c.ExecuteHook(shared.ScheduleMFACreationStates{})
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
 }

@@ -47,6 +47,7 @@ export const it: Translation = {
     authenticatorApp: "App di autenticazione",
     authenticatorAppAlreadySetUp: "L'app di autenticazione è già configurata",
     authenticatorAppNotSetUp: "Imposta l'app di autenticazione",
+    trustDevice: "Fidarsi di questo browser?",
   },
   texts: {
     enterPasscode: 'Inserisci il codice di accesso inviato a "{emailAddress}".',
@@ -93,6 +94,8 @@ export const it: Translation = {
       "Proteggi il tuo account con un'app di autenticazione che genera codici monouso (TOTP) per l'autenticazione a più fattori.",
     securityKeySetUp:
       "Utilizza una chiave di sicurezza dedicata tramite USB, Bluetooth o NFC oppure il tuo telefono. Collega la tua chiave di sicurezza o attivala, quindi fai clic sul pulsante qui sotto e segui le istruzioni per completare la registrazione.",
+    trustDevice:
+      "Se ti fidi di questo browser, non dovrai inserire il tuo OTP (One-Time Password) o utilizzare la tua chiave di sicurezza per l'autenticazione a più fattori (MFA) la prossima volta che accedi.",
   },
   labels: {
     or: "o",
@@ -151,6 +154,8 @@ export const it: Translation = {
     authenticatorAppAdd: "Imposta",
     configured: "configurato",
     useAnotherMethod: "Usa un altro metodo",
+    trustDevice: "Fidarsi di questo browser",
+    staySignedIn: "Rimani connesso",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

@@ -6,6 +6,7 @@ const (
 	FlowCapabilities         flowpilot.FlowName = "capabilities"
 	FlowCredentialOnboarding flowpilot.FlowName = "credential_onboarding"
 	FlowCredentialUsage      flowpilot.FlowName = "credential_usage"
+	FlowDeviceTrust          flowpilot.FlowName = "device_trust"
 	FlowLogin                flowpilot.FlowName = "login"
 	FlowMFACreation          flowpilot.FlowName = "mfa_creation"
 	FlowProfile              flowpilot.FlowName = "profile"

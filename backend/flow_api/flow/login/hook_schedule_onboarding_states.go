@@ -2,7 +2,10 @@ package login
 
 import (
 	"fmt"
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/device_trust"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 )
 
@@ -31,8 +34,13 @@ func (h ScheduleOnboardingStates) Execute(c flowpilot.HookExecutionContext) erro
 
 	c.ScheduleStates(userDetailOnboardingStates...)
 	c.ScheduleStates(credentialOnboardingStates...)
-	c.ScheduleStates(shared.StateSuccess)
 
+	err := c.ExecuteHook(device_trust.ScheduleTrustDeviceState{})
+	if err != nil {
+		return err
+	}
+
+	c.ScheduleStates(shared.StateSuccess)
 	return nil
 }
 
@@ -46,6 +54,19 @@ func (h ScheduleOnboardingStates) determineMFAUsageStates(c flowpilot.HookExecut
 	}
 
 	if c.Stash().Get(shared.StashPathLoginMethod).String() == "passkey" {
+		return result
+	}
+
+	deviceTrustService := services.DeviceTrustService{
+		Persister:   deps.Persister.GetTrustedDevicePersisterWithConnection(deps.Tx),
+		Cfg:         deps.Cfg,
+		HttpContext: deps.HttpContext,
+	}
+
+	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
+
+	if deviceTrustService.CheckDeviceTrust(userID) {
+		// The device is trusted, so MFA can be skipped.
 		return result
 	}
 

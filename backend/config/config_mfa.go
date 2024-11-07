@@ -1,5 +1,10 @@
 package config
 
+import (
+	"github.com/invopop/jsonschema"
+	"time"
+)
+
 type SecurityKeys struct {
 	// `attestation_preference` is used to specify the preference regarding attestation conveyance during
 	// credential generation.
@@ -28,6 +33,14 @@ type MFA struct {
 	AcquireOnLogin bool `yaml:"acquire_on_login" json:"acquire_on_login" koanf:"acquire_on_login" jsonschema:"default=false"`
 	// `acquire_on_registration` configures if users are prompted creating an MFA credential on registration.
 	AcquireOnRegistration bool `yaml:"acquire_on_registration" json:"acquire_on_registration" koanf:"acquire_on_registration" jsonschema:"default=true"`
+	// `device_trust_cookie_name` is the name of the cookie used to store the token of a trusted device.
+	DeviceTrustCookieName string `yaml:"device_trust_cookie_name" json:"device_trust_cookie_name,omitempty" koanf:"device_trust_cookie_name" jsonschema:"default=hanko_device_token"`
+	// `device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the
+	// user must reauthenticate with MFA.
+	DeviceTrustDuration time.Duration `yaml:"device_trust_duration" json:"device_trust_duration" koanf:"device_trust_duration" jsonschema:"default=720h,type=string"`
+	// `trust_device_policy` determines the conditions under which a device or browser is considered trusted, allowing
+	// MFA to be skipped for subsequent logins.
+	DeviceTrustPolicy string `yaml:"device_trust_policy" json:"device_trust_policy,omitempty" koanf:"device_trust_policy" split_words:"true" jsonschema:"default=prompt,enum=always,enum=prompt,enum=never"`
 	// `enabled` determines whether multi-factor-authentication is enabled.
 	Enabled bool `yaml:"enabled" json:"enabled" koanf:"enabled" jsonschema:"default=true"`
 	// `optional` determines whether users must create an MFA credential when prompted. The MFA credential cannot be
@@ -37,4 +50,13 @@ type MFA struct {
 	SecurityKeys SecurityKeys `yaml:"security_keys" json:"security_keys,omitempty" koanf:"security_keys" jsonschema:"title=security_keys"`
 	// `totp` configures the TOTP (Time-Based One-Time-Password) method for multi-factor-authentication.
 	TOTP TOTP `yaml:"totp" json:"totp,omitempty" koanf:"totp" jsonschema:"title=totp"`
+}
+
+func (MFA) JSONSchemaExtend(schema *jsonschema.Schema) {
+	deviceTrustPolicy, _ := schema.Properties.Get("device_trust_policy")
+	deviceTrustPolicy.Extras = map[string]any{"meta:enum": map[string]string{
+		"always": "Devices are trusted without user consent until the trust expires, so MFA is skipped during subsequent logins.",
+		"prompt": "The user can choose to trust the current device to skip MFA for subsequent logins.",
+		"never":  "Devices are considered untrusted, so MFA is required for each login.",
+	}}
 }

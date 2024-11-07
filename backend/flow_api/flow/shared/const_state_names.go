@@ -4,6 +4,7 @@ import "github.com/teamhanko/hanko/backend/flowpilot"
 
 const (
 	StateCredentialOnboardingChooser           flowpilot.StateName = "credential_onboarding_chooser"
+	StateDeviceTrust                           flowpilot.StateName = "device_trust"
 	StateError                                 flowpilot.StateName = "error"
 	StateLoginInit                             flowpilot.StateName = "login_init"
 	StateLoginMethodChooser                    flowpilot.StateName = "login_method_chooser"
