@@ -181,6 +181,11 @@
           "title": "log",
           "description": "`log` configures application logging."
         },
+        "mfa": {
+          "$ref": "#/$defs/MFA",
+          "title": "mfa",
+          "description": "`mfa` configures how multi-factor-authentication behaves."
+        },
         "passcode": {
           "$ref": "#/$defs/Passcode",
           "title": "passcode",
@@ -514,6 +519,48 @@
         "log_health_and_metrics"
       ]
     },
+    "MFA": {
+      "properties": {
+        "acquire_on_login": {
+          "type": "boolean",
+          "description": "`acquire_on_login` configures if users are prompted creating an MFA credential on login.",
+          "default": false
+        },
+        "acquire_on_registration": {
+          "type": "boolean",
+          "description": "`acquire_on_registration` configures if users are prompted creating an MFA credential on registration.",
+          "default": true
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether multi-factor-authentication is enabled.",
+          "default": true
+        },
+        "optional": {
+          "type": "boolean",
+          "description": "`optional` determines whether users must create an MFA credential when prompted. The MFA credential cannot be\ndeleted if multi-factor-authentication is required (`optional: false`).",
+          "default": true
+        },
+        "security_keys": {
+          "$ref": "#/$defs/SecurityKeys",
+          "title": "security_keys",
+          "description": "`security_keys` configures security key settings for multi-factor-authentication"
+        },
+        "totp": {
+          "$ref": "#/$defs/TOTP",
+          "title": "totp",
+          "description": "`totp` configures the TOTP (Time-Based One-Time-Password) method for multi-factor-authentication."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "acquire_on_login",
+        "acquire_on_registration",
+        "enabled",
+        "optional"
+      ]
+    },
     "Options": {
       "properties": {
         "sign_authn_requests": {
@@ -722,6 +769,10 @@
           "$ref": "#/$defs/RateLimits",
           "description": "`passcode_limits` controls rate limits for passcode operations."
         },
+        "otp_limits": {
+          "$ref": "#/$defs/RateLimits",
+          "description": "`otp_limits` controls rate limits for OTP login attempts."
+        },
         "password_limits": {
           "$ref": "#/$defs/RateLimits",
           "description": "`password_limits` controls rate limits for password login operations."
@@ -878,6 +929,55 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "SecurityKeys": {
+      "properties": {
+        "attestation_preference": {
+          "type": "string",
+          "enum": [
+            "direct",
+            "indirect",
+            "none"
+          ],
+          "description": "`attestation_preference` is used to specify the preference regarding attestation conveyance during\ncredential generation.",
+          "default": "direct"
+        },
+        "authenticator_attachment": {
+          "type": "string",
+          "enum": [
+            "platform",
+            "cross-platform",
+            "no_preference"
+          ],
+          "description": "`authenticator_attachment`  is used to specify the preference regarding authenticator attachment during credential registration.",
+          "default": "cross-platform"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether security keys are eligible for multi-factor-authentication.",
+          "default": true
+        },
+        "limit": {
+          "type": "integer",
+          "description": "'limit' determines the maximum number of security keys a user can register.",
+          "default": 10
+        },
+        "user_verification": {
+          "type": "string",
+          "enum": [
+            "required",
+            "preferred",
+            "discouraged"
+          ],
+          "description": "`user_verification` specifies the requirements regarding local authorization with an authenticator through\n various authorization gesture modalities; for example, through a touch plus pin code,\n password entry, or biometric recognition.\n\nThe setting applies to both WebAuthn registration and authentication ceremonies.",
+          "default": "discouraged"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled"
+      ]
+    },
     "Server": {
       "properties": {
         "public": {
@@ -971,6 +1071,20 @@
       "type": "object",
       "required": [
         "server_side"
+      ]
+    },
+    "TOTP": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether TOTP is eligible for multi-factor-authentication.",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "enabled"
       ]
     },
     "ThirdParty": {

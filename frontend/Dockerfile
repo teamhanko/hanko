@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM node:18.14-alpine as build
+FROM --platform=$BUILDPLATFORM node:18.14-alpine AS build
 RUN apk add --no-cache libc6-compat
 RUN apk update
 
