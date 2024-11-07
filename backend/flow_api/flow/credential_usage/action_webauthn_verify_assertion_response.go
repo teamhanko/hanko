@@ -92,7 +92,8 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		}
 	}
 
-	if c.Stash().Get(shared.StashPathUserID).Exists() && c.Stash().Get(shared.StashPathUserID).String() != userModel.ID.String() {
+	userIdStash := c.Stash().Get(shared.StashPathUserID)
+	if userIdStash.Exists() && userIdStash.String() != uuid.Nil.String() && userIdStash.String() != userModel.ID.String() {
 		err = deps.AuditLogger.CreateWithConnection(
 			deps.Tx,
 			deps.HttpContext,
