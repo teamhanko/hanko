@@ -5,11 +5,13 @@ import (
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
 	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/template"
 )
 
@@ -48,8 +50,13 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
+	sessionManager, err := session.NewManager(jwkManager, *cfg)
+	if err != nil {
+		panic(fmt.Errorf("failed to create session generator: %w", err))
+	}
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	userHandler := NewUserHandlerAdmin(persister)
 	emailHandler := NewEmailAdminHandler(cfg, persister)
@@ -79,6 +86,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.GET("/:id", webhookHandler.Get)
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
+
+	sessionsHandler := NewSessionAdminHandler(cfg, persister, sessionManager, auditLogger)
+	sessions := g.Group("/sessions")
+	sessions.POST("", sessionsHandler.Generate)
 
 	return e
 }
