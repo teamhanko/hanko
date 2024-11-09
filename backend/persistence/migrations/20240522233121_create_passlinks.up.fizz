@@ -3,7 +3,6 @@ create_table("passlinks") {
     t.Column("user_id", "uuid", {})
     t.Column("email_id", "uuid", {null: true})
     t.Column("ttl", "integer", {})
-    t.Column("strictness", "string", {})
     t.Column("ip", "string", {})
     t.Column("token", "string", {})
     t.Column("login_count", "integer", {})
