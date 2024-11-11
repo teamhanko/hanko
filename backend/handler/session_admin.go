@@ -64,12 +64,12 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID)
-	if err != nil {
-		return fmt.Errorf("failed to list active sessions: %w", err)
-	}
-
 	if h.cfg.Session.ServerSide.Enabled {
+		activeSessions, err := h.persister.GetSessionPersister().ListActive(userID)
+		if err != nil {
+			return fmt.Errorf("failed to list active sessions: %w", err)
+		}
+
 		// remove all server side sessions that exceed the limit
 		if len(activeSessions) >= h.cfg.Session.ServerSide.Limit {
 			for i := h.cfg.Session.ServerSide.Limit - 1; i < len(activeSessions); i++ {
