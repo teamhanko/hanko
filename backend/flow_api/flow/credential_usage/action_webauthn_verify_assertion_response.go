@@ -92,6 +92,23 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 		}
 	}
 
+	userIdStash := c.Stash().Get(shared.StashPathUserID)
+	if userIdStash.Exists() && userIdStash.String() != uuid.Nil.String() && userIdStash.String() != userModel.ID.String() {
+		err = deps.AuditLogger.CreateWithConnection(
+			deps.Tx,
+			deps.HttpContext,
+			models.AuditLogLoginFailure,
+			userModel,
+			err,
+			auditlog.Detail("flow_id", c.GetFlowID()))
+		if err != nil {
+			return fmt.Errorf("could not create audit log: %w", err)
+		}
+
+		c.SetFlowError(shared.ErrorPasskeyInvalid)
+		return c.Continue(shared.StateError)
+	}
+
 	if userModel != nil {
 		_ = c.Stash().Set(shared.StashPathUserID, userModel.ID.String())
 		_ = c.Stash().Set(shared.StashPathUsername, userModel.GetUsername())

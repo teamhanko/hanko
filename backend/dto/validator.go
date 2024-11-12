@@ -56,6 +56,8 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 					vErrs[i] = fmt.Sprintf("%s entries are not unique", err.Field())
 				case "hanko_event":
 					vErrs[i] = fmt.Sprintf("%s in %s is not a valid webhook event", err.Value(), err.Field())
+				case "ip":
+					vErrs[i] = fmt.Sprintf("%s must be a valid ip address (v4 or v6)", err.Field())
 				default:
 					vErrs[i] = fmt.Sprintf("something wrong on %s; %s", err.Field(), err.Tag())
 				}
