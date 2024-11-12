@@ -1,0 +1,2 @@
+change_column("sessions", "user_agent", "string", {"null": true})
+change_column("sessions", "ip_address", "string", {"null": true})
