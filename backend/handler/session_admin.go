@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/pkg/errors"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -110,4 +111,58 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 	}
 
 	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *SessionAdminHandler) List(ctx echo.Context) error {
+	listDto, err := loadDto2[admin.ListSessionsRequestDto](ctx)
+	if err != nil {
+		return err
+	}
+
+	userID, err := uuid.FromString(listDto.UserID)
+	if err != nil {
+		return fmt.Errorf(parseUserUuidFailureMessage, err)
+	}
+
+	sessions, err := h.persister.GetSessionPersister().ListActive(userID)
+	if err != nil {
+		return err
+	}
+
+	return ctx.JSON(http.StatusOK, sessions)
+}
+
+func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
+	deleteDto, err := loadDto2[admin.DeleteSessionRequestDto](ctx)
+	if err != nil {
+		return err
+	}
+
+	userID, err := uuid.FromString(deleteDto.UserID)
+	if err != nil {
+		return fmt.Errorf(parseUserUuidFailureMessage, err)
+	}
+
+	sessionID, err := uuid.FromString(deleteDto.SessionID)
+	if err != nil {
+		return fmt.Errorf("failed to pasre session_id as uuid: %s", err)
+	}
+
+	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
+	if err != nil {
+		return err
+	}
+
+	if sessionModel == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	} else if sessionModel.UserID != userID {
+		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("session does not belong to user"))
+	}
+
+	err = h.persister.GetSessionPersister().Delete(*sessionModel)
+	if err != nil {
+		return err
+	}
+
+	return ctx.NoContent(http.StatusNoContent)
 }

@@ -60,6 +60,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	userHandler := NewUserHandlerAdmin(persister)
 	emailHandler := NewEmailAdminHandler(cfg, persister)
+	sessionsHandler := NewSessionAdminHandler(cfg, persister, sessionManager, auditLogger)
 
 	user := g.Group("/users")
 	user.GET("", userHandler.List)
@@ -87,6 +88,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	passwordCredentials.PUT("", passwordCredentialHandler.Update)
 	passwordCredentials.DELETE("", passwordCredentialHandler.Delete)
 
+	userSessions := user.Group("/:user_id/sessions")
+	userSessions.GET("", sessionsHandler.List)
+	userSessions.DELETE("/:session_id", sessionsHandler.Delete)
+
 	auditLogHandler := NewAuditLogHandler(persister)
 
 	auditLogs := g.Group("/audit_logs")
@@ -100,7 +105,6 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
 
-	sessionsHandler := NewSessionAdminHandler(cfg, persister, sessionManager, auditLogger)
 	sessions := g.Group("/sessions")
 	sessions.POST("", sessionsHandler.Generate)
 
