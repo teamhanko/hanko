@@ -68,7 +68,6 @@ const LoginMethodChooserPage = (props: Props) => {
             secondary={true}
             uiAction={"passcode-submit"}
             icon={"mail"}
-            showLastUsed={lastLogin?.login_method == "passcode"}
           >
             {t("labels.passcode")}
           </Button>
@@ -81,7 +80,6 @@ const LoginMethodChooserPage = (props: Props) => {
             secondary={true}
             uiAction={"password-submit"}
             icon={"password"}
-            showLastUsed={lastLogin?.login_method == "password"}
           >
             {t("labels.password")}
           </Button>

@@ -225,14 +225,7 @@ const LoginInitPage = (props: Props) => {
                   placeholder={t("labels.emailOrUsername")}
                 />
               )}
-              <Button
-                uiAction={"email-submit"}
-                showLastUsed={["password", "passcode"].includes(
-                  lastLogin?.login_method,
-                )}
-              >
-                {t("labels.continue")}
-              </Button>
+              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
@@ -248,7 +241,6 @@ const LoginInitPage = (props: Props) => {
               }
               disabled={!isWebAuthnSupported}
               icon={"passkey"}
-              showLastUsed={lastLogin?.login_method == "passkey"}
             >
               {t("labels.signInPasskey")}
             </Button>
