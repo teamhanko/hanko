@@ -82,7 +82,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	webauthnCredentials.DELETE("/:credential_id", webauthnCredentialHandler.Delete)
 
 	passwordCredentialHandler := NewPasswordAdminHandler(persister)
-	passwordCredentials := user.Group("/:user_id/passwords")
+	passwordCredentials := user.Group("/:user_id/password")
 	passwordCredentials.GET("", passwordCredentialHandler.Get)
 	passwordCredentials.POST("", passwordCredentialHandler.Create)
 	passwordCredentials.PUT("", passwordCredentialHandler.Update)

@@ -40,6 +40,15 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
 	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
 	if err != nil {
 		return err
@@ -67,6 +76,24 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 	userID, err := uuid.FromString(createDto.UserID)
 	if err != nil {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
+	existingCredential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	if err != nil {
+		return err
+	}
+
+	if existingCredential != nil {
+		return echo.NewHTTPError(http.StatusConflict)
 	}
 
 	err = h.passwordService.CreatePassword(h.persister.GetConnection(), userID, createDto.Password)
@@ -97,6 +124,15 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 	userID, err := uuid.FromString(updateDto.UserID)
 	if err != nil {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
 	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
@@ -136,6 +172,15 @@ func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
 	userID, err := uuid.FromString(getDto.UserID)
 	if err != nil {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
 	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
