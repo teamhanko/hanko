@@ -92,6 +92,11 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	userSessions.GET("", sessionsHandler.List)
 	userSessions.DELETE("/:session_id", sessionsHandler.Delete)
 
+	otpHandler := NewOTPAdminHandler(persister)
+	otp := user.Group("/:user_id/otp")
+	otp.GET("", otpHandler.Get)
+	otp.DELETE("", otpHandler.Delete)
+
 	auditLogHandler := NewAuditLogHandler(persister)
 
 	auditLogs := g.Group("/audit_logs")
