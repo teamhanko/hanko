@@ -37,6 +37,15 @@ func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
 	credentials, err := h.persister.GetWebauthnCredentialPersister().GetFromUser(userID)
 	if err != nil {
 		return err
@@ -61,6 +70,15 @@ func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
 	credential, err := h.persister.GetWebauthnCredentialPersister().Get(getDto.WebauthnCredentialID)
 	if err != nil {
 		return err
@@ -82,6 +100,15 @@ func (h *webauthnCredentialAdminHandler) Delete(ctx echo.Context) error {
 	userID, err := uuid.FromString(deleteDto.UserID)
 	if err != nil {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
 	credential, err := h.persister.GetWebauthnCredentialPersister().Get(deleteDto.WebauthnCredentialID)
