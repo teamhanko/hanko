@@ -124,6 +124,15 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
 	sessions, err := h.persister.GetSessionPersister().ListActive(userID)
 	if err != nil {
 		return err
@@ -143,9 +152,18 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
+	user, err := h.persister.GetUserPersister().Get(userID)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound)
+	}
+
 	sessionID, err := uuid.FromString(deleteDto.SessionID)
 	if err != nil {
-		return fmt.Errorf("failed to pasre session_id as uuid: %s", err)
+		return fmt.Errorf("failed to parse session_id as uuid: %s", err)
 	}
 
 	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
