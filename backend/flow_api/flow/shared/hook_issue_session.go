@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
 )
 
 type IssueSession struct {
@@ -28,18 +29,22 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("user_id not found in stash")
 	}
 
-	emails, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(userId)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
 	if err != nil {
-		return fmt.Errorf("failed to fetch emails from db: %w", err)
+		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
 
 	var emailDTO *dto.EmailJwt
-
-	if email := emails.GetPrimary(); email != nil {
+	if email := userModel.Emails.GetPrimary(); email != nil {
 		emailDTO = dto.JwtFromEmailModel(email)
 	}
 
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO)
+	var jwtOpts []session.JWTOptions
+	if userModel.CustomID != nil {
+		jwtOpts = append(jwtOpts, session.WithValue("custom_id", *userModel.CustomID))
+	}
+
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO, jwtOpts...)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}

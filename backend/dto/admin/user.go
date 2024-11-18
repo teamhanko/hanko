@@ -9,6 +9,7 @@ import (
 
 type User struct {
 	ID                  uuid.UUID                        `json:"id"`
+	CustomID            *string                          `json:"custom_id,omitempty"`
 	WebauthnCredentials []dto.WebauthnCredentialResponse `json:"webauthn_credentials,omitempty"`
 	Emails              []Email                          `json:"emails,omitempty"`
 	Username            *Username                        `json:"username,omitempty"`

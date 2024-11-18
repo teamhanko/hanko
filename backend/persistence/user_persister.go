@@ -12,6 +12,7 @@ import (
 
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
+	GetByCustomID(string) (*models.User, error)
 	GetByEmailAddress(string) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
@@ -45,6 +46,31 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (p *userPersister) GetByCustomID(customID string) (*models.User, error) {
+	user := models.User{}
+
+	eagerPreloadFields := []string{
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"WebauthnCredentials.Transports",
+		"Username",
+		"PasswordCredential",
+		"OTPSecret",
+	}
+
+	err := p.db.EagerPreload(eagerPreloadFields...).Where("custom_id = ?", customID).First(&user)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

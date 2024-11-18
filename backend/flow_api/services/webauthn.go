@@ -184,18 +184,29 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	}
 
 	var userID uuid.UUID
+	var customUserID *string
 	if p.IsMFA {
 		userID = sessionDataModel.UserId
 	} else {
 		userID, err = uuid.FromBytes(credentialAssertionData.Response.UserHandle)
 		if err != nil {
-			return nil, fmt.Errorf("failed to parse user id from user handle: %w", err)
+			uID := string(credentialAssertionData.Response.UserHandle)
+			customUserID = &uID
 		}
 	}
 
-	userModel, err := s.persister.GetUserPersister().Get(userID)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch user from db: %w", err)
+	var userModel *models.User
+	if customUserID != nil {
+		userModel, err = s.persister.GetUserPersister().GetByCustomID(*customUserID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch user from db: %w", err)
+		}
+		userModel.UseCustomID = true
+	} else {
+		userModel, err = s.persister.GetUserPersister().Get(userID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to fetch user from db: %w", err)
+		}
 	}
 
 	if userModel == nil {
