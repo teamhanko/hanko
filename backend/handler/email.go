@@ -54,7 +54,7 @@ func (h *EmailHandler) List(c echo.Context) error {
 	response := make([]*dto.EmailResponse, len(emails))
 
 	for i := range emails {
-		response[i] = dto.FromEmailModel(&emails[i])
+		response[i] = dto.FromEmailModel(&emails[i], h.cfg)
 	}
 
 	return c.JSON(http.StatusOK, response)

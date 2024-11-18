@@ -120,26 +120,32 @@ func DefaultConfig() *Config {
 				Apple: ThirdPartyProvider{
 					DisplayName:  "Apple",
 					AllowLinking: true,
+					Name:         "apple",
 				},
 				Discord: ThirdPartyProvider{
 					DisplayName:  "Discord",
 					AllowLinking: true,
+					Name:         "discord",
 				},
 				LinkedIn: ThirdPartyProvider{
 					DisplayName:  "LinkedIn",
 					AllowLinking: true,
+					Name:         "linkedin",
 				},
 				Microsoft: ThirdPartyProvider{
 					DisplayName:  "Microsoft",
 					AllowLinking: true,
+					Name:         "microsoft",
 				},
 				GitHub: ThirdPartyProvider{
 					DisplayName:  "GitHub",
 					AllowLinking: true,
+					Name:         "github",
 				},
 				Google: ThirdPartyProvider{
 					DisplayName:  "Google",
 					AllowLinking: true,
+					Name:         "google",
 				},
 			},
 		},

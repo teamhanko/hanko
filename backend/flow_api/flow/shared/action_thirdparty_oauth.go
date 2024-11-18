@@ -2,9 +2,11 @@ package shared
 
 import (
 	"fmt"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
+	"golang.org/x/exp/slices"
 	"golang.org/x/oauth2"
 	"net/http"
 	"strings"
@@ -25,8 +27,10 @@ func (a ThirdPartyOAuth) GetDescription() string {
 func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 
-	enabledProviders := deps.Cfg.ThirdParty.Providers.GetEnabled()
-	if len(enabledProviders) == 0 {
+	enabledThirdPartyProviders := deps.Cfg.ThirdParty.Providers.GetEnabled()
+	enabledCustomThirdPartyProviders := deps.Cfg.ThirdParty.CustomProviders.GetEnabled()
+
+	if len(enabledCustomThirdPartyProviders) == 0 && len(enabledThirdPartyProviders) == 0 {
 		c.SuspendAction()
 		return
 	}
@@ -35,8 +39,16 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 		Hidden(true).
 		Required(true)
 
-	for _, provider := range enabledProviders {
-		providerInput.AllowedValue(provider.DisplayName, strings.ToLower(provider.DisplayName))
+	for _, provider := range enabledThirdPartyProviders {
+		providerInput.AllowedValue(provider.DisplayName, provider.Name)
+	}
+
+	slices.SortFunc(enabledCustomThirdPartyProviders, func(a, b config.CustomThirdPartyProvider) bool {
+		return a.DisplayName < b.DisplayName
+	})
+
+	for _, provider := range enabledCustomThirdPartyProviders {
+		providerInput.AllowedValue(provider.DisplayName, provider.Name)
 	}
 
 	c.AddInputs(flowpilot.StringInput("redirect_to").Hidden(true).Required(true), providerInput)
@@ -59,12 +71,14 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	provider, err := thirdparty.GetProvider(deps.Cfg.ThirdParty, c.Input().Get("provider").String())
+	providerName := strings.ToLower(c.Input().Get("provider").String())
+
+	provider, err := thirdparty.GetProvider(deps.Cfg.ThirdParty, providerName)
 	if err != nil {
 		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	state, err := thirdparty.GenerateState(&deps.Cfg, provider.Name(), redirectTo, thirdparty.GenerateStateForFlowAPI(true))
+	state, err := thirdparty.GenerateState(&deps.Cfg, providerName, redirectTo, thirdparty.GenerateStateForFlowAPI(true))
 	if err != nil {
 		return c.Error(flowpilot.ErrorTechnical.Wrap(err))
 	}
