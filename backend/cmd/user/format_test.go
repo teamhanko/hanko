@@ -16,6 +16,7 @@ const invalidUUID = "notvalid"
 func TestImportEntry_validate(t *testing.T) {
 	v := validator.New()
 	validUsername := "example"
+	emptyUsername := ""
 	type fields struct {
 		UserID              string
 		Emails              Emails
@@ -93,6 +94,20 @@ func TestImportEntry_validate(t *testing.T) {
 				Emails:    nil,
 				CreatedAt: nil,
 				UpdatedAt: nil,
+			},
+			wantErr: assert.Error,
+		},
+		{
+			name: "User with an empty username must not validate",
+			fields: fields{
+				Emails: Emails{
+					ImportOrExportEmail{
+						Address:    "primary@hanko.io",
+						IsPrimary:  true,
+						IsVerified: false,
+					},
+				},
+				Username: &emptyUsername,
 			},
 			wantErr: assert.Error,
 		},

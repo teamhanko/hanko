@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/teamhanko/hanko/backend/dto"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
@@ -129,9 +131,9 @@ func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 		}
 
 		if err := userEntry.validate(v); err != nil {
-			errorMsg := fmt.Sprintf("Error at entry %v : %v", index, err.Error())
+			vErrs := dto.TransformValidationErrors(err)
+			errorMsg := fmt.Sprintf("Error at entry %v : %v", index, strings.Join(vErrs, " and "))
 			log.Println(errorMsg)
-			log.Print(userEntry)
 			numErrors++
 			continue
 		}
