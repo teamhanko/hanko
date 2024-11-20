@@ -332,7 +332,7 @@ var userId = "ec4ef049-5b88-4321-a173-21b0eff06a04"
 type sessionManager struct {
 }
 
-func (s sessionManager) GenerateJWT(_ uuid.UUID, _ *dto.EmailJwt) (string, jwt.Token, error) {
+func (s sessionManager) GenerateJWT(_ uuid.UUID, _ *dto.EmailJwt, _ ...session.JWTOptions) (string, jwt.Token, error) {
 	return userId, nil, nil
 }
 
