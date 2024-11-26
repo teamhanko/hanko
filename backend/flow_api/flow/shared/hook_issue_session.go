@@ -92,14 +92,16 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to parse session lifespan: %w", err)
 	}
 
+	sessionRetention := "persistent"
 	if deps.Cfg.Session.Cookie.Retention == "session" ||
 		(deps.Cfg.Session.Cookie.Retention == "prompt" && !rememberMeSelected) {
 		// Issue a session cookie.
 		cookie.MaxAge = 0
+		sessionRetention = "session"
 	}
 
 	deps.HttpContext.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", int(lifespan.Seconds())))
-	deps.HttpContext.Response().Header().Set("X-Remember-Me", fmt.Sprintf("%t", rememberMeSelected))
+	deps.HttpContext.Response().Header().Set("X-Session-Retention", fmt.Sprintf("%s", sessionRetention))
 
 	if deps.Cfg.Session.EnableAuthTokenHeader {
 		deps.HttpContext.Response().Header().Set("X-Auth-Token", signedSessionToken)

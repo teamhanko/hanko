@@ -196,7 +196,7 @@ class HttpClient {
   processHeaders(xhr: XMLHttpRequest) {
     let jwt = "";
     let expirationSeconds = 0;
-    let rememberMe = false;
+    let retention = "";
 
     xhr
       .getAllResponseHeaders()
@@ -210,8 +210,8 @@ class HttpClient {
             xhr.getResponseHeader("X-Session-Lifetime"),
             10,
           );
-        } else if (header.startsWith("x-remember-me")) {
-          rememberMe = xhr.getResponseHeader("X-Remember-Me") === "true";
+        } else if (header.startsWith("x-session-retention")) {
+          retention = xhr.getResponseHeader("X-Session-Retention");
         }
       });
 
@@ -220,9 +220,10 @@ class HttpClient {
       const secure =
         !!this.api.match(https) && !!window.location.href.match(https);
 
-      const expires = rememberMe
-        ? new Date(new Date().getTime() + expirationSeconds * 1000)
-        : undefined;
+      const expires =
+        retention === "session"
+          ? undefined
+          : new Date(new Date().getTime() + expirationSeconds * 1000);
 
       this.cookie.setAuthCookie(jwt, { secure, expires });
     }

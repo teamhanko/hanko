@@ -103,7 +103,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		httplimit.HeaderRateLimitRemaining,
 		httplimit.HeaderRateLimitReset,
 		"X-Session-Lifetime",
-		"X-Remember-Me",
+		"X-Session-Retention",
 	}
 
 	if cfg.Session.EnableAuthTokenHeader {
