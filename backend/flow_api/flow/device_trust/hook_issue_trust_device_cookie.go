@@ -49,7 +49,7 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 	if maxAge > 0 {
 		err = deviceTrustService.CreateTrustedDevice(userID, deviceToken)
 		if err != nil {
-			return fmt.Errorf("failed to storer trusted device: %w", err)
+			return fmt.Errorf("failed to store trusted device: %w", err)
 		}
 	}
 
