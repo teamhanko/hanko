@@ -46,6 +46,7 @@ export interface RegisterClientCapabilitiesInputs {
   readonly webauthn_available: Input<boolean>;
   readonly webauthn_conditional_mediation_available: Input<boolean>;
   readonly webauthn_platform_authenticator_available: Input<boolean>;
+  readonly trusted_device: Input<boolean>;
 }
 
 export interface ContinueWithLoginIdentifierInputs {
@@ -102,6 +103,10 @@ export interface ExchangeTokenInputs {
 export interface ThirdpartyOauthInputs {
   readonly provider: Input<string>;
   readonly redirect_to: Input<string>;
+}
+
+export interface RememberMeInputs {
+  readonly remember_me: Input<boolean>;
 }
 
 export interface SessionDeleteInputs {

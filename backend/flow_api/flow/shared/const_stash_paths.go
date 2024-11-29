@@ -1,6 +1,7 @@
 package shared
 
 const (
+	StashPathDeviceTrustGranted                     = "device_trust_granted"
 	StashPathEmail                                  = "email"
 	StashPathEmailVerified                          = "email_verified"
 	StashPathLoginMethod                            = "login_method"
@@ -15,6 +16,7 @@ const (
 	StashPathPasscodeID                             = "sticky.passcode_id"
 	StashPathPasscodeTemplate                       = "passcode_template"
 	StashPathPasswordRecoveryPending                = "pw_recovery_pending"
+	StashPathRememberMeSelected                     = "remember_me_selected"
 	StashPathSecurityKeyAttachmentSupported         = "security_key_attachment_supported"
 	StashPathSkipUserCreation                       = "skip_user_creation"
 	StashPathThirdPartyProvider                     = "third_party_provider"

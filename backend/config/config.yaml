@@ -32,6 +32,9 @@ log:
 mfa:
   acquire_on_login: false
   acquire_on_registration: true
+  device_trust_cookie_name: hanko-device-token
+  device_trust_duration: 720h
+  device_trust_policy: prompt
   enabled: true
   optional: true
   security_keys:
@@ -89,6 +92,14 @@ service:
 session:
   lifespan: 12h
   enable_auth_token_header: false
+  server_side:
+    enabled: false
+    limit: 100
+  cookie:
+    http_only: true
+    retention: persistent
+    same_site: strict
+    secure: true
 third_party:
   providers:
     apple:

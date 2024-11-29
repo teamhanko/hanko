@@ -48,6 +48,7 @@ export const fr: Translation = {
     authenticatorAppAlreadySetUp:
       "L'application d'authentification est configurée",
     authenticatorAppNotSetUp: "Configurer l'application d'authentification",
+    trustDevice: "Faire confiance à ce navigateur ?",
   },
   texts: {
     enterPasscode:
@@ -96,6 +97,8 @@ export const fr: Translation = {
       "Sécurisez votre compte avec une application d'authentification qui génère des mots de passe à usage unique basés sur le temps (TOTP) pour l'authentification à plusieurs facteurs.",
     securityKeySetUp:
       "Utilisez une clé de sécurité dédiée via USB, Bluetooth ou NFC, ou votre téléphone mobile. Connectez ou activez votre clé de sécurité, puis cliquez sur le bouton ci-dessous et suivez les instructions pour terminer l'enregistrement.",
+    trustDevice:
+      "Si vous faites confiance à ce navigateur, vous n'aurez pas besoin de saisir votre OTP (mot de passe à usage unique) ou d'utiliser votre clé de sécurité pour l'authentification à plusieurs facteurs (MFA) lors de votre prochaine connexion.",
   },
   labels: {
     or: "ou",
@@ -155,6 +158,8 @@ export const fr: Translation = {
     authenticatorAppAdd: "Configurer",
     configured: "configuré",
     useAnotherMethod: "Utiliser une autre méthode",
+    trustDevice: "Faire confiance à ce navigateur",
+    staySignedIn: "Rester connecté",
   },
   errors: {
     somethingWentWrong:
