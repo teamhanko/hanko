@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"github.com/invopop/jsonschema"
 	"time"
 )
 
@@ -44,6 +45,8 @@ type Cookie struct {
 	HttpOnly bool `yaml:"http_only" json:"http_only,omitempty" koanf:"http_only" split_words:"true" jsonschema:"default=true"`
 	// `name` is the name of the cookie.
 	Name string `yaml:"name" json:"name,omitempty" koanf:"name" jsonschema:"default=hanko"`
+	// `retention` determines the retention behavior of authentication cookies.
+	Retention string `yaml:"retention" json:"retention,omitempty" koanf:"retention" split_words:"true" jsonschema:"default=persistent,enum=session,enum=persistent,enum=prompt"`
 	// `same_site` controls whether a cookie is sent with cross-site requests.
 	// See [here](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie#samesitesamesite-value) for
 	// more details.
@@ -54,6 +57,15 @@ type Cookie struct {
 	// NOTE: `secure` must be set to `false` when working on `localhost` and with the Safari browser because it does
 	// not store secure cookies on `localhost`.
 	Secure bool `yaml:"secure" json:"secure,omitempty" koanf:"secure" jsonschema:"default=true"`
+}
+
+func (Cookie) JSONSchemaExtend(schema *jsonschema.Schema) {
+	retention, _ := schema.Properties.Get("retention")
+	retention.Extras = map[string]any{"meta:enum": map[string]string{
+		"session":    "Issues a temporary cookie that lasts for the duration of the browser session.",
+		"persistent": "Issues a cookie that remains stored on the user's device until it reaches its expiration date.",
+		"prompt":     "Allows the user to choose whether to stay signed in. If the user selects 'Stay signed in', a persistent cookie is issued; a session cookie otherwise.",
+	}}
 }
 
 func (c *Cookie) GetName() string {

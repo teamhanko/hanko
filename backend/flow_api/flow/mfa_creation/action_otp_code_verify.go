@@ -42,6 +42,8 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(shared.ErrorPasscodeInvalid)
 	}
 
+	_ = c.Stash().Set(shared.StashPathUserHasOTPSecret, true)
+
 	if c.GetFlowName() != shared.FlowRegistration {
 		var userID uuid.UUID
 		if c.GetFlowName() == shared.FlowLogin {

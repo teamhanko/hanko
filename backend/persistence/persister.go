@@ -44,6 +44,8 @@ type Persister interface {
 	GetWebauthnSessionDataPersister() WebauthnSessionDataPersister
 	GetWebauthnSessionDataPersisterWithConnection(tx *pop.Connection) WebauthnSessionDataPersister
 	GetWebhookPersister(tx *pop.Connection) WebhookPersister
+	GetTrustedDevicePersister() TrustedDevicePersister
+	GetTrustedDevicePersisterWithConnection(tx *pop.Connection) TrustedDevicePersister
 	GetUsernamePersister() UsernamePersister
 	GetUsernamePersisterWithConnection(tx *pop.Connection) UsernamePersister
 	GetSessionPersister() SessionPersister
@@ -157,6 +159,14 @@ func (p *persister) GetPasswordCredentialPersister() PasswordCredentialPersister
 
 func (p *persister) GetPasswordCredentialPersisterWithConnection(tx *pop.Connection) PasswordCredentialPersister {
 	return NewPasswordCredentialPersister(tx)
+}
+
+func (p *persister) GetTrustedDevicePersister() TrustedDevicePersister {
+	return NewTrustedDevicePersister(p.DB)
+}
+
+func (p *persister) GetTrustedDevicePersisterWithConnection(tx *pop.Connection) TrustedDevicePersister {
+	return NewTrustedDevicePersister(tx)
 }
 
 func (p *persister) GetUsernamePersister() UsernamePersister {

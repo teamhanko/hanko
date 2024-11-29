@@ -71,9 +71,10 @@ func DefaultConfig() *Config {
 		Session: Session{
 			Lifespan: "12h",
 			Cookie: Cookie{
-				HttpOnly: true,
-				SameSite: "strict",
-				Secure:   true,
+				HttpOnly:  true,
+				Retention: "persistent",
+				SameSite:  "strict",
+				Secure:    true,
 			},
 			ServerSide: ServerSide{
 				Enabled: false,
@@ -176,6 +177,9 @@ func DefaultConfig() *Config {
 		MFA: MFA{
 			AcquireOnLogin:        false,
 			AcquireOnRegistration: true,
+			DeviceTrustCookieName: "hanko-device-token",
+			DeviceTrustDuration:   30 * 24 * time.Hour, // 30 days
+			DeviceTrustPolicy:     "prompt",
 			Enabled:               true,
 			Optional:              true,
 			SecurityKeys: SecurityKeys{

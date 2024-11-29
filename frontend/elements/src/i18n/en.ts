@@ -47,6 +47,7 @@ export const en: Translation = {
     authenticatorApp: "Authenticator app",
     authenticatorAppAlreadySetUp: "Authenticator app is set up",
     authenticatorAppNotSetUp: "Set up authenticator app",
+    trustDevice: "Trust this browser?",
   },
   texts: {
     enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
@@ -92,6 +93,8 @@ export const en: Translation = {
       "Your account is secured with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
     authenticatorAppNotSetUp:
       "Secure your account with an authenticator app that generates time-based one-time passwords (TOTP) for multi-factor authentication.",
+    trustDevice:
+      "If you trust this browser, you won’t need to enter your OTP (One-Time-Password) or use your security key for multi-factor authentication (MFA) the next time you log in.",
   },
   labels: {
     or: "or",
@@ -151,6 +154,8 @@ export const en: Translation = {
     configured: "configured",
     useAnotherMethod: "Use another method",
     lastUsed: "Last used",
+    trustDevice: "Trust this browser",
+    staySignedIn: "Stay signed in",
   },
   errors: {
     somethingWentWrong:

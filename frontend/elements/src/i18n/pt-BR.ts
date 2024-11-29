@@ -48,6 +48,7 @@ export const ptBR: Translation = {
     authenticatorAppAlreadySetUp:
       "O aplicativo de autenticação já está configurado",
     authenticatorAppNotSetUp: "Configurar o aplicativo de autenticação",
+    trustDevice: "Confiar neste navegador?",
   },
   texts: {
     enterPasscode:
@@ -95,6 +96,8 @@ export const ptBR: Translation = {
       "Proteja sua conta com um aplicativo de autenticação que gera códigos únicos (TOTP) para autenticação de múltiplos fatores.",
     securityKeySetUp:
       "Use uma chave de segurança dedicada via USB, Bluetooth ou NFC ou seu telefone. Conecte sua chave de segurança ou ative-a, em seguida, clique no botão abaixo e siga as instruções para concluir o registro.",
+    trustDevice:
+      "Se você confiar neste navegador, não precisará digitar seu OTP (Senha Única) ou usar sua chave de segurança para autenticação multifator (MFA) na próxima vez que fizer login.",
   },
   labels: {
     or: "ou",
@@ -155,6 +158,8 @@ export const ptBR: Translation = {
     configured: "configurado",
     useAnotherMethod: "Usar outro método",
     lastUsed: "Último uso",
+    trustDevice: "Confiar neste navegador",
+    staySignedIn: "Manter-me conectado",
   },
   errors: {
     somethingWentWrong:

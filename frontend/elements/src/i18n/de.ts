@@ -47,6 +47,7 @@ export const de: Translation = {
     authenticatorApp: "Authenticator-App",
     authenticatorAppNotSetUp: "Authenticator-App einrichten",
     authenticatorAppAlreadySetUp: "Authenticator-App ist eingerichtet",
+    trustDevice: "Diesem Browser vertrauen?",
   },
   texts: {
     enterPasscode:
@@ -97,6 +98,8 @@ export const de: Translation = {
       "Schützen Sie Ihr Konto mit einer Authenticator-App, die zeitbasierte einmalige Passwörter (TOTP) für die Mehrfaktor-Authentifizierung generiert.",
     securityKeySetUp:
       "Verwenden Sie einen dedizierten Sicherheitsschlüssel über USB, Bluetooth oder NFC oder Ihr Mobiltelefon. Schließen Sie Ihren Sicherheitsschlüssel an oder aktivieren Sie ihn, und klicken Sie dann auf die Schaltfläche unten und folgen Sie den Anweisungen, um die Registrierung abzuschließen.",
+    trustDevice:
+      "Wenn Sie diesem Browser vertrauen, müssen Sie bei der nächsten Anmeldung weder Ihr OTP (Einmalpasswort) eingeben noch Ihren Sicherheitsschlüssel für die Multi-Faktor-Authentifizierung (MFA) verwenden.",
   },
   labels: {
     or: "oder",
@@ -156,6 +159,8 @@ export const de: Translation = {
     configured: "konfiguriert",
     useAnotherMethod: "Eine andere Methode verwenden",
     lastUsed: "Zuletzt verwendet",
+    trustDevice: "Diesem Browser vertrauen",
+    staySignedIn: "Angemeldet bleiben",
   },
   errors: {
     somethingWentWrong:

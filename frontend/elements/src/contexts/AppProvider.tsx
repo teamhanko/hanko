@@ -60,6 +60,7 @@ import LoginSecurityKeyPage from "../pages/LoginSecurityKeyPage";
 import MFAMethodChooserPage from "../pages/MFAMethodChooserPage";
 import CreateOTPSecretPage from "../pages/CreateOTPSecretPage";
 import CreateSecurityKeyPage from "../pages/CreateSecurityKeyPage";
+import DeviceTrustPage from "../pages/DeviceTrustPage";
 
 import SignalLike = JSXInternal.SignalLike;
 
@@ -113,7 +114,8 @@ export type UIAction =
   | "thirdparty-submit"
   | "session-delete"
   | "auth-app-add"
-  | "auth-app-remove";
+  | "auth-app-remove"
+  | "trust-device-submit";
 
 interface UIState {
   username?: string;
@@ -488,6 +490,9 @@ const AppProvider = ({
       async account_deleted(state) {
         await hanko.user.logout();
         hanko.relay.dispatchUserDeletedEvent();
+      },
+      device_trust(state) {
+        setPage(<DeviceTrustPage state={state} />);
       },
     }),
     [
