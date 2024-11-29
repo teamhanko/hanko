@@ -38,7 +38,7 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 		HttpContext: deps.HttpContext,
 	}
 
-	deviceToken, err := deviceTrustService.GenerateRandomToken(62)
+	deviceToken, err := deviceTrustService.GenerateRandomToken(64)
 	if err != nil {
 		return fmt.Errorf("failed to generate trusted device token: %w", err)
 	}

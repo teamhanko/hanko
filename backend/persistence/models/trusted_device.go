@@ -22,6 +22,7 @@ func (trustedDevice *TrustedDevice) Validate(tx *pop.Connection) (*validate.Erro
 		&validators.UUIDIsPresent{Name: "ID", Field: trustedDevice.ID},
 		&validators.UUIDIsPresent{Name: "UserID", Field: trustedDevice.UserID},
 		&validators.StringIsPresent{Name: "DeviceToken", Field: trustedDevice.DeviceToken},
+		&validators.StringLengthInRange{Name: "DeviceToken", Field: trustedDevice.DeviceToken, Min: 64, Max: 128},
 		&validators.TimeIsPresent{Name: "ExpiresAt", Field: trustedDevice.ExpiresAt},
 		&validators.TimeIsPresent{Name: "UpdatedAt", Field: trustedDevice.UpdatedAt},
 		&validators.TimeIsPresent{Name: "CreatedAt", Field: trustedDevice.CreatedAt},
