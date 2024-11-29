@@ -23,7 +23,7 @@ func NewOTPAdminHandler(persister persistence.Persister) OTPAdminHandler {
 }
 
 func (h *otpAdminHandler) Get(ctx echo.Context) error {
-	getDto, err := loadDto2[admin.GetOTPRequestDto](ctx)
+	getDto, err := loadDto[admin.GetOTPRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (h *otpAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *otpAdminHandler) Delete(ctx echo.Context) error {
-	deleteDto, err := loadDto2[admin.GetOTPRequestDto](ctx)
+	deleteDto, err := loadDto[admin.GetOTPRequestDto](ctx)
 	if err != nil {
 		return err
 	}

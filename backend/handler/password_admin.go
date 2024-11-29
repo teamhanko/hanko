@@ -30,7 +30,7 @@ func NewPasswordAdminHandler(persister persistence.Persister) PasswordAdminHandl
 }
 
 func (h *passwordAdminHandler) Get(ctx echo.Context) error {
-	getDto, err := loadDto2[admin.GetPasswordCredentialRequestDto](ctx)
+	getDto, err := loadDto[admin.GetPasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Create(ctx echo.Context) error {
-	createDto, err := loadDto2[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
+	createDto, err := loadDto[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -116,7 +116,7 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Update(ctx echo.Context) error {
-	updateDto, err := loadDto2[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
+	updateDto, err := loadDto[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
-	getDto, err := loadDto2[admin.GetPasswordCredentialRequestDto](ctx)
+	getDto, err := loadDto[admin.GetPasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
 	}

@@ -27,7 +27,7 @@ func NewWebauthnCredentialAdminHandler(persister persistence.Persister) Webauthn
 }
 
 func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
-	listDto, err := loadDto2[admin.ListWebauthnCredentialsRequestDto](ctx)
+	listDto, err := loadDto[admin.ListWebauthnCredentialsRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -60,7 +60,7 @@ func (h *webauthnCredentialAdminHandler) List(ctx echo.Context) error {
 }
 
 func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
-	getDto, err := loadDto2[admin.GetWebauthnCredentialRequestDto](ctx)
+	getDto, err := loadDto[admin.GetWebauthnCredentialRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (h *webauthnCredentialAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *webauthnCredentialAdminHandler) Delete(ctx echo.Context) error {
-	deleteDto, err := loadDto2[admin.GetWebauthnCredentialRequestDto](ctx)
+	deleteDto, err := loadDto[admin.GetWebauthnCredentialRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -126,21 +126,4 @@ func (h *webauthnCredentialAdminHandler) Delete(ctx echo.Context) error {
 	}
 
 	return ctx.NoContent(http.StatusNoContent)
-}
-
-func loadDto2[I any](ctx echo.Context) (*I, error) {
-	var adminDto I
-	err := ctx.Bind(&adminDto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return nil, echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	err = ctx.Validate(adminDto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return nil, echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	return &adminDto, nil
 }

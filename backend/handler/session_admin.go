@@ -114,7 +114,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) List(ctx echo.Context) error {
-	listDto, err := loadDto2[admin.ListSessionsRequestDto](ctx)
+	listDto, err := loadDto[admin.ListSessionsRequestDto](ctx)
 	if err != nil {
 		return err
 	}
@@ -142,7 +142,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
-	deleteDto, err := loadDto2[admin.DeleteSessionRequestDto](ctx)
+	deleteDto, err := loadDto[admin.DeleteSessionRequestDto](ctx)
 	if err != nil {
 		return err
 	}
