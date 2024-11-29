@@ -152,6 +152,7 @@ export const bn: Translation = {
     authenticatorAppAdd: "সেট আপ করুন",
     configured: "কনফিগার করা হয়েছে",
     useAnotherMethod: "আরেকটি পদ্ধতি ব্যবহার করুন",
+    lastUsed: "সর্বশেষ ব্যবহৃত",
     trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন",
     staySignedIn: "সাইন ইন থাকা চালিয়ে যান",
   },

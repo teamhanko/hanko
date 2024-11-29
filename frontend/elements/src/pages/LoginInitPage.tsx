@@ -42,6 +42,7 @@ const LoginInitPage = (props: Props) => {
     setUIState,
     stateHandler,
     hidePasskeyButtonOnLogin,
+    lastLogin,
   } = useContext(AppContext);
 
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
@@ -269,6 +270,10 @@ const LoginInitPage = (props: Props) => {
                       secondary
                       // @ts-ignore
                       icon={v.value}
+                      showLastUsed={
+                        lastLogin?.login_method == "third_party" &&
+                        lastLogin?.third_party_provider == v.value
+                      }
                     >
                       {t("labels.signInWith", { provider: v.name })}
                     </Button>

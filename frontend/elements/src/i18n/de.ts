@@ -158,6 +158,7 @@ export const de: Translation = {
     authenticatorAppAdd: "Einrichten",
     configured: "konfiguriert",
     useAnotherMethod: "Eine andere Methode verwenden",
+    lastUsed: "Zuletzt verwendet",
     trustDevice: "Diesem Browser vertrauen",
     staySignedIn: "Angemeldet bleiben",
   },

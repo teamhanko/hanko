@@ -149,6 +149,7 @@ export const zh: Translation = {
     authenticatorAppAdd: "设置",
     configured: "已配置",
     useAnotherMethod: "使用其他方法",
+    lastUsed: "最后使用",
     trustDevice: "信任此浏览器",
     staySignedIn: "保持登录状态",
   },

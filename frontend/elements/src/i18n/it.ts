@@ -154,6 +154,7 @@ export const it: Translation = {
     authenticatorAppAdd: "Imposta",
     configured: "configurato",
     useAnotherMethod: "Usa un altro metodo",
+    lastUsed: "Ultimo utilizzo",
     trustDevice: "Fidarsi di questo browser",
     staySignedIn: "Rimani connesso",
   },
