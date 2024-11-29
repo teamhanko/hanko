@@ -168,7 +168,7 @@ type CustomThirdPartyProvider struct {
 	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
 	// email address of the third party provider account.
 	AllowLinking bool `yaml:"allow_linking" json:"allow_linking,omitempty" koanf:"allow_linking" jsonschema:"default=false"`
-	// `attributeMapping` defines a map that associates a set of known standard OIDC conformant end-user claims
+	// `attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims
 	// (the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the
 	// map entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable
 	// that user data returned from the userinfo endpoint does not already conform to OIDC standard claims.
@@ -193,10 +193,8 @@ type CustomThirdPartyProvider struct {
 	//
 	// Required if `use_discovery` is false or omitted.
 	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint,omitempty" koanf:"authorization_endpoint"`
-	// `name` is a unique name/slug/identifier for the provider derived from the key used in the `custom_providers` map
-	// to configure the respective provider. It is derived in the sense that it is a concatenation the prefix "custom_"
-	// and the key used in the configuration. This allows distinguishing between built-in and custom providers at
-	// runtime.
+	// `name` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by 
+	// concatenating the prefix "custom_". This allows distinguishing between built-in and custom providers at runtime.
 	Name string `jsonschema:"-"`
 	// `issuer` is the provider's issuer identifier. It should be a URL that uses the "https"
 	//	scheme and has no query or fragment components.

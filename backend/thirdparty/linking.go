@@ -76,7 +76,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 
 	identity, err := models.NewIdentity(providerName, userDataMap, email.ID)
 	if err != nil {
-		return nil, ErrorServer("could not get email").WithCause(err)
+		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
 
 	err = p.GetIdentityPersisterWithConnection(tx).Create(*identity)
