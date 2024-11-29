@@ -47,6 +47,7 @@ export const zh: Translation = {
     authenticatorApp: "身份验证应用",
     authenticatorAppAlreadySetUp: "身份验证应用已设置",
     authenticatorAppNotSetUp: "设置身份验证应用",
+    trustDevice: "信任此浏览器？",
   },
   texts: {
     enterPasscode: "输入发送到“{emailAddress}”的验证码。",
@@ -88,6 +89,8 @@ export const zh: Translation = {
       "使用生成基于时间的一次性密码 (TOTP) 的身份验证应用保护您的账户以实现多因素认证。",
     securityKeySetUp:
       "通过 USB、蓝牙或 NFC 使用专用安全密钥，或使用手机。连接或激活您的安全密钥，然后点击下面的按钮，按照提示完成注册。",
+    trustDevice:
+      "如果您信任此浏览器，下次登录时您无需输入一次性密码（OTP）或使用您的安全密钥进行多因素认证（MFA）。",
   },
   labels: {
     or: "或",
@@ -146,6 +149,9 @@ export const zh: Translation = {
     authenticatorAppAdd: "设置",
     configured: "已配置",
     useAnotherMethod: "使用其他方法",
+    lastUsed: "最后使用",
+    trustDevice: "信任此浏览器",
+    staySignedIn: "保持登录状态",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",

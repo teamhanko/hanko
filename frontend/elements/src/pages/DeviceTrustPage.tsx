@@ -7,41 +7,36 @@ import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
 import Button from "../components/form/Button";
 import ErrorBox from "../components/error/ErrorBox";
-import Footer from "../components/wrapper/Footer";
 import Headline1 from "../components/headline/Headline1";
-import Link from "../components/link/Link";
 
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { useFlowState } from "../contexts/FlowState";
 import Paragraph from "../components/paragraph/Paragraph";
+import Footer from "../components/wrapper/Footer";
+import Link from "../components/link/Link";
 
 interface Props {
-  state: State<"login_method_chooser">;
+  state: State<"device_trust">;
 }
 
-const LoginMethodChooserPage = (props: Props) => {
+const DeviceTrustPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler, lastLogin } =
-    useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
-  const onPasswordSelectSubmit = async (event: Event) => {
+  const onTrustDeviceSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("password-submit");
-    const nextState = await flowState.actions
-      .continue_to_password_login(null)
-      .run();
+    setLoadingAction("trust-device-submit");
+    const nextState = await flowState.actions.trust_device(null).run();
     setLoadingAction(null);
     await hanko.flow.run(nextState, stateHandler);
   };
 
-  const onPasscodeSelectSubmit = async (event: Event) => {
+  const onSkipClick = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("passcode-submit");
-    const nextState = await flowState.actions
-      .continue_to_passcode_confirmation(null)
-      .run();
+    setLoadingAction("skip");
+    const nextState = await flowState.actions.skip(null).run();
     setLoadingAction(null);
     await hanko.flow.run(nextState, stateHandler);
   };
@@ -57,31 +52,12 @@ const LoginMethodChooserPage = (props: Props) => {
   return (
     <Fragment>
       <Content>
-        <Headline1>{t("headlines.selectLoginMethod")}</Headline1>
+        <Headline1>{t("headlines.trustDevice")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
-        <Paragraph>{t("texts.howDoYouWantToLogin")}</Paragraph>
-        <Form
-          hidden={!flowState.actions.continue_to_passcode_confirmation?.(null)}
-          onSubmit={onPasscodeSelectSubmit}
-        >
-          <Button
-            secondary={true}
-            uiAction={"passcode-submit"}
-            icon={"mail"}
-          >
-            {t("labels.passcode")}
-          </Button>
-        </Form>
-        <Form
-          hidden={!flowState.actions.continue_to_password_login?.(null)}
-          onSubmit={onPasswordSelectSubmit}
-        >
-          <Button
-            secondary={true}
-            uiAction={"password-submit"}
-            icon={"password"}
-          >
-            {t("labels.password")}
+        <Paragraph>{t("texts.trustDevice")}</Paragraph>
+        <Form onSubmit={onTrustDeviceSubmit}>
+          <Button uiAction={"trust-device-submit"}>
+            {t("labels.trustDevice")}
           </Button>
         </Form>
       </Content>
@@ -90,12 +66,21 @@ const LoginMethodChooserPage = (props: Props) => {
           uiAction={"back"}
           onClick={onBackClick}
           loadingSpinnerPosition={"right"}
+          hidden={!flowState.actions.back?.(null)}
         >
           {t("labels.back")}
+        </Link>
+        <Link
+          uiAction={"skip"}
+          onClick={onSkipClick}
+          loadingSpinnerPosition={"left"}
+          hidden={!flowState.actions.skip?.(null)}
+        >
+          {t("labels.skip")}
         </Link>
       </Footer>
     </Fragment>
   );
 };
 
-export default LoginMethodChooserPage;
+export default DeviceTrustPage;

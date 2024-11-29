@@ -20,6 +20,7 @@ import {
   SessionDeleteInputs,
   OTPCodeInputs,
   SecurityKeyDeleteInputs,
+  RememberMeInputs,
 } from "./input";
 
 export interface Action<TInputs> {
@@ -38,6 +39,7 @@ export interface LoginInitActions {
   readonly webauthn_generate_request_options?: Action<null>;
   readonly webauthn_verify_assertion_response?: Action<WebauthnVerifyAssertionResponseInputs>;
   readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
+  readonly remember_me?: Action<RememberMeInputs>;
 }
 
 export interface ProfileInitActions {
@@ -126,6 +128,7 @@ export interface OnboardingVerifyPasskeyAttestationActions {
 export interface RegistrationInitActions {
   readonly register_login_identifier: Action<RegisterLoginIdentifierInputs>;
   readonly thirdparty_oauth?: Action<ThirdpartyOauthInputs>;
+  readonly remember_me?: Action<RememberMeInputs>;
 }
 
 export interface PasswordCreationActions {
@@ -155,6 +158,12 @@ export interface CredentialOnboardingChooserActions {
   readonly continue_to_password_registration: Action<null>;
   readonly skip: Action<null>;
   readonly back: Action<null>;
+}
+
+export interface DeviceTrustActions {
+  readonly trust_device: Action<null>;
+  readonly skip: Action<null>;
+  readonly back?: Action<null>;
 }
 
 export interface ThirdPartyActions {

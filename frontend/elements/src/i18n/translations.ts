@@ -21,6 +21,7 @@ export interface Translation {
     registerPassword: string;
     securityKeyLogin: string;
     securityKeySetUp: string;
+    trustDevice: string;
     mfaSetUp: string;
     otpLogin: string;
     otpSetUp: string;
@@ -67,6 +68,7 @@ export interface Translation {
     otpSecretKey: string;
     passwordFormatHint: string;
     securityKeyLogin: string;
+    trustDevice: string;
     isPrimaryEmail: string;
     securityKeySetUp: string;
     setPrimaryEmail: string;
@@ -108,6 +110,8 @@ export interface Translation {
     signInPasskey: string;
     signUp: string;
     sendNewPasscode: string;
+    staySignedIn: string;
+    trustDevice: string;
     passwordRetryAfter: string;
     passcodeResendAfter: string;
     useAnotherMethod: string;
@@ -138,6 +142,7 @@ export interface Translation {
     currentSession: string;
     newSecurityKeyName: string;
     createSecurityKey: string;
+    lastUsed: string;
   };
   errors: {
     somethingWentWrong: string;

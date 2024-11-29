@@ -32,7 +32,7 @@
   white-space: nowrap
   width: 100%
   min-width: variables.$button-min-width
-  height: variables.$item-height
+  min-height: variables.$item-height
   outline: none
   cursor: pointer
   transition: 0.1s ease-out
@@ -68,7 +68,7 @@
     color: variables.$color
     background: variables.$background-color
     border-color: variables.$color
-    justify-content: left
+    justify-content: flex-start
 
   &.secondary:hover
     color: variables.$color
@@ -92,8 +92,19 @@
     flex-grow: 0
     width: auto
 
-// Input Styles
+.caption
+  flex-grow: 1
+  flex-wrap: wrap
+  display: flex
+  justify-content: space-between
+  align-items: baseline
 
+// Last Used Styles
+.lastUsed
+ color: variables.$color-shade-1
+ font-size: smaller
+
+// Input Styles
 .inputWrapper
   flex-grow: 1
   position: relative
