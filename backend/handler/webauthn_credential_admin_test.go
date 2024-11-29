@@ -120,7 +120,7 @@ func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Get() 
 			expectedStatusCode: http.StatusNotFound,
 		},
 		{
-			name:               "should fail for if credential is not associated to the user",
+			name:               "should fail if credential is not associated to the user",
 			userID:             "ec4ef049-5b88-4321-a173-21b0eff06a04",
 			credentialID:       "4iVZGFN_jktXJmwmBmaSq0Qr4T62T0jX7PS7XcgAWlM",
 			expectedStatusCode: http.StatusNotFound,
@@ -207,7 +207,7 @@ func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Delete
 			expectedStatusCode: http.StatusNotFound,
 		},
 		{
-			name:               "should fail for if credential is not associated to the user",
+			name:               "should fail if credential is not associated to the user",
 			userID:             "46626836-f2db-4ec0-8752-858b544cbc78",
 			credentialID:       "AaFdkcD4SuPjF-jwUoRwH8-ZHuY5RW46fsZmEvBX6RNKHaGtVzpATs06KQVheIOjYz-YneG4cmQOedzl0e0jF951ukx17Hl9jeGgWz5_DKZCO12p2-2LlzjK",
 			expectedStatusCode: http.StatusNotFound,

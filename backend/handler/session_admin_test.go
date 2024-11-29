@@ -44,7 +44,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_List() {
 			expectedCount:      2,
 		},
 		{
-			name:               "should return a list of sessions with one entries",
+			name:               "should return a list of sessions with one entry",
 			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
 			expectedStatusCode: http.StatusOK,
 			expectedCount:      1,
@@ -132,7 +132,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 			expectedStatusCode: http.StatusNotFound,
 		},
 		{
-			name:               "should fail for if credential is not associated to the user",
+			name:               "should fail if session is not associated to the user",
 			userID:             "38bf5a00-d7ea-40a5-a5de-48722c148925",
 			sessionID:          "74ba812a-923a-43e4-8020-9535dcadc0a8",
 			expectedStatusCode: http.StatusNotFound,
@@ -150,7 +150,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
-			name:               "should fail on empty credentialID",
+			name:               "should fail on empty sessionID",
 			userID:             "46626836-f2db-4ec0-8752-858b544cbc78",
 			sessionID:          "",
 			expectedStatusCode: http.StatusNotFound,
