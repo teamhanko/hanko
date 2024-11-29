@@ -9,7 +9,6 @@ import (
 	"golang.org/x/exp/slices"
 	"golang.org/x/oauth2"
 	"net/http"
-	"strings"
 )
 
 type ThirdPartyOAuth struct {
@@ -71,7 +70,7 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	providerName := strings.ToLower(c.Input().Get("provider").String())
+	providerName := c.Input().Get("provider").String()
 
 	provider, err := thirdparty.GetProvider(deps.Cfg.ThirdParty, providerName)
 	if err != nil {
