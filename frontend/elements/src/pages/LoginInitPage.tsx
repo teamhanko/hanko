@@ -274,6 +274,7 @@ const LoginInitPage = (props: Props) => {
                         v.value.startsWith("custom_")
                           ? "customProvider"
                           : v.value
+                      }
                       showLastUsed={
                         lastLogin?.login_method == "third_party" &&
                         lastLogin?.third_party_provider == v.value
