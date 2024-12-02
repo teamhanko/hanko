@@ -1,1 +1,0 @@
-add_column("users", "custom_id", "string", { "null": true })

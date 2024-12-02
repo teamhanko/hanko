@@ -15,7 +15,6 @@ import (
 // User is used by pop to map your users database table to your go code.
 type User struct {
 	ID                  uuid.UUID           `db:"id" json:"id"`
-	CustomID            *string             `db:"custom_id" json:"custom_id,omitempty"`
 	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
 	Emails              Emails              `has_many:"emails" json:"-"`
 	CreatedAt           time.Time           `db:"created_at" json:"created_at"`
@@ -146,11 +145,6 @@ func (user *User) Validate(tx *pop.Connection) (*validate.Errors, error) {
 }
 
 func (user *User) WebAuthnID() []byte {
-	// The customID is only used when verifying webauthn assertions. This is necessary to be able to import existing webauthn credentials into Hanko.
-	if user.CustomID != nil && user.UseCustomID {
-		return []byte(*user.CustomID)
-	}
-
 	return user.ID.Bytes()
 }
 

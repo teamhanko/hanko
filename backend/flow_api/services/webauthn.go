@@ -1,7 +1,6 @@
 package services
 
 import (
-	"encoding/base64"
 	"errors"
 	"fmt"
 	"github.com/go-webauthn/webauthn/protocol"
@@ -178,56 +177,46 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
-	sessionDataModel, err := s.persister.GetWebauthnSessionDataPersister().Get(p.SessionDataID)
+	sessionDataModel, err := s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Get(p.SessionDataID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get session data from db: %w", err)
 	}
 
-	var userID uuid.UUID
-	var customUserID *string
-	if p.IsMFA {
-		userID = sessionDataModel.UserId
-	} else {
-		userID, err = uuid.FromBytes(credentialAssertionData.Response.UserHandle)
-		if err != nil {
-			uID := string(credentialAssertionData.Response.UserHandle)
-			customUserID = &uID
-		}
+	credentialModel, err := s.persister.GetWebauthnCredentialPersister().Get(credentialAssertionData.ID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get webauthncredential from db: %w", err)
 	}
 
-	var userModel *models.User
-	if customUserID != nil {
-		userModel, err = s.persister.GetUserPersister().GetByCustomID(*customUserID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch user from db: %w", err)
-		}
-		userModel.UseCustomID = true
-	} else {
-		userModel, err = s.persister.GetUserPersister().Get(userID)
-		if err != nil {
-			return nil, fmt.Errorf("failed to fetch user from db: %w", err)
-		}
+	if credentialModel == nil {
+		return nil, ErrInvalidWebauthnCredential
 	}
 
-	if userModel == nil {
-		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
-	}
-
-	cred := userModel.GetWebauthnCredentialById(credentialAssertionData.ID)
-	if cred != nil && (!p.IsMFA && cred.MFAOnly) {
+	if !p.IsMFA && credentialModel.MFAOnly {
 		return nil, ErrInvalidWebauthnCredentialMFAOnly
 	}
 
+	var userID uuid.UUID
+	if p.IsMFA {
+		userID = sessionDataModel.UserId
+	} else {
+		// When the UserHandle is not an uuid it is assumed that it is a custom UserHandle, so it's ok to ignore the error
+		userID, _ = uuid.FromBytes(credentialAssertionData.Response.UserHandle)
+	}
+
+	webAuthnUser, userModel, err := s.GetWebAuthnUser(p.Tx, *credentialModel, userID)
+	if err != nil {
+		return nil, err
+	}
+
 	discoverableUserHandler := func(rawID, userHandle []byte) (webauthn.User, error) {
-		return userModel, nil
+		return webAuthnUser, nil
 	}
 
 	sessionData := sessionDataModel.ToSessionData()
-	var credential *webauthn.Credential
 	if p.IsMFA {
-		credential, err = s.cfg.Webauthn.Handler.ValidateLogin(userModel, *sessionData, credentialAssertionData)
+		_, err = s.cfg.Webauthn.Handler.ValidateLogin(webAuthnUser, *sessionData, credentialAssertionData)
 	} else {
-		credential, err = s.cfg.Webauthn.Handler.ValidateDiscoverableLogin(
+		_, err = s.cfg.Webauthn.Handler.ValidateDiscoverableLogin(
 			discoverableUserHandler,
 			*sessionData,
 			credentialAssertionData,
@@ -237,19 +226,16 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
-	encodedCredentialId := base64.RawURLEncoding.EncodeToString(credential.ID)
-	if credentialModel := userModel.GetWebauthnCredentialById(encodedCredentialId); credentialModel != nil {
-		now := time.Now().UTC()
-		flags := credentialAssertionData.Response.AuthenticatorData.Flags
+	now := time.Now().UTC()
+	flags := credentialAssertionData.Response.AuthenticatorData.Flags
 
-		credentialModel.LastUsedAt = &now
-		credentialModel.BackupState = flags.HasBackupState()
-		credentialModel.BackupEligible = flags.HasBackupEligible()
+	credentialModel.LastUsedAt = &now
+	credentialModel.BackupState = flags.HasBackupState()
+	credentialModel.BackupEligible = flags.HasBackupEligible()
 
-		err = s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).Update(*credentialModel)
-		if err != nil {
-			return nil, fmt.Errorf("failed to update webauthn credential: %w", err)
-		}
+	err = s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).Update(*credentialModel)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update webauthn credential: %w", err)
 	}
 
 	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Delete(*sessionDataModel)
@@ -290,11 +276,10 @@ func (s *webauthnService) generateCreationOptions(p GenerateCreationOptionsParam
 
 	err = s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Create(*sessionDataModel)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to store session data to the db: %W", err)
+		return nil, nil, fmt.Errorf("failed to store session data to the db: %w", err)
 	}
 
 	return sessionDataModel, options, nil
-
 }
 
 func (s *webauthnService) GenerateCreationOptionsSecurityKey(p GenerateCreationOptionsParams) (*models.WebauthnSessionData, *protocol.CredentialCreation, error) {
@@ -364,4 +349,38 @@ func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseP
 	}
 
 	return credential, nil
+}
+
+func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.WebauthnCredential, userID uuid.UUID) (webauthn.User, *models.User, error) {
+	var customUserHandle *string = nil
+	if userID == uuid.Nil {
+		userID = credential.UserId
+		customUserHandle = credential.CustomUserHandle
+	}
+
+	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to fetch user from db: %w", err)
+	}
+	if user == nil {
+		return nil, nil, ErrInvalidWebauthnCredential
+	}
+
+	if customUserHandle != nil {
+		return &webauthnUserWithCustomUserHandle{
+			CustomUserHandle: *customUserHandle,
+			User:             *user,
+		}, user, nil
+	}
+
+	return user, user, err
+}
+
+type webauthnUserWithCustomUserHandle struct {
+	models.User
+	CustomUserHandle string
+}
+
+func (u *webauthnUserWithCustomUserHandle) WebAuthnID() []byte {
+	return []byte(u.CustomUserHandle)
 }
