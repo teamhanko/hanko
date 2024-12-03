@@ -10,3 +10,12 @@ type PasswordCredential struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type GetPasswordCredentialRequestDto struct {
+	UserID string `param:"user_id" validate:"required,uuid4"`
+}
+
+type CreateOrUpdatePasswordCredentialRequestDto struct {
+	GetPasswordCredentialRequestDto
+	Password string `json:"password" validate:"required"`
+}

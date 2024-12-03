@@ -9,3 +9,12 @@ type CreateSessionTokenDto struct {
 type CreateSessionTokenResponse struct {
 	SessionToken string `json:"session_token"`
 }
+
+type ListSessionsRequestDto struct {
+	UserID string `param:"user_id" validate:"required,uuid4"`
+}
+
+type DeleteSessionRequestDto struct {
+	ListSessionsRequestDto
+	SessionID string `param:"session_id" validate:"required,uuid4"`
+}

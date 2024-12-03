@@ -21,6 +21,7 @@ type WebauthnCredentialResponse struct {
 	Transports      []string   `json:"transports"`
 	BackupEligible  bool       `json:"backup_eligible"`
 	BackupState     bool       `json:"backup_state"`
+	MFAOnly         bool       `json:"mfa_only"`
 }
 
 // FromWebauthnCredentialModel Converts the DB model to a DTO object
@@ -36,5 +37,6 @@ func FromWebauthnCredentialModel(c *models.WebauthnCredential) *WebauthnCredenti
 		Transports:      c.Transports.GetNames(),
 		BackupEligible:  c.BackupEligible,
 		BackupState:     c.BackupState,
+		MFAOnly:         c.MFAOnly,
 	}
 }

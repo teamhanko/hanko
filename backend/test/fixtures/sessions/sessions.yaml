@@ -1,0 +1,24 @@
+- id: d8d6dc27-fcf9-4a5c-bb50-a7a03067d936
+  user_id: ec4ef049-5b88-4321-a173-21b0eff06a04
+  user_agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+  ip_address: 192.168.0.1
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  expires_at: 2100-12-31 23:59:59
+  last_used: 2020-12-31 23:59:59
+- id: 74ba812a-923a-43e4-8020-9535dcadc0a8
+  user_id: ec4ef049-5b88-4321-a173-21b0eff06a04
+  user_agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+  ip_address: 192.168.0.1
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  expires_at: 2100-12-31 23:59:59
+  last_used: 2020-12-31 23:59:59
+- id: 108f3789-a795-43bd-a58f-ac8e80a213cd
+  user_id: 38bf5a00-d7ea-40a5-a5de-48722c148925
+  user_agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36
+  ip_address: 192.168.0.1
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+  expires_at: 2100-12-31 23:59:59
+  last_used: 2020-12-31 23:59:59

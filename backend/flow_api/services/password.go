@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"golang.org/x/crypto/bcrypt"
@@ -25,13 +24,11 @@ type Password interface {
 
 type password struct {
 	persister persistence.Persister
-	cfg       config.Config
 }
 
-func NewPasswordService(cfg config.Config, persister persistence.Persister) Password {
+func NewPasswordService(persister persistence.Persister) Password {
 	return &password{
 		persister,
-		cfg,
 	}
 }
 
