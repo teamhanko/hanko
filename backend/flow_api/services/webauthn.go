@@ -355,7 +355,9 @@ func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.
 	var customUserHandle *string = nil
 	if userID == uuid.Nil {
 		userID = credential.UserId
-		customUserHandle = credential.CustomUserHandle
+		if credential.UserHandle != nil {
+			customUserHandle = &credential.UserHandle.Handle
+		}
 	}
 
 	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userID)
