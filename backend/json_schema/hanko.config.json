@@ -335,6 +335,125 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "CustomThirdPartyProvider": {
+      "if": {
+        "properties": {
+          "enabled": {
+            "const": true
+          }
+        }
+      },
+      "then": {
+        "if": {
+          "anyOf": [
+            {
+              "properties": {
+                "use_discovery": {
+                  "const": false
+                }
+              }
+            },
+            {
+              "properties": {
+                "use_discovery": {
+                  "type": "null"
+                }
+              }
+            }
+          ]
+        },
+        "then": {
+          "required": [
+            "authorization_endpoint",
+            "token_endpoint",
+            "userinfo_endpoint"
+          ]
+        },
+        "else": {
+          "required": [
+            "issuer"
+          ]
+        },
+        "required": [
+          "client_id",
+          "secret"
+        ]
+      },
+      "properties": {
+        "allow_linking": {
+          "type": "boolean",
+          "description": "`allow_linking` indicates whether existing accounts can be automatically linked with this provider.\n\nLinking is based on matching one of the email addresses of an existing user account with the (primary)\nemail address of the third party provider account.",
+          "default": false
+        },
+        "attribute_mapping": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "type": "object",
+          "description": "`attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims\n(the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the\nmap entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable\nthat user data returned from the userinfo endpoint does not already conform to OIDC standard claims.\n\nExample: You configure an OAuth Provider (i.e. non-OIDC) and the provider's configured userinfo endpoint returns\nan end-user's user ID at the provider not under a `sub` key in its JSON response but rather under a `user_id`\nkey. You would then configure an attribute mapping as follows:\n\n```yaml\nattribute_mapping:\n sub: user_id\n```\n\nSee https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims\nthat provider claims can be mapped into. Any other claims received from a provider are not discarded but are\nretained internally in a `custom_claims` claim.\n\nMappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible."
+        },
+        "authorization_endpoint": {
+          "type": "string",
+          "description": "URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for\nan application to access their resources.\n\nRequired if `use_discovery` is false or omitted."
+        },
+        "issuer": {
+          "type": "string",
+          "description": "`issuer` is the provider's issuer identifier. It should be a URL that uses the \"https\"\n\tscheme and has no query or fragment components.\n\nRequired if `use_discovery` is true."
+        },
+        "client_id": {
+          "type": "string",
+          "description": "`client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.\n\nRequired if the provider is `enabled`."
+        },
+        "display_name": {
+          "type": "string",
+          "description": "`display_name` is the name of the provider that is intended to be shown to an end-user."
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` indicates if the provider is enabled or disabled.",
+          "default": false
+        },
+        "scopes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`scopes` is a list of scopes requested from the provider that specify the level of access an application has to\na user's resources on a server, defining what actions the app can perform on behalf of the user."
+        },
+        "secret": {
+          "type": "string",
+          "description": "`secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.\n\nRequired if the provider is `enabled`."
+        },
+        "token_endpoint": {
+          "type": "string",
+          "description": "URL of the provider's token endpoint URL where an application exchanges an authorization code for an access\ntoken, which is used to authenticate API requests on behalf of the end-user.\n\nRequired if `use_discovery` is false or omitted."
+        },
+        "use_discovery": {
+          "type": "boolean",
+          "description": "`use_discovery` determines if configuration information about an OpenID Connect (OIDC) provider, such as\nendpoint URLs and supported features,should be automatically retrieved, from a well-known\nURL (typically /.well-known/openid-configuration).",
+          "default": true
+        },
+        "userinfo_endpoint": {
+          "type": "string",
+          "description": "URL of the provider's endpoint that returns claims about an authenticated end-user.\n\nRequired if `use_discovery` is false or omitted."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "required": [
+        "client_id",
+        "display_name",
+        "scopes",
+        "secret"
+      ],
+      "title": "custom_provider"
+    },
+    "CustomThirdPartyProviders": {
+      "additionalProperties": {
+        "$ref": "#/$defs/CustomThirdPartyProvider"
+      },
+      "type": "object"
+    },
     "Database": {
       "properties": {
         "database": {
@@ -1134,6 +1253,11 @@
           "$ref": "#/$defs/ThirdPartyProviders",
           "title": "providers",
           "description": "`providers` contains the configurations for the available OAuth/OIDC identity providers."
+        },
+        "custom_providers": {
+          "$ref": "#/$defs/CustomThirdPartyProviders",
+          "title": "custom_providers",
+          "description": "`custom_providers contains the configurations for custom OAuth/OIDC identity providers."
         },
         "redirect_url": {
           "type": "string",
