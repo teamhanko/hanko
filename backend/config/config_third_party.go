@@ -51,7 +51,7 @@ type ThirdParty struct {
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
+	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
 	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
 }
 
@@ -98,6 +98,62 @@ func (t *ThirdParty) Validate() error {
 	}
 
 	return nil
+}
+
+func (t ThirdParty) JSONSchemaExtend(schema *jsonschema.Schema) {
+	schema.If = &jsonschema.Schema{
+		AllOf: []*jsonschema.Schema{
+			t.JSONSchemaNoBuiltInProviderEnabled(),
+			t.JSONSchemaNoCustomProviderEnabled(),
+		},
+	}
+	schema.Then = &jsonschema.Schema{
+		Required: []string{},
+	}
+	schema.Else = &jsonschema.Schema{
+		Required: []string{"redirect_url", "error_redirect_url", "allowed_redirect_urls"},
+	}
+}
+
+func (t ThirdParty) JSONSchemaNoBuiltInProviderEnabled() *jsonschema.Schema {
+	enabledFalseOrNullProperties := orderedmap.New[string, *jsonschema.Schema]()
+	enabledFalseOrNullProperties.Set("enabled", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Const: "null"},
+		},
+	})
+	enabledFalseOrNullSchema := &jsonschema.Schema{
+		Type: "object",
+		PatternProperties: map[string]*jsonschema.Schema{
+			"^.*": {Ref: "#/$defs/ThirdPartyProvider", Properties: enabledFalseOrNullProperties},
+		},
+	}
+
+	properties := orderedmap.New[string, *jsonschema.Schema]()
+	properties.Set("providers", enabledFalseOrNullSchema)
+
+	return &jsonschema.Schema{Properties: properties}
+}
+
+func (t ThirdParty) JSONSchemaNoCustomProviderEnabled() *jsonschema.Schema {
+	enabledFalseOrNullProperties := orderedmap.New[string, *jsonschema.Schema]()
+	enabledFalseOrNullProperties.Set("enabled", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Type: "null"},
+		},
+	})
+	enabledFalseOrNullSchema := &jsonschema.Schema{
+		AdditionalProperties: &jsonschema.Schema{
+			Ref: "#/$defs/CustomThirdPartyProvider", Properties: enabledFalseOrNullProperties,
+		},
+	}
+
+	properties := orderedmap.New[string, *jsonschema.Schema]()
+	properties.Set("custom_providers", enabledFalseOrNullSchema)
+
+	return &jsonschema.Schema{Properties: properties}
 }
 
 func (t *ThirdParty) PostProcess() error {
@@ -193,7 +249,7 @@ type CustomThirdPartyProvider struct {
 	//
 	// Required if `use_discovery` is false or omitted.
 	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint,omitempty" koanf:"authorization_endpoint"`
-	// `name` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by 
+	// `name` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by
 	// concatenating the prefix "custom_". This allows distinguishing between built-in and custom providers at runtime.
 	Name string `jsonschema:"-"`
 	// `issuer` is the provider's issuer identifier. It should be a URL that uses the "https"
@@ -204,18 +260,22 @@ type CustomThirdPartyProvider struct {
 	// `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
-	ClientID string `yaml:"client_id" json:"client_id" koanf:"client_id" split_words:"true"`
+	ClientID string `yaml:"client_id" json:"client_id,omitempty" koanf:"client_id" split_words:"true"`
 	// `display_name` is the name of the provider that is intended to be shown to an end-user.
-	DisplayName string `yaml:"display_name" json:"display_name" koanf:"display_name" jsonschema:"required"`
+	//
+	// Required if the provider is `enabled`.
+	DisplayName string `yaml:"display_name" json:"display_name,omitempty" koanf:"display_name"`
 	// `enabled` indicates if the provider is enabled or disabled.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	// `scopes` is a list of scopes requested from the provider that specify the level of access an application has to
 	// a user's resources on a server, defining what actions the app can perform on behalf of the user.
-	Scopes []string `yaml:"scopes" json:"scopes" koanf:"scopes" jsonschema:"required"`
+	//
+	// Required if the provider is `enabled`.
+	Scopes []string `yaml:"scopes" json:"scopes,omitempty" koanf:"scopes,omitempty"`
 	// `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
-	Secret string `yaml:"secret" json:"secret" koanf:"secret"`
+	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
 	// URL of the provider's token endpoint URL where an application exchanges an authorization code for an access
 	// token, which is used to authenticate API requests on behalf of the end-user.
 	//
@@ -266,19 +326,21 @@ func (p *CustomThirdPartyProvider) Validate() error {
 func (CustomThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
 	schema.Title = "custom_provider"
 
-	enabledTrue := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
-	enabledTrue.Properties.Set("enabled", &jsonschema.Schema{Const: true})
+	enabledFalseOrNull := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
+	enabledFalseOrNull.Properties.Set("enabled", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Type: "null"},
+		},
+	})
 
-	useDiscoveryFalse := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
-	useDiscoveryFalse.Properties.Set("use_discovery", &jsonschema.Schema{Const: false})
-
-	useDiscoveryTrue := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
-	useDiscoveryTrue.Properties.Set("use_discovery", &jsonschema.Schema{Const: true})
-
-	useDiscoveryNull := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
-	useDiscoveryNull.Properties.Set("use_discovery", &jsonschema.Schema{Type: "null"})
-
-	useDiscoveryFalseOrNull := &jsonschema.Schema{AnyOf: []*jsonschema.Schema{useDiscoveryFalse, useDiscoveryNull}}
+	useDiscoveryFalseOrNull := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
+	useDiscoveryFalseOrNull.Properties.Set("use_discovery", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Type: "null"},
+		},
+	})
 
 	endpointsRequired := &jsonschema.Schema{
 		Required: []string{"authorization_endpoint", "token_endpoint", "userinfo_endpoint"},
@@ -288,9 +350,12 @@ func (CustomThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
 		Required: []string{"issuer"},
 	}
 
-	schema.If = enabledTrue
+	schema.If = enabledFalseOrNull
 	schema.Then = &jsonschema.Schema{
-		Required: []string{"client_id", "secret"},
+		Required: []string{},
+	}
+	schema.Else = &jsonschema.Schema{
+		Required: []string{"display_name", "client_id", "secret", "scopes"},
 		If:       useDiscoveryFalseOrNull,
 		Then:     endpointsRequired,
 		Else:     issuerRequired,
@@ -394,7 +459,7 @@ func (ThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
 		Required: []string{"client_id", "secret"},
 	}
 	schema.Else = &jsonschema.Schema{
-		Required: []string{"enabled"},
+		Required: []string{},
 	}
 }
 
