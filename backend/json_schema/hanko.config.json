@@ -278,6 +278,21 @@
           "description": "`name` is the name of the cookie.",
           "default": "hanko"
         },
+        "retention": {
+          "type": "string",
+          "enum": [
+            "session",
+            "persistent",
+            "prompt"
+          ],
+          "description": "`retention` determines the retention behavior of authentication cookies.",
+          "default": "persistent",
+          "meta:enum": {
+            "persistent": "Issues a cookie that remains stored on the user's device until it reaches its expiration date.",
+            "prompt": "Allows the user to choose whether to stay signed in. If the user selects 'Stay signed in', a persistent cookie is issued; a session cookie otherwise.",
+            "session": "Issues a temporary cookie that lasts for the duration of the browser session."
+          }
+        },
         "same_site": {
           "type": "string",
           "enum": [
@@ -531,6 +546,31 @@
           "description": "`acquire_on_registration` configures if users are prompted creating an MFA credential on registration.",
           "default": true
         },
+        "device_trust_cookie_name": {
+          "type": "string",
+          "description": "`device_trust_cookie_name` is the name of the cookie used to store the token of a trusted device.",
+          "default": "hanko_device_token"
+        },
+        "device_trust_duration": {
+          "type": "string",
+          "description": "`device_trust_duration` configures the duration a device remains trusted after authentication; once expired, the\nuser must reauthenticate with MFA.",
+          "default": "720h"
+        },
+        "device_trust_policy": {
+          "type": "string",
+          "enum": [
+            "always",
+            "prompt",
+            "never"
+          ],
+          "description": "`device_trust_policy` determines the conditions under which a device or browser is considered trusted, allowing\nMFA to be skipped for subsequent logins.",
+          "default": "prompt",
+          "meta:enum": {
+            "always": "Devices are trusted without user consent until the trust expires, so MFA is skipped during subsequent logins.",
+            "never": "Devices are considered untrusted, so MFA is required for each login.",
+            "prompt": "The user can choose to trust the current device to skip MFA for subsequent logins."
+          }
+        },
         "enabled": {
           "type": "boolean",
           "description": "`enabled` determines whether multi-factor-authentication is enabled.",
@@ -557,6 +597,7 @@
       "required": [
         "acquire_on_login",
         "acquire_on_registration",
+        "device_trust_duration",
         "enabled",
         "optional"
       ]

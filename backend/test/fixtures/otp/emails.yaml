@@ -1,0 +1,36 @@
+- id: 51b7c175-ceb6-45ba-aae6-0092221c1b84
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  address: john.doe@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 38bf5a00-d7ea-40a5-a5de-48722c148925
+  user_id: 38bf5a00-d7ea-40a5-a5de-48722c148925
+  address: john.doe+1@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: e0282f3f-b211-4f0e-b777-6fabc69287c9
+  user_id: e0282f3f-b211-4f0e-b777-6fabc69287c9
+  address: john.doe+2@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 8bb4c8a7-a3e6-48bb-b54f-20e3b485ab33
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  address: john.doe+3@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: f194ee0f-dd1a-48f7-8766-c67e4d6cd1fe
+  user_id: b5dd5267-b462-48be-b70d-bcd6f1bbe7a5
+  address: john.doe+4@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
+- id: 0394ad95-6ea3-4cbd-940b-3f6dd10440b0
+  user_id: 38bf5a00-d7ea-40a5-a5de-48722c148925
+  address: john.doe+5@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
