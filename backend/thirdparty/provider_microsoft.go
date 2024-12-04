@@ -28,7 +28,8 @@ var DefaultScopes = []string{
 }
 
 type microsoftProvider struct {
-	*oauth2.Config
+	config      config.ThirdPartyProvider
+	oauthConfig *oauth2.Config
 }
 
 type MicrosoftUser struct {
@@ -46,7 +47,8 @@ func NewMicrosoftProvider(config config.ThirdPartyProvider, redirectURL string) 
 	}
 
 	return &microsoftProvider{
-		Config: &oauth2.Config{
+		config: config,
+		oauthConfig: &oauth2.Config{
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
@@ -59,8 +61,12 @@ func NewMicrosoftProvider(config config.ThirdPartyProvider, redirectURL string) 
 	}, nil
 }
 
+func (p microsoftProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+	return p.oauthConfig.AuthCodeURL(state, opts...)
+}
+
 func (p microsoftProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return p.Exchange(context.Background(), code)
+	return p.oauthConfig.Exchange(context.Background(), code)
 }
 
 func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
@@ -80,7 +86,7 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		// field to be present per default, hence usage of the extra option jws.WithInferAlgorithmFromKey.
 		// See the jwt.WithKeySet documentation.
 		jwt.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)),
-		jwt.WithAudience(p.Config.ClientID),
+		jwt.WithAudience(p.oauthConfig.ClientID),
 		jwt.WithValidator(p.issuerValidator()),
 	)
 
@@ -154,7 +160,7 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 }
 
 func (p microsoftProvider) Name() string {
-	return "microsoft"
+	return p.config.Name
 }
 
 func (p microsoftProvider) issuerValidator() jwt.ValidatorFunc {

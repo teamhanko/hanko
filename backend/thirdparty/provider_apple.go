@@ -25,7 +25,8 @@ var DefaultAppleScopes = []string{
 }
 
 type appleProvider struct {
-	*oauth2.Config
+	config      config.ThirdPartyProvider
+	oauthConfig *oauth2.Config
 }
 
 func NewAppleProvider(config config.ThirdPartyProvider, redirectURL string) (OAuthProvider, error) {
@@ -34,7 +35,8 @@ func NewAppleProvider(config config.ThirdPartyProvider, redirectURL string) (OAu
 	}
 
 	return &appleProvider{
-		Config: &oauth2.Config{
+		config: config,
+		oauthConfig: &oauth2.Config{
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
@@ -49,7 +51,7 @@ func NewAppleProvider(config config.ThirdPartyProvider, redirectURL string) (OAu
 
 func (a appleProvider) AuthCodeURL(state string, args ...oauth2.AuthCodeOption) string {
 	opts := append(args, oauth2.SetAuthURLParam("response_mode", "form_post"))
-	authURL := a.Config.AuthCodeURL(state, opts...)
+	authURL := a.oauthConfig.AuthCodeURL(state, opts...)
 	u, _ := url.Parse(authURL)
 	u.RawQuery = strings.ReplaceAll(u.RawQuery, "+", "%20")
 	authURL = u.String()
@@ -57,7 +59,7 @@ func (a appleProvider) AuthCodeURL(state string, args ...oauth2.AuthCodeOption) 
 }
 
 func (a appleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return a.Exchange(context.Background(), code)
+	return a.oauthConfig.Exchange(context.Background(), code)
 }
 
 func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
@@ -75,7 +77,7 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		[]byte(rawIDToken),
 		jwt.WithKeySet(set),
 		jwt.WithIssuer(AppleAPIBase),
-		jwt.WithAudience(a.Config.ClientID),
+		jwt.WithAudience(a.oauthConfig.ClientID),
 	)
 
 	if err != nil {
@@ -115,5 +117,5 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 }
 
 func (a appleProvider) Name() string {
-	return "apple"
+	return a.config.Name
 }

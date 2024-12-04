@@ -1,6 +1,7 @@
 import { default as apple } from "./Apple";
 import { default as checkmark } from "./Checkmark";
 import { default as copy } from "./Copy";
+import { default as customProvider } from "./CustomProvider";
 import { default as discord } from "./Discord";
 import { default as exclamation } from "./ExclamationMark";
 import { default as github } from "./GitHub";
@@ -18,6 +19,7 @@ export {
   apple,
   checkmark,
   copy,
+  customProvider,
   discord,
   exclamation,
   github,

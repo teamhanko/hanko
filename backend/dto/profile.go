@@ -37,7 +37,7 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileDat
 
 	var emails []EmailResponse
 	for _, emailModel := range user.Emails {
-		email := FromEmailModel(&emailModel)
+		email := FromEmailModel(&emailModel, cfg)
 		emails = append(emails, *email)
 	}
 

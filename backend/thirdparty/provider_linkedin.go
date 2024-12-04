@@ -34,8 +34,9 @@ type LinkedinUser struct {
 }
 
 type linkedInProvider struct {
-	oidc *oidc.Provider
-	*oauth2.Config
+	config       config.ThirdPartyProvider
+	oidcProvider *oidc.Provider
+	oauthConfig  *oauth2.Config
 }
 
 // NewLinkedInProvider creates a LinkedIn third party provider.
@@ -51,8 +52,9 @@ func NewLinkedInProvider(config config.ThirdPartyProvider, redirectURL string) (
 	endpoint := oidcProvider.Endpoint()
 
 	return &linkedInProvider{
-		oidc: oidcProvider,
-		Config: &oauth2.Config{
+		config:       config,
+		oidcProvider: oidcProvider,
+		oauthConfig: &oauth2.Config{
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint:     endpoint,
@@ -62,13 +64,17 @@ func NewLinkedInProvider(config config.ThirdPartyProvider, redirectURL string) (
 	}, nil
 }
 
+func (g linkedInProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+	return g.oauthConfig.AuthCodeURL(state, opts...)
+}
+
 func (g linkedInProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.Exchange(context.Background(), code)
+	return g.oauthConfig.Exchange(context.Background(), code)
 }
 
 func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	var user LinkedinUser
-	if err := makeRequest(token, g.Config, g.oidc.UserInfoEndpoint(), &user); err != nil {
+	if err := makeRequest(token, g.oauthConfig, g.oidcProvider.UserInfoEndpoint(), &user); err != nil {
 		return nil, err
 	}
 
@@ -102,5 +108,5 @@ func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 }
 
 func (g linkedInProvider) Name() string {
-	return "linkedin"
+	return g.config.Name
 }

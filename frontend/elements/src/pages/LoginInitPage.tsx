@@ -263,13 +263,18 @@ const LoginInitPage = (props: Props) => {
               .inputs.provider.allowed_values?.map((v) => {
                 return (
                   <Form
+                    key={v.value}
                     onSubmit={(event) => onThirdpartySubmit(event, v.value)}
                   >
                     <Button
                       uiAction={"thirdparty-submit"}
                       secondary
                       // @ts-ignore
-                      icon={v.value}
+                      icon={
+                        v.value.startsWith("custom_")
+                          ? "customProvider"
+                          : v.value
+                      }
                       showLastUsed={
                         lastLogin?.login_method == "third_party" &&
                         lastLogin?.third_party_provider == v.value

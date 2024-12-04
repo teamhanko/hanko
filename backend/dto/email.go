@@ -2,6 +2,7 @@ package dto
 
 import (
 	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
@@ -23,17 +24,17 @@ type EmailUpdateRequest struct {
 }
 
 // FromEmailModel Converts the DB model to a DTO object
-func FromEmailModel(email *models.Email) *EmailResponse {
+func FromEmailModel(email *models.Email, cfg *config.Config) *EmailResponse {
 	emailResponse := &EmailResponse{
 		ID:         email.ID,
 		Address:    email.Address,
 		IsVerified: email.Verified,
 		IsPrimary:  email.IsPrimary(),
-		Identities: FromIdentitiesModel(email.Identities),
+		Identities: FromIdentitiesModel(email.Identities, cfg),
 	}
 
 	if len(email.Identities) > 0 {
-		identity := FromIdentityModel(&email.Identities[0])
+		identity := FromIdentityModel(&email.Identities[0], cfg)
 		emailResponse.Identity = identity
 	}
 

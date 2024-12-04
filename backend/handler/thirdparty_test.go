@@ -60,30 +60,35 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 	cfg.ThirdParty = config.ThirdParty{
 		Providers: config.ThirdPartyProviders{
 			Apple: config.ThirdPartyProvider{
+				Name:         "apple",
 				Enabled:      false,
 				ClientID:     "fakeClientID",
 				Secret:       "fakeClientSecret",
 				AllowLinking: true,
 			},
 			Google: config.ThirdPartyProvider{
+				Name:         "google",
 				Enabled:      false,
 				ClientID:     "fakeClientID",
 				Secret:       "fakeClientSecret",
 				AllowLinking: true,
 			},
 			GitHub: config.ThirdPartyProvider{
+				Name:         "github",
 				Enabled:      false,
 				ClientID:     "fakeClientID",
 				Secret:       "fakeClientSecret",
 				AllowLinking: true,
 			},
 			Discord: config.ThirdPartyProvider{
+				Name:         "discord",
 				Enabled:      false,
 				ClientID:     "fakeClientID",
 				Secret:       "fakeClientSecret",
 				AllowLinking: true,
 			},
 			Microsoft: config.ThirdPartyProvider{
+				Name:         "microsoft",
 				Enabled:      false,
 				ClientID:     "fakeClientID",
 				Secret:       "fakeClientSecret",

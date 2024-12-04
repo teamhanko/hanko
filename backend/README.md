@@ -17,7 +17,10 @@ easily integrated into any web app with as little as two lines of code.
   - [Cross-domain communication](#cross-domain-communication)
   - [Audit logs](#audit-logs)
   - [Rate Limiting](#rate-limiting)
-  - [Social logins](#social-logins)
+  - [Social connections](#social-connections)
+    - [Built-in providers](#built-in-providers)
+    - [Custom OAuth/OIDC providers](#custom-oauthoidc-providers)
+    - [Account linking](#account-linking)
   - [User import](#user-import)
   - [Webhooks](#webhooks)
 - [API specification](#api-specification)
@@ -432,13 +435,22 @@ It uses a combination of user-id/IP to mitigate DoS attacks on user accounts. Yo
 In production systems, you may want to hide the
 Hanko service behind a proxy or gateway (e.g. Kong, Traefik) to provide additional network-based rate limiting.
 
-### Social Logins
+### Social connections
 
 Hanko supports OAuth-based ([authorization code flow](https://www.rfc-editor.org/rfc/rfc6749#section-1.3.1)) third
-party provider logins. See the `third_party` option in
-the [configuration reference](https://github.com/teamhanko/hanko/wiki/hanko-properties-third_party) on how to
-configure them. All provider configurations require provider credentials. See the guides in the official
-documentation for instructions on how to obtain these:
+party provider logins. The `third_party` configuration
+[option](https://github.com/teamhanko/hanko/wiki/config-properties-third_party) contains all relevant configuration.
+This includes options for setting up redirect URLs (in case of success or error on authentication with a provider) that
+apply to both [built-in](#built-in-providers) and
+[custom](#custom-oauthoidc-providers) providers.
+
+
+#### Built-in providers
+
+Built-in providers can be configured through the `third_party.providers` configuration [option](https://github.com/teamhanko/hanko/wiki/config-properties-third_party).
+They must be explicitly `enabled` (i.e. providers are disabled default).
+All provider configurations require provider credentials in the form of a client ID (`client_id`)
+and a client secret (`secret`). See the guides in the official documentation for instructions on how to obtain these:
 
 - [Apple](https://docs.hanko.io/guides/authentication-methods/oauth/apple)
 - [Discord](https://docs.hanko.io/guides/authentication-methods/oauth/discord)
@@ -447,9 +459,21 @@ documentation for instructions on how to obtain these:
 - [LinkedIn](https://docs.hanko.io/guides/authentication-methods/oauth/linkedin)
 - [Microsoft](https://docs.hanko.io/guides/authentication-methods/oauth/microsoft)
 
+#### Custom OAuth/OIDC providers
+
+Custom providers can be configured through the `third_party.custom_providers` configuration
+[option](https://github.com/teamhanko/hanko/wiki/config-properties-third_party-properties-custom_providers).
+Like built-in providers they must be explicitly `enabled` and require a `client_id` and `secret`, which must
+be obtained from the respective provider.
+Custom providers can use either OAuth or OIDC. OIDC providers can be configured to use
+[OIDC Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html) by setting the `use_discovery`
+option to `true`. An `issuer` must be configured too in that case. Otherwise both OAuth and OIDC providers
+can manually define required endpoints (`authorization_endpoint`, `token_endpoint`, `userinfo_endpoint`).
+`scopes` must be explicitly defined (with `openid` being the minimum requirement in case of OIDC providers).
+
 #### Account linking
 
-The `allow_linking` configuration option for providers determines whether automatic account linking for this provider
+The `allow_linking` configuration option for built-in and custom providers determines whether automatic account linking for this provider
 is activated. Note that account linking is based on e-mail addresses and OAuth providers may allow account holders to
 use unverified e-mail addresses or may not provide any information at all about the verification status of e-mail
 addresses. This poses a security risk and potentially allows bad actors to hijack existing Hanko
