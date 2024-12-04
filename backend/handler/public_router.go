@@ -78,7 +78,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
 	}
 
-	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
+	sessionMiddleware := hankoMiddleware.Session(cfg, persister, sessionManager)
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 
