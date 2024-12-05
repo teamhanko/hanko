@@ -30,10 +30,6 @@ func (i *Importer) createUser(newUser ImportOrExportEntry) (*models.User, error)
 		userModel.ID = uuid.FromStringOrNil(newUser.UserID)
 	}
 
-	if newUser.CustomUserID != "" {
-		userModel.CustomID = &newUser.CustomUserID
-	}
-
 	if newUser.CreatedAt != nil {
 		userModel.CreatedAt = newUser.CreatedAt.UTC()
 	}
@@ -148,6 +144,23 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 		BackupEligible:  webauthnCredential.BackupEligible,
 		BackupState:     webauthnCredential.BackupState,
 		MFAOnly:         webauthnCredential.MFAOnly,
+	}
+
+	if webauthnCredential.UserHandle != nil {
+		userHandleID, err := uuid.NewV4()
+		if err != nil {
+			return err
+		}
+
+		userHandle := models.WebauthnCredentialUserHandle{
+			ID:        userHandleID,
+			UserID:    userID,
+			Handle:    *webauthnCredential.UserHandle,
+			CreatedAt: i.importTimestamp,
+			UpdatedAt: i.importTimestamp,
+		}
+		webauthnCredentialModel.UserHandle = &userHandle
+		webauthnCredentialModel.UserHandleID = &userHandleID
 	}
 
 	err := i.persister.GetWebauthnCredentialPersisterWithConnection(i.tx).Create(webauthnCredentialModel)

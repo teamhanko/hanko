@@ -27,19 +27,35 @@ func (ImportOrExportEmail) JSONSchemaExtend(schema *jsonschema.Schema) {
 type Emails []ImportOrExportEmail
 
 type ImportWebauthnCredential struct {
-	ID              string     `json:"id" yaml:"id" validate:"required"`
-	Name            *string    `json:"name" yaml:"name" validate:"omitempty"`
-	PublicKey       string     `json:"public_key" yaml:"public_key" validate:"required"`
-	AttestationType string     `json:"attestation_type" yaml:"attestation_type" validate:"required"`
-	AAGUID          uuid.UUID  `json:"aaguid" yaml:"aaguid" validate:"omitempty,uuid4"`
-	SignCount       int        `json:"sign_count" yaml:"sign_count"`
-	LastUsedAt      *time.Time `json:"last_used_at" yaml:"last_used_at" validate:"omitempty"`
-	CreatedAt       *time.Time `json:"created_at" yaml:"created_at" validate:"omitempty"`
-	UpdatedAt       *time.Time `json:"updated_at" yaml:"updated_at" validate:"omitempty"`
-	Transports      []string   `json:"transports" yaml:"transports" validate:"omitempty,unique"`
-	BackupEligible  bool       `json:"backup_eligible" yaml:"backup_eligible"`
-	BackupState     bool       `json:"backup_state" yaml:"backup_state"`
-	MFAOnly         bool       `json:"mfa_only" yaml:"mfa_only"`
+	// ID of the webauthn credential.
+	ID string `json:"id" yaml:"id" validate:"required"`
+	// Optional Name of the webauthn credential.
+	Name *string `json:"name" yaml:"name" validate:"omitempty"`
+	// The PublicKey of the credential.
+	PublicKey string `json:"public_key" yaml:"public_key" validate:"required"`
+	// The AttestationType the credential was created with.
+	AttestationType string `json:"attestation_type" yaml:"attestation_type" validate:"required"`
+	// Optional AAGUID of the authenticator on which the credential was created on.
+	AAGUID uuid.UUID `json:"aaguid" yaml:"aaguid" validate:"omitempty,uuid4"`
+	// Optional SignCount of the webauthn credential.
+	SignCount int `json:"sign_count" yaml:"sign_count"`
+	// LastUsedAt optional timestamp when the webauthn credential was last used.
+	LastUsedAt *time.Time `json:"last_used_at" yaml:"last_used_at" validate:"omitempty"`
+	// CreatedAt optional timestamp of the webauthn credentials' creation. Will be set to the import date if not provided.
+	CreatedAt *time.Time `json:"created_at" yaml:"created_at" validate:"omitempty"`
+	// UpdatedAt optional timestamp of the last update to the webauthn credential. Will be set to the import date if not provided.
+	UpdatedAt *time.Time `json:"updated_at" yaml:"updated_at" validate:"omitempty"`
+	// Optional list of supported Transports by the authenticator.
+	Transports []string `json:"transports" yaml:"transports" validate:"omitempty,unique"`
+	// BackupEligible flag indicates if the webauthn credential can be backed up (e.g. in Apple KeyChain, ...). If the information is not available set it to false.
+	BackupEligible bool `json:"backup_eligible" yaml:"backup_eligible"`
+	// BackupState flag indicates if the webauthn credential is backed up (e.g. in Apple KeyChain, ...). If the information is not available set it to false.
+	BackupState bool `json:"backup_state" yaml:"backup_state"`
+	// MFAOnly flag indicates if the webauthn credential can only be used in combination with another login factor (e.g. password, ...).
+	MFAOnly bool `json:"mfa_only" yaml:"mfa_only"`
+	// UserHandle optional user id which was used to create the credential with.
+	// Populate only when user id was not an uuid v4 and the webauthn credential is not an MFAOnly credential.
+	UserHandle *string `json:"user_handle" yaml:"user_handle" validate:"omitempty,excluded_if=MFAOnly true"`
 }
 
 type ImportWebauthnCredentials []ImportWebauthnCredential
@@ -66,8 +82,6 @@ type ImportOTPSecret struct {
 type ImportOrExportEntry struct {
 	// UserID optional uuid.v4. If not provided a new one will be generated for the user
 	UserID string `json:"user_id,omitempty" yaml:"user_id" validate:"omitempty,uuid4"`
-	// CustomUserID optional string. Should only be provided when importing passkeys and when it's needed to link the users in your database.
-	CustomUserID string `json:"custom_user_id" yaml:"custom_user_id" validate:"omitempty"`
 	// Emails optional list of emails
 	Emails Emails `json:"emails" yaml:"emails" jsonschema:"type=array,minItems=1" validate:"required_if=Username 0,unique=Address,dive"`
 	// Username optional username of the user

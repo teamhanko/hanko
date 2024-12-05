@@ -74,6 +74,8 @@ func TransformValidationErrors(err error) []string {
 				vErrs[i] = fmt.Sprintf("%s is required if %v", err.Field(), err.Param())
 			case "min":
 				vErrs[i] = fmt.Sprintf("length of %s must be greater or equal to %v", err.Field(), err.Param())
+			case "excluded_if":
+				vErrs[i] = fmt.Sprintf("%s must not be set when %s", err.Field(), err.Param())
 			default:
 				vErrs[i] = fmt.Sprintf("something wrong on %s; %s", err.Field(), err.Tag())
 			}
