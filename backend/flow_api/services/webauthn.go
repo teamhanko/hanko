@@ -196,11 +196,10 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	}
 
 	var userID uuid.UUID
+	// Only get the userID when it is a mfa login. For passkeys the userID will be found out in GetWebAuthnUser.
+	// Otherwise, a custom user handle could not be an uuid.
 	if p.IsMFA {
 		userID = sessionDataModel.UserId
-	} else {
-		// When the UserHandle is not an uuid it is assumed that it is a custom UserHandle, so it's ok to ignore the error
-		userID, _ = uuid.FromBytes(credentialAssertionData.Response.UserHandle)
 	}
 
 	webAuthnUser, userModel, err := s.GetWebAuthnUser(p.Tx, *credentialModel, userID)
@@ -352,12 +351,13 @@ func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseP
 }
 
 func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.WebauthnCredential, userID uuid.UUID) (webauthn.User, *models.User, error) {
-	var customUserHandle *string = nil
+	var customUserHandle []byte = nil
 	if userID == uuid.Nil {
 		userID = credential.UserId
-		if credential.UserHandle != nil {
-			customUserHandle = &credential.UserHandle.Handle
-		}
+	}
+
+	if credential.UserHandle != nil {
+		customUserHandle = []byte(credential.UserHandle.Handle)
 	}
 
 	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userID)
@@ -370,7 +370,7 @@ func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.
 
 	if customUserHandle != nil {
 		return &webauthnUserWithCustomUserHandle{
-			CustomUserHandle: *customUserHandle,
+			CustomUserHandle: customUserHandle,
 			User:             *user,
 		}, user, nil
 	}
@@ -380,9 +380,9 @@ func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.
 
 type webauthnUserWithCustomUserHandle struct {
 	models.User
-	CustomUserHandle string
+	CustomUserHandle []byte
 }
 
 func (u *webauthnUserWithCustomUserHandle) WebAuthnID() []byte {
-	return []byte(u.CustomUserHandle)
+	return u.CustomUserHandle
 }
