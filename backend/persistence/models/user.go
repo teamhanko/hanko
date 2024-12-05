@@ -22,7 +22,6 @@ type User struct {
 	Username            *Username           `has_one:"username" json:"username,omitempty"`
 	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
-	UseCustomID         bool                `db:"-" json:"-"`
 }
 
 func (user *User) DeleteWebauthnCredential(credentialId string) {
