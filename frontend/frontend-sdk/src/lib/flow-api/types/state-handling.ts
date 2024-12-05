@@ -1,7 +1,7 @@
 import { State } from "../State";
 
 import {
-  CredentialOnboardingChooserActions,
+  CredentialOnboardingChooserActions, DeviceTrustActions,
   LoginInitActions,
   LoginMethodChooserActions,
   LoginOTPActions,
@@ -38,6 +38,7 @@ import {
 export type StateName =
   | "account_deleted"
   | "credential_onboarding_chooser"
+  | "device_trust"
   | "error"
   | "login_init"
   | "login_method_chooser"
@@ -65,6 +66,7 @@ export type StateName =
 export interface Actions {
   readonly account_deleted: null;
   readonly credential_onboarding_chooser: CredentialOnboardingChooserActions;
+  readonly device_trust: DeviceTrustActions;
   readonly error: null;
   readonly login_init: LoginInitActions;
   readonly login_method_chooser: LoginMethodChooserActions;
@@ -93,6 +95,7 @@ export interface Actions {
 export interface Payloads {
   readonly account_deleted: null;
   readonly credential_onboarding_chooser: null;
+  readonly device_trust: null;
   readonly error: null;
   readonly login_init: LoginInitPayload;
   readonly login_method_chooser: null;

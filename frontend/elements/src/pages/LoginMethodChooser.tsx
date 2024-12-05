@@ -22,7 +22,8 @@ interface Props {
 
 const LoginMethodChooserPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
+  const { hanko, setLoadingAction, stateHandler, lastLogin } =
+    useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
   const onPasswordSelectSubmit = async (event: Event) => {
@@ -63,7 +64,11 @@ const LoginMethodChooserPage = (props: Props) => {
           hidden={!flowState.actions.continue_to_passcode_confirmation?.(null)}
           onSubmit={onPasscodeSelectSubmit}
         >
-          <Button secondary={true} uiAction={"passcode-submit"} icon={"mail"}>
+          <Button
+            secondary={true}
+            uiAction={"passcode-submit"}
+            icon={"mail"}
+          >
             {t("labels.passcode")}
           </Button>
         </Form>

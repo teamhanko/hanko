@@ -71,9 +71,10 @@ func DefaultConfig() *Config {
 		Session: Session{
 			Lifespan: "12h",
 			Cookie: Cookie{
-				HttpOnly: true,
-				SameSite: "strict",
-				Secure:   true,
+				HttpOnly:  true,
+				Retention: "persistent",
+				SameSite:  "strict",
+				Secure:    true,
 			},
 			ServerSide: ServerSide{
 				Enabled: false,
@@ -117,21 +118,35 @@ func DefaultConfig() *Config {
 		},
 		ThirdParty: ThirdParty{
 			Providers: ThirdPartyProviders{
-				Google: ThirdPartyProvider{
-					DisplayName:  "Google",
-					AllowLinking: true,
-				},
-				GitHub: ThirdPartyProvider{
-					DisplayName:  "GitHub",
-					AllowLinking: true,
-				},
 				Apple: ThirdPartyProvider{
 					DisplayName:  "Apple",
 					AllowLinking: true,
+					Name:         "apple",
 				},
 				Discord: ThirdPartyProvider{
 					DisplayName:  "Discord",
 					AllowLinking: true,
+					Name:         "discord",
+				},
+				LinkedIn: ThirdPartyProvider{
+					DisplayName:  "LinkedIn",
+					AllowLinking: true,
+					Name:         "linkedin",
+				},
+				Microsoft: ThirdPartyProvider{
+					DisplayName:  "Microsoft",
+					AllowLinking: true,
+					Name:         "microsoft",
+				},
+				GitHub: ThirdPartyProvider{
+					DisplayName:  "GitHub",
+					AllowLinking: true,
+					Name:         "github",
+				},
+				Google: ThirdPartyProvider{
+					DisplayName:  "Google",
+					AllowLinking: true,
+					Name:         "google",
 				},
 			},
 		},
@@ -168,6 +183,9 @@ func DefaultConfig() *Config {
 		MFA: MFA{
 			AcquireOnLogin:        false,
 			AcquireOnRegistration: true,
+			DeviceTrustCookieName: "hanko-device-token",
+			DeviceTrustDuration:   30 * 24 * time.Hour, // 30 days
+			DeviceTrustPolicy:     "prompt",
 			Enabled:               true,
 			Optional:              true,
 			SecurityKeys: SecurityKeys{

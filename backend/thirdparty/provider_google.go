@@ -20,7 +20,8 @@ var DefaultGoogleScopes = []string{
 }
 
 type googleProvider struct {
-	*oauth2.Config
+	config      config.ThirdPartyProvider
+	oauthConfig *oauth2.Config
 }
 
 type GoogleUser struct {
@@ -38,7 +39,8 @@ func NewGoogleProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 	}
 
 	return &googleProvider{
-		Config: &oauth2.Config{
+		config: config,
+		oauthConfig: &oauth2.Config{
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
@@ -51,13 +53,17 @@ func NewGoogleProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 	}, nil
 }
 
+func (g googleProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+	return g.oauthConfig.AuthCodeURL(state, opts...)
+}
+
 func (g googleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.Exchange(context.Background(), code)
+	return g.oauthConfig.Exchange(context.Background(), code)
 }
 
 func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	var user GoogleUser
-	if err := makeRequest(token, g.Config, GoogleUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(token, g.oauthConfig, GoogleUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 
@@ -88,5 +94,5 @@ func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 }
 
 func (g googleProvider) Name() string {
-	return "google"
+	return g.config.Name
 }

@@ -36,6 +36,11 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 		}
+	} else {
+		err = c.Stash().Set(shared.StashPathUserID, userId.String())
+		if err != nil {
+			return fmt.Errorf("failed to set user_id to the stash: %w", err)
+		}
 	}
 
 	err = h.createUser(

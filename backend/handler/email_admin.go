@@ -42,23 +42,6 @@ func NewEmailAdminHandler(cfg *config.Config, persister persistence.Persister) E
 	}
 }
 
-func loadDto[I admin.EmailRequests](ctx echo.Context) (*I, error) {
-	var adminDto I
-	err := ctx.Bind(&adminDto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return nil, echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	err = ctx.Validate(adminDto)
-	if err != nil {
-		ctx.Logger().Error(err)
-		return nil, echo.NewHTTPError(http.StatusBadRequest, err)
-	}
-
-	return &adminDto, nil
-}
-
 func (h *emailAdminHandler) List(ctx echo.Context) error {
 	listDto, err := loadDto[admin.ListEmailRequestDto](ctx)
 	if err != nil {

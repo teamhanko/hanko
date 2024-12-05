@@ -31,7 +31,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	emailService, err := services.NewEmailService(*cfg)
 	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
-	passwordService := services.NewPasswordService(*cfg, persister)
+	passwordService := services.NewPasswordService(persister)
 	webauthnService := services.NewWebauthnService(*cfg, persister)
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
@@ -78,7 +78,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
 	}
 
-	sessionMiddleware := hankoMiddleware.Session(cfg, sessionManager)
+	sessionMiddleware := hankoMiddleware.Session(cfg, persister, sessionManager)
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 
@@ -103,6 +103,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		httplimit.HeaderRateLimitRemaining,
 		httplimit.HeaderRateLimitReset,
 		"X-Session-Lifetime",
+		"X-Session-Retention",
 	}
 
 	if cfg.Session.EnableAuthTokenHeader {

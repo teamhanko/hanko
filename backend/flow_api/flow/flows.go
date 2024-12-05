@@ -4,6 +4,7 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
+	"github.com/teamhanko/hanko/backend/flow_api/flow/device_trust"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_creation"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_usage"
@@ -24,6 +25,7 @@ var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
 		credential_usage.ContinueWithLoginIdentifier{},
 		credential_usage.WebauthnGenerateRequestOptions{},
 		credential_usage.WebauthnVerifyAssertionResponse{},
+		credential_usage.RememberMe{},
 		shared.ThirdPartyOAuth{}).
 	State(shared.StateLoginPasskey,
 		credential_usage.WebauthnVerifyAssertionResponse{},
@@ -103,6 +105,13 @@ var MFAUsageSubFlow = flowpilot.NewSubFlow(shared.FlowMFAUsage).
 		mfa_usage.ContinueToLoginSecurityKey{}).
 	MustBuild()
 
+var DeviceTrustSubFlow = flowpilot.NewSubFlow(shared.FlowDeviceTrust).
+	State(shared.StateDeviceTrust,
+		device_trust.TrustDevice{},
+		shared.Skip{},
+		shared.Back{}).
+	MustBuild()
+
 func NewLoginFlow(debug bool) flowpilot.Flow {
 	return flowpilot.NewFlow(shared.FlowLogin).
 		State(shared.StateSuccess).
@@ -111,6 +120,7 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 		BeforeState(shared.StateLoginInit,
 			login.WebauthnGenerateRequestOptionsForConditionalUi{}).
 		BeforeState(shared.StateSuccess,
+			device_trust.IssueTrustDeviceCookie{},
 			shared.IssueSession{},
 			shared.GetUserData{}).
 		AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
@@ -126,6 +136,7 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 			CapabilitiesSubFlow,
 			CredentialUsageSubFlow,
 			CredentialOnboardingSubFlow,
+			DeviceTrustSubFlow,
 			UserDetailsSubFlow,
 			MFACreationSubFlow,
 			MFAUsageSubFlow).
@@ -138,6 +149,7 @@ func NewRegistrationFlow(debug bool) flowpilot.Flow {
 	return flowpilot.NewFlow(shared.FlowRegistration).
 		State(shared.StateRegistrationInit,
 			registration.RegisterLoginIdentifier{},
+			credential_usage.RememberMe{},
 			shared.ThirdPartyOAuth{}).
 		State(shared.StateThirdParty,
 			shared.ExchangeToken{}).

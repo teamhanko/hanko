@@ -101,7 +101,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedRedirectTo:      "https://app.test.example",
 			expectedBaseURL:          "https://login.test.example",
 			expectedError:            thirdparty.ErrorCodeInvalidRequest,
-			expectedErrorDescription: "is not supported",
+			expectedErrorDescription: "unknownProvider",
 		},
 		{
 			name:                     "error redirect when requesting a redirectTo that is not allowed",
@@ -121,7 +121,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {
 			requestedRedirectTo:      "https://app.test.example",
 			expectedBaseURL:          "https://error.test.example",
 			expectedError:            thirdparty.ErrorCodeInvalidRequest,
-			expectedErrorDescription: "is not supported",
+			expectedErrorDescription: "unknown provider",
 		},
 	}
 

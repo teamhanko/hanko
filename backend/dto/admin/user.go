@@ -16,6 +16,7 @@ type User struct {
 	UpdatedAt           time.Time                        `json:"updated_at"`
 	Password            *PasswordCredential              `json:"password,omitempty"`
 	Identities          []Identity                       `json:"identities,omitempty"`
+	OTP                 *OTPDto                          `json:"otp"`
 }
 
 // FromUserModel Converts the DB model to a DTO object
@@ -46,6 +47,14 @@ func FromUserModel(model models.User) User {
 		}
 	}
 
+	var otp *OTPDto = nil
+	if model.OTPSecret != nil {
+		otp = &OTPDto{
+			ID:        model.OTPSecret.ID,
+			CreatedAt: model.OTPSecret.CreatedAt,
+		}
+	}
+
 	return User{
 		ID:                  model.ID,
 		WebauthnCredentials: credentials,
@@ -55,6 +64,7 @@ func FromUserModel(model models.User) User {
 		UpdatedAt:           model.UpdatedAt,
 		Password:            passwordCredential,
 		Identities:          identities,
+		OTP:                 otp,
 	}
 }
 

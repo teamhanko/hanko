@@ -22,7 +22,8 @@ var DefaultDiscordScopes = []string{
 }
 
 type discordProvider struct {
-	*oauth2.Config
+	config      config.ThirdPartyProvider
+	oauthConfig *oauth2.Config
 }
 
 type DiscordUser struct {
@@ -41,7 +42,8 @@ func NewDiscordProvider(config config.ThirdPartyProvider, redirectURL string) (O
 	}
 
 	return &discordProvider{
-		Config: &oauth2.Config{
+		config: config,
+		oauthConfig: &oauth2.Config{
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
 			Endpoint: oauth2.Endpoint{
@@ -54,13 +56,17 @@ func NewDiscordProvider(config config.ThirdPartyProvider, redirectURL string) (O
 	}, nil
 }
 
+func (p discordProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+	return p.oauthConfig.AuthCodeURL(state, opts...)
+}
+
 func (g discordProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.Exchange(context.Background(), code)
+	return g.oauthConfig.Exchange(context.Background(), code)
 }
 
 func (g discordProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	var user DiscordUser
-	if err := makeRequest(token, g.Config, DiscordUserInfoEndpoint, &user); err != nil {
+	if err := makeRequest(token, g.oauthConfig, DiscordUserInfoEndpoint, &user); err != nil {
 		return nil, err
 	}
 
@@ -99,5 +105,5 @@ func (g discordProvider) buildAvatarURL(userID string, avatarHash string) string
 }
 
 func (g discordProvider) Name() string {
-	return "discord"
+	return g.config.Name
 }

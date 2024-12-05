@@ -17,6 +17,8 @@ import Link from "../components/link/Link";
 import Input from "../components/form/Input";
 import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 import Divider from "../components/spacer/Divider";
+import Checkbox from "../components/form/Checkbox";
+import Spacer from "../components/spacer/Spacer";
 
 interface Props {
   state: State<"registration_init">;
@@ -39,6 +41,7 @@ const RegistrationInitPage = (props: Props) => {
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
   >(undefined);
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   const onIdentifierSubmit = async (event: Event) => {
     event.preventDefault();
@@ -84,6 +87,14 @@ const RegistrationInitPage = (props: Props) => {
         redirect_to: window.location.toString(),
       })
       .run();
+    await hanko.flow.run(nextState, stateHandler);
+  };
+
+  const onRememberMeChange = async (event: Event) => {
+    const nextState = await flowState.actions
+      .remember_me({ remember_me: !rememberMe })
+      .run();
+    setRememberMe((prev) => !prev);
     await hanko.flow.run(nextState, stateHandler);
   };
 
@@ -178,13 +189,18 @@ const RegistrationInitPage = (props: Props) => {
               .inputs.provider.allowed_values?.map((v) => {
                 return (
                   <Form
+                    key={v.value}
                     onSubmit={(event) => onThirdpartySubmit(event, v.value)}
                   >
                     <Button
                       uiAction={"thirdparty-submit"}
                       secondary
                       // @ts-ignore
-                      icon={v.value}
+                      icon={
+                        v.value.startsWith("custom_")
+                          ? "customProvider"
+                          : v.value
+                      }
                     >
                       {t("labels.signInWith", { provider: v.name })}
                     </Button>
@@ -192,6 +208,18 @@ const RegistrationInitPage = (props: Props) => {
                 );
               })
           : null}
+        {flowState.actions.remember_me?.(null) && (
+          <Fragment>
+            <Spacer />
+            <Checkbox
+              required={false}
+              type={"checkbox"}
+              label={t("labels.staySignedIn")}
+              checked={rememberMe}
+              onChange={onRememberMeChange}
+            />
+          </Fragment>
+        )}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />

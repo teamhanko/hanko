@@ -13,6 +13,8 @@ import (
 type ThirdParty struct {
 	// `providers` contains the configurations for the available OAuth/OIDC identity providers.
 	Providers ThirdPartyProviders `yaml:"providers" json:"providers,omitempty" koanf:"providers" jsonschema:"title=providers,uniqueItems=true"`
+	// `custom_providers contains the configurations for custom OAuth/OIDC identity providers.
+	CustomProviders CustomThirdPartyProviders `yaml:"custom_providers" json:"custom_providers,omitempty" koanf:"custom_providers" jsonschema:"title=custom_providers"`
 	// `redirect_url` is the URL the third party provider redirects to with an authorization code. Must consist of the base URL
 	// of your running Hanko backend instance and the `callback` endpoint of the API,
 	// i.e. `{YOUR_BACKEND_INSTANCE}/thirdparty/callback.`
@@ -49,12 +51,15 @@ type ThirdParty struct {
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
-	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
+	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
 	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
-	if t.Providers.HasEnabled() {
+	hasEnabledProviders := t.Providers.HasEnabled()
+	hasEnabledCustomProviders := t.CustomProviders.HasEnabled()
+
+	if hasEnabledProviders || hasEnabledCustomProviders {
 		if t.RedirectURL == "" {
 			return errors.New("redirect_url must be set")
 		}
@@ -78,12 +83,77 @@ func (t *ThirdParty) Validate() error {
 		}
 	}
 
-	err := t.Providers.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate third party providers: %w", err)
+	if hasEnabledProviders {
+		err := t.Providers.Validate()
+		if err != nil {
+			return fmt.Errorf("failed to validate third party providers: %w", err)
+		}
+	}
+
+	if hasEnabledCustomProviders {
+		err := t.CustomProviders.Validate()
+		if err != nil {
+			return fmt.Errorf("failed to validate custom third party providers: %w", err)
+		}
 	}
 
 	return nil
+}
+
+func (t ThirdParty) JSONSchemaExtend(schema *jsonschema.Schema) {
+	schema.If = &jsonschema.Schema{
+		AllOf: []*jsonschema.Schema{
+			t.JSONSchemaNoBuiltInProviderEnabled(),
+			t.JSONSchemaNoCustomProviderEnabled(),
+		},
+	}
+	schema.Then = &jsonschema.Schema{
+		Required: []string{},
+	}
+	schema.Else = &jsonschema.Schema{
+		Required: []string{"redirect_url", "error_redirect_url", "allowed_redirect_urls"},
+	}
+}
+
+func (t ThirdParty) JSONSchemaNoBuiltInProviderEnabled() *jsonschema.Schema {
+	enabledFalseOrNullProperties := orderedmap.New[string, *jsonschema.Schema]()
+	enabledFalseOrNullProperties.Set("enabled", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Const: "null"},
+		},
+	})
+	enabledFalseOrNullSchema := &jsonschema.Schema{
+		Type: "object",
+		PatternProperties: map[string]*jsonschema.Schema{
+			"^.*": {Ref: "#/$defs/ThirdPartyProvider", Properties: enabledFalseOrNullProperties},
+		},
+	}
+
+	properties := orderedmap.New[string, *jsonschema.Schema]()
+	properties.Set("providers", enabledFalseOrNullSchema)
+
+	return &jsonschema.Schema{Properties: properties}
+}
+
+func (t ThirdParty) JSONSchemaNoCustomProviderEnabled() *jsonschema.Schema {
+	enabledFalseOrNullProperties := orderedmap.New[string, *jsonschema.Schema]()
+	enabledFalseOrNullProperties.Set("enabled", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Type: "null"},
+		},
+	})
+	enabledFalseOrNullSchema := &jsonschema.Schema{
+		AdditionalProperties: &jsonschema.Schema{
+			Ref: "#/$defs/CustomThirdPartyProvider", Properties: enabledFalseOrNullProperties,
+		},
+	}
+
+	properties := orderedmap.New[string, *jsonschema.Schema]()
+	properties.Set("custom_providers", enabledFalseOrNullSchema)
+
+	return &jsonschema.Schema{Properties: properties}
 }
 
 func (t *ThirdParty) PostProcess() error {
@@ -97,7 +167,199 @@ func (t *ThirdParty) PostProcess() error {
 		t.AllowedRedirectURLMap[redirectUrl] = g
 	}
 
+	if t.CustomProviders != nil {
+		providers := make(map[string]CustomThirdPartyProvider)
+		for key, provider := range t.CustomProviders {
+			// add prefix per default to ensure built-in and custom providers can be distinguished
+			keyLower := strings.ToLower(key)
+			provider.Name = "custom_" + keyLower
+			providers[keyLower] = provider
+		}
+		t.CustomProviders = providers
+	}
+
 	return nil
+}
+
+type CustomThirdPartyProviders map[string]CustomThirdPartyProvider
+
+func (p *CustomThirdPartyProviders) GetEnabled() []CustomThirdPartyProvider {
+	var enabledProviders []CustomThirdPartyProvider
+	for _, provider := range *p {
+		if provider.Enabled {
+			enabledProviders = append(enabledProviders, provider)
+		}
+	}
+
+	return enabledProviders
+}
+
+func (p *CustomThirdPartyProviders) HasEnabled() bool {
+	for _, provider := range *p {
+		if provider.Enabled {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *CustomThirdPartyProviders) Validate() error {
+	for _, v := range p.GetEnabled() {
+		err := v.Validate()
+		if err != nil {
+			return fmt.Errorf(
+				"failed to validate third party provider %s: %w",
+				strings.TrimPrefix(v.Name, "custom_"),
+				err,
+			)
+		}
+	}
+	return nil
+}
+
+type CustomThirdPartyProvider struct {
+	// `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
+	//
+	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
+	// email address of the third party provider account.
+	AllowLinking bool `yaml:"allow_linking" json:"allow_linking,omitempty" koanf:"allow_linking" jsonschema:"default=false"`
+	// `attribute_mapping` defines a map that associates a set of known standard OIDC conformant end-user claims
+	// (the key of a map entry) at the Hanko backend to claims retrieved from a third party provider (the value of the
+	// map entry). This is primarily necessary if a non-OIDC provider is configured/used in which case it is probable
+	// that user data returned from the userinfo endpoint does not already conform to OIDC standard claims.
+	//
+	// Example: You configure an OAuth Provider (i.e. non-OIDC) and the provider's configured userinfo endpoint returns
+	// an end-user's user ID at the provider not under a `sub` key in its JSON response but rather under a `user_id`
+	// key. You would then configure an attribute mapping as follows:
+	//
+	// ```yaml
+	//attribute_mapping:
+	//  sub: user_id
+	// ```
+	//
+	// See https://openid.net/specs/openid-connect-core-1_0.html#StandardClaims for a list of known standard claims
+	// that provider claims can be mapped into. Any other claims received from a provider are not discarded but are
+	// retained internally in a `custom_claims` claim.
+	//
+	// Mappings are one-to-one mappings, complex mappings (e.g. mapping concatenations of two claims) are not possible.
+	AttributeMapping map[string]string `yaml:"attribute_mapping" json:"attribute_mapping,omitempty" koanf:"attribute_mapping"`
+	// URL of the provider's authorization endpoint where the end-user is redirected to authenticate and grant consent for
+	// an application to access their resources.
+	//
+	// Required if `use_discovery` is false or omitted.
+	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint,omitempty" koanf:"authorization_endpoint"`
+	// `name` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by
+	// concatenating the prefix "custom_". This allows distinguishing between built-in and custom providers at runtime.
+	Name string `jsonschema:"-"`
+	// `issuer` is the provider's issuer identifier. It should be a URL that uses the "https"
+	//	scheme and has no query or fragment components.
+	//
+	// Required if `use_discovery` is true.
+	Issuer string `yaml:"issuer" json:"issuer,omitempty" koanf:"issuer"`
+	// `client_id` is the ID of the OAuth/OIDC client. Must be obtained from the provider.
+	//
+	// Required if the provider is `enabled`.
+	ClientID string `yaml:"client_id" json:"client_id,omitempty" koanf:"client_id" split_words:"true"`
+	// `display_name` is the name of the provider that is intended to be shown to an end-user.
+	//
+	// Required if the provider is `enabled`.
+	DisplayName string `yaml:"display_name" json:"display_name,omitempty" koanf:"display_name"`
+	// `enabled` indicates if the provider is enabled or disabled.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `scopes` is a list of scopes requested from the provider that specify the level of access an application has to
+	// a user's resources on a server, defining what actions the app can perform on behalf of the user.
+	//
+	// Required if the provider is `enabled`.
+	Scopes []string `yaml:"scopes" json:"scopes,omitempty" koanf:"scopes,omitempty"`
+	// `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
+	//
+	// Required if the provider is `enabled`.
+	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
+	// URL of the provider's token endpoint URL where an application exchanges an authorization code for an access
+	// token, which is used to authenticate API requests on behalf of the end-user.
+	//
+	// Required if `use_discovery` is false or omitted.
+	TokenEndpoint string `yaml:"token_endpoint" json:"token_endpoint,omitempty" koanf:"token_endpoint"`
+	// `use_discovery` determines if configuration information about an OpenID Connect (OIDC) provider, such as
+	// endpoint URLs and supported features,should be automatically retrieved, from a well-known
+	// URL (typically /.well-known/openid-configuration).
+	UseDiscovery bool `yaml:"use_discovery" json:"use_discovery,omitempty" koanf:"use_discovery" jsonschema:"default=true"`
+	// URL of the provider's endpoint that returns claims about an authenticated end-user.
+	//
+	// Required if `use_discovery` is false or omitted.
+	UserinfoEndpoint string `yaml:"userinfo_endpoint" json:"userinfo_endpoint,omitempty" koanf:"userinfo_endpoint"`
+}
+
+func (p *CustomThirdPartyProvider) Validate() error {
+	if p.Enabled {
+		if p.DisplayName == "" {
+			return errors.New("missing display_name")
+		}
+		if p.ClientID == "" {
+			return errors.New("missing client_id")
+		}
+		if p.Secret == "" {
+			return errors.New("missing client secret")
+		}
+		if len(p.Scopes) == 0 {
+			return errors.New("missing scopes")
+		}
+		if p.UseDiscovery == true {
+			if p.Issuer == "" {
+				return errors.New("issuer must be set when use_discovery is set to true")
+			}
+		} else {
+			authorizationEndpointSet := p.AuthorizationEndpoint != ""
+			tokenEndpointSet := p.TokenEndpoint != ""
+			userinfoEndpointSet := p.UserinfoEndpoint != ""
+
+			if !authorizationEndpointSet || !tokenEndpointSet || !userinfoEndpointSet {
+				return errors.New("authorization_endpoint, token_endpoint and userinfo_endpoint must be set when use_discovery is set to false or unset")
+			}
+		}
+	}
+
+	return nil
+}
+
+func (CustomThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
+	schema.Title = "custom_provider"
+
+	enabledFalseOrNull := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
+	enabledFalseOrNull.Properties.Set("enabled", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Type: "null"},
+		},
+	})
+
+	useDiscoveryFalseOrNull := &jsonschema.Schema{Properties: orderedmap.New[string, *jsonschema.Schema]()}
+	useDiscoveryFalseOrNull.Properties.Set("use_discovery", &jsonschema.Schema{
+		AnyOf: []*jsonschema.Schema{
+			{Const: false},
+			{Type: "null"},
+		},
+	})
+
+	endpointsRequired := &jsonschema.Schema{
+		Required: []string{"authorization_endpoint", "token_endpoint", "userinfo_endpoint"},
+	}
+
+	issuerRequired := &jsonschema.Schema{
+		Required: []string{"issuer"},
+	}
+
+	schema.If = enabledFalseOrNull
+	schema.Then = &jsonschema.Schema{
+		Required: []string{},
+	}
+	schema.Else = &jsonschema.Schema{
+		Required: []string{"display_name", "client_id", "secret", "scopes"},
+		If:       useDiscoveryFalseOrNull,
+		Then:     endpointsRequired,
+		Else:     issuerRequired,
+	}
 }
 
 type ThirdPartyProviders struct {
@@ -181,6 +443,9 @@ type ThirdPartyProvider struct {
 	//
 	// Required if the provider is `enabled`.
 	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
+	// `name` is a unique name/slug/identifier for the provider. It is the lowercased key of the corresponding field
+	// in ThirdPartyProviders. See also: CustomThirdPartyProvider.Name.
+	Name string `jsonschema:"-"`
 }
 
 func (ThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
@@ -194,7 +459,7 @@ func (ThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
 		Required: []string{"client_id", "secret"},
 	}
 	schema.Else = &jsonschema.Schema{
-		Required: []string{"enabled"},
+		Required: []string{},
 	}
 }
 

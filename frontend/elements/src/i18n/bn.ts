@@ -47,6 +47,7 @@ export const bn: Translation = {
     authenticatorApp: "প্রমাণীকরণ অ্যাপ",
     authenticatorAppAlreadySetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করা হয়েছে",
     authenticatorAppNotSetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করুন",
+    trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন?",
   },
   texts: {
     enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
@@ -91,6 +92,8 @@ export const bn: Translation = {
     authenticatorAppNotSetUp:
       "মাল্টি-ফ্যাক্টর প্রমাণীকরণের জন্য সময়-ভিত্তিক এককালীন পাসওয়ার্ড (TOTP) তৈরি করার জন্য একটি প্রমাণীকরণ অ্যাপ দ্বারা আপনার অ্যাকাউন্টটি সুরক্ষিত করুন।",
     securityKeySetUp: "নিরাপত্তা কী যুক্ত করুন",
+    trustDevice:
+      "যদি আপনি এই ব্রাউজারটিকে বিশ্বাস করেন, তবে পরেরবার লগইন করার সময় আপনাকে আপনার OTP (ওয়ান-টাইম-পাসওয়ার্ড) প্রবেশ করাতে হবে না বা মাল্টি-ফ্যাক্টর অথেনটিকেশন (MFA) এর জন্য আপনার সিকিউরিটি কী ব্যবহার করতে হবে না।",
   },
   labels: {
     or: "বা",
@@ -149,6 +152,9 @@ export const bn: Translation = {
     authenticatorAppAdd: "সেট আপ করুন",
     configured: "কনফিগার করা হয়েছে",
     useAnotherMethod: "আরেকটি পদ্ধতি ব্যবহার করুন",
+    lastUsed: "সর্বশেষ ব্যবহৃত",
+    trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন",
+    staySignedIn: "সাইন ইন থাকা চালিয়ে যান",
   },
   errors: {
     somethingWentWrong:

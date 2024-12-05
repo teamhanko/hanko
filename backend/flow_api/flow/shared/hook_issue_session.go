@@ -8,6 +8,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"time"
 )
 
 type IssueSession struct {
@@ -79,12 +80,27 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
+	rememberMeSelected := c.Stash().Get(StashPathRememberMeSelected).Bool()
 	cookie, err := deps.SessionManager.GenerateCookie(signedSessionToken)
 	if err != nil {
 		return fmt.Errorf("failed to generate auth cookie, %w", err)
 	}
 
-	deps.HttpContext.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
+	lifespan, err := time.ParseDuration(deps.Cfg.Session.Lifespan)
+	if err != nil {
+		return fmt.Errorf("failed to parse session lifespan: %w", err)
+	}
+
+	sessionRetention := "persistent"
+	if deps.Cfg.Session.Cookie.Retention == "session" ||
+		(deps.Cfg.Session.Cookie.Retention == "prompt" && !rememberMeSelected) {
+		// Issue a session cookie.
+		cookie.MaxAge = 0
+		sessionRetention = "session"
+	}
+
+	deps.HttpContext.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", int(lifespan.Seconds())))
+	deps.HttpContext.Response().Header().Set("X-Session-Retention", fmt.Sprintf("%s", sessionRetention))
 
 	if deps.Cfg.Session.EnableAuthTokenHeader {
 		deps.HttpContext.Response().Header().Set("X-Auth-Token", signedSessionToken)
