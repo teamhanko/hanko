@@ -37,7 +37,7 @@ require (
 	github.com/rs/zerolog v1.33.0
 	github.com/russellhaering/gosaml2 v0.9.1
 	github.com/russellhaering/goxmldsig v1.4.0
-	github.com/sethvargo/go-limiter v0.7.2
+	github.com/sethvargo/go-limiter v1.0.0
 	github.com/sethvargo/go-redisstore v0.3.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.9.0
