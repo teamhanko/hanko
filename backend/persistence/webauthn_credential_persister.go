@@ -27,7 +27,7 @@ func NewWebauthnCredentialPersister(db *pop.Connection) WebauthnCredentialPersis
 
 func (p *webauthnCredentialPersister) Get(id string) (*models.WebauthnCredential, error) {
 	credential := models.WebauthnCredential{}
-	err := p.db.Find(&credential, id)
+	err := p.db.Eager().Find(&credential, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
