@@ -109,8 +109,8 @@ github.com/fatih/structs v1.1.0/go.mod h1:9NiDSp5zOcgEDl+j00MP/WkGVPOlPRLejGD8Ga
 github.com/fsnotify/fsnotify v1.4.9/go.mod h1:znqG4EE+3YCdAaPaxE2ZRY/06pZUdp0tY4IgpuI1SZQ=
 github.com/fsnotify/fsnotify v1.5.1 h1:mZcQUHVQUQWoPXXtuf9yuEXKudkV2sx1E06UadKWpgI=
 github.com/fsnotify/fsnotify v1.5.1/go.mod h1:T3375wBYaZdLLcVNkcVbzGHY7f1l/uK5T5Ai1i3InKU=
-github.com/fxamacker/cbor/v2 v2.6.0 h1:sU6J2usfADwWlYDAFhZBQ6TnLFBHxgesMrQfQgk1tWA=
-github.com/fxamacker/cbor/v2 v2.6.0/go.mod h1:pxXPTn3joSm21Gbwsv0w9OSA2y1HFR9qXEeXQVeNoDQ=
+github.com/fxamacker/cbor/v2 v2.7.0 h1:iM5WgngdRBanHcxugY4JySA0nk1wZorNOpTgCMedv5E=
+github.com/fxamacker/cbor/v2 v2.7.0/go.mod h1:pxXPTn3joSm21Gbwsv0w9OSA2y1HFR9qXEeXQVeNoDQ=
 github.com/gabriel-vasile/mimetype v1.4.3 h1:in2uUcidCuFcDKtdcBxlR0rJ1+fsokWf+uqxgUFjbI0=
 github.com/gabriel-vasile/mimetype v1.4.3/go.mod h1:d8uq/6HKRL6CGdk+aubisF/M5GcPfT7nKyLpA0lbSSk=
 github.com/ghodss/yaml v1.0.0/go.mod h1:4dBDuWmgqj2HViK6kFavaiC9ZROes6MMH2rRYeMEF04=
@@ -142,10 +142,10 @@ github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/me
 github.com/go-test/deep v1.0.2-0.20181118220953-042da051cf31/go.mod h1:wGDj63lr65AM2AQyKZd/NYHGb0R+1RLqB8NKt3aSFNA=
 github.com/go-testfixtures/testfixtures/v3 v3.9.0 h1:938g5V+GWLVejm3Hc+nWCuEXRlcglZDDlN/t1gWzcSY=
 github.com/go-testfixtures/testfixtures/v3 v3.9.0/go.mod h1:cdsKD2ApFBjdog9jRsz6EJqF+LClq/hrwE9K/1Dzo4s=
-github.com/go-webauthn/webauthn v0.10.2 h1:OG7B+DyuTytrEPFmTX503K77fqs3HDK/0Iv+z8UYbq4=
-github.com/go-webauthn/webauthn v0.10.2/go.mod h1:Gd1IDsGAybuvK1NkwUTLbGmeksxuRJjVN2PE/xsPxHs=
-github.com/go-webauthn/x v0.1.9 h1:v1oeLmoaa+gPOaZqUdDentu6Rl7HkSSsmOT6gxEQHhE=
-github.com/go-webauthn/x v0.1.9/go.mod h1:pJNMlIMP1SU7cN8HNlKJpLEnFHCygLCvaLZ8a1xeoQA=
+github.com/go-webauthn/webauthn v0.11.2 h1:Fgx0/wlmkClTKlnOsdOQ+K5HcHDsDcYIvtYmfhEOSUc=
+github.com/go-webauthn/webauthn v0.11.2/go.mod h1:aOtudaF94pM71g3jRwTYYwQTG1KyTILTcZqN1srkmD0=
+github.com/go-webauthn/x v0.1.14 h1:1wrB8jzXAofojJPAaRxnZhRgagvLGnLjhCAwg3kTpT0=
+github.com/go-webauthn/x v0.1.14/go.mod h1:UuVvFZ8/NbOnkDz3y1NaxtUN87pmtpC1PQ+/5BBQRdc=
 github.com/gobuffalo/attrs v1.0.3/go.mod h1:KvDJCE0avbufqS0Bw3UV7RQynESY0jjod+572ctX4t8=
 github.com/gobuffalo/envy v1.10.2 h1:EIi03p9c3yeuRCFPOKcSfajzkLb3hrRjEpHGI8I2Wo4=
 github.com/gobuffalo/envy v1.10.2/go.mod h1:qGAGwdvDsaEtPhfBzb3o0SfDea8ByGn9j8bKmVft9z8=
@@ -224,8 +224,8 @@ github.com/google/go-cmp v0.5.6/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/google/go-cmp v0.5.7/go.mod h1:n+brtR0CgQNWTVd5ZUFpTBC8YFBDLK/h/bpaJ8/DtOE=
 github.com/google/go-cmp v0.5.9/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
-github.com/google/go-tpm v0.9.0 h1:sQF6YqWMi+SCXpsmS3fd21oPy/vSddwZry4JnmltHVk=
-github.com/google/go-tpm v0.9.0/go.mod h1:FkNVkc6C+IsvDI9Jw1OveJmxGZUUaKxtrpOS47QWKfU=
+github.com/google/go-tpm v0.9.1 h1:0pGc4X//bAlmZzMKf8iz6IsDo1nYTbYJ6FZN/rg4zdM=
+github.com/google/go-tpm v0.9.1/go.mod h1:h9jEsEECg7gtLis0upRBQU+GhYVH6jMjrFxI8u6bVUY=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510 h1:El6M4kTTCOh6aBiKaUGG7oYTSPP8MxqL4YI3kZKwcP4=
