@@ -13,7 +13,7 @@ import (
 )
 
 type Manager interface {
-	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt) (string, jwt.Token, error)
+	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
@@ -90,7 +90,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt) (string, jwt.Token, error) {
+func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error) {
 	sessionID, err := uuid.NewV4()
 	if err != nil {
 		return "", nil, err
@@ -107,6 +107,10 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt) (string, jw
 
 	if email != nil {
 		_ = token.Set("email", &email)
+	}
+
+	for _, opt := range opts {
+		opt(token)
 	}
 
 	if m.issuer != "" {
@@ -157,4 +161,12 @@ func (m *manager) DeleteCookie() (*http.Cookie, error) {
 		SameSite: m.cookieConfig.SameSite,
 		MaxAge:   -1,
 	}, nil
+}
+
+type JWTOptions func(token jwt.Token)
+
+func WithValue(key string, value interface{}) JWTOptions {
+	return func(jwt jwt.Token) {
+		_ = jwt.Set(key, value)
+	}
 }
