@@ -195,14 +195,7 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		return nil, ErrInvalidWebauthnCredentialMFAOnly
 	}
 
-	var userID uuid.UUID
-	// Only get the userID when it is a mfa login. For passkeys the userID will be found out in GetWebAuthnUser.
-	// Otherwise, a custom user handle could not be an uuid.
-	if p.IsMFA {
-		userID = sessionDataModel.UserId
-	}
-
-	webAuthnUser, userModel, err := s.GetWebAuthnUser(p.Tx, *credentialModel, userID)
+	webAuthnUser, userModel, err := s.GetWebAuthnUser(p.Tx, *credentialModel)
 	if err != nil {
 		return nil, err
 	}
@@ -350,17 +343,8 @@ func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseP
 	return credential, nil
 }
 
-func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.WebauthnCredential, userID uuid.UUID) (webauthn.User, *models.User, error) {
-	var customUserHandle []byte = nil
-	if userID == uuid.Nil {
-		userID = credential.UserId
-	}
-
-	if credential.UserHandle != nil {
-		customUserHandle = []byte(credential.UserHandle.Handle)
-	}
-
-	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userID)
+func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.WebauthnCredential) (webauthn.User, *models.User, error) {
+	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(credential.UserId)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch user from db: %w", err)
 	}
@@ -368,9 +352,9 @@ func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.
 		return nil, nil, ErrInvalidWebauthnCredential
 	}
 
-	if customUserHandle != nil {
+	if credential.UserHandle != nil {
 		return &webauthnUserWithCustomUserHandle{
-			CustomUserHandle: customUserHandle,
+			CustomUserHandle: []byte(credential.UserHandle.Handle),
 			User:             *user,
 		}, user, nil
 	}
