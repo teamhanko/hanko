@@ -339,28 +339,32 @@
       "if": {
         "properties": {
           "enabled": {
-            "const": true
+            "anyOf": [
+              {
+                "const": false
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         }
       },
-      "then": {
+      "then": {},
+      "else": {
         "if": {
-          "anyOf": [
-            {
-              "properties": {
-                "use_discovery": {
+          "properties": {
+            "use_discovery": {
+              "anyOf": [
+                {
                   "const": false
-                }
-              }
-            },
-            {
-              "properties": {
-                "use_discovery": {
+                },
+                {
                   "type": "null"
                 }
-              }
+              ]
             }
-          ]
+          }
         },
         "then": {
           "required": [
@@ -375,8 +379,10 @@
           ]
         },
         "required": [
+          "display_name",
           "client_id",
-          "secret"
+          "secret",
+          "scopes"
         ]
       },
       "properties": {
@@ -406,7 +412,7 @@
         },
         "display_name": {
           "type": "string",
-          "description": "`display_name` is the name of the provider that is intended to be shown to an end-user."
+          "description": "`display_name` is the name of the provider that is intended to be shown to an end-user.\n\nRequired if the provider is `enabled`."
         },
         "enabled": {
           "type": "boolean",
@@ -418,7 +424,7 @@
             "type": "string"
           },
           "type": "array",
-          "description": "`scopes` is a list of scopes requested from the provider that specify the level of access an application has to\na user's resources on a server, defining what actions the app can perform on behalf of the user."
+          "description": "`scopes` is a list of scopes requested from the provider that specify the level of access an application has to\na user's resources on a server, defining what actions the app can perform on behalf of the user.\n\nRequired if the provider is `enabled`."
         },
         "secret": {
           "type": "string",
@@ -440,12 +446,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "client_id",
-        "display_name",
-        "scopes",
-        "secret"
-      ],
       "title": "custom_provider"
     },
     "CustomThirdPartyProviders": {
@@ -1248,6 +1248,63 @@
       ]
     },
     "ThirdParty": {
+      "if": {
+        "allOf": [
+          {
+            "properties": {
+              "providers": {
+                "patternProperties": {
+                  "^.*": {
+                    "$ref": "#/$defs/ThirdPartyProvider",
+                    "properties": {
+                      "enabled": {
+                        "anyOf": [
+                          {
+                            "const": false
+                          },
+                          {
+                            "const": "null"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          {
+            "properties": {
+              "custom_providers": {
+                "additionalProperties": {
+                  "$ref": "#/$defs/CustomThirdPartyProvider",
+                  "properties": {
+                    "enabled": {
+                      "anyOf": [
+                        {
+                          "const": false
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "then": {},
+      "else": {
+        "required": [
+          "redirect_url",
+          "error_redirect_url",
+          "allowed_redirect_urls"
+        ]
+      },
       "properties": {
         "providers": {
           "$ref": "#/$defs/ThirdPartyProviders",
@@ -1279,6 +1336,7 @@
             "type": "string"
           },
           "type": "array",
+          "minItems": 1,
           "description": "`allowed_redirect_urls` is a list of URLs the backend is allowed to redirect to after third party sign-in was\nsuccessful.\n\nSupports wildcard matching through globbing. e.g. `https://*.example.com` will allow `https://foo.example.com`\nand `https://bar.example.com` to be accepted.\n\nGlobbing is also supported for paths, e.g. `https://foo.example.com/*` will match `https://foo.example.com/page1`\nand `https://foo.example.com/page2`.\n\nA double asterisk (`**`) acts as a \"super\"-wildcard/match-all.\n\nSee [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbing.\n\nMust not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash."
         }
       },
@@ -1299,11 +1357,7 @@
           "secret"
         ]
       },
-      "else": {
-        "required": [
-          "enabled"
-        ]
-      },
+      "else": {},
       "properties": {
         "allow_linking": {
           "type": "boolean",
