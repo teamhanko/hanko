@@ -146,6 +146,64 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	assert.Equal(t, "hanko", token.Issuer())
 }
 
+func Test_GenerateJWT_SessionID(t *testing.T) {
+	tests := []struct {
+		name                     string
+		config                   config.Config
+		tokenShouldHaveSessionID bool
+	}{
+		{
+			name: "token has no session id claim if server side sessions are disabled",
+			config: config.Config{
+				Session: config.Session{
+					Lifespan: "5m",
+					ServerSide: config.ServerSide{
+						Enabled: false,
+					},
+				},
+			},
+			tokenShouldHaveSessionID: false,
+		},
+		{
+			name: "token has a session id claim if server side sessions are disabled",
+			config: config.Config{
+				Session: config.Session{
+					Lifespan: "5m",
+					ServerSide: config.ServerSide{
+						Enabled: true,
+					},
+				},
+			},
+			tokenShouldHaveSessionID: true,
+		},
+	}
+	for _, testData := range tests {
+		t.Run(testData.name, func(t *testing.T) {
+			jwkManager := test.JwkManager{}
+			sessionGenerator, err := NewManager(&jwkManager, testData.config)
+			assert.NoError(t, err)
+			require.NotEmpty(t, sessionGenerator)
+
+			userId, _ := uuid.NewV4()
+			tokenString, _, err := sessionGenerator.GenerateJWT(userId, nil)
+			assert.NoError(t, err)
+
+			token, err := jwt.ParseString(tokenString, jwt.WithVerify(false))
+			rawSessionID, tokenHasSessionID := token.Get("session_id")
+			assert.NoError(t, err)
+
+			assert.Equal(t, testData.tokenShouldHaveSessionID, tokenHasSessionID)
+
+			if testData.tokenShouldHaveSessionID {
+				sessionIDstring, ok := rawSessionID.(string)
+				assert.True(t, ok)
+				sessionID := uuid.FromStringOrNil(sessionIDstring)
+				assert.NotEqual(t, sessionID, uuid.Nil)
+			}
+		})
+	}
+}
+
 func TestGenerator_Verify_Error(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{}
