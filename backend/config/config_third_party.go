@@ -52,7 +52,7 @@ type ThirdParty struct {
 	//
 	// Must not be empty if any of the [`providers`](#providers) are `enabled`. URLs in the list must not have a trailing slash.
 	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true" jsonschema:"minItems=1"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
+	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
 func (t *ThirdParty) Validate() error {
@@ -251,7 +251,7 @@ type CustomThirdPartyProvider struct {
 	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint,omitempty" koanf:"authorization_endpoint"`
 	// `name` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by
 	// concatenating the prefix "custom_". This allows distinguishing between built-in and custom providers at runtime.
-	Name string `jsonschema:"-"`
+	Name string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 	// `issuer` is the provider's issuer identifier. It should be a URL that uses the "https"
 	//	scheme and has no query or fragment components.
 	//
@@ -445,7 +445,7 @@ type ThirdPartyProvider struct {
 	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
 	// `name` is a unique name/slug/identifier for the provider. It is the lowercased key of the corresponding field
 	// in ThirdPartyProviders. See also: CustomThirdPartyProvider.Name.
-	Name string `jsonschema:"-"`
+	Name string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
 func (ThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {
