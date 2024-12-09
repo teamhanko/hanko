@@ -147,20 +147,29 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 	}
 
 	if webauthnCredential.UserHandle != nil {
-		userHandleID, err := uuid.NewV4()
+		existingUserHandle, err := i.persister.GetWebauthnCredentialUserHandlePersisterWithConnection(i.tx).GetByHandle(*webauthnCredential.UserHandle)
 		if err != nil {
 			return err
 		}
 
-		userHandle := models.WebauthnCredentialUserHandle{
-			ID:        userHandleID,
-			UserID:    userID,
-			Handle:    *webauthnCredential.UserHandle,
-			CreatedAt: i.importTimestamp,
-			UpdatedAt: i.importTimestamp,
+		if existingUserHandle != nil {
+			webauthnCredentialModel.UserHandleID = &existingUserHandle.ID
+		} else {
+			userHandleID, err := uuid.NewV4()
+			if err != nil {
+				return err
+			}
+
+			userHandle := models.WebauthnCredentialUserHandle{
+				ID:        userHandleID,
+				UserID:    userID,
+				Handle:    *webauthnCredential.UserHandle,
+				CreatedAt: i.importTimestamp,
+				UpdatedAt: i.importTimestamp,
+			}
+			webauthnCredentialModel.UserHandle = &userHandle
+			webauthnCredentialModel.UserHandleID = &userHandleID
 		}
-		webauthnCredentialModel.UserHandle = &userHandle
-		webauthnCredentialModel.UserHandleID = &userHandleID
 	}
 
 	err := i.persister.GetWebauthnCredentialPersisterWithConnection(i.tx).Create(webauthnCredentialModel)
