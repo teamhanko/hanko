@@ -52,6 +52,8 @@ type Persister interface {
 	GetSessionPersisterWithConnection(tx *pop.Connection) SessionPersister
 	GetOTPSecretPersister() OTPSecretPersister
 	GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister
+	GetWebauthnCredentialUserHandlePersister() WebauthnCredentialUserHandlePersister
+	GetWebauthnCredentialUserHandlePersisterWithConnection(tx *pop.Connection) WebauthnCredentialUserHandlePersister
 	Transaction(func(tx *pop.Connection) error) error
 }
 
@@ -275,4 +277,12 @@ func (p *persister) GetSessionPersister() SessionPersister {
 
 func (p *persister) GetSessionPersisterWithConnection(tx *pop.Connection) SessionPersister {
 	return NewSessionPersister(tx)
+}
+
+func (p *persister) GetWebauthnCredentialUserHandlePersister() WebauthnCredentialUserHandlePersister {
+	return NewWebauthnCredentialUserHandlePersister(p.DB)
+}
+
+func (p *persister) GetWebauthnCredentialUserHandlePersisterWithConnection(tx *pop.Connection) WebauthnCredentialUserHandlePersister {
+	return NewWebauthnCredentialUserHandlePersister(tx)
 }

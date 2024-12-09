@@ -41,6 +41,16 @@ func (p *webauthnCredentialPersister) Get(id string) (*models.WebauthnCredential
 // Create stores a new `WebauthnCredential`. Please run inside a transaction, since `Transports` associated with the
 // credential are stored separately in another table.
 func (p *webauthnCredentialPersister) Create(credential models.WebauthnCredential) error {
+	if credential.UserHandle != nil {
+		vErr, err := p.db.ValidateAndCreate(credential.UserHandle)
+		if err != nil {
+			return fmt.Errorf("failed to store credential user handle: %w", err)
+		}
+		if vErr != nil && vErr.HasAny() {
+			return fmt.Errorf("credential object validation failed: %w", vErr)
+		}
+	}
+
 	vErr, err := p.db.ValidateAndCreate(&credential)
 	if err != nil {
 		return fmt.Errorf("failed to store credential: %w", err)
