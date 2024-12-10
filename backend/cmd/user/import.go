@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/go-playground/validator/v10"
+	"github.com/teamhanko/hanko/backend/dto"
 	"io"
 	"log"
 	"net/http"
@@ -12,11 +14,9 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 func NewImportCommand() *cobra.Command {
@@ -114,6 +114,7 @@ func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 	}
 
 	users := []ImportOrExportEntry{}
+	v := validator.New()
 
 	numErrors := 0
 	index := 0
@@ -129,10 +130,10 @@ func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 			return nil, err
 		}
 
-		if err := userEntry.validate(); err != nil {
-			errorMsg := fmt.Sprintf("Error at entry %v : %v", index, err.Error())
+		if err := userEntry.validate(v); err != nil {
+			vErrs := dto.TransformValidationErrors(err)
+			errorMsg := fmt.Sprintf("Error at entry %v : %v", index, strings.Join(vErrs, " and "))
 			log.Println(errorMsg)
-			log.Print(userEntry)
 			numErrors++
 			continue
 		}
@@ -156,63 +157,55 @@ func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persister) error {
 	tx := persister.GetConnection()
 	err := tx.Transaction(func(tx *pop.Connection) error {
+		importer := Importer{
+			persister:       persister,
+			tx:              tx,
+			importTimestamp: time.Now().UTC(),
+		}
 		for i, v := range entries {
-			now := time.Now().UTC()
-			// pre genereate a v4 uuid
-			userId, _ := uuid.NewV4()
-
-			// if there is an userId set try to parse into uuid
-			if v.UserID != "" {
-				err := userId.Parse(v.UserID)
-				if err != nil {
-					return errors.New(fmt.Sprintf("Error Adding entry nr. %v. Error Parsing as uuid: %v", i, v.UserID))
-				}
-			}
-			createdAt := now
-			updatedAt := createdAt
-			if v.CreatedAt != nil {
-				createdAt = *v.CreatedAt
-			}
-			if v.UpdatedAt != nil {
-				updatedAt = *v.UpdatedAt
-			}
-
-			u := models.User{
-				ID:        userId,
-				CreatedAt: createdAt,
-				UpdatedAt: updatedAt,
-			}
-
-			err := tx.Create(&u)
+			userModel, err := importer.createUser(v)
 			if err != nil {
-				return fmt.Errorf("Failed to create user with id: %v : %w", u.ID.String(), err)
+				return fmt.Errorf("failed to create user entry nr. %d: %w", i, err)
 			}
 
 			for _, e := range v.Emails {
-				emailId, _ := uuid.NewV4()
-
-				mail := models.Email{
-					ID:        emailId,
-					UserID:    &userId,
-					Address:   strings.ToLower(e.Address),
-					Verified:  e.IsVerified,
-					CreatedAt: now,
-					UpdatedAt: now,
-				}
-				err := tx.Create(&mail)
+				emailModel, err := importer.createEmailAddress(userModel.ID, e)
 				if err != nil {
-					return fmt.Errorf("Failed to create email %v for user %v : %w", e.Address, userId.String(), err)
+					return fmt.Errorf("failed to create email address \"%s\" for user entry nr. %d: %w", e.Address, i, err)
 				}
-
 				if e.IsPrimary {
-					primary := &models.PrimaryEmail{
-						UserID:  userId,
-						EmailID: emailId,
-					}
-					err = tx.Create(primary)
+					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID)
 					if err != nil {
-						return fmt.Errorf("Failed to set email %v as  primary for user %v : %w", e.Address, userId.String(), err)
+						return fmt.Errorf("failed to set email \"%s\" as primary for user entry nr. %d: %w", e.Address, i, err)
 					}
+				}
+			}
+
+			if v.Username != nil {
+				err = importer.createUsername(userModel.ID, *v.Username)
+				if err != nil {
+					return fmt.Errorf("failed to create username \"%v\" for user entry nr. %d: %w", v.Username, i, err)
+				}
+			}
+
+			for _, credential := range v.WebauthnCredentials {
+				err = importer.createWebauthnCredential(userModel.ID, credential)
+				if err != nil {
+					return fmt.Errorf("failed to create webauthn credential \"%s\" for user entry nr. %d: %w", credential.ID, i, err)
+				}
+			}
+
+			if v.Password != nil {
+				err = importer.createPasswordCredential(userModel.ID, *v.Password)
+				if err != nil {
+					return fmt.Errorf("failed to create password for user entry nr. %d: %w", i, err)
+				}
+			}
+
+			if v.OTPSecret != nil {
+				err = importer.createOTPSecret(userModel.ID, *v.OTPSecret)
+				if err != nil {
+					return fmt.Errorf("failed to create otp secret for user entry nr. %d: %w", i, err)
 				}
 			}
 		}
