@@ -3,6 +3,7 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto"
@@ -49,35 +50,39 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
 
-	if deps.Cfg.Session.ServerSide.Enabled {
-		// remove all server side sessions that exceed the limit
-		if len(activeSessions) >= deps.Cfg.Session.ServerSide.Limit {
-			for i := deps.Cfg.Session.ServerSide.Limit - 1; i < len(activeSessions); i++ {
-				err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Delete(activeSessions[i])
-				if err != nil {
-					return fmt.Errorf("failed to remove latest session: %w", err)
-				}
+	// remove all server side sessions that exceed the limit
+	if len(activeSessions) >= deps.Cfg.Session.Limit {
+		for i := deps.Cfg.Session.Limit - 1; i < len(activeSessions); i++ {
+			err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Delete(activeSessions[i])
+			if err != nil {
+				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
 		}
+	}
 
-		sessionID, _ := rawToken.Get("session_id")
+	sessionID, _ := rawToken.Get("session_id")
 
-		expirationTime := rawToken.Expiration()
-		sessionModel := models.Session{
-			ID:        uuid.FromStringOrNil(sessionID.(string)),
-			UserID:    userId,
-			UserAgent: deps.HttpContext.Request().UserAgent(),
-			IpAddress: deps.HttpContext.RealIP(),
-			CreatedAt: rawToken.IssuedAt(),
-			UpdatedAt: rawToken.IssuedAt(),
-			ExpiresAt: &expirationTime,
-			LastUsed:  rawToken.IssuedAt(),
-		}
+	expirationTime := rawToken.Expiration()
+	sessionModel := models.Session{
+		ID:        uuid.FromStringOrNil(sessionID.(string)),
+		UserID:    userId,
+		CreatedAt: rawToken.IssuedAt(),
+		UpdatedAt: rawToken.IssuedAt(),
+		ExpiresAt: &expirationTime,
+		LastUsed:  rawToken.IssuedAt(),
+	}
 
-		err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Create(sessionModel)
-		if err != nil {
-			return fmt.Errorf("failed to store session: %w", err)
-		}
+	if deps.Cfg.Session.AcquireIPAddress {
+		sessionModel.IpAddress = nulls.NewString(deps.HttpContext.RealIP())
+	}
+
+	if deps.Cfg.Session.AcquireUserAgent {
+		sessionModel.UserAgent = nulls.NewString(deps.HttpContext.Request().UserAgent())
+	}
+
+	err = deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Create(sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to store session: %w", err)
 	}
 
 	rememberMeSelected := c.Stash().Get(StashPathRememberMeSelected).Bool()

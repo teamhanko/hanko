@@ -17,7 +17,7 @@ type GetSessions struct {
 func (h GetSessions) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	if !deps.Cfg.Session.ServerSide.Enabled {
+	if !deps.Cfg.Session.ShowOnProfile {
 		return nil
 	}
 
