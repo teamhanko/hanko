@@ -6,8 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
@@ -90,10 +88,7 @@ func (s *passwordSuite) TestPasswordHandler_Set_Create() {
 			err := s.LoadFixtures("../test/fixtures/password")
 			s.Require().NoError(err)
 
-			sessionManager := s.GetDefaultSessionManager()
-			token, _, err := sessionManager.GenerateJWT(currentTest.userId, nil)
-			s.Require().NoError(err)
-			cookie, err := sessionManager.GenerateCookie(token)
+			cookie, err := generateSessionCookie(s.Storage, currentTest.userId)
 			s.Require().NoError(err)
 
 			req := httptest.NewRequest(http.MethodPut, "/password", strings.NewReader(currentTest.body))
@@ -194,15 +189,6 @@ func (s *passwordSuite) TestPasswordHandler_Login() {
 			}
 		})
 	}
-}
-
-func (s *passwordSuite) GetDefaultSessionManager() session.Manager {
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	s.Require().NoError(err)
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	s.Require().NoError(err)
-
-	return sessionManager
 }
 
 // TestMaxPasswordLength bcrypt since version 0.5.0 only accepts passwords at least 72 bytes long. This test documents this behaviour.
