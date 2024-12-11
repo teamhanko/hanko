@@ -24,6 +24,7 @@ func (a SessionDelete) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
 	if !deps.Cfg.Session.ServerSide.Enabled {
 		c.SuspendAction()
+		return
 	}
 	userModel, ok := c.Get("session_user").(*models.User)
 	if !ok {
