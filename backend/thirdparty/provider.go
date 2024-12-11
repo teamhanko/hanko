@@ -125,6 +125,8 @@ func getThirdPartyProvider(config config.ThirdParty, id string) (OAuthProvider, 
 		return NewMicrosoftProvider(config.Providers.Microsoft, config.RedirectURL)
 	case "linkedin":
 		return NewLinkedInProvider(config.Providers.LinkedIn, config.RedirectURL)
+	case "facebook":
+		return NewFacebookProvider(config.Providers.Facebook, config.RedirectURL)
 	default:
 		return nil, fmt.Errorf("unknown provider: %s", id)
 	}
