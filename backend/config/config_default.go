@@ -151,6 +151,7 @@ func DefaultConfig() *Config {
 				Facebook: ThirdPartyProvider{
 					DisplayName:  "Facebook",
 					AllowLinking: true,
+					Name:         "facebook",
 				},
 			},
 		},
