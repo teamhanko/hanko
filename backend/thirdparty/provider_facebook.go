@@ -13,8 +13,8 @@ import (
 const (
 	FacebookAuthBase           = "https://www.facebook.com"
 	FacebookAPIBase            = "https://graph.facebook.com"
-	FacebookOauthAuthEndpoint  = FacebookAuthBase + "/v9.0/dialog/oauth"
-	FacebookOauthTokenEndpoint = FacebookAPIBase + "/v9.0/oauth/access_token"
+	FacebookOauthAuthEndpoint  = FacebookAuthBase + "/v21.0/dialog/oauth"
+	FacebookOauthTokenEndpoint = FacebookAPIBase + "/v21.0/oauth/access_token"
 	FacebookUserInfoEndpoint   = FacebookAPIBase + "/me?fields=id,name,email,picture"
 )
 
