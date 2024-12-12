@@ -77,8 +77,10 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	data := &UserData{
 		Emails: []Email{
 			{
-				Email:    fbUser.Email,
-				Verified: true, // Facebook email is considered verified
+				Email: fbUser.Email,
+				// Consider the email as verified because a User node only returns an email if a valid
+				// email address is available. See: https://developers.facebook.com/docs/graph-api/reference/user/
+				Verified: true,
 				Primary:  true,
 			},
 		},
