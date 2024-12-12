@@ -2,6 +2,9 @@ package thirdparty
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/hex"
 	"errors"
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
@@ -65,8 +68,16 @@ func (f facebookProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 }
 
 func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
+	// Calculate appsecret_proof
+	// See: https://developers.facebook.com/docs/graph-api/guides/secure-requests/#appsecret_proof
+	hash := hmac.New(sha256.New, []byte(f.config.Secret))
+	hash.Write([]byte(token.AccessToken))
+	appsecretProof := hex.EncodeToString(hash.Sum(nil))
+
+	url := FacebookUserInfoEndpoint + "&appsecret_proof=" + appsecretProof
+
 	var fbUser FacebookUser
-	if err := makeRequest(token, f.oauthConfig, FacebookUserInfoEndpoint, &fbUser); err != nil {
+	if err := makeRequest(token, f.oauthConfig, url, &fbUser); err != nil {
 		return nil, err
 	}
 
