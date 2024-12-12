@@ -4,6 +4,7 @@ import { default as copy } from "./Copy";
 import { default as customProvider } from "./CustomProvider";
 import { default as discord } from "./Discord";
 import { default as exclamation } from "./ExclamationMark";
+import { default as facebook } from "./Facebook";
 import { default as github } from "./GitHub";
 import { default as google } from "./Google";
 import { default as linkedin } from "./LinkedIn";
@@ -22,6 +23,7 @@ export {
   customProvider,
   discord,
   exclamation,
+  facebook,
   github,
   google,
   linkedin,
