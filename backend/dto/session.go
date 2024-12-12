@@ -57,6 +57,16 @@ type Claims struct {
 	SessionID  uuid.UUID  `json:"session_id"`
 }
 
+type Claims struct {
+	Subject    uuid.UUID  `json:"subject"`
+	IssuedAt   *time.Time `json:"issued_at,omitempty"`
+	Expiration time.Time  `json:"expiration"`
+	Audience   []string   `json:"audience,omitempty"`
+	Issuer     *string    `json:"issuer,omitempty"`
+	Email      *EmailJwt  `json:"email,omitempty"`
+	SessionID  uuid.UUID  `json:"session_id"`
+}
+
 type ValidateSessionResponse struct {
 	IsValid bool    `json:"is_valid"`
 	Claims  *Claims `json:"claims,omitempty"`
