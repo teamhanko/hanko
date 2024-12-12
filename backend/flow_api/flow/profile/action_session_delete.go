@@ -22,7 +22,7 @@ func (a SessionDelete) GetDescription() string {
 
 func (a SessionDelete) Initialize(c flowpilot.InitializationContext) {
 	deps := a.GetDeps(c)
-	if !deps.Cfg.Session.ServerSide.Enabled {
+	if !deps.Cfg.Session.AllowRevocation {
 		c.SuspendAction()
 		return
 	}

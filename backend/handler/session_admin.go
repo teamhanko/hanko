@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
@@ -65,40 +66,44 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	if h.cfg.Session.ServerSide.Enabled {
-		activeSessions, err := h.persister.GetSessionPersister().ListActive(userID)
-		if err != nil {
-			return fmt.Errorf("failed to list active sessions: %w", err)
-		}
+	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID)
+	if err != nil {
+		return fmt.Errorf("failed to list active sessions: %w", err)
+	}
 
-		// remove all server side sessions that exceed the limit
-		if len(activeSessions) >= h.cfg.Session.ServerSide.Limit {
-			for i := h.cfg.Session.ServerSide.Limit - 1; i < len(activeSessions); i++ {
-				err = h.persister.GetSessionPersister().Delete(activeSessions[i])
-				if err != nil {
-					return fmt.Errorf("failed to remove latest session: %w", err)
-				}
+	// remove all server side sessions that exceed the limit
+	if len(activeSessions) >= h.cfg.Session.Limit {
+		for i := h.cfg.Session.Limit - 1; i < len(activeSessions); i++ {
+			err = h.persister.GetSessionPersister().Delete(activeSessions[i])
+			if err != nil {
+				return fmt.Errorf("failed to remove latest session: %w", err)
 			}
 		}
+	}
 
-		sessionID, _ := rawToken.Get("session_id")
+	sessionID, _ := rawToken.Get("session_id")
 
-		expirationTime := rawToken.Expiration()
-		sessionModel := models.Session{
-			ID:        uuid.FromStringOrNil(sessionID.(string)),
-			UserID:    userID,
-			UserAgent: body.UserAgent,
-			IpAddress: body.IpAddress,
-			CreatedAt: rawToken.IssuedAt(),
-			UpdatedAt: rawToken.IssuedAt(),
-			ExpiresAt: &expirationTime,
-			LastUsed:  rawToken.IssuedAt(),
-		}
+	expirationTime := rawToken.Expiration()
+	sessionModel := models.Session{
+		ID:        uuid.FromStringOrNil(sessionID.(string)),
+		UserID:    userID,
+		CreatedAt: rawToken.IssuedAt(),
+		UpdatedAt: rawToken.IssuedAt(),
+		ExpiresAt: &expirationTime,
+		LastUsed:  rawToken.IssuedAt(),
+	}
 
-		err = h.persister.GetSessionPersister().Create(sessionModel)
-		if err != nil {
-			return fmt.Errorf("failed to store session: %w", err)
-		}
+	if len(body.UserAgent) > 0 {
+		sessionModel.UserAgent = nulls.NewString(body.UserAgent)
+	}
+
+	if len(body.IpAddress) > 0 {
+		sessionModel.IpAddress = nulls.NewString(body.IpAddress)
+	}
+
+	err = h.persister.GetSessionPersister().Create(sessionModel)
+	if err != nil {
+		return fmt.Errorf("failed to store session: %w", err)
 	}
 
 	response := admin.CreateSessionTokenResponse{

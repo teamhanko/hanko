@@ -90,16 +90,18 @@ server:
 service:
   name: Hanko Authentication Service
 session:
+  allow_revocation: true
+  acquire_ip_address: true
+  acquire_user_agent: true
   lifespan: 12h
   enable_auth_token_header: false
-  server_side:
-    enabled: false
-    limit: 100
+  limit: 5
   cookie:
     http_only: true
     retention: persistent
     same_site: strict
     secure: true
+  show_on_profile: true
 third_party:
   providers:
     apple:

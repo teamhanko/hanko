@@ -7,10 +7,16 @@ import (
 )
 
 type Session struct {
+	// `allow_revocation` allows users to revoke their own sessions.
+	AllowRevocation bool `yaml:"allow_revocation" json:"allow_revocation,omitempty" koanf:"allow_revocation" jsonschema:"default=true"`
 	// `audience` is a list of strings that identifies the recipients that the JWT is intended for.
 	// The audiences are placed in the `aud` claim of the JWT.
 	// If not set, it defaults to the value of the`webauthn.relying_party.id` configuration parameter.
 	Audience []string `yaml:"audience" json:"audience,omitempty" koanf:"audience"`
+	// `acquire_ip_address` stores the user's IP address in the database.
+	AcquireIPAddress bool `yaml:"acquire_ip_address" json:"acquire_ip_address,omitempty" koanf:"acquire_ip_address" jsonschema:"default=true"`
+	// `acquire_user_agent` stores the user's user agent in the database.
+	AcquireUserAgent bool `yaml:"acquire_user_agent" json:"acquire_user_agent,omitempty" koanf:"acquire_user_agent" jsonschema:"default=true"`
 	// `cookie` contains configuration for the session cookie issued on successful registration or login.
 	Cookie Cookie `yaml:"cookie" json:"cookie,omitempty" koanf:"cookie"`
 	// `enable_auth_token_header` determines whether a session token (JWT) is returned in an `X-Auth-Token`
@@ -24,8 +30,11 @@ type Session struct {
 	// numbers, each with optional fraction and a unit suffix, such as "300ms", "-1.5h" or "2h45m".
 	// Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
 	Lifespan string `yaml:"lifespan" json:"lifespan,omitempty" koanf:"lifespan" jsonschema:"default=12h"`
-	// `server_side` contains configuration for server-side sessions.
-	ServerSide ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
+	// `limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,
+	// older sessions are invalidated.
+	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=5"`
+	// `show_on_profile` indicates that the sessions should be listed on the profile.
+	ShowOnProfile bool `yaml:"show_on_profile" json:"show_on_profile,omitempty" koanf:"show_on_profile" jsonschema:"default=true"`
 }
 
 func (s *Session) Validate() error {
@@ -74,14 +83,4 @@ func (c *Cookie) GetName() string {
 	}
 
 	return "hanko"
-}
-
-type ServerSide struct {
-	// `enabled` determines whether server-side sessions are enabled.
-	//
-	// NOTE: When enabled the session endpoint must be used in order to check if a session is still valid.
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-	// `limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,
-	// older sessions are invalidated.
-	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
 }

@@ -35,31 +35,29 @@ func parseToken(cfg config.Session, persister persistence.Persister, generator s
 			return nil, err
 		}
 
-		if cfg.ServerSide.Enabled {
-			// check that the session id is stored in the database
-			sessionId, ok := token.Get("session_id")
-			if !ok {
-				return nil, errors.New("no session id found in token")
-			}
-			sessionID, err := uuid.FromString(sessionId.(string))
-			if err != nil {
-				return nil, errors.New("session id has wrong format")
-			}
+		// check that the session id is stored in the database
+		sessionId, ok := token.Get("session_id")
+		if !ok {
+			return nil, errors.New("no session id found in token")
+		}
+		sessionID, err := uuid.FromString(sessionId.(string))
+		if err != nil {
+			return nil, errors.New("session id has wrong format")
+		}
 
-			sessionModel, err := persister.GetSessionPersister().Get(sessionID)
-			if err != nil {
-				return nil, fmt.Errorf("failed to get session from database: %w", err)
-			}
-			if sessionModel == nil {
-				return nil, fmt.Errorf("session id not found in database")
-			}
+		sessionModel, err := persister.GetSessionPersister().Get(sessionID)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get session from database: %w", err)
+		}
+		if sessionModel == nil {
+			return nil, fmt.Errorf("session id not found in database")
+		}
 
-			// Update lastUsed field
-			sessionModel.LastUsed = time.Now().UTC()
-			err = persister.GetSessionPersister().Update(*sessionModel)
-			if err != nil {
-				return nil, err
-			}
+		// Update lastUsed field
+		sessionModel.LastUsed = time.Now().UTC()
+		err = persister.GetSessionPersister().Update(*sessionModel)
+		if err != nil {
+			return nil, err
 		}
 
 		return token, nil
