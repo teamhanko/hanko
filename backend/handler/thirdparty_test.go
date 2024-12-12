@@ -95,6 +95,7 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 				AllowLinking: false,
 			},
 			Facebook: config.ThirdPartyProvider{
+				Name:         "facebook",
 				Enabled:      false,
 				ClientID:     "fakeClientID",
 				Secret:       "fakeClientSecret",
@@ -125,7 +126,6 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 			cfg.ThirdParty.Providers.Microsoft.Enabled = true
 		case "facebook":
 			cfg.ThirdParty.Providers.Facebook.Enabled = true
-		}
 		}
 	}
 
