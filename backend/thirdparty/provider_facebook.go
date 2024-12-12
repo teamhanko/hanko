@@ -2,12 +2,9 @@ package thirdparty
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
-
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/facebook"
 )
 
 const (
@@ -23,7 +20,8 @@ var DefaultFacebookScopes = []string{
 }
 
 type facebookProvider struct {
-	*oauth2.Config
+	config      config.ThirdPartyProvider
+	oauthConfig *oauth2.Config
 }
 
 type FacebookUser struct {
@@ -44,30 +42,31 @@ func NewFacebookProvider(config config.ThirdPartyProvider, redirectURL string) (
 	}
 
 	return &facebookProvider{
-		Config: &oauth2.Config{
+		config: config,
+		oauthConfig: &oauth2.Config{
 			ClientID:     config.ClientID,
 			ClientSecret: config.Secret,
-			Endpoint:     facebook.Endpoint,
-			Scopes:       DefaultFacebookScopes,
-			RedirectURL:  redirectURL,
+			Endpoint: oauth2.Endpoint{
+				AuthURL:  FacebookOauthAuthEndpoint,
+				TokenURL: FacebookOauthTokenEndpoint,
+			},
+			Scopes:      DefaultFacebookScopes,
+			RedirectURL: redirectURL,
 		},
 	}, nil
 }
 
+func (f facebookProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+	return f.oauthConfig.AuthCodeURL(state, opts...)
+}
+
 func (f facebookProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return f.Exchange(context.Background(), code)
+	return f.oauthConfig.Exchange(context.Background(), code)
 }
 
 func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	var fbUser FacebookUser
-	client := f.Client(context.Background(), token)
-	resp, err := client.Get(FacebookUserInfoEndpoint)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if err := json.NewDecoder(resp.Body).Decode(&fbUser); err != nil {
+	if err := makeRequest(token, f.oauthConfig, FacebookUserInfoEndpoint, &fbUser); err != nil {
 		return nil, err
 	}
 
@@ -93,5 +92,5 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 }
 
 func (f facebookProvider) Name() string {
-	return "facebook"
+	return f.config.Name
 }
