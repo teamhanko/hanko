@@ -70,6 +70,10 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		return nil, err
 	}
 
+	if fbUser.Email == "" {
+		return nil, errors.New("unable to find email with Facebook provider")
+	}
+
 	data := &UserData{
 		Emails: []Email{
 			{
