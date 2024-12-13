@@ -60,6 +60,7 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 	cookie.HttpOnly = true
 	cookie.Secure = true
 	cookie.MaxAge = maxAge
+	cookie.SameSite = http.SameSiteNoneMode
 
 	deps.HttpContext.SetCookie(cookie)
 
