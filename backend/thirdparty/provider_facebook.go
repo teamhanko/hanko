@@ -37,6 +37,9 @@ type FacebookUser struct {
 			URL string `json:"url"`
 		} `json:"data"`
 	} `json:"picture"`
+	FirstName  string `json:"first_name"`
+	MiddleName string `json:"middle_name"`
+	LastName   string `json:"last_name"`
 }
 
 // NewFacebookProvider creates a Facebook third-party OAuth provider.
@@ -75,7 +78,7 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	}
 
 	endpointURLQuery := endpointURL.Query()
-	endpointURLQuery.Add("fields", "id,name,email,picture")
+	endpointURLQuery.Add("fields", "id,name,email,picture,first_name,middle_name,last_name")
 
 	// Calculate appsecret_proof, see:
 	// https://developers.facebook.com/docs/graph-api/guides/secure-requests/#appsecret_proof
@@ -112,6 +115,9 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 			Picture:       fbUser.Picture.Data.URL,
 			Email:         fbUser.Email,
 			EmailVerified: true,
+			GivenName:     fbUser.FirstName,
+			MiddleName:    fbUser.MiddleName,
+			FamilyName:    fbUser.LastName,
 		},
 	}
 
