@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
+	"net/url"
 )
 
 const (
@@ -15,7 +16,7 @@ const (
 	FacebookAPIBase            = "https://graph.facebook.com"
 	FacebookOauthAuthEndpoint  = FacebookAuthBase + "/v21.0/dialog/oauth"
 	FacebookOauthTokenEndpoint = FacebookAPIBase + "/v21.0/oauth/access_token"
-	FacebookUserInfoEndpoint   = FacebookAPIBase + "/me?fields=id,name,email,picture"
+	FacebookUserInfoEndpoint   = FacebookAPIBase + "/me"
 )
 
 var DefaultFacebookScopes = []string{
@@ -68,16 +69,25 @@ func (f facebookProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
 }
 
 func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
-	// Calculate appsecret_proof
-	// See: https://developers.facebook.com/docs/graph-api/guides/secure-requests/#appsecret_proof
+	endpointURL, err := url.Parse(FacebookUserInfoEndpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	endpointURLQuery := endpointURL.Query()
+	endpointURLQuery.Add("fields", "id,name,email,picture")
+
+	// Calculate appsecret_proof, see:
+	// https://developers.facebook.com/docs/graph-api/guides/secure-requests/#appsecret_proof
 	hash := hmac.New(sha256.New, []byte(f.config.Secret))
 	hash.Write([]byte(token.AccessToken))
 	appsecretProof := hex.EncodeToString(hash.Sum(nil))
 
-	url := FacebookUserInfoEndpoint + "&appsecret_proof=" + appsecretProof
+	endpointURLQuery.Add("appsecret_proof", appsecretProof)
+	endpointURL.RawQuery = endpointURLQuery.Encode()
 
 	var fbUser FacebookUser
-	if err := makeRequest(token, f.oauthConfig, url, &fbUser); err != nil {
+	if err = makeRequest(token, f.oauthConfig, endpointURL.String(), &fbUser); err != nil {
 		return nil, err
 	}
 
