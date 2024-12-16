@@ -2,10 +2,8 @@ package handler
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -36,61 +34,47 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
-	var token jwt.Token
 	for _, extractor := range extractors {
 		auths, extractorErr := extractor(c)
 		if extractorErr != nil {
 			continue
 		}
 		for _, auth := range auths {
-			t, tokenErr := h.sessionManager.Verify(auth)
+			token, tokenErr := h.sessionManager.Verify(auth)
 			if tokenErr != nil {
 				continue
 			}
 
-			if h.cfg.Session.ServerSide.Enabled {
-				// check that the session id is stored in the database
-				sessionId, ok := t.Get("session_id")
-				if !ok {
-					continue
-				}
-				sessionID, err := uuid.FromString(sessionId.(string))
-				if err != nil {
-					continue
-				}
-
-				sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
-				if err != nil {
-					return fmt.Errorf("failed to get session from database: %w", err)
-				}
-				if sessionModel == nil {
-					continue
-				}
-
-				// Update lastUsed field
-				sessionModel.LastUsed = time.Now().UTC()
-				err = h.persister.GetSessionPersister().Update(*sessionModel)
-				if err != nil {
-					return dto.ToHttpError(err)
-				}
+			claims, err := dto.GetClaimsFromToken(token)
+			if err != nil {
+				return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 			}
 
-			token = t
-			break
+			sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID)
+			if err != nil {
+				return fmt.Errorf("failed to get session from database: %w", err)
+			}
+			if sessionModel == nil {
+				continue
+			}
+
+			// Update lastUsed field
+			sessionModel.LastUsed = time.Now().UTC()
+			err = h.persister.GetSessionPersister().Update(*sessionModel)
+			if err != nil {
+				return dto.ToHttpError(err)
+			}
+
+			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
+				IsValid:        true,
+				Claims:         claims,
+				ExpirationTime: &claims.Expiration,
+				UserID:         &claims.Subject,
+			})
 		}
 	}
 
-	if token != nil {
-		expirationTime := token.Expiration()
-		userID := uuid.FromStringOrNil(token.Subject())
-		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
-			IsValid:        true,
-			ExpirationTime: &expirationTime,
-			UserID:         &userID,
-		})
-	} else {
-		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-	}
+	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 }
 
 func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
@@ -110,39 +94,31 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
-	if h.cfg.Session.ServerSide.Enabled {
-		// check that the session id is stored in the database
-		sessionId, ok := token.Get("session_id")
-		if !ok {
-			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-		}
-		sessionID, err := uuid.FromString(sessionId.(string))
-		if err != nil {
-			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-		}
-
-		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
-		if err != nil {
-			return dto.ToHttpError(err)
-		}
-
-		if sessionModel == nil {
-			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-		}
-
-		// update lastUsed field
-		sessionModel.LastUsed = time.Now().UTC()
-		err = h.persister.GetSessionPersister().Update(*sessionModel)
-		if err != nil {
-			return dto.ToHttpError(err)
-		}
+	claims, err := dto.GetClaimsFromToken(token)
+	if err != nil {
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
-	expirationTime := token.Expiration()
-	userID := uuid.FromStringOrNil(token.Subject())
+	sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID)
+	if err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	if sessionModel == nil {
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+	}
+
+	// update lastUsed field
+	sessionModel.LastUsed = time.Now().UTC()
+	err = h.persister.GetSessionPersister().Update(*sessionModel)
+	if err != nil {
+		return dto.ToHttpError(err)
+	}
+
 	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 		IsValid:        true,
-		ExpirationTime: &expirationTime,
-		UserID:         &userID,
+		Claims:         claims,
+		ExpirationTime: &claims.Expiration,
+		UserID:         &claims.Subject,
 	})
 }
