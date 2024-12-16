@@ -28,23 +28,19 @@ const ListSessionsAccordion = ({
   const { t } = useContext(TranslateContext);
 
   const labels = (session: Session) => {
-    const description = (
-      <span className={styles.description}>
-        {session.current ? (
-          <Fragment>
-            {" -"} {t("labels.currentSession")}
-          </Fragment>
-        ) : null}
-      </span>
+    const headline = (
+      <b>{session.user_agent ? session.user_agent : session.id}</b>
     );
-    return session.current ? (
+    const description = session.current ? (
+      <span className={styles.description}>
+        <Fragment>
+          {" -"} {t("labels.currentSession")}
+        </Fragment>
+      </span>
+    ) : null;
+    return (
       <Fragment>
-        <b>{session.user_agent}</b>
-        {description}
-      </Fragment>
-    ) : (
-      <Fragment>
-        {session.user_agent}
+        {headline}
         {description}
       </Fragment>
     );
@@ -54,7 +50,7 @@ const ListSessionsAccordion = ({
 
   const contents = (session: Session) => (
     <Fragment>
-      <Paragraph>
+      <Paragraph hidden={!session.ip_address}>
         <Headline2>{t("headlines.ipAddress")}</Headline2>
         {session.ip_address}
       </Paragraph>

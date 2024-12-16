@@ -10,9 +10,9 @@ import (
 
 type SessionData struct {
 	ID           uuid.UUID  `json:"id"`
-	UserAgentRaw string     `json:"user_agent_raw"`
-	UserAgent    string     `json:"user_agent"`
-	IpAddress    string     `json:"ip_address"`
+	UserAgentRaw *string    `json:"user_agent_raw,omitempty"`
+	UserAgent    *string    `json:"user_agent,omitempty"`
+	IpAddress    *string    `json:"ip_address,omitempty"`
 	Current      bool       `json:"current"`
 	CreatedAt    time.Time  `json:"created_at"`
 	ExpiresAt    *time.Time `json:"expires_at,omitempty"`
@@ -20,17 +20,28 @@ type SessionData struct {
 }
 
 func FromSessionModel(model models.Session, current bool) SessionData {
-	ua := useragent.Parse(model.UserAgent)
-	return SessionData{
-		ID:           model.ID,
-		UserAgentRaw: model.UserAgent,
-		UserAgent:    fmt.Sprintf("%s (%s)", ua.OS, ua.Name),
-		IpAddress:    model.IpAddress,
-		Current:      current,
-		CreatedAt:    model.CreatedAt,
-		ExpiresAt:    model.ExpiresAt,
-		LastUsed:     model.LastUsed,
+	sessionData := SessionData{
+		ID:        model.ID,
+		Current:   current,
+		CreatedAt: model.CreatedAt,
+		ExpiresAt: model.ExpiresAt,
+		LastUsed:  model.LastUsed,
 	}
+
+	if model.UserAgent.Valid {
+		raw := model.UserAgent.String
+		sessionData.UserAgentRaw = &raw
+		ua := useragent.Parse(model.UserAgent.String)
+		parsed := fmt.Sprintf("%s (%s)", ua.OS, ua.Name)
+		sessionData.UserAgent = &parsed
+	}
+
+	if model.IpAddress.Valid {
+		s := model.IpAddress.String
+		sessionData.IpAddress = &s
+	}
+
+	return sessionData
 }
 
 type ValidateSessionResponse struct {

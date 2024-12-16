@@ -21,12 +21,11 @@ type Manager interface {
 
 // Manager is used to create and verify session JWTs
 type manager struct {
-	jwtGenerator              hankoJwt.Generator
-	sessionLength             time.Duration
-	cookieConfig              cookieConfig
-	issuer                    string
-	audience                  []string
-	serverSideSessionsEnabled bool
+	jwtGenerator  hankoJwt.Generator
+	sessionLength time.Duration
+	cookieConfig  cookieConfig
+	issuer        string
+	audience      []string
 }
 
 type cookieConfig struct {
@@ -86,8 +85,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 			SameSite: sameSite,
 			Secure:   config.Session.Cookie.Secure,
 		},
-		audience:                  audience,
-		serverSideSessionsEnabled: config.Session.ServerSide.Enabled,
+		audience: audience,
 	}, nil
 }
 
@@ -102,13 +100,11 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWT
 	_ = token.Set(jwt.ExpirationKey, expiration)
 	_ = token.Set(jwt.AudienceKey, m.audience)
 
-	if m.serverSideSessionsEnabled {
-		sessionID, err := uuid.NewV4()
-		if err != nil {
-			return "", nil, err
-		}
-		_ = token.Set("session_id", sessionID.String())
+	sessionID, err := uuid.NewV4()
+	if err != nil {
+		return "", nil, err
 	}
+	_ = token.Set("session_id", sessionID.String())
 
 	if email != nil {
 		_ = token.Set("email", &email)

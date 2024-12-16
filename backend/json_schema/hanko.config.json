@@ -1169,22 +1169,6 @@
       "additionalProperties": false,
       "type": "object"
     },
-    "ServerSide": {
-      "properties": {
-        "enabled": {
-          "type": "boolean",
-          "description": "`enabled` determines whether server-side sessions are enabled.\n\nNOTE: When enabled the session endpoint must be used in order to check if a session is still valid.",
-          "default": false
-        },
-        "limit": {
-          "type": "integer",
-          "description": "`limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,\nolder sessions are invalidated.",
-          "default": 100
-        }
-      },
-      "additionalProperties": false,
-      "type": "object"
-    },
     "Service": {
       "properties": {
         "name": {
@@ -1197,12 +1181,27 @@
     },
     "Session": {
       "properties": {
+        "allow_revocation": {
+          "type": "boolean",
+          "description": "`allow_revocation` allows users to revoke their own sessions.",
+          "default": true
+        },
         "audience": {
           "items": {
             "type": "string"
           },
           "type": "array",
           "description": "`audience` is a list of strings that identifies the recipients that the JWT is intended for.\nThe audiences are placed in the `aud` claim of the JWT.\nIf not set, it defaults to the value of the`webauthn.relying_party.id` configuration parameter."
+        },
+        "acquire_ip_address": {
+          "type": "boolean",
+          "description": "`acquire_ip_address` stores the user's IP address in the database.",
+          "default": true
+        },
+        "acquire_user_agent": {
+          "type": "boolean",
+          "description": "`acquire_user_agent` stores the user's user agent in the database.",
+          "default": true
         },
         "cookie": {
           "$ref": "#/$defs/Cookie",
@@ -1222,16 +1221,19 @@
           "description": "`lifespan` determines the maximum duration for which a session token (JWT) is valid. It must be a (possibly signed) sequence of decimal\nnumbers, each with optional fraction and a unit suffix, such as \"300ms\", \"-1.5h\" or \"2h45m\".\nValid time units are \"ns\", \"us\" (or \"µs\"), \"ms\", \"s\", \"m\", \"h\".",
           "default": "12h"
         },
-        "server_side": {
-          "$ref": "#/$defs/ServerSide",
-          "description": "`server_side` contains configuration for server-side sessions."
+        "limit": {
+          "type": "integer",
+          "description": "`limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,\nolder sessions are invalidated.",
+          "default": 5
+        },
+        "show_on_profile": {
+          "type": "boolean",
+          "description": "`show_on_profile` indicates that the sessions should be listed on the profile.",
+          "default": true
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "server_side"
-      ]
+      "type": "object"
     },
     "TOTP": {
       "properties": {

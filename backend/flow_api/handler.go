@@ -85,34 +85,32 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				continue
 			}
 
-			if h.Cfg.Session.ServerSide.Enabled {
-				// check that the session id is stored in the database
-				sessionId, ok := token.Get("session_id")
-				if !ok {
-					lastTokenErr = errors.New("no session id found in token")
-					continue
-				}
-				sessionID, err := uuid.FromString(sessionId.(string))
-				if err != nil {
-					lastTokenErr = errors.New("session id has wrong format")
-					continue
-				}
+			// check that the session id is stored in the database
+			sessionId, ok := token.Get("session_id")
+			if !ok {
+				lastTokenErr = errors.New("no session id found in token")
+				continue
+			}
+			sessionID, err := uuid.FromString(sessionId.(string))
+			if err != nil {
+				lastTokenErr = errors.New("session id has wrong format")
+				continue
+			}
 
-				sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
-				if err != nil {
-					return fmt.Errorf("failed to get session from database: %w", err)
-				}
-				if sessionModel == nil {
-					lastTokenErr = fmt.Errorf("session id not found in database")
-					continue
-				}
+			sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
+			if err != nil {
+				return fmt.Errorf("failed to get session from database: %w", err)
+			}
+			if sessionModel == nil {
+				lastTokenErr = fmt.Errorf("session id not found in database")
+				continue
+			}
 
-				// Update lastUsed field
-				sessionModel.LastUsed = time.Now().UTC()
-				err = h.Persister.GetSessionPersister().Update(*sessionModel)
-				if err != nil {
-					return dto.ToHttpError(err)
-				}
+			// Update lastUsed field
+			sessionModel.LastUsed = time.Now().UTC()
+			err = h.Persister.GetSessionPersister().Update(*sessionModel)
+			if err != nil {
+				return dto.ToHttpError(err)
 			}
 
 			c.Set("session", token)

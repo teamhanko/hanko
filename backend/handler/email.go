@@ -12,7 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"github.com/teamhanko/hanko/backend/webhooks/utils"
 	"net/http"
@@ -20,18 +19,16 @@ import (
 )
 
 type EmailHandler struct {
-	persister      persistence.Persister
-	cfg            *config.Config
-	sessionManager session.Manager
-	auditLogger    auditlog.Logger
+	persister   persistence.Persister
+	cfg         *config.Config
+	auditLogger auditlog.Logger
 }
 
-func NewEmailHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *EmailHandler {
+func NewEmailHandler(cfg *config.Config, persister persistence.Persister, auditLogger auditlog.Logger) *EmailHandler {
 	return &EmailHandler{
-		persister:      persister,
-		cfg:            cfg,
-		sessionManager: sessionManager,
-		auditLogger:    auditLogger,
+		persister:   persister,
+		cfg:         cfg,
+		auditLogger: auditLogger,
 	}
 }
 
