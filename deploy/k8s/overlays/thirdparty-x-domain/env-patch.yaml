@@ -59,6 +59,16 @@ spec:
                 secretKeyRef:
                   key: client_secret
                   name: apple
+            - name: THIRD_PARTY_PROVIDERS_FACEBOOK_CLIENT_ID 
+              valueFrom:
+                secretKeyRef:
+                  key: client_id
+                  name: facebook 
+            - name: THIRD_PARTY_PROVIDERS_FACEBOOK_SECRET 
+              valueFrom:
+                secretKeyRef:
+                  key: client_secret
+                  name: facebook 
       initContainers:
         - name: hanko-migrate
           env:
