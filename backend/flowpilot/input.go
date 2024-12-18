@@ -2,6 +2,7 @@ package flowpilot
 
 import (
 	"regexp"
+	"strconv"
 )
 
 // inputType represents the type of the input field.
@@ -15,6 +16,10 @@ const (
 	inputTypeNumber   inputType = "number"
 	inputTypePassword inputType = "password"
 	inputTypeJSON     inputType = "json"
+)
+
+var (
+	inputTypeBooleanAllowedValues = []string{"1", "t", "T", "TRUE", "true", "True", "0", "f", "F", "FALSE", "false", "False"}
 )
 
 // Input defines the interface for input fields.
@@ -209,10 +214,6 @@ func (i *defaultInput) validate(inputData readOnlyActionInput) bool {
 		return true
 	}
 
-	if i.dataType == inputTypeBoolean {
-		return true
-	}
-
 	isRequired := i.required != nil && *i.required
 	hasEmptyOrNilValue := inputValue == nil || len(*inputValue) <= 0
 
@@ -235,7 +236,16 @@ func (i *defaultInput) validate(inputData readOnlyActionInput) bool {
 		}
 	}
 
-	if i.dataType == inputTypeEmail && (isRequired || (!isRequired && !hasEmptyOrNilValue)) {
+	if i.dataType == inputTypeBoolean && (isRequired || !hasEmptyOrNilValue) {
+		if _, err := strconv.ParseBool(*inputValue); err != nil {
+			i.error = createMustBeOneOfError(inputTypeBooleanAllowedValues)
+			return false
+		}
+
+		return true
+	}
+
+	if i.dataType == inputTypeEmail && (isRequired || !hasEmptyOrNilValue) {
 		pattern := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
 		if matched := pattern.MatchString(*inputValue); !matched {
 			i.error = ErrorValueInvalid
