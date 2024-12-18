@@ -172,5 +172,5 @@ var (
 )
 
 func createMustBeOneOfError(values []string) InputError {
-	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %s", strings.Join(values, ",")))
+	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %s", strings.Join(values, ", ")))
 }
