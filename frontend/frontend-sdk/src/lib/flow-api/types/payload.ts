@@ -77,9 +77,9 @@ export interface User {
 
 export interface Session {
   readonly id: string;
-  readonly user_agent: string;
-  readonly user_agent_raw: string;
-  readonly ip_address: string;
+  readonly user_agent?: string;
+  readonly user_agent_raw?: string;
+  readonly ip_address?: string;
   readonly created_at: string;
   readonly last_used: string;
   readonly current: boolean;

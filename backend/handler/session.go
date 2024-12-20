@@ -48,31 +48,29 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				continue
 			}
 
-			if h.cfg.Session.ServerSide.Enabled {
-				// check that the session id is stored in the database
-				sessionId, ok := t.Get("session_id")
-				if !ok {
-					continue
-				}
-				sessionID, err := uuid.FromString(sessionId.(string))
-				if err != nil {
-					continue
-				}
+			// check that the session id is stored in the database
+			sessionId, ok := t.Get("session_id")
+			if !ok {
+				continue
+			}
+			sessionID, err := uuid.FromString(sessionId.(string))
+			if err != nil {
+				continue
+			}
 
-				sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
-				if err != nil {
-					return fmt.Errorf("failed to get session from database: %w", err)
-				}
-				if sessionModel == nil {
-					continue
-				}
+			sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
+			if err != nil {
+				return fmt.Errorf("failed to get session from database: %w", err)
+			}
+			if sessionModel == nil {
+				continue
+			}
 
-				// Update lastUsed field
-				sessionModel.LastUsed = time.Now().UTC()
-				err = h.persister.GetSessionPersister().Update(*sessionModel)
-				if err != nil {
-					return dto.ToHttpError(err)
-				}
+			// Update lastUsed field
+			sessionModel.LastUsed = time.Now().UTC()
+			err = h.persister.GetSessionPersister().Update(*sessionModel)
+			if err != nil {
+				return dto.ToHttpError(err)
 			}
 
 			token = t
@@ -110,32 +108,30 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
-	if h.cfg.Session.ServerSide.Enabled {
-		// check that the session id is stored in the database
-		sessionId, ok := token.Get("session_id")
-		if !ok {
-			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-		}
-		sessionID, err := uuid.FromString(sessionId.(string))
-		if err != nil {
-			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-		}
+	// check that the session id is stored in the database
+	sessionId, ok := token.Get("session_id")
+	if !ok {
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+	}
+	sessionID, err := uuid.FromString(sessionId.(string))
+	if err != nil {
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+	}
 
-		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
-		if err != nil {
-			return dto.ToHttpError(err)
-		}
+	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
+	if err != nil {
+		return dto.ToHttpError(err)
+	}
 
-		if sessionModel == nil {
-			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
-		}
+	if sessionModel == nil {
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+	}
 
-		// update lastUsed field
-		sessionModel.LastUsed = time.Now().UTC()
-		err = h.persister.GetSessionPersister().Update(*sessionModel)
-		if err != nil {
-			return dto.ToHttpError(err)
-		}
+	// update lastUsed field
+	sessionModel.LastUsed = time.Now().UTC()
+	err = h.persister.GetSessionPersister().Update(*sessionModel)
+	if err != nil {
+		return dto.ToHttpError(err)
 	}
 
 	expirationTime := token.Expiration()

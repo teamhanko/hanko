@@ -153,26 +153,9 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 		tokenShouldHaveSessionID bool
 	}{
 		{
-			name: "token has no session id claim if server side sessions are disabled",
+			name: "token has a session id claim",
 			config: config.Config{
-				Session: config.Session{
-					Lifespan: "5m",
-					ServerSide: config.ServerSide{
-						Enabled: false,
-					},
-				},
-			},
-			tokenShouldHaveSessionID: false,
-		},
-		{
-			name: "token has a session id claim if server side sessions are disabled",
-			config: config.Config{
-				Session: config.Session{
-					Lifespan: "5m",
-					ServerSide: config.ServerSide{
-						Enabled: true,
-					},
-				},
+				Session: config.Session{Lifespan: "5m"},
 			},
 			tokenShouldHaveSessionID: true,
 		},

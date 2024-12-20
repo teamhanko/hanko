@@ -69,17 +69,18 @@ func DefaultConfig() *Config {
 			Host:     "localhost",
 		},
 		Session: Session{
-			Lifespan: "12h",
+			AllowRevocation:  true,
+			AcquireIPAddress: true,
+			AcquireUserAgent: true,
+			Lifespan:         "12h",
 			Cookie: Cookie{
 				HttpOnly:  true,
 				Retention: "persistent",
 				SameSite:  "strict",
 				Secure:    true,
 			},
-			ServerSide: ServerSide{
-				Enabled: false,
-				Limit:   100,
-			},
+			Limit:         5,
+			ShowOnProfile: true,
 		},
 		AuditLog: AuditLog{
 			ConsoleOutput: AuditLogConsole{

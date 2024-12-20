@@ -73,26 +73,22 @@ func NewCreateCommand() *cobra.Command {
 				return
 			}
 
-			if cfg.Session.ServerSide.Enabled {
-				sessionID, _ := rawToken.Get("session_id")
+			sessionID, _ := rawToken.Get("session_id")
 
-				expirationTime := rawToken.Expiration()
-				sessionModel := models.Session{
-					ID:        uuid.FromStringOrNil(sessionID.(string)),
-					UserID:    userId,
-					UserAgent: "",
-					IpAddress: "",
-					CreatedAt: rawToken.IssuedAt(),
-					UpdatedAt: rawToken.IssuedAt(),
-					ExpiresAt: &expirationTime,
-					LastUsed:  rawToken.IssuedAt(),
-				}
+			expirationTime := rawToken.Expiration()
+			sessionModel := models.Session{
+				ID:        uuid.FromStringOrNil(sessionID.(string)),
+				UserID:    userId,
+				CreatedAt: rawToken.IssuedAt(),
+				UpdatedAt: rawToken.IssuedAt(),
+				ExpiresAt: &expirationTime,
+				LastUsed:  rawToken.IssuedAt(),
+			}
 
-				err = persister.GetSessionPersister().Create(sessionModel)
-				if err != nil {
-					fmt.Printf("failed to store session: %s", err)
-					return
-				}
+			err = persister.GetSessionPersister().Create(sessionModel)
+			if err != nil {
+				fmt.Printf("failed to store session: %s", err)
+				return
 			}
 
 			fmt.Printf("token: %s", token)

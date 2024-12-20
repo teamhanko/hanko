@@ -7,10 +7,8 @@ import (
 	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"golang.org/x/exp/slices"
 	"net/http"
@@ -249,24 +247,14 @@ func (s *userSuite) TestUserHandler_Get() {
 	err := s.LoadFixtures("../test/fixtures/user")
 	s.Require().NoError(err)
 
-	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
-	s.Require().NoError(err)
-	cookie, err := sessionManager.GenerateCookie(token)
+	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId.String()), nil)
 	req.AddCookie(cookie)
 	rec := httptest.NewRecorder()
 
@@ -277,7 +265,7 @@ func (s *userSuite) TestUserHandler_Get() {
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.NoError(err)
-		s.Equal(userId, user.ID.String())
+		s.Equal(userId.String(), user.ID.String())
 		s.Equal(len(user.WebauthnCredentials), 0)
 	}
 }
@@ -289,24 +277,14 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 	err := s.LoadFixtures("../test/fixtures/user_with_webauthn_credential")
 	s.Require().NoError(err)
 
-	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
-	s.Require().NoError(err)
-	cookie, err := sessionManager.GenerateCookie(token)
+	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
 
-	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId), nil)
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/users/%s", userId.String()), nil)
 	rec := httptest.NewRecorder()
 	req.AddCookie(cookie)
 
@@ -317,7 +295,7 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 		user := models.User{}
 		err := json.Unmarshal(rec.Body.Bytes(), &user)
 		s.Require().NoError(err)
-		s.Equal(userId, user.ID.String())
+		s.Equal(userId.String(), user.ID.String())
 		s.Equal(len(user.WebauthnCredentials), 1)
 	}
 }
@@ -328,19 +306,12 @@ func (s *userSuite) TestUserHandler_Get_InvalidUserId() {
 	}
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
-	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
-
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
+	err := s.LoadFixtures("../test/fixtures/user")
 	s.Require().NoError(err)
-	cookie, err := sessionManager.GenerateCookie(token)
+
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+
+	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/users/invalidUserId", nil)
@@ -463,21 +434,11 @@ func (s *userSuite) TestUserHandler_Me() {
 	err := s.LoadFixtures("../test/fixtures/user_with_webauthn_credential")
 	s.Require().NoError(err)
 
-	userId := "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5"
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-	token, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(userId), nil)
-	s.Require().NoError(err)
-	cookie, err := sessionManager.GenerateCookie(token)
+	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/me", nil)
@@ -493,7 +454,7 @@ func (s *userSuite) TestUserHandler_Me() {
 		}{}
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		s.NoError(err)
-		s.Equal(userId, response.UserId)
+		s.Equal(userId.String(), response.UserId)
 	}
 }
 
@@ -501,20 +462,14 @@ func (s *userSuite) TestUserHandler_Logout() {
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
-	userId, _ := uuid.NewV4()
+
+	err := s.LoadFixtures("../test/fixtures/user")
+	s.Require().NoError(err)
+
+	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-	token, _, err := sessionManager.GenerateJWT(userId, nil)
-	s.Require().NoError(err)
-	cookie, err := sessionManager.GenerateCookie(token)
+	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodPost, "/logout", nil)
@@ -545,17 +500,7 @@ func (s *userSuite) TestUserHandler_Delete() {
 	cfg.Account.AllowDeletion = true
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
-	jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
-	token, _, err := sessionManager.GenerateJWT(userId, nil)
-	s.Require().NoError(err)
-	cookie, err := sessionManager.GenerateCookie(token)
+	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodDelete, "/user", nil)

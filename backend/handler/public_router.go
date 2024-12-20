@@ -169,7 +169,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler := NewEmailHandler(cfg, persister, sessionManager, auditLogger)
+	emailHandler := NewEmailHandler(cfg, persister, auditLogger)
 
 	if cfg.Passkey.Enabled {
 		webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
