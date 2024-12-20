@@ -18,6 +18,10 @@
 - id: 48df412f-a7b1-4fbc-ad2d-56bd3e103fd7
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+# user with email and facebook identity
+- id: ef0a05a7-98d1-4e5a-a60f-2c5f740cd26d
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 # user with email, no identity
 - id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
   created_at: 2020-12-31 23:59:59

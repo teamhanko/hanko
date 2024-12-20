@@ -149,6 +149,11 @@ func DefaultConfig() *Config {
 					AllowLinking: true,
 					Name:         "google",
 				},
+				Facebook: ThirdPartyProvider{
+					DisplayName:  "Facebook",
+					AllowLinking: true,
+					Name:         "facebook",
+				},
 			},
 		},
 		Passkey: Passkey{

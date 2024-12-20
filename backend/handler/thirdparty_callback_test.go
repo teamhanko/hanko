@@ -618,6 +618,123 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Microsoft() {
 	}
 }
 
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Facebook() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	gock.New(thirdparty.FacebookOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.FacebookUserInfoEndpoint).
+		Get("/me").
+		Reply(200).
+		JSON(&thirdparty.FacebookUser{
+			ID:    "facebook_abcde",
+			Email: "test-facebook-signup@example.com",
+		})
+
+	cfg := s.setUpConfig([]string{"facebook"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "facebook", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-facebook-signup@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("facebook", "facebook_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signup_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Facebook() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	gock.New(thirdparty.FacebookOauthTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken"})
+
+	gock.New(thirdparty.FacebookUserInfoEndpoint).
+		Get("/me").
+		Reply(200).
+		JSON(&thirdparty.FacebookUser{
+			ID:    "facebook_abcde",
+			Email: "test-with-facebook-identity@example.com",
+		})
+
+	cfg := s.setUpConfig([]string{"facebook"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "facebook", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-facebook-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("facebook", "facebook_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), "", "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_WithUnclaimedEmail() {
 	defer gock.Off()
 	if testing.Short() {
