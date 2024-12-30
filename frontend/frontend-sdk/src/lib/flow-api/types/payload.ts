@@ -2,6 +2,7 @@ import {
   CredentialCreationOptionsJSON,
   CredentialRequestOptionsJSON,
 } from "@github/webauthn-json/src/webauthn-json/basic/json";
+import { Claims } from "../../Dto";
 
 export interface PasscodeConfirmationPayload {
   readonly passcode_resent: boolean;
@@ -103,6 +104,7 @@ export interface LastLogin {
 export interface SuccessPayload {
   readonly user: User;
   readonly last_login?: LastLogin;
+  readonly claims: Claims;
 }
 
 export interface ThirdPartyPayload {

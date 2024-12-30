@@ -51,6 +51,16 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
+	claims, err := dto.GetClaimsFromToken(rawToken)
+	if err != nil {
+		return fmt.Errorf("failed to get token claims: %w", err)
+	}
+
+	err = c.Payload().Set("claims", claims)
+	if err != nil {
+		return fmt.Errorf("failed to set token claims to payload: %w", err)
+	}
+
 	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userId)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)

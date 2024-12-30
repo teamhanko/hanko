@@ -21,7 +21,6 @@ import {
   Hanko,
   HankoError,
   TechnicalError,
-  UnauthorizedError,
   WebauthnSupport,
 } from "@teamhanko/hanko-frontend-sdk";
 
@@ -442,7 +441,9 @@ const AppProvider = ({
             JSON.stringify(state.payload.last_login),
           );
         }
-        hanko.relay.dispatchSessionCreatedEvent(hanko.session.get());
+        const { claims } = state.payload;
+        const expirationSeconds = Date.parse(claims.expiration) - Date.now();
+        hanko.relay.dispatchSessionCreatedEvent({ claims, expirationSeconds });
         lastActionSucceeded();
       },
       profile_init(state) {
@@ -562,11 +563,7 @@ const AppProvider = ({
           flowInit("/registration").catch(handleError);
           break;
         case "profile":
-          if (hanko.session.isValid()) {
-            flowInit("/profile").catch(handleError);
-          } else {
-            setPage(<ErrorPage error={new UnauthorizedError()} />);
-          }
+          flowInit("/profile").catch(handleError);
           break;
       }
     },

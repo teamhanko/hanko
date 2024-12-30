@@ -122,9 +122,10 @@ const defaultOptions = {
   translationsLocation: "/i18n",   // The URL or path where the translation files are located.
   fallbackLanguage: "en",          // The fallback language to be used if a translation is not available.
   storageKey: "hanko",             // The name of the cookie the session token is stored in and the prefix / name of local storage keys
-  cookieDomain: undefined,         // The domain where the cookie set from the SDK is available. When undefined,
+  cookieDomain: undefined,          // The domain where the cookie set from the SDK is available. When undefined,
                                    // defaults to the domain of the page where the cookie was created.
   cookieSameSite: "lax",           // Specify whether/when cookies are sent with cross-site requests.
+  sessionCheckInterval: 30000,     // Interval for session validity checks in milliseconds. Must be greater than 3000 (3s).
 };
 
 const { hanko } = await register(
@@ -246,24 +247,13 @@ The callback function will be called when the event happens and an object will b
 ##### Session Created
 
 Will be triggered after a session has been created and the user has completed possible additional steps (e.g. passkey
-registration or password recovery). It will also be triggered when the user logs in via another browser window. The
-event can be used to obtain the JWT.
-
-Please note, that the JWT is only available, when the Hanko-API configuration allows to obtain the JWT. When using
-Hanko-Cloud the JWT is always present, for self-hosted Hanko-APIs you can restrict the cookie to be readable by the
-backend only, as long as your backend runs under the same domain as your frontend. To do so, make sure the config
-parameter "session.enable_auth_token_header" is turned off via the
-[Hanko-API configuration](https://github.com/teamhanko/hanko/wiki). If you want the JWT to
-be contained in the event details, you need to turn on "session.enable_auth_token_header" when using a cross-domain
-setup. When it's a same-domain setup you need to turn off "session.cookie.http_only" to make the JWT accessible to the
-frontend.
+registration, password recovery, etc.). It will also be triggered when the user logs in via another browser window. The
+event can be used to obtain the JWT claims.
 
 ```js
 hanko.onSessionCreated((sessionDetail) => {
   // A new JWT has been issued.
-  console.info(
-    `Session created or updated (jwt: ${sessionDetail.jwt})`
-  );
+  console.info("Session created", sessionDetail.claims);
 });
 ```
 

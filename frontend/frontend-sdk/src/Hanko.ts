@@ -5,10 +5,9 @@ import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
 import { TokenClient } from "./lib/client/TokenClient";
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
-import { Session } from "./lib/Session";
 import { CookieSameSite } from "./lib/Cookie";
 import { Flow } from "./lib/flow-api/Flow";
-import { SessionClient } from "./lib/client/SessionClient";
+import { SessionClient, Session } from "./lib/client/SessionClient";
 
 /**
  * The options for the Hanko class
@@ -25,6 +24,8 @@ import { SessionClient } from "./lib/client/SessionClient";
  *                            if email delivery by Hanko is enabled. If email delivery by Hanko is disabled and the
  *                            relying party configures a webhook for the "email.send" event, then the set language is
  *                            reflected in the payload of the token contained in the webhook request.
+ * @property {number=} sessionCheckInterval -  Interval for session validity checks in milliseconds.
+ * @property {string=} sessionCheckChannelName - The broadcast channel name for inter-tab communication.
  */
 export interface HankoOptions {
   timeout?: number;
@@ -33,6 +34,8 @@ export interface HankoOptions {
   cookieSameSite?: CookieSameSite;
   localStorageKey?: string;
   lang?: string;
+  sessionCheckInterval?: number;
+  sessionCheckChannelName?: string;
 }
 
 /**
@@ -50,8 +53,8 @@ class Hanko extends Listener {
   enterprise: EnterpriseClient;
   token: TokenClient;
   sessionClient: SessionClient;
-  relay: Relay;
   session: Session;
+  relay: Relay;
   flow: Flow;
 
   // eslint-disable-next-line require-jsdoc
@@ -61,6 +64,8 @@ class Hanko extends Listener {
       timeout: 13000,
       cookieName: "hanko",
       localStorageKey: "hanko",
+      sessionCheckInterval: 30000,
+      sessionCheckChannelName: "hanko-session-check",
     };
     if (options?.cookieName !== undefined) {
       opts.cookieName = options.cookieName;
@@ -79,6 +84,15 @@ class Hanko extends Listener {
     }
     if (options?.lang !== undefined) {
       opts.lang = options.lang;
+    }
+    if (
+      options?.sessionCheckInterval !== undefined &&
+      options.sessionCheckInterval > 3000
+    ) {
+      opts.sessionCheckInterval = options.sessionCheckInterval;
+    }
+    if (options?.sessionCheckChannelName !== undefined) {
+      opts.sessionCheckChannelName = options.sessionCheckChannelName;
     }
 
     this.api = api;
@@ -114,14 +128,15 @@ class Hanko extends Listener {
     this.sessionClient = new SessionClient(api, opts);
     /**
      *  @public
-     *  @type {Relay}
-     */
-    this.relay = new Relay({ ...opts });
-    /**
-     *  @public
+     *  @deprecated
      *  @type {Session}
      */
-    this.session = new Session({ ...opts });
+    this.session = new Session(api, opts);
+    /**
+     *  @public
+     *  @type {Relay}
+     */
+    this.relay = new Relay(api, opts);
     /**
      *  @public
      *  @type {Flow}
@@ -150,6 +165,8 @@ export interface InternalOptions {
   cookieSameSite?: CookieSameSite;
   localStorageKey: string;
   lang?: string;
+  sessionCheckInterval?: number;
+  sessionCheckChannelName?: string;
 }
 
 export { Hanko };

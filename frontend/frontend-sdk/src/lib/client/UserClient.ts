@@ -112,7 +112,6 @@ class UserClient extends Client {
 
     if (response.ok) {
       this.client.cookie.removeAuthCookie();
-      this.client.sessionState.reset().write();
       this.client.dispatcher.dispatchUserDeletedEvent();
       return;
     } else if (response.status === 401) {
@@ -137,7 +136,6 @@ class UserClient extends Client {
     // "Set-Cookie" headers sent by the backend have no effect due to the browser's security policy, which means that
     // the cookie must also be removed client-side in that case.
     this.client.cookie.removeAuthCookie();
-    this.client.sessionState.reset().write();
     this.client.dispatcher.dispatchUserLoggedOutEvent();
 
     if (logoutResponse.status === 401) {

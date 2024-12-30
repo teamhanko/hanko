@@ -1,5 +1,4 @@
 import { RequestTimeoutError, TechnicalError } from "../Errors";
-import { SessionState } from "../state/session/SessionState";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
 
@@ -143,7 +142,6 @@ export interface HttpClientOptions {
 class HttpClient {
   timeout: number;
   api: string;
-  sessionState: SessionState;
   dispatcher: Dispatcher;
   cookie: Cookie;
   lang: string;
@@ -152,8 +150,7 @@ class HttpClient {
   constructor(api: string, options: HttpClientOptions) {
     this.api = api;
     this.timeout = options.timeout;
-    this.sessionState = new SessionState({ ...options });
-    this.dispatcher = new Dispatcher({ ...options });
+    this.dispatcher = new Dispatcher();
     this.cookie = new Cookie({ ...options });
     this.lang = options.lang;
   }
@@ -195,6 +192,29 @@ class HttpClient {
     });
   }
 
+  // This function is to be removed along with the "Session.isValid()" function, where it is used to check the
+  // session without returning a promise.
+  _fetch_blocking(
+    path: string,
+    options: RequestInit,
+    xhr = new XMLHttpRequest(),
+  ) {
+    const url = this.api + path;
+    const bearerToken = this.cookie.getAuthCookie();
+
+    xhr.open(options.method, url, false);
+    xhr.setRequestHeader("Accept", "application/json");
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    if (bearerToken) {
+      xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);
+    }
+
+    xhr.withCredentials = true;
+    xhr.send(options.body ? options.body.toString() : null);
+
+    return xhr.responseText;
+  }
   /**
    * Processes the response headers on login and extracts the JWT and expiration time.
    *
@@ -233,13 +253,6 @@ class HttpClient {
           : new Date(new Date().getTime() + expirationSeconds * 1000);
 
       this.cookie.setAuthCookie(jwt, { secure, expires });
-    }
-
-    if (expirationSeconds > 0) {
-      this.sessionState.read();
-      this.sessionState.setExpirationSeconds(expirationSeconds);
-      this.sessionState.setAuthFlowCompleted(false);
-      this.sessionState.write();
     }
   }
 

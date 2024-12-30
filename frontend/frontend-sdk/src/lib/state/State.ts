@@ -1,14 +1,9 @@
-import { LocalStorageSession } from "./session/SessionState";
-
 /**
  * @interface
  * @category SDK
  * @subcategory Internal
- * @property {LocalStorageUsers=} users - The user states.
  */
-interface LocalStorage {
-  session?: LocalStorageSession;
-}
+interface LocalStorage {}
 
 /**
  * A class to read and write local storage contents.
