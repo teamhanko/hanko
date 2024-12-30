@@ -47,7 +47,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 
 			claims, err := dto.GetClaimsFromToken(token)
 			if err != nil {
-				return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+				return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to parse token claims: %w", err))
 			}
 
 			sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID)
@@ -96,7 +96,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 
 	claims, err := dto.GetClaimsFromToken(token)
 	if err != nil {
-		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to parse token claims: %w", err))
 	}
 
 	sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID)
