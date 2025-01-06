@@ -57,7 +57,7 @@ func StartDB(name string, dialect string) (*TestDB, error) {
 	hostAndPort := resource.GetHostPort(getPortID(dialect))
 	dsn := getDsn(dialect, hostAndPort)
 
-	_ = resource.Expire(120)
+	_ = resource.Expire(300)
 
 	pool.MaxWait = 120 * time.Second
 	if err = pool.Retry(func() error {
