@@ -1,0 +1,38 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Digite o seguinte código de acesso para verificar sua identidade:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "O código de acesso é válido por {{ .TTL }} minutos."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} é o seu código de acesso para {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Use o código de acesso {{ .Code }} para verificar o seu endereço de e-mail"
+subject_login:
+  description: ""
+  other: "Use o código de acesso {{ .Code }} para fazer login na sua conta"
+subject_recovery:
+  description: ""
+  other: "Use o código de acesso {{ .Code }} para recuperar sua conta"
+email_verification_text:
+  description: ""
+  other: "Digite o seguinte código de acesso para verificar o seu endereço de e-mail:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Digite o seguinte código de acesso na tela de login:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Endereço de e-mail fornecido não reconhecido"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Você ou outra pessoa tentou fazer login no {{ .ServiceName }}, mas o endereço de e-mail fornecido não foi reconhecido. Por favor, crie uma conta primeiro."
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "Endereço de e-mail fornecido já está em uso"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Você ou outra pessoa tentou registrar um e-mail para {{ .ServiceName }}, mas o endereço de e-mail fornecido já está registrado. Por favor, tente fazer login em vez disso."
