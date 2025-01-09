@@ -211,6 +211,14 @@ hanko.onUserDeleted(() => {
 
 Please Take a look into the [docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) for more details.
 
+### Translation of outgoing emails
+
+If you use the main `Hanko` client provided by the Frontend SDK, you can use the `lang` parameter in the options when
+instantiating the client to configure the language that is used to convey to the Hanko API the
+language to use for outgoing emails. If you have disabled email delivery through Hanko and configured a webhook for the
+`email.send` event, the value for the `lang` parameter is reflected in the JWT payload of the token contained in the
+webhook request in the "Language" claim.
+
 ## Bugs
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.

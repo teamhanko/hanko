@@ -10,12 +10,16 @@ interface Props extends h.JSX.HTMLAttributes<HTMLElement> {
 }
 
 const Container = forwardRef<HTMLElement>((props: Props, ref) => {
-  const { lang } = useContext(AppContext);
+  const { lang, hanko, setHanko } = useContext(AppContext);
   const { setLang } = useContext(TranslateContext);
 
   useEffect(() => {
-    setLang(lang);
-  }, [lang, setLang]);
+    setLang(lang.replace(/[-]/, ""));
+    setHanko((hanko) => {
+      hanko.setLang(lang);
+      return hanko;
+    });
+  }, [hanko, lang, setHanko, setLang]);
 
   return (
     <section part={"container"} className={styles.container} ref={ref}>
