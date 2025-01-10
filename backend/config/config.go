@@ -89,6 +89,7 @@ func Load(cfgFile *string) (*Config, error) {
 		*cfgFile = DefaultConfigFilePath
 	}
 
+	c := DefaultConfig()
 	k, err := LoadFile(cfgFile, yaml.Parser())
 	if err != nil {
 		if *cfgFile != DefaultConfigFilePath {
@@ -97,12 +98,10 @@ func Load(cfgFile *string) (*Config, error) {
 		log.Println("failed to load config, skipping...")
 	} else {
 		log.Println("Using config file:", *cfgFile)
-	}
-
-	c := DefaultConfig()
-	err = k.Unmarshal("", c)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+		err = k.Unmarshal("", c)
+		if err != nil {
+			return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+		}
 	}
 
 	err = envconfig.Process("", c)
