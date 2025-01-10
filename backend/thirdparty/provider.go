@@ -94,7 +94,7 @@ func GetProvider(config config.ThirdParty, id string) (OAuthProvider, error) {
 	if strings.HasPrefix(idLower, "custom_") {
 		return getCustomThirdPartyProvider(config, idLower)
 	} else {
-		return getThirdPartyProvider(config, id)
+		return getThirdPartyProvider(config, idLower)
 	}
 }
 
