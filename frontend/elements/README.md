@@ -578,6 +578,7 @@ Translations are currently available for the following languages:
 - "de" - German
 - "en" - English
 - "fr" - French
+- "it" - Italian
 - "ptBR" - Brazilian Portuguese
 - "zh" - Simplified Chinese
 
@@ -705,6 +706,13 @@ Markup:
 <!-- Will appear in English, but the "continue" button label will be "➔"  -->
 <hanko-auth lang="symbols"></hanko-auth>
 ```
+
+### Translation of outgoing Hanko emails
+
+If you use Hanko Elements the language supplied to the `lang` attribute of any of the components is also used to convey
+to the Hanko API the language to use for outgoing emails. If you have disabled email delivery through Hanko and
+configured a webhook for the `email.send` event, the value for the `lang` attribute is reflected in the JWT payload of
+the token contained in the webhook request in the `language` claim.
 
 ## Experimental Features
 

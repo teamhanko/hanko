@@ -19,6 +19,12 @@ import { SessionClient } from "./lib/client/SessionClient";
  * @property {string=} cookieDomain - The domain where the cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
  * @property {string=} cookieSameSite - Specify whether/when cookies are sent with cross-site requests. Defaults to "lax".
  * @property {string=} localStorageKey - The prefix / name of the local storage keys. Defaults to "hanko"
+ * @property {string=} lang - Used to convey the preferred language to the API, e.g. for translating outgoing emails.
+ *                            It is transmitted to the API in a custom header (X-Language).
+ *                            Should match one of the supported languages ("bn", "de", "en", "fr", "it, "pt-BR", "zh")
+ *                            if email delivery by Hanko is enabled. If email delivery by Hanko is disabled and the
+ *                            relying party configures a webhook for the "email.send" event, then the set language is
+ *                            reflected in the payload of the token contained in the webhook request.
  */
 export interface HankoOptions {
   timeout?: number;
@@ -26,6 +32,7 @@ export interface HankoOptions {
   cookieDomain?: string;
   cookieSameSite?: CookieSameSite;
   localStorageKey?: string;
+  lang?: string;
 }
 
 /**
@@ -69,6 +76,9 @@ class Hanko extends Listener {
     }
     if (options?.cookieSameSite !== undefined) {
       opts.cookieSameSite = options.cookieSameSite;
+    }
+    if (options?.lang !== undefined) {
+      opts.lang = options.lang;
     }
 
     this.api = api;
@@ -118,6 +128,18 @@ class Hanko extends Listener {
      */
     this.flow = new Flow(api, opts);
   }
+
+  /**
+   * Sets the preferred language on the underlying sub-clients. The clients'
+   * base HttpClient uses this language to transmit an X-Language header to the
+   * API which is then used to e.g. translate outgoing emails.
+   *
+   * @public
+   * @param lang {string} - The preferred language to convey to the API.
+   */
+  setLang(lang: string) {
+    this.flow.client.lang = lang;
+  }
 }
 
 // eslint-disable-next-line require-jsdoc
@@ -127,6 +149,7 @@ export interface InternalOptions {
   cookieDomain?: string;
   cookieSameSite?: CookieSameSite;
   localStorageKey: string;
+  lang?: string;
 }
 
 export { Hanko };

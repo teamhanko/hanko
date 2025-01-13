@@ -57,7 +57,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 	sendParams := services.SendPasscodeParams{
 		Template:     c.Stash().Get(shared.StashPathPasscodeTemplate).String(),
 		EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
-		Language:     deps.HttpContext.Request().Header.Get("Accept-Language"),
+		Language:     deps.HttpContext.Request().Header.Get("X-Language"),
 	}
 	passcodeResult, err := deps.PasscodeService.SendPasscode(deps.Tx, sendParams)
 	if err != nil {
@@ -70,6 +70,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		ToEmailAddress:   sendParams.EmailAddress,
 		DeliveredByHanko: deps.Cfg.EmailDelivery.Enabled,
 		AcceptLanguage:   sendParams.Language,
+		Language:         sendParams.Language,
 		Type:             webhook.EmailTypePasscode,
 		Data: webhook.PasscodeData{
 			ServiceName: deps.Cfg.Service.Name,

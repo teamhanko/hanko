@@ -115,12 +115,15 @@ class Response {
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string=} cookieDomain - The domain where cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
  * @property {string} localStorageKey - The prefix / name of the local storage keys.
+ * @property {string} lang - The language used by the client(s) to convey to the Hanko API the language to use -
+ *                           e.g. for translating outgoing emails - in a custom header (X-Language).
  */
 export interface HttpClientOptions {
   timeout: number;
   cookieName: string;
   cookieDomain?: string;
   localStorageKey: string;
+  lang?: string;
 }
 
 /**
@@ -143,6 +146,7 @@ class HttpClient {
   sessionState: SessionState;
   dispatcher: Dispatcher;
   cookie: Cookie;
+  lang: string;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options: HttpClientOptions) {
@@ -151,6 +155,7 @@ class HttpClient {
     this.sessionState = new SessionState({ ...options });
     this.dispatcher = new Dispatcher({ ...options });
     this.cookie = new Cookie({ ...options });
+    this.lang = options.lang;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -159,11 +164,13 @@ class HttpClient {
     const url = this.api + path;
     const timeout = this.timeout;
     const bearerToken = this.cookie.getAuthCookie();
+    const lang = this.lang;
 
     return new Promise<Response>(function (resolve, reject) {
       xhr.open(options.method, url, true);
       xhr.setRequestHeader("Accept", "application/json");
       xhr.setRequestHeader("Content-Type", "application/json");
+      xhr.setRequestHeader("X-Language", lang);
 
       if (bearerToken) {
         xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);

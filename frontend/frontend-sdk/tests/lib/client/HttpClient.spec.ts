@@ -49,7 +49,7 @@ describe("httpClient._fetch()", () => {
       "Content-Type",
       "application/json",
     );
-    expect(xhr.setRequestHeader).toHaveBeenCalledTimes(2);
+    expect(xhr.setRequestHeader).toHaveBeenCalledTimes(3);
     expect(xhr.open).toHaveBeenNthCalledWith(
       1,
       "GET",
@@ -73,7 +73,7 @@ describe("httpClient._fetch()", () => {
       "Authorization",
       `Bearer ${jwt}`,
     );
-    expect(xhr.setRequestHeader).toHaveBeenCalledTimes(3);
+    expect(xhr.setRequestHeader).toHaveBeenCalledTimes(4);
   });
 
   it("should handle onerror", async () => {

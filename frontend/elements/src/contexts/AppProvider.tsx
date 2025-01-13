@@ -128,6 +128,7 @@ interface UIState {
 
 interface Context {
   hanko: Hanko;
+  setHanko: StateUpdater<Hanko>;
   page: h.JSX.Element;
   setPage: StateUpdater<h.JSX.Element>;
   init: (compName: ComponentName) => void;
@@ -179,6 +180,11 @@ const AppProvider = ({
     fallbackLanguage,
   } = globalOptions;
 
+  // Without this, the initial "lang" attribute value sometimes appears to not
+  // be set properly. This results in a wrong X-Language header value being sent
+  // to the API and hence in outgoing emails translated in the wrong language.
+  hanko.setLang(lang?.toString() || fallbackLanguage);
+
   const ref = useRef<HTMLElement>(null);
 
   const storageKeyLastLogin = useMemo(
@@ -201,6 +207,7 @@ const AppProvider = ({
 
   const initComponent = useMemo(() => <InitPage />, []);
   const [page, setPage] = useState<h.JSX.Element>(initComponent);
+  const [, setHanko] = useState<Hanko>(hanko);
   const [lastLogin, setLastLogin] = useState<LastLogin>();
   const [uiState, setUIState] = useState<UIState>({
     email: prefilledEmail,
@@ -598,6 +605,7 @@ const AppProvider = ({
         setSucceededAction,
         uiState,
         hanko,
+        setHanko,
         lang: lang?.toString() || fallbackLanguage,
         prefilledEmail,
         prefilledUsername,

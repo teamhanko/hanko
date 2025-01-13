@@ -1,0 +1,36 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Entrez le code d'accès suivant pour vérifier votre identité :"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "Le code d'accès est valable pendant {{ .TTL }} minutes."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} est votre code d'accès pour {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Utilisez le code d'accès {{ .Code }} pour vérifier votre adresse e-mail"
+subject_login:
+  description: ""
+  other: "Utilisez le code d'accès {{ .Code }} pour vous connecter à votre compte"
+subject_recovery:
+  description: ""
+  other: "Utilisez le code d'accès {{ .Code }} pour récupérer votre compte"
+email_verification_text:
+  description: ""
+  other: "Entrez le code d'accès suivant pour vérifier votre adresse e-mail :"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Entrez le code d'accès suivant sur votre écran de connexion :"
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "L'adresse e-mail fournie n'est pas reconnue"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Vous ou quelqu'un d'autre avez essayé de vous connecter à {{ .ServiceName }}, mais l'adresse e-mail fournie n'a pas été reconnue. Veuillez d'abord créer un compte."
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "L'adresse e-mail fournie est déjà utilisée"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Vous ou quelqu'un d'autre avez tenté d'enregistrer un e-mail pour {{ .ServiceName }}, mais l'adresse e-mail fournie est déjà enregistrée. Veuillez essayer de vous connecter à la place."

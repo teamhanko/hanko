@@ -1,0 +1,36 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Inserisci il seguente codice di accesso per verificare la tua identità:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "Il codice di accesso è valido per {{ .TTL }} minuti."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} è il tuo codice di accesso per {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Usa il codice di accesso {{ .Code }} per verificare il tuo indirizzo e-mail"
+subject_login:
+  description: ""
+  other: "Usa il codice di accesso {{ .Code }} per accedere al tuo account"
+subject_recovery:
+  description: ""
+  other: "Usa il codice di accesso {{ .Code }} per recuperare il tuo account"
+email_verification_text:
+  description: ""
+  other: "Inserisci il seguente codice di accesso per verificare il tuo indirizzo e-mail:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Inserisci il seguente codice di accesso nella tua schermata di login:"
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Indirizzo e-mail fornito non riconosciuto"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Tu o qualcun altro avete provato ad accedere a {{ .ServiceName }}, ma l'indirizzo e-mail fornito non è stato riconosciuto. Per favore, crea prima un account."
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "Indirizzo e-mail fornito già in uso"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Tu o qualcun altro avete provato a registrare un'e-mail per {{ .ServiceName }}, ma l'indirizzo e-mail fornito è già registrato. Per favore, prova a fare il login invece."

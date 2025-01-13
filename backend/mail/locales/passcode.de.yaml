@@ -1,0 +1,39 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "Geben Sie den folgenden Passcode ein, um Ihre Identität zu überprüfen:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "Der Passcode ist {{ .TTL }} Minuten lang gültig."
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} ist Ihr Passcode für {{ .ServiceName }}"
+subject_email_verification:
+  description: ""
+  other: "Verwenden Sie den Passcode {{ .Code }}, um Ihre E-Mail-Adresse zu bestätigen"
+subject_login:
+  description: ""
+  other: "Verwenden Sie den Passcode {{ .Code }}, um sich in Ihr Konto einzuloggen"
+subject_recovery:
+  description: ""
+  other: "Verwenden Sie den Passcode {{ .Code }}, um Ihr Konto wiederherzustellen"
+email_verification_text:
+  description: ""
+  other: "Geben Sie den folgenden Passcode ein, um Ihre E-Mail-Adresse zu bestätigen:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "Geben Sie auf Ihrem Anmeldebildschirm den folgenden Passcode ein:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "Die angegebene E-Mail-Adresse wird nicht erkannt."
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "Sie oder eine andere Person haben versucht, sich bei {{ .ServiceName }} anzumelden, aber die angegebene E-Mail-Adresse wird nicht erkannt. Bitte erstellen Sie zunächst ein Konto."
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "Die angegebene E-Mail-Adresse ist bereits vergeben."
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "Sie oder eine andere Person haben versucht, eine E-Mail für {{ .ServiceName }} zu registrieren, aber die angegebene E-Mail-Adresse ist bereits registriert. Bitte versuchen Sie stattdessen, sich anzumelden."
+

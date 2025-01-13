@@ -1,0 +1,38 @@
+login_text:
+  description: "The sign in content of the text email."
+  other: "আপনার পরিচয় যাচাই করতে নিচের পাসকোডটি দিন:"
+ttl_text:
+  description: "The length how long the passcode is valid."
+  other: "পাসকোডটি {{ .TTL }} মিনিটের জন্য বৈধ।"
+email_subject_login:
+  description: ""
+  other: "{{ .Code }} হল আপনার পাসকোড {{ .ServiceName }} এর জন্য"
+subject_email_verification:
+  description: ""
+  other: "আপনার ইমেল ঠিকানা যাচাই করতে পাসকোড {{ .Code }} ব্যবহার করুন"
+subject_login:
+  description: ""
+  other: "আপনার অ্যাকাউন্টে লগইন করতে পাসকোড {{ .Code }} ব্যবহার করুন"
+subject_recovery:
+  description: ""
+  other: "আপনার অ্যাকাউন্ট পুনরুদ্ধার করতে পাসকোড {{ .Code }} ব্যবহার করুন"
+email_verification_text:
+  description: ""
+  other: "আপনার ইমেল ঠিকানা যাচাই করতে নিচের পাসকোডটি দিন:"
+recovery_text:
+  description: "The content of the recovery text email."
+  other: "লগইন স্ক্রীনে নিচের পাসকোডটি দিন:"
+
+subject_email_login_attempted:
+  description: "Subject for notification about a login attempt."
+  other: "প্রদত্ত ইমেল ঠিকানা চিহ্নিত হয়নি"
+email_login_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to log in to a specific service using an unrecognized email address."
+  other: "আপনি বা অন্য কেউ {{ .ServiceName }} তে সাইন ইন করার চেষ্টা করেছেন, তবে প্রদত্ত ইমেল ঠিকানা চিহ্নিত হয়নি। দয়া করে আগে একটি অ্যাকাউন্ট তৈরি করুন।"
+
+subject_email_registration_attempted:
+  description: "Subject for notification about a registration attempt."
+  other: "প্রদত্ত ইমেল ঠিকানা ইতিমধ্যেই ব্যবহৃত"
+email_registration_attempted_text:
+  description: "Notifies the recipient that either they or someone else attempted to register for a specific service using an email address that is already in use."
+  other: "আপনি বা অন্য কেউ {{ .ServiceName }} এর জন্য একটি ইমেল নিবন্ধন করার চেষ্টা করেছেন, কিন্তু প্রদত্ত ইমেল ঠিকানা ইতিমধ্যেই নিবন্ধিত। দয়া করে তার পরিবর্তে লগইন করার চেষ্টা করুন।"
