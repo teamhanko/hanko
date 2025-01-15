@@ -94,6 +94,13 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 				Secret:       "fakeClientSecret",
 				AllowLinking: false,
 			},
+			Facebook: config.ThirdPartyProvider{
+				Name:         "facebook",
+				Enabled:      false,
+				ClientID:     "fakeClientID",
+				Secret:       "fakeClientSecret",
+				AllowLinking: false,
+			},
 		},
 		ErrorRedirectURL:    "https://error.test.example",
 		RedirectURL:         "https://api.test.example/callback",
@@ -117,6 +124,8 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 			cfg.ThirdParty.Providers.Discord.Enabled = true
 		case "microsoft":
 			cfg.ThirdParty.Providers.Microsoft.Enabled = true
+		case "facebook":
+			cfg.ThirdParty.Providers.Facebook.Enabled = true
 		}
 	}
 

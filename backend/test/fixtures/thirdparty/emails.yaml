@@ -36,6 +36,12 @@
   verified: false
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
+- id: 967ce4a0-677d-4dc3-bacf-53d54471369c
+  user_id:
+  address: test-with-facebook-identity@example.com
+  verified: true
+  created_at: 2020-12-31 23:59:59
+  updated_at: 2020-12-31 23:59:59
 - id: 527afce8-3b7b-41b6-b1ed-33d408c5a7bb
   user_id: 43fb7e88-4d5d-4b2b-9335-391e78d7e472
   address: test-no-identity@example.com

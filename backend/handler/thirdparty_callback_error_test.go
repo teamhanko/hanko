@@ -2,12 +2,13 @@ package handler
 
 import (
 	"fmt"
-	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowedForProvider() {
