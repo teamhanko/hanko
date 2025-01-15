@@ -7,6 +7,8 @@ import (
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type EmailPersistVerifiedStatus struct {
@@ -116,6 +118,8 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
 		}
+
+		utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserEmailCreate, userId)
 	}
 
 	return nil
