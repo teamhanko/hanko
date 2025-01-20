@@ -54,8 +54,10 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
+	passcodeTemplate := c.Stash().Get(shared.StashPathPasscodeTemplate).String()
+
 	sendParams := services.SendPasscodeParams{
-		Template:     c.Stash().Get(shared.StashPathPasscodeTemplate).String(),
+		Template:     passcodeTemplate,
 		EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 		Language:     deps.HttpContext.Request().Header.Get("X-Language"),
 	}
@@ -71,7 +73,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		DeliveredByHanko: deps.Cfg.EmailDelivery.Enabled,
 		AcceptLanguage:   sendParams.Language,
 		Language:         sendParams.Language,
-		Type:             webhook.EmailTypePasscode,
+		Type:             webhook.EmailTypeFromStashedTemplateName(passcodeTemplate),
 		Data: webhook.PasscodeData{
 			ServiceName: deps.Cfg.Service.Name,
 			OtpCode:     passcodeResult.Code,

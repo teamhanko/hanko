@@ -22,6 +22,28 @@ type PasscodeData struct {
 
 type EmailType string
 
+func EmailTypeFromStashedTemplateName(stashedTemplateName string) EmailType {
+	switch stashedTemplateName {
+	case "login":
+		return EmailTypePasscode
+	case "email_login_attempted":
+		return EmailTypeLoginAttempt
+	case "email_verification":
+		return EmailTypeEmailVerification
+	case "email_registration_attempted":
+		return EmailTypeRegistrationAttempt
+	case "recovery":
+		return EmailTypeRecovery
+	default:
+		return EmailTypeUnknown
+	}
+}
+
 var (
-	EmailTypePasscode EmailType = "passcode"
+	EmailTypePasscode            EmailType = "passcode"
+	EmailTypeLoginAttempt        EmailType = "login_attempt"
+	EmailTypeRegistrationAttempt EmailType = "registration_attempt"
+	EmailTypeEmailVerification   EmailType = "email_verification"
+	EmailTypeRecovery            EmailType = "recovery"
+	EmailTypeUnknown             EmailType = "unknown"
 )
