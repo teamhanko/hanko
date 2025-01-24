@@ -227,7 +227,7 @@ after the user completes the authentication flow), while other events are option
 
     // Function to add event listeners
     function addEventListeners() {
-        hankoEventsEl.addEventListener("onSessionCreated", (event) => {
+        hankoEventsEl.addEventListener("onSessionCreated", () => {
             // The user has completed the authentication flow through the hanko-auth component, so we can display the
             // hanko-profile and hide the hanko-auth component.
             showAuthComponent(false); // Show profile component
