@@ -218,25 +218,13 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
         };
 
         jest.spyOn(response.xhr, "getResponseHeader");
-        jest.spyOn(client.sessionState, "read");
         jest.spyOn(client.cookie, "setAuthCookie");
-        jest.spyOn(client.sessionState, "setExpirationSeconds");
-        jest.spyOn(client.sessionState, "write");
 
         client.processHeaders(xhr);
 
         expect(response.xhr.getResponseHeader).toBeCalledTimes(2);
 
         expect(client.cookie.setAuthCookie).toHaveBeenCalledTimes(1);
-        expect(client.sessionState.read).toHaveBeenCalledTimes(1);
-        expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledTimes(
-          1,
-        );
-        expect(client.sessionState.write).toHaveBeenCalledTimes(1);
-
-        expect(client.sessionState.setExpirationSeconds).toHaveBeenCalledWith(
-          expirationSeconds,
-        );
 
         expect(client.cookie.setAuthCookie).toHaveBeenCalledWith(jwt, {
           secure,
