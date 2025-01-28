@@ -20,7 +20,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/mapper"
 	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"strconv"
 	"time"
@@ -156,7 +155,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 
 		flow.Set("deps", deps)
 
-		flowResult, err = flow.Execute(models.NewFlowDB(tx),
+		flowResult, err = flow.Execute(persistence.NewFlowPersister(tx),
 			flowpilot.WithQueryParamKey(queryParamKey),
 			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
 			flowpilot.WithInputData(inputData),

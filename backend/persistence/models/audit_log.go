@@ -44,6 +44,8 @@ func NewAuditLog(auditLogType AuditLogType, requestMeta RequestMeta, details Det
 		MetaSourceIp:      requestMeta.SourceIp,
 		ActorUserId:       nil,
 		ActorEmail:        nil,
+		CreatedAt:         time.Now().UTC(),
+		UpdatedAt:         time.Now().UTC(),
 	}
 
 	if len(details) > 0 {

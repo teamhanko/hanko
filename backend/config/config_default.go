@@ -87,7 +87,8 @@ func DefaultConfig() *Config {
 				Enabled:      true,
 				OutputStream: OutputStreamStdOut,
 			},
-			Mask: true,
+			Mask:      true,
+			Retention: "720h",
 		},
 		Emails: Emails{
 			RequireVerification: true,

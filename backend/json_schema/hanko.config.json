@@ -98,6 +98,11 @@
         "storage": {
           "$ref": "#/$defs/AuditLogStorage",
           "description": "`storage` controls audit log retention."
+        },
+        "retention": {
+          "type": "string",
+          "description": "`retention` specifies the time duration after which log audit entries may be deleted.",
+          "default": "720h"
         }
       },
       "additionalProperties": false,
