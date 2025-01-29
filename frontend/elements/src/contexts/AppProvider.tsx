@@ -330,7 +330,11 @@ const AppProvider = ({
           });
         } catch (error) {
           const prevState = await state.actions.back(null).run();
-          setLoadingAction(null);
+          setUIState((prev) => ({
+            ...prev,
+            error: state.error,
+            loadingAction: null,
+          }));
           return hanko.flow.run(prevState, stateHandler);
         }
 
