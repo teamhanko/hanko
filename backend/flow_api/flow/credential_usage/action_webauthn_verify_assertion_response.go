@@ -78,7 +78,7 @@ func (a WebauthnVerifyAssertionResponse) Execute(c flowpilot.ExecutionContext) e
 				return fmt.Errorf("could not create audit log: %w", err)
 			}
 
-			return c.Continue(shared.StateError)
+			return c.Continue(c.GetCurrentState())
 		}
 
 		return fmt.Errorf("failed to verify assertion response: %w", err)
