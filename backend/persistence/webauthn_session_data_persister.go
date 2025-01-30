@@ -7,6 +7,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"time"
 )
 
 type WebauthnSessionDataPersister interface {
@@ -15,6 +16,7 @@ type WebauthnSessionDataPersister interface {
 	Create(sessionData models.WebauthnSessionData) error
 	Update(sessionData models.WebauthnSessionData) error
 	Delete(sessionData models.WebauthnSessionData) error
+	Cleanup[models.WebauthnSessionData]
 }
 
 type webauthnSessionDataPersister struct {
@@ -79,6 +81,18 @@ func (p *webauthnSessionDataPersister) Update(sessionData models.WebauthnSession
 	}
 
 	return nil
+}
+
+func (p *webauthnSessionDataPersister) FindExpired(cutoffTime time.Time, page, perPage int) ([]models.WebauthnSessionData, error) {
+	var items []models.WebauthnSessionData
+
+	query := p.db.
+		Where("expires_at < ?", cutoffTime).
+		Select("id").
+		Paginate(page, perPage)
+	err := query.All(&items)
+
+	return items, err
 }
 
 func (p *webauthnSessionDataPersister) Delete(sessionData models.WebauthnSessionData) error {

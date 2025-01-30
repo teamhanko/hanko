@@ -15,8 +15,8 @@ type AuditLogPersister interface {
 	Create(auditLog models.AuditLog) error
 	Get(id uuid.UUID) (*models.AuditLog, error)
 	List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) ([]models.AuditLog, error)
-	Delete(auditLog models.AuditLog) error
 	Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) (int, error)
+	Cleanup[models.AuditLog]
 }
 
 type auditLogPersister struct {
@@ -67,15 +67,6 @@ func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, en
 	}
 
 	return auditLogs, nil
-}
-
-func (p *auditLogPersister) Delete(auditLog models.AuditLog) error {
-	err := p.db.Eager().Destroy(&auditLog)
-	if err != nil {
-		return fmt.Errorf("failed to delete auditlog: %w", err)
-	}
-
-	return nil
 }
 
 func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string) (int, error) {
@@ -131,4 +122,25 @@ func (p *auditLogPersister) addQueryParamsToSqlQuery(query *pop.Query, startTime
 	}
 
 	return query
+}
+
+func (p *auditLogPersister) FindExpired(cutoffTime time.Time, page, perPage int) ([]models.AuditLog, error) {
+	var items []models.AuditLog
+
+	query := p.db.
+		Where("created_at < ?", cutoffTime).
+		Select("id").
+		Paginate(page, perPage)
+	err := query.All(&items)
+
+	return items, err
+}
+
+func (p *auditLogPersister) Delete(auditLog models.AuditLog) error {
+	err := p.db.Eager().Destroy(&auditLog)
+	if err != nil {
+		return fmt.Errorf("failed to delete auditlog: %w", err)
+	}
+
+	return nil
 }

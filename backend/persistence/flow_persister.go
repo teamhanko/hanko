@@ -1,24 +1,31 @@
-package models
+package persistence
 
 import (
 	"errors"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/persistence/models"
+	"time"
 )
 
-type FlowDB struct {
+type FlowPersister interface {
+	flowpilot.FlowDB
+	Cleanup[models.Flow]
+}
+
+type flowPersister struct {
 	tx *pop.Connection
 }
 
-func NewFlowDB(tx *pop.Connection) flowpilot.FlowDB {
-	return FlowDB{tx}
+func NewFlowPersister(tx *pop.Connection) FlowPersister {
+	return flowPersister{tx}
 }
 
-func (flowDB FlowDB) GetFlow(flowID uuid.UUID) (*flowpilot.FlowModel, error) {
-	flowModel := Flow{}
+func (p flowPersister) GetFlow(flowID uuid.UUID) (*flowpilot.FlowModel, error) {
+	flowModel := models.Flow{}
 
-	err := flowDB.tx.Find(&flowModel, flowID)
+	err := p.tx.Find(&flowModel, flowID)
 	if err != nil {
 		return nil, err
 	}
@@ -26,8 +33,8 @@ func (flowDB FlowDB) GetFlow(flowID uuid.UUID) (*flowpilot.FlowModel, error) {
 	return flowModel.ToFlowpilotModel(), nil
 }
 
-func (flowDB FlowDB) CreateFlow(flowModel flowpilot.FlowModel) error {
-	f := Flow{
+func (p flowPersister) CreateFlow(flowModel flowpilot.FlowModel) error {
+	f := models.Flow{
 		ID:        flowModel.ID,
 		Data:      flowModel.Data,
 		Version:   flowModel.Version,
@@ -37,7 +44,7 @@ func (flowDB FlowDB) CreateFlow(flowModel flowpilot.FlowModel) error {
 		UpdatedAt: flowModel.UpdatedAt,
 	}
 
-	err := flowDB.tx.Create(&f)
+	err := p.tx.Create(&f)
 	if err != nil {
 		return err
 	}
@@ -45,8 +52,8 @@ func (flowDB FlowDB) CreateFlow(flowModel flowpilot.FlowModel) error {
 	return nil
 }
 
-func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
-	f := &Flow{
+func (p flowPersister) UpdateFlow(flowModel flowpilot.FlowModel) error {
+	f := &models.Flow{
 		ID:        flowModel.ID,
 		Data:      flowModel.Data,
 		Version:   flowModel.Version,
@@ -58,7 +65,7 @@ func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
 
 	previousVersion := flowModel.Version - 1
 
-	count, err := flowDB.tx.
+	count, err := p.tx.
 		Where("id = ?", f.ID).
 		Where("version = ?", previousVersion).
 		UpdateQuery(f, "version", "csrf_token", "data")
@@ -71,4 +78,20 @@ func (flowDB FlowDB) UpdateFlow(flowModel flowpilot.FlowModel) error {
 	}
 
 	return nil
+}
+
+func (p flowPersister) FindExpired(cutoffTime time.Time, page, perPage int) ([]models.Flow, error) {
+	var items []models.Flow
+
+	query := p.tx.
+		Where("expires_at < ?", cutoffTime).
+		Select("id").
+		Paginate(page, perPage)
+	err := query.All(&items)
+
+	return items, err
+}
+
+func (p flowPersister) Delete(item models.Flow) error {
+	return p.tx.Destroy(&item)
 }

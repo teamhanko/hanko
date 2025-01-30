@@ -19,6 +19,8 @@ type Persister interface {
 	GetAuditLogPersister() AuditLogPersister
 	GetAuditLogPersisterWithConnection(tx *pop.Connection) AuditLogPersister
 	GetConnection() *pop.Connection
+	GetFlowPersister() FlowPersister
+	GetFlowPersisterWithConnection(tx *pop.Connection) FlowPersister
 	GetEmailPersister() EmailPersister
 	GetEmailPersisterWithConnection(tx *pop.Connection) EmailPersister
 	GetIdentityPersister() IdentityPersister
@@ -55,6 +57,11 @@ type Persister interface {
 	GetWebauthnCredentialUserHandlePersister() WebauthnCredentialUserHandlePersister
 	GetWebauthnCredentialUserHandlePersisterWithConnection(tx *pop.Connection) WebauthnCredentialUserHandlePersister
 	Transaction(func(tx *pop.Connection) error) error
+}
+
+type Cleanup[T any] interface {
+	FindExpired(cutoffTime time.Time, page, perPage int) ([]T, error)
+	Delete(item T) error
 }
 
 type Migrator interface {
@@ -129,6 +136,14 @@ func (p *persister) MigrateDown(steps int) error {
 
 func (p *persister) GetConnection() *pop.Connection {
 	return p.DB
+}
+
+func (p *persister) GetFlowPersister() FlowPersister {
+	return NewFlowPersister(p.DB)
+}
+
+func (p *persister) GetFlowPersisterWithConnection(tx *pop.Connection) FlowPersister {
+	return NewFlowPersister(tx)
 }
 
 func (p *persister) GetIdentityPersister() IdentityPersister {
