@@ -33,7 +33,7 @@ func (a WebauthnGenerateRequestOptionsForConditionalUi) Execute(c flowpilot.Hook
 		return fmt.Errorf("failed to generate webauthn request options: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID)
+	err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID.String())
 	if err != nil {
 		return fmt.Errorf("failed to stash webauthn_session_data_id: %w", err)
 	}

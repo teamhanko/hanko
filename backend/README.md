@@ -545,16 +545,20 @@ To decode the webhook you can use the JWKs created in [Configure JSON Web Key Se
 
 Hanko sends webhooks for the following event types:
 
-| Event                     | Triggers on                                                                                        |
-|---------------------------|----------------------------------------------------------------------------------------------------|
-| user                      | user creation, user deletion, user update, email creation, email deletion, change of primary email |
-| user.create               | user creation                                                                                      |
-| user.delete               | user deletion                                                                                      |
-| user.update               | user update, email creation, email deletion, change of primary email                               |
-| user.update.email         | email creation, email deletion, change of primary email                                            |
-| user.update.email.create  | email creation                                                                                     |
-| user.update.email.delete  | email deletion                                                                                     |
-| user.update.email.primary | change of primary email                                                                            |
+| Event                       | Triggers on                                                                                        |
+|-----------------------------|----------------------------------------------------------------------------------------------------|
+| user                        | user creation, user deletion, user update, email creation, email deletion, change of primary email |
+| user.create                 | user creation                                                                                      |
+| user.delete                 | user deletion                                                                                      |
+| user.update                 | user update, email creation, email deletion, change of primary email                               |
+| user.update.email           | email creation, email deletion, change of primary email                                            |
+| user.update.email.create    | email creation                                                                                     |
+| user.update.email.delete    | email deletion                                                                                     |
+| user.update.email.primary   | change of primary email                                                                            |
+| user.update.username.create | username creation                                                                                  |
+| user.update.username.delete | username deletion                                                                                  |
+| user.update.username.update | change of username                                                                                 |
+| email.send                  | an email was sent or should be sent                                                                |
 
 As you can see, events can have subevents. You are able to filter which events you want to receive by either selecting
 a parent event when you want to receive all subevents or selecting specific subevents.
