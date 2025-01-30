@@ -94,7 +94,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			DeliveredByHanko: deps.Cfg.EmailDelivery.Enabled,
 			AcceptLanguage:   sendParams.Language,
 			Language:         sendParams.Language,
-			Type:             webhook.EmailTypeFromStashedTemplateName(passcodeTemplate),
+			Type:             passcodeTemplate,
 			Data: webhook.PasscodeData{
 				ServiceName: deps.Cfg.Service.Name,
 				OtpCode:     passcodeResult.Code,

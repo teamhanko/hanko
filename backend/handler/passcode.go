@@ -207,7 +207,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		DeliveredByHanko: true,
 		AcceptLanguage:   lang,
 		Language:         lang,
-		Type:             webhook.EmailTypePasscode,
+		Type:             "passcode",
 		Data: webhook.PasscodeData{
 			ServiceName: h.cfg.Service.Name,
 			OtpCode:     passcode,
