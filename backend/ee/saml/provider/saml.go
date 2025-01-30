@@ -37,7 +37,7 @@ func NewBaseSamlProvider(cfg *config.Config, idpConfig samlConfig.IdentityProvid
 			IDPCertificateStore:    &idpMetadata.certs,
 
 			AssertionConsumerServiceURL: fmt.Sprintf("%s/saml/callback", cfg.Saml.Endpoint),
-			ServiceProviderIssuer:       fmt.Sprintf("%s/saml/metadata", cfg.Saml.Endpoint),
+			ServiceProviderIssuer:       cfg.Saml.Endpoint,
 			ServiceProviderSLOURL:       fmt.Sprintf("%s/saml/logout", cfg.Saml.Endpoint),
 			SPKeyStore:                  serviceProviderCertStore,
 
