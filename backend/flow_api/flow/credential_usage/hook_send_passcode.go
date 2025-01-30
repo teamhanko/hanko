@@ -63,9 +63,11 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 
 	isDifferentEmailAddress := c.Stash().Get(shared.StashPathEmail).String() != c.Stash().Get(shared.StashPathPasscodeEmail).String()
 
+	passcodeTemplate := c.Stash().Get(shared.StashPathPasscodeTemplate).String()
+
 	if !passcodeIsValid || isDifferentEmailAddress {
 		sendParams := services.SendPasscodeParams{
-			Template:     c.Stash().Get(shared.StashPathPasscodeTemplate).String(),
+			Template:     passcodeTemplate,
 			EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 			Language:     deps.HttpContext.Request().Header.Get("X-Language"),
 		}
@@ -92,7 +94,7 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			DeliveredByHanko: deps.Cfg.EmailDelivery.Enabled,
 			AcceptLanguage:   sendParams.Language,
 			Language:         sendParams.Language,
-			Type:             webhook.EmailTypePasscode,
+			Type:             passcodeTemplate,
 			Data: webhook.PasscodeData{
 				ServiceName: deps.Cfg.Service.Name,
 				OtpCode:     passcodeResult.Code,
