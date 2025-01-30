@@ -124,6 +124,6 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return data, nil
 }
 
-func (f facebookProvider) Name() string {
-	return f.config.Name
+func (f facebookProvider) ID() string {
+	return f.config.ID
 }

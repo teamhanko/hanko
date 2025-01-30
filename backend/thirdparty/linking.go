@@ -17,14 +17,14 @@ type AccountLinkingResult struct {
 	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, isSaml bool, isFlow bool) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, isSaml bool, isFlow bool) (*AccountLinkingResult, error) {
 	if !isFlow {
 		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
 		}
 	}
 
-	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerName)
+	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerID)
 	if err != nil {
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
@@ -36,29 +36,29 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 		}
 
 		if user == nil {
-			return signUp(tx, cfg, p, userData, providerName)
+			return signUp(tx, cfg, p, userData, providerID)
 		} else {
-			return link(tx, cfg, p, userData, providerName, user, isSaml)
+			return link(tx, cfg, p, userData, providerID, user, isSaml)
 		}
 	} else {
 		return signIn(tx, cfg, p, userData, identity)
 	}
 }
 
-func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string, user *models.User, isSaml bool) (*AccountLinkingResult, error) {
+func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool) (*AccountLinkingResult, error) {
 	if !isSaml {
-		if strings.HasPrefix(providerName, "custom_") {
-			provider, ok := cfg.ThirdParty.CustomProviders[strings.TrimPrefix(providerName, "custom_")]
+		if strings.HasPrefix(providerID, "custom_") {
+			provider, ok := cfg.ThirdParty.CustomProviders[strings.TrimPrefix(providerID, "custom_")]
 			if !ok {
-				return nil, ErrorServer(fmt.Sprintf("unknown provider: %s", providerName))
+				return nil, ErrorServer(fmt.Sprintf("unknown provider: %s", providerID))
 			}
 			if !provider.AllowLinking {
 				return nil, ErrorUserConflict("third party account linking for existing user with same email disallowed")
 			}
 		} else {
-			provider := cfg.ThirdParty.Providers.Get(providerName)
+			provider := cfg.ThirdParty.Providers.Get(providerID)
 			if provider == nil {
-				return nil, fmt.Errorf("unknown provider: %s", providerName)
+				return nil, fmt.Errorf("unknown provider: %s", providerID)
 			}
 
 			if !provider.AllowLinking {
@@ -74,7 +74,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, err := models.NewIdentity(providerName, userDataMap, email.ID)
+	identity, err := models.NewIdentity(providerID, userDataMap, email.ID)
 	if err != nil {
 		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
@@ -187,7 +187,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	return linkingResult, nil
 }
 
-func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerName string) (*AccountLinkingResult, error) {
+func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string) (*AccountLinkingResult, error) {
 	if !cfg.Account.AllowSignup {
 		return nil, ErrorSignUpDisabled("account signup is disabled")
 	}
@@ -241,7 +241,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, terr := models.NewIdentity(providerName, userDataMap, email.ID)
+	identity, terr := models.NewIdentity(providerID, userDataMap, email.ID)
 	if terr != nil {
 		return nil, ErrorServer("could not create identity").WithCause(terr)
 	}

@@ -61,7 +61,7 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	state, err := thirdparty.GenerateState(h.cfg, provider.Name(), request.RedirectTo)
+	state, err := thirdparty.GenerateState(h.cfg, provider.ID(), request.RedirectTo)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
@@ -143,14 +143,14 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.Name(), false, state.IsFlow)
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, state.IsFlow)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
 		emailModel := linkingResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
-		identityModel := emailModel.Identities.GetIdentity(provider.Name(), userData.Metadata.Subject)
+		identityModel := emailModel.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
 
 		token, terr := models.NewToken(
 			linkingResult.User.ID,

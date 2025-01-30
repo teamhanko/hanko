@@ -114,6 +114,6 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return data, nil
 }
 
-func (g githubProvider) Name() string {
-	return g.config.Name
+func (g githubProvider) ID() string {
+	return g.config.ID
 }

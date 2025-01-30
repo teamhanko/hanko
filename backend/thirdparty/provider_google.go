@@ -93,6 +93,6 @@ func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return data, nil
 }
 
-func (g googleProvider) Name() string {
-	return g.config.Name
+func (g googleProvider) ID() string {
+	return g.config.ID
 }

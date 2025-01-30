@@ -24,9 +24,9 @@ type Identity struct {
 
 type Identities []Identity
 
-func (identities Identities) GetIdentity(providerName string, providerId string) *Identity {
+func (identities Identities) GetIdentity(providerID string, providerUserID string) *Identity {
 	for _, identity := range identities {
-		if identity.ProviderID == providerName && identity.ProviderUserID == providerId {
+		if identity.ProviderID == providerID && identity.ProviderUserID == providerUserID {
 			return &identity
 		}
 	}
@@ -34,10 +34,10 @@ func (identities Identities) GetIdentity(providerName string, providerId string)
 	return nil
 }
 
-func NewIdentity(provider string, identityData map[string]interface{}, emailID uuid.UUID) (*Identity, error) {
-	providerID, ok := identityData["sub"]
+func NewIdentity(providerID string, identityData map[string]interface{}, emailID uuid.UUID) (*Identity, error) {
+	providerUserID, ok := identityData["sub"]
 	if !ok {
-		return nil, errors.New("missing provider id")
+		return nil, errors.New("missing provider user id")
 	}
 	now := time.Now().UTC()
 
@@ -45,8 +45,8 @@ func NewIdentity(provider string, identityData map[string]interface{}, emailID u
 	identity := &Identity{
 		ID:             id,
 		Data:           identityData,
-		ProviderUserID: providerID.(string),
-		ProviderID:     provider,
+		ProviderUserID: providerUserID.(string),
+		ProviderID:     providerID,
 		EmailID:        emailID,
 		CreatedAt:      now,
 		UpdatedAt:      now,

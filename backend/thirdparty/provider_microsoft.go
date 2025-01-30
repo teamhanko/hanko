@@ -159,8 +159,8 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return data, nil
 }
 
-func (p microsoftProvider) Name() string {
-	return p.config.Name
+func (p microsoftProvider) ID() string {
+	return p.config.ID
 }
 
 func (p microsoftProvider) issuerValidator() jwt.ValidatorFunc {

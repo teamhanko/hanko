@@ -104,6 +104,6 @@ func (g discordProvider) buildAvatarURL(userID string, avatarHash string) string
 	return fmt.Sprintf("https://cdn.discordapp.com/avatars/%s/%s.png", userID, avatarHash)
 }
 
-func (g discordProvider) Name() string {
-	return g.config.Name
+func (g discordProvider) ID() string {
+	return g.config.ID
 }

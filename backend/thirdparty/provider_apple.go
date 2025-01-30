@@ -116,6 +116,6 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return userData, nil
 }
 
-func (a appleProvider) Name() string {
-	return a.config.Name
+func (a appleProvider) ID() string {
+	return a.config.ID
 }
