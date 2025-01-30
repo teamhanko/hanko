@@ -7,6 +7,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type UsernameUpdate struct {
@@ -97,6 +99,8 @@ func (a UsernameUpdate) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
+
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserUsernameUpdate, userModel.ID)
 
 	return c.Continue(shared.StateProfileInit)
 }

@@ -7,6 +7,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type UsernameSet struct {
@@ -64,6 +66,8 @@ func (a UsernameSet) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	c.PreventRevert()
+
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserUsernameCreate, userID)
 
 	return c.Continue()
 }
