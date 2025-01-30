@@ -53,6 +53,7 @@ type Claims struct {
 	Audience   []string   `json:"audience,omitempty"`
 	Issuer     *string    `json:"issuer,omitempty"`
 	Email      *EmailJwt  `json:"email,omitempty"`
+	Username   *string    `json:"username,omitempty"`
 	SessionID  uuid.UUID  `json:"session_id"`
 }
 
@@ -106,6 +107,12 @@ func GetClaimsFromToken(token jwt.Token) (*Claims, error) {
 			if err != nil {
 				return nil, fmt.Errorf("failed to unmarshal 'email' claim: %w", err)
 			}
+		}
+	}
+
+	if username, valid := token.Get("username"); valid {
+		if usernameStr, validStr := username.(string); validStr {
+			claims.Username = &usernameStr
 		}
 	}
 

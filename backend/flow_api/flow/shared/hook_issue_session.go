@@ -9,6 +9,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/session"
 	"time"
 )
 
@@ -40,7 +41,12 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		emailDTO = dto.JwtFromEmailModel(email)
 	}
 
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO)
+	var generateJWTOptions []session.JWTOptions
+	if userModel.Username != nil {
+		generateJWTOptions = append(generateJWTOptions, session.WithValue("username", userModel.Username.Username))
+	}
+
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO, generateJWTOptions...)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
