@@ -34,7 +34,7 @@ func (p identityPersister) GetByID(identityID uuid.UUID) (*models.Identity, erro
 
 func (p identityPersister) Get(userProviderID string, providerID string) (*models.Identity, error) {
 	identity := &models.Identity{}
-	if err := p.db.EagerPreload().Where("provider_id = ? AND provider_name = ?", userProviderID, providerID).First(identity); err != nil {
+	if err := p.db.EagerPreload().Where("provider_user_id = ? AND provider_id = ?", userProviderID, providerID).First(identity); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}

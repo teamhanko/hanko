@@ -45,23 +45,23 @@ func FromIdentityModel(identity *models.Identity, cfg *config.Config) *Identity 
 	}
 
 	return &Identity{
-		ID:       identity.ProviderID,
+		ID:       identity.ProviderUserID,
 		Provider: getProviderDisplayName(identity, cfg),
 	}
 }
 
 func getProviderDisplayName(identity *models.Identity, cfg *config.Config) string {
-	if strings.HasPrefix(identity.ProviderName, "custom_") {
-		providerNameWithoutPrefix := strings.TrimPrefix(identity.ProviderName, "custom_")
+	if strings.HasPrefix(identity.ProviderID, "custom_") {
+		providerNameWithoutPrefix := strings.TrimPrefix(identity.ProviderID, "custom_")
 		return cfg.ThirdParty.CustomProviders[providerNameWithoutPrefix].DisplayName
 	} else {
 		s := structs.New(config.ThirdPartyProviders{})
 		for _, field := range s.Fields() {
-			if strings.ToLower(field.Name()) == strings.ToLower(identity.ProviderName) {
+			if strings.ToLower(field.Name()) == strings.ToLower(identity.ProviderID) {
 				return field.Name()
 			}
 		}
 	}
 
-	return strings.TrimSpace(identity.ProviderName)
+	return strings.TrimSpace(identity.ProviderID)
 }

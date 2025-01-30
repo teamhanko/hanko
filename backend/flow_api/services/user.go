@@ -8,7 +8,7 @@ import (
 
 func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {
 	for _, identity := range identities {
-		if provider := cfg.ThirdParty.Providers.Get(identity.ProviderName); provider != nil {
+		if provider := cfg.ThirdParty.Providers.Get(identity.ProviderID); provider != nil {
 			return provider.Enabled
 		}
 	}
@@ -18,7 +18,7 @@ func UserCanDoThirdParty(cfg config.Config, identities models.Identities) bool {
 
 func UserCanDoSaml(cfg config.Config, identities models.Identities) bool {
 	for _, identity := range identities {
-		if provider := cfg.Saml.GetProviderByDomain(identity.ProviderName); provider != nil {
+		if provider := cfg.Saml.GetProviderByDomain(identity.ProviderID); provider != nil {
 			return cfg.Saml.Enabled && provider.Enabled
 		}
 	}
