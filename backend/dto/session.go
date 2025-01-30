@@ -53,7 +53,7 @@ type Claims struct {
 	Audience   []string   `json:"audience,omitempty"`
 	Issuer     *string    `json:"issuer,omitempty"`
 	Email      *EmailJwt  `json:"email,omitempty"`
-	Username   string     `json:"username,omitempty"`
+	Username   *string    `json:"username,omitempty"`
 	SessionID  uuid.UUID  `json:"session_id"`
 }
 
@@ -112,7 +112,7 @@ func GetClaimsFromToken(token jwt.Token) (*Claims, error) {
 
 	if username, valid := token.Get("username"); valid {
 		if usernameStr, validStr := username.(string); validStr {
-			claims.Username = usernameStr
+			claims.Username = &usernameStr
 		}
 	}
 
