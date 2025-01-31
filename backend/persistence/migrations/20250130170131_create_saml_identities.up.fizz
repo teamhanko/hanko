@@ -1,0 +1,8 @@
+create_table("saml_identities") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("identity_id", "uuid", { "null": false })
+	t.Column("domain", "string", { "null": false })
+	t.Timestamps()
+	t.ForeignKey("identity_id", {"identities": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+	t.Index(["identity_id", "domain"], {"unique": true})
+}

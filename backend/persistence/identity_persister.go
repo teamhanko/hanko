@@ -10,7 +10,7 @@ import (
 )
 
 type IdentityPersister interface {
-	Get(userProviderID string, providerID string) (*models.Identity, error)
+	Get(providerUserID string, providerID string) (*models.Identity, error)
 	GetByID(identityID uuid.UUID) (*models.Identity, error)
 	Create(identity models.Identity) error
 	Update(identity models.Identity) error
@@ -32,9 +32,9 @@ func (p identityPersister) GetByID(identityID uuid.UUID) (*models.Identity, erro
 	return identity, nil
 }
 
-func (p identityPersister) Get(userProviderID string, providerID string) (*models.Identity, error) {
+func (p identityPersister) Get(providerUserID string, providerID string) (*models.Identity, error) {
 	identity := &models.Identity{}
-	if err := p.db.EagerPreload().Where("provider_id = ? AND provider_name = ?", userProviderID, providerID).First(identity); err != nil {
+	if err := p.db.EagerPreload().Where("provider_user_id = ? AND provider_id = ?", providerUserID, providerID).First(identity); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}

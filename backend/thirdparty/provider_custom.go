@@ -17,7 +17,7 @@ type customProvider struct {
 
 func NewCustomThirdPartyProvider(config *config.CustomThirdPartyProvider, redirectURL string) (OAuthProvider, error) {
 	if !config.Enabled {
-		return nil, fmt.Errorf("provider %s is disabled", config.Name)
+		return nil, fmt.Errorf("provider %s is disabled", config.ID)
 	}
 
 	customProvider := &customProvider{
@@ -100,6 +100,6 @@ func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	}, nil
 }
 
-func (p customProvider) Name() string {
-	return p.config.Name
+func (p customProvider) ID() string {
+	return p.config.ID
 }
