@@ -155,8 +155,9 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, state *
 	var samlError error
 	samlError = handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
 		userdata := provider.GetUserData(assertionInfo)
-
-		linkResult, samlErrorTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, state.Provider, true, state.IsFlow)
+		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
+		samlDomain := provider.GetDomain()
+		linkResult, samlErrorTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, state.IsFlow)
 		if samlErrorTx != nil {
 			return samlErrorTx
 		}
@@ -164,7 +165,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, state *
 		accountLinkingResult = linkResult
 
 		emailModel := linkResult.User.Emails.GetEmailByAddress(userdata.Metadata.Email)
-		identityModel := emailModel.Identities.GetIdentity(provider.GetDomain(), userdata.Metadata.Subject)
+		identityModel := emailModel.Identities.GetIdentity(identityProviderIssuer.Value, userdata.Metadata.Subject)
 
 		token, tokenError := models.NewToken(
 			linkResult.User.ID,

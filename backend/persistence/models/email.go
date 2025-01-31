@@ -45,6 +45,15 @@ func (email *Email) IsPrimary() bool {
 	return false
 }
 
+func (email *Email) GetSamlIdentityForDomain(domain string) *SamlIdentity {
+	for _, identity := range email.Identities {
+		if identity.SamlIdentity != nil && identity.SamlIdentity.Domain == domain {
+			return identity.SamlIdentity
+		}
+	}
+	return nil
+}
+
 func (emails *Emails) GetVerified() Emails {
 	var list Emails
 	for _, email := range *emails {

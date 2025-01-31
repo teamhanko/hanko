@@ -1,0 +1,6 @@
+drop_index("identities", "identities_provider_user_id_provider_id_idx")
+
+rename_column("identities", "provider_id", "provider_name")
+rename_column("identities", "provider_user_id", "provider_id")
+
+add_index("identities", ["provider_id", "provider_name"], {unique: true})

@@ -107,6 +107,6 @@ func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	return data, nil
 }
 
-func (g linkedInProvider) Name() string {
-	return g.config.Name
+func (g linkedInProvider) ID() string {
+	return g.config.ID
 }

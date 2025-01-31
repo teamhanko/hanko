@@ -18,8 +18,8 @@ type Identity struct {
 func FromIdentityModel(model models.Identity) Identity {
 	return Identity{
 		ID:           model.ID,
-		ProviderID:   model.ProviderID,
-		ProviderName: model.ProviderName,
+		ProviderID:   model.ProviderUserID,
+		ProviderName: model.ProviderID,
 		EmailID:      model.EmailID,
 		CreatedAt:    model.CreatedAt,
 		UpdatedAt:    model.UpdatedAt,

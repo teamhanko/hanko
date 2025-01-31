@@ -39,7 +39,7 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 		Required(true)
 
 	for _, provider := range enabledThirdPartyProviders {
-		providerInput.AllowedValue(provider.DisplayName, provider.Name)
+		providerInput.AllowedValue(provider.DisplayName, provider.ID)
 	}
 
 	slices.SortFunc(enabledCustomThirdPartyProviders, func(a, b config.CustomThirdPartyProvider) bool {
@@ -47,7 +47,7 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 	})
 
 	for _, provider := range enabledCustomThirdPartyProviders {
-		providerInput.AllowedValue(provider.DisplayName, provider.Name)
+		providerInput.AllowedValue(provider.DisplayName, provider.ID)
 	}
 
 	c.AddInputs(flowpilot.StringInput("redirect_to").Hidden(true).Required(true), providerInput)

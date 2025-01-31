@@ -172,7 +172,7 @@ func (t *ThirdParty) PostProcess() error {
 		for key, provider := range t.CustomProviders {
 			// add prefix per default to ensure built-in and custom providers can be distinguished
 			keyLower := strings.ToLower(key)
-			provider.Name = "custom_" + keyLower
+			provider.ID = "custom_" + keyLower
 			providers[keyLower] = provider
 		}
 		t.CustomProviders = providers
@@ -210,7 +210,7 @@ func (p *CustomThirdPartyProviders) Validate() error {
 		if err != nil {
 			return fmt.Errorf(
 				"failed to validate third party provider %s: %w",
-				strings.TrimPrefix(v.Name, "custom_"),
+				strings.TrimPrefix(v.ID, "custom_"),
 				err,
 			)
 		}
@@ -249,9 +249,9 @@ type CustomThirdPartyProvider struct {
 	//
 	// Required if `use_discovery` is false or omitted.
 	AuthorizationEndpoint string `yaml:"authorization_endpoint" json:"authorization_endpoint,omitempty" koanf:"authorization_endpoint"`
-	// `name` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by
+	// `ID` is a unique identifier for the provider, derived from the key in the `custom_providers` map, by
 	// concatenating the prefix "custom_". This allows distinguishing between built-in and custom providers at runtime.
-	Name string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
+	ID string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 	// `issuer` is the provider's issuer identifier. It should be a URL that uses the "https"
 	//	scheme and has no query or fragment components.
 	//
@@ -443,9 +443,9 @@ type ThirdPartyProvider struct {
 	//
 	// Required if the provider is `enabled`.
 	Secret string `yaml:"secret" json:"secret,omitempty" koanf:"secret"`
-	// `name` is a unique name/slug/identifier for the provider. It is the lowercased key of the corresponding field
-	// in ThirdPartyProviders. See also: CustomThirdPartyProvider.Name.
-	Name string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
+	// `ID` is a unique name/slug/identifier for the provider. It is the lowercased key of the corresponding field
+	// in ThirdPartyProviders. See also: CustomThirdPartyProvider.ID.
+	ID string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 }
 
 func (ThirdPartyProvider) JSONSchemaExtend(schema *jsonschema.Schema) {

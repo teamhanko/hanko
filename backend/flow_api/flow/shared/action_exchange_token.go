@@ -90,7 +90,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	if err := c.Stash().Set(StashPathThirdPartyProvider, identity.ProviderName); err != nil {
+	if err := c.Stash().Set(StashPathThirdPartyProvider, identity.ProviderID); err != nil {
 		return fmt.Errorf("failed to set third_party_provider to the stash: %w", err)
 	}
 
