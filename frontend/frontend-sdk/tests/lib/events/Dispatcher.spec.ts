@@ -1,18 +1,21 @@
 import { Dispatcher } from "../../../src/lib/events/Dispatcher";
-import { CustomEventWithDetail, SessionDetail } from "../../../src";
+import { CustomEventWithDetail, Email, SessionDetail } from "../../../src";
 
 describe("Dispatcher", () => {
   let dispatcher: Dispatcher;
 
   beforeEach(() => {
-    dispatcher = new Dispatcher({ localStorageKey: "hanko" });
+    dispatcher = new Dispatcher();
   });
 
   describe("dispatchSessionCreatedEvent()", () => {
     it("dispatches a custom event with the 'hanko-session-created' type and the provided detail", () => {
       const detail = {
-        userID: "test-user",
-        jwt: "test-token",
+        claims: {
+          subject: "test",
+          expiration: "test",
+          session_id: "test",
+        },
         expirationSeconds: 7,
       };
       const dispatchEventSpy = jest.spyOn(dispatcher, "_dispatchEvent");

@@ -244,7 +244,45 @@ export interface Identity {
   provider: string;
 }
 
+/**
+ * Represents the claims associated with a session or token.
+ *
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {string} subject - The subject or identifier of the claims.
+ * @property {string} [issued_at] - The timestamp when the claims were issued (optional).
+ * @property {string} expiration - The timestamp when the claims expire.
+ * @property {string[]} [audience] - The intended audience(s) for the claims (optional).
+ * @property {string} [issuer] - The entity that issued the claims (optional).
+ * @property {Pick<Email, "address" | "is_primary" | "is_verified">} [email] - Email information associated with the subject (optional).
+ * @property {string} session_id - The session identifier linked to the claims.
+ */
+export interface Claims {
+  subject: string;
+  issued_at?: string;
+  expiration: string;
+  audience?: string[];
+  issuer?: string;
+  email?: Pick<Email, "address" | "is_primary" | "is_verified">;
+  session_id: string;
+}
+
+/**
+ * Represents the response from a session validation or retrieval operation.
+ *
+ * @interface
+ * @category SDK
+ * @subcategory DTO
+ * @property {boolean} is_valid - Indicates whether the session is valid.
+ * @property {Claims} [claims] - The claims associated with the session (optional).
+ * @property {string} [expiration_time] - The expiration timestamp of the session (optional).
+ * @property {string} [user_id] - The user ID linked to the session (optional).
+ */
 export interface SessionCheckResponse {
   is_valid: boolean;
+  claims?: Claims;
   expiration_time?: string;
+  user_id?: string;
 }
+

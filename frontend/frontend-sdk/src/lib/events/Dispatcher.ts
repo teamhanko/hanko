@@ -6,34 +6,15 @@ import {
   userDeletedType,
   userLoggedOutType,
 } from "./CustomEvents";
-import { SessionState } from "../state/session/SessionState";
-
-/**
- * Options for Dispatcher
- *
- * @category SDK
- * @subcategory Internal
- * @property {string} localStorageKey - The prefix / name of the local storage keys.
- */
-interface DispatcherOptions {
-  localStorageKey: string;
-}
 
 /**
  * A class that dispatches custom events.
  *
  * @category SDK
  * @subcategory Internal
- * @param {DispatcherOptions} options - The options that can be used
  */
 export class Dispatcher {
   _dispatchEvent = document.dispatchEvent.bind(document);
-  _sessionState: SessionState;
-
-  // eslint-disable-next-line require-jsdoc
-  constructor(options: DispatcherOptions) {
-    this._sessionState = new SessionState({ ...options });
-  }
 
   /**
    * Dispatches a custom event.
