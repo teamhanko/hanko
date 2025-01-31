@@ -36,7 +36,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	eagerPreloadFields := []string{
 		"Emails",
 		"Emails.PrimaryEmail",
-		"Emails.Identities",
+		"Emails.Identities.SamlIdentity",
 		"WebauthnCredentials",
 		"WebauthnCredentials.Transports",
 		"Username",
@@ -57,7 +57,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 
 func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, error) {
 	email := models.Email{}
-	err := p.db.Where("address = (?)", emailAddress).First(&email)
+	err := p.db.Eager().Where("address = (?)", emailAddress).First(&email)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

@@ -12,14 +12,15 @@ import (
 
 // Identity is used by pop to map your identities database table to your go code.
 type Identity struct {
-	ID             uuid.UUID  `json:"id" db:"id"`
-	ProviderUserID string     `json:"provider_user_id" db:"provider_user_id"`
-	ProviderID     string     `json:"provider_id" db:"provider_id"`
-	Data           slices.Map `json:"data" db:"data"`
-	EmailID        uuid.UUID  `json:"email_id" db:"email_id"`
-	Email          *Email     `json:"email,omitempty" belongs_to:"email"`
-	CreatedAt      time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt      time.Time  `json:"updated_at" db:"updated_at"`
+	ID             uuid.UUID     `json:"id" db:"id"`
+	ProviderUserID string        `json:"provider_user_id" db:"provider_user_id"`
+	ProviderID     string        `json:"provider_id" db:"provider_id"`
+	Data           slices.Map    `json:"data" db:"data"`
+	EmailID        uuid.UUID     `json:"email_id" db:"email_id"`
+	Email          *Email        `json:"email,omitempty" belongs_to:"email"`
+	CreatedAt      time.Time     `json:"created_at" db:"created_at"`
+	UpdatedAt      time.Time     `json:"updated_at" db:"updated_at"`
+	SamlIdentity   *SamlIdentity `json:"saml_identity" has_one:"saml_identity"`
 }
 
 type Identities []Identity

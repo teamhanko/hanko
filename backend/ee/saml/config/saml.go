@@ -139,10 +139,21 @@ func (s *Saml) Validate() error {
 			return errors.New("at least one SAML provider is needed")
 		}
 
+		configuredDomains := make(map[string]int)
 		for _, provider := range s.IdentityProviders {
-			validationErrors = provider.Validate()
-			if validationErrors != nil {
-				return validationErrors
+			if provider.Enabled {
+				validationErrors = provider.Validate()
+				if validationErrors != nil {
+					return validationErrors
+				}
+
+				configuredDomains[provider.Domain] += 1
+			}
+		}
+
+		for configuredDomain, configuredDomainCount := range configuredDomains {
+			if configuredDomainCount > 1 {
+				return fmt.Errorf("provider domains must be unique, found domain %s configured %d times", configuredDomain, configuredDomainCount)
 			}
 		}
 	}

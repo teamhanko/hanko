@@ -3,11 +3,13 @@ package thirdparty
 import (
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"strings"
+	"time"
 )
 
 type AccountLinkingResult struct {
@@ -17,7 +19,7 @@ type AccountLinkingResult struct {
 	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, isSaml bool, isFlow bool) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool) (*AccountLinkingResult, error) {
 	if !isFlow {
 		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
@@ -36,16 +38,16 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 		}
 
 		if user == nil {
-			return signUp(tx, cfg, p, userData, providerID)
+			return signUp(tx, cfg, p, userData, providerID, isSaml, samlDomain)
 		} else {
-			return link(tx, cfg, p, userData, providerID, user, isSaml)
+			return link(tx, cfg, p, userData, providerID, user, isSaml, samlDomain)
 		}
 	} else {
 		return signIn(tx, cfg, p, userData, identity)
 	}
 }
 
-func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool) (*AccountLinkingResult, error) {
+func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string) (*AccountLinkingResult, error) {
 	if !isSaml {
 		if strings.HasPrefix(providerID, "custom_") {
 			provider, ok := cfg.ThirdParty.CustomProviders[strings.TrimPrefix(providerID, "custom_")]
@@ -82,6 +84,38 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 	err = p.GetIdentityPersisterWithConnection(tx).Create(*identity)
 	if err != nil {
 		return nil, ErrorServer("could not create identity").WithCause(err)
+	}
+
+	if isSaml && samlDomain != nil && *samlDomain != "" {
+		if existingSamlIdentity := email.GetSamlIdentityForDomain(*samlDomain); existingSamlIdentity != nil {
+			identityToDeleteID := existingSamlIdentity.IdentityID
+			existingSamlIdentity.IdentityID = identity.ID
+
+			err = p.GetSamlIdentityPersisterWithConnection(tx).Update(*existingSamlIdentity)
+			if err != nil {
+				return nil, ErrorServer("could update saml identity").WithCause(err)
+			}
+
+			err = p.GetIdentityPersisterWithConnection(tx).Delete(models.Identity{ID: identityToDeleteID})
+			if err != nil {
+				return nil, ErrorServer("could not delete identity").WithCause(err)
+			}
+		} else {
+			samlIdentityID, _ := uuid.NewV4()
+			now := time.Now().UTC()
+			samlIdentity := &models.SamlIdentity{
+				ID:         samlIdentityID,
+				IdentityID: identity.ID,
+				Domain:     *samlDomain,
+				CreatedAt:  now,
+				UpdatedAt:  now,
+			}
+
+			err = p.GetSamlIdentityPersisterWithConnection(tx).Create(*samlIdentity)
+			if err != nil {
+				return nil, ErrorServer("could not create saml identity").WithCause(err)
+			}
+		}
 	}
 
 	u, terr := p.GetUserPersisterWithConnection(tx).Get(*email.UserID)
@@ -187,7 +221,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	return linkingResult, nil
 }
 
-func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string) (*AccountLinkingResult, error) {
+func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string) (*AccountLinkingResult, error) {
 	if !cfg.Account.AllowSignup {
 		return nil, ErrorSignUpDisabled("account signup is disabled")
 	}
@@ -248,7 +282,24 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 
 	terr = identityPersister.Create(*identity)
 	if terr != nil {
-		return nil, ErrorServer("could not create identity").WithCause(terr)
+		return nil, ErrorServer("could not store identity").WithCause(terr)
+	}
+
+	if isSaml && samlDomain != nil && *samlDomain != "" {
+		samlIdentityID, _ := uuid.NewV4()
+		now := time.Now().UTC()
+		samlIdentity := &models.SamlIdentity{
+			ID:         samlIdentityID,
+			IdentityID: identity.ID,
+			Domain:     *samlDomain,
+			CreatedAt:  now,
+			UpdatedAt:  now,
+		}
+
+		err = p.GetSamlIdentityPersisterWithConnection(tx).Create(*samlIdentity)
+		if err != nil {
+			return nil, ErrorServer("could not store saml identity").WithCause(err)
+		}
 	}
 
 	u, terr := userPersister.Get(*email.UserID)

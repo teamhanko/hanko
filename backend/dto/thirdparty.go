@@ -51,7 +51,13 @@ func FromIdentityModel(identity *models.Identity, cfg *config.Config) *Identity 
 }
 
 func getProviderDisplayName(identity *models.Identity, cfg *config.Config) string {
-	if strings.HasPrefix(identity.ProviderID, "custom_") {
+	if identity.SamlIdentity != nil {
+		for _, ip := range cfg.Saml.IdentityProviders {
+			if ip.Enabled && ip.Domain == identity.SamlIdentity.Domain {
+				return ip.Name
+			}
+		}
+	} else if strings.HasPrefix(identity.ProviderID, "custom_") {
 		providerNameWithoutPrefix := strings.TrimPrefix(identity.ProviderID, "custom_")
 		return cfg.ThirdParty.CustomProviders[providerNameWithoutPrefix].DisplayName
 	} else {
