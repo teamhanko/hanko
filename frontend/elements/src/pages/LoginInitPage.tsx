@@ -140,8 +140,11 @@ const LoginInitPage = (props: Props) => {
       })
       .run();
 
+    if (nextState.error) {
+      setSelectedThirdPartyProvider(null);
+    }
+
     await hanko.flow.run(nextState, stateHandler);
-    setSelectedThirdPartyProvider(null);
   };
 
   const showDivider = useMemo(
