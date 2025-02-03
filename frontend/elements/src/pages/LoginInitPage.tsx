@@ -54,6 +54,9 @@ const LoginInitPage = (props: Props) => {
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
   >(undefined);
+  const [selectedThirdPartyProvider, setSelectedThirdPartyProvider] = useState<
+    string | null
+  >(null);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
 
   const onIdentifierInput = (event: Event) => {
@@ -128,7 +131,7 @@ const LoginInitPage = (props: Props) => {
 
   const onThirdpartySubmit = async (event: Event, name: string) => {
     event.preventDefault();
-    setLoadingAction("thirdparty-submit");
+    setSelectedThirdPartyProvider(name);
 
     const nextState = await flowState.actions
       .thirdparty_oauth({
@@ -136,6 +139,8 @@ const LoginInitPage = (props: Props) => {
         redirect_to: window.location.toString(),
       })
       .run();
+
+    setSelectedThirdPartyProvider(null);
 
     await hanko.flow.run(nextState, stateHandler);
   };
@@ -267,7 +272,7 @@ const LoginInitPage = (props: Props) => {
                     onSubmit={(event) => onThirdpartySubmit(event, v.value)}
                   >
                     <Button
-                      uiAction={"thirdparty-submit"}
+                      isLoading={v.value == selectedThirdPartyProvider}
                       secondary
                       // @ts-ignore
                       icon={
