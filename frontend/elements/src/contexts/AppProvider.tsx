@@ -111,7 +111,6 @@ export type UIAction =
   | "back"
   | "account_delete"
   | "retry"
-  | "thirdparty-submit"
   | "session-delete"
   | "auth-app-add"
   | "auth-app-remove"
