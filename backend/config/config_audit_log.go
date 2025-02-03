@@ -1,5 +1,10 @@
 package config
 
+import (
+	"errors"
+	"time"
+)
+
 type AuditLog struct {
 	// `console_output` controls audit log console output.
 	ConsoleOutput AuditLogConsole `yaml:"console_output" json:"console_output,omitempty" koanf:"console_output" split_words:"true" jsonschema:"title=console_output"`
@@ -9,6 +14,16 @@ type AuditLog struct {
 	Mask bool `yaml:"mask" json:"mask,omitempty" koanf:"mask" jsonschema:"default=true"`
 	// `storage` controls audit log retention.
 	Storage AuditLogStorage `yaml:"storage" json:"storage,omitempty" koanf:"storage"`
+	// `retention` specifies the time duration after which log audit entries may be deleted.
+	Retention string `yaml:"retention" json:"retention,omitempty" koanf:"retention" jsonschema:"default=720h"`
+}
+
+func (al *AuditLog) Validate() error {
+	_, err := time.ParseDuration(al.Retention)
+	if err != nil {
+		return errors.New("failed to parse retention_duration")
+	}
+	return nil
 }
 
 type AuditLogStorage struct {

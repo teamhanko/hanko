@@ -1,3 +1,7 @@
+audit_log:
+  storage:
+    enabled: false
+  retention: 720h
 account:
   allow_deletion: true
   allow_signup: true
