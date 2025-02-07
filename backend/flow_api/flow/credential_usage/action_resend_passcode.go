@@ -66,7 +66,8 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 
 	webhookData := webhook.EmailSend{
 		Subject:          passcodeResult.Subject,
-		BodyPlain:        passcodeResult.Body,
+		BodyPlain:        passcodeResult.BodyPlain,
+		Body:             passcodeResult.BodyHTML,
 		ToEmailAddress:   sendParams.EmailAddress,
 		DeliveredByHanko: deps.Cfg.EmailDelivery.Enabled,
 		AcceptLanguage:   sendParams.Language,
