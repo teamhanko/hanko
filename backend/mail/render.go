@@ -15,7 +15,7 @@ import (
 var mailFS embed.FS
 
 type Renderer struct {
-	templatePlane *template.Template
+	templatePlain *template.Template
 	bundle        *i18n.Bundle
 	localizer     *i18n.Localizer
 }
@@ -41,7 +41,7 @@ func NewRenderer() (*Renderer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to load templates: %w", err)
 	}
-	r.templatePlane = t
+	r.templatePlain = t
 
 	return r, nil
 }
@@ -61,7 +61,7 @@ func (r *Renderer) RenderPlain(templateName string, lang string, data map[string
 	r.localizer = i18n.NewLocalizer(r.bundle, lang) // set the localizer, so the test will be translated to the given language
 	data["renderer_lang"] = lang
 	templateBuffer := &bytes.Buffer{}
-	err := r.templatePlane.ExecuteTemplate(templateBuffer, fmt.Sprintf("%s.txt.tmpl", templateName), data)
+	err := r.templatePlain.ExecuteTemplate(templateBuffer, fmt.Sprintf("%s.txt.tmpl", templateName), data)
 	if err != nil {
 		return "", fmt.Errorf("failed to fill plain text template with data: %w", err)
 	}
