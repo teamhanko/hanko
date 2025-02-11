@@ -81,22 +81,61 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete token from db: %w", err)
 	}
 
-	onboardingStates, err := a.determineOnboardingStates(c, identity, tokenModel.UserCreated)
-	if err != nil {
-		return fmt.Errorf("failed to determine onboarding stattes: %w", err)
+	isSaml := identity.SamlIdentity != nil
+
+	var onboardingStates []flowpilot.StateName
+	if isSaml {
+		onboardingStates, err = a.determineOnboardingStatesForSaml(c, identity, tokenModel.UserCreated)
+	} else {
+		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated)
 	}
 
-	if err := c.Stash().Set(StashPathLoginMethod, "third_party"); err != nil {
+	if err != nil {
+		return fmt.Errorf("failed to determine onboarding states: %w", err)
+	}
+
+	if err = c.Stash().Set(StashPathLoginMethod, "third_party"); err != nil {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	if err := c.Stash().Set(StashPathThirdPartyProvider, identity.ProviderID); err != nil {
+	if err = c.Stash().Set(StashPathThirdPartyProvider, identity.ProviderID); err != nil {
 		return fmt.Errorf("failed to set third_party_provider to the stash: %w", err)
 	}
 
 	c.PreventRevert()
 
 	return c.Continue(onboardingStates...)
+}
+
+func (a ExchangeToken) determineOnboardingStatesForSaml(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {
+	deps := a.GetDeps(c)
+	result := make([]flowpilot.StateName, 0)
+
+	samlProvider, err := deps.SamlService.GetProviderByIssuer(identity.ProviderID)
+	if err != nil {
+		return nil, fmt.Errorf("could not fetch saml provider for identity: %w", err)
+	}
+
+	if !samlProvider.GetConfig().SkipEmailVerification {
+		if err = c.Stash().Set(StashPathEmail, identity.Email.Address); err != nil {
+			return nil, fmt.Errorf("failed to stash email: %w", err)
+		}
+
+		if err = c.Stash().Set(StashPathPasscodeTemplate, "email_verification"); err != nil {
+			return nil, fmt.Errorf("failed to stash passcode_template: %w", err)
+		}
+
+		result = append(result, StatePasscodeConfirmation)
+	}
+
+	if deps.Cfg.Username.Enabled && identity.Email.User.GetUsername() == nil {
+		if (!userCreated && deps.Cfg.Username.AcquireOnLogin) ||
+			(userCreated && deps.Cfg.Username.AcquireOnRegistration) {
+			result = append(result, StateOnboardingUsername)
+		}
+	}
+
+	return append(result, StateSuccess), nil
 }
 
 func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {

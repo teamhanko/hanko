@@ -121,7 +121,11 @@ export interface Payloads {
   readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationPayload;
 }
 
-export type FlowPath = "/login" | "/registration" | "/profile";
+export type FlowPath =
+  | "/login"
+  | "/registration"
+  | "/profile"
+  | "/token_exchange";
 
 export type FetchNextState = (
   // eslint-disable-next-line no-unused-vars

@@ -15,6 +15,7 @@ type Service interface {
 	Persister() persistence.Persister
 	Providers() []provider.ServiceProvider
 	GetProviderByDomain(domain string) (provider.ServiceProvider, error)
+	GetProviderByIssuer(issuer string) (provider.ServiceProvider, error)
 	GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool) (string, error)
 }
 
@@ -81,6 +82,16 @@ func (s *defaultService) GetProviderByDomain(domain string) (provider.ServicePro
 	}
 
 	return nil, fmt.Errorf("unknown provider for domain %s", domain)
+}
+
+func (s *defaultService) GetProviderByIssuer(issuer string) (provider.ServiceProvider, error) {
+	for _, availableProvider := range s.providers {
+		if availableProvider.GetService().IdentityProviderIssuer == issuer {
+			return availableProvider, nil
+		}
+	}
+
+	return nil, fmt.Errorf("unknown provider for issuer %s", issuer)
 }
 
 func (s *defaultService) GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool) (string, error) {
