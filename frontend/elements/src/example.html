@@ -227,7 +227,7 @@ after the user completes the authentication flow), while other events are option
 
     // Function to add event listeners
     function addEventListeners() {
-        hankoEventsEl.addEventListener("onSessionCreated", () => {
+        hankoEventsEl.addEventListener("onSessionCreated", (event) => {
             // The user has completed the authentication flow through the hanko-auth component, so we can display the
             // hanko-profile and hide the hanko-auth component.
             showAuthComponent(false); // Show profile component
@@ -283,11 +283,12 @@ after the user completes the authentication flow), while other events are option
     }
 
     // Initialization function
-    function init() {
+    async function init() {
         addEventListeners();
 
         // Check if a valid session exists
-        if (hanko.session.isValid()) {
+        const session = await hanko.sessionClient.validate();
+        if (session.is_valid) {
             showAuthComponent(false); // Show profile component
             setVisibility(logoutButtonEl, true); // Show the logout button
         }
@@ -298,7 +299,7 @@ after the user completes the authentication flow), while other events are option
     }
 
     // Call the initialization function
-    init();
+    await init();
 </script>
 </body>
 </html>

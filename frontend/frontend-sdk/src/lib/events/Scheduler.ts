@@ -1,64 +1,115 @@
-/**
- * Represents a task to be scheduled in the scheduler.
- *
- * @ignore
- * @param {number} timeoutID - the ID returned by `setTimeout()`
- * @param {string} type - The type, helps to organize the tasks.
- * @param {Function} func - The function to be called within the task.
- */
-export type Task = {
-  timeoutID: number;
-  type: string;
-  func: () => any;
-};
+import { SessionCheckResponse } from "../Dto";
+
+// Type representing data returned by the session check callback.
+export type SessionCheckResult =
+  | (SessionCheckResponse & { timeToExpiration: number; expiresSoon: boolean })
+  | null;
+
+// Callback type for performing a session check.
+type SessionCheckCallback = () => Promise<SessionCheckResult>;
+
+// Callback type for handling session timeout events.
+type SessionExpiredCallback = () => void;
 
 /**
- * A class that manages scheduled tasks.
+ * Manages scheduling for periodic and timeout-based session checks.
  *
  * @category SDK
  * @subcategory Internal
+ * @param {number} checkInterval - The interval in milliseconds between periodic session checks.
+ * @param {SessionCheckCallback} onSessionCheck - The callback function to perform a session check.
+ * @param {SessionExpiredCallback} onSessionExpired - The callback function to handle session timeout events.
  */
 export class Scheduler {
-  // An array of scheduled tasks.
-  _tasks: Task[] = [];
+  private intervalID: ReturnType<typeof setInterval> | null = null; // Identifier for the periodic check interval.
+  private timeoutID: ReturnType<typeof setTimeout> | null = null; // Identifier for the session expiration timeout.
+  private readonly checkInterval: number; // The interval between periodic session checks.
+  private readonly onSessionCheck: SessionCheckCallback; // The callback function to perform a session check.
+  private readonly onSessionExpired: SessionExpiredCallback; // The callback function to handle session expired events.
 
-  /**
-   * Removes a task from the scheduler.
-   *
-   * @private
-   * @param {Task} task - The task to be removed.
-   */
-  private removeTask(task: Task) {
-    window.clearTimeout(task.timeoutID);
-    this._tasks = this._tasks.filter((_task) => _task !== task);
+  // eslint-disable-next-line require-jsdoc
+  constructor(
+    checkInterval: number,
+    onSessionCheck: SessionCheckCallback,
+    onSessionExpired: SessionExpiredCallback,
+  ) {
+    this.checkInterval = checkInterval;
+    this.onSessionCheck = onSessionCheck;
+    this.onSessionExpired = onSessionExpired;
+
+    this.start(this.checkInterval);
   }
 
   /**
-   * Removes all tasks with a given type from the scheduler.
+   * Handles the session expiration when it is about to expire soon.
+   * Stops any ongoing checks and schedules a timeout for the expiration.
    *
-   * @param {string} type - The type of tasks to be removed.
+   * @param {number} timeToExpiration - The time in milliseconds until the session expires.
    */
-  removeTasksWithType(type: string) {
-    const tasks = this._tasks.filter((task) => task.type === type);
-    tasks.forEach((task) => this.removeTask(task));
+  sessionTimeoutAfter(timeToExpiration: number): void {
+    this.stop();
+    this.timeoutID = setTimeout(async () => {
+      this.onSessionExpired();
+    }, timeToExpiration);
   }
 
   /**
-   * Schedules a task to be executed after a given timeout.
+   * Starts the session check process.
+   * Schedules the first check after an optional initial delay and begins periodic checks.
    *
-   * @param {string} type - The type of the task.
-   * @param {Function} func - The function to be executed when the task is triggered.
-   * @param {number} timeoutSeconds - The timeout after which the task should be executed, in seconds.
+   * @param {number} initialDelay - The delay in milliseconds before the first check is performed.
    */
-  scheduleTask(type: string, func: () => any, timeoutSeconds: number) {
-    const task: Task = {
-      timeoutID: window.setTimeout(() => {
-        func();
-        this.removeTask(task);
-      }, timeoutSeconds * 1000),
-      type,
-      func,
-    };
-    this._tasks.push(task);
+  start(initialDelay: number = 0): void {
+    // Schedule the first check after an optional delay
+    this.timeoutID = setTimeout(async () => {
+      let sessionCheckResult = await this.onSessionCheck();
+
+      if (sessionCheckResult.is_valid) {
+        if (sessionCheckResult.expiresSoon) {
+          this.sessionTimeoutAfter(sessionCheckResult.timeToExpiration);
+          return;
+        }
+
+        // Begin periodic checks
+        this.intervalID = setInterval(async () => {
+          sessionCheckResult = await this.onSessionCheck();
+
+          if (sessionCheckResult.is_valid) {
+            if (sessionCheckResult.expiresSoon) {
+              this.sessionTimeoutAfter(sessionCheckResult.timeToExpiration);
+            }
+          } else {
+            this.stop();
+            this.onSessionExpired();
+          }
+        }, this.checkInterval);
+      } else {
+        this.stop();
+        this.onSessionExpired();
+      }
+    }, initialDelay);
+  }
+
+  /**
+   * Stops the session check process and clears all timers.
+   */
+  stop(): void {
+    if (this.timeoutID) {
+      clearTimeout(this.timeoutID);
+      this.timeoutID = null;
+    }
+
+    if (this.intervalID) {
+      clearInterval(this.intervalID);
+      this.intervalID = null;
+    }
+  }
+
+  /**
+   * Checks if the scheduler is currently running.
+   * @returns {boolean} True if the scheduler is running; otherwise, false.
+   */
+  isRunning(): boolean {
+    return this.timeoutID !== null || this.intervalID !== null;
   }
 }
