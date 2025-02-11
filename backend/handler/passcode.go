@@ -194,15 +194,22 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 	lang := c.Request().Header.Get("Accept-Language")
 
 	subject := h.renderer.Translate(lang, "email_subject_login", data)
+	data["Subject"] = subject
 
-	body, err := h.renderer.Render("login_text.tmpl", lang, data)
+	bodyPlain, err := h.renderer.RenderPlain("login", lang, data)
+	if err != nil {
+		return fmt.Errorf("failed to render email template: %w", err)
+	}
+
+	bodyHTML, err := h.renderer.RenderHTML("login", lang, data)
 	if err != nil {
 		return fmt.Errorf("failed to render email template: %w", err)
 	}
 
 	webhookData := webhook.EmailSend{
 		Subject:          subject,
-		BodyPlain:        body,
+		BodyPlain:        bodyPlain,
+		Body:             bodyHTML,
 		ToEmailAddress:   email.Address,
 		DeliveredByHanko: true,
 		AcceptLanguage:   lang,
@@ -223,7 +230,8 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 
 		message.SetHeader("Subject", subject)
 
-		message.SetBody("text/plain", body)
+		message.SetBody("text/plain", bodyPlain)
+		message.AddAlternative("text/html", bodyHTML)
 
 		err = h.mailer.Send(message)
 		if err != nil {

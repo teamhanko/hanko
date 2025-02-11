@@ -31,12 +31,13 @@ func NewEmailService(cfg config.Config) (*Email, error) {
 }
 
 // SendEmail sends an email to the emailAddress with the given subject and body.
-func (s *Email) SendEmail(emailAddress, subject, body string) error {
+func (s *Email) SendEmail(emailAddress, subject, body, htmlBody string) error {
 	message := gomail.NewMessage()
 	message.SetAddressHeader("To", emailAddress, "")
 	message.SetAddressHeader("From", s.cfg.EmailDelivery.FromAddress, s.cfg.EmailDelivery.FromName)
 	message.SetHeader("Subject", subject)
 	message.SetBody("text/plain", body)
+	message.AddAlternative("text/html", htmlBody)
 
 	if err := s.mailer.Send(message); err != nil {
 		return err
@@ -50,9 +51,13 @@ func (s *Email) RenderSubject(lang, template string, data map[string]interface{}
 	return s.renderer.Translate(lang, fmt.Sprintf("subject_%s", template), data)
 }
 
-// RenderBody renders the body with the given template. The template name must be the name of the template without the
+// RenderBodyPlain renders the body with the given template. The template name must be the name of the template without the
 // content type and the file ending. E.g. when the file is created as "email_verification_text.tmpl" then the template
 // name is just "email_verification"
-func (s *Email) RenderBody(lang, template string, data map[string]interface{}) (string, error) {
-	return s.renderer.Render(fmt.Sprintf("%s_text.tmpl", template), lang, data)
+func (s *Email) RenderBodyPlain(lang, template string, data map[string]interface{}) (string, error) {
+	return s.renderer.RenderPlain(template, lang, data)
+}
+
+func (s *Email) RenderBodyHTML(lang, template string, data map[string]interface{}) (string, error) {
+	return s.renderer.RenderHTML(template, lang, data)
 }

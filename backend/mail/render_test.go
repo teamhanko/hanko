@@ -12,7 +12,7 @@ func TestNewRenderer(t *testing.T) {
 	assert.NotEmpty(t, renderer)
 }
 
-func TestRenderer_Render(t *testing.T) {
+func TestRenderer_RenderPlain(t *testing.T) {
 	renderer, err := NewRenderer()
 
 	assert.NoError(t, err)
@@ -32,7 +32,7 @@ func TestRenderer_Render(t *testing.T) {
 	}{
 		{
 			Name:     "Login text template",
-			Template: "login_text.tmpl",
+			Template: "login",
 			Lang:     "en",
 			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
@@ -46,14 +46,14 @@ func TestRenderer_Render(t *testing.T) {
 		},
 		{
 			Name:     "Login text template with unknown language",
-			Template: "login_text.tmpl",
+			Template: "login",
 			Lang:     "xxx",
 			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
 		},
 		{
 			Name:     "Login text template without translations for language",
-			Template: "login_text.tmpl",
+			Template: "login",
 			Lang:     "es",
 			Expected: "Enter the following passcode to verify your identity:\n\n123456\n\nThe passcode is valid for 5 minutes.",
 			WantErr:  false,
@@ -62,13 +62,77 @@ func TestRenderer_Render(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.Name, func(t *testing.T) {
-			result, err := renderer.Render(test.Template, test.Lang, templateData)
+			result, err := renderer.RenderPlain(test.Template, test.Lang, templateData)
 
 			if test.WantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, test.Expected, result)
+			}
+		})
+	}
+}
+
+func TestRenderer_RenderHTML(t *testing.T) {
+	renderer, err := NewRenderer()
+
+	assert.NoError(t, err)
+	assert.NotEmpty(t, renderer)
+
+	templateData := map[string]interface{}{
+		"TTL":  5,
+		"Code": "123456",
+	}
+
+	tests := []struct {
+		Name     string
+		Template string
+		Lang     string
+		Expected []string
+		WantErr  bool
+	}{
+		{
+			Name:     "Login text template",
+			Template: "login",
+			Lang:     "en",
+			Expected: []string{"<!DOCTYPE html>", "Enter the following passcode to verify your identity:", "123456", "The passcode is valid for 5 minutes."},
+			WantErr:  false,
+		},
+		{
+			Name:     "Not existing template",
+			Template: "NotExistingTemplate",
+			Lang:     "en",
+			Expected: []string{"<!DOCTYPE html>"},
+			WantErr:  true,
+		},
+		{
+			Name:     "Login text template with unknown language",
+			Template: "login",
+			Lang:     "xxx",
+			Expected: []string{"<!DOCTYPE html>", "Enter the following passcode to verify your identity:", "123456", "The passcode is valid for 5 minutes."},
+			WantErr:  false,
+		},
+		{
+			Name:     "Login text template without translations for language",
+			Template: "login",
+			Lang:     "es",
+			Expected: []string{"<!DOCTYPE html>", "Enter the following passcode to verify your identity:", "123456", "The passcode is valid for 5 minutes."},
+			WantErr:  false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.Name, func(t *testing.T) {
+			result, err := renderer.RenderHTML(test.Template, test.Lang, templateData)
+
+			if test.WantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				for _, expected := range test.Expected {
+					assert.Contains(t, result, expected)
+				}
 			}
 		})
 	}

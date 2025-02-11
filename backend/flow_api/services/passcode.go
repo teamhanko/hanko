@@ -36,7 +36,8 @@ type ValidatePasscodeParams struct {
 type SendPasscodeResult struct {
 	PasscodeModel models.Passcode
 	Subject       string
-	Body          string
+	BodyPlain     string
+	BodyHTML      string
 	Code          string
 }
 
@@ -141,20 +142,33 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	}
 
 	durationTTL := time.Duration(passcodeModel.Ttl) * time.Second
-	data := map[string]interface{}{
-		"Code":        code,
-		"ServiceName": s.cfg.Service.Name,
-		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
+
+	subjectData := map[string]interface{}{
+		"Code": code,
+		"TTL":  fmt.Sprintf("%.0f", durationTTL.Minutes()),
 	}
 
-	subject := s.emailService.RenderSubject(p.Language, p.Template, data)
-	body, err := s.emailService.RenderBody(p.Language, p.Template, data)
+	subject := s.emailService.RenderSubject(p.Language, p.Template, subjectData)
+
+	bodyData := map[string]interface{}{
+		"Code":        code,
+		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
+		"ServiceName": s.cfg.Service.Name,
+		"Subject":     subject,
+	}
+
+	bodyPlain, err := s.emailService.RenderBodyPlain(p.Language, p.Template, bodyData)
+	if err != nil {
+		return nil, err
+	}
+
+	bodyHTML, err := s.emailService.RenderBodyHTML(p.Language, p.Template, bodyData)
 	if err != nil {
 		return nil, err
 	}
 
 	if s.cfg.EmailDelivery.Enabled {
-		err = s.emailService.SendEmail(p.EmailAddress, subject, body)
+		err = s.emailService.SendEmail(p.EmailAddress, subject, bodyPlain, bodyHTML)
 		if err != nil {
 			return nil, err
 		}
@@ -163,7 +177,8 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	return &SendPasscodeResult{
 		PasscodeModel: passcodeModel,
 		Subject:       subject,
-		Body:          body,
+		BodyPlain:     bodyPlain,
+		BodyHTML:      bodyHTML,
 		Code:          code,
 	}, nil
 }
