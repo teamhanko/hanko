@@ -13,14 +13,15 @@ export class ProfileComponent implements OnInit {
 
   constructor(private hankoService: HankoService, private todoService: TodoService, private router: Router) {}
 
-  ngOnInit() {
-    if (!this.hankoService.client.session.isValid()) {
+  async ngOnInit() {
+    const { is_valid} = await this.hankoService.client.validateSession();
+    if (!is_valid) {
       this.redirectToLogin();
     }
   }
 
   logout() {
-    this.hankoService.client.user.logout().catch((e) => (this.error = e));
+    this.hankoService.client.logout().catch((e) => (this.error = e));
   }
 
   redirectToLogin() {

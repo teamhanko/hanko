@@ -13,31 +13,17 @@ import {
 } from "preact/compat";
 
 import {
-  create as createWebauthnCredential,
-  get as getWebauthnCredential,
-} from "@github/webauthn-json";
-
-import {
   Hanko,
   HankoError,
   TechnicalError,
-  WebauthnSupport,
+  State,
+  FlowName,
+  Error as FlowError,
+  LastLogin,
+  StateInitConfig,
 } from "@teamhanko/hanko-frontend-sdk";
 
 import { Translations } from "../i18n/translations";
-
-import {
-  FlowPath,
-  Handlers,
-} from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
-
-import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
-import { LastLogin } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
-
-import {
-  PublicKeyCredentialWithAssertionJSON,
-  PublicKeyCredentialWithAttestationJSON,
-} from "@github/webauthn-json/src/webauthn-json/basic/json";
 
 import Container from "../components/wrapper/Container";
 import InitPage from "../pages/InitPage";
@@ -66,8 +52,6 @@ import SignalLike = JSXInternal.SignalLike;
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
 
-const localStorageCacheStateKey = "flow-state";
-
 export type ComponentName =
   | "auth"
   | "login"
@@ -86,42 +70,11 @@ export interface GlobalOptions {
   storageKey?: string;
 }
 
-export type UIAction =
-  | "email-submit"
-  | "webauthn-credential-rename"
-  | "passkey-submit"
-  | "passkey-delete"
-  | "passcode-resend"
-  | "passcode-submit"
-  | "password-submit"
-  | "password-recovery"
-  | "password-delete"
-  | "choose-login-method"
-  | "switch-flow"
-  | "email-set-primary"
-  | "email-delete"
-  | "email-verify"
-  | "username-set"
-  | "username-delete"
-  | "security-key-delete"
-  | "security-key-rename"
-  | "security-key-submit"
-  | "skip"
-  | "back"
-  | "account_delete"
-  | "retry"
-  | "session-delete"
-  | "auth-app-add"
-  | "auth-app-remove"
-  | "trust-device-submit";
-
 interface UIState {
   username?: string;
   email?: string;
-  loadingAction?: UIAction;
-  succeededAction?: UIAction;
-  lastAction?: UIAction;
   error?: FlowError;
+  isDisabled?: boolean;
 }
 
 interface Context {
@@ -130,7 +83,6 @@ interface Context {
   page: h.JSX.Element;
   setPage: StateUpdater<h.JSX.Element>;
   init: (compName: ComponentName) => void;
-  isDisabled: boolean;
   componentName: ComponentName;
   setComponentName: StateUpdater<ComponentName>;
   experimentalFeatures?: ExperimentalFeatures;
@@ -138,13 +90,11 @@ interface Context {
   hidePasskeyButtonOnLogin: boolean;
   prefilledEmail?: string;
   prefilledUsername?: string;
-  stateHandler: Handlers;
-  setLoadingAction: StateUpdater<UIAction>;
-  setSucceededAction: StateUpdater<UIAction>;
   uiState: UIState;
   setUIState: StateUpdater<UIState>;
   initialComponentName: ComponentName;
   lastLogin?: LastLogin;
+  isOwnFlow: (state: State<any>) => boolean;
 }
 
 export const AppContext = createContext<Context>(null);
@@ -194,6 +144,19 @@ const AppProvider = ({
     props.componentName,
   );
 
+  const [authComponentFlow, setAuthComponentFlow] = useState<FlowName>("login");
+
+  const componentFlowNameMap = useMemo<Record<ComponentName, FlowName>>(
+    () => ({
+      auth: authComponentFlow,
+      login: "login",
+      registration: "registration",
+      profile: "profile",
+      events: null,
+    }),
+    [authComponentFlow],
+  );
+
   const experimentalFeatures = useMemo(
     () =>
       experimental
@@ -212,38 +175,6 @@ const AppProvider = ({
     username: prefilledUsername,
   });
 
-  const setLoadingAction = useCallback((loadingAction: UIAction) => {
-    setUIState((prev) => ({
-      ...prev,
-      loadingAction,
-      succeededAction: null,
-      error: null,
-      lastAction: loadingAction || prev.lastAction,
-    }));
-  }, []);
-
-  const setSucceededAction = useCallback((succeededAction: UIAction) => {
-    setUIState((prev) => ({
-      ...prev,
-      succeededAction,
-      loadingAction: null,
-    }));
-  }, []);
-
-  const lastActionSucceeded = useCallback(() => {
-    setUIState((prev) => ({
-      ...prev,
-      succeededAction: prev.lastAction,
-      loadingAction: null,
-      error: null,
-    }));
-  }, []);
-
-  const isDisabled = useMemo(
-    () => !!uiState.loadingAction || !!uiState.succeededAction,
-    [uiState],
-  );
-
   const dispatchEvent = function <T>(type: string, detail?: T) {
     ref.current?.dispatchEvent(
       new CustomEvent<T>(type, {
@@ -254,322 +185,161 @@ const AppProvider = ({
     );
   };
 
+  const isOwnFlow = useCallback(
+    (state: State<any>) =>
+      componentFlowNameMap[componentName] == state.flowName,
+    [componentFlowNameMap, componentName, authComponentFlow],
+  );
+
   const handleError = (e: any) => {
-    setLoadingAction(null);
     setPage(
       <ErrorPage error={e instanceof HankoError ? e : new TechnicalError(e)} />,
     );
   };
 
-  const stateHandler: Handlers & { onError: (e: any) => void } = useMemo(
-    () => ({
-      onError: (e) => {
-        handleError(e);
-      },
-      async preflight(state) {
-        const conditionalMediationAvailable =
-          await WebauthnSupport.isConditionalMediationAvailable();
-        const platformAuthenticatorAvailable =
-          await WebauthnSupport.isPlatformAuthenticatorAvailable();
-        const newState = await state.actions
-          .register_client_capabilities({
-            webauthn_available: isWebAuthnSupported,
-            webauthn_conditional_mediation_available:
-              conditionalMediationAvailable,
-            webauthn_platform_authenticator_available:
-              platformAuthenticatorAvailable,
-          })
-          .run();
-        return hanko.flow.run(newState, stateHandler);
-      },
-      async login_init(state) {
-        setPage(<LoginInitPage state={state} />);
-        void (async function () {
-          if (state.payload.request_options) {
-            let assertionResponse: PublicKeyCredentialWithAssertionJSON;
+  useMemo(
+    () =>
+      hanko.onBeforeStateChange(({ state }) => {
+        if (!isOwnFlow(state)) {
+          return;
+        }
 
-            try {
-              assertionResponse = await getWebauthnCredential({
-                publicKey: state.payload.request_options.publicKey,
-                mediation: "conditional" as CredentialMediationRequirement,
-                signal: createWebauthnAbortSignal(),
-              });
-            } catch (error) {
-              // We do not need to handle the error, because this is a conditional request, which can fail silently
-              return;
+        setUIState((prev) => ({ ...prev, isDisabled: true, error: undefined }));
+      }),
+    [hanko, isOwnFlow],
+  );
+
+  useEffect(
+    () =>
+      hanko.onAfterStateChange(async ({ state }) => {
+        if (!isOwnFlow(state)) {
+          return;
+        }
+        if (
+          ![
+            "onboarding_verify_passkey_attestation",
+            "webauthn_credential_verification",
+            "login_passkey",
+            "thirdparty",
+          ].includes(state.name)
+        ) {
+          setUIState((prev) => ({ ...prev, isDisabled: false }));
+        }
+
+        switch (state.name) {
+          case "login_init":
+            setPage(<LoginInitPage state={state} />);
+            state.passkeyAutofillActivation();
+            break;
+          case "passcode_confirmation":
+            setPage(<PasscodePage state={state} />);
+            break;
+          case "login_otp":
+            setPage(<LoginOTPPage state={state} />);
+            break;
+          case "onboarding_create_passkey":
+            setPage(<RegisterPasskeyPage state={state} />);
+            break;
+          case "login_password":
+            setPage(<LoginPasswordPage state={state} />);
+            break;
+          case "login_password_recovery":
+            setPage(<EditPasswordPage state={state} />);
+            break;
+          case "login_security_key":
+            setPage(<LoginSecurityKeyPage state={state} />);
+            break;
+          case "mfa_method_chooser":
+            setPage(<MFAMethodChooserPage state={state} />);
+            break;
+          case "mfa_otp_secret_creation":
+            setPage(<CreateOTPSecretPage state={state} />);
+            break;
+          case "mfa_security_key_creation":
+            setPage(<CreateSecurityKeyPage state={state} />);
+            break;
+          case "login_method_chooser":
+            setPage(<LoginMethodChooserPage state={state} />);
+            break;
+          case "registration_init":
+            setPage(<RegistrationInitPage state={state} />);
+            break;
+          case "password_creation":
+            setPage(<CreatePasswordPage state={state} />);
+            break;
+          case "success":
+            if (state.payload?.last_login) {
+              localStorage.setItem(
+                storageKeyLastLogin,
+                JSON.stringify(state.payload.last_login),
+              );
             }
-
-            setLoadingAction("passkey-submit");
-            const nextState = await state.actions
-              .webauthn_verify_assertion_response({
-                assertion_response: assertionResponse,
-              })
-              .run();
-
-            setLoadingAction(null);
-            await hanko.flow.run(nextState, stateHandler);
-          }
-        })();
-      },
-      passcode_confirmation(state) {
-        setPage(<PasscodePage state={state} />);
-      },
-      async login_otp(state) {
-        setPage(<LoginOTPPage state={state} />);
-      },
-      async login_passkey(state) {
-        let assertionResponse: PublicKeyCredentialWithAssertionJSON;
-        setLoadingAction("passkey-submit");
-
-        try {
-          assertionResponse = await getWebauthnCredential({
-            ...state.payload.request_options,
-            signal: createWebauthnAbortSignal(),
-          });
-        } catch (error) {
-          const prevState = await state.actions.back(null).run();
-          setUIState((prev) => ({
-            ...prev,
-            error: state.error,
-            loadingAction: null,
-          }));
-          return hanko.flow.run(prevState, stateHandler);
+            state.autoStep();
+            break;
+          case "profile_init":
+            setPage(
+              <ProfilePage
+                state={state}
+                enablePasskeys={globalOptions.enablePasskeys}
+              />,
+            );
+            break;
+          case "error":
+            setPage(<ErrorPage state={state} />);
+            break;
+          case "onboarding_email":
+            setPage(<CreateEmailPage state={state} />);
+            break;
+          case "onboarding_username":
+            setPage(<CreateUsernamePage state={state} />);
+            break;
+          case "credential_onboarding_chooser":
+            setPage(<CredentialOnboardingChooserPage state={state} />);
+            break;
+          case "device_trust":
+            setPage(<DeviceTrustPage state={state} />);
+            break;
         }
-
-        const nextState = await state.actions
-          .webauthn_verify_assertion_response({
-            assertion_response: assertionResponse,
-          })
-          .run();
-
-        setLoadingAction(null);
-        await hanko.flow.run(nextState, stateHandler);
-      },
-      onboarding_create_passkey(state) {
-        setPage(<RegisterPasskeyPage state={state} />);
-      },
-      async onboarding_verify_passkey_attestation(state) {
-        let attestationResponse: PublicKeyCredentialWithAttestationJSON;
-        try {
-          attestationResponse = await createWebauthnCredential({
-            ...state.payload.creation_options,
-            signal: createWebauthnAbortSignal(),
-          });
-        } catch (e) {
-          const prevState = await state.actions.back(null).run();
-          setLoadingAction(null);
-          await hanko.flow.run(prevState, stateHandler);
-          setUIState((prev) => ({
-            ...prev,
-            error: {
-              code: "webauthn_credential_already_exists",
-              message: "Webauthn credential already exists",
-            },
-          }));
-          return;
-        }
-
-        const nextState = await state.actions
-          .webauthn_verify_attestation_response({
-            public_key: attestationResponse,
-          })
-          .run();
-
-        setLoadingAction(null);
-        await hanko.flow.run(nextState, stateHandler);
-      },
-      async webauthn_credential_verification(state) {
-        let attestationResponse: PublicKeyCredentialWithAttestationJSON;
-        try {
-          attestationResponse = await createWebauthnCredential({
-            ...state.payload.creation_options,
-            signal: createWebauthnAbortSignal(),
-          });
-        } catch (e) {
-          const prevState = await state.actions.back(null).run();
-          setLoadingAction(null);
-          await hanko.flow.run(prevState, stateHandler);
-          setUIState((prev) => ({
-            ...prev,
-            error: {
-              code: "webauthn_credential_already_exists",
-              message: "Webauthn credential already exists",
-            },
-          }));
-          return;
-        }
-
-        const nextState = await state.actions
-          .webauthn_verify_attestation_response({
-            public_key: attestationResponse,
-          })
-          .run();
-
-        await hanko.flow.run(nextState, stateHandler);
-      },
-      login_password(state) {
-        setPage(<LoginPasswordPage state={state} />);
-      },
-      login_password_recovery(state) {
-        setPage(<EditPasswordPage state={state} />);
-      },
-      async login_security_key(state) {
-        setPage(<LoginSecurityKeyPage state={state} />);
-      },
-      async mfa_method_chooser(state) {
-        setPage(<MFAMethodChooserPage state={state} />);
-      },
-      async mfa_otp_secret_creation(state) {
-        setPage(<CreateOTPSecretPage state={state} />);
-      },
-      async mfa_security_key_creation(state) {
-        setPage(<CreateSecurityKeyPage state={state} />);
-      },
-      login_method_chooser(state) {
-        setPage(<LoginMethodChooserPage state={state} />);
-      },
-      registration_init(state) {
-        setPage(<RegistrationInitPage state={state} />);
-      },
-      password_creation(state) {
-        setPage(<CreatePasswordPage state={state} />);
-      },
-      success(state) {
-        if (state.payload?.last_login) {
-          localStorage.setItem(
-            storageKeyLastLogin,
-            JSON.stringify(state.payload.last_login),
-          );
-        }
-        const { claims } = state.payload;
-        const expirationSeconds = Date.parse(claims.expiration) - Date.now();
-        hanko.relay.dispatchSessionCreatedEvent({ claims, expirationSeconds });
-        lastActionSucceeded();
-      },
-      profile_init(state) {
-        setPage(
-          <ProfilePage
-            state={state}
-            enablePasskeys={globalOptions.enablePasskeys}
-          />,
-        );
-      },
-      async thirdparty(state) {
-        const token = new URLSearchParams(window.location.search).get(
-          "hanko_token",
-        );
-        if (token && token.length > 0) {
-          const searchParams = new URLSearchParams(window.location.search);
-          const nextState = await state.actions
-            .exchange_token({ token: searchParams.get("hanko_token") })
-            .run();
-
-          searchParams.delete("hanko_token");
-          searchParams.delete("saml_hint");
-
-          history.replaceState(
-            null,
-            null,
-            window.location.pathname +
-              (searchParams.size < 1 ? "" : `?${searchParams.toString()}`),
-          );
-
-          await hanko.flow.run(nextState, stateHandler);
-        } else {
-          setUIState((prev) => ({
-            ...prev,
-            lastAction: null,
-          }));
-          localStorage.setItem(
-            localStorageCacheStateKey,
-            JSON.stringify(state.toJSON()),
-          );
-          window.location.assign(state.payload.redirect_url);
-        }
-      },
-      error(state) {
-        setLoadingAction(null);
-        setPage(<ErrorPage state={state} />);
-      },
-      onboarding_email(state) {
-        setPage(<CreateEmailPage state={state} />);
-      },
-      onboarding_username(state) {
-        setPage(<CreateUsernamePage state={state} />);
-      },
-      credential_onboarding_chooser(state) {
-        setPage(<CredentialOnboardingChooserPage state={state} />);
-      },
-      async account_deleted(state) {
-        await hanko.user.logout();
-        hanko.relay.dispatchUserDeletedEvent();
-      },
-      device_trust(state) {
-        setPage(<DeviceTrustPage state={state} />);
-      },
-    }),
-    [
-      globalOptions.enablePasskeys,
-      hanko,
-      lastActionSucceeded,
-      setLoadingAction,
-    ],
+      }),
+    [componentName, componentFlowNameMap],
   );
 
-  const flowInit = useCallback(
-    async (path: FlowPath) => {
-      setLoadingAction("switch-flow");
-      const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
-      if (lastLoginEncoded) {
-        setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
-      }
-      const token = new URLSearchParams(window.location.search).get(
-        "hanko_token",
-      );
-      const cachedState = localStorage.getItem(localStorageCacheStateKey);
-      const samlHint = new URLSearchParams(window.location.search).get(
-        "saml_hint",
-      );
-      if (samlHint === "idp_initiated") {
-        await hanko.flow.init("/token_exchange", { ...stateHandler });
-      } else if (
-        cachedState &&
-        cachedState.length > 0 &&
-        token &&
-        token.length > 0
-      ) {
-        await hanko.flow.fromString(
-          localStorage.getItem(localStorageCacheStateKey),
-          { ...stateHandler },
-        );
-        localStorage.removeItem(localStorageCacheStateKey);
-      } else {
-        await hanko.flow.init(path, { ...stateHandler });
-      }
-      setLoadingAction(null);
-    },
-    [stateHandler],
-  );
+  const flowInit = useCallback(async (flowName: FlowName) => {
+    setUIState((prev) => ({ ...prev, isDisabled: true }));
+    const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
+    if (lastLoginEncoded) {
+      setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
+    }
+    const samlHint = new URLSearchParams(window.location.search).get(
+      "saml_hint",
+    );
+    const config: StateInitConfig = {
+      excludeAutoSteps: ["success"],
+      cacheKey: `hanko-auth-flow-state`,
+      dispatchAfterStateChangeEvent: false,
+    };
 
-  const init = useCallback(
-    (compName: ComponentName) => {
-      switch (compName) {
-        case "auth":
-          flowInit("/login").catch(handleError);
-          break;
-        case "login":
-          flowInit("/login").catch(handleError);
-          break;
-        case "registration":
-          flowInit("/registration").catch(handleError);
-          break;
-        case "profile":
-          flowInit("/profile").catch(handleError);
-          break;
-      }
-    },
-    [flowInit],
-  );
+    if (samlHint === "idp_initiated") {
+      setAuthComponentFlow("token_exchange");
+      await hanko.createState("token_exchange", {
+        ...config,
+        dispatchAfterStateChangeEvent: true,
+      });
+    } else {
+      const state = await hanko.createState(flowName, config);
+      setAuthComponentFlow(state.flowName);
+      setTimeout(() => state.dispatchAfterStateChangeEvent(), 500);
+    }
+  }, []);
+
+  const init = useCallback((compName: ComponentName) => {
+    setComponentName(compName);
+    const flowName = componentFlowNameMap[compName];
+
+    if (flowName) {
+      flowInit(flowName).catch(handleError);
+    }
+  }, []);
 
   useEffect(() => init(componentName), []);
 
@@ -589,6 +359,14 @@ const AppProvider = ({
     hanko.onUserLoggedOut(() => {
       dispatchEvent("onUserLoggedOut");
     });
+
+    hanko.onBeforeStateChange((detail) => {
+      dispatchEvent("onBeforeStateChange", detail);
+    });
+
+    hanko.onAfterStateChange((detail) => {
+      dispatchEvent("onAfterStateChange", detail);
+    });
   }, [hanko]);
 
   useMemo(() => {
@@ -602,19 +380,14 @@ const AppProvider = ({
     } else if (componentName === "profile") {
       hanko.onSessionCreated(cb);
     }
-  }, []);
-
-  const isWebAuthnSupported = WebauthnSupport.supported();
+  }, [componentName, hanko, init]);
 
   return (
     <AppContext.Provider
       value={{
         init,
         initialComponentName: props.componentName,
-        isDisabled,
         setUIState,
-        setLoadingAction,
-        setSucceededAction,
         uiState,
         hanko,
         setHanko,
@@ -627,8 +400,8 @@ const AppProvider = ({
         hidePasskeyButtonOnLogin,
         page,
         setPage,
-        stateHandler,
         lastLogin,
+        isOwnFlow,
       }}
     >
       <TranslateProvider

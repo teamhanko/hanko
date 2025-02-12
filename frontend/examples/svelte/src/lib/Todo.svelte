@@ -108,8 +108,7 @@
   };
 
   const logout = () => {
-    hankoClient.user
-      .logout()
+    hankoClient.logout()
       .catch((e) => {
         error = e;
       });
@@ -123,8 +122,9 @@
     navigate("/profile");
   }
 
-  onMount(() => {
-    if (hankoClient.session.isValid()) {
+  onMount(async () => {
+    const {is_valid} = await hankoClient.validateSession();
+    if (is_valid) {
       listTodos();
     } else {
       redirectToLogin();

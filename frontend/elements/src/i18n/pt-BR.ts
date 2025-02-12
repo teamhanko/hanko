@@ -222,5 +222,7 @@ export const ptBR: Translation = {
       "A solicitação expirou, foi cancelada ou o dispositivo já está registrado. Tente novamente ou use outro dispositivo.",
     platform_authenticator_required:
       "Sua conta está configurada para usar autentificadores de plataforma. No entanto, seu dispositivo ou navegador atual não suporta esse recurso. Tente novamente com um dispositivo ou navegador compatível.",
+    third_party_access_denied:
+      "Acesso negado. O pedido foi cancelado pelo usuário ou o provedor negou o acesso por outros motivos.",
   },
 };

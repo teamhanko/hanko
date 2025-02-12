@@ -2,10 +2,15 @@ import { Throttle } from "../Throttle";
 import {
   CustomEventWithDetail,
   SessionDetail,
+  FlowDetail,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
   userLoggedOutType,
+  flowAfterStateChangeType,
+  flowBeforeStateChangeType,
+  flowErrorType,
+  FlowErrorDetail,
 } from "./CustomEvents";
 
 /**
@@ -219,5 +224,27 @@ export class Listener {
     once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(userDeletedType, { callback, once });
+  }
+
+  public onAfterStateChange(
+    callback: CallbackFunc<FlowDetail>,
+    once?: boolean,
+  ): CleanupFunc {
+    return this.addEventListener(
+      flowAfterStateChangeType,
+      { callback, once },
+      false,
+    );
+  }
+
+  public onBeforeStateChange(
+    callback: CallbackFunc<FlowDetail>,
+    once?: boolean,
+  ): CleanupFunc {
+    return this.addEventListener(
+      flowBeforeStateChangeType,
+      { callback, once },
+      false,
+    );
   }
 }

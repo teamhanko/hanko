@@ -2,7 +2,6 @@ import { h } from "preact";
 import { StateUpdater, useContext, useState } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { UsernameSetInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
 
 import Form from "../form/Form";
 import Input from "../form/Input";
@@ -10,25 +9,20 @@ import Button from "../form/Button";
 import Dropdown from "./Dropdown";
 import ErrorMessage from "../error/ErrorMessage";
 import Link from "../link/Link";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
-  inputs: UsernameSetInputs;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
-  onUsernameSubmit: (event: Event, username: string) => Promise<void>;
-  onUsernameDelete: (event: Event) => Promise<void>;
-  hasUsername?: boolean;
-  allowUsernameDeletion?: boolean;
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const ChangeUsernameDropdown = ({
-  inputs,
   checkedItemID,
   setCheckedItemID,
-  onUsernameSubmit,
-  onUsernameDelete,
-  hasUsername,
-  allowUsernameDeletion,
+  flowState,
+  onState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const [username, setUsername] = useState<string>();
@@ -40,18 +34,52 @@ const ChangeUsernameDropdown = ({
     }
   };
 
+  const onSubmit = async (event: Event) => {
+    event.preventDefault();
+    const action = flowState.payload.user.username
+      ? flowState.actions.username_update
+      : flowState.actions.username_create;
+    const nextState = await action.run(
+      { username },
+      { dispatchAfterStateChangeEvent: false },
+    );
+
+    return onState(nextState).then(() => setUsername(""));
+  };
+
+  const onDelete = async (event: Event) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.username_delete.run(null, {
+      dispatchAfterStateChangeEvent: false,
+    });
+    return onState(nextState).then(() => setUsername(""));
+  };
+
   return (
     <Dropdown
       name={"username-edit-dropdown"}
-      title={t(hasUsername ? "labels.changeUsername" : "labels.setUsername")}
+      title={t(
+        flowState.payload.user.username
+          ? "labels.changeUsername"
+          : "labels.setUsername",
+      )}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}
     >
-      <ErrorMessage flowError={inputs.username?.error} />
-      <Form
-        onSubmit={(event: Event) =>
-          onUsernameSubmit(event, username).then(() => setUsername(""))
+      <ErrorMessage
+        flowError={
+          flowState.payload.user.username
+            ? flowState.actions.username_update.inputs.username?.error
+            : flowState.actions.username_create.inputs.username?.error
         }
+      />
+      <Form
+        flowAction={
+          flowState.payload.user.username
+            ? flowState.actions.username_update
+            : flowState.actions.username_create
+        }
+        onSubmit={onSubmit}
       >
         <Input
           markError
@@ -59,17 +87,18 @@ const ChangeUsernameDropdown = ({
           type={"text"}
           onInput={onInputHandler}
           value={username}
-          flowInput={inputs.username}
+          flowInput={
+            flowState.payload.user.username
+              ? flowState.actions.username_update.inputs.username
+              : flowState.actions.username_create.inputs.username
+          }
         />
-        <Button uiAction={"username-set"}>{t("labels.save")}</Button>
+        <Button>{t("labels.save")}</Button>
       </Form>
       <Link
-        hidden={!allowUsernameDeletion}
-        uiAction={"username-delete"}
+        flowAction={flowState.actions.username_delete}
+        onClick={onDelete}
         dangerous
-        onClick={(event: Event) =>
-          onUsernameDelete(event).then(() => setUsername(""))
-        }
         loadingSpinnerPosition={"right"}
       >
         {t("labels.delete")}

@@ -1,4 +1,5 @@
 import { Claims } from "../Dto";
+import { AnyState } from "../flow-api/types/flow";
 
 /**
  * The type of the `hanko-session-created` event.
@@ -46,6 +47,29 @@ export const userLoggedInType: "hanko-user-logged-in" = "hanko-user-logged-in";
 export const userCreatedType: "hanko-user-created" = "hanko-user-created";
 
 /**
+ * The type of the `hanko-after-state-change` event.
+ * @typedef {string} flowAfterStateChangeType
+ * @memberOf Listener
+ */
+export const flowAfterStateChangeType: "hanko-after-state-change" =
+  "hanko-after-state-change";
+
+/**
+ * The type of the `hanko-before-state-change` event.
+ * @typedef {string} flowBeforeStateChangeType
+ * @memberOf Listener
+ */
+export const flowBeforeStateChangeType: "hanko-before-state-change" =
+  "hanko-before-state-change";
+
+/**
+ * The type of the `hanko-flow-error` event.
+ * @typedef {string} flowErrorType
+ * @memberOf Listener
+ */
+export const flowErrorType: "hanko-flow-error" = "hanko-flow-error";
+
+/**
  * The data passed in the `hanko-session-created` or `hanko-session-resumed` event.
  *
  * @interface
@@ -57,6 +81,14 @@ export const userCreatedType: "hanko-user-created" = "hanko-user-created";
 export interface SessionDetail {
   claims: Claims;
   expirationSeconds: number; // deprecated
+}
+
+export interface FlowErrorDetail {
+  error: Error;
+}
+
+export interface FlowDetail {
+  state: AnyState;
 }
 
 /**

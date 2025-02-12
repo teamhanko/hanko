@@ -53,103 +53,277 @@ const defaultOptions = {
 const hanko = new Hanko("http://localhost:3000", defaultOptions);
 ```
 
-## Documentation
+## FlowAPI
 
-To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
+The SDK offers a TypeScript-based interface for managing authentication and profile flows with Hanko, enabling the
+development of custom frontends with the Hanko FlowAPI. It handles state transitions, action execution, input
+validation, and event dispatching, while also providing built-in support for auto-stepping and passkey autofill.
+This guide explores its core functionality and usage patterns.
 
-## Exports
+### Initializing a New Flow
 
-### SDK
-
-- `Hanko` - A class that bundles all functionalities.
-
-### Client Classes
-
-- `UserClient` - A class to manage users.
-- `ThirdPartyClient` - A class to handle social logins.
-- `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
-
-### Utility Classes
-
-- `WebauthnSupport` - A class to check the browser's WebAuthn support.
-
-### DTO Interfaces
-
-- `PasswordConfig`
-- `EmailConfig`
-- `AccountConfig`
-- `Config`
-- `WebauthnFinalized`
-- `TokenFinalized`
-- `UserInfo`
-- `Me`
-- `Credential`
-- `User`
-- `UserCreated`
-- `Passcode`
-- `WebauthnTransports`
-- `Attestation`
-- `Email`
-- `Emails`
-- `WebauthnCredential`
-- `WebauthnCredentials`
-- `Identity`
-
-### Event Interfaces
-
-- `SessionDetail`
-
-### Event Types
-
-- `CustomEventWithDetail`
-- `sessionCreatedType`
-- `sessionExpiredType`
-- `userLoggedOutType`
-- `userDeletedType`
-
-### Error Classes
-
-- `HankoError`
-- `TechnicalError`
-- `ConflictError`
-- `RequestTimeoutError`
-- `WebauthnRequestCancelledError`
-- `InvalidPasswordError`
-- `InvalidPasscodeError`
-- `InvalidWebauthnCredentialError`
-- `PasscodeExpiredError`
-- `MaxNumOfPasscodeAttemptsReachedError`
-- `NotFoundError`
-- `TooManyRequestsError`
-- `UnauthorizedError`
-
-## Examples
-
-### Get the current user / Validate the JWT against the Hanko API
-
-The Hanko API issues a JWT when a user logs in. For certain actions, like obtaining the user object, a valid  JWT is
-required. The following example shows how to get the user object of the current user, or to identify that the user is
-not logged in:
+Start a new authentication or profile flow using the `createState` method on a Hanko instance. Options allow you to control
+event dispatching and auto-step behavior.
 
 ```typescript
-import { Hanko, UnauthorizedError } from "@teamhanko/hanko-frontend-sdk"
+const state = await hanko.createState("login", {
+    dispatchAfterStateChangeEvent: true,
+    excludeAutoSteps: [],
+    loadFromCache: true,
+    cacheKey: "hanko-flow-state",
+});
+```
 
-const hanko = new Hanko("https://[HANKO_API_URL]")
+#### Parameters
 
-try {
-    const user = await hanko.user.getCurrent()
+- **flowName**: The name of the flow (e.g., "login", "register" or "profile").
+- **options**:
+    - **dispatchAfterStateChangeEvent**: `boolean` - Whether to dispatch the onAfterStateChange event after state changes (default: true).
+    - **excludeAutoSteps**: `AutoStepExclusion` - Array of state names or "all" to skip specific or all auto-steps (default: null).
+    - **loadFromCache**: `boolean` - Whether to attempt loading a cached state from localStorage (default: true).
+    - **cacheKey**: `string` - The key used for localStorage caching (default: "hanko-flow-state").
 
-    // A valid JWT is in place so that the user object was able to be fetched.
-} catch (e) {
-    if (e instanceof UnauthorizedError) {
-        // Display an error or prompt the user to login again. After a successful call to `hanko.webauthn.login()`,
-        // `hanko.password.login()` or `hanko.passcode.finalize()` a JWT will be issued and `hanko.user.getCurrent()`
-        // would succeed.
-    }
+
+### Understanding the State Object
+
+The `state` object represents the current step in the flow. It contains properties and methods to interact with the flow.
+
+#### Structure
+
+- **name**: `StateName` - The current state’s name (e.g., "login_init", "login_password", "success").
+- **flowName**: `FlowName` - The name of the flow (e.g., "login").
+- **error**: `Error | undefined` - An error object if an action or request fails (e.g., invalid input, network error).
+- **payload**: `Payloads[StateName] | undefined` - State-specific data returned by the API.
+- **actions**: `ActionMap<StateName>` - An object mapping action names to Action instances.
+- **csrfToken**: `string` - CSRF token for secure requests.
+- **status**: `number` - HTTP status code of the last response.
+- **invokedAction**: `ActionInfo | undefined` - Details of the last action run on this state, if any.
+- **previousAction**: `ActionInfo | undefined` - Details of the action that led to this state, if any.
+- **isCached**: `boolean` - Whether the state was loaded from localStorage.
+- **cacheKey**: `string` - The key used for localStorage caching.
+- **excludeAutoSteps**: `AutoStepExclusion` - An array of `StateNames` excluded from auto-stepping.
+
+
+### Action Availability
+
+Actions can be enabled or disabled based on the backend configuration or the user's state and properties. You can check
+whether a specific action is enabled by accessing its `enabled` property:
+
+```typescript
+if (state.actions.example_action.enabled) {
+  await state.actions.example_action.run();
+} else {
+  console.log("Action is disabled");
 }
 ```
 
-### Custom Events
+### Accessing Action Inputs
+
+Each action in `state.actions` has an `inputs` property defining expected input fields.
+
+```typescript
+console.log(state.actions.continue_with_login_identifier.inputs);
+// Example output:
+// {
+//   username: {
+//     required: true,
+//     type: "string",
+//     minLength: 3,
+//     maxLength: 20,
+//     description: "User’s login name"
+//   }
+// }
+```
+
+### Running an Action
+
+Actions transition the flow to a new state. Use the `run` method on an action, passing input values and optional configuration.
+
+#### Basic Example with Type Narrowing
+
+```typescript
+if (state.name === "login_init") {
+  const newState = await state.actions.continue_with_login_identifier.run({
+    username: "user1",
+  });
+  // Triggers `onBeforeStateChange` and `onAfterStateChange` events
+  // `newState` is the next state in the flow (e.g., "login_password")
+}
+```
+
+#### Additional Considerations
+
+- **Type Narrowing**: Check `state.name` to ensure the action exists and inputs are valid for that state.
+- **Events**: By default, `run` triggers `onBeforeStateChange` before the action and `onAfterStateChange` after the new state is loaded.
+- **Validation Errors**: If the action fails due to invalid input (e.g., wrong format or length), `newState.error` will be set to "invalid_form_data", and specific errors will be attached to the related input fields (see "Error Handling" below).
+
+### Event Handlers
+
+The SDK dispatches events via the Hanko instance to track state changes.
+
+#### `onBeforeStateChange`
+
+Fires before an action is executed, useful for showing loading states.
+
+```typescript
+hanko.onBeforeStateChange(({ state }) => {
+  console.log("Action loading:", state.invokedAction);
+});
+```
+
+#### `onAfterStateChange`
+
+Fires after a new state is loaded, ideal for rendering UI or handling state-specific logic.
+
+```typescript
+hanko.onAfterStateChange(({ state }) => {
+  console.log("Action load finished:", state.invokedAction);
+
+  switch (state.name) {
+    case "login_init":
+      state.passkeyAutofillActivation(); // Special handler for passkey autofill; requires an <input> field on the page with `autocomplete="username webauthn"` (e.g., <input type="text" name="username" autocomplete="username webauthn" />) so the browser can suggest and autofill passkeys when the user interacts with it.
+      break;
+    case "login_password":
+      // Render password input UI
+      if (state.error) {
+        console.log("Error:", state.error); // e.g., "invalid_form_data"
+      }
+      break;
+    case "error":
+      // Handle network errors or 5xx responses
+      console.error("Flow error:", state.error);
+      break;
+  }
+});
+```
+
+### Controlling the AfterStateChanged Event
+
+You can disable the automatic `onAfterStateChange` event and dispatch it manually after custom logic.
+
+```typescript
+if (state.name === "login_init") {
+  const newState = await state.actions.continue_with_login_identifier.run(
+    { username: "user1" },
+    { dispatchAfterStateChangeEvent: false }, // Disable automatic dispatch
+  );
+  // Only `onBeforeStateChange` is triggered here
+
+  await doSomething(); // Your custom async logic
+  newState.dispatchAfterStateChangeEvent(); // Manually trigger the event
+}
+```
+
+### Auto-Steps
+
+Auto-steps automatically advance the flow for certain states, reducing manual intervention.
+
+#### Supported States
+
+- `preflight`
+- `login_passkey`
+- `onboarding_verify_passkey_attestation`
+- `webauthn_credential_verification`
+- `thirdparty`
+- `success`
+- `account_deleted`
+
+#### Disabling Auto-Steps
+
+Prevent auto-steps by specifying states in `excludeAutoSteps`:
+
+```typescript
+const state = await hanko.createState("login", {
+  excludeAutoSteps: ["success"], // Skip auto-step for "success"
+});
+```
+
+#### Manual Auto-Step Execution
+
+```typescript
+hanko.onAfterStateChange(({ state }) => {
+  if (state.name === "success") {
+    console.log("Flow completed");
+    await state.autoStep();
+  }
+});
+```
+
+### Error Handling
+
+#### Input Errors
+
+If an action fails due to invalid inputs:
+
+```typescript
+if (state.name === "login_password" && state.error === "invalid_form_data") {
+  const passwordError = state.actions.password_login.inputs.password.error;
+  console.log("Password error:", passwordError);
+}
+```
+
+#### Network/API Errors
+
+For network issues or `5xx` responses, the `error` state is entered with details in `state.error`.
+
+```typescript
+if (state.name === "error") {
+    console.error("Flow error:", state.error);
+}
+```
+
+### Caching Flow State
+
+Persist and recover flow state using `localStorage`.
+
+#### Saving State
+
+Save the current flow state to `localStorage` using `saveToLocalStorage()`.
+
+```typescript
+state.saveToLocalStorage(); // Stores under `state.cacheKey` (default: "hanko-flow-state")
+```
+
+Please note that the `localStorage` entry will be removed automatically when an action is invoked on the saved state.
+
+#### Loading State
+
+Recover a cached state or start a new flow:
+
+```typescript
+const state = await hanko.createState("login", {
+    loadFromCache: true, // Attempts to load from `cacheKey`
+    cacheKey: "hanko-flow-state",
+});
+```
+
+#### Clearing State
+
+Remove the cached state:
+
+```typescript
+state.removeFromLocalStorage(); // Deletes from `state.cacheKey`
+```
+
+#### Advanced Serialization
+
+For custom persistence:
+
+```typescript
+import { State } from "@teamhanko/hanko-frontend-sdk";
+
+const serialized = state.serialize(); // Returns a `SerializedState` object
+// Store `serialized` in your storage system
+
+// Later, deserialize it
+const recoveredState = await State.deserialize(hanko, serialized, {
+    cacheKey: "custom-key",
+});
+```
+
+This allows integration with other storage mechanisms.
+
+### Session Events
 
 You can bind callback functions to different custom events. The callback function will be called when the event happens
 and an object will be passed in, containing event details. The event binding works as follows:
@@ -208,6 +382,61 @@ hanko.onUserDeleted(() => {
 
 Please Take a look into the [docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) for more details.
 
+### Session Management
+
+The SDK provides methods to manage user sessions and retrieve user information.
+
+#### Getting the User Object
+
+Fetches the current user's profile information.
+
+```typescript
+try {
+    const user = await hanko.getUser();
+    console.log("User profile:", user);
+} catch (error) {
+    console.error("Failed to fetch user:", error);
+    // Handle UnauthorizedError or TechnicalError
+}
+```
+
+#### Validating a Session
+
+Checks the validity of the current session.
+
+```typescript
+try {
+    const sessionStatus = await hanko.validateSession();
+    console.log("Session status:", sessionStatus);
+} catch (error) {
+    console.error("Failed to fetch session status:", error);
+    // Handle TechnicalError
+}
+```
+
+#### Getting the Session Token
+
+Retrieves the current session token from the authentication cookie.
+
+```typescript
+const token = hanko.getSessionToken();
+console.log("Session token:", token);
+```
+
+#### Logging out a User
+
+Logs out the current user by invalidating the session.
+
+```typescript
+try {
+    await hanko.logout();
+    console.log("User logged out");
+} catch (error) {
+    console.error("Failed to fetch user logout:", error);
+    // Handle TechnicalError
+}
+```
+
 ### Translation of outgoing emails
 
 If you use the main `Hanko` client provided by the Frontend SDK, you can use the `lang` parameter in the options when
@@ -265,6 +494,10 @@ async function session() {
 ## Bugs
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
+
+## Documentation
+
+To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
 
 ## License
 

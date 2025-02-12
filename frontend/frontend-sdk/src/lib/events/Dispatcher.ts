@@ -5,6 +5,9 @@ import {
   sessionExpiredType,
   userDeletedType,
   userLoggedOutType,
+  flowAfterStateChangeType,
+  FlowDetail,
+  flowBeforeStateChangeType,
 } from "./CustomEvents";
 
 /**
@@ -55,5 +58,19 @@ export class Dispatcher {
    */
   public dispatchUserDeletedEvent() {
     this.dispatch(userDeletedType, null);
+  }
+
+  /**
+   * Dispatches a "hanko-after-state-change" event to the document.
+   */
+  public dispatchAfterStateChangeEvent(detail: FlowDetail) {
+    this.dispatch(flowAfterStateChangeType, detail);
+  }
+
+  /**
+   * Dispatches a "hanko-before-state-change" event to the document.
+   */
+  public dispatchBeforeStateChangeEvent(detail: FlowDetail) {
+    this.dispatch(flowBeforeStateChangeType, detail);
   }
 }

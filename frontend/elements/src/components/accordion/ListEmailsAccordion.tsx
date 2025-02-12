@@ -10,28 +10,56 @@ import Paragraph from "../paragraph/Paragraph";
 import Headline2 from "../headline/Headline2";
 import Link from "../link/Link";
 import { Email } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
-  onEmailDelete: (event: Event, emailID: string) => Promise<void>;
-  onEmailSetPrimary: (event: Event, emailID: string) => Promise<void>;
-  onEmailVerify: (event: Event, emailID: string) => Promise<void>;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
-  emails?: Email[];
-  deletableEmailIDs?: string[];
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const ListEmailsAccordion = ({
-  onEmailDelete,
-  onEmailSetPrimary,
-  onEmailVerify,
   checkedItemID,
   setCheckedItemID,
-  emails = [],
-  deletableEmailIDs = [],
+  flowState,
+  onState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const isDisabled = useMemo(() => false, []);
+
+  const onEmailDelete = async (event: Event, emailID: string) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.email_delete.run(
+      {
+        email_id: emailID,
+      },
+      { dispatchAfterStateChangeEvent: false },
+    );
+    return onState(nextState);
+  };
+
+  const onEmailSetPrimary = async (event: Event, emailID: string) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.email_set_primary.run(
+      {
+        email_id: emailID,
+      },
+      { dispatchAfterStateChangeEvent: false },
+    );
+    return onState(nextState);
+  };
+
+  const onEmailVerify = async (event: Event, emailID: string) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.email_verify.run(
+      {
+        email_id: emailID,
+      },
+      { dispatchAfterStateChangeEvent: false },
+    );
+    return onState(nextState);
+  };
 
   const labels = (email: Email) => {
     const description = (
@@ -70,7 +98,7 @@ const ListEmailsAccordion = ({
             {t("texts.setPrimaryEmail")}
             <br />
             <Link
-              uiAction={"email-set-primary"}
+              flowAction={flowState.actions.email_set_primary}
               onClick={(event: Event) => onEmailSetPrimary(event, email.id)}
               loadingSpinnerPosition={"right"}
             >
@@ -100,7 +128,7 @@ const ListEmailsAccordion = ({
             {t("texts.emailUnverified")}
             <br />
             <Link
-              uiAction={"email-verify"}
+              flowAction={flowState.actions.email_verify}
               onClick={(event) => onEmailVerify(event, email.id)}
               loadingSpinnerPosition={"right"}
             >
@@ -109,15 +137,17 @@ const ListEmailsAccordion = ({
           </Paragraph>
         </Fragment>
       )}
-      {deletableEmailIDs.includes(email.id) ? (
+      {flowState.actions.email_delete.inputs.email_id.allowed_values
+        ?.map((e) => e.value)
+        .includes(email.id) ? (
         <Fragment>
           <Paragraph>
             <Headline2>{t("headlines.emailDelete")}</Headline2>
             {t("texts.emailDelete")}
             <br />
             <Link
-              uiAction={"email-delete"}
               dangerous
+              flowAction={flowState.actions.email_delete}
               onClick={(event) => onEmailDelete(event, email.id)}
               disabled={isDisabled}
               loadingSpinnerPosition={"right"}
@@ -141,7 +171,7 @@ const ListEmailsAccordion = ({
     <Accordion
       name={"email-edit-dropdown"}
       columnSelector={labels}
-      data={emails}
+      data={flowState.payload.user.emails}
       contentSelector={contents}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}

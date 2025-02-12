@@ -19,8 +19,9 @@ export class TodoComponent implements OnInit {
   @ViewChild(SessionExpiredModalComponent)
   private sessionExpiredModalComponent!: SessionExpiredModalComponent;
 
-  ngOnInit(): void {
-      if (this.hankoService.client.session.isValid()) {
+  async ngOnInit() {
+    const { is_valid} = await this.hankoService.client.validateSession();
+    if (is_valid) {
         this.listTodos();
       } else {
         this.redirectToLogin();
@@ -108,7 +109,7 @@ export class TodoComponent implements OnInit {
   }
 
   logout() {
-    this.hankoService.client.user.logout().catch((e) => (this.error = e));
+    this.hankoService.client.logout().catch((e) => (this.error = e));
   }
 
   redirectToLogin() {
