@@ -4,7 +4,8 @@ import "time"
 
 func DefaultConfig() *Config {
 	return &Config{
-		ConvertLegacyConfig: false,
+		ConvertLegacyConfig:                  false,
+		ConvertLegacyServerSideSessionConfig: true,
 		Service: Service{
 			Name: "Hanko Authentication Service",
 		},

@@ -35,6 +35,9 @@ type Session struct {
 	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=5"`
 	// `show_on_profile` indicates that the sessions should be listed on the profile.
 	ShowOnProfile bool `yaml:"show_on_profile" json:"show_on_profile,omitempty" koanf:"show_on_profile" jsonschema:"default=true"`
+	// Deprecated. Use settings in parent object.
+	//`server_side` contains configuration for server-side sessions.
+	ServerSide *ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
 }
 
 func (s *Session) Validate() error {
@@ -83,4 +86,14 @@ func (c *Cookie) GetName() string {
 	}
 
 	return "hanko"
+}
+
+type ServerSide struct {
+	// `enabled` determines whether server-side sessions are enabled.
+	//
+	// NOTE: When enabled the session endpoint must be used in order to check if a session is still valid.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,
+	// older sessions are invalidated.
+	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
 }

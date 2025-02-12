@@ -20,6 +20,10 @@ type Config struct {
 	// options, to new ones. If set to `false`, these values have to be set manually if non-default values should be
 	// used.
 	ConvertLegacyConfig bool `yaml:"convert_legacy_config" json:"convert_legacy_config,omitempty" koanf:"convert_legacy_config" split_words:"true" jsonschema:"default=false"`
+	// `covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session
+	// configuration options to the new ones. If set to `false`, these values have to be set manually if non-default
+	// values should be used.
+	ConvertLegacyServerSideSessionConfig bool `yaml:"convert_legacy_server_side_session_config" json:"convert_legacy_server_side_session_config" koanf:"convert_legacy_server_side_session_config" split_words:"true" jsonschema:"default=true"`
 	// `database` configures database connection settings.
 	Database Database `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"title=database"`
 	// `debug`, if set to `true`, adds additional debugging information to flow API responses.
@@ -186,9 +190,23 @@ func (c *Config) convertLegacyConfig() {
 	c.Webauthn.Timeouts.Registration = c.Webauthn.Timeout
 }
 
+func (c *Config) convertLegacyServerSideSessionConfig() {
+	if c.Session.ServerSide != nil && c.Session.ServerSide.Enabled {
+		c.Session.AllowRevocation = true
+		c.Session.AcquireIPAddress = true
+		c.Session.AcquireUserAgent = true
+		c.Session.Limit = c.Session.ServerSide.Limit
+		c.Session.ShowOnProfile = true
+	}
+}
+
 func (c *Config) PostProcess() error {
 	if c.ConvertLegacyConfig {
 		c.convertLegacyConfig()
+	}
+
+	if c.ConvertLegacyServerSideSessionConfig {
+		c.convertLegacyServerSideSessionConfig()
 	}
 
 	err := c.ThirdParty.PostProcess()
