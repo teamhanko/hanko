@@ -464,7 +464,7 @@ const AppProvider = ({
             .run();
 
           searchParams.delete("hanko_token");
-          searchParams.delete("hint");
+          searchParams.delete("saml_hint");
 
           history.replaceState(
             null,
