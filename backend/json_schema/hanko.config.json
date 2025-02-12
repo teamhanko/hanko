@@ -156,6 +156,11 @@
           "description": "`convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration\noptions, to new ones. If set to `false`, these values have to be set manually if non-default values should be\nused.",
           "default": false
         },
+        "convert_legacy_server_side_session_config": {
+          "type": "boolean",
+          "description": "`covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session\nconfiguration options to the new ones. If set to `false`, these values have to be set manually if non-default\nvalues should be used.",
+          "default": true
+        },
         "database": {
           "$ref": "#/$defs/Database",
           "title": "database",
@@ -264,6 +269,9 @@
       },
       "additionalProperties": false,
       "type": "object",
+      "required": [
+        "convert_legacy_server_side_session_config"
+      ],
       "description": "Config is the central configuration type"
     },
     "Cookie": {
@@ -1174,6 +1182,22 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "ServerSide": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether server-side sessions are enabled.\n\nNOTE: When enabled the session endpoint must be used in order to check if a session is still valid.",
+          "default": false
+        },
+        "limit": {
+          "type": "integer",
+          "description": "`limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,\nolder sessions are invalidated.",
+          "default": 100
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Service": {
       "properties": {
         "name": {
@@ -1235,10 +1259,17 @@
           "type": "boolean",
           "description": "`show_on_profile` indicates that the sessions should be listed on the profile.",
           "default": true
+        },
+        "server_side": {
+          "$ref": "#/$defs/ServerSide",
+          "description": "Deprecated. Use settings in parent object.\n`server_side` contains configuration for server-side sessions."
         }
       },
       "additionalProperties": false,
-      "type": "object"
+      "type": "object",
+      "required": [
+        "server_side"
+      ]
     },
     "TOTP": {
       "properties": {
