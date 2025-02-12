@@ -85,9 +85,15 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 
 	var onboardingStates []flowpilot.StateName
 	if isSaml {
-		onboardingStates, err = a.determineOnboardingStatesForSaml(c, identity, tokenModel.UserCreated)
+		samlProvider, err := deps.SamlService.GetProviderByIssuer(identity.ProviderID)
+		if err != nil {
+			return fmt.Errorf("could not fetch saml provider for identity: %w", err)
+		}
+		mustDoEmailVerification := !samlProvider.GetConfig().SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
+		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated, mustDoEmailVerification)
 	} else {
-		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated)
+		mustDoEmailVerification := deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified
+		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated, mustDoEmailVerification)
 	}
 
 	if err != nil {
@@ -107,42 +113,11 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(onboardingStates...)
 }
 
-func (a ExchangeToken) determineOnboardingStatesForSaml(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {
+func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool, mustDoEmailVerification bool) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 	result := make([]flowpilot.StateName, 0)
 
-	samlProvider, err := deps.SamlService.GetProviderByIssuer(identity.ProviderID)
-	if err != nil {
-		return nil, fmt.Errorf("could not fetch saml provider for identity: %w", err)
-	}
-
-	if !samlProvider.GetConfig().SkipEmailVerification {
-		if err = c.Stash().Set(StashPathEmail, identity.Email.Address); err != nil {
-			return nil, fmt.Errorf("failed to stash email: %w", err)
-		}
-
-		if err = c.Stash().Set(StashPathPasscodeTemplate, "email_verification"); err != nil {
-			return nil, fmt.Errorf("failed to stash passcode_template: %w", err)
-		}
-
-		result = append(result, StatePasscodeConfirmation)
-	}
-
-	if deps.Cfg.Username.Enabled && identity.Email.User.GetUsername() == nil {
-		if (!userCreated && deps.Cfg.Username.AcquireOnLogin) ||
-			(userCreated && deps.Cfg.Username.AcquireOnRegistration) {
-			result = append(result, StateOnboardingUsername)
-		}
-	}
-
-	return append(result, StateSuccess), nil
-}
-
-func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {
-	deps := a.GetDeps(c)
-	result := make([]flowpilot.StateName, 0)
-
-	if deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified {
+	if mustDoEmailVerification {
 		if err := c.Stash().Set(StashPathEmail, identity.Email.Address); err != nil {
 			return nil, fmt.Errorf("failed to stash email: %w", err)
 		}
