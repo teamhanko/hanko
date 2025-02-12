@@ -81,16 +81,30 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to delete token from db: %w", err)
 	}
 
-	onboardingStates, err := a.determineOnboardingStates(c, identity, tokenModel.UserCreated)
-	if err != nil {
-		return fmt.Errorf("failed to determine onboarding stattes: %w", err)
+	isSaml := identity.SamlIdentity != nil
+
+	var onboardingStates []flowpilot.StateName
+	if isSaml {
+		samlProvider, err := deps.SamlService.GetProviderByIssuer(identity.ProviderID)
+		if err != nil {
+			return fmt.Errorf("could not fetch saml provider for identity: %w", err)
+		}
+		mustDoEmailVerification := !samlProvider.GetConfig().SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
+		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated, mustDoEmailVerification)
+	} else {
+		mustDoEmailVerification := deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified
+		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated, mustDoEmailVerification)
 	}
 
-	if err := c.Stash().Set(StashPathLoginMethod, "third_party"); err != nil {
+	if err != nil {
+		return fmt.Errorf("failed to determine onboarding states: %w", err)
+	}
+
+	if err = c.Stash().Set(StashPathLoginMethod, "third_party"); err != nil {
 		return fmt.Errorf("failed to set login_method to the stash: %w", err)
 	}
 
-	if err := c.Stash().Set(StashPathThirdPartyProvider, identity.ProviderID); err != nil {
+	if err = c.Stash().Set(StashPathThirdPartyProvider, identity.ProviderID); err != nil {
 		return fmt.Errorf("failed to set third_party_provider to the stash: %w", err)
 	}
 
@@ -99,11 +113,11 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(onboardingStates...)
 }
 
-func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool) ([]flowpilot.StateName, error) {
+func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool, mustDoEmailVerification bool) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 	result := make([]flowpilot.StateName, 0)
 
-	if deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified {
+	if mustDoEmailVerification {
 		if err := c.Stash().Set(StashPathEmail, identity.Email.Address); err != nil {
 			return nil, fmt.Errorf("failed to stash email: %w", err)
 		}

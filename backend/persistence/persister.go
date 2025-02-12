@@ -39,6 +39,8 @@ type Persister interface {
 	GetSamlStatePersisterWithConnection(tx *pop.Connection) SamlStatePersister
 	GetSamlIdentityPersister() SamlIdentityPersister
 	GetSamlIdentityPersisterWithConnection(tx *pop.Connection) SamlIdentityPersister
+	GetSamlIDPInitiatedRequestPersister() SamlIDPInitiatedRequestPersister
+	GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Connection) SamlIDPInitiatedRequestPersister
 	GetTokenPersister() TokenPersister
 	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
 	GetUserPersister() UserPersister
@@ -286,6 +288,14 @@ func (p *persister) GetSamlIdentityPersister() SamlIdentityPersister {
 
 func (p *persister) GetSamlIdentityPersisterWithConnection(tx *pop.Connection) SamlIdentityPersister {
 	return NewSamlIdentityPersister(tx)
+}
+
+func (p *persister) GetSamlIDPInitiatedRequestPersister() SamlIDPInitiatedRequestPersister {
+	return NewSamlIDPInitiatedRequestPersister(p.DB)
+}
+
+func (p *persister) GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Connection) SamlIDPInitiatedRequestPersister {
+	return NewSamlIDPInitiatedRequestPersister(tx)
 }
 
 func (p *persister) GetWebhookPersister(tx *pop.Connection) WebhookPersister {

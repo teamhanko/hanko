@@ -1,0 +1,9 @@
+create_table("saml_idp_initiated_requests") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("response_id", "string", { "null": false })
+	t.Column("issuer", "string", { "null": false })
+	t.Column("expires_at", "timestamp", { "null": false })
+    t.Column("created_at", "timestamp", { "null": false })
+    t.DisableTimestamps()
+    t.Index(["response_id", "issuer"], {"unique": true})
+}

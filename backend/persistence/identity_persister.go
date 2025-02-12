@@ -23,7 +23,7 @@ type identityPersister struct {
 
 func (p identityPersister) GetByID(identityID uuid.UUID) (*models.Identity, error) {
 	identity := &models.Identity{}
-	if err := p.db.EagerPreload("Email", "Email.User", "Email.User.Username").Find(identity, identityID); err != nil {
+	if err := p.db.EagerPreload("Email", "Email.User", "Email.User.Username", "SamlIdentity").Find(identity, identityID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}

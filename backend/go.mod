@@ -3,6 +3,7 @@ module github.com/teamhanko/hanko/backend
 go 1.20
 
 require (
+	github.com/beevik/etree v1.1.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/coreos/go-oidc/v3 v3.9.0
 	github.com/fatih/structs v1.1.0
@@ -28,6 +29,7 @@ require (
 	github.com/labstack/gommon v0.4.2
 	github.com/lestrrat-go/jwx/v2 v2.1.0
 	github.com/lib/pq v1.10.9
+	github.com/mattermost/xml-roundtrip-validator v0.1.0
 	github.com/mileusna/useragent v1.3.5
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/nicksnyder/go-i18n/v2 v2.4.0
@@ -63,7 +65,6 @@ require (
 	github.com/andybalholm/brotli v1.0.5 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
-	github.com/beevik/etree v1.1.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/boombuler/barcode v1.0.1-0.20190219062509-6c824513bacc // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
@@ -123,7 +124,6 @@ require (
 	github.com/lestrrat-go/option v1.0.1 // indirect
 	github.com/luna-duclos/instrumentedsql v1.1.3 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
-	github.com/mattermost/xml-roundtrip-validator v0.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible // indirect
