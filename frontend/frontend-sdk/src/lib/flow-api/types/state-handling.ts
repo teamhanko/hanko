@@ -1,7 +1,8 @@
 import { State } from "../State";
 
 import {
-  CredentialOnboardingChooserActions, DeviceTrustActions,
+  CredentialOnboardingChooserActions,
+  DeviceTrustActions,
   LoginInitActions,
   LoginMethodChooserActions,
   LoginOTPActions,
@@ -123,7 +124,7 @@ export interface Payloads {
 
 export type FlowPath = "/login" | "/registration" | "/profile";
 
-export type FetchNextState = (
+export type FetchState = (
   // eslint-disable-next-line no-unused-vars
   href: string,
   // eslint-disable-next-line no-unused-vars

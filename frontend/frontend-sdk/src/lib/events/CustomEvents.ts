@@ -44,6 +44,13 @@ export const userLoggedInType: "hanko-user-logged-in" = "hanko-user-logged-in";
 export const userCreatedType: "hanko-user-created" = "hanko-user-created";
 
 /**
+ * The type of the `hanko-flow-error` event.
+ * @typedef {string} flowErrorType
+ * @memberOf Listener
+ */
+export const flowErrorType: "hanko-flow-error" = "hanko-flow-error";
+
+/**
  * The data passed in the `hanko-session-created` or `hanko-session-resumed` event.
  *
  * @interface
