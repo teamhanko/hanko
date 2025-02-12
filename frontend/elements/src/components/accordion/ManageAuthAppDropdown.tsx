@@ -8,29 +8,43 @@ import Dropdown from "./Dropdown";
 import Link from "../link/Link";
 import Headline2 from "../headline/Headline2";
 import styles from "./styles.sass";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
-  onDelete: (event: Event) => Promise<void>;
-  onConnect: (event: Event) => Promise<void>;
-  authAppSetUp: boolean;
-  allowDeletion: boolean;
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const ManageAuthAppDropdown = ({
   checkedItemID,
   setCheckedItemID,
-  onDelete,
-  onConnect,
-  authAppSetUp,
-  allowDeletion,
+  flowState,
+  onState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
 
+  const onAuthAppSetUp = async (event: Event) => {
+    event.preventDefault();
+    const nextState =
+      await flowState.actions.continue_to_otp_secret_creation.run(null, {
+        dispatchAfterStateChangeEvent: false,
+      });
+    return onState(nextState);
+  };
+
+  const onAuthAppRemove = async (event: Event) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.otp_secret_delete.run(null, {
+      dispatchAfterStateChangeEvent: false,
+    });
+    return onState(nextState);
+  };
+
   const configuredLabel = (
     <span className={styles.description}>
-      {authAppSetUp ? (
+      {flowState.payload.user.mfa_config?.auth_app_set_up ? (
         <Fragment>
           {" -"} {t("labels.configured")}
         </Fragment>
@@ -53,23 +67,22 @@ const ManageAuthAppDropdown = ({
     >
       <Headline2>
         {t(
-          authAppSetUp
+          flowState.payload.user.mfa_config?.auth_app_set_up
             ? "headlines.authenticatorAppAlreadySetUp"
             : "headlines.authenticatorAppNotSetUp",
         )}
       </Headline2>
       <Paragraph>
         {t(
-          authAppSetUp
+          flowState.payload.user.mfa_config?.auth_app_set_up
             ? "texts.authenticatorAppAlreadySetUp"
             : "texts.authenticatorAppNotSetUp",
         )}
         <br />
-        {authAppSetUp ? (
+        {flowState.payload.user.mfa_config?.auth_app_set_up ? (
           <Link
-            hidden={!allowDeletion}
-            uiAction={"auth-app-remove"}
-            onClick={(event: Event) => onDelete(event)}
+            flowAction={flowState.actions.otp_secret_delete}
+            onClick={onAuthAppRemove}
             loadingSpinnerPosition={"right"}
             dangerous
           >
@@ -77,8 +90,8 @@ const ManageAuthAppDropdown = ({
           </Link>
         ) : (
           <Link
-            uiAction={"auth-app-add"}
-            onClick={(event: Event) => onConnect(event)}
+            flowAction={flowState.actions.continue_to_otp_secret_creation}
+            onClick={onAuthAppSetUp}
             loadingSpinnerPosition={"right"}
           >
             {t("labels.authenticatorAppAdd")}

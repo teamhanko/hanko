@@ -29,14 +29,7 @@ const PasscodePage = (props: Props) => {
   const numberOfDigits = 6;
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
-  const {
-    hanko,
-    uiState,
-    setUIState,
-    setLoadingAction,
-    setSucceededAction,
-    stateHandler,
-  } = useContext(AppContext);
+  const { uiState, setUIState } = useContext(AppContext);
   const [ttl, setTtl] = useState<number>();
   const [resendAfter, setResendAfter] = useState<number>(
     flowState.payload.resend_after,
@@ -50,14 +43,9 @@ const PasscodePage = (props: Props) => {
 
   const submitPasscode = useCallback(
     async (code: string) => {
-      setLoadingAction("passcode-submit");
-
-      const nextState = await flowState.actions.verify_passcode({ code }).run();
-
-      setLoadingAction(null);
-      await hanko.flow.run(nextState, stateHandler);
+      return await flowState.actions.verify_passcode.run({ code });
     },
-    [hanko, flowState, setLoadingAction, stateHandler],
+    [flowState],
   );
 
   const onPasscodeInput = (digits: string[]) => {
@@ -73,34 +61,18 @@ const PasscodePage = (props: Props) => {
     return submitPasscode(passcodeDigits.join(""));
   };
 
-  const onPasscodeResendClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("passcode-resend");
-    const nextState = await flowState.actions.resend_passcode(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
+  // useEffect(() => {
+  //   if (flowState.payload.passcode_resent) {
+  //     setSucceededAction("passcode-resend");
+  //     setTimeout(() => setSucceededAction(null), 1000);
+  //   }
+  // }, [flowState, setSucceededAction]);
 
-  const onBackClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("back");
-    const nextState = await flowState.actions.back(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  useEffect(() => {
-    if (flowState.payload.passcode_resent) {
-      setSucceededAction("passcode-resend");
-      setTimeout(() => setSucceededAction(null), 1000);
-    }
-  }, [flowState, setSucceededAction]);
-
-  useEffect(() => {
-    if (ttl <= 0 && uiState.succeededAction !== "passcode-submit") {
-      // setError(new PasscodeExpiredError());
-    }
-  }, [uiState, ttl]);
+  // useEffect(() => {
+  //   if (ttl <= 0 && uiState.succeededAction !== "passcode-submit") {
+  //     // setError(new PasscodeExpiredError());
+  //   }
+  // }, [uiState, ttl]);
 
   useEffect(() => {
     const timer = ttl > 0 && setInterval(() => setTtl(ttl - 1), 1000);
@@ -139,34 +111,31 @@ const PasscodePage = (props: Props) => {
             ? t("texts.enterPasscode", { emailAddress: uiState.email })
             : t("texts.enterPasscodeNoEmail")}
         </Paragraph>
-        <Form onSubmit={onPasscodeSubmit}>
+        <Form
+          flowAction={flowState.actions.verify_passcode}
+          onSubmit={onPasscodeSubmit}
+        >
           <CodeInput
             onInput={onPasscodeInput}
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
             disabled={ttl <= 0 || maxAttemptsReached}
           />
-          <Button
-            disabled={ttl <= 0 || maxAttemptsReached}
-            uiAction={"passcode-submit"}
-          >
+          <Button disabled={ttl <= 0 || maxAttemptsReached}>
             {t("labels.continue")}
           </Button>
         </Form>
       </Content>
       <Footer>
         <Link
-          hidden={!flowState.actions.back?.(null)}
-          onClick={onBackClick}
+          flowAction={flowState.actions.back}
           loadingSpinnerPosition={"right"}
-          isLoading={uiState.loadingAction === "back"}
         >
           {t("labels.back")}
         </Link>
         <Link
-          uiAction={"passcode-resend"}
           disabled={resendAfter > 0}
-          onClick={onPasscodeResendClick}
+          flowAction={flowState.actions.resend_passcode}
           loadingSpinnerPosition={"left"}
         >
           {resendAfter > 0

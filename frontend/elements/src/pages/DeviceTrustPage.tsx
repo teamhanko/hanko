@@ -1,7 +1,6 @@
 import { Fragment } from "preact";
 import { useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -22,32 +21,7 @@ interface Props {
 
 const DeviceTrustPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-
-  const onTrustDeviceSubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("trust-device-submit");
-    const nextState = await flowState.actions.trust_device(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onSkipClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("skip");
-    const nextState = await flowState.actions.skip(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onBackClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("back");
-    const nextState = await flowState.actions.back(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
 
   return (
     <Fragment>
@@ -55,26 +29,20 @@ const DeviceTrustPage = (props: Props) => {
         <Headline1>{t("headlines.trustDevice")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
         <Paragraph>{t("texts.trustDevice")}</Paragraph>
-        <Form onSubmit={onTrustDeviceSubmit}>
-          <Button uiAction={"trust-device-submit"}>
-            {t("labels.trustDevice")}
-          </Button>
+        <Form flowAction={flowState.actions.trust_device}>
+          <Button>{t("labels.trustDevice")}</Button>
         </Form>
       </Content>
       <Footer>
         <Link
-          uiAction={"back"}
-          onClick={onBackClick}
+          flowAction={flowState.actions.back}
           loadingSpinnerPosition={"right"}
-          hidden={!flowState.actions.back?.(null)}
         >
           {t("labels.back")}
         </Link>
         <Link
-          uiAction={"skip"}
-          onClick={onSkipClick}
+          flowAction={flowState.actions.skip}
           loadingSpinnerPosition={"left"}
-          hidden={!flowState.actions.skip?.(null)}
         >
           {t("labels.skip")}
         </Link>

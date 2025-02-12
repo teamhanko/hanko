@@ -1,5 +1,4 @@
-import { ThirdPartyClient } from "../../../src";
-import { ThirdPartyError } from "../../../src/lib/Errors";
+import { ThirdPartyClient, ThirdPartyError } from "../../../src";
 
 let thirdPartyClient: ThirdPartyClient;
 

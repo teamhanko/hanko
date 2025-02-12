@@ -1,7 +1,6 @@
 import { Fragment, useContext, useState } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -21,7 +20,6 @@ type Props = {
 
 const CreateEmailPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [email, setEmail] = useState<string>();
 
@@ -33,20 +31,7 @@ const CreateEmailPage = (props: Props) => {
 
   const onEmailSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("email-submit");
-    const nextState = await flowState.actions
-      .email_address_set({ email })
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onSkipClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("skip");
-    const nextState = await flowState.actions.skip(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.email_address_set.run({ email });
   };
 
   return (
@@ -54,25 +39,27 @@ const CreateEmailPage = (props: Props) => {
       <Content>
         <Headline1>{t("headlines.createEmail")}</Headline1>
         <ErrorBox state={flowState} />
-        <Form onSubmit={onEmailSubmit}>
+        <Form
+          onSubmit={onEmailSubmit}
+          flowAction={flowState.actions.email_address_set}
+        >
           <Input
             type={"email"}
             autoComplete={"email"}
             autoCorrect={"off"}
-            flowInput={flowState.actions.email_address_set?.(null).inputs.email}
+            flowInput={flowState.actions.email_address_set.inputs.email}
             onInput={onEmailInput}
             placeholder={t("labels.email")}
             pattern={"^.*[^0-9]+$"}
             value={email}
           />
-          <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+          <Button>{t("labels.continue")}</Button>
         </Form>
       </Content>
-      <Footer hidden={!flowState.actions.skip?.(null)}>
+      <Footer hidden={!flowState.actions.skip.enabled}>
         <span hidden />
         <Link
-          uiAction={"skip"}
-          onClick={onSkipClick}
+          flowAction={flowState.actions.skip}
           loadingSpinnerPosition={"left"}
         >
           {t("labels.skip")}
