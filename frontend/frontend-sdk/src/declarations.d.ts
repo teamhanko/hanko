@@ -5,6 +5,7 @@ import {
   sessionExpiredType,
   userLoggedOutType,
   userDeletedType,
+  flowErrorType,
 } from "./lib/events/CustomEvents";
 
 declare global {
@@ -14,6 +15,7 @@ declare global {
     [sessionExpiredType]: CustomEventWithDetail<null>;
     [userLoggedOutType]: CustomEventWithDetail<null>;
     [userDeletedType]: CustomEventWithDetail<null>;
+    [flowErrorType]: CustomEventWithDetail<Error>;
   }
 }
 

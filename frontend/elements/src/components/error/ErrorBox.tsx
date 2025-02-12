@@ -21,11 +21,9 @@ const ErrorBox = ({ state, error, flowError }: Props) => {
   useEffect(() => {
     if (state?.error?.code == "form_data_invalid_error") {
       for (const action of Object.values(state?.actions)) {
-        // @ts-ignore
-        const a = action?.(null);
         let relatedInputFound = false;
         // @ts-ignore
-        for (const input of Object.values(a?.inputs)) {
+        for (const input of Object.values(action?.inputs)) {
           // @ts-ignore
           if (input.error?.code) {
             // @ts-ignore

@@ -35,12 +35,9 @@ const LoginInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const {
     init,
-    hanko,
     initialComponentName,
-    setLoadingAction,
     uiState,
     setUIState,
-    stateHandler,
     hidePasskeyButtonOnLogin,
     lastLogin,
   } = useContext(AppContext);
@@ -70,28 +67,10 @@ const LoginInitPage = (props: Props) => {
 
   const onEmailSubmit = async (event: Event) => {
     event.preventDefault();
-
-    setLoadingAction("email-submit");
-
-    const nextState = await flowState.actions
-      .continue_with_login_identifier({ [identifierType]: identifier })
-      .run();
-
     setIdentifierToUIState(identifier);
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onPasskeySubmit = async (event: Event) => {
-    event.preventDefault();
-
-    setLoadingAction("passkey-submit");
-
-    const nextState = await flowState.actions
-      .webauthn_generate_request_options(null)
-      .run();
-
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.continue_with_login_identifier.run({
+      [identifierType]: identifier,
+    });
   };
 
   const onRegisterClick = async (event: Event) => {
@@ -100,11 +79,8 @@ const LoginInitPage = (props: Props) => {
   };
 
   const onRememberMeChange = async (event: Event) => {
-    const nextState = await flowState.actions
-      .remember_me({ remember_me: !rememberMe })
-      .run();
     setRememberMe((prev) => !prev);
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.remember_me.run({ remember_me: !rememberMe });
   };
 
   const setIdentifierToUIState = (value: string) => {
@@ -133,33 +109,29 @@ const LoginInitPage = (props: Props) => {
     event.preventDefault();
     setSelectedThirdPartyProvider(name);
 
-    const nextState = await flowState.actions
-      .thirdparty_oauth({
-        provider: name,
-        redirect_to: window.location.toString(),
-      })
-      .run();
+    const nextState = await flowState.actions.thirdparty_oauth.run({
+      provider: name,
+      redirect_to: window.location.toString(),
+    });
 
     if (nextState.error) {
       setSelectedThirdPartyProvider(null);
     }
 
-    await hanko.flow.run(nextState, stateHandler);
+    return nextState;
   };
 
   const showDivider = useMemo(
     () =>
-      !!flowState.actions.webauthn_generate_request_options?.(null) ||
-      !!flowState.actions.thirdparty_oauth?.(null),
+      !!flowState.actions.webauthn_generate_request_options.enabled ||
+      !!flowState.actions.thirdparty_oauth.enabled,
     [flowState.actions],
   );
 
-  const inputs =
-    flowState.actions.continue_with_login_identifier?.(null).inputs;
+  const inputs = flowState.actions.continue_with_login_identifier.inputs;
 
   useEffect(() => {
-    const inputs =
-      flowState.actions.continue_with_login_identifier?.(null).inputs;
+    const inputs = flowState.actions.continue_with_login_identifier.inputs;
     setIdentifierType(
       inputs?.email ? "email" : inputs?.username ? "username" : "identifier",
     );
@@ -211,7 +183,11 @@ const LoginInitPage = (props: Props) => {
         <ErrorBox state={flowState} error={thirdPartyError} />
         {inputs ? (
           <Fragment>
-            <Form onSubmit={onEmailSubmit} maxWidth>
+            <Form
+              flowAction={flowState.actions.continue_with_login_identifier}
+              onSubmit={onEmailSubmit}
+              maxWidth
+            >
               {inputs.email ? (
                 <Input
                   type={"email"}
@@ -244,16 +220,17 @@ const LoginInitPage = (props: Props) => {
                   placeholder={t("labels.emailOrUsername")}
                 />
               )}
-              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+              <Button>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
         ) : null}
-        {flowState.actions.webauthn_generate_request_options?.(null) &&
+        {flowState.actions.webauthn_generate_request_options.enabled &&
         !hidePasskeyButtonOnLogin ? (
-          <Form onSubmit={(event) => onPasskeySubmit(event)}>
+          <Form
+            flowAction={flowState.actions.webauthn_generate_request_options}
+          >
             <Button
-              uiAction={"passkey-submit"}
               secondary
               title={
                 !isWebAuthnSupported ? t("labels.webauthnUnsupported") : null
@@ -265,13 +242,13 @@ const LoginInitPage = (props: Props) => {
             </Button>
           </Form>
         ) : null}
-        {flowState.actions.thirdparty_oauth?.(null)
-          ? flowState.actions
-              .thirdparty_oauth(null)
-              .inputs.provider.allowed_values?.map((v) => {
+        {flowState.actions.thirdparty_oauth.enabled
+          ? flowState.actions.thirdparty_oauth.inputs.provider.allowed_values?.map(
+              (v) => {
                 return (
                   <Form
                     key={v.value}
+                    flowAction={flowState.actions.thirdparty_oauth}
                     onSubmit={(event) => onThirdpartySubmit(event, v.value)}
                   >
                     <Button
@@ -292,9 +269,10 @@ const LoginInitPage = (props: Props) => {
                     </Button>
                   </Form>
                 );
-              })
+              },
+            )
           : null}
-        {flowState.actions.remember_me?.(null) && (
+        {flowState.actions.remember_me.enabled && (
           <Fragment>
             <Spacer />
             <Checkbox
@@ -309,11 +287,7 @@ const LoginInitPage = (props: Props) => {
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />
-        <Link
-          uiAction={"switch-flow"}
-          onClick={onRegisterClick}
-          loadingSpinnerPosition={"left"}
-        >
+        <Link onClick={onRegisterClick} loadingSpinnerPosition={"left"}>
           {t("labels.dontHaveAnAccount")}
         </Link>
       </Footer>

@@ -12,7 +12,6 @@ import Dropdown from "./Dropdown";
 type CredentialType = "passkey" | "security-key";
 
 interface Props {
-  setError: (e: HankoError) => void;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
   onCredentialSubmit: (event: Event) => Promise<void>;
@@ -51,11 +50,6 @@ const AddWebauthnCredentialDropdown = ({
       </Paragraph>
       <Form onSubmit={onCredentialSubmit}>
         <Button
-          uiAction={
-            credentialType === "security-key"
-              ? "security-key-submit"
-              : "passkey-submit"
-          }
           title={!webauthnSupported ? t("labels.webauthnUnsupported") : null}
         >
           {credentialType === "security-key"

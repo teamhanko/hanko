@@ -16,12 +16,12 @@ interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
 
 const Input = ({ label, ...props }: Props) => {
   const ref = useRef(null);
-  const { isDisabled } = useContext(AppContext);
+  const { uiState } = useContext(AppContext);
   const { t } = useContext(TranslateContext);
 
   const disabled = useMemo(
-    () => isDisabled || props.disabled,
-    [props, isDisabled],
+    () => uiState.isDisabled || props.disabled,
+    [props, uiState],
   );
 
   useEffect(() => {

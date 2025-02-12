@@ -26,17 +26,10 @@ interface Props {
 
 const RegistrationInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const {
-    init,
-    hanko,
-    uiState,
-    setUIState,
-    stateHandler,
-    setLoadingAction,
-    initialComponentName,
-  } = useContext(AppContext);
+  const { init, uiState, setUIState, initialComponentName } =
+    useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-  const inputs = flowState.actions.register_login_identifier?.(null).inputs;
+  const inputs = flowState.actions.register_login_identifier.inputs;
   const multipleInputsAvailable = !!(inputs?.email && inputs?.username);
   const [thirdPartyError, setThirdPartyError] = useState<
     HankoError | undefined
@@ -48,15 +41,10 @@ const RegistrationInitPage = (props: Props) => {
 
   const onIdentifierSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("email-submit");
-    const nextState = await flowState.actions
-      .register_login_identifier({
-        email: uiState.email,
-        username: uiState.username,
-      })
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
+    return await flowState.actions.register_login_identifier.run({
+      email: uiState.email,
+      username: uiState.username,
+    });
   };
 
   const onUsernameInput = (event: Event) => {
@@ -84,28 +72,30 @@ const RegistrationInitPage = (props: Props) => {
     event.preventDefault();
     setSelectedThirdPartyProvider(name);
 
-    const nextState = await flowState.actions
-      .thirdparty_oauth({
+    const nextState = await flowState.actions.thirdparty_oauth.run(
+      {
         provider: name,
         redirect_to: window.location.toString(),
-      })
-      .run();
+      },
+      { dispatchAfterStateChangeEvent: false },
+    );
 
     setSelectedThirdPartyProvider(null);
-
-    await hanko.flow.run(nextState, stateHandler);
+    nextState.dispatchAfterStateChangeEvent();
   };
 
   const onRememberMeChange = async (event: Event) => {
-    const nextState = await flowState.actions
-      .remember_me({ remember_me: !rememberMe })
-      .run();
+    event.preventDefault();
+    const nextState = await flowState.actions.remember_me.run(
+      { remember_me: !rememberMe },
+      { dispatchAfterStateChangeEvent: false },
+    );
     setRememberMe((prev) => !prev);
-    await hanko.flow.run(nextState, stateHandler);
+    nextState.dispatchAfterStateChangeEvent();
   };
 
   const showDivider = useMemo(
-    () => !!flowState.actions.thirdparty_oauth?.(null),
+    () => !!flowState.actions.thirdparty_oauth.enabled,
     [flowState.actions],
   );
 
@@ -155,7 +145,11 @@ const RegistrationInitPage = (props: Props) => {
         <ErrorBox state={flowState} error={thirdPartyError} />
         {inputs ? (
           <Fragment>
-            <Form onSubmit={onIdentifierSubmit} maxWidth>
+            <Form
+              flowAction={flowState.actions.register_login_identifier}
+              onSubmit={onIdentifierSubmit}
+              maxWidth
+            >
               {inputs.username ? (
                 <Input
                   markOptional={multipleInputsAvailable}
@@ -183,19 +177,17 @@ const RegistrationInitPage = (props: Props) => {
                   pattern={"^.*[^0-9]+$"}
                 />
               ) : null}
-              <Button uiAction={"email-submit"} autofocus>
-                {t("labels.continue")}
-              </Button>
+              <Button autofocus>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
         ) : null}
-        {flowState.actions.thirdparty_oauth?.(null)
-          ? flowState.actions
-              .thirdparty_oauth(null)
-              .inputs.provider.allowed_values?.map((v) => {
+        {flowState.actions.thirdparty_oauth.enabled
+          ? flowState.actions.thirdparty_oauth.inputs.provider.allowed_values?.map(
+              (v) => {
                 return (
                   <Form
+                    flowAction={flowState.actions.thirdparty_oauth}
                     key={v.value}
                     onSubmit={(event) => onThirdpartySubmit(event, v.value)}
                   >
@@ -213,9 +205,10 @@ const RegistrationInitPage = (props: Props) => {
                     </Button>
                   </Form>
                 );
-              })
+              },
+            )
           : null}
-        {flowState.actions.remember_me?.(null) && (
+        {flowState.actions.remember_me.enabled && (
           <Fragment>
             <Spacer />
             <Checkbox
@@ -230,11 +223,7 @@ const RegistrationInitPage = (props: Props) => {
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />
-        <Link
-          uiAction={"switch-flow"}
-          onClick={onLoginClick}
-          loadingSpinnerPosition={"left"}
-        >
+        <Link onClick={onLoginClick} loadingSpinnerPosition={"left"}>
           {t("labels.alreadyHaveAnAccount")}
         </Link>
       </Footer>
