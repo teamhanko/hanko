@@ -3,7 +3,6 @@ package profile
 import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/dto/admin"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -62,11 +61,7 @@ func (a AccountDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	deps.HttpContext.SetCookie(cookie)
-
-	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.UserDelete, admin.FromUserModel(*userModel))
-	if err != nil {
-		return fmt.Errorf("failed to trrigger webhook: %w", err)
-	}
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserDelete, userModel.ID)
 
 	return c.Continue(shared.StateProfileAccountDeleted)
 }

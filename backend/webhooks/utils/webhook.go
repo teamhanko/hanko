@@ -30,7 +30,11 @@ func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistenc
 		return
 	}
 
-	err = TriggerWebhooks(ctx, tx, event, admin.FromUserModel(*updatedUser))
+	user := admin.FromUserModel(*updatedUser)
+	user.SetUserAgent(ctx.Request().UserAgent())
+	user.SetIPAddress(ctx.RealIP())
+
+	err = TriggerWebhooks(ctx, tx, event, user)
 	if err != nil {
 		ctx.Logger().Warn(err)
 	}

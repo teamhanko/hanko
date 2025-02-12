@@ -120,6 +120,7 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 		BeforeState(shared.StateLoginInit,
 			login.WebauthnGenerateRequestOptionsForConditionalUi{}).
 		BeforeState(shared.StateSuccess,
+			login.TriggerLoginWebhook{},
 			device_trust.IssueTrustDeviceCookie{},
 			shared.IssueSession{},
 			shared.GetUserData{}).

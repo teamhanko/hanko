@@ -17,6 +17,16 @@ type User struct {
 	Password            *PasswordCredential              `json:"password,omitempty"`
 	Identities          []Identity                       `json:"identities,omitempty"`
 	OTP                 *OTPDto                          `json:"otp"`
+	IPAddress           *string                          `json:"ip_address,omitempty"`
+	UserAgent           *string                          `json:"user_agent,omitempty"`
+}
+
+func (u *User) SetIPAddress(ip string) {
+	u.IPAddress = &ip
+}
+
+func (u *User) SetUserAgent(agent string) {
+	u.UserAgent = &agent
 }
 
 // FromUserModel Converts the DB model to a DTO object
