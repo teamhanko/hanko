@@ -62,6 +62,11 @@ func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
 	return h.executeFlow(c, profileFlow)
 }
 
+func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
+	samlIdPInitiatedLoginFlow := flow.NewTokenExchangeFlow(h.Cfg.Debug)
+	return h.executeFlow(c, samlIdPInitiatedLoginFlow)
+}
+
 func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.Cfg.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)

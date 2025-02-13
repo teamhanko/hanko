@@ -215,3 +215,22 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 		Debug(debug).
 		MustBuild()
 }
+
+func NewTokenExchangeFlow(debug bool) flowpilot.Flow {
+	return flowpilot.NewFlow("token_exchange").
+		State(shared.StateThirdParty,
+			shared.ExchangeToken{}).
+		State(shared.StateSuccess).
+		BeforeState(shared.StateSuccess,
+			shared.IssueSession{},
+			shared.GetUserData{}).
+		SubFlows(
+			CredentialUsageSubFlow,
+			UserDetailsSubFlow).
+		AfterState(shared.StatePasscodeConfirmation,
+			shared.EmailPersistVerifiedStatus{}).
+		InitialState(shared.StateThirdParty).
+		ErrorState(shared.StateError).
+		Debug(debug).
+		MustBuild()
+}

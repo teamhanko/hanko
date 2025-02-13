@@ -22,6 +22,8 @@ type State struct {
 	IsFlow     bool      `json:"is_flow"`
 }
 
+const statePrefixServiceProviderInitiated = "hanko_spi_"
+
 func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	return func(state *State) {
 		state.IsFlow = isFlow
@@ -77,7 +79,9 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 		return nil, fmt.Errorf("could not save state to db: %w", err)
 	}
 
-	return []byte(encryptedState), nil
+	// Add prefix to distinguish between SP initiated and IDP initiated requests in callback handler.
+	result := fmt.Sprintf("%s%s", statePrefixServiceProviderInitiated, encryptedState)
+	return []byte(result), nil
 }
 
 func VerifyState(config *config.Config, persister persistence.SamlStatePersister, state string) (*State, error) {

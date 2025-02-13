@@ -86,6 +86,10 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
 	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
 
+	if cfg.Saml.Enabled {
+		e.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
+	}
+
 	e.HideBanner = true
 	g := e.Group("")
 

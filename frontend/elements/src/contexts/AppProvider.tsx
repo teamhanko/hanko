@@ -464,6 +464,7 @@ const AppProvider = ({
             .run();
 
           searchParams.delete("hanko_token");
+          searchParams.delete("saml_hint");
 
           history.replaceState(
             null,
@@ -524,7 +525,17 @@ const AppProvider = ({
         "hanko_token",
       );
       const cachedState = localStorage.getItem(localStorageCacheStateKey);
-      if (cachedState && cachedState.length > 0 && token && token.length > 0) {
+      const samlHint = new URLSearchParams(window.location.search).get(
+        "saml_hint",
+      );
+      if (samlHint === "idp_initiated") {
+        await hanko.flow.init("/token_exchange", { ...stateHandler });
+      } else if (
+        cachedState &&
+        cachedState.length > 0 &&
+        token &&
+        token.length > 0
+      ) {
         await hanko.flow.fromString(
           localStorage.getItem(localStorageCacheStateKey),
           { ...stateHandler },
