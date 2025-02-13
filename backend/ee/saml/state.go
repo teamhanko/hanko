@@ -121,7 +121,7 @@ func decodeState(config *config.Config, state string) (*State, error) {
 
 	decryptedState, err := aes.Decrypt(state)
 	if err != nil {
-		return nil, fmt.Errorf("could not decrypt statesdafasdfasdf: %w", err)
+		return nil, fmt.Errorf("could not decrypt state: %w", err)
 	}
 
 	var unmarshalledState State
