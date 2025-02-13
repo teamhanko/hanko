@@ -130,7 +130,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 	if issuerElement == nil || issuerElement.Text() == "" {
 		return handler.redirectError(
 			c,
-			thirdparty.ErrorInvalidRequest("invalid saml response: no issuer node present "),
+			thirdparty.ErrorInvalidRequest("invalid saml response: no issuer node present"),
 			redirectTo.String(),
 		)
 	}
