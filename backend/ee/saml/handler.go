@@ -249,16 +249,16 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	if handler.isIDPInitiated(relayState) {
 		return handler.callbackPostIdPInitiated(c, samlResponse)
 	} else {
-		state, samlError := VerifyState(
+		state, err := VerifyState(
 			handler.samlService.Config(),
 			handler.samlService.Persister().GetSamlStatePersister(),
 			strings.TrimPrefix(relayState, statePrefixServiceProviderInitiated),
 		)
 
-		if samlError != nil {
+		if err != nil {
 			return handler.redirectError(
 				c,
-				thirdparty.ErrorInvalidRequest(samlError.Error()).WithCause(samlError),
+				thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err),
 				handler.samlService.Config().Saml.DefaultRedirectUrl,
 			)
 		}
@@ -267,38 +267,38 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 			state.RedirectTo = handler.samlService.Config().Saml.DefaultRedirectUrl
 		}
 
-		redirectTo, samlError := url.Parse(state.RedirectTo)
-		if samlError != nil {
+		redirectTo, err := url.Parse(state.RedirectTo)
+		if err != nil {
 			return handler.redirectError(
 				c,
-				thirdparty.ErrorServer("unable to parse redirect url").WithCause(samlError),
+				thirdparty.ErrorServer("unable to parse redirect url").WithCause(err),
 				handler.samlService.Config().Saml.DefaultRedirectUrl,
 			)
 		}
 
-		foundProvider, samlError := handler.samlService.GetProviderByDomain(state.Provider)
-		if samlError != nil {
+		foundProvider, err := handler.samlService.GetProviderByDomain(state.Provider)
+		if err != nil {
 			return handler.redirectError(
 				c,
-				thirdparty.ErrorServer("unable to find provider by domain").WithCause(samlError),
+				thirdparty.ErrorServer("unable to find provider by domain").WithCause(err),
 				redirectTo.String(),
 			)
 		}
 
-		assertionInfo, samlError := handler.getAssertionInfo(foundProvider, samlResponse)
-		if samlError != nil {
+		assertionInfo, err := handler.getAssertionInfo(foundProvider, samlResponse)
+		if err != nil {
 			return handler.redirectError(
 				c,
-				thirdparty.ErrorServer("unable to parse saml response").WithCause(samlError),
+				thirdparty.ErrorServer("unable to parse saml response").WithCause(err),
 				redirectTo.String(),
 			)
 		}
 
-		redirectUrl, samlError := handler.linkAccount(c, redirectTo, state.IsFlow, foundProvider, assertionInfo)
-		if samlError != nil {
+		redirectUrl, err := handler.linkAccount(c, redirectTo, state.IsFlow, foundProvider, assertionInfo)
+		if err != nil {
 			return handler.redirectError(
 				c,
-				samlError,
+				err,
 				redirectTo.String(),
 			)
 		}
@@ -313,14 +313,14 @@ func (handler *Handler) isIDPInitiated(relayState string) bool {
 
 func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow bool, provider provider.ServiceProvider, assertionInfo *saml2.AssertionInfo) (*url.URL, error) {
 	var accountLinkingResult *thirdparty.AccountLinkingResult
-	var samlError error
-	samlError = handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
+	var err error
+	err = handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
 		userdata := provider.GetUserData(assertionInfo)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
 		samlDomain := provider.GetDomain()
-		linkResult, samlErrorTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow)
-		if samlErrorTx != nil {
-			return samlErrorTx
+		linkResult, errTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow)
+		if errTx != nil {
+			return errTx
 		}
 
 		accountLinkingResult = linkResult
@@ -328,18 +328,18 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		emailModel := linkResult.User.Emails.GetEmailByAddress(userdata.Metadata.Email)
 		identityModel := emailModel.Identities.GetIdentity(identityProviderIssuer.Value, userdata.Metadata.Subject)
 
-		token, tokenError := models.NewToken(
+		token, errTx := models.NewToken(
 			linkResult.User.ID,
 			models.TokenWithIdentityID(identityModel.ID),
 			models.TokenForFlowAPI(isFlow),
 			models.TokenUserCreated(linkResult.UserCreated))
-		if tokenError != nil {
-			return thirdparty.ErrorServer("could not create token").WithCause(tokenError)
+		if errTx != nil {
+			return thirdparty.ErrorServer("could not create token").WithCause(errTx)
 		}
 
-		tokenError = handler.samlService.Persister().GetTokenPersisterWithConnection(tx).Create(*token)
-		if tokenError != nil {
-			return thirdparty.ErrorServer("could not save token to db").WithCause(tokenError)
+		errTx = handler.samlService.Persister().GetTokenPersisterWithConnection(tx).Create(*token)
+		if errTx != nil {
+			return thirdparty.ErrorServer("could not save token to db").WithCause(errTx)
 		}
 
 		query := redirectTo.Query()
@@ -349,14 +349,14 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		return nil
 	})
 
-	if samlError != nil {
-		return nil, samlError
+	if err != nil {
+		return nil, err
 	}
 
-	samlError = handler.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
+	err = handler.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
 
-	if samlError != nil {
-		return nil, samlError
+	if err != nil {
+		return nil, err
 	}
 
 	return redirectTo, nil
