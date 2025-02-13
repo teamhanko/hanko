@@ -9,6 +9,8 @@ import (
 	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/webhooks/utils"
 )
 
 type PasswordRecovery struct {
@@ -80,6 +82,8 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to set pw_recovery_pending to the stash: %w", err)
 	}
+
+	utils.NotifyUserChange(deps.HttpContext, deps.Tx, deps.Persister, events.UserPasswordChange, uuid.FromStringOrNil(authUserID))
 
 	err = c.ExecuteHook(shared.ScheduleMFACreationStates{})
 	if err != nil {
