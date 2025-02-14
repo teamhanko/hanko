@@ -92,7 +92,7 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		jwtToken, _, err := h.sessionManager.GenerateJWT(token.UserID, emailJwt)
+		jwtToken, rawToken, err := h.sessionManager.GenerateJWT(token.UserID, emailJwt)
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}
@@ -100,6 +100,11 @@ func (h TokenHandler) Validate(c echo.Context) error {
 		cookie, err := h.sessionManager.GenerateCookie(jwtToken)
 		if err != nil {
 			return fmt.Errorf("failed to create session token: %w", err)
+		}
+
+		err = storeSession(h.cfg, h.persister, token.UserID, rawToken, c, h.persister.GetConnection())
+		if err != nil {
+			return fmt.Errorf("failed to store session in DB: %w", err)
 		}
 
 		c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
