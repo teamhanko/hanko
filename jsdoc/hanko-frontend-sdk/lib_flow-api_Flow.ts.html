@@ -91,17 +91,13 @@ import { Action } from "./types/action";
 import { FetchNextState, FlowPath, Handlers } from "./types/state-handling";
 import { HankoError } from "../Errors";
 
-type MaybePromise&lt;T> = T | Promise&lt;T>;
-
 type ExtendedHandlers = Handlers &amp; { onError?: (e: unknown) => any };
-type GetInitState = (flow: Flow) => MaybePromise&lt;State&lt;any> | null>;
 
 // eslint-disable-next-line require-jsdoc
 class Flow extends Client {
   public async init(
     initPath: FlowPath,
     handlers: ExtendedHandlers,
-    // getInitState: GetInitState = () => this.fetchNextState(initPath),
   ): Promise&lt;void> {
     const fetchNextState: FetchNextState = async (href: string, body?: any) => {
       try {

@@ -279,6 +279,12 @@ will be triggered at the same time.</li>
 })
 </code></pre>
 <p>Please Take a look into the <a href="https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/">docs</a> for more details.</p>
+<h3>Translation of outgoing emails</h3>
+<p>If you use the main <code>Hanko</code> client provided by the Frontend SDK, you can use the <code>lang</code> parameter in the options when
+instantiating the client to configure the language that is used to convey to the Hanko API the
+language to use for outgoing emails. If you have disabled email delivery through Hanko and configured a webhook for the
+<code>email.send</code> event, the value for the <code>lang</code> parameter is reflected in the JWT payload of the token contained in the
+webhook request in the &quot;Language&quot; claim.</p>
 <h2>Bugs</h2>
 <p>Found a bug? Please report on our <a href="https://github.com/teamhanko/hanko/issues">GitHub</a> page.</p>
 <h2>License</h2>

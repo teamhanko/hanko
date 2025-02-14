@@ -280,6 +280,42 @@
 </tr>
 
         
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>lang</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">Used to convey the preferred language to the API, e.g. for translating outgoing emails.
+                           It is transmitted to the API in a custom header (X-Language).
+                           Should match one of the supported languages ("bn", "de", "en", "fr", "it, "pt-BR", "zh")
+                           if email delivery by Hanko is enabled. If email delivery by Hanko is disabled and the
+                           relying party configures a webhook for the "email.send" event, then the set language is
+                           reflected in the payload of the token contained in the webhook request.</td>
+</tr>
+
+        
         </tbody>
     </table>
 </div>
@@ -321,7 +357,7 @@
         <p class="tag-source">
             <a href="Hanko.ts.html" class="button">View Source</a>
             <span>
-                <a href="Hanko.ts.html">Hanko.ts</a>, <a href="Hanko.ts.html#line114">line 114</a>
+                <a href="Hanko.ts.html">Hanko.ts</a>, <a href="Hanko.ts.html#line128">line 128</a>
             </span>
         </p>
     
