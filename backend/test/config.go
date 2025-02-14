@@ -37,6 +37,7 @@ var DefaultConfig = config.Config{
 		Cookie: config.Cookie{
 			SameSite: "none",
 		},
+		Limit: 5,
 	},
 	Service: config.Service{
 		Name: "Test",

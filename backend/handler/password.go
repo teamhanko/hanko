@@ -223,7 +223,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		emailJwt = dto.JwtFromEmailModel(e)
 	}
 
-	token, _, err := h.sessionManager.GenerateJWT(pw.UserId, emailJwt)
+	token, rawToken, err := h.sessionManager.GenerateJWT(pw.UserId, emailJwt)
 	if err != nil {
 		return fmt.Errorf("failed to generate jwt: %w", err)
 	}
@@ -231,6 +231,11 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 	cookie, err := h.sessionManager.GenerateCookie(token)
 	if err != nil {
 		return fmt.Errorf("failed to create session cookie: %w", err)
+	}
+
+	err = storeSession(h.cfg, h.persister, userId, rawToken, c, h.persister.GetConnection())
+	if err != nil {
+		return fmt.Errorf("failed to store session in DB: %w", err)
 	}
 
 	c.Response().Header().Set("X-Session-Lifetime", fmt.Sprintf("%d", cookie.MaxAge))
