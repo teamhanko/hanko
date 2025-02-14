@@ -35,17 +35,12 @@ To follow the development of this project, watch our releases, leave a star, sig
 |✅| Webhooks |
 |✅| Server-side sessions & remote session revocation |
 |✅| MFA (TOTP, security keys) |
-|⚙️| Custom Social SSO connections (OIDC/OAuth2) |
-|⚙️| Privileged sessions & step-up authentication |
-| | User impersonation |
-| | Improved email templates & i18n |
+|✅| Custom Social SSO connections (OIDC/OAuth2) |
+|⚙️| JS SDK |
 | | `<hanko-menu>` web component |
-| | Email security notifications |
-| | Refresh tokens |
-| | Custom user metadata / JWT claims |
 | | iOS, Android, React Native, Flutter SDKs |
 
-Visit our [Roadmap](https://www.hanko.io/roadmap) for more information.
+Visit our [Roadmap](https://www.hanko.io/roadmap) for more information on upcoming features.
 
 # Contact us
 Schedule a Hanko demo. Learn how Hanko will speed up your registration and login flows with passkeys.
