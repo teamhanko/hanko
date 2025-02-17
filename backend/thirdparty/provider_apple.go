@@ -96,7 +96,9 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		switch v := emailVerifiedRaw.(type) {
 		case string:
 			emailVerified, err = strconv.ParseBool(v)
-			zeroLogger.Warn().Err(err).Msgf("could not parse 'email_verified' claim as bool")
+			if err != nil {
+				zeroLogger.Warn().Err(err).Msgf("could not parse 'email_verified' claim as bool")
+			}
 		case bool:
 			emailVerified = v
 		default:
