@@ -15,9 +15,9 @@ import (
 var mailFS embed.FS
 
 type Renderer struct {
-	template  *template.Template
-	bundle    *i18n.Bundle
-	localizer *i18n.Localizer
+	templatePlain *template.Template
+	bundle        *i18n.Bundle
+	localizer     *i18n.Localizer
 }
 
 // NewRenderer creates an instance of Renderer, which renders the templates (located in mail/templates) with locales (located in mail/locales)
@@ -37,11 +37,11 @@ func NewRenderer() (*Renderer, error) {
 	// add the translate function to the template, so it can be used inside
 	funcMap := template.FuncMap{"t": r.translate}
 	t := template.New("root").Funcs(funcMap)
-	_, err = t.ParseFS(mailFS, "templates/*")
+	_, err = t.ParseFS(mailFS, "templates/*.txt.tmpl")
 	if err != nil {
 		return nil, fmt.Errorf("failed to load templates: %w", err)
 	}
-	r.template = t
+	r.templatePlain = t
 
 	return r, nil
 }
@@ -55,17 +55,40 @@ func (r *Renderer) translate(messageID string, templateData map[string]interface
 	})
 }
 
-// Render renders a template with the given data and lang.
+// RenderPlain renders a template with the given data and lang.
 // The lang can be the contents of Accept-Language headers as defined in http://www.ietf.org/rfc/rfc2616.txt.
-func (r *Renderer) Render(templateName string, lang string, data map[string]interface{}) (string, error) {
+func (r *Renderer) RenderPlain(templateName string, lang string, data map[string]interface{}) (string, error) {
 	r.localizer = i18n.NewLocalizer(r.bundle, lang) // set the localizer, so the test will be translated to the given language
 	data["renderer_lang"] = lang
 	templateBuffer := &bytes.Buffer{}
-	err := r.template.ExecuteTemplate(templateBuffer, templateName, data)
+	err := r.templatePlain.ExecuteTemplate(templateBuffer, fmt.Sprintf("%s.txt.tmpl", templateName), data)
 	if err != nil {
-		return "", fmt.Errorf("failed to fill template with data: %w", err)
+		return "", fmt.Errorf("failed to fill plain text template with data: %w", err)
 	}
 	return strings.TrimSpace(templateBuffer.String()), nil
+}
+
+// RenderHTML renders an HTML template with the given data and lang.
+// The lang can be the contents of Accept-Language headers as defined in http://www.ietf.org/rfc/rfc2616.txt.
+func (r *Renderer) RenderHTML(templateName string, lang string, data map[string]interface{}) (string, error) {
+	var buffer bytes.Buffer
+
+	r.localizer = i18n.NewLocalizer(r.bundle, lang)
+	data["renderer_lang"] = lang
+
+	templateHTML := template.New("root").Funcs(template.FuncMap{"t": r.translate})
+	patterns := []string{"templates/layout.html.tmpl", fmt.Sprintf("templates/%s.html.tmpl", templateName)}
+	_, err := templateHTML.ParseFS(mailFS, patterns...)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse html template: %w", err)
+	}
+
+	err = templateHTML.ExecuteTemplate(&buffer, "layout", data)
+	if err != nil {
+		return "", fmt.Errorf("failed to execute html template: %w", err)
+	}
+
+	return strings.TrimSpace(buffer.String()), nil
 }
 
 func (r *Renderer) Translate(lang string, messageID string, data map[string]interface{}) string {
