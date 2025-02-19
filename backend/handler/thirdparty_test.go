@@ -143,15 +143,19 @@ func (s *thirdPartySuite) setUpFakeJwkSet() jwk2.Set {
 	return keySet
 }
 
-func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerified bool) string {
+func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerified bool, emailVerifiedTypeBool bool) string {
 	s.T().Helper()
 	token := jwt.New()
 	_ = token.Set(jwt.SubjectKey, sub)
 	_ = token.Set(jwt.IssuedAtKey, time.Now().UTC())
 	_ = token.Set(jwt.IssuerKey, "https://appleid.apple.com")
 	_ = token.Set(jwt.AudienceKey, aud)
-	_ = token.Set("email_verified", strconv.FormatBool(emailVerified))
 	_ = token.Set("email", email)
+	if emailVerifiedTypeBool {
+		_ = token.Set("email_verified", emailVerified)
+	} else {
+		_ = token.Set("email_verified", strconv.FormatBool(emailVerified))
+	}
 
 	generator := test.JwkManager{}
 	signingKey, err := generator.GetSigningKey()

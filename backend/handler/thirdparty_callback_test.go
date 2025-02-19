@@ -275,7 +275,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Apple() {
 		s.T().Skip("skipping test in short mode.")
 	}
 
-	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-apple-signup@example.com", true)
+	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-apple-signup@example.com", true, false)
 	gock.New(thirdparty.AppleTokenEndpoint).
 		Post("/").
 		Reply(200).
@@ -334,7 +334,66 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple() {
 	err := s.LoadFixtures("../test/fixtures/thirdparty")
 	s.NoError(err)
 
-	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-with-apple-identity@example.com", true)
+	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-with-apple-identity@example.com", true, false)
+	gock.New(thirdparty.AppleTokenEndpoint).
+		Post("/").
+		Reply(200).
+		JSON(map[string]string{"access_token": "fakeAccessToken", "id_token": fakeIdToken})
+
+	fakeJwkSet := s.setUpFakeJwkSet()
+	gock.New(thirdparty.AppleKeysEndpoint).
+		Get("/").
+		Reply(200).
+		JSON(fakeJwkSet)
+
+	cfg := s.setUpConfig([]string{"apple"}, []string{"https://example.com"})
+
+	state, err := thirdparty.GenerateState(cfg, "apple", "https://example.com")
+	s.NoError(err)
+
+	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
+	req.AddCookie(&http.Cookie{
+		Name:  utils.HankoThirdpartyStateCookie,
+		Value: string(state),
+	})
+
+	c, rec := s.setUpContext(req)
+	handler := s.setUpHandler(cfg)
+
+	if s.NoError(handler.Callback(c)) {
+		s.Equal(http.StatusTemporaryRedirect, rec.Code)
+
+		s.assertLocationHeaderHasToken(rec)
+		s.assertStateCookieRemoved(rec)
+
+		email, err := s.Storage.GetEmailPersister().FindByAddress("test-with-apple-identity@example.com")
+		s.NoError(err)
+		s.NotNil(email)
+		s.True(email.IsPrimary())
+
+		user, err := s.Storage.GetUserPersister().Get(*email.UserID)
+		s.NoError(err)
+		s.NotNil(user)
+
+		identity := email.Identities.GetIdentity("apple", "apple_abcde")
+		s.NotNil(identity)
+
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_succeeded"}, user.ID.String(), email.Address, "", "")
+		s.NoError(lerr)
+		s.Len(logs, 1)
+	}
+}
+
+func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignIn_Apple_WithBooleanEmailVerifiedClaim() {
+	defer gock.Off()
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	err := s.LoadFixtures("../test/fixtures/thirdparty")
+	s.NoError(err)
+
+	fakeIdToken := s.setUpAppleIdToken("apple_abcde", "fakeClientID", "test-with-apple-identity@example.com", true, true)
 	gock.New(thirdparty.AppleTokenEndpoint).
 		Post("/").
 		Reply(200).

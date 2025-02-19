@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/config"
 	"golang.org/x/oauth2"
 	"net/url"
@@ -89,13 +90,19 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		return nil, errors.New("email claim expected to be of type string")
 	}
 
-	var emailVerified bool
-	if emailVerifiedRaw, ok := parsedIDToken.PrivateClaims()["email_verified"].(string); !ok {
-		return nil, errors.New("email_verified claim expected to be of type string")
-	} else {
-		emailVerified, err = strconv.ParseBool(emailVerifiedRaw)
-		if err != nil {
-			return nil, errors.New("cannot parse email_verified claim as bool")
+	var emailVerified = false
+	emailVerifiedRaw, found := parsedIDToken.PrivateClaims()["email_verified"]
+	if found {
+		switch v := emailVerifiedRaw.(type) {
+		case string:
+			emailVerified, err = strconv.ParseBool(v)
+			if err != nil {
+				zeroLogger.Warn().Err(err).Msgf("could not parse 'email_verified' claim as bool")
+			}
+		case bool:
+			emailVerified = v
+		default:
+			zeroLogger.Warn().Msgf("'email_verified' claim is neither of type 'string' or 'bool'")
 		}
 	}
 
