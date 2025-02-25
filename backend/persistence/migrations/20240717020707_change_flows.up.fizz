@@ -1,4 +1,8 @@
+{{ if eq .Dialect "mysql" }}
+add_column("flows", "data", "mediumtext", {})
+{{ else }}
 add_column("flows", "data", "string", {"size": 65536})
+{{ end }}
 drop_column("flows", "stash_data")
 drop_column("flows", "current_state")
 drop_column("flows", "previous_state")
