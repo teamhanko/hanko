@@ -24,7 +24,7 @@ import { SessionClient, Session } from "./lib/client/SessionClient";
  *                            if email delivery by Hanko is enabled. If email delivery by Hanko is disabled and the
  *                            relying party configures a webhook for the "email.send" event, then the set language is
  *                            reflected in the payload of the token contained in the webhook request.
- * @property {number=} sessionCheckInterval -  Interval for session validity checks in milliseconds.
+ * @property {number=} sessionCheckInterval -  Interval for session validity checks in milliseconds. Must be greater than 3000 (3s), defaults to 3000 otherwise.
  * @property {string=} sessionCheckChannelName - The broadcast channel name for inter-tab communication.
  */
 export interface HankoOptions {
@@ -85,11 +85,12 @@ class Hanko extends Listener {
     if (options?.lang !== undefined) {
       opts.lang = options.lang;
     }
-    if (
-      options?.sessionCheckInterval !== undefined &&
-      options.sessionCheckInterval > 3000
-    ) {
-      opts.sessionCheckInterval = options.sessionCheckInterval;
+    if (options?.sessionCheckInterval !== undefined) {
+      if (options.sessionCheckInterval < 3000) {
+        opts.sessionCheckInterval = 3000;
+      } else {
+        opts.sessionCheckInterval = options.sessionCheckInterval;
+      }
     }
     if (options?.sessionCheckChannelName !== undefined) {
       opts.sessionCheckChannelName = options.sessionCheckChannelName;
