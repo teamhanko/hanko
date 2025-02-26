@@ -256,6 +256,7 @@ export interface Identity {
  * @property {string[]} [audience] - The intended audience(s) for the claims (optional).
  * @property {string} [issuer] - The entity that issued the claims (optional).
  * @property {Pick<Email, "address" | "is_primary" | "is_verified">} [email] - Email information associated with the subject (optional).
+ * @property {string} [username] - The subject's username (optional).
  * @property {string} session_id - The session identifier linked to the claims.
  */
 export interface Claims {
@@ -265,6 +266,7 @@ export interface Claims {
   audience?: string[];
   issuer?: string;
   email?: Pick<Email, "address" | "is_primary" | "is_verified">;
+  username?: string;
   session_id: string;
 }
 
@@ -285,4 +287,3 @@ export interface SessionCheckResponse {
   expiration_time?: string;
   user_id?: string;
 }
-
