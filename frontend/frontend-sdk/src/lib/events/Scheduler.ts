@@ -2,13 +2,21 @@ import { SessionCheckResponse } from "../Dto";
 
 // Type representing data returned by the session check callback.
 export type SessionCheckResult =
-  | (SessionCheckResponse & { timeToExpiration: number; expiresSoon: boolean })
+  | (Omit<SessionCheckResponse, "expiration_time"> & {
+      expiration: number;
+    })
   | null;
 
-// Callback type for performing a session check.
+/**
+ * Callback type for performing a session check.
+ * @ignore
+ */
 type SessionCheckCallback = () => Promise<SessionCheckResult>;
 
-// Callback type for handling session timeout events.
+/**
+ * Callback type for handling session timeout events.
+ * @ignore
+ */
 type SessionExpiredCallback = () => void;
 
 /**
@@ -17,27 +25,25 @@ type SessionExpiredCallback = () => void;
  * @category SDK
  * @subcategory Internal
  * @param {number} checkInterval - The interval in milliseconds between periodic session checks.
- * @param {SessionCheckCallback} onSessionCheck - The callback function to perform a session check.
+ * @param {SessionCheckCallback} checkSession - The callback function to perform a session check.
  * @param {SessionExpiredCallback} onSessionExpired - The callback function to handle session timeout events.
  */
 export class Scheduler {
   private intervalID: ReturnType<typeof setInterval> | null = null; // Identifier for the periodic check interval.
   private timeoutID: ReturnType<typeof setTimeout> | null = null; // Identifier for the session expiration timeout.
   private readonly checkInterval: number; // The interval between periodic session checks.
-  private readonly onSessionCheck: SessionCheckCallback; // The callback function to perform a session check.
+  private readonly checkSession: SessionCheckCallback; // The callback function to perform a session check.
   private readonly onSessionExpired: SessionExpiredCallback; // The callback function to handle session expired events.
 
   // eslint-disable-next-line require-jsdoc
   constructor(
     checkInterval: number,
-    onSessionCheck: SessionCheckCallback,
+    checkSession: SessionCheckCallback,
     onSessionExpired: SessionExpiredCallback,
   ) {
     this.checkInterval = checkInterval;
-    this.onSessionCheck = onSessionCheck;
+    this.checkSession = checkSession;
     this.onSessionExpired = onSessionExpired;
-
-    this.start(this.checkInterval);
   }
 
   /**
@@ -46,48 +52,60 @@ export class Scheduler {
    *
    * @param {number} timeToExpiration - The time in milliseconds until the session expires.
    */
-  sessionTimeoutAfter(timeToExpiration: number): void {
+  scheduleSessionExpiry(timeToExpiration: number): void {
     this.stop();
     this.timeoutID = setTimeout(async () => {
+      this.stop();
       this.onSessionExpired();
     }, timeToExpiration);
   }
 
   /**
    * Starts the session check process.
-   * Schedules the first check after an optional initial delay and begins periodic checks.
+   * Determines when the next check should run based on the last known check time and session expiration.
+   * If the session is expiring soon, schedules an expiration event instead of starting periodic checks.
    *
-   * @param {number} initialDelay - The delay in milliseconds before the first check is performed.
+   * @param {number} lastCheck - The timestamp (in milliseconds) of the last session check.
+   * @param {number} expiration - The timestamp (in milliseconds) of when the session expires.
    */
-  start(initialDelay: number = 0): void {
+  start(lastCheck: number = 0, expiration: number = 0): void {
+    const timeToNextCheck = this.calcTimeToNextCheck(lastCheck);
+
+    console.log("START", timeToNextCheck, expiration);
+
+    if (this.sessionExpiresSoon(expiration)) {
+      this.scheduleSessionExpiry(timeToNextCheck);
+      return;
+    }
+
     // Schedule the first check after an optional delay
     this.timeoutID = setTimeout(async () => {
-      let sessionCheckResult = await this.onSessionCheck();
+      console.log("INIT DELAY", timeToNextCheck, expiration);
+      let result = await this.checkSession();
 
-      if (sessionCheckResult.is_valid) {
-        if (sessionCheckResult.expiresSoon) {
-          this.sessionTimeoutAfter(sessionCheckResult.timeToExpiration);
+      if (result.is_valid) {
+        if (this.sessionExpiresSoon(result.expiration)) {
+          this.scheduleSessionExpiry(result.expiration - Date.now());
           return;
         }
 
         // Begin periodic checks
         this.intervalID = setInterval(async () => {
-          sessionCheckResult = await this.onSessionCheck();
+          console.log("PERIODIC DELAY", timeToNextCheck, expiration);
+          result = await this.checkSession();
 
-          if (sessionCheckResult.is_valid) {
-            if (sessionCheckResult.expiresSoon) {
-              this.sessionTimeoutAfter(sessionCheckResult.timeToExpiration);
+          if (result.is_valid) {
+            if (this.sessionExpiresSoon(result.expiration)) {
+              this.scheduleSessionExpiry(result.expiration - Date.now());
             }
           } else {
             this.stop();
-            this.onSessionExpired();
           }
         }, this.checkInterval);
       } else {
         this.stop();
-        this.onSessionExpired();
       }
-    }, initialDelay);
+    }, timeToNextCheck);
   }
 
   /**
@@ -111,5 +129,26 @@ export class Scheduler {
    */
   isRunning(): boolean {
     return this.timeoutID !== null || this.intervalID !== null;
+  }
+  /**
+   * Checks if the session is about to expire.
+   * @param {number} expiration - Timestamp when the session will expire.
+   * @returns {boolean} True if the session is about to expire; otherwise, false.
+   */
+  sessionExpiresSoon(expiration: number): boolean {
+    return expiration > 0 && expiration - Date.now() <= this.checkInterval;
+  }
+
+  /**
+   * Calculates the time until the next session check should occur.
+   *
+   * @param {number} lastCheck - The timestamp (in milliseconds) of the last session check.
+   * @returns {number} The time in milliseconds until the next check should be performed.
+   */
+  calcTimeToNextCheck(lastCheck: number): number {
+    const timeSinceLastCheck = Date.now() - lastCheck;
+    return this.checkInterval >= timeSinceLastCheck
+      ? this.checkInterval - (timeSinceLastCheck % this.checkInterval)
+      : 0;
   }
 }

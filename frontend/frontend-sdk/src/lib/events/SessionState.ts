@@ -1,110 +1,55 @@
 /**
- * Manages session-related operations such as validation, expiration, and reset.
+ * Represents the session state with expiration and last check timestamps.
+ *
+ * @category SDK
+ * @subcategory Internal
+ */
+export interface State {
+  expiration: number; // Timestamp (in milliseconds) when the session expires.
+  lastCheck: number; // Timestamp (in milliseconds) of the last session check.
+}
+
+/**
+ * Manages session state persistence using localStorage.
  *
  * @category SDK
  * @subcategory Internal
  */
 export class SessionState {
-  private lastCheck: number = Date.now(); // Timestamp of the last session validity check.
-  private expiration: number = 0; // Timestamp when the current session will expire.
-  private isLoggedIn: boolean = false; // Indicates if a user is currently logged in.
-  private readonly checkInterval: number; // milliseconds; interval for session validity checks.
+  private readonly storageKey: string;
+  private readonly defaultState: State = {
+    expiration: 0,
+    lastCheck: 0,
+  };
 
-  // eslint-disable-next-line require-jsdoc
-  constructor(checkInterval: number) {
-    this.checkInterval = checkInterval;
+  /**
+   * Creates an instance of SessionState.
+   *
+   * @param {string} storageKey - The key used to store session state in localStorage.
+   */
+  constructor(storageKey: string) {
+    this.storageKey = storageKey;
   }
 
   /**
-   * Checks if the user is currently logged in.
-   * @returns {boolean} True if the user is logged in; otherwise, false.
+   * Loads the current session state from localStorage.
+   *
+   * @returns {State} The parsed session state or a default state if not found.
    */
-  getIsLoggedIn(): boolean {
-    return this.isLoggedIn;
+  load(): State {
+    const item = window.localStorage.getItem(this.storageKey);
+    return item == null ? this.defaultState : JSON.parse(item);
   }
 
   /**
-   * Sets the login status of the user.
-   * @param {boolean} loggedIn - True if the user is logged in; otherwise, false.
+   * Saves the session state to localStorage.
+   *
+   * @param {State | null} session - The session state to save. If null, the default state is used.
    */
-  setIsLoggedIn(loggedIn: boolean): void {
-    this.isLoggedIn = loggedIn;
-  }
-
-  /**
-   * Retrieves the last session check timestamp.
-   * @returns {number} The timestamp of the last session check.
-   */
-  getLastCheck(): number {
-    return this.lastCheck;
-  }
-
-  /**
-   * Updates the timestamp of the last session check.
-   * @param {number} timestamp - The new timestamp.
-   */
-  setLastCheck(timestamp: number): void {
-    this.lastCheck = timestamp;
-  }
-
-  /**
-   * Retrieves the session expiration time.
-   * @returns {number} The session expiration timestamp.
-   */
-  getExpiration(): number {
-    return this.expiration;
-  }
-
-  /**
-   * Sets the session expiration time.
-   * @param {number} expiration - The new expiration timestamp.
-   */
-  setExpiration(expiration: number): void {
-    this.expiration = expiration;
-  }
-
-  /**
-   * Resets the session state.
-   */
-  reset(): void {
-    this.isLoggedIn = false;
-    this.expiration = 0;
-  }
-
-  /**
-   * Checks if the session is about to expire.
-   * @param {number} now - The current timestamp.
-   * @returns {boolean} True if the session is about to expire; otherwise, false.
-   */
-  isExpiringSoon(now: number): boolean {
-    return this.expiration > 0 && this.expiration - now <= this.checkInterval;
-  }
-
-  /**
-   * Retrieves the time remaining until the session expires.
-   * @param {number} now - The current timestamp.
-   * @returns {number} The time remaining until session expiration in milliseconds.
-   */
-  getTimeToExpiration(now: number): number {
-    return this.expiration - now;
-  }
-
-  /**
-   * Retrieves the time elapsed since the last session check.
-   * @param {number} now - The current timestamp.
-   * @returns {number} The time elapsed since the last check in milliseconds.
-   */
-  getTimeSinceLastCheck(now: number): number {
-    return now - this.lastCheck;
-  }
-
-  /**
-   * Calculates the time until the next session check should occur.
-   * @param {number} now - The current timestamp.
-   * @returns {number} The time remaining until the next check in milliseconds.
-   */
-  getTimeToNextCheck(now: number): number {
-    const timeSinceLastCheck = this.getTimeSinceLastCheck(now);
-    return this.checkInterval - (timeSinceLastCheck % this.checkInterval);
+  save(session: State | null): void {
+    window.localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(session ? session : this.defaultState),
+    );
   }
 }

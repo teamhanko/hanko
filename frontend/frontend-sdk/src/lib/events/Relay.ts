@@ -19,37 +19,42 @@ import { InternalOptions } from "../../Hanko";
  */
 export class Relay extends Dispatcher {
   listener = new Listener(); // Listener for session-related events.
-  checkInterval = 30000; // Interval for session validity checks in milliseconds.
-  client: SessionClient; // Client for session validation.
-  sessionState: SessionState; // Manages session-related states.
-  windowActivityManager: WindowActivityManager; // Manages window activity states.
-  scheduler: Scheduler; //  Schedules session validity checks.
-  sessionChannel: SessionChannel; // Handles inter-tab communication via broadcast channels.
+  private readonly checkInterval: number = 30000; // Interval for session validity checks in milliseconds.
+  private readonly client: SessionClient; // Client for session validation.
+  private readonly sessionState: SessionState; // Manages session-related states.
+  private readonly windowActivityManager: WindowActivityManager; // Manages window activity states.
+  private readonly scheduler: Scheduler; //  Schedules session validity checks.
+  private readonly sessionChannel: SessionChannel; // Handles inter-tab communication via broadcast channels.
+  private isLoggedIn: boolean;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options: InternalOptions) {
     super();
     this.client = new SessionClient(api, options);
     this.checkInterval = options.sessionCheckInterval;
-    this.sessionState = new SessionState(this.checkInterval);
-    this.windowActivityManager = new WindowActivityManager(
-      () => this.startSessionCheck(),
-      () => this.stopSessionCheck(),
+    this.sessionState = new SessionState(`${options.cookieName}_session_state`);
+    this.sessionChannel = new SessionChannel(
+      options.sessionCheckChannelName,
+      () => this.onChannelSessionExpired(),
+      (msg) => this.onChannelSessionCreated(msg),
+      () => this.onChannelLeadershipRequested(),
     );
     this.scheduler = new Scheduler(
       this.checkInterval,
       () => this.checkSession(),
-      () => this.onSessionExpired(true),
+      () => this.onSessionExpired(),
     );
-    this.sessionChannel = new SessionChannel(
-      options.sessionCheckChannelName,
-      () => this.onSessionExpired(true),
-      (msg) => this.onSessionCreated(msg),
-      () => this.onLeadershipRequested(),
-      (msg) => this.onCheckCompleted(msg),
+    this.windowActivityManager = new WindowActivityManager(
+      () => this.startSessionCheck(),
+      () => this.scheduler.stop(),
     );
 
+    const now = Date.now();
+    const { expiration } = this.sessionState.load();
+
+    this.isLoggedIn = now < expiration;
     this.initializeEventListeners();
+    this.startSessionCheck();
   }
 
   /**
@@ -60,20 +65,23 @@ export class Relay extends Dispatcher {
   private initializeEventListeners(): void {
     // Listen for session creation events
     this.listener.onSessionCreated((detail) => {
-      if (this.sessionState.getIsLoggedIn()) return;
-      this.sessionState.setIsLoggedIn(true);
+      const { claims } = detail;
+      const expiration = Date.parse(claims.expiration);
+      const lastCheck = Date.now();
+
+      this.sessionState.save({ expiration, lastCheck }); // Save initial session state
+      this.sessionChannel.post("sessionCreated", { claims }); // Inform other tabs
       this.startSessionCheck(); // Begin session checks now that a user is logged in
-      this.sessionChannel.post("sessionCreated", {
-        claims: detail.claims,
-      }); // Inform other tabs
     });
 
     // Listen for user logout events
     this.listener.onUserLoggedOut(() => {
-      if (!this.sessionState.getIsLoggedIn()) return;
       this.sessionChannel.post("sessionExpired"); // Inform other tabs session ended
-      this.onSessionExpired(false); // Reset session state
+      this.sessionState.save(null);
+      this.scheduler.stop();
     });
+
+    window.addEventListener("beforeunload", () => this.scheduler.stop());
   }
 
   /**
@@ -82,79 +90,21 @@ export class Relay extends Dispatcher {
    * @private
    */
   private startSessionCheck(): void {
-    this.sessionChannel.post("requestLeadership"); // Inform other tabs this tab is now checking
-    if (this.scheduler.isRunning()) return;
-
-    const now = Date.now();
-    const expiresSoon = this.sessionState.isExpiringSoon(now);
-
-    if (expiresSoon) {
-      const timeToExpiration = this.sessionState.getTimeToExpiration(now);
-      this.scheduler.sessionTimeoutAfter(timeToExpiration);
+    if (this.windowActivityManager.hasFocus()) {
+      this.sessionChannel.post("requestLeadership"); // Inform other tabs this tab is now checking
     } else {
-      const timeToNextCheck = this.sessionState.getTimeToNextCheck(now);
-      this.scheduler.start(timeToNextCheck);
+      return;
     }
-  }
 
-  /**
-   * Stops session checking.
-   * @private
-   */
-  private stopSessionCheck(): void {
-    this.scheduler.stop();
-  }
-
-  /**
-   * Resets session-related states when a session becomes invalid.
-   * This ensures all session-related variables are cleared to avoid stale data.
-   * @private
-   */
-  private onSessionExpired(dispatchEvent: boolean = false) {
-    if (!this.sessionState.getIsLoggedIn()) return;
-    if (dispatchEvent) {
-      this.dispatchSessionExpiredEvent(); // Inform listeners that session expired
+    if (this.scheduler.isRunning()) {
+      return;
     }
-    this.scheduler.stop();
-    this.sessionState.reset();
-  }
 
-  /**
-   * Handles session creation events from broadcast messages.
-   * @param {BroadcastMessage} msg - The broadcast message containing session details.
-   * @private
-   */
-  private onSessionCreated(msg: BroadcastMessage) {
-    if (this.sessionState.getIsLoggedIn()) return;
-    const now = Date.now();
-    const expiration = Date.parse(msg.claims.expiration);
-    this.sessionState.setExpiration(expiration);
-    const expirationSeconds = this.sessionState.getTimeToExpiration(now);
-    this.sessionState.setIsLoggedIn(true);
-    this.dispatchSessionCreatedEvent({
-      claims: msg.claims,
-      expirationSeconds, // deprecated
-    }); // Notify listeners of new session
-  }
+    const { lastCheck, expiration } = this.sessionState.load();
 
-  /**
-   * Handles leadership requests from other tabs.
-   * @private
-   */
-  private onLeadershipRequested() {
-    if (this.windowActivityManager.hasFocus()) return; // Ignore leadership requests when the 'document' is still focused.
-    this.stopSessionCheck();
-  }
-
-  /**
-   * Handles completed session checks from broadcast messages.
-   * @param {BroadcastMessage} msg - The broadcast message containing session check details.
-   * @private
-   */
-  private onCheckCompleted(msg: BroadcastMessage) {
-    // Update with latest session info
-    this.sessionState.setExpiration(msg.sessionExpiration);
-    this.sessionState.setLastCheck(msg.lastCheck);
+    if (this.isLoggedIn) {
+      this.scheduler.start(lastCheck, expiration);
+    }
   }
 
   /**
@@ -164,36 +114,87 @@ export class Relay extends Dispatcher {
    * @private
    */
   private async checkSession(): Promise<SessionCheckResult> {
-    try {
-      const now = Date.now();
-      const sessionResponse = await this.client.validate();
-      const sessionExpiration = Date.parse(sessionResponse.expiration_time);
+    const lastCheck = Date.now();
+    // eslint-disable-next-line camelcase
+    const { is_valid, claims, expiration_time } = await this.client.validate();
 
-      if (this.sessionState.getIsLoggedIn() && !sessionResponse.is_valid) {
-        this.sessionChannel.post("sessionExpired"); // Inform other tabs
-      }
+    // eslint-disable-next-line camelcase
+    const expiration = expiration_time ? Date.parse(expiration_time) : 0;
 
-      this.sessionState.setLastCheck(now);
-      this.sessionState.setExpiration(sessionExpiration);
-      this.sessionState.setIsLoggedIn(sessionResponse.is_valid);
-
-      this.sessionChannel.post("checkCompleted", {
-        sessionExpiration: this.sessionState.getExpiration(),
-        lastCheck: this.sessionState.getLastCheck(),
-      }); // Share latest session info
-
-      const expiresSoon = this.sessionState.isExpiringSoon(now);
-      const timeToExpiration = this.sessionState.getTimeToExpiration(now);
-
-      return {
-        expiresSoon,
-        timeToExpiration,
-        ...sessionResponse,
-      };
-    } catch (e) {
-      console.error("Error during session validation:", e);
+    // eslint-disable-next-line camelcase
+    if (!is_valid && this.isLoggedIn) {
+      this.dispatchSessionExpiredEvent();
     }
 
-    return null;
+    // eslint-disable-next-line camelcase
+    if (is_valid) {
+      this.isLoggedIn = true;
+      this.sessionState.save({ lastCheck, expiration });
+    } else {
+      this.isLoggedIn = false;
+      this.sessionState.save(null);
+      this.sessionChannel.post("sessionExpired"); // Inform other tabs
+    }
+
+    return {
+      // eslint-disable-next-line camelcase
+      is_valid,
+      claims,
+      expiration,
+    };
+  }
+
+  /**
+   * Resets session-related states when a session expires.
+   * Ensures that authentication state is cleared and an expiration event is dispatched.
+   * Assumes the user is logged out by default if the session state is unknown.
+   * @private
+   */
+  private onSessionExpired() {
+    if (this.isLoggedIn) {
+      this.isLoggedIn = false;
+      this.sessionState.save(null);
+      this.sessionChannel.post("sessionExpired"); // Inform other tabs
+      this.dispatchSessionExpiredEvent();
+    }
+  }
+
+  /**
+   * Handles session expired events from broadcast messages.
+   * @private
+   */
+  private onChannelSessionExpired() {
+    if (this.isLoggedIn) {
+      this.isLoggedIn = false;
+      this.dispatchSessionExpiredEvent();
+    }
+  }
+
+  /**
+   * Handles session creation events from broadcast messages.
+   * @param {BroadcastMessage} msg - The broadcast message containing session details.
+   * @private
+   */
+  private onChannelSessionCreated(msg: BroadcastMessage) {
+    const { claims } = msg;
+    const now = Date.now();
+    const expiration = Date.parse(claims.expiration);
+    const expirationSeconds = expiration - now;
+
+    this.isLoggedIn = true;
+    this.dispatchSessionCreatedEvent({
+      claims,
+      expirationSeconds, // deprecated
+    });
+  }
+
+  /**
+   * Handles leadership requests from other tabs.
+   * @private
+   */
+  private onChannelLeadershipRequested() {
+    if (!this.windowActivityManager.hasFocus()) {
+      this.scheduler.stop();
+    }
   }
 }
