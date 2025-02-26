@@ -71,8 +71,6 @@ export class Scheduler {
   start(lastCheck: number = 0, expiration: number = 0): void {
     const timeToNextCheck = this.calcTimeToNextCheck(lastCheck);
 
-    console.log("START", timeToNextCheck, expiration);
-
     if (this.sessionExpiresSoon(expiration)) {
       this.scheduleSessionExpiry(timeToNextCheck);
       return;
@@ -80,7 +78,6 @@ export class Scheduler {
 
     // Schedule the first check after an optional delay
     this.timeoutID = setTimeout(async () => {
-      console.log("INIT DELAY", timeToNextCheck, expiration);
       let result = await this.checkSession();
 
       if (result.is_valid) {
@@ -91,7 +88,6 @@ export class Scheduler {
 
         // Begin periodic checks
         this.intervalID = setInterval(async () => {
-          console.log("PERIODIC DELAY", timeToNextCheck, expiration);
           result = await this.checkSession();
 
           if (result.is_valid) {

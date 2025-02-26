@@ -7,35 +7,23 @@ import { Claims } from "../Dto";
  * @category SDK
  * @subcategory Internal
  */
-type Action =
-  | "sessionExpired"
-  | "sessionCreated"
-  | "requestLeadership";
+type Action = "sessionExpired" | "sessionCreated" | "requestLeadership";
 
 /**
  * Interface representing the data structure of a channel event.
  *
  * @interface
  * @property {Action} action - The type of action being broadcasted.
- * @property {Claims} claims - Optional claims associated with the event.
- * @property {number} [expiration] - Optional timestamp indicating when the session will expire.
- * @property {number} [lastCheck] - Optional timestamp of the last check.
+ * @property {Claims=} claims - Optional claims associated with the event.
+ * @property {boolean=} is_valid - Optional indication of the session validity.
  * @category SDK
  * @subcategory Internal
  */
-interface ChannelEventData {
+export interface BroadcastMessage {
   action: Action;
   claims?: Claims;
   is_valid?: boolean;
 }
-
-/**
- * Type representing the message sent to callbacks, omitting the `action` field from `ChannelEventData`.
- *
- * @ignore
- * @type {Omit<ChannelEventData, "action">} BroadcastMessage
- */
-export type BroadcastMessage = Omit<ChannelEventData, "action">;
 
 /**
  * Callback type for handling broadcast messages.
@@ -79,11 +67,10 @@ export class SessionChannel {
   /**
    * Sends a message via the broadcast channel to inform other tabs of session changes.
    *
-   * @param {Action} action - The action type to broadcast.
-   * @param {Partial<ChannelEventData>} [data={}] - Additional data to send with the action.
+   * @param {BroadcastMessage} msg - The messsage to broadcast.
    */
-  post(action: Action, data: Partial<ChannelEventData> = {}) {
-    this.channel.postMessage({ action, ...data });
+  post(msg: BroadcastMessage) {
+    this.channel.postMessage(msg);
   }
 
   /**
@@ -93,8 +80,8 @@ export class SessionChannel {
    * @private
    */
   private handleMessage = (event: MessageEvent) => {
-    const { action, ...data } = event.data as ChannelEventData;
-    switch (action) {
+    const data = event.data as BroadcastMessage;
+    switch (data.action) {
       case "sessionExpired":
         this.onSessionExpired(data);
         break;

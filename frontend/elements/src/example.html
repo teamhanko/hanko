@@ -191,7 +191,7 @@ after the user completes the authentication flow), while other events are option
     const apiUrl = "http://localhost:8000";
 
     // Register Hanko Web Components
-    const {hanko} = await register(apiUrl, {translations: all});
+    const {hanko} = await register(apiUrl, {translations: all, sessionCheckInterval: 5000});
 
     // Get DOM elements
     const hankoAuthEl = document.getElementById("hankoAuth"),

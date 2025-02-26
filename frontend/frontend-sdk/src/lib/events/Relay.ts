@@ -69,14 +69,15 @@ export class Relay extends Dispatcher {
       const expiration = Date.parse(claims.expiration);
       const lastCheck = Date.now();
 
+      this.isLoggedIn = true;
       this.sessionState.save({ expiration, lastCheck }); // Save initial session state
-      this.sessionChannel.post("sessionCreated", { claims }); // Inform other tabs
+      this.sessionChannel.post({ action: "sessionCreated", claims }); // Inform other tabs
       this.startSessionCheck(); // Begin session checks now that a user is logged in
     });
 
     // Listen for user logout events
     this.listener.onUserLoggedOut(() => {
-      this.sessionChannel.post("sessionExpired"); // Inform other tabs session ended
+      this.sessionChannel.post({ action: "sessionExpired" }); // Inform other tabs session ended
       this.sessionState.save(null);
       this.scheduler.stop();
     });
@@ -91,7 +92,7 @@ export class Relay extends Dispatcher {
    */
   private startSessionCheck(): void {
     if (this.windowActivityManager.hasFocus()) {
-      this.sessionChannel.post("requestLeadership"); // Inform other tabs this tab is now checking
+      this.sessionChannel.post({ action: "requestLeadership" }); // Inform other tabs this tab is now checking
     } else {
       return;
     }
@@ -110,7 +111,7 @@ export class Relay extends Dispatcher {
   /**
    * Validates the current session and updates session information.
    * This method checks if the session is still valid and updates local data accordingly.
-   * @returns {Promise<{SessionCheckResult>} - A promise that resolves with the session check result.
+   * @returns {Promise<SessionCheckResult>} - A promise that resolves with the session check result.
    * @private
    */
   private async checkSession(): Promise<SessionCheckResult> {
@@ -133,7 +134,7 @@ export class Relay extends Dispatcher {
     } else {
       this.isLoggedIn = false;
       this.sessionState.save(null);
-      this.sessionChannel.post("sessionExpired"); // Inform other tabs
+      this.sessionChannel.post({ action: "sessionExpired" }); // Inform other tabs
     }
 
     return {
@@ -154,7 +155,7 @@ export class Relay extends Dispatcher {
     if (this.isLoggedIn) {
       this.isLoggedIn = false;
       this.sessionState.save(null);
-      this.sessionChannel.post("sessionExpired"); // Inform other tabs
+      this.sessionChannel.post({ action: "sessionExpired" }); // Inform other tabs
       this.dispatchSessionExpiredEvent();
     }
   }
