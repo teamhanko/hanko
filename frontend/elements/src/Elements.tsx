@@ -48,6 +48,7 @@ export interface RegisterOptions {
   storageKey?: string;
   cookieDomain?: string;
   cookieSameSite?: CookieSameSite;
+  sessionCheckInterval?: number;
 }
 
 export interface RegisterResult {
@@ -134,6 +135,7 @@ export const register = async (
     translationsLocation: "/i18n",
     fallbackLanguage: "en",
     storageKey: "hanko",
+    sessionCheckInterval: 30000,
     ...options,
   };
 
@@ -142,6 +144,7 @@ export const register = async (
     cookieDomain: options.cookieDomain,
     cookieSameSite: options.cookieSameSite,
     localStorageKey: options.storageKey,
+    sessionCheckInterval: options.sessionCheckInterval,
   });
   globalOptions.injectStyles = options.injectStyles;
   globalOptions.enablePasskeys = options.enablePasskeys;

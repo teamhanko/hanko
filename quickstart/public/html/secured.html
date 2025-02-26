@@ -40,16 +40,22 @@
 <script type="module">
     import { register } from "{{.HankoElementUrl}}";
 
-    const { hanko } = await register("{{.HankoUrl}}", { shadow: false });
+    const { hanko } = await register("{{.HankoUrl}}", { sessionCheckInterval: 5000 });
+
+    const session = await hanko.sessionClient.validate();
+
+    if (!session.is_valid) {
+        window.location.href = "/unauthorized";
+    }
 
     hanko.onUserDeleted(() => window.location.href = "/" );
+    hanko.onSessionExpired(() => window.location.href = "/unauthorized");
+    hanko.onUserLoggedOut(() => window.location.href = "/");
 
     document.getElementById("logout-link")
         .addEventListener("click", (event) => {
             event.preventDefault();
-            hanko.user.logout()
-                .then(() => { window.location.href = "/" })
-                .catch(console.error);
+            hanko.user.logout().catch(console.error);
         });
 </script>
 

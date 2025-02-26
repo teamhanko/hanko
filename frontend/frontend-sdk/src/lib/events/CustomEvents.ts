@@ -1,3 +1,5 @@
+import { Claims } from "../Dto";
+
 /**
  * The type of the `hanko-session-created` event.
  * @typedef {string} sessionCreatedType
@@ -49,12 +51,12 @@ export const userCreatedType: "hanko-user-created" = "hanko-user-created";
  * @interface
  * @category SDK
  * @subcategory Events
- * @property {string=} jwt - The JSON web token associated with the session. Only present when the Hanko-API allows the JWT to be accessible client-side.
- * @property {number} expirationSeconds - The number of seconds until the JWT expires.
+ * @property {number} expirationSeconds - This property is deprecated. The number of seconds until the JWT expires.
+ * @property {Claims} claims - The JSON web token associated with the session. Only present when the Hanko-API allows the JWT to be accessible client-side.
  */
 export interface SessionDetail {
-  jwt?: string;
-  expirationSeconds: number;
+  claims: Claims;
+  expirationSeconds: number; // deprecated
 }
 
 /**

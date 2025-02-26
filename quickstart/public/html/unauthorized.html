@@ -26,5 +26,13 @@
     </div>
 </main>
 
+<script type="module">
+    import { register } from "{{.HankoElementUrl}}";
+
+    const { hanko } = await register("{{.HankoUrl}}", { sessionCheckInterval: 5000});
+
+    hanko.onSessionCreated(() => window.location.href = "/secured");
+</script>
+
 </body>
 </html>

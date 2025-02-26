@@ -18,7 +18,6 @@ func main() {
 
 	hankoUrl := getEnv("HANKO_URL")
 	hankoElementUrl := getEnv("HANKO_ELEMENT_URL")
-	hankoFrontendSdkUrl := getEnv("HANKO_FRONTEND_SDK_URL")
 	hankoUrlInternal := hankoUrl
 	if value, ok := os.LookupEnv("HANKO_URL_INTERNAL"); ok {
 		hankoUrlInternal = value
@@ -41,25 +40,25 @@ func main() {
 
 	e.Static("/static", "public/assets")
 
+	indexData := IndexData{
+		HankoUrl:        hankoUrl,
+		HankoElementUrl: hankoElementUrl,
+		ConditionalUi:   conditionalUi,
+	}
+
 	e.GET("/", func(c echo.Context) error {
-		indexData := IndexData{
-			HankoUrl:        hankoUrl,
-			HankoElementUrl: hankoElementUrl,
-			ConditionalUi:   conditionalUi,
-		}
 		return c.Render(http.StatusOK, "index.html", &indexData)
 	})
 
-	e.File("/unauthorized", "public/html/unauthorized.html")
-	e.File("/error", "public/html/error.html")
+	e.GET("/unauthorized", func(c echo.Context) error {
+		return c.Render(http.StatusOK, "unauthorized.html", &indexData)
+	})
 
 	e.GET("/secured", func(c echo.Context) error {
-		return c.Render(http.StatusOK, "secured.html", map[string]interface{}{
-			"HankoFrontendSdkUrl": hankoFrontendSdkUrl,
-			"HankoUrl":            hankoUrl,
-			"HankoElementUrl":     hankoElementUrl,
-		})
+		return c.Render(http.StatusOK, "secured.html", &indexData)
 	}, middleware.SessionMiddleware(hankoUrlInternal))
+
+	e.File("/error", "public/html/error.html")
 
 	if err := e.Start(":8080"); err != nil {
 		log.Fatal(err)
