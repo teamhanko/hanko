@@ -124,7 +124,7 @@ class Hanko extends Listener {
     this.session = new Session({ ...opts });
     /**
      *  @public
-     *  @type {FlowOld}
+     *  @type {Flow}
      */
     this.flow = new Flow(api, opts);
   }
