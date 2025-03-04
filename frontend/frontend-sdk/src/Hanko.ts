@@ -127,6 +127,12 @@ class Hanko extends Listener {
      *  @type {Flow}
      */
     this.flow = new Flow(api, opts);
+
+    const state = await this.flow.init("/login");
+    if (state.name == "login_init") {
+      const c = state;
+      const x = await state.autoStep();
+    }
   }
 
   /**

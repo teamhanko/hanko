@@ -1,6 +1,7 @@
 import { Client } from "../client/Client";
-import { FlowPath, StateName } from "./types/state-handling";
-import { State, FetchFunction, AllStates } from "./State";
+import { StateName } from "./types/state";
+import { State } from "./State";
+import { AllStates, FetchFunction, FlowPath } from "./types/flow";
 
 // eslint-disable-next-line require-jsdoc
 class Flow extends Client {

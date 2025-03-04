@@ -1,5 +1,3 @@
-import { State } from "../State";
-
 import {
   CredentialOnboardingChooserActions,
   DeviceTrustActions,
@@ -23,7 +21,7 @@ import {
   ProfileInitActions,
   RegistrationInitActions,
   ThirdPartyActions,
-} from "./action";
+} from "./actionType";
 
 import {
   LoginInitPayload,
@@ -121,21 +119,3 @@ export interface Payloads {
   readonly thirdparty: ThirdPartyPayload;
   readonly webauthn_credential_verification: OnboardingVerifyPasskeyAttestationPayload;
 }
-
-export type FlowPath = "/login" | "/registration" | "/profile";
-
-export type FetchState = (
-  // eslint-disable-next-line no-unused-vars
-  href: string,
-  // eslint-disable-next-line no-unused-vars
-  body?: any,
-) => Promise<State<any>>;
-
-export type HandlerFunction<TStateName extends StateName> = (
-  // eslint-disable-next-line no-unused-vars
-  state: State<TStateName>,
-) => any;
-
-export type Handlers = {
-  [TStateName in StateName]: HandlerFunction<TStateName>;
-};
