@@ -6,7 +6,6 @@ import {
   AllStates,
   FetchFunction,
   FlowResponse,
-  DefaultHandlers,
 } from "./types/flow";
 import { Action } from "./Action";
 import { autoSteps, defaultHandlers } from "./auto-steps";
@@ -64,6 +63,14 @@ export class State<TState extends StateName = StateName> {
       );
     });
 
-    return actionMap as ActionMap<TState>;
+    // Return a Proxy that handles missing keys
+    return new Proxy(actionMap as ActionMap<TState>, {
+      get: (target: ActionMap<TState>, prop: string | symbol): Action<any> => {
+        if (prop in target) {
+          return target[prop as keyof ActionMap<TState>];
+        }
+        return Action.createDisabled(this.name, this.fetchFunc, this.csrfToken);
+      },
+    });
   }
 }

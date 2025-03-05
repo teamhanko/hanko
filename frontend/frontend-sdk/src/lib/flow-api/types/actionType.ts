@@ -24,7 +24,6 @@ import {
 } from "./input";
 
 export interface ActionType<TInputs> {
-  enabled: boolean;
   name: string;
   href: string;
   inputs: TInputs;

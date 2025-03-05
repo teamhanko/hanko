@@ -3,11 +3,9 @@ import { WebauthnSupport } from "../WebauthnSupport";
 import {
   PublicKeyCredentialWithAssertionJSON,
   PublicKeyCredentialWithAttestationJSON,
-} from "@github/webauthn-json/src/webauthn-json/basic/json";
-import {
   create as createWebauthnCredential,
   get as getWebauthnCredential,
-} from "@github/webauthn-json/dist/types/basic/api";
+} from "@github/webauthn-json";
 
 let webauthnAbortController = new AbortController();
 

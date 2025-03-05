@@ -1,3 +1,5 @@
+import { AllStates } from "../flow-api/types/flow";
+
 /**
  * The type of the `hanko-session-created` event.
  * @typedef {string} sessionCreatedType
@@ -44,6 +46,14 @@ export const userLoggedInType: "hanko-user-logged-in" = "hanko-user-logged-in";
 export const userCreatedType: "hanko-user-created" = "hanko-user-created";
 
 /**
+ * The type of the `hanko-flow-state-changed` event.
+ * @typedef {string} flowStateChangedType
+ * @memberOf Listener
+ */
+export const flowStateChangedType: "hanko-flow-state-changed" =
+  "hanko-flow-state-changed";
+
+/**
  * The type of the `hanko-flow-error` event.
  * @typedef {string} flowErrorType
  * @memberOf Listener
@@ -62,6 +72,10 @@ export const flowErrorType: "hanko-flow-error" = "hanko-flow-error";
 export interface SessionDetail {
   jwt?: string;
   expirationSeconds: number;
+}
+
+export interface FlowDetail {
+  state: AllStates;
 }
 
 /**

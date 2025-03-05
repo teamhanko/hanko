@@ -19,14 +19,34 @@ export class Action<TInputs> {
     fetchFunc: FetchFunction,
     stateName: StateName,
     csrfToken: string,
+    enabled: boolean = false,
   ) {
-    this.enabled = action.enabled;
+    this.enabled = enabled;
     this.inputs = action.inputs;
     this.href = action.href;
     this.fetchFunc = fetchFunc;
     this.name = action.name;
     this.stateName = stateName;
     this.csrfToken = csrfToken;
+  }
+
+  static createDisabled<TInputs>(
+    stateName: StateName,
+    fetchFunc: FetchFunction,
+    csrfToken: string
+  ): Action<TInputs> {
+    return new Action(
+      {
+        name: "disabled",
+        href: "", // No valid href since it’s disabled
+        inputs: {} as TInputs,
+        description: "Disabled action",
+      },
+      fetchFunc,
+      stateName,
+      csrfToken,
+      false,
+    );
   }
 
   // eslint-disable-next-line require-jsdoc

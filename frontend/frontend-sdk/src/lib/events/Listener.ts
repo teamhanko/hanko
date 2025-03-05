@@ -6,6 +6,7 @@ import {
   sessionExpiredType,
   userDeletedType,
   userLoggedOutType,
+  FlowDetail, flowStateChangedType,
 } from "./CustomEvents";
 
 /**
@@ -219,5 +220,16 @@ export class Listener {
     once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(userDeletedType, { callback, once });
+  }
+
+  public onFlowStateChanged(
+    callback: CallbackFunc<FlowDetail>,
+    once?: boolean,
+  ): CleanupFunc {
+    return this.addEventListener(
+      flowStateChangedType,
+      { callback, once },
+      false,
+    );
   }
 }
