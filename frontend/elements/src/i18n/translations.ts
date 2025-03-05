@@ -172,6 +172,7 @@ export interface Translation {
     passcode_max_attempts_reached: string;
     rate_limit_exceeded: string;
     unknown_username_error: string;
+    unknown_email_error: string;
     username_already_exists: string;
     invalid_username_error: string;
     email_already_exists: string;

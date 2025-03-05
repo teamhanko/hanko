@@ -196,6 +196,7 @@ export const en: Translation = {
     rate_limit_exceeded:
       "Too many requests have been made. Please wait to repeat the requested operation.",
     unknown_username_error: "The username is unknown.",
+    unknown_email_error: "The email address is unknown.",
     username_already_exists: "The username is already taken.",
     invalid_username_error:
       "The username must contain only letters, numbers, and underscores.",

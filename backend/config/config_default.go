@@ -207,6 +207,10 @@ func DefaultConfig() *Config {
 				Enabled: true,
 			},
 		},
+		Privacy: Privacy{
+			ShowAccountExistenceHints:  false,
+			OnlyShowActualLoginMethods: false,
+		},
 		Debug: false,
 	}
 }

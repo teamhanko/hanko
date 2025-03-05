@@ -20,5 +20,6 @@ var (
 	ErrorEmailAlreadyExists    = flowpilot.NewInputError("email_already_exists", "The email address already exists.")
 	ErrorUsernameAlreadyExists = flowpilot.NewInputError("username_already_exists", "The username already exists.")
 	ErrorUnknownUsername       = flowpilot.NewInputError("unknown_username_error", "The username is unknown.")
+	ErrorUnknownEmail          = flowpilot.NewInputError("unknown_email_error", "The email address is unknown.")
 	ErrorInvalidUsername       = flowpilot.NewInputError("invalid_username_error", "The username is invalid.")
 )

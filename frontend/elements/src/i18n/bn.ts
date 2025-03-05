@@ -196,6 +196,7 @@ export const bn: Translation = {
     rate_limit_exceeded:
       "অনেকগুলি অনুরোধ করা হয়েছে। অনুরোধকৃত অপারেশন পুনরায় প্রয়াত করতে অপেক্ষা করুন।",
     unknown_username_error: "ব্যবহারকারীর নাম অজানা।",
+    unknown_email_error: "ইমেইল ঠিকানাটি অজানা।",
     username_already_exists: "ব্যবহারকারীর নাম ইতিমধ্যে নেওয়া হয়েছে।",
     invalid_username_error:
       "ব্যবহারকারীর নাম শুধুমাত্র অক্ষর, সংখ্যা এবং আন্ডারস্কোর থাকতে পারে।",

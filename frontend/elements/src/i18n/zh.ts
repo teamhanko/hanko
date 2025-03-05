@@ -186,6 +186,7 @@ export const zh: Translation = {
       "密码输入错误次数太多。请请求一个新的验证码。",
     rate_limit_exceeded: "请求过多。请等待重复所请求的操作。",
     unknown_username_error: "用户名未知。",
+    unknown_email_error: "电子邮件地址未知。",
     username_already_exists: "用户名已被使用。",
     invalid_username_error: "用户名只能包含字母、数字和下划线。",
     email_already_exists: "电子邮件已被使用。",

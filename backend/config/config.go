@@ -68,6 +68,8 @@ type Config struct {
 	Webauthn WebauthnSettings `yaml:"webauthn" json:"webauthn,omitempty" koanf:"webauthn" jsonschema:"title=webauthn"`
 	// `webhooks` configures HTTP-based callbacks for specific events occurring in the system.
 	Webhooks WebhookSettings `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks" jsonschema:"title=webhooks"`
+	// `privacy` configures privacy settings
+	Privacy Privacy `yaml:"privacy" json:"privacy" koanf:"privacy" jsonschema:"title=privacy"`
 }
 
 var (

@@ -117,10 +117,10 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		if err != nil {
 			return err
 		}
-		// Do not return an error when only identifier is email and email verification is on (account enumeration protection)
+		// Do not return an error when only identifier is email and email verification is on (account enumeration protection) and privacy setting is off
 		if emailModel != nil {
 			// E-mail address already exists
-			if !deps.Cfg.Email.RequireVerification {
+			if !deps.Cfg.Email.RequireVerification || deps.Cfg.Privacy.ShowAccountExistenceHints {
 				c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 				return c.Error(flowpilot.ErrorFormDataInvalid)
 			} else {
