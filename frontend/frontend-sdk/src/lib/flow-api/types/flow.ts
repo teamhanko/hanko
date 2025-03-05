@@ -1,5 +1,5 @@
 import { StateName, Actions, Payloads } from "./state";
-import { ActionType as ActionType } from "./actionType";
+import { ActionType } from "./actionType";
 import { Input } from "./input";
 import { Error } from "./error";
 import { State } from "../State";
@@ -21,10 +21,26 @@ export type AutoStep<TState extends StateName> = (
   state: State<TState>,
 ) => Promise<AllStates>;
 
+export type DefaultHandler<TState extends StateName> = (
+  // eslint-disable-next-line no-unused-vars
+  state: State<TState>,
+) => Promise<void>;
+
 type PickStates<T extends StateName> = T;
 
 export type AutoSteps = {
-  [TStateName in PickStates<"preflight">]: AutoStep<TStateName>;
+  [TStateName in PickStates<
+    | "preflight"
+    | "login_passkey"
+    | "onboarding_verify_passkey_attestation"
+    | "webauthn_credential_verification"
+  >]: AutoStep<TStateName>;
+};
+
+export type DefaultHandlers = {
+  [TStateName in PickStates<
+    "login_init" | "success"
+  >]: DefaultHandler<TStateName>;
 };
 
 export type ActionMap<TState extends StateName> = {

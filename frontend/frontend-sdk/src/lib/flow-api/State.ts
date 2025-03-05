@@ -6,36 +6,47 @@ import {
   AllStates,
   FetchFunction,
   FlowResponse,
+  DefaultHandlers,
 } from "./types/flow";
 import { Action } from "./Action";
-import { autoSteps } from "./auto-steps";
+import { autoSteps, defaultHandlers } from "./auto-steps";
 
 type AutoSteppedStates = keyof typeof autoSteps;
-type ConditionalAutoStepGuard<TState> = TState extends AutoSteppedStates
-  ? () => Promise<AllStates>
-  : never;
+type DefaultHandledStates = keyof typeof defaultHandlers;
 
 // eslint-disable-next-line require-jsdoc
 export class State<TState extends StateName = StateName> {
   public readonly name: TState;
-  public readonly error?: Error;
+  public error?: Error;
   public readonly payload?: Payloads[TState];
   public readonly actions: ActionMap<TState>;
   private readonly csrfToken: string;
   private readonly fetchFunc: FetchFunction;
-  public readonly autoStep?: ConditionalAutoStepGuard<TState>;
-
-  // public readonly autoStep?: () => Promise<AllStates>;
+  public readonly autoStep?: TState extends AutoSteppedStates
+    ? () => Promise<AllStates>
+    : never;
+  public readonly defaultHandler: TState extends DefaultHandledStates
+    ? () => Promise<void>
+    : never;
 
   // eslint-disable-next-line require-jsdoc
   constructor(response: FlowResponse<TState>, fetchFunc: FetchFunction) {
-    this.name = response.name; // No cast needed
+    this.name = response.name;
     this.error = response.error;
     this.payload = response.payload;
     this.csrfToken = response.csrf_token;
     this.actions = this.buildActions(response.actions);
     this.fetchFunc = fetchFunc;
-    this.autoStep = this.getAutoStep();
+
+    if (this.name in autoSteps) {
+      const handler = autoSteps[this.name as AutoSteppedStates];
+      (this.autoStep as () => Promise<AllStates>) = () => handler(this as any);
+    }
+
+    if (this.name in defaultHandlers) {
+      const handler = defaultHandlers[this.name as DefaultHandledStates];
+      (this.defaultHandler as () => Promise<void>) = () => handler(this as any);
+    }
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -55,18 +66,4 @@ export class State<TState extends StateName = StateName> {
 
     return actionMap as ActionMap<TState>;
   }
-
-  // eslint-disable-next-line require-jsdoc
-  private getAutoStep(): ConditionalAutoStepGuard<TState> {
-    if (isAutoSteppedState(this.name)) {
-      const handler = autoSteps[this.name];
-      return (() => handler(this as any)) as ConditionalAutoStepGuard<TState>;
-    }
-    return;
-  }
-}
-
-// eslint-disable-next-line require-jsdoc
-function isAutoSteppedState(name: StateName): name is AutoSteppedStates {
-  return name in autoSteps;
 }
