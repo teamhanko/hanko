@@ -77,6 +77,7 @@ export class Relay extends Dispatcher {
 
     // Listen for user logout events
     this.listener.onUserLoggedOut(() => {
+      this.isLoggedIn = false;
       this.sessionChannel.post({ action: "sessionExpired" }); // Inform other tabs session ended
       this.sessionState.save(null);
       this.scheduler.stop();
