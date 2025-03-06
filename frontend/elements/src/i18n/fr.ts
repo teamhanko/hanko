@@ -205,6 +205,7 @@ export const fr: Translation = {
     rate_limit_exceeded:
       "Trop de demandes ont été effectuées. Veuillez patienter pour répéter l'opération demandée.",
     unknown_username_error: "Le nom d'utilisateur est inconnu.",
+    unknown_email_error: "L'adresse e-mail est inconnue.",
     username_already_exists: "Le nom d'utilisateur est déjà pris.",
     invalid_username_error:
       "Le nom d'utilisateur ne doit contenir que des lettres, des chiffres et des traits de soulignement.",

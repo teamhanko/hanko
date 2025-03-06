@@ -198,6 +198,7 @@ export const it: Translation = {
     rate_limit_exceeded:
       "Troppe richieste sono state effettuate. Si prega di attendere per ripetere l'operazione richiesta.",
     unknown_username_error: "Il nome utente è sconosciuto.",
+    unknown_email_error: "L'indirizzo email è sconosciuto.",
     username_already_exists: "Il nome utente è già in uso.",
     invalid_username_error:
       "Il nome utente deve contenere solo lettere, numeri e trattini bassi.",
