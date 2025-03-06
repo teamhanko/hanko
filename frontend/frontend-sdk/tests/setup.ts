@@ -75,3 +75,23 @@ export const fakeTimerNow = 1664379699000;
 jest.useFakeTimers({
   now: fakeTimerNow,
 });
+
+// eslint-disable-next-line require-jsdoc
+class MockBroadcastChannel {
+  name: string;
+  message: any;
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  postMessage(message: any) {
+    this.message = message;
+  }
+}
+
+Object.defineProperty(global, "BroadcastChannel", {
+  value: MockBroadcastChannel,
+  configurable: true,
+  writable: true,
+});

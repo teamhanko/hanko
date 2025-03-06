@@ -134,7 +134,7 @@ class InvalidWebauthnCredentialError extends HankoError {
     super(
       "Invalid WebAuthn credential error",
       "invalidWebauthnCredential",
-      cause
+      cause,
     );
     Object.setPrototypeOf(this, InvalidWebauthnCredentialError.prototype);
   }
@@ -168,7 +168,7 @@ class MaxNumOfPasscodeAttemptsReachedError extends HankoError {
     super(
       "Maximum number of Passcode attempts reached error",
       "passcodeAttemptsReached",
-      cause
+      cause,
     );
     Object.setPrototypeOf(this, MaxNumOfPasscodeAttemptsReachedError.prototype);
   }
@@ -266,7 +266,7 @@ class MaxNumOfEmailAddressesReachedError extends HankoError {
     super(
       "Maximum number of email addresses reached error",
       "maxNumOfEmailAddressesReached",
-      cause
+      cause,
     );
     Object.setPrototypeOf(this, MaxNumOfEmailAddressesReachedError.prototype);
   }
@@ -285,7 +285,7 @@ class EmailAddressAlreadyExistsError extends HankoError {
     super(
       "The email address already exists",
       "emailAddressAlreadyExistsError",
-      cause
+      cause,
     );
     Object.setPrototypeOf(this, EmailAddressAlreadyExistsError.prototype);
   }

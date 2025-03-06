@@ -191,7 +191,7 @@ after the user completes the authentication flow), while other events are option
     const apiUrl = "http://localhost:8000";
 
     // Register Hanko Web Components
-    const {hanko} = await register(apiUrl, {translations: all});
+    const {hanko} = await register(apiUrl, {translations: all, sessionCheckInterval: 5000});
 
     // Get DOM elements
     const hankoAuthEl = document.getElementById("hankoAuth"),
@@ -283,11 +283,12 @@ after the user completes the authentication flow), while other events are option
     }
 
     // Initialization function
-    function init() {
+    async function init() {
         addEventListeners();
 
         // Check if a valid session exists
-        if (hanko.session.isValid()) {
+        const session = await hanko.sessionClient.validate();
+        if (session.is_valid) {
             showAuthComponent(false); // Show profile component
             setVisibility(logoutButtonEl, true); // Show the logout button
         }
@@ -298,7 +299,7 @@ after the user completes the authentication flow), while other events are option
     }
 
     // Call the initialization function
-    init();
+    await init();
 </script>
 </body>
 </html>

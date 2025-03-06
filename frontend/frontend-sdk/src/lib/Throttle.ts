@@ -37,7 +37,7 @@ export class Throttle {
   static throttle<T extends (...args: any[]) => any>(
     func: T,
     wait: number,
-    options: ThrottleOptions = {}
+    options: ThrottleOptions = {},
   ): ThrottledFunction<T> {
     const { leading = true, trailing = true } = options;
     let context: any;
