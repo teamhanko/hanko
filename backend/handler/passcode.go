@@ -246,7 +246,7 @@ func (h *PasscodeHandler) Init(c echo.Context) error {
 		webhookData.DeliveredByHanko = false
 		err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.EmailSend, webhookData)
 		if err != nil {
-			return fmt.Errorf(fmt.Sprintf("failed to trigger webhook: %s", err))
+			return fmt.Errorf("failed to trigger webhook: %w", err)
 		}
 	}
 

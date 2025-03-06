@@ -187,7 +187,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		Str("user_agent", c.Request().UserAgent()).Int("status", flowResult.GetStatus()).
 		Str("referer", c.Request().Referer())
 	if flowResult.GetResponse().Error != nil {
-		log.Str("error", fmt.Sprintf(flowResult.GetResponse().Error.Code))
+		log.Str("error", fmt.Sprintf("%s", flowResult.GetResponse().Error.Code))
 		if flowResult.GetResponse().Error.Internal != nil {
 			log.Str("error_internal", *flowResult.GetResponse().Error.Internal)
 		}
