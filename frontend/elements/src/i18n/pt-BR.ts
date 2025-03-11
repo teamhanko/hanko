@@ -202,6 +202,7 @@ export const ptBR: Translation = {
     rate_limit_exceeded:
       "Foram feitas muitas solicitações. Por favor, aguarde para repetir a operação solicitada.",
     unknown_username_error: "O nome de usuário é desconhecido.",
+    unknown_email_error: "O endereço de e-mail é desconhecido.",
     username_already_exists: "O nome de usuário já está em uso.",
     invalid_username_error:
       "O nome de usuário deve conter apenas letras, números e sublinhados.",
