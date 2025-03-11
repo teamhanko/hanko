@@ -7,8 +7,8 @@ import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
 import { Session } from "./lib/Session";
 import { CookieSameSite } from "./lib/Cookie";
-import { Flow } from "./lib/flow-api/Flow";
 import { SessionClient } from "./lib/client/SessionClient";
+import { HttpClient } from "./lib/client/HttpClient";
 
 /**
  * The options for the Hanko class
@@ -44,6 +44,7 @@ export interface HankoOptions {
  */
 class Hanko extends Listener {
   api: string;
+  client: HttpClient;
   user: UserClient;
   email: EmailClient;
   thirdParty: ThirdPartyClient;
@@ -52,7 +53,6 @@ class Hanko extends Listener {
   sessionClient: SessionClient;
   relay: Relay;
   session: Session;
-  flow: Flow;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
@@ -82,6 +82,11 @@ class Hanko extends Listener {
     }
 
     this.api = api;
+    /**
+     *  @public
+     *  @type {Client}
+     */
+    this.client = new HttpClient(api, opts);
     /**
      *  @public
      *  @type {UserClient}
@@ -122,11 +127,6 @@ class Hanko extends Listener {
      *  @type {Session}
      */
     this.session = new Session({ ...opts });
-    /**
-     *  @public
-     *  @type {Flow}
-     */
-    this.flow = new Flow(api, opts);
   }
 
   /**
@@ -138,7 +138,7 @@ class Hanko extends Listener {
    * @param lang {string} - The preferred language to convey to the API.
    */
   setLang(lang: string) {
-    this.flow.client.lang = lang;
+    this.client.lang = lang;
   }
 }
 

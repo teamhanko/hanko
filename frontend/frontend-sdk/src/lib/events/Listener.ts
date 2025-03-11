@@ -2,11 +2,12 @@ import { Throttle } from "../Throttle";
 import {
   CustomEventWithDetail,
   SessionDetail,
+  FlowDetail,
   sessionCreatedType,
   sessionExpiredType,
   userDeletedType,
   userLoggedOutType,
-  FlowDetail, flowStateChangedType,
+  flowStateChangedType,
 } from "./CustomEvents";
 
 /**

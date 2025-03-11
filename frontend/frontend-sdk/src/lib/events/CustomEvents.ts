@@ -1,4 +1,4 @@
-import { AllStates } from "../flow-api/types/flow";
+import { AnyState } from "../flow-api/types/flow";
 
 /**
  * The type of the `hanko-session-created` event.
@@ -75,7 +75,7 @@ export interface SessionDetail {
 }
 
 export interface FlowDetail {
-  state: AllStates;
+  state: AnyState;
 }
 
 /**

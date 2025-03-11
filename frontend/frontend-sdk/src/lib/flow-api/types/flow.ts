@@ -4,13 +4,22 @@ import { Input } from "./input";
 import { Error } from "./error";
 import { State } from "../State";
 import { Action } from "../Action";
+import { Hanko } from "../../../Hanko";
 
 export type FlowPath = "/login" | "/registration" | "/profile";
 
-export type AllStates = { [K in StateName]: State<K> }[StateName];
+export type AnyState = { [K in StateName]: State<K> }[StateName];
 
-// eslint-disable-next-line no-unused-vars
-export type FetchFunction = (href: string, body?: any) => Promise<AllStates>;
+export type FetchFunction = (
+  // eslint-disable-next-line no-unused-vars
+  hanko: Hanko,
+  // eslint-disable-next-line no-unused-vars
+  path: FlowPath,
+  // eslint-disable-next-line no-unused-vars
+  href: string,
+  // eslint-disable-next-line no-unused-vars
+  body?: any,
+) => Promise<AnyState>;
 
 export type ExtractInputValues<TInputs> = {
   [K in keyof TInputs]: TInputs[K] extends Input<infer TValue> ? TValue : never;
@@ -19,7 +28,7 @@ export type ExtractInputValues<TInputs> = {
 export type AutoStep<TState extends StateName> = (
   // eslint-disable-next-line no-unused-vars
   state: State<TState>,
-) => Promise<AllStates>;
+) => Promise<AnyState>;
 
 export type DefaultHandler<TState extends StateName> = (
   // eslint-disable-next-line no-unused-vars
@@ -34,6 +43,7 @@ export type AutoSteps = {
     | "login_passkey"
     | "onboarding_verify_passkey_attestation"
     | "webauthn_credential_verification"
+    | "thirdparty"
   >]: AutoStep<TStateName>;
 };
 

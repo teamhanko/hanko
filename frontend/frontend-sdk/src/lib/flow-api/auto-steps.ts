@@ -96,6 +96,41 @@ export const autoSteps: AutoSteps = {
       public_key: attestationResponse,
     });
   },
+  thirdparty: async (state) => {
+    const token = new URLSearchParams(window.location.search).get(
+      "hanko_token",
+    );
+    if (token && token.length > 0) {
+      const searchParams = new URLSearchParams(window.location.search);
+      const nextState = await state.actions.exchange_token.run(
+        {
+          token: searchParams.get("hanko_token"),
+        },
+        { dispatchEvents: false },
+      );
+
+      searchParams.delete("hanko_token");
+
+      history.replaceState(
+        null,
+        null,
+        window.location.pathname + searchParams.toString(),
+      );
+
+      nextState.dispatchEvents();
+
+      return nextState;
+    }
+    // setUIState((prev) => ({
+    //   ...prev,
+    //   lastAction: null,
+    // }));
+
+    state.save("hanko-saved-state");
+    window.location.assign(state.payload.redirect_url);
+
+    return state;
+  },
 };
 
 export const defaultHandlers: DefaultHandlers = {
@@ -122,13 +157,13 @@ export const defaultHandlers: DefaultHandlers = {
     })();
   },
   success: async (state) => {
-    // if (state.payload?.last_login) {
-    //   localStorage.setItem(
-    //     storageKeyLastLogin,
-    //     JSON.stringify(state.payload.last_login),
-    //   );
-    // }
-    // hanko.relay.dispatchSessionCreatedEvent(hanko.session.get());
+    if (state.payload?.last_login) {
+      localStorage.setItem(
+        "hanko-last-login", // TODO storageKeyLastLogin,
+        JSON.stringify(state.payload.last_login),
+      );
+    }
+    state.hanko.relay.dispatchSessionCreatedEvent(state.hanko.session.get());
     return;
   },
 };

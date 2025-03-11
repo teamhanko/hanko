@@ -6,6 +6,7 @@ export { Hanko };
 
 // Clients
 
+import { Client } from "./lib/client/Client";
 import { UserClient } from "./lib/client/UserClient";
 import { EmailClient } from "./lib/client/EmailClient";
 import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
@@ -14,6 +15,7 @@ import { EnterpriseClient } from "./lib/client/EnterpriseClient";
 import { SessionClient } from "./lib/client/SessionClient";
 
 export {
+  Client,
   UserClient,
   EmailClient,
   ThirdPartyClient,
@@ -125,6 +127,7 @@ export {
 import {
   CustomEventWithDetail,
   SessionDetail,
+  FlowDetail,
   sessionCreatedType,
   sessionExpiredType,
   userLoggedOutType,
@@ -132,6 +135,7 @@ import {
 } from "./lib/events/CustomEvents";
 
 export type { SessionDetail };
+export type { FlowDetail };
 
 export {
   sessionCreatedType,
@@ -146,3 +150,8 @@ export {
 import { CookieSameSite } from "./lib/Cookie";
 
 export type { CookieSameSite };
+
+// Flow
+import { State } from "./lib/flow-api/State";
+
+export { State };

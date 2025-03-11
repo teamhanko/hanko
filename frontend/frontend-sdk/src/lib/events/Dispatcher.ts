@@ -5,10 +5,10 @@ import {
   sessionExpiredType,
   userDeletedType,
   userLoggedOutType,
-  flowErrorType, flowStateChangedType,
+  flowErrorType, flowStateChangedType, FlowDetail,
 } from "./CustomEvents";
 import { SessionState } from "../state/session/SessionState";
-import { AllStates } from "../flow-api/types/flow";
+import { AnyState } from "../flow-api/types/flow";
 
 /**
  * Options for Dispatcher
@@ -88,7 +88,7 @@ export class Dispatcher {
   /**
    * Dispatches a "hanko-state-changed" event to the document.
    */
-  public dispatchFlowStateChangedEvent(state: AllStates) {
-    this.dispatch(flowStateChangedType, state);
+  public dispatchFlowStateChangedEvent(detail: FlowDetail) {
+    this.dispatch(flowStateChangedType, detail);
   }
 }
