@@ -143,7 +143,8 @@ const RegistrationInitPage = (props: Props) => {
     history.replaceState(
       null,
       null,
-      window.location.pathname + searchParams.toString(),
+      window.location.pathname +
+        (searchParams.size < 1 ? "" : `?${searchParams.toString()}`),
     );
   }, []);
 
