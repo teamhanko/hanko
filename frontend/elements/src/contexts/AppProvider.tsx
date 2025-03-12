@@ -470,7 +470,8 @@ const AppProvider = ({
           history.replaceState(
             null,
             null,
-            window.location.pathname + searchParams.toString(),
+            window.location.pathname +
+              (searchParams.size < 1 ? "" : `?${searchParams.toString()}`),
           );
 
           await hanko.flow.run(nextState, stateHandler);
