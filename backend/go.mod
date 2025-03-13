@@ -1,6 +1,6 @@
 module github.com/teamhanko/hanko/backend
 
-go 1.20
+go 1.24
 
 require (
 	github.com/beevik/etree v1.1.0
