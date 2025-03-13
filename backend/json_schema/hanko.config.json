@@ -265,12 +265,18 @@
           "$ref": "#/$defs/WebhookSettings",
           "title": "webhooks",
           "description": "`webhooks` configures HTTP-based callbacks for specific events occurring in the system."
+        },
+        "privacy": {
+          "$ref": "#/$defs/Privacy",
+          "title": "privacy",
+          "description": "`privacy` configures privacy settings"
         }
       },
       "additionalProperties": false,
       "type": "object",
       "required": [
-        "convert_legacy_server_side_session_config"
+        "convert_legacy_server_side_session_config",
+        "privacy"
       ],
       "description": "Config is the central configuration type"
     },
@@ -913,6 +919,22 @@
           "type": "boolean",
           "description": "`recovery` determines whether users can start a recovery process, e.g. in case of a forgotten password.",
           "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Privacy": {
+      "properties": {
+        "show_account_existence_hints": {
+          "type": "boolean",
+          "description": "`show_account_existence_hints` determines whether the user should get a user-friendly response rather than a privacy protecting one. E.g. on sign-up, when enabled the user will get \"user already exists\" response.\nIt only has an effect when emails are enabled.",
+          "default": false
+        },
+        "only_show_actual_login_methods": {
+          "type": "boolean",
+          "description": "`only_show_actual_login_methods` determines whether the user will only be prompted with his configured login methods.\nIt only has an effect when emails are enabled, can be used for authentication and passwords are enabled.",
+          "default": false
         }
       },
       "additionalProperties": false,
