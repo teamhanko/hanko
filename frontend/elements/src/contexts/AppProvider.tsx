@@ -227,9 +227,9 @@ const AppProvider = ({
         }
 
         switch (state.name) {
-          case "preflight":
-            await state.autoStep();
-            break;
+          // case "preflight":
+          //   await state.autoStep();
+          //   break;
           case "login_init":
             setPage(<LoginInitPage state={state} />);
             await state.defaultHandler();
@@ -240,9 +240,9 @@ const AppProvider = ({
           case "login_otp":
             setPage(<LoginOTPPage state={state} />);
             break;
-          case "login_passkey":
-            await state.autoStep();
-            break;
+          // case "login_passkey":
+          //   await state.autoStep();
+          //   break;
           case "onboarding_create_passkey":
             setPage(<RegisterPasskeyPage state={state} />);
             break;
@@ -341,8 +341,7 @@ const AppProvider = ({
         // );
         localStorage.removeItem(localStorageCacheStateKey);
       } else {
-        console.log("flow init!!!", hanko);
-        await State.init(hanko, flowName);
+        await State.create(hanko, flowName);
       }
     },
     [hanko],

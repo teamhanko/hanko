@@ -126,16 +126,24 @@ export class State<TState extends StateName = StateName> {
   }
 
   // eslint-disable-next-line require-jsdoc
-  public static load(hanko: Hanko, key: string): AnyState | null {
+  public static async load(
+    hanko: Hanko,
+    key: string,
+  ): Promise<AnyState | null> {
     const storedData = localStorage.getItem(key);
     if (!storedData) {
       return null;
     }
     const serializedState: SerializedState = JSON.parse(storedData);
-    return new State(hanko, serializedState.flowName, serializedState);
+    return State.initializeFlowState(
+      hanko,
+      serializedState.flowName,
+      serializedState,
+    );
   }
 
-  private static async initializeFlowState(
+  // eslint-disable-next-line require-jsdoc
+  public static async initializeFlowState(
     hanko: Hanko,
     flowName: FlowName,
     response: FlowResponse<any>,
@@ -143,20 +151,23 @@ export class State<TState extends StateName = StateName> {
   ): Promise<AnyState> {
     let state = new State(hanko, flowName, response, options);
 
-    while (state.autoStep) {
-      state = await state.autoStep();
+    if (state.runAutoSteps) {
+      while (state.autoStep) {
+        state = await state.autoStep();
+      }
     }
 
     return state;
   }
 
   // eslint-disable-next-line require-jsdoc
-  public static async init(
+  public static async create(
     hanko: Hanko,
     flowName: FlowName,
+    options: Options = {},
   ): Promise<AnyState> {
     const response = await State.fetchState(hanko, `/${flowName}`);
-    return new State(hanko, flowName, response) as AnyState;
+    return State.initializeFlowState(hanko, flowName, response, options);
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -235,11 +246,14 @@ export class Action<TInputs> {
   // eslint-disable-next-line require-jsdoc
   async run(
     inputValues: ExtractInputValues<TInputs> = null,
-    runOptions: Options = {},
+    options: Options = {},
   ): Promise<AnyState> {
-    const { dispatchEvents = true } = runOptions;
     const { name, hanko, flowName, csrfToken, invokedAction } =
       this.parentState;
+    const {
+      dispatchEvents = true,
+      runAutoSteps = this.parentState.runAutoSteps,
+    } = options;
 
     if (!this.enabled) {
       throw new Error(
@@ -284,6 +298,9 @@ export class Action<TInputs> {
 
     const response = await State.fetchState(hanko, this.href, requestBody);
 
-    return new State(hanko, flowName, response, { dispatchEvents }) as AnyState;
+    return State.initializeFlowState(hanko, flowName, response, {
+      dispatchEvents,
+      runAutoSteps,
+    });
   }
 }

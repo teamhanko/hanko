@@ -7,17 +7,6 @@ import {
   get as getWebauthnCredential,
 } from "@github/webauthn-json";
 
-let webauthnAbortController = new AbortController();
-
-const createWebauthnAbortSignal = () => {
-  if (webauthnAbortController) {
-    webauthnAbortController.abort();
-  }
-
-  webauthnAbortController = new AbortController();
-  return webauthnAbortController.signal;
-};
-
 export const autoSteps: AutoSteps = {
   preflight: async (state) => {
     createWebauthnAbortSignal();
@@ -132,6 +121,17 @@ export const autoSteps: AutoSteps = {
 
     return state;
   },
+};
+
+let webauthnAbortController = new AbortController();
+
+const createWebauthnAbortSignal = () => {
+  if (webauthnAbortController) {
+    webauthnAbortController.abort();
+  }
+
+  webauthnAbortController = new AbortController();
+  return webauthnAbortController.signal;
 };
 
 export const defaultHandlers: DefaultHandlers = {
