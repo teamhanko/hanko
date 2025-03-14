@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnTransports</title>
+  <title> lib/events/WindowActivityManager.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,147 +75,82 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Interface</p>
-                    <h1>WebauthnTransports</h1>
+                    <p>Source</p>
+                    <h1>lib/events/WindowActivityManager.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2>WebauthnTransports</h2>
-        
-    
-</header>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>// Callback type for handling window activity changes.
+type Callback = () => void;
 
-<article>
-    <div class="container-overview">
-    
-        
+/**
+ * Manages window focus and blur events.
+ *
+ * @class
+ * @category SDK
+ * @subcategory Internal
+ * @param {Callback} onActivityCallback - Callback to invoke when the window gains focus.
+ * @param {Callback} onInactivityCallback - Callback to invoke when the window loses focus.
+ */
+export class WindowActivityManager {
+  private readonly onActivityCallback: Callback; // Callback for when the window or tab gains focus.
+  private readonly onInactivityCallback: Callback; // Callback for when the window or tab loses focus.
 
-        
+  // eslint-disable-next-line require-jsdoc
+  constructor(onActivityCallback: Callback, onInactivityCallback: Callback) {
+    this.onActivityCallback = onActivityCallback;
+    this.onInactivityCallback = onInactivityCallback;
 
+    // Attach event listeners for focus and blur
+    window.addEventListener("focus", this.handleFocus);
+    window.addEventListener("blur", this.handleBlur);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+  }
 
-    <h5 class="subsection-title">Properties:</h5>
+  /**
+   * Handles the focus event and invokes the activity callback.
+   * @private
+   */
+  private handleFocus = (): void => {
+    this.onActivityCallback();
+  };
 
-    
-<div class="table-container">
-    <table class="props table">
-        <thead>
-        <tr>
-            
+  /**
+   * Handles the blur event and invokes the inactivity callback.
+   * @private
+   */
+  private handleBlur = (): void => {
+    this.onInactivityCallback();
+  };
 
-            <th>Type</th>
+  /**
+   * Handles the visibility change event and invokes appropriate callbacks.
+   * @private
+   */
+  private handleVisibilityChange = (): void => {
+    if (document.visibilityState === "visible") {
+      this.onActivityCallback();
+    } else {
+      this.onInactivityCallback();
+    }
+  };
 
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-            
-<tr class="deep-level-0">
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">Array.&lt;string></code>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last">Transports which may be used by the authenticator. E.g. "internal", "ble",...</td>
-</tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_Dto.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line106">line 106</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+  /**
+   * Checks if the current window has focus.
+   * @returns {boolean} True if the window has focus; otherwise, false.
+   */
+  hasFocus = (): boolean => {
+    return document.hasFocus();
+  };
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

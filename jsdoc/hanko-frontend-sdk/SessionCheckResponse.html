@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnTransports</title>
+  <title> SessionCheckResponse</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Interface</p>
-                    <h1>WebauthnTransports</h1>
+                    <h1>SessionCheckResponse</h1>
                 </header>
                 
 
@@ -85,7 +85,7 @@
 
 <header>
     
-        <h2>WebauthnTransports</h2>
+        <h2>SessionCheckResponse</h2>
         
     
 </header>
@@ -93,6 +93,8 @@
 <article>
     <div class="container-overview">
     
+        
+            <div class="description">Represents the response from a session validation or retrieval operation.</div>
         
 
         
@@ -106,9 +108,13 @@
         <thead>
         <tr>
             
+            <th>Name</th>
+            
 
             <th>Type</th>
 
+            
+            <th>Attributes</th>
             
 
             
@@ -122,21 +128,122 @@
             
 <tr class="deep-level-0">
     
+        <td class="name"><code>is_valid</code></td>
+    
 
     <td class="type">
     
         
-<code class="param-type">Array.&lt;string></code>
+<code class="param-type">boolean</code>
 
 
     
     </td>
 
     
+        <td class="attributes">
+        
+
+        
+        </td>
+    
 
     
 
-    <td class="description last">Transports which may be used by the authenticator. E.g. "internal", "ble",...</td>
+    <td class="description last">Indicates whether the session is valid.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>claims</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type"><a href="Claims.html">Claims</a></code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The claims associated with the session (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>expiration_time</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The expiration timestamp of the session (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>user_id</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The user ID linked to the session (optional).</td>
 </tr>
 
         
@@ -181,7 +288,7 @@
         <p class="tag-source">
             <a href="lib_Dto.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line106">line 106</a>
+                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line185">line 185</a>
             </span>
         </p>
     

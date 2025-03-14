@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnTransports</title>
+  <title> lib/events/SessionState.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,147 +75,74 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Interface</p>
-                    <h1>WebauthnTransports</h1>
+                    <p>Source</p>
+                    <h1>lib/events/SessionState.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2>WebauthnTransports</h2>
-        
-    
-</header>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Represents the session state with expiration and last check timestamps.
+ *
+ * @category SDK
+ * @subcategory Internal
+ */
+export interface State {
+  expiration: number; // Timestamp (in milliseconds) when the session expires.
+  lastCheck: number; // Timestamp (in milliseconds) of the last session check.
+}
 
-<article>
-    <div class="container-overview">
-    
-        
+/**
+ * Manages session state persistence using localStorage.
+ *
+ * @category SDK
+ * @subcategory Internal
+ */
+export class SessionState {
+  private readonly storageKey: string;
+  private readonly defaultState: State = {
+    expiration: 0,
+    lastCheck: 0,
+  };
 
-        
+  /**
+   * Creates an instance of SessionState.
+   *
+   * @param {string} storageKey - The key used to store session state in localStorage.
+   */
+  constructor(storageKey: string) {
+    this.storageKey = storageKey;
+  }
 
+  /**
+   * Loads the current session state from localStorage.
+   *
+   * @returns {State} The parsed session state or a default state if not found.
+   */
+  load(): State {
+    const item = window.localStorage.getItem(this.storageKey);
+    return item == null ? this.defaultState : JSON.parse(item);
+  }
 
-    <h5 class="subsection-title">Properties:</h5>
-
-    
-<div class="table-container">
-    <table class="props table">
-        <thead>
-        <tr>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-            
-<tr class="deep-level-0">
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">Array.&lt;string></code>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last">Transports which may be used by the authenticator. E.g. "internal", "ble",...</td>
-</tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_Dto.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line106">line 106</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+  /**
+   * Saves the session state to localStorage.
+   *
+   * @param {State | null} session - The session state to save. If null, the default state is used.
+   */
+  save(session: State | null): void {
+    window.localStorage.setItem(
+      this.storageKey,
+      JSON.stringify(session ? session : this.defaultState),
+    );
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 

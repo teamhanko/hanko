@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnTransports</title>
+  <title> Claims</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Interface</p>
-                    <h1>WebauthnTransports</h1>
+                    <h1>Claims</h1>
                 </header>
                 
 
@@ -85,7 +85,7 @@
 
 <header>
     
-        <h2>WebauthnTransports</h2>
+        <h2>Claims</h2>
         
     
 </header>
@@ -93,6 +93,8 @@
 <article>
     <div class="container-overview">
     
+        
+            <div class="description">Represents the claims associated with a session or token.</div>
         
 
         
@@ -106,9 +108,13 @@
         <thead>
         <tr>
             
+            <th>Name</th>
+            
 
             <th>Type</th>
 
+            
+            <th>Attributes</th>
             
 
             
@@ -122,6 +128,97 @@
             
 <tr class="deep-level-0">
     
+        <td class="name"><code>subject</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The subject or identifier of the claims.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>issued_at</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The timestamp when the claims were issued (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>expiration</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The timestamp when the claims expire.</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>audience</code></td>
+    
 
     <td class="type">
     
@@ -133,10 +230,140 @@
     </td>
 
     
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
 
     
 
-    <td class="description last">Transports which may be used by the authenticator. E.g. "internal", "ble",...</td>
+    <td class="description last">The intended audience(s) for the claims (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>issuer</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The entity that issued the claims (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>email</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">Pick.&lt;<a href="Email.html">Email</a>, ("address"|"is_primary"|"is_verified")></code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">Email information associated with the subject (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>username</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+            &lt;optional><br>
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The subject's username (optional).</td>
+</tr>
+
+        
+            
+<tr class="deep-level-0">
+    
+        <td class="name"><code>session_id</code></td>
+    
+
+    <td class="type">
+    
+        
+<code class="param-type">string</code>
+
+
+    
+    </td>
+
+    
+        <td class="attributes">
+        
+
+        
+        </td>
+    
+
+    
+
+    <td class="description last">The session identifier linked to the claims.</td>
 </tr>
 
         
@@ -181,7 +408,7 @@
         <p class="tag-source">
             <a href="lib_Dto.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line106">line 106</a>
+                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line169">line 169</a>
             </span>
         </p>
     

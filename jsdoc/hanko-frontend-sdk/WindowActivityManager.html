@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnTransports</title>
+  <title> WindowActivityManager</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,8 +73,8 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Interface</p>
-                    <h1>WebauthnTransports</h1>
+                    <p>Class</p>
+                    <h1>WindowActivityManager</h1>
                 </header>
                 
 
@@ -85,7 +85,9 @@
 
 <header>
     
-        <h2>WebauthnTransports</h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>WindowActivityManager<span class="signature">(onActivityCallback, onInactivityCallback)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Manages window focus and blur events.</div>
         
     
 </header>
@@ -94,17 +96,46 @@
     <div class="container-overview">
     
         
+            <div class='vertical-section'>
+                <div class="members">
+                    <div class="member">
+                        <div class=name>
+                            <span class="tag">Constructor</span>
+                        </div>
+                        
 
-        
-
-
-    <h5 class="subsection-title">Properties:</h5>
 
     
+    <h4 class="name" id="WindowActivityManager">
+        <a class="href-link" href="#WindowActivityManager">#</a>
+        
+        <span class="code-name">
+            
+                new WindowActivityManager<span class="signature">(onActivityCallback, onInactivityCallback)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
 <div class="table-container">
-    <table class="props table">
+    <table class="params table">
         <thead>
         <tr>
+            
+            <th>Name</th>
             
 
             <th>Type</th>
@@ -119,30 +150,61 @@
 
         <tbody>
         
+
             
 <tr class="deep-level-0">
-    
+  
+      <td class="name"><code>onActivityCallback</code></td>
+  
 
-    <td class="type">
-    
-        
-<code class="param-type">Array.&lt;string></code>
+  <td class="type">
+  
+      
+<code class="param-type">Callback</code>
 
 
-    
-    </td>
+  
+  </td>
 
-    
+  
 
-    
+  
 
-    <td class="description last">Transports which may be used by the authenticator. E.g. "internal", "ble",...</td>
+  <td class="description last">Callback to invoke when the window gains focus.</td>
 </tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>onInactivityCallback</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">Callback</code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">Callback to invoke when the window loses focus.</td>
+</tr>
+
 
         
         </tbody>
     </table>
 </div>
+
+
 
 
 
@@ -179,15 +241,38 @@
 
     
         <p class="tag-source">
-            <a href="lib_Dto.ts.html" class="button">View Source</a>
+            <a href="lib_events_WindowActivityManager.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line106">line 106</a>
+                <a href="lib_events_WindowActivityManager.ts.html">lib/events/WindowActivityManager.ts</a>, <a href="lib_events_WindowActivityManager.ts.html#line11">line 11</a>
             </span>
         </p>
     
 </dl>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
         
     
     </div>
@@ -197,6 +282,48 @@
     
 
     
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="WindowActivityManager.html">WindowActivityManager</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
+    
+
+    
+
+    
+        <div class='vertical-section'>
+            <h1>Members</h1>
+            <div class="members">
+            
+                <div class="member">
+
+<h4 class="name" id="hasFocus">
+    <a class="href-link" href="#hasFocus">#</a>
+    
+    <span class="code-name">
+        hasFocus
+    </span>
+    
+</h4>
+
+
+
+
+<div class="description">
+    Checks if the current window has focus.
+</div>
+
+
+
+
+
+<dl class="details">
 
     
 
@@ -204,6 +331,116 @@
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_events_WindowActivityManager.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_events_WindowActivityManager.ts.html">lib/events/WindowActivityManager.ts</a>, <a href="lib_events_WindowActivityManager.ts.html#line53">line 53</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+</div>
+            
+                <div class="member">
+
+<h4 class="name" id="hasFocus">
+    <a class="href-link" href="#hasFocus">#</a>
+    
+    <span class="code-name">
+        hasFocus
+    </span>
+    
+</h4>
+
+
+
+
+<div class="description">
+    Checks if the current window has focus.
+</div>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_events_WindowActivityManager.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_events_WindowActivityManager.ts.html">lib/events/WindowActivityManager.ts</a>, <a href="lib_events_WindowActivityManager.ts.html#line82">line 82</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+</div>
+            
+            </div>
+        </div>
     
 
     

@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WebauthnTransports</title>
+  <title> SessionChannel</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,8 +73,8 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Interface</p>
-                    <h1>WebauthnTransports</h1>
+                    <p>Class</p>
+                    <h1>SessionChannel</h1>
                 </header>
                 
 
@@ -85,7 +85,9 @@
 
 <header>
     
-        <h2>WebauthnTransports</h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>SessionChannel<span class="signature">(channelName, onSessionExpired, onSessionCreated, onLeadershipRequested)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Manages inter-tab communication using the BroadcastChannel API.</div>
         
     
 </header>
@@ -94,17 +96,46 @@
     <div class="container-overview">
     
         
+            <div class='vertical-section'>
+                <div class="members">
+                    <div class="member">
+                        <div class=name>
+                            <span class="tag">Constructor</span>
+                        </div>
+                        
 
-        
-
-
-    <h5 class="subsection-title">Properties:</h5>
 
     
+    <h4 class="name" id="SessionChannel">
+        <a class="href-link" href="#SessionChannel">#</a>
+        
+        <span class="code-name">
+            
+                new SessionChannel<span class="signature">(channelName, onSessionExpired, onSessionCreated, onLeadershipRequested)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
 <div class="table-container">
-    <table class="props table">
+    <table class="params table">
         <thead>
         <tr>
+            
+            <th>Name</th>
             
 
             <th>Type</th>
@@ -119,30 +150,111 @@
 
         <tbody>
         
+
             
 <tr class="deep-level-0">
-    
+  
+      <td class="name"><code>channelName</code></td>
+  
 
-    <td class="type">
-    
-        
-<code class="param-type">Array.&lt;string></code>
+  <td class="type">
+  
+      
+<code class="param-type">string</code>
 
 
-    
-    </td>
+  
+  </td>
 
-    
+  
 
-    
+  
 
-    <td class="description last">Transports which may be used by the authenticator. E.g. "internal", "ble",...</td>
+  <td class="description last">The name of the broadcast channel.</td>
 </tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>onSessionExpired</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">Callback</code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">Callback invoked when the session has expired.</td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>onSessionCreated</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">Callback</code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">Callback invoked when a session is created.</td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>onLeadershipRequested</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">Callback</code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">Callback invoked when a leadership request is received.</td>
+</tr>
+
 
         
         </tbody>
     </table>
 </div>
+
+
 
 
 
@@ -179,15 +291,38 @@
 
     
         <p class="tag-source">
-            <a href="lib_Dto.ts.html" class="button">View Source</a>
+            <a href="lib_events_SessionChannel.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line106">line 106</a>
+                <a href="lib_events_SessionChannel.ts.html">lib/events/SessionChannel.ts</a>, <a href="lib_events_SessionChannel.ts.html#line12">line 12</a>
             </span>
         </p>
     
 </dl>
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
         
     
     </div>
@@ -197,6 +332,113 @@
     
 
     
+        <h3 class="subsection-title">Classes</h3>
+
+        <dl>
+            <dt><a href="SessionChannel.html">SessionChannel</a></dt>
+            <dd></dd>
+        </dl>
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        <div class='vertical-section'>
+            <h1>Methods</h1>
+            <div class="members">
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="post">
+        <a class="href-link" href="#post">#</a>
+        
+        <span class="code-name">
+            
+                post<span class="signature">(msg)</span><span class="type-signature"></span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        Sends a message via the broadcast channel to inform other tabs of session changes.
+    </div>
+    
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>msg</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type"><a href="BroadcastMessage.html">BroadcastMessage</a></code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">The messsage to broadcast.</td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
+</div>
+
+
+
+
+
+<dl class="details">
 
     
 
@@ -206,6 +448,61 @@
 
     
 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_events_SessionChannel.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_events_SessionChannel.ts.html">lib/events/SessionChannel.ts</a>, <a href="lib_events_SessionChannel.ts.html#line89">line 89</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</div>
+            
+            </div>
+        </div>
     
 
     
