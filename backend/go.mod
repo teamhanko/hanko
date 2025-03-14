@@ -43,7 +43,7 @@ require (
 	github.com/sethvargo/go-redisstore v0.3.0
 	github.com/spf13/cobra v1.8.1
 	github.com/stretchr/testify v1.10.0
-	github.com/tidwall/gjson v1.16.0
+	github.com/tidwall/gjson v1.18.0
 	github.com/tidwall/sjson v1.2.5
 	github.com/wk8/go-ordered-map/v2 v2.1.8
 	golang.org/x/crypto v0.36.0
