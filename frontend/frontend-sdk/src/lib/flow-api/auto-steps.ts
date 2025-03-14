@@ -21,13 +21,17 @@ const createWebauthnAbortSignal = () => {
 export const autoSteps: AutoSteps = {
   preflight: async (state) => {
     createWebauthnAbortSignal();
-    return await state.actions.register_client_capabilities.run({
-      webauthn_available: WebauthnSupport.supported(),
-      webauthn_conditional_mediation_available:
-        await WebauthnSupport.isConditionalMediationAvailable(),
-      webauthn_platform_authenticator_available:
-        await WebauthnSupport.isPlatformAuthenticatorAvailable(),
-    });
+    const { actions, runAutoSteps } = state;
+    return await actions.register_client_capabilities.run(
+      {
+        webauthn_available: WebauthnSupport.supported(),
+        webauthn_conditional_mediation_available:
+          await WebauthnSupport.isConditionalMediationAvailable(),
+        webauthn_platform_authenticator_available:
+          await WebauthnSupport.isPlatformAuthenticatorAvailable(),
+      },
+      { runAutoSteps },
+    );
   },
   login_passkey: async (state) => {
     let assertionResponse: PublicKeyCredentialWithAssertionJSON;

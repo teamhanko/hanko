@@ -33,7 +33,7 @@ export class State<TState extends StateName = StateName> {
 
   public readonly hanko: Hanko;
   public invokedAction: string | undefined;
-  private readonly runAutoSteps: boolean;
+  public readonly runAutoSteps: boolean;
 
   public readonly autoStep?: TState extends AutoSteppedStates
     ? () => Promise<AnyState>
@@ -70,11 +70,11 @@ export class State<TState extends StateName = StateName> {
 
     const { dispatchEvents = true, runAutoSteps = true } = options;
 
+    this.runAutoSteps = runAutoSteps;
+
     if (dispatchEvents) {
       this.dispatchEvents();
     }
-
-    this.runAutoSteps = runAutoSteps;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -133,6 +133,21 @@ export class State<TState extends StateName = StateName> {
     }
     const serializedState: SerializedState = JSON.parse(storedData);
     return new State(hanko, serializedState.flowName, serializedState);
+  }
+
+  private static async initializeFlowState(
+    hanko: Hanko,
+    flowName: FlowName,
+    response: FlowResponse<any>,
+    options: Options = {},
+  ): Promise<AnyState> {
+    let state = new State(hanko, flowName, response, options);
+
+    while (state.autoStep) {
+      state = await state.autoStep();
+    }
+
+    return state;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -225,9 +240,7 @@ export class Action<TInputs> {
     const { dispatchEvents = true } = runOptions;
     const { name, hanko, flowName, csrfToken, invokedAction } =
       this.parentState;
-    console.log(
-      `RRUUUN Action '${this.name}' is not enabled in state '${name}'`,
-    );
+
     if (!this.enabled) {
       throw new Error(
         `Action '${this.name}' is not enabled in state '${name}'`,
