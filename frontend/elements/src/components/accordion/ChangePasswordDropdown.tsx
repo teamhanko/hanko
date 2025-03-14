@@ -69,11 +69,10 @@ const ChangePasswordDropdown = ({
           value={newPassword}
           flowInput={inputs.password}
         />
-        <Button uiAction={"password-submit"}>{t("labels.save")}</Button>
+        <Button>{t("labels.save")}</Button>
       </Form>
       <Link
         hidden={!allowPasswordDelete}
-        uiAction={"password-delete"}
         dangerous
         onClick={(event: Event) =>
           onPasswordDelete(event).then(() => setNewPassword(""))

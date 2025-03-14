@@ -107,7 +107,6 @@ const ListWebauthnCredentialsAccordion = ({
           : t("texts.deletePasskey")}
         <br />
         <Link
-          uiAction={"password-delete"}
           dangerous
           onClick={(event) => onCredentialDelete(event, credential.id)}
           loadingSpinnerPosition={"right"}

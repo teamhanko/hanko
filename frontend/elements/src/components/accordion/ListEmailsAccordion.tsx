@@ -10,6 +10,7 @@ import Paragraph from "../paragraph/Paragraph";
 import Headline2 from "../headline/Headline2";
 import Link from "../link/Link";
 import { Email } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
   onEmailDelete: (event: Event, emailID: string) => Promise<void>;
@@ -19,6 +20,8 @@ interface Props {
   setCheckedItemID: StateUpdater<string>;
   emails?: Email[];
   deletableEmailIDs?: string[];
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const ListEmailsAccordion = ({
@@ -70,7 +73,6 @@ const ListEmailsAccordion = ({
             {t("texts.setPrimaryEmail")}
             <br />
             <Link
-              uiAction={"email-set-primary"}
               onClick={(event: Event) => onEmailSetPrimary(event, email.id)}
               loadingSpinnerPosition={"right"}
             >
@@ -100,7 +102,6 @@ const ListEmailsAccordion = ({
             {t("texts.emailUnverified")}
             <br />
             <Link
-              uiAction={"email-verify"}
               onClick={(event) => onEmailVerify(event, email.id)}
               loadingSpinnerPosition={"right"}
             >
@@ -116,7 +117,6 @@ const ListEmailsAccordion = ({
             {t("texts.emailDelete")}
             <br />
             <Link
-              uiAction={"email-delete"}
               dangerous
               onClick={(event) => onEmailDelete(event, email.id)}
               disabled={isDisabled}

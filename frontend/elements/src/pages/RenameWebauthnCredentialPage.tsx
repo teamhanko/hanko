@@ -76,9 +76,7 @@ const RenameWebauthnCredentialPage = ({
             onInput={onInput}
             autofocus
           />
-          <Button uiAction={"webauthn-credential-rename"}>
-            {t("labels.save")}
-          </Button>
+          <Button>{t("labels.save")}</Button>
         </Form>
       </Content>
       <Footer>

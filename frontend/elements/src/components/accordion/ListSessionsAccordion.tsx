@@ -66,7 +66,6 @@ const ListSessionsAccordion = ({
         <Paragraph>
           <Headline2>{t("headlines.revokeSession")}</Headline2>
           <Link
-            uiAction={"session-delete"}
             dangerous
             onClick={(event) => onSessionDelete(event, session.id)}
             loadingSpinnerPosition={"right"}

@@ -51,11 +51,6 @@ const AddWebauthnCredentialDropdown = ({
       </Paragraph>
       <Form onSubmit={onCredentialSubmit}>
         <Button
-          uiAction={
-            credentialType === "security-key"
-              ? "security-key-submit"
-              : "passkey-submit"
-          }
           title={!webauthnSupported ? t("labels.webauthnUnsupported") : null}
         >
           {credentialType === "security-key"

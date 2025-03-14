@@ -9,30 +9,39 @@ import LoadingSpinner, {
 import styles from "./styles.sass";
 import { useCallback, useContext, useMemo, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext, UIAction } from "../../contexts/AppProvider";
+import { AppContext } from "../../contexts/AppProvider";
+import { useFlowEffects } from "../../contexts/UseFlowEffects";
+import { Action } from "@teamhanko/hanko-frontend-sdk";
 
 type LoadingSpinnerPosition = "left" | "right";
 
 export interface Props
   extends LoadingSpinnerProps,
     h.JSX.HTMLAttributes<HTMLButtonElement> {
-  uiAction?: UIAction;
-  onClick(event: Event): void;
+  onClick?(event: Event): void;
   dangerous?: boolean;
   loadingSpinnerPosition?: LoadingSpinnerPosition;
+  flowAction?: Action<any>;
 }
 
 const Link = ({
   loadingSpinnerPosition,
   dangerous = false,
   onClick,
-  uiAction,
+  flowAction,
   ...props
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { uiState, isDisabled } = useContext(AppContext);
-
+  const { uiState } = useContext(AppContext);
   const [confirmationActive, setConfirmationActive] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  onClick ||= async (e: Event) => {
+    e.preventDefault();
+    return await flowAction?.run();
+  };
+
+  useFlowEffects(flowAction, setIsLoading);
 
   let timeoutID: number;
 
@@ -47,14 +56,14 @@ const Link = ({
   };
 
   const loading = useMemo(
-    () => (uiAction && uiState.loadingAction === uiAction) || props.isLoading,
-    [props, uiAction, uiState],
+    () => isLoading || props.isLoading,
+    [isLoading, props],
   );
 
-  const success = useMemo(
-    () => (uiAction && uiState.succeededAction === uiAction) || props.isSuccess,
-    [props, uiAction, uiState],
-  );
+  // const success = useMemo(
+  //   () => (uiAction && uiState.succeededAction === uiAction) || props.isSuccess,
+  //   [props, uiAction, uiState],
+  // );
 
   const onConfirmation = useCallback(
     (event: Event) => {
@@ -78,7 +87,7 @@ const Link = ({
         <button
           {...props}
           onClick={dangerous ? dangerousOnClick : onClick}
-          disabled={confirmationActive || props.disabled || isDisabled}
+          disabled={confirmationActive || props.disabled || uiState.isDisabled}
           // @ts-ignore
           part={"link"}
           className={cx(styles.link, dangerous ? styles.danger : null)}
@@ -87,15 +96,7 @@ const Link = ({
         </button>
       </Fragment>
     ),
-    [
-      confirmationActive,
-      dangerous,
-      onClick,
-      onConfirmation,
-      props,
-      t,
-      isDisabled,
-    ],
+    [uiState, confirmationActive, dangerous, onClick, onConfirmation, props, t],
   );
 
   const handleOnMouseEnter = () => {
@@ -115,15 +116,15 @@ const Link = ({
           styles.linkWrapper,
           loadingSpinnerPosition === "right" ? styles.reverse : null,
         )}
-        hidden={props.hidden}
+        hidden={!(flowAction && flowAction.enabled) || props.hidden}
         onMouseEnter={handleOnMouseEnter}
         onMouseLeave={handleOnMouseLeave}
       >
-        {loadingSpinnerPosition && (loading || success) ? (
+        {loadingSpinnerPosition && loading ? ( // || success) ? (
           <Fragment>
             <LoadingSpinner
               isLoading={loading}
-              isSuccess={success}
+              isSuccess={false} // {success}
               secondary={props.secondary}
               fadeOut
             />

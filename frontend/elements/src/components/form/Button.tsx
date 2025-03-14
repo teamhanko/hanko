@@ -1,5 +1,11 @@
 import { ComponentChildren } from "preact";
-import { useContext, useEffect, useMemo, useRef } from "preact/compat";
+import {
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "preact/compat";
 
 import cx from "classnames";
 
@@ -7,11 +13,12 @@ import styles from "./styles.sass";
 
 import LoadingSpinner from "../icons/LoadingSpinner";
 import Icon, { IconName } from "../icons/Icon";
-import { AppContext, UIAction } from "../../contexts/AppProvider";
+import { AppContext } from "../../contexts/AppProvider";
 import LastUsed from "./LastUsed";
+import { useFlowEffects } from "../../contexts/UseFlowEffects";
+import { useFormContext } from "./Form";
 
 type Props = {
-  uiAction?: UIAction;
   title?: string;
   children: ComponentChildren;
   secondary?: boolean;
@@ -26,7 +33,6 @@ type Props = {
 };
 
 const Button = ({
-  uiAction,
   title,
   children,
   secondary,
@@ -38,7 +44,12 @@ const Button = ({
   ...props
 }: Props) => {
   const ref = useRef(null);
-  const { uiState, isDisabled } = useContext(AppContext);
+  const { uiState } = useContext(AppContext);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const { flowAction } = useFormContext();
+
+  useFlowEffects(flowAction, setIsLoading);
 
   useEffect(() => {
     const { current: element } = ref;
@@ -47,19 +58,11 @@ const Button = ({
     }
   }, [autofocus]);
 
-  const loading = useMemo(
-    () => (uiAction && uiState.loadingAction === uiAction) || props.isLoading,
-    [props, uiAction, uiState],
-  );
-
-  const success = useMemo(
-    () => (uiAction && uiState.succeededAction === uiAction) || props.isSuccess,
-    [props, uiAction, uiState],
-  );
+  const success = useMemo(() => props.isSuccess, [props]);
 
   const disabled = useMemo(
-    () => isDisabled || props.disabled,
-    [props, isDisabled],
+    () => uiState.isDisabled || props.disabled,
+    [props, uiState],
   );
 
   return (
@@ -87,7 +90,7 @@ const Button = ({
       )}
     >
       <LoadingSpinner
-        isLoading={loading}
+        isLoading={isLoading}
         isSuccess={success}
         secondary={true}
         hasIcon={!!icon}

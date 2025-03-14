@@ -53,7 +53,7 @@ const AddEmailDropdown = ({
           value={newEmail}
           flowInput={inputs.email}
         />
-        <Button uiAction={"email-submit"}>{t("labels.save")}</Button>
+        <Button>{t("labels.save")}</Button>
       </Form>
     </Dropdown>
   );
