@@ -2,14 +2,16 @@ package session
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
 	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
 	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
 	"github.com/teamhanko/hanko/backend/dto"
-	"net/http"
-	"time"
+	"github.com/teamhanko/hanko/backend/persistence"
 )
 
 type Manager interface {
@@ -21,11 +23,13 @@ type Manager interface {
 
 // Manager is used to create and verify session JWTs
 type manager struct {
-	jwtGenerator  hankoJwt.Generator
-	sessionLength time.Duration
-	cookieConfig  cookieConfig
-	issuer        string
-	audience      []string
+	jwtGenerator   hankoJwt.Generator
+	sessionLength  time.Duration
+	cookieConfig   cookieConfig
+	issuer         string
+	audience       []string
+	claimTemplates []config.ClaimTemplate
+	persister      persistence.Persister
 }
 
 type cookieConfig struct {
@@ -41,7 +45,7 @@ const (
 )
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, error) {
+func NewManager(jwkManager hankoJwk.Manager, config config.Config, persister persistence.Persister) (Manager, error) {
 	signatureKey, err := jwkManager.GetSigningKey()
 	if err != nil {
 		return nil, fmt.Errorf(GeneratorCreateFailure, err)
@@ -85,16 +89,51 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 			SameSite: sameSite,
 			Secure:   config.Session.Cookie.Secure,
 		},
-		audience: audience,
+		audience:       audience,
+		claimTemplates: config.Session.ClaimTemplates,
+		persister:      persister,
 	}, nil
 }
 
 // GenerateJWT creates a new session JWT for the given user
 func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error) {
+	// Get the full user model for template processing
+	user, err := m.persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return "", nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	// Create template data
+	templateData := TemplateData{
+		User: user,
+	}
+
+	// Find the active template
+	var activeTemplate *config.ClaimTemplate
+	for i := range m.claimTemplates {
+		if m.claimTemplates[i].Active {
+			activeTemplate = &m.claimTemplates[i]
+			break
+		}
+	}
+
+	// Create a new token
+	token := jwt.New()
+
+	// Process the active template if found
+	if activeTemplate != nil {
+		for key, value := range activeTemplate.Claims {
+			processed, err := processClaimValue(value, templateData)
+			if err != nil {
+				return "", nil, fmt.Errorf("failed to process claim %s: %w", key, err)
+			}
+			_ = token.Set(key, processed)
+		}
+	}
+
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(m.sessionLength)
 
-	token := jwt.New()
 	_ = token.Set(jwt.SubjectKey, userId.String())
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
