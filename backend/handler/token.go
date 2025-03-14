@@ -3,6 +3,9 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
@@ -14,8 +17,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	rateLimit "github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
-	"net/http"
-	"time"
 )
 
 type TokenHandler struct {
@@ -92,7 +93,10 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		jwtToken, rawToken, err := h.sessionManager.GenerateJWT(token.UserID, emailJwt)
+		jwtToken, rawToken, err := h.sessionManager.GenerateJWT(session.User{
+			UserID: token.UserID.String(),
+			Email:  emailJwt,
+		})
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

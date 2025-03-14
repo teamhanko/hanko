@@ -11,11 +11,17 @@ import (
 	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
 	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
 	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/persistence"
 )
 
+// User represents an abstracted user model for session management
+type User struct {
+	UserID   string
+	Email    *dto.EmailJwt
+	Username string
+}
+
 type Manager interface {
-	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error)
+	GenerateJWT(user User, opts ...JWTOptions) (string, jwt.Token, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
@@ -29,7 +35,6 @@ type manager struct {
 	issuer         string
 	audience       []string
 	claimTemplates []config.ClaimTemplate
-	persister      persistence.Persister
 }
 
 type cookieConfig struct {
@@ -45,7 +50,7 @@ const (
 )
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager hankoJwk.Manager, config config.Config, persister persistence.Persister) (Manager, error) {
+func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, error) {
 	signatureKey, err := jwkManager.GetSigningKey()
 	if err != nil {
 		return nil, fmt.Errorf(GeneratorCreateFailure, err)
@@ -91,21 +96,14 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config, persister per
 		},
 		audience:       audience,
 		claimTemplates: config.Session.ClaimTemplates,
-		persister:      persister,
 	}, nil
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error) {
-	// Get the full user model for template processing
-	user, err := m.persister.GetUserPersister().Get(userId)
-	if err != nil {
-		return "", nil, fmt.Errorf("failed to get user: %w", err)
-	}
-
+func (m *manager) GenerateJWT(user User, opts ...JWTOptions) (string, jwt.Token, error) {
 	// Create template data
 	templateData := TemplateData{
-		User: user,
+		User: &user,
 	}
 
 	// Find the active template
@@ -134,7 +132,7 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWT
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(m.sessionLength)
 
-	_ = token.Set(jwt.SubjectKey, userId.String())
+	_ = token.Set(jwt.SubjectKey, user.UserID)
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
 	_ = token.Set(jwt.AudienceKey, m.audience)
@@ -145,8 +143,8 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWT
 	}
 	_ = token.Set("session_id", sessionID.String())
 
-	if email != nil {
-		_ = token.Set("email", &email)
+	if user.Email != nil {
+		_ = token.Set("email", user.Email)
 	}
 
 	for _, opt := range opts {

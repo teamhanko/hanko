@@ -3,6 +3,8 @@ package jwt
 import (
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
@@ -11,7 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
-	"log"
 )
 
 func NewCreateCommand() *cobra.Command {
@@ -48,7 +49,7 @@ func NewCreateCommand() *cobra.Command {
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager, *cfg, persister)
+			sessionManager, err := session.NewManager(jwkManager, *cfg)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return
@@ -67,7 +68,10 @@ func NewCreateCommand() *cobra.Command {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
-			token, rawToken, err := sessionManager.GenerateJWT(userId, emailJwt)
+			token, rawToken, err := sessionManager.GenerateJWT(session.User{
+				UserID: userId.String(),
+				Email:  emailJwt,
+			})
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return

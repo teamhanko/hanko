@@ -4,13 +4,17 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/dto/intern"
@@ -18,9 +22,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type WebauthnHandler struct {
@@ -423,7 +424,10 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		token, rawToken, err := h.sessionManager.GenerateJWT(webauthnUser.UserId, emailJwt)
+		token, rawToken, err := h.sessionManager.GenerateJWT(session.User{
+			UserID: webauthnUser.UserId.String(),
+			Email:  emailJwt,
+		})
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

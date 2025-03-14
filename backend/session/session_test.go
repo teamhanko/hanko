@@ -2,6 +2,9 @@ package session
 
 import (
 	"encoding/json"
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
@@ -9,8 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/test"
-	"testing"
-	"time"
 )
 
 func TestNewGenerator(t *testing.T) {
@@ -31,7 +32,9 @@ func TestGenerator_Generate(t *testing.T) {
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
 
-	session, _, err := sessionGenerator.GenerateJWT(userId, nil)
+	session, _, err := sessionGenerator.GenerateJWT(User{
+		UserID: userId.String(),
+	})
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 }
@@ -57,7 +60,10 @@ func TestGenerator_Verify(t *testing.T) {
 		IsVerified: false,
 	}
 
-	session, _, err := sessionGenerator.GenerateJWT(userId, emailDto)
+	session, _, err := sessionGenerator.GenerateJWT(User{
+		UserID: userId.String(),
+		Email:  emailDto,
+	})
 	assert.NoError(t, err)
 	require.NotEmpty(t, session)
 
@@ -103,7 +109,9 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
-	j, _, err := sessionGenerator.GenerateJWT(userId, nil)
+	j, _, err := sessionGenerator.GenerateJWT(User{
+		UserID: userId.String(),
+	})
 	assert.NoError(t, err)
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
@@ -134,7 +142,9 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
-	j, _, err := sessionGenerator.GenerateJWT(userId, nil)
+	j, _, err := sessionGenerator.GenerateJWT(User{
+		UserID: userId.String(),
+	})
 	assert.NoError(t, err)
 
 	token, err := jwt.ParseString(j, jwt.WithVerify(false))
@@ -168,7 +178,9 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 			require.NotEmpty(t, sessionGenerator)
 
 			userId, _ := uuid.NewV4()
-			tokenString, _, err := sessionGenerator.GenerateJWT(userId, nil)
+			tokenString, _, err := sessionGenerator.GenerateJWT(User{
+				UserID: userId.String(),
+			})
 			assert.NoError(t, err)
 
 			token, err := jwt.ParseString(tokenString, jwt.WithVerify(false))

@@ -3,6 +3,8 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
@@ -10,7 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
-	"time"
 )
 
 type IssueSession struct {
@@ -46,7 +47,16 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		generateJWTOptions = append(generateJWTOptions, session.WithValue("username", userModel.Username.Username))
 	}
 
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO, generateJWTOptions...)
+	userJWT := session.User{
+		UserID: userId.String(),
+		Email:  emailDTO,
+	}
+
+	if userModel.Username != nil && userModel.Username.Username != "" {
+		userJWT.Username = userModel.Username.Username
+	}
+
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}

@@ -4,13 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"text/template"
-
-	"github.com/teamhanko/hanko/backend/persistence/models"
 )
 
 // TemplateData holds the data available for template processing
 type TemplateData struct {
-	User *models.User
+	User *User
 }
 
 // processTemplate processes a template string using the provided data
