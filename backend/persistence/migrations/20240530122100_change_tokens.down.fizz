@@ -1,3 +1,4 @@
+drop_foreign_key("tokens", "tokens_identities_id_fk")
 drop_column("tokens", "identity_id")
 drop_column("tokens", "is_flow")
 drop_column("tokens", "user_created")
