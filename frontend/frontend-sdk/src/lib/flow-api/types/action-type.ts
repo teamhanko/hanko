@@ -24,7 +24,7 @@ import {
 } from "./input";
 
 export interface ActionType<TInputs> {
-  name: string;
+  action: string;
   href: string;
   inputs: TInputs;
   description: string;

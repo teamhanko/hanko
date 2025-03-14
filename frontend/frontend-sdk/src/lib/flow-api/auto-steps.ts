@@ -20,6 +20,7 @@ const createWebauthnAbortSignal = () => {
 
 export const autoSteps: AutoSteps = {
   preflight: async (state) => {
+    createWebauthnAbortSignal();
     return await state.actions.register_client_capabilities.run({
       webauthn_available: WebauthnSupport.supported(),
       webauthn_conditional_mediation_available:
@@ -36,8 +37,8 @@ export const autoSteps: AutoSteps = {
         ...state.payload.request_options,
         signal: createWebauthnAbortSignal(),
       });
-    } catch {
-      const nextState = await state.actions.back.run(null);
+    } catch (e) {
+      const nextState = await state.actions.back.run();
 
       if (state.error) {
         nextState.error = state.error;
@@ -59,7 +60,7 @@ export const autoSteps: AutoSteps = {
         signal: createWebauthnAbortSignal(),
       });
     } catch {
-      const nextState = await state.actions.back.run(null);
+      const nextState = await state.actions.back.run();
 
       nextState.error = {
         code: "webauthn_credential_already_exists",
@@ -121,10 +122,6 @@ export const autoSteps: AutoSteps = {
 
       return nextState;
     }
-    // setUIState((prev) => ({
-    //   ...prev,
-    //   lastAction: null,
-    // }));
 
     state.save("hanko-saved-state");
     window.location.assign(state.payload.redirect_url);

@@ -53,6 +53,9 @@ export const userCreatedType: "hanko-user-created" = "hanko-user-created";
 export const flowStateChangedType: "hanko-flow-state-changed" =
   "hanko-flow-state-changed";
 
+export const flowBeforeStateChangedType: "hanko-flow-before-state-changed" =
+  "hanko-flow-before-state-changed";
+
 /**
  * The type of the `hanko-flow-error` event.
  * @typedef {string} flowErrorType
@@ -72,6 +75,10 @@ export const flowErrorType: "hanko-flow-error" = "hanko-flow-error";
 export interface SessionDetail {
   jwt?: string;
   expirationSeconds: number;
+}
+
+export interface FlowErrorDetail {
+  error: Error;
 }
 
 export interface FlowDetail {

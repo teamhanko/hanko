@@ -8,6 +8,8 @@ import {
   userDeletedType,
   userLoggedOutType,
   flowStateChangedType,
+  flowBeforeStateChangedType,
+  flowErrorType, FlowErrorDetail,
 } from "./CustomEvents";
 
 /**
@@ -223,12 +225,30 @@ export class Listener {
     return this.addEventListener(userDeletedType, { callback, once });
   }
 
+  public onFlowError(
+    callback: CallbackFunc<FlowErrorDetail>,
+    once?: boolean,
+  ): CleanupFunc {
+    return this.addEventListener(flowErrorType, { callback, once }, false);
+  }
+
   public onFlowStateChanged(
     callback: CallbackFunc<FlowDetail>,
     once?: boolean,
   ): CleanupFunc {
     return this.addEventListener(
       flowStateChangedType,
+      { callback, once },
+      false,
+    );
+  }
+
+  public onFlowBeforeStateChanged(
+    callback: CallbackFunc<FlowDetail>,
+    once?: boolean,
+  ): CleanupFunc {
+    return this.addEventListener(
+      flowBeforeStateChangedType,
       { callback, once },
       false,
     );

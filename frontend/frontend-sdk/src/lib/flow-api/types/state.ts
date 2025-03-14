@@ -21,7 +21,7 @@ import {
   ProfileInitActions,
   RegistrationInitActions,
   ThirdPartyActions,
-} from "./actionType";
+} from "./action-type";
 
 import {
   LoginInitPayload,

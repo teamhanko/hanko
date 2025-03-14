@@ -1,25 +1,12 @@
 import { StateName, Actions, Payloads } from "./state";
-import { ActionType } from "./actionType";
+import { ActionType } from "./action-type";
 import { Input } from "./input";
 import { Error } from "./error";
-import { State } from "../State";
-import { Action } from "../Action";
-import { Hanko } from "../../../Hanko";
+import { Action, State } from "../State";
 
-export type FlowPath = "/login" | "/registration" | "/profile";
+export type FlowName = "login" | "registration" | "profile";
 
 export type AnyState = { [K in StateName]: State<K> }[StateName];
-
-export type FetchFunction = (
-  // eslint-disable-next-line no-unused-vars
-  hanko: Hanko,
-  // eslint-disable-next-line no-unused-vars
-  path: FlowPath,
-  // eslint-disable-next-line no-unused-vars
-  href: string,
-  // eslint-disable-next-line no-unused-vars
-  body?: any,
-) => Promise<AnyState>;
 
 export type ExtractInputValues<TInputs> = {
   [K in keyof TInputs]: TInputs[K] extends Input<infer TValue> ? TValue : never;

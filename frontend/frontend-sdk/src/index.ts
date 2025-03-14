@@ -152,6 +152,8 @@ import { CookieSameSite } from "./lib/Cookie";
 export type { CookieSameSite };
 
 // Flow
-import { State } from "./lib/flow-api/State";
+import { State, Action } from "./lib/flow-api/State";
+import { FlowName } from "./lib/flow-api/types/flow";
 
-export { State };
+export { State, Action };
+export type { FlowName };
