@@ -7,7 +7,7 @@ require (
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/coreos/go-oidc/v3 v3.13.0
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.22.0
+	github.com/go-playground/validator/v10 v10.25.0
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/go-testfixtures/testfixtures/v3 v3.9.0
 	github.com/go-webauthn/webauthn v0.10.2
@@ -81,7 +81,7 @@ require (
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.6.1 // indirect
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
