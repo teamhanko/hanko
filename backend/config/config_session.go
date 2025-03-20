@@ -39,28 +39,14 @@ type Session struct {
 	// Deprecated. Use settings in parent object.
 	//`server_side` contains configuration for server-side sessions.
 	ServerSide *ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
-	// `claim_templates` defines templates for additional JWT claims that can be added to session tokens.
-	// Only one template can be active at a time.
-	ClaimTemplates []ClaimTemplate `yaml:"claim_templates" json:"claim_templates,omitempty" koanf:"claim_templates"`
+	// `claim_template` defines a template for additional JWT claims that can be added to session tokens.
+	ClaimTemplate *ClaimTemplate `yaml:"claim_template" json:"claim_template,omitempty" koanf:"claim_template"`
 }
 
 func (s *Session) Validate() error {
 	_, err := time.ParseDuration(s.Lifespan)
 	if err != nil {
 		return errors.New("failed to parse lifespan")
-	}
-
-	// Validate claim templates
-	if len(s.ClaimTemplates) > 0 {
-		activeCount := 0
-		for _, tmpl := range s.ClaimTemplates {
-			if tmpl.Active {
-				activeCount++
-			}
-		}
-		if activeCount > 1 {
-			return errors.New("only one claim template can be active at a time")
-		}
 	}
 
 	return nil
@@ -117,7 +103,5 @@ type ServerSide struct {
 }
 
 type ClaimTemplate struct {
-	Name   string                 `yaml:"name" json:"name,omitempty" koanf:"name"`
-	Active bool                   `yaml:"active" json:"active,omitempty" koanf:"active" jsonschema:"default=true"`
 	Claims map[string]interface{} `yaml:"claims" json:"claims,omitempty" koanf:"claims"`
 }

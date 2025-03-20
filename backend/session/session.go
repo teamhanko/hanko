@@ -22,12 +22,12 @@ type Manager interface {
 
 // Manager is used to create and verify session JWTs
 type manager struct {
-	jwtGenerator   hankoJwt.Generator
-	sessionLength  time.Duration
-	cookieConfig   cookieConfig
-	issuer         string
-	audience       []string
-	claimTemplates []config.ClaimTemplate
+	jwtGenerator  hankoJwt.Generator
+	sessionLength time.Duration
+	cookieConfig  cookieConfig
+	issuer        string
+	audience      []string
+	claimTemplate *config.ClaimTemplate
 }
 
 type cookieConfig struct {
@@ -87,8 +87,8 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 			SameSite: sameSite,
 			Secure:   config.Session.Cookie.Secure,
 		},
-		audience:       audience,
-		claimTemplates: config.Session.ClaimTemplates,
+		audience:      audience,
+		claimTemplate: config.Session.ClaimTemplate,
 	}, nil
 }
 
@@ -99,21 +99,12 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 		User: &user,
 	}
 
-	// Find the active template
-	var activeTemplate *config.ClaimTemplate
-	for i := range m.claimTemplates {
-		if m.claimTemplates[i].Active {
-			activeTemplate = &m.claimTemplates[i]
-			break
-		}
-	}
-
 	// Create a new token
 	token := jwt.New()
 
-	// Process the active template if found
-	if activeTemplate != nil {
-		for key, value := range activeTemplate.Claims {
+	// Process the template if found
+	if m.claimTemplate != nil {
+		for key, value := range m.claimTemplate.Claims {
 			processed, err := processClaimValue(value, templateData)
 			if err != nil {
 				return "", nil, fmt.Errorf("failed to process claim %s: %w", key, err)
