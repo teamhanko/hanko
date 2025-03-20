@@ -32,7 +32,7 @@ func TestGenerator_Generate(t *testing.T) {
 	userId, err := uuid.NewV4()
 	assert.NoError(t, err)
 
-	session, _, err := sessionGenerator.GenerateJWT(User{
+	session, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
 	})
 	assert.NoError(t, err)
@@ -60,7 +60,7 @@ func TestGenerator_Verify(t *testing.T) {
 		IsVerified: false,
 	}
 
-	session, _, err := sessionGenerator.GenerateJWT(User{
+	session, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
 		Email:  emailDto,
 	})
@@ -109,7 +109,7 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
-	j, _, err := sessionGenerator.GenerateJWT(User{
+	j, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
 	})
 	assert.NoError(t, err)
@@ -142,7 +142,7 @@ func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	require.NotEmpty(t, sessionGenerator)
 
 	userId, _ := uuid.NewV4()
-	j, _, err := sessionGenerator.GenerateJWT(User{
+	j, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
 	})
 	assert.NoError(t, err)
@@ -178,7 +178,7 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 			require.NotEmpty(t, sessionGenerator)
 
 			userId, _ := uuid.NewV4()
-			tokenString, _, err := sessionGenerator.GenerateJWT(User{
+			tokenString, _, err := sessionGenerator.GenerateJWT(dto.UserJWT{
 				UserID: userId.String(),
 			})
 			assert.NoError(t, err)

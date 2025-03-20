@@ -62,7 +62,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		emailDTO = dto.JwtFromEmailModel(email)
 	}
 
-	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(session.UserJWT{
+	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(dto.UserJWT{
 		UserID: userID.String(),
 		Email:  emailDTO,
 	})

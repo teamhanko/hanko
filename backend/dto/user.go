@@ -1,10 +1,18 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"time"
 )
+
+// UserJWT represents an abstracted user model for session management
+type UserJWT struct {
+	UserID   string
+	Email    *EmailJwt
+	Username string
+}
 
 type CreateUserResponse struct {
 	ID      uuid.UUID `json:"id"` // deprecated

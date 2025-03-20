@@ -116,7 +116,7 @@ func (h *UserHandler) Create(c echo.Context) error {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
-			token, _, err := h.sessionManager.GenerateJWT(session.UserJWT{
+			token, _, err := h.sessionManager.GenerateJWT(dto.UserJWT{
 				UserID: newUser.ID.String(),
 				Email:  emailJwt,
 			})

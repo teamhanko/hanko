@@ -47,7 +47,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		generateJWTOptions = append(generateJWTOptions, session.WithValue("username", userModel.Username.Username))
 	}
 
-	userJWT := session.UserJWT{
+	userJWT := dto.UserJWT{
 		UserID: userId.String(),
 		Email:  emailDTO,
 	}

@@ -4,11 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"text/template"
+
+	"github.com/teamhanko/hanko/backend/dto"
 )
 
 // TemplateData holds the data available for template processing
 type TemplateData struct {
-	User *User
+	User *dto.UserJWT
 }
 
 // processTemplate processes a template string using the provided data

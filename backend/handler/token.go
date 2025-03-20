@@ -93,7 +93,7 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		jwtToken, rawToken, err := h.sessionManager.GenerateJWT(session.UserJWT{
+		jwtToken, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{
 			UserID: token.UserID.String(),
 			Email:  emailJwt,
 		})
