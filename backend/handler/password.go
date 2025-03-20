@@ -224,7 +224,7 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		emailJwt = dto.JwtFromEmailModel(e)
 	}
 
-	token, rawToken, err := h.sessionManager.GenerateJWT(session.User{
+	token, rawToken, err := h.sessionManager.GenerateJWT(session.UserJWT{
 		UserID: pw.UserId.String(),
 		Email:  emailJwt,
 	})

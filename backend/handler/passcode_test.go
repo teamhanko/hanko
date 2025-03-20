@@ -302,7 +302,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 				req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 				req.Header.Set("Content-Type", "application/json")
 				if currentTest.sendSessionTokenInAuthHeader {
-					sessionToken, _, err := sessionManager.GenerateJWT(session.User{
+					sessionToken, _, err := sessionManager.GenerateJWT(session.UserJWT{
 						UserID: currentTest.userId,
 					})
 					s.Require().NoError(err)
@@ -310,7 +310,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 				}
 
 				if currentTest.sendSessionTokenInCookie {
-					sessionToken, _, err := sessionManager.GenerateJWT(session.User{
+					sessionToken, _, err := sessionManager.GenerateJWT(session.UserJWT{
 						UserID: currentTest.userId,
 					})
 					s.Require().NoError(err)

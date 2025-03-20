@@ -20,7 +20,7 @@ func getDefaultSessionManager(storage persistence.Persister) session.Manager {
 
 func generateSessionCookie(storage persistence.Persister, userId uuid.UUID) (*http.Cookie, error) {
 	manager := getDefaultSessionManager(storage)
-	token, rawToken, err := manager.GenerateJWT(session.User{
+	token, rawToken, err := manager.GenerateJWT(session.UserJWT{
 		UserID: userId.String(),
 	})
 	if err != nil {

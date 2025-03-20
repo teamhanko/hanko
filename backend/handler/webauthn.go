@@ -424,8 +424,8 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			emailJwt = dto.JwtFromEmailModel(e)
 		}
 
-		token, rawToken, err := h.sessionManager.GenerateJWT(session.User{
-			UserID: webauthnUser.UserId.String(),
+		token, rawToken, err := h.sessionManager.GenerateJWT(session.UserJWT{
+			UserID: user.ID.String(),
 			Email:  emailJwt,
 		})
 		if err != nil {

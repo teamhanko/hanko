@@ -13,15 +13,15 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 )
 
-// User represents an abstracted user model for session management
-type User struct {
+// UserJWT represents an abstracted user model for session management
+type UserJWT struct {
 	UserID   string
 	Email    *dto.EmailJwt
 	Username string
 }
 
 type Manager interface {
-	GenerateJWT(user User, opts ...JWTOptions) (string, jwt.Token, error)
+	GenerateJWT(user UserJWT, opts ...JWTOptions) (string, jwt.Token, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
@@ -100,7 +100,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (m *manager) GenerateJWT(user User, opts ...JWTOptions) (string, jwt.Token, error) {
+func (m *manager) GenerateJWT(user UserJWT, opts ...JWTOptions) (string, jwt.Token, error) {
 	// Create template data
 	templateData := TemplateData{
 		User: &user,

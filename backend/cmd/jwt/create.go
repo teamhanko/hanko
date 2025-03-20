@@ -68,7 +68,7 @@ func NewCreateCommand() *cobra.Command {
 				emailJwt = dto.JwtFromEmailModel(e)
 			}
 
-			token, rawToken, err := sessionManager.GenerateJWT(session.User{
+			token, rawToken, err := sessionManager.GenerateJWT(session.UserJWT{
 				UserID: userId.String(),
 				Email:  emailJwt,
 			})
