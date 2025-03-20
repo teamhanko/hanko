@@ -404,9 +404,9 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			}
 		}
 
-		var emailJwt *dto.EmailJwt
+		var emailJwt *dto.EmailJWT
 		if e := userModel.Emails.GetPrimary(); e != nil {
-			emailJwt = dto.JwtFromEmailModel(e)
+			emailJwt = dto.EmailJWTFromEmailModel(e)
 		}
 
 		token, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{

@@ -63,9 +63,9 @@ func NewCreateCommand() *cobra.Command {
 				return
 			}
 
-			var emailJwt *dto.EmailJwt
+			var emailJwt *dto.EmailJWT
 			if e := emails.GetPrimary(); e != nil {
-				emailJwt = dto.JwtFromEmailModel(e)
+				emailJwt = dto.EmailJWTFromEmailModel(e)
 			}
 
 			token, rawToken, err := sessionManager.GenerateJWT(dto.UserJWT{

@@ -54,7 +54,7 @@ func TestGenerator_Verify(t *testing.T) {
 
 	testEmail := "lorem@ipsum.local"
 
-	emailDto := &dto.EmailJwt{
+	emailDto := &dto.EmailJWT{
 		Address:    testEmail,
 		IsPrimary:  true,
 		IsVerified: false,
@@ -78,9 +78,9 @@ func TestGenerator_Verify(t *testing.T) {
 	assert.True(t, ok)
 	assert.NotNil(t, emailClaim)
 
-	// Workaround as .(EmailJwt) interface conversion is not possible
+	// Workaround as .(EmailJWT) interface conversion is not possible
 	emailJson, _ := json.Marshal(emailClaim)
-	var tokenEmail dto.EmailJwt
+	var tokenEmail dto.EmailJWT
 	_ = json.Unmarshal(emailJson, &tokenEmail)
 
 	assert.Equal(t, testEmail, tokenEmail.Address)

@@ -57,9 +57,9 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	var emailDTO *dto.EmailJwt
+	var emailDTO *dto.EmailJWT
 	if email := user.Emails.GetPrimary(); email != nil {
-		emailDTO = dto.JwtFromEmailModel(email)
+		emailDTO = dto.EmailJWTFromEmailModel(email)
 	}
 
 	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(dto.UserJWT{

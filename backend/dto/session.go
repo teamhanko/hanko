@@ -52,7 +52,7 @@ type Claims struct {
 	Expiration time.Time  `json:"expiration"`
 	Audience   []string   `json:"audience,omitempty"`
 	Issuer     *string    `json:"issuer,omitempty"`
-	Email      *EmailJwt  `json:"email,omitempty"`
+	Email      *EmailJWT  `json:"email,omitempty"`
 	Username   *string    `json:"username,omitempty"`
 	SessionID  uuid.UUID  `json:"session_id"`
 }

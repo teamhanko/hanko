@@ -419,9 +419,9 @@ func (h *WebauthnHandler) FinishAuthentication(c echo.Context) error {
 			return fmt.Errorf("failed to delete assertion session data: %w", err)
 		}
 
-		var emailJwt *dto.EmailJwt
+		var emailJwt *dto.EmailJWT
 		if e := user.Emails.GetPrimary(); e != nil {
-			emailJwt = dto.JwtFromEmailModel(e)
+			emailJwt = dto.EmailJWTFromEmailModel(e)
 		}
 
 		token, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{

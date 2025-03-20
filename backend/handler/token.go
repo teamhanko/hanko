@@ -88,9 +88,9 @@ func (h TokenHandler) Validate(c echo.Context) error {
 			return fmt.Errorf("failed to get emails from db: %w", err)
 		}
 
-		var emailJwt *dto.EmailJwt
+		var emailJwt *dto.EmailJWT
 		if e := emails.GetPrimary(); e != nil {
-			emailJwt = dto.JwtFromEmailModel(e)
+			emailJwt = dto.EmailJWTFromEmailModel(e)
 		}
 
 		jwtToken, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{

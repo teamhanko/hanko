@@ -219,9 +219,9 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
-	var emailJwt *dto.EmailJwt
+	var emailJwt *dto.EmailJWT
 	if e := user.Emails.GetPrimary(); e != nil {
-		emailJwt = dto.JwtFromEmailModel(e)
+		emailJwt = dto.EmailJWTFromEmailModel(e)
 	}
 
 	token, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{

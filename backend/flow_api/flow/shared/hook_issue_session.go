@@ -11,7 +11,6 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
 )
 
 type IssueSession struct {
@@ -37,24 +36,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
 
-	var emailDTO *dto.EmailJwt
-	if email := userModel.Emails.GetPrimary(); email != nil {
-		emailDTO = dto.JwtFromEmailModel(email)
-	}
-
-	var generateJWTOptions []session.JWTOptions
-	if userModel.Username != nil {
-		generateJWTOptions = append(generateJWTOptions, session.WithValue("username", userModel.Username.Username))
-	}
-
-	userJWT := dto.UserJWT{
-		UserID: userId.String(),
-		Email:  emailDTO,
-	}
-
-	if userModel.Username != nil && userModel.Username.Username != "" {
-		userJWT.Username = userModel.Username.Username
-	}
+	userJWT := dto.UserJWTFromUserModel(userModel)
 
 	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT)
 	if err != nil {

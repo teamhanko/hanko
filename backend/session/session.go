@@ -94,22 +94,20 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 
 // GenerateJWT creates a new session JWT for the given user
 func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt.Token, error) {
-	// Create template data
-	templateData := TemplateData{
-		User: &user,
-	}
-
-	// Create a new token
 	token := jwt.New()
 
-	// Process the template if found
+	// Process the claim template if found
 	if m.claimTemplate != nil {
+		// Create template data
+		claimTemplateData := ClaimTemplateData{
+			User: &user,
+		}
 		for key, value := range m.claimTemplate.Claims {
-			processed, err := processClaimValue(value, templateData)
+			processedValue, err := processClaimValue(value, claimTemplateData)
 			if err != nil {
 				return "", nil, fmt.Errorf("failed to process claim %s: %w", key, err)
 			}
-			_ = token.Set(key, processed)
+			_ = token.Set(key, processedValue)
 		}
 	}
 

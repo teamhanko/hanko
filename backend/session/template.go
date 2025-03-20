@@ -8,13 +8,13 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 )
 
-// TemplateData holds the data available for template processing
-type TemplateData struct {
+// ClaimTemplateData holds the data available for template processing
+type ClaimTemplateData struct {
 	User *dto.UserJWT
 }
 
 // processTemplate processes a template string using the provided data
-func processTemplate(tmplStr string, data TemplateData) (string, error) {
+func processTemplate(tmplStr string, data ClaimTemplateData) (string, error) {
 	tmpl, err := template.New("").Parse(tmplStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template: %w", err)
@@ -29,7 +29,7 @@ func processTemplate(tmplStr string, data TemplateData) (string, error) {
 }
 
 // processClaimValue processes a claim value, handling both string templates and nested structures
-func processClaimValue(value interface{}, data TemplateData) (interface{}, error) {
+func processClaimValue(value interface{}, data ClaimTemplateData) (interface{}, error) {
 	switch v := value.(type) {
 	case string:
 		return processTemplate(v, data)
