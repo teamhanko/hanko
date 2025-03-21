@@ -157,5 +157,4 @@ export * from "./lib/flow-api/types/flow";
 export * from "./lib/flow-api/types/error";
 export * from "./lib/flow-api/types/payload";
 export * from "./lib/flow-api/types/state";
-export * from "lib/flow-api/types/input";
-
+export * from "./lib/flow-api/types/input";
