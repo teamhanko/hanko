@@ -30,6 +30,7 @@ export interface Options {
   dispatchAfterStateChangeEvent?: boolean;
   excludeAutoSteps?: AutoStepExclusion;
   previousActionID?: string;
+  readFromLocalStorage?: boolean;
 }
 
 /**
@@ -52,6 +53,7 @@ export class State<TState extends StateName = StateName> {
   public readonly csrfToken: string;
   public readonly status: number;
   public readonly previousActionID?: string;
+  public readonly readFromLocalStorage: boolean;
 
   public readonly hanko: Hanko;
   public invokedActionID?: string;
@@ -96,10 +98,12 @@ export class State<TState extends StateName = StateName> {
       dispatchAfterStateChangeEvent = true,
       excludeAutoSteps = null,
       previousActionID = null,
+      readFromLocalStorage = false,
     } = options;
 
     this.excludeAutoSteps = excludeAutoSteps;
     this.previousActionID = previousActionID;
+    this.readFromLocalStorage = readFromLocalStorage;
 
     if (dispatchAfterStateChangeEvent) {
       this.dispatchAfterStateChangeEvent();
@@ -224,8 +228,17 @@ export class State<TState extends StateName = StateName> {
     let state = new State(hanko, flowName, response, options);
 
     if (state.excludeAutoSteps != "all") {
-      while (state.autoStep && !state.excludeAutoSteps?.includes(state.name)) {
-        state = await state.autoStep();
+      while (
+        state &&
+        state.autoStep &&
+        !state.excludeAutoSteps?.includes(state.name)
+      ) {
+        const nextState = await state.autoStep();
+        if (nextState.name != state.name) {
+          state = nextState;
+        } else {
+          return nextState;
+        }
       }
     }
 
@@ -242,7 +255,7 @@ export class State<TState extends StateName = StateName> {
   public static async create(
     hanko: Hanko,
     flowName: FlowName,
-    options: Omit<Options, "previousActionID"> = {},
+    options: Omit<Options, "previousActionID" | "readFromLocalStorage"> = {},
   ): Promise<AnyState> {
     const cachedState = State.getFromLocalStorage(flowName);
 
@@ -254,6 +267,7 @@ export class State<TState extends StateName = StateName> {
         {
           ...options,
           previousActionID: cachedState.previous_action_id,
+          readFromLocalStorage: true,
         },
       );
     }

@@ -218,5 +218,7 @@ export const it: Translation = {
       "La richiesta è scaduta, è stata annullata o il dispositivo è già registrato. Prova di nuovo o usa un altro dispositivo.",
     platform_authenticator_required:
       "Il tuo account è configurato per utilizzare gli autenticatori di piattaforma. Tuttavia, il tuo dispositivo o browser corrente non supporta questa funzione. Prova di nuovo con un dispositivo o un browser compatibile.",
+    third_party_access_denied:
+      "Accesso negato. La richiesta è stata cancellata dall'utente o il provider ha negato l'accesso per altre ragioni.",
   },
 };

@@ -228,5 +228,7 @@ export const de: Translation = {
       "Die Anfrage wurde entweder abgebrochen, abgelaufen oder das Gerät ist bereits registriert. Bitte versuchen Sie es erneut oder verwenden Sie ein anderes Gerät.",
     platform_authenticator_required:
       "Ihr Konto ist so konfiguriert, dass es Plattform-Authentifikatoren verwendet, jedoch unterstützt Ihr aktuelles Gerät oder Ihr Browser diese Funktion nicht. Bitte versuchen Sie es mit einem kompatiblen Gerät oder Browser erneut.",
+    third_party_access_denied:
+      "Zugriff verweigert. Die Anfrage wurde durch den Nutzer abgebrochen oder der Provider hat den Zugriff aus anderen Gründen verweigert.",
   },
 };

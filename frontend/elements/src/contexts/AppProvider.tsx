@@ -16,7 +16,6 @@ import {
   Hanko,
   HankoError,
   TechnicalError,
-  UnauthorizedError,
   State,
   FlowName,
   Error as FlowError,
@@ -51,8 +50,6 @@ import SignalLike = JSXInternal.SignalLike;
 
 type ExperimentalFeature = "conditionalMediation";
 type ExperimentalFeatures = ExperimentalFeature[];
-
-const localStorageCacheStateKey = "flow-state";
 
 export type ComponentName =
   | "auth"
@@ -220,20 +217,23 @@ const AppProvider = ({
           return;
         }
 
-        console.log("onFlowStateChanged", detail.state);
-
-        if (state.name != "login_passkey") {
+        if (
+          ![
+            "onboarding_verify_passkey_attestation",
+            "webauthn_credential_verification",
+            "login_passkey",
+            "thirdparty",
+          ].includes(state.name)
+        ) {
           setUIState((prev) => ({ ...prev, isDisabled: false }));
         }
 
         switch (state.name) {
           case "login_init":
-            state.saveToLocalStorage();
             setPage(<LoginInitPage state={state} />);
             state.passkeyAutofillActivation();
             break;
           case "passcode_confirmation":
-            state.saveToLocalStorage();
             setPage(<PasscodePage state={state} />);
             break;
           case "login_otp":
@@ -312,17 +312,11 @@ const AppProvider = ({
       if (lastLoginEncoded) {
         setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
       }
-      const token = new URLSearchParams(window.location.search).get(
-        "hanko_token",
+      const samlHint = new URLSearchParams(window.location.search).get(
+        "saml_hint",
       );
-      const cachedState = localStorage.getItem(localStorageCacheStateKey);
-      if (cachedState && cachedState.length > 0 && token && token.length > 0) {
-        // TODO
-        // await hanko.flow.fromString(
-        //   localStorage.getItem(localStorageCacheStateKey),
-        //   { ...stateHandler },
-        // );
-        localStorage.removeItem(localStorageCacheStateKey);
+      if (samlHint === "idp_initiated") {
+        await hanko.createState("token_exchange");
       } else {
         await hanko.createState(flowName, { excludeAutoSteps: ["success"] });
       }
@@ -332,21 +326,15 @@ const AppProvider = ({
 
   const init = useCallback(
     (compName: ComponentName) => {
-      // Special handling for profile
-      if (compName === "profile" && !hanko.session.isValid()) {
-        setPage(<ErrorPage error={new UnauthorizedError()} />);
-        return;
-      }
-
       setComponentName(compName);
-
+      setUIState((prev) => ({ ...prev, isDisabled: false }));
       const flowName = componentFlowNameMap[compName];
 
       if (flowName) {
         flowInit(flowName).catch(handleError);
       }
     },
-    [flowInit],
+    [componentFlowNameMap, flowInit],
   );
 
   useEffect(() => init(componentName), []);
@@ -367,6 +355,14 @@ const AppProvider = ({
     hanko.onUserLoggedOut(() => {
       dispatchEvent("onUserLoggedOut");
     });
+
+    hanko.onBeforeStateChange((detail) => {
+      dispatchEvent("onBeforeStateChange", detail);
+    });
+
+    hanko.onAfterStateChange((detail) => {
+      dispatchEvent("onAfterStateChange", detail);
+    });
   }, [hanko]);
 
   useMemo(() => {
@@ -380,7 +376,7 @@ const AppProvider = ({
     } else if (componentName === "profile") {
       hanko.onSessionCreated(cb);
     }
-  }, []);
+  }, [componentName, hanko, init]);
 
   return (
     <AppContext.Provider
