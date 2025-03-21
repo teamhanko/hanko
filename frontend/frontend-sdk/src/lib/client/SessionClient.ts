@@ -29,7 +29,14 @@ export class SessionClient extends Client {
   }
 }
 
-// Class to maintain compatibility with previous versions.
+/**
+ * Class to maintain compatibility with previous versions.
+ *
+ * @constructor
+ * @category SDK
+ * @subcategory Clients
+ * @extends {Client}
+ */
 export class Session extends Client {
   /**
    * Checks if the current session is still valid. This function is to be removed - please replace
