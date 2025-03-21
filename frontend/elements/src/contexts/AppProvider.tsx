@@ -196,9 +196,7 @@ const AppProvider = ({
 
   useMemo(
     () =>
-      hanko.onBeforeStateChange((detail) => {
-        const { state } = detail;
-
+      hanko.onBeforeStateChange(({ state }) => {
         if (!isOwnFlow(state)) {
           return;
         }
@@ -210,9 +208,7 @@ const AppProvider = ({
 
   useEffect(
     () =>
-      hanko.onAfterStateChange(async (detail) => {
-        const { state } = detail;
-
+      hanko.onAfterStateChange(async ({ state }) => {
         if (!isOwnFlow(state)) {
           return;
         }

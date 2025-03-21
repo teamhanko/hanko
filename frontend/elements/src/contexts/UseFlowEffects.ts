@@ -11,25 +11,25 @@ export const useFlowEffects = (
 
   useEffect(
     () =>
-      hanko.onBeforeStateChange((detail) => {
-        if (!flowAction || !isOwnFlow(detail.state)) {
+      hanko.onBeforeStateChange(({ state }) => {
+        if (!flowAction || !isOwnFlow(state)) {
           return;
         }
 
         setUIState((prev) => ({ ...prev, isDisabled: true, error: undefined }));
-        setIsLoading(detail.state.invokedActionID == flowAction.id);
+        setIsLoading(state.invokedActionID == flowAction.id);
       }),
     [flowAction, hanko, isOwnFlow, setIsLoading, setUIState],
   );
 
   useEffect(
     () =>
-      hanko.onAfterStateChange((detail) => {
-        if (!flowAction || !isOwnFlow(detail.state)) {
+      hanko.onAfterStateChange(({ state }) => {
+        if (!flowAction || !isOwnFlow(state)) {
           return;
         }
 
-        setIsSuccess(detail.state.previousActionID == flowAction.id);
+        setIsSuccess(state.previousActionID == flowAction.id);
         setIsLoading(false);
       }),
     [hanko, setIsSuccess, setIsLoading, flowAction, isOwnFlow],
