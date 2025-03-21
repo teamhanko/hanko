@@ -153,16 +153,9 @@ export type { CookieSameSite };
 
 // Flow
 export * from "./lib/flow-api/State";
-
-// import { Options, State, Action } from "./lib/flow-api/State";
-// export type { Options };
-// export { State, Action };
-
-export * from "./lib/flow-api/State";
 export * from "./lib/flow-api/types/flow";
 export * from "./lib/flow-api/types/error";
 export * from "./lib/flow-api/types/payload";
+export * from "./lib/flow-api/types/state";
+export * from "lib/flow-api/types/input";
 
-import { LoginMethod, MFAMethod, LastLogin } from "./lib/flow-api/types/payload";
-export type { LoginMethod, MFAMethod, LastLogin };
-// export * from "lib/flow-api/types/input";
