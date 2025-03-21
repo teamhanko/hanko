@@ -12,13 +12,8 @@ import {
  * Uses an internal AbortController to cancel previous requests when a new one is initiated.
  */
 class WebauthnManager {
-  /** @private The single instance of WebauthnManager */
   private static instance: WebauthnManager | null = null;
-
-  /** @private Controls abortion of WebAuthn requests */
   private abortController = new AbortController();
-
-  /** @private Prevents direct instantiation */
   // eslint-disable-next-line no-useless-constructor,require-jsdoc
   private constructor() {}
 
@@ -64,7 +59,7 @@ class WebauthnManager {
   /**
    * Retrieves a WebAuthn credential with conditional UI mediation.
    * Aborts any previous request before starting a new one.
-   * @param {CredentialRequestOptionsJSON['publicKey']} publicKey - The public key options for conditional retrieval
+   * @param {CredentialRequestOptionsJSON} publicKey - The public key options for conditional retrieval
    * @returns {Promise<PublicKeyCredentialWithAssertionJSON>} A promise resolving to the retrieved credential
    * @throws {DOMException} If the WebAuthn request fails (e.g., aborted, not allowed)
    */
