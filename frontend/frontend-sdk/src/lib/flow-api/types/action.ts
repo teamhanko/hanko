@@ -169,4 +169,5 @@ export interface DeviceTrustActions {
 
 export interface ThirdPartyActions {
   readonly exchange_token: Action<ExchangeTokenInputs>;
+  readonly back?: Action<null>;
 }

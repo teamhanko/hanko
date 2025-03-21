@@ -38,6 +38,8 @@ const RegistrationInitPage = (props: Props) => {
     string | null
   >(null);
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [isFlowSwitchLoading, setIsFlowSwitchLoading] =
+    useState<boolean>(false);
 
   const onIdentifierSubmit = async (event: Event) => {
     event.preventDefault();
@@ -65,6 +67,7 @@ const RegistrationInitPage = (props: Props) => {
 
   const onLoginClick = async (event: Event) => {
     event.preventDefault();
+    setIsFlowSwitchLoading(true);
     init("login");
   };
 
@@ -98,45 +101,6 @@ const RegistrationInitPage = (props: Props) => {
     () => !!flowState.actions.thirdparty_oauth.enabled,
     [flowState.actions],
   );
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-
-    if (
-      searchParams.get("error") == undefined ||
-      searchParams.get("error").length === 0
-    ) {
-      return;
-    }
-
-    let errorCode = "";
-    switch (searchParams.get("error")) {
-      case "access_denied":
-        errorCode = "thirdPartyAccessDenied";
-        break;
-      default:
-        errorCode = "somethingWentWrong";
-        break;
-    }
-
-    const error: HankoError = {
-      name: errorCode,
-      code: errorCode,
-      message: searchParams.get("error_description"),
-    };
-
-    setThirdPartyError(error);
-
-    searchParams.delete("error");
-    searchParams.delete("error_description");
-
-    history.replaceState(
-      null,
-      null,
-      window.location.pathname +
-        (searchParams.size < 1 ? "" : `?${searchParams.toString()}`),
-    );
-  }, []);
 
   return (
     <Fragment>
@@ -223,7 +187,11 @@ const RegistrationInitPage = (props: Props) => {
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />
-        <Link onClick={onLoginClick} loadingSpinnerPosition={"left"}>
+        <Link
+          onClick={onLoginClick}
+          loadingSpinnerPosition={"left"}
+          isLoading={isFlowSwitchLoading}
+        >
           {t("labels.alreadyHaveAnAccount")}
         </Link>
       </Footer>

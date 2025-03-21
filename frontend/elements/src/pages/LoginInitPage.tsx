@@ -42,6 +42,8 @@ const LoginInitPage = (props: Props) => {
     lastLogin,
   } = useContext(AppContext);
 
+  const [isFlowSwitchLoading, setIsFlowSwitchLoading] =
+    useState<boolean>(false);
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
   const [identifier, setIdentifier] = useState<string>(
     uiState.username || uiState.email,
@@ -75,6 +77,7 @@ const LoginInitPage = (props: Props) => {
 
   const onRegisterClick = async (event: Event) => {
     event.preventDefault();
+    setIsFlowSwitchLoading(true);
     init("registration");
   };
 
@@ -136,45 +139,6 @@ const LoginInitPage = (props: Props) => {
       inputs?.email ? "email" : inputs?.username ? "username" : "identifier",
     );
   }, [flowState]);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-
-    if (
-      searchParams.get("error") == undefined ||
-      searchParams.get("error").length === 0
-    ) {
-      return;
-    }
-
-    let errorCode = "";
-    switch (searchParams.get("error")) {
-      case "access_denied":
-        errorCode = "thirdPartyAccessDenied";
-        break;
-      default:
-        errorCode = "somethingWentWrong";
-        break;
-    }
-
-    const error: HankoError = {
-      name: errorCode,
-      code: errorCode,
-      message: searchParams.get("error_description"),
-    };
-
-    setThirdPartyError(error);
-
-    searchParams.delete("error");
-    searchParams.delete("error_description");
-
-    history.replaceState(
-      null,
-      null,
-      window.location.pathname +
-        (searchParams.size < 1 ? "" : `?${searchParams.toString()}`),
-    );
-  }, []);
 
   return (
     <Fragment>
@@ -287,7 +251,11 @@ const LoginInitPage = (props: Props) => {
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />
-        <Link onClick={onRegisterClick} loadingSpinnerPosition={"left"}>
+        <Link
+          onClick={onRegisterClick}
+          loadingSpinnerPosition={"left"}
+          isLoading={isFlowSwitchLoading}
+        >
           {t("labels.dontHaveAnAccount")}
         </Link>
       </Footer>

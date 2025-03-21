@@ -216,5 +216,7 @@ export const en: Translation = {
       "The request either timed out, was canceled or the device is already registered. Please try again or try using another device.",
     platform_authenticator_required:
       "Your account is configured to use platform authenticators, but your current device or browser does not support this feature. Please try again with a compatible device or browser.",
+    third_party_access_denied:
+      "Access denied. The request was cancelled by the user or the provider has denied access for other reasons.",
   },
 };

@@ -4,7 +4,7 @@ import { State } from "../State";
 
 type PickStates<TState extends StateName> = TState;
 
-export type FlowName = "login" | "registration" | "profile";
+export type FlowName = "login" | "registration" | "profile" | "token_exchange";
 
 export type AnyState = { [TState in StateName]: State<TState> }[StateName];
 

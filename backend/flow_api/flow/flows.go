@@ -31,7 +31,8 @@ var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
 		credential_usage.WebauthnVerifyAssertionResponse{},
 		shared.Back{}).
 	State(shared.StateThirdParty,
-		shared.ExchangeToken{}).
+		shared.ExchangeToken{},
+		shared.Back{}).
 	State(shared.StateLoginMethodChooser,
 		credential_usage.ContinueToPasswordLogin{},
 		credential_usage.ContinueToPasscodeConfirmation{},
@@ -154,7 +155,8 @@ func NewRegistrationFlow(debug bool) flowpilot.Flow {
 			credential_usage.RememberMe{},
 			shared.ThirdPartyOAuth{}).
 		State(shared.StateThirdParty,
-			shared.ExchangeToken{}).
+			shared.ExchangeToken{},
+			shared.Back{}).
 		State(shared.StateSuccess).
 		InitialState(shared.StatePreflight,
 			shared.StateRegistrationInit).

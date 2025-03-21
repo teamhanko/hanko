@@ -1,13 +1,14 @@
 import { AutoSteps } from "./types/flow";
 import { WebauthnSupport } from "../WebauthnSupport";
 import WebauthnManager from "./WebauthnManager";
+import { CredentialCreationOptionsJSON } from "@github/webauthn-json";
 
 // Helper function to handle WebAuthn credential creation and error handling
 // eslint-disable-next-line require-jsdoc
 async function handleCredentialCreation(
   state: any,
   manager: WebauthnManager,
-  options: any,
+  options: CredentialCreationOptionsJSON,
   errorCode: string = "webauthn_credential_already_exists",
   errorMessage: string = "Webauthn credential already exists",
 ) {
@@ -43,7 +44,7 @@ export const autoSteps: AutoSteps = {
       return await state.actions.webauthn_verify_assertion_response.run({
         assertion_response: assertionResponse,
       });
-    } catch (e) {
+    } catch {
       const nextState = await state.actions.back.run();
       if (state.error) {
         nextState.error = state.error;
@@ -70,39 +71,71 @@ export const autoSteps: AutoSteps = {
     );
   },
 
-  thirdparty: async (state) => {
+  async thirdparty(state) {
     const searchParams = new URLSearchParams(window.location.search);
     const token = searchParams.get("hanko_token");
+    const error = searchParams.get("error");
 
-    if (token && token.length > 0) {
-      const nextState = await state.actions.exchange_token.run(
-        { token },
-        { dispatchAfterStateChangeEvent: false },
-      );
-
-      searchParams.delete("hanko_token");
+    const updateUrl = (paramsToDelete: string[]) => {
+      paramsToDelete.forEach((param) => searchParams.delete(param));
+      const newSearch = searchParams.toString()
+        ? `?${searchParams.toString()}`
+        : "";
       history.replaceState(
         null,
         null,
-        window.location.pathname + searchParams.toString(),
+        `${window.location.pathname}${newSearch}`,
       );
+    };
 
+    if (token?.length > 0) {
+      updateUrl(["hanko_token"]);
+      return await state.actions.exchange_token.run({ token });
+    }
+
+    if (error?.length > 0) {
+      const errorCode =
+        error === "access_denied"
+          ? "third_party_access_denied"
+          : "technical_error";
+      const message = searchParams.get("error_description");
+
+      updateUrl(["error", "error_description"]);
+
+      const nextState = await state.actions.back.run(null, {
+        dispatchAfterStateChangeEvent: false,
+      });
+
+      nextState.error = { code: errorCode, message };
       nextState.dispatchAfterStateChangeEvent();
+
       return nextState;
     }
 
-    state.saveToLocalStorage();
-    window.location.assign(state.payload.redirect_url);
+    if (!state.readFromLocalStorage) {
+      state.saveToLocalStorage();
+      window.location.assign(state.payload.redirect_url);
+    } else {
+      return await state.actions.back.run();
+    }
+
     return state;
   },
 
   success: async (state) => {
-    state.hanko.relay.dispatchSessionCreatedEvent(state.hanko.session.get());
-    return Promise.resolve(state);
+    const { claims } = state.payload;
+    const expirationSeconds = Date.parse(claims.expiration) - Date.now();
+    state.removeFromLocalStorage();
+    state.hanko.relay.dispatchSessionCreatedEvent({
+      claims,
+      expirationSeconds,
+    });
+    return state;
   },
 
   account_deleted: async (state) => {
+    state.removeFromLocalStorage();
     state.hanko.relay.dispatchUserDeletedEvent();
-    return Promise.resolve(state);
+    return state;
   },
 };
