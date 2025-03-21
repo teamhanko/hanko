@@ -1,5 +1,4 @@
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { StateName } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/state-handling";
+import { State, StateName } from "@teamhanko/hanko-frontend-sdk";
 import { useEffect, useState } from "preact/compat";
 
 export const useFlowState = <T extends StateName>(
