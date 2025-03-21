@@ -17,7 +17,7 @@ export const useFlowEffects = (
         }
 
         setUIState((prev) => ({ ...prev, isDisabled: true, error: undefined }));
-        setIsLoading(state.invokedActionID == flowAction.id);
+        setIsLoading(state.invokedAction.name == flowAction.name);
       }),
     [flowAction, hanko, isOwnFlow, setIsLoading, setUIState],
   );
@@ -29,7 +29,7 @@ export const useFlowEffects = (
           return;
         }
 
-        setIsSuccess(state.previousActionID == flowAction.id);
+        setIsSuccess(state.previousAction.name == flowAction.name);
         setIsLoading(false);
       }),
     [hanko, setIsSuccess, setIsLoading, flowAction, isOwnFlow],

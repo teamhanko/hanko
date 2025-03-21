@@ -7,16 +7,10 @@ import { AnyState, FlowName, FlowResponse } from "./types/flow";
 import { autoSteps } from "./auto-steps";
 import { passkeyAutofillActivationHandlers } from "./passkey-autofill-activation";
 
-type AutoSteppedStates = keyof typeof autoSteps;
-type PasskeyAutofillStates = keyof typeof passkeyAutofillActivationHandlers;
-type SerializedState = FlowResponse<any> & {
-  flow_name: FlowName;
-  previous_action_id?: string;
-};
-
-type ExtractInputValues<TInputs> = {
-  [K in keyof TInputs]: TInputs[K] extends Input<infer TValue> ? TValue : never;
-};
+export type AutoSteppedStates = keyof typeof autoSteps;
+export type PasskeyAutofillStates =
+  keyof typeof passkeyAutofillActivationHandlers;
+export type AutoStepExclusion = AutoSteppedStates[] | "all";
 
 export type ActionMap<TState extends StateName> = {
   [K in keyof Actions[TState]]: Action<
@@ -24,14 +18,26 @@ export type ActionMap<TState extends StateName> = {
   >;
 };
 
-type AutoStepExclusion = AutoSteppedStates[] | "all";
+export type ActionInfo = {
+  name: string;
+  relatedStateName: StateName;
+};
 
 export interface Options {
   dispatchAfterStateChangeEvent?: boolean;
   excludeAutoSteps?: AutoStepExclusion;
-  previousActionID?: string;
+  previousAction?: ActionInfo;
   readFromLocalStorage?: boolean;
 }
+
+type SerializedState = FlowResponse<any> & {
+  flow_name: FlowName;
+  previous_action?: ActionInfo;
+};
+
+type ExtractInputValues<TInputs> = {
+  [K in keyof TInputs]: TInputs[K] extends Input<infer TValue> ? TValue : never;
+};
 
 /**
  * Represents a state in a flow with associated actions and properties.
@@ -52,11 +58,10 @@ export class State<TState extends StateName = StateName> {
   public readonly actions: ActionMap<TState>;
   public readonly csrfToken: string;
   public readonly status: number;
-  public readonly previousActionID?: string;
+  public readonly previousAction?: ActionInfo;
   public readonly readFromLocalStorage: boolean;
-
   public readonly hanko: Hanko;
-  public invokedActionID?: string;
+  public invokedAction?: ActionInfo;
   public readonly excludeAutoSteps: AutoStepExclusion;
 
   public readonly autoStep?: TState extends AutoSteppedStates
@@ -97,12 +102,12 @@ export class State<TState extends StateName = StateName> {
     const {
       dispatchAfterStateChangeEvent = true,
       excludeAutoSteps = null,
-      previousActionID = null,
+      previousAction = null,
       readFromLocalStorage = false,
     } = options;
 
     this.excludeAutoSteps = excludeAutoSteps;
-    this.previousActionID = previousActionID;
+    this.previousAction = previousAction;
     this.readFromLocalStorage = readFromLocalStorage;
 
     if (dispatchAfterStateChangeEvent) {
@@ -169,7 +174,7 @@ export class State<TState extends StateName = StateName> {
       payload: this.payload,
       csrf_token: this.csrfToken,
       status: this.status,
-      previous_action_id: this.previousActionID,
+      previous_action: this.previousAction,
       actions: Object.fromEntries(
         (Object.entries(this.actions) as [string, Action<any>][]).map(
           ([name, action]) => [
@@ -255,7 +260,7 @@ export class State<TState extends StateName = StateName> {
   public static async create(
     hanko: Hanko,
     flowName: FlowName,
-    options: Omit<Options, "previousActionID" | "readFromLocalStorage"> = {},
+    options: Omit<Options, "previousAction" | "readFromLocalStorage"> = {},
   ): Promise<AnyState> {
     const cachedState = State.getFromLocalStorage(flowName);
 
@@ -266,7 +271,7 @@ export class State<TState extends StateName = StateName> {
         cachedState,
         {
           ...options,
-          previousActionID: cachedState.previous_action_id,
+          previousAction: cachedState.previous_action,
           readFromLocalStorage: true,
         },
       );
@@ -325,7 +330,6 @@ export class State<TState extends StateName = StateName> {
  * @subcategory FlowAPI
  */
 export class Action<TInputs> {
-  public readonly id: string;
   public readonly enabled: boolean;
   public readonly href: string;
   public readonly name: string;
@@ -338,7 +342,6 @@ export class Action<TInputs> {
     parentState: State,
     enabled: boolean = true,
   ) {
-    this.id = `${parentState.name}-${action.action}`;
     this.enabled = enabled;
     this.href = action.href;
     this.name = action.action;
@@ -385,7 +388,7 @@ export class Action<TInputs> {
       hanko,
       flowName,
       csrfToken,
-      invokedActionID,
+      invokedAction,
       excludeAutoSteps,
     } = this.parentState;
     const { dispatchAfterStateChangeEvent = true } = options;
@@ -396,13 +399,16 @@ export class Action<TInputs> {
       );
     }
 
-    if (invokedActionID) {
+    if (invokedAction) {
       throw new Error(
-        `An action '${invokedActionID}' has already been invoked on state '${name}'. No further actions can be run.`,
+        `An action '${invokedAction.name}' has already been invoked on state '${invokedAction.relatedStateName}'. No further actions can be run.`,
       );
     }
 
-    this.parentState.invokedActionID = this.id;
+    this.parentState.invokedAction = {
+      name: this.name,
+      relatedStateName: name,
+    };
 
     hanko.relay.dispatchBeforeStateChangeEvent({
       state: this.parentState as AnyState,
@@ -438,7 +444,7 @@ export class Action<TInputs> {
     return State.initializeFlowState(hanko, flowName, response, {
       dispatchAfterStateChangeEvent,
       excludeAutoSteps,
-      previousActionID: this.id,
+      previousAction: this.parentState.invokedAction,
     });
   }
 }

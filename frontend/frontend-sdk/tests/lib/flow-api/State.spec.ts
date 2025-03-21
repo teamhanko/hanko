@@ -283,9 +283,12 @@ describe("Action", () => {
 
     it("throws if action already invoked", async () => {
       const action = new Action(actionDef, state);
-      state.invokedActionID = "previousAction";
+      state.invokedAction = {
+        name: "previousAction",
+        relatedStateName: "login_init",
+      };
       await expect(action.run()).rejects.toThrow(
-        "An action 'previousAction' has already been invoked",
+        "An action 'previousAction' has already been invoked on state 'login_init'. No further actions can be run.",
       );
     });
   });
