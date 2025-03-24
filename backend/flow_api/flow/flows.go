@@ -35,6 +35,7 @@ var CredentialUsageSubFlow = flowpilot.NewSubFlow(shared.FlowCredentialUsage).
 	State(shared.StateLoginMethodChooser,
 		credential_usage.ContinueToPasswordLogin{},
 		credential_usage.ContinueToPasscodeConfirmation{},
+		credential_usage.WebauthnGenerateRequestOptions{},
 		shared.Back{},
 	).
 	State(shared.StateLoginPassword,

@@ -10,12 +10,14 @@ import (
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
+	"reflect"
 	"strings"
 	"time"
 )
 
 type GenerateRequestOptionsPasskeyParams struct {
-	Tx *pop.Connection
+	Tx   *pop.Connection
+	User *models.User
 }
 
 type GenerateRequestOptionsSecurityKeyParams struct {
@@ -115,7 +117,7 @@ func (s *webauthnService) generateRequestOptions(tx *pop.Connection, user webaut
 	var options *protocol.CredentialAssertion
 	var sessionData *webauthn.SessionData
 	var err error
-	if user != nil {
+	if !reflect.ValueOf(user).IsNil() {
 		options, sessionData, err = s.cfg.Webauthn.Handler.BeginLogin(user, opts...)
 	} else {
 		options, sessionData, err = s.cfg.Webauthn.Handler.BeginDiscoverableLogin(opts...)
@@ -141,7 +143,7 @@ func (s *webauthnService) GenerateRequestOptionsPasskey(p GenerateRequestOptions
 	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification)
 
 	return s.generateRequestOptions(p.Tx,
-		nil,
+		p.User,
 		webauthn.WithUserVerification(userVerificationRequirement),
 	)
 }
@@ -205,7 +207,7 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 	}
 
 	sessionData := sessionDataModel.ToSessionData()
-	if p.IsMFA {
+	if p.IsMFA || len(sessionData.AllowedCredentialIDs) > 0 {
 		_, err = s.cfg.Webauthn.Handler.ValidateLogin(webAuthnUser, *sessionData, credentialAssertionData)
 	} else {
 		_, err = s.cfg.Webauthn.Handler.ValidateDiscoverableLogin(
