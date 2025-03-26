@@ -53,9 +53,209 @@ const defaultOptions = {
 const hanko = new Hanko("http://localhost:3000", defaultOptions);
 ```
 
-## Documentation
+## FlowAPI
 
-To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
+The SDK offers a TypeScript-based interface for managing authentication and profile flows with Hanko, enabling the
+development of custom frontends with the Hanko FlowAPI. It handles state transitions, action execution, input
+validation, and event dispatching, while also providing built-in support for auto-stepping and passkey autofill.
+This guide explores its core functionality and usage patterns.
+
+### Initializing a New Flow
+
+Start a new authentication or profile flow using the `createFlow` method on a Hanko instance. Options allow you to control
+event dispatching and auto-step behavior.
+
+```typescript
+const state = await hanko.createFlow("login", {
+  dispatchAfterStateChangeEvent: true, // Dispatch after-state-change events by default
+  excludeAutoSteps: [], // Empty array means all auto-steps are enabled
+});
+```
+
+#### Parameters
+
+- **flowName**: The name of the flow (e.g., "login", "register" or "profile").
+- **options**:
+    - **dispatchAfterStateChangeEvent**: Boolean to enable the `onAfterStateChanged` event after state changes when creating a new state (default: `true`).
+    - **excludeAutoSteps**: Array of state names or "all" to skip specific or all auto-steps.
+
+### Understanding the State Object
+
+The `state` object represents the current step in the flow. It contains properties and methods to interact with the flow.
+
+#### Structure
+
+- `state.name`: The current state’s name (e.g., "login_init", "login_password", "success").
+- `state.flowName`: The name of the flow (e.g., "login").
+- `state.error`: An `Error` object if an action or request fails (e.g., invalid input or network error).
+- `state.payload`: State-specific data returned by the API.
+- `state.actions`: An object mapping action names to `Action` instances.
+- `state.csrfToken`: CSRF token for secure requests.
+- `state.status`: HTTP status code of the last response.
+- `state.invokedAction`: Name of the last action run on this state (if any).
+
+### Accessing Action Inputs
+
+Each action in `state.actions` has an `inputs` property defining expected input fields.
+
+```typescript
+console.log(state.actions.continue_with_login_identifier.inputs);
+// Example output:
+// {
+//   username: {
+//     required: true,
+//     type: "string",
+//     minLength: 3,
+//     maxLength: 20,
+//     description: "User’s login name"
+//   }
+// }
+```
+
+### Running an Action
+
+Actions transition the flow to a new state. Use the `run` method on an action, passing input values and optional configuration.
+
+#### Basic Example with Type Narrowing
+
+```typescript
+if (state.name === "login_init") {
+  const newState = await state.actions.continue_with_login_identifier.run({
+    username: "user1",
+  });
+  // Triggers `onBeforeStateChanged` and `onAfterStateChanged` events
+  // `newState` is the next state in the flow (e.g., "login_password")
+}
+```
+
+#### Additional Considerations
+
+- **Type Narrowing**: Check `state.name` to ensure the action exists and inputs are valid for that state.
+- **Events**: By default, `run` triggers `onBeforeStateChanged` before the action and `onAfterStateChanged` after the new state is loaded.
+- **Validation Errors**: If the action fails due to invalid input (e.g., wrong format or length), `newState.error` will be set to "invalid_form_data", and specific errors will be attached to the related input fields (see "Error Handling" below).
+
+### Event Handlers
+
+The SDK dispatches events via the Hanko instance to track state changes.
+
+#### `onBeforeStateChanged`
+
+Fires before an action is executed, useful for showing loading states.
+
+```typescript
+hanko.onBeforeStateChanged(({ state }) => {
+  console.log("Action loading:", state.invokedAction); // e.g., "continue_with_login_identifier"
+});
+```
+
+#### `onAfterStateChanged`
+
+Fires after a new state is loaded, ideal for rendering UI or handling state-specific logic.
+
+```typescript
+hanko.onAfterStateChanged(({ state }) => {
+  console.log("Action load finished:", state.invokedAction);
+
+  switch (state.name) {
+    case "login_init":
+      state.webauthnAutofillActivation(); // Special handler for passkey autofill; requires an <input> field on the page with `autocomplete="username webauthn"` (e.g., <input type="text" name="username" autocomplete="username webauthn" />) so the browser can suggest and autofill passkeys when the user interacts with it.
+      break;
+    case "login_password":
+      // Render password input UI
+      if (state.error) {
+        console.log("Error:", state.error); // e.g., "invalid_form_data"
+      }
+      break;
+    case "error":
+      // Handle network errors or 5xx responses
+      console.error("Flow error:", state.error);
+      break;
+  }
+});
+```
+
+### Controlling the AfterStateChanged Event
+
+You can disable the automatic `onAfterStateChanged` event and dispatch it manually after custom logic.
+
+```typescript
+if (state.name === "login_init") {
+  const newState = await state.actions.continue_with_login_identifier.run(
+    { username: "user1" },
+    { dispatchAfterStateChangeEvent: false }, // Disable automatic dispatch
+  );
+  // Only `onBeforeStateChanged` is triggered here
+
+  await doSomething(); // Your custom async logic
+  newState.dispatchAfterStateChangeEvent(); // Manually trigger the event
+}
+```
+
+### Auto-Steps
+
+Auto-steps automatically advance the flow for certain states, reducing manual intervention.
+
+#### Supported States
+
+- `preflight`
+- `login_passkey`
+- `onboarding_verify_passkey_attestation`
+- `webauthn_credential_verification`
+- `thirdparty`
+- `success`
+- `account_deleted`
+
+#### Disabling Auto-Steps
+
+Prevent auto-steps by specifying states in `excludeAutoSteps`:
+
+```typescript
+const state = await hanko.createFlow("login", {
+  excludeAutoSteps: ["success"], // Skip auto-step for "success"
+});
+```
+
+#### Manual Auto-Step Execution
+
+```typescript
+hanko.onAfterStateChanged(({ state }) => {
+  if (state.name === "success") {
+    console.log("Flow completed");
+    await state.autoStep();
+  }
+});
+```
+
+### Error Handling
+
+#### Input Errors
+
+If an action fails due to invalid inputs:
+
+```typescript
+if (state.name === "login_password" && state.error === "invalid_form_data") {
+  const passwordError = state.actions.password_login.inputs.password.error;
+  console.log("Password error:", passwordError);
+}
+```
+
+#### Network/API Errors
+
+For network issues or `5xx` responses, the `error` state is entered with details in `state.error`.
+
+### Saving and Loading State
+
+Persist the current flow state to `localStorage` using `save()`.
+
+```typescript
+// Save the current state
+state.save(); // Stores the state to the localStorage
+
+// Later, recover or start a new flow
+const recoveredState = await hanko.createFlow("login");
+```
+
+Please note that the `localStorage` entry will be removed automatically when an action is invoked on the saved state.
 
 ## Exports
 
@@ -219,6 +419,10 @@ webhook request in the "Language" claim.
 ## Bugs
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
+
+## Documentation
+
+To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
 
 ## License
 
