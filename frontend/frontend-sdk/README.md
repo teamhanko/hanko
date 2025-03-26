@@ -62,11 +62,11 @@ This guide explores its core functionality and usage patterns.
 
 ### Initializing a New Flow
 
-Start a new authentication or profile flow using the `createFlow` method on a Hanko instance. Options allow you to control
+Start a new authentication or profile flow using the `createState` method on a Hanko instance. Options allow you to control
 event dispatching and auto-step behavior.
 
 ```typescript
-const state = await hanko.createFlow("login", {
+const state = await hanko.createState("login", {
   dispatchAfterStateChangeEvent: true, // Dispatch after-state-change events by default
   excludeAutoSteps: [], // Empty array means all auto-steps are enabled
 });
@@ -210,7 +210,7 @@ Auto-steps automatically advance the flow for certain states, reducing manual in
 Prevent auto-steps by specifying states in `excludeAutoSteps`:
 
 ```typescript
-const state = await hanko.createFlow("login", {
+const state = await hanko.createState("login", {
   excludeAutoSteps: ["success"], // Skip auto-step for "success"
 });
 ```
@@ -252,7 +252,7 @@ Persist the current flow state to `localStorage` using `save()`.
 state.save(); // Stores the state to the localStorage
 
 // Later, recover or start a new flow
-const recoveredState = await hanko.createFlow("login");
+const recoveredState = await hanko.createState("login");
 ```
 
 Please note that the `localStorage` entry will be removed automatically when an action is invoked on the saved state.
