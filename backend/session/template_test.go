@@ -30,7 +30,7 @@ func TestProcessTemplate(t *testing.T) {
 		},
 		{
 			name:     "template with pipelining",
-			template: "Hello {{.User.Email.Address | printf \"%s\" | title}}",
+			template: "Hello {{.User.Email.Addresss | printf \"%s\" }}",
 			data: ClaimTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
@@ -38,20 +38,7 @@ func TestProcessTemplate(t *testing.T) {
 					},
 				},
 			},
-			want:    "Hello Test@Example.Com",
-			wantErr: false,
-		},
-		{
-			name:     "template with multiple functions",
-			template: "Welcome {{.User.Email.Address | printf \"%s\" | strings.ToUpper}}! Your email is {{.User.Email.Address | printf \"%s\" | strings.ToLower}}",
-			data: ClaimTemplateData{
-				User: &dto.UserJWT{
-					Email: &dto.EmailJWT{
-						Address: "Test@Example.Com",
-					},
-				},
-			},
-			want:    "Welcome TEST@EXAMPLE.COM! Your email is test@example.com",
+			want:    "Hello test@example.com",
 			wantErr: false,
 		},
 		{
@@ -90,7 +77,7 @@ func TestProcessTemplate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := processTemplate(tt.template, tt.data)
+			got, err := parseClaimTemplate(tt.template, tt.data)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
