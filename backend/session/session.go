@@ -98,16 +98,8 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 
 	// Process the claim template if found
 	if m.claimTemplate != nil {
-		// Create template data
-		claimTemplateData := ClaimTemplateData{
-			User: &user,
-		}
-		for key, value := range m.claimTemplate.Claims {
-			processedValue, err := processClaimValue(value, claimTemplateData)
-			if err != nil {
-				return "", nil, fmt.Errorf("failed to process claim %s: %w", key, err)
-			}
-			_ = token.Set(key, processedValue)
+		if err := ProcessClaimTemplate(token, m.claimTemplate.Claims, user); err != nil {
+			return "", nil, err
 		}
 	}
 
