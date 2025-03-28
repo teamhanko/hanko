@@ -121,6 +121,10 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 		_ = token.Set("email", user.Email)
 	}
 
+	if user.Username != "" {
+		_ = token.Set("username", user.Username)
+	}
+
 	for _, opt := range opts {
 		opt(token)
 	}

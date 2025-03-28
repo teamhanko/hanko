@@ -3,6 +3,7 @@ package session
 import (
 	"testing"
 
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/teamhanko/hanko/backend/dto"
 )
@@ -30,7 +31,7 @@ func TestProcessTemplate(t *testing.T) {
 		},
 		{
 			name:     "template with pipelining",
-			template: "Hello {{.User.Email.Addresss | printf \"%s\" }}",
+			template: "Hello {{.User.Email.Address | printf \"%s\" }}",
 			data: ClaimTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
@@ -186,6 +187,73 @@ func TestProcessClaimValue(t *testing.T) {
 			}
 			assert.NoError(t, err)
 			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestProcessClaimTemplate(t *testing.T) {
+	tests := []struct {
+		name           string
+		claims         map[string]interface{}
+		user           dto.UserJWT
+		expectedClaims map[string]interface{}
+	}{
+		{
+			name: "successful claim processing",
+			claims: map[string]interface{}{
+				"email":    "{{.User.Email.Address}}",
+				"verified": "{{.User.Email.IsVerified}}",
+				"static":   "static-value",
+			},
+			user: dto.UserJWT{
+				Email: &dto.EmailJWT{
+					Address:    "test@example.com",
+					IsVerified: true,
+				},
+			},
+			expectedClaims: map[string]interface{}{
+				"email":    "test@example.com",
+				"verified": "true",
+				"static":   "static-value",
+			},
+		},
+		{
+			name: "partial claim processing with errors",
+			claims: map[string]interface{}{
+				"valid":   "{{.User.Email.Address}}",
+				"invalid": "{{.InvalidField}}",
+				"static":  "static-value",
+			},
+			user: dto.UserJWT{
+				Email: &dto.EmailJWT{
+					Address: "test@example.com",
+				},
+			},
+			expectedClaims: map[string]interface{}{
+				"valid":  "test@example.com",
+				"static": "static-value",
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			token := jwt.New()
+			err := ProcessClaimTemplate(token, tt.claims, tt.user)
+			assert.NoError(t, err)
+
+			// Verify each expected claim
+			for key, expectedValue := range tt.expectedClaims {
+				value, exists := token.Get(key)
+				assert.True(t, exists, "claim %s should exist", key)
+				assert.Equal(t, expectedValue, value, "claim %s should have correct value", key)
+			}
+
+			// For the error case, verify the invalid claim was not set
+			if tt.name == "partial claim processing with errors" {
+				_, exists := token.Get("invalid")
+				assert.False(t, exists, "invalid claim should not be set")
+			}
 		})
 	}
 }

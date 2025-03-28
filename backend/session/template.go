@@ -6,6 +6,7 @@ import (
 	"text/template"
 
 	"github.com/lestrrat-go/jwx/v2/jwt"
+	"github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/dto"
 )
 
@@ -22,7 +23,8 @@ func ProcessClaimTemplate(token jwt.Token, claims map[string]interface{}, user d
 	for key, value := range claims {
 		processedValue, err := processClaimValue(value, claimTemplateData)
 		if err != nil {
-			return fmt.Errorf("failed to process claim %s: %w", key, err)
+			log.Warn().Err(err).Str("session", key).Msgf("failed to process custom JWT claim: %+v", value)
+			continue
 		}
 		_ = token.Set(key, processedValue)
 	}
