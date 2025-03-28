@@ -46,6 +46,16 @@ const LoginMethodChooserPage = (props: Props) => {
     await hanko.flow.run(nextState, stateHandler);
   };
 
+  const onPasskeySelectSubmit = async (event: Event) => {
+    event.preventDefault();
+    setLoadingAction("passkey-submit");
+    const nextState = await flowState.actions
+      .webauthn_generate_request_options(null)
+      .run();
+    setLoadingAction(null);
+    await hanko.flow.run(nextState, stateHandler);
+  };
+
   const onBackClick = async (event: Event) => {
     event.preventDefault();
     setLoadingAction("back");
@@ -82,6 +92,18 @@ const LoginMethodChooserPage = (props: Props) => {
             icon={"password"}
           >
             {t("labels.password")}
+          </Button>
+        </Form>
+        <Form
+          hidden={!flowState.actions.webauthn_generate_request_options?.(null)}
+          onSubmit={onPasskeySelectSubmit}
+        >
+          <Button
+            secondary={true}
+            uiAction={"passkey-submit"}
+            icon={"passkey"}
+          >
+            {t("labels.passkey")}
           </Button>
         </Form>
       </Content>

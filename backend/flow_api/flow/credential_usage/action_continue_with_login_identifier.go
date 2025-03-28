@@ -5,6 +5,7 @@ import (
 	"fmt"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/flow_api/services"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"regexp"
@@ -197,13 +198,48 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	}
 
 	if deps.Cfg.Privacy.OnlyShowActualLoginMethods {
+		emailAvailable := deps.Cfg.Email.UseForAuthentication && userModel != nil && userModel.Emails.GetPrimary() != nil
+		passwordAvailable := deps.Cfg.Password.Enabled && userModel != nil && userModel.PasswordCredential != nil
+		passkeysAvailable := deps.Cfg.Passkey.Enabled && userModel != nil && len(userModel.GetPasskeys()) > 0
+		availableMethods := 0
+		if emailAvailable {
+			availableMethods += 1
+		}
+		if passwordAvailable {
+			availableMethods += 1
+		}
+		if passkeysAvailable {
+			availableMethods += 1
+		}
+
 		switch {
-		case deps.Cfg.Email.UseForAuthentication && userModel != nil && userModel.Emails.GetPrimary() != nil && deps.Cfg.Password.Enabled && userModel.PasswordCredential != nil:
+		case availableMethods > 1:
 			return c.Continue(shared.StateLoginMethodChooser)
-		case deps.Cfg.Email.UseForAuthentication && userModel != nil && userModel.Emails.GetPrimary() != nil:
+		case emailAvailable:
 			return a.continueToPasscodeConfirmation(c)
-		case deps.Cfg.Password.Enabled && userModel != nil && userModel.PasswordCredential != nil:
+		case passwordAvailable:
 			return c.Continue(shared.StateLoginPassword)
+		case passkeysAvailable:
+			//goland:noinspection GoDfaNilDereference
+			userModel.WebauthnCredentials = userModel.GetPasskeys()
+			params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: userModel}
+
+			sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasskey(params)
+			if err != nil {
+				return fmt.Errorf("failed to generate webauthn request options: %w", err)
+			}
+
+			err = c.Stash().Set(shared.StashPathWebauthnSessionDataID, sessionDataModel.ID.String())
+			if err != nil {
+				return fmt.Errorf("failed to stash webauthn_session_data_id: %w", err)
+			}
+
+			err = c.Payload().Set("request_options", requestOptions)
+			if err != nil {
+				return fmt.Errorf("failed to set request_options payload: %w", err)
+			}
+
+			return c.Continue(shared.StateLoginPasskey)
 		}
 	} else {
 		if deps.Cfg.Email.UseForAuthentication && deps.Cfg.Password.Enabled {
