@@ -94,6 +94,19 @@ The `state` object represents the current step in the flow. It contains properti
 - `state.status`: HTTP status code of the last response.
 - `state.invokedAction`: Name of the last action run on this state (if any).
 
+### Action Availability
+
+Actions can be enabled or disabled based on the backend configuration or the user's state and properties. You can check
+whether a specific action is enabled by accessing its `enabled` property:
+
+```typescript
+if (state.actions.example_action.enabled) {
+  await state.actions.example_action.run();
+} else {
+  console.log("Action is disabled");
+}
+```
+
 ### Accessing Action Inputs
 
 Each action in `state.actions` has an `inputs` property defining expected input fields.
@@ -144,7 +157,7 @@ Fires before an action is executed, useful for showing loading states.
 
 ```typescript
 hanko.onBeforeStateChanged(({ state }) => {
-  console.log("Action loading:", state.invokedAction); // e.g., "continue_with_login_identifier"
+  console.log("Action loading:", state.invokedAction);
 });
 ```
 
@@ -257,72 +270,6 @@ const recoveredState = await hanko.createState("login");
 
 Please note that the `localStorage` entry will be removed automatically when an action is invoked on the saved state.
 
-## Exports
-
-### SDK
-
-- `Hanko` - A class that bundles all functionalities.
-
-### Client Classes
-
-- `UserClient` - A class to manage users.
-- `ThirdPartyClient` - A class to handle social logins.
-- `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
-
-### Utility Classes
-
-- `WebauthnSupport` - A class to check the browser's WebAuthn support.
-
-### DTO Interfaces
-
-- `PasswordConfig`
-- `EmailConfig`
-- `AccountConfig`
-- `Config`
-- `WebauthnFinalized`
-- `TokenFinalized`
-- `UserInfo`
-- `Me`
-- `Credential`
-- `User`
-- `UserCreated`
-- `Passcode`
-- `WebauthnTransports`
-- `Attestation`
-- `Email`
-- `Emails`
-- `WebauthnCredential`
-- `WebauthnCredentials`
-- `Identity`
-
-### Event Interfaces
-
-- `SessionDetail`
-
-### Event Types
-
-- `CustomEventWithDetail`
-- `sessionCreatedType`
-- `sessionExpiredType`
-- `userLoggedOutType`
-- `userDeletedType`
-
-### Error Classes
-
-- `HankoError`
-- `TechnicalError`
-- `ConflictError`
-- `RequestTimeoutError`
-- `WebauthnRequestCancelledError`
-- `InvalidPasswordError`
-- `InvalidPasscodeError`
-- `InvalidWebauthnCredentialError`
-- `PasscodeExpiredError`
-- `MaxNumOfPasscodeAttemptsReachedError`
-- `NotFoundError`
-- `TooManyRequestsError`
-- `UnauthorizedError`
-
 ## Examples
 
 ### Get the current user / Validate the JWT against the Hanko API
@@ -423,6 +370,73 @@ Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/is
 ## Documentation
 
 To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
+
+
+## Exports
+
+### SDK
+
+- `Hanko` - A class that bundles all functionalities.
+
+### Client Classes
+
+- `UserClient` - A class to manage users.
+- `ThirdPartyClient` - A class to handle social logins.
+- `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
+
+### Utility Classes
+
+- `WebauthnSupport` - A class to check the browser's WebAuthn support.
+
+### DTO Interfaces
+
+- `PasswordConfig`
+- `EmailConfig`
+- `AccountConfig`
+- `Config`
+- `WebauthnFinalized`
+- `TokenFinalized`
+- `UserInfo`
+- `Me`
+- `Credential`
+- `User`
+- `UserCreated`
+- `Passcode`
+- `WebauthnTransports`
+- `Attestation`
+- `Email`
+- `Emails`
+- `WebauthnCredential`
+- `WebauthnCredentials`
+- `Identity`
+
+### Event Interfaces
+
+- `SessionDetail`
+
+### Event Types
+
+- `CustomEventWithDetail`
+- `sessionCreatedType`
+- `sessionExpiredType`
+- `userLoggedOutType`
+- `userDeletedType`
+
+### Error Classes
+
+- `HankoError`
+- `TechnicalError`
+- `ConflictError`
+- `RequestTimeoutError`
+- `WebauthnRequestCancelledError`
+- `InvalidPasswordError`
+- `InvalidPasscodeError`
+- `InvalidWebauthnCredentialError`
+- `PasscodeExpiredError`
+- `MaxNumOfPasscodeAttemptsReachedError`
+- `NotFoundError`
+- `TooManyRequestsError`
+- `UnauthorizedError`
 
 ## License
 
