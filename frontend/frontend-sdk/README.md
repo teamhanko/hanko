@@ -171,7 +171,7 @@ hanko.onAfterStateChanged(({ state }) => {
 
   switch (state.name) {
     case "login_init":
-      state.webauthnAutofillActivation(); // Special handler for passkey autofill; requires an <input> field on the page with `autocomplete="username webauthn"` (e.g., <input type="text" name="username" autocomplete="username webauthn" />) so the browser can suggest and autofill passkeys when the user interacts with it.
+      state.passkeyAutofillActivation(); // Special handler for passkey autofill; requires an <input> field on the page with `autocomplete="username webauthn"` (e.g., <input type="text" name="username" autocomplete="username webauthn" />) so the browser can suggest and autofill passkeys when the user interacts with it.
       break;
     case "login_password":
       // Render password input UI
