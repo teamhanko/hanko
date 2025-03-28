@@ -78,7 +78,7 @@ func TestProcessTemplate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := parseClaimTemplate(tt.template, tt.data)
+			got, err := parseClaimTemplateValue(tt.template, tt.data)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -180,7 +180,7 @@ func TestProcessClaimValue(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := processClaimValue(tt.value, tt.data)
+			got, err := processClaimTemplate(tt.value, tt.data)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return

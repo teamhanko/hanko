@@ -21,7 +21,7 @@ func ProcessClaimTemplate(token jwt.Token, claims map[string]interface{}, user d
 		User: &user,
 	}
 	for key, value := range claims {
-		processedValue, err := processClaimValue(value, claimTemplateData)
+		processedValue, err := processClaimTemplate(value, claimTemplateData)
 		if err != nil {
 			log.Warn().Err(err).Str("session", key).Msgf("failed to process custom JWT claim: %+v", value)
 			continue
@@ -31,8 +31,38 @@ func ProcessClaimTemplate(token jwt.Token, claims map[string]interface{}, user d
 	return nil
 }
 
-// parseClaimTemplate parses and executes a template string using the provided data
-func parseClaimTemplate(tmplStr string, data ClaimTemplateData) (string, error) {
+// processClaimTemplate processes a claim value, handling both string templates and nested structures
+func processClaimTemplate(value interface{}, data ClaimTemplateData) (interface{}, error) {
+	switch v := value.(type) {
+	case string:
+		return parseClaimTemplateValue(v, data)
+	case map[string]interface{}:
+		result := make(map[string]interface{})
+		for key, val := range v {
+			processed, err := processClaimTemplate(val, data)
+			if err != nil {
+				return nil, err
+			}
+			result[key] = processed
+		}
+		return result, nil
+	case []interface{}:
+		result := make([]interface{}, len(v))
+		for i, val := range v {
+			processed, err := processClaimTemplate(val, data)
+			if err != nil {
+				return nil, err
+			}
+			result[i] = processed
+		}
+		return result, nil
+	default:
+		return value, nil
+	}
+}
+
+// parseClaimTemplateValue parses and executes a template string using the provided data
+func parseClaimTemplateValue(tmplStr string, data ClaimTemplateData) (string, error) {
 	tmpl, err := template.New("").Parse(tmplStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template: %w", err)
@@ -44,34 +74,4 @@ func parseClaimTemplate(tmplStr string, data ClaimTemplateData) (string, error) 
 	}
 
 	return buf.String(), nil
-}
-
-// processClaimValue processes a claim value, handling both string templates and nested structures
-func processClaimValue(value interface{}, data ClaimTemplateData) (interface{}, error) {
-	switch v := value.(type) {
-	case string:
-		return parseClaimTemplate(v, data)
-	case map[string]interface{}:
-		result := make(map[string]interface{})
-		for key, val := range v {
-			processed, err := processClaimValue(val, data)
-			if err != nil {
-				return nil, err
-			}
-			result[key] = processed
-		}
-		return result, nil
-	case []interface{}:
-		result := make([]interface{}, len(v))
-		for i, val := range v {
-			processed, err := processClaimValue(val, data)
-			if err != nil {
-				return nil, err
-			}
-			result[i] = processed
-		}
-		return result, nil
-	default:
-		return value, nil
-	}
 }
