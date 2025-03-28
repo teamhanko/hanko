@@ -28,8 +28,7 @@ export const useFlowEffects = (
         if (!flowAction || !isOwnFlow(state)) {
           return;
         }
-
-        setIsSuccess(state.previousAction.name == flowAction.name);
+        setIsSuccess(state.previousAction?.name == flowAction.name);
         setIsLoading(false);
       }),
     [hanko, setIsSuccess, setIsLoading, flowAction, isOwnFlow],

@@ -34,7 +34,7 @@ const Form = ({
   };
   return (
     <FormContext.Provider value={{ flowAction }}>
-      {(flowAction && flowAction.enabled && !hidden) || !hidden ? (
+      {flowAction && flowAction.enabled && !hidden ? (
         <form onSubmit={onSubmit || defaultOnSubmit} className={styles.form}>
           <ul className={styles.ul}>
             {toChildArray(children).map((child, index) => (

@@ -39,7 +39,7 @@ const LoginMethodChooserPage = (props: Props) => {
             {t("labels.password")}
           </Button>
         </Form>
-        <Form flowAction={!flowState.actions.webauthn_generate_request_options}>
+        <Form flowAction={flowState.actions.webauthn_generate_request_options}>
           <Button secondary={true} icon={"passkey"}>
             {t("labels.passkey")}
           </Button>
