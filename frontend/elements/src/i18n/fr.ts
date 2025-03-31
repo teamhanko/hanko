@@ -226,5 +226,7 @@ export const fr: Translation = {
       "La demande a expiré, a été annulée ou le dispositif est déjà enregistré. Veuillez réessayer ou essayer d'utiliser un autre dispositif.",
     platform_authenticator_required:
       "Votre compte est configuré pour utiliser des authentificateurs de plate-forme, mais votre appareil ou navigateur actuel ne prend pas en charge cette fonctionnalité. Veuillez réessayer avec un appareil ou un navigateur compatible.",
+    third_party_access_denied:
+      "Accès refusé. La demande a été annulée par l'utilisateur ou le fournisseur a refusé l'accès pour d'autres raisons.",
   },
 };

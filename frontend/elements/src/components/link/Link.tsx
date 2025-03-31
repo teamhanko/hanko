@@ -9,30 +9,40 @@ import LoadingSpinner, {
 import styles from "./styles.sass";
 import { useCallback, useContext, useMemo, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext, UIAction } from "../../contexts/AppProvider";
+import { AppContext } from "../../contexts/AppProvider";
+import { useFlowEffects } from "../../contexts/UseFlowEffects";
+import { Action } from "@teamhanko/hanko-frontend-sdk";
 
 type LoadingSpinnerPosition = "left" | "right";
 
 export interface Props
   extends LoadingSpinnerProps,
     h.JSX.HTMLAttributes<HTMLButtonElement> {
-  uiAction?: UIAction;
-  onClick(event: Event): void;
+  onClick?(event: Event): void;
   dangerous?: boolean;
   loadingSpinnerPosition?: LoadingSpinnerPosition;
+  flowAction?: Action<any>;
 }
 
 const Link = ({
   loadingSpinnerPosition,
   dangerous = false,
   onClick,
-  uiAction,
+  flowAction,
   ...props
 }: Props) => {
   const { t } = useContext(TranslateContext);
-  const { uiState, isDisabled } = useContext(AppContext);
-
+  const { uiState } = useContext(AppContext);
   const [confirmationActive, setConfirmationActive] = useState<boolean>();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isSuccess, setIsSuccess] = useState<boolean>(false);
+
+  onClick ||= async (e: Event) => {
+    e.preventDefault();
+    return await flowAction?.run();
+  };
+
+  useFlowEffects(flowAction, setIsLoading, setIsSuccess);
 
   let timeoutID: number;
 
@@ -47,13 +57,18 @@ const Link = ({
   };
 
   const loading = useMemo(
-    () => (uiAction && uiState.loadingAction === uiAction) || props.isLoading,
-    [props, uiAction, uiState],
+    () => isLoading || props.isLoading,
+    [isLoading, props],
   );
 
   const success = useMemo(
-    () => (uiAction && uiState.succeededAction === uiAction) || props.isSuccess,
-    [props, uiAction, uiState],
+    () => isSuccess || props.isSuccess,
+    [isSuccess, props],
+  );
+
+  const hidden = useMemo(
+    () => (flowAction && !flowAction.enabled) || props.hidden,
+    [flowAction, props],
   );
 
   const onConfirmation = useCallback(
@@ -66,35 +81,39 @@ const Link = ({
   );
 
   const renderLink = useCallback(
-    () => (
-      <Fragment>
-        {confirmationActive ? (
-          <Fragment>
-            <Link onClick={onConfirmation}>{t("labels.yes")}</Link>&nbsp;/&nbsp;
-            <Link onClick={onCancel}>{t("labels.no")}</Link>
-            &nbsp;
-          </Fragment>
-        ) : null}
-        <button
-          {...props}
-          onClick={dangerous ? dangerousOnClick : onClick}
-          disabled={confirmationActive || props.disabled || isDisabled}
-          // @ts-ignore
-          part={"link"}
-          className={cx(styles.link, dangerous ? styles.danger : null)}
-        >
-          {props.children}
-        </button>
-      </Fragment>
-    ),
+    () =>
+      !hidden ? (
+        <Fragment>
+          {confirmationActive ? (
+            <Fragment>
+              <Link onClick={onConfirmation}>{t("labels.yes")}</Link>
+              &nbsp;/&nbsp;
+              <Link onClick={onCancel}>{t("labels.no")}</Link>
+              &nbsp;
+            </Fragment>
+          ) : null}
+          <button
+            {...props}
+            onClick={dangerous ? dangerousOnClick : onClick}
+            disabled={
+              confirmationActive || props.disabled || uiState.isDisabled
+            }
+            part={"link"}
+            className={cx(styles.link, dangerous ? styles.danger : null)}
+          >
+            {props.children}
+          </button>
+        </Fragment>
+      ) : null,
     [
+      hidden,
+      uiState,
       confirmationActive,
       dangerous,
       onClick,
       onConfirmation,
       props,
       t,
-      isDisabled,
     ],
   );
 
@@ -115,11 +134,10 @@ const Link = ({
           styles.linkWrapper,
           loadingSpinnerPosition === "right" ? styles.reverse : null,
         )}
-        hidden={props.hidden}
         onMouseEnter={handleOnMouseEnter}
         onMouseLeave={handleOnMouseLeave}
       >
-        {loadingSpinnerPosition && (loading || success) ? (
+        {!confirmationActive && (loading || success) ? (
           <Fragment>
             <LoadingSpinner
               isLoading={loading}
