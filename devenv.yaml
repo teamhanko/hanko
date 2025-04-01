@@ -1,0 +1,12 @@
+inputs:
+  nix2container:
+    url: github:nlewo/nix2container
+    inputs:
+      nixpkgs:
+        follows: nixpkgs
+  mk-shell-bin:
+    url: github:rrbutani/nix-mk-shell-bin
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
+  go_1_20_revision:
+    url: github:NixOS/nixpkgs?rev=336eda0d07dc5e2be1f923990ad9fdb6bc8e28e3
