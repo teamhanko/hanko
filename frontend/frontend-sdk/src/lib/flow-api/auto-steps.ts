@@ -1,3 +1,4 @@
+import JSCookie from "js-cookie";
 import { AutoSteps } from "./types/flow";
 import { WebauthnSupport } from "../WebauthnSupport";
 import WebauthnManager from "./WebauthnManager";
@@ -125,8 +126,11 @@ export const autoSteps: AutoSteps = {
   success: async (state) => {
     const { claims } = state.payload;
     const expirationSeconds = Date.parse(claims.expiration) - Date.now();
+    const jwt = JSCookie.get(state.hanko.options.cookieName);
+
     state.removeFromLocalStorage();
     state.hanko.relay.dispatchSessionCreatedEvent({
+      jwt,
       claims,
       expirationSeconds,
     });

@@ -1,3 +1,5 @@
+import JSCookie from "js-cookie";
+import { InternalOptions } from "../../Hanko";
 import { Listener } from "./Listener";
 import { Dispatcher } from "./Dispatcher";
 import { SessionClient } from "../client/SessionClient";
@@ -5,7 +7,6 @@ import { SessionState } from "./SessionState";
 import { WindowActivityManager } from "./WindowActivityManager";
 import { Scheduler, SessionCheckResult } from "./Scheduler";
 import { SessionChannel, BroadcastMessage } from "./SessionChannel";
-import { InternalOptions } from "../../Hanko";
 
 /**
  * A class that manages session checks, dispatches events based on session status,
@@ -25,6 +26,7 @@ export class Relay extends Dispatcher {
   private readonly windowActivityManager: WindowActivityManager; // Manages window activity states.
   private readonly scheduler: Scheduler; //  Schedules session validity checks.
   private readonly sessionChannel: SessionChannel; // Handles inter-tab communication via broadcast channels.
+  private readonly options: InternalOptions;
   private isLoggedIn: boolean;
 
   // eslint-disable-next-line require-jsdoc
@@ -33,6 +35,7 @@ export class Relay extends Dispatcher {
     this.client = new SessionClient(api, options);
     this.checkInterval = options.sessionCheckInterval;
     this.sessionState = new SessionState(`${options.cookieName}_session_state`);
+    this.options = options;
     this.sessionChannel = new SessionChannel(
       options.sessionCheckChannelName,
       () => this.onChannelSessionExpired(),
@@ -182,9 +185,11 @@ export class Relay extends Dispatcher {
     const now = Date.now();
     const expiration = Date.parse(claims.expiration);
     const expirationSeconds = expiration - now;
+    const jwt = JSCookie.get(this.options.cookieName);
 
     this.isLoggedIn = true;
     this.dispatchSessionCreatedEvent({
+      jwt,
       claims,
       expirationSeconds, // deprecated
     });
