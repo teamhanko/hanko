@@ -59,6 +59,7 @@ class Hanko extends Listener {
   sessionClient: SessionClient;
   session: Session;
   relay: Relay;
+  readonly options: InternalOptions;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
@@ -98,6 +99,8 @@ class Hanko extends Listener {
     if (options?.sessionCheckChannelName !== undefined) {
       opts.sessionCheckChannelName = options.sessionCheckChannelName;
     }
+
+    this.options = opts;
 
     this.api = api;
     /**
