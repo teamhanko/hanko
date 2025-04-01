@@ -3,7 +3,7 @@ module github.com/teamhanko/hanko/backend
 go 1.24
 
 require (
-	github.com/beevik/etree v1.1.0
+	github.com/beevik/etree v1.5.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/coreos/go-oidc/v3 v3.13.0
 	github.com/fatih/structs v1.1.0
