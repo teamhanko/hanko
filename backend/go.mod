@@ -22,7 +22,10 @@ require (
 	github.com/invopop/jsonschema v0.12.0
 	github.com/jackc/pgconn v1.14.3
 	github.com/kelseyhightower/envconfig v1.4.0
-	github.com/knadh/koanf v1.5.0
+	github.com/knadh/koanf/parsers/json v0.1.0
+	github.com/knadh/koanf/parsers/yaml v0.1.0
+	github.com/knadh/koanf/providers/file v1.1.2
+	github.com/knadh/koanf/v2 v2.1.2
 	github.com/labstack/echo-contrib v0.17.1
 	github.com/labstack/echo-jwt/v4 v4.2.0
 	github.com/labstack/echo/v4 v4.12.0
@@ -79,7 +82,7 @@ require (
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/fatih/color v1.13.0 // indirect
-	github.com/fsnotify/fsnotify v1.5.1 // indirect
+	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fxamacker/cbor/v2 v2.6.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.8 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
@@ -87,6 +90,7 @@ require (
 	github.com/go-jose/go-jose/v4 v4.0.5 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
 	github.com/go-webauthn/x v0.1.9 // indirect
 	github.com/gobuffalo/envy v1.10.2 // indirect
 	github.com/gobuffalo/fizz v1.14.4 // indirect
@@ -116,6 +120,7 @@ require (
 	github.com/jonboulle/clockwork v0.3.0 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.16.5 // indirect
+	github.com/knadh/koanf/maps v0.1.1 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/lestrrat-go/blackmagic v1.0.2 // indirect
 	github.com/lestrrat-go/httpcc v1.0.1 // indirect
@@ -136,7 +141,6 @@ require (
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runc v1.1.14 // indirect
 	github.com/paulmach/orb v0.9.0 // indirect
-	github.com/pelletier/go-toml v1.9.4 // indirect
 	github.com/pierrec/lz4/v4 v4.1.17 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
