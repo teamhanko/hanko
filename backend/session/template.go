@@ -16,8 +16,8 @@ type ClaimTemplateData struct {
 	User *dto.UserJWT
 }
 
-// ProcessClaimTemplate processes a map of claims using the provided user data and sets them on the token
-func ProcessClaimTemplate(token jwt.Token, claims map[string]interface{}, user dto.UserJWT) error {
+// ProcessJWTTemplate processes a map of claims using the provided user data and sets them on the token
+func ProcessJWTTemplate(token jwt.Token, claims map[string]interface{}, user dto.UserJWT) error {
 	claimTemplateData := ClaimTemplateData{
 		User: &user,
 	}

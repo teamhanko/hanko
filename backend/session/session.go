@@ -27,7 +27,7 @@ type manager struct {
 	cookieConfig  cookieConfig
 	issuer        string
 	audience      []string
-	claimTemplate *config.ClaimTemplate
+	jwtTemplate   *config.JWTTemplate
 }
 
 type cookieConfig struct {
@@ -87,8 +87,8 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 			SameSite: sameSite,
 			Secure:   config.Session.Cookie.Secure,
 		},
-		audience:      audience,
-		claimTemplate: config.Session.ClaimTemplate,
+		audience:    audience,
+		jwtTemplate: config.Session.JWTTemplate,
 	}, nil
 }
 
@@ -97,8 +97,8 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 	token := jwt.New()
 
 	// Process the claim template if found
-	if m.claimTemplate != nil {
-		if err := ProcessClaimTemplate(token, m.claimTemplate.Claims, user); err != nil {
+	if m.jwtTemplate != nil {
+		if err := ProcessJWTTemplate(token, m.jwtTemplate.Claims, user); err != nil {
 			return "", nil, err
 		}
 	}
