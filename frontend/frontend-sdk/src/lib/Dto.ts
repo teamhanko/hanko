@@ -268,6 +268,7 @@ export interface Claims {
   email?: Pick<Email, "address" | "is_primary" | "is_verified">;
   username?: string;
   session_id: string;
+  [key: string]: unknown;
 }
 
 /**
