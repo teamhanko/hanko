@@ -45,7 +45,7 @@ func UserJWTFromUserModel(userModel *models.User) UserJWT {
 		userJWT.Email = EmailJWTFromEmailModel(primaryEmail)
 	}
 
-	if userModel.Username != nil && userModel.Username.Username != "" {
+	if userModel.Username != nil {
 		userJWT.Username = userModel.Username.Username
 	}
 
