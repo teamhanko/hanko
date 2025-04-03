@@ -201,9 +201,10 @@ func TestProcessClaimTemplate(t *testing.T) {
 		{
 			name: "successful claim processing",
 			claims: map[string]interface{}{
-				"email":    "{{.User.Email.Address}}",
-				"verified": "{{.User.Email.IsVerified}}",
-				"static":   "static-value",
+				"email":         "{{.User.Email.Address}}",
+				"verified":      "{{.User.Email.IsVerified}}",
+				"static_string": "static-value",
+				"static_bool":   false,
 			},
 			user: dto.UserJWT{
 				Email: &dto.EmailJWT{
@@ -212,9 +213,10 @@ func TestProcessClaimTemplate(t *testing.T) {
 				},
 			},
 			expectedClaims: map[string]interface{}{
-				"email":    "test@example.com",
-				"verified": "true",
-				"static":   "static-value",
+				"email":         "test@example.com",
+				"verified":      true,
+				"static_string": "static-value",
+				"static_bool":   false,
 			},
 		},
 		{

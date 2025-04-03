@@ -3,6 +3,7 @@ package session
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"text/template"
 
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -62,16 +63,29 @@ func processClaimTemplate(value interface{}, data ClaimTemplateData) (interface{
 }
 
 // parseClaimTemplateValue parses and executes a template string using the provided data
-func parseClaimTemplateValue(tmplStr string, data ClaimTemplateData) (string, error) {
+func parseClaimTemplateValue(tmplStr string, data ClaimTemplateData) (interface{}, error) {
 	tmpl, err := template.New("").Parse(tmplStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template: %w", err)
 	}
 
 	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
+	if err = tmpl.Execute(&buf, data); err != nil {
 		return "", fmt.Errorf("failed to execute template: %w", err)
 	}
 
-	return buf.String(), nil
+	// "Workaround"/"hack" for when the template expression evaluates to a boolean string, i.e. "true"
+	// or "false". This converts it to a bool for consistency's sake (i.e. to prevent that both boolean
+	// values and boolean strings are eventually set in the JWT).
+	resultString := buf.String()
+	if resultString == "true" || resultString == "false" {
+		b, err := strconv.ParseBool(buf.String())
+		if err != nil {
+			return nil, fmt.Errorf("could not parse string as bool: %w", err)
+		}
+
+		return b, nil
+	}
+
+	return resultString, nil
 }
