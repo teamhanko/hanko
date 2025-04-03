@@ -24,10 +24,14 @@ func ProcessJWTTemplate(token jwt.Token, claims map[string]interface{}, user dto
 	for key, value := range claims {
 		processedValue, err := processClaimTemplate(value, claimTemplateData)
 		if err != nil {
-			log.Warn().Err(err).Str("session", key).Msgf("failed to process custom JWT claim: %+v", value)
+			log.Warn().Err(err).Str("session", key).Msgf("failed to process custom JWT claim template: %+v", value)
 			continue
 		}
-		_ = token.Set(key, processedValue)
+		err = token.Set(key, processedValue)
+		if err != nil {
+			log.Warn().Err(err).Str("session", key).Msgf("failed to set processed JWT claim %+v to token", value)
+			continue
+		}
 	}
 	return nil
 }
