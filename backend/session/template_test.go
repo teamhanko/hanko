@@ -12,14 +12,14 @@ func TestProcessTemplate(t *testing.T) {
 	tests := []struct {
 		name     string
 		template string
-		data     ClaimTemplateData
+		data     JWTTemplateData
 		want     string
 		wantErr  bool
 	}{
 		{
 			name:     "simple template",
 			template: "Hello {{.User.Email.Address}}",
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
 						Address: "test@example.com",
@@ -32,7 +32,7 @@ func TestProcessTemplate(t *testing.T) {
 		{
 			name:     "template with pipelining",
 			template: "Hello {{.User.Email.Address | printf \"%s\" }}",
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
 						Address: "test@example.com",
@@ -45,7 +45,7 @@ func TestProcessTemplate(t *testing.T) {
 		{
 			name:     "template with conditional",
 			template: "{{if .User.Email.IsVerified}}Verified{{else}}Unverified{{end}} user {{.User.Email.Address}}",
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
 						Address:    "test@example.com",
@@ -59,7 +59,7 @@ func TestProcessTemplate(t *testing.T) {
 		{
 			name:     "invalid template",
 			template: "Hello {{.InvalidField}}",
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{},
 			},
 			want:    "",
@@ -68,7 +68,7 @@ func TestProcessTemplate(t *testing.T) {
 		{
 			name:     "empty template",
 			template: "",
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{},
 			},
 			want:    "",
@@ -93,14 +93,14 @@ func TestProcessClaimValue(t *testing.T) {
 	tests := []struct {
 		name    string
 		value   interface{}
-		data    ClaimTemplateData
+		data    JWTTemplateData
 		want    interface{}
 		wantErr bool
 	}{
 		{
 			name:  "string template",
 			value: "Hello {{.User.Email.Address}}",
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
 						Address: "test@example.com",
@@ -118,7 +118,7 @@ func TestProcessClaimValue(t *testing.T) {
 					"message": "Welcome {{.User.Email.Address}}",
 				},
 			},
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
 						Address: "test@example.com",
@@ -141,7 +141,7 @@ func TestProcessClaimValue(t *testing.T) {
 					"message": "Welcome {{.User.Email.Address}}",
 				},
 			},
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{
 					Email: &dto.EmailJWT{
 						Address: "test@example.com",
@@ -159,7 +159,7 @@ func TestProcessClaimValue(t *testing.T) {
 		{
 			name:  "non-string primitive",
 			value: 42,
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{},
 			},
 			want:    42,
@@ -170,7 +170,7 @@ func TestProcessClaimValue(t *testing.T) {
 			value: map[string]interface{}{
 				"message": "Hello {{.InvalidField}}",
 			},
-			data: ClaimTemplateData{
+			data: JWTTemplateData{
 				User: &dto.UserJWT{},
 			},
 			want:    nil,

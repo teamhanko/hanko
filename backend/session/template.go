@@ -11,14 +11,14 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 )
 
-// ClaimTemplateData holds the data available for template processing
-type ClaimTemplateData struct {
+// JWTTemplateData holds the data available for template processing
+type JWTTemplateData struct {
 	User *dto.UserJWT
 }
 
 // ProcessJWTTemplate processes a map of claims using the provided user data and sets them on the token
 func ProcessJWTTemplate(token jwt.Token, claims map[string]interface{}, user dto.UserJWT) error {
-	claimTemplateData := ClaimTemplateData{
+	claimTemplateData := JWTTemplateData{
 		User: &user,
 	}
 	for key, value := range claims {
@@ -37,7 +37,7 @@ func ProcessJWTTemplate(token jwt.Token, claims map[string]interface{}, user dto
 }
 
 // processClaimTemplate processes a claim value, handling both string templates and nested structures
-func processClaimTemplate(value interface{}, data ClaimTemplateData) (interface{}, error) {
+func processClaimTemplate(value interface{}, data JWTTemplateData) (interface{}, error) {
 	switch v := value.(type) {
 	case string:
 		return parseClaimTemplateValue(v, data)
@@ -67,7 +67,7 @@ func processClaimTemplate(value interface{}, data ClaimTemplateData) (interface{
 }
 
 // parseClaimTemplateValue parses and executes a template string using the provided data
-func parseClaimTemplateValue(tmplStr string, data ClaimTemplateData) (interface{}, error) {
+func parseClaimTemplateValue(tmplStr string, data JWTTemplateData) (interface{}, error) {
 	tmpl, err := template.New("").Parse(tmplStr)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template: %w", err)
