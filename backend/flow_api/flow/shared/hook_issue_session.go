@@ -3,14 +3,14 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
-	"time"
 )
 
 type IssueSession struct {
@@ -36,17 +36,9 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
 
-	var emailDTO *dto.EmailJwt
-	if email := userModel.Emails.GetPrimary(); email != nil {
-		emailDTO = dto.JwtFromEmailModel(email)
-	}
+	userJWT := dto.UserJWTFromUserModel(userModel)
 
-	var generateJWTOptions []session.JWTOptions
-	if userModel.Username != nil {
-		generateJWTOptions = append(generateJWTOptions, session.WithValue("username", userModel.Username.Username))
-	}
-
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userId, emailDTO, generateJWTOptions...)
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}

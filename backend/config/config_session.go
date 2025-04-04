@@ -2,8 +2,9 @@ package config
 
 import (
 	"errors"
-	"github.com/invopop/jsonschema"
 	"time"
+
+	"github.com/invopop/jsonschema"
 )
 
 type Session struct {
@@ -38,6 +39,8 @@ type Session struct {
 	// Deprecated. Use settings in parent object.
 	//`server_side` contains configuration for server-side sessions.
 	ServerSide *ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
+	// `jwt_template` defines a template for additional JWT claims that can be added to session tokens.
+	JWTTemplate *JWTTemplate `yaml:"jwt_template" json:"jwt_template,omitempty" koanf:"jwt_template"`
 }
 
 func (s *Session) Validate() error {
@@ -45,6 +48,7 @@ func (s *Session) Validate() error {
 	if err != nil {
 		return errors.New("failed to parse lifespan")
 	}
+
 	return nil
 }
 
@@ -96,4 +100,8 @@ type ServerSide struct {
 	// `limit` determines the maximum number of server-side sessions a user can have. When the limit is exceeded,
 	// older sessions are invalidated.
 	Limit int `yaml:"limit" json:"limit,omitempty" koanf:"limit" jsonschema:"default=100"`
+}
+
+type JWTTemplate struct {
+	Claims map[string]interface{} `yaml:"claims" json:"claims,omitempty" koanf:"claims"`
 }

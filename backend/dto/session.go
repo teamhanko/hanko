@@ -3,11 +3,12 @@ package dto
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/mileusna/useragent"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"time"
 )
 
 type SessionData struct {
@@ -47,27 +48,55 @@ func FromSessionModel(model models.Session, current bool) SessionData {
 }
 
 type Claims struct {
-	Subject    uuid.UUID  `json:"subject"`
-	IssuedAt   *time.Time `json:"issued_at,omitempty"`
-	Expiration time.Time  `json:"expiration"`
-	Audience   []string   `json:"audience,omitempty"`
-	Issuer     *string    `json:"issuer,omitempty"`
-	Email      *EmailJwt  `json:"email,omitempty"`
-	Username   *string    `json:"username,omitempty"`
-	SessionID  uuid.UUID  `json:"session_id"`
+	Subject      uuid.UUID              `json:"subject"`
+	IssuedAt     *time.Time             `json:"issued_at,omitempty"`
+	Expiration   time.Time              `json:"expiration"`
+	Audience     []string               `json:"audience,omitempty"`
+	Issuer       *string                `json:"issuer,omitempty"`
+	Email        *EmailJWT              `json:"email,omitempty"`
+	Username     *string                `json:"username,omitempty"`
+	SessionID    uuid.UUID              `json:"session_id"`
+	CustomClaims map[string]interface{} `json:"-"`
 }
 
-type ValidateSessionResponse struct {
-	IsValid bool    `json:"is_valid"`
-	Claims  *Claims `json:"claims,omitempty"`
-	// deprecated
-	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
-	// deprecated
-	UserID *uuid.UUID `json:"user_id,omitempty"`
+// Custom MarshalJSON to flatten CustomClaims into the top level
+func (c Claims) MarshalJSON() ([]byte, error) {
+	// Create a map to hold the flattened structure
+	flattened := make(map[string]interface{})
+
+	// Marshal basic fields into the flattened map
+	flattened["subject"] = c.Subject
+	flattened["expiration"] = c.Expiration
+	flattened["session_id"] = c.SessionID
+
+	if c.IssuedAt != nil {
+		flattened["issued_at"] = c.IssuedAt
+	}
+	if len(c.Audience) > 0 {
+		flattened["audience"] = c.Audience
+	}
+	if c.Issuer != nil {
+		flattened["issuer"] = c.Issuer
+	}
+	if c.Email != nil {
+		flattened["email"] = c.Email
+	}
+	if c.Username != nil {
+		flattened["username"] = c.Username
+	}
+
+	// Flatten CustomClaims into the top level
+	for key, value := range c.CustomClaims {
+		flattened[key] = value
+	}
+
+	return json.Marshal(flattened)
 }
 
 func GetClaimsFromToken(token jwt.Token) (*Claims, error) {
-	claims := &Claims{}
+	claims := &Claims{
+		CustomClaims: make(map[string]interface{}),
+	}
 
 	if subject := token.Subject(); len(subject) > 0 {
 		s, err := uuid.FromString(subject)
@@ -118,7 +147,28 @@ func GetClaimsFromToken(token jwt.Token) (*Claims, error) {
 
 	claims.Expiration = token.Expiration()
 
+	hankoClaims := map[string]bool{
+		"email":      true,
+		"username":   true,
+		"session_id": true,
+	}
+
+	for key, value := range token.PrivateClaims() {
+		if !hankoClaims[key] {
+			claims.CustomClaims[key] = value
+		}
+	}
+
 	return claims, nil
+}
+
+type ValidateSessionResponse struct {
+	IsValid bool    `json:"is_valid"`
+	Claims  *Claims `json:"claims,omitempty"`
+	// deprecated
+	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
+	// deprecated
+	UserID *uuid.UUID `json:"user_id,omitempty"`
 }
 
 type ValidateSessionRequest struct {

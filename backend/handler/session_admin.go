@@ -2,6 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
@@ -13,7 +15,6 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
-	"net/http"
 )
 
 type SessionAdminHandler struct {
@@ -56,12 +57,15 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	var emailDTO *dto.EmailJwt
+	var emailDTO *dto.EmailJWT
 	if email := user.Emails.GetPrimary(); email != nil {
-		emailDTO = dto.JwtFromEmailModel(email)
+		emailDTO = dto.EmailJWTFromEmailModel(email)
 	}
 
-	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(userID, emailDTO)
+	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(dto.UserJWT{
+		UserID: userID.String(),
+		Email:  emailDTO,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}

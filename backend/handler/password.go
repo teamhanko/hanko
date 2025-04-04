@@ -3,12 +3,15 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"unicode/utf8"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/sethvargo/go-limiter"
-	"github.com/teamhanko/hanko/backend/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
@@ -16,8 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"github.com/teamhanko/hanko/backend/session"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"unicode/utf8"
 )
 
 type PasswordHandler struct {
@@ -218,12 +219,15 @@ func (h *PasswordHandler) Login(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 	}
 
-	var emailJwt *dto.EmailJwt
+	var emailJwt *dto.EmailJWT
 	if e := user.Emails.GetPrimary(); e != nil {
-		emailJwt = dto.JwtFromEmailModel(e)
+		emailJwt = dto.EmailJWTFromEmailModel(e)
 	}
 
-	token, rawToken, err := h.sessionManager.GenerateJWT(pw.UserId, emailJwt)
+	token, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{
+		UserID: pw.UserId.String(),
+		Email:  emailJwt,
+	})
 	if err != nil {
 		return fmt.Errorf("failed to generate jwt: %w", err)
 	}

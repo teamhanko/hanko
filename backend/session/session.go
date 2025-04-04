@@ -2,18 +2,19 @@ package session
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/config"
 	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
 	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
 	"github.com/teamhanko/hanko/backend/dto"
-	"net/http"
-	"time"
 )
 
 type Manager interface {
-	GenerateJWT(userId uuid.UUID, userDto *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error)
+	GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt.Token, error)
 	Verify(string) (jwt.Token, error)
 	GenerateCookie(token string) (*http.Cookie, error)
 	DeleteCookie() (*http.Cookie, error)
@@ -26,6 +27,7 @@ type manager struct {
 	cookieConfig  cookieConfig
 	issuer        string
 	audience      []string
+	jwtTemplate   *config.JWTTemplate
 }
 
 type cookieConfig struct {
@@ -85,17 +87,26 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 			SameSite: sameSite,
 			Secure:   config.Session.Cookie.Secure,
 		},
-		audience: audience,
+		audience:    audience,
+		jwtTemplate: config.Session.JWTTemplate,
 	}, nil
 }
 
 // GenerateJWT creates a new session JWT for the given user
-func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWTOptions) (string, jwt.Token, error) {
+func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt.Token, error) {
+	token := jwt.New()
+
+	// Process the claim template if found
+	if m.jwtTemplate != nil {
+		if err := ProcessJWTTemplate(token, m.jwtTemplate.Claims, user); err != nil {
+			return "", nil, err
+		}
+	}
+
 	issuedAt := time.Now()
 	expiration := issuedAt.Add(m.sessionLength)
 
-	token := jwt.New()
-	_ = token.Set(jwt.SubjectKey, userId.String())
+	_ = token.Set(jwt.SubjectKey, user.UserID)
 	_ = token.Set(jwt.IssuedAtKey, issuedAt)
 	_ = token.Set(jwt.ExpirationKey, expiration)
 	_ = token.Set(jwt.AudienceKey, m.audience)
@@ -106,8 +117,12 @@ func (m *manager) GenerateJWT(userId uuid.UUID, email *dto.EmailJwt, opts ...JWT
 	}
 	_ = token.Set("session_id", sessionID.String())
 
-	if email != nil {
-		_ = token.Set("email", &email)
+	if user.Email != nil {
+		_ = token.Set("email", user.Email)
+	}
+
+	if user.Username != "" {
+		_ = token.Set("username", user.Username)
 	}
 
 	for _, opt := range opts {

@@ -1,8 +1,12 @@
 package jwt
 
 import (
+	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
+
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/config"
@@ -11,12 +15,12 @@ import (
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
-	"log"
 )
 
 func NewCreateCommand() *cobra.Command {
 	var (
 		configFile string
+		pretty     bool
 	)
 
 	cmd := &cobra.Command{
@@ -56,18 +60,13 @@ func NewCreateCommand() *cobra.Command {
 
 			userId := uuid.FromStringOrNil(args[0])
 
-			emails, err := persister.GetEmailPersister().FindByUserId(userId)
+			userModel, err := persister.GetUserPersister().Get(userId)
 			if err != nil {
-				fmt.Printf("failed to get emails from db: %s", err)
+				fmt.Printf("failed to get user from db: %s", err)
 				return
 			}
 
-			var emailJwt *dto.EmailJwt
-			if e := emails.GetPrimary(); e != nil {
-				emailJwt = dto.JwtFromEmailModel(e)
-			}
-
-			token, rawToken, err := sessionManager.GenerateJWT(userId, emailJwt)
+			token, rawToken, err := sessionManager.GenerateJWT(dto.UserJWTFromUserModel(userModel))
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return
@@ -91,11 +90,25 @@ func NewCreateCommand() *cobra.Command {
 				return
 			}
 
-			fmt.Printf("token: %s", token)
+			fmt.Printf("Token: %s\n", token)
+
+			if pretty {
+				rawTokenMap, err := rawToken.AsMap(context.Background())
+				if err != nil {
+					fmt.Println("failed to get JWT payload as map:", err)
+					return
+				}
+				payloadJSON, err := json.MarshalIndent(rawTokenMap, "", "  ")
+				if err != nil {
+					fmt.Println("failed to marshal JWT payload as JSON:", err)
+				}
+				fmt.Printf("JWT payload: %s\n", string(payloadJSON))
+			}
 		},
 	}
 
 	cmd.Flags().StringVar(&configFile, "config", "", "config file")
+	cmd.Flags().BoolVar(&pretty, "pretty", true, "pretty print the JWT payload")
 
 	return cmd
 }
