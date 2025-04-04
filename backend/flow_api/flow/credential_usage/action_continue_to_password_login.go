@@ -17,7 +17,12 @@ func (a ContinueToPasswordLogin) GetDescription() string {
 	return "Continue to the password login."
 }
 
-func (a ContinueToPasswordLogin) Initialize(c flowpilot.InitializationContext) {}
+func (a ContinueToPasswordLogin) Initialize(c flowpilot.InitializationContext) {
+	deps := a.GetDeps(c)
+	if deps.Cfg.Privacy.OnlyShowActualLoginMethods && (!c.Stash().Get(shared.StashPathUserHasPassword).Bool() || !deps.Cfg.Password.Enabled) {
+		c.SuspendAction()
+	}
+}
 
 func (a ContinueToPasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(shared.StateLoginPassword)

@@ -18,7 +18,12 @@ func (a ContinueToPasscodeConfirmation) GetDescription() string {
 	return "Send a login passcode code via email."
 }
 
-func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationContext) {}
+func (a ContinueToPasscodeConfirmation) Initialize(c flowpilot.InitializationContext) {
+	deps := a.GetDeps(c)
+	if deps.Cfg.Privacy.OnlyShowActualLoginMethods && (!c.Stash().Get(shared.StashPathUserHasEmails).Bool() || !deps.Cfg.Email.Enabled || (deps.Cfg.Email.Enabled && !deps.Cfg.Email.UseForAuthentication)) {
+		c.SuspendAction()
+	}
+}
 
 func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) error {
 	if err := c.Stash().Set(shared.StashPathLoginMethod, "passcode"); err != nil {
