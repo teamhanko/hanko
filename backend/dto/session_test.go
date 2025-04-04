@@ -193,17 +193,17 @@ func TestClaims_MarshalJSON(t *testing.T) {
 				switch v := expectedValue.(type) {
 				case time.Time:
 					// For time values, compare the string representation after truncating to seconds
-					expectedTime := v.Truncate(time.Second)
+					expectedTime := v.Truncate(time.Second).UTC()
 					actualTime, err := time.Parse(time.RFC3339, actualValue.(string))
 					assert.NoError(t, err)
-					actualTime = actualTime.Truncate(time.Second)
+					actualTime = actualTime.Truncate(time.Second).UTC()
 					assert.Equal(t, expectedTime, actualTime, "time mismatch for key: %s", key)
 				case *time.Time:
 					// For pointer to time values, compare the string representation after truncating to seconds
-					expectedTime := v.Truncate(time.Second)
+					expectedTime := v.Truncate(time.Second).UTC()
 					actualTime, err := time.Parse(time.RFC3339, actualValue.(string))
 					assert.NoError(t, err)
-					actualTime = actualTime.Truncate(time.Second)
+					actualTime = actualTime.Truncate(time.Second).UTC()
 					assert.Equal(t, expectedTime, actualTime, "time mismatch for key: %s", key)
 				case uuid.UUID:
 					// For UUID values, compare the string representation
