@@ -11,7 +11,7 @@ import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { useFlowState } from "../hooks/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 import Button from "../components/form/Button";
 import Input from "../components/form/Input";

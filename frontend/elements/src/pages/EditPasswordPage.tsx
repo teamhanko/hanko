@@ -11,7 +11,7 @@ import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../hooks/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 type Props = {
   state: State<"login_password_recovery">;

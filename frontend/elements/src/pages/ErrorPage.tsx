@@ -10,7 +10,7 @@ import Headline1 from "../components/headline/Headline1";
 import ErrorBox from "../components/error/ErrorBox";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 import { HankoError } from "@teamhanko/hanko-frontend-sdk";
-import { useFlowState } from "../hooks/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 interface Props {
   state?: State<any>;

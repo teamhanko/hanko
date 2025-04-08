@@ -13,7 +13,7 @@ import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import OTPCreationDetails from "../components/otp/OTPCreationDetails";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../hooks/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 interface Props {
   state: State<"mfa_otp_secret_creation">;
