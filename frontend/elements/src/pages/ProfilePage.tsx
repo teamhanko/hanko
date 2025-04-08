@@ -76,15 +76,6 @@ const ProfilePage = (props: Props) => {
     return onState(nextState);
   };
 
-  const onPasskeySubmit = async (event: Event) => {
-    event.preventDefault();
-    const nextState = await flowState.actions.webauthn_credential_create.run(
-      null,
-      { dispatchAfterStateChangeEvent: false },
-    );
-    return onState(nextState);
-  };
-
   const onSecurityKeyDelete = async (event: Event, id: string) => {
     event.preventDefault();
     const nextState = await flowState.actions.security_key_delete.run(
@@ -93,14 +84,6 @@ const ProfilePage = (props: Props) => {
       },
       { dispatchAfterStateChangeEvent: false },
     );
-    return onState(nextState);
-  };
-
-  const onSecurityKeySubmit = async (event: Event) => {
-    event.preventDefault();
-    const nextState = await flowState.actions.security_key_create.run(null, {
-      dispatchAfterStateChangeEvent: false,
-    });
     return onState(nextState);
   };
 
@@ -207,8 +190,9 @@ const ProfilePage = (props: Props) => {
             />
             {flowState.actions.webauthn_credential_create.enabled ? (
               <AddWebauthnCredentialDropdown
+                flowState={flowState}
+                onState={onState}
                 credentialType={"passkey"}
-                onCredentialSubmit={onPasskeySubmit}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />
@@ -235,8 +219,9 @@ const ProfilePage = (props: Props) => {
             />
             {flowState.actions.security_key_create.enabled ? (
               <AddWebauthnCredentialDropdown
+                flowState={flowState}
+                onState={onState}
                 credentialType={"security-key"}
-                onCredentialSubmit={onSecurityKeySubmit}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />

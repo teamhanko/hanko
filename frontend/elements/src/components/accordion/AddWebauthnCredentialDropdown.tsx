@@ -1,6 +1,6 @@
 import { StateUpdater, useContext } from "preact/compat";
 
-import { WebauthnSupport, HankoError } from "@teamhanko/hanko-frontend-sdk";
+import { WebauthnSupport, State } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
@@ -14,19 +14,34 @@ type CredentialType = "passkey" | "security-key";
 interface Props {
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
-  onCredentialSubmit: (event: Event) => Promise<void>;
   credentialType: CredentialType;
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const AddWebauthnCredentialDropdown = ({
   checkedItemID,
   setCheckedItemID,
-  onCredentialSubmit,
   credentialType,
+  flowState,
+  onState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
 
   const webauthnSupported = WebauthnSupport.supported();
+
+  const action =
+    credentialType == "passkey"
+      ? flowState.actions.webauthn_credential_create
+      : flowState.actions.security_key_create;
+  const onSubmit = async (event: Event) => {
+    event.preventDefault();
+
+    const nextState = await action.run(null, {
+      dispatchAfterStateChangeEvent: false,
+    });
+    return onState(nextState);
+  };
 
   return (
     <Dropdown
@@ -48,7 +63,7 @@ const AddWebauthnCredentialDropdown = ({
           ? t("texts.securityKeySetUp")
           : t("texts.setupPasskey")}
       </Paragraph>
-      <Form onSubmit={onCredentialSubmit}>
+      <Form onSubmit={onSubmit} flowAction={action}>
         <Button
           title={!webauthnSupported ? t("labels.webauthnUnsupported") : null}
         >

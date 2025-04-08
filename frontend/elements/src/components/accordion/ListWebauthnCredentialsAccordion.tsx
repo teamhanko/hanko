@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { StateUpdater, useContext } from "preact/compat";
 
-import { HankoError, State } from "@teamhanko/hanko-frontend-sdk";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
