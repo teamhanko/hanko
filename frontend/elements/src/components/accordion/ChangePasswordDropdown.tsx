@@ -27,7 +27,6 @@ const ChangePasswordDropdown = ({
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const [newPassword, setNewPassword] = useState<string>("");
-  // const { flowState } = useFlowState(props.flowState);
 
   const action = flowState.actions.password_create.enabled
     ? flowState.actions.password_create
