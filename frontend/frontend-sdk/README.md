@@ -76,7 +76,7 @@ const state = await hanko.createState("login", {
 
 - **flowName**: The name of the flow (e.g., "login", "register" or "profile").
 - **options**:
-    - **dispatchAfterStateChangeEvent**: Boolean to enable the `onAfterStateChanged` event after state changes when creating a new state (default: `true`).
+    - **dispatchAfterStateChangeEvent**: Boolean to enable the `onAfterStateChange` event after state changes when creating a new state (default: `true`).
     - **excludeAutoSteps**: Array of state names or "all" to skip specific or all auto-steps.
 
 ### Understanding the State Object
@@ -136,7 +136,7 @@ if (state.name === "login_init") {
   const newState = await state.actions.continue_with_login_identifier.run({
     username: "user1",
   });
-  // Triggers `onBeforeStateChanged` and `onAfterStateChanged` events
+  // Triggers `onBeforeStateChange` and `onAfterStateChange` events
   // `newState` is the next state in the flow (e.g., "login_password")
 }
 ```
@@ -144,29 +144,29 @@ if (state.name === "login_init") {
 #### Additional Considerations
 
 - **Type Narrowing**: Check `state.name` to ensure the action exists and inputs are valid for that state.
-- **Events**: By default, `run` triggers `onBeforeStateChanged` before the action and `onAfterStateChanged` after the new state is loaded.
+- **Events**: By default, `run` triggers `onBeforeStateChange` before the action and `onAfterStateChange` after the new state is loaded.
 - **Validation Errors**: If the action fails due to invalid input (e.g., wrong format or length), `newState.error` will be set to "invalid_form_data", and specific errors will be attached to the related input fields (see "Error Handling" below).
 
 ### Event Handlers
 
 The SDK dispatches events via the Hanko instance to track state changes.
 
-#### `onBeforeStateChanged`
+#### `onBeforeStateChange`
 
 Fires before an action is executed, useful for showing loading states.
 
 ```typescript
-hanko.onBeforeStateChanged(({ state }) => {
+hanko.onBeforeStateChange(({ state }) => {
   console.log("Action loading:", state.invokedAction);
 });
 ```
 
-#### `onAfterStateChanged`
+#### `onAfterStateChange`
 
 Fires after a new state is loaded, ideal for rendering UI or handling state-specific logic.
 
 ```typescript
-hanko.onAfterStateChanged(({ state }) => {
+hanko.onAfterStateChange(({ state }) => {
   console.log("Action load finished:", state.invokedAction);
 
   switch (state.name) {
@@ -189,7 +189,7 @@ hanko.onAfterStateChanged(({ state }) => {
 
 ### Controlling the AfterStateChanged Event
 
-You can disable the automatic `onAfterStateChanged` event and dispatch it manually after custom logic.
+You can disable the automatic `onAfterStateChange` event and dispatch it manually after custom logic.
 
 ```typescript
 if (state.name === "login_init") {
@@ -197,7 +197,7 @@ if (state.name === "login_init") {
     { username: "user1" },
     { dispatchAfterStateChangeEvent: false }, // Disable automatic dispatch
   );
-  // Only `onBeforeStateChanged` is triggered here
+  // Only `onBeforeStateChange` is triggered here
 
   await doSomething(); // Your custom async logic
   newState.dispatchAfterStateChangeEvent(); // Manually trigger the event
@@ -231,7 +231,7 @@ const state = await hanko.createState("login", {
 #### Manual Auto-Step Execution
 
 ```typescript
-hanko.onAfterStateChanged(({ state }) => {
+hanko.onAfterStateChange(({ state }) => {
   if (state.name === "success") {
     console.log("Flow completed");
     await state.autoStep();
