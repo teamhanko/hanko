@@ -68,11 +68,6 @@ const PasscodePage = (props: Props) => {
   //   }
   // }, [flowState, setSucceededAction]);
 
-  // useEffect(() => {
-  //   if (ttl <= 0 && uiState.succeededAction !== "passcode-submit") {
-  //     // setError(new PasscodeExpiredError());
-  //   }
-  // }, [uiState, ttl]);
 
   useEffect(() => {
     const timer = ttl > 0 && setInterval(() => setTtl(ttl - 1), 1000);
