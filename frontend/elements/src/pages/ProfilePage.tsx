@@ -262,7 +262,10 @@ const ProfilePage = (props: Props) => {
             <Divider />
           </Paragraph>
           <Paragraph>
-            <Form onSubmit={onUserDelete}>
+            <Form
+              onSubmit={onUserDelete}
+              flowAction={flowState.actions.account_delete}
+            >
               <Button dangerous>{t("headlines.deleteAccount")}</Button>
             </Form>
           </Paragraph>
