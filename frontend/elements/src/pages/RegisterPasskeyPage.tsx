@@ -12,7 +12,7 @@ import Headline1 from "../components/headline/Headline1";
 
 import Link from "../components/link/Link";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/FlowState";
 
 interface Props {
   state: State<"onboarding_create_passkey">;

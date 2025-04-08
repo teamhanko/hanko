@@ -10,7 +10,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/FlowState";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
 

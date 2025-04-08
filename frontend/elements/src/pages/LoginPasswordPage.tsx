@@ -12,7 +12,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Link from "../components/link/Link";
 import Headline1 from "../components/headline/Headline1";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/FlowState";
 
 type Props = {
   state: State<"login_password">;

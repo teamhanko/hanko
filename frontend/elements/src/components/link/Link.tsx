@@ -10,7 +10,7 @@ import styles from "./styles.sass";
 import { useCallback, useContext, useMemo, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../../contexts/AppProvider";
-import { useFlowEffects } from "../../contexts/UseFlowEffects";
+import { useFlowEffects } from "../../hooks/UseFlowEffects";
 import { Action } from "@teamhanko/hanko-frontend-sdk";
 
 type LoadingSpinnerPosition = "left" | "right";

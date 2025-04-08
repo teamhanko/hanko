@@ -12,7 +12,7 @@ import Link from "../components/link/Link";
 
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/FlowState";
 import Paragraph from "../components/paragraph/Paragraph";
 
 interface Props {

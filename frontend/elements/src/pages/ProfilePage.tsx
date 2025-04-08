@@ -3,7 +3,7 @@ import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/FlowState";
 import { AppContext } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";

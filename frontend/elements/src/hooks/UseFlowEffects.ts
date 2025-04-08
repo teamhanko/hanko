@@ -1,6 +1,6 @@
 import { StateUpdater, useContext, useEffect } from "preact/compat";
 import { Action } from "@teamhanko/hanko-frontend-sdk";
-import { AppContext } from "./AppProvider";
+import { AppContext } from "../contexts/AppProvider";
 
 export const useFlowEffects = (
   flowAction: Action<any> | undefined,
