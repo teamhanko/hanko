@@ -1,7 +1,6 @@
 import { Fragment } from "preact";
 import { useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -13,7 +12,7 @@ import Headline1 from "../components/headline/Headline1";
 
 import Link from "../components/link/Link";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 interface Props {
   state: State<"onboarding_create_passkey">;
@@ -21,34 +20,7 @@ interface Props {
 
 const RegisterPasskeyPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-
-  const onPasskeySubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("passkey-submit");
-
-    const nextState = await flowState.actions
-      .webauthn_generate_creation_options(null)
-      .run();
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onSkipClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("skip");
-    const nextState = await flowState.actions.skip(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onBackClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("back");
-    const nextState = await flowState.actions.back(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
 
   return (
     <Fragment>
@@ -56,30 +28,26 @@ const RegisterPasskeyPage = (props: Props) => {
         <Headline1>{t("headlines.registerAuthenticator")}</Headline1>
         <ErrorBox state={flowState} />
         <Paragraph>{t("texts.setupPasskey")}</Paragraph>
-        <Form onSubmit={onPasskeySubmit}>
-          <Button uiAction={"passkey-submit"} autofocus icon={"passkey"}>
+        <Form flowAction={flowState.actions.webauthn_generate_creation_options}>
+          <Button autofocus icon={"passkey"}>
             {t("labels.registerAuthenticator")}
           </Button>
         </Form>
       </Content>
       <Footer
         hidden={
-          !flowState.actions.skip?.(null) && !flowState.actions.back?.(null)
+          !flowState.actions.skip.enabled && !flowState.actions.back.enabled
         }
       >
         <Link
-          uiAction={"back"}
-          onClick={onBackClick}
           loadingSpinnerPosition={"right"}
-          hidden={!flowState.actions.back?.(null)}
+          flowAction={flowState.actions.back}
         >
           {t("labels.back")}
         </Link>
         <Link
-          uiAction={"skip"}
-          onClick={onSkipClick}
           loadingSpinnerPosition={"left"}
-          hidden={!flowState.actions.skip?.(null)}
+          flowAction={flowState.actions.skip}
         >
           {t("labels.skip")}
         </Link>

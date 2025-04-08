@@ -19,7 +19,7 @@ const Accordion = function <T>({
   name,
   columnSelector,
   contentSelector,
-  data,
+  data = [],
   checkedItemID,
   setCheckedItemID,
   dropdown = false,

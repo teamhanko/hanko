@@ -1,5 +1,5 @@
 import { Session } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 import { StateUpdater, useContext } from "preact/compat";
 import Accordion from "./Accordion";
 import { Fragment } from "preact";
@@ -10,22 +10,30 @@ import Link from "../link/Link";
 import styles from "./styles.sass";
 
 interface Props {
-  sessions: Session[];
-  setError: (e: HankoError) => void;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
-  onSessionDelete: (event: Event, id: string) => Promise<void>;
-  deletableSessionIDs?: string[];
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const ListSessionsAccordion = ({
-  sessions = [],
   checkedItemID,
   setCheckedItemID,
-  onSessionDelete,
-  deletableSessionIDs,
+  flowState,
+  onState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
+
+  const onSessionDelete = async (event: Event, id: string) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.session_delete.run(
+      {
+        session_id: id,
+      },
+      { dispatchAfterStateChangeEvent: false },
+    );
+    return onState(nextState);
+  };
 
   const labels = (session: Session) => {
     const headline = (
@@ -62,11 +70,12 @@ const ListSessionsAccordion = ({
         <Headline2>{t("headlines.createdAt")}</Headline2>
         {convertTime(session.created_at)}
       </Paragraph>
-      {deletableSessionIDs?.includes(session.id) ? (
+      {flowState.actions.session_delete.inputs.session_id?.allowed_values
+        ?.map((e) => e.value)
+        ?.includes(session.id) ? (
         <Paragraph>
           <Headline2>{t("headlines.revokeSession")}</Headline2>
           <Link
-            uiAction={"session-delete"}
             dangerous
             onClick={(event) => onSessionDelete(event, session.id)}
             loadingSpinnerPosition={"right"}
@@ -82,7 +91,7 @@ const ListSessionsAccordion = ({
     <Accordion
       name={"session-edit-dropdown"}
       columnSelector={labels}
-      data={sessions}
+      data={flowState.payload.sessions}
       contentSelector={contents}
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}

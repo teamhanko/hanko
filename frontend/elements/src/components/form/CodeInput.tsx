@@ -27,7 +27,7 @@ interface DigitProps extends h.JSX.HTMLAttributes<HTMLInputElement> {
 
 const Digit = ({ index, focus, digit = "", ...props }: DigitProps) => {
   const ref = useRef(null);
-  const { isDisabled } = useContext(AppContext);
+  const { uiState } = useContext(AppContext);
 
   const focusInput = () => {
     const { current: element } = ref;
@@ -38,8 +38,8 @@ const Digit = ({ index, focus, digit = "", ...props }: DigitProps) => {
   };
 
   const disabled = useMemo(
-    () => isDisabled || props.disabled,
-    [props, isDisabled],
+    () => uiState.isDisabled || props.disabled,
+    [props, uiState],
   );
 
   // Autofocus if it's the first input element

@@ -3,8 +3,8 @@ import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
-import { useFlowState } from "../contexts/FlowState";
-import { AppContext, UIAction } from "../contexts/AppProvider";
+import { useFlowState } from "../hooks/UseFlowState";
+import { AppContext } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";
 import Headline1 from "../components/headline/Headline1";
@@ -31,8 +31,7 @@ interface Props {
 
 const ProfilePage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler, setUIState, setPage } =
-    useContext(AppContext);
+  const { setPage } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
 
   const [checkedItemID, setCheckedItemID] = useState<string>("");
@@ -41,152 +40,52 @@ const ProfilePage = (props: Props) => {
     return new Promise((resolve) => setTimeout(resolve, 360));
   };
 
-  const onAction = async (
-    event: Event,
-    uiAction: UIAction,
-    func: () => Promise<State<any>>,
-  ) => {
-    event.preventDefault();
-
-    setLoadingAction(uiAction);
-    const newState = await func();
-
+  const onState = async (newState: State<any>) => {
     if (!newState?.error) {
       setCheckedItemID(null);
       await animationFinished();
     }
 
-    setLoadingAction(null);
-    await hanko.flow.run(newState, stateHandler);
+    newState.dispatchAfterStateChangeEvent();
   };
 
-  const onEmailSubmit = async (event: Event, email: string) => {
-    setUIState((prev) => ({ ...prev, email }));
-    return onAction(
-      event,
-      "email-submit",
-      flowState.actions.email_create({ email }).run,
+  const onPasskeyDelete = async (event: Event, id: string) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.webauthn_credential_delete.run(
+      {
+        passkey_id: id,
+      },
+      { dispatchAfterStateChangeEvent: false },
     );
+    return onState(nextState);
   };
-
-  const onEmailDelete = async (event: Event, emailID: string) =>
-    onAction(
-      event,
-      "email-delete",
-      flowState.actions.email_delete({ email_id: emailID }).run,
-    );
-
-  const onEmailSetPrimary = async (event: Event, emailID: string) =>
-    onAction(
-      event,
-      "email-set-primary",
-      flowState.actions.email_set_primary({ email_id: emailID }).run,
-    );
-
-  const onEmailVerify = async (event: Event, emailID: string) =>
-    onAction(
-      event,
-      "email-verify",
-      flowState.actions.email_verify({ email_id: emailID }).run,
-    );
-
-  const onPasswordCreate = async (event: Event, password: string) =>
-    onAction(
-      event,
-      "password-submit",
-      flowState.actions.password_create({ password }).run,
-    );
-
-  const onPasswordUpdate = async (event: Event, password: string) =>
-    onAction(
-      event,
-      "password-submit",
-      flowState.actions.password_update({ password }).run,
-    );
-
-  const onPasswordDelete = async (event: Event) =>
-    onAction(
-      event,
-      "password-delete",
-      flowState.actions.password_delete(null).run,
-    );
-
-  const onUsernameCreate = async (event: Event, username: string) =>
-    onAction(
-      event,
-      "username-set",
-      flowState.actions.username_create({ username }).run,
-    );
-
-  const onUsernameUpdate = async (event: Event, username: string) =>
-    onAction(
-      event,
-      "username-set",
-      flowState.actions.username_update({ username }).run,
-    );
-
-  const onUsernameDelete = async (event: Event) =>
-    onAction(
-      event,
-      "username-delete",
-      flowState.actions.username_delete(null).run,
-    );
 
   const onWebauthnCredentialNameSubmit = async (
     event: Event,
     id: string,
     name: string,
-  ) =>
-    onAction(
-      event,
-      "webauthn-credential-rename",
-      flowState.actions.webauthn_credential_rename({
+  ) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.webauthn_credential_rename.run(
+      {
         passkey_id: id,
         passkey_name: name,
-      }).run,
+      },
+      { dispatchAfterStateChangeEvent: false },
     );
+    return onState(nextState);
+  };
 
-  const onPasskeyDelete = async (event: Event, id: string) =>
-    onAction(
-      event,
-      "passkey-delete",
-      flowState.actions.webauthn_credential_delete({ passkey_id: id }).run,
+  const onSecurityKeyDelete = async (event: Event, id: string) => {
+    event.preventDefault();
+    const nextState = await flowState.actions.security_key_delete.run(
+      {
+        security_key_id: id,
+      },
+      { dispatchAfterStateChangeEvent: false },
     );
-
-  const onPasskeySubmit = async (event: Event) =>
-    onAction(
-      event,
-      "passkey-submit",
-      flowState.actions.webauthn_credential_create(null).run,
-    );
-
-  const onSessionDelete = async (event: Event, id: string) =>
-    onAction(
-      event,
-      "session-delete",
-      flowState.actions.session_delete({ session_id: id }).run,
-    );
-
-  const onSecurityKeyDelete = async (event: Event, id: string) =>
-    onAction(
-      event,
-      "security-key-delete",
-      flowState.actions.security_key_delete({ security_key_id: id }).run,
-    );
-
-  const onSecurityKeySubmit = async (event: Event) =>
-    onAction(
-      event,
-      "security-key-submit",
-      flowState.actions.security_key_create(null).run,
-    );
-
-  const onAccountDelete = async (event: Event) =>
-    onAction(
-      event,
-      "account_delete",
-      flowState.actions.account_delete(null).run,
-    );
+    return onState(nextState);
+  };
 
   const onBack = (event: Event) => {
     event.preventDefault();
@@ -198,25 +97,9 @@ const ProfilePage = (props: Props) => {
 
   const onUserDelete = (event: Event) => {
     event.preventDefault();
-    setPage(
-      <DeleteAccountPage onBack={onBack} onAccountDelete={onAccountDelete} />,
-    );
+    setPage(<DeleteAccountPage onBack={onBack} state={flowState} />);
     return Promise.resolve();
   };
-
-  const onAuthAppSetUp = async (event: Event) =>
-    onAction(
-      event,
-      "auth-app-add",
-      flowState.actions.continue_to_otp_secret_creation(null).run,
-    );
-
-  const onAuthAppRemove = async (event: Event) =>
-    onAction(
-      event,
-      "auth-app-remove",
-      flowState.actions.otp_secret_delete(null).run,
-    );
 
   return (
     <Content>
@@ -227,9 +110,9 @@ const ProfilePage = (props: Props) => {
             : null
         }
       />
-      {flowState.actions.username_create?.(null) ||
-      flowState.actions.username_update?.(null) ||
-      flowState.actions.username_delete?.(null) ? (
+      {flowState.actions.username_create.enabled ||
+      flowState.actions.username_update.enabled ||
+      flowState.actions.username_delete.enabled ? (
         <Fragment>
           <Headline1>{t("labels.username")}</Headline1>
           {flowState.payload.user.username ? (
@@ -238,28 +121,11 @@ const ProfilePage = (props: Props) => {
             </Paragraph>
           ) : null}
           <Paragraph>
-            {flowState.actions.username_create?.(null) ? (
+            {flowState.actions.username_create.enabled ||
+            flowState.actions.username_update.enabled ? (
               <ChangeUsernameDropdown
-                inputs={flowState.actions.username_create(null).inputs}
-                hasUsername={!!flowState.payload.user.username}
-                allowUsernameDeletion={
-                  !!flowState.actions.username_delete?.(null)
-                }
-                onUsernameSubmit={onUsernameCreate}
-                onUsernameDelete={onUsernameDelete}
-                checkedItemID={checkedItemID}
-                setCheckedItemID={setCheckedItemID}
-              />
-            ) : null}
-            {flowState.actions.username_update?.(null) ? (
-              <ChangeUsernameDropdown
-                inputs={flowState.actions.username_update(null).inputs}
-                hasUsername={!!flowState.payload.user.username}
-                allowUsernameDeletion={
-                  !!flowState.actions.username_delete?.(null)
-                }
-                onUsernameSubmit={onUsernameUpdate}
-                onUsernameDelete={onUsernameDelete}
+                onState={onState}
+                flowState={flowState}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />
@@ -268,25 +134,20 @@ const ProfilePage = (props: Props) => {
         </Fragment>
       ) : null}
       {flowState.payload?.user?.emails ||
-      flowState.actions.email_create?.(null) ? (
+      flowState.actions.email_create.enabled ? (
         <Fragment>
           <Headline1>{t("headlines.profileEmails")}</Headline1>
           <Paragraph>
             <ListEmailsAccordion
-              emails={flowState.payload.user.emails}
-              onEmailDelete={onEmailDelete}
-              onEmailSetPrimary={onEmailSetPrimary}
-              onEmailVerify={onEmailVerify}
+              flowState={flowState}
+              onState={onState}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
-              deletableEmailIDs={flowState.actions
-                .email_delete?.(null)
-                .inputs.email_id.allowed_values?.map((e) => e.value)}
             />
-            {flowState.actions.email_create?.(null) ? (
+            {flowState.actions.email_create.enabled ? (
               <AddEmailDropdown
-                inputs={flowState.actions.email_create(null).inputs}
-                onEmailSubmit={onEmailSubmit}
+                flowState={flowState}
+                onState={onState}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />
@@ -294,60 +155,44 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.actions.password_create?.(null) ? (
+      {flowState.actions.password_create.enabled ||
+      flowState.actions.password_update.enabled ? (
         <Fragment>
           <Headline1>{t("headlines.profilePassword")}</Headline1>
           <Paragraph>
             <ChangePasswordDropdown
-              inputs={flowState.actions.password_create(null).inputs}
-              onPasswordSubmit={onPasswordCreate}
-              onPasswordDelete={onPasswordDelete}
+              flowState={flowState}
+              onState={onState}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
-            />
-          </Paragraph>
-        </Fragment>
-      ) : null}
-      {flowState.actions.password_update?.(null) ? (
-        <Fragment>
-          <Headline1>{t("headlines.profilePassword")}</Headline1>
-          <Paragraph>
-            <ChangePasswordDropdown
-              allowPasswordDelete={!!flowState.actions.password_delete?.(null)}
-              inputs={flowState.actions.password_update(null).inputs}
-              onPasswordSubmit={onPasswordUpdate}
-              onPasswordDelete={onPasswordDelete}
-              checkedItemID={checkedItemID}
-              setCheckedItemID={setCheckedItemID}
-              passwordExists
             />
           </Paragraph>
         </Fragment>
       ) : null}
       {props.enablePasskeys &&
       (flowState.payload?.user?.passkeys ||
-        flowState.actions.webauthn_credential_create?.(null)) ? (
+        flowState.actions.webauthn_credential_create.enabled) ? (
         <Fragment>
           <Headline1>{t("headlines.profilePasskeys")}</Headline1>
           <Paragraph>
             <ListWebauthnCredentialsAccordion
+              flowState={flowState}
               onBack={onBack}
               onCredentialNameSubmit={onWebauthnCredentialNameSubmit}
               onCredentialDelete={onPasskeyDelete}
               credentials={flowState.payload.user.passkeys}
-              setError={null}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
               allowCredentialDeletion={
-                !!flowState.actions.webauthn_credential_delete?.(null)
+                !!flowState.actions.webauthn_credential_delete.enabled
               }
               credentialType={"passkey"}
             />
-            {flowState.actions.webauthn_credential_create?.(null) ? (
+            {flowState.actions.webauthn_credential_create.enabled ? (
               <AddWebauthnCredentialDropdown
+                flowState={flowState}
+                onState={onState}
                 credentialType={"passkey"}
-                onCredentialSubmit={onPasskeySubmit}
-                setError={null}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />
@@ -361,22 +206,22 @@ const ProfilePage = (props: Props) => {
           <Paragraph>
             <ListWebauthnCredentialsAccordion
               onBack={onBack}
+              flowState={flowState}
               onCredentialNameSubmit={onWebauthnCredentialNameSubmit}
               onCredentialDelete={onSecurityKeyDelete}
               credentials={flowState.payload.user.security_keys}
-              setError={null}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
               allowCredentialDeletion={
-                !!flowState.actions.security_key_delete?.(null)
+                !!flowState.actions.security_key_delete.enabled
               }
               credentialType={"security-key"}
             />
-            {flowState.actions.security_key_create?.(null) ? (
+            {flowState.actions.security_key_create.enabled ? (
               <AddWebauthnCredentialDropdown
+                flowState={flowState}
+                onState={onState}
                 credentialType={"security-key"}
-                onCredentialSubmit={onSecurityKeySubmit}
-                setError={null}
                 checkedItemID={checkedItemID}
                 setCheckedItemID={setCheckedItemID}
               />
@@ -389,10 +234,8 @@ const ProfilePage = (props: Props) => {
           <Headline1>{t("headlines.authenticatorApp")}</Headline1>
           <Paragraph>
             <ManageAuthAppDropdown
-              onConnect={onAuthAppSetUp}
-              onDelete={onAuthAppRemove}
-              allowDeletion={!!flowState.actions.otp_secret_delete?.(null)}
-              authAppSetUp={flowState.payload.user.mfa_config?.auth_app_set_up}
+              onState={onState}
+              flowState={flowState}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
             />
@@ -404,26 +247,25 @@ const ProfilePage = (props: Props) => {
           <Headline1>{t("headlines.profileSessions")}</Headline1>
           <Paragraph>
             <ListSessionsAccordion
-              sessions={flowState.payload.sessions}
-              setError={null}
+              flowState={flowState}
+              onState={onState}
               checkedItemID={checkedItemID}
               setCheckedItemID={setCheckedItemID}
-              onSessionDelete={onSessionDelete}
-              deletableSessionIDs={flowState.actions
-                .session_delete?.(null)
-                .inputs.session_id.allowed_values?.map((e) => e.value)}
             />
           </Paragraph>
         </Fragment>
       ) : null}
-      {flowState.actions.account_delete?.(null) ? (
+      {flowState.actions.account_delete.enabled ? (
         <Fragment>
           <Spacer />
           <Paragraph>
             <Divider />
           </Paragraph>
           <Paragraph>
-            <Form onSubmit={onUserDelete}>
+            <Form
+              onSubmit={onUserDelete}
+              flowAction={flowState.actions.account_delete}
+            >
               <Button dangerous>{t("headlines.deleteAccount")}</Button>
             </Form>
           </Paragraph>
