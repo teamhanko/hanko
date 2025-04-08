@@ -61,12 +61,6 @@ const PasscodePage = (props: Props) => {
     return submitPasscode(passcodeDigits.join(""));
   };
 
-  // useEffect(() => {
-  //   if (flowState.payload.passcode_resent) {
-  //     setSucceededAction("passcode-resend");
-  //     setTimeout(() => setSucceededAction(null), 1000);
-  //   }
-  // }, [flowState, setSucceededAction]);
 
 
   useEffect(() => {
