@@ -51,6 +51,7 @@ import {
   WebauthnCredentials,
   Identity,
   SessionCheckResponse,
+  Claims,
 } from "./lib/Dto";
 
 export type {
@@ -74,6 +75,7 @@ export type {
   WebauthnCredentials,
   Identity,
   SessionCheckResponse,
+  Claims,
 };
 
 // Errors

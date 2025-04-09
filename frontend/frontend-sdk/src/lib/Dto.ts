@@ -245,7 +245,12 @@ export interface Identity {
 }
 
 /**
- * Represents the claims associated with a session or token.
+ * Represents the claims associated with a session or token. Includes standard claims such as `subject`, `issued_at`,
+ * `expiration`, and others, as well as custom claims defined by the user.
+ *
+ * @template TCustomClaims - An optional generic parameter that represents custom claims.
+ *                           It extends a record with string keys and unknown values.
+ *                           Defaults to `Record<string, unknown>` if not provided.
  *
  * @interface
  * @category SDK
@@ -258,8 +263,13 @@ export interface Identity {
  * @property {Pick<Email, "address" | "is_primary" | "is_verified">} [email] - Email information associated with the subject (optional).
  * @property {string} [username] - The subject's username (optional).
  * @property {string} session_id - The session identifier linked to the claims.
+ *
+ * @description Custom claims can be added via the `TCustomClaims` generic parameter, which will be merged
+ * with the standard claims properties. These custom claims must follow the `Record<string, unknown>` pattern.
  */
-export interface Claims {
+export type Claims<
+  TCustomClaims extends Record<string, unknown> = Record<string, unknown>,
+> = {
   subject: string;
   issued_at?: string;
   expiration: string;
@@ -268,8 +278,7 @@ export interface Claims {
   email?: Pick<Email, "address" | "is_primary" | "is_verified">;
   username?: string;
   session_id: string;
-  [key: string]: unknown;
-}
+} & TCustomClaims;
 
 /**
  * Represents the response from a session validation or retrieval operation.
