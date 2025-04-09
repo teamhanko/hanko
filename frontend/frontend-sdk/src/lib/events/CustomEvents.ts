@@ -76,9 +76,11 @@ export const flowErrorType: "hanko-flow-error" = "hanko-flow-error";
  * @category SDK
  * @subcategory Events
  * @property {number} expirationSeconds - This property is deprecated. The number of seconds until the JWT expires.
- * @property {Claims} claims - The JSON web token associated with the session. Only present when the Hanko-API allows the JWT to be accessible client-side.
+ * @property {Claims} claims - The claims extracted from a JWT.
+ * @property {string=} jwt - The JSON web token associated with the session. Only present when the Hanko-API allows the JWT to be accessible client-side.
  */
 export interface SessionDetail {
+  jwt?: string;
   claims: Claims;
   expirationSeconds: number; // deprecated
 }
