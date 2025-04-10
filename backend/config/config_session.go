@@ -37,7 +37,7 @@ type Session struct {
 	ShowOnProfile bool `yaml:"show_on_profile" json:"show_on_profile,omitempty" koanf:"show_on_profile" jsonschema:"default=true"`
 	// Deprecated. Use settings in parent object.
 	//`server_side` contains configuration for server-side sessions.
-	ServerSide *ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
+	ServerSide *ServerSide `yaml:"server_side" json:"server_side,omitempty" koanf:"server_side"`
 }
 
 func (s *Session) Validate() error {
