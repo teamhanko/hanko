@@ -20,6 +20,7 @@ import {
   FlowName,
   Error as FlowError,
   LastLogin,
+  Options,
 } from "@teamhanko/hanko-frontend-sdk";
 
 import { Translations } from "../i18n/translations";
@@ -143,15 +144,17 @@ const AppProvider = ({
     props.componentName,
   );
 
+  const [authComponentFlow, setAuthComponentFlow] = useState<FlowName>("login");
+
   const componentFlowNameMap = useMemo<Record<ComponentName, FlowName>>(
     () => ({
-      auth: "login",
+      auth: authComponentFlow,
       login: "login",
       registration: "registration",
       profile: "profile",
       events: null,
     }),
-    [],
+    [authComponentFlow],
   );
 
   const experimentalFeatures = useMemo(
@@ -185,7 +188,7 @@ const AppProvider = ({
   const isOwnFlow = useCallback(
     (state: State<any>) =>
       componentFlowNameMap[componentName] == state.flowName,
-    [componentFlowNameMap, componentName],
+    [componentFlowNameMap, componentName, authComponentFlow],
   );
 
   const handleError = (e: any) => {
@@ -212,7 +215,6 @@ const AppProvider = ({
         if (!isOwnFlow(state)) {
           return;
         }
-
         if (
           ![
             "onboarding_verify_passkey_attestation",
@@ -299,11 +301,12 @@ const AppProvider = ({
             break;
         }
       }),
-    [componentName],
+    [componentName, componentFlowNameMap],
   );
 
   const flowInit = useCallback(
     async (flowName: FlowName) => {
+      console.log("flow init", flowName);
       const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
       if (lastLoginEncoded) {
         setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
@@ -311,13 +314,22 @@ const AppProvider = ({
       const samlHint = new URLSearchParams(window.location.search).get(
         "saml_hint",
       );
+      const options: Options = {
+        excludeAutoSteps: ["success"],
+        cacheKey: `hanko-auth-flow-state`,
+        dispatchAfterStateChangeEvent: false,
+      };
+
       if (samlHint === "idp_initiated") {
-        await hanko.createState("token_exchange");
+        setAuthComponentFlow("token_exchange");
+        await hanko.createState("token_exchange", options);
       } else {
-        await hanko.createState(flowName, { excludeAutoSteps: ["success"] });
+        const state = await hanko.createState(flowName, options);
+        setAuthComponentFlow(state.flowName);
+        setTimeout(() => state.dispatchAfterStateChangeEvent(), 1000);
       }
     },
-    [hanko],
+    [componentName, componentFlowNameMap],
   );
 
   const init = useCallback(
@@ -330,7 +342,7 @@ const AppProvider = ({
         flowInit(flowName).catch(handleError);
       }
     },
-    [componentFlowNameMap, flowInit],
+    [componentName, componentFlowNameMap],
   );
 
   useEffect(() => init(componentName), []);

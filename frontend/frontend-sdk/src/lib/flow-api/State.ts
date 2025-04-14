@@ -23,16 +23,25 @@ export type ActionInfo = {
   relatedStateName: StateName;
 };
 
-export interface Options {
+export interface AllOptions {
   dispatchAfterStateChangeEvent?: boolean;
   excludeAutoSteps?: AutoStepExclusion;
   previousAction?: ActionInfo;
-  readFromLocalStorage?: boolean;
+  isCached?: boolean;
+  cacheKey?: string;
 }
+
+export type Options = Pick<
+  AllOptions,
+  "dispatchAfterStateChangeEvent" | "excludeAutoSteps" | "cacheKey"
+> & {
+  loadFromCache?: boolean; // Adding optional boolean property
+};
 
 type SerializedState = FlowResponse<any> & {
   flow_name: FlowName;
   previous_action?: ActionInfo;
+  is_cached?: boolean;
 };
 
 type ExtractInputValues<TInputs> = {
@@ -43,10 +52,10 @@ type ExtractInputValues<TInputs> = {
  * Represents a state in a flow with associated actions and properties.
  * @template TState - The specific state name type.
  * @constructor
- * @param hanko - The Hanko instance for API interactions.
- * @param flowName - The name of the flow this state belongs to.
- * @param response - The flow response containing state data.
- * @param options - Configuration options for state initialization.
+ * @param {Hanko} hanko - The Hanko instance for API interactions.
+ * @param {FlowName} flowName - The name of the flow this state belongs to.
+ * @param {FlowResponse<TState>} response - The flow response containing state data.
+ * @param {AllOptions} [options={}] - Configuration options for state initialization.
  * @category SDK
  * @subcategory FlowAPI
  */
@@ -59,7 +68,8 @@ export class State<TState extends StateName = StateName> {
   public readonly csrfToken: string;
   public readonly status: number;
   public readonly previousAction?: ActionInfo;
-  public readonly readFromLocalStorage: boolean;
+  public readonly isCached: boolean;
+  public readonly cacheKey: string;
   public readonly hanko: Hanko;
   public invokedAction?: ActionInfo;
   public readonly excludeAutoSteps: AutoStepExclusion;
@@ -71,12 +81,18 @@ export class State<TState extends StateName = StateName> {
     ? () => Promise<void>
     : never;
 
-  // eslint-disable-next-line require-jsdoc
+  /**
+   * Constructs a new State instance.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {FlowName} flowName - The name of the flow this state belongs to.
+   * @param {FlowResponse<TState>} response - The flow response containing state data.
+   * @param {AllOptions} [options={}] - Configuration options for state initialization.
+   */
   constructor(
     hanko: Hanko,
     flowName: FlowName,
     response: FlowResponse<TState>,
-    options: Options = {},
+    options: AllOptions = {},
   ) {
     this.flowName = flowName;
     this.name = response.name;
@@ -103,12 +119,14 @@ export class State<TState extends StateName = StateName> {
       dispatchAfterStateChangeEvent = true,
       excludeAutoSteps = null,
       previousAction = null,
-      readFromLocalStorage = false,
+      isCached = false,
+      cacheKey = "hanko-flow-state",
     } = options;
 
     this.excludeAutoSteps = excludeAutoSteps;
     this.previousAction = previousAction;
-    this.readFromLocalStorage = readFromLocalStorage;
+    this.isCached = isCached;
+    this.cacheKey = cacheKey;
 
     if (dispatchAfterStateChangeEvent) {
       this.dispatchAfterStateChangeEvent();
@@ -116,9 +134,9 @@ export class State<TState extends StateName = StateName> {
   }
 
   /**
-   * Builds the action map for this state.
-   * @param actions - The actions available in this state.
-   * @returns The action map for the state.
+   * Builds the action map for this state, wrapping it in a Proxy to handle undefined actions.
+   * @param {Actions} actions - The actions available in this state.
+   * @returns {ActionMap<TState>} The action map for the state.
    * @private
    */
   private buildActionMap(actions: Actions[TState]): ActionMap<TState> {
@@ -155,19 +173,11 @@ export class State<TState extends StateName = StateName> {
   }
 
   /**
-   * Generates a local storage key for the given flow name.
-   * @param flowName - The name of the flow.
-   * @returns The formatted local storage key.
+   * Serializes the current state into a storable format.
+   * @returns {SerializedState} The serialized state object.
    */
-  public static getLocalStorageKey(flowName: FlowName) {
-    return `hanko_${flowName}_state`;
-  }
-
-  /**
-   * Saves the current state to localStorage.
-   */
-  public saveToLocalStorage(): void {
-    const serializedState: SerializedState = {
+  public serialize(): SerializedState {
+    return {
       flow_name: this.flowName,
       name: this.name,
       error: this.error,
@@ -183,52 +193,51 @@ export class State<TState extends StateName = StateName> {
               action: action.name,
               href: action.href,
               inputs: action.inputs,
+              description: null,
             },
           ],
         ),
       ),
     };
+  }
 
+  /**
+   * Saves the current state to localStorage.
+   * @returns {void}
+   */
+  public saveToLocalStorage(): void {
     localStorage.setItem(
-      State.getLocalStorageKey(this.flowName),
-      JSON.stringify(serializedState),
+      this.cacheKey,
+      JSON.stringify({ ...this.serialize(), is_cached: true }),
     );
   }
 
   /**
    * Removes the current state from localStorage.
+   * @returns {void}
    */
   public removeFromLocalStorage() {
-    localStorage.removeItem(State.getLocalStorageKey(this.flowName));
-  }
-
-  /**
-   * Retrieves a flow response from localStorage.
-   * @param flowName - The name of the flow.
-   * @returns The stored flow state or null if not found.
-   * @private
-   */
-  private static getFromLocalStorage(flowName: FlowName): SerializedState {
-    const storedData = localStorage.getItem(State.getLocalStorageKey(flowName));
-    if (!storedData) {
-      return null;
-    }
-    return JSON.parse(storedData);
+    localStorage.removeItem(this.cacheKey);
   }
 
   /**
    * Initializes a flow state, processing auto-steps if applicable.
-   * @param hanko - The Hanko instance for API interactions.
-   * @param flowName - The name of the flow.
-   * @param response - The initial flow response.
-   * @param options - Configuration options.
-   * @returns A promise resolving to the initialized state.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {FlowName} flowName - The name of the flow.
+   * @param {FlowResponse<any>} response - The initial flow response.
+   * @param {AllOptions} [options={}] - Configuration options.
+   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {ActionInfo} [options.previousAction=null] - Information about the previous action.
+   * @param {boolean} [options.isCached=false] - Whether the state is loaded from cache.
+   * @param {string} [options.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @returns {Promise<AnyState>} A promise resolving to the initialized state.
    */
   public static async initializeFlowState(
     hanko: Hanko,
     flowName: FlowName,
     response: FlowResponse<any>,
-    options: Options = {},
+    options: AllOptions = {},
   ): Promise<AnyState> {
     let state = new State(hanko, flowName, response, options);
 
@@ -251,43 +260,89 @@ export class State<TState extends StateName = StateName> {
   }
 
   /**
+   * Retrieves and parses state data from localStorage.
+   * @param {string} cacheKey - The key used to store the state in localStorage.
+   * @returns {SerializedState | undefined} The parsed serialized state, or undefined if not found or invalid.
+   */
+  public static readFromLocalStorage(cacheKey: string) {
+    const raw = localStorage.getItem(cacheKey);
+    if (raw) {
+      try {
+        return JSON.parse(raw) as SerializedState;
+      } catch {
+        return undefined;
+      }
+    }
+  }
+
+  /**
    * Creates a new state instance, using cached or fetched data.
-   * @param hanko - The Hanko instance for API interactions.
-   * @param flowName - The name of the flow.
-   * @param options - Configuration options.
-   * @returns A promise resolving to the created state.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {FlowName} flowName - The name of the flow.
+   * @param {Options} [options={}] - Configuration options.
+   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {string} [options.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @param {boolean} [options.loadFromCache=true] - Whether to attempt loading from cache.
+   * @returns {Promise<AnyState>} A promise resolving to the created state.
    */
   public static async create(
     hanko: Hanko,
     flowName: FlowName,
-    options: Omit<Options, "previousAction" | "readFromLocalStorage"> = {},
+    options: Options = {},
   ): Promise<AnyState> {
-    const cachedState = State.getFromLocalStorage(flowName);
-
-    if (cachedState) {
-      return State.initializeFlowState(
-        hanko,
-        cachedState.flow_name,
-        cachedState,
-        {
+    const { cacheKey = "hanko-flow-state", loadFromCache = true } = options;
+    if (loadFromCache) {
+      const cachedState = State.readFromLocalStorage(cacheKey);
+      if (cachedState) {
+        return State.deserialize(hanko, cachedState, {
           ...options,
-          previousAction: cachedState.previous_action,
-          readFromLocalStorage: true,
-        },
-      );
+          cacheKey,
+        });
+      }
     }
 
     const newState = await State.fetchState(hanko, `/${flowName}`);
+    return State.initializeFlowState(hanko, flowName, newState, {
+      ...options,
+      cacheKey,
+    });
+  }
 
-    return State.initializeFlowState(hanko, flowName, newState, options);
+  /**
+   * Deserializes a state from a serialized state object.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {SerializedState} serializedState - The serialized state data.
+   * @param {Options} [options={}] - Configuration options.
+   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {string} [options.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @param {boolean} [options.loadFromCache=true] - Whether to attempt loading from cache.
+   * @returns {Promise<AnyState>} A promise resolving to the deserialized state.
+   */
+  public static async deserialize(
+    hanko: Hanko,
+    serializedState: SerializedState,
+    options: Options = {},
+  ) {
+    return State.initializeFlowState(
+      hanko,
+      serializedState.flow_name,
+      serializedState,
+      {
+        ...options,
+        previousAction: serializedState.previous_action,
+        isCached: serializedState.is_cached,
+      },
+    );
   }
 
   /**
    * Fetches state data from the server.
-   * @param hanko - The Hanko instance for API interactions.
-   * @param href - The endpoint to fetch from.
-   * @param body - Optional request body.
-   * @returns A promise resolving to the flow response.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {string} href - The endpoint to fetch from.
+   * @param {any} [body] - Optional request body.
+   * @returns {Promise<FlowResponse<any>>} A promise resolving to the flow response.
    */
   static async fetchState(
     hanko: Hanko,
@@ -304,8 +359,8 @@ export class State<TState extends StateName = StateName> {
 
   /**
    * Creates an error flow response.
-   * @param error - The error to include in the response.
-   * @returns A flow response with error details.
+   * @param {Error} error - The error to include in the response.
+   * @returns {FlowResponse<"error">} A flow response with error details.
    * @private
    */
   private static createErrorResponse(error: Error): FlowResponse<"error"> {
@@ -323,9 +378,9 @@ export class State<TState extends StateName = StateName> {
 /**
  * Represents an actionable operation within a state.
  * @template TInputs - The type of inputs required for the action.
- * @param action - The action type definition.
- * @param parentState - The state this action belongs to.
- * @param enabled - Whether the action is enabled (default: true).
+ * @param {ActionType<TInputs>} action - The action type definition.
+ * @param {State} parentState - The state this action belongs to.
+ * @param {boolean} [enabled=true] - Whether the action is enabled.
  * @category SDK
  * @subcategory FlowAPI
  */
@@ -336,7 +391,12 @@ export class Action<TInputs> {
   public readonly inputs: TInputs;
   private readonly parentState: State;
 
-  // eslint-disable-next-line require-jsdoc
+  /**
+   * Constructs a new Action instance.
+   * @param {ActionType<TInputs>} action - The action type definition.
+   * @param {State} parentState - The state this action belongs to.
+   * @param {boolean} [enabled=true] - Whether the action is enabled.
+   */
   constructor(
     action: ActionType<TInputs>,
     parentState: State,
@@ -351,10 +411,10 @@ export class Action<TInputs> {
 
   /**
    * Creates a disabled action instance.
-   * @param name - The name of the action.
-   * @param parentState - The state this action belongs to.
-   * @returns A disabled action instance.
    * @template TInputs - The type of inputs (inferred as empty).
+   * @param {string} name - The name of the action.
+   * @param {State} parentState - The state this action belongs to.
+   * @returns {Action<TInputs>} A disabled action instance.
    */
   static createDisabled<TInputs>(
     name: string,
@@ -374,14 +434,15 @@ export class Action<TInputs> {
 
   /**
    * Executes the action, transitioning to a new state.
-   * @param inputValues - Values for the action's inputs (optional).
-   * @param options - Configuration options for execution.
-   * @returns A promise resolving to the next state.
-   * @throws Error if the action is disabled or already invoked.
+   * @param {ExtractInputValues<TInputs>} [inputValues=null] - Values for the action's inputs.
+   * @param {Pick<AllOptions, "dispatchAfterStateChangeEvent">} [options={}] - Configuration options.
+   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @returns {Promise<AnyState>} A promise resolving to the next state.
+   * @throws {Error} If the action is disabled or already invoked.
    */
   async run(
     inputValues: ExtractInputValues<TInputs> = null,
-    options: Pick<Options, "dispatchAfterStateChangeEvent"> = {},
+    options: Pick<AllOptions, "dispatchAfterStateChangeEvent"> = {},
   ): Promise<AnyState> {
     const {
       name,
@@ -445,6 +506,7 @@ export class Action<TInputs> {
       dispatchAfterStateChangeEvent,
       excludeAutoSteps,
       previousAction: this.parentState.invokedAction,
+      cacheKey: this.parentState.cacheKey,
     });
   }
 }

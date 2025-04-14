@@ -39,6 +39,7 @@ jest.mock("../../../src/lib/flow-api/passkey-autofill-activation", () => ({
 describe("State", () => {
   let hankoMock: jest.Mocked<Hanko>;
   const flowName: FlowName = "login";
+  const defaultCacheKey = "hanko-flow-state"; // Updated to match code's default
   const mockLoginInitResponse: FlowResponse<"login_init"> = {
     name: "login_init",
     csrf_token: "csrf123",
@@ -48,7 +49,7 @@ describe("State", () => {
         action: "continue_with_login_identifier",
         href: "/continue_with_login_identifier",
         inputs: {},
-        description: "",
+        description: null,
       },
     },
     payload: null,
@@ -100,6 +101,8 @@ describe("State", () => {
       expect(state.actions.continue_with_login_identifier).toBeInstanceOf(
         Action,
       );
+      expect(state.isCached).toBe(false);
+      expect(state.cacheKey).toBe("hanko-flow-state");
     });
 
     it("sets up autoStep if state is in autoSteps", () => {
@@ -133,30 +136,65 @@ describe("State", () => {
   describe("saveToLocalStorage", () => {
     it("saves serialized state to localStorage", () => {
       const state = new State(hankoMock, flowName, mockLoginInitResponse);
-      const key = State.getLocalStorageKey(flowName);
-      const json = JSON.stringify(mockLoginInitResponse);
       state.saveToLocalStorage();
-      expect(localStorage.setItem).toHaveBeenCalledWith(
-        key,
-        expect.any(String),
+      expect(localStorage.setItem).toHaveBeenCalled();
+      const setItemCall = (localStorage.setItem as jest.Mock).mock.calls[0];
+      const [key, value] = setItemCall;
+      expect(key).toBe(defaultCacheKey);
+      const parsedValue = JSON.parse(value);
+      expect(parsedValue).toEqual({
+        ...mockLoginInitResponse,
+        flow_name: flowName,
+        is_cached: true,
+        previous_action: null,
+      });
+    });
+
+    it("uses custom cacheKey for cached data", async () => {
+      const customCacheKey = "custom-hanko-state";
+      (localStorage.getItem as jest.Mock).mockReturnValue(
+        JSON.stringify({ ...mockLoginInitResponse, is_cached: true }),
       );
-      (localStorage.getItem as jest.Mock).mockReturnValue(json);
-      const stored = localStorage.getItem(key);
-      expect(stored).toBeDefined();
-      const parsed = JSON.parse(stored);
-      expect(parsed.csrf_token).toBe("csrf123");
-      expect(parsed.name).toBe("login_init");
+      const state = await State.create(hankoMock, flowName, {
+        cacheKey: customCacheKey,
+      });
+      expect(localStorage.getItem).toHaveBeenCalledWith(customCacheKey);
+      expect(state.cacheKey).toBe(customCacheKey);
+      expect(state.name).toBe("login_init");
+    });
+  });
+
+  describe("static deserialize", () => {
+    it("creates state from serialized data", async () => {
+      const serializedState = {
+        ...mockLoginInitResponse,
+        flow_name: flowName,
+        is_cached: true,
+      };
+      const state = await State.deserialize(hankoMock, serializedState);
+      expect(state.name).toBe("login_init");
+      expect(state.isCached).toBe(true);
+      expect(state.flowName).toBe(flowName);
+    });
+  });
+
+  describe("readFromLocalStorage", () => {
+    it("returns undefined for invalid JSON", () => {
+      (localStorage.getItem as jest.Mock).mockReturnValue("invalid-json");
+      const result = State.readFromLocalStorage(defaultCacheKey);
+      expect(result).toBeUndefined();
     });
   });
 
   describe("static create", () => {
     it("creates state from cached data if available", async () => {
       (localStorage.getItem as jest.Mock).mockReturnValue(
-        JSON.stringify(mockLoginInitResponse),
+        JSON.stringify({ ...mockLoginInitResponse, is_cached: true }),
       );
       const state = await State.create(hankoMock, flowName);
       expect(hankoMock.client.post).not.toHaveBeenCalled();
       expect(state.name).toBe("login_init");
+      expect(state.isCached).toBe(true);
     });
 
     it("fetches state if no cached data", async () => {
@@ -167,6 +205,22 @@ describe("State", () => {
       const state = await State.create(hankoMock, flowName);
       expect(hankoMock.client.post).toHaveBeenCalled();
       expect(state.name).toBe("login_init");
+      expect(state.isCached).toBe(false);
+    });
+
+    it("respects loadFromCache: false", async () => {
+      (localStorage.getItem as jest.Mock).mockReturnValue(
+        JSON.stringify({ ...mockLoginInitResponse, is_cached: true }),
+      );
+      (hankoMock.client.post as jest.Mock).mockResolvedValue({
+        json: () => Promise.resolve(mockLoginInitResponse),
+      });
+      const state = await State.create(hankoMock, flowName, {
+        loadFromCache: false,
+      });
+      expect(hankoMock.client.post).toHaveBeenCalled();
+      expect(state.name).toBe("login_init");
+      expect(state.isCached).toBe(false);
     });
   });
 
