@@ -67,8 +67,10 @@ event dispatching and auto-step behavior.
 
 ```typescript
 const state = await hanko.createState("login", {
-  dispatchAfterStateChangeEvent: true, // Dispatch after-state-change events by default
-  excludeAutoSteps: [], // Empty array means all auto-steps are enabled
+    dispatchAfterStateChangeEvent: true,
+    excludeAutoSteps: [],
+    loadFromCache: true,
+    cacheKey: "hanko-flow-state",
 });
 ```
 
@@ -76,8 +78,11 @@ const state = await hanko.createState("login", {
 
 - **flowName**: The name of the flow (e.g., "login", "register" or "profile").
 - **options**:
-    - **dispatchAfterStateChangeEvent**: Boolean to enable the `onAfterStateChange` event after state changes when creating a new state (default: `true`).
-    - **excludeAutoSteps**: Array of state names or "all" to skip specific or all auto-steps.
+    - **dispatchAfterStateChangeEvent**: `boolean` - Whether to dispatch the onAfterStateChange event after state changes (default: true).
+    - **excludeAutoSteps**: `AutoStepExclusion` - Array of state names or "all" to skip specific or all auto-steps (default: null).
+    - **loadFromCache**: `boolean` - Whether to attempt loading a cached state from localStorage (default: true).
+    - **cacheKey**: `string` - The key used for localStorage caching (default: "hanko-flow-state").
+
 
 ### Understanding the State Object
 
@@ -85,14 +90,19 @@ The `state` object represents the current step in the flow. It contains properti
 
 #### Structure
 
-- `state.name`: The current state’s name (e.g., "login_init", "login_password", "success").
-- `state.flowName`: The name of the flow (e.g., "login").
-- `state.error`: An `Error` object if an action or request fails (e.g., invalid input or network error).
-- `state.payload`: State-specific data returned by the API.
-- `state.actions`: An object mapping action names to `Action` instances.
-- `state.csrfToken`: CSRF token for secure requests.
-- `state.status`: HTTP status code of the last response.
-- `state.invokedAction`: Name of the last action run on this state (if any).
+- **name**: `StateName` - The current state’s name (e.g., "login_init", "login_password", "success").
+- **flowName**: `FlowName` - The name of the flow (e.g., "login").
+- **error**: `Error | undefined` - An error object if an action or request fails (e.g., invalid input, network error).
+- **payload**: `Payloads[StateName] | undefined` - State-specific data returned by the API.
+- **actions**: `ActionMap<StateName>` - An object mapping action names to Action instances.
+- **csrfToken**: `string` - CSRF token for secure requests.
+- **status**: `number` - HTTP status code of the last response.
+- **invokedAction**: `ActionInfo | undefined` - Details of the last action run on this state, if any.
+- **previousAction**: `ActionInfo | undefined` - Details of the action that led to this state, if any.
+- **isCached**: `boolean` - Whether the state was loaded from localStorage.
+- **cacheKey**: `string` - The key used for localStorage caching.
+- **excludeAutoSteps**: `AutoStepExclusion` - An array of `StateNames` excluded from auto-stepping.
+
 
 ### Action Availability
 
@@ -256,47 +266,64 @@ if (state.name === "login_password" && state.error === "invalid_form_data") {
 
 For network issues or `5xx` responses, the `error` state is entered with details in `state.error`.
 
-### Saving and Loading State
+```typescript
+if (state.name === "error") {
+    console.error("Flow error:", state.error);
+}
+```
 
-Persist the current flow state to `localStorage` using `save()`.
+### Caching Flow State
+
+Persist and recover flow state using `localStorage` for seamless user experiences.
+
+#### Saving State
+
+Save the current flow state to `localStorage` using `saveToLocalStorage()`.
 
 ```typescript
-// Save the current state
-state.save(); // Stores the state to the localStorage
-
-// Later, recover or start a new flow
-const recoveredState = await hanko.createState("login");
+state.saveToLocalStorage(); // Stores under `state.cacheKey` (default: "hanko-flow-state")
 ```
 
 Please note that the `localStorage` entry will be removed automatically when an action is invoked on the saved state.
 
-## Examples
+#### Loading State
 
-### Get the current user / Validate the JWT against the Hanko API
-
-The Hanko API issues a JWT when a user logs in. For certain actions, like obtaining the user object, a valid  JWT is
-required. The following example shows how to get the user object of the current user, or to identify that the user is
-not logged in:
+Recover a cached state or start a new:
 
 ```typescript
-import { Hanko, UnauthorizedError } from "@teamhanko/hanko-frontend-sdk"
-
-const hanko = new Hanko("https://[HANKO_API_URL]")
-
-try {
-    const user = await hanko.user.getCurrent()
-
-    // A valid JWT is in place so that the user object was able to be fetched.
-} catch (e) {
-    if (e instanceof UnauthorizedError) {
-        // Display an error or prompt the user to login again. After a successful call to `hanko.webauthn.login()`,
-        // `hanko.password.login()` or `hanko.passcode.finalize()` a JWT will be issued and `hanko.user.getCurrent()`
-        // would succeed.
-    }
-}
+const state = await hanko.createState("login", {
+    loadFromCache: true, // Attempts to load from `cacheKey`
+    cacheKey: "hanko-flow-state",
+});
 ```
 
-### Custom Events
+#### Clearing State
+
+Remove the cached state:
+
+```typescript
+state.removeFromLocalStorage(); // Deletes from `state.cacheKey`
+```
+
+#### Advanced Serialization
+
+For custom persistence:
+
+```typescript
+import { State } from "@teamhanko/hanko-frontend-sdk";
+
+const serialized = state.serialize(); // Returns a `SerializedState` object
+// Store `serialized` in your storage system
+
+// Later, deserialize it
+const recoveredState = await State.deserialize(hanko, serialized, {
+    cacheKey: "custom-key",
+});
+```
+
+This allows integration with other storage mechanisms.
+
+### Session Events
 
 You can bind callback functions to different custom events. The callback function will be called when the event happens
 and an object will be passed in, containing event details. The event binding works as follows:
@@ -370,73 +397,6 @@ Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/is
 ## Documentation
 
 To see the latest documentation, please click [here](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
-
-
-## Exports
-
-### SDK
-
-- `Hanko` - A class that bundles all functionalities.
-
-### Client Classes
-
-- `UserClient` - A class to manage users.
-- `ThirdPartyClient` - A class to handle social logins.
-- `TokenClient` - A class that handles the exchange of one time tokens for session JWTs.
-
-### Utility Classes
-
-- `WebauthnSupport` - A class to check the browser's WebAuthn support.
-
-### DTO Interfaces
-
-- `PasswordConfig`
-- `EmailConfig`
-- `AccountConfig`
-- `Config`
-- `WebauthnFinalized`
-- `TokenFinalized`
-- `UserInfo`
-- `Me`
-- `Credential`
-- `User`
-- `UserCreated`
-- `Passcode`
-- `WebauthnTransports`
-- `Attestation`
-- `Email`
-- `Emails`
-- `WebauthnCredential`
-- `WebauthnCredentials`
-- `Identity`
-
-### Event Interfaces
-
-- `SessionDetail`
-
-### Event Types
-
-- `CustomEventWithDetail`
-- `sessionCreatedType`
-- `sessionExpiredType`
-- `userLoggedOutType`
-- `userDeletedType`
-
-### Error Classes
-
-- `HankoError`
-- `TechnicalError`
-- `ConflictError`
-- `RequestTimeoutError`
-- `WebauthnRequestCancelledError`
-- `InvalidPasswordError`
-- `InvalidPasscodeError`
-- `InvalidWebauthnCredentialError`
-- `PasscodeExpiredError`
-- `MaxNumOfPasscodeAttemptsReachedError`
-- `NotFoundError`
-- `TooManyRequestsError`
-- `UnauthorizedError`
 
 ## License
 
