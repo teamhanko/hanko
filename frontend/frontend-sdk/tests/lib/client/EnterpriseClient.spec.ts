@@ -13,6 +13,7 @@ beforeEach(() => {
     cookieName: "hanko",
     localStorageKey: "hanko",
     timeout: 13000,
+    sessionTokenLocation: "cookie",
   });
 });
 

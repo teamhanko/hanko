@@ -99,7 +99,7 @@ class Hanko extends Listener {
     if (options?.sessionCheckChannelName !== undefined) {
       opts.sessionCheckChannelName = options.sessionCheckChannelName;
     }
-    if (options.sessionTokenLocation !== undefined) {
+    if (options?.sessionTokenLocation !== undefined) {
       opts.sessionTokenLocation = options.sessionTokenLocation;
     }
 
