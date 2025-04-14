@@ -1,7 +1,7 @@
 package admin
 
 type CreateSessionTokenDto struct {
-	UserID    string `json:"user_id" validate:"required,uuid4"`
+	UserID    string `json:"user_id" validate:"required,uuid"`
 	UserAgent string `json:"user_agent"`
 	IpAddress string `json:"ip_address" validate:"omitempty,ip"`
 }
@@ -11,7 +11,7 @@ type CreateSessionTokenResponse struct {
 }
 
 type ListSessionsRequestDto struct {
-	UserID string `param:"user_id" validate:"required,uuid4"`
+	UserID string `param:"user_id" validate:"required,uuid"`
 }
 
 type DeleteSessionRequestDto struct {

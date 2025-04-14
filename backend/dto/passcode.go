@@ -8,7 +8,7 @@ type PasscodeFinishRequest struct {
 }
 
 type PasscodeInitRequest struct {
-	UserId  string  `json:"user_id" validate:"required,uuid4"`
+	UserId  string  `json:"user_id" validate:"required,uuid"`
 	EmailId *string `json:"email_id"`
 }
 
