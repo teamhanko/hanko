@@ -58,6 +58,8 @@ func TransformValidationErrors(err error) []string {
 				vErrs[i] = fmt.Sprintf("%s is a required field", err.Field())
 			case "email":
 				vErrs[i] = fmt.Sprintf("%s must be a valid email address", err.Field())
+			case "uuid":
+				vErrs[i] = fmt.Sprintf("%s must be a valid uuid", err.Field())
 			case "uuid4":
 				vErrs[i] = fmt.Sprintf("%s must be a valid uuid4", err.Field())
 			case "url":

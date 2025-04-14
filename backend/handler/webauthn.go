@@ -232,7 +232,7 @@ func (h *WebauthnHandler) FinishRegistration(c echo.Context) error {
 }
 
 type BeginAuthenticationBody struct {
-	UserID *string `json:"user_id" validate:"uuid4"`
+	UserID *string `json:"user_id" validate:"uuid"`
 }
 
 // BeginAuthentication returns credential assertion options for the WebAuthnAPI.

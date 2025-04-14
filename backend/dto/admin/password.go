@@ -12,7 +12,7 @@ type PasswordCredential struct {
 }
 
 type GetPasswordCredentialRequestDto struct {
-	UserID string `param:"user_id" validate:"required,uuid4"`
+	UserID string `param:"user_id" validate:"required,uuid"`
 }
 
 type CreateOrUpdatePasswordCredentialRequestDto struct {

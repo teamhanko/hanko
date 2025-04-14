@@ -43,7 +43,7 @@ func NewPasswordHandler(persister persistence.Persister, sessionManager session.
 }
 
 type PasswordSetBody struct {
-	UserID   string `json:"user_id" validate:"required,uuid4"`
+	UserID   string `json:"user_id" validate:"required,uuid"`
 	Password string `json:"password" validate:"required"`
 }
 
@@ -150,7 +150,7 @@ func (h *PasswordHandler) Set(c echo.Context) error {
 }
 
 type PasswordLoginBody struct {
-	UserId   string `json:"user_id" validate:"required,uuid4"`
+	UserId   string `json:"user_id" validate:"required,uuid"`
 	Password string `json:"password" validate:"required"`
 }
 
