@@ -8,8 +8,10 @@ import { autoSteps } from "./auto-steps";
 import { passkeyAutofillActivationHandlers } from "./passkey-autofill-activation";
 
 export type AutoSteppedStates = keyof typeof autoSteps;
+
 export type PasskeyAutofillStates =
   keyof typeof passkeyAutofillActivationHandlers;
+
 export type AutoStepExclusion = AutoSteppedStates[] | "all";
 
 export type ActionMap<TState extends StateName> = {
@@ -35,7 +37,7 @@ export type Options = Pick<
   AllOptions,
   "dispatchAfterStateChangeEvent" | "excludeAutoSteps" | "cacheKey"
 > & {
-  loadFromCache?: boolean; // Adding optional boolean property
+  loadFromCache?: boolean;
 };
 
 type SerializedState = FlowResponse<any> & {
@@ -451,6 +453,7 @@ export class Action<TInputs> {
       csrfToken,
       invokedAction,
       excludeAutoSteps,
+      cacheKey,
     } = this.parentState;
     const { dispatchAfterStateChangeEvent = true } = options;
 
@@ -505,8 +508,8 @@ export class Action<TInputs> {
     return State.initializeFlowState(hanko, flowName, response, {
       dispatchAfterStateChangeEvent,
       excludeAutoSteps,
-      previousAction: this.parentState.invokedAction,
-      cacheKey: this.parentState.cacheKey,
+      previousAction: invokedAction,
+      cacheKey,
     });
   }
 }
