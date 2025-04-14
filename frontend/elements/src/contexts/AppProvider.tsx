@@ -304,46 +304,42 @@ const AppProvider = ({
     [componentName, componentFlowNameMap],
   );
 
-  const flowInit = useCallback(
-    async (flowName: FlowName) => {
-      console.log("flow init", flowName);
-      const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
-      if (lastLoginEncoded) {
-        setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
-      }
-      const samlHint = new URLSearchParams(window.location.search).get(
-        "saml_hint",
-      );
-      const options: Options = {
-        excludeAutoSteps: ["success"],
-        cacheKey: `hanko-auth-flow-state`,
-        dispatchAfterStateChangeEvent: false,
-      };
+  const flowInit = useCallback(async (flowName: FlowName) => {
+    setUIState((prev) => ({ ...prev, isDisabled: true }));
+    const lastLoginEncoded = localStorage.getItem(storageKeyLastLogin);
+    if (lastLoginEncoded) {
+      setLastLogin(JSON.parse(lastLoginEncoded) as LastLogin);
+    }
+    const samlHint = new URLSearchParams(window.location.search).get(
+      "saml_hint",
+    );
+    const options: Options = {
+      excludeAutoSteps: ["success"],
+      cacheKey: `hanko-auth-flow-state`,
+      dispatchAfterStateChangeEvent: false,
+    };
 
-      if (samlHint === "idp_initiated") {
-        setAuthComponentFlow("token_exchange");
-        await hanko.createState("token_exchange", options);
-      } else {
-        const state = await hanko.createState(flowName, options);
-        setAuthComponentFlow(state.flowName);
-        setTimeout(() => state.dispatchAfterStateChangeEvent(), 1000);
-      }
-    },
-    [componentName, componentFlowNameMap],
-  );
+    if (samlHint === "idp_initiated") {
+      setAuthComponentFlow("token_exchange");
+      await hanko.createState("token_exchange", {
+        ...options,
+        dispatchAfterStateChangeEvent: true,
+      });
+    } else {
+      const state = await hanko.createState(flowName, options);
+      setAuthComponentFlow(state.flowName);
+      setTimeout(() => state.dispatchAfterStateChangeEvent(), 500);
+    }
+  }, []);
 
-  const init = useCallback(
-    (compName: ComponentName) => {
-      setComponentName(compName);
-      setUIState((prev) => ({ ...prev, isDisabled: false }));
-      const flowName = componentFlowNameMap[compName];
+  const init = useCallback((compName: ComponentName) => {
+    setComponentName(compName);
+    const flowName = componentFlowNameMap[compName];
 
-      if (flowName) {
-        flowInit(flowName).catch(handleError);
-      }
-    },
-    [componentName, componentFlowNameMap],
-  );
+    if (flowName) {
+      flowInit(flowName).catch(handleError);
+    }
+  }, []);
 
   useEffect(() => init(componentName), []);
 

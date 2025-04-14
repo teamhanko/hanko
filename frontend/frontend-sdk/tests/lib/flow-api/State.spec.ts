@@ -39,7 +39,7 @@ jest.mock("../../../src/lib/flow-api/passkey-autofill-activation", () => ({
 describe("State", () => {
   let hankoMock: jest.Mocked<Hanko>;
   const flowName: FlowName = "login";
-  const defaultCacheKey = "hanko-flow-state"; // Updated to match code's default
+  const defaultCacheKey = "hanko-flow-state";
   const mockLoginInitResponse: FlowResponse<"login_init"> = {
     name: "login_init",
     csrf_token: "csrf123",
