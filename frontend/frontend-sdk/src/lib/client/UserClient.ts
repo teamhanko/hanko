@@ -111,6 +111,7 @@ class UserClient extends Client {
     const response = await this.client.delete("/user");
 
     if (response.ok) {
+      this.client.sessionTokenStorage.removeSessionToken();
       this.client.cookie.removeAuthCookie();
       this.client.dispatcher.dispatchUserDeletedEvent();
       return;
@@ -135,6 +136,7 @@ class UserClient extends Client {
     // For cross-domain operations, the frontend SDK creates the cookie by reading the "X-Auth-Token" header, and
     // "Set-Cookie" headers sent by the backend have no effect due to the browser's security policy, which means that
     // the cookie must also be removed client-side in that case.
+    this.client.sessionTokenStorage.removeSessionToken();
     this.client.cookie.removeAuthCookie();
     this.client.dispatcher.dispatchUserLoggedOutEvent();
 

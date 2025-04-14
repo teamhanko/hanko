@@ -7,7 +7,8 @@ import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
 import { CookieSameSite } from "./lib/Cookie";
 import { Flow } from "./lib/flow-api/Flow";
-import { SessionClient, Session } from "./lib/client/SessionClient";
+import { Session, SessionClient } from "./lib/client/SessionClient";
+import { SessionTokenLocation } from "./lib/client/HttpClient";
 
 /**
  * The options for the Hanko class
@@ -26,6 +27,7 @@ import { SessionClient, Session } from "./lib/client/SessionClient";
  *                            reflected in the payload of the token contained in the webhook request.
  * @property {number=} sessionCheckInterval -  Interval for session validity checks in milliseconds. Must be greater than 3000 (3s), defaults to 3000 otherwise.
  * @property {string=} sessionCheckChannelName - The broadcast channel name for inter-tab communication.
+ * @property {string=} sessionTokenLocation - The location where the session token is stored.
  */
 export interface HankoOptions {
   timeout?: number;
@@ -36,6 +38,7 @@ export interface HankoOptions {
   lang?: string;
   sessionCheckInterval?: number;
   sessionCheckChannelName?: string;
+  sessionTokenLocation?: SessionTokenLocation;
 }
 
 /**
@@ -66,6 +69,7 @@ class Hanko extends Listener {
       localStorageKey: "hanko",
       sessionCheckInterval: 30000,
       sessionCheckChannelName: "hanko-session-check",
+      sessionTokenLocation: "cookie",
     };
     if (options?.cookieName !== undefined) {
       opts.cookieName = options.cookieName;
@@ -94,6 +98,9 @@ class Hanko extends Listener {
     }
     if (options?.sessionCheckChannelName !== undefined) {
       opts.sessionCheckChannelName = options.sessionCheckChannelName;
+    }
+    if (options.sessionTokenLocation !== undefined) {
+      opts.sessionTokenLocation = options.sessionTokenLocation;
     }
 
     this.api = api;
@@ -168,6 +175,7 @@ export interface InternalOptions {
   lang?: string;
   sessionCheckInterval?: number;
   sessionCheckChannelName?: string;
+  sessionTokenLocation: SessionTokenLocation;
 }
 
 export { Hanko };

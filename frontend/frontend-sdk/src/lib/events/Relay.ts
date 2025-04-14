@@ -4,8 +4,9 @@ import { SessionClient } from "../client/SessionClient";
 import { SessionState } from "./SessionState";
 import { WindowActivityManager } from "./WindowActivityManager";
 import { Scheduler, SessionCheckResult } from "./Scheduler";
-import { SessionChannel, BroadcastMessage } from "./SessionChannel";
+import { BroadcastMessage, SessionChannel } from "./SessionChannel";
 import { InternalOptions } from "../../Hanko";
+import { SessionTokenLocation } from "../client/HttpClient";
 
 /**
  * A class that manages session checks, dispatches events based on session status,
@@ -34,7 +35,10 @@ export class Relay extends Dispatcher {
     this.checkInterval = options.sessionCheckInterval;
     this.sessionState = new SessionState(`${options.cookieName}_session_state`);
     this.sessionChannel = new SessionChannel(
-      options.sessionCheckChannelName,
+      this.getSessionCheckChannelName(
+        options.sessionTokenLocation,
+        options.sessionCheckChannelName,
+      ),
       () => this.onChannelSessionExpired(),
       (msg) => this.onChannelSessionCreated(msg),
       () => this.onChannelLeadershipRequested(),
@@ -198,5 +202,32 @@ export class Relay extends Dispatcher {
     if (!this.windowActivityManager.hasFocus()) {
       this.scheduler.stop();
     }
+  }
+
+  /**
+   * Return the SessionCheckChannelName. When the sessionTokenLocation is "cookie" it is set to the option value.
+   * When the sessionTokenLocation is "sessionStorage" it is tried to get the channel name from the sessionStorage,
+   * when it is empty a new name is created prefixed with the provided sessionCheckChannelName.
+   * @param sessionTokenLocation - The location where the session token is stored.
+   * @param sessionCheckChannelName - The name or prefix of the channel.
+   * @private
+   */
+  private getSessionCheckChannelName(
+    sessionTokenLocation: SessionTokenLocation,
+    sessionCheckChannelName?: string,
+  ): string | undefined {
+    if (sessionTokenLocation == "cookie") {
+      return sessionCheckChannelName;
+    }
+    let channelName = sessionStorage.getItem("sessionCheckChannelName");
+    if (
+      channelName === null ||
+      channelName === undefined ||
+      channelName === ""
+    ) {
+      channelName = `hanko_session_${Math.floor(Math.random() * 100) + 1}`;
+      sessionStorage.setItem("sessionCheckChannelName", channelName);
+    }
+    return channelName;
   }
 }
