@@ -33,10 +33,7 @@ export interface AllOptions {
   cacheKey?: string;
 }
 
-export type Options = Pick<
-  AllOptions,
-  "dispatchAfterStateChangeEvent" | "excludeAutoSteps" | "cacheKey"
-> & {
+export type Options = Omit<AllOptions, "previousAction" | "isCached"> & {
   loadFromCache?: boolean;
 };
 
@@ -218,7 +215,7 @@ export class State<TState extends StateName = StateName> {
    * Removes the current state from localStorage.
    * @returns {void}
    */
-  public removeFromLocalStorage() {
+  public removeFromLocalStorage(): void {
     localStorage.removeItem(this.cacheKey);
   }
 

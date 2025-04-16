@@ -382,6 +382,61 @@ hanko.onUserDeleted(() => {
 
 Please Take a look into the [docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) for more details.
 
+### Session Management
+
+The SDK provides methods to manage user sessions and retrieve user information.
+
+#### Getting the User Object
+
+Fetches the current user's profile information.
+
+```typescript
+try {
+    const user = await hanko.getUser();
+    console.log("User profile:", user);
+} catch (error) {
+    console.error("Failed to fetch user:", error);
+    // Handle UnauthorizedError or TechnicalError
+}
+```
+
+#### Validating a Session
+
+Checks the validity of the current session.
+
+```typescript
+try {
+    const sessionStatus = await hanko.validateSession();
+    console.log("Session status:", sessionStatus);
+} catch (error) {
+    console.error("Failed to fetch session status:", error);
+    // Handle TechnicalError
+}
+```
+
+#### Getting the Session Token
+
+Retrieves the current session token from the authentication cookie.
+
+```typescript
+const token = hanko.getSessionToken();
+console.log("Session token:", token);
+```
+
+#### Logging out a User
+
+Logs out the current user by invalidating the session.
+
+```typescript
+try {
+    await hanko.logout();
+    console.log("User logged out");
+} catch (error) {
+    console.error("Failed to fetch user logout:", error);
+    // Handle TechnicalError
+}
+```
+
 ### Translation of outgoing emails
 
 If you use the main `Hanko` client provided by the Frontend SDK, you can use the `lang` parameter in the options when
