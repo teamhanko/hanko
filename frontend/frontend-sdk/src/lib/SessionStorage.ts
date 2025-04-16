@@ -10,7 +10,7 @@ interface SessionStorageOptions {
 }
 
 /**
- * A call to manage sessionStorage.
+ * A class to manage sessionStorage.
  *
  * @category SDK
  * @subcategory Internal
