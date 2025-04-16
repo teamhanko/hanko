@@ -27,51 +27,9 @@ export { WebauthnSupport };
 
 // DTO
 
-import {
-  PasswordConfig,
-  EmailConfig,
-  AccountConfig,
-  Config,
-  WebauthnFinalized,
-  TokenFinalized,
-  UserInfo,
-  Me,
-  Credential,
-  User,
-  UserCreated,
-  Passcode,
-  WebauthnTransports,
-  Attestation,
-  Email,
-  Emails,
-  WebauthnCredential,
-  WebauthnCredentials,
-  Identity,
-  SessionCheckResponse,
-} from "./lib/Dto";
+import { Email, Emails, Identity, SessionCheckResponse } from "./lib/Dto";
 
-export type {
-  PasswordConfig,
-  EmailConfig,
-  AccountConfig,
-  Config,
-  WebauthnFinalized,
-  TokenFinalized,
-  UserInfo,
-  Me,
-  Credential,
-  User,
-  UserCreated,
-  Passcode,
-  WebauthnTransports,
-  Attestation,
-  Email,
-  Emails,
-  WebauthnCredential,
-  WebauthnCredentials,
-  Identity,
-  SessionCheckResponse,
-};
+export type { Email, Emails, Identity, SessionCheckResponse };
 
 // Errors
 
