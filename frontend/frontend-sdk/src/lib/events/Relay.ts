@@ -205,11 +205,16 @@ export class Relay extends Dispatcher {
   }
 
   /**
-   * Return the SessionCheckChannelName. When the sessionTokenLocation is "cookie" it is set to the option value.
-   * When the sessionTokenLocation is "sessionStorage" it is tried to get the channel name from the sessionStorage,
-   * when it is empty a new name is created prefixed with the provided sessionCheckChannelName.
-   * @param sessionTokenLocation - The location where the session token is stored.
-   * @param sessionCheckChannelName - The name or prefix of the channel.
+   * Retrieves or generates the session check channel name based on the session token storage location.
+   *
+   * - If the `sessionTokenLocation` is `"cookie"`, the provided `sessionCheckChannelName` is returned as-is.
+   * - If the `sessionTokenLocation` is `"sessionStorage"`, the function attempts to retrieve the channel name from
+   *   `sessionStorage`. If none is found, a new name is generated with the value of `sessionCheckChannelName` as a prefix and a random number,
+   *   then stored in `sessionStorage` for future use.
+   *
+   * @param sessionTokenLocation - Indicates where the session token is stored, either `"cookie"` or `"sessionStorage"`.
+   * @param sessionCheckChannelName - The name or prefix used for the session check channel.
+   * @returns The resolved session check channel name, or `undefined` if not applicable.
    * @private
    */
   private getSessionCheckChannelName(
@@ -225,7 +230,9 @@ export class Relay extends Dispatcher {
       channelName === undefined ||
       channelName === ""
     ) {
-      channelName = `hanko_session_${Math.floor(Math.random() * 100) + 1}`;
+      channelName = `${sessionCheckChannelName}-${
+        Math.floor(Math.random() * 100) + 1
+      }`;
       sessionStorage.setItem("sessionCheckChannelName", channelName);
     }
     return channelName;
