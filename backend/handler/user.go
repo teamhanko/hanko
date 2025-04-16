@@ -3,11 +3,14 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/audit_log"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/dto/admin"
@@ -16,8 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
 	"github.com/teamhanko/hanko/backend/webhooks/utils"
-	"net/http"
-	"strings"
 )
 
 type UserHandler struct {
@@ -110,12 +111,15 @@ func (h *UserHandler) Create(c echo.Context) error {
 				return fmt.Errorf("failed to get email from db: %w", err)
 			}
 
-			var emailJwt *dto.EmailJwt
+			var emailJwt *dto.EmailJWT
 			if e := emails.GetPrimary(); e != nil {
-				emailJwt = dto.JwtFromEmailModel(e)
+				emailJwt = dto.EmailJWTFromEmailModel(e)
 			}
 
-			token, _, err := h.sessionManager.GenerateJWT(newUser.ID, emailJwt)
+			token, _, err := h.sessionManager.GenerateJWT(dto.UserJWT{
+				UserID: newUser.ID.String(),
+				Email:  emailJwt,
+			})
 
 			if err != nil {
 				return fmt.Errorf("failed to generate jwt: %w", err)

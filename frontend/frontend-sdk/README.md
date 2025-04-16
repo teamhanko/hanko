@@ -216,6 +216,52 @@ language to use for outgoing emails. If you have disabled email delivery through
 `email.send` event, the value for the `lang` parameter is reflected in the JWT payload of the token contained in the
 webhook request in the "Language" claim.
 
+### Custom session claim type safety
+
+The Hanko backend allows you to define custom claims that are added to issued session JWTs
+(see [here](https://github.com/teamhanko/hanko/blob/main/backend/README.md#session-jwt-templates) for more info).
+
+To allow for IDE autocompletion and to maintain type safety for your custom claims:
+
+1. Create a TypeScript definition file (`*.d.ts`) in your project (alternatively, modify an existing one).
+2. Import the `Claims` type from the frontend SDK.
+3. Declare a custom type that extends the `Claims` type.
+4. Add your custom claims to your custom type.
+
+```ts
+import type { Claims } from "@teamhanko/hanko-frontend-sdk" // 2.
+// import type { Claims } from "@teamhanko/elements"        // alternatively, if you use Hanko Elements, which
+                                                            // re-exports most SDK types
+
+
+type CustomClaims = Claims<{                                // 3.
+    custom_claim?: string                                   // 4.
+}>;
+```
+
+5. Use your custom type when accessing claims, e.g. in session details received in event callbacks or when accessing
+claims in responses from session validation
+[endpoints](https://docs.hanko.io/api-reference/public/session-management/validate-a-session):
+
+```ts
+import type { CustomClaims } from "..."; // path to your type declaration file
+
+hanko.onSessionCreated((sessionDetail) => {
+  const claims = sessionDetail.claims as CustomClaims;
+  console.info("My custom claim:", claims.custom_claim);
+});
+```
+
+```ts
+import type { CustomClaims } from "..."; // path to your type declaration file
+
+async function session() {
+    const session = await hanko.sessionClient.validate();
+    const claims = session.claims as CustomClaims;
+    console.info("My custom claim:", claims.custom_claim);
+};
+```
+
 ## Bugs
 
 Found a bug? Please report on our [GitHub](https://github.com/teamhanko/hanko/issues) page.
