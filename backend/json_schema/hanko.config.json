@@ -658,6 +658,15 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "JWTTemplate": {
+      "properties": {
+        "claims": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "LoggerConfig": {
       "properties": {
         "log_health_and_metrics": {
@@ -1285,6 +1294,10 @@
         "server_side": {
           "$ref": "#/$defs/ServerSide",
           "description": "Deprecated. Use settings in parent object.\n`server_side` contains configuration for server-side sessions."
+        },
+        "jwt_template": {
+          "$ref": "#/$defs/JWTTemplate",
+          "description": "`jwt_template` defines a template for adding custom `claims` to session JWTs.\n\nThese claims are processed at JWT generation time and can include static values,\ntemplated strings using Go's text/template syntax, or nested structures (maps and slices).\n\nThe template has access to user data via the `.User` field, which includes:\n- `.User.UserID`: The user's unique ID (string)\n- `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)\n- `.User.Username`: The user's username (string, optional)\n\nClaims that fail to process (e.g., due to invalid templates) are logged and skipped,\nensuring JWT generation continues without interruption.\n\nExample usage in YAML configuration:\n```yaml\nsession:\n  lifespan: 24h\n  jwt_template:\n    claims:\n      role: \"user\"                               # Static value\n      user_email: \"{{.User.Email.Address}}\"      # Templated string\n      is_verified: \"{{.User.Email.IsVerified}}\"  # Boolean from user data\n      metadata:                                  # Nested map\n        source: \"hanko\"\n        greeting: \"Hello {{.User.Username}}\"\n      scopes:                                    # Slice with templated value\n        - \"read\"\n        - \"write\"\n        - \"{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}\"\n```\n\nIn this example:\n- `role` is a static string (\"user\").\n- `user_email` dynamically inserts the user's email address.\n- `is_verified` inserts a boolean indicating email verification status.\n- `metadata` is a nested map with a static `source` and a templated `greeting`.\n- `scopes` is a slice combining static values and a conditional template.\n\nNotes:\n- Claims with the following keys will be ignored because they are currently added to the JWT\n  by default:\n    - sub\n    - iat\n    - exp\n    - aud\n    - iss\n    - email\n    - username\n    - session_id\n- Templates must be valid Go `text/template` syntax. Invalid templates are logged and ignored.\n- Boolean strings (\"true\" or \"false\") from templates are automatically converted to actual booleans.\n- Use conditionals (e.g., `{{if .User.Email}}`) to handle optional fields safely.\n\nFor more details on template syntax, see: https://pkg.go.dev/text/template"
         }
       },
       "additionalProperties": false,
