@@ -1,16 +1,12 @@
-import { EnterpriseClient } from "./lib/client/EnterpriseClient";
-import { UserClient } from "./lib/client/UserClient";
-import { EmailClient } from "./lib/client/EmailClient";
-import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
-import { TokenClient } from "./lib/client/TokenClient";
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
 import { CookieSameSite } from "./lib/Cookie";
 
-import { SessionClient, Session } from "./lib/client/SessionClient";
+import { SessionClient } from "./lib/client/SessionClient";
 import { HttpClient } from "./lib/client/HttpClient";
 import { FlowName } from "./lib/flow-api/types/flow";
 import { Options, State } from "./lib/flow-api/State";
+import { UserClient } from "./lib/client/UserClient";
 
 /**
  * The options for the Hanko class
@@ -49,57 +45,23 @@ export interface HankoOptions {
  * @param {HankoOptions=} options - The options that can be used
  */
 class Hanko extends Listener {
-  api: string;
   client: HttpClient;
+  session: SessionClient;
   user: UserClient;
-  email: EmailClient;
-  thirdParty: ThirdPartyClient;
-  enterprise: EnterpriseClient;
-  token: TokenClient;
-  sessionClient: SessionClient;
-  session: Session;
   relay: Relay;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
     super();
-    const opts: InternalOptions = {
+    const opts: HankoOptions = {
       timeout: 13000,
       cookieName: "hanko",
       localStorageKey: "hanko",
       sessionCheckInterval: 30000,
       sessionCheckChannelName: "hanko-session-check",
+      ...options,
     };
-    if (options?.cookieName !== undefined) {
-      opts.cookieName = options.cookieName;
-    }
-    if (options?.timeout !== undefined) {
-      opts.timeout = options.timeout;
-    }
-    if (options?.localStorageKey !== undefined) {
-      opts.localStorageKey = options.localStorageKey;
-    }
-    if (options?.cookieDomain !== undefined) {
-      opts.cookieDomain = options.cookieDomain;
-    }
-    if (options?.cookieSameSite !== undefined) {
-      opts.cookieSameSite = options.cookieSameSite;
-    }
-    if (options?.lang !== undefined) {
-      opts.lang = options.lang;
-    }
-    if (options?.sessionCheckInterval !== undefined) {
-      if (options.sessionCheckInterval < 3000) {
-        opts.sessionCheckInterval = 3000;
-      } else {
-        opts.sessionCheckInterval = options.sessionCheckInterval;
-      }
-    }
-    if (options?.sessionCheckChannelName !== undefined) {
-      opts.sessionCheckChannelName = options.sessionCheckChannelName;
-    }
 
-    this.api = api;
     /**
      *  @public
      *  @type {Client}
@@ -107,40 +69,14 @@ class Hanko extends Listener {
     this.client = new HttpClient(api, opts);
     /**
      *  @public
-     *  @type {UserClient}
+     *  @type {SessionClient}
      */
-    this.user = new UserClient(api, opts);
-    /**
-     *  @public
-     *  @type {EmailClient}
-     */
-    this.email = new EmailClient(api, opts);
-    /**
-     *  @public
-     *  @type {ThirdPartyClient}
-     */
-    this.thirdParty = new ThirdPartyClient(api, opts);
-    /**
-     *  @public
-     *  @type {EnterpriseClient}
-     */
-    this.enterprise = new EnterpriseClient(api, opts);
-    /**
-     *  @public
-     *  @type {TokenClient}
-     */
-    this.token = new TokenClient(api, opts);
+    this.session = new SessionClient(api, opts);
     /**
      *  @public
      *  @type {SessionClient}
      */
-    this.sessionClient = new SessionClient(api, opts);
-    /**
-     *  @public
-     *  @deprecated
-     *  @type {Session}
-     */
-    this.session = new Session(api, opts);
+    this.user = new UserClient(api, opts);
     /**
      *  @public
      *  @type {Relay}
@@ -164,18 +100,6 @@ class Hanko extends Listener {
   createState(flowName: FlowName, options: Options = {}) {
     return State.create(this, flowName, options);
   }
-}
-
-// eslint-disable-next-line require-jsdoc
-export interface InternalOptions {
-  timeout: number;
-  cookieName: string;
-  cookieDomain?: string;
-  cookieSameSite?: CookieSameSite;
-  localStorageKey: string;
-  lang?: string;
-  sessionCheckInterval?: number;
-  sessionCheckChannelName?: string;
 }
 
 export { Hanko };

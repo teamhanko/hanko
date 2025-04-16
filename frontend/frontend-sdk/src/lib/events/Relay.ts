@@ -5,7 +5,7 @@ import { SessionState } from "./SessionState";
 import { WindowActivityManager } from "./WindowActivityManager";
 import { Scheduler, SessionCheckResult } from "./Scheduler";
 import { SessionChannel, BroadcastMessage } from "./SessionChannel";
-import { InternalOptions } from "../../Hanko";
+import { HankoOptions } from "../../Hanko";
 
 /**
  * A class that manages session checks, dispatches events based on session status,
@@ -15,7 +15,7 @@ import { InternalOptions } from "../../Hanko";
  * @subcategory Internal
  * @extends Dispatcher
  * @param {string} api - The API endpoint URL.
- * @param {InternalOptions} options - The internal configuration options of the SDK.
+ * @param {HankoOptions} options - The internal configuration options of the SDK.
  */
 export class Relay extends Dispatcher {
   listener = new Listener(); // Listener for session-related events.
@@ -28,10 +28,17 @@ export class Relay extends Dispatcher {
   private isLoggedIn: boolean;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: InternalOptions) {
+  constructor(api: string, options: HankoOptions) {
     super();
     this.client = new SessionClient(api, options);
-    this.checkInterval = options.sessionCheckInterval;
+
+    if (options.sessionCheckInterval) {
+      this.checkInterval =
+        options.sessionCheckInterval < 3000
+          ? 3000
+          : options.sessionCheckInterval;
+    }
+
     this.sessionState = new SessionState(`${options.cookieName}_session_state`);
     this.sessionChannel = new SessionChannel(
       options.sessionCheckChannelName,

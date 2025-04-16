@@ -266,7 +266,9 @@ export class State<TState extends StateName = StateName> {
    * @param {string} cacheKey - The key used to store the state in localStorage.
    * @returns {SerializedState | undefined} The parsed serialized state, or undefined if not found or invalid.
    */
-  public static readFromLocalStorage(cacheKey: string) {
+  public static readFromLocalStorage(
+    cacheKey: string,
+  ): SerializedState | undefined {
     const raw = localStorage.getItem(cacheKey);
     if (raw) {
       try {
@@ -326,7 +328,7 @@ export class State<TState extends StateName = StateName> {
     hanko: Hanko,
     serializedState: SerializedState,
     options: Options = {},
-  ) {
+  ): Promise<AnyState> {
     return State.initializeFlowState(
       hanko,
       serializedState.flow_name,

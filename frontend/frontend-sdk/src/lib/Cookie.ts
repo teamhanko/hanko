@@ -6,12 +6,12 @@ import { TechnicalError } from "./Errors";
  *
  * @category SDK
  * @subcategory Internal
- * @property {string} cookieName - The name of the session cookie set from the SDK.
+ * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko".
  * @property {string=} cookieDomain - The domain where the cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
  * @property {string=} cookieSameSite -Specify whether/when cookies are sent with cross-site requests. Defaults to "lax".
  */
 interface CookieOptions {
-  cookieName: string;
+  cookieName?: string;
   cookieDomain?: string;
   cookieSameSite?: CookieSameSite;
 }
@@ -38,7 +38,7 @@ export class Cookie {
 
   // eslint-disable-next-line require-jsdoc
   constructor(options: CookieOptions) {
-    this.authCookieName = options.cookieName;
+    this.authCookieName = options.cookieName ?? "hanko";
     this.authCookieDomain = options.cookieDomain;
     this.authCookieSameSite = options.cookieSameSite ?? "lax";
   }

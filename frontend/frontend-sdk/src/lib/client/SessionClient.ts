@@ -28,34 +28,3 @@ export class SessionClient extends Client {
     return await response.json();
   }
 }
-
-/**
- * Class to maintain compatibility with previous versions.
- *
- * @constructor
- * @category SDK
- * @subcategory Clients
- * @extends {Client}
- */
-export class Session extends Client {
-  /**
-   * Checks if the current session is still valid. This function is to be removed - please replace
-   * any usage with the new 'SessionClient.validate()' function.
-   *
-   * @return {boolean}
-   * @throws {TechnicalError}
-   * @deprecated
-   */
-  isValid(): boolean {
-    let session: SessionCheckResponse;
-    try {
-      const response = this.client._fetch_blocking("/sessions/validate", {
-        method: "GET",
-      });
-      session = JSON.parse(response);
-    } catch (e) {
-      throw new TechnicalError(e);
-    }
-    return session ? session.is_valid : false;
-  }
-}
