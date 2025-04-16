@@ -1,6 +1,7 @@
 import { RequestTimeoutError, TechnicalError } from "../Errors";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
+import { HankoOptions } from "../../Hanko";
 
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
@@ -110,18 +111,16 @@ class Response {
  *
  * @category SDK
  * @subcategory Internal
- * @property {number} timeout - The http request timeout in milliseconds.
+ * @property {number=} timeout - The http request timeout in milliseconds.
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string=} cookieDomain - The domain where cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
- * @property {string} localStorageKey - The prefix / name of the local storage keys.
- * @property {string} lang - The language used by the client(s) to convey to the Hanko API the language to use -
+ * @property {string?} lang - The language used by the client(s) to convey to the Hanko API the language to use -
  *                           e.g. for translating outgoing emails - in a custom header (X-Language).
  */
 export interface HttpClientOptions {
-  timeout: number;
-  cookieName: string;
+  timeout?: number;
+  cookieName?: string;
   cookieDomain?: string;
-  localStorageKey: string;
   lang?: string;
 }
 
@@ -147,9 +146,9 @@ class HttpClient {
   lang: string;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: HttpClientOptions) {
+  constructor(api: string, options: HankoOptions) {
     this.api = api;
-    this.timeout = options.timeout;
+    this.timeout = options.timeout ?? 13000;
     this.dispatcher = new Dispatcher();
     this.cookie = new Cookie({ ...options });
     this.lang = options.lang;
@@ -192,29 +191,6 @@ class HttpClient {
     });
   }
 
-  // This function is to be removed along with the "Session.isValid()" function, where it is used to check the
-  // session without returning a promise.
-  _fetch_blocking(
-    path: string,
-    options: RequestInit,
-    xhr = new XMLHttpRequest(),
-  ) {
-    const url = this.api + path;
-    const bearerToken = this.cookie.getAuthCookie();
-
-    xhr.open(options.method, url, false);
-    xhr.setRequestHeader("Accept", "application/json");
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    if (bearerToken) {
-      xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);
-    }
-
-    xhr.withCredentials = true;
-    xhr.send(options.body ? options.body.toString() : null);
-
-    return xhr.responseText;
-  }
   /**
    * Processes the response headers on login and extracts the JWT and expiration time.
    *
