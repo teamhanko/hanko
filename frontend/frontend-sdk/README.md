@@ -229,10 +229,13 @@ To allow for IDE autocompletion and to maintain type safety for your custom clai
 4. Add your custom claims to your custom type.
 
 ```ts
-import type { Claims } from "@teamhanko/hanko-elements" // 2.
+import type { Claims } from "@teamhanko/hanko-frontend-sdk" // 2.
+// import type { Claims } from "@teamhanko/elements"        // alternatively, if you use Hanko Elements, which
+                                                            // re-exports most SDK types
 
-type CustomClaims = Claims<{                            // 3.
-    custom_claim?: string                               // 4.
+
+type CustomClaims = Claims<{                                // 3.
+    custom_claim?: string                                   // 4.
 }>;
 ```
 
