@@ -4,8 +4,9 @@ import { SessionClient } from "../client/SessionClient";
 import { SessionState } from "./SessionState";
 import { WindowActivityManager } from "./WindowActivityManager";
 import { Scheduler, SessionCheckResult } from "./Scheduler";
-import { SessionChannel, BroadcastMessage } from "./SessionChannel";
+import { BroadcastMessage, SessionChannel } from "./SessionChannel";
 import { InternalOptions } from "../../Hanko";
+import { SessionTokenLocation } from "../client/HttpClient";
 
 /**
  * A class that manages session checks, dispatches events based on session status,
@@ -34,7 +35,10 @@ export class Relay extends Dispatcher {
     this.checkInterval = options.sessionCheckInterval;
     this.sessionState = new SessionState(`${options.cookieName}_session_state`);
     this.sessionChannel = new SessionChannel(
-      options.sessionCheckChannelName,
+      this.getSessionCheckChannelName(
+        options.sessionTokenLocation,
+        options.sessionCheckChannelName,
+      ),
       () => this.onChannelSessionExpired(),
       (msg) => this.onChannelSessionCreated(msg),
       () => this.onChannelLeadershipRequested(),
@@ -198,5 +202,39 @@ export class Relay extends Dispatcher {
     if (!this.windowActivityManager.hasFocus()) {
       this.scheduler.stop();
     }
+  }
+
+  /**
+   * Retrieves or generates the session check channel name based on the session token storage location.
+   *
+   * - If the `sessionTokenLocation` is `"cookie"`, the provided `sessionCheckChannelName` is returned as-is.
+   * - If the `sessionTokenLocation` is `"sessionStorage"`, the function attempts to retrieve the channel name from
+   *   `sessionStorage`. If none is found, a new name is generated with the value of `sessionCheckChannelName` as a prefix and a random number,
+   *   then stored in `sessionStorage` for future use.
+   *
+   * @param sessionTokenLocation - Indicates where the session token is stored, either `"cookie"` or `"sessionStorage"`.
+   * @param sessionCheckChannelName - The name or prefix used for the session check channel.
+   * @returns The resolved session check channel name, or `undefined` if not applicable.
+   * @private
+   */
+  private getSessionCheckChannelName(
+    sessionTokenLocation: SessionTokenLocation,
+    sessionCheckChannelName?: string,
+  ): string | undefined {
+    if (sessionTokenLocation == "cookie") {
+      return sessionCheckChannelName;
+    }
+    let channelName = sessionStorage.getItem("sessionCheckChannelName");
+    if (
+      channelName === null ||
+      channelName === undefined ||
+      channelName === ""
+    ) {
+      channelName = `${sessionCheckChannelName}-${
+        Math.floor(Math.random() * 100) + 1
+      }`;
+      sessionStorage.setItem("sessionCheckChannelName", channelName);
+    }
+    return channelName;
   }
 }

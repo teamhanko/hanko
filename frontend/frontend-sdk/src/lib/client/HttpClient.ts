@@ -1,6 +1,10 @@
 import { RequestTimeoutError, TechnicalError } from "../Errors";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
+import { SessionStorage } from "../SessionStorage";
+import { CookieAttributes } from "js-cookie";
+
+export type SessionTokenLocation = "cookie" | "sessionStorage";
 
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
@@ -123,6 +127,7 @@ export interface HttpClientOptions {
   cookieDomain?: string;
   localStorageKey: string;
   lang?: string;
+  sessionTokenLocation: SessionTokenLocation;
 }
 
 /**
@@ -144,7 +149,9 @@ class HttpClient {
   api: string;
   dispatcher: Dispatcher;
   cookie: Cookie;
+  sessionTokenStorage: SessionStorage;
   lang: string;
+  sessionTokenLocation: SessionTokenLocation;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options: HttpClientOptions) {
@@ -152,7 +159,11 @@ class HttpClient {
     this.timeout = options.timeout;
     this.dispatcher = new Dispatcher();
     this.cookie = new Cookie({ ...options });
+    this.sessionTokenStorage = new SessionStorage({
+      keyName: options.cookieName,
+    });
     this.lang = options.lang;
+    this.sessionTokenLocation = options.sessionTokenLocation;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -160,7 +171,7 @@ class HttpClient {
     const self = this;
     const url = this.api + path;
     const timeout = this.timeout;
-    const bearerToken = this.cookie.getAuthCookie();
+    const bearerToken = this.getAuthToken();
     const lang = this.lang;
 
     return new Promise<Response>(function (resolve, reject) {
@@ -200,7 +211,7 @@ class HttpClient {
     xhr = new XMLHttpRequest(),
   ) {
     const url = this.api + path;
-    const bearerToken = this.cookie.getAuthCookie();
+    const bearerToken = this.getAuthToken();
 
     xhr.open(options.method, url, false);
     xhr.setRequestHeader("Accept", "application/json");
@@ -215,6 +226,7 @@ class HttpClient {
 
     return xhr.responseText;
   }
+
   /**
    * Processes the response headers on login and extracts the JWT and expiration time.
    *
@@ -252,7 +264,7 @@ class HttpClient {
           ? undefined
           : new Date(new Date().getTime() + expirationSeconds * 1000);
 
-      this.cookie.setAuthCookie(jwt, { secure, expires });
+      this.setAuthToken(jwt, { secure, expires });
     }
   }
 
@@ -328,6 +340,38 @@ class HttpClient {
     return this._fetch(path, {
       method: "DELETE",
     });
+  }
+
+  /**
+   * Returns the session token either from the cookie or the sessionStorage.
+   * @private
+   * @return {string}
+   */
+  private getAuthToken(): string {
+    let token = "";
+    switch (this.sessionTokenLocation) {
+      case "cookie":
+        token = this.cookie.getAuthCookie();
+        break;
+      case "sessionStorage":
+        token = this.sessionTokenStorage.getSessionToken();
+    }
+    return token;
+  }
+
+  /**
+   * Stores the session token either in a cookie or in the sessionStorage depending on the configuration.
+   * @param {string} token - The session token to be stored.
+   * @param {CookieAttributes} options - Options for setting the auth cookie.
+   * @private
+   */
+  private setAuthToken(token: string, options: CookieAttributes) {
+    switch (this.sessionTokenLocation) {
+      case "cookie":
+        return this.cookie.setAuthCookie(token, options);
+      case "sessionStorage":
+        return this.sessionTokenStorage.setSessionToken(token);
+    }
   }
 }
 

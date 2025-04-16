@@ -6,6 +6,7 @@ import AppProvider, {
 } from "./contexts/AppProvider";
 import { CookieSameSite, Hanko } from "@teamhanko/hanko-frontend-sdk";
 import { defaultTranslations, Translations } from "./i18n/translations";
+import { SessionTokenLocation } from "@teamhanko/hanko-frontend-sdk/dist/lib/client/HttpClient";
 
 export interface HankoAuthAdditionalProps {
   experimental?: string;
@@ -49,6 +50,7 @@ export interface RegisterOptions {
   cookieDomain?: string;
   cookieSameSite?: CookieSameSite;
   sessionCheckInterval?: number;
+  sessionTokenLocation?: SessionTokenLocation;
 }
 
 export interface RegisterResult {
@@ -145,6 +147,7 @@ export const register = async (
     cookieSameSite: options.cookieSameSite,
     localStorageKey: options.storageKey,
     sessionCheckInterval: options.sessionCheckInterval,
+    sessionTokenLocation: options.sessionTokenLocation,
   });
   globalOptions.injectStyles = options.injectStyles;
   globalOptions.enablePasskeys = options.enablePasskeys;
