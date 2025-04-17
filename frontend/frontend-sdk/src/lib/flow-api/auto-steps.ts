@@ -112,7 +112,7 @@ export const autoSteps: AutoSteps = {
       return nextState;
     }
 
-    if (!state.readFromLocalStorage) {
+    if (!state.isCached) {
       state.saveToLocalStorage();
       window.location.assign(state.payload.redirect_url);
     } else {
