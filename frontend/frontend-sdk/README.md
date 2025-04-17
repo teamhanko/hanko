@@ -288,7 +288,7 @@ Please note that the `localStorage` entry will be removed automatically when an 
 
 #### Loading State
 
-Recover a cached state or start a new:
+Recover a cached state or start a new flow:
 
 ```typescript
 const state = await hanko.createState("login", {
