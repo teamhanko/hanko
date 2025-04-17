@@ -274,7 +274,7 @@ if (state.name === "error") {
 
 ### Caching Flow State
 
-Persist and recover flow state using `localStorage` for seamless user experiences.
+Persist and recover flow state using `localStorage`.
 
 #### Saving State
 
