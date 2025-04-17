@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Identity</title>
+  <title> lib/SessionStorage.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -73,174 +75,70 @@
         <div class="core" id="main-content-wrapper">
             <div class="content">
                 <header class="page-title">
-                    <p>Interface</p>
-                    <h1>Identity</h1>
+                    <p>Source</p>
+                    <h1>lib/SessionStorage.ts</h1>
                 </header>
                 
 
 
 
-
-<section>
-
-<header>
     
-        <h2>Identity</h2>
-        
-    
-</header>
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/**
+ * Options for SessionStorage
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @property {string} keyName - The name of the sessionStorage session token entry set from the SDK.
+ */
+interface SessionStorageOptions {
+  keyName: string;
+}
 
-<article>
-    <div class="container-overview">
-    
-        
+/**
+ * A class to manage sessionStorage.
+ *
+ * @category SDK
+ * @subcategory Internal
+ * @param {SessionStorageOptions} options - The options that can be used.
+ */
+export class SessionStorage {
+  keyName: string;
 
-        
+  // eslint-disable-next-line require-jsdoc
+  constructor(options: SessionStorageOptions) {
+    this.keyName = options.keyName;
+  }
 
+  /**
+   * Return the session token that was stored in the sessionStorage.
+   *
+   * @return {string}
+   */
+  getSessionToken(): string {
+    return sessionStorage.getItem(this.keyName);
+  }
 
-    <h5 class="subsection-title">Properties:</h5>
+  /**
+   * Stores the session token in the sessionStorage.
+   *
+   * @param {string} token - The session token to be stored.
+   */
+  setSessionToken(token: string) {
+    sessionStorage.setItem(this.keyName, token);
+  }
 
-    
-<div class="table-container">
-    <table class="props table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>id</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last">The subject ID with the third party provider.</td>
-</tr>
-
-        
-            
-<tr class="deep-level-0">
-    
-        <td class="name"><code>provider</code></td>
-    
-
-    <td class="type">
-    
-        
-<code class="param-type">string</code>
-
-
-    
-    </td>
-
-    
-
-    
-
-    <td class="description last">The third party provider name.</td>
-</tr>
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_Dto.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_Dto.ts.html">lib/Dto.ts</a>, <a href="lib_Dto.ts.html#line161">line 161</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-        
-    
-    </div>
-    
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</article>
-
-</section>
+  /**
+   * Removes the session token used for authentication.
+   */
+  removeSessionToken() {
+    sessionStorage.removeItem(this.keyName);
+  }
+}
+</code></pre>
+        </article>
+    </section>
 
 
 
