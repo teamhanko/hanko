@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -67,6 +68,10 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	user.POST("", userHandler.Create, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
 	user.DELETE("/:id", userHandler.Delete, webhookMiddleware)
+
+	metadataHandler := NewMetadataAdminHandler(persister)
+	user.PATCH("/:id/metadata", metadataHandler.PatchMetadata)
+	user.GET("/:id/metadata", metadataHandler.GetMetadata)
 
 	email := user.Group("/:user_id/emails", webhookMiddleware)
 	email.GET("", emailHandler.List)

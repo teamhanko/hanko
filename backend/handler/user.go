@@ -198,6 +198,11 @@ func (h *UserHandler) Get(c echo.Context) error {
 		emailAddress = &e.Address
 	}
 
+	var metadata *dto.Metadata
+	if user.Metadata != nil {
+		metadata = dto.NewMetadata(user.Metadata)
+	}
+
 	return c.JSON(http.StatusOK, dto.GetUserResponse{
 		ID:                  user.ID,
 		WebauthnCredentials: user.WebauthnCredentials,
@@ -205,6 +210,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 		Username:            user.GetUsername(),
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
+		Metadata:            metadata,
 	})
 }
 

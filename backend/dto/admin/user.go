@@ -1,10 +1,11 @@
 package admin
 
 import (
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"time"
 )
 
 type User struct {
@@ -16,9 +17,10 @@ type User struct {
 	UpdatedAt           time.Time                        `json:"updated_at"`
 	Password            *PasswordCredential              `json:"password,omitempty"`
 	Identities          []Identity                       `json:"identities,omitempty"`
-	OTP                 *OTPDto                          `json:"otp"`
+	OTP                 *OTPDto                          `json:"otp,omitempty"`
 	IPAddress           *string                          `json:"ip_address,omitempty"`
 	UserAgent           *string                          `json:"user_agent,omitempty"`
+	Metadata            *Metadata                        `json:"metadata,omitempty"`
 }
 
 func (u *User) SetIPAddress(ip string) {
@@ -65,6 +67,11 @@ func FromUserModel(model models.User) User {
 		}
 	}
 
+	var metadata *Metadata
+	if model.Metadata != nil {
+		metadata = NewMetadata(model.Metadata)
+	}
+
 	return User{
 		ID:                  model.ID,
 		WebauthnCredentials: credentials,
@@ -75,6 +82,7 @@ func FromUserModel(model models.User) User {
 		Password:            passwordCredential,
 		Identities:          identities,
 		OTP:                 otp,
+		Metadata:            metadata,
 	}
 }
 

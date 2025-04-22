@@ -22,4 +22,5 @@ var (
 	ErrorUnknownEmail          = flowpilot.NewInputError("unknown_email_error", "The email address is unknown.")
 	ErrorInvalidUsername       = flowpilot.NewInputError("invalid_username_error", "The username is invalid.")
 	ErrorPasscodeInvalid       = flowpilot.NewInputError("passcode_invalid", "The passcode is invalid.")
+	ErrorInvalidMetadata       = flowpilot.NewInputError("invalid_metadata_error", "The metadata is invalid.")
 )

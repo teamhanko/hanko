@@ -21,6 +21,7 @@ easily integrated into any web app with as little as two lines of code.
     - [Built-in providers](#built-in-providers)
     - [Custom OAuth/OIDC providers](#custom-oauthoidc-providers)
     - [Account linking](#account-linking)
+  - [User metadata](#user-metadata)
   - [User import](#user-import)
   - [Webhooks](#webhooks)
   - [Session JWT templates](#session-jwt-templates)
@@ -482,6 +483,97 @@ accounts associated with the same address. It is therefore recommended to make s
 also enable `emails.require_verification` in your configuration to ensure that only verified third party provider
 addresses may be used.
 
+### User metadata
+
+Hanko allows for defining arbitrary user metadata. Metadata can be categorized into
+three types that differ as to how they can be accessed and modified:
+
+| Metadata type | Public API                   | Admin API             |
+|---------------|------------------------------|-----------------------|
+| Private       | No read or write access      | Read and write access |
+| Public        | Read access                  | Read and write access |
+| Unsafe        | Read access and write access | Read and write access |
+
+Each metadata type is currently limited to 3000 characters.
+
+#### Private metadata
+
+Private metadata should be used for sensitive data that should not be exposed to the client (e.g., internal flags/ids,
+configuration, or access control details).
+
+Private metadata can be read through the Admin API only using the
+[Get metadata of a user](/api-reference/admin/user-management/get-metadata-of-a-user)
+endpoint.
+
+Private metadata can be set and modified through the Admin API only by using the
+[Patch metadata of a user](https://docs.hanko.io/api-reference/admin/user-management/patch-metadata-of-a-user) endpoint.
+
+#### Public metadata
+
+Public metadata should be used for non-sensitive information that you want accessible but not modifiable by the client
+(e.g., certain user roles, UI preferences, display options).
+
+Public metadata can be read through the Public API, the Admin API and in JWT templates for customizing
+the session JWT:
+
+- `Public API`:
+  - Public metadata is returned in the `user` object in the payload on the `success` state in a
+    [Login](https://docs.hanko.io/api-reference/flow/login) and
+    [Registration](https://docs.hanko.io/api-reference/flow/registration) flow as well
+    as in the payload on the `profile_init` state in a [Profile](https://docs.hanko.io/api-reference/flow/profile) flow.
+  - Public metadata is returned as part of the response of the
+    [Get a user by ID](https://docs.hanko.io/api-reference/public/user-management/get-a-user-by-id) endpoint.
+- `Admin API`:
+  - Public metadata is returned as part of the response of the
+    [Get metadata of a user](https://docs.hanko.io/api-reference/admin/user-metadata-management/get-metadata-of-a-user)
+    endpoint.
+  - Public metadata is returned as part of the response of the
+    [Get a user by ID](https://docs.hanko.io/api-reference/admin/user-management/get-a-user-by-id) endpoint.
+- `JWT Templates`:
+  - Public metadata can be accessed through the `User` context object available on session JWT customization.
+    See [Session JWT templates](#session-jwt-templates) for more details.
+
+Public metadata can be set and modified through the Admin API only by using the
+[Patch metadata of a user](https://docs.hanko.io/api-reference/admin/user-management/patch-metadata-of-a-user) endpoint.
+
+#### Unsafe metadata
+
+Unsafe metadata should be used for non-sensitive, temporary or experimental data that doesn't need strong safety
+guarantees.
+
+Unsafe metadata can be read through the Public API, the Admin API and in JWT templates for customizing
+the session JWT:
+
+- `Public API`:
+    - Unsafe metadata is returned in the `user` object in the payload on the `success` state in a
+      [Login](https://docs.hanko.io/api-reference/flow/login) and
+      [Registration](https://docs.hanko.io/api-reference/flow/registration) flow as well
+      as in the payload on the `profile_init` state in a [Profile](https://docs.hanko.io/api-reference/flow/profile) flow.
+    - Unsafe metadata is returned as part of the response of the
+      [Get a user by ID](https://docs.hanko.io/api-reference/public/user-management/get-a-user-by-id) endpoint.
+- `Admin API`:
+    - Unsafe metadata is returned as part of the response of the
+      [Get metadata of a user](https://docs.hanko.io/api-reference/admin/user-metadata-management/get-metadata-of-a-user)
+      endpoint.
+    - Unsafe metadata is returned as part of the response of the
+      [Get a user by ID](https://docs.hanko.io/api-reference/admin/user-management/get-a-user-by-id) endpoint.
+- `JWT Templates`:
+    - Unsafe metadata can be accessed through the `User` context object available on session JWT customization.
+      See [Session JWT templates](#session-jwt-templates) for more details.
+
+Unsafe metadata can be set and modified through the Public API and the Admin API:
+
+- `Public API`:
+  - Unsafe metadata can be set using the `patch_metadata` action in the
+    [Profile](https://docs.hanko.io/api-reference/flow/profile) flow.
+
+- `Admin API`:
+  - Unsafe metadata can be set using the
+    [Patch metadata of a user](https://docs.hanko.io/api-reference/admin/user-management/patch-metadata-of-a-user)
+    endpoint.
+
+
+
 ### User import
 You can import an existing user pool into Hanko using json in the following format:
 ```json
@@ -589,28 +681,67 @@ The template has access to user data via the `.User` field, which includes:
 - `.User.UserID`: The user's unique ID (string)
 - `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)
 - `.User.Username`: The user's username (string, optional)
+- `.User.Metadata`: The user's public and unsafe metadata (optional)
+    - `.User.Metadata.Public`: The user's public metadata (object)
+    - `.User.Metadata.Unsafe`: The user's unsafe metadata (object)
 
-Claims that fail to process (e.g., due to invalid templates) are logged and skipped,
-ensuring JWT generation continues without interruption.
+#### Accessing user metadata
+
+`.User.Metadata.Public` and `.User.Metadata.Unsafe`  can be accessed and queried using
+[GJSON Path Syntax](https://github.com/tidwall/gjson/blob/master/SYNTAX.md) (try it out in the
+[playground](https://gjson.dev/)).
+
+Assume that a user's public metadata consisted of the following data:
+
+```json
+{
+    "display_name": "GamerDude",
+    "favorite_games": [
+        {
+            "name": "Legends of Valor",
+            "genre": "RPG",
+            "playtime_hours": 142.3
+        },
+        {
+            "name": "Space Raiders",
+            "genre": "Sci-Fi Shooter",
+            "playtime_hours": 87.6
+        }
+    ]
+}
+```
+
+Then you could, for example, access this data in the following ways in your templates:
+
+```yaml
+display_name: '{{ .User.Metadata.Public "display_name" }}'
+favorite_games: '{{ .User.Metadata.Public "favorite_games" }}'
+favorite_games_with_playtime_over_100: '{{ .User.Metadata.Public "favorite_games.#(playtime_hours>100)" }}'
+favorite_genres: '{{ .User.Metadata.Public "favorite_games.#.genre" }}'
+```
+
+> **Note**
+>
+> Ensure you use proper quoting when accessing metadata. `.User.Metadata.Public` and `.User.Metadata.Unsafe`
+are function calls internally and and the given path argument must be a string, so it must be double quoted.
+If you use use double quotes for your entire claim template then the path argument must be escaped, i.e.:
+`"{{ .User.Metadata.Public \"display_name\" }}"`
 
 
 Example usage in YAML configuration:
- ```yaml
- session:
-   lifespan: 24h
-   jwt_template:
-     claims:
-       role: "user"                               # Static value
-       user_email: "{{.User.Email.Address}}"      # Templated string
-       is_verified: "{{.User.Email.IsVerified}}"  # Boolean from user data
-       metadata:                                  # Nested map
-         source: "hanko"
-         greeting: "Hello {{.User.Username}}"
-       scopes:                                    # Slice with templated value
-         - "read"
-         - "write"
-         - "{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}"
- ```
+```yaml
+role: "user"                                           # Static value
+user_email: "{{.User.Email.Address}}"                  # Templated string
+is_verified: "{{.User.Email.IsVerified}}"              # Boolean from user data
+metadata:                                              # Nested map
+  greeting: "Hello {{.User.Username}}"
+  source: '{{ .User.Metadata.Public "display_name" }}' # Data read from public metadata
+  ui_theme: '{{ .User.Metadata.Unsafe "ui_theme" }}'   # Data read from unsafe metadata
+scopes:                                                # Slice with templated value
+    - "read"
+    - "write"
+    - "{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}"
+```
 
 In this example:
 - `role` is a static string ("user").
@@ -620,19 +751,19 @@ In this example:
 - `scopes` is a slice combining static values and a conditional template.
 
 Notes:
-- Claims with the following keys will be ignored because they are currently added to the JWT
-  by default:
-    - sub
-    - iat
-    - exp
-    - aud
-    - iss
-    - email
-    - username
-    - session_id
-- Templates must be valid Go `text/template` syntax. Invalid templates are logged and ignored.
+- Custom claims are added at the top level of the session token [payload](#jwt-payload).
+- Claims with the following keys will be ignored because they are currently added to the JWT by default:
+    - `sub`
+    - `iat`
+    - `exp`
+    - `aud`
+    - `iss`
+    - `email`
+    - `username`
+    - `session_id`
+- Templates must conform to valid [Go text/template syntax](https://pkg.go.dev/text/template). Invalid templates are
+  logged and excluded from the generated token.
 - Boolean strings ("true" or "false") from templates are automatically converted to actual booleans.
-- Use conditionals (e.g., `{{if .User.Email}}`) to handle optional fields safely.
 
 For more details on template syntax, see: https://pkg.go.dev/text/template
 

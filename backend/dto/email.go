@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"encoding/json"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence/models"
@@ -45,6 +47,14 @@ type EmailJWT struct {
 	Address    string `json:"address"`
 	IsPrimary  bool   `json:"is_primary"`
 	IsVerified bool   `json:"is_verified"`
+}
+
+func (e *EmailJWT) String() string {
+	if e == nil {
+		return ""
+	}
+	jsonBytes, _ := json.Marshal(e)
+	return string(jsonBytes)
 }
 
 func EmailJWTFromEmailModel(email *models.Email) *EmailJWT {

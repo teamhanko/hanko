@@ -1,10 +1,11 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence/models"
-	"time"
 )
 
 type MFAConfig struct {
@@ -22,6 +23,7 @@ type ProfileData struct {
 	Username     *Username                    `json:"username,omitempty"`
 	CreatedAt    time.Time                    `json:"created_at"`
 	UpdatedAt    time.Time                    `json:"updated_at"`
+	Metadata     *Metadata                    `json:"metadata,omitempty"`
 }
 
 func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileData {
@@ -41,6 +43,11 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileDat
 		emails = append(emails, *email)
 	}
 
+	var metadata *Metadata
+	if user.Metadata != nil {
+		metadata = NewMetadata(user.Metadata)
+	}
+
 	return &ProfileData{
 		UserID:       user.ID,
 		Passkeys:     webauthnCredentials,
@@ -54,5 +61,6 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileDat
 		Username:  FromUsernameModel(user.Username),
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
+		Metadata:  metadata,
 	}
 }

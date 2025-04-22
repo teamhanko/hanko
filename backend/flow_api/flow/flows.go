@@ -189,6 +189,7 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 			profile.PasswordCreate{},
 			profile.PasswordDelete{},
 			profile.PasswordUpdate{},
+			profile.PatchMetadata{},
 			profile.SecurityKeyCreate{},
 			profile.SecurityKeyDelete{},
 			profile.UsernameCreate{},

@@ -1,0 +1,12 @@
+create_table("user_metadata") {
+	t.Column("id", "uuid", {primary: true})
+	t.Column("user_id", "uuid", {})
+	t.Column("public_metadata", "string", {"null": true, size: 3000})
+	t.Column("private_metadata", "string", {"null": true, size: 3000})
+	t.Column("unsafe_metadata", "string", {"null": true, size: 3000})
+	t.Column("created_at", "timestamp", {})
+	t.Column("updated_at", "timestamp", {})
+
+	t.ForeignKey("user_id", {"users": ["id"]}, {"on_delete": "CASCADE"})
+	t.Index("user_id", {unique: true})
+}

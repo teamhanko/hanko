@@ -9,6 +9,7 @@ import {
   PasskeyCredentialRenameInputs,
   PasswordRecoveryInputs,
   PasswordInputs,
+  PatchMetadataInputs,
   RegisterClientCapabilitiesInputs,
   RegisterLoginIdentifierInputs,
   RegisterPasswordInputs,
@@ -53,6 +54,7 @@ export interface ProfileInitActions {
   readonly password_create?: Action<PasswordInputs>;
   readonly password_update?: Action<PasswordInputs>;
   readonly password_delete?: Action<null>;
+  readonly patch_metadata: Action<PatchMetadataInputs>;
   readonly security_key_create?: Action<null>;
   readonly security_key_delete?: Action<SecurityKeyDeleteInputs>;
   readonly username_create?: Action<UsernameSetInputs>;
