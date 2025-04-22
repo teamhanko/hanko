@@ -13,8 +13,7 @@
     let error: Error | null = null;
 
     const logout = () => {
-        hankoClient.user
-            .logout()
+        hankoClient.logout()
             .catch((e) => error = e);
     }
 
@@ -26,8 +25,9 @@
         navigate("/todo");
     }
 
-    onMount(() => {
-        if (!hankoClient.session.isValid()) {
+    onMount(async () => {
+        const {is_valid} = await hankoClient.validateSession();
+        if (!is_valid) {
             redirectToLogin();
         }
     });
