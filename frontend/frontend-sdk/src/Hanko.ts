@@ -125,20 +125,7 @@ class Hanko extends Listener {
    * @throws {TechnicalError} If an unexpected error occurs
    */
   async getUser(): Promise<User> {
-    const state = await this.createState("profile", {
-      dispatchAfterStateChangeEvent: false,
-      loadFromCache: false,
-    });
-
-    if (state.name == "profile_init") {
-      return state.payload?.user;
-    }
-
-    if (state.status == 401) {
-      throw new UnauthorizedError();
-    }
-
-    throw new TechnicalError();
+    return this.user.getCurrent();
   }
 
   /**
