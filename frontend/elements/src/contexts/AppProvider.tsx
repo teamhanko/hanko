@@ -20,7 +20,7 @@ import {
   FlowName,
   Error as FlowError,
   LastLogin,
-  Options,
+  StateInitConfig,
 } from "@teamhanko/hanko-frontend-sdk";
 
 import { Translations } from "../i18n/translations";
@@ -313,7 +313,7 @@ const AppProvider = ({
     const samlHint = new URLSearchParams(window.location.search).get(
       "saml_hint",
     );
-    const options: Options = {
+    const config: StateInitConfig = {
       excludeAutoSteps: ["success"],
       cacheKey: `hanko-auth-flow-state`,
       dispatchAfterStateChangeEvent: false,
@@ -322,11 +322,11 @@ const AppProvider = ({
     if (samlHint === "idp_initiated") {
       setAuthComponentFlow("token_exchange");
       await hanko.createState("token_exchange", {
-        ...options,
+        ...config,
         dispatchAfterStateChangeEvent: true,
       });
     } else {
-      const state = await hanko.createState(flowName, options);
+      const state = await hanko.createState(flowName, config);
       setAuthComponentFlow(state.flowName);
       setTimeout(() => state.dispatchAfterStateChangeEvent(), 500);
     }
