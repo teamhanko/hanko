@@ -42,7 +42,7 @@
 
     const { hanko } = await register("{{.HankoUrl}}", { sessionCheckInterval: 5000 });
 
-    const session = await hanko.sessionClient.validate();
+    const session = await hanko.validateSession();
 
     if (!session.is_valid) {
         window.location.href = "/unauthorized";
@@ -55,7 +55,7 @@
     document.getElementById("logout-link")
         .addEventListener("click", (event) => {
             event.preventDefault();
-            hanko.user.logout().catch(console.error);
+            hanko.logout().catch(console.error);
         });
 </script>
 

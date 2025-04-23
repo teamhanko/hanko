@@ -16,8 +16,7 @@ const Profile: NextPage = () => {
   const [error, setError] = useState<Error | null>(null);
 
   const logout = () => {
-    hankoClient?.user
-      .logout()
+    hankoClient?.logout()
       .catch((e) => {
         setError(e);
       });
@@ -36,9 +35,11 @@ const Profile: NextPage = () => {
       return;
     }
 
-    if (!hankoClient.session.isValid()) {
-      redirectToLogin();
-    }
+    hankoClient.validateSession().then(({is_valid}) => {
+      if (!is_valid) {
+        redirectToLogin();
+      }
+    }).catch(setError);
   }, [hankoClient, redirectToLogin]);
 
   useEffect(() => setHankoClient(new Hanko(api)), []);

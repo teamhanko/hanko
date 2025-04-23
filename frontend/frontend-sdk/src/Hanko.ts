@@ -4,11 +4,12 @@ import { Cookie, CookieSameSite } from "./lib/Cookie";
 import { SessionClient } from "./lib/client/SessionClient";
 import { HttpClient } from "./lib/client/HttpClient";
 import { AnyState, FlowName } from "./lib/flow-api/types/flow";
-import { Options, State } from "./lib/flow-api/State";
+import { StateCreateConfig, State } from "./lib/flow-api/State";
 import { UserClient } from "./lib/client/UserClient";
 import { TechnicalError, UnauthorizedError } from "./lib/Errors";
 import { SessionCheckResponse } from "./lib/Dto";
 import { User } from "./lib/flow-api/types/payload";
+
 
 /**
  * The options for the Hanko class
@@ -105,15 +106,23 @@ class Hanko extends Listener {
   }
 
   /**
-   * Creates a new state for a specified flow.
+   * Creates a new flow state for the specified flow.
    *
-   * @public
-   * @param {FlowName} flowName - The name of the flow to create a state for
-   * @param {Options=} options - Options to configure the state creation
-   * @returns {Promise<AnyState>} A promise that resolves to the created state
+   * This method initializes a state by either loading from cache (if configured) or fetching from the server.
+   * It uses the provided configuration to control caching, event dispatching, and auto-step behavior.
+   *
+   * @param {FlowName} flowName - The name of the flow to create a state for.
+   * @param {StateCreateConfig} [config={}] - Configuration options for state creation.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after the state changes.
+   * @param {AutoStepExclusion} [config.excludeAutoSteps=null] - States to exclude from auto-step processing, or `"all"` to skip all auto-steps.
+   * @param {string} [config.cacheKey="hanko-flow-state"] - Key used for caching the state in localStorage.
+   * @param {boolean} [config.loadFromCache=true] - Whether to attempt loading the state from cache.
+   * @returns {Promise<AnyState>} A promise that resolves to the created flow state.
+   * @category SDK
+   * @subcategory FlowAPI
    */
-  createState(flowName: FlowName, options: Options = {}): Promise<AnyState> {
-    return State.create(this, flowName, options);
+  createState(flowName: FlowName, config: StateCreateConfig = {}) {
+    return State.create(this, flowName, config);
   }
 
   /**

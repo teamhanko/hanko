@@ -103,7 +103,7 @@ function Todo() {
   };
 
   const logout = () => {
-    hankoClient.user.logout().catch(setError);
+    hankoClient.logout().catch(setError);
   };
 
   const changeDescription = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,12 +116,13 @@ function Todo() {
   };
 
   useEffect(() => {
-    if (hankoClient.session.isValid()) {
-      listTodos();
-    } else {
-      redirectToLogin();
-    }
-
+    hankoClient.validateSession().then(({is_valid}) => {
+      if (is_valid) {
+        listTodos();
+      } else {
+        redirectToLogin();
+      }
+    }).catch(setError);
   }, [hankoClient, listTodos, redirectToLogin]);
 
   useEffect(

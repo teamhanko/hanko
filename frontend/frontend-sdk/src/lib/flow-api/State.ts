@@ -25,7 +25,7 @@ export type ActionInfo = {
   relatedStateName: StateName;
 };
 
-export interface AllOptions {
+export interface StateInitConfig {
   dispatchAfterStateChangeEvent?: boolean;
   excludeAutoSteps?: AutoStepExclusion;
   previousAction?: ActionInfo;
@@ -33,9 +33,17 @@ export interface AllOptions {
   cacheKey?: string;
 }
 
-export type Options = Omit<AllOptions, "previousAction" | "isCached"> & {
+export type StateCreateConfig = Pick<
+  StateInitConfig,
+  "dispatchAfterStateChangeEvent" | "excludeAutoSteps" | "cacheKey"
+> & {
   loadFromCache?: boolean;
 };
+
+export type ActionRunConfig = Pick<
+  StateInitConfig,
+  "dispatchAfterStateChangeEvent"
+>;
 
 type SerializedState = FlowResponse<any> & {
   flow_name: FlowName;
@@ -54,7 +62,7 @@ type ExtractInputValues<TInputs> = {
  * @param {Hanko} hanko - The Hanko instance for API interactions.
  * @param {FlowName} flowName - The name of the flow this state belongs to.
  * @param {FlowResponse<TState>} response - The flow response containing state data.
- * @param {AllOptions} [options={}] - Configuration options for state initialization.
+ * @param {StateInitConfig} [options={}] - Configuration options for state initialization.
  * @category SDK
  * @subcategory FlowAPI
  */
@@ -85,13 +93,13 @@ export class State<TState extends StateName = StateName> {
    * @param {Hanko} hanko - The Hanko instance for API interactions.
    * @param {FlowName} flowName - The name of the flow this state belongs to.
    * @param {FlowResponse<TState>} response - The flow response containing state data.
-   * @param {AllOptions} [options={}] - Configuration options for state initialization.
+   * @param {StateInitConfig} [options={}] - Configuration options for state initialization.
    */
   constructor(
     hanko: Hanko,
     flowName: FlowName,
     response: FlowResponse<TState>,
-    options: AllOptions = {},
+    options: StateInitConfig = {},
   ) {
     this.flowName = flowName;
     this.name = response.name;
@@ -224,7 +232,7 @@ export class State<TState extends StateName = StateName> {
    * @param {Hanko} hanko - The Hanko instance for API interactions.
    * @param {FlowName} flowName - The name of the flow.
    * @param {FlowResponse<any>} response - The initial flow response.
-   * @param {AllOptions} [options={}] - Configuration options.
+   * @param {StateInitConfig} [options={}] - Configuration options.
    * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
    * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
    * @param {ActionInfo} [options.previousAction=null] - Information about the previous action.
@@ -236,7 +244,7 @@ export class State<TState extends StateName = StateName> {
     hanko: Hanko,
     flowName: FlowName,
     response: FlowResponse<any>,
-    options: AllOptions = {},
+    options: StateInitConfig = {},
   ): Promise<AnyState> {
     let state = new State(hanko, flowName, response, options);
 
@@ -280,24 +288,24 @@ export class State<TState extends StateName = StateName> {
    * Creates a new state instance, using cached or fetched data.
    * @param {Hanko} hanko - The Hanko instance for API interactions.
    * @param {FlowName} flowName - The name of the flow.
-   * @param {Options} [options={}] - Configuration options.
-   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
-   * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
-   * @param {string} [options.cacheKey="hanko-flow-state"] - Key for localStorage caching.
-   * @param {boolean} [options.loadFromCache=true] - Whether to attempt loading from cache.
+   * @param {StateCreateConfig} [config={}] - Configuration options.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [config.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {string} [config.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @param {boolean} [config.loadFromCache=true] - Whether to attempt loading from cache.
    * @returns {Promise<AnyState>} A promise resolving to the created state.
    */
   public static async create(
     hanko: Hanko,
     flowName: FlowName,
-    options: Options = {},
+    config: StateCreateConfig = {},
   ): Promise<AnyState> {
-    const { cacheKey = "hanko-flow-state", loadFromCache = true } = options;
+    const { cacheKey = "hanko-flow-state", loadFromCache = true } = config;
     if (loadFromCache) {
       const cachedState = State.readFromLocalStorage(cacheKey);
       if (cachedState) {
         return State.deserialize(hanko, cachedState, {
-          ...options,
+          ...config,
           cacheKey,
         });
       }
@@ -305,7 +313,7 @@ export class State<TState extends StateName = StateName> {
 
     const newState = await State.fetchState(hanko, `/${flowName}`);
     return State.initializeFlowState(hanko, flowName, newState, {
-      ...options,
+      ...config,
       cacheKey,
     });
   }
@@ -314,24 +322,24 @@ export class State<TState extends StateName = StateName> {
    * Deserializes a state from a serialized state object.
    * @param {Hanko} hanko - The Hanko instance for API interactions.
    * @param {SerializedState} serializedState - The serialized state data.
-   * @param {Options} [options={}] - Configuration options.
-   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
-   * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
-   * @param {string} [options.cacheKey="hanko-flow-state"] - Key for localStorage caching.
-   * @param {boolean} [options.loadFromCache=true] - Whether to attempt loading from cache.
+   * @param {StateCreateConfig} [config={}] - Configuration options.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [config.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {string} [config.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @param {boolean} [config.loadFromCache=true] - Whether to attempt loading from cache.
    * @returns {Promise<AnyState>} A promise resolving to the deserialized state.
    */
   public static async deserialize(
     hanko: Hanko,
     serializedState: SerializedState,
-    options: Options = {},
+    config: StateCreateConfig = {},
   ): Promise<AnyState> {
     return State.initializeFlowState(
       hanko,
       serializedState.flow_name,
       serializedState,
       {
-        ...options,
+        ...config,
         previousAction: serializedState.previous_action,
         isCached: serializedState.is_cached,
       },
@@ -436,14 +444,14 @@ export class Action<TInputs> {
   /**
    * Executes the action, transitioning to a new state.
    * @param {ExtractInputValues<TInputs>} [inputValues=null] - Values for the action's inputs.
-   * @param {Pick<AllOptions, "dispatchAfterStateChangeEvent">} [options={}] - Configuration options.
-   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {ActionRunConfig} [config={}] - Configuration options.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
    * @returns {Promise<AnyState>} A promise resolving to the next state.
    * @throws {Error} If the action is disabled or already invoked.
    */
   async run(
     inputValues: ExtractInputValues<TInputs> = null,
-    options: Pick<AllOptions, "dispatchAfterStateChangeEvent"> = {},
+    config: ActionRunConfig = {},
   ): Promise<AnyState> {
     const {
       name,
@@ -454,7 +462,7 @@ export class Action<TInputs> {
       excludeAutoSteps,
       cacheKey,
     } = this.parentState;
-    const { dispatchAfterStateChangeEvent = true } = options;
+    const { dispatchAfterStateChangeEvent = true } = config;
 
     if (!this.enabled) {
       throw new Error(
