@@ -1,16 +1,15 @@
-import { EnterpriseClient } from "./lib/client/EnterpriseClient";
-import { UserClient } from "./lib/client/UserClient";
-import { EmailClient } from "./lib/client/EmailClient";
-import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
-import { TokenClient } from "./lib/client/TokenClient";
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
-import { CookieSameSite } from "./lib/Cookie";
-
-import { SessionClient, Session } from "./lib/client/SessionClient";
+import { Cookie, CookieSameSite } from "./lib/Cookie";
+import { SessionClient } from "./lib/client/SessionClient";
 import { HttpClient } from "./lib/client/HttpClient";
-import { FlowName } from "./lib/flow-api/types/flow";
+import { AnyState, FlowName } from "./lib/flow-api/types/flow";
 import { StateCreateConfig, State } from "./lib/flow-api/State";
+import { UserClient } from "./lib/client/UserClient";
+import { TechnicalError, UnauthorizedError } from "./lib/Errors";
+import { SessionCheckResponse } from "./lib/Dto";
+import { User } from "./lib/flow-api/types/payload";
+
 
 /**
  * The options for the Hanko class
@@ -49,57 +48,24 @@ export interface HankoOptions {
  * @param {HankoOptions=} options - The options that can be used
  */
 class Hanko extends Listener {
-  api: string;
-  client: HttpClient;
-  user: UserClient;
-  email: EmailClient;
-  thirdParty: ThirdPartyClient;
-  enterprise: EnterpriseClient;
-  token: TokenClient;
-  sessionClient: SessionClient;
-  session: Session;
-  relay: Relay;
+  private readonly session: SessionClient;
+  private readonly user: UserClient;
+  private readonly cookie: Cookie;
+  public readonly client: HttpClient;
+  public readonly relay: Relay;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
     super();
-    const opts: InternalOptions = {
+    const opts: HankoOptions = {
       timeout: 13000,
       cookieName: "hanko",
       localStorageKey: "hanko",
       sessionCheckInterval: 30000,
       sessionCheckChannelName: "hanko-session-check",
+      ...options,
     };
-    if (options?.cookieName !== undefined) {
-      opts.cookieName = options.cookieName;
-    }
-    if (options?.timeout !== undefined) {
-      opts.timeout = options.timeout;
-    }
-    if (options?.localStorageKey !== undefined) {
-      opts.localStorageKey = options.localStorageKey;
-    }
-    if (options?.cookieDomain !== undefined) {
-      opts.cookieDomain = options.cookieDomain;
-    }
-    if (options?.cookieSameSite !== undefined) {
-      opts.cookieSameSite = options.cookieSameSite;
-    }
-    if (options?.lang !== undefined) {
-      opts.lang = options.lang;
-    }
-    if (options?.sessionCheckInterval !== undefined) {
-      if (options.sessionCheckInterval < 3000) {
-        opts.sessionCheckInterval = 3000;
-      } else {
-        opts.sessionCheckInterval = options.sessionCheckInterval;
-      }
-    }
-    if (options?.sessionCheckChannelName !== undefined) {
-      opts.sessionCheckChannelName = options.sessionCheckChannelName;
-    }
 
-    this.api = api;
     /**
      *  @public
      *  @type {Client}
@@ -107,45 +73,24 @@ class Hanko extends Listener {
     this.client = new HttpClient(api, opts);
     /**
      *  @public
-     *  @type {UserClient}
+     *  @type {SessionClient}
      */
-    this.user = new UserClient(api, opts);
-    /**
-     *  @public
-     *  @type {EmailClient}
-     */
-    this.email = new EmailClient(api, opts);
-    /**
-     *  @public
-     *  @type {ThirdPartyClient}
-     */
-    this.thirdParty = new ThirdPartyClient(api, opts);
-    /**
-     *  @public
-     *  @type {EnterpriseClient}
-     */
-    this.enterprise = new EnterpriseClient(api, opts);
-    /**
-     *  @public
-     *  @type {TokenClient}
-     */
-    this.token = new TokenClient(api, opts);
+    this.session = new SessionClient(api, opts);
     /**
      *  @public
      *  @type {SessionClient}
      */
-    this.sessionClient = new SessionClient(api, opts);
-    /**
-     *  @public
-     *  @deprecated
-     *  @type {Session}
-     */
-    this.session = new Session(api, opts);
+    this.user = new UserClient(api, opts);
     /**
      *  @public
      *  @type {Relay}
      */
     this.relay = new Relay(api, opts);
+    /**
+     *  @public
+     *  @type {Cookie}
+     */
+    this.cookie = new Cookie(opts);
   }
 
   /**
@@ -179,18 +124,48 @@ class Hanko extends Listener {
   createState(flowName: FlowName, config: StateCreateConfig = {}) {
     return State.create(this, flowName, config);
   }
-}
 
-// eslint-disable-next-line require-jsdoc
-export interface InternalOptions {
-  timeout: number;
-  cookieName: string;
-  cookieDomain?: string;
-  cookieSameSite?: CookieSameSite;
-  localStorageKey: string;
-  lang?: string;
-  sessionCheckInterval?: number;
-  sessionCheckChannelName?: string;
+  /**
+   * Retrieves the current user's profile information.
+   *
+   * @public
+   * @returns {Promise<User>} A promise that resolves to the user object
+   * @throws {UnauthorizedError} If the user is not authenticated
+   * @throws {TechnicalError} If an unexpected error occurs
+   */
+  async getUser(): Promise<User> {
+    return this.user.getCurrent();
+  }
+
+  /**
+   * Validates the current session.
+   *
+   * @public
+   * @returns {Promise<SessionCheckResponse>} A promise that resolves to the session check response
+   */
+  async validateSession(): Promise<SessionCheckResponse> {
+    return this.session.validate();
+  }
+
+  /**
+   * Retrieves the current session token from the authentication cookie.
+   *
+   * @public
+   * @returns {string} The session token
+   */
+  getSessionToken(): string {
+    return this.cookie.getAuthCookie();
+  }
+
+  /**
+   * Logs out the current user by invalidating the session.
+   *
+   * @public
+   * @returns {Promise<void>} A promise that resolves when the logout is complete
+   */
+  async logout(): Promise<void> {
+    return this.user.logout();
+  }
 }
 
 export { Hanko };

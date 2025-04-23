@@ -263,14 +263,15 @@ after the user completes the authentication flow), while other events are option
 
         logoutButtonEl.addEventListener("click", () => {
             // Logout the user, triggering the `onUserLoggedOut` event upon success.
-            hanko.user.logout();
+            hanko.logout();
         });
 
-        dialogEl.addEventListener('close', () => {
+        dialogEl.addEventListener('close', async () => {
             // When the dialog, which informs the user that the session has expired, is closed, check if the session
             // has been created again, for example, in another browser window. If it has, there is no need to switch to
             // the hanko-auth component.
-            if (!hanko.session.isValid()) {
+            const { is_valid } = await hanko.validateSession();
+            if (!is_valid) {
                 showAuthComponent(true); // Show authentication component
             }
         });
@@ -287,8 +288,8 @@ after the user completes the authentication flow), while other events are option
         addEventListeners();
 
         // Check if a valid session exists
-        const session = await hanko.sessionClient.validate();
-        if (session.is_valid) {
+        const { is_valid } = await hanko.validateSession();
+        if (is_valid) {
             showAuthComponent(false); // Show profile component
             setVisibility(logoutButtonEl, true); // Show the logout button
         }

@@ -1,15 +1,3 @@
-import { LocalStorage } from "../src/lib/state/State";
-
-export const encodedLSContent = () =>
-  "JTI1N0IlMjUyMnNlc3Npb24lMjUyMiUyNTNBJTI1N0IlMjUyMmV4cGlyeSUyNTIyJTI1M0ExNjY0MzgwMDAwJTI1MkMlMjUyMmF1dGhGbG93Q29tcGxldGVkJTI1MjIlMjUzQWZhbHNlJTI1N0QlMjU3RA==";
-
-export const decodedLSContent = (): LocalStorage => ({
-  session: {
-    expiry: 1664380000,
-    authFlowCompleted: false,
-  },
-});
-
 const fakeLocalStorage = (function () {
   return {
     getItem: jest.fn(),

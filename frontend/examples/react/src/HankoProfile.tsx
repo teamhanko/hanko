@@ -19,7 +19,7 @@ function HankoProfile() {
   const modalRef = useRef<HTMLDialogElement>(null);
 
   const logout = () => {
-    hankoClient.user.logout().catch(setError);
+    hankoClient.logout().catch(setError);
   };
 
   const redirectToTodo = () => {
@@ -35,9 +35,11 @@ function HankoProfile() {
   }, []);
 
   useEffect(() => {
-    if (!hankoClient.session.isValid()) {
-      redirectToLogin();
-    }
+    hankoClient.validateSession().then(({is_valid}) => {
+      if (!is_valid) {
+        redirectToLogin();
+      }
+    }).catch(setError);
   }, [hankoClient, redirectToLogin]);
 
 

@@ -6,23 +6,18 @@ export { Hanko };
 
 // Clients
 
+import { HttpClient } from "./lib/client/HttpClient";
 import { Client } from "./lib/client/Client";
-import { UserClient } from "./lib/client/UserClient";
-import { EmailClient } from "./lib/client/EmailClient";
-import { ThirdPartyClient } from "./lib/client/ThirdPartyClient";
-import { TokenClient } from "./lib/client/TokenClient";
-import { EnterpriseClient } from "./lib/client/EnterpriseClient";
 import { SessionClient } from "./lib/client/SessionClient";
+import { UserClient } from "./lib/client/UserClient";
 
-export {
-  Client,
-  UserClient,
-  EmailClient,
-  ThirdPartyClient,
-  TokenClient,
-  EnterpriseClient,
-  SessionClient,
-};
+export { HttpClient, Client, SessionClient, UserClient };
+
+// Events
+
+import { Relay } from "./lib/events/Relay";
+
+export { Relay };
 
 // Utils
 
@@ -32,51 +27,9 @@ export { WebauthnSupport };
 
 // DTO
 
-import {
-  PasswordConfig,
-  EmailConfig,
-  AccountConfig,
-  Config,
-  WebauthnFinalized,
-  TokenFinalized,
-  UserInfo,
-  Me,
-  Credential,
-  User,
-  UserCreated,
-  Passcode,
-  WebauthnTransports,
-  Attestation,
-  Email,
-  Emails,
-  WebauthnCredential,
-  WebauthnCredentials,
-  Identity,
-  SessionCheckResponse,
-} from "./lib/Dto";
+import { Email, Emails, Identity, SessionCheckResponse } from "./lib/Dto";
 
-export type {
-  PasswordConfig,
-  EmailConfig,
-  AccountConfig,
-  Config,
-  WebauthnFinalized,
-  TokenFinalized,
-  UserInfo,
-  Me,
-  Credential,
-  User,
-  UserCreated,
-  Passcode,
-  WebauthnTransports,
-  Attestation,
-  Email,
-  Emails,
-  WebauthnCredential,
-  WebauthnCredentials,
-  Identity,
-  SessionCheckResponse,
-};
+export type { Email, Emails, Identity, SessionCheckResponse };
 
 // Errors
 
