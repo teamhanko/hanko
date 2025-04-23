@@ -1,12 +1,14 @@
 import { Listener } from "./lib/events/Listener";
 import { Relay } from "./lib/events/Relay";
-import { CookieSameSite } from "./lib/Cookie";
-
+import { Cookie, CookieSameSite } from "./lib/Cookie";
 import { SessionClient } from "./lib/client/SessionClient";
 import { HttpClient } from "./lib/client/HttpClient";
-import { FlowName } from "./lib/flow-api/types/flow";
+import { AnyState, FlowName } from "./lib/flow-api/types/flow";
 import { StateCreateConfig, State } from "./lib/flow-api/State";
 import { UserClient } from "./lib/client/UserClient";
+import { TechnicalError, UnauthorizedError } from "./lib/Errors";
+import { SessionCheckResponse } from "./lib/Dto";
+import { User } from "./lib/flow-api/types/payload";
 
 
 /**
@@ -46,10 +48,11 @@ export interface HankoOptions {
  * @param {HankoOptions=} options - The options that can be used
  */
 class Hanko extends Listener {
-  client: HttpClient;
-  session: SessionClient;
-  user: UserClient;
-  relay: Relay;
+  private readonly session: SessionClient;
+  private readonly user: UserClient;
+  private readonly cookie: Cookie;
+  public readonly client: HttpClient;
+  public readonly relay: Relay;
 
   // eslint-disable-next-line require-jsdoc
   constructor(api: string, options?: HankoOptions) {
@@ -83,6 +86,11 @@ class Hanko extends Listener {
      *  @type {Relay}
      */
     this.relay = new Relay(api, opts);
+    /**
+     *  @public
+     *  @type {Cookie}
+     */
+    this.cookie = new Cookie(opts);
   }
 
   /**
@@ -115,6 +123,48 @@ class Hanko extends Listener {
    */
   createState(flowName: FlowName, config: StateCreateConfig = {}) {
     return State.create(this, flowName, config);
+  }
+
+  /**
+   * Retrieves the current user's profile information.
+   *
+   * @public
+   * @returns {Promise<User>} A promise that resolves to the user object
+   * @throws {UnauthorizedError} If the user is not authenticated
+   * @throws {TechnicalError} If an unexpected error occurs
+   */
+  async getUser(): Promise<User> {
+    return this.user.getCurrent();
+  }
+
+  /**
+   * Validates the current session.
+   *
+   * @public
+   * @returns {Promise<SessionCheckResponse>} A promise that resolves to the session check response
+   */
+  async validateSession(): Promise<SessionCheckResponse> {
+    return this.session.validate();
+  }
+
+  /**
+   * Retrieves the current session token from the authentication cookie.
+   *
+   * @public
+   * @returns {string} The session token
+   */
+  getSessionToken(): string {
+    return this.cookie.getAuthCookie();
+  }
+
+  /**
+   * Logs out the current user by invalidating the session.
+   *
+   * @public
+   * @returns {Promise<void>} A promise that resolves when the logout is complete
+   */
+  async logout(): Promise<void> {
+    return this.user.logout();
   }
 }
 

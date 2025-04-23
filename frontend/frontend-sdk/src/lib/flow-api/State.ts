@@ -223,7 +223,7 @@ export class State<TState extends StateName = StateName> {
    * Removes the current state from localStorage.
    * @returns {void}
    */
-  public removeFromLocalStorage() {
+  public removeFromLocalStorage(): void {
     localStorage.removeItem(this.cacheKey);
   }
 

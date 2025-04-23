@@ -2,6 +2,17 @@
  * @interface
  * @category SDK
  * @subcategory DTO
+ * @property {string} id - The UUID of the current user.
+ * @ignore
+ */
+export interface Me {
+  id: string;
+}
+
+/**
+ * @interface
+ * @category SDK
+ * @subcategory DTO
  * @property {string} id - The UUID of the email address.
  * @property {string} address - The email address.
  * @property {boolean} is_verified - Indicates whether the email address is verified.
