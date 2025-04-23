@@ -126,7 +126,7 @@ export interface HttpClientOptions {
   cookieName?: string;
   cookieDomain?: string;
   lang?: string;
-  sessionTokenLocation: SessionTokenLocation;
+  sessionTokenLocation?: SessionTokenLocation;
 }
 
 /**
