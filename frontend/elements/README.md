@@ -228,112 +228,48 @@ handler via the `frontend-sdk` (see next section).
 ### Using the Frontend-SDK
 
 The following examples will cover some common use-cases for the `hanko-frontend-sdk` instance returned by
-the `register()` function, but please take a look into the
-[frontend-sdk docs](https://docs.hanko.io/jsdoc/hanko-frontend-sdk/) for details.
-
-Note that you can create a `hanko-frontend-sdk` instance without having to register the web components as follows:
+the `register()` function:
 
 ```js
-import { Hanko } from "@teamhanko/hanko-elements";
+// Validate the current session
+const session = await hanko.validateSession();
+console.log("Session valid:", session.is_valid, "Claims:", session.claims);
 
-const hanko = new Hanko("https://hanko.yourdomain.com");
-```
+// Retrieve the session token
+const token = hanko.getSessionToken();
+console.log("Session token:", token);
 
-#### Events
+// Fetch the user profile
+const user = await hanko.getUser();
+console.log("User profile:", user.user_id, user.emails);
 
-It is possible to bind callbacks to different custom events in use of the SDKs event listener functions.
-The callback function will be called when the event happens and an object will be passed in, containing event details.
+// Log out the user
+await hanko.logout();
+console.log("User logged out");
 
-##### Session Created
-
-Will be triggered after a session has been created and the user has completed possible additional steps (e.g. passkey
-registration, password recovery, etc.). It will also be triggered when the user logs in via another browser window. The
-event can be used to obtain the JWT claims.
-
-```js
-hanko.onSessionCreated((sessionDetail) => {
-  // A new JWT has been issued.
-  console.info("Session created", sessionDetail.claims);
+// Handle session creation event
+hanko.onSessionCreated(({ claims }) => {
+    console.log("Session created with JWT claims:", claims);
 });
-```
 
-##### Session Expired
-
-Will be triggered when the session has expired, or when the session has been removed in another browser window, because
-the user has logged out, or deleted the account.
-
-```js
+// Handle session expiration event
 hanko.onSessionExpired(() => {
-  // You can redirect the user to a login page or show the `<hanko-auth>` element, or to prompt the user to log in again.
-  console.info("Session expired");
+    console.log("Session expired, redirecting to login");
 });
-```
 
-##### User Logged Out
-
-Will be triggered, when the user actively logs out. In other browser windows, a "hanko-session-expired" event will be
-triggered at the same time.
-
-```js
+// Handle user logout event
 hanko.onUserLoggedOut(() => {
-  // You can redirect the user to a login page or show the `<hanko-auth>` element.
-  console.info("User logged out");
+    console.log("User logged out successfully");
 });
-```
 
-##### User Deleted
-
-Will be triggered when the user has deleted the account. In other browser windows, a "hanko-session-expired" event will
-be triggered at the same time.
-
-```js
+// Handle user account deletion event
 hanko.onUserDeleted(() => {
-  // You can redirect the user to a login page or show the `<hanko-auth>` element.
-  console.info("User has been deleted");
+    console.log("User account deleted");
 });
 ```
 
-To learn what else you can do, check out the
-[custom-events](https://github.com/teamhanko/hanko/tree/main/frontend/frontend-sdk#custom-events) README.
-
-#### Sessions
-
-Determine whether the user is logged in:
-
-```js
-hanko.session.isValid();
-```
-
-Getting the session details:
-
-```js
-const session = hanko.session.get();
-
-if (session) {
-  console.info(`userID: ${session.userID}, jwt: ${session.jwt}`);
-}
-```
-
-#### User Client
-
-The SDK contains several client classes to make the communication with the Hanko-API easier. Here some examples of
-things you might want to do:
-
-Getting the current user:
-
-```js
-const user = await hanko.user.getCurrent();
-console.info(`id: ${user.id}, email: ${user.email}`);
-```
-
-Log out a user:
-
-```js
-await hanko.user.logout();
-```
-
-To learn how error handling works and what else you can do with SDK, take a look into
-the [frontend-sdk docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/).
+Please take a look into the [frontend-sdk docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/), for
+further details.
 
 ## UI Customization
 

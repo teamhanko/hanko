@@ -390,12 +390,31 @@ The SDK provides methods to manage user sessions and retrieve user information.
 
 Fetches the current user's profile information.
 
+- **Returns**: A `User` object containing the user’s profile details. The object includes:
+    - `user_id`: A unique string identifier for the user.
+    - `passkeys`: An optional array of WebAuthn credentials (passkey-based authentication).
+    - `security_keys`: An optional array of WebAuthn credentials (security key-based authentication).
+    - `mfa_config`: An optional configuration object for multi-factor authentication settings.
+    - `emails`: An optional array of email objects (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
+    - `username`: An optional username object (e.g., `{ value: string }`).
+    - `created_at`: A string timestamp (ISO 8601) of when the user was created.
+    - `updated_at`: A string timestamp (ISO 8601) of when the user was last updated.
+- **Errors**: `UnauthorizedError` (invalid or expired session), `TechnicalError` (server or network issues).
+
 ```typescript
 try {
     const user = await hanko.getUser();
     console.log("User profile:", user);
+    // Example output:
+    // {
+    //   user_id: "123e4567-e89b-12d3-a456-426614174000",
+    //   emails: [{ address: "user@example.com", is_primary: true, is_verified: true }],
+    //   username: { value: "johndoe" },
+    //   created_at: "2025-01-01T10:00:00Z",
+    //   updated_at: "2025-04-01T12:00:00Z"
+    // }
 } catch (error) {
-    console.error("Failed to fetch user:", error);
+    console.error("Failed to fetch user profile:", error);
     // Handle UnauthorizedError or TechnicalError
 }
 ```
@@ -404,12 +423,37 @@ try {
 
 Checks the validity of the current session.
 
+- **Returns**: A SessionCheckResponse object containing:
+    - `is_valid`: A boolean indicating whether the session is valid.
+    - `claims`: An optional object with session details, including:
+    - `subject`: The user ID or session identifier.
+    - `session_id`: The unique session identifier.
+    - `expiration`: A string timestamp (ISO 8601) when the session expires.
+    - `email`: An optional object with email details (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
+    - `username`: An optional string with the user’s username.
+    - `issued_at`, `audience`, `issuer`: Optional metadata about the session token.
+    - Custom claims (defined by the application).
+- **Errors**: TechnicalError (server or network issues).
+
 ```typescript
 try {
     const sessionStatus = await hanko.validateSession();
     console.log("Session status:", sessionStatus);
+    // Example output:
+    // {
+    //   is_valid: true,
+    //   claims: {
+    //     subject: "123e4567-e89b-12d3-a456-426614174000",
+    //     session_id: "789abc",
+    //     expiration: "2025-04-25T12:00:00Z",
+    //     email: { address: "user@example.com", is_primary: true, is_verified: true },
+    //     custom_field: "value"
+    //   },
+    //   expiration_time: "2025-04-25T12:00:00Z",
+    //   user_id: "123e4567-e89b-12d3-a456-426614174000"
+    // }
 } catch (error) {
-    console.error("Failed to fetch session status:", error);
+    console.error("Failed to validate session:", error);
     // Handle TechnicalError
 }
 ```
@@ -418,14 +462,22 @@ try {
 
 Retrieves the current session token from the authentication cookie.
 
+- **Returns**: A string containing the JWT session token or `null` if no session exists.
+- **Note**: This method does not throw errors; check for `null` to handle missing sessions.
+
 ```typescript
 const token = hanko.getSessionToken();
 console.log("Session token:", token);
+// Example output: "eyJhbGciOiJIUzI1NiIs..."
 ```
 
 #### Logging out a User
 
 Logs out the current user by invalidating the session.
+
+- **Returns**: A promise that resolves with no value on successful logout or throws an error.
+- **Errors**: `TechnicalError` (server or network issues).
+- **Note**: If no session exists, the method resolves without error.
 
 ```typescript
 try {
