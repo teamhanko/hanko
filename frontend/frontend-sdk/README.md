@@ -182,13 +182,13 @@ Checks the validity of the current session.
 - **Returns**: A SessionCheckResponse object containing:
     - `is_valid`: A boolean indicating whether the session is valid.
     - `claims`: An optional object with session details, including:
-    - `subject`: The user ID or session identifier.
-    - `session_id`: The unique session identifier.
-    - `expiration`: A string timestamp (ISO 8601) when the session expires.
-    - `email`: An optional object with email details (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
-    - `username`: An optional string with the user’s username.
-    - `issued_at`, `audience`, `issuer`: Optional metadata about the session token.
-    - Custom claims (defined by the application).
+        - `subject`: The user ID or session identifier.
+        - `session_id`: The unique session identifier.
+        - `expiration`: A string timestamp (ISO 8601) when the session expires.
+        - `email`: An optional object with email details (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
+        - `username`: An optional string with the user’s username.
+        - `issued_at`, `audience`, `issuer`: Optional metadata about the session token.
+        - Custom claims (defined by the application).
 - **Errors**: TechnicalError (server or network issues).
 
 ```typescript
