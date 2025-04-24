@@ -537,7 +537,7 @@ hanko.onSessionCreated((sessionDetail) => {
 import type { CustomClaims } from "..."; // path to your type declaration file
 
 async function session() {
-    const session = await hanko.sessionClient.validate();
+    const session = await hanko.validateSession();
     const claims = session.claims as CustomClaims;
     console.info("My custom claim:", claims.custom_claim);
 };
