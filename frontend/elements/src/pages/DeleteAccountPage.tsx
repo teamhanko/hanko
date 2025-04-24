@@ -11,13 +11,14 @@ import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Checkbox from "../components/form/Checkbox";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
+  state: State<"profile_init">;
   onBack: (event: Event) => Promise<void>;
-  onAccountDelete: (event: Event) => Promise<void>;
 }
 
-const DeleteAccountPage = ({ onBack, onAccountDelete }: Props) => {
+const DeleteAccountPage = ({ state, onBack }: Props) => {
   const { t } = useContext(TranslateContext);
 
   return (
@@ -26,13 +27,13 @@ const DeleteAccountPage = ({ onBack, onAccountDelete }: Props) => {
         <Headline1>{t("headlines.deleteAccount")}</Headline1>
         <ErrorBox flowError={null} />
         <Paragraph>{t("texts.deleteAccount")}</Paragraph>
-        <Form onSubmit={onAccountDelete}>
+        <Form flowAction={state.actions.account_delete}>
           <Checkbox
             required={true}
             type={"checkbox"}
             label={t("labels.deleteAccount")}
           />
-          <Button uiAction={"account_delete"}>{t("labels.delete")}</Button>
+          <Button>{t("labels.delete")}</Button>
         </Form>
       </Content>
       <Footer>

@@ -6,8 +6,7 @@ const code = `
   register('${HANKO_API_URL}', { shadow: true });
   window.addEventListener('logout', () => {
     const hanko = new Hanko('${HANKO_API_URL}');
-    hanko.user.logout()
-      .then(() => {
+    hanko.logout().then(() => {
         window.location.href = '/';
       })
       .catch((error) => {

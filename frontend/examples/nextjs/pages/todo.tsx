@@ -112,8 +112,7 @@ const Todo: NextPage = () => {
   };
 
   const logout = () => {
-    hankoClient?.user
-      .logout()
+    hankoClient?.logout()
       .catch((e) => {
         setError(e);
       });
@@ -133,11 +132,13 @@ const Todo: NextPage = () => {
       return;
     }
 
-    if (hankoClient.session.isValid()) {
-      listTodos();
-    } else {
-      redirectToLogin();
-    }
+    hankoClient.validateSession().then(({is_valid}) => {
+      if (is_valid) {
+        listTodos();
+      } else {
+        redirectToLogin();
+      }
+    }).catch(setError);
   }, [hankoClient, listTodos, redirectToLogin]);
 
   useEffect(() => hankoClient?.onUserLoggedOut(() => {

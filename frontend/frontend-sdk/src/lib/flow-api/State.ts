@@ -1,361 +1,522 @@
-import {
-  FetchNextState,
-  StateName,
-  Actions,
-  Payloads,
-} from "./types/state-handling";
-import { Error } from "./types/error";
-import { Action } from "./types/action";
+import { Hanko } from "../../Hanko";
+import { Actions, Payloads, StateName } from "./types/state";
 import { Input } from "./types/input";
+import { Error } from "./types/error";
+import { Action as ActionType } from "./types/action";
+import { AnyState, FlowName, FlowResponse } from "./types/flow";
+import { autoSteps } from "./auto-steps";
+import { passkeyAutofillActivationHandlers } from "./passkey-autofill-activation";
 
-type InputValues<TInput extends Record<string, Input<any>>> = {
-  [K in keyof TInput]?: TInput[K]["value"];
+export type AutoSteppedStates = keyof typeof autoSteps;
+
+export type PasskeyAutofillStates =
+  keyof typeof passkeyAutofillActivationHandlers;
+
+export type AutoStepExclusion = AutoSteppedStates[] | "all";
+
+export type ActionMap<TState extends StateName> = {
+  [K in keyof Actions[TState]]: Action<
+    Actions[TState][K] extends ActionType<infer TInputs> ? TInputs : never
+  >;
 };
 
-type CreateAction<TAction extends Action<any>> = (
-  inputs: InputValues<TAction["inputs"]>
-) => TAction & {
-  run: () => Promise<State<any>>;
-  validate: () => TAction;
-  tryValidate: () => ValidationError | void;
+export type ActionInfo = {
+  name: string;
+  relatedStateName: StateName;
 };
 
-type ActionFunctions = {
-  [TStateName in keyof Actions]: {
-    [TActionName in keyof Actions[TStateName]]: Actions[TStateName][TActionName] extends Action<
-      infer Inputs
-    >
-      ? CreateAction<Action<Inputs>>
-      : never;
-  };
-};
-
-interface StateResponse<TStateName extends StateName> {
-  name: StateName;
-  status: number;
-  payload?: Payloads[TStateName];
-  actions?: Actions[TStateName];
-  csrf_token: string;
-  error: Error;
+export interface StateInitConfig {
+  dispatchAfterStateChangeEvent?: boolean;
+  excludeAutoSteps?: AutoStepExclusion;
+  previousAction?: ActionInfo;
+  isCached?: boolean;
+  cacheKey?: string;
 }
 
-// State class represents a state in the flow
-// eslint-disable-next-line require-jsdoc
-class State<TStateName extends StateName>
-  implements Omit<StateResponse<TStateName>, "actions">
-{
-  readonly name: StateName;
-  readonly payload?: Payloads[TStateName];
-  readonly error: Error;
-  readonly status: number;
-  readonly csrf_token: string;
+export type StateCreateConfig = Pick<
+  StateInitConfig,
+  "dispatchAfterStateChangeEvent" | "excludeAutoSteps" | "cacheKey"
+> & {
+  loadFromCache?: boolean;
+};
 
-  readonly #actionDefinitions: Actions[TStateName];
-  readonly actions: ActionFunctions[TStateName];
+export type ActionRunConfig = Pick<
+  StateInitConfig,
+  "dispatchAfterStateChangeEvent"
+>;
 
-  private readonly fetchNextState: FetchNextState;
+type SerializedState = FlowResponse<any> & {
+  flow_name: FlowName;
+  previous_action?: ActionInfo;
+  is_cached?: boolean;
+};
 
-  toJSON() {
-    return {
-      name: this.name,
-      payload: this.payload,
-      error: this.error,
-      status: this.status,
-      csrf_token: this.csrf_token,
-      actions: this.#actionDefinitions,
-    };
-  }
+type ExtractInputValues<TInputs> = {
+  [K in keyof TInputs]: TInputs[K] extends Input<infer TValue> ? TValue : never;
+};
 
-  // eslint-disable-next-line require-jsdoc
+/**
+ * Represents a state in a flow with associated actions and properties.
+ * @template TState - The specific state name type.
+ * @constructor
+ * @param {Hanko} hanko - The Hanko instance for API interactions.
+ * @param {FlowName} flowName - The name of the flow this state belongs to.
+ * @param {FlowResponse<TState>} response - The flow response containing state data.
+ * @param {StateInitConfig} [options={}] - Configuration options for state initialization.
+ * @category SDK
+ * @subcategory FlowAPI
+ */
+export class State<TState extends StateName = StateName> {
+  public readonly name: TState;
+  public readonly flowName: FlowName;
+  public error?: Error;
+  public readonly payload?: Payloads[TState];
+  public readonly actions: ActionMap<TState>;
+  public readonly csrfToken: string;
+  public readonly status: number;
+  public readonly previousAction?: ActionInfo;
+  public readonly isCached: boolean;
+  public readonly cacheKey: string;
+  public readonly hanko: Hanko;
+  public invokedAction?: ActionInfo;
+  public readonly excludeAutoSteps: AutoStepExclusion;
+
+  public readonly autoStep?: TState extends AutoSteppedStates
+    ? () => Promise<AnyState>
+    : never;
+  public readonly passkeyAutofillActivation: TState extends PasskeyAutofillStates
+    ? () => Promise<void>
+    : never;
+
+  /**
+   * Constructs a new State instance.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {FlowName} flowName - The name of the flow this state belongs to.
+   * @param {FlowResponse<TState>} response - The flow response containing state data.
+   * @param {StateInitConfig} [options={}] - Configuration options for state initialization.
+   */
   constructor(
-    { name, payload, error, status, actions, csrf_token }: StateResponse<TStateName>,
-    fetchNextState: FetchNextState
+    hanko: Hanko,
+    flowName: FlowName,
+    response: FlowResponse<TState>,
+    options: StateInitConfig = {},
   ) {
-    this.name = name;
-    this.payload = payload;
-    this.error = error;
-    this.status = status;
-    this.csrf_token = csrf_token;
-    this.#actionDefinitions = actions;
+    this.flowName = flowName;
+    this.name = response.name;
+    this.error = response.error;
+    this.payload = response.payload;
+    this.csrfToken = response.csrf_token;
+    this.status = response.status;
+    this.hanko = hanko;
+    this.actions = this.buildActionMap(response.actions);
 
-    // We're doing something really hacky here, but hear me out
-    //
-    // `actions` is an object like this:
-    //
-    //     { login_password_recovery: { inputs: { new_password: { min_length: 8, value: "this still needs to be set" } } } }
-    //
-    // However, we don't want users to have to mutate the `actions` object manually.
-    // They WOULD have to do this:
-    //
-    //     actions.login_password_recovery.inputs.new_password.value = "password";
-    //
-    // Instead, we're going to wrap the `actions` object in a Proxy.
-    // This Proxy transforms the manual mutation you're seeing above into a function call.
-    // The following is doing the same thing as the manual mutation above:
-    //
-    //     actions.login_password_recovery({ new_password: "password" });
-    //
-    // Okay, there's one difference, the function call creates a copy of the action, so it's not mutating the original object.
-    // The newly created action is returned. It also has a `run` method, which sends the action to the server (fetchNextState)
-    this.actions = this.#createActionsProxy(actions, csrf_token);
+    if (this.name in autoSteps) {
+      const handler = autoSteps[this.name as AutoSteppedStates];
+      (this.autoStep as () => Promise<AnyState>) = () => handler(this as any);
+    }
 
-    // Do not remove! `this.fetchNextState` has to be set for `this.#runAction` to work
-    this.fetchNextState = fetchNextState;
+    if (this.name in passkeyAutofillActivationHandlers) {
+      const handler =
+        passkeyAutofillActivationHandlers[this.name as PasskeyAutofillStates];
+      (this.passkeyAutofillActivation as () => Promise<void>) = () =>
+        handler(this as any);
+    }
+
+    const {
+      dispatchAfterStateChangeEvent = true,
+      excludeAutoSteps = null,
+      previousAction = null,
+      isCached = false,
+      cacheKey = "hanko-flow-state",
+    } = options;
+
+    this.excludeAutoSteps = excludeAutoSteps;
+    this.previousAction = previousAction;
+    this.isCached = isCached;
+    this.cacheKey = cacheKey;
+
+    if (dispatchAfterStateChangeEvent) {
+      this.dispatchAfterStateChangeEvent();
+    }
   }
 
   /**
-   * We get the `actions` object from the server. That object is essentially a definition of actions that can be performed in the current state.
-   *
-   * For example:
-   *
-   *     actions = {
-   *       login_password_recovery: {
-   *         inputs: {
-   *           email: { value: undefined, required: true, ... },
-   *           password: { value: undefined, required: true, min_length: 8, ... }
-   *         }
-   *       },
-   *       create_account: { inputs: ... },
-   *       some_other_action: { inputs: ... },
-   *     };
-   *
-   * The proxy returned by this method creates "action functions".
-   *
-   * Each action function copies the original definition (`{ inputs: ... }`) and modifies that copy with the inputs provided by the user.
-   *
-   * In practice, it looks like this:
-   *
-   *     actions.login_password_recovery({ new_password: "very-secure-123" });
-   *     // => { inputs: { password: { value: "very-secure-123", min_length: 8, ... }}}
-   *
-   * Additionally, helper methods like `run` (to send the action to the server) and `validate` (to validate the inputs; the `inputs` object also contains validation rules)
+   * Builds the action map for this state, wrapping it in a Proxy to handle undefined actions.
+   * @param {Actions} actions - The actions available in this state.
+   * @returns {ActionMap<TState>} The action map for the state.
+   * @private
    */
-  #createActionsProxy(actions: Actions[TStateName], csrfToken: string) {
-    const runAction = (action: Action<any>) => this.runAction(action, csrfToken);
-    const validateAction = (action: Action<any>) => this.validateAction(action);
+  private buildActionMap(actions: Actions[TState]): ActionMap<TState> {
+    const actionMap: Partial<ActionMap<TState>> = {};
 
-    return new Proxy(actions, {
-      get(target, prop): CreateAction<Action<unknown>> | undefined {
-        if (typeof prop === "symbol") return (target as any)[prop];
+    Object.keys(actions).forEach((actionName) => {
+      const key = actionName as keyof Actions[TState];
+      const action = actions[key] as ActionType<any>;
 
-        type Original = Actions[TStateName][keyof Actions[TStateName]];
-        type Prop = keyof typeof target;
+      actionMap[key] = new Action(action, this);
+    });
 
-        /**
-         * This is the action defintion.
-         * Running the function returned by this getter creates a **deep copy**
-         * with values set by the user.
-         */
-        const originalAction = target[
-          prop as Prop
-        ] satisfies Original as Action<unknown>;
-
-        if (originalAction == null) {
-          return null;
+    // Return a Proxy that handles missing keys
+    return new Proxy(actionMap as ActionMap<TState>, {
+      get: (target: ActionMap<TState>, prop: string | symbol): Action<any> => {
+        if (prop in target) {
+          return target[prop as keyof ActionMap<TState>];
         }
 
-        return (newInputs: any) => {
-          const action = Object.assign(deepCopy(originalAction), {
-            validate() {
-              validateAction(action);
-              return action;
-            },
-            tryValidate() {
-              try {
-                validateAction(action);
-              } catch (e) {
-                if (e instanceof ValidationError) return e;
+        const actionName = typeof prop === "string" ? prop : prop.toString();
 
-                // We still want to throw non-ValidationErrors since they're unexpected (and indicate a bug on our side)
-                throw e;
-              }
-            },
-            run() {
-              return runAction(action);
-            },
-          });
-
-          // If `actions` is an object that has inputs,
-          //
-          // Transform this:
-          // actions.login_password_recovery({ new_password: "password" });
-          //                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-          // Into this:
-          // action.inputs = { new_password: { min_length: 8, value: "password", ... }}
-          if (
-            action !== null &&
-            typeof action === "object" &&
-            "inputs" in action
-          ) {
-            for (const inputName in newInputs) {
-              const actionInputs = action.inputs as Record<
-                string,
-                Input<unknown>
-              >;
-
-              if (!actionInputs[inputName]) {
-                actionInputs[inputName] = { name: inputName, type: "" };
-              }
-
-              actionInputs[inputName].value = newInputs[inputName];
-            }
-          }
-
-          return action;
-        };
+        return Action.createDisabled(actionName, this);
       },
-    }) satisfies Actions[TStateName] as any;
-  }
-
-  runAction(action: Action<any>, csrfToken: string): Promise<State<any>> {
-    const data: Record<string, any> = {};
-
-    // Deal with object-type inputs
-    // i.e. actions.some_action({ ... })
-    //                          ^^^^^^^
-    // Other input types would look like this:
-    //
-    // actions.another_action(1234);
-    // actions.yet_another_action("foo");
-    //
-    // Meaning
-    if (
-      "inputs" in action &&
-      typeof action.inputs === "object" &&
-      action.inputs !== null
-    ) {
-      // This looks horrible, but at this point we're sure that `action.inputs` is a Record<string, Input>
-      // Because there are no object-type inputs that AREN'T a Record<string, Input>
-      const inputs = action.inputs satisfies object as Record<
-        string,
-        Input<unknown>
-      >;
-
-      for (const inputName in action.inputs) {
-        const input = inputs[inputName];
-
-        if (input && "value" in input) {
-          data[inputName] = input.value;
-        }
-      }
-    }
-
-    // (Possibly add more input types here?)
-
-    // Use the fetch function to perform the action
-    return this.fetchNextState(action.href, {
-      input_data: data,
-      csrf_token: csrfToken,
     });
   }
 
-  validateAction(action: Action<{ [key: string]: Input<unknown> }>) {
-    if (!("inputs" in action)) return;
+  /**
+   * Dispatches an event after the state has changed.
+   */
+  public dispatchAfterStateChangeEvent() {
+    this.hanko.relay.dispatchAfterStateChangeEvent({
+      state: this as AnyState,
+    });
+  }
 
-    for (const inputName in action.inputs) {
-      const input = action.inputs[inputName];
+  /**
+   * Serializes the current state into a storable format.
+   * @returns {SerializedState} The serialized state object.
+   */
+  public serialize(): SerializedState {
+    return {
+      flow_name: this.flowName,
+      name: this.name,
+      error: this.error,
+      payload: this.payload,
+      csrf_token: this.csrfToken,
+      status: this.status,
+      previous_action: this.previousAction,
+      actions: Object.fromEntries(
+        (Object.entries(this.actions) as [string, Action<any>][]).map(
+          ([name, action]) => [
+            name,
+            {
+              action: action.name,
+              href: action.href,
+              inputs: action.inputs,
+              description: null,
+            },
+          ],
+        ),
+      ),
+    };
+  }
 
-      function reject<T>(
-        reason: ValidationReason,
-        message: string,
-        wanted?: T,
-        actual?: T
+  /**
+   * Saves the current state to localStorage.
+   * @returns {void}
+   */
+  public saveToLocalStorage(): void {
+    localStorage.setItem(
+      this.cacheKey,
+      JSON.stringify({ ...this.serialize(), is_cached: true }),
+    );
+  }
+
+  /**
+   * Removes the current state from localStorage.
+   * @returns {void}
+   */
+  public removeFromLocalStorage(): void {
+    localStorage.removeItem(this.cacheKey);
+  }
+
+  /**
+   * Initializes a flow state, processing auto-steps if applicable.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {FlowName} flowName - The name of the flow.
+   * @param {FlowResponse<any>} response - The initial flow response.
+   * @param {StateInitConfig} [options={}] - Configuration options.
+   * @param {boolean} [options.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [options.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {ActionInfo} [options.previousAction=null] - Information about the previous action.
+   * @param {boolean} [options.isCached=false] - Whether the state is loaded from cache.
+   * @param {string} [options.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @returns {Promise<AnyState>} A promise resolving to the initialized state.
+   */
+  public static async initializeFlowState(
+    hanko: Hanko,
+    flowName: FlowName,
+    response: FlowResponse<any>,
+    options: StateInitConfig = {},
+  ): Promise<AnyState> {
+    let state = new State(hanko, flowName, response, options);
+
+    if (state.excludeAutoSteps != "all") {
+      while (
+        state &&
+        state.autoStep &&
+        !state.excludeAutoSteps?.includes(state.name)
       ) {
-        throw new ValidationError({
-          reason,
-          inputName,
-          wanted,
-          actual,
-          message,
-        });
-      }
-
-      const value = input.value as any; // TS gets in the way here
-
-      // TODO is !input.value right here? this will also reject empty strings, `0`, ... and will never reject an empty array/object
-      if (input.required && !value) {
-        reject(ValidationReason.Required, "is required");
-      }
-
-      const hasLengthRequirement =
-        input.min_length != null || input.max_length != null;
-
-      if (hasLengthRequirement) {
-        if (!("length" in value)) {
-          reject(
-            ValidationReason.InvalidInputDefinition,
-            'has min/max length requirement, but is missing "length" property',
-            "string",
-            typeof value
-          );
-        }
-
-        if (input.min_length != null && value < input.min_length) {
-          reject(
-            ValidationReason.MinLength,
-            `too short (min ${input.min_length})`,
-            input.min_length,
-            value.length
-          );
-        }
-
-        if (input.max_length != null && value > input.max_length) {
-          reject(
-            ValidationReason.MaxLength,
-            `too long (max ${input.max_length})`,
-            input.max_length,
-            value.length
-          );
+        const nextState = await state.autoStep();
+        if (nextState.name != state.name) {
+          state = nextState;
+        } else {
+          return nextState;
         }
       }
     }
+
+    return state;
+  }
+
+  /**
+   * Retrieves and parses state data from localStorage.
+   * @param {string} cacheKey - The key used to store the state in localStorage.
+   * @returns {SerializedState | undefined} The parsed serialized state, or undefined if not found or invalid.
+   */
+  public static readFromLocalStorage(
+    cacheKey: string,
+  ): SerializedState | undefined {
+    const raw = localStorage.getItem(cacheKey);
+    if (raw) {
+      try {
+        return JSON.parse(raw) as SerializedState;
+      } catch {
+        return undefined;
+      }
+    }
+  }
+
+  /**
+   * Creates a new state instance, using cached or fetched data.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {FlowName} flowName - The name of the flow.
+   * @param {StateCreateConfig} [config={}] - Configuration options.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [config.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {string} [config.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @param {boolean} [config.loadFromCache=true] - Whether to attempt loading from cache.
+   * @returns {Promise<AnyState>} A promise resolving to the created state.
+   */
+  public static async create(
+    hanko: Hanko,
+    flowName: FlowName,
+    config: StateCreateConfig = {},
+  ): Promise<AnyState> {
+    const { cacheKey = "hanko-flow-state", loadFromCache = true } = config;
+    if (loadFromCache) {
+      const cachedState = State.readFromLocalStorage(cacheKey);
+      if (cachedState) {
+        return State.deserialize(hanko, cachedState, {
+          ...config,
+          cacheKey,
+        });
+      }
+    }
+
+    const newState = await State.fetchState(hanko, `/${flowName}`);
+    return State.initializeFlowState(hanko, flowName, newState, {
+      ...config,
+      cacheKey,
+    });
+  }
+
+  /**
+   * Deserializes a state from a serialized state object.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {SerializedState} serializedState - The serialized state data.
+   * @param {StateCreateConfig} [config={}] - Configuration options.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @param {AutoStepExclusion} [config.excludeAutoSteps=null] - States to exclude from auto-step processing, or "all".
+   * @param {string} [config.cacheKey="hanko-flow-state"] - Key for localStorage caching.
+   * @param {boolean} [config.loadFromCache=true] - Whether to attempt loading from cache.
+   * @returns {Promise<AnyState>} A promise resolving to the deserialized state.
+   */
+  public static async deserialize(
+    hanko: Hanko,
+    serializedState: SerializedState,
+    config: StateCreateConfig = {},
+  ): Promise<AnyState> {
+    return State.initializeFlowState(
+      hanko,
+      serializedState.flow_name,
+      serializedState,
+      {
+        ...config,
+        previousAction: serializedState.previous_action,
+        isCached: serializedState.is_cached,
+      },
+    );
+  }
+
+  /**
+   * Fetches state data from the server.
+   * @param {Hanko} hanko - The Hanko instance for API interactions.
+   * @param {string} href - The endpoint to fetch from.
+   * @param {any} [body] - Optional request body.
+   * @returns {Promise<FlowResponse<any>>} A promise resolving to the flow response.
+   */
+  static async fetchState(
+    hanko: Hanko,
+    href: string,
+    body?: any,
+  ): Promise<FlowResponse<any>> {
+    try {
+      const response = await hanko.client.post(href, body);
+      return response.json();
+    } catch (error) {
+      return State.createErrorResponse(error);
+    }
+  }
+
+  /**
+   * Creates an error flow response.
+   * @param {Error} error - The error to include in the response.
+   * @returns {FlowResponse<"error">} A flow response with error details.
+   * @private
+   */
+  private static createErrorResponse(error: Error): FlowResponse<"error"> {
+    return {
+      actions: null,
+      csrf_token: "",
+      name: "error",
+      payload: null,
+      status: 0,
+      error,
+    };
   }
 }
 
-export enum ValidationReason {
-  InvalidInputDefinition,
-  MinLength,
-  MaxLength,
-  Required,
-}
+/**
+ * Represents an actionable operation within a state.
+ * @template TInputs - The type of inputs required for the action.
+ * @param {ActionType<TInputs>} action - The action type definition.
+ * @param {State} parentState - The state this action belongs to.
+ * @param {boolean} [enabled=true] - Whether the action is enabled.
+ * @category SDK
+ * @subcategory FlowAPI
+ */
+export class Action<TInputs> {
+  public readonly enabled: boolean;
+  public readonly href: string;
+  public readonly name: string;
+  public readonly inputs: TInputs;
+  private readonly parentState: State;
 
-export class ValidationError<TWanted = undefined> extends Error {
-  reason: ValidationReason;
-  inputName: string;
-  wanted: TWanted;
-  actual: TWanted;
+  /**
+   * Constructs a new Action instance.
+   * @param {ActionType<TInputs>} action - The action type definition.
+   * @param {State} parentState - The state this action belongs to.
+   * @param {boolean} [enabled=true] - Whether the action is enabled.
+   */
+  constructor(
+    action: ActionType<TInputs>,
+    parentState: State,
+    enabled: boolean = true,
+  ) {
+    this.enabled = enabled;
+    this.href = action.href;
+    this.name = action.action;
+    this.inputs = action.inputs;
+    this.parentState = parentState;
+  }
 
-  constructor(opts: {
-    reason: ValidationReason;
-    inputName: string;
-    wanted: TWanted;
-    actual: TWanted;
-    message: string;
-  }) {
-    super(`"${opts.inputName}" ${opts.message}`);
+  /**
+   * Creates a disabled action instance.
+   * @template TInputs - The type of inputs (inferred as empty).
+   * @param {string} name - The name of the action.
+   * @param {State} parentState - The state this action belongs to.
+   * @returns {Action<TInputs>} A disabled action instance.
+   */
+  static createDisabled<TInputs>(
+    name: string,
+    parentState: State,
+  ): Action<TInputs> {
+    return new Action(
+      {
+        action: name,
+        href: "", // No valid href since it’s disabled
+        inputs: {} as TInputs,
+        description: "Disabled action",
+      },
+      parentState,
+      false,
+    );
+  }
 
-    this.name = "ValidationError";
-    this.reason = opts.reason;
-    this.inputName = opts.inputName;
-    this.wanted = opts.wanted;
-    this.actual = opts.actual;
+  /**
+   * Executes the action, transitioning to a new state.
+   * @param {ExtractInputValues<TInputs>} [inputValues=null] - Values for the action's inputs.
+   * @param {ActionRunConfig} [config={}] - Configuration options.
+   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
+   * @returns {Promise<AnyState>} A promise resolving to the next state.
+   * @throws {Error} If the action is disabled or already invoked.
+   */
+  async run(
+    inputValues: ExtractInputValues<TInputs> = null,
+    config: ActionRunConfig = {},
+  ): Promise<AnyState> {
+    const {
+      name,
+      hanko,
+      flowName,
+      csrfToken,
+      invokedAction,
+      excludeAutoSteps,
+      cacheKey,
+    } = this.parentState;
+    const { dispatchAfterStateChangeEvent = true } = config;
+
+    if (!this.enabled) {
+      throw new Error(
+        `Action '${this.name}' is not enabled in state '${name}'`,
+      );
+    }
+
+    if (invokedAction) {
+      throw new Error(
+        `An action '${invokedAction.name}' has already been invoked on state '${invokedAction.relatedStateName}'. No further actions can be run.`,
+      );
+    }
+
+    this.parentState.invokedAction = {
+      name: this.name,
+      relatedStateName: name,
+    };
+
+    hanko.relay.dispatchBeforeStateChangeEvent({
+      state: this.parentState as AnyState,
+    });
+
+    // Extract default values from this.inputs
+    const defaultValues = Object.keys(this.inputs).reduce(
+      (acc, key) => {
+        const input = (this.inputs as any)[key] as Input<any>;
+        if (input.value !== undefined) {
+          acc[key] = input.value;
+        }
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    // Merge defaults with user-provided inputs
+    const mergedInputData = {
+      ...defaultValues,
+      ...inputValues,
+    };
+
+    const requestBody = {
+      input_data: mergedInputData,
+      csrf_token: csrfToken,
+    };
+
+    const response = await State.fetchState(hanko, this.href, requestBody);
+
+    this.parentState.removeFromLocalStorage();
+
+    return State.initializeFlowState(hanko, flowName, response, {
+      dispatchAfterStateChangeEvent,
+      excludeAutoSteps,
+      previousAction: invokedAction,
+      cacheKey,
+    });
   }
 }
-
-function deepCopy<T>(obj: T): T {
-  return JSON.parse(JSON.stringify(obj));
-}
-
-export function isState(x: any): x is State<any> {
-  return (
-    typeof x === "object" &&
-    x !== null &&
-    "status" in x &&
-    "error" in x &&
-    "name" in x &&
-    Boolean(x.name) &&
-    Boolean(x.status)
-  );
-}
-
-export { State };

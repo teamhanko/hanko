@@ -1,7 +1,6 @@
 import JSCookie from "js-cookie";
 import { Cookie } from "../../src/lib/Cookie";
 import { fakeTimerNow } from "../setup";
-import { Response } from "../../src/lib/client/HttpClient";
 
 describe("Cookie()", () => {
   let cookie: Cookie;

@@ -107,11 +107,12 @@ const redirectToProfile = () => {
 };
 
 const logout = () => {
-  hankoClient.user.logout().catch((e) => (error.value = e));
+  hankoClient.logout().catch((e) => (error.value = e));
 };
 
-onMounted(() => {
-  if (hankoClient.session.isValid()) {
+onMounted(async () => {
+  const {is_valid} = await hankoClient.validateSession();
+  if (is_valid) {
     listTodos();
   } else {
     redirectToLogin();
