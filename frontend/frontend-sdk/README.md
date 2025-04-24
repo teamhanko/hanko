@@ -204,9 +204,7 @@ try {
     //     expiration: "2025-04-25T12:00:00Z",
     //     email: { address: "user@example.com", is_primary: true, is_verified: true },
     //     custom_field: "value"
-    //   },
-    //   expiration_time: "2025-04-25T12:00:00Z",
-    //   user_id: "123e4567-e89b-12d3-a456-426614174000"
+    //   }
     // }
 } catch (error) {
     console.error("Failed to validate session:", error);
