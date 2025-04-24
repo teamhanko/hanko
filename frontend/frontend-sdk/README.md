@@ -3,6 +3,32 @@
 This package utilizes the [Hanko API](https://github.com/teamhanko/hanko/blob/main/backend/README.md) to provide
 functionality that allows an easier UI integration. It is meant for use in browsers only.
 
+- [Installation](#installation)
+- [Usage](#usage)
+- [Options](#options)
+- [Session Events](#session-events)
+- [Session Management](#session-management)
+    - [Getting the User Object](#getting-the-user-object)
+    - [Validating a Session](#validating-a-session)
+    - [Getting the Session Token](#getting-the-session-token)
+    - [Logging out a User](#logging-out-a-user)
+- [Translation of Outgoing Emails](#translation-of-outgoing-emails)
+- [Custom Session Claim Type Safety](#custom-session-claim-type-safety)
+- [FlowAPI](#flowapi)
+    - [Initializing a New Flow](#initializing-a-new-flow)
+    - [Understanding the State Object](#understanding-the-state-object)
+    - [Action Availability](#action-availability)
+    - [Accessing Action Inputs](#accessing-action-inputs)
+    - [Running an Action](#running-an-action)
+    - [Event Handlers](#event-handlers)
+    - [Controlling the AfterStateChanged Event](#controlling-the-afterstatechanged-event)
+    - [Auto-Steps](#auto-steps)
+    - [Error Handling](#error-handling)
+    - [Caching Flow State](#caching-flow-state)
+- [Bugs](#bugs)
+- [Documentation](#documentation)
+- [License](#license)
+
 ## Installation
 
 ```shell
@@ -51,6 +77,226 @@ const defaultOptions = {
 
 };
 const hanko = new Hanko("http://localhost:3000", defaultOptions);
+```
+
+### Session Events
+
+You can bind callback functions to different custom events. The callback function will be called when the event happens
+and an object will be passed in, containing event details. The event binding works as follows:
+
+```typescript
+// Controls the optional `once` parameter. When set to `true` the callback function will be called only once.
+const once = false;
+
+const removeEventListener = hanko.onSessionCreated((eventDetail) => {
+    // Your code...
+}, once);
+```
+
+The following events are available:
+
+- "hanko-session-created": Will be triggered after a session has been created and the user has completed possible
+  additional steps (e.g. passkey registration or password recovery). It will also be triggered when the user logs in via
+  another browser window. The event can be used to obtain the JWT claims.
+
+```js
+hanko.onSessionCreated((sessionDetail) => {
+  // A new JWT has been issued.
+    console.info("Session created", sessionDetail.claims);
+})
+```
+
+- "hanko-session-expired": Will be triggered when the session has expired, or when the session has been removed in
+  another browser window, because the user has logged out, or deleted the account.
+
+```js
+hanko.onSessionExpired(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element, or to prompt the user to log in again.
+  console.info("Session expired");
+})
+```
+
+- "hanko-user-logged-out": Will be triggered, when the user actively logs out. In other browser windows, a "hanko-session-expired" event
+  will be triggered at the same time.
+
+```js
+hanko.onUserLoggedOut(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element.
+  console.info("User logged out");
+})
+```
+
+- "hanko-user-deleted": Will be triggered when the user has deleted the account. In other browser windows, a "hanko-session-expired" event
+  will be triggered at the same time.
+
+```js
+hanko.onUserDeleted(() => {
+  // You can redirect the user to a login page or show the `<hanko-auth>` element.
+  console.info("User has been deleted");
+})
+```
+
+Please Take a look into the [docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) for more details.
+
+### Session Management
+
+The SDK provides methods to manage user sessions and retrieve user information.
+
+#### Getting the User Object
+
+Fetches the current user's profile information.
+
+- **Returns**: A `User` object containing the user’s profile details. The object includes:
+    - `user_id`: A unique string identifier for the user.
+    - `passkeys`: An optional array of WebAuthn credentials (passkey-based authentication).
+    - `security_keys`: An optional array of WebAuthn credentials (security key-based authentication).
+    - `mfa_config`: An optional configuration object for multi-factor authentication settings.
+    - `emails`: An optional array of email objects (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
+    - `username`: An optional username object (e.g., `{ value: string }`).
+    - `created_at`: A string timestamp (ISO 8601) of when the user was created.
+    - `updated_at`: A string timestamp (ISO 8601) of when the user was last updated.
+- **Errors**: `UnauthorizedError` (invalid or expired session), `TechnicalError` (server or network issues).
+
+```typescript
+try {
+    const user = await hanko.getUser();
+    console.log("User profile:", user);
+    // Example output:
+    // {
+    //   user_id: "123e4567-e89b-12d3-a456-426614174000",
+    //   emails: [{ address: "user@example.com", is_primary: true, is_verified: true }],
+    //   username: { value: "johndoe" },
+    //   created_at: "2025-01-01T10:00:00Z",
+    //   updated_at: "2025-04-01T12:00:00Z"
+    // }
+} catch (error) {
+    console.error("Failed to fetch user profile:", error);
+    // Handle UnauthorizedError or TechnicalError
+}
+```
+
+#### Validating a Session
+
+Checks the validity of the current session.
+
+- **Returns**: A SessionCheckResponse object containing:
+    - `is_valid`: A boolean indicating whether the session is valid.
+    - `claims`: An optional object with session details, including:
+    - `subject`: The user ID or session identifier.
+    - `session_id`: The unique session identifier.
+    - `expiration`: A string timestamp (ISO 8601) when the session expires.
+    - `email`: An optional object with email details (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
+    - `username`: An optional string with the user’s username.
+    - `issued_at`, `audience`, `issuer`: Optional metadata about the session token.
+    - Custom claims (defined by the application).
+- **Errors**: TechnicalError (server or network issues).
+
+```typescript
+try {
+    const sessionStatus = await hanko.validateSession();
+    console.log("Session status:", sessionStatus);
+    // Example output:
+    // {
+    //   is_valid: true,
+    //   claims: {
+    //     subject: "123e4567-e89b-12d3-a456-426614174000",
+    //     session_id: "789abc",
+    //     expiration: "2025-04-25T12:00:00Z",
+    //     email: { address: "user@example.com", is_primary: true, is_verified: true },
+    //     custom_field: "value"
+    //   },
+    //   expiration_time: "2025-04-25T12:00:00Z",
+    //   user_id: "123e4567-e89b-12d3-a456-426614174000"
+    // }
+} catch (error) {
+    console.error("Failed to validate session:", error);
+    // Handle TechnicalError
+}
+```
+
+#### Getting the Session Token
+
+Retrieves the current session token from the authentication cookie.
+
+- **Returns**: A string containing the JWT session token or `null` if no session exists.
+- **Note**: This method does not throw errors; check for `null` to handle missing sessions.
+
+```typescript
+const token = hanko.getSessionToken();
+console.log("Session token:", token);
+// Example output: "eyJhbGciOiJIUzI1NiIs..."
+```
+
+#### Logging out a User
+
+Logs out the current user by invalidating the session.
+
+- **Returns**: A promise that resolves with no value on successful logout or throws an error.
+- **Errors**: `TechnicalError` (server or network issues).
+- **Note**: If no session exists, the method resolves without error.
+
+```typescript
+try {
+    await hanko.logout();
+    console.log("User logged out");
+} catch (error) {
+    console.error("Failed to fetch user logout:", error);
+    // Handle TechnicalError
+}
+```
+
+### Translation of outgoing emails
+
+If you use the main `Hanko` client provided by the Frontend SDK, you can use the `lang` parameter in the options when
+instantiating the client to configure the language that is used to convey to the Hanko API the
+language to use for outgoing emails. If you have disabled email delivery through Hanko and configured a webhook for the
+`email.send` event, the value for the `lang` parameter is reflected in the JWT payload of the token contained in the
+webhook request in the "Language" claim.
+
+### Custom session claim type safety
+
+The Hanko backend allows you to define custom claims that are added to issued session JWTs
+(see [here](https://github.com/teamhanko/hanko/blob/main/backend/README.md#session-jwt-templates) for more info).
+
+To allow for IDE autocompletion and to maintain type safety for your custom claims:
+
+1. Create a TypeScript definition file (`*.d.ts`) in your project (alternatively, modify an existing one).
+2. Import the `Claims` type from the frontend SDK.
+3. Declare a custom type that extends the `Claims` type.
+4. Add your custom claims to your custom type.
+
+```ts
+import type { Claims } from "@teamhanko/hanko-frontend-sdk" // 2.
+// import type { Claims } from "@teamhanko/elements"        // alternatively, if you use Hanko Elements, which
+                                                            // re-exports most SDK types
+
+
+type CustomClaims = Claims<{                                // 3.
+    custom_claim?: string                                   // 4.
+}>;
+```
+
+5. Use your custom type when accessing claims, e.g. in session details received in event callbacks or when accessing
+claims in responses from session validation
+[endpoints](https://docs.hanko.io/api-reference/public/session-management/validate-a-session):
+
+```ts
+import type { CustomClaims } from "..."; // path to your type declaration file
+
+hanko.onSessionCreated((sessionDetail) => {
+  const claims = sessionDetail.claims as CustomClaims;
+  console.info("My custom claim:", claims.custom_claim);
+});
+```
+
+```ts
+import type { CustomClaims } from "..."; // path to your type declaration file
+
+async function session() {
+    const session = await hanko.validateSession();
+    const claims = session.claims as CustomClaims;
+    console.info("My custom claim:", claims.custom_claim);
+};
 ```
 
 ## FlowAPI
@@ -323,225 +569,6 @@ const recoveredState = await State.deserialize(hanko, serialized, {
 
 This allows integration with other storage mechanisms.
 
-### Session Events
-
-You can bind callback functions to different custom events. The callback function will be called when the event happens
-and an object will be passed in, containing event details. The event binding works as follows:
-
-```typescript
-// Controls the optional `once` parameter. When set to `true` the callback function will be called only once.
-const once = false;
-
-const removeEventListener = hanko.onSessionCreated((eventDetail) => {
-    // Your code...
-}, once);
-```
-
-The following events are available:
-
-- "hanko-session-created": Will be triggered after a session has been created and the user has completed possible
-  additional steps (e.g. passkey registration or password recovery). It will also be triggered when the user logs in via
-  another browser window. The event can be used to obtain the JWT claims.
-
-```js
-hanko.onSessionCreated((sessionDetail) => {
-  // A new JWT has been issued.
-    console.info("Session created", sessionDetail.claims);
-})
-```
-
-- "hanko-session-expired": Will be triggered when the session has expired, or when the session has been removed in
-  another browser window, because the user has logged out, or deleted the account.
-
-```js
-hanko.onSessionExpired(() => {
-  // You can redirect the user to a login page or show the `<hanko-auth>` element, or to prompt the user to log in again.
-  console.info("Session expired");
-})
-```
-
-- "hanko-user-logged-out": Will be triggered, when the user actively logs out. In other browser windows, a "hanko-session-expired" event
-  will be triggered at the same time.
-
-```js
-hanko.onUserLoggedOut(() => {
-  // You can redirect the user to a login page or show the `<hanko-auth>` element.
-  console.info("User logged out");
-})
-```
-
-- "hanko-user-deleted": Will be triggered when the user has deleted the account. In other browser windows, a "hanko-session-expired" event
-  will be triggered at the same time.
-
-```js
-hanko.onUserDeleted(() => {
-  // You can redirect the user to a login page or show the `<hanko-auth>` element.
-  console.info("User has been deleted");
-})
-```
-
-Please Take a look into the [docs](https://teamhanko.github.io/hanko/jsdoc/hanko-frontend-sdk/) for more details.
-
-### Session Management
-
-The SDK provides methods to manage user sessions and retrieve user information.
-
-#### Getting the User Object
-
-Fetches the current user's profile information.
-
-- **Returns**: A `User` object containing the user’s profile details. The object includes:
-    - `user_id`: A unique string identifier for the user.
-    - `passkeys`: An optional array of WebAuthn credentials (passkey-based authentication).
-    - `security_keys`: An optional array of WebAuthn credentials (security key-based authentication).
-    - `mfa_config`: An optional configuration object for multi-factor authentication settings.
-    - `emails`: An optional array of email objects (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
-    - `username`: An optional username object (e.g., `{ value: string }`).
-    - `created_at`: A string timestamp (ISO 8601) of when the user was created.
-    - `updated_at`: A string timestamp (ISO 8601) of when the user was last updated.
-- **Errors**: `UnauthorizedError` (invalid or expired session), `TechnicalError` (server or network issues).
-
-```typescript
-try {
-    const user = await hanko.getUser();
-    console.log("User profile:", user);
-    // Example output:
-    // {
-    //   user_id: "123e4567-e89b-12d3-a456-426614174000",
-    //   emails: [{ address: "user@example.com", is_primary: true, is_verified: true }],
-    //   username: { value: "johndoe" },
-    //   created_at: "2025-01-01T10:00:00Z",
-    //   updated_at: "2025-04-01T12:00:00Z"
-    // }
-} catch (error) {
-    console.error("Failed to fetch user profile:", error);
-    // Handle UnauthorizedError or TechnicalError
-}
-```
-
-#### Validating a Session
-
-Checks the validity of the current session.
-
-- **Returns**: A SessionCheckResponse object containing:
-    - `is_valid`: A boolean indicating whether the session is valid.
-    - `claims`: An optional object with session details, including:
-    - `subject`: The user ID or session identifier.
-    - `session_id`: The unique session identifier.
-    - `expiration`: A string timestamp (ISO 8601) when the session expires.
-    - `email`: An optional object with email details (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
-    - `username`: An optional string with the user’s username.
-    - `issued_at`, `audience`, `issuer`: Optional metadata about the session token.
-    - Custom claims (defined by the application).
-- **Errors**: TechnicalError (server or network issues).
-
-```typescript
-try {
-    const sessionStatus = await hanko.validateSession();
-    console.log("Session status:", sessionStatus);
-    // Example output:
-    // {
-    //   is_valid: true,
-    //   claims: {
-    //     subject: "123e4567-e89b-12d3-a456-426614174000",
-    //     session_id: "789abc",
-    //     expiration: "2025-04-25T12:00:00Z",
-    //     email: { address: "user@example.com", is_primary: true, is_verified: true },
-    //     custom_field: "value"
-    //   },
-    //   expiration_time: "2025-04-25T12:00:00Z",
-    //   user_id: "123e4567-e89b-12d3-a456-426614174000"
-    // }
-} catch (error) {
-    console.error("Failed to validate session:", error);
-    // Handle TechnicalError
-}
-```
-
-#### Getting the Session Token
-
-Retrieves the current session token from the authentication cookie.
-
-- **Returns**: A string containing the JWT session token or `null` if no session exists.
-- **Note**: This method does not throw errors; check for `null` to handle missing sessions.
-
-```typescript
-const token = hanko.getSessionToken();
-console.log("Session token:", token);
-// Example output: "eyJhbGciOiJIUzI1NiIs..."
-```
-
-#### Logging out a User
-
-Logs out the current user by invalidating the session.
-
-- **Returns**: A promise that resolves with no value on successful logout or throws an error.
-- **Errors**: `TechnicalError` (server or network issues).
-- **Note**: If no session exists, the method resolves without error.
-
-```typescript
-try {
-    await hanko.logout();
-    console.log("User logged out");
-} catch (error) {
-    console.error("Failed to fetch user logout:", error);
-    // Handle TechnicalError
-}
-```
-
-### Translation of outgoing emails
-
-If you use the main `Hanko` client provided by the Frontend SDK, you can use the `lang` parameter in the options when
-instantiating the client to configure the language that is used to convey to the Hanko API the
-language to use for outgoing emails. If you have disabled email delivery through Hanko and configured a webhook for the
-`email.send` event, the value for the `lang` parameter is reflected in the JWT payload of the token contained in the
-webhook request in the "Language" claim.
-
-### Custom session claim type safety
-
-The Hanko backend allows you to define custom claims that are added to issued session JWTs
-(see [here](https://github.com/teamhanko/hanko/blob/main/backend/README.md#session-jwt-templates) for more info).
-
-To allow for IDE autocompletion and to maintain type safety for your custom claims:
-
-1. Create a TypeScript definition file (`*.d.ts`) in your project (alternatively, modify an existing one).
-2. Import the `Claims` type from the frontend SDK.
-3. Declare a custom type that extends the `Claims` type.
-4. Add your custom claims to your custom type.
-
-```ts
-import type { Claims } from "@teamhanko/hanko-frontend-sdk" // 2.
-// import type { Claims } from "@teamhanko/elements"        // alternatively, if you use Hanko Elements, which
-                                                            // re-exports most SDK types
-
-
-type CustomClaims = Claims<{                                // 3.
-    custom_claim?: string                                   // 4.
-}>;
-```
-
-5. Use your custom type when accessing claims, e.g. in session details received in event callbacks or when accessing
-claims in responses from session validation
-[endpoints](https://docs.hanko.io/api-reference/public/session-management/validate-a-session):
-
-```ts
-import type { CustomClaims } from "..."; // path to your type declaration file
-
-hanko.onSessionCreated((sessionDetail) => {
-  const claims = sessionDetail.claims as CustomClaims;
-  console.info("My custom claim:", claims.custom_claim);
-});
-```
-
-```ts
-import type { CustomClaims } from "..."; // path to your type declaration file
-
-async function session() {
-    const session = await hanko.validateSession();
-    const claims = session.claims as CustomClaims;
-    console.info("My custom claim:", claims.custom_claim);
-};
-```
 
 ## Bugs
 
