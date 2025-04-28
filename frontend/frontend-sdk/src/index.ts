@@ -107,7 +107,7 @@ export type { CookieSameSite };
 // Flow
 export * from "./lib/flow-api/State";
 export * from "./lib/flow-api/types/flow";
-export * from "./lib/flow-api/types/error";
+export * from "./lib/flow-api/types/flowError";
 export * from "./lib/flow-api/types/payload";
 export * from "./lib/flow-api/types/state";
 export * from "./lib/flow-api/types/input";

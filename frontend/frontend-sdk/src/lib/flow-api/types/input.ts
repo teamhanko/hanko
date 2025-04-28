@@ -1,4 +1,4 @@
-import { Error } from "./error";
+import { FlowError } from "./flowError";
 import {
   PublicKeyCredentialWithAssertionJSON,
   PublicKeyCredentialWithAttestationJSON,
@@ -12,7 +12,7 @@ export interface Input<TValue> {
   readonly max_length?: number;
   readonly required?: boolean;
   readonly hidden?: boolean;
-  readonly error?: Error;
+  readonly error?: FlowError;
   readonly allowed_values?: AllowedInputValues[];
 }
 

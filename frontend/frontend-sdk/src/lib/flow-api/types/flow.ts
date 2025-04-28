@@ -1,5 +1,5 @@
 import { StateName, Actions, Payloads } from "./state";
-import { Error } from "./error";
+import { FlowError } from "./flowError";
 import { State } from "../State";
 
 type PickStates<TState extends StateName> = TState;
@@ -40,5 +40,5 @@ export interface FlowResponse<TState extends StateName> {
   payload?: Payloads[TState];
   actions?: Actions[TState];
   csrf_token: string;
-  error?: Error;
+  error?: FlowError;
 }
