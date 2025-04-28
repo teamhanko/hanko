@@ -1,6 +1,7 @@
 import { Fragment } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Button from "../components/form/Button";
 import Content from "../components/wrapper/Content";
@@ -10,7 +11,6 @@ import CodeInput from "../components/form/CodeInput";
 import ErrorBox from "../components/error/ErrorBox";
 import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 import { useFlowState } from "../hooks/UseFlowState";
 import Link from "../components/link/Link";
 

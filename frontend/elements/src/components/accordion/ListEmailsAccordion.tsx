@@ -1,5 +1,6 @@
 import { Fragment } from "preact";
 import { StateUpdater, useContext, useMemo } from "preact/compat";
+import { State, Email } from "@teamhanko/hanko-frontend-sdk";
 
 import styles from "./styles.sass";
 
@@ -9,8 +10,6 @@ import Accordion from "./Accordion";
 import Paragraph from "../paragraph/Paragraph";
 import Headline2 from "../headline/Headline2";
 import Link from "../link/Link";
-import { Email } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
-import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
   checkedItemID?: string;

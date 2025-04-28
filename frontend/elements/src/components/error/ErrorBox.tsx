@@ -1,7 +1,5 @@
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
+import { FlowError, HankoError, State } from "@teamhanko/hanko-frontend-sdk";
 import { useContext, useEffect } from "preact/compat";
 import { AppContext } from "../../contexts/AppProvider";
 

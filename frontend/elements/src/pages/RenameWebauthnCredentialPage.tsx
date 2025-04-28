@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
-
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -12,8 +12,6 @@ import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
-import { WebauthnCredential } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
-import { State } from "@teamhanko/hanko-frontend-sdk";
 
 type Props = {
   oldName: string;

@@ -6,6 +6,8 @@ import {
   useMemo,
   useState,
 } from "preact/compat";
+import { State } from "@teamhanko/hanko-frontend-sdk";
+
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
@@ -18,7 +20,6 @@ import ErrorBox from "../components/error/ErrorBox";
 import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 import { useFlowState } from "../hooks/UseFlowState";
 
 interface Props {

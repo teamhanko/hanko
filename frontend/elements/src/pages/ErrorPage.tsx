@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
+import { State, HankoError } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";
@@ -8,8 +9,6 @@ import Button from "../components/form/Button";
 import Content from "../components/wrapper/Content";
 import Headline1 from "../components/headline/Headline1";
 import ErrorBox from "../components/error/ErrorBox";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 import { useFlowState } from "../hooks/UseFlowState";
 
 interface Props {
