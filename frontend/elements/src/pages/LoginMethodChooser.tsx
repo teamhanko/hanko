@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -11,9 +11,7 @@ import Footer from "../components/wrapper/Footer";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 import Paragraph from "../components/paragraph/Paragraph";
 
 interface Props {
@@ -22,47 +20,7 @@ interface Props {
 
 const LoginMethodChooserPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler, lastLogin } =
-    useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-
-  const onPasswordSelectSubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("password-submit");
-    const nextState = await flowState.actions
-      .continue_to_password_login(null)
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onPasscodeSelectSubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("passcode-submit");
-    const nextState = await flowState.actions
-      .continue_to_passcode_confirmation(null)
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onPasskeySelectSubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("passkey-submit");
-    const nextState = await flowState.actions
-      .webauthn_generate_request_options(null)
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onBackClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("back");
-    const nextState = await flowState.actions.back(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
 
   return (
     <Fragment>
@@ -70,47 +28,25 @@ const LoginMethodChooserPage = (props: Props) => {
         <Headline1>{t("headlines.selectLoginMethod")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
         <Paragraph>{t("texts.howDoYouWantToLogin")}</Paragraph>
-        <Form
-          hidden={!flowState.actions.continue_to_passcode_confirmation?.(null)}
-          onSubmit={onPasscodeSelectSubmit}
-        >
-          <Button
-            secondary={true}
-            uiAction={"passcode-submit"}
-            icon={"mail"}
-          >
+        <Form flowAction={flowState.actions.continue_to_passcode_confirmation}>
+          <Button secondary icon={"mail"}>
             {t("labels.passcode")}
           </Button>
         </Form>
-        <Form
-          hidden={!flowState.actions.continue_to_password_login?.(null)}
-          onSubmit={onPasswordSelectSubmit}
-        >
-          <Button
-            secondary={true}
-            uiAction={"password-submit"}
-            icon={"password"}
-          >
+        <Form flowAction={flowState.actions.continue_to_password_login}>
+          <Button secondary icon={"password"}>
             {t("labels.password")}
           </Button>
         </Form>
-        <Form
-          hidden={!flowState.actions.webauthn_generate_request_options?.(null)}
-          onSubmit={onPasskeySelectSubmit}
-        >
-          <Button
-            secondary={true}
-            uiAction={"passkey-submit"}
-            icon={"passkey"}
-          >
+        <Form flowAction={flowState.actions.webauthn_generate_request_options}>
+          <Button secondary={true} icon={"passkey"}>
             {t("labels.passkey")}
           </Button>
         </Form>
       </Content>
       <Footer>
         <Link
-          uiAction={"back"}
-          onClick={onBackClick}
+          flowAction={flowState.actions.back}
           loadingSpinnerPosition={"right"}
         >
           {t("labels.back")}

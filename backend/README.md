@@ -23,6 +23,7 @@ easily integrated into any web app with as little as two lines of code.
     - [Account linking](#account-linking)
   - [User import](#user-import)
   - [Webhooks](#webhooks)
+  - [Session JWT templates](#session-jwt-templates)
 - [API specification](#api-specification)
 - [Configuration reference](#configuration-reference)
 - [License](#license)
@@ -575,6 +576,65 @@ webhooks:
       events:
         - user
 ```
+
+### Session JWT templates
+
+You can define custom claims that will be added to session JWTs through the `session.jwt_template.claims`
+configuration option.
+
+These claims are processed at JWT generation time and can include static values,
+templated strings using Go's text/template syntax, or nested structures (maps and slices).
+
+The template has access to user data via the `.User` field, which includes:
+- `.User.UserID`: The user's unique ID (string)
+- `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)
+- `.User.Username`: The user's username (string, optional)
+
+Claims that fail to process (e.g., due to invalid templates) are logged and skipped,
+ensuring JWT generation continues without interruption.
+
+
+Example usage in YAML configuration:
+ ```yaml
+ session:
+   lifespan: 24h
+   jwt_template:
+     claims:
+       role: "user"                               # Static value
+       user_email: "{{.User.Email.Address}}"      # Templated string
+       is_verified: "{{.User.Email.IsVerified}}"  # Boolean from user data
+       metadata:                                  # Nested map
+         source: "hanko"
+         greeting: "Hello {{.User.Username}}"
+       scopes:                                    # Slice with templated value
+         - "read"
+         - "write"
+         - "{{if .User.Email.IsVerified}}admin{{else}}basic{{end}}"
+ ```
+
+In this example:
+- `role` is a static string ("user").
+- `user_email` dynamically inserts the user's email address.
+- `is_verified` inserts a boolean indicating email verification status.
+- `metadata` is a nested map with a static `source` and a templated `greeting`.
+- `scopes` is a slice combining static values and a conditional template.
+
+Notes:
+- Claims with the following keys will be ignored because they are currently added to the JWT
+  by default:
+    - sub
+    - iat
+    - exp
+    - aud
+    - iss
+    - email
+    - username
+    - session_id
+- Templates must be valid Go `text/template` syntax. Invalid templates are logged and ignored.
+- Boolean strings ("true" or "false") from templates are automatically converted to actual booleans.
+- Use conditionals (e.g., `{{if .User.Email}}`) to handle optional fields safely.
+
+For more details on template syntax, see: https://pkg.go.dev/text/template
 
 ## API specification
 

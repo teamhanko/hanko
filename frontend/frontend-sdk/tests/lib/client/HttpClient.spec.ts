@@ -28,6 +28,7 @@ beforeEach(() => {
     cookieName: "hanko",
     localStorageKey: "hanko",
     timeout: 13000,
+    sessionTokenLocation: "cookie",
   });
   xhr = new XMLHttpRequest();
 });
@@ -208,6 +209,7 @@ describe("httpClient.processResponseHeadersOnLogin()", () => {
           cookieName: "hanko",
           localStorageKey: "hanko",
           timeout: 13000,
+          sessionTokenLocation: "cookie",
         });
         const xhr = new XMLHttpRequest();
         const response = new Response(xhr);

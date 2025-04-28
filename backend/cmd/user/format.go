@@ -81,7 +81,7 @@ type ImportOTPSecret struct {
 // ImportOrExportEntry represents a user to be imported/export to the Hanko database
 type ImportOrExportEntry struct {
 	// UserID optional uuid.v4. If not provided a new one will be generated for the user
-	UserID string `json:"user_id,omitempty" yaml:"user_id" validate:"omitempty,uuid4"`
+	UserID string `json:"user_id,omitempty" yaml:"user_id" validate:"omitempty,uuid"`
 	// Emails optional list of emails
 	Emails Emails `json:"emails" yaml:"emails" jsonschema:"type=array,minItems=1" validate:"required_if=Username 0,unique=Address,dive"`
 	// Username optional username of the user

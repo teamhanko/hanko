@@ -5,13 +5,15 @@ import {
   useMemo,
   useState,
 } from "preact/compat";
-
-import { HankoError, WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
+import {
+  State,
+  HankoError,
+  WebauthnSupport,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 import Button from "../components/form/Button";
 import Input from "../components/form/Input";
@@ -35,16 +37,15 @@ const LoginInitPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
   const {
     init,
-    hanko,
     initialComponentName,
-    setLoadingAction,
     uiState,
     setUIState,
-    stateHandler,
     hidePasskeyButtonOnLogin,
     lastLogin,
   } = useContext(AppContext);
 
+  const [isFlowSwitchLoading, setIsFlowSwitchLoading] =
+    useState<boolean>(false);
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
   const [identifier, setIdentifier] = useState<string>(
     uiState.username || uiState.email,
@@ -70,41 +71,21 @@ const LoginInitPage = (props: Props) => {
 
   const onEmailSubmit = async (event: Event) => {
     event.preventDefault();
-
-    setLoadingAction("email-submit");
-
-    const nextState = await flowState.actions
-      .continue_with_login_identifier({ [identifierType]: identifier })
-      .run();
-
     setIdentifierToUIState(identifier);
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onPasskeySubmit = async (event: Event) => {
-    event.preventDefault();
-
-    setLoadingAction("passkey-submit");
-
-    const nextState = await flowState.actions
-      .webauthn_generate_request_options(null)
-      .run();
-
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.continue_with_login_identifier.run({
+      [identifierType]: identifier,
+    });
   };
 
   const onRegisterClick = async (event: Event) => {
     event.preventDefault();
+    setIsFlowSwitchLoading(true);
     init("registration");
   };
 
   const onRememberMeChange = async (event: Event) => {
-    const nextState = await flowState.actions
-      .remember_me({ remember_me: !rememberMe })
-      .run();
     setRememberMe((prev) => !prev);
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.remember_me.run({ remember_me: !rememberMe });
   };
 
   const setIdentifierToUIState = (value: string) => {
@@ -133,76 +114,33 @@ const LoginInitPage = (props: Props) => {
     event.preventDefault();
     setSelectedThirdPartyProvider(name);
 
-    const nextState = await flowState.actions
-      .thirdparty_oauth({
-        provider: name,
-        redirect_to: window.location.toString(),
-      })
-      .run();
+    const nextState = await flowState.actions.thirdparty_oauth.run({
+      provider: name,
+      redirect_to: window.location.toString(),
+    });
 
     if (nextState.error) {
       setSelectedThirdPartyProvider(null);
     }
 
-    await hanko.flow.run(nextState, stateHandler);
+    return nextState;
   };
 
   const showDivider = useMemo(
     () =>
-      !!flowState.actions.webauthn_generate_request_options?.(null) ||
-      !!flowState.actions.thirdparty_oauth?.(null),
+      !!flowState.actions.webauthn_generate_request_options.enabled ||
+      !!flowState.actions.thirdparty_oauth.enabled,
     [flowState.actions],
   );
 
-  const inputs =
-    flowState.actions.continue_with_login_identifier?.(null).inputs;
+  const inputs = flowState.actions.continue_with_login_identifier.inputs;
 
   useEffect(() => {
-    const inputs =
-      flowState.actions.continue_with_login_identifier?.(null).inputs;
+    const inputs = flowState.actions.continue_with_login_identifier.inputs;
     setIdentifierType(
       inputs?.email ? "email" : inputs?.username ? "username" : "identifier",
     );
   }, [flowState]);
-
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-
-    if (
-      searchParams.get("error") == undefined ||
-      searchParams.get("error").length === 0
-    ) {
-      return;
-    }
-
-    let errorCode = "";
-    switch (searchParams.get("error")) {
-      case "access_denied":
-        errorCode = "thirdPartyAccessDenied";
-        break;
-      default:
-        errorCode = "somethingWentWrong";
-        break;
-    }
-
-    const error: HankoError = {
-      name: errorCode,
-      code: errorCode,
-      message: searchParams.get("error_description"),
-    };
-
-    setThirdPartyError(error);
-
-    searchParams.delete("error");
-    searchParams.delete("error_description");
-
-    history.replaceState(
-      null,
-      null,
-      window.location.pathname +
-        (searchParams.size < 1 ? "" : `?${searchParams.toString()}`),
-    );
-  }, []);
 
   return (
     <Fragment>
@@ -211,7 +149,11 @@ const LoginInitPage = (props: Props) => {
         <ErrorBox state={flowState} error={thirdPartyError} />
         {inputs ? (
           <Fragment>
-            <Form onSubmit={onEmailSubmit} maxWidth>
+            <Form
+              flowAction={flowState.actions.continue_with_login_identifier}
+              onSubmit={onEmailSubmit}
+              maxWidth
+            >
               {inputs.email ? (
                 <Input
                   type={"email"}
@@ -244,16 +186,17 @@ const LoginInitPage = (props: Props) => {
                   placeholder={t("labels.emailOrUsername")}
                 />
               )}
-              <Button uiAction={"email-submit"}>{t("labels.continue")}</Button>
+              <Button>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
         ) : null}
-        {flowState.actions.webauthn_generate_request_options?.(null) &&
+        {flowState.actions.webauthn_generate_request_options.enabled &&
         !hidePasskeyButtonOnLogin ? (
-          <Form onSubmit={(event) => onPasskeySubmit(event)}>
+          <Form
+            flowAction={flowState.actions.webauthn_generate_request_options}
+          >
             <Button
-              uiAction={"passkey-submit"}
               secondary
               title={
                 !isWebAuthnSupported ? t("labels.webauthnUnsupported") : null
@@ -265,13 +208,13 @@ const LoginInitPage = (props: Props) => {
             </Button>
           </Form>
         ) : null}
-        {flowState.actions.thirdparty_oauth?.(null)
-          ? flowState.actions
-              .thirdparty_oauth(null)
-              .inputs.provider.allowed_values?.map((v) => {
+        {flowState.actions.thirdparty_oauth.enabled
+          ? flowState.actions.thirdparty_oauth.inputs.provider.allowed_values?.map(
+              (v) => {
                 return (
                   <Form
                     key={v.value}
+                    flowAction={flowState.actions.thirdparty_oauth}
                     onSubmit={(event) => onThirdpartySubmit(event, v.value)}
                   >
                     <Button
@@ -292,9 +235,10 @@ const LoginInitPage = (props: Props) => {
                     </Button>
                   </Form>
                 );
-              })
+              },
+            )
           : null}
-        {flowState.actions.remember_me?.(null) && (
+        {flowState.actions.remember_me.enabled && (
           <Fragment>
             <Spacer />
             <Checkbox
@@ -310,9 +254,9 @@ const LoginInitPage = (props: Props) => {
       <Footer hidden={initialComponentName !== "auth"}>
         <span hidden />
         <Link
-          uiAction={"switch-flow"}
           onClick={onRegisterClick}
           loadingSpinnerPosition={"left"}
+          isLoading={isFlowSwitchLoading}
         >
           {t("labels.dontHaveAnAccount")}
         </Link>

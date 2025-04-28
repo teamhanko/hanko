@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
-
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -12,7 +12,6 @@ import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
-import { WebauthnCredential } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 
 type Props = {
   oldName: string;
@@ -24,6 +23,7 @@ type Props = {
     id: string,
     name: string,
   ) => Promise<void>;
+  flowState: State<"profile_init">;
 };
 
 const RenameWebauthnCredentialPage = ({
@@ -32,6 +32,7 @@ const RenameWebauthnCredentialPage = ({
   onBack,
   credential,
   credentialType,
+  flowState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const [newName, setNewName] = useState<string>(oldName);
@@ -57,6 +58,7 @@ const RenameWebauthnCredentialPage = ({
             : t("texts.renamePasskey")}
         </Paragraph>
         <Form
+          flowAction={flowState.actions.webauthn_credential_rename}
           onSubmit={(event: Event) =>
             onCredentialNameSubmit(event, credential.id, newName)
           }
@@ -76,9 +78,7 @@ const RenameWebauthnCredentialPage = ({
             onInput={onInput}
             autofocus
           />
-          <Button uiAction={"webauthn-credential-rename"}>
-            {t("labels.save")}
-          </Button>
+          <Button>{t("labels.save")}</Button>
         </Form>
       </Content>
       <Footer>

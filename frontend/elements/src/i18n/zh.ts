@@ -204,5 +204,7 @@ export const zh: Translation = {
       "请求已超时、被取消或设备已注册。请重试或尝试使用其他设备。",
     platform_authenticator_required:
       "您的账户配置为使用平台身份验证器，但您当前的设备或浏览器不支持该功能。请尝试使用兼容的设备或浏览器重新进行尝试。",
+    third_party_access_denied:
+      "访问被拒绝。该请求已被用户取消或者供应商由于其他原因拒绝了访问。",
   },
 };

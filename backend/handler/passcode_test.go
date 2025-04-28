@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/config"
@@ -13,10 +18,6 @@ import (
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
 	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func TestPasscodeSuite(t *testing.T) {
@@ -301,13 +302,17 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 				req := httptest.NewRequest(http.MethodPost, "/passcode/login/finalize", bytes.NewReader(bodyJson))
 				req.Header.Set("Content-Type", "application/json")
 				if currentTest.sendSessionTokenInAuthHeader {
-					sessionToken, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(currentTest.userId), nil)
+					sessionToken, _, err := sessionManager.GenerateJWT(dto.UserJWT{
+						UserID: currentTest.userId,
+					})
 					s.Require().NoError(err)
 					req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", sessionToken))
 				}
 
 				if currentTest.sendSessionTokenInCookie {
-					sessionToken, _, err := sessionManager.GenerateJWT(uuid.FromStringOrNil(currentTest.userId), nil)
+					sessionToken, _, err := sessionManager.GenerateJWT(dto.UserJWT{
+						UserID: currentTest.userId,
+					})
 					s.Require().NoError(err)
 
 					sessionCookie, err := sessionManager.GenerateCookie(sessionToken)

@@ -1,15 +1,12 @@
 import { Fragment } from "preact";
 import { StateUpdater, useContext } from "preact/compat";
-
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
-
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
 
 import Accordion from "./Accordion";
 import Paragraph from "../paragraph/Paragraph";
 import Link from "../link/Link";
 import Headline2 from "../headline/Headline2";
-import { WebauthnCredential } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 import { AppContext } from "../../contexts/AppProvider";
 import RenameWebauthnCredentialPage from "../../pages/RenameWebauthnCredentialPage";
 
@@ -17,7 +14,6 @@ type CredentialType = "passkey" | "security-key";
 
 interface Props {
   credentials: WebauthnCredential[];
-  setError: (e: HankoError) => void;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
   onBack: (event: Event) => Promise<void>;
@@ -29,6 +25,7 @@ interface Props {
   onCredentialDelete: (event: Event, id: string) => Promise<void>;
   allowCredentialDeletion?: boolean;
   credentialType: CredentialType;
+  flowState: State<"profile_init">;
 }
 
 const ListWebauthnCredentialsAccordion = ({
@@ -37,9 +34,10 @@ const ListWebauthnCredentialsAccordion = ({
   setCheckedItemID,
   onBack,
   onCredentialNameSubmit,
-  onCredentialDelete,
   allowCredentialDeletion,
   credentialType,
+  onCredentialDelete,
+  flowState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
   const { setPage } = useContext(AppContext);
@@ -57,6 +55,7 @@ const ListWebauthnCredentialsAccordion = ({
         credentialType={credentialType}
         onBack={onBack}
         onCredentialNameSubmit={onCredentialNameSubmit}
+        flowState={flowState}
       />,
     );
   };
@@ -107,8 +106,8 @@ const ListWebauthnCredentialsAccordion = ({
           : t("texts.deletePasskey")}
         <br />
         <Link
-          uiAction={"password-delete"}
           dangerous
+          flowAction={flowState.actions.webauthn_credential_delete}
           onClick={(event) => onCredentialDelete(event, credential.id)}
           loadingSpinnerPosition={"right"}
         >

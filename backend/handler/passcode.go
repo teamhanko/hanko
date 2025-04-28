@@ -404,12 +404,15 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			}
 		}
 
-		var emailJwt *dto.EmailJwt
+		var emailJwt *dto.EmailJWT
 		if e := userModel.Emails.GetPrimary(); e != nil {
-			emailJwt = dto.JwtFromEmailModel(e)
+			emailJwt = dto.EmailJWTFromEmailModel(e)
 		}
 
-		token, rawToken, err := h.sessionManager.GenerateJWT(*passcode.UserId, emailJwt)
+		token, rawToken, err := h.sessionManager.GenerateJWT(dto.UserJWT{
+			UserID: passcode.UserId.String(),
+			Email:  emailJwt,
+		})
 		if err != nil {
 			return fmt.Errorf("failed to generate jwt: %w", err)
 		}

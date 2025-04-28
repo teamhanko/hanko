@@ -1,28 +1,30 @@
 import { h } from "preact";
 import { StateUpdater, useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { EmailCreateInputs } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
 
 import Form from "../form/Form";
 import Input from "../form/Input";
 import Button from "../form/Button";
 import Dropdown from "./Dropdown";
 import ErrorMessage from "../error/ErrorMessage";
+import { State } from "@teamhanko/hanko-frontend-sdk";
+import { AppContext } from "../../contexts/AppProvider";
 
 interface Props {
-  inputs: EmailCreateInputs;
-  onEmailSubmit: (event: Event, email: string) => Promise<void>;
   checkedItemID?: string;
   setCheckedItemID: StateUpdater<string>;
+  flowState: State<"profile_init">;
+  onState(state: State<any>): Promise<void>;
 }
 
 const AddEmailDropdown = ({
-  inputs,
-  onEmailSubmit,
   checkedItemID,
   setCheckedItemID,
+  flowState,
+  onState,
 }: Props) => {
   const { t } = useContext(TranslateContext);
+  const { setUIState } = useContext(AppContext);
   const [newEmail, setNewEmail] = useState<string>();
 
   const onInputHandler = (event: Event) => {
@@ -32,6 +34,16 @@ const AddEmailDropdown = ({
     }
   };
 
+  const onEmailSubmit = async (event: Event, email: string) => {
+    event.preventDefault();
+    setUIState((prev) => ({ ...prev, email }));
+    const nextState = await flowState.actions.email_create.run(
+      { email },
+      { dispatchAfterStateChangeEvent: false },
+    );
+    return onState(nextState);
+  };
+
   return (
     <Dropdown
       name={"email-create-dropdown"}
@@ -39,8 +51,11 @@ const AddEmailDropdown = ({
       checkedItemID={checkedItemID}
       setCheckedItemID={setCheckedItemID}
     >
-      <ErrorMessage flowError={inputs.email?.error} />
+      <ErrorMessage
+        flowError={flowState.actions.email_create.inputs.email?.error}
+      />
       <Form
+        flowAction={flowState.actions.email_create}
         onSubmit={(event: Event) =>
           onEmailSubmit(event, newEmail).then(() => setNewEmail(""))
         }
@@ -51,9 +66,9 @@ const AddEmailDropdown = ({
           placeholder={t("labels.newEmailAddress")}
           onInput={onInputHandler}
           value={newEmail}
-          flowInput={inputs.email}
+          flowInput={flowState.actions.email_create.inputs.email}
         />
-        <Button uiAction={"email-submit"}>{t("labels.save")}</Button>
+        <Button>{t("labels.save")}</Button>
       </Form>
     </Dropdown>
   );

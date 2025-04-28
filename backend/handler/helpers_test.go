@@ -1,14 +1,16 @@
 package handler
 
 import (
+	"net/http"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/dto"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/session"
 	"github.com/teamhanko/hanko/backend/test"
-	"net/http"
-	"time"
 )
 
 func getDefaultSessionManager(storage persistence.Persister) session.Manager {
@@ -19,7 +21,9 @@ func getDefaultSessionManager(storage persistence.Persister) session.Manager {
 
 func generateSessionCookie(storage persistence.Persister, userId uuid.UUID) (*http.Cookie, error) {
 	manager := getDefaultSessionManager(storage)
-	token, rawToken, err := manager.GenerateJWT(userId, nil)
+	token, rawToken, err := manager.GenerateJWT(dto.UserJWT{
+		UserID: userId.String(),
+	})
 	if err != nil {
 		return nil, err
 	}

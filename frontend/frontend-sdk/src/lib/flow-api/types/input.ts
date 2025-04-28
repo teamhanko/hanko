@@ -1,4 +1,4 @@
-import { Error } from "./error";
+import { FlowError } from "./flowError";
 import {
   PublicKeyCredentialWithAssertionJSON,
   PublicKeyCredentialWithAttestationJSON,
@@ -7,12 +7,12 @@ import {
 export interface Input<TValue> {
   readonly name: string;
   readonly type: string;
-  value?: TValue;
+  readonly value?: TValue;
   readonly min_length?: number;
   readonly max_length?: number;
   readonly required?: boolean;
   readonly hidden?: boolean;
-  readonly error?: Error;
+  readonly error?: FlowError;
   readonly allowed_values?: AllowedInputValues[];
 }
 
@@ -46,7 +46,6 @@ export interface RegisterClientCapabilitiesInputs {
   readonly webauthn_available: Input<boolean>;
   readonly webauthn_conditional_mediation_available: Input<boolean>;
   readonly webauthn_platform_authenticator_available: Input<boolean>;
-  readonly trusted_device: Input<boolean>;
 }
 
 export interface ContinueWithLoginIdentifierInputs {

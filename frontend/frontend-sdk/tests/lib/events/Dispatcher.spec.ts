@@ -1,5 +1,5 @@
 import { Dispatcher } from "../../../src/lib/events/Dispatcher";
-import { CustomEventWithDetail, Email, SessionDetail } from "../../../src";
+import { CustomEventWithDetail, SessionDetail } from "../../../src";
 
 describe("Dispatcher", () => {
   let dispatcher: Dispatcher;

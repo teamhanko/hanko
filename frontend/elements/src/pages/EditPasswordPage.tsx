@@ -1,7 +1,7 @@
 import { useContext, useState } from "preact/compat";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -11,8 +11,7 @@ import ErrorBox from "../components/error/ErrorBox";
 import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 type Props = {
   state: State<"login_password_recovery">;
@@ -20,7 +19,6 @@ type Props = {
 
 const EditPasswordPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [password, setPassword] = useState<string>();
 
@@ -32,12 +30,7 @@ const EditPasswordPage = (props: Props) => {
 
   const onPasswordSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("password-submit");
-    const nextState = await flowState.actions
-      .password_recovery({ new_password: password })
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.password_recovery.run({ new_password: password });
   };
 
   return (
@@ -47,23 +40,23 @@ const EditPasswordPage = (props: Props) => {
       <Paragraph>
         {t("texts.passwordFormatHint", {
           minLength:
-            flowState.actions.password_recovery(null).inputs.new_password
-              .min_length,
+            flowState.actions.password_recovery.inputs.new_password.min_length,
           maxLength: 72,
         })}
       </Paragraph>
-      <Form onSubmit={onPasswordSubmit}>
+      <Form
+        flowAction={flowState.actions.password_recovery}
+        onSubmit={onPasswordSubmit}
+      >
         <Input
           type={"password"}
           autocomplete={"new-password"}
-          flowInput={
-            flowState.actions.password_recovery(null).inputs.new_password
-          }
+          flowInput={flowState.actions.password_recovery.inputs.new_password}
           placeholder={t("labels.newPassword")}
           onInput={onPasswordInput}
           autofocus
         />
-        <Button uiAction={"password-submit"}>{t("labels.continue")}</Button>
+        <Button>{t("labels.continue")}</Button>
       </Form>
     </Content>
   );

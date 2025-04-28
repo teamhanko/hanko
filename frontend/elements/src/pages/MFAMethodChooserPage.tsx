@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useContext, useMemo } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -9,9 +9,7 @@ import Button from "../components/form/Button";
 import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 import Paragraph from "../components/paragraph/Paragraph";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
@@ -22,64 +20,27 @@ interface Props {
 
 const MFAMMethodChooserPage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
-
-  const onSecurityKeySubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("passcode-submit");
-    const nextState = await flowState.actions
-      .continue_to_security_key_creation(null)
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onTOTPSubmit = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("password-submit");
-    const nextState = await flowState.actions
-      .continue_to_otp_secret_creation(null)
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onSkipClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("skip");
-    const nextState = await flowState.actions.skip(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onBackClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("back");
-    const nextState = await flowState.actions.back(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
 
   const singleAction = useMemo(() => {
     const { actions } = flowState;
 
     if (
-      actions.continue_to_security_key_creation &&
-      !actions.continue_to_otp_secret_creation
+      actions.continue_to_security_key_creation.enabled &&
+      !actions.continue_to_otp_secret_creation.enabled
     ) {
-      return onSecurityKeySubmit;
+      return actions.continue_to_security_key_creation;
     }
 
     if (
-      !actions.continue_to_security_key_creation &&
-      actions.continue_to_otp_secret_creation
+      !actions.continue_to_security_key_creation.enabled &&
+      actions.continue_to_otp_secret_creation.enabled
     ) {
-      return onTOTPSubmit;
+      return actions.continue_to_otp_secret_creation;
     }
 
     return undefined;
-  }, [flowState, onSecurityKeySubmit, onTOTPSubmit]);
+  }, [flowState]);
 
   return (
     <Fragment>
@@ -88,36 +49,22 @@ const MFAMMethodChooserPage = (props: Props) => {
         <ErrorBox flowError={flowState?.error} />
         <Paragraph>{t("texts.mfaSetUp")}</Paragraph>
         {singleAction ? (
-          <Form onSubmit={singleAction}>
-            <Button uiAction={"passcode-submit"}>{t("labels.continue")}</Button>
+          <Form flowAction={singleAction}>
+            <Button>{t("labels.continue")}</Button>
           </Form>
         ) : (
           <Fragment>
             <Form
-              hidden={
-                !flowState.actions.continue_to_security_key_creation?.(null)
-              }
-              onSubmit={onSecurityKeySubmit}
+              flowAction={flowState.actions.continue_to_security_key_creation}
             >
-              <Button
-                secondary
-                uiAction={"passcode-submit"}
-                icon={"securityKey"}
-              >
+              <Button secondary icon={"securityKey"}>
                 {t("labels.securityKey")}
               </Button>
             </Form>
             <Form
-              hidden={
-                !flowState.actions.continue_to_otp_secret_creation?.(null)
-              }
-              onSubmit={onTOTPSubmit}
+              flowAction={flowState.actions.continue_to_otp_secret_creation}
             >
-              <Button
-                secondary
-                uiAction={"password-submit"}
-                icon={"qrCodeScanner"}
-              >
+              <Button secondary icon={"qrCodeScanner"}>
                 {t("labels.authenticatorApp")}
               </Button>
             </Form>
@@ -126,18 +73,14 @@ const MFAMMethodChooserPage = (props: Props) => {
       </Content>
       <Footer>
         <Link
-          uiAction={"back"}
-          onClick={onBackClick}
           loadingSpinnerPosition={"right"}
-          hidden={!flowState.actions.back?.(null)}
+          flowAction={flowState.actions.back}
         >
           {t("labels.back")}
         </Link>
         <Link
-          uiAction={"skip"}
-          onClick={onSkipClick}
           loadingSpinnerPosition={"left"}
-          hidden={!flowState.actions.skip?.(null)}
+          flowAction={flowState.actions.skip}
         >
           {t("labels.skip")}
         </Link>

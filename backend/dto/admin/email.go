@@ -38,7 +38,7 @@ type EmailRequests interface {
 }
 
 type ListEmailRequestDto struct {
-	UserId string `param:"user_id" validate:"required,uuid4"`
+	UserId string `param:"user_id" validate:"required,uuid"`
 }
 
 type CreateEmailRequestDto struct {

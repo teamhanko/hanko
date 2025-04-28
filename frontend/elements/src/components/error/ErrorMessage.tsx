@@ -1,7 +1,7 @@
 import styles from "./styles.sass";
 import { Fragment, useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { Error as FlowError } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/error";
+import { FlowError } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
   flowError?: FlowError;

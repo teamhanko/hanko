@@ -1,6 +1,11 @@
 import { RequestTimeoutError, TechnicalError } from "../Errors";
 import { Dispatcher } from "../events/Dispatcher";
 import { Cookie } from "../Cookie";
+import { SessionStorage } from "../SessionStorage";
+import { CookieAttributes } from "js-cookie";
+import { HankoOptions } from "../../Hanko";
+
+export type SessionTokenLocation = "cookie" | "sessionStorage";
 
 /**
  * This class wraps an XMLHttpRequest to maintain compatibility with the fetch API.
@@ -110,19 +115,18 @@ class Response {
  *
  * @category SDK
  * @subcategory Internal
- * @property {number} timeout - The http request timeout in milliseconds.
+ * @property {number=} timeout - The http request timeout in milliseconds.
  * @property {string} cookieName - The name of the session cookie set from the SDK.
  * @property {string=} cookieDomain - The domain where cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
- * @property {string} localStorageKey - The prefix / name of the local storage keys.
- * @property {string} lang - The language used by the client(s) to convey to the Hanko API the language to use -
+ * @property {string?} lang - The language used by the client(s) to convey to the Hanko API the language to use -
  *                           e.g. for translating outgoing emails - in a custom header (X-Language).
  */
 export interface HttpClientOptions {
-  timeout: number;
-  cookieName: string;
+  timeout?: number;
+  cookieName?: string;
   cookieDomain?: string;
-  localStorageKey: string;
   lang?: string;
+  sessionTokenLocation?: SessionTokenLocation;
 }
 
 /**
@@ -144,15 +148,21 @@ class HttpClient {
   api: string;
   dispatcher: Dispatcher;
   cookie: Cookie;
+  sessionTokenStorage: SessionStorage;
   lang: string;
+  sessionTokenLocation: SessionTokenLocation;
 
   // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options: HttpClientOptions) {
+  constructor(api: string, options: HankoOptions) {
     this.api = api;
-    this.timeout = options.timeout;
+    this.timeout = options.timeout ?? 13000;
     this.dispatcher = new Dispatcher();
     this.cookie = new Cookie({ ...options });
+    this.sessionTokenStorage = new SessionStorage({
+      keyName: options.cookieName,
+    });
     this.lang = options.lang;
+    this.sessionTokenLocation = options.sessionTokenLocation;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -160,7 +170,7 @@ class HttpClient {
     const self = this;
     const url = this.api + path;
     const timeout = this.timeout;
-    const bearerToken = this.cookie.getAuthCookie();
+    const bearerToken = this.getAuthToken();
     const lang = this.lang;
 
     return new Promise<Response>(function (resolve, reject) {
@@ -192,29 +202,6 @@ class HttpClient {
     });
   }
 
-  // This function is to be removed along with the "Session.isValid()" function, where it is used to check the
-  // session without returning a promise.
-  _fetch_blocking(
-    path: string,
-    options: RequestInit,
-    xhr = new XMLHttpRequest(),
-  ) {
-    const url = this.api + path;
-    const bearerToken = this.cookie.getAuthCookie();
-
-    xhr.open(options.method, url, false);
-    xhr.setRequestHeader("Accept", "application/json");
-    xhr.setRequestHeader("Content-Type", "application/json");
-
-    if (bearerToken) {
-      xhr.setRequestHeader("Authorization", `Bearer ${bearerToken}`);
-    }
-
-    xhr.withCredentials = true;
-    xhr.send(options.body ? options.body.toString() : null);
-
-    return xhr.responseText;
-  }
   /**
    * Processes the response headers on login and extracts the JWT and expiration time.
    *
@@ -252,7 +239,7 @@ class HttpClient {
           ? undefined
           : new Date(new Date().getTime() + expirationSeconds * 1000);
 
-      this.cookie.setAuthCookie(jwt, { secure, expires });
+      this.setAuthToken(jwt, { secure, expires });
     }
   }
 
@@ -328,6 +315,38 @@ class HttpClient {
     return this._fetch(path, {
       method: "DELETE",
     });
+  }
+
+  /**
+   * Returns the session token either from the cookie or the sessionStorage.
+   * @private
+   * @return {string}
+   */
+  private getAuthToken(): string {
+    let token = "";
+    switch (this.sessionTokenLocation) {
+      case "cookie":
+        token = this.cookie.getAuthCookie();
+        break;
+      case "sessionStorage":
+        token = this.sessionTokenStorage.getSessionToken();
+    }
+    return token;
+  }
+
+  /**
+   * Stores the session token either in a cookie or in the sessionStorage depending on the configuration.
+   * @param {string} token - The session token to be stored.
+   * @param {CookieAttributes} options - Options for setting the auth cookie.
+   * @private
+   */
+  private setAuthToken(token: string, options: CookieAttributes) {
+    switch (this.sessionTokenLocation) {
+      case "cookie":
+        return this.cookie.setAuthCookie(token, options);
+      case "sessionStorage":
+        return this.sessionTokenStorage.setSessionToken(token);
+    }
   }
 }
 

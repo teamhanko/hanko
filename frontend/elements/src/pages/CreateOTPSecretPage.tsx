@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
-import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Button from "../components/form/Button";
 import Content from "../components/wrapper/Content";
@@ -13,8 +13,7 @@ import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import OTPCreationDetails from "../components/otp/OTPCreationDetails";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 
 interface Props {
   state: State<"mfa_otp_secret_creation">;
@@ -24,22 +23,15 @@ const CreateOTPSecretPage = (props: Props) => {
   const numberOfDigits = 6;
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
-  const { hanko, uiState, setLoadingAction, stateHandler } =
-    useContext(AppContext);
   const [passcodeDigits, setPasscodeDigits] = useState<string[]>([]);
 
   const submitPasscode = useCallback(
     async (code: string) => {
-      setLoadingAction("passcode-submit");
-
-      const nextState = await flowState.actions
-        .otp_code_verify({ otp_code: code })
-        .run();
-
-      setLoadingAction(null);
-      await hanko.flow.run(nextState, stateHandler);
+      return flowState.actions.otp_code_verify.run({
+        otp_code: code,
+      });
     },
-    [flowState, setLoadingAction, stateHandler],
+    [flowState],
   );
 
   const onPasscodeInput = (digits: string[]) => {
@@ -53,14 +45,6 @@ const CreateOTPSecretPage = (props: Props) => {
   const onPasscodeSubmit = async (event: Event) => {
     event.preventDefault();
     return submitPasscode(passcodeDigits.join(""));
-  };
-
-  const onBackClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("back");
-    const nextState = await flowState.actions.back(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
   };
 
   useEffect(() => {
@@ -78,20 +62,22 @@ const CreateOTPSecretPage = (props: Props) => {
           secret={flowState.payload.otp_secret}
         />
         <Paragraph>{t("texts.otpEnterVerificationCode")}</Paragraph>
-        <Form onSubmit={onPasscodeSubmit}>
+        <Form
+          flowAction={flowState.actions.otp_code_verify}
+          onSubmit={onPasscodeSubmit}
+        >
           <CodeInput
             onInput={onPasscodeInput}
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
           />
-          <Button uiAction={"passcode-submit"}>{t("labels.continue")}</Button>
+          <Button>{t("labels.continue")}</Button>
         </Form>
       </Content>
       <Footer>
         <Link
-          onClick={onBackClick}
+          flowAction={flowState.actions.back}
           loadingSpinnerPosition={"right"}
-          isLoading={uiState.loadingAction === "back"}
         >
           {t("labels.back")}
         </Link>

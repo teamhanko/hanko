@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { useContext, useEffect, useMemo, useRef } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { Input as FlowInput } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
+import { Input as FlowInput } from "@teamhanko/hanko-frontend-sdk";
 import { AppContext } from "../../contexts/AppProvider";
 import cx from "classnames";
 
@@ -16,12 +16,12 @@ interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
 
 const Input = ({ label, ...props }: Props) => {
   const ref = useRef(null);
-  const { isDisabled } = useContext(AppContext);
+  const { uiState } = useContext(AppContext);
   const { t } = useContext(TranslateContext);
 
   const disabled = useMemo(
-    () => isDisabled || props.disabled,
-    [props, isDisabled],
+    () => uiState.isDisabled || props.disabled,
+    [props, uiState],
   );
 
   useEffect(() => {

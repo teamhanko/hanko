@@ -1,7 +1,6 @@
 import { Fragment, useContext, useState } from "preact/compat";
-
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { AppContext } from "../contexts/AppProvider";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
@@ -10,8 +9,7 @@ import Button from "../components/form/Button";
 import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 import Footer from "../components/wrapper/Footer";
 import Link from "../components/link/Link";
 
@@ -21,7 +19,6 @@ type Props = {
 
 const CreateUsernamePage = (props: Props) => {
   const { t } = useContext(TranslateContext);
-  const {  hanko, stateHandler, setLoadingAction } = useContext(AppContext);
   const { flowState } = useFlowState(props.state);
   const [username, setUsername] = useState<string>();
 
@@ -33,20 +30,7 @@ const CreateUsernamePage = (props: Props) => {
 
   const onUsernameSubmit = async (event: Event) => {
     event.preventDefault();
-    setLoadingAction("username-set");
-    const nextState = await flowState.actions
-      .username_create({ username })
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
-  const onSkipClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("skip");
-    const nextState = await flowState.actions.skip(null).run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
+    return flowState.actions.username_create.run({ username });
   };
 
   return (
@@ -54,26 +38,26 @@ const CreateUsernamePage = (props: Props) => {
       <Content>
         <Headline1>{t("headlines.createUsername")}</Headline1>
         <ErrorBox state={flowState} />
-        <Form onSubmit={onUsernameSubmit}>
+        <Form
+          flowAction={flowState.actions.username_create}
+          onSubmit={onUsernameSubmit}
+        >
           <Input
             type={"text"}
             autoComplete={"username"}
             autoCorrect={"off"}
-            flowInput={
-              flowState.actions.username_create?.(null).inputs.username
-            }
+            flowInput={flowState.actions.username_create.inputs.username}
             onInput={onUsernameInput}
             value={username}
             placeholder={t("labels.username")}
           />
-          <Button uiAction={"username-set"}>{t("labels.continue")}</Button>
+          <Button>{t("labels.continue")}</Button>
         </Form>
       </Content>
-      <Footer hidden={!flowState.actions.skip?.(null)}>
+      <Footer hidden={!flowState.actions.skip.enabled}>
         <span hidden />
         <Link
-          uiAction={"skip"}
-          onClick={onSkipClick}
+          flowAction={flowState.actions.skip}
           loadingSpinnerPosition={"left"}
         >
           {t("labels.skip")}

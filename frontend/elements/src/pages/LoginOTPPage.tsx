@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
-import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Button from "../components/form/Button";
 import Content from "../components/wrapper/Content";
@@ -11,8 +11,7 @@ import CodeInput from "../components/form/CodeInput";
 import ErrorBox from "../components/error/ErrorBox";
 import Paragraph from "../components/paragraph/Paragraph";
 import Headline1 from "../components/headline/Headline1";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
-import { useFlowState } from "../contexts/FlowState";
+import { useFlowState } from "../hooks/UseFlowState";
 import Link from "../components/link/Link";
 
 interface Props {
@@ -23,21 +22,13 @@ const LoginOTPPAge = (props: Props) => {
   const numberOfDigits = 6;
   const { t } = useContext(TranslateContext);
   const { flowState } = useFlowState(props.state);
-  const { hanko, setLoadingAction, stateHandler } = useContext(AppContext);
   const [passcodeDigits, setPasscodeDigits] = useState<string[]>([]);
 
   const submitPasscode = useCallback(
     async (code: string) => {
-      setLoadingAction("passcode-submit");
-
-      const nextState = await flowState.actions
-        .otp_code_validate({ otp_code: code })
-        .run();
-
-      setLoadingAction(null);
-      await hanko.flow.run(nextState, stateHandler);
+      return flowState.actions.otp_code_validate.run({ otp_code: code });
     },
-    [hanko, flowState, setLoadingAction, stateHandler],
+    [flowState],
   );
 
   const onPasscodeInput = (digits: string[]) => {
@@ -53,16 +44,6 @@ const LoginOTPPAge = (props: Props) => {
     return submitPasscode(passcodeDigits.join(""));
   };
 
-  const onClick = async (event: Event) => {
-    event.preventDefault();
-    setLoadingAction("skip");
-    const nextState = await flowState.actions
-      .continue_to_login_security_key(null)
-      .run();
-    setLoadingAction(null);
-    await hanko.flow.run(nextState, stateHandler);
-  };
-
   useEffect(() => {
     if (flowState.error?.code === "passcode_invalid") setPasscodeDigits([]);
   }, [flowState]);
@@ -73,23 +54,24 @@ const LoginOTPPAge = (props: Props) => {
         <Headline1>{t(`headlines.otpLogin`)}</Headline1>
         <ErrorBox state={flowState} />
         <Paragraph>{t("texts.otpLogin")}</Paragraph>
-        <Form onSubmit={onPasscodeSubmit}>
+        <Form
+          flowAction={flowState.actions.otp_code_validate}
+          onSubmit={onPasscodeSubmit}
+        >
           <CodeInput
             onInput={onPasscodeInput}
             passcodeDigits={passcodeDigits}
             numberOfInputs={numberOfDigits}
           />
-          <Button uiAction={"passcode-submit"}>{t("labels.continue")}</Button>
+          <Button>{t("labels.continue")}</Button>
         </Form>
       </Content>
       <Footer
-        hidden={!flowState.actions.continue_to_login_security_key?.(null)}
+        hidden={!flowState.actions.continue_to_login_security_key.enabled}
       >
         <Link
-          uiAction={"skip"}
-          onClick={onClick}
           loadingSpinnerPosition={"right"}
-          hidden={!flowState.actions.continue_to_login_security_key?.(null)}
+          flowAction={flowState.actions.continue_to_login_security_key}
         >
           {t("labels.useAnotherMethod")}
         </Link>
