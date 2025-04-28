@@ -1,14 +1,13 @@
 import { Fragment } from "preact";
 import { useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import Content from "../components/wrapper/Content";
 import Form from "../components/form/Form";
 import Button from "../components/form/Button";
 import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
-
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 
 import { useFlowState } from "../hooks/UseFlowState";
 import Paragraph from "../components/paragraph/Paragraph";

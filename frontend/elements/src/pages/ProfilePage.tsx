@@ -1,7 +1,7 @@
 import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import { useFlowState } from "../hooks/UseFlowState";
 import { AppContext } from "../contexts/AppProvider";

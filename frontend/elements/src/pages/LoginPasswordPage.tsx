@@ -1,5 +1,6 @@
 import { Fragment } from "preact";
 import { useContext, useEffect, useMemo, useState } from "preact/compat";
+import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
@@ -11,7 +12,6 @@ import Button from "../components/form/Button";
 import ErrorBox from "../components/error/ErrorBox";
 import Link from "../components/link/Link";
 import Headline1 from "../components/headline/Headline1";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
 import { useFlowState } from "../hooks/UseFlowState";
 
 type Props = {

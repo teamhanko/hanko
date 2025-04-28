@@ -1,7 +1,7 @@
 import { h } from "preact";
 import { useContext, useEffect, useMemo, useRef } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { Input as FlowInput } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/input";
+import { Input as FlowInput } from "@teamhanko/hanko-frontend-sdk";
 import { AppContext } from "../../contexts/AppProvider";
 import cx from "classnames";
 

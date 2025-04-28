@@ -5,9 +5,11 @@ import {
   useMemo,
   useState,
 } from "preact/compat";
-
-import { HankoError, WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
-import { State } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/State";
+import {
+  State,
+  HankoError,
+  WebauthnSupport,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";

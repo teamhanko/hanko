@@ -18,7 +18,7 @@ import {
   TechnicalError,
   State,
   FlowName,
-  Error as FlowError,
+  FlowError,
   LastLogin,
   StateInitConfig,
 } from "@teamhanko/hanko-frontend-sdk";

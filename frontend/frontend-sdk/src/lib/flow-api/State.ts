@@ -1,7 +1,7 @@
 import { Hanko } from "../../Hanko";
 import { Actions, Payloads, StateName } from "./types/state";
 import { Input } from "./types/input";
-import { Error } from "./types/error";
+import { FlowError } from "./types/flowError";
 import { Action as ActionType } from "./types/action";
 import { AnyState, FlowName, FlowResponse } from "./types/flow";
 import { autoSteps } from "./auto-steps";
@@ -69,7 +69,7 @@ type ExtractInputValues<TInputs> = {
 export class State<TState extends StateName = StateName> {
   public readonly name: TState;
   public readonly flowName: FlowName;
-  public error?: Error;
+  public error?: FlowError;
   public readonly payload?: Payloads[TState];
   public readonly actions: ActionMap<TState>;
   public readonly csrfToken: string;
@@ -368,11 +368,11 @@ export class State<TState extends StateName = StateName> {
 
   /**
    * Creates an error flow response.
-   * @param {Error} error - The error to include in the response.
+   * @param {FlowError} error - The error to include in the response.
    * @returns {FlowResponse<"error">} A flow response with error details.
    * @private
    */
-  private static createErrorResponse(error: Error): FlowResponse<"error"> {
+  private static createErrorResponse(error: FlowError): FlowResponse<"error"> {
     return {
       actions: null,
       csrf_token: "",
@@ -447,7 +447,7 @@ export class Action<TInputs> {
    * @param {ActionRunConfig} [config={}] - Configuration options.
    * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after state change.
    * @returns {Promise<AnyState>} A promise resolving to the next state.
-   * @throws {Error} If the action is disabled or already invoked.
+   * @throws {FlowError} If the action is disabled or already invoked.
    */
   async run(
     inputValues: ExtractInputValues<TInputs> = null,

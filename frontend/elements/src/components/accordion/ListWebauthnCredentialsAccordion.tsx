@@ -1,15 +1,12 @@
 import { Fragment } from "preact";
 import { StateUpdater, useContext } from "preact/compat";
-
-import { State } from "@teamhanko/hanko-frontend-sdk";
-
 import { TranslateContext } from "@denysvuika/preact-translate";
+import { State, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
 
 import Accordion from "./Accordion";
 import Paragraph from "../paragraph/Paragraph";
 import Link from "../link/Link";
 import Headline2 from "../headline/Headline2";
-import { WebauthnCredential } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
 import { AppContext } from "../../contexts/AppProvider";
 import RenameWebauthnCredentialPage from "../../pages/RenameWebauthnCredentialPage";
 

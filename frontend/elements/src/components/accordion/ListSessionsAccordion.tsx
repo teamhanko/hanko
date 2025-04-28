@@ -1,11 +1,11 @@
-import { Session } from "@teamhanko/hanko-frontend-sdk/dist/lib/flow-api/types/payload";
-import { State } from "@teamhanko/hanko-frontend-sdk";
 import { StateUpdater, useContext } from "preact/compat";
+import { TranslateContext } from "@denysvuika/preact-translate";
+import { State, Session } from "@teamhanko/hanko-frontend-sdk";
+
 import Accordion from "./Accordion";
 import { Fragment } from "preact";
 import Paragraph from "../paragraph/Paragraph";
 import Headline2 from "../headline/Headline2";
-import { TranslateContext } from "@denysvuika/preact-translate";
 import Link from "../link/Link";
 import styles from "./styles.sass";
 
