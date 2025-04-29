@@ -330,6 +330,10 @@ class HttpClient {
         break;
       case "sessionStorage":
         token = this.sessionTokenStorage.getSessionToken();
+        break;
+      default:
+        token = this.cookie.getAuthCookie();
+        break;
     }
     return token;
   }
@@ -346,6 +350,8 @@ class HttpClient {
         return this.cookie.setAuthCookie(token, options);
       case "sessionStorage":
         return this.sessionTokenStorage.setSessionToken(token);
+      default:
+        return this.cookie.setAuthCookie(token, options);
     }
   }
 }

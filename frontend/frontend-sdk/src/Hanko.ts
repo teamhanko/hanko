@@ -63,7 +63,6 @@ class Hanko extends Listener {
       localStorageKey: "hanko",
       sessionCheckInterval: 30000,
       sessionCheckChannelName: "hanko-session-check",
-      sessionTokenLocation: "cookie",
       ...options,
     };
 
