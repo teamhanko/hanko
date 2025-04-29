@@ -45,7 +45,7 @@ const LoginOTPPAge = (props: Props) => {
   };
 
   useEffect(() => {
-    if (flowState.error?.code === "passcode_invalid") setPasscodeDigits([]);
+    setPasscodeDigits([]);
   }, [flowState]);
 
   return (
