@@ -63,7 +63,8 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 	code := c.Input().Get("otp_code").String()
 
 	if !totp.Validate(code, userModel.OTPSecret.Secret) {
-		return c.Error(shared.ErrorPasscodeInvalid)
+		c.Input().SetError("otp_code", shared.ErrorPasscodeInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	err = c.Stash().Set(shared.StashPathMFAUsageMethod, "totp")

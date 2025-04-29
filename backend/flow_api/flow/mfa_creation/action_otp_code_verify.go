@@ -39,7 +39,8 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 	secret := c.Stash().Get(shared.StashPathOTPSecret).String()
 
 	if !totp.Validate(code, secret) {
-		return c.Error(shared.ErrorPasscodeInvalid)
+		c.Input().SetError("otp_code", shared.ErrorPasscodeInvalid)
+		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
 	_ = c.Stash().Set(shared.StashPathUserHasOTPSecret, true)

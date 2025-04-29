@@ -60,7 +60,8 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 				}
 			}
 
-			return c.Error(shared.ErrorPasscodeInvalid)
+			c.Input().SetError("code", shared.ErrorPasscodeInvalid)
+			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
 
 		if errors.Is(err, services.ErrorPasscodeMaxAttemptsReached) {

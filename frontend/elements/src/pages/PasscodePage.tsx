@@ -62,8 +62,6 @@ const PasscodePage = (props: Props) => {
     return submitPasscode(passcodeDigits.join(""));
   };
 
-
-
   useEffect(() => {
     const timer = ttl > 0 && setInterval(() => setTtl(ttl - 1), 1000);
     return () => clearInterval(timer);
@@ -85,7 +83,7 @@ const PasscodePage = (props: Props) => {
   }, [resendAfter]);
 
   useEffect(() => {
-    if (flowState.error?.code === "passcode_invalid") setPasscodeDigits([]);
+    setPasscodeDigits([]);
     if (flowState.payload.resend_after >= 0) {
       setResendAfter(flowState.payload.resend_after);
     }
