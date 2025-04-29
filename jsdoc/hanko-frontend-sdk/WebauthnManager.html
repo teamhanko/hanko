@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Scheduler</title>
+  <title> WebauthnManager</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Class</p>
-                    <h1>Scheduler</h1>
+                    <h1>WebauthnManager</h1>
                 </header>
                 
 
@@ -85,9 +85,10 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>Scheduler<span class="signature">(checkInterval, checkSession, onSessionExpired)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>WebauthnManager<span class="signature">()</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Manages scheduling for periodic and timeout-based session checks.</div>
+            <div class="class-description">Manages WebAuthn credential operations as a singleton, ensuring only one active request at a time.
+Uses an internal AbortController to cancel previous requests when a new one is initiated.</div>
         
     
 </header>
@@ -106,12 +107,12 @@
 
 
     
-    <h4 class="name" id="Scheduler">
-        <a class="href-link" href="#Scheduler">#</a>
+    <h4 class="name" id="WebauthnManager">
+        <a class="href-link" href="#WebauthnManager">#</a>
         
         <span class="code-name">
             
-                new Scheduler<span class="signature">(checkInterval, checkSession, onSessionExpired)</span><span class="type-signature"></span>
+                new WebauthnManager<span class="signature">()</span><span class="type-signature"></span>
             
         </span>
     </h4>
@@ -127,107 +128,6 @@
 
 
 
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>checkInterval</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The interval in milliseconds between periodic session checks.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>checkSession</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">SessionCheckCallback</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The callback function to perform a session check.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>onSessionExpired</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">SessionExpiredCallback</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The callback function to handle session timeout events.</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
 
 
 
@@ -266,9 +166,9 @@
 
     
         <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_WebauthnManager.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line11">line 11</a>
+                <a href="lib_flow-api_WebauthnManager.ts.html">lib/flow-api/WebauthnManager.ts</a>, <a href="lib_flow-api_WebauthnManager.ts.html#line7">line 7</a>
             </span>
         </p>
     
@@ -307,13 +207,6 @@
     
 
     
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="Scheduler.html">Scheduler</a></dt>
-            <dd></dd>
-        </dl>
-    
 
     
 
@@ -332,12 +225,16 @@
 
 
     
-    <h4 class="name" id="calcTimeToNextCheck">
-        <a class="href-link" href="#calcTimeToNextCheck">#</a>
+    <h4 class="name" id=".getInstance">
+        <a class="href-link" href="#.getInstance">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
         
         <span class="code-name">
             
-                calcTimeToNextCheck<span class="signature">(lastCheck)</span><span class="type-signature"> &rarr; {number}</span>
+                getInstance<span class="signature">()</span><span class="type-signature"> &rarr; {<a href="WebauthnManager.html">WebauthnManager</a>}</span>
             
         </span>
     </h4>
@@ -346,7 +243,135 @@
     
     
     <div class="description">
-        Calculates the time until the next session check should occur.
+        Gets the singleton instance of WebauthnManager.
+Creates a new instance if one doesn't exist, otherwise returns the existing one.
+    </div>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    
+
+    
+
+    
+
+    
+        <p class="tag-source">
+            <a href="lib_flow-api_WebauthnManager.ts.html" class="button">View Source</a>
+            <span>
+                <a href="lib_flow-api_WebauthnManager.ts.html">lib/flow-api/WebauthnManager.ts</a>, <a href="lib_flow-api_WebauthnManager.ts.html#line85">line 85</a>
+            </span>
+        </p>
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'>The singleton instance</div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<code class="param-type"><a href="WebauthnManager.html">WebauthnManager</a></code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+
+</div>
+            
+                <div class="member">
+
+
+    
+    <h4 class="name" id="createWebauthnCredential">
+        <a class="href-link" href="#createWebauthnCredential">#</a>
+        
+            
+                <span class='tag'>async</span>
+            
+        
+        <span class="code-name">
+            
+                createWebauthnCredential<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise.&lt;PublicKeyCredentialWithAttestationJSON>}</span>
+            
+        </span>
+    </h4>
+    
+
+    
+    
+    <div class="description">
+        Creates a new WebAuthn credential using the provided options.
+Aborts any previous request before starting a new one.
     </div>
     
 
@@ -384,13 +409,13 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>lastCheck</code></td>
+      <td class="name"><code>options</code></td>
   
 
   <td class="type">
   
       
-<code class="param-type">number</code>
+<code class="param-type">CredentialCreationOptionsJSON</code>
 
 
   
@@ -400,7 +425,7 @@
 
   
 
-  <td class="description last">The timestamp (in milliseconds) of the last session check.</td>
+  <td class="description last">The options for credential creation</td>
 </tr>
 
 
@@ -446,9 +471,9 @@
 
     
         <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_WebauthnManager.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line177">line 177</a>
+                <a href="lib_flow-api_WebauthnManager.ts.html">lib/flow-api/WebauthnManager.ts</a>, <a href="lib_flow-api_WebauthnManager.ts.html#line126">line 126</a>
             </span>
         </p>
     
@@ -469,6 +494,27 @@
 
 
 
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+    <div class='param-desc column is-7'>If the WebAuthn request fails (e.g., aborted, not allowed)</div>
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+<code class="param-type">DOMException</code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
 
 
     <div class='columns method-parameter'>
@@ -479,13 +525,13 @@
 
 <div class="columns">
     
-    <div class='param-desc column is-7'>The time in milliseconds until the next check should be performed.</div>
+    <div class='param-desc column is-7'>A promise resolving to the created credential</div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<code class="param-type">number</code>
+<code class="param-type">Promise.&lt;PublicKeyCredentialWithAttestationJSON></code>
 
 
     </div>
@@ -505,12 +551,16 @@
 
 
     
-    <h4 class="name" id="isRunning">
-        <a class="href-link" href="#isRunning">#</a>
+    <h4 class="name" id="getConditionalWebauthnCredential">
+        <a class="href-link" href="#getConditionalWebauthnCredential">#</a>
+        
+            
+                <span class='tag'>async</span>
+            
         
         <span class="code-name">
             
-                isRunning<span class="signature">()</span><span class="type-signature"> &rarr; {boolean}</span>
+                getConditionalWebauthnCredential<span class="signature">(publicKey)</span><span class="type-signature"> &rarr; {Promise.&lt;PublicKeyCredentialWithAssertionJSON>}</span>
             
         </span>
     </h4>
@@ -519,130 +569,8 @@
     
     
     <div class="description">
-        Checks if the scheduler is currently running.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line162">line 162</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
-    
-    <div class='param-desc column is-7'>True if the scheduler is running; otherwise, false.</div>
-    
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">boolean</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="scheduleSessionExpiry">
-        <a class="href-link" href="#scheduleSessionExpiry">#</a>
-        
-        <span class="code-name">
-            
-                scheduleSessionExpiry<span class="signature">(timeToExpiration)</span><span class="type-signature"> &rarr; {void}</span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        Handles the session expiration when it is about to expire soon.
-Stops any ongoing checks and schedules a timeout for the expiration.
+        Retrieves a WebAuthn credential with conditional UI mediation.
+Aborts any previous request before starting a new one.
     </div>
     
 
@@ -680,13 +608,13 @@ Stops any ongoing checks and schedules a timeout for the expiration.
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>timeToExpiration</code></td>
+      <td class="name"><code>publicKey</code></td>
   
 
   <td class="type">
   
       
-<code class="param-type">number</code>
+<code class="param-type">CredentialRequestOptionsJSON</code>
 
 
   
@@ -696,7 +624,7 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
   
 
-  <td class="description last">The time in milliseconds until the session expires.</td>
+  <td class="description last">The public key options for conditional retrieval</td>
 </tr>
 
 
@@ -742,9 +670,9 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
     
         <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_WebauthnManager.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line139">line 139</a>
+                <a href="lib_flow-api_WebauthnManager.ts.html">lib/flow-api/WebauthnManager.ts</a>, <a href="lib_flow-api_WebauthnManager.ts.html#line115">line 115</a>
             </span>
         </p>
     
@@ -765,6 +693,27 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
 
 
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+    <div class='param-desc column is-7'>If the WebAuthn request fails (e.g., aborted, not allowed)</div>
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+<code class="param-type">DOMException</code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
 
 
     <div class='columns method-parameter'>
@@ -775,11 +724,13 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
 <div class="columns">
     
+    <div class='param-desc column is-7'>A promise resolving to the retrieved credential</div>
+    
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<code class="param-type">void</code>
+<code class="param-type">Promise.&lt;PublicKeyCredentialWithAssertionJSON></code>
 
 
     </div>
@@ -799,12 +750,16 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
 
     
-    <h4 class="name" id="sessionExpiresSoon">
-        <a class="href-link" href="#sessionExpiresSoon">#</a>
+    <h4 class="name" id="getWebauthnCredential">
+        <a class="href-link" href="#getWebauthnCredential">#</a>
+        
+            
+                <span class='tag'>async</span>
+            
         
         <span class="code-name">
             
-                sessionExpiresSoon<span class="signature">(expiration)</span><span class="type-signature"> &rarr; {boolean}</span>
+                getWebauthnCredential<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise.&lt;PublicKeyCredentialWithAssertionJSON>}</span>
             
         </span>
     </h4>
@@ -813,7 +768,8 @@ Stops any ongoing checks and schedules a timeout for the expiration.
     
     
     <div class="description">
-        Checks if the session is about to expire.
+        Retrieves a WebAuthn credential using the provided options.
+Aborts any previous request before starting a new one.
     </div>
     
 
@@ -851,13 +807,13 @@ Stops any ongoing checks and schedules a timeout for the expiration.
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>expiration</code></td>
+      <td class="name"><code>options</code></td>
   
 
   <td class="type">
   
       
-<code class="param-type">number</code>
+<code class="param-type">CredentialRequestOptionsJSON</code>
 
 
   
@@ -867,7 +823,7 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
   
 
-  <td class="description last">Timestamp when the session will expire.</td>
+  <td class="description last">The options for credential retrieval</td>
 </tr>
 
 
@@ -913,9 +869,9 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
     
         <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_WebauthnManager.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line169">line 169</a>
+                <a href="lib_flow-api_WebauthnManager.ts.html">lib/flow-api/WebauthnManager.ts</a>, <a href="lib_flow-api_WebauthnManager.ts.html#line104">line 104</a>
             </span>
         </p>
     
@@ -936,23 +892,17 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
 
 
-
-
     <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-2"><label>Throws:</label></div>
         <div class="column is-10">
             
                     
-
 <div class="columns">
     
-    <div class='param-desc column is-7'>True if the session is about to expire; otherwise, false.</div>
-    
-    
+    <div class='param-desc column is-7'>If the WebAuthn request fails (e.g., aborted, not allowed)</div>
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
-        
-<code class="param-type">boolean</code>
+<code class="param-type">DOMException</code>
 
 
     </div>
@@ -965,179 +915,6 @@ Stops any ongoing checks and schedules a timeout for the expiration.
 
 
 
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="start">
-        <a class="href-link" href="#start">#</a>
-        
-        <span class="code-name">
-            
-                start<span class="signature">(lastCheck, expiration)</span><span class="type-signature"> &rarr; {void}</span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        Starts the session check process.
-Determines when the next check should run based on the last known check time and session expiration.
-If the session is expiring soon, schedules an expiration event instead of starting periodic checks.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-<div class="table-container">
-    <table class="params table">
-        <thead>
-        <tr>
-            
-            <th>Name</th>
-            
-
-            <th>Type</th>
-
-            
-
-            
-
-            <th class="last">Description</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>lastCheck</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The timestamp (in milliseconds) of the last session check.</td>
-</tr>
-
-
-        
-
-            
-<tr class="deep-level-0">
-  
-      <td class="name"><code>expiration</code></td>
-  
-
-  <td class="type">
-  
-      
-<code class="param-type">number</code>
-
-
-  
-  </td>
-
-  
-
-  
-
-  <td class="description last">The timestamp (in milliseconds) of when the session expires.</td>
-</tr>
-
-
-        
-        </tbody>
-    </table>
-</div>
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line150">line 150</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     <div class='columns method-parameter'>
         <div class="column is-2"><label>Returns:</label></div>
         <div class="column is-10">
@@ -1146,131 +923,13 @@ If the session is expiring soon, schedules an expiration event instead of starti
 
 <div class="columns">
     
-    
-    <div class='column is-5 has-text-left'>
-        <label>Type: </label>
-        
-<code class="param-type">void</code>
-
-
-    </div>
-    
-</div>
-
-                
-        </div>
-    </div>
-
-
-
-
-</div>
-            
-                <div class="member">
-
-
-    
-    <h4 class="name" id="stop">
-        <a class="href-link" href="#stop">#</a>
-        
-        <span class="code-name">
-            
-                stop<span class="signature">()</span><span class="type-signature"> &rarr; {void}</span>
-            
-        </span>
-    </h4>
-    
-
-    
-    
-    <div class="description">
-        Stops the session check process and clears all timers.
-    </div>
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    
-
-    
-
-    
-
-    
-        <p class="tag-source">
-            <a href="lib_events_Scheduler.ts.html" class="button">View Source</a>
-            <span>
-                <a href="lib_events_Scheduler.ts.html">lib/events/Scheduler.ts</a>, <a href="lib_events_Scheduler.ts.html#line156">line 156</a>
-            </span>
-        </p>
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    <div class='columns method-parameter'>
-        <div class="column is-2"><label>Returns:</label></div>
-        <div class="column is-10">
-            
-                    
-
-<div class="columns">
+    <div class='param-desc column is-7'>A promise resolving to the retrieved credential</div>
     
     
     <div class='column is-5 has-text-left'>
         <label>Type: </label>
         
-<code class="param-type">void</code>
+<code class="param-type">Promise.&lt;PublicKeyCredentialWithAssertionJSON></code>
 
 
     </div>

@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> Hanko.ts</title>
+  <title> lib/flow-api/WebauthnManager.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -76,7 +76,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>Hanko.ts</h1>
+                    <h1>lib/flow-api/WebauthnManager.ts</h1>
                 </header>
                 
 
@@ -85,177 +85,99 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import { Listener } from "./lib/events/Listener";
-import { Relay } from "./lib/events/Relay";
-import { Cookie, CookieSameSite } from "./lib/Cookie";
-import { SessionClient } from "./lib/client/SessionClient";
-import { HttpClient, SessionTokenLocation } from "./lib/client/HttpClient";
-import { FlowName } from "./lib/flow-api/types/flow";
-import { StateCreateConfig, State } from "./lib/flow-api/State";
-import { UserClient } from "./lib/client/UserClient";
-import { SessionCheckResponse } from "./lib/Dto";
-import { User } from "./lib/flow-api/types/payload";
+            <pre class="prettyprint source linenums"><code>import {
+  CredentialRequestOptionsJSON,
+  CredentialCreationOptionsJSON,
+  PublicKeyCredentialWithAssertionJSON,
+  PublicKeyCredentialWithAttestationJSON,
+  create,
+  get,
+} from "@github/webauthn-json";
 
 /**
- * The options for the Hanko class
- *
- * @interface
- * @property {number=} timeout - The http request timeout in milliseconds. Defaults to 13000ms
- * @property {string=} cookieName - The name of the session cookie set from the SDK. Defaults to "hanko"
- * @property {string=} cookieDomain - The domain where the cookie set from the SDK is available. Defaults to the domain of the page where the cookie was created.
- * @property {string=} cookieSameSite - Specify whether/when cookies are sent with cross-site requests. Defaults to "lax".
- * @property {string=} localStorageKey - The prefix / name of the local storage keys. Defaults to "hanko"
- * @property {string=} lang - Used to convey the preferred language to the API, e.g. for translating outgoing emails.
- *                            It is transmitted to the API in a custom header (X-Language).
- *                            Should match one of the supported languages ("bn", "de", "en", "fr", "it, "pt-BR", "zh")
- *                            if email delivery by Hanko is enabled. If email delivery by Hanko is disabled and the
- *                            relying party configures a webhook for the "email.send" event, then the set language is
- *                            reflected in the payload of the token contained in the webhook request.
- * @property {number=} sessionCheckInterval -  Interval for session validity checks in milliseconds. Must be greater than 3000 (3s), defaults to 3000 otherwise.
- * @property {string=} sessionCheckChannelName - The broadcast channel name for inter-tab communication.
- * @property {string=} sessionTokenLocation - The location where the session token is stored.
+ * Manages WebAuthn credential operations as a singleton, ensuring only one active request at a time.
+ * Uses an internal AbortController to cancel previous requests when a new one is initiated.
  */
-export interface HankoOptions {
-  timeout?: number;
-  cookieName?: string;
-  cookieDomain?: string;
-  cookieSameSite?: CookieSameSite;
-  localStorageKey?: string;
-  lang?: string;
-  sessionCheckInterval?: number;
-  sessionCheckChannelName?: string;
-  sessionTokenLocation?: SessionTokenLocation;
-}
+class WebauthnManager {
+  private static instance: WebauthnManager | null = null;
+  private abortController = new AbortController();
+  // eslint-disable-next-line no-useless-constructor,require-jsdoc
+  private constructor() {}
 
-/**
- * A class that bundles all available SDK functions.
- *
- * @extends {Listener}
- * @param {string} api - The URL of your Hanko API instance
- * @param {HankoOptions=} options - The options that can be used
- */
-class Hanko extends Listener {
-  private readonly session: SessionClient;
-  private readonly user: UserClient;
-  private readonly cookie: Cookie;
-  public readonly client: HttpClient;
-  public readonly relay: Relay;
+  /**
+   * Gets the singleton instance of WebauthnManager.
+   * Creates a new instance if one doesn't exist, otherwise returns the existing one.
+   * @returns {WebauthnManager} The singleton instance
+   */
+  public static getInstance(): WebauthnManager {
+    if (!WebauthnManager.instance) {
+      WebauthnManager.instance = new WebauthnManager();
+    }
+    return WebauthnManager.instance;
+  }
 
-  // eslint-disable-next-line require-jsdoc
-  constructor(api: string, options?: HankoOptions) {
-    super();
-    const opts: HankoOptions = {
-      timeout: 13000,
-      cookieName: "hanko",
-      localStorageKey: "hanko",
-      sessionCheckInterval: 30000,
-      sessionCheckChannelName: "hanko-session-check",
+  /**
+   * Creates a new abort signal, aborting any ongoing WebAuthn request.
+   * @private
+   * @returns {AbortSignal} The new abort signal
+   */
+  private createAbortSignal(): AbortSignal {
+    this.abortController.abort(); // Cancel any ongoing request
+    this.abortController = new AbortController();
+    return this.abortController.signal;
+  }
+
+  /**
+   * Retrieves a WebAuthn credential using the provided options.
+   * Aborts any previous request before starting a new one.
+   * @param {CredentialRequestOptionsJSON} options - The options for credential retrieval
+   * @returns {Promise&lt;PublicKeyCredentialWithAssertionJSON>} A promise resolving to the retrieved credential
+   * @throws {DOMException} If the WebAuthn request fails (e.g., aborted, not allowed)
+   */
+  public async getWebauthnCredential(
+    options: CredentialRequestOptionsJSON,
+  ): Promise&lt;PublicKeyCredentialWithAssertionJSON> {
+    return await get({
       ...options,
-    };
-
-    /**
-     *  @public
-     *  @type {Client}
-     */
-    this.client = new HttpClient(api, opts);
-    /**
-     *  @public
-     *  @type {SessionClient}
-     */
-    this.session = new SessionClient(api, opts);
-    /**
-     *  @public
-     *  @type {SessionClient}
-     */
-    this.user = new UserClient(api, opts);
-    /**
-     *  @public
-     *  @type {Relay}
-     */
-    this.relay = new Relay(api, opts);
-    /**
-     *  @public
-     *  @type {Cookie}
-     */
-    this.cookie = new Cookie(opts);
+      signal: this.createAbortSignal(),
+    });
   }
 
   /**
-   * Sets the preferred language on the underlying sub-clients. The clients'
-   * base HttpClient uses this language to transmit an X-Language header to the
-   * API which is then used to e.g. translate outgoing emails.
-   *
-   * @public
-   * @param lang {string} - The preferred language to convey to the API.
+   * Retrieves a WebAuthn credential with conditional UI mediation.
+   * Aborts any previous request before starting a new one.
+   * @param {CredentialRequestOptionsJSON} publicKey - The public key options for conditional retrieval
+   * @returns {Promise&lt;PublicKeyCredentialWithAssertionJSON>} A promise resolving to the retrieved credential
+   * @throws {DOMException} If the WebAuthn request fails (e.g., aborted, not allowed)
    */
-  setLang(lang: string) {
-    this.client.lang = lang;
+  public async getConditionalWebauthnCredential(
+    publicKey: CredentialRequestOptionsJSON["publicKey"],
+  ): Promise&lt;PublicKeyCredentialWithAssertionJSON> {
+    return await get({
+      publicKey,
+      mediation: "conditional" as CredentialMediationRequirement,
+      signal: this.createAbortSignal(),
+    });
   }
 
   /**
-   * Creates a new flow state for the specified flow.
-   *
-   * This method initializes a state by either loading from cache (if configured) or fetching from the server.
-   * It uses the provided configuration to control caching, event dispatching, and auto-step behavior.
-   *
-   * @param {FlowName} flowName - The name of the flow to create a state for.
-   * @param {StateCreateConfig} [config={}] - Configuration options for state creation.
-   * @param {boolean} [config.dispatchAfterStateChangeEvent=true] - Whether to dispatch an event after the state changes.
-   * @param {AutoStepExclusion} [config.excludeAutoSteps=null] - States to exclude from auto-step processing, or `"all"` to skip all auto-steps.
-   * @param {string} [config.cacheKey="hanko-flow-state"] - Key used for caching the state in localStorage.
-   * @param {boolean} [config.loadFromCache=true] - Whether to attempt loading the state from cache.
-   * @returns {Promise&lt;AnyState>} A promise that resolves to the created flow state.
-   * @category SDK
-   * @subcategory FlowAPI
+   * Creates a new WebAuthn credential using the provided options.
+   * Aborts any previous request before starting a new one.
+   * @param {CredentialCreationOptionsJSON} options - The options for credential creation
+   * @returns {Promise&lt;PublicKeyCredentialWithAttestationJSON>} A promise resolving to the created credential
+   * @throws {DOMException} If the WebAuthn request fails (e.g., aborted, not allowed)
    */
-  createState(flowName: FlowName, config: StateCreateConfig = {}) {
-    return State.create(this, flowName, config);
-  }
-
-  /**
-   * Retrieves the current user's profile information.
-   *
-   * @public
-   * @returns {Promise&lt;User>} A promise that resolves to the user object
-   * @throws {UnauthorizedError} If the user is not authenticated
-   * @throws {TechnicalError} If an unexpected error occurs
-   */
-  async getUser(): Promise&lt;User> {
-    return this.user.getCurrent();
-  }
-
-  /**
-   * Validates the current session.
-   *
-   * @public
-   * @returns {Promise&lt;SessionCheckResponse>} A promise that resolves to the session check response
-   */
-  async validateSession(): Promise&lt;SessionCheckResponse> {
-    return this.session.validate();
-  }
-
-  /**
-   * Retrieves the current session token from the authentication cookie.
-   *
-   * @public
-   * @returns {string} The session token
-   */
-  getSessionToken(): string {
-    return this.cookie.getAuthCookie();
-  }
-
-  /**
-   * Logs out the current user by invalidating the session.
-   *
-   * @public
-   * @returns {Promise&lt;void>} A promise that resolves when the logout is complete
-   */
-  async logout(): Promise&lt;void> {
-    return this.user.logout();
+  public async createWebauthnCredential(
+    options: CredentialCreationOptionsJSON,
+  ): Promise&lt;PublicKeyCredentialWithAttestationJSON> {
+    return await create({
+      ...options,
+      signal: this.createAbortSignal(),
+    });
   }
 }
 
-export { Hanko };
+export default WebauthnManager;
 </code></pre>
         </article>
     </section>

@@ -5,7 +5,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> WindowActivityManager</title>
+  <title> Action</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -74,7 +74,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Class</p>
-                    <h1>WindowActivityManager</h1>
+                    <h1>Action</h1>
                 </header>
                 
 
@@ -85,9 +85,9 @@
 
 <header>
     
-        <h2><span class="attribs"><span class="type-signature"></span></span>WindowActivityManager<span class="signature">(onActivityCallback, onInactivityCallback)</span><span class="type-signature"></span></h2>
+        <h2><span class="attribs"><span class="type-signature"></span></span>Action<span class="signature">(action, parentState, enabled<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span></h2>
         
-            <div class="class-description">Manages window focus and blur events.</div>
+            <div class="class-description">Represents an actionable operation within a state.</div>
         
     
 </header>
@@ -106,18 +106,22 @@
 
 
     
-    <h4 class="name" id="WindowActivityManager">
-        <a class="href-link" href="#WindowActivityManager">#</a>
+    <h4 class="name" id="Action">
+        <a class="href-link" href="#Action">#</a>
         
         <span class="code-name">
             
-                new WindowActivityManager<span class="signature">(onActivityCallback, onInactivityCallback)</span><span class="type-signature"></span>
+                new Action<span class="signature">(action, parentState, enabled<span class="signature-attributes">opt</span>)</span><span class="type-signature"></span>
             
         </span>
     </h4>
     
 
     
+    
+    <div class="description">
+        Constructs a new Action instance.
+    </div>
     
 
 
@@ -141,7 +145,11 @@
             <th>Type</th>
 
             
+            <th>Attributes</th>
+            
 
+            
+            <th>Default</th>
             
 
             <th class="last">Description</th>
@@ -154,23 +162,35 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>onActivityCallback</code></td>
+      <td class="name"><code>action</code></td>
   
 
   <td class="type">
   
       
-<code class="param-type">Callback</code>
+<code class="param-type">ActionType.&lt;TInputs></code>
 
 
   
   </td>
 
   
+      <td class="attributes">
+      
 
+      
+
+      
+      </td>
   
 
-  <td class="description last">Callback to invoke when the window gains focus.</td>
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last">The action type definition.</td>
 </tr>
 
 
@@ -179,23 +199,76 @@
             
 <tr class="deep-level-0">
   
-      <td class="name"><code>onInactivityCallback</code></td>
+      <td class="name"><code>parentState</code></td>
   
 
   <td class="type">
   
       
-<code class="param-type">Callback</code>
+<code class="param-type"><a href="State.html">State</a></code>
 
 
   
   </td>
 
   
+      <td class="attributes">
+      
 
+      
+
+      
+      </td>
   
 
-  <td class="description last">Callback to invoke when the window loses focus.</td>
+  
+      <td class="default">
+      
+      </td>
+  
+
+  <td class="description last">The state this action belongs to.</td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>enabled</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">boolean</code>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          true
+      
+      </td>
+  
+
+  <td class="description last">Whether the action is enabled.</td>
 </tr>
 
 
@@ -241,9 +314,9 @@
 
     
         <p class="tag-source">
-            <a href="lib_events_WindowActivityManager.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_State.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_WindowActivityManager.ts.html">lib/events/WindowActivityManager.ts</a>, <a href="lib_events_WindowActivityManager.ts.html#line11">line 11</a>
+                <a href="lib_flow-api_State.ts.html">lib/flow-api/State.ts</a>, <a href="lib_flow-api_State.ts.html#line268">line 268</a>
             </span>
         </p>
     
@@ -285,7 +358,10 @@
         <h3 class="subsection-title">Classes</h3>
 
         <dl>
-            <dt><a href="WindowActivityManager.html">WindowActivityManager</a></dt>
+            <dt><a href="Action.html">Action</a></dt>
+            <dd></dd>
+        
+            <dt><a href="Action_Action.html">Action</a></dt>
             <dd></dd>
         </dl>
     
@@ -297,26 +373,120 @@
     
 
     
+
+    
         <div class='vertical-section'>
-            <h1>Members</h1>
+            <h1>Methods</h1>
             <div class="members">
             
                 <div class="member">
 
-<h4 class="name" id="hasFocus">
-    <a class="href-link" href="#hasFocus">#</a>
+
     
-    <span class="code-name">
-        hasFocus
-    </span>
+    <h4 class="name" id=".createDisabled">
+        <a class="href-link" href="#.createDisabled">#</a>
+        
+            
+                <span class='tag'>static</span>
+            
+        
+        <span class="code-name">
+            
+                createDisabled<span class="signature">(name, parentState)</span><span class="type-signature"> &rarr; {<a href="Action.html">Action</a>.&lt;TInputs>}</span>
+            
+        </span>
+    </h4>
     
-</h4>
+
+    
+    
+    <div class="description">
+        Creates a disabled action instance.
+    </div>
+    
 
 
 
 
-<div class="description">
-    Checks if the current window has focus.
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>name</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">string</code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">The name of the action.</td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>parentState</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type"><a href="State.html">State</a></code>
+
+
+  
+  </td>
+
+  
+
+  
+
+  <td class="description last">The state this action belongs to.</td>
+</tr>
+
+
+        
+        </tbody>
+    </table>
 </div>
 
 
@@ -356,14 +526,55 @@
 
     
         <p class="tag-source">
-            <a href="lib_events_WindowActivityManager.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_State.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_WindowActivityManager.ts.html">lib/events/WindowActivityManager.ts</a>, <a href="lib_events_WindowActivityManager.ts.html#line53">line 53</a>
+                <a href="lib_flow-api_State.ts.html">lib/flow-api/State.ts</a>, <a href="lib_flow-api_State.ts.html#line511">line 511</a>
             </span>
         </p>
     
 </dl>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'>A disabled action instance.</div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<code class="param-type"><a href="Action.html">Action</a>.&lt;TInputs></code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -372,20 +583,190 @@
             
                 <div class="member">
 
-<h4 class="name" id="hasFocus">
-    <a class="href-link" href="#hasFocus">#</a>
+
     
-    <span class="code-name">
-        hasFocus
-    </span>
+    <h4 class="name" id="run">
+        <a class="href-link" href="#run">#</a>
+        
+            
+                <span class='tag'>async</span>
+            
+        
+        <span class="code-name">
+            
+                run<span class="signature">(inputValues<span class="signature-attributes">opt</span>, config<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Promise.&lt;AnyState>}</span>
+            
+        </span>
+    </h4>
     
-</h4>
+
+    
+    
+    <div class="description">
+        Executes the action, transitioning to a new state.
+    </div>
+    
 
 
 
 
-<div class="description">
-    Checks if the current window has focus.
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+<div class="table-container">
+    <table class="params table">
+        <thead>
+        <tr>
+            
+            <th>Name</th>
+            
+
+            <th>Type</th>
+
+            
+            <th>Attributes</th>
+            
+
+            
+            <th>Default</th>
+            
+
+            <th class="last">Description</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>inputValues</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">ExtractInputValues.&lt;TInputs></code>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          null
+      
+      </td>
+  
+
+  <td class="description last">Values for the action's inputs.</td>
+</tr>
+
+
+        
+
+            
+<tr class="deep-level-0">
+  
+      <td class="name"><code>config</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">ActionRunConfig</code>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          {}
+      
+      </td>
+  
+
+  <td class="description last">Configuration options.</td>
+</tr>
+
+  
+  
+    
+<tr class="deep-level-1">
+  
+      <td class="name"><code>dispatchAfterStateChangeEvent</code></td>
+  
+
+  <td class="type">
+  
+      
+<code class="param-type">boolean</code>
+
+
+  
+  </td>
+
+  
+      <td class="attributes">
+      
+          &lt;optional><br>
+      
+
+      
+
+      
+      </td>
+  
+
+  
+      <td class="default">
+      
+          true
+      
+      </td>
+  
+
+  <td class="description last">Whether to dispatch an event after state change.</td>
+</tr>
+
+  
+
+
+        
+        </tbody>
+    </table>
 </div>
 
 
@@ -425,14 +806,76 @@
 
     
         <p class="tag-source">
-            <a href="lib_events_WindowActivityManager.ts.html" class="button">View Source</a>
+            <a href="lib_flow-api_State.ts.html" class="button">View Source</a>
             <span>
-                <a href="lib_events_WindowActivityManager.ts.html">lib/events/WindowActivityManager.ts</a>, <a href="lib_events_WindowActivityManager.ts.html#line82">line 82</a>
+                <a href="lib_flow-api_State.ts.html">lib/flow-api/State.ts</a>, <a href="lib_flow-api_State.ts.html#line522">line 522</a>
             </span>
         </p>
     
 </dl>
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Throws:</label></div>
+        <div class="column is-10">
+            
+                    
+<div class="columns">
+    
+    <div class='param-desc column is-7'>If the action is disabled or already invoked.</div>
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+<code class="param-type">FlowError</code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
+
+
+
+    <div class='columns method-parameter'>
+        <div class="column is-2"><label>Returns:</label></div>
+        <div class="column is-10">
+            
+                    
+
+<div class="columns">
+    
+    <div class='param-desc column is-7'>A promise resolving to the next state.</div>
+    
+    
+    <div class='column is-5 has-text-left'>
+        <label>Type: </label>
+        
+<code class="param-type">Promise.&lt;AnyState></code>
+
+
+    </div>
+    
+</div>
+
+                
+        </div>
+    </div>
 
 
 
@@ -441,8 +884,6 @@
             
             </div>
         </div>
-    
-
     
 
     
