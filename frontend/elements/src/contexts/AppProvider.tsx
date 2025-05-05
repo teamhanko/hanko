@@ -49,9 +49,6 @@ import DeviceTrustPage from "../pages/DeviceTrustPage";
 
 import SignalLike = JSXInternal.SignalLike;
 
-type ExperimentalFeature = "conditionalMediation";
-type ExperimentalFeatures = ExperimentalFeature[];
-
 export type ComponentName =
   | "auth"
   | "login"
@@ -85,7 +82,6 @@ interface Context {
   init: (compName: ComponentName) => void;
   componentName: ComponentName;
   setComponentName: StateUpdater<ComponentName>;
-  experimentalFeatures?: ExperimentalFeatures;
   lang: string;
   hidePasskeyButtonOnLogin: boolean;
   prefilledEmail?: string;
@@ -101,7 +97,6 @@ export const AppContext = createContext<Context>(null);
 
 interface Props {
   lang?: string | SignalLike<string>;
-  experimental?: string;
   prefilledEmail?: string;
   prefilledUsername?: string;
   componentName: ComponentName;
@@ -112,7 +107,6 @@ interface Props {
 
 const AppProvider = ({
   lang,
-  experimental = "",
   prefilledEmail,
   prefilledUsername,
   globalOptions,
@@ -155,15 +149,6 @@ const AppProvider = ({
       events: null,
     }),
     [authComponentFlow],
-  );
-
-  const experimentalFeatures = useMemo(
-    () =>
-      experimental
-        .split(" ")
-        .filter((feature) => feature.length)
-        .map((feature) => feature as ExperimentalFeature),
-    [experimental],
   );
 
   const initComponent = useMemo(() => <InitPage />, []);
@@ -396,7 +381,6 @@ const AppProvider = ({
         prefilledUsername,
         componentName,
         setComponentName,
-        experimentalFeatures,
         hidePasskeyButtonOnLogin,
         page,
         setPage,
