@@ -152,7 +152,7 @@ Fetches the current user's profile information.
     - `security_keys`: An optional array of WebAuthn credentials (security key-based authentication).
     - `mfa_config`: An optional configuration object for multi-factor authentication settings.
     - `emails`: An optional array of email objects (e.g., `{ address: string, is_primary: boolean, is_verified: boolean }`).
-    - `username`: An optional username object (e.g., `{ value: string }`).
+    - `username`: An optional username object (e.g., `{ id: string, username: string }`).
     - `created_at`: A string timestamp (ISO 8601) of when the user was created.
     - `updated_at`: A string timestamp (ISO 8601) of when the user was last updated.
 - **Errors**: `UnauthorizedError` (invalid or expired session), `TechnicalError` (server or network issues).
@@ -165,7 +165,7 @@ try {
     // {
     //   user_id: "123e4567-e89b-12d3-a456-426614174000",
     //   emails: [{ address: "user@example.com", is_primary: true, is_verified: true }],
-    //   username: { value: "johndoe" },
+    //   username: { id: "f2882293-3c39-451d-a7cb-4cf3375e0c66", username: "johndoe" },
     //   created_at: "2025-01-01T10:00:00Z",
     //   updated_at: "2025-04-01T12:00:00Z"
     // }
