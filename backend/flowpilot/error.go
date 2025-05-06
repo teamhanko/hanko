@@ -2,7 +2,6 @@ package flowpilot
 
 import (
 	"fmt"
-	"net/http"
 	"strings"
 )
 
@@ -153,23 +152,6 @@ func newInputErrorWithCause(code, message string, cause error) InputError {
 func (e *defaultInputError) Wrap(err error) InputError {
 	return newInputErrorWithCause(e.code, e.message, err)
 }
-
-// Predefined flow error types
-var (
-	ErrorTechnical             = NewFlowError("technical_error", "Something went wrong.", http.StatusInternalServerError)
-	ErrorFlowExpired           = NewFlowError("flow_expired_error", "The flow has expired.", http.StatusGone)
-	ErrorFlowDiscontinuity     = NewFlowError("flow_discontinuity_error", "The flow can't be continued.", http.StatusInternalServerError)
-	ErrorOperationNotPermitted = NewFlowError("operation_not_permitted_error", "The operation is not permitted.", http.StatusForbidden)
-	ErrorFormDataInvalid       = NewFlowError("form_data_invalid_error", "Form data invalid.", http.StatusBadRequest)
-)
-
-// Predefined input error types
-var (
-	ErrorValueMissing  = NewInputError("value_missing_error", "The value is missing.")
-	ErrorValueInvalid  = NewInputError("value_invalid_error", "The value is invalid.")
-	ErrorValueTooLong  = NewInputError("value_too_long_error", "The value is too long.")
-	ErrorValueTooShort = NewInputError("value_too_short_error", "The value is too short.")
-)
 
 func createMustBeOneOfError(values []string) InputError {
 	return NewInputError("value_invalid_error", fmt.Sprintf("The value is invalid. Must be one of: %s", strings.Join(values, ",")))
