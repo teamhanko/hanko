@@ -24,8 +24,6 @@ that provides the underlying functionalities.
   - [Adding New Translations](#adding-new-translations)
   - [Using External Files](#using-external-files)
   - [Fallback Language](#fallback-language)
-- [Experimental Features](#experimental-features)
-  - [Conditional Mediation / Autofill assisted Requests](#conditional-mediation--autofill-assisted-requests)
 - [Live Demo](#live-demo)
 - [Examples](#examples)
 - [Frontend framework integrations](#frontend-framework-integrations)
@@ -190,8 +188,6 @@ Dedicated UI for the registration:
 - `prefilled-email` Used to prefill the email input field.
 - `prefilled-username` Used to prefill the username input field.
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
-- `experimental` A space-separated list of experimental features to be enabled.
-  See [experimental features](#experimental-features).
 
 #### &lt;hanko-profile&gt;
 
@@ -639,23 +635,6 @@ If you use Hanko Elements the language supplied to the `lang` attribute of any o
 to the Hanko API the language to use for outgoing emails. If you have disabled email delivery through Hanko and
 configured a webhook for the `email.send` event, the value for the `lang` attribute is reflected in the JWT payload of
 the token contained in the webhook request in the `language` claim.
-
-## Experimental Features
-
-### Conditional Mediation / Autofill assisted Requests
-
-```html
-<hanko-auth [...] experimental="conditionalMediation" />
-```
-
-If the browser supports autofill assisted requests, it will hide the "Sign in with passkey" button on the login page and
-instead present the available passkeys via the email input's autocompletion menu. Enabling this feature will currently
-cause the following issues:
-
-- On iOS 16/Safari you may encounter an issue that WebAuthn credential registration is not working the first time you
-  press the button or only after reloading the page.
-
-- Microsoft Edge v. 108 sometimes crashes or is not able to display the credential name properly.
 
 ## Live Demo
 

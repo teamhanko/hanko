@@ -9,7 +9,6 @@ import { defaultTranslations, Translations } from "./i18n/translations";
 import { SessionTokenLocation } from "@teamhanko/hanko-frontend-sdk/dist/lib/client/HttpClient";
 
 export interface HankoAuthAdditionalProps {
-  experimental?: string;
   prefilledEmail?: string;
   prefilledUsername?: string;
 }
@@ -123,7 +122,6 @@ export const register = async (
   const observedAttributes = [
     "api",
     "lang",
-    "experimental",
     "prefilled-email",
     "entry",
   ];
