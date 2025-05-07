@@ -56,6 +56,8 @@ export type ComponentName =
   | "profile"
   | "events";
 
+export type HankoAuthMode = "registration" | "login";
+
 export interface GlobalOptions {
   hanko?: Hanko;
   injectStyles?: boolean;
@@ -99,6 +101,7 @@ interface Props {
   lang?: string | SignalLike<string>;
   prefilledEmail?: string;
   prefilledUsername?: string;
+  mode?: HankoAuthMode;
   componentName: ComponentName;
   globalOptions: GlobalOptions;
   children?: ComponentChildren;
@@ -138,7 +141,9 @@ const AppProvider = ({
     props.componentName,
   );
 
-  const [authComponentFlow, setAuthComponentFlow] = useState<FlowName>("login");
+  const [authComponentFlow, setAuthComponentFlow] = useState<FlowName>(
+    props.mode ?? "login",
+  );
 
   const componentFlowNameMap = useMemo<Record<ComponentName, FlowName>>(
     () => ({
