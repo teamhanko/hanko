@@ -188,6 +188,7 @@ Dedicated UI for the registration:
 - `prefilled-email` Used to prefill the email input field.
 - `prefilled-username` Used to prefill the username input field.
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
+- `mode` Accepts either "login" or "registration" to initialize the `<hanko-auth>` component with a login or registration flow, respectively.
 
 #### &lt;hanko-profile&gt;
 
