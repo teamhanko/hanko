@@ -38,7 +38,7 @@ type Session struct {
 	ShowOnProfile bool `yaml:"show_on_profile" json:"show_on_profile,omitempty" koanf:"show_on_profile" jsonschema:"default=true"`
 	// Deprecated. Use settings in parent object.
 	//`server_side` contains configuration for server-side sessions.
-	ServerSide *ServerSide `yaml:"server_side" json:"server_side" koanf:"server_side"`
+	ServerSide *ServerSide `yaml:"server_side" json:"server_side,omitempty" koanf:"server_side"`
 	// `jwt_template` defines a template for adding custom `claims` to session JWTs.
 	//
 	// These claims are processed at JWT generation time and can include static values,
