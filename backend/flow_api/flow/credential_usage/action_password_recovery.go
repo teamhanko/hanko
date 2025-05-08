@@ -30,7 +30,8 @@ func (a PasswordRecovery) Initialize(c flowpilot.InitializationContext) {
 
 	c.AddInputs(flowpilot.PasswordInput("new_password").
 		Required(true).
-		MinLength(deps.Cfg.Password.MinLength),
+		MinLength(deps.Cfg.Password.MinLength).
+		MaxLength(72),
 	)
 
 	if !deps.Cfg.Password.Enabled {
@@ -40,6 +41,10 @@ func (a PasswordRecovery) Initialize(c flowpilot.InitializationContext) {
 
 func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 	deps := a.GetDeps(c)
+
+	if valid := c.ValidateInputData(); !valid {
+		return c.Error(flowpilot.ErrorFormDataInvalid)
+	}
 
 	newPassword := c.Input().Get("new_password").String()
 
