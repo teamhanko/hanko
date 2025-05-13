@@ -228,7 +228,7 @@ export class Relay extends Dispatcher {
     sessionTokenLocation: SessionTokenLocation,
     sessionCheckChannelName?: string,
   ): string | undefined {
-    if (sessionTokenLocation == "cookie") {
+    if (sessionTokenLocation !== "sessionStorage") {
       return sessionCheckChannelName;
     }
     let channelName = sessionStorage.getItem("sessionCheckChannelName");
