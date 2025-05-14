@@ -3,6 +3,7 @@ import registerCustomElement from "@teamhanko/preact-custom-element";
 import AppProvider, {
   ComponentName,
   GlobalOptions,
+  HankoAuthMode,
 } from "./contexts/AppProvider";
 import { CookieSameSite, Hanko } from "@teamhanko/hanko-frontend-sdk";
 import { defaultTranslations, Translations } from "./i18n/translations";
@@ -11,6 +12,7 @@ import { SessionTokenLocation } from "@teamhanko/hanko-frontend-sdk/dist/lib/cli
 export interface HankoAuthAdditionalProps {
   prefilledEmail?: string;
   prefilledUsername?: string;
+  mode?: HankoAuthMode;
 }
 
 export declare interface HankoAuthElementProps
@@ -124,6 +126,7 @@ export const register = async (
     "lang",
     "prefilled-email",
     "entry",
+    "mode",
   ];
 
   options = {
