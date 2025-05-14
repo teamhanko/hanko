@@ -10,7 +10,7 @@ import (
 	"github.com/teamhanko/hanko/backend/dto"
 )
 
-func TestProcessJWTTEmplate(t *testing.T) {
+func TestProcessJWTTemplate(t *testing.T) {
 	tests := []struct {
 		name           string
 		claims         map[string]interface{}
