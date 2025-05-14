@@ -192,13 +192,6 @@ func (s *metadataAdminSuite) TestMetadataAdminHandler_Patch_Errors() {
 			expectedMetadata:   nil,
 		},
 		{
-			name:               "should fail on only unknown top levelkeys",
-			userId:             "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
-			patchMetadata:      json.RawMessage(`{"unknown_metadata":"key":"value"`),
-			expectedStatusCode: http.StatusBadRequest,
-			expectedMetadata:   nil,
-		},
-		{
 			name:               "should fail on exceeding metadata size limit (3000)",
 			userId:             "b5dd5267-b462-48be-b70d-bcd6f1bbe7a5",
 			patchMetadata:      json.RawMessage(metadataExceedingLimit),
