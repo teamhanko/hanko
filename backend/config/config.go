@@ -23,7 +23,7 @@ type Config struct {
 	// `covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session
 	// configuration options to the new ones. If set to `false`, these values have to be set manually if non-default
 	// values should be used.
-	ConvertLegacyServerSideSessionConfig bool `yaml:"convert_legacy_server_side_session_config" json:"convert_legacy_server_side_session_config" koanf:"convert_legacy_server_side_session_config" split_words:"true" jsonschema:"default=true"`
+	ConvertLegacyServerSideSessionConfig bool `yaml:"convert_legacy_server_side_session_config" json:"convert_legacy_server_side_session_config,omitempty" koanf:"convert_legacy_server_side_session_config" split_words:"true" jsonschema:"default=true"`
 	// `database` configures database connection settings.
 	Database Database `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"title=database"`
 	// `debug`, if set to `true`, adds additional debugging information to flow API responses.
@@ -69,7 +69,7 @@ type Config struct {
 	// `webhooks` configures HTTP-based callbacks for specific events occurring in the system.
 	Webhooks WebhookSettings `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks" jsonschema:"title=webhooks"`
 	// `privacy` configures privacy settings
-	Privacy Privacy `yaml:"privacy" json:"privacy" koanf:"privacy" jsonschema:"title=privacy"`
+	Privacy Privacy `yaml:"privacy" json:"privacy,omitempty" koanf:"privacy" jsonschema:"title=privacy"`
 }
 
 var (
