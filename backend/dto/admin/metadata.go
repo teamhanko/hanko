@@ -25,7 +25,7 @@ func (m *PatchMetadataRequest) UnmarshalJSON(data []byte) error {
 	}
 
 	if body.Raw == "" || (body.Raw != "null" && !body.IsObject()) {
-		return errors.New("patch metadata must be null ")
+		return errors.New("patch metadata must be null or object")
 	}
 
 	var validResultKeys []string
