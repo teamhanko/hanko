@@ -2,6 +2,7 @@ package session
 
 import (
 	"encoding/json"
+	"github.com/stretchr/testify/require"
 	"github.com/tidwall/gjson"
 	"testing"
 
@@ -61,7 +62,7 @@ func TestProcessJWTTemplate(t *testing.T) {
 					"A": "a",
 					"B": ["a", "b", "c"],
 					"C": {
-						"D": ["a", 1, true],
+						"D": ["a", 1, true]
 					}
 				}
 			}`),
@@ -115,7 +116,7 @@ func TestProcessJWTTemplate(t *testing.T) {
 			},
 			expectedClaims: json.RawMessage(`{
 				"user_id": "48986f51-d9c8-4f22-89e9-fb7fab959399",
-				"username": "test_user"
+				"username": "test_user",
 				"email": {
 					"address": "test@example.com",
 					"is_verified": true,
@@ -127,7 +128,7 @@ func TestProcessJWTTemplate(t *testing.T) {
 					},
 					"unsafe_metadata": {
 						"unsafe_key": "unsafe_value"
-					},
+					}
 				}
 			}`),
 		},
@@ -156,7 +157,7 @@ func TestProcessJWTTemplate(t *testing.T) {
 			expectedClaims: json.RawMessage(`{
 				"greeting": "Hello test@example.com",
 				"greeting_pipelined": "Hello test@example.com",
-				"verification_msg_conditional": "Verified user test@example.com"
+				"verification_msg_conditional": "Verified user test@example.com",
 				"verification_msg_conditional_pretty": "Verified user test@example.com"
 			}`),
 		},
@@ -230,13 +231,13 @@ func TestProcessJWTTemplate(t *testing.T) {
 						"genre": "Sci-Fi Shooter",
 						"playtime_hours": 87.6
 					}
-				]
+				],
 				"favorite_games_with_playtime_over_100": {
 					"name": "Legends of Valor",
 					"genre": "RPG",
 					"playtime_hours": 142.3
-				}
-				"favorite_genres": ["RPG", "Sci-Fi Shooter"]
+				},
+				"favorite_genres": ["RPG", "Sci-Fi Shooter"],
 				"ui_theme": "dark"
 			}`),
 		},
@@ -251,6 +252,9 @@ func TestProcessJWTTemplate(t *testing.T) {
 			privateClaims := token.PrivateClaims()
 			privateClaimsBytes, err := json.Marshal(privateClaims)
 			assert.NoError(t, err)
+
+			require.True(t, gjson.ValidBytes(tt.expectedClaims))
+			require.True(t, gjson.ValidBytes(privateClaimsBytes))
 
 			assert.Equal(
 				t,
