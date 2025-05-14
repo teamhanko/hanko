@@ -274,10 +274,6 @@
       },
       "additionalProperties": false,
       "type": "object",
-      "required": [
-        "convert_legacy_server_side_session_config",
-        "privacy"
-      ],
       "description": "Config is the central configuration type"
     },
     "Cookie": {
@@ -1301,10 +1297,7 @@
         }
       },
       "additionalProperties": false,
-      "type": "object",
-      "required": [
-        "server_side"
-      ]
+      "type": "object"
     },
     "TOTP": {
       "properties": {
