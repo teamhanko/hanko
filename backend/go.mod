@@ -166,7 +166,7 @@ require (
 	github.com/xeipuuv/gojsonschema v1.2.0 // indirect
 	go.opentelemetry.io/otel v1.15.0 // indirect
 	go.opentelemetry.io/otel/trace v1.15.0 // indirect
-	golang.org/x/net v0.37.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sync v0.12.0 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
