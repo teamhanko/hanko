@@ -451,7 +451,11 @@ func (s *metadataAdminSuite) TestMetadataAdminHandler_Patch() {
 
 				// Verify the response contains correct updated metadata
 				var metadataResponse *admin.Metadata
-				s.NoError(json.Unmarshal(rec.Body.Bytes(), &metadataResponse))
+				if rec.Code == http.StatusOK {
+					s.NoError(json.Unmarshal(rec.Body.Bytes(), &metadataResponse))
+				} else if rec.Code == http.StatusNoContent {
+					s.Nil(rec.Body.Bytes())
+				}
 				if currentTest.expectedMetadata == nil {
 					s.Nil(metadataResponse)
 				} else {
