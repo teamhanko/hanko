@@ -49,7 +49,7 @@ func (h *MetadataAdminHandler) GetMetadata(c echo.Context) error {
 	response := admin.NewMetadata(metadataModel)
 
 	if response == nil {
-		return c.JSON(http.StatusNoContent, nil)
+		return c.NoContent(http.StatusNoContent)
 	}
 	return c.JSON(http.StatusOK, response)
 }
@@ -97,7 +97,7 @@ func (h *MetadataAdminHandler) PatchMetadata(c echo.Context) error {
 	response := admin.NewMetadata(currentMetadataModel)
 
 	if response == nil {
-		return c.JSON(http.StatusNoContent, nil)
+		return c.NoContent(http.StatusNoContent)
 	}
 	return c.JSON(http.StatusOK, response)
 }

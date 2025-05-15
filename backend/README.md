@@ -723,7 +723,7 @@ favorite_genres: '{{ .User.Metadata.Public "favorite_games.#.genre" }}'
 > **Note**
 >
 > Ensure you use proper quoting when accessing metadata. `.User.Metadata.Public` and `.User.Metadata.Unsafe`
-are function calls internally and and the given path argument must be a string, so it must be double quoted.
+are function calls internally and the given path argument must be a string, so it must be double quoted.
 If you use use double quotes for your entire claim template then the path argument must be escaped, i.e.:
 `"{{ .User.Metadata.Public \"display_name\" }}"`
 
