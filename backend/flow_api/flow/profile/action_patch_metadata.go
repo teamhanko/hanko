@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/teamhanko/hanko/backend/persistence"
 	"strings"
 
 	jsonpatch "github.com/evanphx/json-patch"
@@ -80,6 +81,13 @@ func (a PatchMetadata) Execute(c flowpilot.ExecutionContext) error {
 
 	err = deps.Persister.GetUserMetadataPersister().Update(userMetadataModel)
 	if err != nil {
+		if persistence.IsMetadataLimitExceededError(err) {
+			c.Input().SetError(
+				"patch_metadata",
+				shared.ErrorInvalidMetadata.Wrap(errors.New("metadata must not exceed character limit (3000)")))
+			return c.Error(flowpilot.ErrorFormDataInvalid)
+		}
+
 		return fmt.Errorf("could not save metadata: %w", err)
 	}
 
