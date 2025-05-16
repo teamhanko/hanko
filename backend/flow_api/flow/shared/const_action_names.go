@@ -29,6 +29,7 @@ const (
 	ActionPasswordLogin                          flowpilot.ActionName = "password_login"
 	ActionPasswordRecovery                       flowpilot.ActionName = "password_recovery"
 	ActionPasswordUpdate                         flowpilot.ActionName = "password_update"
+	ActionPatchMetadata                          flowpilot.ActionName = "patch_metadata"
 	ActionRegisterClientCapabilities             flowpilot.ActionName = "register_client_capabilities"
 	ActionRegisterLoginIdentifier                flowpilot.ActionName = "register_login_identifier"
 	ActionRegisterPassword                       flowpilot.ActionName = "register_password"

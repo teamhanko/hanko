@@ -65,6 +65,14 @@ export interface MFAConfig {
   readonly security_keys_enabled: boolean;
 }
 
+export type UserMetadata<
+  PublicMetadata extends Record<string, any> = {},
+  UnsafeMetadata extends Record<string, any> = {},
+> = {
+  public_metadata?: PublicMetadata;
+  unsafe_metadata?: UnsafeMetadata;
+};
+
 export interface User {
   readonly user_id: string;
   readonly passkeys?: WebauthnCredential[];
@@ -72,6 +80,7 @@ export interface User {
   readonly mfa_config?: MFAConfig;
   readonly emails?: Email[];
   readonly username?: Username;
+  readonly metadata?: UserMetadata;
   readonly created_at: string;
   readonly updated_at: string;
 }

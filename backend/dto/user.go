@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -20,6 +21,7 @@ type GetUserResponse struct {
 	WebauthnCredentials []models.WebauthnCredential `json:"webauthn_credentials"` // deprecated
 	UpdatedAt           time.Time                   `json:"updated_at"`
 	CreatedAt           time.Time                   `json:"created_at"`
+	Metadata            *Metadata                   `json:"metadata,omitempty"`
 }
 
 type UserInfoResponse struct {
@@ -31,9 +33,19 @@ type UserInfoResponse struct {
 
 // UserJWT represents an abstracted user model for session management
 type UserJWT struct {
-	UserID   string
-	Email    *EmailJWT
-	Username string
+	UserID   string       `json:"user_id"`
+	Email    *EmailJWT    `json:"email,omitempty"`
+	Username string       `json:"username"`
+	Metadata *MetadataJWT `json:"metadata,omitempty"`
+}
+
+func (u *UserJWT) String() string {
+	if u == nil {
+		return ""
+	}
+
+	jsonBytes, _ := json.Marshal(u)
+	return string(jsonBytes)
 }
 
 func UserJWTFromUserModel(userModel *models.User) UserJWT {
@@ -47,6 +59,13 @@ func UserJWTFromUserModel(userModel *models.User) UserJWT {
 
 	if userModel.Username != nil {
 		userJWT.Username = userModel.Username.Username
+	}
+
+	if userModel.Metadata != nil {
+		metadataJWT := MetadataJWTFromUserModel(userModel.Metadata)
+		if metadataJWT != nil {
+			userJWT.Metadata = metadataJWT
+		}
 	}
 
 	return userJWT

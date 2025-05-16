@@ -2,9 +2,10 @@ package persistence
 
 import (
 	"embed"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/teamhanko/hanko/backend/config"
-	"time"
 )
 
 //go:embed migrations/*
@@ -45,6 +46,8 @@ type Persister interface {
 	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
 	GetUserPersister() UserPersister
 	GetUserPersisterWithConnection(tx *pop.Connection) UserPersister
+	GetUserMetadataPersister() UserMetadataPersister
+	GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister
 	GetWebauthnCredentialPersister() WebauthnCredentialPersister
 	GetWebauthnCredentialPersisterWithConnection(tx *pop.Connection) WebauthnCredentialPersister
 	GetWebauthnSessionDataPersister() WebauthnSessionDataPersister
@@ -320,4 +323,12 @@ func (p *persister) GetWebauthnCredentialUserHandlePersister() WebauthnCredentia
 
 func (p *persister) GetWebauthnCredentialUserHandlePersisterWithConnection(tx *pop.Connection) WebauthnCredentialUserHandlePersister {
 	return NewWebauthnCredentialUserHandlePersister(tx)
+}
+
+func (p *persister) GetUserMetadataPersister() UserMetadataPersister {
+	return NewUserMetadataPersister(p.DB)
+}
+
+func (p *persister) GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister {
+	return NewUserMetadataPersister(tx)
 }

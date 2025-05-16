@@ -42,6 +42,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"Username",
 		"PasswordCredential",
 		"OTPSecret",
+		"Metadata",
 	}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
@@ -83,7 +84,8 @@ func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 		"WebauthnCredentials",
 		"PasswordCredential",
 		"Username",
-		"OTPSecret").
+		"OTPSecret",
+		"Metadata").
 		LeftJoin("usernames", "usernames.user_id = users.id").
 		Where("usernames.username = (?)", username).
 		First(&user)

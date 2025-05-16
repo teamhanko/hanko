@@ -78,6 +78,10 @@ export interface PasswordInputs {
   readonly password: Input<string>;
 }
 
+export interface PatchMetadataInputs {
+  readonly patch_metadata: Input<Record<string, any>>;
+}
+
 export interface UsernameSetInputs {
   readonly username: Input<string>;
 }
