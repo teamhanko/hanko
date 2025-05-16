@@ -494,7 +494,9 @@ three types that differ as to how they can be accessed and modified:
 | Public        | Read access                  | Read and write access |
 | Unsafe        | Read access and write access | Read and write access |
 
-Each metadata type is currently limited to 3000 characters.
+Each metadata type supports a maximum of 3,000 characters. Metadata is stored as compact JSON (whitespace is ignored).
+JSON syntax characters (`{`, `:`, `"`, `}`) count toward the character limit.
+Multibyte UTF-8 characters (like emojis or non-Latin characters) count as 1 character each.
 
 #### Private metadata
 
