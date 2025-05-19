@@ -778,7 +778,7 @@ For more details on template syntax, see: https://pkg.go.dev/text/template
 
 - [Using configuration file](https://github.com/teamhanko/hanko/wiki/Using-configuration-file)
 - [Using environment variables](https://github.com/teamhanko/hanko/wiki/Using-environment-variables)
-- [Configuration reference](https://github.com/teamhanko/hanko/wiki/hanko)
+- [Configuration reference](https://github.com/teamhanko/hanko/wiki/config)
 
 
 ## License
