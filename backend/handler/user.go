@@ -211,6 +211,7 @@ func (h *UserHandler) Get(c echo.Context) error {
 		CreatedAt:           user.CreatedAt,
 		UpdatedAt:           user.UpdatedAt,
 		Metadata:            metadata,
+		ProfileData:         *dto.ProfileDataFromUserModel(user, h.cfg),
 	})
 }
 

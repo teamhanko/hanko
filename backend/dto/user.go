@@ -22,6 +22,7 @@ type GetUserResponse struct {
 	UpdatedAt           time.Time                   `json:"updated_at"`
 	CreatedAt           time.Time                   `json:"created_at"`
 	Metadata            *Metadata                   `json:"metadata,omitempty"`
+	ProfileData         `json:",inline"`
 }
 
 type UserInfoResponse struct {
