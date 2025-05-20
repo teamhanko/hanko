@@ -36,7 +36,7 @@ To follow the development of this project, watch our releases, leave a star, sig
 |✅| Server-side sessions & remote session revocation |
 |✅| MFA (TOTP, security keys) |
 |✅| Custom Social SSO connections (OIDC/OAuth2) |
-|⚙️| JS SDK |
+|✅| JS SDK |
 | | `<hanko-menu>` web component |
 | | iOS, Android, React Native, Flutter SDKs |
 
