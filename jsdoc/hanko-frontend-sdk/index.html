@@ -233,7 +233,7 @@ will be triggered at the same time.</li>
 <li><code>security_keys</code>: An optional array of WebAuthn credentials (security key-based authentication).</li>
 <li><code>mfa_config</code>: An optional configuration object for multi-factor authentication settings.</li>
 <li><code>emails</code>: An optional array of email objects (e.g., <code>{ address: string, is_primary: boolean, is_verified: boolean }</code>).</li>
-<li><code>username</code>: An optional username object (e.g., <code>{ value: string }</code>).</li>
+<li><code>username</code>: An optional username object (e.g., <code>{ id: string, username: string }</code>).</li>
 <li><code>created_at</code>: A string timestamp (ISO 8601) of when the user was created.</li>
 <li><code>updated_at</code>: A string timestamp (ISO 8601) of when the user was last updated.</li>
 </ul>
@@ -247,7 +247,7 @@ will be triggered at the same time.</li>
     // {
     //   user_id: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
     //   emails: [{ address: &quot;user@example.com&quot;, is_primary: true, is_verified: true }],
-    //   username: { value: &quot;johndoe&quot; },
+    //   username: { id: &quot;f2882293-3c39-451d-a7cb-4cf3375e0c66&quot;, username: &quot;johndoe&quot; },
     //   created_at: &quot;2025-01-01T10:00:00Z&quot;,
     //   updated_at: &quot;2025-04-01T12:00:00Z&quot;
     // }
