@@ -135,6 +135,6 @@
     "@teamhanko/hanko-frontend-sdk": "^2.1.0",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
-    "preact": "^10.13.1"
+    "preact": "^10.26.6"
   }
 }
