@@ -2,11 +2,12 @@ package config
 
 import (
 	"fmt"
-	"github.com/go-webauthn/webauthn/protocol"
-	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
-	"golang.org/x/exp/slices"
+	"slices"
 	"strings"
 	"time"
+
+	"github.com/go-webauthn/webauthn/protocol"
+	webauthnLib "github.com/go-webauthn/webauthn/webauthn"
 )
 
 // WebauthnSettings defines the settings for the webauthn authentication mechanism

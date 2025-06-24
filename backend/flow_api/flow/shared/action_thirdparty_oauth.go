@@ -1,14 +1,16 @@
 package shared
 
 import (
+	"cmp"
 	"fmt"
+	"net/http"
+	"slices"
+
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/flowpilot"
 	"github.com/teamhanko/hanko/backend/thirdparty"
 	"github.com/teamhanko/hanko/backend/utils"
-	"golang.org/x/exp/slices"
 	"golang.org/x/oauth2"
-	"net/http"
 )
 
 type ThirdPartyOAuth struct {
@@ -41,9 +43,8 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 	for _, provider := range enabledThirdPartyProviders {
 		providerInput.AllowedValue(provider.DisplayName, provider.ID)
 	}
-
-	slices.SortFunc(enabledCustomThirdPartyProviders, func(a, b config.CustomThirdPartyProvider) bool {
-		return a.DisplayName < b.DisplayName
+	slices.SortFunc(enabledCustomThirdPartyProviders, func(a, b config.CustomThirdPartyProvider) int {
+		return cmp.Compare(a.DisplayName, b.DisplayName)
 	})
 
 	for _, provider := range enabledCustomThirdPartyProviders {
@@ -84,11 +85,11 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 
 	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
 
-	//cookie := utils.GenerateStateCookie(&deps.Cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
+	// cookie := utils.GenerateStateCookie(&deps.Cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 	//	MaxAge:   300,
 	//	Path:     "/",
 	//	SameSite: http.SameSiteLaxMode,
-	//})
+	// })
 
 	cookie := &http.Cookie{
 		Name:     utils.HankoThirdpartyStateCookie,

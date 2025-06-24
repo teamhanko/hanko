@@ -10,7 +10,7 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"golang.org/x/exp/slices"
+	"slices"
 )
 
 // User is used by pop to map your users database table to your go code.
