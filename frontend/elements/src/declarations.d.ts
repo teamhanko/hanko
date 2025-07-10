@@ -5,4 +5,4 @@ interface Window {
   _hankoStyle: HTMLStyleElement;
 }
 
-declare module "react"
+declare module "react";
