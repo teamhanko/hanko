@@ -2,14 +2,15 @@ package thirdparty
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/config"
 	"github.com/teamhanko/hanko/backend/persistence"
 	"github.com/teamhanko/hanko/backend/persistence/models"
 	"github.com/teamhanko/hanko/backend/webhooks/events"
-	"strings"
-	"time"
 )
 
 type AccountLinkingResult struct {
@@ -25,6 +26,14 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
 		}
 	}
+
+	// Validate userData
+	if userData == nil {
+		return nil, ErrorInvalidRequest("user data must be set")
+	}
+
+	// Ensure the email is lowercase to avoid case sensitivity issues
+	userData.Metadata.Email = strings.ToLower(userData.Metadata.Email)
 
 	identity, err := p.GetIdentityPersister().Get(userData.Metadata.Subject, providerID)
 	if err != nil {
