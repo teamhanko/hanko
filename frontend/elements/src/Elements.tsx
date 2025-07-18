@@ -39,6 +39,21 @@ declare global {
   }
 }
 
+// React 19 and later
+declare module "react" {
+  // eslint-disable-next-line no-unused-vars
+  namespace JSX {
+    // eslint-disable-next-line no-unused-vars
+    interface IntrinsicElements {
+      "hanko-auth": HankoAuthElementProps;
+      "hanko-login": HankoAuthElementProps;
+      "hanko-registration": HankoAuthElementProps;
+      "hanko-profile": HankoProfileElementProps;
+      "hanko-events": HankoEventsElementProps;
+    }
+  }
+}
+
 export interface RegisterOptions {
   shadow?: boolean;
   injectStyles?: boolean;
