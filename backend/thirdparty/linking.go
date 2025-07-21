@@ -31,6 +31,10 @@ func LinkAccount(tx *pop.Connection, cfg *config.Config, p persistence.Persister
 		return nil, ErrorServer("could not get identity").WithCause(err)
 	}
 
+	if userData.Metadata != nil && userData.Metadata.Email != "" {
+		userData.Metadata.Email = strings.ToLower(userData.Metadata.Email)
+	}
+
 	if identity == nil {
 		user, err := p.GetUserPersisterWithConnection(tx).GetByEmailAddress(userData.Metadata.Email)
 		if err != nil {
