@@ -85,10 +85,10 @@ const createHankoComponent = (
   componentName: ComponentName,
   props: Record<string, any>,
 ) => {
-  props.nonce = document.getElementsByTagName(
-    `hanko-${componentName}`,
+  props.nonce = document
+    .getElementsByTagName(`hanko-${componentName}`)
     // @ts-ignore
-  )[0].nonce;
+    .item(0)?.nonce;
   return (
     <AppProvider
       componentName={componentName}
