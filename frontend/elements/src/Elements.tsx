@@ -84,17 +84,24 @@ const globalOptions: GlobalOptions = {};
 const createHankoComponent = (
   componentName: ComponentName,
   props: Record<string, any>,
-) => (
-  <AppProvider
-    componentName={componentName}
-    globalOptions={globalOptions}
-    createWebauthnAbortSignal={createWebauthnAbortSignal}
-    {...props}
-  />
-);
+) => {
+  props.nonce = document.getElementsByTagName(
+    `hanko-${componentName}`,
+    // @ts-ignore
+  )[0].nonce;
+  return (
+    <AppProvider
+      componentName={componentName}
+      globalOptions={globalOptions}
+      createWebauthnAbortSignal={createWebauthnAbortSignal}
+      {...props}
+    />
+  );
+};
 
-const HankoAuth = (props: HankoAuthElementProps) =>
-  createHankoComponent("auth", props);
+const HankoAuth = (props: HankoAuthElementProps) => {
+  return createHankoComponent("auth", props);
+};
 
 const HankoLogin = (props: HankoAuthElementProps) =>
   createHankoComponent("login", props);
