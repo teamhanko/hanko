@@ -405,7 +405,7 @@ const AppProvider = ({
             <Fragment>
               {injectStyles ? (
                 <style
-                  nonce={nonce}
+                  nonce={nonce || undefined}
                   /* eslint-disable-next-line react/no-danger */
                   dangerouslySetInnerHTML={{
                     __html: window._hankoStyle.innerHTML,

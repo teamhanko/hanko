@@ -85,7 +85,10 @@ const createHankoComponent = (
   componentName: ComponentName,
   props: Record<string, any>,
 ) => {
-  props.nonce = document
+  // In most browser the IDL property (script['nonce']) is the only way to access nonces.
+  // Because of that the nonce would be an empty string in the props property.
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/nonce
+  const nonce = document
     .getElementsByTagName(`hanko-${componentName}`)
     // @ts-ignore
     .item(0)?.nonce;
@@ -95,6 +98,7 @@ const createHankoComponent = (
       globalOptions={globalOptions}
       createWebauthnAbortSignal={createWebauthnAbortSignal}
       {...props}
+      nonce={nonce}
     />
   );
 };
