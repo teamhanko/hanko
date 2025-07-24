@@ -102,6 +102,7 @@ interface Props {
   prefilledEmail?: string;
   prefilledUsername?: string;
   mode?: HankoAuthMode;
+  nonce?: string;
   componentName: ComponentName;
   globalOptions: GlobalOptions;
   children?: ComponentChildren;
@@ -114,6 +115,7 @@ const AppProvider = ({
   prefilledUsername,
   globalOptions,
   createWebauthnAbortSignal,
+  nonce,
   ...props
 }: Props) => {
   const {
@@ -403,6 +405,7 @@ const AppProvider = ({
             <Fragment>
               {injectStyles ? (
                 <style
+                  nonce={nonce || undefined}
                   /* eslint-disable-next-line react/no-danger */
                   dangerouslySetInnerHTML={{
                     __html: window._hankoStyle.innerHTML,

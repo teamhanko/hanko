@@ -189,6 +189,7 @@ Dedicated UI for the registration:
 - `prefilled-username` Used to prefill the username input field.
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
 - `mode` Accepts either "login" or "registration" to initialize the `<hanko-auth>` component with a login or registration flow, respectively.
+- `nonce` A nonce that is used to allow loading of inline styles when a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) is applied.
 
 #### &lt;hanko-profile&gt;
 
@@ -203,6 +204,7 @@ A web component that allows to manage emails, passwords and passkeys.
 ##### Attributes
 
 - `lang` Used to specify the language of the content within the element. See [Translations](#translations).
+- `nonce` A nonce that is used to allow loading of inline styles when a [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy) is applied.
 
 #### &lt;hanko-events&gt;
 
