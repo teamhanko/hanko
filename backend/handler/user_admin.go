@@ -46,7 +46,9 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	err = p.Delete(*user)
+	err = h.persister.Transaction(func(tx *pop.Connection) error {
+		return p.Delete(*user)
+	})
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
 	}
