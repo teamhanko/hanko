@@ -51,15 +51,16 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to delete user: %w", err)
 		}
+
+		err = utils.TriggerWebhooks(c, tx, events.UserDelete, admin.FromUserModel(*user))
+		if err != nil {
+			c.Logger().Warn(err)
+		}
+
 		return nil
 	})
 	if err != nil {
 		return err
-	}
-
-	err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserDelete, admin.FromUserModel(*user))
-	if err != nil {
-		c.Logger().Warn(err)
 	}
 
 	return c.NoContent(http.StatusNoContent)
