@@ -78,28 +78,32 @@ export class Scheduler {
 
     // Schedule the first check after an optional delay
     this.timeoutID = setTimeout(async () => {
-      let result = await this.checkSession();
+      try {
+        let result = await this.checkSession();
 
-      if (result.is_valid) {
-        if (this.sessionExpiresSoon(result.expiration)) {
-          this.scheduleSessionExpiry(result.expiration - Date.now());
-          return;
-        }
-
-        // Begin periodic checks
-        this.intervalID = setInterval(async () => {
-          result = await this.checkSession();
-
-          if (result.is_valid) {
-            if (this.sessionExpiresSoon(result.expiration)) {
-              this.scheduleSessionExpiry(result.expiration - Date.now());
-            }
-          } else {
-            this.stop();
+        if (result.is_valid) {
+          if (this.sessionExpiresSoon(result.expiration)) {
+            this.scheduleSessionExpiry(result.expiration - Date.now());
+            return;
           }
-        }, this.checkInterval);
-      } else {
-        this.stop();
+
+          // Begin periodic checks
+          this.intervalID = setInterval(async () => {
+            result = await this.checkSession();
+
+            if (result.is_valid) {
+              if (this.sessionExpiresSoon(result.expiration)) {
+                this.scheduleSessionExpiry(result.expiration - Date.now());
+              }
+            } else {
+              this.stop();
+            }
+          }, this.checkInterval);
+        } else {
+          this.stop();
+        }
+      } catch (e) {
+        console.log(e);
       }
     }, timeToNextCheck);
   }
@@ -126,6 +130,7 @@ export class Scheduler {
   isRunning(): boolean {
     return this.timeoutID !== null || this.intervalID !== null;
   }
+
   /**
    * Checks if the session is about to expire.
    * @param {number} expiration - Timestamp when the session will expire.
