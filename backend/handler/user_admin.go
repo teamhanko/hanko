@@ -36,21 +36,25 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
-	p := h.persister.GetUserPersister()
-	user, err := p.Get(userId)
-	if err != nil {
-		return fmt.Errorf("failed to get user: %w", err)
-	}
-
-	if user == nil {
-		return echo.NewHTTPError(http.StatusNotFound, "user not found")
-	}
-
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
-		return p.Delete(*user)
+		p := h.persister.GetUserPersisterWithConnection(tx)
+		user, err := p.Get(userId)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
+
+		if user == nil {
+			return echo.NewHTTPError(http.StatusNotFound, "user not found")
+		}
+
+		err = p.Delete(*user)
+		if err != nil {
+			return fmt.Errorf("failed to delete user: %w", err)
+		}
+		return nil
 	})
 	if err != nil {
-		return fmt.Errorf("failed to delete user: %w", err)
+		return err
 	}
 
 	err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserDelete, admin.FromUserModel(*user))
