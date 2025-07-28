@@ -54,7 +54,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if existingEmailModel != nil {
-		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Email.RequireVerification {
+		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Email.RequireVerification || deps.Cfg.Privacy.ShowAccountExistenceHints {
 			c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
 			return c.Error(flowpilot.ErrorFormDataInvalid)
 		} else {
