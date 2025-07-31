@@ -190,7 +190,7 @@ export const en: Translation = {
       "The session has expired, please click the button to restart.",
     value_invalid_error: "The entered value is invalid.",
     passcode_invalid: "The passcode provided was not correct.",
-    passkey_invalid: "This passkey cannot be used anymore",
+    passkey_invalid: "This passkey cannot be used anymore.",
     passcode_max_attempts_reached:
       "The passcode was entered incorrectly too many times. Please request a new code.",
     rate_limit_exceeded:
