@@ -191,23 +191,6 @@ const LoginInitPage = (props: Props) => {
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
           </Fragment>
         ) : null}
-        {flowState.actions.webauthn_generate_request_options.enabled &&
-        !hidePasskeyButtonOnLogin ? (
-          <Form
-            flowAction={flowState.actions.webauthn_generate_request_options}
-          >
-            <Button
-              secondary
-              title={
-                !isWebAuthnSupported ? t("labels.webauthnUnsupported") : null
-              }
-              disabled={!isWebAuthnSupported}
-              icon={"passkey"}
-            >
-              {t("labels.signInPasskey")}
-            </Button>
-          </Form>
-        ) : null}
         {flowState.actions.thirdparty_oauth.enabled
           ? flowState.actions.thirdparty_oauth.inputs.provider.allowed_values?.map(
               (v) => {
@@ -238,6 +221,22 @@ const LoginInitPage = (props: Props) => {
               },
             )
           : null}
+        {flowState.actions.webauthn_generate_request_options.enabled &&
+        !hidePasskeyButtonOnLogin ? (
+          <Form
+            flowAction={flowState.actions.webauthn_generate_request_options}
+          >
+            <Button
+              secondary
+              title={
+                !isWebAuthnSupported ? t("labels.webauthnUnsupported") : null
+              }
+              disabled={!isWebAuthnSupported}
+            >
+              {t("labels.signInPasskey")}
+            </Button>
+          </Form>
+        ) : null}
         {flowState.actions.remember_me.enabled && (
           <Fragment>
             <Spacer />
