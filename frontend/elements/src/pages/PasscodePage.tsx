@@ -96,8 +96,11 @@ const PasscodePage = (props: Props) => {
         <ErrorBox state={flowState} />
         <Paragraph>
           {uiState.email
-            ? t("texts.enterPasscode", { emailAddress: uiState.email })
+            ? t("texts.enterPasscode")
             : t("texts.enterPasscodeNoEmail")}
+        </Paragraph>
+        <Paragraph hidden={!uiState.email}>
+           <b>{uiState.email}</b>
         </Paragraph>
         <Form
           flowAction={flowState.actions.verify_passcode}

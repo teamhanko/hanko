@@ -52,7 +52,7 @@ export const ptBR: Translation = {
   },
   texts: {
     enterPasscode:
-      'Digite o código de acesso que foi enviado para "{emailAddress}".',
+      "Digite o código de acesso enviado para o seu endereço de email.",
     enterPasscodeNoEmail:
       "Digite o código enviado para o seu endereço de e-mail principal.",
     setupPasskey:

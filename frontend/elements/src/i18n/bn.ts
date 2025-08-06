@@ -50,7 +50,7 @@ export const bn: Translation = {
     trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন?",
   },
   texts: {
-    enterPasscode: 'যে পাসকোডটি পাঠানো হয়েছিল "{emailAddress}" এ তা লিখুন.',
+    enterPasscode: "আপনার ইমেইল ঠিকানায় পাঠানো পাসকোডটি প্রবেশ করান।",
     enterPasscodeNoEmail:
       "আপনার প্রাথমিক ইমেল ঠিকানায় প্রেরিত পাসকোডটি লিখুন।",
     setupPasskey:
