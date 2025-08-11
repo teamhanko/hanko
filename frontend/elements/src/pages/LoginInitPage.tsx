@@ -26,6 +26,7 @@ import Link from "../components/link/Link";
 import Footer from "../components/wrapper/Footer";
 import Checkbox from "../components/form/Checkbox";
 import Spacer from "../components/spacer/Spacer";
+import Paragraph from "../components/paragraph/Paragraph";
 
 interface Props {
   state: State<"login_init">;
@@ -252,14 +253,16 @@ const LoginInitPage = (props: Props) => {
         )}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
-        <span hidden />
-        <Link
-          onClick={onRegisterClick}
-          loadingSpinnerPosition={"left"}
-          isLoading={isFlowSwitchLoading}
-        >
-          {t("labels.dontHaveAnAccount")}
-        </Link>
+        <Paragraph center>
+          <span>{t("labels.dontHaveAnAccount")}</span>
+          <Link
+            onClick={onRegisterClick}
+            loadingSpinnerPosition={"left"}
+            isLoading={isFlowSwitchLoading}
+          >
+            {t("labels.signUp")}
+          </Link>
+        </Paragraph>
       </Footer>
     </Fragment>
   );
