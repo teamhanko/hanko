@@ -50,7 +50,7 @@ export const en: Translation = {
     trustDevice: "Trust this browser?",
   },
   texts: {
-    enterPasscode: 'Enter the passcode that was sent to "{emailAddress}".',
+    enterPasscode: "Enter the passcode sent to your email address.",
     enterPasscodeNoEmail:
       "Enter the passcode that was sent to your primary email address.",
     setupPasskey:

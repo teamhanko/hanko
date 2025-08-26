@@ -51,8 +51,7 @@ export const fr: Translation = {
     trustDevice: "Faire confiance à ce navigateur ?",
   },
   texts: {
-    enterPasscode:
-      'Saisissez le code d\'accès qui a été envoyé à "{emailAddress}".',
+    enterPasscode: "Saisissez le code d'accès envoyé à votre adresse e-mail.",
     enterPasscodeNoEmail:
       "Entrez le code envoyé à votre adresse e-mail principale.",
     setupPasskey:

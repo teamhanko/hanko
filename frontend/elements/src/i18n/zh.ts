@@ -50,7 +50,7 @@ export const zh: Translation = {
     trustDevice: "信任此浏览器？",
   },
   texts: {
-    enterPasscode: "输入发送到“{emailAddress}”的验证码。",
+    enterPasscode: "请输入发送到您邮箱地址的验证码。",
     enterPasscodeNoEmail: "输入发送到您的主要电子邮件地址的验证码。",
     setupPasskey:
       "使用密钥轻松安全地登录您的账户。注意：您的生物识别数据仅存储在您的设备上，永远不会与任何人共享。",

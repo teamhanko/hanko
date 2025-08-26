@@ -51,7 +51,7 @@ export const de: Translation = {
   },
   texts: {
     enterPasscode:
-      'Geben Sie den Passcode ein, der an die E-Mail-Adresse "{emailAddress}" gesendet wurde.',
+      "Geben Sie den Passcode ein, der an Ihre E-Mail-Adresse gesendet wurde.",
     enterPasscodeNoEmail:
       "Geben Sie den Passcode ein, der an Ihre primäre E-Mail-Adresse gesendet wurde.",
     setupPasskey:
