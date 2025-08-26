@@ -131,7 +131,7 @@ export const en: Translation = {
     addEmail: "Add email",
     createPasskey: "Create a passkey",
     webauthnUnsupported: "Passkeys are not supported by your browser",
-    signInWith: "Sign in with {provider}",
+    signInWith: "Continue with {provider}",
     deleteAccount: "Yes, delete this account.",
     emailOrUsername: "Email or username",
     username: "Username",
