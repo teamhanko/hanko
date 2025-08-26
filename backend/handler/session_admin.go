@@ -57,15 +57,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	var emailDTO *dto.EmailJWT
-	if email := user.Emails.GetPrimary(); email != nil {
-		emailDTO = dto.EmailJWTFromEmailModel(email)
-	}
-
-	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(dto.UserJWT{
-		UserID: userID.String(),
-		Email:  emailDTO,
-	})
+	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(dto.UserJWTFromUserModel(user))
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
