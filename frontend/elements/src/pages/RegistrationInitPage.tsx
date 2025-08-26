@@ -18,6 +18,7 @@ import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 import Divider from "../components/spacer/Divider";
 import Checkbox from "../components/form/Checkbox";
 import Spacer from "../components/spacer/Spacer";
+import Paragraph from "../components/paragraph/Paragraph";
 
 interface Props {
   state: State<"registration_init">;
@@ -185,14 +186,16 @@ const RegistrationInitPage = (props: Props) => {
         )}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
-        <span hidden />
-        <Link
-          onClick={onLoginClick}
-          loadingSpinnerPosition={"left"}
-          isLoading={isFlowSwitchLoading}
-        >
-          {t("labels.alreadyHaveAnAccount")}
-        </Link>
+        <Paragraph center>
+          <span>{t("labels.alreadyHaveAnAccount")}</span>
+          <Link
+            onClick={onLoginClick}
+            loadingSpinnerPosition={"left"}
+            isLoading={isFlowSwitchLoading}
+          >
+            {t("labels.signIn")}
+          </Link>
+        </Paragraph>
       </Footer>
     </Fragment>
   );
