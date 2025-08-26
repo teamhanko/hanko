@@ -125,7 +125,18 @@ func (p *userPersister) Update(user models.User) error {
 	return nil
 }
 
+// Delete deletes a user from the database including all information (e.g., emails, username, metadata)
+// It must be called within a transaction otherwise some information might not be rolled back on an error.
 func (p *userPersister) Delete(user models.User) error {
+	primaryEmail := user.Emails.GetPrimary()
+
+	if primaryEmail != nil {
+		err := p.db.Destroy(primaryEmail.PrimaryEmail)
+		if err != nil {
+			return fmt.Errorf("failed to delete primary email: %w", err)
+		}
+	}
+
 	err := p.db.Destroy(&user)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
