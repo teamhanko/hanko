@@ -1,7 +1,7 @@
 import { HANKO_API_URL } from "../config.ts";
 
 const code = `
-  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@2.1.0';
+  import { register } from 'https://esm.sh/@teamhanko/hanko-elements@2.1.1';
 
   const {hanko} = await register('${HANKO_API_URL}', { shadow: true });
   hanko.onSessionCreated((event) => {
