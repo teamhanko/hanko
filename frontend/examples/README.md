@@ -10,13 +10,16 @@ It contains:
 - an example [express](express) backend - this is a simple version of the well-known todo app
 - example frontend applications using the following frameworks:
   - [Angular](angular)
-  - [Next.js](nextjs)
+  - [Next.js](nextjs) (Pages Router)
+  - [Next.js App Router](nextjs-app)
   - [React](react)
   - [Vue](vue)
   - [Svelte](svelte)
 
 ## How to run
+
 ### Manual
+
 1. Start the Hanko API (see the instructions on how to run the API [in Docker](../../backend/README.md#Docker) or [from Source](../../backend/README.md#from-source))
 2. Start the express backend (see the [README](express) for the express backend)
 3. Start one of the frontend applications (see the README for the app of your choice)
@@ -24,22 +27,37 @@ It contains:
 ### Docker Compose
 
 #### React
+
 ```
 docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-react.yaml -p "hanko-todo-react" up --build
 ```
+
 #### Angular
+
 ```
 docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-angular.yaml -p "hanko-todo-angular" up --build
 ```
-#### Next.js
+
+#### Next.js (Pages Router)
+
 ```
 docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-nextjs.yaml -p "hanko-todo-nextjs" up --build
 ```
+
+#### Next.js (App Router)
+
+```
+docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-nextjs-app.yaml -p "hanko-todo-nextjs-app" up --build
+```
+
 #### Vue
+
 ```
 docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-vue.yaml -p "hanko-todo-vue" up --build
 ```
+
 #### Svelte
+
 ```
 docker compose -f deploy/docker-compose/base.yaml -f deploy/docker-compose/todo-svelte.yaml -p "hanko-todo-svelte" up --build
 ```
