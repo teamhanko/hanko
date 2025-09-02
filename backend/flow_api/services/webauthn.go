@@ -302,7 +302,7 @@ func (s *webauthnService) GenerateCreationOptionsPasskey(p GenerateCreationOptio
 	authenticatorSelection := protocol.AuthenticatorSelection{
 		RequireResidentKey: &requireResidentKey,
 		ResidentKey:        protocol.ResidentKeyRequirementRequired,
-		UserVerification:   protocol.VerificationRequired,
+		UserVerification:   protocol.UserVerificationRequirement(s.cfg.Passkey.UserVerification),
 	}
 
 	attestationPreference := protocol.ConveyancePreference(s.cfg.Passkey.AttestationPreference)
