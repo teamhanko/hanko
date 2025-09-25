@@ -3,9 +3,9 @@ package handler
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/pagination"
-	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/pagination"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"net/http"
 	"net/url"
 	"strconv"

@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/h2non/gock"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
+	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Callback_SignUp_Google() {

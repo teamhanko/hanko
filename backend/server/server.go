@@ -2,10 +2,10 @@ package server
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/handler"
-	"github.com/teamhanko/hanko/backend/mapper"
-	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/handler"
+	"github.com/teamhanko/hanko/backend/v2/mapper"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"sync"
 )
 

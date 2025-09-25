@@ -1,8 +1,8 @@
 package credential_usage
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 )
 
 type ContinueToPasswordLogin struct {

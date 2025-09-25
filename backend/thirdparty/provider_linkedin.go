@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
 )
 

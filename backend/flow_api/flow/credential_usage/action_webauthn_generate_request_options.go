@@ -3,9 +3,9 @@ package credential_usage
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 )
 
 type WebauthnGenerateRequestOptions struct {

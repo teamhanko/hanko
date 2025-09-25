@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type EmailResponse struct {

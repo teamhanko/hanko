@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-playground/validator/v10"
-	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 	"io"
 	"log"
 	"net/http"
@@ -15,8 +15,8 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
 func NewImportCommand() *cobra.Command {

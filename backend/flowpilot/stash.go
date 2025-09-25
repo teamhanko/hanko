@@ -6,7 +6,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot/jsonmanager"
 	"github.com/tidwall/gjson"
 	"github.com/tidwall/sjson"
 	"io"

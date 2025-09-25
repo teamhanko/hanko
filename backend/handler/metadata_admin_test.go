@@ -11,8 +11,8 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/dto/admin"
-	"github.com/teamhanko/hanko/backend/test"
+	"github.com/teamhanko/hanko/backend/v2/dto/admin"
+	"github.com/teamhanko/hanko/backend/v2/test"
 )
 
 func TestMetadataAdminSuite(t *testing.T) {

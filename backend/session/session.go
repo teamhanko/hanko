@@ -7,10 +7,10 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/config"
-	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
-	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
-	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	hankoJwk "github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	hankoJwt "github.com/teamhanko/hanko/backend/v2/crypto/jwt"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 )
 
 type Manager interface {

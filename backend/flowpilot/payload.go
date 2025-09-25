@@ -1,6 +1,6 @@
 package flowpilot
 
-import "github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+import "github.com/teamhanko/hanko/backend/v2/flowpilot/jsonmanager"
 
 type payload interface {
 	jsonmanager.JSONManager

@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"net/http"
 )
 
