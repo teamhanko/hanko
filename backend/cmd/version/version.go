@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/build_info"
+	"github.com/teamhanko/hanko/backend/v2/build_info"
 )
 
 func NewVersionCommand() *cobra.Command {
