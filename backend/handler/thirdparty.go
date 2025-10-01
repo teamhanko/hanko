@@ -66,7 +66,7 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
 
-	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
+	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", provider.GetPromptParam()))
 
 	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 		MaxAge:   300,

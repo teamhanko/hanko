@@ -110,3 +110,10 @@ func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 func (g linkedInProvider) ID() string {
 	return g.config.ID
 }
+
+func (g linkedInProvider) GetPromptParam() string {
+	if g.config.Prompt != "" {
+		return g.config.Prompt
+	}
+	return "consent"
+}

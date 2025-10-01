@@ -103,3 +103,10 @@ func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 func (p customProvider) ID() string {
 	return p.config.ID
 }
+
+func (p customProvider) GetPromptParam() string {
+	if p.config.Prompt != "" {
+		return p.config.Prompt
+	}
+	return "consent"
+}

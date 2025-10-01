@@ -163,6 +163,13 @@ func (p microsoftProvider) ID() string {
 	return p.config.ID
 }
 
+func (p microsoftProvider) GetPromptParam() string {
+	if p.config.Prompt != "" {
+		return p.config.Prompt
+	}
+	return "consent"
+}
+
 func (p microsoftProvider) issuerValidator() jwt.ValidatorFunc {
 	var microsoftIssuerRegexp = regexp.MustCompile("^https://login[.]microsoftonline[.]com/([^/]+)/v2[.]0/?$")
 	validator := jwt.ValidatorFunc(func(_ context.Context, t jwt.Token) jwt.ValidationError {

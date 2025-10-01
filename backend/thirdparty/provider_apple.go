@@ -126,3 +126,10 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 func (a appleProvider) ID() string {
 	return a.config.ID
 }
+
+func (a appleProvider) GetPromptParam() string {
+	if a.config.Prompt != "" {
+		return a.config.Prompt
+	}
+	return "consent"
+}

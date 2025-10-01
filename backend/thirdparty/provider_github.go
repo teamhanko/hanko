@@ -117,3 +117,10 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 func (g githubProvider) ID() string {
 	return g.config.ID
 }
+
+func (g githubProvider) GetPromptParam() string {
+	if g.config.Prompt != "" {
+		return g.config.Prompt
+	}
+	return "consent"
+}

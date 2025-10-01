@@ -86,6 +86,7 @@ type OAuthProvider interface {
 	GetUserData(*oauth2.Token) (*UserData, error)
 	GetOAuthToken(string) (*oauth2.Token, error)
 	ID() string
+	GetPromptParam() string
 }
 
 func GetProvider(config config.ThirdParty, id string) (OAuthProvider, error) {
