@@ -143,3 +143,16 @@ webauthn:
 webhooks:
   enabled: false
   allow_time_expiration: false
+security_notifications:
+  notifications:
+    email_create:
+      enabled: true
+    password_update:
+      enabled: true
+    passkey_create:
+      enabled: true
+    primary_email_update:
+      enabled: true
+  sender:
+    from_address: "test@example.com"
+    from_name: "foobar"

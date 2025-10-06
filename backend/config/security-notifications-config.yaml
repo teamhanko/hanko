@@ -1,0 +1,25 @@
+smtp:
+    port: "465"
+    host: smtp.example.com
+    user: example
+    password: example
+database:
+  url: postgres://postgres:123456@127.0.0.1:5432/dummy
+secrets:
+  keys:
+    - abcedfghijklmnopqrstuvwxyz
+service:
+  name: Hanko Authentication Service
+security_notifications:
+  notifications:
+    email_create:
+      enabled: true
+    password_update:
+      enabled: true
+    passkey_create:
+      enabled: true
+    primary_email_update:
+      enabled: true
+  sender:
+    from_address: "test@example.com"
+    from_name: "foobar"

@@ -1,11 +1,12 @@
 package config
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDefaultConfigAccountParameters(t *testing.T) {
@@ -92,4 +93,40 @@ func TestEnvironmentVariables(t *testing.T) {
 
 	assert.Equal(t, "valueFromEnvVars", cfg.Smtp.Host)
 	assert.True(t, reflect.DeepEqual([]string{"https://hanko.io", "https://auth.hanko.io"}, cfg.Webauthn.RelyingParty.Origins))
+}
+
+func TestParseSecurityNotificationsConfig(t *testing.T) {
+	configPath := "./security-notifications-config.yaml"
+	cfg, err := Load(&configPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+	notificationsConfig := cfg.SecurityNotifications
+
+	assert.True(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
+
+	assert.Equal(t, "test@example.com", notificationsConfig.Sender.FromAddress)
+	assert.Equal(t, "foobar", notificationsConfig.Sender.FromName)
+}
+
+func TestParseDefaultSecurityNotificationsConfig(t *testing.T) {
+	cfg := DefaultConfig()
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+	notificationsConfig := cfg.SecurityNotifications
+
+	assert.False(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
+
+	assert.Equal(t, "security@hanko.com", notificationsConfig.Sender.FromAddress)
+	assert.Equal(t, "Hanko Security", notificationsConfig.Sender.FromName)
 }

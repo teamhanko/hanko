@@ -37,6 +37,26 @@ func DefaultConfig() *Config {
 				Login:        600000,
 			},
 		},
+		SecurityNotifications: SecurityNotifications{
+			Notifications: SecurityNotificationTypes{
+				EmailCreate: SecurityNotificationConfiguration{
+					Enabled: false,
+				},
+				PasswordUpdate: SecurityNotificationConfiguration{
+					Enabled: false,
+				},
+				PasskeyCreate: SecurityNotificationConfiguration{
+					Enabled: false,
+				},
+				PrimaryEmailUpdate: SecurityNotificationConfiguration{
+					Enabled: false,
+				},
+			},
+			Sender: SecurityNotificationsEmailAddress{
+				FromAddress: "security@hanko.com",
+				FromName:    "Hanko Security",
+			},
+		},
 		Smtp: SMTP{
 			Host: "localhost",
 			Port: "465",

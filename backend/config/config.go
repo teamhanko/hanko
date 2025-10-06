@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 	"github.com/teamhanko/hanko/backend/ee/saml/config"
-	"log"
 )
 
 // Config is the central configuration type
@@ -51,6 +52,8 @@ type Config struct {
 	Saml config.Saml `yaml:"saml" json:"saml,omitempty" koanf:"saml" jsonschema:"title=saml"`
 	// `secrets` configures the keys used for cryptographically signing tokens issued by the API.
 	Secrets Secrets `yaml:"secrets" json:"secrets,omitempty" koanf:"secrets" jsonschema:"title=secrets"`
+	// `security_notifications` configures security notifications for important security-related events.
+	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications,omitempty" koanf:"security_notifications"`
 	// `server` configures address and CORS settings of the public and admin API.
 	Server Server `yaml:"server" json:"server,omitempty" koanf:"server" jsonschema:"title=server"`
 	// `service` configures general service information.
