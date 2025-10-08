@@ -68,8 +68,8 @@ func (g linkedInProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOptio
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g linkedInProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code)
+func (g linkedInProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

@@ -67,8 +67,8 @@ func (f facebookProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOptio
 	return f.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (f facebookProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return f.oauthConfig.Exchange(context.Background(), code)
+func (f facebookProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return f.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

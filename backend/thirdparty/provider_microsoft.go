@@ -65,8 +65,8 @@ func (p microsoftProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOpti
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (p microsoftProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return p.oauthConfig.Exchange(context.Background(), code)
+func (p microsoftProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return p.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

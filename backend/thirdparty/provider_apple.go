@@ -59,8 +59,8 @@ func (a appleProvider) AuthCodeURL(state string, args ...oauth2.AuthCodeOption) 
 	return authURL
 }
 
-func (a appleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return a.oauthConfig.Exchange(context.Background(), code)
+func (a appleProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return a.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
