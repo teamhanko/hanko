@@ -1,8 +1,7 @@
 package config
 
 type SecurityNotifications struct {
-	Notifications SecurityNotificationTypes         `yaml:"notifications" json:"notifications,omitempty" koanf:"notifications"`
-	Sender        SecurityNotificationsEmailAddress `yaml:"sender" json:"sender,omitempty" koanf:"sender"`
+	Notifications SecurityNotificationTypes `yaml:"notifications" json:"notifications,omitempty" koanf:"notifications"`
 }
 
 type SecurityNotificationTypes struct {
@@ -14,12 +13,4 @@ type SecurityNotificationTypes struct {
 
 type SecurityNotificationConfiguration struct {
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
-}
-
-type SecurityNotificationsEmailAddress struct {
-	// `from_address` configures the sender address of emails sent to users.
-	FromAddress string `yaml:"from_address" json:"from_address,omitempty" koanf:"from_address" split_words:"true" jsonschema:"default=noreply@hanko.io"`
-
-	// `from_name` configures the sender name of emails sent to users.
-	FromName string `yaml:"from_name" json:"from_name,omitempty" koanf:"from_name" split_words:"true" jsonschema:"default=Hanko"`
 }

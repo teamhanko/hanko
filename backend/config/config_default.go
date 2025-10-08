@@ -40,21 +40,17 @@ func DefaultConfig() *Config {
 		SecurityNotifications: SecurityNotifications{
 			Notifications: SecurityNotificationTypes{
 				EmailCreate: SecurityNotificationConfiguration{
-					Enabled: false,
+					Enabled: true,
 				},
 				PasswordUpdate: SecurityNotificationConfiguration{
-					Enabled: false,
+					Enabled: true,
 				},
 				PasskeyCreate: SecurityNotificationConfiguration{
-					Enabled: false,
+					Enabled: true,
 				},
 				PrimaryEmailUpdate: SecurityNotificationConfiguration{
-					Enabled: false,
+					Enabled: true,
 				},
-			},
-			Sender: SecurityNotificationsEmailAddress{
-				FromAddress: "security@hanko.com",
-				FromName:    "Hanko Security",
 			},
 		},
 		Smtp: SMTP{

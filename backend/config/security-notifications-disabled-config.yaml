@@ -13,13 +13,10 @@ service:
 security_notifications:
   notifications:
     email_create:
-      enabled: true
+      enabled: false
     password_update:
-      enabled: true
+      enabled: false
     passkey_create:
-      enabled: true
+      enabled: false
     primary_email_update:
-      enabled: true
-  sender:
-    from_address: "test@example.com"
-    from_name: "foobar"
+      enabled: false

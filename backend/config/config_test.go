@@ -96,7 +96,7 @@ func TestEnvironmentVariables(t *testing.T) {
 }
 
 func TestParseSecurityNotificationsConfig(t *testing.T) {
-	configPath := "./security-notifications-config.yaml"
+	configPath := "./security-notifications-disabled-config.yaml"
 	cfg, err := Load(&configPath)
 	if err != nil {
 		t.Error(err)
@@ -106,13 +106,10 @@ func TestParseSecurityNotificationsConfig(t *testing.T) {
 	}
 	notificationsConfig := cfg.SecurityNotifications
 
-	assert.True(t, notificationsConfig.Notifications.EmailCreate.Enabled)
-	assert.True(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
-	assert.True(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
-	assert.True(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
-
-	assert.Equal(t, "test@example.com", notificationsConfig.Sender.FromAddress)
-	assert.Equal(t, "foobar", notificationsConfig.Sender.FromName)
+	assert.False(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
 }
 
 func TestParseDefaultSecurityNotificationsConfig(t *testing.T) {
@@ -122,11 +119,8 @@ func TestParseDefaultSecurityNotificationsConfig(t *testing.T) {
 	}
 	notificationsConfig := cfg.SecurityNotifications
 
-	assert.False(t, notificationsConfig.Notifications.EmailCreate.Enabled)
-	assert.False(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
-	assert.False(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
-	assert.False(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
-
-	assert.Equal(t, "security@hanko.com", notificationsConfig.Sender.FromAddress)
-	assert.Equal(t, "Hanko Security", notificationsConfig.Sender.FromName)
+	assert.True(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
 }

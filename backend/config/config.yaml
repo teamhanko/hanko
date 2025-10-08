@@ -153,6 +153,3 @@ security_notifications:
       enabled: true
     primary_email_update:
       enabled: true
-  sender:
-    from_address: "test@example.com"
-    from_name: "foobar"
