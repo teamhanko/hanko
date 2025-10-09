@@ -42,7 +42,7 @@ func generateSchema(params generateSchemaParams) error {
 
 	if params.extractComments {
 		for _, path := range params.commentPaths {
-			if err := r.AddGoComments("github.com/teamhanko/hanko/backend", path); err != nil {
+			if err := r.AddGoComments("github.com/teamhanko/hanko/backend/v2", path); err != nil {
 				return err
 			}
 		}

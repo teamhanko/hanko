@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/teamhanko/hanko/backend/config/config",
+  "$id": "https://github.com/teamhanko/hanko/backend/v2/config/config",
   "$ref": "#/$defs/Config",
   "$defs": {
     "Account": {
