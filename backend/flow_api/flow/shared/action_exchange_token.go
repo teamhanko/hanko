@@ -60,7 +60,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return errors.New("token not found")
 	}
 
-	if tokenModel.PKCECodeVerifier != "" && tokenModel.PKCECodeVerifier != c.Input().Get("code_verifier").String() {
+	if tokenModel.PKCECodeVerifier != nil && *tokenModel.PKCECodeVerifier != "" && *tokenModel.PKCECodeVerifier != c.Input().Get("code_verifier").String() {
 		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("code_verifier does not match")))
 	}
 

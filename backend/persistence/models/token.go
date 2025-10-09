@@ -18,7 +18,7 @@ type Token struct {
 	IsFlow           bool       `db:"is_flow"`
 	Value            string     `db:"value"`
 	UserCreated      bool       `db:"user_created"`
-	PKCECodeVerifier string     `db:"code_verifier"`
+	PKCECodeVerifier *string    `db:"code_verifier"`
 	ExpiresAt        time.Time  `db:"expires_at"`
 	CreatedAt        time.Time  `db:"created_at"`
 	UpdatedAt        time.Time  `db:"updated_at"`
@@ -44,7 +44,7 @@ func TokenUserCreated(userCreated bool) func(*Token) {
 
 func TokenPKCESessionVerifier(pkceSessionVerifier string) func(*Token) {
 	return func(token *Token) {
-		token.PKCECodeVerifier = pkceSessionVerifier
+		token.PKCECodeVerifier = &pkceSessionVerifier
 	}
 }
 
