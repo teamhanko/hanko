@@ -3,8 +3,6 @@ package shared
 import (
 	"cmp"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/v2/utils"
-	"net/http"
 	"slices"
 
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -103,18 +101,18 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 	//	SameSite: http.SameSiteLaxMode,
 	// })
 
-	cookie := &http.Cookie{
-		Name:     utils.HankoThirdpartyStateCookie,
-		Value:    string(state),
-		Path:     "/",
-		Domain:   deps.Cfg.Session.Cookie.Domain,
-		MaxAge:   300,
-		Secure:   true,
-		HttpOnly: deps.Cfg.Session.Cookie.HttpOnly,
-		SameSite: http.SameSiteNoneMode,
-	}
+	//cookie := &http.Cookie{
+	//	Name:     utils.HankoThirdpartyStateCookie,
+	//	Value:    string(state),
+	//	Path:     "/",
+	//	Domain:   deps.Cfg.Session.Cookie.Domain,
+	//	MaxAge:   300,
+	//	Secure:   true,
+	//	HttpOnly: deps.Cfg.Session.Cookie.HttpOnly,
+	//	SameSite: http.SameSiteNoneMode,
+	//}
 
-	deps.HttpContext.SetCookie(cookie)
+	//deps.HttpContext.SetCookie(cookie)
 
 	if err = c.Payload().Set("redirect_url", authCodeUrl); err != nil {
 		return fmt.Errorf("failed to set redirect_url to payload: %w", err)

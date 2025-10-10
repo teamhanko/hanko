@@ -115,9 +115,13 @@ const LoginInitPage = (props: Props) => {
     event.preventDefault();
     setSelectedThirdPartyProvider(name);
 
+    const codeVerifier = crypto.randomUUID();
+    localStorage.setItem("code_verifier", codeVerifier);
+
     const nextState = await flowState.actions.thirdparty_oauth.run({
       provider: name,
       redirect_to: window.location.toString(),
+      code_verifier: codeVerifier,
     });
 
     if (nextState.error) {

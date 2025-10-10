@@ -90,7 +90,11 @@ export const autoSteps: AutoSteps = {
 
     if (token?.length > 0) {
       updateUrl(["hanko_token"]);
-      return await state.actions.exchange_token.run({ token });
+      const codeVerifier = localStorage.getItem("code_verifier");
+      return await state.actions.exchange_token.run({
+        token,
+        code_verifier: codeVerifier,
+      });
     }
 
     if (error?.length > 0) {
