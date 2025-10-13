@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
@@ -110,12 +111,17 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			}
 		}
 
-		expectedState, terr := c.Cookie(utils.HankoThirdpartyStateCookie)
-		if terr != nil {
-			return thirdparty.ErrorInvalidRequest("thirdparty state cookie is missing")
+		expectedStateCookie, terr := c.Cookie(utils.HankoThirdpartyStateCookie)
+		if terr != nil && !errors.Is(terr, http.ErrNoCookie) {
+			return thirdparty.ErrorInvalidRequest("could not read state cookie").WithCause(terr)
 		}
 
-		state, terr := thirdparty.VerifyState(h.cfg, callback.State, expectedState.Value)
+		var expectedState string
+		if expectedStateCookie != nil {
+			expectedState = expectedStateCookie.Value
+		}
+		var state *thirdparty.State
+		state, terr = thirdparty.VerifyState(h.cfg, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -133,7 +139,11 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("auth code missing from request")
 		}
 
-		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode)
+		opts := []oauth2.AuthCodeOption{}
+		if state.CodeVerifier != "" {
+			opts = append(opts, oauth2.VerifierOption(state.CodeVerifier))
+		}
+		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode, opts...)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(terr)
 		}
@@ -152,11 +162,18 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		emailModel := linkingResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
 		identityModel := emailModel.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
 
-		token, terr := models.NewToken(
-			linkingResult.User.ID,
+		tokenOpts := []func(*models.Token){
 			models.TokenForFlowAPI(state.IsFlow),
 			models.TokenWithIdentityID(identityModel.ID),
-			models.TokenUserCreated(linkingResult.UserCreated))
+			models.TokenUserCreated(linkingResult.UserCreated),
+		}
+		if state.CodeVerifier != "" {
+			tokenOpts = append(tokenOpts, models.TokenPKCESessionVerifier(state.CodeVerifier))
+		}
+		token, terr := models.NewToken(
+			linkingResult.User.ID,
+			tokenOpts...,
+		)
 		if terr != nil {
 			return thirdparty.ErrorServer("could not create token").WithCause(terr)
 		}

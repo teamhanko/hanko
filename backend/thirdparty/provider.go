@@ -84,7 +84,7 @@ type Email struct {
 type OAuthProvider interface {
 	AuthCodeURL(string, ...oauth2.AuthCodeOption) string
 	GetUserData(*oauth2.Token) (*UserData, error)
-	GetOAuthToken(string) (*oauth2.Token, error)
+	GetOAuthToken(string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 	ID() string
 	GetPromptParam() string
 }

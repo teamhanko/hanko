@@ -60,8 +60,8 @@ func (p discordProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g discordProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code)
+func (g discordProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (g discordProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
