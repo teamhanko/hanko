@@ -434,6 +434,11 @@
           "description": "`enabled` indicates if the provider is enabled or disabled.",
           "default": false
         },
+        "prompt": {
+          "type": "string",
+          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values.",
+          "default": "consent"
+        },
         "scopes": {
           "items": {
             "type": "string"
@@ -1437,6 +1442,11 @@
           "type": "boolean",
           "description": "`enabled` determines whether this provider is enabled.",
           "default": false
+        },
+        "prompt": {
+          "type": "string",
+          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values.",
+          "default": "consent"
         },
         "secret": {
           "type": "string",
