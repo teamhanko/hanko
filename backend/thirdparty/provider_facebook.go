@@ -127,3 +127,10 @@ func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 func (f facebookProvider) ID() string {
 	return f.config.ID
 }
+
+func (f facebookProvider) GetPromptParam() string {
+	if f.config.Prompt != "" {
+		return f.config.Prompt
+	}
+	return "consent"
+}

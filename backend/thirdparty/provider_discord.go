@@ -107,3 +107,10 @@ func (g discordProvider) buildAvatarURL(userID string, avatarHash string) string
 func (g discordProvider) ID() string {
 	return g.config.ID
 }
+
+func (g discordProvider) GetPromptParam() string {
+	if g.config.Prompt != "" {
+		return g.config.Prompt
+	}
+	return "consent"
+}
