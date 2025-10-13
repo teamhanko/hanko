@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/dto/admin"
-	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/dto/admin"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"net/http"
 )
 

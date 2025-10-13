@@ -13,13 +13,13 @@ import (
 	jwk2 "github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/suite"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/session"
-	"github.com/teamhanko/hanko/backend/test"
-	"github.com/teamhanko/hanko/backend/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 func TestThirdPartySuite(t *testing.T) {

@@ -5,7 +5,7 @@ import (
 	"github.com/labstack/gommon/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"testing"
 	"time"
 )

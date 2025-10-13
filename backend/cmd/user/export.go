@@ -7,8 +7,8 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/persistence"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
 func NewExportCommand() *cobra.Command {

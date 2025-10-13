@@ -6,7 +6,7 @@ import (
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/teamhanko/hanko/backend/ee/saml/config"
+	"github.com/teamhanko/hanko/backend/v2/ee/saml/config"
 	"log"
 )
 

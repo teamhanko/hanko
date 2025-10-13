@@ -2,9 +2,9 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/config"
-	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
-	dto "github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	hankoJwk "github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	dto "github.com/teamhanko/hanko/backend/v2/dto"
 	"net/http"
 )
 

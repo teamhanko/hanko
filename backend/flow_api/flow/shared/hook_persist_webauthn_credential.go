@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type WebauthnCredentialSave struct {

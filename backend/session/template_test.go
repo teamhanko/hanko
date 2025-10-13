@@ -8,7 +8,7 @@ import (
 
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
-	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 )
 
 func TestProcessJWTTemplate(t *testing.T) {

@@ -1,9 +1,9 @@
 package admin
 
 import (
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 )
 
 type WebhookListResponseDto struct {

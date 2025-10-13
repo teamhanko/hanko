@@ -3,9 +3,9 @@ package shared
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 	"time"
 )
 

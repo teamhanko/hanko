@@ -9,9 +9,9 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/test"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/test"
 )
 
 func TestNewGenerator(t *testing.T) {

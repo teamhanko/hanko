@@ -1,18 +1,18 @@
 package flow
 
 import (
-	"github.com/teamhanko/hanko/backend/flow_api/flow/capabilities"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_onboarding"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/credential_usage"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/device_trust"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/login"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_creation"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/mfa_usage"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/profile"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/registration"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/user_details"
-	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/capabilities"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/credential_onboarding"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/credential_usage"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/device_trust"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/login"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/mfa_creation"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/mfa_usage"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/profile"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/registration"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/user_details"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"time"
 )
 

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/invopop/jsonschema"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"net/url"
 	"strings"
 )

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
 )
 

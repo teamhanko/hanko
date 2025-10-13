@@ -1,4 +1,4 @@
-module github.com/teamhanko/hanko/backend
+module github.com/teamhanko/hanko/backend/v2
 
 go 1.24
 

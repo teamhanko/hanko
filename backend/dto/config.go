@@ -2,8 +2,8 @@ package dto
 
 import (
 	"github.com/fatih/structs"
-	"github.com/teamhanko/hanko/backend/config"
-	samlConfig "github.com/teamhanko/hanko/backend/ee/saml/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	samlConfig "github.com/teamhanko/hanko/backend/v2/ee/saml/config"
 )
 
 // PublicConfig is the part of the configuration that will be shared with the frontend
