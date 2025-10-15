@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/stretchr/testify/assert"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"net/http"
 	"testing"
 )

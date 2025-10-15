@@ -1,0 +1,1 @@
+add_column("tokens", "code_verifier", "string", {"null":true} )

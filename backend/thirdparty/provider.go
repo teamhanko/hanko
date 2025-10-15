@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
 )
 
@@ -84,8 +84,9 @@ type Email struct {
 type OAuthProvider interface {
 	AuthCodeURL(string, ...oauth2.AuthCodeOption) string
 	GetUserData(*oauth2.Token) (*UserData, error)
-	GetOAuthToken(string) (*oauth2.Token, error)
+	GetOAuthToken(string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 	ID() string
+	GetPromptParam() string
 }
 
 func GetProvider(config config.ThirdParty, id string) (OAuthProvider, error) {

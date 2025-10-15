@@ -2,11 +2,11 @@ package saml
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/ee/saml/provider"
-	samlUtils "github.com/teamhanko/hanko/backend/ee/saml/utils"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
+	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"net/url"
 )
 

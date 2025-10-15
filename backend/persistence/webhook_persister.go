@@ -7,7 +7,7 @@ import (
 	"github.com/gofrs/uuid"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type WebhookPersister interface {

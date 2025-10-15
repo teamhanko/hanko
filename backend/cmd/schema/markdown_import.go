@@ -3,7 +3,7 @@ package schema
 import (
 	"fmt"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/cmd/user"
+	"github.com/teamhanko/hanko/backend/v2/cmd/user"
 	"log"
 	"os/exec"
 	"path/filepath"

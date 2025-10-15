@@ -3,11 +3,11 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"regexp"
 	"strings"
 )
@@ -84,6 +84,21 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	if treatIdentifierAsEmail {
 		// User has submitted an email address.
 
+		if deps.Cfg.Saml.Enabled {
+			domain := strings.Split(identifierInputValue, "@")[1]
+			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
+				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+
+				if err != nil {
+					return fmt.Errorf("failed to get auth url: %w", err)
+				}
+
+				_ = c.Payload().Set("redirect_url", authUrl)
+
+				return c.Continue(shared.StateThirdParty)
+			}
+		}
+
 		var err error
 
 		userModel, err = deps.Persister.GetUserPersister().GetByEmailAddress(identifierInputValue)
@@ -122,21 +137,6 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				if err != nil {
 					return fmt.Errorf("failed to set user_id to the stash: %w", err)
 				}
-			}
-		}
-
-		if deps.Cfg.Saml.Enabled {
-			domain := strings.Split(identifierInputValue, "@")[1]
-			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
-
-				if err != nil {
-					return fmt.Errorf("failed to get auth url: %w", err)
-				}
-
-				_ = c.Payload().Set("redirect_url", authUrl)
-
-				return c.Continue(shared.StateThirdParty)
 			}
 		}
 	} else {

@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 )
 
 type GenerateOAuthLinks struct {

@@ -10,7 +10,7 @@ import (
 
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/rs/zerolog/log"
-	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 )
 
 // JWTTemplateData holds the data available for template processing

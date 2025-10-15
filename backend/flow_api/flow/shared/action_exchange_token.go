@@ -3,9 +3,9 @@ package shared
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 	"time"
 )
 
@@ -22,7 +22,10 @@ func (a ExchangeToken) GetDescription() string {
 }
 
 func (a ExchangeToken) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.StringInput("token").Hidden(true).Required(true))
+	c.AddInputs(
+		flowpilot.StringInput("token").Hidden(true).Required(true),
+		flowpilot.StringInput("code_verifier").Hidden(true),
+	)
 }
 
 func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
@@ -55,6 +58,10 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 
 	if tokenModel == nil {
 		return errors.New("token not found")
+	}
+
+	if tokenModel.PKCECodeVerifier != nil && *tokenModel.PKCECodeVerifier != "" && *tokenModel.PKCECodeVerifier != c.Input().Get("code_verifier").String() {
+		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("code_verifier does not match")))
 	}
 
 	if time.Now().UTC().After(tokenModel.ExpiresAt) {

@@ -5,7 +5,7 @@ import (
 	"github.com/tidwall/gjson"
 	"strings"
 
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 // Metadata represents user metadata with public and unsafe fields

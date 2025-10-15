@@ -6,7 +6,7 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	zeroLogger "github.com/rs/zerolog/log"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
 	"net/url"
 	"strconv"
@@ -59,8 +59,8 @@ func (a appleProvider) AuthCodeURL(state string, args ...oauth2.AuthCodeOption) 
 	return authURL
 }
 
-func (a appleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return a.oauthConfig.Exchange(context.Background(), code)
+func (a appleProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return a.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
@@ -125,4 +125,11 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (a appleProvider) ID() string {
 	return a.config.ID
+}
+
+func (a appleProvider) GetPromptParam() string {
+	if a.config.Prompt != "" {
+		return a.config.Prompt
+	}
+	return "consent"
 }

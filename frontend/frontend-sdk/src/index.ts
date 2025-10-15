@@ -27,9 +27,15 @@ export { WebauthnSupport };
 
 // DTO
 
-import { Email, Emails, Identity, SessionCheckResponse } from "./lib/Dto";
+import {
+  Email,
+  Emails,
+  Identity,
+  SessionCheckResponse,
+  Claims,
+} from "./lib/Dto";
 
-export type { Email, Emails, Identity, SessionCheckResponse };
+export type { Email, Emails, Identity, SessionCheckResponse, Claims };
 
 // Errors
 

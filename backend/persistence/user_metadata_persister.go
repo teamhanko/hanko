@@ -9,7 +9,7 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 // MetadataLimitExceededError is returned when metadata fields exceed their length limits

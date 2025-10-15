@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/teamhanko/hanko/backend/thirdparty"
+	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 )
 
 func (s *thirdPartySuite) TestThirdPartyHandler_Auth() {

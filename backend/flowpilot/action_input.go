@@ -2,7 +2,7 @@ package flowpilot
 
 import (
 	"encoding/json"
-	"github.com/teamhanko/hanko/backend/flowpilot/jsonmanager"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot/jsonmanager"
 )
 
 type actionInput interface {
