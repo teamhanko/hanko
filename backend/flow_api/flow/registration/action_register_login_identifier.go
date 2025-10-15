@@ -3,11 +3,12 @@ package registration
 import (
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"strings"
 )
 
 // RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
@@ -85,7 +86,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 		// Check that username is not already taken
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
-		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
 		if err != nil {
 			return err
 		}
