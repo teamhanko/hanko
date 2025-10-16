@@ -3,6 +3,7 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -72,7 +73,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		userID = *emailModel.UserID
 	} else if c.Stash().Get(shared.StashPathUsername).Exists() {
 		username := c.Stash().Get(shared.StashPathUsername).String()
-		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
 		}
