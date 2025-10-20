@@ -3,10 +3,11 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
-	"time"
 )
 
 type ExchangeToken struct {
