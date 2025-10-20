@@ -3,6 +3,9 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+	"slices"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -11,7 +14,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
-	"time"
 )
 
 type SendPasscode struct {
@@ -96,12 +98,23 @@ func (h SendPasscode) Execute(c flowpilot.HookExecutionContext) error {
 			AcceptLanguage:   sendParams.Language,
 			Language:         sendParams.Language,
 			Type:             passcodeTemplate,
-			Data: webhook.PasscodeData{
+		}
+
+		if slices.Contains(
+			[]string{
+				shared.PasscodeTemplateEmailRegistrationAttempted,
+				shared.PasscodeTemplateEmailLoginAttempted,
+			}, passcodeTemplate) {
+			webhookData.Data = webhook.PasscodeData{
+				ServiceName: deps.Cfg.Service.Name,
+			}
+		} else {
+			webhookData.Data = webhook.PasscodeData{
 				ServiceName: deps.Cfg.Service.Name,
 				OtpCode:     passcodeResult.Code,
 				TTL:         deps.Cfg.Email.PasscodeTtl,
 				ValidUntil:  passcodeResult.PasscodeModel.CreatedAt.Add(time.Duration(deps.Cfg.Email.PasscodeTtl) * time.Second).UTC().Unix(),
-			},
+			}
 		}
 
 		err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.EmailSend, webhookData)

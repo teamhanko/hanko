@@ -129,7 +129,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 					return fmt.Errorf("failed to copy email to stash: %w", err)
 				}
 
-				err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted")
+				err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailRegistrationAttempted)
 				if err != nil {
 					return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 				}
@@ -155,7 +155,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if email != "" && deps.Cfg.Email.RequireVerification {
-		if err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification"); err != nil {
+		if err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification); err != nil {
 			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
 		}
 	}

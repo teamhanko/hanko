@@ -52,12 +52,12 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		// Email verification is enabled. Send an email regardless of whether the email address exists, but select the
 		// appropriate passcode template beforehand.
 		if existingEmail != nil {
-			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted") // "email_verification"
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailRegistrationAttempted)
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
 		} else {
-			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification)
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}

@@ -129,7 +129,7 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 			return nil, fmt.Errorf("failed to stash email: %w", err)
 		}
 
-		if err := c.Stash().Set(StashPathPasscodeTemplate, "email_verification"); err != nil {
+		if err := c.Stash().Set(StashPathPasscodeTemplate, PasscodeTemplateEmailVerification); err != nil {
 			return nil, fmt.Errorf("failed to stash passcode_template: %w", err)
 		}
 
