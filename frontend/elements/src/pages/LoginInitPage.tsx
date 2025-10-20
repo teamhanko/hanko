@@ -129,8 +129,9 @@ const LoginInitPage = (props: Props) => {
 
   const showDivider = useMemo(
     () =>
-      !!flowState.actions.webauthn_generate_request_options.enabled ||
-      !!flowState.actions.thirdparty_oauth.enabled,
+      (!!flowState.actions.webauthn_generate_request_options.enabled ||
+        !!flowState.actions.thirdparty_oauth.enabled) &&
+      flowState.actions.continue_with_login_identifier.enabled,
     [flowState.actions],
   );
 

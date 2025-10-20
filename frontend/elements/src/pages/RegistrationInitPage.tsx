@@ -98,7 +98,9 @@ const RegistrationInitPage = (props: Props) => {
   };
 
   const showDivider = useMemo(
-    () => !!flowState.actions.thirdparty_oauth.enabled,
+    () =>
+      !!flowState.actions.thirdparty_oauth.enabled &&
+      flowState.actions.register_login_identifier.enabled,
     [flowState.actions],
   );
 
