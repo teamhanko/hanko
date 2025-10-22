@@ -3,8 +3,10 @@ package shared
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
@@ -18,21 +20,32 @@ type EmailPersistVerifiedStatus struct {
 func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
+	fmt.Printf("EMAIL VERIFIED\n")
+
 	if !c.Stash().Get(StashPathEmailVerified).Bool() {
+		fmt.Printf("NOT VERIFIED?\n")
 		return nil
 	}
 
 	if !c.Stash().Get(StashPathEmail).Exists() {
+		fmt.Printf("NOT VERIFIED EMAIL?\n")
 		return errors.New("verified email not set on the stash")
 	}
 
 	if !c.Stash().Get(StashPathUserID).Exists() {
+		fmt.Printf("NO USER ID?\n")
 		return errors.New("user_id not set on the stash")
 	}
 
 	userId, err := uuid.FromString(c.Stash().Get(StashPathUserID).String())
 	if err != nil {
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
+	}
+
+	user, err := deps.Persister.GetUserPersister().Get(userId)
+	if err != nil {
+		fmt.Printf("FAILED TO GE USER BY USER ID?\n")
+		return fmt.Errorf("failed to get user by user_id: %w", err)
 	}
 
 	emailAddressToVerify := c.Stash().Get(StashPathEmail).String()
@@ -104,6 +117,21 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			return fmt.Errorf("could not create audit log: %w", err)
 		}
 	}
+
+	fmt.Printf("EMAIL CREATE? %t\n", deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled)
+
+	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: user.Emails.GetPrimary().Address,
+			Template:     "email_create",
+			Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+			BodyData: map[string]interface{}{
+				"NewEmailAddress": emailAddressToVerify,
+			},
+		})
+	}
+
+	fmt.Printf("DONE HERE\n")
 
 	if emailCreated {
 		err = deps.AuditLogger.CreateWithConnection(

@@ -19,7 +19,6 @@ subject_email_create:
   description: ""
   other: "A new email address has been registered to your {{ .ServiceName }} account"
 
-
 passkey_create_text:
   description: ""
   other: "Your {{.ServiceName}} account has been registered with a new passkey."

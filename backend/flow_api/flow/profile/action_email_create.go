@@ -2,8 +2,10 @@ package profile
 
 import (
 	"fmt"
+
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
@@ -52,6 +54,8 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("could not fetch email: %w", err)
 	}
+
+	currentPrimaryEmail := userModel.Emails.GetPrimary().Address
 
 	if existingEmailModel != nil {
 		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Email.RequireVerification || deps.Cfg.Privacy.ShowAccountExistenceHints {
@@ -122,6 +126,17 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
+		}
+
+		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
+			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				EmailAddress: currentPrimaryEmail,
+				Template:     "email_create",
+				Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+				BodyData: map[string]interface{}{
+					"NewEmailAddress": newEmailAddress,
+				},
+			})
 		}
 
 		userModel.Emails = append(userModel.Emails, *emailModel)
