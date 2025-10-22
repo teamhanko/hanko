@@ -2,11 +2,12 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter"
 	"github.com/sethvargo/go-limiter/httplimit"
-	"github.com/teamhanko/hanko/backend/v2/audit_log"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/v2/dto"
@@ -29,10 +30,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
 
-	emailService, err := services.NewEmailService(*cfg)
+	emailService, _ := services.NewEmailService(*cfg)
 	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
 	passwordService := services.NewPasswordService(persister)
 	webauthnService := services.NewWebauthnService(*cfg, persister)
+	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister)
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {
@@ -59,19 +61,20 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	samlService := saml.NewSamlService(cfg, persister)
 
 	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:                persister,
-		Cfg:                      *cfg,
-		PasscodeService:          passcodeService,
-		PasswordService:          passwordService,
-		WebauthnService:          webauthnService,
-		SessionManager:           sessionManager,
-		OTPRateLimiter:           otpRateLimiter,
-		PasscodeRateLimiter:      passcodeRateLimiter,
-		PasswordRateLimiter:      passwordRateLimiter,
-		TokenExchangeRateLimiter: tokenExchangeRateLimiter,
-		AuthenticatorMetadata:    authenticatorMetadata,
-		AuditLogger:              auditLogger,
-		SamlService:              samlService,
+		Persister:                   persister,
+		Cfg:                         *cfg,
+		PasscodeService:             passcodeService,
+		SecurityNotificationService: securityNotificationService,
+		PasswordService:             passwordService,
+		WebauthnService:             webauthnService,
+		SessionManager:              sessionManager,
+		OTPRateLimiter:              otpRateLimiter,
+		PasscodeRateLimiter:         passcodeRateLimiter,
+		PasswordRateLimiter:         passwordRateLimiter,
+		TokenExchangeRateLimiter:    tokenExchangeRateLimiter,
+		AuthenticatorMetadata:       authenticatorMetadata,
+		AuditLogger:                 auditLogger,
+		SamlService:                 samlService,
 	}
 
 	if cfg.Saml.Enabled {
