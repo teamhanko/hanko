@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml/config"
-	"log"
 )
 
 // Config is the central configuration type
@@ -34,6 +35,8 @@ type Config struct {
 	EmailDelivery EmailDelivery `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true" jsonschema:"title=email_delivery"`
 	// Deprecated. See child properties for suggested replacements.
 	Emails Emails `yaml:"emails" json:"emails,omitempty" koanf:"emails" jsonschema:"title=emails"`
+	// `flow_locker` confgures flow locking
+	FlowLocker FlowLocker `yaml:"flow_locker" json:"flow_locker,omitempty" koanf:"flow_locker"`
 	// `log` configures application logging.
 	Log LoggerConfig `yaml:"log" json:"log,omitempty" koanf:"log" jsonschema:"title=log"`
 	// `mfa` configures how multi-factor-authentication behaves.
@@ -173,6 +176,10 @@ func (c *Config) Validate() error {
 	err = c.Webhooks.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webhook settings: %w", err)
+	}
+	err = c.FlowLocker.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate flow_locker settings: %w", err)
 	}
 	return nil
 }

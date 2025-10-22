@@ -3,6 +3,10 @@ package flow_api
 import (
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -16,13 +20,12 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/ee/saml"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
-	"strconv"
-	"time"
 )
 
 type FlowPilotHandler struct {
@@ -39,6 +42,7 @@ type FlowPilotHandler struct {
 	TokenExchangeRateLimiter limiter.Store
 	AuthenticatorMetadata    mapper.AuthenticatorMetadata
 	AuditLogger              auditlog.Logger
+	FlowLocker               flow_locker.FlowLocker
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -139,6 +143,39 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	var inputData flowpilot.InputData
 	var flowResult flowpilot.FlowResult
 
+	if c.QueryParam(queryParamKey) != "" {
+		err = c.Bind(&inputData)
+		if err != nil {
+			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+
+		flowID, err := extractFlowID(c.QueryParam(queryParamKey))
+		if err != nil {
+			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+
+		// Try to acquire lock for this flow
+		ctx := c.Request().Context()
+		unlock, err := h.FlowLocker.Lock(ctx, flowID)
+		if err != nil {
+			// Lock acquisition failed - flow is being processed by another request
+			zeroLogger.Debug().
+				Str("flow_id", flowID.String()).
+				Err(err).
+				Msg("failed to acquire flow lock - concurrent request detected")
+
+			flowResult = flow.ResultFromError(
+				flowpilot.ErrorOperationNotPermitted.Wrap(
+					fmt.Errorf("this flow is currently being processed by another request"),
+				),
+			)
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+		defer unlock()
+	}
+
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
 			Cfg:                      h.Cfg,
@@ -169,14 +206,9 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		return err
 	}
 
-	err = c.Bind(&inputData)
+	err = h.Persister.Transaction(txFunc)
 	if err != nil {
-		flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
-	} else {
-		err = h.Persister.Transaction(txFunc)
-		if err != nil {
-			flowResult = flow.ResultFromError(err)
-		}
+		flowResult = flow.ResultFromError(err)
 	}
 
 	log := zeroLogger.Info().
@@ -199,4 +231,13 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 
 func init() {
 	zerolog.TimeFieldFormat = time.RFC3339Nano
+}
+
+// extractFlowID extracts just the flow ID from "action@flowID" format
+func extractFlowID(queryParamValue string) (uuid.UUID, error) {
+	parts := strings.Split(queryParamValue, "@")
+	if len(parts) != 2 {
+		return uuid.Nil, fmt.Errorf("invalid flow id format")
+	}
+	return uuid.FromString(parts[1])
 }
