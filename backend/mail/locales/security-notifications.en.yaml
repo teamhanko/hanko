@@ -1,21 +1,21 @@
 password_update_text:
   description: ""
   other: "The password for your {{ .ServiceName }} account has been successfully updated."
-email_subject_password_update:
+subject_password_update:
   description: ""
   other: "Your {{ .ServiceName }} account password has been updated"
 
 primary_email_update_text:
   description: ""
   other: "The primary email address for your {{ .ServiceName }} account has been successfully updated from {{ .OldEmailAddress }} to {{ .NewEmailAddress }}."
-email_subject_primary_email_update:
+subject_primary_email_update:
   description: ""
   other: "Your {{ .ServiceName }} primary email address has been updated"
 
 email_create_text:
   description: ""
   other: "The email address {{ .NewEmailAddress }} has been successfully added to your {{ .ServiceName }} account."
-email_subject_email_create:
+subject_email_create:
   description: ""
   other: "A new email address has been registered to your {{ .ServiceName }} account"
 
@@ -23,6 +23,6 @@ email_subject_email_create:
 passkey_create_text:
   description: ""
   other: "Your {{.ServiceName}} account has been registered with a new passkey."
-email_subject_passkey_create:
+subject_passkey_create:
   description: ""
   other: "A new passkey has been registered to your {{ .ServiceName }} account"
