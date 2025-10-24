@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml"
 	"github.com/teamhanko/hanko/backend/v2/flow_api"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/mail"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
@@ -72,6 +73,14 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		AuthenticatorMetadata:    authenticatorMetadata,
 		AuditLogger:              auditLogger,
 		SamlService:              samlService,
+	}
+
+	if cfg.FlowLocker.Enabled {
+		flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
+		if err != nil {
+			panic(fmt.Errorf("failed to initialize flow locker: %w", err))
+		}
+		flowAPIHandler.FlowLocker = flowLocker
 	}
 
 	if cfg.Saml.Enabled {

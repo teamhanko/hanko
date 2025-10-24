@@ -186,6 +186,10 @@
           "title": "emails",
           "description": "Deprecated. See child properties for suggested replacements."
         },
+        "flow_locker": {
+          "$ref": "#/$defs/FlowLocker",
+          "description": "`flow_locker` confgures flow locking"
+        },
         "log": {
           "$ref": "#/$defs/LoggerConfig",
           "title": "log",
@@ -626,6 +630,35 @@
         "type": "string"
       },
       "type": "array"
+    },
+    "FlowLocker": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` controls whether flow locking is enabled",
+          "default": true
+        },
+        "store": {
+          "type": "string",
+          "enum": [
+            "in_memory",
+            "redis"
+          ],
+          "description": "`store` sets the backend for the flow locker",
+          "default": "in_memory"
+        },
+        "redis_config": {
+          "$ref": "#/$defs/RedisConfig",
+          "description": "`redis_config` configures connection to a redis instance\nRequired if `store` is set to `redis`"
+        },
+        "ttl": {
+          "type": "string",
+          "description": "`ttl` is the lock timeout (for Redis only)",
+          "default": "30s"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "IdentityProvider": {
       "properties": {
