@@ -67,7 +67,7 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user_id to stash: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+	err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification)
 	if err != nil {
 		return fmt.Errorf("failed to set passcode_tempalte to stash %w", err)
 	}

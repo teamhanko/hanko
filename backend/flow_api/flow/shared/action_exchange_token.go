@@ -3,10 +3,11 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
-	"time"
 )
 
 type ExchangeToken struct {
@@ -129,7 +130,7 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 			return nil, fmt.Errorf("failed to stash email: %w", err)
 		}
 
-		if err := c.Stash().Set(StashPathPasscodeTemplate, "email_verification"); err != nil {
+		if err := c.Stash().Set(StashPathPasscodeTemplate, PasscodeTemplateEmailVerification); err != nil {
 			return nil, fmt.Errorf("failed to stash passcode_template: %w", err)
 		}
 
