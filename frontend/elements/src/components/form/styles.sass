@@ -39,6 +39,27 @@
   flex-grow: 1
   flex-shrink: 1
   display: inline-flex
+  position: relative
+
+  &[data-bubble]
+    &:before
+      @include mixins.font
+      @include mixins.border
+
+      padding: 2px 8px
+      font-size: 9px
+      line-height: normal
+      content: attr(data-bubble)
+      display: block
+      position: absolute
+      bottom: 80%
+      left: 80%
+      white-space: nowrap
+      width: max-content
+      text-align: center
+      background-color: inherit
+      color: variables.$brand-color-shade-1
+      border-color: variables.$brand-color-shade-1
 
   &:disabled
     cursor: default
@@ -97,11 +118,6 @@
   display: flex
   justify-content: space-between
   align-items: baseline
-
-// Last Used Styles
-.lastUsed
- color: variables.$color-shade-1
- font-size: smaller
 
 // Input Styles
 .inputWrapper

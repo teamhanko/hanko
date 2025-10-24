@@ -14,9 +14,9 @@ import styles from "./styles.sass";
 import LoadingSpinner from "../icons/LoadingSpinner";
 import Icon, { IconName } from "../icons/Icon";
 import { AppContext } from "../../contexts/AppProvider";
-import LastUsed from "./LastUsed";
 import { useFlowEffects } from "../../hooks/UseFlowEffects";
 import { useFormContext } from "./Form";
+import { TranslateContext } from "@denysvuika/preact-translate";
 
 type Props = {
   title?: string;
@@ -47,6 +47,7 @@ const Button = ({
 }: Props) => {
   const ref = useRef(null);
   const { uiState } = useContext(AppContext);
+  const { t } = useContext(TranslateContext);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isSuccess, setIsSuccess] = useState<boolean>(false);
 
@@ -94,6 +95,7 @@ const Button = ({
           ? styles.secondary
           : styles.primary,
       )}
+      data-bubble={showLastUsed ? t("labels.lastUsed") : undefined}
     >
       <LoadingSpinner
         isLoading={isLoading}
@@ -107,7 +109,6 @@ const Button = ({
         ) : null}
         <div className={styles.caption}>
           <span>{children}</span>
-          {showLastUsed ? <LastUsed /> : null}
         </div>
       </LoadingSpinner>
     </button>
