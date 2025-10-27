@@ -2,6 +2,7 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter"
@@ -75,13 +76,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		SamlService:              samlService,
 	}
 
-	if cfg.FlowLocker.Enabled {
-		flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
-		if err != nil {
-			panic(fmt.Errorf("failed to initialize flow locker: %w", err))
-		}
-		flowAPIHandler.FlowLocker = flowLocker
+	flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize flow locker: %w", err))
 	}
+	flowAPIHandler.FlowLocker = flowLocker
 
 	if cfg.Saml.Enabled {
 		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)
