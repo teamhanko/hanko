@@ -28,7 +28,7 @@ type RedisLockerConfig struct {
 // NewRedisLocker creates a new Redis-based flow locker
 func NewRedisLocker(config RedisLockerConfig) *RedisLocker {
 	if config.Expiry == 0 {
-		config.Expiry = 30 * time.Second
+		config.Expiry = 15 * time.Second
 	}
 
 	// Create redigo pool
