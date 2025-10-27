@@ -23,9 +23,6 @@ func NewFlowLocker(cfg config.FlowLocker) (FlowLocker, error) {
 
 	switch cfg.Store {
 	case config.FLOW_LOCKER_STORE_REDIS:
-		if cfg.Redis == nil {
-			return nil, fmt.Errorf("redis config required for redis flow locker")
-		}
 		return NewRedisLocker(RedisLockerConfig{
 			Address:  cfg.Redis.Address,
 			Password: cfg.Redis.Password,
