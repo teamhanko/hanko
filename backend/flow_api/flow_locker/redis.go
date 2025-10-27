@@ -31,24 +31,17 @@ func NewRedisLocker(config RedisLockerConfig) *RedisLocker {
 		config.Expiry = 15 * time.Second
 	}
 
-	// Create redigo pool
 	pool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
-			c, err := redis.Dial("tcp", config.Address)
+			c, err := redis.Dial("tcp", config.Address, redis.DialPassword(config.Password))
 			if err != nil {
 				return nil, err
 			}
-			if config.Password != "" {
-				if _, err := c.Do("AUTH", config.Password); err != nil {
-					c.Close()
-					return nil, err
-				}
-			}
+
 			return c, nil
 		},
 	}
 
-	// Create redsync instance
 	rs := redsync.New(redigo.NewPool(pool))
 
 	return &RedisLocker{
