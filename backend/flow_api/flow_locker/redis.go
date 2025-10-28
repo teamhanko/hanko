@@ -9,7 +9,6 @@ import (
 	"github.com/go-redsync/redsync/v4/redis/redigo"
 	"github.com/gofrs/uuid"
 	"github.com/gomodule/redigo/redis"
-	zeroLogger "github.com/rs/zerolog/log"
 )
 
 // RedisLocker implements FlowLocker using Redis with Redlock
@@ -51,7 +50,7 @@ func NewRedisLocker(config RedisLockerConfig) *RedisLocker {
 }
 
 // Lock acquires a distributed lock for the given flow ID
-func (r *RedisLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(), error) {
+func (r *RedisLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(context.Context) error, error) {
 	// Check if context is already canceled before attempting lock
 	if err := ctx.Err(); err != nil {
 		return nil, fmt.Errorf("context error: %w", err)
@@ -64,24 +63,15 @@ func (r *RedisLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(), error
 	)
 
 	if err := mutex.LockContext(ctx); err != nil {
-		return nil, fmt.Errorf("failed to acquire lock: %w", err)
+		return nil, err
 	}
 
-	zeroLogger.Debug().
-		Str("flow_id", flowID.String()).
-		Msg("acquired distributed flow lock")
-
-	unlock := func() {
-		if ok, err := mutex.UnlockContext(context.Background()); !ok || err != nil {
-			zeroLogger.Error().
-				Err(err).
-				Str("flow_id", flowID.String()).
-				Msg("failed to release lock")
-		} else {
-			zeroLogger.Debug().
-				Str("flow_id", flowID.String()).
-				Msg("released distributed flow lock")
+	unlock := func(ctx context.Context) error {
+		if ok, err := mutex.UnlockContext(ctx); !ok || err != nil {
+			return fmt.Errorf("failed to release lock: %w", err)
 		}
+
+		return nil
 	}
 
 	return unlock, nil

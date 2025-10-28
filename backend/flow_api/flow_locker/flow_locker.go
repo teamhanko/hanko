@@ -12,7 +12,7 @@ import (
 type FlowLocker interface {
 	// Lock acquires a lock for the given flow ID
 	// Returns an unlock function that must be called when done
-	Lock(ctx context.Context, flowID uuid.UUID) (unlock func(), err error)
+	Lock(ctx context.Context, flowID uuid.UUID) (unlock func(context.Context) error, err error)
 }
 
 // NewFlowLocker creates a FlowLocker based on configuration

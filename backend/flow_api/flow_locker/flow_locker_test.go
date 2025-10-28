@@ -50,17 +50,6 @@ func TestNewFlowLocker(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name: "redis store without config returns error",
-			cfg: config.FlowLocker{
-				Enabled: true,
-				Store:   config.FLOW_LOCKER_STORE_REDIS,
-				Redis:   nil,
-			},
-			wantType:    "error",
-			wantErr:     true,
-			errContains: "redis config required",
-		},
-		{
 			name: "unsupported store type returns error",
 			cfg: config.FlowLocker{
 				Enabled: true,

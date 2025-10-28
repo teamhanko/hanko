@@ -1,6 +1,7 @@
 package flow_api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -52,7 +53,8 @@ func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 	loginFlow := flow.NewLoginFlow(h.Cfg.Debug)
-	return h.executeFlow(c, loginFlow)
+	e := h.executeFlow(c, loginFlow)
+	return e
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
@@ -142,38 +144,30 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	var err error
 	var inputData flowpilot.InputData
 	var flowResult flowpilot.FlowResult
+	var unlock func(context.Context) error
+	var flowID uuid.UUID
 
 	if c.QueryParam(queryParamKey) != "" {
 		err = c.Bind(&inputData)
 		if err != nil {
 			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+			h.logFlowResult(c, flowResult)
 			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 		}
 
-		flowID, err := extractFlowID(c.QueryParam(queryParamKey))
+		flowID, err = extractFlowID(c.QueryParam(queryParamKey))
 		if err != nil {
 			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+			h.logFlowResult(c, flowResult)
 			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 		}
 
-		// Try to acquire lock for this flow
-		ctx := c.Request().Context()
-		unlock, err := h.FlowLocker.Lock(ctx, flowID)
+		unlock, err = h.FlowLocker.Lock(c.Request().Context(), flowID)
 		if err != nil {
-			// Lock acquisition failed - flow is being processed by another request
-			zeroLogger.Debug().
-				Str("flow_id", flowID.String()).
-				Err(err).
-				Msg("failed to acquire flow lock - concurrent request detected")
-
-			flowResult = flow.ResultFromError(
-				flowpilot.ErrorOperationNotPermitted.Wrap(
-					fmt.Errorf("this flow is currently being processed by another request"),
-				),
-			)
+			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(fmt.Errorf("could not acquire lock: %w", err)))
+			h.logFlowResult(c, flowResult)
 			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 		}
-		defer unlock()
 	}
 
 	txFunc := func(tx *pop.Connection) error {
@@ -211,6 +205,26 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		flowResult = flow.ResultFromError(err)
 	}
 
+	if unlock != nil {
+		unlockCtx, cancel := context.WithTimeout(c.Request().Context(), 5*time.Second)
+		defer cancel()
+
+		if unlockErr := unlock(unlockCtx); unlockErr != nil {
+			uErr := fmt.Errorf("failed to release lock: %w", unlockErr)
+			if err != nil {
+				flowResult = flow.ResultFromError(errors.Join(err, uErr))
+			} else {
+				flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(uErr))
+			}
+		}
+	}
+
+	h.logFlowResult(c, flowResult)
+
+	return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+}
+
+func (h *FlowPilotHandler) logFlowResult(c echo.Context, flowResult flowpilot.FlowResult) {
 	log := zeroLogger.Info().
 		Str("time_unix", strconv.FormatInt(time.Now().Unix(), 10)).
 		Str("id", c.Response().Header().Get(echo.HeaderXRequestID)).
@@ -225,8 +239,6 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		}
 	}
 	log.Send()
-
-	return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 }
 
 func init() {

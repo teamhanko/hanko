@@ -22,7 +22,8 @@ func TestMemoryLocker_Lock_Success(t *testing.T) {
 	require.NotNil(t, unlock)
 
 	// Clean up
-	unlock()
+	err = unlock(ctx)
+	assert.NoError(t, err)
 }
 
 func TestMemoryLocker_Lock_FailFast_WhenAlreadyLocked(t *testing.T) {
@@ -34,7 +35,6 @@ func TestMemoryLocker_Lock_FailFast_WhenAlreadyLocked(t *testing.T) {
 	unlock1, err := locker.Lock(ctx, flowID)
 	require.NoError(t, err)
 	require.NotNil(t, unlock1)
-	defer unlock1()
 
 	// Second lock on same flow ID should fail immediately
 	unlock2, err := locker.Lock(ctx, flowID)
@@ -42,6 +42,10 @@ func TestMemoryLocker_Lock_FailFast_WhenAlreadyLocked(t *testing.T) {
 	assert.Error(t, err)
 	assert.Nil(t, unlock2)
 	assert.Contains(t, err.Error(), "already being processed")
+
+	// Clean up first lock
+	err = unlock1(ctx)
+	assert.NoError(t, err)
 }
 
 func TestMemoryLocker_Lock_SucceedsAfterUnlock(t *testing.T) {
@@ -52,13 +56,15 @@ func TestMemoryLocker_Lock_SucceedsAfterUnlock(t *testing.T) {
 	// First lock
 	unlock1, err := locker.Lock(ctx, flowID)
 	require.NoError(t, err)
-	unlock1() // Release the lock
+	err = unlock1(ctx)
+	require.NoError(t, err)
 
 	// Second lock should now succeed
 	unlock2, err := locker.Lock(ctx, flowID)
 	require.NoError(t, err)
 	require.NotNil(t, unlock2)
-	unlock2()
+	err = unlock2(ctx)
+	assert.NoError(t, err)
 }
 
 func TestMemoryLocker_Lock_DifferentFlowIDs(t *testing.T) {
@@ -70,13 +76,17 @@ func TestMemoryLocker_Lock_DifferentFlowIDs(t *testing.T) {
 	// Lock first flow
 	unlock1, err := locker.Lock(ctx, flowID1)
 	require.NoError(t, err)
-	defer unlock1()
 
 	// Lock second flow should succeed (different ID)
 	unlock2, err := locker.Lock(ctx, flowID2)
 	require.NoError(t, err)
 	require.NotNil(t, unlock2)
-	defer unlock2()
+
+	// Clean up
+	err = unlock2(ctx)
+	assert.NoError(t, err)
+	err = unlock1(ctx)
+	assert.NoError(t, err)
 }
 
 func TestMemoryLocker_Unlock_CanBeCalled_Multiple(t *testing.T) {
@@ -87,11 +97,14 @@ func TestMemoryLocker_Unlock_CanBeCalled_Multiple(t *testing.T) {
 	unlock, err := locker.Lock(ctx, flowID)
 	require.NoError(t, err)
 
-	// Calling unlock multiple times should not panic
+	// First unlock should succeed
+	err = unlock(ctx)
+	assert.NoError(t, err)
+
+	// Subsequent unlocks should not panic (even if they're no-ops)
 	assert.NotPanics(t, func() {
-		unlock()
-		unlock()
-		unlock()
+		unlock(ctx)
+		unlock(ctx)
 	})
 }
 
@@ -120,7 +133,10 @@ func TestMemoryLocker_ConcurrentLockAttempts(t *testing.T) {
 				successCount++
 				// Hold lock briefly
 				time.Sleep(10 * time.Millisecond)
-				unlock()
+				unlockErr := unlock(ctx)
+				if unlockErr != nil {
+					t.Errorf("unlock failed: %v", unlockErr)
+				}
 			} else {
 				failCount++
 			}
@@ -143,7 +159,7 @@ func TestMemoryLocker_ConcurrentDifferentFlows(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(numFlows)
 
-	errors := make(chan error, numFlows)
+	errors := make(chan error, numFlows*2) // Both lock and unlock errors
 
 	// Lock different flows concurrently
 	for i := 0; i < numFlows; i++ {
@@ -160,7 +176,10 @@ func TestMemoryLocker_ConcurrentDifferentFlows(t *testing.T) {
 
 			// Simulate work
 			time.Sleep(5 * time.Millisecond)
-			unlock()
+
+			if unlockErr := unlock(ctx); unlockErr != nil {
+				errors <- unlockErr
+			}
 		}()
 	}
 
@@ -182,7 +201,8 @@ func TestMemoryLocker_MemoryLeak_LocksAreCleanedUp(t *testing.T) {
 		flowID := uuid.Must(uuid.NewV4())
 		unlock, err := locker.Lock(ctx, flowID)
 		require.NoError(t, err)
-		unlock()
+		err = unlock(ctx)
+		require.NoError(t, err)
 	}
 
 	// Check that the map is cleaned up
@@ -210,7 +230,9 @@ func TestMemoryLocker_RaceCondition(t *testing.T) {
 			unlock, err := locker.Lock(ctx, flowID)
 			if err == nil {
 				time.Sleep(time.Microsecond)
-				unlock()
+				if unlockErr := unlock(ctx); unlockErr != nil {
+					t.Errorf("unlock failed: %v", unlockErr)
+				}
 			}
 			time.Sleep(time.Microsecond)
 		}
@@ -224,7 +246,9 @@ func TestMemoryLocker_RaceCondition(t *testing.T) {
 			unlock, err := locker.Lock(ctx, flowID)
 			if err == nil {
 				time.Sleep(time.Microsecond)
-				unlock()
+				if unlockErr := unlock(ctx); unlockErr != nil {
+					t.Errorf("unlock failed: %v", unlockErr)
+				}
 			}
 			time.Sleep(time.Microsecond)
 		}
@@ -248,13 +272,14 @@ func TestMemoryLocker_ContextCancellation_DoesNotAffectLocking(t *testing.T) {
 	// Cancel the context AFTER lock is acquired
 	cancel()
 
-	// Lock should still work
-	defer unlock()
-
 	// Try to acquire the SAME lock from a NEW context,
 	// verify lock is still held
 	_, err = locker.Lock(context.Background(), flowID)
 	assert.Error(t, err)
+
+	// Clean up - unlock should still work with original (canceled) context
+	err = unlock(ctx)
+	assert.NoError(t, err)
 }
 
 func TestMemoryLocker_SimulateRealWorldScenario(t *testing.T) {
@@ -281,7 +306,13 @@ func TestMemoryLocker_SimulateRealWorldScenario(t *testing.T) {
 
 			// Simulate processing (e.g., verifying passcode)
 			time.Sleep(50 * time.Millisecond)
-			unlock()
+
+			unlockErr := unlock(ctx)
+			if unlockErr != nil {
+				t.Errorf("unlock failed for request %d: %v", requestNum, unlockErr)
+				results <- false
+				return
+			}
 
 			results <- true
 		}(i)

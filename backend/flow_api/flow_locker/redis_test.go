@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-// RedisLockerTestSuite holds the test suite with shared Redis setup
 type RedisLockerTestSuite struct {
 	suite.Suite
 	pool         *dockertest.Pool
@@ -23,18 +22,15 @@ type RedisLockerTestSuite struct {
 	redisAddress string
 }
 
-// SetupSuite runs once before all tests in the suite
 func (suite *RedisLockerTestSuite) SetupSuite() {
 	var err error
 
-	// Create dockertest pool
 	suite.pool, err = dockertest.NewPool("")
 	require.NoError(suite.T(), err, "Could not construct pool")
 
 	err = suite.pool.Client.Ping()
 	require.NoError(suite.T(), err, "Could not connect to Docker")
 
-	// Pull and run Redis container
 	suite.resource, err = suite.pool.RunWithOptions(&dockertest.RunOptions{
 		Repository: "redis",
 		Tag:        "8-alpine",
@@ -45,7 +41,6 @@ func (suite *RedisLockerTestSuite) SetupSuite() {
 	})
 	require.NoError(suite.T(), err, "Could not start Redis container")
 
-	// Set container to expire in 10 minutes
 	_ = suite.resource.Expire(600)
 
 	// Wait for Redis to be ready
@@ -64,13 +59,11 @@ func (suite *RedisLockerTestSuite) SetupSuite() {
 		if err != nil {
 			return err
 		}
-		unlock()
-		return nil
+		return unlock(ctx)
 	})
 	require.NoError(suite.T(), err, "Could not connect to Redis")
 }
 
-// TearDownSuite runs once after all tests in the suite
 func (suite *RedisLockerTestSuite) TearDownSuite() {
 	if suite.resource != nil {
 		err := suite.pool.Purge(suite.resource)
@@ -78,7 +71,6 @@ func (suite *RedisLockerTestSuite) TearDownSuite() {
 	}
 }
 
-// getTestRedisLocker is a helper to create a locker for each test
 func (suite *RedisLockerTestSuite) getTestRedisLocker() *RedisLocker {
 	return NewRedisLocker(RedisLockerConfig{
 		Address: suite.redisAddress,
@@ -91,8 +83,6 @@ func TestRedisLockerSuite(t *testing.T) {
 	suite.Run(t, new(RedisLockerTestSuite))
 }
 
-// Tests start here
-
 func (suite *RedisLockerTestSuite) TestLock_Success() {
 	locker := suite.getTestRedisLocker()
 	ctx := context.Background()
@@ -103,7 +93,8 @@ func (suite *RedisLockerTestSuite) TestLock_Success() {
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), unlock)
 
-	unlock()
+	err = unlock(ctx)
+	assert.NoError(suite.T(), err, "unlock should succeed")
 }
 
 func (suite *RedisLockerTestSuite) TestLock_FailFast_WhenAlreadyLocked() {
@@ -114,13 +105,15 @@ func (suite *RedisLockerTestSuite) TestLock_FailFast_WhenAlreadyLocked() {
 	unlock1, err := locker.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), unlock1)
-	defer unlock1()
+	defer func() {
+		err := unlock1(ctx)
+		assert.NoError(suite.T(), err)
+	}()
 
 	unlock2, err := locker.Lock(ctx, flowID)
 
 	assert.Error(suite.T(), err)
 	assert.Nil(suite.T(), unlock2)
-	assert.Contains(suite.T(), err.Error(), "failed to acquire lock")
 }
 
 func (suite *RedisLockerTestSuite) TestLock_SucceedsAfterUnlock() {
@@ -130,14 +123,16 @@ func (suite *RedisLockerTestSuite) TestLock_SucceedsAfterUnlock() {
 
 	unlock1, err := locker.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
-	unlock1()
+	err = unlock1(ctx)
+	require.NoError(suite.T(), err)
 
 	time.Sleep(10 * time.Millisecond)
 
 	unlock2, err := locker.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), unlock2)
-	unlock2()
+	err = unlock2(ctx)
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *RedisLockerTestSuite) TestLock_DifferentFlowIDs() {
@@ -148,15 +143,21 @@ func (suite *RedisLockerTestSuite) TestLock_DifferentFlowIDs() {
 
 	unlock1, err := locker.Lock(ctx, flowID1)
 	require.NoError(suite.T(), err)
-	defer unlock1()
+	defer func() {
+		err := unlock1(ctx)
+		assert.NoError(suite.T(), err)
+	}()
 
 	unlock2, err := locker.Lock(ctx, flowID2)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), unlock2)
-	defer unlock2()
+	defer func() {
+		err := unlock2(ctx)
+		assert.NoError(suite.T(), err)
+	}()
 }
 
-func (suite *RedisLockerTestSuite) TestUnlock_CanBeCalled_Multiple() {
+func (suite *RedisLockerTestSuite) TestUnlock_ReturnsError_OnMultipleCalls() {
 	locker := suite.getTestRedisLocker()
 	ctx := context.Background()
 	flowID := uuid.Must(uuid.NewV4())
@@ -164,11 +165,15 @@ func (suite *RedisLockerTestSuite) TestUnlock_CanBeCalled_Multiple() {
 	unlock, err := locker.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
 
-	assert.NotPanics(suite.T(), func() {
-		unlock()
-		unlock()
-		unlock()
-	})
+	err = unlock(ctx)
+	assert.NoError(suite.T(), err, "first unlock should succeed")
+
+	err = unlock(ctx)
+	assert.Error(suite.T(), err, "second unlock should fail")
+	assert.Contains(suite.T(), err.Error(), "failed to release lock")
+
+	err = unlock(ctx)
+	assert.Error(suite.T(), err, "third unlock should also fail")
 }
 
 func (suite *RedisLockerTestSuite) TestConcurrentLockAttempts() {
@@ -194,7 +199,10 @@ func (suite *RedisLockerTestSuite) TestConcurrentLockAttempts() {
 			if err == nil {
 				successCount++
 				time.Sleep(10 * time.Millisecond)
-				unlock()
+				unlockErr := unlock(ctx)
+				if unlockErr != nil {
+					suite.T().Errorf("unlock failed: %v", unlockErr)
+				}
 			} else {
 				failCount++
 			}
@@ -216,7 +224,7 @@ func (suite *RedisLockerTestSuite) TestConcurrentDifferentFlows() {
 	var wg sync.WaitGroup
 	wg.Add(numFlows)
 
-	errors := make(chan error, numFlows)
+	errors := make(chan error, numFlows*2) // Both lock and unlock errors
 
 	for i := 0; i < numFlows; i++ {
 		go func() {
@@ -226,12 +234,15 @@ func (suite *RedisLockerTestSuite) TestConcurrentDifferentFlows() {
 			unlock, err := locker.Lock(ctx, flowID)
 
 			if err != nil {
-				errors <- err
+				errors <- fmt.Errorf("lock error: %w", err)
 				return
 			}
 
 			time.Sleep(5 * time.Millisecond)
-			unlock()
+
+			if unlockErr := unlock(ctx); unlockErr != nil {
+				errors <- fmt.Errorf("unlock error: %w", unlockErr)
+			}
 		}()
 	}
 
@@ -252,16 +263,19 @@ func (suite *RedisLockerTestSuite) TestLockExpiry() {
 	ctx := context.Background()
 	flowID := uuid.Must(uuid.NewV4())
 
-	unlock1, err := locker.Lock(ctx, flowID)
+	_, err := locker.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
-	defer unlock1()
 
+	// Unlock ignored, we don't unlock but let it expire
 	time.Sleep(2 * time.Second)
 
+	// Should be able to acquire lock again after expiry
 	unlock2, err := locker.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
 	require.NotNil(suite.T(), unlock2)
-	unlock2()
+
+	err = unlock2(ctx)
+	assert.NoError(suite.T(), err)
 }
 
 func (suite *RedisLockerTestSuite) TestContextCancellation() {
@@ -282,7 +296,10 @@ func (suite *RedisLockerTestSuite) TestContextTimeout() {
 
 	unlock1, err := locker.Lock(context.Background(), flowID)
 	require.NoError(suite.T(), err)
-	defer unlock1()
+	defer func() {
+		err := unlock1(context.Background())
+		assert.NoError(suite.T(), err)
+	}()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 	defer cancel()
@@ -312,7 +329,13 @@ func (suite *RedisLockerTestSuite) TestSimulateRealWorldScenario() {
 			}
 
 			time.Sleep(50 * time.Millisecond)
-			unlock()
+
+			unlockErr := unlock(ctx)
+			if unlockErr != nil {
+				suite.T().Errorf("unlock failed for request %d: %v", requestNum, unlockErr)
+				results <- false
+				return
+			}
 
 			results <- true
 		}(i)
@@ -343,7 +366,10 @@ func (suite *RedisLockerTestSuite) TestMultipleInstances() {
 
 	unlock1, err := locker1.Lock(ctx, flowID)
 	require.NoError(suite.T(), err)
-	defer unlock1()
+	defer func() {
+		err := unlock1(ctx)
+		assert.NoError(suite.T(), err)
+	}()
 
 	unlock2, err := locker2.Lock(ctx, flowID)
 	assert.Error(suite.T(), err)
@@ -365,7 +391,9 @@ func (suite *RedisLockerTestSuite) TestRaceCondition() {
 			unlock, err := locker.Lock(ctx, flowID)
 			if err == nil {
 				time.Sleep(5 * time.Millisecond)
-				unlock()
+				if unlockErr := unlock(ctx); unlockErr != nil {
+					suite.T().Errorf("unlock failed: %v", unlockErr)
+				}
 			}
 			time.Sleep(5 * time.Millisecond)
 		}
@@ -378,11 +406,35 @@ func (suite *RedisLockerTestSuite) TestRaceCondition() {
 			unlock, err := locker.Lock(ctx, flowID)
 			if err == nil {
 				time.Sleep(5 * time.Millisecond)
-				unlock()
+				if unlockErr := unlock(ctx); unlockErr != nil {
+					suite.T().Errorf("unlock failed: %v", unlockErr)
+				}
 			}
 			time.Sleep(5 * time.Millisecond)
 		}
 	}()
 
 	wg.Wait()
+}
+
+func (suite *RedisLockerTestSuite) TestRedisLocker_UnlockReturnsError() {
+	// Test that calling unlock multiple times returns an error
+	// This validates that unlock properly returns errors without needing to simulate Redis failures
+	locker := suite.getTestRedisLocker()
+	ctx := context.Background()
+	flowID := uuid.Must(uuid.NewV4())
+
+	unlock, err := locker.Lock(ctx, flowID)
+	require.NoError(suite.T(), err)
+	require.NotNil(suite.T(), unlock)
+
+	err = unlock(ctx)
+	assert.NoError(suite.T(), err, "first unlock should succeed")
+
+	unlockCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	err = unlock(unlockCtx)
+	assert.Error(suite.T(), err, "second unlock should return an error")
+	assert.Contains(suite.T(), err.Error(), "failed to release lock")
 }

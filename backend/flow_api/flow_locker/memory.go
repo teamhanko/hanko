@@ -6,7 +6,6 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
-	zeroLogger "github.com/rs/zerolog/log"
 )
 
 // MemoryLocker implements FlowLocker using fail-fast locking (i.e. concurrent requests do not wait)
@@ -24,7 +23,7 @@ func NewMemoryLocker() *MemoryLocker {
 
 // Lock tries to acquire a lock for the given flow ID
 // Returns error immediately if lock is already held.
-func (m *MemoryLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(), error) {
+func (m *MemoryLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(context.Context) error, error) {
 	// Check if context is already canceled before attempting lock
 	if err := ctx.Err(); err != nil {
 		return nil, err
@@ -39,18 +38,12 @@ func (m *MemoryLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(), erro
 
 	m.locks[flowID] = true
 
-	zeroLogger.Debug().
-		Str("flow_id", flowID.String()).
-		Msg("acquired flow lock")
-
-	unlock := func() {
+	unlock := func(ctx context.Context) error {
 		m.mu.Lock()
 		delete(m.locks, flowID)
 		m.mu.Unlock()
 
-		zeroLogger.Debug().
-			Str("flow_id", flowID.String()).
-			Msg("released flow lock")
+		return nil
 	}
 
 	return unlock, nil

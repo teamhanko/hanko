@@ -15,6 +15,6 @@ func NewNoOpLocker() *NoOpLocker {
 }
 
 // Lock does nothing and returns a no-op unlock function
-func (n *NoOpLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(), error) {
-	return func() {}, nil
+func (n *NoOpLocker) Lock(ctx context.Context, flowID uuid.UUID) (func(context.Context) error, error) {
+	return func(context.Context) error { return nil }, nil
 }
