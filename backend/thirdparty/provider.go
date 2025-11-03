@@ -6,11 +6,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"io"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
@@ -86,7 +87,6 @@ type OAuthProvider interface {
 	GetUserData(*oauth2.Token) (*UserData, error)
 	GetOAuthToken(string, ...oauth2.AuthCodeOption) (*oauth2.Token, error)
 	ID() string
-	GetPromptParam() string
 }
 
 func GetProvider(config config.ThirdParty, id string) (OAuthProvider, error) {
