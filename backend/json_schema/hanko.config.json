@@ -1050,7 +1050,14 @@
           "description": "`address` is the address of the redis instance in the form of `host[:port][/database]`."
         },
         "password": {
-          "type": "string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "description": "`password` is the password for the redis instance."
         }
       },
