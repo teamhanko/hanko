@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
@@ -65,6 +66,11 @@ func NewLinkedInProvider(config config.ThirdPartyProvider, redirectURL string) (
 }
 
 func (g linkedInProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := g.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
@@ -109,11 +115,4 @@ func (g linkedInProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (g linkedInProvider) ID() string {
 	return g.config.ID
-}
-
-func (g linkedInProvider) GetPromptParam() string {
-	if g.config.Prompt != "" {
-		return g.config.Prompt
-	}
-	return "consent"
 }

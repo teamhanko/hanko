@@ -440,8 +440,7 @@
         },
         "prompt": {
           "type": "string",
-          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values.",
-          "default": "consent"
+          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values."
         },
         "scopes": {
           "items": {
@@ -1050,7 +1049,14 @@
           "description": "`address` is the address of the redis instance in the form of `host[:port][/database]`."
         },
         "password": {
-          "type": "string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "description": "`password` is the password for the redis instance."
         }
       },
@@ -1478,8 +1484,7 @@
         },
         "prompt": {
           "type": "string",
-          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values.",
-          "default": "consent"
+          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values."
         },
         "secret": {
           "type": "string",

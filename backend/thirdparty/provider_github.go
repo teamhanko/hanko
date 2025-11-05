@@ -3,9 +3,10 @@ package thirdparty
 import (
 	"context"
 	"errors"
+	"strconv"
+
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
-	"strconv"
 )
 
 const (
@@ -63,6 +64,11 @@ func NewGithubProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 }
 
 func (g githubProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := g.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
@@ -116,11 +122,4 @@ func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (g githubProvider) ID() string {
 	return g.config.ID
-}
-
-func (g githubProvider) GetPromptParam() string {
-	if g.config.Prompt != "" {
-		return g.config.Prompt
-	}
-	return "consent"
 }
