@@ -201,6 +201,14 @@ const AppProvider = ({
     [hanko, isOwnFlow],
   );
 
+  useEffect(() => {
+    setUIState((prev) => ({
+      ...prev,
+      ...(prefilledEmail && { email: prefilledEmail }),
+      ...(prefilledUsername && { username: prefilledUsername }),
+    }));
+  }, [prefilledEmail, prefilledUsername]);
+
   useEffect(
     () =>
       hanko.onAfterStateChange(async ({ state }) => {
