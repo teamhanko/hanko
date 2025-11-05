@@ -3,14 +3,15 @@ package thirdparty
 import (
 	"context"
 	"errors"
+	"net/url"
+	"strconv"
+	"strings"
+
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
-	"net/url"
-	"strconv"
-	"strings"
 )
 
 const (
@@ -52,6 +53,11 @@ func NewAppleProvider(config config.ThirdPartyProvider, redirectURL string) (OAu
 
 func (a appleProvider) AuthCodeURL(state string, args ...oauth2.AuthCodeOption) string {
 	opts := append(args, oauth2.SetAuthURLParam("response_mode", "form_post"))
+
+	if prompt := a.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	authURL := a.oauthConfig.AuthCodeURL(state, opts...)
 	u, _ := url.Parse(authURL)
 	u.RawQuery = strings.ReplaceAll(u.RawQuery, "+", "%20")
@@ -125,11 +131,4 @@ func (a appleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (a appleProvider) ID() string {
 	return a.config.ID
-}
-
-func (a appleProvider) GetPromptParam() string {
-	if a.config.Prompt != "" {
-		return a.config.Prompt
-	}
-	return "consent"
 }

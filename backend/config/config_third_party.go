@@ -275,7 +275,7 @@ type CustomThirdPartyProvider struct {
 	// - consent
 	// - select_account
 	// Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
-	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt" jsonschema:"default=consent"`
+	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt"`
 	// `scopes` is a list of scopes requested from the provider that specify the level of access an application has to
 	// a user's resources on a server, defining what actions the app can perform on behalf of the user.
 	//
@@ -457,7 +457,7 @@ type ThirdPartyProvider struct {
 	// - consent
 	// - select_account
 	// Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
-	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt" jsonschema:"default=consent"`
+	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt"`
 	// `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.

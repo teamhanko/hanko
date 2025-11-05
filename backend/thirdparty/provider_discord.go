@@ -57,6 +57,11 @@ func NewDiscordProvider(config config.ThirdPartyProvider, redirectURL string) (O
 }
 
 func (p discordProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := p.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
@@ -106,11 +111,4 @@ func (g discordProvider) buildAvatarURL(userID string, avatarHash string) string
 
 func (g discordProvider) ID() string {
 	return g.config.ID
-}
-
-func (g discordProvider) GetPromptParam() string {
-	if g.config.Prompt != "" {
-		return g.config.Prompt
-	}
-	return "consent"
 }

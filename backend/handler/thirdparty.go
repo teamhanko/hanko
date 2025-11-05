@@ -3,6 +3,9 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
@@ -16,8 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/utils"
 	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 	"golang.org/x/oauth2"
-	"net/http"
-	"net/url"
 )
 
 type ThirdPartyHandler struct {
@@ -67,7 +68,7 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
 
-	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", provider.GetPromptParam()))
+	authCodeUrl := provider.AuthCodeURL(string(state))
 
 	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 		MaxAge:   300,
