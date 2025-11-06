@@ -3,8 +3,10 @@ package shared
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
@@ -47,6 +49,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 			return err
 		}
 
+		var userModel *models.User
 		if userModel, ok := c.Get("session_user").(*models.User); ok {
 			userModel.WebauthnCredentials = append(userModel.WebauthnCredentials, credentialModel)
 		}
@@ -56,6 +59,15 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 			auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", credentialModel.ID))
 		} else {
 			auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", credentialModel.ID))
+		}
+
+		if userModel != nil && deps.Cfg.SecurityNotifications.Notifications.PasskeyCreate.Enabled {
+			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				EmailAddress: userModel.Emails.GetPrimary().Address,
+				Template:     "passkey_create",
+				HttpContext:  deps.HttpContext,
+				UserContext:  *userModel,
+			})
 		}
 	}
 

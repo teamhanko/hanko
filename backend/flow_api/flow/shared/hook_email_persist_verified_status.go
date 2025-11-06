@@ -124,7 +124,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: user.Emails.GetPrimary().Address,
 			Template:     "email_create",
-			Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+			HttpContext:  deps.HttpContext,
 			BodyData: map[string]interface{}{
 				"NewEmailAddress": emailAddressToVerify,
 			},

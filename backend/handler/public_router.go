@@ -30,11 +30,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
 
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
+
 	emailService, _ := services.NewEmailService(*cfg)
 	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
 	passwordService := services.NewPasswordService(persister)
 	webauthnService := services.NewWebauthnService(*cfg, persister)
-	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister)
+	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister, auditLogger)
 
 	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
 	if err != nil {
@@ -55,8 +57,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
 		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
 	}
-
-	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	samlService := saml.NewSamlService(cfg, persister)
 

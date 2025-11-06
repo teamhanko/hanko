@@ -100,7 +100,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: existingPrimaryEmailAddress,
 			Template:     "primary_email_update",
-			Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+			HttpContext:  deps.HttpContext,
 			BodyData: map[string]interface{}{
 				"OldEmailAddress": existingPrimaryEmailAddress,
 				"NewEmailAddress": emailModel.Address,

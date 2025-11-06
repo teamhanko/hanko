@@ -132,7 +132,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 				EmailAddress: currentPrimaryEmail,
 				Template:     "email_create",
-				Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+				HttpContext:  deps.HttpContext,
 				BodyData: map[string]interface{}{
 					"NewEmailAddress": newEmailAddress,
 				},
