@@ -18,6 +18,8 @@ type Session struct {
 	AcquireIPAddress bool `yaml:"acquire_ip_address" json:"acquire_ip_address,omitempty" koanf:"acquire_ip_address" jsonschema:"default=true"`
 	// `acquire_user_agent` stores the user's user agent in the database.
 	AcquireUserAgent bool `yaml:"acquire_user_agent" json:"acquire_user_agent,omitempty" koanf:"acquire_user_agent" jsonschema:"default=true"`
+	// `binding` configures session binding properties.
+	Binding Binding `yaml:"binding" json:"binding,omitempty" koanf:"binding"`
 	// `cookie` contains configuration for the session cookie issued on successful registration or login.
 	Cookie Cookie `yaml:"cookie" json:"cookie,omitempty" koanf:"cookie"`
 	// `enable_auth_token_header` determines whether a session token (JWT) is returned in an `X-Auth-Token`
@@ -158,4 +160,9 @@ type ServerSide struct {
 
 type JWTTemplate struct {
 	Claims map[string]interface{} `yaml:"claims" json:"claims,omitempty" koanf:"claims"`
+}
+
+type Binding struct {
+	// `enabled` determines whether session binding is enabled.
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 }
