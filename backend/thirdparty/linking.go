@@ -85,7 +85,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, err := models.NewIdentity(providerID, userDataMap, email.ID)
+	identity, err := models.NewIdentity(providerID, userDataMap, email.ID, user.ID)
 	if err != nil {
 		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
@@ -215,7 +215,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not update identity").WithCause(terr)
 	}
 
-	user, terr := userPersister.Get(*identity.Email.UserID)
+	user, terr := userPersister.Get(identity.UserID)
 	if terr != nil {
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}
@@ -284,7 +284,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, terr := models.NewIdentity(providerID, userDataMap, email.ID)
+	identity, terr := models.NewIdentity(providerID, userDataMap, email.ID, user.ID)
 	if terr != nil {
 		return nil, ErrorServer("could not create identity").WithCause(terr)
 	}
