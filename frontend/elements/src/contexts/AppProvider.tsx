@@ -147,7 +147,7 @@ const AppProvider = ({
     props.mode ?? "login",
   );
 
-  // TODO: check if necessary, see commit e5e84de9 for more info
+  // TODO: check if necessary, see also TODO below
   const hasInitializedRef = useRef(false);
   const [isReadyToInit, setIsReadyToInit] = useState(false);
 
@@ -348,7 +348,7 @@ const AppProvider = ({
     [componentFlowNameMap],
   );
 
-  // TODO: check if this can be done in cleaner way, see commit e5e84de9 for more info.
+  // TODO: check if this can be done in cleaner way
   // Step 1: Set the authComponentFlow from props.mode
   useEffect(() => {
     if (!hasInitializedRef.current) {
