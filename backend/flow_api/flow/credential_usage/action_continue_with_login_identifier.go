@@ -52,6 +52,10 @@ func (a ContinueWithLoginIdentifier) Initialize(c flowpilot.InitializationContex
 			LowerCase(true))
 	}
 
+	if deps.Cfg.Session.Cookie.Retention == "prompt" {
+		c.AddInputs(flowpilot.BooleanInput("remember_me").Required(true))
+	}
+
 	if !deps.Cfg.Password.Enabled &&
 		!deps.Cfg.Email.UseForAuthentication &&
 		!(emailEnabled && deps.Cfg.Saml.Enabled && len(deps.SamlService.Providers()) > 0) {
@@ -179,6 +183,13 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 			if err = c.Stash().Set(shared.StashPathEmail, primaryEmailModel.Address); err != nil {
 				return fmt.Errorf("failed to set email to stash: %w", err)
 			}
+		}
+	}
+
+	if deps.Cfg.Session.Cookie.Retention == "prompt" {
+		rememberMeSelected := c.Input().Get("remember_me").Bool()
+		if err := c.Stash().Set(shared.StashPathRememberMeSelected, rememberMeSelected); err != nil {
+			return fmt.Errorf("failed to set remember_me_selected to stash: %w", err)
 		}
 	}
 
