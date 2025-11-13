@@ -99,8 +99,8 @@ github.com/go-sql-driver/mysql v1.9.3/go.mod h1:qn46aNg1333BRMNU69Lq93t8du/dwxI6
 github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
 github.com/go-testfixtures/testfixtures/v3 v3.17.0 h1:oaWVDAOl13JszPM1jQZ2iS6bIBhy43WY3gpTeQEq/IU=
 github.com/go-testfixtures/testfixtures/v3 v3.17.0/go.mod h1:HCIVT6p9uKXaCv898IT1iS0My5TF8kF785H4n+6049U=
-github.com/go-viper/mapstructure/v2 v2.3.0 h1:27XbWsHIqhbdR5TIC911OfYvgSaW93HM+dX7970Q7jk=
-github.com/go-viper/mapstructure/v2 v2.3.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
+github.com/go-viper/mapstructure/v2 v2.4.0 h1:EBsztssimR/CONLSZZ04E8qAkxNYq4Qp9LvH92wZUgs=
+github.com/go-viper/mapstructure/v2 v2.4.0/go.mod h1:oJDH3BJKyqBA2TXFhDsKDGDTlndYOZ6rGS0BRZIxGhM=
 github.com/go-webauthn/webauthn v0.10.2 h1:OG7B+DyuTytrEPFmTX503K77fqs3HDK/0Iv+z8UYbq4=
 github.com/go-webauthn/webauthn v0.10.2/go.mod h1:Gd1IDsGAybuvK1NkwUTLbGmeksxuRJjVN2PE/xsPxHs=
 github.com/go-webauthn/x v0.1.9 h1:v1oeLmoaa+gPOaZqUdDentu6Rl7HkSSsmOT6gxEQHhE=
