@@ -160,8 +160,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 		accountLinkingResult = linkingResult
 
-		emailModel := linkingResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
-		identityModel := emailModel.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
+		identityModel := linkingResult.User.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
 
 		tokenOpts := []func(*models.Token){
 			models.TokenForFlowAPI(state.IsFlow),

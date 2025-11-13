@@ -79,13 +79,16 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 	}
 
 	email := user.GetEmailByAddress(userData.Metadata.Email)
+	if email == nil {
+		return nil, ErrorServer("could not link account").WithCause(fmt.Errorf("email %s not found", userData.Metadata.Email))
+	}
 
 	userDataMap, err := userData.ToMap()
 	if err != nil {
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, err := models.NewIdentity(providerID, userDataMap, email.ID, user.ID)
+	identity, err := models.NewIdentity(providerID, userDataMap, &email.ID, user.ID)
 	if err != nil {
 		return nil, ErrorServer("could not create identity").WithCause(err)
 	}
@@ -102,7 +105,7 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 
 			err = p.GetSamlIdentityPersisterWithConnection(tx).Update(*existingSamlIdentity)
 			if err != nil {
-				return nil, ErrorServer("could update saml identity").WithCause(err)
+				return nil, ErrorServer("could not update saml identity").WithCause(err)
 			}
 
 			err = p.GetIdentityPersisterWithConnection(tx).Delete(models.Identity{ID: identityToDeleteID})
@@ -150,7 +153,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 
 	var terr error
 	email := identity.Email
-	if userData.Metadata.Email != identity.Email.Address {
+	if userData.Metadata.Email != identity.Email.Address && email != nil {
 		// The primary email address at the provider has changed, check if the new provider email already exists
 		email, terr = emailPersister.FindByAddress(userData.Metadata.Email)
 		if terr != nil {
@@ -168,7 +171,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 					return nil, ErrorServer("could not update email").WithCause(terr)
 				}
 
-				identity.EmailID = email.ID
+				identity.EmailID = &email.ID
 				webhookEvent = events.UserUpdate
 			} else if email.UserID.String() != identity.Email.UserID.String() {
 				// The email is assigned to a different user, and so the identity is linked to multiple users. There
@@ -179,7 +182,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 				// address equal to the new primary provider email prior to changing the primary mail at the
 				// provider and then doing a sign in with the provider. We need to update the associated email in
 				// the identity.
-				identity.EmailID = email.ID
+				identity.EmailID = &email.ID
 			}
 		} else {
 			// The email does not exist. Create a new one and associate the identity with it.
@@ -199,7 +202,7 @@ func signIn(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 				return nil, ErrorServer("could not create email").WithCause(terr)
 			}
 
-			identity.EmailID = email.ID
+			identity.EmailID = &email.ID
 			webhookEvent = events.UserEmailCreate
 		}
 	}
@@ -263,7 +266,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 			return nil, ErrorServer("could not update email").WithCause(terr)
 		}
 
-	} else {
+	} else if userData.Metadata.Email != "" {
 		// No email exists, create a new one using the provider user data email
 		email = models.NewEmail(&user.ID, userData.Metadata.Email)
 		email.Verified = userData.Metadata.EmailVerified
@@ -273,10 +276,16 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		}
 	}
 
-	primaryEmail := models.NewPrimaryEmail(email.ID, *email.UserID)
-	terr = primaryEmailPersister.Create(*primaryEmail)
-	if terr != nil {
-		return nil, ErrorServer("failed to store primary email").WithCause(terr)
+	var emailID *uuid.UUID = nil
+	if email != nil {
+		emailID = &email.ID
+	}
+	if email != nil {
+		primaryEmail := models.NewPrimaryEmail(email.ID, *email.UserID)
+		terr = primaryEmailPersister.Create(*primaryEmail)
+		if terr != nil {
+			return nil, ErrorServer("failed to store primary email").WithCause(terr)
+		}
 	}
 
 	userDataMap, err := userData.ToMap()
@@ -284,7 +293,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		return nil, ErrorServer("could not link account").WithCause(err)
 	}
 
-	identity, terr := models.NewIdentity(providerID, userDataMap, email.ID, user.ID)
+	identity, terr := models.NewIdentity(providerID, userDataMap, emailID, user.ID)
 	if terr != nil {
 		return nil, ErrorServer("could not create identity").WithCause(terr)
 	}
@@ -311,7 +320,7 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 		}
 	}
 
-	u, terr := userPersister.Get(*email.UserID)
+	u, terr := userPersister.Get(user.ID)
 	if terr != nil {
 		return nil, ErrorServer("could not get user").WithCause(terr)
 	}
