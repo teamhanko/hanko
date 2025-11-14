@@ -1,27 +1,48 @@
 password_update_text:
   description: ""
-  other: "The password for your {{ .ServiceName }} account has been successfully updated."
+  other: "The password for your {{ .ServiceName }} account has been updated."
 subject_password_update:
   description: ""
-  other: "Your {{ .ServiceName }} account password has been updated"
+  other: "Your password has been updated"
 
 primary_email_update_text:
   description: ""
-  other: "The primary email address for your {{ .ServiceName }} account has been successfully updated from {{ .OldEmailAddress }} to {{ .NewEmailAddress }}."
+  other: "The primary email address for your {{ .ServiceName }} account has been updated from {{ .OldEmailAddress }} to {{ .NewEmailAddress }}."
 subject_primary_email_update:
   description: ""
-  other: "Your {{ .ServiceName }} primary email address has been updated"
+  other: "Your primary email address has been updated"
 
 email_create_text:
   description: ""
-  other: "The email address {{ .NewEmailAddress }} has been successfully added to your {{ .ServiceName }} account."
+  other: "The email address {{ .NewEmailAddress }} has been added to your {{ .ServiceName }} account."
 subject_email_create:
   description: ""
-  other: "A new email address has been registered to your {{ .ServiceName }} account"
+  other: "A new email address has been registered"
+
+email_delete_text:
+  description: ""
+  other: "The email address {{ .DeletedEmailAddress}} has been removed from your {{ .ServiceName }} account."
+subject_email_delete:
+  description: ""
+  other: "An email address has been removed"
 
 passkey_create_text:
   description: ""
   other: "Your {{.ServiceName}} account has been registered with a new passkey."
 subject_passkey_create:
   description: ""
-  other: "A new passkey has been registered to your {{ .ServiceName }} account"
+  other: "A new passkey has been registered"
+
+mfa_enabled_text:
+  description: ""
+  other: "Two-factor authentication has been successfully enabled for your {{ .ServiceName }} account."
+subject_mfa_enabled:
+  description: ""
+  other: "Two-factor authentication enabled"
+
+mfa_disabled_text:
+  description: ""
+  other: "Two-factor authentication has been disabled for your {{ .ServiceName }} account."
+subject_mfa_disabled:
+  description: ""
+  other: "Two-factor authentication disabled"
