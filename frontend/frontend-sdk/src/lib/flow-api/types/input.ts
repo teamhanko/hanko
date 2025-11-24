@@ -110,6 +110,10 @@ export interface ThirdpartyOauthInputs {
   readonly code_verifier?: Input<string>;
 }
 
+export interface DisconnectThirdpartyInputs {
+  readonly identity_id: Input<string>;
+}
+
 export interface RememberMeInputs {
   readonly remember_me: Input<boolean>;
 }

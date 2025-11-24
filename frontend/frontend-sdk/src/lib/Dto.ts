@@ -25,8 +25,8 @@ export interface Email {
   address: string;
   is_verified: boolean;
   is_primary: boolean;
-  identity: Identity;
-  identities: Identity[];
+  identity?: Identity;
+  identities?: Identity[];
 }
 
 /**
@@ -47,6 +47,7 @@ export interface Emails extends Array<Email> {}
 export interface Identity {
   id: string;
   provider: string;
+  readonly identity_id?: string;
 }
 
 /**

@@ -49,6 +49,7 @@ export const fr: Translation = {
       "L'application d'authentification est configurée",
     authenticatorAppNotSetUp: "Configurer l'application d'authentification",
     trustDevice: "Faire confiance à ce navigateur ?",
+    deleteIdentity: "Supprimer la connexion",
   },
   texts: {
     enterPasscode: "Saisissez le code d'accès envoyé à votre adresse e-mail.",
@@ -160,6 +161,7 @@ export const fr: Translation = {
     lastUsed: "Dernière utilisation",
     trustDevice: "Faire confiance à ce navigateur",
     staySignedIn: "Rester connecté",
+    connectAccount: "Connecter un compte",
   },
   errors: {
     somethingWentWrong:
