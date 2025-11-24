@@ -3,12 +3,13 @@ package models
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/crypto"
-	"time"
 )
 
 type Token struct {
@@ -19,6 +20,7 @@ type Token struct {
 	Value            string     `db:"value"`
 	UserCreated      bool       `db:"user_created"`
 	PKCECodeVerifier *string    `db:"code_verifier"`
+	LinkUser         bool       `db:"link_user"`
 	ExpiresAt        time.Time  `db:"expires_at"`
 	CreatedAt        time.Time  `db:"created_at"`
 	UpdatedAt        time.Time  `db:"updated_at"`
@@ -45,6 +47,12 @@ func TokenUserCreated(userCreated bool) func(*Token) {
 func TokenPKCESessionVerifier(pkceSessionVerifier string) func(*Token) {
 	return func(token *Token) {
 		token.PKCECodeVerifier = &pkceSessionVerifier
+	}
+}
+
+func TokenWithLinkUser(linkUser bool) func(*Token) {
+	return func(token *Token) {
+		token.LinkUser = linkUser
 	}
 }
 

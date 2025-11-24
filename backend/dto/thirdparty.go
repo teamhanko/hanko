@@ -1,10 +1,12 @@
 package dto
 
 import (
+	"strings"
+
 	"github.com/fatih/structs"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"strings"
 )
 
 type ThirdPartyAuthCallback struct {
@@ -24,8 +26,9 @@ type ThirdPartyAuthRequest struct {
 }
 
 type Identity struct {
-	ID       string `json:"id"`
-	Provider string `json:"provider"`
+	ID         string    `json:"id"`
+	Provider   string    `json:"provider"`
+	IdentityID uuid.UUID `json:"identity_id"`
 }
 
 type Identities []Identity
@@ -45,8 +48,9 @@ func FromIdentityModel(identity *models.Identity, cfg *config.Config) *Identity 
 	}
 
 	return &Identity{
-		ID:       identity.ProviderUserID,
-		Provider: getProviderDisplayName(identity, cfg),
+		ID:         identity.ProviderUserID,
+		Provider:   getProviderDisplayName(identity, cfg),
+		IdentityID: identity.ID,
 	}
 }
 

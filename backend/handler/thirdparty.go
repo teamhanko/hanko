@@ -154,18 +154,26 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow)
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		identityModel := linkingResult.User.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID())
+		if err != nil {
+			return thirdparty.ErrorServer("could not get identity").WithCause(err)
+		}
+
+		if identityModel != nil && state.UserID != nil && identityModel.UserID != nil && *identityModel.UserID != *state.UserID {
+			return thirdparty.ErrorInvalidRequest("identity already exists for a different user")
+		}
 
 		tokenOpts := []func(*models.Token){
 			models.TokenForFlowAPI(state.IsFlow),
 			models.TokenWithIdentityID(identityModel.ID),
 			models.TokenUserCreated(linkingResult.UserCreated),
+			models.TokenWithLinkUser(state.UserID != nil),
 		}
 		if state.CodeVerifier != "" {
 			tokenOpts = append(tokenOpts, models.TokenPKCESessionVerifier(state.CodeVerifier))
@@ -208,6 +216,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	})
 
 	if err != nil {
+		// TODO: redirect should go to redirectURL in state, when state can be verified, only when state is not available it should redirect to the configured ErrorRedirectURL
 		return h.redirectError(c, err, h.cfg.ThirdParty.ErrorRedirectURL)
 	}
 

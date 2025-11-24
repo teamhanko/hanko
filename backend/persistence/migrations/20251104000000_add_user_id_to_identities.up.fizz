@@ -5,5 +5,3 @@ sql("UPDATE identities SET user_id = (SELECT user_id FROM emails WHERE emails.id
 change_column("identities", "email_id", "uuid", {"null": true})
 
 add_foreign_key("identities", "user_id", {"users": ["id"]}, {"on_delete": "cascade"})
-
-change_column("identities", "user_id", "uuid", {"null": false})
