@@ -73,7 +73,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	expirationTime := rawToken.Expiration()
 	sessionModel := models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
-		UserID:    userId,
+		UserID:    nulls.NewUUID(userId),
 		CreatedAt: rawToken.IssuedAt(),
 		UpdatedAt: rawToken.IssuedAt(),
 		ExpiresAt: &expirationTime,
