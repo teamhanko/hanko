@@ -220,6 +220,9 @@ func (p *CustomThirdPartyProviders) Validate() error {
 }
 
 type CustomThirdPartyProvider struct {
+	// `acr_values` is a list of strings that specifies the Authentication Context Class Reference values that the
+	// Authorization Server is being requested to use for processing this Authentication Request.
+	AcrValues []string `yaml:"acr_values" json:"acr_values,omitempty" koanf:"acr_values"`
 	// `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
 	//
 	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
