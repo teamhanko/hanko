@@ -48,9 +48,7 @@ const LoginInitPage = (props: Props) => {
   const [isFlowSwitchLoading, setIsFlowSwitchLoading] =
     useState<boolean>(false);
   const [identifierType, setIdentifierType] = useState<IdentifierTypes>(null);
-  const [identifier, setIdentifier] = useState<string>(
-    uiState.username || uiState.email,
-  );
+  const [identifier, setIdentifier] = useState<string>(null);
   const { flowState } = useFlowState(props.state);
   const isWebAuthnSupported = WebauthnSupport.supported();
   const [thirdPartyError, setThirdPartyError] = useState<
@@ -129,8 +127,9 @@ const LoginInitPage = (props: Props) => {
 
   const showDivider = useMemo(
     () =>
-      !!flowState.actions.webauthn_generate_request_options.enabled ||
-      !!flowState.actions.thirdparty_oauth.enabled,
+      (!!flowState.actions.webauthn_generate_request_options.enabled ||
+        !!flowState.actions.thirdparty_oauth.enabled) &&
+      flowState.actions.continue_with_login_identifier.enabled,
     [flowState.actions],
   );
 
@@ -138,10 +137,18 @@ const LoginInitPage = (props: Props) => {
 
   useEffect(() => {
     const inputs = flowState.actions.continue_with_login_identifier.inputs;
-    setIdentifierType(
-      inputs?.email ? "email" : inputs?.username ? "username" : "identifier",
-    );
-  }, [flowState]);
+
+    if (inputs?.email) {
+      setIdentifierType("email");
+      setIdentifier(uiState.email);
+    } else if (inputs?.username) {
+      setIdentifierType("username");
+      setIdentifier(uiState.username);
+    } else {
+      setIdentifierType("identifier");
+      setIdentifier(uiState.email || uiState.username);
+    }
+  }, [flowState, uiState.email, uiState.username]);
 
   return (
     <Fragment>

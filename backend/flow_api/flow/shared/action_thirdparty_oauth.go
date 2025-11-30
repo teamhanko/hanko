@@ -3,9 +3,10 @@ package shared
 import (
 	"cmp"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/v2/utils"
 	"net/http"
 	"slices"
+
+	"github.com/teamhanko/hanko/backend/v2/utils"
 
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -88,10 +89,7 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorTechnical.Wrap(err))
 	}
 
-	opts := []oauth2.AuthCodeOption{
-		oauth2.SetAuthURLParam("prompt", provider.GetPromptParam()),
-	}
-
+	var opts []oauth2.AuthCodeOption
 	if codeVerifier.Exists() {
 		opts = append(opts, oauth2.S256ChallengeOption(codeVerifier.String()))
 	}

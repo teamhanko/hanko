@@ -186,6 +186,10 @@
           "title": "emails",
           "description": "Deprecated. See child properties for suggested replacements."
         },
+        "flow_locker": {
+          "$ref": "#/$defs/FlowLocker",
+          "description": "`flow_locker` confgures flow locking"
+        },
         "log": {
           "$ref": "#/$defs/LoggerConfig",
           "title": "log",
@@ -401,6 +405,13 @@
         ]
       },
       "properties": {
+        "acr_values": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`acr_values` is a list of strings that specifies the Authentication Context Class Reference values that the\nAuthorization Server is being requested to use for processing this Authentication Request."
+        },
         "allow_linking": {
           "type": "boolean",
           "description": "`allow_linking` indicates whether existing accounts can be automatically linked with this provider.\n\nLinking is based on matching one of the email addresses of an existing user account with the (primary)\nemail address of the third party provider account.",
@@ -436,8 +447,7 @@
         },
         "prompt": {
           "type": "string",
-          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values.",
-          "default": "consent"
+          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values."
         },
         "scopes": {
           "items": {
@@ -626,6 +636,35 @@
         "type": "string"
       },
       "type": "array"
+    },
+    "FlowLocker": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` controls whether flow locking is enabled",
+          "default": true
+        },
+        "store": {
+          "type": "string",
+          "enum": [
+            "in_memory",
+            "redis"
+          ],
+          "description": "`store` sets the backend for the flow locker",
+          "default": "in_memory"
+        },
+        "redis_config": {
+          "$ref": "#/$defs/RedisConfig",
+          "description": "`redis_config` configures connection to a redis instance\nRequired if `store` is set to `redis`"
+        },
+        "ttl": {
+          "type": "string",
+          "description": "`ttl` is the lock timeout (for Redis only)",
+          "default": "30s"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "IdentityProvider": {
       "properties": {
@@ -1017,7 +1056,14 @@
           "description": "`address` is the address of the redis instance in the form of `host[:port][/database]`."
         },
         "password": {
-          "type": "string",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
           "description": "`password` is the password for the redis instance."
         }
       },
@@ -1445,8 +1491,7 @@
         },
         "prompt": {
           "type": "string",
-          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values.",
-          "default": "consent"
+          "description": "`prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.\nPossible values are:\n- login\n- none\n- consent\n- select_account\nPlease note that not all providers support all values. Check the corresponding docs of the provider for supported values."
         },
         "secret": {
           "type": "string",

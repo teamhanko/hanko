@@ -35,15 +35,13 @@ easily integrated into any web app with as little as two lines of code.
 - Passcodes
 - Passwords
 - Email verification
+- 2FA (TOTP, security keys)
 - JWT management
+- Sessions
 - User management
-- 3rd-party identity providers
-- Webhooks
+- OAuth/OIDC SSO identity providers
 - SAML
-
-### Upcoming features
-
-- 2FA configurations (optional, mandatory)
+- Webhooks
 
 ## Running the backend
 

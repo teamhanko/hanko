@@ -31,11 +31,11 @@ func (a ContinueToPasscodeConfirmation) Execute(c flowpilot.ExecutionContext) er
 	}
 
 	if len(c.Stash().Get(shared.StashPathUserID).String()) > 0 {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateLogin); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	} else {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_login_attempted"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailLoginAttempted); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	}

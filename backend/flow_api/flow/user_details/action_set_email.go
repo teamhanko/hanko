@@ -2,6 +2,7 @@ package user_details
 
 import (
 	"fmt"
+
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 )
@@ -43,7 +44,7 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to stash email address: %w", err)
 	}
 
-	existingEmail, err := deps.Persister.GetEmailPersister().FindByAddress(email)
+	existingEmail, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
 	if err != nil {
 		return fmt.Errorf("failed to get email from db: %w", err)
 	}
@@ -52,12 +53,12 @@ func (a EmailAddressSet) Execute(c flowpilot.ExecutionContext) error {
 		// Email verification is enabled. Send an email regardless of whether the email address exists, but select the
 		// appropriate passcode template beforehand.
 		if existingEmail != nil {
-			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted") // "email_verification"
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailRegistrationAttempted)
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
 		} else {
-			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification)
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}

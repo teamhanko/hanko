@@ -228,5 +228,9 @@ func DefaultConfig() *Config {
 			OnlyShowActualLoginMethods: false,
 		},
 		Debug: false,
+		FlowLocker: FlowLocker{
+			Enabled: true,
+			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
+		},
 	}
 }

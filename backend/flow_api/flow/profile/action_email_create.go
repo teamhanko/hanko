@@ -72,7 +72,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 				return fmt.Errorf("failed to set user_id to stash: %w", err)
 			}
 
-			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted")
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailRegistrationAttempted)
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
@@ -90,7 +90,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set user_id to stash: %w", err)
 		}
 
-		err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+		err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification)
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}

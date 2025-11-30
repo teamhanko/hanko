@@ -1,9 +1,11 @@
 package flow_api
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
@@ -19,6 +21,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/ee/saml"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
@@ -41,6 +44,7 @@ type FlowPilotHandler struct {
 	TokenExchangeRateLimiter    limiter.Store
 	AuthenticatorMetadata       mapper.AuthenticatorMetadata
 	AuditLogger                 auditlog.Logger
+	FlowLocker                  flow_locker.FlowLocker
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -50,7 +54,8 @@ func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 	loginFlow := flow.NewLoginFlow(h.Cfg.Debug)
-	return h.executeFlow(c, loginFlow)
+	e := h.executeFlow(c, loginFlow)
+	return e
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
@@ -140,6 +145,31 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	var err error
 	var inputData flowpilot.InputData
 	var flowResult flowpilot.FlowResult
+	var unlock func(context.Context) error
+	var flowID uuid.UUID
+
+	if c.QueryParam(queryParamKey) != "" {
+		err = c.Bind(&inputData)
+		if err != nil {
+			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+			h.logFlowResult(c, flowResult)
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+
+		flowID, err = extractFlowID(c.QueryParam(queryParamKey))
+		if err != nil {
+			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
+			h.logFlowResult(c, flowResult)
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+
+		unlock, err = h.FlowLocker.Lock(c.Request().Context(), flowID)
+		if err != nil {
+			flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(fmt.Errorf("could not acquire lock: %w", err)))
+			h.logFlowResult(c, flowResult)
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+	}
 
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
@@ -172,16 +202,31 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		return err
 	}
 
-	err = c.Bind(&inputData)
+	err = h.Persister.Transaction(txFunc)
 	if err != nil {
-		flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(err))
-	} else {
-		err = h.Persister.Transaction(txFunc)
-		if err != nil {
-			flowResult = flow.ResultFromError(err)
+		flowResult = flow.ResultFromError(err)
+	}
+
+	if unlock != nil {
+		unlockCtx, cancel := context.WithTimeout(c.Request().Context(), 5*time.Second)
+		defer cancel()
+
+		if unlockErr := unlock(unlockCtx); unlockErr != nil {
+			uErr := fmt.Errorf("failed to release lock: %w", unlockErr)
+			if err != nil {
+				flowResult = flow.ResultFromError(errors.Join(err, uErr))
+			} else {
+				flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(uErr))
+			}
 		}
 	}
 
+	h.logFlowResult(c, flowResult)
+
+	return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+}
+
+func (h *FlowPilotHandler) logFlowResult(c echo.Context, flowResult flowpilot.FlowResult) {
 	log := zeroLogger.Info().
 		Str("time_unix", strconv.FormatInt(time.Now().Unix(), 10)).
 		Str("id", c.Response().Header().Get(echo.HeaderXRequestID)).
@@ -196,10 +241,17 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		}
 	}
 	log.Send()
-
-	return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 }
 
 func init() {
 	zerolog.TimeFieldFormat = time.RFC3339Nano
+}
+
+// extractFlowID extracts just the flow ID from "action@flowID" format
+func extractFlowID(queryParamValue string) (uuid.UUID, error) {
+	parts := strings.Split(queryParamValue, "@")
+	if len(parts) != 2 {
+		return uuid.Nil, fmt.Errorf("invalid flow id format")
+	}
+	return uuid.FromString(parts[1])
 }

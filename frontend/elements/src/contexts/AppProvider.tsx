@@ -147,6 +147,10 @@ const AppProvider = ({
     props.mode ?? "login",
   );
 
+  // TODO: check if necessary, see also TODO below
+  const hasInitializedRef = useRef(false);
+  const [isReadyToInit, setIsReadyToInit] = useState(false);
+
   const componentFlowNameMap = useMemo<Record<ComponentName, FlowName>>(
     () => ({
       auth: authComponentFlow,
@@ -200,6 +204,14 @@ const AppProvider = ({
       }),
     [hanko, isOwnFlow],
   );
+
+  useEffect(() => {
+    setUIState((prev) => ({
+      ...prev,
+      ...(prefilledEmail && { email: prefilledEmail }),
+      ...(prefilledUsername && { username: prefilledUsername }),
+    }));
+  }, [prefilledEmail, prefilledUsername]);
 
   useEffect(
     () =>
@@ -324,16 +336,38 @@ const AppProvider = ({
     }
   }, []);
 
-  const init = useCallback((compName: ComponentName) => {
-    setComponentName(compName);
-    const flowName = componentFlowNameMap[compName];
+  const init = useCallback(
+    (compName: ComponentName) => {
+      setComponentName(compName);
+      const flowName = componentFlowNameMap[compName];
 
-    if (flowName) {
-      flowInit(flowName).catch(handleError);
+      if (flowName) {
+        flowInit(flowName).catch(handleError);
+      }
+    },
+    [componentFlowNameMap],
+  );
+
+  // TODO: check if this can be done in cleaner way
+  // Step 1: Set the authComponentFlow from props.mode
+  useEffect(() => {
+    if (!hasInitializedRef.current) {
+      const timer = setTimeout(() => {
+        setAuthComponentFlow(props.mode ?? "login");
+        setIsReadyToInit(true);
+      }, 0);
+
+      return () => clearTimeout(timer);
     }
-  }, []);
+  }, [props.mode]);
 
-  useEffect(() => init(componentName), []);
+  // Step 2: Call init after authComponentFlow has been updated
+  useEffect(() => {
+    if (isReadyToInit && !hasInitializedRef.current) {
+      hasInitializedRef.current = true;
+      init(componentName);
+    }
+  }, [isReadyToInit, authComponentFlow, componentName, init]);
 
   useEffect(() => {
     hanko.onUserDeleted(() => {

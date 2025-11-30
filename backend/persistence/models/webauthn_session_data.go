@@ -86,7 +86,7 @@ func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Ope
 		UpdatedAt:          now,
 		Operation:          operation,
 		AllowedCredentials: allowedCredentials,
-		ExpiresAt:          nulls.NewTime(sessionData.Expires),
+		ExpiresAt:          nulls.NewTime(sessionData.Expires.UTC()),
 	}
 
 	return sessionDataModel, nil

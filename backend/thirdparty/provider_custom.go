@@ -3,6 +3,8 @@ package thirdparty
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/mitchellh/mapstructure"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -55,6 +57,14 @@ func NewCustomThirdPartyProvider(config *config.CustomThirdPartyProvider, redire
 }
 
 func (p customProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := p.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+	if acrValues := p.config.AcrValues; len(acrValues) > 0 {
+		opts = append(opts, oauth2.SetAuthURLParam("acr_values", strings.Join(acrValues, " ")))
+	}
+
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
@@ -102,11 +112,4 @@ func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 
 func (p customProvider) ID() string {
 	return p.config.ID
-}
-
-func (p customProvider) GetPromptParam() string {
-	if p.config.Prompt != "" {
-		return p.config.Prompt
-	}
-	return "consent"
 }
