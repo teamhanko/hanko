@@ -244,6 +244,26 @@ const ProfilePage = (props: Props) => {
           </Paragraph>
         </Fragment>
       ) : null}
+      {flowState.actions.connect_thirdparty_oauth_provider.enabled ||
+      flowState.actions.disconnect_thirdparty_oauth_provider.enabled ? (
+        <Fragment>
+          <Headline1>{t("headlines.connectedAccounts")}</Headline1>
+          <ListIdentities
+            flowState={flowState}
+            onState={onState}
+            checkedItemID={checkedItemID}
+            setCheckedItemID={setCheckedItemID}
+          />
+          {flowState.actions.connect_thirdparty_oauth_provider.enabled ? (
+            <ConnectIdentityDropdown
+              setCheckedItemID={setCheckedItemID}
+              flowState={flowState}
+              onState={onState}
+              checkedItemID={checkedItemID}
+            />
+          ) : null}
+        </Fragment>
+      ) : null}
       {flowState.payload.sessions ? (
         <Fragment>
           <Headline1>{t("headlines.profileSessions")}</Headline1>
@@ -271,26 +291,6 @@ const ProfilePage = (props: Props) => {
               <Button dangerous>{t("headlines.deleteAccount")}</Button>
             </Form>
           </Paragraph>
-        </Fragment>
-      ) : null}
-      {flowState.actions.connect_thirdparty_oauth_provider.enabled ||
-      flowState.actions.disconnect_thirdparty_oauth_provider.enabled ? (
-        <Fragment>
-          <Headline1>{t("headlines.connectedAccounts")}</Headline1>
-          <ListIdentities
-            flowState={flowState}
-            onState={onState}
-            checkedItemID={checkedItemID}
-            setCheckedItemID={setCheckedItemID}
-          />
-          {flowState.actions.connect_thirdparty_oauth_provider.enabled ? (
-            <ConnectIdentityDropdown
-              setCheckedItemID={setCheckedItemID}
-              flowState={flowState}
-              onState={onState}
-              checkedItemID={checkedItemID}
-            />
-          ) : null}
         </Fragment>
       ) : null}
     </Content>
