@@ -90,7 +90,7 @@ func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
-	var successRedirectTo *url.URL
+	var redirectToURL *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
 	err := h.persister.Transaction(func(tx *pop.Connection) error {
 		var callback dto.ThirdPartyAuthCallback
@@ -125,6 +125,11 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		state, terr = thirdparty.VerifyState(h.cfg, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+		}
+
+		redirectToURL, terr = url.Parse(state.RedirectTo)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
 		}
 
 		if callback.HasError() {
@@ -191,15 +196,9 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorServer("could not save token to db").WithCause(terr)
 		}
 
-		redirectTo, terr := url.Parse(state.RedirectTo)
-		if terr != nil {
-			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
-		}
-
-		query := redirectTo.Query()
+		query := redirectToURL.Query()
 		query.Add(utils.HankoTokenQuery, token.Value)
-		redirectTo.RawQuery = query.Encode()
-		successRedirectTo = redirectTo
+		redirectToURL.RawQuery = query.Encode()
 
 		c.SetCookie(&http.Cookie{
 			Name:     utils.HankoThirdpartyStateCookie,
@@ -215,15 +214,18 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return nil
 	})
 
+	errorRedirect := h.cfg.ThirdParty.ErrorRedirectURL
+	if redirectToURL != nil {
+		errorRedirect = redirectToURL.String()
+	}
+
 	if err != nil {
-		// TODO: redirect should go to redirectURL in state, when state can be verified, only when state is not available it should redirect to the configured ErrorRedirectURL
-		return h.redirectError(c, err, h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, err, errorRedirect)
 	}
 
 	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
-
 	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), errorRedirect)
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
@@ -233,7 +235,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, successRedirectTo.String())
+	return c.Redirect(http.StatusTemporaryRedirect, redirectToURL.String())
 }
 
 func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string) error {
