@@ -48,14 +48,14 @@ func (a ConnectThirdpartyOauthProvider) Initialize(c flowpilot.InitializationCon
 		Hidden(true).
 		Required(true)
 
-	availableProvider := 0
+	availableProviders := 0
 	for _, provider := range enabledThirdPartyProviders {
 		// Check if the user already has an identity with this provider
 		// to avoid duplicates and only show providers that are not yet connected
 		if !slices.ContainsFunc(userModel.Identities, func(identity models.Identity) bool {
 			return identity.ProviderID == provider.ID
 		}) {
-			availableProvider += 1
+			availableProviders += 1
 			providerInput.AllowedValue(provider.DisplayName, provider.ID)
 		}
 	}
@@ -69,12 +69,12 @@ func (a ConnectThirdpartyOauthProvider) Initialize(c flowpilot.InitializationCon
 		if !slices.ContainsFunc(userModel.Identities, func(identity models.Identity) bool {
 			return identity.ProviderID == provider.ID
 		}) {
-			availableProvider += 1
+			availableProviders += 1
 			providerInput.AllowedValue(provider.DisplayName, provider.ID)
 		}
 	}
 
-	if availableProvider == 0 {
+	if availableProviders == 0 {
 		c.SuspendAction()
 		return
 	}
