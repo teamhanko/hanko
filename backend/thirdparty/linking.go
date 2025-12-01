@@ -294,8 +294,6 @@ func signUp(tx *pop.Connection, cfg *config.Config, p persistence.Persister, use
 	var emailID *uuid.UUID = nil
 	if email != nil {
 		emailID = &email.ID
-	}
-	if email != nil {
 		primaryEmail := models.NewPrimaryEmail(email.ID, *email.UserID)
 		terr = primaryEmailPersister.Create(*primaryEmail)
 		if terr != nil {
