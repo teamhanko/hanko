@@ -122,7 +122,7 @@ func (a ConnectThirdpartyOauthProvider) Execute(c flowpilot.ExecutionContext) er
 		redirectTo,
 		thirdparty.GenerateStateForFlowAPI(true),
 		thirdparty.GenerateStateWithPKCECodeVerifier(codeVerifier.String()),
-		thirdparty.GenerateStateForLoggedInUser(userModel.ID),
+		thirdparty.GenerateStateWithUserID(userModel.ID),
 	)
 	if err != nil {
 		return c.Error(flowpilot.ErrorTechnical.Wrap(err))

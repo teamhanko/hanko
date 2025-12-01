@@ -26,8 +26,8 @@ func GenerateStateWithPKCECodeVerifier(codeVerifier string) func(state *State) {
 	}
 }
 
-// GenerateStateForLoggedInUser If the state is generated for a logged-in user, the OAuth request and response must only be used with the same already logged-in user.
-func GenerateStateForLoggedInUser(userID uuid.UUID) func(*State) {
+// GenerateStateWithUserID If the state is generated for a logged-in user, the OAuth request and response must only be used with the same already logged-in user.
+func GenerateStateWithUserID(userID uuid.UUID) func(*State) {
 	return func(state *State) {
 		if userID != uuid.Nil {
 			state.UserID = &userID
