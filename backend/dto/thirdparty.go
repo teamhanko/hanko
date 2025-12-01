@@ -26,9 +26,9 @@ type ThirdPartyAuthRequest struct {
 }
 
 type Identity struct {
-	ID         string    `json:"id"`
+	ID         string    `json:"id"` // the user/subject ID at the provider, ProviderUserID from models.Identity
 	Provider   string    `json:"provider"`
-	IdentityID uuid.UUID `json:"identity_id"`
+	IdentityID uuid.UUID `json:"identity_id"` // the internal id from models.Identity
 }
 
 type Identities []Identity
