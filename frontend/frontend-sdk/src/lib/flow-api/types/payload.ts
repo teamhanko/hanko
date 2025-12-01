@@ -49,6 +49,7 @@ export interface Username {
 export interface Identity {
   readonly id: string;
   readonly provider: string;
+  readonly identity_id?: string;
 }
 
 export interface Email {
@@ -81,6 +82,7 @@ export interface User {
   readonly emails?: Email[];
   readonly username?: Username;
   readonly metadata?: UserMetadata;
+  readonly identities?: Identity[];
   readonly created_at: string;
   readonly updated_at: string;
 }

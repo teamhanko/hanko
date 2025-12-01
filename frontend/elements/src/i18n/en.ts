@@ -48,6 +48,7 @@ export const en: Translation = {
     authenticatorAppAlreadySetUp: "Authenticator app is set up",
     authenticatorAppNotSetUp: "Set up authenticator app",
     trustDevice: "Trust this browser?",
+    deleteIdentity: "Delete connection",
   },
   texts: {
     enterPasscode: "Enter the passcode sent to your email address.",
@@ -156,6 +157,7 @@ export const en: Translation = {
     lastUsed: "Last used",
     trustDevice: "Trust this browser",
     staySignedIn: "Stay signed in",
+    connectAccount: "Connect account",
   },
   errors: {
     somethingWentWrong:

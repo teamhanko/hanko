@@ -2,12 +2,13 @@ package models
 
 import (
 	"errors"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/pop/v6/slices"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 // Identity is used by pop to map your identities database table to your go code.
@@ -16,7 +17,8 @@ type Identity struct {
 	ProviderUserID string        `json:"provider_user_id" db:"provider_user_id"`
 	ProviderID     string        `json:"provider_id" db:"provider_id"`
 	Data           slices.Map    `json:"data" db:"data"`
-	EmailID        uuid.UUID     `json:"email_id" db:"email_id"`
+	EmailID        *uuid.UUID    `json:"email_id" db:"email_id"`
+	UserID         *uuid.UUID    `json:"user_id" db:"user_id"`
 	Email          *Email        `json:"email,omitempty" belongs_to:"email"`
 	CreatedAt      time.Time     `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time     `json:"updated_at" db:"updated_at"`
@@ -35,7 +37,7 @@ func (identities Identities) GetIdentity(providerID string, providerUserID strin
 	return nil
 }
 
-func NewIdentity(providerID string, identityData map[string]interface{}, emailID uuid.UUID) (*Identity, error) {
+func NewIdentity(providerID string, identityData map[string]interface{}, emailID *uuid.UUID, userID *uuid.UUID) (*Identity, error) {
 	providerUserID, ok := identityData["sub"]
 	if !ok {
 		return nil, errors.New("missing provider user id")
@@ -49,6 +51,7 @@ func NewIdentity(providerID string, identityData map[string]interface{}, emailID
 		ProviderUserID: providerUserID.(string),
 		ProviderID:     providerID,
 		EmailID:        emailID,
+		UserID:         userID,
 		CreatedAt:      now,
 		UpdatedAt:      now,
 	}

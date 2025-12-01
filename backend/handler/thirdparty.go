@@ -90,7 +90,7 @@ func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
-	var successRedirectTo *url.URL
+	var redirectToURL *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
 	err := h.persister.Transaction(func(tx *pop.Connection) error {
 		var callback dto.ThirdPartyAuthCallback
@@ -127,6 +127,11 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
 
+		redirectToURL, terr = url.Parse(state.RedirectTo)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
+		}
+
 		if callback.HasError() {
 			return thirdparty.NewThirdPartyError(callback.Error, callback.ErrorDescription)
 		}
@@ -154,19 +159,26 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow)
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		emailModel := linkingResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
-		identityModel := emailModel.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID())
+		if err != nil {
+			return thirdparty.ErrorServer("could not get identity").WithCause(err)
+		}
+
+		if identityModel != nil && state.UserID != nil && identityModel.UserID != nil && *identityModel.UserID != *state.UserID {
+			return thirdparty.ErrorInvalidRequest("identity already exists for a different user")
+		}
 
 		tokenOpts := []func(*models.Token){
 			models.TokenForFlowAPI(state.IsFlow),
 			models.TokenWithIdentityID(identityModel.ID),
 			models.TokenUserCreated(linkingResult.UserCreated),
+			models.TokenWithLinkUser(state.UserID != nil),
 		}
 		if state.CodeVerifier != "" {
 			tokenOpts = append(tokenOpts, models.TokenPKCESessionVerifier(state.CodeVerifier))
@@ -184,15 +196,9 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorServer("could not save token to db").WithCause(terr)
 		}
 
-		redirectTo, terr := url.Parse(state.RedirectTo)
-		if terr != nil {
-			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
-		}
-
-		query := redirectTo.Query()
+		query := redirectToURL.Query()
 		query.Add(utils.HankoTokenQuery, token.Value)
-		redirectTo.RawQuery = query.Encode()
-		successRedirectTo = redirectTo
+		redirectToURL.RawQuery = query.Encode()
 
 		c.SetCookie(&http.Cookie{
 			Name:     utils.HankoThirdpartyStateCookie,
@@ -208,14 +214,18 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return nil
 	})
 
+	errorRedirect := h.cfg.ThirdParty.ErrorRedirectURL
+	if redirectToURL != nil {
+		errorRedirect = redirectToURL.String()
+	}
+
 	if err != nil {
-		return h.redirectError(c, err, h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, err, errorRedirect)
 	}
 
 	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
-
 	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), errorRedirect)
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
@@ -225,7 +235,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, successRedirectTo.String())
+	return c.Redirect(http.StatusTemporaryRedirect, redirectToURL.String())
 }
 
 func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string) error {

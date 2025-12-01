@@ -3,6 +3,11 @@ package saml
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"net/url"
+	"strings"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
@@ -14,10 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/session"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"github.com/teamhanko/hanko/backend/v2/utils"
-	"net/http"
-	"net/url"
-	"strings"
-	"time"
 )
 
 type Handler struct {
@@ -318,7 +319,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		userdata := provider.GetUserData(assertionInfo)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
 		samlDomain := provider.GetDomain()
-		linkResult, errTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow)
+		linkResult, errTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil)
 		if errTx != nil {
 			return errTx
 		}

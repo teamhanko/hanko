@@ -4,10 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"time"
+
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/crypto"
 	"github.com/teamhanko/hanko/backend/v2/crypto/aes_gcm"
-	"time"
 )
 
 func GenerateStateForFlowAPI(isFlow bool) func(*State) {
@@ -20,6 +22,15 @@ func GenerateStateWithPKCECodeVerifier(codeVerifier string) func(state *State) {
 	return func(state *State) {
 		if codeVerifier != "" {
 			state.CodeVerifier = codeVerifier
+		}
+	}
+}
+
+// GenerateStateWithUserID If the state is generated for a logged-in user, the OAuth request and response must only be used with the same already logged-in user.
+func GenerateStateWithUserID(userID uuid.UUID) func(*State) {
+	return func(state *State) {
+		if userID != uuid.Nil {
+			state.UserID = &userID
 		}
 	}
 }
@@ -67,13 +78,14 @@ func GenerateState(config *config.Config, provider string, redirectTo string, op
 }
 
 type State struct {
-	Provider     string    `json:"provider"`
-	RedirectTo   string    `json:"redirect_to"`
-	IssuedAt     time.Time `json:"issued_at"`
-	ExpiresAt    time.Time `json:"expires_at"`
-	Nonce        string    `json:"nonce"`
-	IsFlow       bool      `json:"is_flow"`
-	CodeVerifier string    `json:"code_verifier,omitempty"`
+	Provider     string     `json:"provider"`
+	RedirectTo   string     `json:"redirect_to"`
+	IssuedAt     time.Time  `json:"issued_at"`
+	ExpiresAt    time.Time  `json:"expires_at"`
+	Nonce        string     `json:"nonce"`
+	IsFlow       bool       `json:"is_flow"`
+	CodeVerifier string     `json:"code_verifier,omitempty"`
+	UserID       *uuid.UUID `json:"user_id,omitempty"`
 }
 
 func VerifyState(config *config.Config, state string, expectedState string) (*State, error) {

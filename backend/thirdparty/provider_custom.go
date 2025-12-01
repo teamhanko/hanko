@@ -101,10 +101,6 @@ func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		return nil, fmt.Errorf("could not get user data: %s", err)
 	}
 
-	if claims.Email == "" {
-		return nil, fmt.Errorf("could not get user data: email not present")
-	}
-
 	return &UserData{
 		Metadata: &claims,
 	}, nil

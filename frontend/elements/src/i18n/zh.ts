@@ -48,6 +48,7 @@ export const zh: Translation = {
     authenticatorAppAlreadySetUp: "身份验证应用已设置",
     authenticatorAppNotSetUp: "设置身份验证应用",
     trustDevice: "信任此浏览器？",
+    deleteIdentity: "删除连接",
   },
   texts: {
     enterPasscode: "请输入发送到您邮箱地址的验证码。",
@@ -152,6 +153,7 @@ export const zh: Translation = {
     lastUsed: "最后使用",
     trustDevice: "信任此浏览器",
     staySignedIn: "保持登录状态",
+    connectAccount: "连接账户",
   },
   errors: {
     somethingWentWrong: "发生技术错误。请稍后再试。",

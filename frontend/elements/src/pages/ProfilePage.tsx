@@ -23,6 +23,8 @@ import DeleteAccountPage from "./DeleteAccountPage";
 import ErrorBox from "../components/error/ErrorBox";
 import ListSessionsAccordion from "../components/accordion/ListSessionsAccordion";
 import ManageAuthAppDropdown from "../components/accordion/ManageAuthAppDropdown";
+import ListIdentities from "../components/accordion/ListIdentities";
+import ConnectIdentityDropdown from "../components/accordion/ConnectIdentityDropdown";
 
 interface Props {
   state: State<"profile_init">;
@@ -240,6 +242,26 @@ const ProfilePage = (props: Props) => {
               setCheckedItemID={setCheckedItemID}
             />
           </Paragraph>
+        </Fragment>
+      ) : null}
+      {flowState.actions.connect_thirdparty_oauth_provider.enabled ||
+      flowState.actions.disconnect_thirdparty_oauth_provider.enabled ? (
+        <Fragment>
+          <Headline1>{t("headlines.connectedAccounts")}</Headline1>
+          <ListIdentities
+            flowState={flowState}
+            onState={onState}
+            checkedItemID={checkedItemID}
+            setCheckedItemID={setCheckedItemID}
+          />
+          {flowState.actions.connect_thirdparty_oauth_provider.enabled ? (
+            <ConnectIdentityDropdown
+              setCheckedItemID={setCheckedItemID}
+              flowState={flowState}
+              onState={onState}
+              checkedItemID={checkedItemID}
+            />
+          ) : null}
         </Fragment>
       ) : null}
       {flowState.payload.sessions ? (
