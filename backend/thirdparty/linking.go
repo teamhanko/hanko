@@ -92,9 +92,6 @@ func link(tx *pop.Connection, cfg *config.Config, p persistence.Persister, userD
 	if !comesFromProfile {
 		userID = &user.ID
 	}
-	//if email == nil {
-	//	return nil, ErrorServer("could not link account").WithCause(fmt.Errorf("email %s not found", userData.Metadata.Email))
-	//}
 
 	// TODO: when email is nil, we should create a new email and associate it with the identity
 
