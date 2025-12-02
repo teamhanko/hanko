@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -26,6 +28,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
@@ -48,24 +51,60 @@ type FlowPilotHandler struct {
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
 	registrationFlow := flow.NewRegistrationFlow(h.Cfg.Debug)
-	return h.executeFlow(c, registrationFlow)
+
+	var executionOpts []flowpilot.FlowExecutionOption
+
+	if h.Cfg.Session.Binding.Enabled {
+		s, err := h.getOrCreateAnonymousSession(c)
+		if err != nil {
+			flowResult := registrationFlow.ResultFromError(err)
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+
+		executionOpts = append(executionOpts, flowpilot.WithSession(s.ID))
+	}
+
+	return h.executeFlow(c, registrationFlow, executionOpts...)
 }
 
 func (h *FlowPilotHandler) LoginFlowHandler(c echo.Context) error {
 	loginFlow := flow.NewLoginFlow(h.Cfg.Debug)
-	e := h.executeFlow(c, loginFlow)
-	return e
+
+	var executionOpts []flowpilot.FlowExecutionOption
+
+	if h.Cfg.Session.Binding.Enabled {
+		s, err := h.getOrCreateAnonymousSession(c)
+		if err != nil {
+			flowResult := loginFlow.ResultFromError(err)
+			return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		}
+
+		executionOpts = append(executionOpts, flowpilot.WithSession(s.ID))
+	}
+
+	return h.executeFlow(c, loginFlow, executionOpts...)
 }
 
 func (h *FlowPilotHandler) ProfileFlowHandler(c echo.Context) error {
 	profileFlow := flow.NewProfileFlow(h.Cfg.Debug)
 
-	if err := h.validateSession(c); err != nil {
+	s, err := h.validateSession(c)
+	if err != nil {
 		flowResult := profileFlow.ResultFromError(err)
 		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
 	}
 
-	return h.executeFlow(c, profileFlow)
+	if s == nil {
+		flowResult := profileFlow.ResultFromError(shared.ErrorUnauthorized)
+		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+	}
+
+	var executionOpts []flowpilot.FlowExecutionOption
+	if h.Cfg.Session.Binding.Enabled {
+		executionOpts = append(executionOpts, flowpilot.WithSession(s.ID))
+	}
+
+	return h.executeFlow(c, profileFlow, executionOpts...)
 }
 
 func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
@@ -73,12 +112,133 @@ func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
 	return h.executeFlow(c, samlIdPInitiatedLoginFlow)
 }
 
-func (h *FlowPilotHandler) validateSession(c echo.Context) error {
+func (h *FlowPilotHandler) getOrCreateAnonymousSession(c echo.Context) (*models.Session, error) {
+	// We ignore the error, since the only error returned from "Cookie" is an "ErrNoCookie" but not having
+	// the cookie is valid.
+	anonSessionCookie, _ := c.Cookie(fmt.Sprintf("%s_anonymous", h.Cfg.Session.Cookie.GetName()))
+
+	var sessionModel *models.Session
+	var err error
+
+	if anonSessionCookie != nil && anonSessionCookie.Value != "" {
+		anonymousSessionId := uuid.FromStringOrNil(anonSessionCookie.Value)
+
+		sessionModel, err = h.Persister.GetSessionPersister().Get(anonymousSessionId)
+		if err != nil {
+			return nil, fmt.Errorf("could not fetch session model: %w", err)
+		}
+
+		if sessionModel != nil && sessionModel.ExpiresAt != nil && time.Now().UTC().After(*sessionModel.ExpiresAt) {
+			return nil, flowpilot.ErrorFlowExpired
+		}
+	}
+
+	action := c.QueryParam("action")
+	// If we have an action query parameter, this request attempts to advance an existing flow.
+	// We need to check if this flow can be advanced with the given session.
+	if action != "" {
+		if sessionModel == nil {
+			return nil, flowpilot.ErrorOperationNotPermitted.Wrap(
+				errors.New("session binding mismatch: flow cannot advance given the current session"),
+			)
+		}
+
+		flowID, err := extractFlowID(action)
+		if err != nil {
+			return nil, flowpilot.ErrorFormDataInvalid.Wrap(err)
+		}
+		if !flowID.IsNil() {
+			flowModel, err := h.Persister.GetFlowPersister().GetFlow(flowID)
+			if err != nil {
+				return nil, fmt.Errorf("could not fetch flow: %w", err)
+			}
+
+			if flowModel == nil {
+				return nil, shared.ErrorNotFound.Wrap(
+					fmt.Errorf("flow with id %s not found", flowID),
+				)
+			}
+
+			sessionID := *flowModel.SessionID
+			if sessionModel.ID.String() != sessionID.String() {
+				return nil, flowpilot.ErrorOperationNotPermitted.Wrap(
+					errors.New("session binding mismatch: flow cannot advance given the current session"),
+				)
+			}
+		}
+
+		sessionModel.LastUsed = time.Now().UTC()
+		err = h.Persister.GetSessionPersister().Update(*sessionModel)
+		if err != nil {
+			return nil, fmt.Errorf("could not update session model: %w", err)
+		}
+
+		return sessionModel, nil
+	}
+
+	// If we are here, we are initializing a flow.
+	// If we have a session for the given cookie, we simply use the existing session.
+	if sessionModel != nil {
+		sessionModel.LastUsed = time.Now().UTC()
+		err = h.Persister.GetSessionPersister().Update(*sessionModel)
+		if err != nil {
+			return nil, fmt.Errorf("could not update session model: %w", err)
+		}
+
+		return sessionModel, nil
+	}
+
+	// No existing session found, create a new one.
+	id, _ := uuid.NewV4()
+	now := time.Now().UTC()
+	expiresAt := now.Add(24 * time.Hour)
+
+	newSession := models.Session{
+		ID:        id,
+		UserID:    nulls.UUID{},
+		UserAgent: nulls.String{},
+		IpAddress: nulls.String{},
+		CreatedAt: now,
+		UpdatedAt: now,
+		ExpiresAt: &expiresAt,
+		LastUsed:  now,
+	}
+
+	if h.Cfg.Session.AcquireIPAddress {
+		newSession.IpAddress = nulls.NewString(c.RealIP())
+	}
+
+	if h.Cfg.Session.AcquireUserAgent {
+		newSession.UserAgent = nulls.NewString(c.Request().UserAgent())
+	}
+
+	err = h.Persister.GetSessionPersister().Create(newSession)
+	if err != nil {
+		return nil, fmt.Errorf("could not create new anonymous session: %w", err)
+	}
+
+	cookie := &http.Cookie{
+		Name:     fmt.Sprintf("%s_anonymous", h.Cfg.Session.Cookie.GetName()),
+		Value:    newSession.ID.String(),
+		Domain:   h.Cfg.Session.Cookie.Domain,
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		MaxAge:   int(time.Until(expiresAt).Seconds()),
+	}
+
+	c.SetCookie(cookie)
+
+	return &newSession, nil
+}
+
+func (h *FlowPilotHandler) validateSession(c echo.Context) (*models.Session, error) {
 	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.Cfg.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
 
 	if err != nil {
-		return flowpilot.ErrorTechnical.Wrap(err)
+		return nil, flowpilot.ErrorTechnical.Wrap(err)
 	}
 
 	var lastExtractorErr, lastTokenErr error
@@ -109,7 +269,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 
 			sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
 			if err != nil {
-				return fmt.Errorf("failed to get session from database: %w", err)
+				return nil, fmt.Errorf("failed to get session from database: %w", err)
 			}
 			if sessionModel == nil {
 				lastTokenErr = fmt.Errorf("session id not found in database")
@@ -120,25 +280,25 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 			sessionModel.LastUsed = time.Now().UTC()
 			err = h.Persister.GetSessionPersister().Update(*sessionModel)
 			if err != nil {
-				return dto.ToHttpError(err)
+				return nil, dto.ToHttpError(err)
 			}
 
 			c.Set("session", token)
 
-			return nil
+			return sessionModel, nil
 		}
 	}
 
 	if lastTokenErr != nil {
-		return shared.ErrorUnauthorized.Wrap(lastTokenErr)
+		return nil, shared.ErrorUnauthorized.Wrap(lastTokenErr)
 	} else if lastExtractorErr != nil {
-		return shared.ErrorUnauthorized.Wrap(lastExtractorErr)
+		return nil, shared.ErrorUnauthorized.Wrap(lastExtractorErr)
 	}
 
-	return nil
+	return nil, nil
 }
 
-func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) error {
+func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow, opts ...flowpilot.FlowExecutionOption) error {
 	const queryParamKey = "action"
 
 	var err error
@@ -191,11 +351,17 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 
 		flow.Set("deps", deps)
 
-		flowResult, err = flow.Execute(persistence.NewFlowPersister(tx),
+		executionOptions := []flowpilot.FlowExecutionOption{
 			flowpilot.WithQueryParamKey(queryParamKey),
 			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
 			flowpilot.WithInputData(inputData),
-			flowpilot.UseCompression(!h.Cfg.Debug))
+			flowpilot.UseCompression(!h.Cfg.Debug),
+		}
+
+		executionOptions = append(executionOptions, opts...)
+
+		flowResult, err = flow.Execute(persistence.NewFlowPersister(tx),
+			executionOptions...)
 
 		return err
 	}

@@ -3,11 +3,13 @@ package shared
 import (
 	"errors"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
@@ -119,6 +121,26 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		deps.HttpContext.Response().Header().Set("X-Auth-Token", signedSessionToken)
 	} else {
 		deps.HttpContext.SetCookie(cookie)
+	}
+
+	anonCookieName := fmt.Sprintf("%s_anonymous", deps.Cfg.Session.Cookie.GetName())
+	if anonCookie, cookieErr := deps.HttpContext.Cookie(anonCookieName); cookieErr == nil && anonCookie != nil {
+		if anonSessionID, uuidErr := uuid.FromString(anonCookie.Value); uuidErr == nil {
+			if delErr := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Delete(models.Session{ID: anonSessionID}); delErr != nil {
+				return fmt.Errorf("could not delete anonymous session: %w", delErr)
+			}
+		}
+
+		deps.HttpContext.SetCookie(&http.Cookie{
+			Name:     anonCookieName,
+			Value:    "",
+			Domain:   deps.Cfg.Session.Cookie.Domain,
+			Path:     "/",
+			Secure:   true,
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+			MaxAge:   -1,
+		})
 	}
 
 	loginMethod := c.Stash().Get(StashPathLoginMethod)
