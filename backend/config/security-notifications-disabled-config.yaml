@@ -14,9 +14,15 @@ security_notifications:
   notifications:
     email_create:
       enabled: false
+    email_delete:
+      enabled: false
     password_update:
       enabled: false
     passkey_create:
       enabled: false
     primary_email_update:
+      enabled: false
+    mfa_enabled:
+      enabled: false
+    mfa_disabled:
       enabled: false

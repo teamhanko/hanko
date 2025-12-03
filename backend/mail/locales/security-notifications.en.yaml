@@ -21,14 +21,14 @@ subject_email_create:
 
 email_delete_text:
   description: ""
-  other: "The email address {{ .DeletedEmailAddress}} has been removed from your {{ .ServiceName }} account."
+  other: "The email address {{ .DeletedEmailAddress }} has been removed from your {{ .ServiceName }} account."
 subject_email_delete:
   description: ""
   other: "An email address has been removed"
 
 passkey_create_text:
   description: ""
-  other: "Your {{.ServiceName}} account has been registered with a new passkey."
+  other: "Your {{ .ServiceName }} account has been registered with a new passkey."
 subject_passkey_create:
   description: ""
   other: "A new passkey has been registered"

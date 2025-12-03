@@ -139,9 +139,12 @@ func TestParseSecurityNotificationsConfig(t *testing.T) {
 	notificationsConfig := cfg.SecurityNotifications
 
 	assert.False(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.EmailDelete.Enabled)
 	assert.False(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
 	assert.False(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
 	assert.False(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.MFAEnabled.Enabled)
+	assert.False(t, notificationsConfig.Notifications.MFADisabled.Enabled)
 }
 
 func TestParseDefaultSecurityNotificationsConfig(t *testing.T) {
@@ -152,7 +155,10 @@ func TestParseDefaultSecurityNotificationsConfig(t *testing.T) {
 	notificationsConfig := cfg.SecurityNotifications
 
 	assert.True(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.EmailDelete.Enabled)
 	assert.True(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
 	assert.True(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
 	assert.True(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.MFAEnabled.Enabled)
+	assert.True(t, notificationsConfig.Notifications.MFADisabled.Enabled)
 }

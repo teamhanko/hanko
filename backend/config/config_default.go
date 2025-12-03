@@ -42,6 +42,9 @@ func DefaultConfig() *Config {
 				EmailCreate: SecurityNotificationConfiguration{
 					Enabled: true,
 				},
+				EmailDelete: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
 				PasswordUpdate: SecurityNotificationConfiguration{
 					Enabled: true,
 				},
@@ -49,6 +52,12 @@ func DefaultConfig() *Config {
 					Enabled: true,
 				},
 				PrimaryEmailUpdate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				MFAEnabled: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				MFADisabled: SecurityNotificationConfiguration{
 					Enabled: true,
 				},
 			},
