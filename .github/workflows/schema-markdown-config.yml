@@ -21,12 +21,12 @@ jobs:
           registry-url: https://registry.npmjs.org/
 
       - name: Checkout backend
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: hanko
 
       - name: Checkout backend wiki
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{github.repository}}.wiki
           path: wiki
