@@ -1,7 +1,7 @@
 package services
 
 import (
-	"time"
+	"fmt"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -30,7 +30,7 @@ type SendSecurityNotificationResult struct {
 }
 
 type SecurityNotification interface {
-	SendNotification(*pop.Connection, SendSecurityNotificationParams) (*SendSecurityNotificationResult, error)
+	SendNotification(*pop.Connection, SendSecurityNotificationParams) error
 }
 
 type securityNotification struct {
@@ -49,12 +49,7 @@ func NewSecurityNotificationService(cfg config.Config, emailService Email, persi
 	}
 }
 
-func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurityNotificationParams) (*SendSecurityNotificationResult, error) {
-	id, err := uuid.NewV4()
-	if err != nil {
-		return nil, err
-	}
-
+func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurityNotificationParams) error {
 	language := p.HttpContext.Request().Header.Get("X-Language")
 
 	subject := s.emailService.RenderSubject(language, p.Template, map[string]interface{}{
@@ -69,34 +64,37 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 
 	bodyPlain, err := s.emailService.RenderBodyPlain(language, p.Template, p.BodyData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	bodyHTML, err := s.emailService.RenderBodyHTML(language, p.Template, p.BodyData)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if s.cfg.EmailDelivery.Enabled {
 		err = s.emailService.SendEmail(p.EmailAddress, subject, bodyPlain, bodyHTML)
 		if err != nil {
-			return nil, err
+			return err
+		}
+
+		auditLogDetails := []auditlog.DetailOption{
+			auditlog.Detail("template", p.Template),
+			auditlog.Detail("email_address", p.EmailAddress),
+		}
+
+		err := s.auditLog.CreateWithConnection(
+			tx,
+			p.HttpContext,
+			models.AuditLogSecurityNotificationSent,
+			&models.User{ID: p.UserID},
+			nil,
+			auditLogDetails...)
+
+		if err != nil {
+			return fmt.Errorf("could not create audit log: %w", err)
 		}
 	}
 
-	now := time.Now().UTC()
-	model := models.SecurityNotification{
-		ID:           id,
-		EmailAddress: p.EmailAddress,
-		TemplateName: p.Template,
-		Language:     language,
-		CreatedAt:    now,
-	}
-
-	return &SendSecurityNotificationResult{
-		SecurityNotificationModel: model,
-		Subject:                   subject,
-		BodyPlain:                 bodyPlain,
-		BodyHTML:                  bodyHTML,
-	}, nil
+	return nil
 }
