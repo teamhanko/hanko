@@ -139,6 +139,17 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "Binding": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "`enabled` determines whether session binding is enabled.",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "Config": {
       "properties": {
         "account": {
@@ -1309,6 +1320,10 @@
           "type": "boolean",
           "description": "`acquire_user_agent` stores the user's user agent in the database.",
           "default": true
+        },
+        "binding": {
+          "$ref": "#/$defs/Binding",
+          "description": "`binding` configures session binding properties."
         },
         "cookie": {
           "$ref": "#/$defs/Cookie",
