@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "La password per il tuo account {{ .ServiceName }} è stata aggiornata."
+subject_password_update:
+  description: ""
+  other: "La tua password è stata aggiornata."
+
+primary_email_update_text:
+  description: ""
+  other: "L'indirizzo email principale per il tuo account {{ .ServiceName }} è stato aggiornato da {{ .OldEmailAddress }} a {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Il tuo indirizzo email principale è stato aggiornato."
+
+email_create_text:
+  description: ""
+  other: "L'indirizzo email {{ .NewEmailAddress }} è stato aggiunto al tuo account {{ .ServiceName }}."
+subject_email_create:
+  description: ""
+  other: "Un nuovo indirizzo email è stato registrato."
+
+email_delete_text:
+  description: ""
+  other: "L'indirizzo email {{ .DeletedEmailAddress }} è stato rimosso dal tuo account {{ .ServiceName }}."
+subject_email_delete:
+  description: ""
+  other: "Un indirizzo email è stato rimosso."
+
+passkey_create_text:
+  description: ""
+  other: "Il tuo account {{ .ServiceName }} è stato registrato con una nuova chiave di accesso."
+subject_passkey_create:
+  description: ""
+  other: "Una nuova chiave di accesso è stata registrata."
+
+mfa_enabled_text:
+  description: ""
+  other: "L'autenticazione a due fattori è stata attivata con successo per il tuo account {{ .ServiceName }}."
+subject_mfa_enabled:
+  description: ""
+  other: "Autenticazione a due fattori attivata"
+
+mfa_disabled_text:
+  description: ""
+  other: "L'autenticazione a due fattori è stata disattivata per il tuo account {{ .ServiceName }}."
+subject_mfa_disabled:
+  description: ""
+  other: "Autenticazione a due fattori disattivata"

@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "A senha da sua conta {{ .ServiceName }} foi atualizada."
+subject_password_update:
+  description: ""
+  other: "Sua senha foi atualizada."
+
+primary_email_update_text:
+  description: ""
+  other: "O endereço de e-mail principal da sua conta {{ .ServiceName }} foi atualizado de {{ .OldEmailAddress }} para {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "O seu endereço de e-mail principal foi atualizado."
+
+email_create_text:
+  description: ""
+  other: "O endereço de e-mail {{ .NewEmailAddress }} foi adicionado à sua conta {{ .ServiceName }}."
+subject_email_create:
+  description: ""
+  other: "Um novo endereço de e-mail foi registrado."
+
+email_delete_text:
+  description: ""
+  other: "O endereço de e-mail {{ .DeletedEmailAddress }} foi removido da sua conta {{ .ServiceName }}."
+subject_email_delete:
+  description: ""
+  other: "Um endereço de e-mail foi removido."
+
+passkey_create_text:
+  description: ""
+  other: "A sua conta {{ .ServiceName }} foi registrada com uma nova chave de acesso."
+subject_passkey_create:
+  description: ""
+  other: "Uma nova chave de acesso foi registrada."
+
+mfa_enabled_text:
+  description: ""
+  other: "A autenticação de dois fatores foi ativada com sucesso para a sua conta {{ .ServiceName }}."
+subject_mfa_enabled:
+  description: ""
+  other: "Autenticação de dois fatores ativada"
+
+mfa_disabled_text:
+  description: ""
+  other: "A autenticação de dois fatores foi desativada para a sua conta {{ .ServiceName }}."
+subject_mfa_disabled:
+  description: ""
+  other: "Autenticação de dois fatores desativada"

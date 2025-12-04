@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের পাসওয়ার্ড আপডেট করা হয়েছে।"
+subject_password_update:
+  description: ""
+  other: "আপনার পাসওয়ার্ড আপডেট করা হয়েছে।"
+
+primary_email_update_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের প্রাথমিক ইমেল ঠিকানা {{ .OldEmailAddress }} থেকে {{ .NewEmailAddress }} এ আপডেট করা হয়েছে।"
+subject_primary_email_update:
+  description: ""
+  other: "আপনার প্রাথমিক ইমেল ঠিকানা আপডেট করা হয়েছে।"
+
+email_create_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে {{ .NewEmailAddress }} ইমেল ঠিকানা যোগ করা হয়েছে।"
+subject_email_create:
+  description: ""
+  other: "একটি নতুন ইমেল ঠিকানা নিবন্ধিত হয়েছে।"
+
+email_delete_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্ট থেকে {{ .DeletedEmailAddress }} ইমেল ঠিকানা মুছে ফেলা হয়েছে।"
+subject_email_delete:
+  description: ""
+  other: "একটি ইমেল ঠিকানা মুছে ফেলা হয়েছে।"
+
+passkey_create_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে একটি নতুন পাসকি নিবন্ধিত হয়েছে।"
+subject_passkey_create:
+  description: ""
+  other: "একটি নতুন পাসকি নিবন্ধিত হয়েছে।"
+
+mfa_enabled_text:
+  description: ""
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য দুই-ফ্যাক্টর প্রমাণীকরণ সফলভাবে সক্ষম করা হয়েছে।"
+subject_mfa_enabled:
+  description: ""
+  other: "দুই-ফ্যাক্টর প্রমাণীকরণ সক্ষম করা হয়েছে।"
+
+mfa_disabled_text:
+  description: ""
+  other: "দুই-ফ্যাক্টর প্রমাণীকরণ আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য অক্ষম করা হয়েছে।"
+subject_mfa_disabled:
+  description: ""
+  other: "দুই-ফ্যাক্টর প্রমাণীকরণ অক্ষম করা হয়েছে।"
