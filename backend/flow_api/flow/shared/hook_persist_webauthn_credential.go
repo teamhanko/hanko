@@ -35,14 +35,20 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		auditlog.Detail("flow_id", c.GetFlowID()),
 	}
 
+	fmt.Println("Stashed webauthn credentials found, persisting...")
+
 	auditLogType := models.AuditLogPasskeyCreated
 
 	for _, webauthnCredential := range c.Stash().Get(StashPathWebauthnCredentials).Array() {
+		fmt.Println("Persisting webauthn credential from stash:", webauthnCredential.String())
+
 		var credentialModel models.WebauthnCredential
 		err = json.Unmarshal([]byte(webauthnCredential.String()), &credentialModel)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
+
+		fmt.Println("Unmarshalled webauthn credential model:", credentialModel)
 
 		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(credentialModel)
 		if err != nil {
@@ -50,24 +56,32 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		}
 
 		var userModel *models.User
-		if userModel, ok := c.Get("session_user").(*models.User); ok {
+		if userValue, ok := c.Get("session_user").(*models.User); ok {
+			userModel = userValue
 			userModel.WebauthnCredentials = append(userModel.WebauthnCredentials, credentialModel)
 		}
+
+		var isPasskey bool = false
 
 		if credentialModel.MFAOnly {
 			auditLogType = models.AuditLogSecurityKeyCreated
 			auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", credentialModel.ID))
 		} else {
+			isPasskey = true
 			auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", credentialModel.ID))
 		}
 
-		if userModel != nil && deps.Cfg.SecurityNotifications.Notifications.PasskeyCreate.Enabled {
-			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
-				EmailAddress: userModel.Emails.GetPrimary().Address,
-				Template:     "passkey_create",
-				HttpContext:  deps.HttpContext,
-				UserContext:  *userModel,
-			})
+		if userModel != nil {
+			emailAddress := userModel.Emails.GetPrimary().Address
+
+			if isPasskey && deps.Cfg.SecurityNotifications.Notifications.PasskeyCreate.Enabled {
+				deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+					EmailAddress: emailAddress,
+					Template:     "passkey_create",
+					HttpContext:  deps.HttpContext,
+					UserContext:  *userModel,
+				})
+			}
 		}
 	}
 
