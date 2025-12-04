@@ -73,18 +73,8 @@ func (a SecurityKeyDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.DeleteWebauthnCredential(webauthnCredentialModel.ID)
 
-	var hasOtherMfa bool = false
-
-	for _, credential := range userModel.WebauthnCredentials {
-		if credential.ID != webauthnCredentialModel.ID && credential.MFAOnly {
-			// User has another MFA-only credential
-			hasOtherMfa = true
-			break
-		}
-	}
-
 	// Send MFA disabled notification if there are no more MFA methods
-	if !hasOtherMfa && userModel.OTPSecret == nil && deps.Cfg.SecurityNotifications.Notifications.MFADisabled.Enabled {
+	if !userModel.HasMFAEnabledExcept(webauthnCredentialModel.ID) && userModel.OTPSecret == nil && deps.Cfg.SecurityNotifications.Notifications.MFADisabled.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: userModel.Emails.GetPrimary().Address,
 			Template:     "mfa_disabled",

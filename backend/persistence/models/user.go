@@ -4,13 +4,14 @@ import (
 	"encoding/base64"
 	"time"
 
+	"slices"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"slices"
 )
 
 // User is used by pop to map your users database table to your go code.
@@ -33,6 +34,28 @@ func (user *User) DeleteWebauthnCredential(credentialId string) {
 			return
 		}
 	}
+}
+
+func (user *User) HasMFAEnabled() bool {
+	for _, credential := range user.WebauthnCredentials {
+		if credential.MFAOnly {
+			// User has another MFA-only credential
+			return true
+		}
+	}
+
+	return user.OTPSecret != nil
+}
+
+func (user *User) HasMFAEnabledExcept(excludeId string) bool {
+	for _, credential := range user.WebauthnCredentials {
+		if credential.MFAOnly && credential.ID != excludeId {
+			// User has another MFA-only credential
+			return true
+		}
+	}
+
+	return user.OTPSecret != nil
 }
 
 func (user *User) GetIdentities() Identities {

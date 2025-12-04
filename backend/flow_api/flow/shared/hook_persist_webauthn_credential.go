@@ -70,18 +70,8 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 			emailAddress := userModel.Emails.GetPrimary().Address
 
 			if !isPasskey {
-				var hasOtherMfa bool = false
-
-				for _, credential := range userModel.WebauthnCredentials {
-					if credential.ID != credentialModel.ID && credential.MFAOnly {
-						// User has another MFA-only credential
-						hasOtherMfa = true
-						break
-					}
-				}
-
 				// Send MFA enabled notification if this is the first MFA method
-				if !hasOtherMfa && userModel.OTPSecret == nil && deps.Cfg.SecurityNotifications.Notifications.MFAEnabled.Enabled {
+				if !userModel.HasMFAEnabledExcept(credentialModel.ID) && deps.Cfg.SecurityNotifications.Notifications.MFAEnabled.Enabled {
 					deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 						EmailAddress: emailAddress,
 						Template:     "mfa_enabled",

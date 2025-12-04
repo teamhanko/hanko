@@ -69,18 +69,8 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		if userModel != nil {
-			var hasOtherMfa bool = false
-
-			for _, credential := range userModel.WebauthnCredentials {
-				if credential.MFAOnly {
-					// User has another MFA-only credential
-					hasOtherMfa = true
-					break
-				}
-			}
-
 			// Send MFA enabled notification if this is the first MFA method
-			if !hasOtherMfa && deps.Cfg.SecurityNotifications.Notifications.MFAEnabled.Enabled {
+			if !userModel.HasMFAEnabled() && deps.Cfg.SecurityNotifications.Notifications.MFAEnabled.Enabled {
 				deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 					EmailAddress: userModel.Emails.GetPrimary().Address,
 					Template:     "mfa_enabled",

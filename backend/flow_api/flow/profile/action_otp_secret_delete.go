@@ -56,18 +56,8 @@ func (a OTPSecretDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.DeleteOTPSecret()
 
-	var hasOtherMfa bool = false
-
-	for _, credential := range userModel.WebauthnCredentials {
-		if credential.MFAOnly {
-			// User has another MFA-only credential
-			hasOtherMfa = true
-			break
-		}
-	}
-
 	// Send MFA disabled notification if there are no more MFA methods
-	if !hasOtherMfa && userModel.OTPSecret == nil && deps.Cfg.SecurityNotifications.Notifications.MFADisabled.Enabled {
+	if !userModel.HasMFAEnabled() && deps.Cfg.SecurityNotifications.Notifications.MFADisabled.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: userModel.Emails.GetPrimary().Address,
 			Template:     "mfa_disabled",
