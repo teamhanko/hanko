@@ -20,20 +20,15 @@ type EmailPersistVerifiedStatus struct {
 func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) error {
 	deps := h.GetDeps(c)
 
-	fmt.Printf("EMAIL VERIFIED\n")
-
 	if !c.Stash().Get(StashPathEmailVerified).Bool() {
-		fmt.Printf("NOT VERIFIED?\n")
 		return nil
 	}
 
 	if !c.Stash().Get(StashPathEmail).Exists() {
-		fmt.Printf("NOT VERIFIED EMAIL?\n")
 		return errors.New("verified email not set on the stash")
 	}
 
 	if !c.Stash().Get(StashPathUserID).Exists() {
-		fmt.Printf("NO USER ID?\n")
 		return errors.New("user_id not set on the stash")
 	}
 
@@ -44,7 +39,6 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 
 	user, err := deps.Persister.GetUserPersister().Get(userId)
 	if err != nil {
-		fmt.Printf("FAILED TO GE USER BY USER ID?\n")
 		return fmt.Errorf("failed to get user by user_id: %w", err)
 	}
 
@@ -118,8 +112,6 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		}
 	}
 
-	fmt.Printf("EMAIL CREATE? %t\n", deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled)
-
 	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: user.Emails.GetPrimary().Address,
@@ -130,8 +122,6 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			},
 		})
 	}
-
-	fmt.Printf("DONE HERE\n")
 
 	if emailCreated {
 		err = deps.AuditLogger.CreateWithConnection(

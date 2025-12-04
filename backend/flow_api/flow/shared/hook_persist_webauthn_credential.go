@@ -35,20 +35,15 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		auditlog.Detail("flow_id", c.GetFlowID()),
 	}
 
-	fmt.Println("Stashed webauthn credentials found, persisting...")
-
 	auditLogType := models.AuditLogPasskeyCreated
 
 	for _, webauthnCredential := range c.Stash().Get(StashPathWebauthnCredentials).Array() {
-		fmt.Println("Persisting webauthn credential from stash:", webauthnCredential.String())
 
 		var credentialModel models.WebauthnCredential
 		err = json.Unmarshal([]byte(webauthnCredential.String()), &credentialModel)
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal stashed webauthn_credential: %w", err)
 		}
-
-		fmt.Println("Unmarshalled webauthn credential model:", credentialModel)
 
 		err = deps.Persister.GetWebauthnCredentialPersisterWithConnection(deps.Tx).Create(credentialModel)
 		if err != nil {
