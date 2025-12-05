@@ -11,7 +11,7 @@ require (
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/go-redsync/redsync/v4 v4.14.0
 	github.com/go-sql-driver/mysql v1.9.3
-	github.com/go-testfixtures/testfixtures/v3 v3.17.0
+	github.com/go-testfixtures/testfixtures/v3 v3.19.0
 	github.com/go-webauthn/webauthn v0.10.2
 	github.com/gobuffalo/nulls v0.4.2
 	github.com/gobuffalo/pop/v6 v6.1.1
