@@ -8,7 +8,7 @@ import (
 
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 
-	jsonpatch "github.com/evanphx/json-patch"
+	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/gobuffalo/nulls"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"net/http"
 
-	jsonpatch "github.com/evanphx/json-patch"
+	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
