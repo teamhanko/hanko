@@ -2,7 +2,9 @@ package profile
 
 import (
 	"fmt"
+
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
@@ -70,6 +72,16 @@ func (a SecurityKeyDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	userModel.DeleteWebauthnCredential(webauthnCredentialModel.ID)
+
+	// Send MFA disabled notification if there are no more MFA methods
+	if !userModel.HasMFAEnabledExcept(webauthnCredentialModel.ID) && userModel.OTPSecret == nil && deps.Cfg.SecurityNotifications.Notifications.MFADisabled.Enabled {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: userModel.Emails.GetPrimary().Address,
+			Template:     "mfa_disabled",
+			HttpContext:  deps.HttpContext,
+			UserContext:  *userModel,
+		})
+	}
 
 	return c.Continue(shared.StateProfileInit)
 }

@@ -2,8 +2,10 @@ package profile
 
 import (
 	"fmt"
+
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
@@ -59,6 +61,15 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 	err := deps.PasswordService.UpdatePassword(deps.Tx, userModel.PasswordCredential, password)
 	if err != nil {
 		return fmt.Errorf("could not udate password: %w", err)
+	}
+
+	if deps.Cfg.SecurityNotifications.Notifications.PasswordUpdate.Enabled {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: userModel.Emails.GetPrimary().Address,
+			Template:     "password_update",
+			HttpContext:  deps.HttpContext,
+			UserContext:  *userModel,
+		})
 	}
 
 	err = deps.AuditLogger.CreateWithConnection(
