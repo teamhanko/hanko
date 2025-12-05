@@ -68,6 +68,7 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 			EmailAddress: userModel.Emails.GetPrimary().Address,
 			Template:     "password_update",
 			HttpContext:  deps.HttpContext,
+			UserContext:  *userModel,
 		})
 	}
 

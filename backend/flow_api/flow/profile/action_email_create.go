@@ -136,6 +136,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 				BodyData: map[string]interface{}{
 					"NewEmailAddress": newEmailAddress,
 				},
+				UserContext: *userModel,
 			})
 		}
 

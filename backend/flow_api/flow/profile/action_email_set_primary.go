@@ -101,6 +101,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 			EmailAddress: existingPrimaryEmailAddress,
 			Template:     "primary_email_update",
 			HttpContext:  deps.HttpContext,
+			UserContext:  *userModel,
 			BodyData: map[string]interface{}{
 				"OldEmailAddress": existingPrimaryEmailAddress,
 				"NewEmailAddress": emailModel.Address,

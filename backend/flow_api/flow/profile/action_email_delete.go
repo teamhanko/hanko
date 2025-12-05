@@ -111,6 +111,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 			BodyData: map[string]interface{}{
 				"DeletedEmailAddress": deletedEmailAddress,
 			},
+			UserContext: *userModel,
 		})
 	}
 

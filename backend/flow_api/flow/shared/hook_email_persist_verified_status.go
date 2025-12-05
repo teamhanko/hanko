@@ -120,6 +120,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			BodyData: map[string]interface{}{
 				"NewEmailAddress": emailAddressToVerify,
 			},
+			UserContext: *user,
 		})
 	}
 
