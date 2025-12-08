@@ -3,7 +3,7 @@ module github.com/teamhanko/hanko/backend/v2
 go 1.24.0
 
 require (
-	github.com/beevik/etree v1.5.1
+	github.com/beevik/etree v1.6.0
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/coreos/go-oidc/v3 v3.14.1
 	github.com/evanphx/json-patch/v5 v5.9.11
