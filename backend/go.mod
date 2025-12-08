@@ -6,7 +6,7 @@ require (
 	github.com/beevik/etree v1.5.1
 	github.com/brianvoe/gofakeit/v6 v6.28.0
 	github.com/coreos/go-oidc/v3 v3.14.1
-	github.com/evanphx/json-patch/v5 v5.9.0
+	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.28.0
 	github.com/go-redsync/redsync/v4 v4.14.0
