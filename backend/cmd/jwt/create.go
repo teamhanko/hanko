@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -77,7 +78,7 @@ func NewCreateCommand() *cobra.Command {
 			expirationTime := rawToken.Expiration()
 			sessionModel := models.Session{
 				ID:        uuid.FromStringOrNil(sessionID.(string)),
-				UserID:    userId,
+				UserID:    nulls.NewUUID(userId),
 				CreatedAt: rawToken.IssuedAt(),
 				UpdatedAt: rawToken.IssuedAt(),
 				ExpiresAt: &expirationTime,

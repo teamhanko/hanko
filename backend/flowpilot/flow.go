@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 // FlowName represents the name of the flow.
@@ -40,6 +42,12 @@ func WithInputData(inputData InputData) func(*defaultFlow) {
 func UseCompression(b bool) func(*defaultFlow) {
 	return func(f *defaultFlow) {
 		f.useCompression = b
+	}
+}
+
+func WithSession(sessionID uuid.UUID) func(*defaultFlow) {
+	return func(f *defaultFlow) {
+		f.sessionID = &sessionID
 	}
 }
 
@@ -153,11 +161,13 @@ type flowBase interface {
 	getAfterFlowHooks() hookActions
 }
 
+type FlowExecutionOption func(*defaultFlow)
+
 // Flow represents a flow.
 type Flow interface {
 	// Execute executes the flow using the provided FlowDB and options.
 	// It returns the result of the flow execution and an error if any.
-	Execute(db FlowDB, opts ...func(*defaultFlow)) (FlowResult, error)
+	Execute(db FlowDB, opts ...FlowExecutionOption) (FlowResult, error)
 	// ResultFromError converts an error into a FlowResult.
 	ResultFromError(err error) FlowResult
 	// Set sets a value with the given key in the flow context.
@@ -197,6 +207,7 @@ type defaultFlow struct {
 	debug             bool          // Enables debug mode.
 	queryParam        queryParam    // TODO
 	contextValues     contextValues // Values to be used within the flow context.
+	sessionID         *uuid.UUID    // ID of the session this flow is bound to.
 	inputData         InputData
 	useCompression    bool
 	queryParamKey     string
@@ -257,7 +268,7 @@ func (f *defaultFlow) setDefaults() {
 }
 
 // Execute handles the execution of actions for a defaultFlow.
-func (f *defaultFlow) Execute(db FlowDB, opts ...func(flow *defaultFlow)) (FlowResult, error) {
+func (f *defaultFlow) Execute(db FlowDB, opts ...FlowExecutionOption) (FlowResult, error) {
 	for _, option := range opts {
 		option(f)
 	}
