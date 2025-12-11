@@ -1,5 +1,7 @@
 package config
 
+import "fmt"
+
 type Email struct {
 	// `acquire_on_login` determines whether users, provided that they do not already have registered an email,
 	//	are prompted to provide an email on login.
@@ -18,6 +20,9 @@ type Email struct {
 	Optional bool `yaml:"optional" json:"optional,omitempty" koanf:"optional" jsonschema:"default=false"`
 	// `passcode_ttl` specifies, in seconds, how long a passcode is valid for.
 	PasscodeTtl int `yaml:"passcode_ttl" json:"passcode_ttl,omitempty" koanf:"passcode_ttl" jsonschema:"default=300"`
+	// `passcode_charset` specifies the characters that can be used in passcodes.
+	// E.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.
+	PasscodeCharset PasscodeCharset `yaml:"passcode_charset" json:"passcode_charset,omitempty" koanf:"passcode_charset" jsonschema:"default=numeric,enum=numeric,enum=alphanumeric"`
 	// `require_verification` determines whether newly created emails must be verified by providing a passcode sent
 	// to respective address.
 	RequireVerification bool `yaml:"require_verification" json:"require_verification,omitempty" koanf:"require_verification" split_words:"true" jsonschema:"default=true"`
@@ -26,4 +31,19 @@ type Email struct {
 	// `user_for_authentication` determines whether users can log in by providing an email address and subsequently
 	// providing a passcode sent to the given email address.
 	UseForAuthentication bool `yaml:"use_for_authentication" json:"use_for_authentication,omitempty" koanf:"use_for_authentication" jsonschema:"default=true"`
+}
+
+type PasscodeCharset string
+
+var (
+	PasscodeCharsetNumeric      PasscodeCharset = "numeric"
+	PasscodeCharsetAlphanumeric PasscodeCharset = "alphanumeric"
+)
+
+func (e *Email) Validate() error {
+	switch e.PasscodeCharset {
+	case PasscodeCharsetNumeric, PasscodeCharsetAlphanumeric:
+		return nil
+	}
+	return fmt.Errorf("invalid passcode_characters: %s (allowed: 'numeric', 'alphanumeric')", e.PasscodeCharset)
 }
