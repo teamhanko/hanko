@@ -1,4 +1,4 @@
-import { StateUpdater, useContext } from "preact/compat";
+import { Dispatch, SetStateAction, useContext } from "preact/compat";
 import { State } from "@teamhanko/hanko-frontend-sdk";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import Dropdown from "./Dropdown";
@@ -8,7 +8,7 @@ import Form from "../form/Form";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   flowState: State<"profile_init">;
 
   onState(state: State<any>): Promise<void>;

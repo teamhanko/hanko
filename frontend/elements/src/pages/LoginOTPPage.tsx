@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
@@ -49,7 +48,7 @@ const LoginOTPPAge = (props: Props) => {
   }, [flowState]);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t(`headlines.otpLogin`)}</Headline1>
         <ErrorBox state={flowState} />
@@ -76,7 +75,7 @@ const LoginOTPPAge = (props: Props) => {
           {t("labels.useAnotherMethod")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 
