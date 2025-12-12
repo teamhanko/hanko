@@ -14,10 +14,10 @@
 
   const navigate = useNavigate();
 
-  let openSessionExpiredModal;
-  let description = '';
-  let error: Error | null = null;
-  let todos: Todos = [];
+  let openSessionExpiredModal = $state();
+  let description = $state('');
+  let error: Error | null = $state(null);
+  let todos: Todos = $state([]);
 
   const changeDescription = (event: any) => {
     description = event.currentTarget.value;
@@ -28,7 +28,8 @@
     patchTodo(currentTarget.value, currentTarget.checked);
   };
 
-  const addTodo = () => {
+  const addTodo = (event) => {
+    event.preventDefault();
     const entry = { description: description, checked: false };
 
     todoClient
@@ -107,7 +108,8 @@
       });
   };
 
-  const logout = () => {
+  const logout = (event) => {
+    event.preventDefault();
     hankoClient.logout()
       .catch((e) => {
         error = e;
@@ -118,7 +120,8 @@
     navigate("/");
   }
 
-  const redirectToProfile = () => {
+  const redirectToProfile = (event) => {
+    event.preventDefault();
     navigate("/profile");
   }
 
@@ -132,10 +135,10 @@
   });
 </script>
 <SessionExpiredModal bind:openSessionExpiredModal></SessionExpiredModal>
-<hanko-events on:onUserLoggedOut={redirectToLogin}></hanko-events>
+<hanko-events ononUserLoggedOut={redirectToLogin}></hanko-events>
 <nav class="nav">
-  <button class="button" on:click|preventDefault={logout}>Logout</button>
-  <button class="button" on:click|preventDefault={redirectToProfile}>Profile</button>
+  <button class="button" onclick={logout}>Logout</button>
+  <button class="button" onclick={redirectToProfile}>Profile</button>
   <button class="button" disabled>Todos</button>
 </nav>
 <div class="content">
@@ -143,13 +146,13 @@
   {#if error}
     <div class="error">{ error?.message }</div>
   {/if}
-  <form on:submit|preventDefault={addTodo} class="form">
+  <form onsubmit={addTodo} class="form">
     <input
       required
       class="input"
       type="text"
       value={description}
-      on:change={changeDescription}
+      onchange={changeDescription}
     />
     <button type="submit" class="button">+</button>
   </form>
@@ -162,10 +165,10 @@
           id={todo.todoID}
           value={todo.todoID}
           checked={todo.checked}
-          on:change={changeCheckbox}
+          onchange={changeCheckbox}
         />
         <label class="description" for={todo.todoID}>{todo.description}</label>
-        <button class="button" on:click={() => deleteTodo(todo.todoID)}>×</button>
+        <button class="button" onclick={() => deleteTodo(todo.todoID)}>×</button>
       </div>
     {/each}
   </div>

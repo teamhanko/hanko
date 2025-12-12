@@ -14,8 +14,8 @@
   }
 </script>
 
-<hanko-events on:onSessionExpired={openSessionExpiredModal}></hanko-events>
+<hanko-events ononSessionExpired={openSessionExpiredModal}></hanko-events>
 <dialog bind:this={dialog}>
   Please login again.<br /><br />
-  <button on:click={redirectToLogin}>Login</button>
+  <button onclick={redirectToLogin}>Login</button>
 </dialog>

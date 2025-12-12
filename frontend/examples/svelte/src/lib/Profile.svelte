@@ -9,10 +9,11 @@
 
     const navigate = useNavigate();
 
-    let showModal = false;
-    let error: Error | null = null;
+    let showModal = $state(false);
+    let error: Error | null = $state(null);
 
-    const logout = () => {
+    const logout = (event) => {
+        event.preventDefault()
         hankoClient.logout()
             .catch((e) => error = e);
     }
@@ -21,7 +22,8 @@
         navigate("/");
     }
 
-    const redirectToTodos = () => {
+    const redirectToTodos = (event) => {
+        event.preventDefault()
         navigate("/todo");
     }
 
@@ -35,14 +37,14 @@
 
 <SessionExpiredModal bind:showModal></SessionExpiredModal>
 <nav class="nav">
-    <button class="button" on:click|preventDefault={logout}>Logout</button>
+    <button class="button" onclick={logout}>Logout</button>
     <button class="button" disabled>Profile</button>
-    <button class="button" on:click|preventDefault={redirectToTodos}>Todos</button>
+    <button class="button" onclick={redirectToTodos}>Todos</button>
 </nav>
 <div class="content">
     <h1 class="headline">Profile</h1>
     {#if error}
         <div class="error">{ error?.message }</div>
     {/if}
-    <hanko-profile on:onUserLoggedOut={redirectToLogin}></hanko-profile>
+    <hanko-profile ononUserLoggedOut={redirectToLogin}></hanko-profile>
 </div>
