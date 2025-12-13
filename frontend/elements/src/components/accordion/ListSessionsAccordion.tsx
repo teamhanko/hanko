@@ -1,4 +1,4 @@
-import { StateUpdater, useContext } from "preact/compat";
+import { Dispatch, SetStateAction, useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State, Session } from "@teamhanko/hanko-frontend-sdk";
 
@@ -11,7 +11,7 @@ import styles from "./styles.sass";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   flowState: State<"profile_init">;
   onState(state: State<any>): Promise<void>;
 }
@@ -41,23 +41,23 @@ const ListSessionsAccordion = ({
     );
     const description = session.current ? (
       <span className={styles.description}>
-        <Fragment>
+        <>
           {" -"} {t("labels.currentSession")}
-        </Fragment>
+        </>
       </span>
     ) : null;
     return (
-      <Fragment>
+      <>
         {headline}
         {description}
-      </Fragment>
+      </>
     );
   };
 
   const convertTime = (t: string) => new Date(t).toLocaleString();
 
   const contents = (session: Session) => (
-    <Fragment>
+    <>
       <Paragraph hidden={!session.ip_address}>
         <Headline2>{t("headlines.ipAddress")}</Headline2>
         {session.ip_address}
@@ -84,7 +84,7 @@ const ListSessionsAccordion = ({
           </Link>
         </Paragraph>
       ) : null}
-    </Fragment>
+    </>
   );
 
   return (

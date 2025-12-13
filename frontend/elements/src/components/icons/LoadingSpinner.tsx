@@ -23,7 +23,7 @@ const LoadingSpinner = ({
   maxWidth,
 }: Props) => {
   return (
-    <Fragment>
+    <>
       {isLoading ? (
         <div
           className={cx(
@@ -55,7 +55,7 @@ const LoadingSpinner = ({
           {children}
         </div>
       )}
-    </Fragment>
+    </>
   );
 };
 

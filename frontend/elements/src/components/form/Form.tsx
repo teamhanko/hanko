@@ -32,8 +32,13 @@ const Form = ({
     event.preventDefault();
     return await flowAction.run();
   };
+
+  // Cast Provider to any to bypass strict JSX return type check (TS2786)
+  // TODO: Find out why, we this need to be casted to any for the build to work.
+  const FormContextProviderAny = FormContext.Provider as any;
+
   return (
-    <FormContext.Provider value={{ flowAction }}>
+    <FormContextProviderAny value={{ flowAction }}>
       {flowAction && flowAction.enabled && !hidden ? (
         <form onSubmit={onSubmit || defaultOnSubmit} className={styles.form}>
           <ul className={styles.ul}>
@@ -49,7 +54,7 @@ const Form = ({
           </ul>
         </form>
       ) : null}
-    </FormContext.Provider>
+    </FormContextProviderAny>
   );
 };
 

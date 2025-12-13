@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
@@ -44,7 +43,7 @@ const RenameWebauthnCredentialPage = ({
   };
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>
           {credentialType === "security-key"
@@ -86,7 +85,7 @@ const RenameWebauthnCredentialPage = ({
           {t("labels.back")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

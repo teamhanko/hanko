@@ -1,4 +1,4 @@
-import { Fragment, h } from "preact";
+import { ButtonHTMLAttributes, Fragment, h } from "preact";
 
 import cx from "classnames";
 
@@ -15,9 +15,7 @@ import { Action } from "@teamhanko/hanko-frontend-sdk";
 
 type LoadingSpinnerPosition = "left" | "right";
 
-export interface Props
-  extends LoadingSpinnerProps,
-    h.JSX.HTMLAttributes<HTMLButtonElement> {
+export interface Props extends LoadingSpinnerProps, ButtonHTMLAttributes {
   onClick?(event: Event): void;
   dangerous?: boolean;
   loadingSpinnerPosition?: LoadingSpinnerPosition;
@@ -83,14 +81,14 @@ const Link = ({
   const renderLink = useCallback(
     () =>
       !hidden ? (
-        <Fragment>
+        <>
           {confirmationActive ? (
-            <Fragment>
+            <>
               <Link onClick={onConfirmation}>{t("labels.yes")}</Link>
               &nbsp;/&nbsp;
               <Link onClick={onCancel}>{t("labels.no")}</Link>
               &nbsp;
-            </Fragment>
+            </>
           ) : null}
           <button
             {...props}
@@ -103,7 +101,7 @@ const Link = ({
           >
             {props.children}
           </button>
-        </Fragment>
+        </>
       ) : null,
     [
       hidden,
@@ -128,7 +126,7 @@ const Link = ({
   };
 
   return (
-    <Fragment>
+    <>
       <span
         className={cx(
           styles.linkWrapper,
@@ -138,7 +136,7 @@ const Link = ({
         onMouseLeave={handleOnMouseLeave}
       >
         {!confirmationActive && (loading || success) ? (
-          <Fragment>
+          <>
             <LoadingSpinner
               isLoading={loading}
               isSuccess={success}
@@ -146,12 +144,12 @@ const Link = ({
               fadeOut
             />
             {renderLink()}
-          </Fragment>
+          </>
         ) : (
-          <Fragment>{renderLink()}</Fragment>
+          <>{renderLink()}</>
         )}
       </span>
-    </Fragment>
+    </>
   );
 };
 

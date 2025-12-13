@@ -1,5 +1,5 @@
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
-import { State, HankoError } from "@teamhanko/hanko-frontend-sdk";
+import { HankoError, State } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { AppContext } from "../contexts/AppProvider";

@@ -1,15 +1,15 @@
-import { ComponentChildren, h } from "preact";
+import { ComponentChildren, h, HTMLAttributes, JSX } from "preact";
 import { forwardRef, useContext, useEffect } from "preact/compat";
 
 import styles from "./styles.sass";
 import { AppContext } from "../../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
-interface Props extends h.JSX.HTMLAttributes<HTMLElement> {
+interface Props extends HTMLAttributes {
   children: ComponentChildren;
 }
 
-const Container = forwardRef<HTMLElement>((props: Props, ref) => {
+const Container = forwardRef<HTMLElement>((props: Props, ref)=> {
   const { lang, hanko, setHanko } = useContext(AppContext);
   const { setLang } = useContext(TranslateContext);
 

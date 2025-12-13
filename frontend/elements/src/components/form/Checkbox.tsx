@@ -1,10 +1,10 @@
-import { h } from "preact";
+import { h, InputHTMLAttributes } from "preact";
 import styles from "./styles.sass";
 import cx from "classnames";
 import { useContext, useMemo } from "preact/compat";
 import { AppContext } from "../../contexts/AppProvider";
 
-interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
+interface Props extends InputHTMLAttributes {
   label?: string;
 }
 

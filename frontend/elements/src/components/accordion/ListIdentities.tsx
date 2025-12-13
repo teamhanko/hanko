@@ -1,5 +1,5 @@
 import { Identity, State } from "@teamhanko/hanko-frontend-sdk";
-import { StateUpdater, useContext, useMemo } from "preact/compat";
+import { Dispatch, SetStateAction, useContext, useMemo } from "preact/compat";
 import { Fragment } from "preact";
 import Accordion from "./Accordion";
 import Paragraph from "../paragraph/Paragraph";
@@ -9,7 +9,7 @@ import { TranslateContext } from "@denysvuika/preact-translate";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   flowState: State<"profile_init">;
   onState(state: State<any>): Promise<void>;
 }
@@ -25,7 +25,7 @@ const ListIdentities = ({
 
   const labels = (identity: Identity) => {
     const headline = <b>{identity.provider}</b>;
-    return <Fragment>{headline}</Fragment>;
+    return <>{headline}</>;
   };
 
   const onIdentityDelete = async (event: Event, identityID: string) => {
@@ -41,8 +41,8 @@ const ListIdentities = ({
   };
 
   const contents = (identity: Identity) => (
-    <Fragment>
-      <Fragment>
+    <>
+      <>
         <Paragraph>
           <Headline2>{t("headlines.deleteIdentity")}</Headline2>
           <Link
@@ -55,8 +55,8 @@ const ListIdentities = ({
             {t("labels.delete")}
           </Link>
         </Paragraph>
-      </Fragment>
-    </Fragment>
+      </>
+    </>
   );
 
   return (

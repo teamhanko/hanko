@@ -1,5 +1,5 @@
 import { Fragment } from "preact";
-import { StateUpdater, useContext } from "preact/compat";
+import { Dispatch, SetStateAction, useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State, WebauthnCredential } from "@teamhanko/hanko-frontend-sdk";
 
@@ -15,7 +15,7 @@ type CredentialType = "passkey" | "security-key";
 interface Props {
   credentials: WebauthnCredential[];
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   onBack: (event: Event) => Promise<void>;
   onCredentialNameSubmit: (
     event: Event,
@@ -75,7 +75,7 @@ const ListWebauthnCredentialsAccordion = ({
   const labels = (credential: WebauthnCredential) => uiDisplayName(credential);
 
   const contents = (credential: WebauthnCredential) => (
-    <Fragment>
+    <>
       <Paragraph>
         <Headline2>
           {credentialType === "security-key"
@@ -122,7 +122,7 @@ const ListWebauthnCredentialsAccordion = ({
         <Headline2>{t("headlines.createdAt")}</Headline2>
         {convertTime(credential.created_at)}
       </Paragraph>
-    </Fragment>
+    </>
   );
   return (
     <Accordion

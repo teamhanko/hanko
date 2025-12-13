@@ -1,4 +1,4 @@
-import { h } from "preact";
+import { h, InputHTMLAttributes } from "preact";
 import {
   useContext,
   useEffect,
@@ -19,7 +19,7 @@ interface Props {
   disabled?: boolean;
 }
 
-interface DigitProps extends h.JSX.HTMLAttributes<HTMLInputElement> {
+interface DigitProps extends InputHTMLAttributes {
   index: number;
   focus: boolean;
   digit: string;

@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useContext, useMemo } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
@@ -43,7 +42,7 @@ const MFAMMethodChooserPage = (props: Props) => {
   }, [flowState]);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.mfaSetUp")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
@@ -53,7 +52,7 @@ const MFAMMethodChooserPage = (props: Props) => {
             <Button>{t("labels.continue")}</Button>
           </Form>
         ) : (
-          <Fragment>
+          <>
             <Form
               flowAction={flowState.actions.continue_to_security_key_creation}
             >
@@ -68,7 +67,7 @@ const MFAMMethodChooserPage = (props: Props) => {
                 {t("labels.authenticatorApp")}
               </Button>
             </Form>
-          </Fragment>
+          </>
         )}
       </Content>
       <Footer>
@@ -85,7 +84,7 @@ const MFAMMethodChooserPage = (props: Props) => {
           {t("labels.skip")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

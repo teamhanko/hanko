@@ -1,4 +1,4 @@
-import { Fragment } from "preact";
+
 import { useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
@@ -23,7 +23,7 @@ const CreateSecurityKeyPage = (props: Props) => {
   const { flowState } = useFlowState(props.state);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.securityKeySetUp")}</Headline1>
         <ErrorBox state={flowState} />
@@ -42,7 +42,7 @@ const CreateSecurityKeyPage = (props: Props) => {
           {t("labels.back")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

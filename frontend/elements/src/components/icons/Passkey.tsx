@@ -13,7 +13,7 @@ const Passkey = ({ size, secondary, disabled }: IconProps) => {
       className={cx(
         styles.icon,
         secondary && styles.secondary,
-        disabled && styles.disabled
+        disabled && styles.disabled,
       )}
     >
       <g id="icon-passkey-all">

@@ -1,11 +1,11 @@
-import { StateUpdater, useContext, useEffect } from "preact/compat";
+import { Dispatch, SetStateAction, useContext, useEffect } from "preact/compat";
 import { Action } from "@teamhanko/hanko-frontend-sdk";
 import { AppContext } from "../contexts/AppProvider";
 
 export const useFlowEffects = (
   flowAction: Action<any> | undefined,
-  setIsLoading: StateUpdater<boolean>,
-  setIsSuccess: StateUpdater<boolean>,
+  setIsLoading: Dispatch<SetStateAction<boolean>>,
+  setIsSuccess: Dispatch<SetStateAction<boolean>>,
 ) => {
   const { hanko, setUIState, isOwnFlow } = useContext(AppContext);
 
