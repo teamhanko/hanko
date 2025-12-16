@@ -11,6 +11,9 @@ func DefaultConfig() *Config {
 		},
 		Secrets: Secrets{
 			Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+			KeyManagement: KeyManagement{
+				Type: "local",
+			},
 		},
 		Server: Server{
 			Public: ServerSettings{
