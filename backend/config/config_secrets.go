@@ -70,9 +70,22 @@ func (s *Secrets) Validate() error {
 }
 
 type KeyManagement struct {
-	Type   KeyManagementStoreType `yaml:"type" json:"type,omitempty" koanf:"type"`
-	KeyID  string                 `yaml:"key_id" json:"key_id,omitempty" koanf:"key_id"`
-	Region string                 `yaml:"region" json:"region,omitempty" koanf:"region"`
+	// Type specifies the key management system to use. Supported values are 'local' (default) for local key storage
+	// or 'aws_kms' for AWS Key Management Service.
+	// When using 'aws_kms,' the AWS credentials must be set using the standard AWS credential chain (in order of precedence).
+	// 1. Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)
+	// 2. Shared credentials file (~/.aws/credentials)
+	// 3. Shared config file (~/.aws/config)
+	// 4. IAM role for Amazon EC2 (via instance metadata service)
+	// 5. IAM role for Amazon ECS (via container credentials)
+	// 6. IAM role for Amazon EKS (via service account token)
+	Type KeyManagementStoreType `yaml:"type" json:"type,omitempty" koanf:"type"`
+	// KeyID is the AWS KMS key identifier (ARN or alias) used for signing operations.
+	// Required when Type is 'aws_kms'.
+	KeyID string `yaml:"key_id" json:"key_id,omitempty" koanf:"key_id"`
+	// Region is the AWS region where the KMS key is located.
+	// Required when Type is 'aws_kms'.
+	Region string `yaml:"region" json:"region,omitempty" koanf:"region"`
 }
 
 func (KeyManagement) JSONSchemaExtend(schema *jsonschema.Schema) {
