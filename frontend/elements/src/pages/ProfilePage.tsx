@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
@@ -115,7 +114,7 @@ const ProfilePage = (props: Props) => {
       {flowState.actions.username_create.enabled ||
       flowState.actions.username_update.enabled ||
       flowState.actions.username_delete.enabled ? (
-        <Fragment>
+        <>
           <Headline1>{t("labels.username")}</Headline1>
           {flowState.payload.user.username ? (
             <Paragraph>
@@ -133,11 +132,11 @@ const ProfilePage = (props: Props) => {
               />
             ) : null}
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {flowState.payload?.user?.emails ||
       flowState.actions.email_create.enabled ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.profileEmails")}</Headline1>
           <Paragraph>
             <ListEmailsAccordion
@@ -155,11 +154,11 @@ const ProfilePage = (props: Props) => {
               />
             ) : null}
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {flowState.actions.password_create.enabled ||
       flowState.actions.password_update.enabled ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.profilePassword")}</Headline1>
           <Paragraph>
             <ChangePasswordDropdown
@@ -169,12 +168,12 @@ const ProfilePage = (props: Props) => {
               setCheckedItemID={setCheckedItemID}
             />
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {props.enablePasskeys &&
       (flowState.payload?.user?.passkeys ||
         flowState.actions.webauthn_credential_create.enabled) ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.profilePasskeys")}</Headline1>
           <Paragraph>
             <ListWebauthnCredentialsAccordion
@@ -200,10 +199,10 @@ const ProfilePage = (props: Props) => {
               />
             ) : null}
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {flowState.payload.user.mfa_config?.security_keys_enabled ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.securityKeys")}</Headline1>
           <Paragraph>
             <ListWebauthnCredentialsAccordion
@@ -229,10 +228,10 @@ const ProfilePage = (props: Props) => {
               />
             ) : null}
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {flowState.payload.user.mfa_config?.totp_enabled ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.authenticatorApp")}</Headline1>
           <Paragraph>
             <ManageAuthAppDropdown
@@ -242,11 +241,11 @@ const ProfilePage = (props: Props) => {
               setCheckedItemID={setCheckedItemID}
             />
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {flowState.actions.connect_thirdparty_oauth_provider.enabled ||
       flowState.actions.disconnect_thirdparty_oauth_provider.enabled ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.connectedAccounts")}</Headline1>
           <ListIdentities
             flowState={flowState}
@@ -262,10 +261,10 @@ const ProfilePage = (props: Props) => {
               checkedItemID={checkedItemID}
             />
           ) : null}
-        </Fragment>
+        </>
       ) : null}
       {flowState.payload.sessions ? (
-        <Fragment>
+        <>
           <Headline1>{t("headlines.profileSessions")}</Headline1>
           <Paragraph>
             <ListSessionsAccordion
@@ -275,10 +274,10 @@ const ProfilePage = (props: Props) => {
               setCheckedItemID={setCheckedItemID}
             />
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {flowState.actions.account_delete.enabled ? (
-        <Fragment>
+        <>
           <Spacer />
           <Paragraph>
             <Divider />
@@ -291,7 +290,7 @@ const ProfilePage = (props: Props) => {
               <Button dangerous>{t("headlines.deleteAccount")}</Button>
             </Form>
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
     </Content>
   );

@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { StateUpdater, useCallback } from "preact/compat";
+import { Dispatch, SetStateAction, useCallback } from "preact/compat";
 type Selector<T> = (item: T, itemIndex?: number) => string | h.JSX.Element;
 
 import cx from "classnames";
@@ -10,7 +10,7 @@ interface Props<T> {
   columnSelector: Selector<T>;
   contentSelector: Selector<T>;
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string | null>>;
   data: Array<T>;
   dropdown?: boolean;
 }

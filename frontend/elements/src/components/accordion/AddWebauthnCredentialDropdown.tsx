@@ -1,4 +1,4 @@
-import { StateUpdater, useContext } from "preact/compat";
+import { Dispatch, SetStateAction, useContext } from "preact/compat";
 
 import { WebauthnSupport, State } from "@teamhanko/hanko-frontend-sdk";
 
@@ -13,7 +13,7 @@ type CredentialType = "passkey" | "security-key";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   credentialType: CredentialType;
   flowState: State<"profile_init">;
   onState(state: State<any>): Promise<void>;
