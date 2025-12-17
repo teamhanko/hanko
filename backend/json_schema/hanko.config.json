@@ -570,6 +570,15 @@
           "description": "`passcode_ttl` specifies, in seconds, how long a passcode is valid for.",
           "default": 300
         },
+        "passcode_charset": {
+          "type": "string",
+          "enum": [
+            "numeric",
+            "alphanumeric"
+          ],
+          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.",
+          "default": "numeric"
+        },
         "require_verification": {
           "type": "boolean",
           "description": "`require_verification` determines whether newly created emails must be verified by providing a passcode sent\nto respective address.",
