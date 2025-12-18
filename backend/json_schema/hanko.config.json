@@ -716,6 +716,41 @@
       "additionalProperties": false,
       "type": "object"
     },
+    "KeyManagement": {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "aws_kms"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "key_id",
+          "region"
+        ]
+      },
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "local",
+            "aws_kms"
+          ],
+          "description": "Type specifies the key management system to use. Supported values are 'local' (default) for local key storage\nor 'aws_kms' for AWS Key Management Service.\nWhen using 'aws_kms,' the AWS credentials must be set using the standard AWS credential chain (in order of precedence).\n1. Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)\n2. Shared credentials file (~/.aws/credentials)\n3. Shared config file (~/.aws/config)\n4. IAM role for Amazon EC2 (via instance metadata service)\n5. IAM role for Amazon ECS (via container credentials)\n6. IAM role for Amazon EKS (via service account token)"
+        },
+        "key_id": {
+          "type": "string",
+          "description": "KeyID is the AWS KMS key identifier (ARN or alias) used for signing operations.\nRequired when Type is 'aws_kms'."
+        },
+        "region": {
+          "type": "string",
+          "description": "Region is the AWS region where the KMS key is located.\nRequired when Type is 'aws_kms'."
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "LoggerConfig": {
       "properties": {
         "log_health_and_metrics": {
@@ -1174,7 +1209,29 @@
       "type": "object"
     },
     "Secrets": {
+      "if": {
+        "properties": {
+          "key_management": {
+            "properties": {
+              "type": {
+                "const": "local"
+              }
+            }
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "keys": {
+            "minItems": 1
+          }
+        }
+      },
       "properties": {
+        "key_management": {
+          "$ref": "#/$defs/KeyManagement",
+          "description": "KeyManagement configures the key management system used for signing JWTs.\nSupports 'local' (default) which uses the keys defined in the 'keys' field to encrypt a newly generated private\nRSA key in the database, or 'aws_kms' which uses AWS Key Management Service for key signatures."
+        },
         "keys": {
           "items": {
             "type": "string",
@@ -1182,7 +1239,6 @@
             "title": "keys"
           },
           "type": "array",
-          "minItems": 1,
           "description": "`keys` are used to en- and decrypt the JWKs which get used to sign the JWTs issued by the API.\nFor every key a JWK is generated, encrypted with the key and persisted in the database.\n\nYou can use this list for key rotation: add a new key to the beginning of the list and the corresponding\nJWK will then be used for signing JWTs. All tokens signed with the previous JWK(s) will still\nbe valid until they expire. Removing a key from the list does not remove the corresponding\ndatabase record. If you remove a key, you also have to remove the database record, otherwise\napplication startup will fail."
         }
       },
