@@ -1,8 +1,9 @@
-package jwk
+package local_db
 
 import (
 	"crypto/rand"
 	"crypto/rsa"
+
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 )

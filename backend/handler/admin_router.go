@@ -47,7 +47,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
