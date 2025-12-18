@@ -181,6 +181,7 @@ func DefaultConfig() *Config {
 			MaxLength:             120,
 			UseForAuthentication:  true,
 			PasscodeTtl:           300,
+			PasscodeCharset:       PasscodeCharsetNumeric,
 		},
 		Username: Username{
 			Enabled:               false,

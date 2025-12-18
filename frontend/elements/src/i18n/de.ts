@@ -48,6 +48,7 @@ export const de: Translation = {
     authenticatorAppNotSetUp: "Authenticator-App einrichten",
     authenticatorAppAlreadySetUp: "Authenticator-App ist eingerichtet",
     trustDevice: "Diesem Browser vertrauen?",
+    deleteIdentity: "Verbindung löschen",
   },
   texts: {
     enterPasscode:
@@ -161,6 +162,7 @@ export const de: Translation = {
     lastUsed: "Zuletzt verwendet",
     trustDevice: "Diesem Browser vertrauen",
     staySignedIn: "Angemeldet bleiben",
+    connectAccount: "Verbinde Konto",
   },
   errors: {
     somethingWentWrong:

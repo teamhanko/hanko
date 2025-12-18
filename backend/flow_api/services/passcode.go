@@ -3,6 +3,8 @@ package services
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -10,7 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"golang.org/x/crypto/bcrypt"
-	"time"
 )
 
 var maxPasscodeTries = 3
@@ -55,9 +56,14 @@ type passcode struct {
 }
 
 func NewPasscodeService(cfg config.Config, emailService Email, persister persistence.Persister) Passcode {
+	passcodeGenerator := crypto.NewNumericPasscodeGenerator()
+	switch cfg.Email.PasscodeCharset {
+	case config.PasscodeCharsetAlphanumeric:
+		passcodeGenerator = crypto.NewAlphanumericPasscodeGenerator()
+	}
 	return &passcode{
 		emailService,
-		crypto.NewPasscodeGenerator(),
+		passcodeGenerator,
 		persister,
 		cfg,
 	}

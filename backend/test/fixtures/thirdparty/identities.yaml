@@ -3,6 +3,7 @@
   provider_id: "google"
   data: '{"email":"test-with-google-identity@example.com","email_verified":true,"iss":"https://www.googleapis.com","sub":"google_abcde"}'
   email_id: 15ed767e-1544-4e03-a732-4bf80caa2e78
+  user_id: e45a7f3f-029d-46fc-a2c6-bed892b1e84e
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: b140230b-be5b-4589-9762-ec72f32d2833
@@ -10,6 +11,7 @@
   provider_id: "github"
   data: '{"email":"test-with-github-identity@example.com","email_verified":true,"iss":"https://api.github.com","sub":"1234"}'
   email_id: 80939e4c-0028-4b67-aeee-98c617a20b6b
+  user_id: 1d6a4824-d935-4980-8f18-8ee5d6efe2fc
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 09b084b7-36af-41c5-b4b6-db9b8ed8385b
@@ -17,6 +19,7 @@
   provider_id: "apple"
   data: '{"email":"test-with-apple-identity@example.com","email_verified":true,"iss":"https://appleid.apple.com","sub":"apple_abcde"}'
   email_id: 05ab6e1f-8dfb-4329-ae04-22571a68d96b
+  user_id: b3537e49-de92-4e16-8981-ae4beb44c447
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: 18d61f13-2789-467a-a3a6-4292c0621580
@@ -24,6 +27,7 @@
   provider_id: "discord"
   data: '{"email":"test-with-discord-identity@example.com","email_verified":true,"iss":"https://discord.com/api","sub":"discord_abcde"}'
   email_id: 09f35529-cca6-44a7-ab1d-b07e95a04e3b
+  user_id: d69bffda-4e4a-4424-a238-fbecc1651d81
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: e4cd954b-8f1f-4fa2-b7e9-60a0ffa56363
@@ -31,6 +35,7 @@
   provider_id: "microsoft"
   data: '{"email":"test-with-microsoft-identity@example.com","iss":"https://login.microsoftonline.com/common","sub":"microsoft_abcde"}'
   email_id: d781006b-4f55-4327-bad6-55bc34b88585
+  user_id: 48df412f-a7b1-4fbc-ad2d-56bd3e103fd7
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59
 - id: b6b1309d-61de-4a82-b8b8-d54db0be679b
@@ -38,5 +43,6 @@
   provider_id: "facebook"
   data: '{"email":"test-with-facebook-identity@example.com","sub":"facebook_abcde"}'
   email_id: d781006b-4f55-4327-bad6-55bc34b88585
+  user_id: 48df412f-a7b1-4fbc-ad2d-56bd3e103fd7
   created_at: 2020-12-31 23:59:59
   updated_at: 2020-12-31 23:59:59

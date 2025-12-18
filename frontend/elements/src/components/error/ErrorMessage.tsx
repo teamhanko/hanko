@@ -10,13 +10,13 @@ interface Props {
 const ErrorMessage = ({ flowError }: Props) => {
   const { t } = useContext(TranslateContext);
   return (
-    <Fragment>
+    <>
       {flowError ? (
         <div className={styles.errorMessage}>
           {t(`flowErrors.${flowError?.code}`)}
         </div>
       ) : null}
-    </Fragment>
+    </>
   );
 };
 

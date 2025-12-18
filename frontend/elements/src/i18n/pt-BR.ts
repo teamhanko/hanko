@@ -49,6 +49,7 @@ export const ptBR: Translation = {
       "O aplicativo de autenticação já está configurado",
     authenticatorAppNotSetUp: "Configurar o aplicativo de autenticação",
     trustDevice: "Confiar neste navegador?",
+    deleteIdentity: "Excluir conexão",
   },
   texts: {
     enterPasscode:
@@ -160,6 +161,7 @@ export const ptBR: Translation = {
     lastUsed: "Último uso",
     trustDevice: "Confiar neste navegador",
     staySignedIn: "Manter-me conectado",
+    connectAccount: "Conectar conta",
   },
   errors: {
     somethingWentWrong:

@@ -22,6 +22,7 @@ import {
   OTPCodeInputs,
   SecurityKeyDeleteInputs,
   RememberMeInputs,
+  DisconnectThirdpartyInputs,
 } from "./input";
 
 export interface Action<TInputs> {
@@ -65,6 +66,8 @@ export interface ProfileInitActions {
   readonly webauthn_credential_delete?: Action<PasskeyCredentialDeleteInputs>;
   readonly webauthn_verify_attestation_response?: Action<WebauthnVerifyAttestationResponseInputs>;
   readonly session_delete?: Action<SessionDeleteInputs>;
+  readonly connect_thirdparty_oauth_provider?: Action<ThirdpartyOauthInputs>;
+  readonly disconnect_thirdparty_oauth_provider?: Action<DisconnectThirdpartyInputs>;
 }
 
 export interface LoginMethodChooserActions {

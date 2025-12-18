@@ -43,6 +43,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"PasswordCredential",
 		"OTPSecret",
 		"Metadata",
+		"Identities",
 	}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)

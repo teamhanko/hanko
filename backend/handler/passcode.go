@@ -57,7 +57,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 	return &PasscodeHandler{
 		mailer:            mailer,
 		renderer:          renderer,
-		passcodeGenerator: crypto.NewPasscodeGenerator(),
+		passcodeGenerator: crypto.NewNumericPasscodeGenerator(),
 		persister:         persister,
 		emailConfig:       cfg.EmailDelivery,
 		serviceConfig:     cfg.Service,

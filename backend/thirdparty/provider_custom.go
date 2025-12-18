@@ -3,6 +3,7 @@ package thirdparty
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/mitchellh/mapstructure"
@@ -60,6 +61,9 @@ func (p customProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption)
 	if prompt := p.config.Prompt; prompt != "" {
 		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
 	}
+	if acrValues := p.config.AcrValues; len(acrValues) > 0 {
+		opts = append(opts, oauth2.SetAuthURLParam("acr_values", strings.Join(acrValues, " ")))
+	}
 
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
@@ -95,10 +99,6 @@ func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	err = mapstructure.Decode(userInfoClaims, &claims)
 	if err != nil {
 		return nil, fmt.Errorf("could not get user data: %s", err)
-	}
-
-	if claims.Email == "" {
-		return nil, fmt.Errorf("could not get user data: email not present")
 	}
 
 	return &UserData{

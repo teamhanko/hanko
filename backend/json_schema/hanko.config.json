@@ -405,6 +405,13 @@
         ]
       },
       "properties": {
+        "acr_values": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`acr_values` is a list of strings that specifies the Authentication Context Class Reference values that the\nAuthorization Server is being requested to use for processing this Authentication Request."
+        },
         "allow_linking": {
           "type": "boolean",
           "description": "`allow_linking` indicates whether existing accounts can be automatically linked with this provider.\n\nLinking is based on matching one of the email addresses of an existing user account with the (primary)\nemail address of the third party provider account.",
@@ -562,6 +569,15 @@
           "type": "integer",
           "description": "`passcode_ttl` specifies, in seconds, how long a passcode is valid for.",
           "default": 300
+        },
+        "passcode_charset": {
+          "type": "string",
+          "enum": [
+            "numeric",
+            "alphanumeric"
+          ],
+          "description": "`passcode_charset` specifies the characters that can be used in passcodes.\nE.g. `numeric` allows only numbers, `alphanumeric` allows both numbers and letters.",
+          "default": "numeric"
         },
         "require_verification": {
           "type": "boolean",

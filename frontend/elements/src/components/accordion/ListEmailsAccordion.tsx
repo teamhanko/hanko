@@ -1,5 +1,5 @@
 import { Fragment } from "preact";
-import { StateUpdater, useContext, useMemo } from "preact/compat";
+import { Dispatch, SetStateAction, useContext, useMemo } from "preact/compat";
 import { State, Email } from "@teamhanko/hanko-frontend-sdk";
 
 import styles from "./styles.sass";
@@ -13,7 +13,7 @@ import Link from "../link/Link";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   flowState: State<"profile_init">;
   onState(state: State<any>): Promise<void>;
 }
@@ -64,34 +64,34 @@ const ListEmailsAccordion = ({
     const description = (
       <span className={styles.description}>
         {!email.is_verified ? (
-          <Fragment>
+          <>
             {" -"} {t("labels.unverifiedEmail")}
-          </Fragment>
+          </>
         ) : email.is_primary ? (
-          <Fragment>
+          <>
             {" -"} {t("labels.primaryEmail")}
-          </Fragment>
+          </>
         ) : null}
       </span>
     );
 
     return email.is_primary ? (
-      <Fragment>
+      <>
         <b>{email.address}</b>
         {description}
-      </Fragment>
+      </>
     ) : (
-      <Fragment>
+      <>
         {email.address}
         {description}
-      </Fragment>
+      </>
     );
   };
 
   const contents = (email: Email) => (
-    <Fragment>
+    <>
       {!email.is_primary ? (
-        <Fragment>
+        <>
           <Paragraph>
             <Headline2>{t("headlines.setPrimaryEmail")}</Headline2>
             {t("texts.setPrimaryEmail")}
@@ -104,24 +104,24 @@ const ListEmailsAccordion = ({
               {t("labels.setAsPrimaryEmail")}
             </Link>
           </Paragraph>
-        </Fragment>
+        </>
       ) : (
-        <Fragment>
+        <>
           <Paragraph>
             <Headline2>{t("headlines.isPrimaryEmail")}</Headline2>
             {t("texts.isPrimaryEmail")}
           </Paragraph>
-        </Fragment>
+        </>
       )}
       {email.is_verified ? (
-        <Fragment>
+        <>
           <Paragraph>
             <Headline2>{t("headlines.emailVerified")}</Headline2>
             {t("texts.emailVerified")}
           </Paragraph>
-        </Fragment>
+        </>
       ) : (
-        <Fragment>
+        <>
           <Paragraph>
             <Headline2>{t("headlines.emailUnverified")}</Headline2>
             {t("texts.emailUnverified")}
@@ -134,12 +134,12 @@ const ListEmailsAccordion = ({
               {t("labels.verify")}
             </Link>
           </Paragraph>
-        </Fragment>
+        </>
       )}
       {flowState.actions.email_delete.inputs.email_id.allowed_values
         ?.map((e) => e.value)
         .includes(email.id) ? (
-        <Fragment>
+        <>
           <Paragraph>
             <Headline2>{t("headlines.emailDelete")}</Headline2>
             {t("texts.emailDelete")}
@@ -154,17 +154,17 @@ const ListEmailsAccordion = ({
               {t("labels.delete")}
             </Link>
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
       {email.identities?.length > 0 ? (
-        <Fragment>
+        <>
           <Paragraph>
             <Headline2>{t("headlines.connectedAccounts")}</Headline2>
             {email.identities.map((i) => i.provider).join(", ")}
           </Paragraph>
-        </Fragment>
+        </>
       ) : null}
-    </Fragment>
+    </>
   );
   return (
     <Accordion

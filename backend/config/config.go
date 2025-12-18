@@ -181,6 +181,10 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate flow_locker settings: %w", err)
 	}
+	err = c.Email.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate email settings: %w", err)
+	}
 	return nil
 }
 

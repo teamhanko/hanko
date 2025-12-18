@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { Fragment, StateUpdater, useContext } from "preact/compat";
+import { Dispatch, Fragment, SetStateAction, useContext } from "preact/compat";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
 
@@ -12,7 +12,7 @@ import { State } from "@teamhanko/hanko-frontend-sdk";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   flowState: State<"profile_init">;
   onState(state: State<any>): Promise<void>;
 }
@@ -45,17 +45,17 @@ const ManageAuthAppDropdown = ({
   const configuredLabel = (
     <span className={styles.description}>
       {flowState.payload.user.mfa_config?.auth_app_set_up ? (
-        <Fragment>
+        <>
           {" -"} {t("labels.configured")}
-        </Fragment>
+        </>
       ) : null}
     </span>
   );
 
   const title = (
-    <Fragment>
+    <>
       {t("labels.authenticatorAppManage")} {configuredLabel}
-    </Fragment>
+    </>
   );
 
   return (

@@ -1,0 +1,1 @@
+add_column("tokens", "link_user", "bool", {"default": false, "null": false})

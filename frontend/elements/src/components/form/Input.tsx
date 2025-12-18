@@ -1,4 +1,4 @@
-import { h } from "preact";
+import { h, InputHTMLAttributes } from "preact";
 import { useContext, useEffect, useMemo, useRef } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { Input as FlowInput } from "@teamhanko/hanko-frontend-sdk";
@@ -7,7 +7,7 @@ import cx from "classnames";
 
 import styles from "./styles.sass";
 
-interface Props extends h.JSX.HTMLAttributes<HTMLInputElement> {
+interface Props extends InputHTMLAttributes {
   label?: string;
   markOptional?: boolean;
   markError?: boolean;
