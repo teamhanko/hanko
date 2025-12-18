@@ -19,19 +19,32 @@
     <button type="submit" class="button">+</button>
   </form>
   <div class="list">
-    <div *ngFor="let todo of todos" class="item">
-      <input
-        class="checkbox"
-        id="{{ todo.todoID }}"
-        type="checkbox"
-        value="{{ todo.todoID }}"
-        [checked]="todo.checked"
-        (change)="changeCheckbox($event)"
-      />
-      <label class="description" for="{{ todo.todoID }}">{{
-        todo.description
-      }}</label>
-      <button class="button" (click)="deleteTodo(todo.todoID!)">×</button>
-    </div>
+    @for (todo of todos; track todo.todoID) {
+      <div class="item">
+        <input
+          class="checkbox"
+          [id]="todo.todoID"
+          type="checkbox"
+          [value]="todo.todoID"
+          [checked]="todo.checked"
+          (change)="changeCheckbox($event)"
+        />
+
+        <label class="description" [for]="todo.todoID">
+          {{ todo.description }}
+        </label>
+
+        <button
+          class="button"
+          (click)="deleteTodo(todo.todoID!)"
+        >
+          ×
+        </button>
+      </div>
+    } @empty {
+      <div class="item empty">
+        No todos available
+      </div>
+    }
   </div>
 </div>
