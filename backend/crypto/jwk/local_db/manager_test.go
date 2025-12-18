@@ -1,4 +1,4 @@
-package jwk
+package local_db
 
 import (
 	"github.com/lestrrat-go/jwx/v2/jwa"
