@@ -1,15 +1,5 @@
-import {
-  Fragment,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "preact/compat";
-import {
-  State,
-  HankoError,
-  WebauthnSupport,
-} from "@teamhanko/hanko-frontend-sdk";
+import { useContext, useEffect, useMemo, useState } from "preact/compat";
+import { HankoError, State, WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -151,12 +141,12 @@ const LoginInitPage = (props: Props) => {
   }, [flowState, uiState.email, uiState.username]);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.signIn")}</Headline1>
         <ErrorBox state={flowState} error={thirdPartyError} />
         {inputs ? (
-          <Fragment>
+          <>
             <Form
               flowAction={flowState.actions.continue_with_login_identifier}
               onSubmit={onEmailSubmit}
@@ -197,7 +187,7 @@ const LoginInitPage = (props: Props) => {
               <Button>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
-          </Fragment>
+          </>
         ) : null}
         {flowState.actions.thirdparty_oauth.enabled
           ? flowState.actions.thirdparty_oauth.inputs.provider.allowed_values?.map(
@@ -246,7 +236,7 @@ const LoginInitPage = (props: Props) => {
           </Form>
         ) : null}
         {flowState.actions.remember_me.enabled && (
-          <Fragment>
+          <>
             <Spacer />
             <Checkbox
               required={false}
@@ -255,7 +245,7 @@ const LoginInitPage = (props: Props) => {
               checked={rememberMe}
               onChange={onRememberMeChange}
             />
-          </Fragment>
+          </>
         )}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
@@ -270,7 +260,7 @@ const LoginInitPage = (props: Props) => {
           </Link>
         </Paragraph>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Fragment, useContext, useState } from "preact/compat";
+import { useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
 
@@ -34,7 +34,7 @@ const CreateEmailPage = (props: Props) => {
   };
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.createEmail")}</Headline1>
         <ErrorBox state={flowState} />
@@ -64,7 +64,7 @@ const CreateEmailPage = (props: Props) => {
           {t("labels.skip")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

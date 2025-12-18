@@ -1,7 +1,6 @@
-import { Fragment } from "preact";
 import { useContext, useMemo, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { State } from "@teamhanko/hanko-frontend-sdk";
+import { HankoError, State } from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { useFlowState } from "../hooks/UseFlowState";
@@ -14,7 +13,6 @@ import ErrorBox from "../components/error/ErrorBox";
 import Headline1 from "../components/headline/Headline1";
 import Link from "../components/link/Link";
 import Input from "../components/form/Input";
-import { HankoError } from "@teamhanko/hanko-frontend-sdk";
 import Divider from "../components/spacer/Divider";
 import Checkbox from "../components/form/Checkbox";
 import Spacer from "../components/spacer/Spacer";
@@ -105,12 +103,12 @@ const RegistrationInitPage = (props: Props) => {
   );
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.signUp")}</Headline1>
         <ErrorBox state={flowState} error={thirdPartyError} />
         {inputs ? (
-          <Fragment>
+          <>
             <Form
               flowAction={flowState.actions.register_login_identifier}
               onSubmit={onIdentifierSubmit}
@@ -146,7 +144,7 @@ const RegistrationInitPage = (props: Props) => {
               <Button autofocus>{t("labels.continue")}</Button>
             </Form>
             <Divider hidden={!showDivider}>{t("labels.or")}</Divider>
-          </Fragment>
+          </>
         ) : null}
         {flowState.actions.thirdparty_oauth.enabled
           ? flowState.actions.thirdparty_oauth.inputs.provider.allowed_values?.map(
@@ -175,7 +173,7 @@ const RegistrationInitPage = (props: Props) => {
             )
           : null}
         {flowState.actions.remember_me.enabled && (
-          <Fragment>
+          <>
             <Spacer />
             <Checkbox
               required={false}
@@ -184,7 +182,7 @@ const RegistrationInitPage = (props: Props) => {
               checked={rememberMe}
               onChange={onRememberMeChange}
             />
-          </Fragment>
+          </>
         )}
       </Content>
       <Footer hidden={initialComponentName !== "auth"}>
@@ -199,7 +197,7 @@ const RegistrationInitPage = (props: Props) => {
           </Link>
         </Paragraph>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

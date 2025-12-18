@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useContext, useEffect, useMemo, useState } from "preact/compat";
 import { State } from "@teamhanko/hanko-frontend-sdk";
 
@@ -71,7 +70,7 @@ const LoginPasswordPage = (props: Props) => {
   }, [passwordRetryAfter]);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.loginPassword")}</Headline1>
         <ErrorBox state={flowState} />
@@ -108,7 +107,7 @@ const LoginPasswordPage = (props: Props) => {
           ? loginMethodChooserLink
           : recoveryLink}
       </Footer>
-    </Fragment>
+    </>
   );
 };
 
