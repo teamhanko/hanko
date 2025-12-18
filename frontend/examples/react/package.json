@@ -29,5 +29,14 @@
     "@vitejs/plugin-react": "4.5.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.1"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "*"
+  },
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   }
+
 }

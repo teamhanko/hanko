@@ -19,5 +19,13 @@
     "typescript": "~5.9.0",
     "vite": "^7.2.4",
     "vue-tsc": "^3.1.5"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "*"
+  },
+  "overrides": {
+    "vite": {
+      "rollup": "npm:@rollup/wasm-node"
+    }
   }
 }
