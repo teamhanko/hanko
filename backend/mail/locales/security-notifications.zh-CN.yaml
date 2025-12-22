@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "您的 {{ .ServiceName }} 帐户密码已更新。"
+subject_password_update:
+  description: ""
+  other: "您的密码已更新。"
+
+primary_email_update_text:
+  description: ""
+  other: "您的 {{ .ServiceName }} 帐户的主要电子邮件地址已从 {{ .OldEmailAddress }} 更新为 {{ .NewEmailAddress }}。"
+subject_primary_email_update:
+  description: ""
+  other: "您的主要电子邮件地址已更新。"
+
+email_create_text:
+  description: ""
+  other: "电子邮件地址 {{ .NewEmailAddress }} 已添加到您的 {{ .ServiceName }} 帐户。"
+subject_email_create:
+  description: ""
+  other: "已注册新电子邮件地址。"
+
+email_delete_text:
+  description: ""
+  other: "电子邮件地址 {{ .DeletedEmailAddress }} 已从您的 {{ .ServiceName }} 帐户中删除。"
+subject_email_delete:
+  description: ""
+  other: "已删除电子邮件地址。"
+
+passkey_create_text:
+  description: ""
+  other: "您的 {{ .ServiceName }} 帐户已注册新密码密钥。"
+subject_passkey_create:
+  description: ""
+  other: "已注册新密码密钥。"
+
+mfa_enabled_text:
+  description: ""
+  other: "您的 {{ .ServiceName }} 帐户已成功启用双因素身份验证。"
+subject_mfa_enabled:
+  description: ""
+  other: "双因素身份验证已启用"
+
+mfa_disabled_text:
+  description: ""
+  other: "您的 {{ .ServiceName }} 帐户已禁用双因素身份验证。"
+subject_mfa_disabled:
+  description: ""
+  other: "双因素身份验证已禁用"

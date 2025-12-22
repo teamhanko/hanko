@@ -40,6 +40,31 @@ func DefaultConfig() *Config {
 				Login:        600000,
 			},
 		},
+		SecurityNotifications: SecurityNotifications{
+			Notifications: SecurityNotificationTypes{
+				EmailCreate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				EmailDelete: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				PasswordUpdate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				PasskeyCreate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				PrimaryEmailUpdate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				MFAEnabled: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				MFADisabled: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+			},
+		},
 		Smtp: SMTP{
 			Host: "localhost",
 			Port: "465",
