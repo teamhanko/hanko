@@ -1,11 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA } from "@angular/core";
 import { HankoService } from "../services/hanko.services";
 import { Router } from "@angular/router";
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.component.html',
-  styleUrls: ['../app.component.css']
+    selector: 'app-login',
+    templateUrl: './login.component.html',
+    styleUrls: ['../app.component.css'],
+    standalone: true,
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class LoginComponent {
   error?: Error;

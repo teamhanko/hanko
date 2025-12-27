@@ -5,7 +5,11 @@
   "workspaces": [
     "frontend-sdk",
     "elements",
-    "examples/*"
+    "examples/angular",
+    "examples/nextjs",
+    "examples/react",
+    "examples/vue",
+    "examples/express"
   ],
   "scripts": {
     "build": "turbo run build",

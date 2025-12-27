@@ -1,12 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, OnInit } from "@angular/core";
 import { Router } from '@angular/router';
 import { TodoService } from '../services/todo.service';
 import { HankoService } from "../services/hanko.services";
+import { SessionExpiredModalComponent } from '../modal/session-expired-modal.component';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['../app.component.css'],
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['../app.component.css'],
+    standalone: true,
+    imports: [SessionExpiredModalComponent],
+    schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class ProfileComponent implements OnInit {
   error?: Error;

@@ -1,4 +1,4 @@
-import React, {
+import{
   useCallback,
   useEffect,
   useMemo,
@@ -6,13 +6,13 @@ import React, {
   useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
-import { TodoClient, Todos } from "./TodoClient";
+import { TodoClient, type Todos } from "./TodoClient";
 import styles from "./Todo.module.css";
 import { Hanko } from "@teamhanko/hanko-elements";
 import { SessionExpiredModal } from "./SessionExpiredModal";
 
-const todoAPI = process.env.REACT_APP_TODO_API!;
-const hankoAPI = process.env.REACT_APP_HANKO_API!;
+const todoAPI = import.meta.env.VITE_TODO_API!;
+const hankoAPI = import.meta.env.VITE_HANKO_API!;
 
 function Todo() {
   const navigate = useNavigate();
