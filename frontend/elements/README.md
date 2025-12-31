@@ -504,6 +504,7 @@ Translations are currently available for the following languages:
 - "en" - English
 - "fr" - French
 - "it" - Italian
+- "nl" - Dutch
 - "ptBR" - Brazilian Portuguese
 - "zh" - Simplified Chinese
 
@@ -518,6 +519,8 @@ import { bn } from "@teamhanko/hanko-elements/i18n/bn";
 import { de } from "@teamhanko/hanko-elements/i18n/de";
 import { en } from "@teamhanko/hanko-elements/i18n/en";
 import { fr } from "@teamhanko/hanko-elements/i18n/fr";
+import { it } from "@teamhanko/hanko-elements/i18n/it";
+import { nl } from "@teamhanko/hanko-elements/i18n/nl";
 import { ptBR } from "@teamhanko/hanko-elements/i18n/pt-BR";
 import { zh } from "@teamhanko/hanko-elements/i18n/zh";
 ```
@@ -531,7 +534,7 @@ import { all } from "@teamhanko/hanko-elements/i18n/all";
 After importing, provide the translations through the `register()` function:
 
 ```typescript
-register("https://hanko.yourdomain.com", { translations: { bn, de, en, fr, it, ptBR, zh } });
+register("https://hanko.yourdomain.com", { translations: { bn, de, en, fr, it, nl, ptBR, zh } });
 
 // or
 
