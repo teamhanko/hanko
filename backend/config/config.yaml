@@ -155,7 +155,7 @@ security_notifications:
       enabled: true
     primary_email_update:
       enabled: true
-    mfa_created:
+    mfa_create:
       enabled: true
-    mfa_deleted:
+    mfa_delete:
       enabled: true

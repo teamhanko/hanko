@@ -33,16 +33,16 @@ subject_passkey_create:
   description: ""
   other: "已添加新密码密钥。"
 
-mfa_created_text:
+mfa_create_text:
   description: ""
   other: "您的 {{ .ServiceName }} 帐户已成功添加新的多因素身份验证 (MFA) 方法。"
-subject_mfa_created:
+subject_mfa_create:
   description: ""
   other: "新增了一种多因素身份验证 (MFA) 方法。"
 
-mfa_deleted_text:
+mfa_delete_text:
   description: ""
   other: "您的 {{ .ServiceName }} 帐户中已移除现有的多因素身份验证 (MFA) 方法。"
-subject_mfa_deleted:
+subject_mfa_delete:
   description: ""
   other: "MFA方法已移除"

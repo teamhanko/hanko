@@ -57,10 +57,10 @@ func (a OTPSecretDelete) Execute(c flowpilot.ExecutionContext) error {
 	userModel.DeleteOTPSecret()
 
 	// Inform user that an MFA method has been deleted
-	if deps.Cfg.SecurityNotifications.Notifications.MFADeleted.Enabled {
+	if deps.Cfg.SecurityNotifications.Notifications.MFADelete.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: userModel.Emails.GetPrimary().Address,
-			Template:     "mfa_deleted",
+			Template:     "mfa_delete",
 			HttpContext:  deps.HttpContext,
 			UserContext:  *userModel,
 		})

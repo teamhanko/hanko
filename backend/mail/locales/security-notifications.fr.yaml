@@ -33,16 +33,16 @@ subject_passkey_create:
   description: ""
   other: "Une nouvelle clé d'accès a été ajoutée."
 
-mfa_created_text:
+mfa_create_text:
   description: ""
   other: "Une nouvelle méthode d'authentification multifactorielle (MFA) a été ajoutée avec succès à votre compte {{ .ServiceName }}."
-subject_mfa_created:
+subject_mfa_create:
   description: ""
   other: "Une nouvelle méthode d'authentification multifacteur a été ajoutée"
 
-mfa_deleted_text:
+mfa_delete_text:
   description: ""
   other: "Une méthode d'authentification multifactorielle (MFA) existante a été supprimée de votre compte {{ .ServiceName }}."
-subject_mfa_deleted:
+subject_mfa_delete:
   description: ""
   other: "Méthode MFA supprimée"

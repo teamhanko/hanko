@@ -71,10 +71,10 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 
 			if !isPasskey {
 				// Send user an email informing of new MFA method
-				if deps.Cfg.SecurityNotifications.Notifications.MFACreated.Enabled {
+				if deps.Cfg.SecurityNotifications.Notifications.MFACreate.Enabled {
 					deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 						EmailAddress: emailAddress,
-						Template:     "mfa_created",
+						Template:     "mfa_create",
 						HttpContext:  deps.HttpContext,
 						UserContext:  *userModel,
 					})
