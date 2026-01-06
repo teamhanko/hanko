@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "type": "module",
   "private": false,
   "publishConfig": {
@@ -29,6 +29,9 @@
       ],
       "i18n/it": [
         "dist/i18n/it.d.ts"
+      ],
+      "i18n/nl": [
+        "dist/i18n/nl.d.ts"
       ],
       "i18n/pt-BR": [
         "dist/i18n/pt-BR.d.ts"
@@ -69,6 +72,11 @@
       "types": "./dist/i18n/it.d.ts",
       "import": "./dist/i18n/it.js",
       "require": "./dist/i18n/it.js"
+    },
+    "./i18n/nl": {
+      "types": "./dist/i18n/nl.d.ts",
+      "import": "./dist/i18n/nl.js",
+      "require": "./dist/i18n/nl.js"
     },
     "./i18n/pt-BR": {
       "types": "./dist/i18n/pt-BR.d.ts",
@@ -131,10 +139,10 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@denysvuika/preact-translate": "^0.5.0",
-    "@teamhanko/hanko-frontend-sdk": "^2.2.1",
+    "@denysvuika/preact-translate": "^0.5.1",
+    "@teamhanko/hanko-frontend-sdk": "^2.3.0",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
-    "preact": "^10.13.1"
+    "preact": "^10.28.0"
   }
 }

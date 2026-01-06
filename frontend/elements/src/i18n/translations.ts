@@ -52,6 +52,7 @@ export interface Translation {
     renameSecurityKey: string;
     deleteSecurityKey: string;
     securityKeys: string;
+    deleteIdentity: string;
   };
   texts: {
     authenticatorAppAlreadySetUp: string;
@@ -143,6 +144,7 @@ export interface Translation {
     newSecurityKeyName: string;
     createSecurityKey: string;
     lastUsed: string;
+    connectAccount: string;
   };
   errors: {
     somethingWentWrong: string;

@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useCallback, useContext, useEffect, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
@@ -52,7 +51,7 @@ const CreateOTPSecretPage = (props: Props) => {
   }, [flowState]);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t(`headlines.otpSetUp`)}</Headline1>
         <ErrorBox state={flowState} />
@@ -82,7 +81,7 @@ const CreateOTPSecretPage = (props: Props) => {
           {t("labels.back")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

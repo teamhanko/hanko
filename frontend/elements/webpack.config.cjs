@@ -40,6 +40,13 @@ module.exports = {
         type: "module",
       },
     },
+    it: {
+      filename: "i18n/nl.js",
+      import: "./src/i18n/nl.ts",
+      library: {
+        type: "module",
+      },
+    },
     ptBR: {
       filename: "i18n/pt-BR.js",
       import: "./src/i18n/pt-BR.ts",

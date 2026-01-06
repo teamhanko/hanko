@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import { useContext } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import { State } from "@teamhanko/hanko-frontend-sdk";
@@ -23,7 +22,7 @@ const CredentialOnboardingChooserPage = (props: Props) => {
   const { flowState } = useFlowState(props.state);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.setupLoginMethod")}</Headline1>
         <ErrorBox flowError={flowState?.error} />
@@ -57,7 +56,7 @@ const CredentialOnboardingChooserPage = (props: Props) => {
           {t("labels.skip")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

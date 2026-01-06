@@ -48,6 +48,7 @@ export const bn: Translation = {
     authenticatorAppAlreadySetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করা হয়েছে",
     authenticatorAppNotSetUp: "প্রমাণীকরণ অ্যাপ সেট আপ করুন",
     trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন?",
+    deleteIdentity: "সংযোগ মুছুন",
   },
   texts: {
     enterPasscode: "আপনার ইমেইল ঠিকানায় পাঠানো পাসকোডটি প্রবেশ করান।",
@@ -155,6 +156,7 @@ export const bn: Translation = {
     lastUsed: "সর্বশেষ ব্যবহৃত",
     trustDevice: "এই ব্রাউজারটি বিশ্বাস করবেন",
     staySignedIn: "সাইন ইন থাকা চালিয়ে যান",
+    connectAccount: "অ্যাকাউন্ট সংযুক্ত করুন",
   },
   errors: {
     somethingWentWrong:

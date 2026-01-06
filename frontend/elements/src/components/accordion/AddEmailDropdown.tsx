@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { StateUpdater, useContext, useState } from "preact/compat";
+import { Dispatch, SetStateAction, useContext, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Form from "../form/Form";
@@ -12,7 +12,7 @@ import { AppContext } from "../../contexts/AppProvider";
 
 interface Props {
   checkedItemID?: string;
-  setCheckedItemID: StateUpdater<string>;
+  setCheckedItemID: Dispatch<SetStateAction<string>>;
   flowState: State<"profile_init">;
   onState(state: State<any>): Promise<void>;
 }

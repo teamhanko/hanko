@@ -11,6 +11,9 @@ func DefaultConfig() *Config {
 		},
 		Secrets: Secrets{
 			Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+			KeyManagement: KeyManagement{
+				Type: "local",
+			},
 		},
 		Server: Server{
 			Public: ServerSettings{
@@ -203,6 +206,7 @@ func DefaultConfig() *Config {
 			MaxLength:             120,
 			UseForAuthentication:  true,
 			PasscodeTtl:           300,
+			PasscodeCharset:       PasscodeCharsetNumeric,
 		},
 		Username: Username{
 			Enabled:               false,

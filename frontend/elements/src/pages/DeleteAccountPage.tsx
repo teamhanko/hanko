@@ -1,5 +1,4 @@
 import { useContext } from "preact/compat";
-import { Fragment } from "preact";
 import { TranslateContext } from "@denysvuika/preact-translate";
 
 import Content from "../components/wrapper/Content";
@@ -22,7 +21,7 @@ const DeleteAccountPage = ({ state, onBack }: Props) => {
   const { t } = useContext(TranslateContext);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.deleteAccount")}</Headline1>
         <ErrorBox flowError={null} />
@@ -39,7 +38,7 @@ const DeleteAccountPage = ({ state, onBack }: Props) => {
       <Footer>
         <Link onClick={onBack}>{t("labels.back")}</Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

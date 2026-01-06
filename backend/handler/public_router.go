@@ -39,7 +39,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	webauthnService := services.NewWebauthnService(*cfg, persister)
 	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister, auditLogger)
 
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}

@@ -15,7 +15,7 @@ const Microsoft = ({ size, disabled }: IconProps) => {
       <rect
         className={cx(
           styles.microsoftIcon,
-          disabled ? styles.disabled : styles.blue
+          disabled ? styles.disabled : styles.blue,
         )}
         x="1"
         y="1"
@@ -25,7 +25,7 @@ const Microsoft = ({ size, disabled }: IconProps) => {
       <rect
         className={cx(
           styles.microsoftIcon,
-          disabled ? styles.disabled : styles.green
+          disabled ? styles.disabled : styles.green,
         )}
         x="1"
         y="11"
@@ -35,7 +35,7 @@ const Microsoft = ({ size, disabled }: IconProps) => {
       <rect
         className={cx(
           styles.microsoftIcon,
-          disabled ? styles.disabled : styles.yellow
+          disabled ? styles.disabled : styles.yellow,
         )}
         x="11"
         y="1"
@@ -45,7 +45,7 @@ const Microsoft = ({ size, disabled }: IconProps) => {
       <rect
         className={cx(
           styles.microsoftIcon,
-          disabled ? styles.disabled : styles.red
+          disabled ? styles.disabled : styles.red,
         )}
         x="11"
         y="11"

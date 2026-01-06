@@ -15,6 +15,9 @@ var DefaultConfig = config.Config{
 	},
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
+		KeyManagement: config.KeyManagement{
+			Type: "local",
+		},
 	},
 	Email: config.Email{
 		Enabled:              true,
