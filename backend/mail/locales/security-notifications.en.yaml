@@ -17,7 +17,7 @@ email_create_text:
   other: "The email address {{ .NewEmailAddress }} has been added to your {{ .ServiceName }} account."
 subject_email_create:
   description: ""
-  other: "A new email address has been registered"
+  other: "A new email address has been added"
 
 email_delete_text:
   description: ""
@@ -28,10 +28,10 @@ subject_email_delete:
 
 passkey_create_text:
   description: ""
-  other: "Your {{ .ServiceName }} account has been registered with a new passkey."
+  other: "A new passkey has been added to your {{ .ServiceName }} account."
 subject_passkey_create:
   description: ""
-  other: "A new passkey has been registered"
+  other: "A new passkey has been added"
 
 mfa_enabled_text:
   description: ""

@@ -17,7 +17,7 @@ email_create_text:
   other: "电子邮件地址 {{ .NewEmailAddress }} 已添加到您的 {{ .ServiceName }} 帐户。"
 subject_email_create:
   description: ""
-  other: "已注册新电子邮件地址。"
+  other: "已添加新的电子邮件地址。"
 
 email_delete_text:
   description: ""
@@ -28,10 +28,10 @@ subject_email_delete:
 
 passkey_create_text:
   description: ""
-  other: "您的 {{ .ServiceName }} 帐户已注册新密码密钥。"
+  other: "您的 {{ .ServiceName }} 帐户已添加新密码密钥。"
 subject_passkey_create:
   description: ""
-  other: "已注册新密码密钥。"
+  other: "已添加新密码密钥。"
 
 mfa_enabled_text:
   description: ""

@@ -17,7 +17,7 @@ email_create_text:
   other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে {{ .NewEmailAddress }} ইমেল ঠিকানা যোগ করা হয়েছে।"
 subject_email_create:
   description: ""
-  other: "একটি নতুন ইমেল ঠিকানা নিবন্ধিত হয়েছে।"
+  other: "একটি নতুন ইমেল ঠিকানা যোগ করা হয়েছে।"
 
 email_delete_text:
   description: ""
@@ -28,10 +28,10 @@ subject_email_delete:
 
 passkey_create_text:
   description: ""
-  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে একটি নতুন পাসকি নিবন্ধিত হয়েছে।"
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টে একটি নতুন পাসকি যোগ করা হয়েছে।"
 subject_passkey_create:
   description: ""
-  other: "একটি নতুন পাসকি নিবন্ধিত হয়েছে।"
+  other: "একটি নতুন পাসকি যোগ করা হয়েছে।"
 
 mfa_enabled_text:
   description: ""

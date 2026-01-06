@@ -17,7 +17,7 @@ email_create_text:
   other: "Die E-Mail-Adresse {{ .NewEmailAddress }} wurde zu Ihrem {{ .ServiceName }}-Konto hinzugefügt."
 subject_email_create:
   description: ""
-  other: "Eine neue E-Mail-Adresse wurde registriert."
+  other: "Eine neue E-Mail-Adresse wurde hinzugefügt."
 
 email_delete_text:
   description: ""
@@ -28,10 +28,10 @@ subject_email_delete:
 
 passkey_create_text:
   description: ""
-  other: "Ihr {{ .ServiceName }}-Konto wurde mit einem neuen Passkey registriert."
+  other: "Ein neuer Passkey wurde zu Ihrem {{ .ServiceName }}-Konto hinzugefügt."
 subject_passkey_create:
   description: ""
-  other: "Ein neuer Passkey wurde registriert."
+  other: "Ein neuer Passkey wurde hinzugefügt."
 
 mfa_enabled_text:
   description: ""
