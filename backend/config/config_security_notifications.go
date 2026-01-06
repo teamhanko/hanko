@@ -15,5 +15,5 @@ type SecurityNotificationTypes struct {
 }
 
 type SecurityNotificationConfiguration struct {
-	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=true"`
 }
