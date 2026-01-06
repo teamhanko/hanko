@@ -57,10 +57,10 @@ func DefaultConfig() *Config {
 				PrimaryEmailUpdate: SecurityNotificationConfiguration{
 					Enabled: true,
 				},
-				MFAEnabled: SecurityNotificationConfiguration{
+				MFACreated: SecurityNotificationConfiguration{
 					Enabled: true,
 				},
-				MFADisabled: SecurityNotificationConfiguration{
+				MFADeleted: SecurityNotificationConfiguration{
 					Enabled: true,
 				},
 			},

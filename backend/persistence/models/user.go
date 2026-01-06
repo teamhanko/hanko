@@ -37,28 +37,6 @@ func (user *User) DeleteWebauthnCredential(credentialId string) {
 	}
 }
 
-func (user *User) HasMFAEnabled() bool {
-	for _, credential := range user.WebauthnCredentials {
-		if credential.MFAOnly {
-			// User has another MFA-only credential
-			return true
-		}
-	}
-
-	return user.OTPSecret != nil
-}
-
-func (user *User) HasMFAEnabledExcept(excludeId string) bool {
-	for _, credential := range user.WebauthnCredentials {
-		if credential.MFAOnly && credential.ID != excludeId {
-			// User has another MFA-only credential
-			return true
-		}
-	}
-
-	return user.OTPSecret != nil
-}
-
 func (user *User) GetIdentities() Identities {
 	var identities Identities
 	for _, email := range user.Emails {

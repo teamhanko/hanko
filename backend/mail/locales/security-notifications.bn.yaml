@@ -33,16 +33,16 @@ subject_passkey_create:
   description: ""
   other: "একটি নতুন পাসকি যোগ করা হয়েছে।"
 
-mfa_enabled_text:
+mfa_created_text:
   description: ""
-  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য দুই-ফ্যাক্টর প্রমাণীকরণ সফলভাবে সক্ষম করা হয়েছে।"
-subject_mfa_enabled:
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য একটি নতুন দুই-ফ্যাক্টর (MFA) পদ্ধতি সফলভাবে যোগ করা হয়েছে।"
+subject_mfa_created:
   description: ""
-  other: "দুই-ফ্যাক্টর প্রমাণীকরণ সক্ষম করা হয়েছে।"
+  other: "একটি নতুন MFA পদ্ধতি যোগ করা হয়েছে"
 
-mfa_disabled_text:
+mfa_deleted_text:
   description: ""
-  other: "দুই-ফ্যাক্টর প্রমাণীকরণ আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য অক্ষম করা হয়েছে।"
-subject_mfa_disabled:
+  other: "আপনার {{ .ServiceName }} অ্যাকাউন্টের জন্য একটি বিদ্যমান দুই-ফ্যাক্টর (MFA) পদ্ধতি মুছে ফেলা হয়েছে।"
+subject_mfa_deleted:
   description: ""
-  other: "দুই-ফ্যাক্টর প্রমাণীকরণ অক্ষম করা হয়েছে।"
+  other: "একটি MFA পদ্ধতি মুছে ফেলা হয়েছে।"

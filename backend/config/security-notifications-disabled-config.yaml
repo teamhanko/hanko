@@ -22,7 +22,7 @@ security_notifications:
       enabled: false
     primary_email_update:
       enabled: false
-    mfa_enabled:
+    mfa_created:
       enabled: false
-    mfa_disabled:
+    mfa_deleted:
       enabled: false

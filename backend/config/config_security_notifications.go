@@ -10,8 +10,8 @@ type SecurityNotificationTypes struct {
 	EmailCreate        SecurityNotificationConfiguration `yaml:"email_create" json:"email_create,omitempty" koanf:"email_create"`
 	EmailDelete        SecurityNotificationConfiguration `yaml:"email_delete" json:"email_delete,omitempty" koanf:"email_delete"`
 	PasskeyCreate      SecurityNotificationConfiguration `yaml:"passkey_create" json:"passkey_create,omitempty" koanf:"passkey_create"`
-	MFAEnabled         SecurityNotificationConfiguration `yaml:"mfa_enabled" json:"mfa_enabled,omitempty" koanf:"mfa_enabled"`
-	MFADisabled        SecurityNotificationConfiguration `yaml:"mfa_disabled" json:"mfa_disabled,omitempty" koanf:"mfa_disabled"`
+	MFACreated         SecurityNotificationConfiguration `yaml:"mfa_created" json:"mfa_created,omitempty" koanf:"mfa_created"`
+	MFADeleted         SecurityNotificationConfiguration `yaml:"mfa_deleted" json:"mfa_deleted,omitempty" koanf:"mfa_deleted"`
 }
 
 type SecurityNotificationConfiguration struct {

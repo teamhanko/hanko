@@ -69,11 +69,11 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		if userModel != nil {
-			// Send MFA enabled notification if this is the first MFA method
-			if !userModel.HasMFAEnabled() && deps.Cfg.SecurityNotifications.Notifications.MFAEnabled.Enabled {
+			// Send user an email informing of new MFA method
+			if deps.Cfg.SecurityNotifications.Notifications.MFACreated.Enabled {
 				deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 					EmailAddress: userModel.Emails.GetPrimary().Address,
-					Template:     "mfa_enabled",
+					Template:     "mfa_created",
 					HttpContext:  deps.HttpContext,
 					UserContext:  *userModel,
 				})

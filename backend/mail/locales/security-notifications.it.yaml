@@ -33,16 +33,16 @@ subject_passkey_create:
   description: ""
   other: "Una nuova chiave di accesso è stata aggiunta."
 
-mfa_enabled_text:
+mfa_created_text:
   description: ""
-  other: "L'autenticazione a due fattori è stata attivata con successo per il tuo account {{ .ServiceName }}."
-subject_mfa_enabled:
+  other: "Un nuovo metodo multifattoriale (MFA) è stato aggiunto correttamente al tuo account {{ .ServiceName }}."
+subject_mfa_created:
   description: ""
-  other: "Autenticazione a due fattori attivata"
+  other: "È stato aggiunto un nuovo metodo MFA"
 
-mfa_disabled_text:
+mfa_deleted_text:
   description: ""
-  other: "L'autenticazione a due fattori è stata disattivata per il tuo account {{ .ServiceName }}."
-subject_mfa_disabled:
+  other: "Un metodo multifattoriale (MFA) esistente è stato rimosso dal tuo account {{ .ServiceName }}."
+subject_mfa_deleted:
   description: ""
-  other: "Autenticazione a due fattori disattivata"
+  other: "Metodo MFA rimosso"

@@ -73,11 +73,11 @@ func (a SecurityKeyDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	userModel.DeleteWebauthnCredential(webauthnCredentialModel.ID)
 
-	// Send MFA disabled notification if there are no more MFA methods
-	if !userModel.HasMFAEnabledExcept(webauthnCredentialModel.ID) && userModel.OTPSecret == nil && deps.Cfg.SecurityNotifications.Notifications.MFADisabled.Enabled {
+	// Inform user that an MFA method has been deleted
+	if deps.Cfg.SecurityNotifications.Notifications.MFADeleted.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
 			EmailAddress: userModel.Emails.GetPrimary().Address,
-			Template:     "mfa_disabled",
+			Template:     "mfa_deleted",
 			HttpContext:  deps.HttpContext,
 			UserContext:  *userModel,
 		})
