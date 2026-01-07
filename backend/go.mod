@@ -10,7 +10,7 @@ require (
 	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/structs v1.1.0
-	github.com/go-playground/validator/v10 v10.30.0
+	github.com/go-playground/validator/v10 v10.30.1
 	github.com/go-redsync/redsync/v4 v4.15.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-testfixtures/testfixtures/v3 v3.19.0
@@ -32,14 +32,14 @@ require (
 	github.com/knadh/koanf/v2 v2.3.0
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo-jwt/v4 v4.4.0
-	github.com/labstack/echo/v4 v4.14.0
+	github.com/labstack/echo/v4 v4.15.0
 	github.com/labstack/gommon v0.4.2
 	github.com/lestrrat-go/jwx/v2 v2.1.6
 	github.com/lib/pq v1.10.9
 	github.com/mattermost/xml-roundtrip-validator v0.1.0
 	github.com/mileusna/useragent v1.3.5
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/nicksnyder/go-i18n/v2 v2.6.0
+	github.com/nicksnyder/go-i18n/v2 v2.6.1
 	github.com/ory/dockertest/v3 v3.12.0
 	github.com/pkg/errors v0.9.1
 	github.com/pquerna/otp v1.5.0
