@@ -2,10 +2,12 @@ package mfa_creation
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/pquerna/otp/totp"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
@@ -47,13 +49,15 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 
 	if c.GetFlowName() != shared.FlowRegistration {
 		var userID uuid.UUID
+		var userModel *models.User
 		if c.GetFlowName() == shared.FlowLogin {
 			userID = uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
 		} else if c.GetFlowName() == shared.FlowProfile {
-			userModel, ok := c.Get("session_user").(*models.User)
+			user, ok := c.Get("session_user").(*models.User)
 			if !ok {
 				return c.Error(flowpilot.ErrorOperationNotPermitted)
 			}
+			userModel = user
 			userID = userModel.ID
 		}
 
@@ -62,6 +66,18 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 		err := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
 		if err != nil {
 			return fmt.Errorf("could not create OTP secret: %w", err)
+		}
+
+		if userModel != nil {
+			// Send user an email informing of new MFA method
+			if deps.Cfg.SecurityNotifications.Notifications.MFACreate.Enabled {
+				deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+					EmailAddress: userModel.Emails.GetPrimary().Address,
+					Template:     "mfa_create",
+					HttpContext:  deps.HttpContext,
+					UserContext:  *userModel,
+				})
+			}
 		}
 
 		err = deps.AuditLogger.CreateWithConnection(

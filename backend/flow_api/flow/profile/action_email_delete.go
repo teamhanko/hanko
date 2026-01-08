@@ -3,6 +3,7 @@ package profile
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -81,11 +82,15 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
+	currentPrimaryEmail := userModel.Emails.GetPrimary().Address
+
 	emailToBeDeletedId := uuid.FromStringOrNil(c.Input().Get("email_id").String())
 	emailToBeDeletedModel := userModel.GetEmailById(emailToBeDeletedId)
 	if emailToBeDeletedModel == nil {
 		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("unknown email")))
 	}
+
+	deletedEmailAddress := emailToBeDeletedModel.Address
 
 	if emailToBeDeletedModel.IsPrimary() {
 		if !deps.Cfg.Email.Optional {
@@ -96,6 +101,18 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 				return fmt.Errorf("could not delete primary email: %w", err)
 			}
 		}
+	}
+
+	if deps.Cfg.SecurityNotifications.Notifications.EmailDelete.Enabled {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: currentPrimaryEmail,
+			Template:     "email_delete",
+			HttpContext:  deps.HttpContext,
+			BodyData: map[string]interface{}{
+				"DeletedEmailAddress": deletedEmailAddress,
+			},
+			UserContext: *userModel,
+		})
 	}
 
 	err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Delete(*emailToBeDeletedModel)

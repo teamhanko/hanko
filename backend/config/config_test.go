@@ -126,3 +126,39 @@ func TestEnvironmentVariables(t *testing.T) {
 	assert.Equal(t, "valueFromEnvVars", cfg.Smtp.Host)
 	assert.True(t, reflect.DeepEqual([]string{"https://hanko.io", "https://auth.hanko.io"}, cfg.Webauthn.RelyingParty.Origins))
 }
+
+func TestParseSecurityNotificationsConfig(t *testing.T) {
+	configPath := "./security-notifications-disabled-config.yaml"
+	cfg, err := Load(&configPath)
+	if err != nil {
+		t.Error(err)
+	}
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+	notificationsConfig := cfg.SecurityNotifications
+
+	assert.False(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.EmailDelete.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.MFACreate.Enabled)
+	assert.False(t, notificationsConfig.Notifications.MFADelete.Enabled)
+}
+
+func TestParseDefaultSecurityNotificationsConfig(t *testing.T) {
+	cfg := DefaultConfig()
+	if err := cfg.Validate(); err != nil {
+		t.Error(err)
+	}
+	notificationsConfig := cfg.SecurityNotifications
+
+	assert.True(t, notificationsConfig.Notifications.EmailCreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.EmailDelete.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PrimaryEmailUpdate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PasswordUpdate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.PasskeyCreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.MFACreate.Enabled)
+	assert.True(t, notificationsConfig.Notifications.MFADelete.Enabled)
+}
