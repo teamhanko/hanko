@@ -22,13 +22,6 @@ type SendSecurityNotificationParams struct {
 	UserContext  models.User
 }
 
-type SendSecurityNotificationResult struct {
-	SecurityNotificationModel models.SecurityNotification
-	Subject                   string
-	BodyPlain                 string
-	BodyHTML                  string
-}
-
 type SecurityNotification interface {
 	SendNotification(*pop.Connection, SendSecurityNotificationParams) error
 }
