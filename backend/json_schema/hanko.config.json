@@ -230,6 +230,10 @@
           "title": "secrets",
           "description": "`secrets` configures the keys used for cryptographically signing tokens issued by the API."
         },
+        "security_notifications": {
+          "$ref": "#/$defs/SecurityNotifications",
+          "description": "`security_notifications` configures security notifications for important security-related events."
+        },
         "server": {
           "$ref": "#/$defs/Server",
           "title": "server",
@@ -1293,6 +1297,52 @@
       "required": [
         "enabled"
       ]
+    },
+    "SecurityNotificationConfiguration": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecurityNotificationTypes": {
+      "properties": {
+        "password_update": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "primary_email_update": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "email_create": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "email_delete": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "passkey_create": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "mfa_create": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        },
+        "mfa_delete": {
+          "$ref": "#/$defs/SecurityNotificationConfiguration"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "SecurityNotifications": {
+      "properties": {
+        "notifications": {
+          "$ref": "#/$defs/SecurityNotificationTypes"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
     },
     "Server": {
       "properties": {
