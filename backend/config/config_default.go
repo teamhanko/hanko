@@ -218,13 +218,14 @@ func DefaultConfig() *Config {
 			MaxLength:             32,
 		},
 		MFA: MFA{
-			AcquireOnLogin:        false,
-			AcquireOnRegistration: true,
-			DeviceTrustCookieName: "hanko-device-token",
-			DeviceTrustDuration:   30 * 24 * time.Hour, // 30 days
-			DeviceTrustPolicy:     "prompt",
-			Enabled:               true,
-			Optional:              true,
+			AcquireOnLogin:               false,
+			AcquireOnRegistration:        true,
+			DeviceTrustCookieName:        "hanko-device-token",
+			DeviceTrustDuration:          30 * 24 * time.Hour, // 30 days
+			DeviceTrustMaxUsersPerDevice: 20,
+			DeviceTrustPolicy:            "prompt",
+			Enabled:                      true,
+			Optional:                     true,
 			SecurityKeys: SecurityKeys{
 				AttestationPreference:   "direct",
 				AuthenticatorAttachment: "cross-platform",

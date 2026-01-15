@@ -14,8 +14,6 @@ type IssueTrustDeviceCookie struct {
 }
 
 func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error {
-	var err error
-
 	deps := h.GetDeps(c)
 
 	if deps.Cfg.MFA.DeviceTrustPolicy == "never" ||
@@ -38,6 +36,7 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 		HttpContext: deps.HttpContext,
 	}
 
+	// Generate new token for this user
 	deviceToken, err := deviceTrustService.GenerateRandomToken(64)
 	if err != nil {
 		return fmt.Errorf("failed to generate trusted device token: %w", err)
@@ -53,9 +52,43 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 		}
 	}
 
+	// Read existing cookie entries for multi-user support
+	var entries []services.DeviceTrustEntry
+	existingCookie, _ := deps.HttpContext.Cookie(name)
+	if existingCookie != nil {
+		entries = deviceTrustService.ParseDeviceTrustCookie(existingCookie.Value)
+	}
+
+	// Remove existing entry for this user (if any)
+	var filteredEntries []services.DeviceTrustEntry
+	for _, entry := range entries {
+		if entry.UserID.String() != userID.String() {
+			filteredEntries = append(filteredEntries, entry)
+		}
+	}
+
+	// Add new entry at the front (most recent)
+	newEntry := services.DeviceTrustEntry{
+		UserID:      userID,
+		DeviceToken: deviceToken,
+	}
+	entries = append([]services.DeviceTrustEntry{newEntry}, filteredEntries...)
+
+	// Enforce max users limit
+	maxUsers := deps.Cfg.MFA.DeviceTrustMaxUsersPerDevice
+	if maxUsers <= 0 {
+		maxUsers = 20 // Default
+	}
+	if len(entries) > maxUsers {
+		entries = entries[:maxUsers]
+	}
+
+	// Serialize composite cookie value
+	cookieValue := deviceTrustService.SerializeDeviceTrustCookie(entries)
+
 	cookie := new(http.Cookie)
 	cookie.Name = name
-	cookie.Value = deviceToken
+	cookie.Value = cookieValue
 	cookie.Path = "/"
 	cookie.HttpOnly = true
 	cookie.Secure = true
