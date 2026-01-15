@@ -1,6 +1,11 @@
 import { useContext, useMemo, useState } from "preact/compat";
 import { TranslateContext } from "@denysvuika/preact-translate";
-import { HankoError, State } from "@teamhanko/hanko-frontend-sdk";
+import {
+  HankoError,
+  State,
+  generateCodeVerifier,
+  setStoredCodeVerifier, clearStoredCodeVerifier
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { useFlowState } from "../hooks/UseFlowState";
@@ -73,16 +78,30 @@ const RegistrationInitPage = (props: Props) => {
     event.preventDefault();
     setSelectedThirdPartyProvider(name);
 
-    const nextState = await flowState.actions.thirdparty_oauth.run(
-      {
-        provider: name,
-        redirect_to: window.location.toString(),
-      },
-      { dispatchAfterStateChangeEvent: false },
-    );
+    const codeVerifier = generateCodeVerifier();
+    setStoredCodeVerifier(codeVerifier);
 
-    setSelectedThirdPartyProvider(null);
-    nextState.dispatchAfterStateChangeEvent();
+    try {
+      const nextState = await flowState.actions.thirdparty_oauth.run(
+        {
+          provider: name,
+          redirect_to: window.location.toString(),
+          code_verifier: codeVerifier,
+        },
+        { dispatchAfterStateChangeEvent: false },
+      );
+
+      if (nextState.error) {
+        clearStoredCodeVerifier();
+        setSelectedThirdPartyProvider(null);
+      }
+
+      nextState.dispatchAfterStateChangeEvent();
+    } catch (e) {
+      clearStoredCodeVerifier();
+      setSelectedThirdPartyProvider(null);
+      throw e;
+    }
   };
 
   const onRememberMeChange = async (event: Event) => {

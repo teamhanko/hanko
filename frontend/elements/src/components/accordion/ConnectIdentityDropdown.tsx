@@ -1,5 +1,10 @@
 import { Dispatch, SetStateAction, useContext } from "preact/compat";
-import { State } from "@teamhanko/hanko-frontend-sdk";
+import {
+  clearStoredCodeVerifier,
+  generateCodeVerifier,
+  setStoredCodeVerifier,
+  State,
+} from "@teamhanko/hanko-frontend-sdk";
 import { TranslateContext } from "@denysvuika/preact-translate";
 import Dropdown from "./Dropdown";
 import ErrorMessage from "../error/ErrorMessage";
@@ -24,13 +29,27 @@ const ConnectIdentityDropdown = ({
 
   const onSubmit = async (event: Event, provider: string) => {
     event.preventDefault();
-    const nextState =
-      await flowState.actions.connect_thirdparty_oauth_provider.run({
-        provider,
-        redirect_to: window.location.href,
-      });
 
-    return onState(nextState);
+    const codeVerifier = generateCodeVerifier();
+    setStoredCodeVerifier(codeVerifier);
+
+    try {
+      const nextState =
+        await flowState.actions.connect_thirdparty_oauth_provider.run({
+          provider,
+          redirect_to: window.location.href,
+          code_verifier: codeVerifier,
+        });
+
+      if (nextState.error) {
+        clearStoredCodeVerifier();
+      }
+
+      return onState(nextState);
+    } catch (e) {
+      clearStoredCodeVerifier();
+      throw e;
+    }
   };
 
   return (
