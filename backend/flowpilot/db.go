@@ -2,19 +2,21 @@ package flowpilot
 
 import (
 	"fmt"
-	"github.com/gofrs/uuid"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 // FlowModel represents the database model for a flow.
 type FlowModel struct {
-	ID        uuid.UUID // Unique ID of the flow.
-	Data      string    // Stash data associated with the flow.
-	CSRFToken string    // Current CSRF token
-	Version   int       // Version of the flow.
-	ExpiresAt time.Time // Expiry time of the flow.
-	CreatedAt time.Time // Creation time of the flow.
-	UpdatedAt time.Time // Update time of the flow.
+	ID        uuid.UUID  // Unique ID of the flow.
+	Data      string     // Stash data associated with the flow.
+	CSRFToken string     // Current CSRF token
+	SessionID *uuid.UUID // ID of the session the flow is bound to.
+	Version   int        // Version of the flow.
+	ExpiresAt time.Time  // Expiry time of the flow.
+	CreatedAt time.Time  // Creation time of the flow.
+	UpdatedAt time.Time  // Update time of the flow.
 }
 
 // FlowDB is the interface for interacting with the flow database.
@@ -43,9 +45,10 @@ func wrapDB(db FlowDB) flowDBWrapper {
 
 // flowCreationParam holds parameters for creating a new flow.
 type flowCreationParam struct {
-	data      string    //
-	csrfToken string    // Current CSRF token
-	expiresAt time.Time // Expiry time of the flow.
+	data      string     //
+	csrfToken string     // Current CSRF token
+	expiresAt time.Time  // Expiry time of the flow.
+	sessionID *uuid.UUID // ID of the session the flow is bound to.
 }
 
 // CreateFlowWithParam creates a new flow with the given parameters.
@@ -65,6 +68,7 @@ func (w *defaultFlowDBWrapper) createFlowWithParam(p flowCreationParam) (*FlowMo
 		ExpiresAt: p.expiresAt,
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
+		SessionID: p.sessionID,
 	}
 
 	// Create the flow in the database.
@@ -78,12 +82,13 @@ func (w *defaultFlowDBWrapper) createFlowWithParam(p flowCreationParam) (*FlowMo
 
 // flowUpdateParam holds parameters for updating a flow.
 type flowUpdateParam struct {
-	flowID    uuid.UUID // ID of the flow to update.
-	data      string    // Updated stash data for the flow.
-	version   int       // Updated version of the flow.
-	csrfToken string    // Current CSRF tokens
-	expiresAt time.Time // Updated expiry time of the flow.
-	createdAt time.Time // Original creation time of the flow.
+	flowID    uuid.UUID  // ID of the flow to update.
+	data      string     // Updated stash data for the flow.
+	version   int        // Updated version of the flow.
+	csrfToken string     // Current CSRF tokens
+	expiresAt time.Time  // Updated expiry time of the flow.
+	createdAt time.Time  // Original creation time of the flow.
+	sessionID *uuid.UUID // ID of the session the flow is bound to.
 }
 
 // UpdateFlowWithParam updates the specified flow with the given parameters.
@@ -97,6 +102,7 @@ func (w *defaultFlowDBWrapper) updateFlowWithParam(p flowUpdateParam) (*FlowMode
 		ExpiresAt: p.expiresAt,
 		UpdatedAt: time.Now().UTC(),
 		CreatedAt: p.createdAt,
+		SessionID: p.sessionID,
 	}
 
 	// Update the flow in the database.
