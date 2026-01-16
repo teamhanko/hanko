@@ -4,7 +4,7 @@
   "dependencies": {
     "@teamhanko/hanko-elements": "^2.3.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "react-dom": "^19.2.3",
     "react-router-dom": "7.5.0"
   },
   "scripts": {
@@ -25,7 +25,7 @@
   },
   "devDependencies": {
     "@types/react": "^18.3.27",
-    "@types/react-dom": "^18.3.7",
+    "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "4.5.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.1"
