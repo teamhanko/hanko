@@ -1,5 +1,12 @@
 import { useContext, useEffect, useMemo, useState } from "preact/compat";
-import { HankoError, State, WebauthnSupport } from "@teamhanko/hanko-frontend-sdk";
+import {
+  HankoError,
+  State,
+  WebauthnSupport,
+  setStoredCodeVerifier,
+  generateCodeVerifier,
+  clearStoredCodeVerifier,
+} from "@teamhanko/hanko-frontend-sdk";
 
 import { AppContext } from "../contexts/AppProvider";
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -103,16 +110,27 @@ const LoginInitPage = (props: Props) => {
     event.preventDefault();
     setSelectedThirdPartyProvider(name);
 
-    const nextState = await flowState.actions.thirdparty_oauth.run({
-      provider: name,
-      redirect_to: window.location.toString(),
-    });
+    const codeVerifier = generateCodeVerifier();
+    setStoredCodeVerifier(codeVerifier);
 
-    if (nextState.error) {
+    try {
+      const nextState = await flowState.actions.thirdparty_oauth.run({
+        provider: name,
+        redirect_to: window.location.toString(),
+        code_verifier: codeVerifier,
+      });
+
+      if (nextState.error) {
+        clearStoredCodeVerifier();
+        setSelectedThirdPartyProvider(null);
+      }
+
+      return nextState;
+    } catch (e) {
+      clearStoredCodeVerifier();
       setSelectedThirdPartyProvider(null);
+      throw e;
     }
-
-    return nextState;
   };
 
   const showDivider = useMemo(
