@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "A senha da sua conta {{ .ServiceName }} foi atualizada."
+subject_password_update:
+  description: ""
+  other: "Sua senha foi atualizada."
+
+primary_email_update_text:
+  description: ""
+  other: "O endereço de e-mail principal da sua conta {{ .ServiceName }} foi atualizado de {{ .OldEmailAddress }} para {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "O seu endereço de e-mail principal foi atualizado."
+
+email_create_text:
+  description: ""
+  other: "O endereço de e-mail {{ .NewEmailAddress }} foi adicionado à sua conta {{ .ServiceName }}."
+subject_email_create:
+  description: ""
+  other: "Um novo endereço de e-mail foi adicionado."
+
+email_delete_text:
+  description: ""
+  other: "O endereço de e-mail {{ .DeletedEmailAddress }} foi removido da sua conta {{ .ServiceName }}."
+subject_email_delete:
+  description: ""
+  other: "Um endereço de e-mail foi removido."
+
+passkey_create_text:
+  description: ""
+  other: "Uma nova chave de acesso foi adicionada à sua conta {{ .ServiceName }}."
+subject_passkey_create:
+  description: ""
+  other: "Uma nova chave de acesso foi adicionada."
+
+mfa_create_text:
+  description: ""
+  other: "Um novo método de autenticação multifator (MFA) foi adicionado com sucesso à sua conta {{ .ServiceName }}."
+subject_mfa_create:
+  description: ""
+  other: "Um novo método de MFA foi adicionado."
+
+mfa_delete_text:
+  description: ""
+  other: "Um método de autenticação multifator (MFA) existente foi removido da sua conta {{ .ServiceName }}."
+subject_mfa_delete:
+  description: ""
+  other: "Um método de MFA foi removido."
