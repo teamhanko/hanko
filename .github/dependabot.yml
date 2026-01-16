@@ -17,6 +17,8 @@ updates:
     # Always increase the version requirement
     # to match the new version.
     versioning-strategy: increase
+    exclude-paths:
+      - "/examples/**"
 
   - package-ecosystem: "github-actions"
     # Workflow files stored in the default location of `.github/workflows`.
