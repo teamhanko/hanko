@@ -130,7 +130,7 @@
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-promise": "^6.1.1",
     "sass": "^1.61.0",
-    "sass-loader": "^13.2.0",
+    "sass-loader": "^16.0.6",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.2",
     "ts-jest": "^29.1.1",
