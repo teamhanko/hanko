@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 
 	"github.com/gobuffalo/pop/v6"
@@ -60,6 +61,17 @@ func (w *webhookPersister) Update(webhook models.Webhook) error {
 
 	if vErr != nil && vErr.HasAny() {
 		return fmt.Errorf("webhook object validation failed: %w", vErr)
+	}
+
+	for _, event := range webhook.WebhookEvents {
+		vErr, err = w.db.ValidateAndCreate(&event)
+		if err != nil {
+			return fmt.Errorf("failed to create webhook event during update: %w", err)
+		}
+
+		if vErr != nil && vErr.HasAny() {
+			return fmt.Errorf("webhook event object validation failed during update: %w", vErr)
+		}
 	}
 
 	return nil
