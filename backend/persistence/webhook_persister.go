@@ -64,6 +64,15 @@ func (w *webhookPersister) Update(webhook models.Webhook) error {
 	}
 
 	for _, event := range webhook.WebhookEvents {
+		exists, err := w.db.Where("id = ?", event.ID).Exists(&models.WebhookEvent{})
+		if err != nil {
+			return fmt.Errorf("failed to check for existing webhook event: %w", err)
+		}
+
+		if exists {
+			continue
+		}
+
 		vErr, err = w.db.ValidateAndCreate(&event)
 		if err != nil {
 			return fmt.Errorf("failed to create webhook event during update: %w", err)
