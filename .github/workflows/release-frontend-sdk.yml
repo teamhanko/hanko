@@ -10,6 +10,7 @@ defaults:
     working-directory: frontend/frontend-sdk
 
 permissions:
+  contents: write  # Added to allow pushing to gh-pages
   id-token: write  # Required for OIDC
 
 jobs:
