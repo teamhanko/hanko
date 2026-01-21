@@ -15,6 +15,11 @@ type EmailPersister interface {
 	FindByUserId(uuid.UUID) (models.Emails, error)
 	FindByAddress(string) (*models.Email, error)
 	FindByAddressAndTenant(address string, tenantID *uuid.UUID) (*models.Email, error)
+	// FindByAddressWithTenantFallback looks for email by address:
+	// 1. First tries to find with the specified tenant_id
+	// 2. If not found and tenantID is provided, falls back to global (tenant_id IS NULL)
+	// Returns: email, isGlobalFallback, error
+	FindByAddressWithTenantFallback(address string, tenantID *uuid.UUID) (*models.Email, bool, error)
 	Create(models.Email) error
 	Update(models.Email) error
 	Delete(models.Email) error
@@ -111,6 +116,34 @@ func (e *emailPersister) FindByAddressAndTenant(address string, tenantID *uuid.U
 	}
 
 	return &email, nil
+}
+
+func (e *emailPersister) FindByAddressWithTenantFallback(address string, tenantID *uuid.UUID) (*models.Email, bool, error) {
+	// If no tenant specified, just do normal lookup
+	if tenantID == nil {
+		email, err := e.FindByAddress(address)
+		return email, false, err
+	}
+
+	// First, try to find with the specified tenant
+	email, err := e.FindByAddressAndTenant(address, tenantID)
+	if err != nil {
+		return nil, false, err
+	}
+	if email != nil {
+		return email, false, nil // Found in tenant
+	}
+
+	// Not found in tenant, try to find global user (tenant_id IS NULL)
+	email, err = e.FindByAddressAndTenant(address, nil)
+	if err != nil {
+		return nil, false, err
+	}
+	if email != nil {
+		return email, true, nil // Found as global user (needs adoption)
+	}
+
+	return nil, false, nil // Not found anywhere
 }
 
 func (e *emailPersister) Create(email models.Email) error {
