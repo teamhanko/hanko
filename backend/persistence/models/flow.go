@@ -11,13 +11,14 @@ import (
 
 // Flow is used by pop to map your flows database table to your go code.
 type Flow struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	Data      string    `json:"data" db:"data"`
-	Version   int       `json:"version" db:"version"`
-	CSRFToken string    `json:"csrf_token" db:"csrf_token"`
-	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ID        uuid.UUID  `json:"id" db:"id"`
+	TenantID  *uuid.UUID `json:"tenant_id,omitempty" db:"tenant_id"`
+	Data      string     `json:"data" db:"data"`
+	Version   int        `json:"version" db:"version"`
+	CSRFToken string     `json:"csrf_token" db:"csrf_token"`
+	ExpiresAt time.Time  `json:"expires_at" db:"expires_at"`
+	UpdatedAt time.Time  `json:"updated_at" db:"updated_at"`
+	CreatedAt time.Time  `json:"created_at" db:"created_at"`
 }
 
 func (f *Flow) ToFlowpilotModel() *flowpilot.FlowModel {

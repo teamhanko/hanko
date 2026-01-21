@@ -12,6 +12,7 @@ import (
 // Email is used by pop to map your users database table to your go code.
 type Email struct {
 	ID           uuid.UUID     `db:"id" json:"id"`
+	TenantID     *uuid.UUID    `db:"tenant_id" json:"tenant_id,omitempty"`
 	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"` // TODO: should not be a pointer anymore
 	Address      string        `db:"address" json:"address"`
 	Verified     bool          `db:"verified" json:"verified"`

@@ -61,7 +61,8 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 	var userID uuid.UUID
 
 	if c.Stash().Get(shared.StashPathEmail).Exists() {
-		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(c.Stash().Get(shared.StashPathEmail).String())
+		// Use tenant-scoped lookup if multi-tenant mode is enabled
+		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddressAndTenant(c.Stash().Get(shared.StashPathEmail).String(), deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to find user by email: %w", err)
 		}
@@ -73,7 +74,8 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		userID = *emailModel.UserID
 	} else if c.Stash().Get(shared.StashPathUsername).Exists() {
 		username := c.Stash().Get(shared.StashPathUsername).String()
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
+		// Use tenant-scoped lookup if multi-tenant mode is enabled
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsernameAndTenant(username, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
 		}

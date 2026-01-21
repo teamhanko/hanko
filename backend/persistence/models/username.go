@@ -9,11 +9,12 @@ import (
 )
 
 type Username struct {
-	ID        uuid.UUID `db:"id"`
-	UserId    uuid.UUID `db:"user_id"`
-	Username  string    `db:"username"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        uuid.UUID  `db:"id"`
+	TenantID  *uuid.UUID `db:"tenant_id"`
+	UserId    uuid.UUID  `db:"user_id"`
+	Username  string     `db:"username"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at"`
 }
 
 func NewUsername(userId uuid.UUID, username string) *Username {

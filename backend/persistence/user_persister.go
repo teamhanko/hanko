@@ -13,6 +13,7 @@ import (
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
 	GetByEmailAddress(string) (*models.User, error)
+	GetByEmailAddressAndTenant(emailAddress string, tenantID *uuid.UUID) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
@@ -20,6 +21,7 @@ type UserPersister interface {
 	All() ([]models.User, error)
 	Count(userIDs []uuid.UUID, email string, username string) (int, error)
 	GetByUsername(username string) (*models.User, error)
+	GetByUsernameAndTenant(username string, tenantID *uuid.UUID) (*models.User, error)
 }
 
 type userPersister struct {
@@ -76,6 +78,31 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 	return p.Get(*email.UserID)
 }
 
+func (p *userPersister) GetByEmailAddressAndTenant(emailAddress string, tenantID *uuid.UUID) (*models.User, error) {
+	email := models.Email{}
+	query := p.db.Eager().Where("address = (?)", emailAddress)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID.String())
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.First(&email)
+
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by email address and tenant: %w", err)
+	}
+
+	if email.UserID == nil {
+		return nil, nil
+	}
+
+	return p.Get(*email.UserID)
+}
+
 func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	user := models.User{}
 	err := p.db.EagerPreload(
@@ -95,6 +122,35 @@ func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (p *userPersister) GetByUsernameAndTenant(username string, tenantID *uuid.UUID) (*models.User, error) {
+	user := models.User{}
+	query := p.db.EagerPreload(
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"PasswordCredential",
+		"Username",
+		"OTPSecret",
+		"Metadata").
+		LeftJoin("usernames", "usernames.user_id = users.id").
+		Where("usernames.username = (?)", username)
+	if tenantID != nil {
+		query = query.Where("usernames.tenant_id = ?", tenantID.String())
+	} else {
+		query = query.Where("usernames.tenant_id IS NULL")
+	}
+	err := query.First(&user)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by username and tenant: %w", err)
 	}
 
 	return &user, nil

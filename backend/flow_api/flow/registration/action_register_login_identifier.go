@@ -84,13 +84,13 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
 
-		// Check that username is not already taken
+		// Check that username is not already taken (tenant-scoped if multi-tenant mode is enabled)
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
+		usernameModel, err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).GetByNameAndTenant(username, deps.TenantID)
 		if err != nil {
 			return err
 		}
-		if userModel != nil {
+		if usernameModel != nil {
 			c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
 			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
@@ -119,9 +119,9 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		}
 
 		if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
-			// Check that email is not already taken
+			// Check that email is not already taken (tenant-scoped if multi-tenant mode is enabled)
 			// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
-			emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
+			emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddressAndTenant(email, deps.TenantID)
 			if err != nil {
 				return err
 			}

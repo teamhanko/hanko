@@ -102,7 +102,8 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue)
+		// Use tenant-scoped lookup if multi-tenant mode is enabled
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddressAndTenant(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return err
 		}
@@ -144,7 +145,8 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		// User has submitted a username.
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue)
+		// Use tenant-scoped lookup if multi-tenant mode is enabled
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsernameAndTenant(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get user by username from db: %w", err)
 		}
