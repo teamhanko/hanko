@@ -57,7 +57,7 @@ func Tenant(cfg config.MultiTenant, persister persistence.Persister) echo.Middle
 					now := time.Now().UTC()
 					tenant = &models.Tenant{
 						ID:        *tenantID,
-						Name:      fmt.Sprintf("Tenant-%s", tenantID.String()[:8]), // Use first 8 chars of UUID as name
+						Name:      fmt.Sprintf("Tenant-%s", tenantID.String()), // Use full UUID as name to avoid collisions
 						Slug:      tenantID.String(),                               // Use full UUID as slug for uniqueness
 						Enabled:   true,
 						CreatedAt: now,
