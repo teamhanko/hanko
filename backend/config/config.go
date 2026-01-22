@@ -239,5 +239,10 @@ func (c *Config) PostProcess() error {
 		return fmt.Errorf("failed to post process saml settings: %w", err)
 	}
 
+	err = c.Email.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process email settings: %w", err)
+	}
+
 	return nil
 }

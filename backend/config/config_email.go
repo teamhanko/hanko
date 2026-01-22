@@ -47,3 +47,11 @@ func (e *Email) Validate() error {
 	}
 	return fmt.Errorf("invalid passcode_characters: %s (allowed: 'numeric', 'alphanumeric')", e.PasscodeCharset)
 }
+
+func (e *Email) PostProcess() error {
+	if e.PasscodeCharset == "" {
+		e.PasscodeCharset = PasscodeCharsetNumeric
+	}
+
+	return nil
+}
