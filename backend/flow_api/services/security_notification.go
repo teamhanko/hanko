@@ -7,8 +7,11 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 
 	"github.com/teamhanko/hanko/backend/v2/config"
 )
@@ -65,28 +68,55 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		return err
 	}
 
+	deliveredByHanko := false
 	if s.cfg.EmailDelivery.Enabled {
 		err = s.emailService.SendEmail(p.EmailAddress, subject, bodyPlain, bodyHTML)
 		if err != nil {
 			return err
 		}
+		deliveredByHanko = true
+	}
 
-		auditLogDetails := []auditlog.DetailOption{
-			auditlog.Detail("template", p.Template),
-			auditlog.Detail("email_address", p.EmailAddress),
-		}
+	webhookData := webhook.EmailSend{
+		Subject:          subject,
+		BodyPlain:        bodyPlain,
+		Body:             bodyHTML,
+		ToEmailAddress:   p.EmailAddress,
+		DeliveredByHanko: deliveredByHanko,
+		Language:         language,
+		Type:             "security_notification",
+		Data: map[string]interface{}{
+			"template": p.Template,
+		},
+	}
 
-		err := s.auditLog.CreateWithConnection(
-			tx,
-			p.HttpContext,
-			models.AuditLogSecurityNotificationSent,
-			&models.User{ID: p.UserID},
-			nil,
-			auditLogDetails...)
+	err = webhookUtils.TriggerWebhooks(p.HttpContext, tx, events.EmailSend, webhookData)
+	if err != nil {
+		return err
+	}
 
-		if err != nil {
-			return fmt.Errorf("could not create audit log: %w", err)
-		}
+	// Prefer full user context if available; fall back to a bare user by ID.
+	userForAudit := &models.User{ID: p.UserID}
+	if p.UserContext.ID != uuid.Nil {
+		userForAudit = &p.UserContext
+	}
+
+	auditLogDetails := []auditlog.DetailOption{
+		auditlog.Detail("template", p.Template),
+		auditlog.Detail("email_address", p.EmailAddress),
+		auditlog.Detail("delivered_by_hanko", fmt.Sprintf("%t", deliveredByHanko)),
+	}
+
+	err = s.auditLog.CreateWithConnection(
+		tx,
+		p.HttpContext,
+		models.AuditLogSecurityNotificationSent,
+		userForAudit,
+		nil,
+		auditLogDetails...,
+	)
+	if err != nil {
+		return fmt.Errorf("could not create audit log: %w", err)
 	}
 
 	return nil
