@@ -63,6 +63,8 @@ type Persister interface {
 	GetOTPSecretPersisterWithConnection(tx *pop.Connection) OTPSecretPersister
 	GetWebauthnCredentialUserHandlePersister() WebauthnCredentialUserHandlePersister
 	GetWebauthnCredentialUserHandlePersisterWithConnection(tx *pop.Connection) WebauthnCredentialUserHandlePersister
+	GetTenantPersister() TenantPersister
+	GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister
 	Transaction(func(tx *pop.Connection) error) error
 }
 
@@ -331,4 +333,12 @@ func (p *persister) GetUserMetadataPersister() UserMetadataPersister {
 
 func (p *persister) GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister {
 	return NewUserMetadataPersister(tx)
+}
+
+func (p *persister) GetTenantPersister() TenantPersister {
+	return NewTenantPersister(p.DB)
+}
+
+func (p *persister) GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister {
+	return NewTenantPersister(tx)
 }

@@ -1,0 +1,7 @@
+sql("DROP INDEX IF EXISTS usernames_username_global_idx")
+sql("DROP INDEX IF EXISTS usernames_username_tenant_idx")
+sql("DROP INDEX IF EXISTS emails_address_global_idx")
+sql("DROP INDEX IF EXISTS emails_address_tenant_idx")
+
+add_index("usernames", "username", {"unique": true})
+add_index("emails", "address", {"unique": true})

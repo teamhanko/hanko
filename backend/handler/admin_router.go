@@ -118,5 +118,14 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	sessions := g.Group("/sessions")
 	sessions.POST("", sessionsHandler.Generate)
 
+	// Tenant management routes (only available when multi-tenant mode can be enabled)
+	tenantHandler := NewTenantHandlerAdmin(persister)
+	tenants := g.Group("/tenants")
+	tenants.GET("", tenantHandler.List)
+	tenants.POST("", tenantHandler.Create, webhookMiddleware)
+	tenants.GET("/:id", tenantHandler.Get)
+	tenants.PUT("/:id", tenantHandler.Update, webhookMiddleware)
+	tenants.DELETE("/:id", tenantHandler.Delete, webhookMiddleware)
+
 	return e
 }

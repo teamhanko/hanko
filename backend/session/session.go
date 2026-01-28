@@ -111,6 +111,10 @@ func (m *manager) GenerateJWT(user dto.UserJWT, opts ...JWTOptions) (string, jwt
 		_ = token.Set("username", user.Username)
 	}
 
+	if user.TenantID != nil {
+		_ = token.Set("tenant_id", *user.TenantID)
+	}
+
 	for _, opt := range opts {
 		opt(token)
 	}

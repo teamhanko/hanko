@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
@@ -11,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
@@ -31,6 +33,8 @@ type Dependencies struct {
 	Tx                          *pop.Connection
 	AuthenticatorMetadata       mapper.AuthenticatorMetadata
 	AuditLogger                 auditlog.Logger
+	TenantID                    *uuid.UUID     // Tenant ID for multi-tenant mode
+	Tenant                      *models.Tenant // Full tenant model for multi-tenant mode
 }
 
 type Action struct{}

@@ -25,6 +25,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
+	"github.com/teamhanko/hanko/backend/v2/middleware"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
@@ -189,6 +190,8 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			SamlService:                 h.SamlService,
 			AuthenticatorMetadata:       h.AuthenticatorMetadata,
 			AuditLogger:                 h.AuditLogger,
+			TenantID:                    middleware.GetTenantID(c),
+			Tenant:                      middleware.GetTenant(c),
 		}
 
 		flow.Set("deps", deps)

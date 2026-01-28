@@ -14,6 +14,7 @@ import (
 // WebauthnCredential is used by pop to map your webauthn_credentials database table to your go code.
 type WebauthnCredential struct {
 	ID              string                        `db:"id" json:"id"`
+	TenantID        *uuid.UUID                    `db:"tenant_id" json:"tenant_id,omitempty"`
 	Name            *string                       `db:"name" json:"name"`
 	UserId          uuid.UUID                     `db:"user_id" json:"user_id"`
 	PublicKey       string                        `db:"public_key" json:"public_key"`

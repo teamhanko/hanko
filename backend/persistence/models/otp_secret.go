@@ -9,11 +9,12 @@ import (
 )
 
 type OTPSecret struct {
-	ID        uuid.UUID `db:"id"`
-	UserID    uuid.UUID `db:"user_id"`
-	Secret    string    `db:"secret"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        uuid.UUID  `db:"id"`
+	TenantID  *uuid.UUID `db:"tenant_id"`
+	UserID    uuid.UUID  `db:"user_id"`
+	Secret    string     `db:"secret"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at"`
 }
 
 func (otpSecret OTPSecret) TableName() string {
