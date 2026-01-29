@@ -35,7 +35,7 @@ require (
 	github.com/labstack/echo/v4 v4.15.0
 	github.com/labstack/gommon v0.4.2
 	github.com/lestrrat-go/jwx/v2 v2.1.6
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.1
 	github.com/mattermost/xml-roundtrip-validator v0.1.0
 	github.com/mileusna/useragent v1.3.5
 	github.com/mitchellh/mapstructure v1.5.0
