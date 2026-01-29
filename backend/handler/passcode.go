@@ -309,7 +309,7 @@ func (h *PasscodeHandler) Finish(c echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("failed to create audit log: %w", err)
 			}
-			businessError = echo.NewHTTPError(http.StatusRequestTimeout, "passcode request timed out").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime))) // TODO: maybe we should use BadRequest, because RequestTimeout might be to technical and can refer to different error
+			businessError = echo.NewHTTPError(http.StatusBadRequest, "passcode has expired").SetInternal(errors.New(fmt.Sprintf("createdAt: %s -> lastVerificationTime: %s", passcode.CreatedAt, lastVerificationTime)))
 			return nil
 		}
 
