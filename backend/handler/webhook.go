@@ -2,6 +2,9 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
@@ -11,8 +14,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"net/http"
-	"time"
 )
 
 type WebhookHandler interface {
