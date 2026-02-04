@@ -20,7 +20,8 @@ type SendSecurityNotificationParams struct {
 	Template     string
 	UserID       uuid.UUID
 	EmailAddress string
-	BodyData     map[string]interface{}
+	BodyData     map[string]interface{}            // Data used in templates
+	Data         *webhook.SecurityNotificationData // Data used for (serialized) webhook 'data' payload
 	HttpContext  echo.Context
 	UserContext  models.User
 }
@@ -77,6 +78,13 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		deliveredByHanko = true
 	}
 
+	if p.Data == nil {
+		p.Data = &webhook.SecurityNotificationData{}
+	}
+
+	p.Data.Template = p.Template
+	p.Data.ServiceName = s.cfg.Service.Name
+
 	webhookData := webhook.EmailSend{
 		Subject:          subject,
 		BodyPlain:        bodyPlain,
@@ -85,9 +93,7 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		DeliveredByHanko: deliveredByHanko,
 		Language:         language,
 		Type:             "security_notification",
-		Data: map[string]interface{}{
-			"template": p.Template,
-		},
+		Data:             p.Data,
 	}
 
 	err = webhookUtils.TriggerWebhooks(p.HttpContext, tx, events.EmailSend, webhookData)

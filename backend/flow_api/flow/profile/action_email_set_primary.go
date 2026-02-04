@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -105,6 +106,10 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 			BodyData: map[string]interface{}{
 				"OldEmailAddress": existingPrimaryEmailAddress,
 				"NewEmailAddress": emailModel.Address,
+			},
+			Data: &webhook.SecurityNotificationData{
+				OldEmailAddress: existingPrimaryEmailAddress,
+				NewEmailAddress: emailModel.Address,
 			},
 		})
 	}
