@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -110,6 +111,9 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 			HttpContext:  deps.HttpContext,
 			BodyData: map[string]interface{}{
 				"DeletedEmailAddress": deletedEmailAddress,
+			},
+			Data: &webhook.SecurityNotificationData{
+				DeletedEmailAddress: deletedEmailAddress,
 			},
 			UserContext: *userModel,
 		})

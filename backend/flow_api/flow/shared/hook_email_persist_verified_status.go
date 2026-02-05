@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
@@ -119,6 +120,9 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			HttpContext:  deps.HttpContext,
 			BodyData: map[string]interface{}{
 				"NewEmailAddress": emailAddressToVerify,
+			},
+			Data: &webhook.SecurityNotificationData{
+				NewEmailAddress: emailAddressToVerify,
 			},
 			UserContext: *user,
 		})
