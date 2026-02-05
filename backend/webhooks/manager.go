@@ -2,7 +2,6 @@ package webhooks
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
@@ -72,8 +71,6 @@ func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}
 		m.logger.Error(fmt.Errorf("unable to generate JWT for webhook data: %w", err))
 		return
 	}
-
-	log.Println("Token: ", dataToken)
 
 	jobData := JobData{
 		Token: dataToken,
