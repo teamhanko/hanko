@@ -40,7 +40,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 
 	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 	s.Require().NoError(err)
-	s.Equal(2, count)
+	s.Equal(3, count)
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
@@ -61,7 +61,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 
 	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
 	s.Require().NoError(err)
-	s.Equal(3, count)
+	s.Equal(4, count)
 }
 
 func (s *userAdminSuite) TestUserHandlerAdmin_Delete_InvalidUserId() {
@@ -90,7 +90,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_List() {
 	e.ServeHTTP(rec, req)
 
 	s.Equal(http.StatusOK, rec.Code)
-	s.Equal("3", rec.Header().Get("X-Total-Count"))
+	s.Equal("4", rec.Header().Get("X-Total-Count"))
 	s.Equal("<http://example.com/users?page=1&per_page=20>; rel=\"first\"", rec.Header().Get("Link"))
 }
 
@@ -109,14 +109,14 @@ func (s *userAdminSuite) TestUserHandlerAdmin_List_Pagination() {
 	e.ServeHTTP(rec, req)
 
 	if s.Equal(http.StatusOK, rec.Code) {
-		s.Equal("3", rec.Header().Get("X-Total-Count"))
+		s.Equal("4", rec.Header().Get("X-Total-Count"))
 
 		var got []models.User
 		err = json.Unmarshal(rec.Body.Bytes(), &got)
 		s.Require().NoError(err)
 
 		s.Equal(1, len(got))
-		s.Equal("<http://example.com/users?page=3&per_page=1>; rel=\"last\",<http://example.com/users?page=2&per_page=1>; rel=\"next\"", rec.Header().Get("Link"))
+		s.Equal("<http://example.com/users?page=4&per_page=1>; rel=\"last\",<http://example.com/users?page=2&per_page=1>; rel=\"next\"", rec.Header().Get("Link"))
 	}
 }
 
@@ -264,6 +264,164 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Create() {
 			s.Require().NoError(err)
 
 			req := httptest.NewRequest(http.MethodPost, "/users", strings.NewReader(currentTest.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Equal(currentTest.expectedStatusCode, rec.Code)
+
+			err = e.Close()
+			s.Require().NoError(err)
+
+			s.Require().NoError(s.Storage.MigrateDown(-1))
+		})
+	}
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_Patch_Success() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tests := []struct {
+		name               string
+		userID             string
+		body               string
+		expectedStatusCode int
+		verify             func(s *userAdminSuite, rec *httptest.ResponseRecorder)
+	}{
+		{
+			name:               "success all fields",
+			userID:             "6be8e0e7-05e6-4223-807b-06fe1d5e7b75",
+			body:               `{"username": "newusername", "name": "New Name", "given_name": "New", "family_name": "Name", "picture": "https://example.com/pic.png"}`,
+			expectedStatusCode: http.StatusOK,
+			verify: func(s *userAdminSuite, rec *httptest.ResponseRecorder) {
+				var got map[string]any
+				err := json.Unmarshal(rec.Body.Bytes(), &got)
+				s.Require().NoError(err)
+				s.NotNil(got["username"])
+				username := got["username"].(map[string]any)
+				s.Equal("newusername", username["username"])
+				s.Equal("New Name", got["name"])
+				s.Equal("New", got["given_name"])
+				s.Equal("Name", got["family_name"])
+				s.Equal("https://example.com/pic.png", got["picture"])
+			},
+		},
+		{
+			name:               "success clear fields",
+			userID:             "6be8e0e7-05e6-4223-807b-06fe1d5e7b75",
+			body:               `{"username": null, "name": null, "given_name": null, "family_name": null, "picture": null}`,
+			expectedStatusCode: http.StatusOK,
+			verify: func(s *userAdminSuite, rec *httptest.ResponseRecorder) {
+				var got map[string]any
+				err := json.Unmarshal(rec.Body.Bytes(), &got)
+				s.Require().NoError(err)
+				s.Nil(got["username"])
+				s.Empty(got["name"])
+				s.Empty(got["given_name"])
+				s.Empty(got["family_name"])
+				s.Empty(got["picture"])
+			},
+		},
+		{
+			name:               "partial update (create username)",
+			userID:             "b3210fd8-c71f-4c9d-8123-a58f5f46a07f",
+			body:               `{"username": "baruser"}`,
+			expectedStatusCode: http.StatusOK,
+			verify: func(s *userAdminSuite, rec *httptest.ResponseRecorder) {
+				var got map[string]any
+				err := json.Unmarshal(rec.Body.Bytes(), &got)
+				s.Require().NoError(err)
+				s.NotNil(got["username"])
+				username := got["username"].(map[string]any)
+				s.Equal("baruser", username["username"])
+			},
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.Require().NoError(s.Storage.MigrateUp())
+
+			e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+			err := s.LoadFixtures("../test/fixtures/user_admin")
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("/users/%s", currentTest.userID), strings.NewReader(currentTest.body))
+			req.Header.Set("Content-Type", "application/json")
+			rec := httptest.NewRecorder()
+
+			e.ServeHTTP(rec, req)
+
+			s.Equal(currentTest.expectedStatusCode, rec.Code)
+			if currentTest.verify != nil {
+				currentTest.verify(s, rec)
+			}
+
+			err = e.Close()
+			s.Require().NoError(err)
+
+			s.Require().NoError(s.Storage.MigrateDown(-1))
+		})
+	}
+}
+
+func (s *userAdminSuite) TestUserHandlerAdmin_Patch_Failure() {
+	if testing.Short() {
+		s.T().Skip("skipping test in short mode.")
+	}
+
+	tests := []struct {
+		name               string
+		userID             string
+		body               string
+		expectedStatusCode int
+	}{
+		{
+			name:               "invalid username",
+			userID:             "6be8e0e7-05e6-4223-807b-06fe1d5e7b75",
+			body:               `{"username": "invalid username with spaces"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "invalid picture URL",
+			userID:             "6be8e0e7-05e6-4223-807b-06fe1d5e7b75",
+			body:               `{"picture": "not-a-url"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "empty string username",
+			userID:             "6be8e0e7-05e6-4223-807b-06fe1d5e7b75",
+			body:               `{"username": ""}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+		{
+			name:               "user not found",
+			userID:             "00000000-0000-0000-0000-000000000000",
+			body:               `{"name": "Does Not Matter"}`,
+			expectedStatusCode: http.StatusNotFound,
+		},
+		{
+			name:               "invalid user id",
+			userID:             "invalid-uuid",
+			body:               `{"name": "Does Not Matter"}`,
+			expectedStatusCode: http.StatusBadRequest,
+		},
+	}
+
+	for _, currentTest := range tests {
+		s.Run(currentTest.name, func() {
+			s.Require().NoError(s.Storage.MigrateUp())
+
+			e := NewAdminRouter(&test.DefaultConfig, s.Storage, nil)
+
+			err := s.LoadFixtures("../test/fixtures/user_admin")
+			s.Require().NoError(err)
+
+			req := httptest.NewRequest(http.MethodPatch, fmt.Sprintf("/users/%s", currentTest.userID), strings.NewReader(currentTest.body))
 			req.Header.Set("Content-Type", "application/json")
 			rec := httptest.NewRecorder()
 

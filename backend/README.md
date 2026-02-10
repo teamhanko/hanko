@@ -679,7 +679,14 @@ templated strings using Go's text/template syntax, or nested structures (maps an
 
 The template has access to user data via the `.User` field, which includes:
 - `.User.UserID`: The user's unique ID (string)
-- `.User.Email`: Email details (optional, with `.Address`, `.IsPrimary`, `.IsVerified`)
+- `.User.Email`: Email details (optional)
+  - `User.Email.Address`: The actual email address
+  - `User.Email.IsPrimary`: Whether this email address is the primary email address of this user
+  - `User.Email.IsVerified`: Whether this email address has been verified by the user
+- `.User.FamilyName`: The user's family name (string, optional)
+- `.User.GivenName`: The user's given name (string, optional)
+- `.User.Name`: The user's full name (string, optional)
+- `.User.Picture`: The user's profile picture URL (string, optional)
 - `.User.Username`: The user's username (string, optional)
 - `.User.Metadata`: The user's public and unsafe metadata (optional)
     - `.User.Metadata.Public`: The user's public metadata (object)
