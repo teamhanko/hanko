@@ -13,6 +13,7 @@ import (
 type UserPersister interface {
 	Get(uuid.UUID) (*models.User, error)
 	GetByEmailAddress(string) (*models.User, error)
+	GetByEmailAddressAndTenant(emailAddress string, tenantID *uuid.UUID) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
@@ -20,6 +21,10 @@ type UserPersister interface {
 	All() ([]models.User, error)
 	Count(userIDs []uuid.UUID, email string, username string) (int, error)
 	GetByUsername(username string) (*models.User, error)
+	GetByUsernameAndTenant(username string, tenantID *uuid.UUID) (*models.User, error)
+	// AdoptUserToTenant updates a user and all related records to belong to a tenant.
+	// This is used when a global user (tenant_id = NULL) logs in with X-Tenant-ID.
+	AdoptUserToTenant(userID uuid.UUID, tenantID uuid.UUID) error
 }
 
 type userPersister struct {
@@ -76,6 +81,31 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 	return p.Get(*email.UserID)
 }
 
+func (p *userPersister) GetByEmailAddressAndTenant(emailAddress string, tenantID *uuid.UUID) (*models.User, error) {
+	email := models.Email{}
+	query := p.db.Eager().Where("address = (?)", emailAddress)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID.String())
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.First(&email)
+
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by email address and tenant: %w", err)
+	}
+
+	if email.UserID == nil {
+		return nil, nil
+	}
+
+	return p.Get(*email.UserID)
+}
+
 func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	user := models.User{}
 	err := p.db.EagerPreload(
@@ -95,6 +125,35 @@ func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 	}
 	if err != nil {
 		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (p *userPersister) GetByUsernameAndTenant(username string, tenantID *uuid.UUID) (*models.User, error) {
+	user := models.User{}
+	query := p.db.EagerPreload(
+		"Emails",
+		"Emails.PrimaryEmail",
+		"Emails.Identities",
+		"WebauthnCredentials",
+		"PasswordCredential",
+		"Username",
+		"OTPSecret",
+		"Metadata").
+		LeftJoin("usernames", "usernames.user_id = users.id").
+		Where("usernames.username = (?)", username)
+	if tenantID != nil {
+		query = query.Where("usernames.tenant_id = ?", tenantID.String())
+	} else {
+		query = query.Where("usernames.tenant_id IS NULL")
+	}
+	err := query.First(&user)
+	if err != nil && errors.Is(err, sql.ErrNoRows) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user by username and tenant: %w", err)
 	}
 
 	return &user, nil
@@ -141,6 +200,31 @@ func (p *userPersister) Delete(user models.User) error {
 	err := p.db.Destroy(&user)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	return nil
+}
+
+// AdoptUserToTenant updates a user and all related records to belong to a tenant.
+// This migrates a global user (tenant_id = NULL) to a specific tenant.
+func (p *userPersister) AdoptUserToTenant(userID uuid.UUID, tenantID uuid.UUID) error {
+	// Update user
+	err := p.db.RawQuery("UPDATE users SET tenant_id = ? WHERE id = ? AND tenant_id IS NULL", tenantID, userID).Exec()
+	if err != nil {
+		return fmt.Errorf("failed to update user tenant_id: %w", err)
+	}
+
+	// Update all related records
+	tables := []string{"emails", "usernames", "identities", "webauthn_credentials",
+		"otp_secrets", "password_credentials", "sessions"}
+	for _, table := range tables {
+		err := p.db.RawQuery(
+			fmt.Sprintf("UPDATE %s SET tenant_id = ? WHERE user_id = ? AND tenant_id IS NULL", table),
+			tenantID, userID,
+		).Exec()
+		if err != nil {
+			return fmt.Errorf("failed to update %s tenant_id: %w", table, err)
+		}
 	}
 
 	return nil

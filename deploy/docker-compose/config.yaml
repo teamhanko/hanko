@@ -56,3 +56,11 @@ security_notifications:
       enabled: true
     mfa_delete:
       enabled: true
+
+# Multi-tenant configuration
+# Uncomment and configure to enable multi-tenant mode
+# multi_tenant:
+#   enabled: true                    # Enable multi-tenant mode (default: false)
+#   tenant_header: "X-Tenant-ID"     # HTTP header for tenant ID (default: X-Tenant-ID)
+#   allow_global_users: true         # Allow users without tenant - backward compatible (default: true)
+#   auto_provision: true             # Auto-create tenant if ID doesn't exist (default: true)

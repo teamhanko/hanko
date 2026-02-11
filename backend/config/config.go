@@ -75,6 +75,8 @@ type Config struct {
 	Webhooks WebhookSettings `yaml:"webhooks" json:"webhooks,omitempty" koanf:"webhooks" jsonschema:"title=webhooks"`
 	// `privacy` configures privacy settings
 	Privacy Privacy `yaml:"privacy" json:"privacy,omitempty" koanf:"privacy" jsonschema:"title=privacy"`
+	// `multi_tenant` configures multi-tenant mode for tenant-scoped user isolation.
+	MultiTenant MultiTenant `yaml:"multi_tenant" json:"multi_tenant,omitempty" koanf:"multi_tenant" split_words:"true" jsonschema:"title=multi_tenant"`
 }
 
 var (

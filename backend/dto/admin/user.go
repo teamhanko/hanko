@@ -10,6 +10,7 @@ import (
 
 type User struct {
 	ID                  uuid.UUID                        `json:"id"`
+	TenantID            *uuid.UUID                       `json:"tenant_id,omitempty"`
 	WebauthnCredentials []dto.WebauthnCredentialResponse `json:"webauthn_credentials,omitempty"`
 	Emails              []Email                          `json:"emails,omitempty"`
 	Username            *Username                        `json:"username,omitempty"`
@@ -74,6 +75,7 @@ func FromUserModel(model models.User) User {
 
 	return User{
 		ID:                  model.ID,
+		TenantID:            model.TenantID,
 		WebauthnCredentials: credentials,
 		Emails:              emails,
 		Username:            username,

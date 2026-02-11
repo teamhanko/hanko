@@ -17,6 +17,7 @@ import (
 // User is used by pop to map your users database table to your go code.
 type User struct {
 	ID                  uuid.UUID           `db:"id" json:"id"`
+	TenantID            *uuid.UUID          `db:"tenant_id" json:"tenant_id,omitempty"`
 	WebauthnCredentials WebauthnCredentials `has_many:"webauthn_credentials" json:"webauthn_credentials,omitempty"`
 	Emails              Emails              `has_many:"emails" json:"-"`
 	CreatedAt           time.Time           `db:"created_at" json:"created_at"`

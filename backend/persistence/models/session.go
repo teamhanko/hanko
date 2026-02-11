@@ -11,6 +11,7 @@ import (
 
 type Session struct {
 	ID        uuid.UUID    `db:"id" json:"id"`
+	TenantID  *uuid.UUID   `db:"tenant_id" json:"tenant_id,omitempty"`
 	UserID    uuid.UUID    `db:"user_id" json:"user_id"`
 	UserAgent nulls.String `db:"user_agent" json:"user_agent"`
 	IpAddress nulls.String `db:"ip_address" json:"ip_address"`
