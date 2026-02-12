@@ -2,9 +2,10 @@ package shared
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type PasswordSave struct {
@@ -25,7 +26,7 @@ func (h PasswordSave) Execute(c flowpilot.HookExecutionContext) error {
 		Password: c.Stash().Get(StashPathNewPassword).String(),
 	}
 
-	err := deps.Persister.GetPasswordCredentialPersister().Create(passwordCredential)
+	err := deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Create(passwordCredential)
 	if err != nil {
 		return fmt.Errorf("could not create password: %w", err)
 	}

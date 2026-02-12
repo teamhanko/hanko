@@ -13,18 +13,18 @@ import (
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/sethvargo/go-limiter"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/dto/webhook"
-	"github.com/teamhanko/hanko/backend/mail"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/rate_limiter"
-	"github.com/teamhanko/hanko/backend/session"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
-	"github.com/teamhanko/hanko/backend/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v2/mail"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/gomail.v2"
 )
@@ -57,7 +57,7 @@ func NewPasscodeHandler(cfg *config.Config, persister persistence.Persister, ses
 	return &PasscodeHandler{
 		mailer:            mailer,
 		renderer:          renderer,
-		passcodeGenerator: crypto.NewPasscodeGenerator(),
+		passcodeGenerator: crypto.NewNumericPasscodeGenerator(),
 		persister:         persister,
 		emailConfig:       cfg.EmailDelivery,
 		serviceConfig:     cfg.Service,

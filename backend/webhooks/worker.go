@@ -3,7 +3,7 @@ package webhooks
 import (
 	"fmt"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"time"
 )
 

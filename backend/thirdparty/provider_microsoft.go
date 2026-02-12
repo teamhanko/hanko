@@ -4,14 +4,15 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/mail"
+	"regexp"
+
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jws"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/mitchellh/mapstructure"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
-	"net/mail"
-	"regexp"
 )
 
 const (
@@ -62,11 +63,16 @@ func NewMicrosoftProvider(config config.ThirdPartyProvider, redirectURL string) 
 }
 
 func (p microsoftProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := p.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (p microsoftProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return p.oauthConfig.Exchange(context.Background(), code)
+func (p microsoftProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return p.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

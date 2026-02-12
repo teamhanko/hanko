@@ -101,11 +101,17 @@ export interface PasskeyCredentialDeleteInputs {
 
 export interface ExchangeTokenInputs {
   readonly token: Input<string>;
+  readonly code_verifier?: Input<string>;
 }
 
 export interface ThirdpartyOauthInputs {
   readonly provider: Input<string>;
   readonly redirect_to: Input<string>;
+  readonly code_verifier?: Input<string>;
+}
+
+export interface DisconnectThirdpartyInputs {
+  readonly identity_id: Input<string>;
 }
 
 export interface RememberMeInputs {

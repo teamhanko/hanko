@@ -2,13 +2,16 @@ package profile
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
-	"github.com/teamhanko/hanko/backend/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type EmailSetPrimary struct {
@@ -74,8 +77,10 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	var primaryEmail *models.PrimaryEmail
+	var existingPrimaryEmailAddress string
 	if e := userModel.Emails.GetPrimary(); e != nil {
 		primaryEmail = e.PrimaryEmail
+		existingPrimaryEmailAddress = e.Address
 	}
 
 	if primaryEmail == nil {
@@ -90,6 +95,23 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		if err != nil {
 			return fmt.Errorf("failed to change primary email: %w", err)
 		}
+	}
+
+	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled && existingPrimaryEmailAddress != "" {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: existingPrimaryEmailAddress,
+			Template:     "primary_email_update",
+			HttpContext:  deps.HttpContext,
+			UserContext:  *userModel,
+			BodyData: map[string]interface{}{
+				"OldEmailAddress": existingPrimaryEmailAddress,
+				"NewEmailAddress": emailModel.Address,
+			},
+			Data: &webhook.SecurityNotificationData{
+				OldEmailAddress: existingPrimaryEmailAddress,
+				NewEmailAddress: emailModel.Address,
+			},
+		})
 	}
 
 	err := deps.AuditLogger.CreateWithConnection(

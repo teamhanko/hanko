@@ -1,4 +1,3 @@
-import { Fragment } from "preact";
 import {
   useCallback,
   useContext,
@@ -90,7 +89,7 @@ const PasscodePage = (props: Props) => {
   }, [flowState]);
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t(`headlines.loginPasscode`)}</Headline1>
         <ErrorBox state={flowState} />
@@ -100,7 +99,7 @@ const PasscodePage = (props: Props) => {
             : t("texts.enterPasscodeNoEmail")}
         </Paragraph>
         <Paragraph hidden={!uiState.email}>
-           <b>{uiState.email}</b>
+          <b>{uiState.email}</b>
         </Paragraph>
         <Form
           flowAction={flowState.actions.verify_passcode}
@@ -136,7 +135,7 @@ const PasscodePage = (props: Props) => {
             : t("labels.sendNewPasscode")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

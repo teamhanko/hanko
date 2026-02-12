@@ -3,7 +3,8 @@ package thirdparty
 import (
 	"context"
 	"errors"
-	"github.com/teamhanko/hanko/backend/config"
+
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
 )
 
@@ -54,11 +55,16 @@ func NewGoogleProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 }
 
 func (g googleProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := g.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g googleProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code)
+func (g googleProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

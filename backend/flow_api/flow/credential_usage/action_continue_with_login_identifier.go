@@ -3,13 +3,14 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
 	"regexp"
 	"strings"
+
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type ContinueWithLoginIdentifier struct {
@@ -88,9 +89,24 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 	if treatIdentifierAsEmail {
 		// User has submitted an email address.
 
+		if deps.Cfg.Saml.Enabled {
+			domain := strings.Split(identifierInputValue, "@")[1]
+			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
+				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+
+				if err != nil {
+					return fmt.Errorf("failed to get auth url: %w", err)
+				}
+
+				_ = c.Payload().Set("redirect_url", authUrl)
+
+				return c.Continue(shared.StateThirdParty)
+			}
+		}
+
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersister().GetByEmailAddress(identifierInputValue)
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue)
 		if err != nil {
 			return err
 		}
@@ -128,26 +144,11 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				}
 			}
 		}
-
-		if deps.Cfg.Saml.Enabled {
-			domain := strings.Split(identifierInputValue, "@")[1]
-			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
-
-				if err != nil {
-					return fmt.Errorf("failed to get auth url: %w", err)
-				}
-
-				_ = c.Payload().Set("redirect_url", authUrl)
-
-				return c.Continue(shared.StateThirdParty)
-			}
-		}
 	} else {
 		// User has submitted a username.
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersister().GetByUsername(identifierInputValue)
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue)
 		if err != nil {
 			return fmt.Errorf("failed to get user by username from db: %w", err)
 		}
@@ -319,11 +320,11 @@ func (a ContinueWithLoginIdentifier) continueToPasscodeConfirmation(c flowpilot.
 	}
 
 	if c.Stash().Get(shared.StashPathUserID).Exists() {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "login"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateLogin); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	} else {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_login_attempted"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailLoginAttempted); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	}

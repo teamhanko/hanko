@@ -3,13 +3,14 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/rate_limiter"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 )
 
 type PasswordLogin struct {
@@ -72,7 +73,7 @@ func (a PasswordLogin) Execute(c flowpilot.ExecutionContext) error {
 		userID = *emailModel.UserID
 	} else if c.Stash().Get(shared.StashPathUsername).Exists() {
 		username := c.Stash().Get(shared.StashPathUsername).String()
-		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
 		if err != nil {
 			return fmt.Errorf("failed to find user via username: %w", err)
 		}

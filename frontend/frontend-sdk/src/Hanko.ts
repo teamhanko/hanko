@@ -20,7 +20,7 @@ import { User } from "./lib/flow-api/types/payload";
  * @property {string=} localStorageKey - The prefix / name of the local storage keys. Defaults to "hanko"
  * @property {string=} lang - Used to convey the preferred language to the API, e.g. for translating outgoing emails.
  *                            It is transmitted to the API in a custom header (X-Language).
- *                            Should match one of the supported languages ("bn", "de", "en", "fr", "it, "pt-BR", "zh")
+ *                            Should match one of the supported languages ("bn", "de", "en", "fr", "it, "nl", "pt-BR", "zh")
  *                            if email delivery by Hanko is enabled. If email delivery by Hanko is disabled and the
  *                            relying party configures a webhook for the "email.send" event, then the set language is
  *                            reflected in the payload of the token contained in the webhook request.

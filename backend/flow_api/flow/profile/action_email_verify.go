@@ -3,9 +3,9 @@ package profile
 import (
 	"fmt"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type EmailVerify struct {
@@ -67,7 +67,7 @@ func (a EmailVerify) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set user_id to stash: %w", err)
 	}
 
-	err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+	err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification)
 	if err != nil {
 		return fmt.Errorf("failed to set passcode_tempalte to stash %w", err)
 	}

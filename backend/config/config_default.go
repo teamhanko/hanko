@@ -11,6 +11,9 @@ func DefaultConfig() *Config {
 		},
 		Secrets: Secrets{
 			Keys: []string{"abcedfghijklmnopqrstuvwxyz"},
+			KeyManagement: KeyManagement{
+				Type: "local",
+			},
 		},
 		Server: Server{
 			Public: ServerSettings{
@@ -35,6 +38,31 @@ func DefaultConfig() *Config {
 			Timeouts: WebauthnTimeouts{
 				Registration: 600000,
 				Login:        600000,
+			},
+		},
+		SecurityNotifications: SecurityNotifications{
+			Notifications: SecurityNotificationTypes{
+				EmailCreate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				EmailDelete: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				PasswordUpdate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				PasskeyCreate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				PrimaryEmailUpdate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				MFACreate: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
+				MFADelete: SecurityNotificationConfiguration{
+					Enabled: true,
+				},
 			},
 		},
 		Smtp: SMTP{
@@ -178,6 +206,7 @@ func DefaultConfig() *Config {
 			MaxLength:             120,
 			UseForAuthentication:  true,
 			PasscodeTtl:           300,
+			PasscodeCharset:       PasscodeCharsetNumeric,
 		},
 		Username: Username{
 			Enabled:               false,
@@ -189,13 +218,14 @@ func DefaultConfig() *Config {
 			MaxLength:             32,
 		},
 		MFA: MFA{
-			AcquireOnLogin:        false,
-			AcquireOnRegistration: true,
-			DeviceTrustCookieName: "hanko-device-token",
-			DeviceTrustDuration:   30 * 24 * time.Hour, // 30 days
-			DeviceTrustPolicy:     "prompt",
-			Enabled:               true,
-			Optional:              true,
+			AcquireOnLogin:               false,
+			AcquireOnRegistration:        true,
+			DeviceTrustCookieName:        "hanko-device-token",
+			DeviceTrustDuration:          30 * 24 * time.Hour, // 30 days
+			DeviceTrustMaxUsersPerDevice: 20,
+			DeviceTrustPolicy:            "prompt",
+			Enabled:                      true,
+			Optional:                     true,
 			SecurityKeys: SecurityKeys{
 				AttestationPreference:   "direct",
 				AuthenticatorAttachment: "cross-platform",
@@ -212,5 +242,9 @@ func DefaultConfig() *Config {
 			OnlyShowActualLoginMethods: false,
 		},
 		Debug: false,
+		FlowLocker: FlowLocker{
+			Enabled: true,
+			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
+		},
 	}
 }

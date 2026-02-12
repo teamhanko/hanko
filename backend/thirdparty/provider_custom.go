@@ -3,9 +3,11 @@ package thirdparty
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/mitchellh/mapstructure"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"golang.org/x/oauth2"
 )
 
@@ -55,11 +57,19 @@ func NewCustomThirdPartyProvider(config *config.CustomThirdPartyProvider, redire
 }
 
 func (p customProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := p.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+	if acrValues := p.config.AcrValues; len(acrValues) > 0 {
+		opts = append(opts, oauth2.SetAuthURLParam("acr_values", strings.Join(acrValues, " ")))
+	}
+
 	return p.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (p customProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return p.oauthConfig.Exchange(context.Background(), code)
+func (p customProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return p.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
@@ -89,10 +99,6 @@ func (p customProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 	err = mapstructure.Decode(userInfoClaims, &claims)
 	if err != nil {
 		return nil, fmt.Errorf("could not get user data: %s", err)
-	}
-
-	if claims.Email == "" {
-		return nil, fmt.Errorf("could not get user data: email not present")
 	}
 
 	return &UserData{

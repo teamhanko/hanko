@@ -3,11 +3,12 @@ package registration
 import (
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/flowpilot"
 	"strings"
+
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 )
 
 // RegisterLoginIdentifier takes the identifier which the user entered and checks if they are valid and available according to the configuration
@@ -77,7 +78,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	if username != "" {
+	if username != "" && (deps.Cfg.Username.Enabled && deps.Cfg.Username.AcquireOnRegistration) {
 		if !services.ValidateUsername(username) {
 			c.Input().SetError("username", shared.ErrorInvalidUsername)
 			return c.Error(flowpilot.ErrorFormDataInvalid)
@@ -85,7 +86,7 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 
 		// Check that username is not already taken
 		// this check is non-exhaustive as the username is not blocked here and might be created after the check here and the user creation
-		userModel, err := deps.Persister.GetUserPersister().GetByUsername(username)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(username)
 		if err != nil {
 			return err
 		}
@@ -93,13 +94,19 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			c.Input().SetError("username", shared.ErrorUsernameAlreadyExists)
 			return c.Error(flowpilot.ErrorFormDataInvalid)
 		}
+
+		err = c.CopyInputValuesToStash("username")
+		if err != nil {
+			return fmt.Errorf("failed to copy username input to the stash: %w", err)
+		}
 	}
 
 	if email != "" {
 		if deps.Cfg.Saml.Enabled {
 			domain := strings.Split(email, "@")[1]
 			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+				var authUrl string
+				authUrl, err = deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)
@@ -111,37 +118,45 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 			}
 		}
 
-		// Check that email is not already taken
-		// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
-		emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
-		if err != nil {
-			return err
-		}
-		// Do not return an error when only identifier is email and email verification is on (account enumeration protection) and privacy setting is off
-		if emailModel != nil {
-			// E-mail address already exists
-			if !deps.Cfg.Email.RequireVerification || deps.Cfg.Privacy.ShowAccountExistenceHints {
-				c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
-				return c.Error(flowpilot.ErrorFormDataInvalid)
-			} else {
-				err = c.CopyInputValuesToStash("email")
-				if err != nil {
-					return fmt.Errorf("failed to copy email to stash: %w", err)
-				}
+		if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
+			// Check that email is not already taken
+			// this check is non-exhaustive as the email is not blocked here and might be created after the check here and the user creation
+			emailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(email)
+			if err != nil {
+				return err
+			}
+			// Do not return an error when only identifier is email and email verification is on (account enumeration protection) and privacy setting is off
+			if emailModel != nil {
+				// E-mail address already exists
+				if !deps.Cfg.Email.RequireVerification || deps.Cfg.Privacy.ShowAccountExistenceHints {
+					c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
+					return c.Error(flowpilot.ErrorFormDataInvalid)
+				} else {
+					err = c.CopyInputValuesToStash("email")
+					if err != nil {
+						return fmt.Errorf("failed to copy email to stash: %w", err)
+					}
 
-				err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted")
-				if err != nil {
-					return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
-				}
+					err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailRegistrationAttempted)
+					if err != nil {
+						return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
+					}
 
-				return c.Continue(shared.StatePasscodeConfirmation)
+					return c.Continue(shared.StatePasscodeConfirmation)
+				}
+			}
+
+			err = c.CopyInputValuesToStash("email")
+			if err != nil {
+				return fmt.Errorf("failed to copy email input to the stash: %w", err)
+			}
+
+			if deps.Cfg.Email.RequireVerification {
+				if err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification); err != nil {
+					return fmt.Errorf("failed to set passcode_template to stash: %w", err)
+				}
 			}
 		}
-	}
-
-	err := c.CopyInputValuesToStash("email", "username")
-	if err != nil {
-		return fmt.Errorf("failed to copy input values to the stash: %w", err)
 	}
 
 	userID, err := uuid.NewV4()
@@ -152,12 +167,6 @@ func (a RegisterLoginIdentifier) Execute(c flowpilot.ExecutionContext) error {
 	err = c.Stash().Set(shared.StashPathUserID, userID.String())
 	if err != nil {
 		return fmt.Errorf("failed to stash user_id: %w", err)
-	}
-
-	if email != "" && deps.Cfg.Email.RequireVerification {
-		if err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification"); err != nil {
-			return fmt.Errorf("failed to set passcode_template to stash: %w", err)
-		}
 	}
 
 	states, err := a.generateRegistrationStates(c)
@@ -173,9 +182,11 @@ func (a RegisterLoginIdentifier) generateRegistrationStates(c flowpilot.Executio
 
 	result := make([]flowpilot.StateName, 0)
 
-	emailExists := len(c.Input().Get("email").String()) > 0
-	if emailExists && deps.Cfg.Email.RequireVerification {
-		result = append(result, shared.StatePasscodeConfirmation)
+	if deps.Cfg.Email.Enabled && deps.Cfg.Email.AcquireOnRegistration {
+		emailExists := len(c.Input().Get("email").String()) > 0
+		if emailExists && deps.Cfg.Email.RequireVerification {
+			result = append(result, shared.StatePasscodeConfirmation)
+		}
 	}
 
 	webauthnAvailable := c.Stash().Get(shared.StashPathWebauthnAvailable).Bool()

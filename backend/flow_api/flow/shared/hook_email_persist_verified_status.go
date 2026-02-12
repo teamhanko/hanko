@@ -3,12 +3,15 @@ package shared
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
-	"github.com/teamhanko/hanko/backend/webhooks/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type EmailPersistVerifiedStatus struct {
@@ -33,6 +36,11 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 	userId, err := uuid.FromString(c.Stash().Get(StashPathUserID).String())
 	if err != nil {
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
+	}
+
+	user, err := deps.Persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user by user_id: %w", err)
 	}
 
 	emailAddressToVerify := c.Stash().Get(StashPathEmail).String()
@@ -103,6 +111,21 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
 		}
+	}
+
+	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: user.Emails.GetPrimary().Address,
+			Template:     "email_create",
+			HttpContext:  deps.HttpContext,
+			BodyData: map[string]interface{}{
+				"NewEmailAddress": emailAddressToVerify,
+			},
+			Data: &webhook.SecurityNotificationData{
+				NewEmailAddress: emailAddressToVerify,
+			},
+			UserContext: *user,
+		})
 	}
 
 	if emailCreated {

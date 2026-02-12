@@ -9,12 +9,12 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
 func NewCreateCommand() *cobra.Command {
@@ -45,8 +45,7 @@ func NewCreateCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			jwkPersister := persister.GetJwkPersister()
-			jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, jwkPersister)
+			jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return

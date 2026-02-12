@@ -1,6 +1,6 @@
 package shared
 
-import "github.com/teamhanko/hanko/backend/flowpilot"
+import "github.com/teamhanko/hanko/backend/v2/flowpilot"
 
 const (
 	ActionAccountDelete                          flowpilot.ActionName = "account_delete"
@@ -52,4 +52,6 @@ const (
 	ActionWebauthnVerifyAssertionResponse        flowpilot.ActionName = "webauthn_verify_assertion_response"
 	ActionWebauthnVerifyAttestationResponse      flowpilot.ActionName = "webauthn_verify_attestation_response"
 	ActionSessionDelete                          flowpilot.ActionName = "session_delete"
+	ActionConnectThirdpartyOauthProvider         flowpilot.ActionName = "connect_thirdparty_oauth_provider"
+	ActionDisconnectThirdpartyOauthProvider      flowpilot.ActionName = "disconnect_thirdparty_oauth_provider"
 )

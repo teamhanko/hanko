@@ -22,14 +22,32 @@ export { Relay };
 // Utils
 
 import { WebauthnSupport } from "./lib/WebauthnSupport";
+import {
+  generateCodeVerifier,
+  setStoredCodeVerifier,
+  getStoredCodeVerifier,
+  clearStoredCodeVerifier,
+} from "./lib/Pkce";
 
-export { WebauthnSupport };
+export {
+  WebauthnSupport,
+  generateCodeVerifier,
+  setStoredCodeVerifier,
+  getStoredCodeVerifier,
+  clearStoredCodeVerifier,
+};
 
 // DTO
 
-import { Email, Emails, Identity, SessionCheckResponse } from "./lib/Dto";
+import {
+  Email,
+  Emails,
+  Identity,
+  SessionCheckResponse,
+  Claims,
+} from "./lib/Dto";
 
-export type { Email, Emails, Identity, SessionCheckResponse };
+export type { Email, Emails, Identity, SessionCheckResponse, Claims };
 
 // Errors
 

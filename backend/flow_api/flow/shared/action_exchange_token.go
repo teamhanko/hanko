@@ -3,10 +3,11 @@ package shared
 import (
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/rate_limiter"
 	"time"
+
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 )
 
 type ExchangeToken struct {
@@ -22,7 +23,10 @@ func (a ExchangeToken) GetDescription() string {
 }
 
 func (a ExchangeToken) Initialize(c flowpilot.InitializationContext) {
-	c.AddInputs(flowpilot.StringInput("token").Hidden(true).Required(true))
+	c.AddInputs(
+		flowpilot.StringInput("token").Hidden(true).Required(true),
+		flowpilot.StringInput("code_verifier").Hidden(true),
+	)
 }
 
 func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
@@ -57,6 +61,10 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return errors.New("token not found")
 	}
 
+	if tokenModel.PKCECodeVerifier != nil && *tokenModel.PKCECodeVerifier != "" && *tokenModel.PKCECodeVerifier != c.Input().Get("code_verifier").String() {
+		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(errors.New("code_verifier does not match")))
+	}
+
 	if time.Now().UTC().After(tokenModel.ExpiresAt) {
 		return errors.New("token expired")
 	}
@@ -65,6 +73,12 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	if err != nil {
 		return fmt.Errorf("failed to fetch identity from db: %w", err)
 	}
+
+	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(tokenModel.UserID)
+	if err != nil {
+		return fmt.Errorf("failed to fetch user from db: %w", err)
+	}
+	// TODO: the identity does not need to be fetched from the DB, because it is already there in the user.
 
 	// Set so the issue_session hook knows who to create the session for.
 	if err := c.Stash().Set(StashPathUserID, tokenModel.UserID.String()); err != nil {
@@ -90,10 +104,10 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("could not fetch saml provider for identity: %w", err)
 		}
 		mustDoEmailVerification := !samlProvider.GetConfig().SkipEmailVerification && identity.Email != nil && !identity.Email.Verified
-		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated, mustDoEmailVerification)
+		onboardingStates, err = a.determineOnboardingStates(c, identity, user, tokenModel.UserCreated, mustDoEmailVerification)
 	} else {
 		mustDoEmailVerification := deps.Cfg.Email.RequireVerification && identity.Email != nil && !identity.Email.Verified
-		onboardingStates, err = a.determineOnboardingStates(c, identity, tokenModel.UserCreated, mustDoEmailVerification)
+		onboardingStates, err = a.determineOnboardingStates(c, identity, user, tokenModel.UserCreated, mustDoEmailVerification)
 	}
 
 	if err != nil {
@@ -113,7 +127,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 	return c.Continue(onboardingStates...)
 }
 
-func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, userCreated bool, mustDoEmailVerification bool) ([]flowpilot.StateName, error) {
+func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, identity *models.Identity, user *models.User, userCreated bool, mustDoEmailVerification bool) ([]flowpilot.StateName, error) {
 	deps := a.GetDeps(c)
 	result := make([]flowpilot.StateName, 0)
 
@@ -122,14 +136,21 @@ func (a ExchangeToken) determineOnboardingStates(c flowpilot.ExecutionContext, i
 			return nil, fmt.Errorf("failed to stash email: %w", err)
 		}
 
-		if err := c.Stash().Set(StashPathPasscodeTemplate, "email_verification"); err != nil {
+		if err := c.Stash().Set(StashPathPasscodeTemplate, PasscodeTemplateEmailVerification); err != nil {
 			return nil, fmt.Errorf("failed to stash passcode_template: %w", err)
 		}
 
 		result = append(result, StatePasscodeConfirmation)
 	}
 
-	if deps.Cfg.Username.Enabled && identity.Email.User.GetUsername() == nil {
+	if deps.Cfg.Email.Enabled && !(len(user.Emails) > 0) {
+		if (!userCreated && deps.Cfg.Email.AcquireOnLogin) ||
+			(userCreated && deps.Cfg.Email.AcquireOnRegistration) {
+			result = append(result, StateOnboardingEmail)
+		}
+	}
+
+	if deps.Cfg.Username.Enabled && user.Username == nil {
 		if (!userCreated && deps.Cfg.Username.AcquireOnLogin) ||
 			(userCreated && deps.Cfg.Username.AcquireOnRegistration) {
 			result = append(result, StateOnboardingUsername)

@@ -3,8 +3,8 @@ package test
 import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 func NewAuditLogger() auditlog.Logger {

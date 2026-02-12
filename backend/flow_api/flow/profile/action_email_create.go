@@ -2,12 +2,15 @@ package profile
 
 import (
 	"fmt"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/webhooks/events"
-	"github.com/teamhanko/hanko/backend/webhooks/utils"
+
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/dto/webhook"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type EmailCreate struct {
@@ -53,6 +56,8 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("could not fetch email: %w", err)
 	}
 
+	currentPrimaryEmail := userModel.Emails.GetPrimary().Address
+
 	if existingEmailModel != nil {
 		if (existingEmailModel.UserID != nil && existingEmailModel.UserID.String() == userModel.ID.String()) || !deps.Cfg.Email.RequireVerification || deps.Cfg.Privacy.ShowAccountExistenceHints {
 			c.Input().SetError("email", shared.ErrorEmailAlreadyExists)
@@ -68,7 +73,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 				return fmt.Errorf("failed to set user_id to stash: %w", err)
 			}
 
-			err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_registration_attempted")
+			err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailRegistrationAttempted)
 			if err != nil {
 				return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 			}
@@ -86,7 +91,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			return fmt.Errorf("failed to set user_id to stash: %w", err)
 		}
 
-		err = c.Stash().Set(shared.StashPathPasscodeTemplate, "email_verification")
+		err = c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailVerification)
 		if err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
@@ -122,6 +127,21 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		if err != nil {
 			return fmt.Errorf("could not create audit log: %w", err)
+		}
+
+		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
+			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				EmailAddress: currentPrimaryEmail,
+				Template:     "email_create",
+				HttpContext:  deps.HttpContext,
+				BodyData: map[string]interface{}{
+					"NewEmailAddress": newEmailAddress,
+				},
+				Data: &webhook.SecurityNotificationData{
+					NewEmailAddress: newEmailAddress,
+				},
+				UserContext: *userModel,
+			})
 		}
 
 		userModel.Emails = append(userModel.Emails, *emailModel)

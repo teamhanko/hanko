@@ -3,9 +3,10 @@ package thirdparty
 import (
 	"context"
 	"errors"
-	"github.com/teamhanko/hanko/backend/config"
-	"golang.org/x/oauth2"
 	"strconv"
+
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -63,11 +64,16 @@ func NewGithubProvider(config config.ThirdPartyProvider, redirectURL string) (OA
 }
 
 func (g githubProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := g.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return g.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (g githubProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return g.oauthConfig.Exchange(context.Background(), code)
+func (g githubProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return g.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (g githubProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

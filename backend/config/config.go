@@ -2,12 +2,13 @@ package config
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/knadh/koanf/parsers/yaml"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"github.com/teamhanko/hanko/backend/ee/saml/config"
-	"log"
+	"github.com/teamhanko/hanko/backend/v2/ee/saml/config"
 )
 
 // Config is the central configuration type
@@ -34,6 +35,8 @@ type Config struct {
 	EmailDelivery EmailDelivery `yaml:"email_delivery" json:"email_delivery,omitempty" koanf:"email_delivery" split_words:"true" jsonschema:"title=email_delivery"`
 	// Deprecated. See child properties for suggested replacements.
 	Emails Emails `yaml:"emails" json:"emails,omitempty" koanf:"emails" jsonschema:"title=emails"`
+	// `flow_locker` confgures flow locking
+	FlowLocker FlowLocker `yaml:"flow_locker" json:"flow_locker,omitempty" koanf:"flow_locker"`
 	// `log` configures application logging.
 	Log LoggerConfig `yaml:"log" json:"log,omitempty" koanf:"log" jsonschema:"title=log"`
 	// `mfa` configures how multi-factor-authentication behaves.
@@ -51,6 +54,8 @@ type Config struct {
 	Saml config.Saml `yaml:"saml" json:"saml,omitempty" koanf:"saml" jsonschema:"title=saml"`
 	// `secrets` configures the keys used for cryptographically signing tokens issued by the API.
 	Secrets Secrets `yaml:"secrets" json:"secrets,omitempty" koanf:"secrets" jsonschema:"title=secrets"`
+	// `security_notifications` configures security notifications for important security-related events.
+	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications,omitempty" koanf:"security_notifications"`
 	// `server` configures address and CORS settings of the public and admin API.
 	Server Server `yaml:"server" json:"server,omitempty" koanf:"server" jsonschema:"title=server"`
 	// `service` configures general service information.
@@ -174,6 +179,14 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate webhook settings: %w", err)
 	}
+	err = c.FlowLocker.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate flow_locker settings: %w", err)
+	}
+	err = c.Email.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate email settings: %w", err)
+	}
 	return nil
 }
 
@@ -224,6 +237,11 @@ func (c *Config) PostProcess() error {
 	err = c.Saml.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process saml settings: %w", err)
+	}
+
+	err = c.Email.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process email settings: %w", err)
 	}
 
 	return nil

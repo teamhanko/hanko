@@ -2,9 +2,11 @@ package profile
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type OTPSecretDelete struct {
@@ -53,6 +55,16 @@ func (a OTPSecretDelete) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	userModel.DeleteOTPSecret()
+
+	// Inform user that an MFA method has been deleted
+	if deps.Cfg.SecurityNotifications.Notifications.MFADelete.Enabled {
+		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			EmailAddress: userModel.Emails.GetPrimary().Address,
+			Template:     "mfa_delete",
+			HttpContext:  deps.HttpContext,
+			UserContext:  *userModel,
+		})
+	}
 
 	return c.Continue(shared.StateProfileInit)
 }

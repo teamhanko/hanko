@@ -1,13 +1,14 @@
 package webhooks
 
 import (
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/test"
 	"testing"
 	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/test"
 )
 
 func TestDatabaseHookSuite(t *testing.T) {
@@ -91,8 +92,6 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
-	now := time.Now()
-
 	dbHook := NewDatabaseHook(hook, whPersister, nil)
 	err := dbHook.Reset()
 	s.NoError(err)
@@ -100,11 +99,13 @@ func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	updatedHook, err := whPersister.Get(hook.ID)
 	s.Require().NoError(err)
 
-	s.Less(updatedHook.Failures, hook.Failures, "Failures should be reset to 0")
+	// Failures should be reset
 	s.Equal(0, updatedHook.Failures)
+	s.Less(updatedHook.Failures, hook.Failures, "Failures should be reset to 0")
 
-	s.True(updatedHook.ExpiresAt.After(now))
-	s.True(updatedHook.UpdatedAt.After(now))
+	// Ensure timestamps moved forward relative to the original hook values
+	s.True(updatedHook.UpdatedAt.After(hook.UpdatedAt), "UpdatedAt should be updated")
+	s.True(updatedHook.ExpiresAt.After(hook.ExpiresAt), "ExpiresAt should be updated")
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_IsEnabled() {

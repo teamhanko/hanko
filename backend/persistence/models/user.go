@@ -4,13 +4,14 @@ import (
 	"encoding/base64"
 	"time"
 
+	"slices"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"slices"
 )
 
 // User is used by pop to map your users database table to your go code.
@@ -24,6 +25,7 @@ type User struct {
 	OTPSecret           *OTPSecret          `has_one:"otp_secret" json:"-"`
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 	Metadata            *UserMetadata       `has_one:"user_metadata" json:"-"`
+	Identities          Identities          `has_many:"identities" json:"-"`
 }
 
 func (user *User) DeleteWebauthnCredential(credentialId string) {

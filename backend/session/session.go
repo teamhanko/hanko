@@ -7,10 +7,9 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"github.com/teamhanko/hanko/backend/config"
-	hankoJwk "github.com/teamhanko/hanko/backend/crypto/jwk"
-	hankoJwt "github.com/teamhanko/hanko/backend/crypto/jwt"
-	"github.com/teamhanko/hanko/backend/dto"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 )
 
 type Manager interface {
@@ -22,7 +21,7 @@ type Manager interface {
 
 // Manager is used to create and verify session JWTs
 type manager struct {
-	jwtGenerator  hankoJwt.Generator
+	jwtGenerator  jwk.Generator
 	sessionLength time.Duration
 	cookieConfig  cookieConfig
 	issuer        string
@@ -43,20 +42,7 @@ const (
 )
 
 // NewManager returns a new Manager which will be used to create and verify sessions JWTs
-func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, error) {
-	signatureKey, err := jwkManager.GetSigningKey()
-	if err != nil {
-		return nil, fmt.Errorf(GeneratorCreateFailure, err)
-	}
-	verificationKeys, err := jwkManager.GetPublicKeys()
-	if err != nil {
-		return nil, fmt.Errorf(GeneratorCreateFailure, err)
-	}
-	g, err := hankoJwt.NewGenerator(signatureKey, verificationKeys)
-	if err != nil {
-		return nil, fmt.Errorf(GeneratorCreateFailure, err)
-	}
-
+func NewManager(jwtGenerator jwk.Generator, config config.Config) (Manager, error) {
 	duration, _ := time.ParseDuration(config.Session.Lifespan) // error can be ignored, value is checked in config validation
 	sameSite := http.SameSite(0)
 	switch config.Session.Cookie.SameSite {
@@ -77,7 +63,7 @@ func NewManager(jwkManager hankoJwk.Manager, config config.Config) (Manager, err
 	}
 
 	return &manager{
-		jwtGenerator:  g,
+		jwtGenerator:  jwtGenerator,
 		sessionLength: duration,
 		issuer:        config.Session.Issuer,
 		cookieConfig: cookieConfig{

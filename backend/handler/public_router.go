@@ -2,24 +2,26 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter"
 	"github.com/sethvargo/go-limiter/httplimit"
-	"github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/ee/saml"
-	"github.com/teamhanko/hanko/backend/flow_api"
-	"github.com/teamhanko/hanko/backend/flow_api/services"
-	"github.com/teamhanko/hanko/backend/mail"
-	"github.com/teamhanko/hanko/backend/mapper"
-	hankoMiddleware "github.com/teamhanko/hanko/backend/middleware"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/rate_limiter"
-	"github.com/teamhanko/hanko/backend/session"
-	"github.com/teamhanko/hanko/backend/template"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/ee/saml"
+	"github.com/teamhanko/hanko/backend/v2/flow_api"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v2/mail"
+	"github.com/teamhanko/hanko/backend/v2/mapper"
+	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/template"
 )
 
 func NewPublicRouter(cfg *config.Config, persister persistence.Persister, prometheus echo.MiddlewareFunc, authenticatorMetadata mapper.AuthenticatorMetadata) *echo.Echo {
@@ -29,12 +31,15 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Static("/flowpilot", "flow_api/static") // TODO: remove!
 
-	emailService, err := services.NewEmailService(*cfg)
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
+
+	emailService, _ := services.NewEmailService(*cfg)
 	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
 	passwordService := services.NewPasswordService(persister)
 	webauthnService := services.NewWebauthnService(*cfg, persister)
+	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister, auditLogger)
 
-	jwkManager, err := jwk.NewDefaultManager(cfg.Secrets.Keys, persister.GetJwkPersister())
+	jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
 	if err != nil {
 		panic(fmt.Errorf("failed to create jwk manager: %w", err))
 	}
@@ -54,25 +59,30 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
 	}
 
-	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
-
 	samlService := saml.NewSamlService(cfg, persister)
 
 	flowAPIHandler := flow_api.FlowPilotHandler{
-		Persister:                persister,
-		Cfg:                      *cfg,
-		PasscodeService:          passcodeService,
-		PasswordService:          passwordService,
-		WebauthnService:          webauthnService,
-		SessionManager:           sessionManager,
-		OTPRateLimiter:           otpRateLimiter,
-		PasscodeRateLimiter:      passcodeRateLimiter,
-		PasswordRateLimiter:      passwordRateLimiter,
-		TokenExchangeRateLimiter: tokenExchangeRateLimiter,
-		AuthenticatorMetadata:    authenticatorMetadata,
-		AuditLogger:              auditLogger,
-		SamlService:              samlService,
+		Persister:                   persister,
+		Cfg:                         *cfg,
+		PasscodeService:             passcodeService,
+		SecurityNotificationService: securityNotificationService,
+		PasswordService:             passwordService,
+		WebauthnService:             webauthnService,
+		SessionManager:              sessionManager,
+		OTPRateLimiter:              otpRateLimiter,
+		PasscodeRateLimiter:         passcodeRateLimiter,
+		PasswordRateLimiter:         passwordRateLimiter,
+		TokenExchangeRateLimiter:    tokenExchangeRateLimiter,
+		AuthenticatorMetadata:       authenticatorMetadata,
+		AuditLogger:                 auditLogger,
+		SamlService:                 samlService,
 	}
+
+	flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize flow locker: %w", err))
+	}
+	flowAPIHandler.FlowLocker = flowLocker
 
 	if cfg.Saml.Enabled {
 		saml.CreateSamlRoutes(e, sessionManager, auditLogger, samlService)

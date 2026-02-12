@@ -1,22 +1,24 @@
 package handler
 
 import (
+	"errors"
 	"fmt"
-	"github.com/gobuffalo/pop/v6"
-	"github.com/labstack/echo/v4"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/dto/admin"
-	"github.com/teamhanko/hanko/backend/persistence"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
-	webhookUtils "github.com/teamhanko/hanko/backend/webhooks/utils"
-	"golang.org/x/oauth2"
 	"net/http"
 	"net/url"
+
+	"github.com/gobuffalo/pop/v6"
+	"github.com/labstack/echo/v4"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/dto/admin"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	"github.com/teamhanko/hanko/backend/v2/utils"
+	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	"golang.org/x/oauth2"
 )
 
 type ThirdPartyHandler struct {
@@ -66,7 +68,7 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
 
-	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
+	authCodeUrl := provider.AuthCodeURL(string(state))
 
 	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 		MaxAge:   300,
@@ -88,7 +90,7 @@ func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
-	var successRedirectTo *url.URL
+	var redirectToURL *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
 	err := h.persister.Transaction(func(tx *pop.Connection) error {
 		var callback dto.ThirdPartyAuthCallback
@@ -110,14 +112,24 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			}
 		}
 
-		expectedState, terr := c.Cookie(utils.HankoThirdpartyStateCookie)
-		if terr != nil {
-			return thirdparty.ErrorInvalidRequest("thirdparty state cookie is missing")
+		expectedStateCookie, terr := c.Cookie(utils.HankoThirdpartyStateCookie)
+		if terr != nil && !errors.Is(terr, http.ErrNoCookie) {
+			return thirdparty.ErrorInvalidRequest("could not read state cookie").WithCause(terr)
 		}
 
-		state, terr := thirdparty.VerifyState(h.cfg, callback.State, expectedState.Value)
+		var expectedState string
+		if expectedStateCookie != nil {
+			expectedState = expectedStateCookie.Value
+		}
+		var state *thirdparty.State
+		state, terr = thirdparty.VerifyState(h.cfg, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
+		}
+
+		redirectToURL, terr = url.Parse(state.RedirectTo)
+		if terr != nil {
+			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
 		}
 
 		if callback.HasError() {
@@ -133,7 +145,11 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("auth code missing from request")
 		}
 
-		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode)
+		opts := []oauth2.AuthCodeOption{}
+		if state.CodeVerifier != "" && provider.ID() != "linkedin" {
+			opts = append(opts, oauth2.VerifierOption(state.CodeVerifier))
+		}
+		oAuthToken, terr := provider.GetOAuthToken(callback.AuthCode, opts...)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest("could not exchange authorization code for access token").WithCause(terr)
 		}
@@ -143,20 +159,34 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow)
+		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		emailModel := linkingResult.User.Emails.GetEmailByAddress(userData.Metadata.Email)
-		identityModel := emailModel.Identities.GetIdentity(provider.ID(), userData.Metadata.Subject)
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID())
+		if err != nil {
+			return thirdparty.ErrorServer("could not get identity").WithCause(err)
+		}
 
-		token, terr := models.NewToken(
-			linkingResult.User.ID,
+		if identityModel != nil && state.UserID != nil && identityModel.UserID != nil && *identityModel.UserID != *state.UserID {
+			return thirdparty.ErrorInvalidRequest("identity already exists for a different user")
+		}
+
+		tokenOpts := []func(*models.Token){
 			models.TokenForFlowAPI(state.IsFlow),
 			models.TokenWithIdentityID(identityModel.ID),
-			models.TokenUserCreated(linkingResult.UserCreated))
+			models.TokenUserCreated(linkingResult.UserCreated),
+			models.TokenWithLinkUser(state.UserID != nil),
+		}
+		if state.CodeVerifier != "" {
+			tokenOpts = append(tokenOpts, models.TokenPKCESessionVerifier(state.CodeVerifier))
+		}
+		token, terr := models.NewToken(
+			linkingResult.User.ID,
+			tokenOpts...,
+		)
 		if terr != nil {
 			return thirdparty.ErrorServer("could not create token").WithCause(terr)
 		}
@@ -166,15 +196,9 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorServer("could not save token to db").WithCause(terr)
 		}
 
-		redirectTo, terr := url.Parse(state.RedirectTo)
-		if terr != nil {
-			return thirdparty.ErrorServer("could not parse redirect url").WithCause(terr)
-		}
-
-		query := redirectTo.Query()
+		query := redirectToURL.Query()
 		query.Add(utils.HankoTokenQuery, token.Value)
-		redirectTo.RawQuery = query.Encode()
-		successRedirectTo = redirectTo
+		redirectToURL.RawQuery = query.Encode()
 
 		c.SetCookie(&http.Cookie{
 			Name:     utils.HankoThirdpartyStateCookie,
@@ -190,14 +214,18 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return nil
 	})
 
+	errorRedirect := h.cfg.ThirdParty.ErrorRedirectURL
+	if redirectToURL != nil {
+		errorRedirect = redirectToURL.String()
+	}
+
 	if err != nil {
-		return h.redirectError(c, err, h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, err, errorRedirect)
 	}
 
 	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
-
 	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), errorRedirect)
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
@@ -207,7 +235,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 	}
 
-	return c.Redirect(http.StatusTemporaryRedirect, successRedirectTo.String())
+	return c.Redirect(http.StatusTemporaryRedirect, redirectToURL.String())
 }
 
 func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string) error {

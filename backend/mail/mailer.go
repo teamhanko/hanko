@@ -2,7 +2,7 @@ package mail
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/config"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"gopkg.in/gomail.v2"
 	"strconv"
 )

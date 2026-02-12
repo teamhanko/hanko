@@ -4,10 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type WebhookPersister interface {
@@ -60,6 +61,26 @@ func (w *webhookPersister) Update(webhook models.Webhook) error {
 
 	if vErr != nil && vErr.HasAny() {
 		return fmt.Errorf("webhook object validation failed: %w", vErr)
+	}
+
+	for _, event := range webhook.WebhookEvents {
+		exists, err := w.db.Where("id = ?", event.ID).Exists(&models.WebhookEvent{})
+		if err != nil {
+			return fmt.Errorf("failed to check for existing webhook event: %w", err)
+		}
+
+		if exists {
+			continue
+		}
+
+		vErr, err = w.db.ValidateAndCreate(&event)
+		if err != nil {
+			return fmt.Errorf("failed to create webhook event during update: %w", err)
+		}
+
+		if vErr != nil && vErr.HasAny() {
+			return fmt.Errorf("webhook event object validation failed during update: %w", vErr)
+		}
 	}
 
 	return nil

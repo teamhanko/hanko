@@ -4,15 +4,34 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto"
-	"github.com/teamhanko/hanko/backend/crypto/aes_gcm"
 	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto"
+	"github.com/teamhanko/hanko/backend/v2/crypto/aes_gcm"
 )
 
 func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	return func(state *State) {
 		state.IsFlow = isFlow
+	}
+}
+
+func GenerateStateWithPKCECodeVerifier(codeVerifier string) func(state *State) {
+	return func(state *State) {
+		if codeVerifier != "" {
+			state.CodeVerifier = codeVerifier
+		}
+	}
+}
+
+// GenerateStateWithUserID If the state is generated for a logged-in user, the OAuth request and response must only be used with the same already logged-in user.
+func GenerateStateWithUserID(userID uuid.UUID) func(*State) {
+	return func(state *State) {
+		if userID != uuid.Nil {
+			state.UserID = &userID
+		}
 	}
 }
 
@@ -59,12 +78,14 @@ func GenerateState(config *config.Config, provider string, redirectTo string, op
 }
 
 type State struct {
-	Provider   string    `json:"provider"`
-	RedirectTo string    `json:"redirect_to"`
-	IssuedAt   time.Time `json:"issued_at"`
-	ExpiresAt  time.Time `json:"expires_at"`
-	Nonce      string    `json:"nonce"`
-	IsFlow     bool      `json:"is_flow"`
+	Provider     string     `json:"provider"`
+	RedirectTo   string     `json:"redirect_to"`
+	IssuedAt     time.Time  `json:"issued_at"`
+	ExpiresAt    time.Time  `json:"expires_at"`
+	Nonce        string     `json:"nonce"`
+	IsFlow       bool       `json:"is_flow"`
+	CodeVerifier string     `json:"code_verifier,omitempty"`
+	UserID       *uuid.UUID `json:"user_id,omitempty"`
 }
 
 func VerifyState(config *config.Config, state string, expectedState string) (*State, error) {
@@ -73,13 +94,18 @@ func VerifyState(config *config.Config, state string, expectedState string) (*St
 		return nil, fmt.Errorf("could not decode state: %w", err)
 	}
 
-	decodedExpectedState, err := decodeState(config, expectedState)
-	if err != nil {
-		return nil, fmt.Errorf("could not decode expectedState: %w", err)
-	}
+	if decodedState.CodeVerifier == "" {
+		if expectedState == "" {
+			return nil, errors.New("expected state must not be empty")
+		}
+		decodedExpectedState, err := decodeState(config, expectedState)
+		if err != nil {
+			return nil, fmt.Errorf("could not decode expectedState: %w", err)
+		}
 
-	if decodedState.Nonce != decodedExpectedState.Nonce {
-		return nil, errors.New("could not verify state")
+		if decodedState.Nonce != decodedExpectedState.Nonce {
+			return nil, errors.New("could not verify state")
+		}
 	}
 
 	if time.Now().UTC().After(decodedState.ExpiresAt) {

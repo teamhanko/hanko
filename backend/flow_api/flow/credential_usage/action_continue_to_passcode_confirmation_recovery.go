@@ -2,8 +2,8 @@ package credential_usage
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 )
 
 type ContinueToPasscodeConfirmationRecovery struct {
@@ -32,11 +32,11 @@ func (a ContinueToPasscodeConfirmationRecovery) Execute(c flowpilot.ExecutionCon
 	}
 
 	if len(c.Stash().Get(shared.StashPathUserID).String()) > 0 {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "recovery"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateRecovery); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	} else {
-		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, "email_login_attempted"); err != nil {
+		if err := c.Stash().Set(shared.StashPathPasscodeTemplate, shared.PasscodeTemplateEmailLoginAttempted); err != nil {
 			return fmt.Errorf("failed to set passcode_template to the stash: %w", err)
 		}
 	}

@@ -1,0 +1,48 @@
+password_update_text:
+  description: ""
+  other: "Het wachtwoord voor je {{ .ServiceName }}-account is bijgewerkt."
+subject_password_update:
+  description: ""
+  other: "Je wachtwoord is bijgewerkt."
+
+primary_email_update_text:
+  description: ""
+  other: "Het primaire e-mailadres voor je {{ .ServiceName }}-account is gewijzigd van {{ .OldEmailAddress }} naar {{ .NewEmailAddress }}."
+subject_primary_email_update:
+  description: ""
+  other: "Je primaire e-mailadres is bijgewerkt."
+
+email_create_text:
+  description: ""
+  other: "Het e-mailadres {{ .NewEmailAddress }} is toegevoegd aan je {{ .ServiceName }}-account."
+subject_email_create:
+  description: ""
+  other: "Een nieuw e-mailadres is toegevoegd."
+
+email_delete_text:
+  description: ""
+  other: "Het e-mailadres {{ .DeletedEmailAddress }} is verwijderd van je {{ .ServiceName }}-account."
+subject_email_delete:
+  description: ""
+  other: "Een e-mailadres is verwijderd."
+
+passkey_create_text:
+  description: ""
+  other: "Er is een nieuwe passkey toegevoegd aan je {{ .ServiceName }}-account."
+subject_passkey_create:
+  description: ""
+  other: "Een nieuwe passkey is toegevoegd."
+
+mfa_create_text:
+  description: ""
+  other: "Er is een nieuwe tweestapsverificatiemethode (MFA) toegevoegd aan je {{ .ServiceName }}-account."
+subject_mfa_create:
+  description: ""
+  other: "Een nieuwe MFA-methode is toegevoegd"
+
+mfa_delete_text:
+  description: ""
+  other: "Een bestaande tweestapsverificatiemethode (MFA) is verwijderd van je {{ .ServiceName }}-account."
+subject_mfa_delete:
+  description: ""
+  other: "Een MFA-methode is verwijderd."

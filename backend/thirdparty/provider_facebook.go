@@ -6,9 +6,10 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"errors"
-	"github.com/teamhanko/hanko/backend/config"
-	"golang.org/x/oauth2"
 	"net/url"
+
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -64,11 +65,16 @@ func NewFacebookProvider(config config.ThirdPartyProvider, redirectURL string) (
 }
 
 func (f facebookProvider) AuthCodeURL(state string, opts ...oauth2.AuthCodeOption) string {
+
+	if prompt := f.config.Prompt; prompt != "" {
+		opts = append(opts, oauth2.SetAuthURLParam("prompt", prompt))
+	}
+
 	return f.oauthConfig.AuthCodeURL(state, opts...)
 }
 
-func (f facebookProvider) GetOAuthToken(code string) (*oauth2.Token, error) {
-	return f.oauthConfig.Exchange(context.Background(), code)
+func (f facebookProvider) GetOAuthToken(code string, opts ...oauth2.AuthCodeOption) (*oauth2.Token, error) {
+	return f.oauthConfig.Exchange(context.Background(), code, opts...)
 }
 
 func (f facebookProvider) GetUserData(token *oauth2.Token) (*UserData, error) {

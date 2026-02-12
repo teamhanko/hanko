@@ -3,21 +3,22 @@ package saml
 import (
 	"errors"
 	"fmt"
-	"github.com/gobuffalo/pop/v6"
-	"github.com/labstack/echo/v4"
-	saml2 "github.com/russellhaering/gosaml2"
-	auditlog "github.com/teamhanko/hanko/backend/audit_log"
-	"github.com/teamhanko/hanko/backend/ee/saml/dto"
-	"github.com/teamhanko/hanko/backend/ee/saml/provider"
-	samlUtils "github.com/teamhanko/hanko/backend/ee/saml/utils"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/gobuffalo/pop/v6"
+	"github.com/labstack/echo/v4"
+	saml2 "github.com/russellhaering/gosaml2"
+	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/ee/saml/dto"
+	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
+	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type Handler struct {
@@ -318,7 +319,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		userdata := provider.GetUserData(assertionInfo)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
 		samlDomain := provider.GetDomain()
-		linkResult, errTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow)
+		linkResult, errTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil)
 		if errTx != nil {
 			return errTx
 		}

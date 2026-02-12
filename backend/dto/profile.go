@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type MFAConfig struct {
@@ -24,6 +24,7 @@ type ProfileData struct {
 	CreatedAt    time.Time                    `json:"created_at"`
 	UpdatedAt    time.Time                    `json:"updated_at"`
 	Metadata     *Metadata                    `json:"metadata,omitempty"`
+	Identities   Identities                   `json:"identities,omitempty"`
 }
 
 func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileData {
@@ -57,10 +58,11 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileDat
 			TOTPEnabled:         cfg.MFA.Enabled && cfg.MFA.TOTP.Enabled,
 			SecurityKeysEnabled: cfg.MFA.Enabled && cfg.MFA.SecurityKeys.Enabled,
 		},
-		Emails:    emails,
-		Username:  FromUsernameModel(user.Username),
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Metadata:  metadata,
+		Emails:     emails,
+		Username:   FromUsernameModel(user.Username),
+		CreatedAt:  user.CreatedAt,
+		UpdatedAt:  user.UpdatedAt,
+		Metadata:   metadata,
+		Identities: FromIdentitiesModel(user.Identities, cfg),
 	}
 }

@@ -11,12 +11,12 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/dto"
-	"github.com/teamhanko/hanko/backend/persistence/models"
-	"github.com/teamhanko/hanko/backend/session"
-	"github.com/teamhanko/hanko/backend/test"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/test"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -277,7 +277,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			err := s.LoadFixtures("../test/fixtures/passcode")
 			s.Require().NoError(err)
 
-			jwkManager, err := jwk.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+			jwkManager, err := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
 			s.Require().NoError(err)
 			sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 			s.Require().NoError(err)

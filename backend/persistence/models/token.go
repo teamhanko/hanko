@@ -3,24 +3,27 @@ package models
 import (
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/crypto"
-	"time"
+	"github.com/teamhanko/hanko/backend/v2/crypto"
 )
 
 type Token struct {
-	ID          uuid.UUID  `db:"id"`
-	UserID      uuid.UUID  `db:"user_id"`
-	IdentityID  *uuid.UUID `db:"identity_id"`
-	IsFlow      bool       `db:"is_flow"`
-	Value       string     `db:"value"`
-	UserCreated bool       `db:"user_created"`
-	ExpiresAt   time.Time  `db:"expires_at"`
-	CreatedAt   time.Time  `db:"created_at"`
-	UpdatedAt   time.Time  `db:"updated_at"`
+	ID               uuid.UUID  `db:"id"`
+	UserID           uuid.UUID  `db:"user_id"`
+	IdentityID       *uuid.UUID `db:"identity_id"`
+	IsFlow           bool       `db:"is_flow"`
+	Value            string     `db:"value"`
+	UserCreated      bool       `db:"user_created"`
+	PKCECodeVerifier *string    `db:"code_verifier"`
+	LinkUser         bool       `db:"link_user"`
+	ExpiresAt        time.Time  `db:"expires_at"`
+	CreatedAt        time.Time  `db:"created_at"`
+	UpdatedAt        time.Time  `db:"updated_at"`
 }
 
 func TokenWithIdentityID(identityID uuid.UUID) func(*Token) {
@@ -38,6 +41,18 @@ func TokenForFlowAPI(isFlow bool) func(*Token) {
 func TokenUserCreated(userCreated bool) func(*Token) {
 	return func(token *Token) {
 		token.UserCreated = userCreated
+	}
+}
+
+func TokenPKCESessionVerifier(pkceSessionVerifier string) func(*Token) {
+	return func(token *Token) {
+		token.PKCECodeVerifier = &pkceSessionVerifier
+	}
+}
+
+func TokenWithLinkUser(linkUser bool) func(*Token) {
+	return func(token *Token) {
+		token.LinkUser = linkUser
 	}
 }
 

@@ -14,8 +14,16 @@ type EmailSend struct {
 }
 
 type PasscodeData struct {
-	ServiceName string `json:"service_name"`
-	OtpCode     string `json:"otp_code"`
-	TTL         int    `json:"ttl"`
-	ValidUntil  int64  `json:"valid_until"` // UnixTimestamp
+	ServiceName string `json:"service_name,omitempty"`
+	OtpCode     string `json:"otp_code,omitempty"`
+	TTL         int    `json:"ttl,omitempty"`
+	ValidUntil  int64  `json:"valid_until,omitempty"` // UnixTimestamp
+}
+
+type SecurityNotificationData struct {
+	Template            string `json:"template"`
+	ServiceName         string `json:"service_name,omitempty"`
+	NewEmailAddress     string `json:"new_email_address,omitempty"`
+	OldEmailAddress     string `json:"old_email_address,omitempty"`
+	DeletedEmailAddress string `json:"deleted_email_address,omitempty"`
 }

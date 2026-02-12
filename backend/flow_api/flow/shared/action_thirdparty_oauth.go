@@ -6,10 +6,11 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/teamhanko/hanko/backend/config"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/thirdparty"
-	"github.com/teamhanko/hanko/backend/utils"
+	"github.com/teamhanko/hanko/backend/v2/utils"
+
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"golang.org/x/oauth2"
 )
 
@@ -51,7 +52,11 @@ func (a ThirdPartyOAuth) Initialize(c flowpilot.InitializationContext) {
 		providerInput.AllowedValue(provider.DisplayName, provider.ID)
 	}
 
-	c.AddInputs(flowpilot.StringInput("redirect_to").Hidden(true).Required(true), providerInput)
+	c.AddInputs(
+		flowpilot.StringInput("redirect_to").Hidden(true).Required(true),
+		providerInput,
+		flowpilot.StringInput("code_verifier").Hidden(true),
+	)
 }
 
 func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
@@ -78,12 +83,17 @@ func (a ThirdPartyOAuth) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid.Wrap(err))
 	}
 
-	state, err := thirdparty.GenerateState(&deps.Cfg, providerName, redirectTo, thirdparty.GenerateStateForFlowAPI(true))
+	codeVerifier := c.Input().Get("code_verifier")
+	state, err := thirdparty.GenerateState(&deps.Cfg, providerName, redirectTo, thirdparty.GenerateStateForFlowAPI(true), thirdparty.GenerateStateWithPKCECodeVerifier(codeVerifier.String()))
 	if err != nil {
 		return c.Error(flowpilot.ErrorTechnical.Wrap(err))
 	}
 
-	authCodeUrl := provider.AuthCodeURL(string(state), oauth2.SetAuthURLParam("prompt", "consent"))
+	var opts []oauth2.AuthCodeOption
+	if codeVerifier.Exists() {
+		opts = append(opts, oauth2.S256ChallengeOption(codeVerifier.String()))
+	}
+	authCodeUrl := provider.AuthCodeURL(string(state), opts...)
 
 	// cookie := utils.GenerateStateCookie(&deps.Cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 	//	MaxAge:   300,

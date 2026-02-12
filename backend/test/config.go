@@ -1,6 +1,6 @@
 package test
 
-import "github.com/teamhanko/hanko/backend/config"
+import "github.com/teamhanko/hanko/backend/v2/config"
 
 var DefaultConfig = config.Config{
 	Webauthn: config.WebauthnSettings{
@@ -15,6 +15,9 @@ var DefaultConfig = config.Config{
 	},
 	Secrets: config.Secrets{
 		Keys: []string{"abcdefghijklmnop"},
+		KeyManagement: config.KeyManagement{
+			Type: "local",
+		},
 	},
 	Email: config.Email{
 		Enabled:              true,

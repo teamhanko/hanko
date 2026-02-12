@@ -48,6 +48,7 @@ export const it: Translation = {
     authenticatorAppAlreadySetUp: "L'app di autenticazione è già configurata",
     authenticatorAppNotSetUp: "Imposta l'app di autenticazione",
     trustDevice: "Fidarsi di questo browser?",
+    deleteIdentity: "Elimina connessione",
   },
   texts: {
     enterPasscode: "Inserisci il codice di accesso inviato al tuo indirizzo email.",
@@ -157,6 +158,7 @@ export const it: Translation = {
     lastUsed: "Ultimo utilizzo",
     trustDevice: "Fidarsi di questo browser",
     staySignedIn: "Rimani connesso",
+    connectAccount: "Collega account",
   },
   errors: {
     somethingWentWrong: "Si è verificato un errore tecnico. Riprova più tardi.",

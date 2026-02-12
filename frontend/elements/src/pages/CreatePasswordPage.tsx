@@ -1,4 +1,4 @@
-import { Fragment, useContext, useState } from "preact/compat";
+import { useContext, useState } from "preact/compat";
 import { State } from "@teamhanko/hanko-frontend-sdk";
 
 import { TranslateContext } from "@denysvuika/preact-translate";
@@ -36,7 +36,7 @@ const CreatePasswordPage = (props: Props) => {
   };
 
   return (
-    <Fragment>
+    <>
       <Content>
         <Headline1>{t("headlines.registerPassword")}</Headline1>
         <ErrorBox state={flowState} />
@@ -81,7 +81,7 @@ const CreatePasswordPage = (props: Props) => {
           {t("labels.skip")}
         </Link>
       </Footer>
-    </Fragment>
+    </>
   );
 };
 

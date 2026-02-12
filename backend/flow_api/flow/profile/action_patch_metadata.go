@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/teamhanko/hanko/backend/persistence"
 	"strings"
 
-	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
+
+	jsonpatch "github.com/evanphx/json-patch/v5"
 	"github.com/gobuffalo/nulls"
-	"github.com/teamhanko/hanko/backend/flow_api/flow/shared"
-	"github.com/teamhanko/hanko/backend/flowpilot"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type PatchMetadata struct {
@@ -48,7 +49,7 @@ func (a PatchMetadata) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	userMetadataModel, err := deps.Persister.GetUserMetadataPersister().Get(userModel.ID)
+	userMetadataModel, err := deps.Persister.GetUserMetadataPersisterWithConnection(deps.Tx).Get(userModel.ID)
 	if err != nil {
 		return fmt.Errorf("could not fetch user metadata: %w", err)
 	}
@@ -79,7 +80,7 @@ func (a PatchMetadata) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	err = deps.Persister.GetUserMetadataPersister().Update(userMetadataModel)
+	err = deps.Persister.GetUserMetadataPersisterWithConnection(deps.Tx).Update(userMetadataModel)
 	if err != nil {
 		if persistence.IsMetadataLimitExceededError(err) {
 			c.Input().SetError(

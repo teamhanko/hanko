@@ -7,7 +7,7 @@ import (
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type UserPersister interface {
@@ -43,6 +43,7 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"PasswordCredential",
 		"OTPSecret",
 		"Metadata",
+		"Identities",
 	}
 
 	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)

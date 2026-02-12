@@ -220,6 +220,9 @@ func (p *CustomThirdPartyProviders) Validate() error {
 }
 
 type CustomThirdPartyProvider struct {
+	// `acr_values` is a list of strings that specifies the Authentication Context Class Reference values that the
+	// Authorization Server is being requested to use for processing this Authentication Request.
+	AcrValues []string `yaml:"acr_values" json:"acr_values,omitempty" koanf:"acr_values"`
 	// `allow_linking` indicates whether existing accounts can be automatically linked with this provider.
 	//
 	// Linking is based on matching one of the email addresses of an existing user account with the (primary)
@@ -268,6 +271,14 @@ type CustomThirdPartyProvider struct {
 	DisplayName string `yaml:"display_name" json:"display_name,omitempty" koanf:"display_name"`
 	// `enabled` indicates if the provider is enabled or disabled.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+	// Possible values are:
+	// - login
+	// - none
+	// - consent
+	// - select_account
+	// Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
+	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt"`
 	// `scopes` is a list of scopes requested from the provider that specify the level of access an application has to
 	// a user's resources on a server, defining what actions the app can perform on behalf of the user.
 	//
@@ -442,6 +453,14 @@ type ThirdPartyProvider struct {
 	DisplayName string `jsonschema:"-" yaml:"-" json:"-" koanf:"-"`
 	// `enabled` determines whether this provider is enabled.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
+	// `prompt` specifies whether the Authorization Server prompts the End-User for reauthentication and consent.
+	// Possible values are:
+	// - login
+	// - none
+	// - consent
+	// - select_account
+	// Please note that not all providers support all values. Check the corresponding docs of the provider for supported values.
+	Prompt string `yaml:"prompt" json:"prompt,omitempty" koanf:"prompt"`
 	// `secret` is the client secret for the OAuth/OIDC client. Must be obtained from the provider.
 	//
 	// Required if the provider is `enabled`.
