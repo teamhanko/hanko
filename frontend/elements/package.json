@@ -139,7 +139,7 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "@denysvuika/preact-translate": "^0.5.1",
+    "@denysvuika/preact-translate": "^0.6.0",
     "@teamhanko/hanko-frontend-sdk": "^2.4.0",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
