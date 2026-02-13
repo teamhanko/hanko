@@ -643,6 +643,7 @@ Hanko sends webhooks for the following event types:
 | user                        | user creation, user deletion, user update, email creation, email deletion, change of primary email |
 | user.create                 | user creation                                                                                      |
 | user.delete                 | user deletion                                                                                      |
+| user.login                  | user login                                                                                         |
 | user.update                 | user update, email creation, email deletion, change of primary email                               |
 | user.update.email           | email creation, email deletion, change of primary email                                            |
 | user.update.email.create    | email creation                                                                                     |
