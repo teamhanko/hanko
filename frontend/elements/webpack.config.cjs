@@ -40,7 +40,7 @@ module.exports = {
         type: "module",
       },
     },
-    it: {
+    nl: {
       filename: "i18n/nl.js",
       import: "./src/i18n/nl.ts",
       library: {
