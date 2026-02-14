@@ -8,11 +8,21 @@ import (
 
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
 )
+
+// ProviderProfile is a provider-agnostic projection of "profile-like" data.
+// Keep this in models so other packages can map their data into it without creating import cycles.
+type ProviderProfile struct {
+	Name       string
+	GivenName  string
+	FamilyName string
+	Picture    string
+}
 
 // User is used by pop to map your users database table to your go code.
 type User struct {
@@ -26,6 +36,10 @@ type User struct {
 	PasswordCredential  *PasswordCredential `has_one:"password_credentials" json:"-"`
 	Metadata            *UserMetadata       `has_one:"user_metadata" json:"-"`
 	Identities          Identities          `has_many:"identities" json:"-"`
+	Name                nulls.String        `db:"name" json:"name"`
+	GivenName           nulls.String        `db:"given_name" json:"given_name"`
+	FamilyName          nulls.String        `db:"family_name" json:"family_name"`
+	Picture             nulls.String        `db:"picture" json:"picture"`
 }
 
 func (user *User) DeleteWebauthnCredential(credentialId string) {
@@ -199,4 +213,42 @@ func (user *User) WebAuthnCredentials() []webauthn.Credential {
 	}
 
 	return credentials
+}
+
+// SyncFromProviderProfile overwrites fields only if the incoming provider value is non-empty.
+// If the incoming value is empty, the existing value is kept.
+func (user *User) SyncFromProviderProfile(profile ProviderProfile) (changed bool) {
+	if profile.Name != "" {
+		newName := nulls.NewString(profile.Name)
+		if user.Name != newName {
+			user.Name = newName
+			changed = true
+		}
+	}
+
+	if profile.GivenName != "" {
+		newGiven := nulls.NewString(profile.GivenName)
+		if user.GivenName != newGiven {
+			user.GivenName = newGiven
+			changed = true
+		}
+	}
+
+	if profile.FamilyName != "" {
+		newFamily := nulls.NewString(profile.FamilyName)
+		if user.FamilyName != newFamily {
+			user.FamilyName = newFamily
+			changed = true
+		}
+	}
+
+	if profile.Picture != "" {
+		newPicture := nulls.NewString(profile.Picture)
+		if user.Picture != newPicture {
+			user.Picture = newPicture
+			changed = true
+		}
+	}
+
+	return changed
 }

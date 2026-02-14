@@ -19,7 +19,7 @@ const (
 )
 
 var DefaultGitHubScopes = []string{
-	"user:email",
+	"user:email", "user:read",
 }
 
 type githubProvider struct {

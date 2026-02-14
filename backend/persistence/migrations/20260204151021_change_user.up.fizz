@@ -1,0 +1,5 @@
+add_column("users", "name", "string", {"null": true})
+add_column("users", "family_name", "string", {"null": true})
+add_column("users", "given_name", "string", {"null": true})
+add_column("users", "picture", "text", {"null": true})
+

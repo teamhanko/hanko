@@ -18,6 +18,7 @@ const (
 
 var DefaultGoogleScopes = []string{
 	"email",
+	"profile",
 }
 
 type googleProvider struct {
@@ -28,9 +29,11 @@ type googleProvider struct {
 type GoogleUser struct {
 	ID            string `json:"sub"`
 	Name          string `json:"name"`
-	AvatarURL     string `json:"picture"`
+	Picture       string `json:"picture"`
 	Email         string `json:"email"`
 	EmailVerified bool   `json:"email_verified"`
+	GivenName     string `json:"given_name"`
+	FamilyName    string `json:"family_name"`
 }
 
 // NewGoogleProvider creates a Google third party provider.
@@ -91,9 +94,11 @@ func (g googleProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		Issuer:        GoogleAuthBase,
 		Subject:       user.ID,
 		Name:          user.Name,
-		Picture:       user.AvatarURL,
+		Picture:       user.Picture,
 		Email:         user.Email,
 		EmailVerified: user.EmailVerified,
+		GivenName:     user.GivenName,
+		FamilyName:    user.FamilyName,
 	}
 
 	return data, nil

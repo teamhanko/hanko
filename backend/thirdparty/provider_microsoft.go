@@ -160,6 +160,8 @@ func (p microsoftProvider) GetUserData(token *oauth2.Token) (*UserData, error) {
 		PreferredUsername: idTokenClaims.PreferredUsername,
 		Email:             email.Email,
 		EmailVerified:     email.Verified,
+		GivenName:         idTokenClaims.GivenName,
+		FamilyName:        idTokenClaims.FamilyName,
 	}
 
 	return data, nil
@@ -186,6 +188,8 @@ type microsoftIdTokenClaims struct {
 	PreferredUsername                  string `mapstructure:"preferred_username"`
 	UserPrincipalName                  string `mapstructure:"upn"`
 	XMicrosoftEmailDomainOwnerVerified any    `mapstructure:"xms_edov"`
+	FamilyName                         string `mapstructure:"family_name"`
+	GivenName                          string `mapstructure:"given_name"`
 }
 
 // IsEmailVerified checks if the email used is verified. Functionality mainly derived from Supabase's GoTrue fork
