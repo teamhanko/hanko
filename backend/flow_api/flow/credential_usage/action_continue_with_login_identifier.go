@@ -102,9 +102,25 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue)
+		// Use tenant-scoped lookup with fallback to global users
+		emailModel, isGlobalFallback, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddressWithTenantFallback(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return err
+		}
+
+		// If we found an email, get the associated user
+		if emailModel != nil && emailModel.UserID != nil {
+			// If this is a global user and we have a tenant, adopt them
+			if isGlobalFallback && deps.TenantID != nil {
+				err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).AdoptUserToTenant(*emailModel.UserID, *deps.TenantID)
+				if err != nil {
+					return fmt.Errorf("failed to adopt user to tenant: %w", err)
+				}
+			}
+			userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(*emailModel.UserID)
+			if err != nil {
+				return err
+			}
 		}
 
 		// When privacy setting is off return an error when email address does not exist
@@ -144,9 +160,25 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		// User has submitted a username.
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue)
+		// Use tenant-scoped lookup with fallback to global users
+		usernameModel, isGlobalFallback, err := deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).GetByNameWithTenantFallback(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get user by username from db: %w", err)
+		}
+
+		// If we found a username, get the associated user
+		if usernameModel != nil {
+			// If this is a global user and we have a tenant, adopt them
+			if isGlobalFallback && deps.TenantID != nil {
+				err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).AdoptUserToTenant(usernameModel.UserId, *deps.TenantID)
+				if err != nil {
+					return fmt.Errorf("failed to adopt user to tenant: %w", err)
+				}
+			}
+			userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(usernameModel.UserId)
+			if err != nil {
+				return fmt.Errorf("failed to get user from db: %w", err)
+			}
 		}
 
 		if userModel == nil {

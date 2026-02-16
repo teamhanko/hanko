@@ -35,6 +35,7 @@ type UserInfoResponse struct {
 // UserJWT represents an abstracted user model for session management
 type UserJWT struct {
 	UserID   string       `json:"user_id"`
+	TenantID *string      `json:"tenant_id,omitempty"`
 	Email    *EmailJWT    `json:"email,omitempty"`
 	Username string       `json:"username"`
 	Metadata *MetadataJWT `json:"metadata,omitempty"`
@@ -52,6 +53,11 @@ func (u *UserJWT) String() string {
 func UserJWTFromUserModel(userModel *models.User) UserJWT {
 	userJWT := UserJWT{
 		UserID: userModel.ID.String(),
+	}
+
+	if userModel.TenantID != nil {
+		tenantID := userModel.TenantID.String()
+		userJWT.TenantID = &tenantID
 	}
 
 	if primaryEmail := userModel.Emails.GetPrimary(); primaryEmail != nil {

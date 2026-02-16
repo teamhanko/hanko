@@ -1,0 +1,10 @@
+create_table("tenants") {
+	t.Column("id", "uuid")
+	t.Column("name", "string", {"null": false})
+	t.Column("slug", "string", {"null": false})
+	t.Column("config", "text", {"null": true})
+	t.Column("enabled", "bool", {"default": true})
+	t.PrimaryKey("id")
+	t.Index("slug", {"unique": true})
+	t.Timestamps()
+}

@@ -27,6 +27,7 @@ import { User } from "./lib/flow-api/types/payload";
  * @property {number=} sessionCheckInterval -  Interval for session validity checks in milliseconds. Must be greater than 3000 (3s), defaults to 3000 otherwise.
  * @property {string=} sessionCheckChannelName - The broadcast channel name for inter-tab communication.
  * @property {string=} sessionTokenLocation - The location where the session token is stored.
+ * @property {string=} tenantId - The tenant ID for multi-tenant support. Transmitted via X-Tenant-ID header.
  */
 export interface HankoOptions {
   timeout?: number;
@@ -38,6 +39,7 @@ export interface HankoOptions {
   sessionCheckInterval?: number;
   sessionCheckChannelName?: string;
   sessionTokenLocation?: SessionTokenLocation;
+  tenantId?: string;
 }
 
 /**
@@ -103,6 +105,17 @@ class Hanko extends Listener {
    */
   setLang(lang: string) {
     this.client.lang = lang;
+  }
+
+  /**
+   * Sets the tenant ID for multi-tenant support. The tenant ID is transmitted
+   * to the API via X-Tenant-ID header.
+   *
+   * @public
+   * @param tenantId {string} - The tenant UUID to send with requests.
+   */
+  setTenantId(tenantId: string) {
+    this.client.tenantId = tenantId;
   }
 
   /**

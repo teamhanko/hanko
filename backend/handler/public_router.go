@@ -89,12 +89,13 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 
 	sessionMiddleware := hankoMiddleware.Session(cfg, persister, sessionManager)
+	tenantMiddleware := hankoMiddleware.Tenant(cfg.MultiTenant, persister)
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 
-	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
-	e.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
-	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
+	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler, tenantMiddleware, webhookMiddleware)
+	e.POST("/login", flowAPIHandler.LoginFlowHandler, tenantMiddleware, webhookMiddleware)
+	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, tenantMiddleware, webhookMiddleware)
 
 	if cfg.Saml.Enabled {
 		e.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)

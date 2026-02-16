@@ -246,5 +246,6 @@ func DefaultConfig() *Config {
 			Enabled: true,
 			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
 		},
+		MultiTenant: DefaultMultiTenantConfig(),
 	}
 }

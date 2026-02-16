@@ -14,6 +14,7 @@ import (
 // Identity is used by pop to map your identities database table to your go code.
 type Identity struct {
 	ID             uuid.UUID     `json:"id" db:"id"`
+	TenantID       *uuid.UUID    `json:"tenant_id,omitempty" db:"tenant_id"`
 	ProviderUserID string        `json:"provider_user_id" db:"provider_user_id"`
 	ProviderID     string        `json:"provider_id" db:"provider_id"`
 	Data           slices.Map    `json:"data" db:"data"`

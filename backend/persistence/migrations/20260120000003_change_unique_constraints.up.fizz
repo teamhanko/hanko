@@ -1,0 +1,7 @@
+drop_index("emails", "emails_address_idx")
+drop_index("usernames", "usernames_username_idx")
+
+sql("CREATE UNIQUE INDEX emails_address_tenant_idx ON emails (address, tenant_id) WHERE tenant_id IS NOT NULL")
+sql("CREATE UNIQUE INDEX emails_address_global_idx ON emails (address) WHERE tenant_id IS NULL")
+sql("CREATE UNIQUE INDEX usernames_username_tenant_idx ON usernames (username, tenant_id) WHERE tenant_id IS NOT NULL")
+sql("CREATE UNIQUE INDEX usernames_username_global_idx ON usernames (username) WHERE tenant_id IS NULL")

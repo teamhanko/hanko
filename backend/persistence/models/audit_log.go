@@ -10,6 +10,7 @@ import (
 
 type AuditLog struct {
 	ID                uuid.UUID    `db:"id" json:"id"`
+	TenantID          *uuid.UUID   `db:"tenant_id" json:"tenant_id,omitempty"`
 	Type              AuditLogType `db:"type" json:"type"`
 	Error             *string      `db:"error" json:"error,omitempty"`
 	MetaHttpRequestId string       `db:"meta_http_request_id" json:"meta_http_request_id"`

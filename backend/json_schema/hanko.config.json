@@ -278,6 +278,11 @@
           "$ref": "#/$defs/Privacy",
           "title": "privacy",
           "description": "`privacy` configures privacy settings"
+        },
+        "multi_tenant": {
+          "$ref": "#/$defs/MultiTenant",
+          "title": "multi_tenant",
+          "description": "`multi_tenant` configures multi-tenant mode for tenant-scoped user isolation."
         }
       },
       "additionalProperties": false,
@@ -841,6 +846,33 @@
         "enabled",
         "optional"
       ]
+    },
+    "MultiTenant": {
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Enabled enables multi-tenant mode. When disabled (default), Hanko operates in single-tenant mode\nwith global email/username uniqueness.",
+          "default": false
+        },
+        "tenant_header": {
+          "type": "string",
+          "description": "TenantHeader is the HTTP header name used to identify the tenant.\nThe value must be a valid UUID.",
+          "default": "X-Tenant-ID"
+        },
+        "allow_global_users": {
+          "type": "boolean",
+          "description": "AllowGlobalUsers allows users without a tenant_id (backward compatibility).\nWhen true, requests without the tenant header will create/access global users.\nWhen false, the tenant header is required for all requests.",
+          "default": true
+        },
+        "auto_provision": {
+          "type": "boolean",
+          "description": "AutoProvision enables automatic tenant creation when a request includes a tenant ID\nthat doesn't exist yet. The tenant is created with default values.\nWhen false, requests with unknown tenant IDs will return a 404 error.",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "description": "MultiTenant configures multi-tenant mode for Hanko"
     },
     "Options": {
       "properties": {
