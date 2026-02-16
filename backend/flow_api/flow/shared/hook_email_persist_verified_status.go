@@ -113,22 +113,22 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		}
 	}
 
-	if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
-		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
-			EmailAddress: user.Emails.GetPrimary().Address,
-			Template:     "email_create",
-			HttpContext:  deps.HttpContext,
-			BodyData: map[string]interface{}{
-				"NewEmailAddress": emailAddressToVerify,
-			},
-			Data: &webhook.SecurityNotificationData{
-				NewEmailAddress: emailAddressToVerify,
-			},
-			UserContext: *user,
-		})
-	}
-
 	if emailCreated {
+		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
+			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				EmailAddress: user.Emails.GetPrimary().Address,
+				Template:     "email_create",
+				HttpContext:  deps.HttpContext,
+				BodyData: map[string]interface{}{
+					"NewEmailAddress": emailAddressToVerify,
+				},
+				Data: &webhook.SecurityNotificationData{
+					NewEmailAddress: emailAddressToVerify,
+				},
+				UserContext: *user,
+			})
+		}
+
 		err = deps.AuditLogger.CreateWithConnection(
 			deps.Tx,
 			deps.HttpContext,
