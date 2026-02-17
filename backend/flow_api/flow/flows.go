@@ -126,6 +126,7 @@ func NewLoginFlow(debug bool) flowpilot.Flow {
 			login.TriggerLoginWebhook{},
 			device_trust.IssueTrustDeviceCookie{},
 			shared.IssueSession{},
+			shared.DetermineAMRValues{},
 			shared.GetUserData{}).
 		AfterState(shared.StateOnboardingVerifyPasskeyAttestation,
 			shared.WebauthnCredentialSave{}).
@@ -164,6 +165,7 @@ func NewRegistrationFlow(debug bool) flowpilot.Flow {
 		ErrorState(shared.StateError).
 		BeforeState(shared.StateSuccess,
 			shared.IssueSession{},
+			registration.DetermineAMRValues{},
 			shared.GetUserData{},
 			registration.CreateUser{}).
 		SubFlows(
@@ -231,6 +233,7 @@ func NewTokenExchangeFlow(debug bool) flowpilot.Flow {
 		State(shared.StateSuccess).
 		BeforeState(shared.StateSuccess,
 			shared.IssueSession{},
+			shared.DetermineAMRValues{},
 			shared.GetUserData{}).
 		SubFlows(
 			CredentialUsageSubFlow,
