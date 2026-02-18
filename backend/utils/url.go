@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 )
@@ -14,33 +15,42 @@ const (
 	pictureURLReasonHasUserInfo   = "has_userinfo"
 )
 
-// ValidatePictureURL returns "" if valid, otherwise a stable reason code.
-func ValidatePictureURL(raw string) string {
+// PictureURLError is returned by ValidatePictureURL when the URL is invalid.
+type PictureURLError struct {
+	Reason string
+}
+
+func (e PictureURLError) Error() string {
+	return fmt.Sprintf("invalid picture url: %s", e.Reason)
+}
+
+// ValidatePictureURL returns nil if valid, otherwise an error that includes a reason string.
+func ValidatePictureURL(raw string) error {
 	raw = strings.TrimSpace(raw)
 	if raw == "" {
-		return pictureURLReasonEmpty
+		return PictureURLError{Reason: pictureURLReasonEmpty}
 	}
 	if len(raw) > 2048 {
-		return pictureURLReasonTooLong
+		return PictureURLError{Reason: pictureURLReasonTooLong}
 	}
 
 	u, err := url.ParseRequestURI(raw)
 	if err != nil {
-		return pictureURLReasonInvalidURI
+		return PictureURLError{Reason: pictureURLReasonInvalidURI}
 	}
 
 	if u.Scheme != "http" && u.Scheme != "https" {
-		return pictureURLReasonInvalidScheme
+		return PictureURLError{Reason: pictureURLReasonInvalidScheme}
 	}
 
 	if u.Host == "" {
-		return pictureURLReasonMissingHost
+		return PictureURLError{Reason: pictureURLReasonMissingHost}
 	}
 
 	// Disallow credentials in URL (user:pass@host).
 	if u.User != nil {
-		return pictureURLReasonHasUserInfo
+		return PictureURLError{Reason: pictureURLReasonHasUserInfo}
 	}
 
-	return ""
+	return nil
 }

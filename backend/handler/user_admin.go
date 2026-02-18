@@ -392,8 +392,8 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 	}
 
 	if body.Picture.Present && body.Picture.Value != nil {
-		if reason := utils.ValidatePictureURL(*body.Picture.Value); reason != "" {
-			return echo.NewHTTPError(http.StatusBadRequest, "picture must be a valid http(s) URL or null")
+		if err := utils.ValidatePictureURL(*body.Picture.Value); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "picture must be a valid http(s) URL or null").SetInternal(err)
 		}
 	}
 

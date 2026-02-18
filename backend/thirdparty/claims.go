@@ -1,8 +1,11 @@
 package thirdparty
 
 import (
+	"errors"
+
 	zeroLogger "github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type ClaimsAddress struct {
@@ -67,7 +70,13 @@ func (c *Claims) ProviderProfile() (models.ProviderProfile, []claimWarning) {
 	var warnings []claimWarning
 
 	if profile.Picture != "" {
-		if reason := validatePictureURL(profile.Picture); reason != "" {
+		if err := utils.ValidatePictureURL(profile.Picture); err != nil {
+			reason := "invalid"
+			var perr utils.PictureURLError
+			if errors.As(err, &perr) {
+				reason = perr.Reason
+			}
+
 			warnings = append(warnings, claimWarning{
 				Field:  "picture",
 				Reason: reason,
