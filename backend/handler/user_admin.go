@@ -1,8 +1,18 @@
 package handler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/url"
+	"regexp"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/go-sql-driver/mysql"
+	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgconn"
@@ -13,13 +23,9 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/pagination"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
-	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
-	"time"
+	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type UserHandlerAdmin struct {
@@ -52,7 +58,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
-		err = utils.TriggerWebhooks(c, tx, events.UserDelete, admin.FromUserModel(*user))
+		err = webhookUtils.TriggerWebhooks(c, tx, events.UserDelete, admin.FromUserModel(*user))
 		if err != nil {
 			c.Logger().Warn(err)
 		}
@@ -294,10 +300,201 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 	userDto := admin.FromUserModel(*user)
 
-	err = utils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserCreate, userDto)
+	err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserCreate, userDto)
 	if err != nil {
 		c.Logger().Warn(err)
 	}
 
 	return c.JSON(http.StatusOK, userDto)
+}
+
+// OptionalString represents a PATCH-able string field with 3 states:
+// - not present in JSON => Present=false (no change)
+// - present with string => Present=true, Value!=nil (set)
+// - present with null   => Present=true, Value==nil (clear)
+type OptionalString struct {
+	Present bool
+	Value   *string
+}
+
+func (o *OptionalString) UnmarshalJSON(b []byte) error {
+	o.Present = true
+
+	if bytes.Equal(bytes.TrimSpace(b), []byte("null")) {
+		o.Value = nil
+		return nil
+	}
+
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return fmt.Errorf("expected string or null: %w", err)
+	}
+
+	o.Value = &s
+	return nil
+}
+
+type PatchUserAdminRequest struct {
+	Username   OptionalString `json:"username"`
+	Name       OptionalString `json:"name"`
+	GivenName  OptionalString `json:"given_name"`
+	FamilyName OptionalString `json:"family_name"`
+	Picture    OptionalString `json:"picture"`
+}
+
+func (h *UserHandlerAdmin) Patch(c echo.Context) error {
+	userId, err := uuid.FromString(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
+	}
+
+	var body PatchUserAdminRequest
+	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
+		return dto.ToHttpError(err)
+	}
+
+	// Empty/whitespace-only strings are invalid (`null` is used to clear).
+	normalizeOptionalString := func(field string, v OptionalString, lower bool) (OptionalString, error) {
+		if !v.Present || v.Value == nil {
+			return v, nil
+		}
+
+		s := strings.TrimSpace(*v.Value)
+		if s == "" {
+			return v, echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("%s must be a non-empty string or null", field))
+		}
+		if lower {
+			s = strings.ToLower(s)
+		}
+		v.Value = &s
+		return v, nil
+	}
+
+	body.Username, err = normalizeOptionalString("username", body.Username, true)
+	if err != nil {
+		return err
+	}
+	body.Name, err = normalizeOptionalString("name", body.Name, false)
+	if err != nil {
+		return err
+	}
+	body.GivenName, err = normalizeOptionalString("given_name", body.GivenName, false)
+	if err != nil {
+		return err
+	}
+	body.FamilyName, err = normalizeOptionalString("family_name", body.FamilyName, false)
+	if err != nil {
+		return err
+	}
+	body.Picture, err = normalizeOptionalString("picture", body.Picture, false)
+	if err != nil {
+		return err
+	}
+
+	if body.Picture.Present && body.Picture.Value != nil {
+		if err := utils.ValidatePictureURL(*body.Picture.Value); err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "picture must be a valid http(s) URL or null").SetInternal(err)
+		}
+	}
+
+	err = h.persister.Transaction(func(tx *pop.Connection) error {
+		userPersister := h.persister.GetUserPersisterWithConnection(tx)
+		usernamePersister := h.persister.GetUsernamePersisterWithConnection(tx)
+
+		user, err := userPersister.Get(userId)
+		if err != nil {
+			return fmt.Errorf("failed to get user: %w", err)
+		}
+		if user == nil {
+			return echo.NewHTTPError(http.StatusNotFound, "user not found")
+		}
+
+		changed := false
+
+		applyNullsString := func(dst *nulls.String, in OptionalString) {
+			if !in.Present {
+				return
+			}
+			if in.Value == nil {
+				*dst = nulls.String{} // NULL
+			} else {
+				*dst = nulls.NewString(*in.Value)
+			}
+			changed = true
+		}
+
+		applyNullsString(&user.Name, body.Name)
+		applyNullsString(&user.GivenName, body.GivenName)
+		applyNullsString(&user.FamilyName, body.FamilyName)
+		applyNullsString(&user.Picture, body.Picture)
+
+		// Username is currently still stored in its own table/record.
+		if body.Username.Present {
+			if body.Username.Value == nil {
+				if user.Username != nil {
+					if err := usernamePersister.Delete(user.Username); err != nil {
+						return fmt.Errorf("failed to delete username: %w", err)
+					}
+					user.DeleteUsername()
+					changed = true
+				}
+			} else {
+				newUsername := *body.Username.Value
+
+				validNewUsername := regexp.MustCompile(`^\w+$`).MatchString(newUsername)
+
+				if !validNewUsername {
+					return echo.NewHTTPError(http.StatusBadRequest, "username is invalid")
+				}
+
+				dup, err := usernamePersister.GetByName(newUsername)
+				if err != nil {
+					return fmt.Errorf("failed to check duplicate username: %w", err)
+				}
+				if dup != nil && dup.UserId != user.ID {
+					return echo.NewHTTPError(http.StatusConflict, "username already exists")
+				}
+
+				if user.Username == nil {
+					usernameModel := models.NewUsername(user.ID, newUsername)
+					if err := usernamePersister.Create(*usernameModel); err != nil {
+						return fmt.Errorf("failed to create username: %w", err)
+					}
+					user.SetUsername(usernameModel)
+					changed = true
+				} else if user.Username.Username != newUsername {
+					user.Username.Username = newUsername
+					user.Username.UpdatedAt = time.Now()
+					if err := usernamePersister.Update(user.Username); err != nil {
+						return fmt.Errorf("failed to update username: %w", err)
+					}
+					changed = true
+				}
+			}
+		}
+
+		if !changed {
+			return nil
+		}
+
+		user.UpdatedAt = time.Now()
+		if err := userPersister.Update(*user); err != nil {
+			return fmt.Errorf("failed to update user: %w", err)
+		}
+
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	user, err := h.persister.GetUserPersister().Get(userId)
+	if err != nil {
+		return fmt.Errorf("failed to get user: %w", err)
+	}
+	if user == nil {
+		return echo.NewHTTPError(http.StatusNotFound, "user not found")
+	}
+
+	return c.JSON(http.StatusOK, admin.FromUserModel(*user))
 }

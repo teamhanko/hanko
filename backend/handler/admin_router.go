@@ -68,6 +68,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	user.POST("", userHandler.Create, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
 	user.DELETE("/:id", userHandler.Delete, webhookMiddleware)
+	user.PATCH("/:id", userHandler.Patch)
 
 	metadataHandler := NewMetadataAdminHandler(persister)
 	user.PATCH("/:id/metadata", metadataHandler.PatchMetadata)
