@@ -10,6 +10,7 @@ import (
 	"io"
 	"log"
 	"sync"
+	"time"
 
 	awsConfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/kms"
@@ -27,7 +28,7 @@ type AWSKMSAdapter struct {
 }
 
 // NewAWSKMSAdapter initializes and returns a new instance of AWSKMSAdapter with the provided KeyManagement configuration.
-func NewAWSKMSAdapter(cfg config.KeyManagement) (*AWSKMSAdapter, error) {
+func NewAWSKMSAdapter(ctx context.Context, cfg config.KeyManagement) (*AWSKMSAdapter, error) {
 	// LoadDefaultConfig resolves AWS credentials using the following chain (in order of precedence):
 	// 1. Environment variables (AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN)
 	// 2. Shared credentials file (~/.aws/credentials)
@@ -36,7 +37,7 @@ func NewAWSKMSAdapter(cfg config.KeyManagement) (*AWSKMSAdapter, error) {
 	// 5. IAM role for Amazon ECS (via container credentials)
 	// 6. IAM role for Amazon EKS (via service account token)
 	awsCfg, err := awsConfig.LoadDefaultConfig(
-		context.TODO(),
+		ctx,
 		awsConfig.WithRegion(cfg.Region),
 	)
 	if err != nil {
@@ -68,7 +69,10 @@ func (k *AWSKMSAdapter) Public() crypto.PublicKey {
 	}
 
 	// Fetch and cache the public key
-	result, err := k.KmsClient.GetPublicKey(context.TODO(), &kms.GetPublicKeyInput{
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	result, err := k.KmsClient.GetPublicKey(ctx, &kms.GetPublicKeyInput{
 		KeyId: &k.KeyId,
 	})
 	if err != nil {
@@ -105,7 +109,10 @@ func (k *AWSKMSAdapter) Sign(rand io.Reader, digest []byte, opts crypto.SignerOp
 	}
 
 	// Sign the digest using AWS KMS
-	result, err := k.KmsClient.Sign(context.TODO(), &kms.SignInput{
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	result, err := k.KmsClient.Sign(ctx, &kms.SignInput{
 		KeyId:            &k.KeyId,
 		Message:          digest,
 		MessageType:      types.MessageTypeDigest,
