@@ -3,6 +3,8 @@ package registration
 import (
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -11,7 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 	"github.com/tidwall/gjson"
-	"time"
 )
 
 type CreateUser struct {
@@ -69,6 +70,11 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 
 	var auditLogDetails []auditlog.DetailOption
 
+	enrolledPwd := false
+	enrolledPasskey := false
+	enrolledTotp := false
+	enrolledSecurityKey := false
+
 	err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Create(models.User{
 		ID:        id,
 		CreatedAt: now,
@@ -107,8 +113,10 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 
 		if credentialModel.MFAOnly {
 			auditLogDetails = append(auditLogDetails, auditlog.Detail("security_key", credentialModel.ID))
+			enrolledSecurityKey = true
 		} else {
 			auditLogDetails = append(auditLogDetails, auditlog.Detail("passkey", credentialModel.ID))
+			enrolledPasskey = true
 		}
 	}
 
@@ -122,6 +130,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		}
 
 		auditLogDetails = append(auditLogDetails, auditlog.Detail("password", true))
+		enrolledPwd = true
 	}
 
 	if otpSecret != "" {
@@ -132,6 +141,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		}
 
 		auditLogDetails = append(auditLogDetails, auditlog.Detail("otp_secret", otpSecretModel.ID))
+		enrolledTotp = true
 	}
 
 	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(id)
@@ -160,6 +170,22 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 
 	if err != nil {
 		return fmt.Errorf("failed to create audit log: %w", err)
+	}
+
+	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledPwd, enrolledPwd); err != nil {
+		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledPwd, err)
+	}
+	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledPasskey, enrolledPasskey); err != nil {
+		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledPasskey, err)
+	}
+	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledPasskey, enrolledPasskey); err != nil {
+		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledPasskey, err)
+	}
+	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledSecurityKey, enrolledSecurityKey); err != nil {
+		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledSecurityKey, err)
+	}
+	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledTotp, enrolledTotp); err != nil {
+		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledTotp, err)
 	}
 
 	return nil

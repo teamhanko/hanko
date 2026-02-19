@@ -122,6 +122,15 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		return fmt.Errorf("failed to set third_party_provider to the stash: %w", err)
 	}
 
+	if c.IsFlow(FlowRegistration) {
+		if err = c.Stash().Set(StashPathRegistrationAMRUsedThirdParty, true); err != nil {
+			return fmt.Errorf("failed to set %s to the stash: %w", StashPathRegistrationAMRUsedThirdParty, err)
+		}
+		if err = c.Stash().Set(StashPathRegistrationAMRUsedThirdPartyProvider, identity.ProviderID); err != nil {
+			return fmt.Errorf("failed to set %s to the stash: %w", StashPathRegistrationAMRUsedThirdPartyProvider, err)
+		}
+	}
+
 	c.PreventRevert()
 
 	return c.Continue(onboardingStates...)

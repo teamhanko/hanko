@@ -1,6 +1,17 @@
 package shared
 
 const (
+	StashPathAMRValues = "amr"
+
+	// Registration-only keys for AMR derivation
+	StashPathRegistrationAMRUsedPasscode           = "registration.amr.passcode"
+	StashPathRegistrationAMRUsedThirdParty         = "registration.amr.used.third_party"
+	StashPathRegistrationAMRUsedThirdPartyProvider = "registration.amr.used.third_party_provider"
+	StashPathRegistrationAMREnrolledPwd            = "registration.amr.enrolled.pwd"
+	StashPathRegistrationAMREnrolledPasskey        = "registration.amr.enrolled.passkey"
+	StashPathRegistrationAMREnrolledTotp           = "registration.amr.enrolled.totp"
+	StashPathRegistrationAMREnrolledSecurityKey    = "registration.amr.enrolled.security_key"
+
 	StashPathDeviceTrustGranted                     = "device_trust_granted"
 	StashPathEmail                                  = "email"
 	StashPathEmailVerified                          = "email_verified"
