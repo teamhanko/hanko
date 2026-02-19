@@ -1,0 +1,9 @@
+{
+  "dockerComposeFile": "./devcontainers-full-setup.yaml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "forwardPorts": [
+    80,
+    8025
+  ]
+}

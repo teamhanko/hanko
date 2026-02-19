@@ -25,7 +25,7 @@
     "lint": "eslint 'src/**/*.ts'",
     "format": "pretty-quick --staged",
     "build": "microbundle --globals @github/webauthn-json=webauthnJson --tsconfig tsconfig.prod.json",
-    "dev": "microbundle watch",
+    "build:dev": "microbundle watch",
     "docs": "jsdoc -r -c jsdoc.json -d ./.generated/docs -R README.md --pedantic",
     "test": "jest --coverage"
   },
