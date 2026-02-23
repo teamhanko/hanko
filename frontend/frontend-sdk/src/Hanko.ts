@@ -129,12 +129,25 @@ class Hanko extends Listener {
    * Retrieves the current user's profile information.
    *
    * @public
+   * @deprecated
    * @returns {Promise<User>} A promise that resolves to the user object
    * @throws {UnauthorizedError} If the user is not authenticated
    * @throws {TechnicalError} If an unexpected error occurs
    */
   async getUser(): Promise<User> {
     return this.user.getCurrent();
+  }
+
+  /**
+   * Retrieves the current user's profile information.
+   *
+   * @public
+   * @returns {Promise<User>} A promise that resolves to the user object
+   * @throws {UnauthorizedError} If the user is not authenticated
+   * @throws {TechnicalError} If an unexpected error occurs
+   */
+  async getCurrentUser(): Promise<User> {
+    return this.user.getCurrentUser();
   }
 
   /**
