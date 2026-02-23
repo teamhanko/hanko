@@ -11,6 +11,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
 type IssueSession struct {
@@ -38,7 +39,20 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 
 	userJWT := dto.UserJWTFromUserModel(userModel)
 
-	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT)
+	var jwtOpts []session.JWTOptions
+	if c.Stash().Get(StashPathAMRValues).Exists() {
+		var amr []string
+		for _, v := range c.Stash().Get(StashPathAMRValues).Array() {
+			if s := v.String(); s != "" {
+				amr = append(amr, s)
+			}
+		}
+		if len(amr) > 0 {
+			jwtOpts = append(jwtOpts, session.WithValue("amr", amr))
+		}
+	}
+
+	signedSessionToken, rawToken, err := deps.SessionManager.GenerateJWT(userJWT, jwtOpts...)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
@@ -125,9 +139,9 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 	mfaMethod := c.Stash().Get(StashPathMFAUsageMethod)
 	thirdPartyProvider := c.Stash().Get(StashPathThirdPartyProvider)
 
-	// Audit log logins only, because user creation on registration implies that the user is logged
-	// in after a registration. Only login actions should set the "login_method" stash entry.
-	if loginMethod.Exists() {
+	// Audit log logins (including third party signups) only, because user creation on registration implies that the
+	// user is logged in after a registration. Only login actions should set the "login_method" stash entry.
+	if c.IsFlow(FlowLogin) || c.IsFlow(FlowTokenExchange) && loginMethod.Exists() {
 		auditLogDetails := []auditlog.DetailOption{
 			auditlog.Detail("login_method", loginMethod.String()),
 			auditlog.Detail("flow_id", c.GetFlowID()),
@@ -153,7 +167,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	if loginMethod.Exists() {
+	if c.IsFlow(FlowLogin) || c.IsFlow(FlowTokenExchange) && loginMethod.Exists() {
 		if err := c.Payload().Set("last_login.login_method", loginMethod.String()); err != nil {
 			return fmt.Errorf("failed to set login_method to the payload: %w", err)
 		}
