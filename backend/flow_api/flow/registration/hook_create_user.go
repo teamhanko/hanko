@@ -178,9 +178,6 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledPasskey, enrolledPasskey); err != nil {
 		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledPasskey, err)
 	}
-	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledPasskey, enrolledPasskey); err != nil {
-		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledPasskey, err)
-	}
 	if err = c.Stash().Set(shared.StashPathRegistrationAMREnrolledSecurityKey, enrolledSecurityKey); err != nil {
 		return fmt.Errorf("failed to set %s to the stash: %w", shared.StashPathRegistrationAMREnrolledSecurityKey, err)
 	}
