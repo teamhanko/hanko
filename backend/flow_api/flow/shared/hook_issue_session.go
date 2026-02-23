@@ -141,7 +141,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 
 	// Audit log logins (including third party signups) only, because user creation on registration implies that the
 	// user is logged in after a registration. Only login actions should set the "login_method" stash entry.
-	if c.IsFlow(FlowLogin) || c.IsFlow(FlowExchangeToken) && loginMethod.Exists() {
+	if c.IsFlow(FlowLogin) || c.IsFlow(FlowTokenExchange) && loginMethod.Exists() {
 		auditLogDetails := []auditlog.DetailOption{
 			auditlog.Detail("login_method", loginMethod.String()),
 			auditlog.Detail("flow_id", c.GetFlowID()),
@@ -167,7 +167,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		}
 	}
 
-	if c.IsFlow(FlowLogin) || c.IsFlow(FlowExchangeToken) && loginMethod.Exists() {
+	if c.IsFlow(FlowLogin) || c.IsFlow(FlowTokenExchange) && loginMethod.Exists() {
 		if err := c.Payload().Set("last_login.login_method", loginMethod.String()); err != nil {
 			return fmt.Errorf("failed to set login_method to the payload: %w", err)
 		}

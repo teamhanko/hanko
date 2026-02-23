@@ -227,7 +227,7 @@ func NewProfileFlow(debug bool) flowpilot.Flow {
 }
 
 func NewTokenExchangeFlow(debug bool) flowpilot.Flow {
-	return flowpilot.NewFlow("token_exchange").
+	return flowpilot.NewFlow(shared.FlowTokenExchange).
 		State(shared.StateThirdParty,
 			shared.ExchangeToken{}).
 		State(shared.StateSuccess).
