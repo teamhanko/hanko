@@ -4,17 +4,18 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"slices"
+	"strings"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"net/http"
-	"net/http/httptest"
-	"slices"
-	"strings"
-	"testing"
 )
 
 func TestUserSuite(t *testing.T) {
@@ -292,11 +293,16 @@ func (s *userSuite) TestUserHandler_GetUserWithWebAuthnCredential() {
 
 	if s.Equal(http.StatusOK, rec.Code) {
 		s.Equal(rec.Code, http.StatusOK)
-		user := models.User{}
-		err := json.Unmarshal(rec.Body.Bytes(), &user)
+		var resp struct {
+			ID                  string `json:"id"`
+			WebauthnCredentials []struct {
+				ID string `json:"id"`
+			} `json:"webauthn_credentials"`
+		}
+		err := json.Unmarshal(rec.Body.Bytes(), &resp)
 		s.Require().NoError(err)
-		s.Equal(userId.String(), user.ID.String())
-		s.Equal(len(user.WebauthnCredentials), 1)
+		s.Equal(userId.String(), resp.ID)
+		s.Len(resp.WebauthnCredentials, 2)
 	}
 }
 
@@ -436,7 +442,12 @@ func (s *userSuite) TestUserHandler_Me() {
 
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
 
-	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
+	cfg := test.DefaultConfig
+	cfg.Passkey.Enabled = true
+	cfg.MFA.Enabled = true
+	cfg.MFA.TOTP.Enabled = true
+	cfg.MFA.SecurityKeys.Enabled = true
+	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
 	cookie, err := generateSessionCookie(s.Storage, userId)
 	s.Require().NoError(err)
@@ -448,13 +459,33 @@ func (s *userSuite) TestUserHandler_Me() {
 	e.ServeHTTP(rec, req)
 
 	if s.Equal(http.StatusOK, rec.Code) {
-
-		response := struct {
-			UserId string `json:"id"`
-		}{}
+		response := dto.ProfileData{}
 		err = json.Unmarshal(rec.Body.Bytes(), &response)
 		s.NoError(err)
-		s.Equal(userId.String(), response.UserId)
+		s.Equal(userId, response.UserID)
+		s.Len(response.Emails, 1)
+		s.Equal("john.doe@example.com", response.Emails[0].Address)
+		s.True(response.Emails[0].IsVerified)
+		s.Len(response.Passkeys, 1)
+		s.Equal("P8fcQ6U8zxJRzhI0yuUCOxcA_UyAs0jbauO5ektj4SM", response.Passkeys[0].ID)
+		s.Len(response.SecurityKeys, 1)
+		s.Equal("security-key-cred-id", response.SecurityKeys[0].ID)
+		s.False(response.MFAConfig.AuthAppSetUp)
+		s.True(response.MFAConfig.TOTPEnabled)
+		s.True(response.MFAConfig.SecurityKeysEnabled)
+		s.NotNil(response.Username)
+		s.Equal("johndoe", response.Username.Username)
+		s.Equal("John Doe", response.Name)
+		s.Equal("John", response.GivenName)
+		s.Equal("Doe", response.FamilyName)
+		s.Equal("https://example.com/john.jpg", response.Picture)
+		s.NotNil(response.Metadata)
+		s.Contains(string(response.Metadata.Public), "tester")
+		s.Contains(string(response.Metadata.Unsafe), "debug")
+		s.NotContains(string(rec.Body.Bytes()), "private_metadata")
+		s.NotContains(string(rec.Body.Bytes()), "quota")
+		s.Len(response.Identities, 1)
+		s.Equal("Google", response.Identities[0].Provider)
 	}
 }
 
