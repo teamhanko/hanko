@@ -1,7 +1,9 @@
 package aws_kms
 
 import (
+	"context"
 	"fmt"
+	"time"
 
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
@@ -17,7 +19,10 @@ type AWSKMSManager struct {
 }
 
 func NewAWSKMSManager(cfg config.KeyManagement) (*AWSKMSManager, error) {
-	adapter, err := NewAWSKMSAdapter(cfg)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	adapter, err := NewAWSKMSAdapter(ctx, cfg)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create AWS KMS adapter: %w", err)
 	}
