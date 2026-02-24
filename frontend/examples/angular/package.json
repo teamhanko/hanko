@@ -22,7 +22,7 @@
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^21.1.5",
-    "@angular/cli": "^21.1.4",
+    "@angular/cli": "^21.1.5",
     "@angular/compiler-cli": "^21.1.5",
     "@types/node": "^22.5.1",
     "copyfiles": "^2.4.1",
