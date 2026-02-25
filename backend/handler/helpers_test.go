@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gobuffalo/nulls"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/crypto/jwk/local_db"
 	"github.com/teamhanko/hanko/backend/v2/dto"
@@ -30,7 +31,7 @@ func generateSessionCookie(storage persistence.Persister, userId uuid.UUID) (*ht
 	sessionID, _ := rawToken.Get("session_id")
 	_ = storage.GetSessionPersister().Create(models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
-		UserID:    userId,
+		UserID:    nulls.NewUUID(userId),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 		ExpiresAt: nil,

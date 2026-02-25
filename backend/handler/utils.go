@@ -2,6 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
@@ -10,7 +12,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"net/http"
 )
 
 func loadDto[I any](ctx echo.Context) (*I, error) {
@@ -51,7 +52,7 @@ func storeSession(cfg *config.Config, persister persistence.Persister, userId uu
 	expirationTime := rawToken.Expiration()
 	sessionModel := models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
-		UserID:    userId,
+		UserID:    nulls.NewUUID(userId),
 		CreatedAt: rawToken.IssuedAt(),
 		UpdatedAt: rawToken.IssuedAt(),
 		ExpiresAt: &expirationTime,

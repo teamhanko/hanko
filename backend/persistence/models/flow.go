@@ -1,8 +1,10 @@
 package models
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"time"
+
+	"github.com/gobuffalo/nulls"
+	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
@@ -11,13 +13,14 @@ import (
 
 // Flow is used by pop to map your flows database table to your go code.
 type Flow struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	Data      string    `json:"data" db:"data"`
-	Version   int       `json:"version" db:"version"`
-	CSRFToken string    `json:"csrf_token" db:"csrf_token"`
-	ExpiresAt time.Time `json:"expires_at" db:"expires_at"`
-	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
-	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	ID        uuid.UUID  `json:"id" db:"id"`
+	Data      string     `json:"data" db:"data"`
+	Version   int        `json:"version" db:"version"`
+	CSRFToken string     `json:"csrf_token" db:"csrf_token"`
+	SessionID nulls.UUID `json:"session_id" db:"session_id"`
+	ExpiresAt time.Time  `json:"expires_at" db:"expires_at"`
+	UpdatedAt time.Time  `json:"updated_at" db:"updated_at"`
+	CreatedAt time.Time  `json:"created_at" db:"created_at"`
 }
 
 func (f *Flow) ToFlowpilotModel() *flowpilot.FlowModel {
@@ -26,6 +29,7 @@ func (f *Flow) ToFlowpilotModel() *flowpilot.FlowModel {
 		Data:      f.Data,
 		Version:   f.Version,
 		CSRFToken: f.CSRFToken,
+		SessionID: &f.SessionID.UUID,
 		ExpiresAt: f.ExpiresAt,
 		CreatedAt: f.CreatedAt,
 		UpdatedAt: f.UpdatedAt,
