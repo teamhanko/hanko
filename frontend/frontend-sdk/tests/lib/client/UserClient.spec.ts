@@ -83,7 +83,7 @@ describe("UserClient.getCurrent()", () => {
       .mockRejectedValue(new Error("Test error"));
 
     const user = userClient.getCurrent();
-    await expect(user).rejects.toThrowError("Test error");
+    await expect(user).rejects.toThrow("Test error");
   });
 });
 
