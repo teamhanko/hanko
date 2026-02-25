@@ -17,7 +17,7 @@ describe("throttle()", () => {
   it("should throttle the function to once per specified interval", async () => {
     const throttledFn = Throttle.throttle(mockFn, 1000);
 
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
 
     throttledFn();
     expect(mockFn).toHaveBeenCalledTimes(1);
@@ -34,13 +34,13 @@ describe("throttle()", () => {
       leading: false,
     });
 
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
 
     throttledFunction();
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(500);
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
 
     jest.advanceTimersByTime(500);
     expect(mockFn).toHaveBeenCalledTimes(1);
@@ -55,7 +55,7 @@ describe("throttle()", () => {
       trailing: false,
     });
 
-    expect(mockFn).not.toBeCalled();
+    expect(mockFn).not.toHaveBeenCalled();
 
     throttledFunction();
     expect(mockFn).toHaveBeenCalledTimes(1);
