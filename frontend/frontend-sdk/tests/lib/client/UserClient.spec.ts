@@ -84,7 +84,7 @@ describe("UserClient.getCurrent()", () => {
       .mockRejectedValue(new Error("Test error"));
 
     const user = userClient.getCurrent();
-    await expect(user).rejects.toThrowError("Test error");
+    await expect(user).rejects.toThrow("Test error");
   });
 });
 
@@ -144,7 +144,7 @@ describe("UserClient.getCurrentUser()", () => {
       .mockRejectedValue(new Error("Test error"));
 
     const user = userClient.getCurrentUser();
-    await expect(user).rejects.toThrowError("Test error");
+    await expect(user).rejects.toThrow("Test error");
   });
 });
 
