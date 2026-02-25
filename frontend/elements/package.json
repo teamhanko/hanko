@@ -121,7 +121,7 @@
   "homepage": "https://hanko.io",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.54.0",
-    "@typescript-eslint/parser": "^5.62.0",
+    "@typescript-eslint/parser": "^8.56.1",
     "css-loader": "^6.8.1",
     "eslint": "^8.52.0",
     "eslint-config-google": "^0.14.0",
