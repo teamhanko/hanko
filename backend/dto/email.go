@@ -13,8 +13,8 @@ type EmailResponse struct {
 	Address    string     `json:"address"`
 	IsVerified bool       `json:"is_verified"`
 	IsPrimary  bool       `json:"is_primary"`
-	Identity   *Identity  `json:"identity,omitempty"` // Deprecated
-	Identities Identities `json:"identities,omitempty"`
+	Identity   *Identity  `json:"identity,omitempty"`   // Deprecated
+	Identities Identities `json:"identities,omitempty"` // Deprecated. Identities are now accessible at the user level.
 }
 
 type EmailCreateRequest struct {

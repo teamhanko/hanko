@@ -15,6 +15,9 @@ type MFAConfig struct {
 }
 
 type ProfileData struct {
+	// Added for backward compatibility, since ProfileData is now returned
+	// in the '/me' endpoint, which previously  returned the user ID as `id`.
+	ID           uuid.UUID                    `json:"id"`
 	UserID       uuid.UUID                    `json:"user_id"`
 	Passkeys     []WebauthnCredentialResponse `json:"passkeys,omitempty"`
 	SecurityKeys []WebauthnCredentialResponse `json:"security_keys,omitempty"`
@@ -54,6 +57,7 @@ func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileDat
 	}
 
 	return &ProfileData{
+		ID:           user.ID,
 		UserID:       user.ID,
 		Passkeys:     webauthnCredentials,
 		SecurityKeys: securityKeys,

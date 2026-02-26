@@ -85,6 +85,10 @@ export interface User {
   readonly identities?: Identity[];
   readonly created_at: string;
   readonly updated_at: string;
+  readonly name?: string;
+  readonly given_name?: string;
+  readonly family_name?: string;
+  readonly picture?: string;
 }
 
 export interface Session {
