@@ -1,6 +1,6 @@
 module github.com/teamhanko/hanko/backend/v2
 
-go 1.24.0
+go 1.24.9
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.32.10
@@ -11,7 +11,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11
 	github.com/fatih/structs v1.1.0
 	github.com/go-playground/validator/v10 v10.30.1
-	github.com/go-redsync/redsync/v4 v4.15.0
+	github.com/go-redsync/redsync/v4 v4.16.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/go-testfixtures/testfixtures/v3 v3.19.0
 	github.com/go-webauthn/webauthn v0.10.2
