@@ -20,7 +20,7 @@
     "build:elements:dev": "turbo build:dev --filter=./elements"
   },
   "devDependencies": {
-    "turbo": "^2.8.10"
+    "turbo": "^2.8.12"
   },
   "packageManager": "npm@11.6.2"
 }
