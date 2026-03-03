@@ -7,7 +7,7 @@
   
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title> lib/client/UserClient.ts</title>
+  <title> lib/Pkce.ts</title>
 
   <script src="https://cdn.jsdelivr.net/gh/google/code-prettify@master/loader/run_prettify.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -76,7 +76,7 @@
             <div class="content">
                 <header class="page-title">
                     <p>Source</p>
-                    <h1>lib/client/UserClient.ts</h1>
+                    <h1>lib/Pkce.ts</h1>
                 </header>
                 
 
@@ -85,101 +85,63 @@
     
     <section>
         <article>
-            <pre class="prettyprint source linenums"><code>import { TechnicalError, UnauthorizedError } from "../Errors";
-import { Client } from "./Client";
-import { User } from "../flow-api/types/payload";
-import { Me } from "../Dto";
+            <pre class="prettyprint source linenums"><code>const PKCE_STORAGE_KEY = "hanko_pkce_code_verifier";
 
 /**
- * A class to manage user information.
+ * Generates a high-entropy, cryptographically strong random string for use as a PKCE code verifier.
+ * It uses rejection sampling to eliminate modulo bias, ensuring a perfectly uniform distribution
+ * across the character set recommended by RFC 7636.
  *
- * @category SDK
- * @subcategory Clients
- * @extends {Client}
+ * @returns {string} A 64-character URL-safe random string.
  */
-class UserClient extends Client {
-  /**
-   * Fetches the current user.
-   *
-   * @return {Promise&lt;User>}
-   * @throws {UnauthorizedError}
-   * @throws {RequestTimeoutError}
-   * @throws {TechnicalError}
-   * @deprecated
-   * @see https://docs.hanko.io/api/public#tag/User-Management/operation/IsUserAuthorized
-   * @see https://docs.hanko.io/api/public#tag/User-Management/operation/listUser
-   */
-  async getCurrent(): Promise&lt;User> {
-    const meResponse = await this.client.get("/me");
+export const generateCodeVerifier = (): string => {
+  const charset =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+  const n = charset.length;
+  const maxValidByte = 256 - (256 % n);
+  let result = "";
+  const requiredLength = 64;
+  const tempArray = new Uint8Array(1);
 
-    if (meResponse.status === 401) {
-      this.client.dispatcher.dispatchSessionExpiredEvent();
-      throw new UnauthorizedError();
-    } else if (!meResponse.ok) {
-      throw new TechnicalError();
-    }
-
-    const me: Me = meResponse.json();
-    const userResponse = await this.client.get(`/users/${me.id}`);
-
-    if (userResponse.status === 401) {
-      this.client.dispatcher.dispatchSessionExpiredEvent();
-      throw new UnauthorizedError();
-    } else if (!userResponse.ok) {
-      throw new TechnicalError();
-    }
-
-    return userResponse.json();
-  }
-
-  /**
-   * Fetches the current user.
-   *
-   * @return {Promise&lt;User>}
-   * @throws {UnauthorizedError}
-   * @throws {RequestTimeoutError}
-   * @throws {TechnicalError}
-   */
-  async getCurrentUser(): Promise&lt;User> {
-    const meResponse = await this.client.get("/me");
-
-    if (meResponse.status === 401) {
-      this.client.dispatcher.dispatchSessionExpiredEvent();
-      throw new UnauthorizedError();
-    } else if (!meResponse.ok) {
-      throw new TechnicalError();
-    }
-
-    return meResponse.json();
-  }
-
-  /**
-   * Logs out the current user and expires the existing session cookie. A valid session cookie is required to call the logout endpoint.
-   *
-   * @return {Promise&lt;void>}
-   * @throws {RequestTimeoutError}
-   * @throws {TechnicalError}
-   */
-  async logout(): Promise&lt;void> {
-    const logoutResponse = await this.client.post("/logout");
-
-    // For cross-domain operations, the frontend SDK creates the cookie by reading the "X-Auth-Token" header, and
-    // "Set-Cookie" headers sent by the backend have no effect due to the browser's security policy, which means that
-    // the cookie must also be removed client-side in that case.
-    this.client.sessionTokenStorage.removeSessionToken();
-    this.client.cookie.removeAuthCookie();
-    this.client.dispatcher.dispatchUserLoggedOutEvent();
-
-    if (logoutResponse.status === 401) {
-      // The user is logged out already
-      return;
-    } else if (!logoutResponse.ok) {
-      throw new TechnicalError();
+  while (result.length &lt; requiredLength) {
+    window.crypto.getRandomValues(tempArray);
+    const byte = tempArray[0];
+    if (byte &lt; maxValidByte) {
+      result += charset.charAt(byte % n);
     }
   }
-}
+  return result;
+};
 
-export { UserClient };
+/**
+ * Stores the PKCE code verifier in sessionStorage.
+ * @param {string} verifier - The verifier to store.
+ */
+export const setStoredCodeVerifier = (verifier: string) => {
+  if (typeof window !== "undefined" &amp;&amp; window.sessionStorage) {
+    window.sessionStorage.setItem(PKCE_STORAGE_KEY, verifier);
+  }
+};
+
+/**
+ * Retrieves the PKCE code verifier from sessionStorage.
+ * @returns {string | null}
+ */
+export const getStoredCodeVerifier = (): string | null => {
+  if (typeof window !== "undefined" &amp;&amp; window.sessionStorage) {
+    return window.sessionStorage.getItem(PKCE_STORAGE_KEY);
+  }
+  return null;
+};
+
+/**
+ * Removes the PKCE code verifier from sessionStorage.
+ */
+export const clearStoredCodeVerifier = () => {
+  if (typeof window !== "undefined" &amp;&amp; window.sessionStorage) {
+    window.sessionStorage.removeItem(PKCE_STORAGE_KEY);
+  }
+};
 </code></pre>
         </article>
     </section>
