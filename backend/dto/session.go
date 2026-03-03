@@ -126,16 +126,14 @@ func GetClaimsFromToken(token jwt.Token) (*Claims, error) {
 		claims.Issuer = &issuer
 	}
 
-	if email, valid := token.Get("email"); valid {
-		if data, ok := email.(map[string]interface{}); ok {
-			jsonData, err := json.Marshal(data)
-			if err != nil {
-				return nil, fmt.Errorf("failed to marshal 'email' claim: %w", err)
-			}
-			err = json.Unmarshal(jsonData, &claims.Email)
-			if err != nil {
-				return nil, fmt.Errorf("failed to unmarshal 'email' claim: %w", err)
-			}
+	if v, ok := token.Get("email"); ok {
+		switch t := v.(type) {
+		case *EmailJWT:
+			claims.Email = t
+		case EmailJWT:
+			claims.Email = &t
+		default:
+			return nil, fmt.Errorf("unexpected 'email' claim type: %T", v)
 		}
 	}
 
