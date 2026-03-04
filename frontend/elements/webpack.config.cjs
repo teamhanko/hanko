@@ -105,6 +105,7 @@ module.exports = {
               modules: {
                 localIdentName: "hanko_[local]",
                 localIdentContext: path.resolve(__dirname, "src"),
+                namedExport: false,
               },
               importLoaders: 1,
             },
