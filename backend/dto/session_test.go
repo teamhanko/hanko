@@ -60,6 +60,44 @@ func TestGetClaimsFromToken(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "valid token with all claims (email as EmailJWT)",
+			token: func() jwt.Token {
+				token, _ := jwt.NewBuilder().
+					Subject(subject.String()).
+					IssuedAt(now).
+					Audience([]string{"test-audience"}).
+					Issuer("test-issuer").
+					Expiration(expiration).
+					Claim("session_id", sessionID.String()).
+					Claim("email", EmailJWT{
+						Address:    "test@example.com",
+						IsVerified: true,
+						IsPrimary:  true,
+					}).
+					Claim("username", "testuser").
+					Claim("custom", "value").
+					Build()
+				return token
+			}(),
+			expected: &Claims{
+				Subject:   subject,
+				SessionID: sessionID,
+				IssuedAt:  &now,
+				Audience:  []string{"test-audience"},
+				Issuer:    stringPtr("test-issuer"),
+				Email: &EmailJWT{
+					Address:    "test@example.com",
+					IsVerified: true,
+					IsPrimary:  true,
+				},
+				Username:   stringPtr("testuser"),
+				Expiration: expiration,
+				CustomClaims: map[string]interface{}{
+					"custom": "value",
+				},
+			},
+		},
 	}
 
 	for _, tt := range tests {
