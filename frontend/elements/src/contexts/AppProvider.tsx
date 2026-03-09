@@ -370,58 +370,41 @@ const AppProvider = ({
   }, [isReadyToInit, authComponentFlow, componentName, init]);
 
   useEffect(() => {
-    const cleanUserDeleted = hanko.onUserDeleted(() => {
+    hanko.onUserDeleted(() => {
       dispatchEvent("onUserDeleted");
     });
 
-    const cleanSessionCreated = hanko.onSessionCreated((detail) => {
+    hanko.onSessionCreated((detail) => {
       dispatchEvent("onSessionCreated", detail);
     });
 
-    const cleanSessionExpired = hanko.onSessionExpired(() => {
+    hanko.onSessionExpired(() => {
       dispatchEvent("onSessionExpired");
     });
 
-    const cleanUserLoggedOut = hanko.onUserLoggedOut(() => {
+    hanko.onUserLoggedOut(() => {
       dispatchEvent("onUserLoggedOut");
     });
 
-    const cleanBeforeStateChange = hanko.onBeforeStateChange((detail) => {
+    hanko.onBeforeStateChange((detail) => {
       dispatchEvent("onBeforeStateChange", detail);
     });
 
-    const cleanAfterStateChange = hanko.onAfterStateChange((detail) => {
+    hanko.onAfterStateChange((detail) => {
       dispatchEvent("onAfterStateChange", detail);
     });
-
-    return () => {
-      cleanUserDeleted();
-      cleanSessionCreated();
-      cleanSessionExpired();
-      cleanUserLoggedOut();
-      cleanBeforeStateChange();
-      cleanAfterStateChange();
-    };
   }, [hanko]);
 
-  useEffect(() => {
+  useMemo(() => {
     const cb = () => {
       init(componentName);
     };
     if (["auth", "login", "registration"].includes(componentName)) {
-      const cleanUserLoggedOut = hanko.onUserLoggedOut(cb);
-      const cleanSessionExpired = hanko.onSessionExpired(cb);
-      const cleanUserDeleted = hanko.onUserDeleted(cb);
-      return () => {
-        cleanUserLoggedOut();
-        cleanSessionExpired();
-        cleanUserDeleted();
-      };
+      hanko.onUserLoggedOut(cb);
+      hanko.onSessionExpired(cb);
+      hanko.onUserDeleted(cb);
     } else if (componentName === "profile") {
-      const cleanSessionCreated = hanko.onSessionCreated(cb);
-      return () => {
-        cleanSessionCreated();
-      };
+      hanko.onSessionCreated(cb);
     }
   }, [componentName, hanko, init]);
 
