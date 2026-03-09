@@ -99,7 +99,7 @@ func DefaultConfig() *Config {
 		},
 		Session: Session{
 			Binding: Binding{
-				Enabled: true,
+				Enabled: false,
 			},
 			AllowRevocation:  true,
 			AcquireIPAddress: true,
