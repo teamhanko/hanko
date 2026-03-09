@@ -32,6 +32,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/session"
 )
 
+const anonymousSessionReuseGracePeriod = 10 * time.Minute
+
 type FlowPilotHandler struct {
 	Persister                   persistence.Persister
 	Cfg                         config.Config
@@ -177,8 +179,15 @@ func (h *FlowPilotHandler) getOrCreateAnonymousSession(c echo.Context) (*models.
 		return sessionModel, nil
 	}
 
-	// If we are here, we are initializing a flow.
-	// If we have a session for the given cookie, we simply use the existing session.
+	// If we are here, we are initializing a new flow.
+	// Reuse the existing anonymous session only if it is not within the grace period before expiry.
+	// Otherwise, fall through and create a new anonymous session below.
+	if sessionModel != nil &&
+		sessionModel.ExpiresAt != nil &&
+		time.Until(*sessionModel.ExpiresAt) <= anonymousSessionReuseGracePeriod {
+		sessionModel = nil
+	}
+
 	if sessionModel != nil {
 		sessionModel.LastUsed = time.Now().UTC()
 		err = h.Persister.GetSessionPersister().Update(*sessionModel)
@@ -189,7 +198,7 @@ func (h *FlowPilotHandler) getOrCreateAnonymousSession(c echo.Context) (*models.
 		return sessionModel, nil
 	}
 
-	// No existing session found, create a new one.
+	// No reusable anonymous session found, create a new one.
 	id, _ := uuid.NewV4()
 	now := time.Now().UTC()
 	expiresAt := now.Add(24 * time.Hour)
