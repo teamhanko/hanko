@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
@@ -20,24 +21,31 @@ type databaseHookSuite struct {
 	test.Suite
 }
 
+func (s *databaseHookSuite) testWebhookSecurity() config.WebhookSecurity {
+	return config.WebhookSecurity{
+		Mode:           config.WebhookSecurityModeInsecure,
+		AllowedSchemes: []string{"http", "https"},
+	}
+}
+
 func (s *databaseHookSuite) TestNewDatabaseHook() {
-	hookId, err := uuid.NewV4()
+	hookID, err := uuid.NewV4()
 	s.Require().NoError(err)
 
 	hook := models.Webhook{
-		ID:        hookId,
+		ID:        hookID,
 		Enabled:   false,
 		Failures:  0,
 		ExpiresAt: time.Now().Add(WebhookExpireDuration),
 	}
 
-	dbHook := NewDatabaseHook(hook, s.Storage.GetWebhookPersister(nil), nil)
+	dbHook := NewDatabaseHook(hook, s.Storage.GetWebhookPersister(nil), s.testWebhookSecurity(), nil)
 	s.NotEmpty(dbHook)
 }
 
 func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3")
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 
 	now := time.Now()
 	err := dbHook.DisableOnExpiryDate(now)
@@ -48,10 +56,11 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
 
 	s.False(updatedHook.Enabled)
 }
+
 func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
 	hook, whPersister := s.loadWebhook("a47fe92a-1e4b-4119-8653-55ad82737c88")
 
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 
 	now := time.Now()
 	err := dbHook.DisableOnExpiryDate(now)
@@ -66,7 +75,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
 func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 	err := dbHook.DisableOnFailure()
 	s.Require().NoError(err)
 
@@ -79,7 +88,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
 func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da3")
 
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 	err := dbHook.DisableOnFailure()
 	s.NoError(err)
 
@@ -92,18 +101,16 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	hook, whPersister := s.loadWebhook("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da2")
 
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 	err := dbHook.Reset()
 	s.NoError(err)
 
 	updatedHook, err := whPersister.Get(hook.ID)
 	s.Require().NoError(err)
 
-	// Failures should be reset
 	s.Equal(0, updatedHook.Failures)
 	s.Less(updatedHook.Failures, hook.Failures, "Failures should be reset to 0")
 
-	// Ensure timestamps moved forward relative to the original hook values
 	s.True(updatedHook.UpdatedAt.After(hook.UpdatedAt), "UpdatedAt should be updated")
 	s.True(updatedHook.ExpiresAt.After(hook.ExpiresAt), "ExpiresAt should be updated")
 }
@@ -111,7 +118,7 @@ func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 func (s *databaseHookSuite) TestDatabaseHook_IsEnabled() {
 	hook, whPersister := s.loadWebhook("a47fe92a-1e4b-4119-8653-55ad82737c88")
 
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 
 	s.True(dbHook.IsEnabled())
 }
@@ -119,17 +126,17 @@ func (s *databaseHookSuite) TestDatabaseHook_IsEnabled() {
 func (s *databaseHookSuite) TestDatabaseHook_IsDisabled() {
 	hook, whPersister := s.loadWebhook("279beae1-8a6d-4eaf-a791-1fa79d21d37a")
 
-	dbHook := NewDatabaseHook(hook, whPersister, nil)
+	dbHook := NewDatabaseHook(hook, whPersister, s.testWebhookSecurity(), nil)
 
 	s.False(dbHook.IsEnabled())
 }
 
-func (s *databaseHookSuite) loadWebhook(hookId string) (models.Webhook, persistence.WebhookPersister) {
+func (s *databaseHookSuite) loadWebhook(hookID string) (models.Webhook, persistence.WebhookPersister) {
 	err := s.LoadFixtures("../test/fixtures/webhooks")
 	s.Require().NoError(err)
 
 	whPersister := s.Storage.GetWebhookPersister(nil)
-	hook, err := whPersister.Get(uuid.FromStringOrNil(hookId))
+	hook, err := whPersister.Get(uuid.FromStringOrNil(hookID))
 	s.Require().NoError(err)
 	s.Require().NotEmpty(hook)
 

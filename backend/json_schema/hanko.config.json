@@ -1798,6 +1798,65 @@
       "type": "object",
       "title": "hooks"
     },
+    "WebhookSecurity": {
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "public_only",
+            "custom",
+            "insecure"
+          ],
+          "description": "`mode` defines the outbound destination policy for webhook callbacks.",
+          "default": "public_only"
+        },
+        "allowed_schemes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`allowed_schemes` defines the allowed URL schemes for webhook callbacks."
+        },
+        "follow_redirects": {
+          "type": "boolean",
+          "description": "`follow_redirects` determines whether webhook delivery follows redirects.",
+          "default": false
+        },
+        "max_redirects": {
+          "type": "integer",
+          "description": "`max_redirects` defines the maximum number of redirects to follow.",
+          "default": 0
+        },
+        "allowed_cidrs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`allowed_cidrs` defines IP ranges that are explicitly allowed in `custom` mode."
+        },
+        "blocked_hosts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`blocked_hosts` defines exact hostnames that are blocked."
+        },
+        "blocked_cidrs": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`blocked_cidrs` defines IP ranges that are blocked."
+        },
+        "deny_metadata_endpoints": {
+          "type": "boolean",
+          "description": "`deny_metadata_endpoints` determines whether metadata service endpoints are blocked.",
+          "default": true
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
     "WebhookSettings": {
       "properties": {
         "allow_time_expiration": {
@@ -1809,6 +1868,11 @@
           "type": "boolean",
           "description": "`enabled` enables the webhook feature.",
           "default": false
+        },
+        "security": {
+          "$ref": "#/$defs/WebhookSecurity",
+          "title": "security",
+          "description": "`security` defines the outbound destination policy for webhook callbacks."
         },
         "hooks": {
           "$ref": "#/$defs/Webhooks",

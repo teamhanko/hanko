@@ -1,21 +1,23 @@
 package webhooks
 
 import (
+	"time"
+
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
-	"time"
 )
 
 type ConfigHook struct {
 	BaseWebhook
 }
 
-func NewConfigHook(cfgHook config.Webhook, logger echo.Logger) Webhook {
+func NewConfigHook(cfgHook config.Webhook, security config.WebhookSecurity, logger echo.Logger) Webhook {
 	return &ConfigHook{
 		BaseWebhook{
 			Logger:   logger,
 			Callback: cfgHook.Callback,
 			Events:   cfgHook.Events,
+			Security: security,
 		},
 	}
 }

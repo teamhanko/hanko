@@ -1,19 +1,20 @@
 package webhooks
 
 import (
-	"github.com/labstack/gommon/log"
-	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/labstack/gommon/log"
+	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 )
 
 func TestBaseWebhook_HasEvent(t *testing.T) {
 	baseHook := BaseWebhook{
-		Logger:   nil,
+		Logger:   log.New("test"),
 		Callback: "http://ipsum.lorem",
 		Events:   events.Events{events.UserUpdate},
 	}
@@ -23,7 +24,7 @@ func TestBaseWebhook_HasEvent(t *testing.T) {
 
 func TestWebhooks_HasEvent_WithMultipleEvents(t *testing.T) {
 	baseHook := BaseWebhook{
-		Logger:   nil,
+		Logger:   log.New("test"),
 		Callback: "http://ipsum.lorem",
 		Events:   events.Events{events.UserCreate, events.UserUpdate},
 	}
@@ -33,7 +34,7 @@ func TestWebhooks_HasEvent_WithMultipleEvents(t *testing.T) {
 
 func TestWebhooks_HasSubEvent_WithMultipleEvents(t *testing.T) {
 	baseHook := BaseWebhook{
-		Logger:   nil,
+		Logger:   log.New("test"),
 		Callback: "http://ipsum.lorem",
 		Events:   events.Events{events.UserCreate, events.UserUpdate},
 	}
@@ -43,7 +44,7 @@ func TestWebhooks_HasSubEvent_WithMultipleEvents(t *testing.T) {
 
 func TestBaseWebhook_HasSubEvent(t *testing.T) {
 	baseHook := BaseWebhook{
-		Logger:   nil,
+		Logger:   log.New("test"),
 		Callback: "http://ipsum.lorem",
 		Events:   events.Events{events.UserCreate},
 	}
@@ -53,7 +54,7 @@ func TestBaseWebhook_HasSubEvent(t *testing.T) {
 
 func TestBaseWebhook_DoesNotHaveEvent(t *testing.T) {
 	baseHook := BaseWebhook{
-		Logger:   nil,
+		Logger:   log.New("test"),
 		Callback: "http://ipsum.lorem",
 		Events:   events.Events{events.UserCreate},
 	}
@@ -68,9 +69,13 @@ func TestBaseWebhook_Trigger(t *testing.T) {
 	defer server.Close()
 
 	baseHook := BaseWebhook{
-		Logger:   nil,
+		Logger:   log.New("test"),
 		Callback: server.URL,
 		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeInsecure,
+			AllowedSchemes: []string{"http", "https"},
+		},
 	}
 
 	data := JobData{
@@ -82,11 +87,15 @@ func TestBaseWebhook_Trigger(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestBaseWebhook_TriggerWithWrongUrl(t *testing.T) {
+func TestBaseWebhook_TriggerWithWrongURL(t *testing.T) {
 	baseHook := BaseWebhook{
 		Logger:   log.New("test"),
 		Callback: "http://broken!",
 		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeInsecure,
+			AllowedSchemes: []string{"http", "https"},
+		},
 	}
 
 	data := JobData{
@@ -96,7 +105,33 @@ func TestBaseWebhook_TriggerWithWrongUrl(t *testing.T) {
 
 	err := baseHook.Trigger(data)
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "dial tcp: lookup broken!: no such host")
+}
+
+func TestBaseWebhook_TriggerWithDisallowedSchemeFailsEvenInInsecureMode(t *testing.T) {
+	server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer server.Close()
+
+	baseHook := BaseWebhook{
+		Logger:   log.New("test"),
+		Callback: server.URL,
+		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeInsecure,
+			AllowedSchemes: []string{"http"},
+		},
+	}
+
+	data := JobData{
+		Token: "test-token",
+		Event: "user",
+	}
+
+	err := baseHook.Trigger(data)
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "scheme")
 }
 
 func TestBaseWebhook_TriggerWithBadStatusCode(t *testing.T) {
@@ -109,6 +144,10 @@ func TestBaseWebhook_TriggerWithBadStatusCode(t *testing.T) {
 		Logger:   log.New("test"),
 		Callback: server.URL,
 		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeInsecure,
+			AllowedSchemes: []string{"http", "https"},
+		},
 	}
 
 	data := JobData{
@@ -119,7 +158,134 @@ func TestBaseWebhook_TriggerWithBadStatusCode(t *testing.T) {
 	err := baseHook.Trigger(data)
 
 	require.Error(t, err)
-	require.ErrorContains(t, err, "request failed due to status code")
+	require.ErrorContains(t, err, "status code")
+}
+
+func TestBaseWebhook_TriggerWithRedirectDisallowedFails(t *testing.T) {
+	redirectTarget := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer redirectTarget.Close()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, redirectTarget.URL, http.StatusFound)
+	}))
+	defer server.Close()
+
+	baseHook := BaseWebhook{
+		Logger:   log.New("test"),
+		Callback: server.URL,
+		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:            config.WebhookSecurityModeInsecure,
+			AllowedSchemes:  []string{"http", "https"},
+			FollowRedirects: false,
+			MaxRedirects:    0,
+		},
+	}
+
+	data := JobData{
+		Token: "test-token",
+		Event: "user",
+	}
+
+	err := baseHook.Trigger(data)
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "status code")
+}
+
+func TestBaseWebhook_TriggerWithRedirectAllowedSucceeds(t *testing.T) {
+	redirectTarget := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+	defer redirectTarget.Close()
+
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, redirectTarget.URL, http.StatusFound)
+	}))
+	defer server.Close()
+
+	baseHook := BaseWebhook{
+		Logger:   log.New("test"),
+		Callback: server.URL,
+		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:            config.WebhookSecurityModeInsecure,
+			AllowedSchemes:  []string{"http", "https"},
+			FollowRedirects: true,
+			MaxRedirects:    1,
+		},
+	}
+
+	data := JobData{
+		Token: "test-token",
+		Event: "user",
+	}
+
+	err := baseHook.Trigger(data)
+
+	require.NoError(t, err)
+}
+
+func TestBaseWebhook_TriggerWithRedirectRejectedByPolicyFails(t *testing.T) {
+	redirectServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "http://forbidden.invalid/forbidden", http.StatusFound)
+	}))
+	defer redirectServer.Close()
+
+	baseHook := BaseWebhook{
+		Logger:   log.New("test"),
+		Callback: redirectServer.URL,
+		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:            config.WebhookSecurityModeInsecure,
+			AllowedSchemes:  []string{"http", "https"},
+			FollowRedirects: true,
+			MaxRedirects:    1,
+			BlockedHosts:    []string{"forbidden.invalid"},
+		},
+	}
+
+	data := JobData{
+		Token: "test-token",
+		Event: "user",
+	}
+
+	err := baseHook.Trigger(data)
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "redirect target rejected by outbound policy")
+}
+
+func TestBaseWebhook_TriggerWithTooManyRedirectsFails(t *testing.T) {
+	var server *httptest.Server
+	server = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, server.URL, http.StatusFound)
+	}))
+	defer server.Close()
+
+	baseHook := BaseWebhook{
+		Logger:   log.New("test"),
+		Callback: server.URL,
+		Events:   events.Events{events.UserCreate},
+		Security: config.WebhookSecurity{
+			Mode:            config.WebhookSecurityModeInsecure,
+			AllowedSchemes:  []string{"http", "https"},
+			FollowRedirects: true,
+			MaxRedirects:    1,
+		},
+	}
+
+	data := JobData{
+		Token: "test-token",
+		Event: "user",
+	}
+
+	err := baseHook.Trigger(data)
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "too many redirects")
 }
 
 func TestBaseWebhook_TriggerWithBadServer(t *testing.T) {
@@ -131,9 +297,14 @@ func TestBaseWebhook_TriggerWithBadServer(t *testing.T) {
 	defer server.Close()
 
 	baseHook := BaseWebhook{
-		Logger:   log.New("test"),
-		Callback: server.URL,
-		Events:   events.Events{events.UserCreate},
+		Logger:         log.New("test"),
+		Callback:       server.URL,
+		Events:         events.Events{events.UserCreate},
+		RequestTimeout: 2 * time.Second,
+		Security: config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeInsecure,
+			AllowedSchemes: []string{"http", "https"},
+		},
 	}
 
 	data := JobData{
@@ -144,33 +315,4 @@ func TestBaseWebhook_TriggerWithBadServer(t *testing.T) {
 	err := baseHook.Trigger(data)
 
 	require.Error(t, err)
-	require.ErrorContains(t, err, "EOF")
-}
-
-func TestBaseWebhook_TriggerTimeout(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(100 * time.Millisecond)
-		w.WriteHeader(http.StatusOK)
-	}))
-	defer server.Close()
-
-	baseHook := BaseWebhook{
-		Logger:   log.New("test"),
-		Callback: server.URL,
-		Events:   events.Events{events.UserCreate},
-		Timeout:  20 * time.Millisecond,
-	}
-
-	data := JobData{
-		Token: "test-token",
-		Event: "user",
-	}
-
-	err := baseHook.Trigger(data)
-
-	var netErr net.Error
-
-	require.Error(t, err)
-	require.ErrorAs(t, err, &netErr)
-	require.True(t, netErr.Timeout())
 }

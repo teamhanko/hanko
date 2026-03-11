@@ -246,5 +246,19 @@ func DefaultConfig() *Config {
 			Enabled: true,
 			Store:   FLOW_LOCKER_STORE_IN_MEMORY,
 		},
+		Webhooks: WebhookSettings{
+			AllowTimeExpiration: false,
+			Enabled:             false,
+			Security: WebhookSecurity{
+				Mode:                  WebhookSecurityModePublicOnly,
+				AllowedSchemes:        []string{"https"},
+				FollowRedirects:       false,
+				MaxRedirects:          0,
+				AllowedCIDRs:          []string{},
+				BlockedHosts:          []string{},
+				BlockedCIDRs:          []string{},
+				DenyMetadataEndpoints: true,
+			},
+		},
 	}
 }

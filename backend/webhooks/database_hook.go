@@ -2,11 +2,13 @@ package webhooks
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"time"
 )
 
 const (
@@ -19,12 +21,13 @@ type DatabaseHook struct {
 	rawHook   models.Webhook
 }
 
-func NewDatabaseHook(dbHook models.Webhook, persister persistence.WebhookPersister, logger echo.Logger) Webhook {
+func NewDatabaseHook(dbHook models.Webhook, persister persistence.WebhookPersister, security config.WebhookSecurity, logger echo.Logger) Webhook {
 	return &DatabaseHook{
 		BaseWebhook{
 			Logger:   logger,
 			Callback: dbHook.Callback,
 			Events:   events.ConvertFromDbList(dbHook.WebhookEvents),
+			Security: security,
 		},
 		persister,
 		dbHook,
@@ -32,7 +35,6 @@ func NewDatabaseHook(dbHook models.Webhook, persister persistence.WebhookPersist
 }
 
 func (dh *DatabaseHook) DisableOnExpiryDate(now time.Time) error {
-	// check expire date
 	if dh.rawHook.ExpiresAt.Before(now) {
 		dh.rawHook.Enabled = false
 
@@ -47,7 +49,6 @@ func (dh *DatabaseHook) DisableOnExpiryDate(now time.Time) error {
 }
 
 func (dh *DatabaseHook) DisableOnFailure() error {
-	// increase Failure-Rate
 	dh.rawHook.Failures++
 
 	if dh.rawHook.Failures > FailureExpireRate {
