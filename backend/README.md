@@ -670,6 +670,130 @@ webhooks:
         - user
 ```
 
+#### Webhook Security Configuration
+
+Webhooks include comprehensive SSRF (Server-Side Request Forgery) protection to prevent attacks on internal networks and metadata endpoints. The security system validates callback URLs both at configuration time and during webhook delivery.
+
+##### Security Modes
+
+The webhook security mode determines which destination IPs are allowed:
+
+**`public_only` (default, recommended)**
+
+Only allows callbacks to public, routable IP addresses. Blocks:
+- Private networks (10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12)
+- Loopback addresses (127.0.0.0/8)
+- Link-local addresses (169.254.0.0/16)
+- Cloud metadata endpoints (169.254.169.254, fe80::/10, fc00::/7)
+- Reserved IP ranges
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: public_only
+    allowed_schemes:
+      - https
+  hooks:
+    - callback: https://api.example.com/webhooks
+      events:
+        - user
+```
+
+**`custom` (for internal webhooks)**
+
+Allows callbacks to private networks if explicitly allowlisted via CIDRs, hosts, or domains:
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: custom
+    allowed_schemes:
+      - https
+    # Allow specific internal hosts
+    allowed_hosts:
+      - internal-webhook-server.local
+    # Allow internal domains and subdomains
+    allowed_domains:
+      - internal.company.com
+    # Allow specific IP ranges
+    allowed_cidrs:
+      - 10.0.0.0/24
+      - 192.168.1.0/24
+  hooks:
+    - callback: https://internal-webhook-server.local/hook
+      events:
+        - user.create
+```
+
+**`insecure` (development only)**
+
+Allows any destination (still respects blocklists). **Not recommended for production.**
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: insecure
+    allowed_schemes:
+      - http
+      - https
+```
+
+##### Blocking Specific Hosts or Networks
+
+You can block specific hosts, domains, or IP ranges regardless of security mode:
+
+```yaml
+webhooks:
+  security:
+    mode: public_only
+    # Block specific hostnames
+    blocked_hosts:
+      - suspicious.example.com
+    # Block domains and all subdomains
+    blocked_domains:
+      - untrusted.com
+    # Block IP ranges
+    blocked_cidrs:
+      - 203.0.113.0/24
+```
+
+##### Redirect Security
+
+Control how webhooks handle HTTP redirects:
+
+```yaml
+webhooks:
+  security:
+    mode: public_only
+    follow_redirects: true
+    max_redirects: 3
+```
+
+> **Note:** Each redirect target is validated against the security policy. Set `follow_redirects: false` (default) to reject all redirects.
+
+##### Security Best Practices
+
+1. **Use `public_only` mode** unless you explicitly need internal webhooks
+2. **Use HTTPS only** by setting `allowed_schemes: ["https"]`
+3. **Disable redirects** unless required: `follow_redirects: false`
+4. **Regularly review** webhook destinations and events
+5. **Monitor webhook failures** for potential attack attempts
+
+##### Metadata Endpoint Protection
+
+The webhook system automatically blocks cloud provider metadata endpoints:
+- AWS: 169.254.169.254
+- GCP: metadata.google.internal
+- IPv6 metadata ranges
+- Common DNS rebinding bypass attempts
+
+This protection is **always active** when `deny_metadata_endpoints: true` (default).
+
+For complete configuration options, see the [webhook configuration reference](https://github.com/teamhanko/hanko/wiki/config-properties-webhooks).
+
 ### Session JWT templates
 
 You can define custom claims that will be added to session JWTs through the `session.jwt_template.claims`

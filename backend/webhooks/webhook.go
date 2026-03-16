@@ -59,7 +59,9 @@ func (bh *BaseWebhook) Trigger(data JobData) error {
 	validateCtx, cancel := context.WithTimeout(context.Background(), resolveTimeout)
 	defer cancel()
 
-	if err := validator.Validate(validateCtx, bh.Callback); err != nil {
+	// Validate the callback URL and get the validated IPs to prevent DNS rebinding
+	validationResult, err := validator.ValidateAndGetIPs(validateCtx, bh.Callback)
+	if err != nil {
 		bh.logError(fmt.Errorf("webhook callback rejected by outbound policy: %w", err))
 		return err
 	}
@@ -82,8 +84,20 @@ func (bh *BaseWebhook) Trigger(data JobData) error {
 		requestTimeout = 10 * time.Second
 	}
 
+	// Create a custom dialer that only connects to the validated IPs
+	// This prevents DNS rebinding attacks by bypassing DNS resolution in http.Client
+	dialer := NewValidatedDialer(validationResult.ValidatedIPs, validationResult.Host)
+
 	client := &http.Client{
 		Timeout: requestTimeout,
+		Transport: &http.Transport{
+			DialContext:           dialer.DialContext,
+			ForceAttemptHTTP2:     true,
+			MaxIdleConns:          1,
+			IdleConnTimeout:       90 * time.Second,
+			TLSHandshakeTimeout:   10 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if !bh.Security.FollowRedirects {
 				return http.ErrUseLastResponse
@@ -93,12 +107,20 @@ func (bh *BaseWebhook) Trigger(data JobData) error {
 				return fmt.Errorf("too many redirects")
 			}
 
+			// Validate the redirect target and get its validated IPs
 			redirectCtx, redirectCancel := context.WithTimeout(req.Context(), resolveTimeout)
 			defer redirectCancel()
 
-			if err := validator.Validate(redirectCtx, req.URL.String()); err != nil {
+			redirectResult, err := validator.ValidateAndGetIPs(redirectCtx, req.URL.String())
+			if err != nil {
 				return fmt.Errorf("redirect target rejected by outbound policy: %w", err)
 			}
+
+			// Update the dialer to use the new validated IPs for the redirect
+			// Note: This is safe because the transport is not shared across goroutines
+			dialer.validatedIPs = redirectResult.ValidatedIPs
+			dialer.originalHost = redirectResult.Host
+			dialer.currentIPIndex = 0
 
 			return nil
 		},

@@ -9,6 +9,7 @@ import (
 
 	"github.com/invopop/jsonschema"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/validation"
 )
 
 type WebhookSecurityMode string
@@ -45,6 +46,23 @@ type WebhookSecurity struct {
 
 	// `deny_metadata_endpoints` determines whether metadata service endpoints are blocked.
 	DenyMetadataEndpoints bool `yaml:"deny_metadata_endpoints" json:"deny_metadata_endpoints,omitempty" koanf:"deny_metadata_endpoints" jsonschema:"default=true"`
+}
+
+// ToWebhookSecurityPolicy converts WebhookSecurity to validation.WebhookSecurityPolicy to avoid circular dependencies.
+func (s *WebhookSecurity) ToWebhookSecurityPolicy() validation.WebhookSecurityPolicy {
+	return validation.WebhookSecurityPolicy{
+		Mode:                  validation.SecurityMode(s.Mode),
+		AllowedSchemes:        s.AllowedSchemes,
+		FollowRedirects:       s.FollowRedirects,
+		MaxRedirects:          s.MaxRedirects,
+		AllowedHosts:          s.AllowedHosts,
+		AllowedDomains:        s.AllowedDomains,
+		AllowedCIDRs:          s.AllowedCIDRs,
+		BlockedHosts:          s.BlockedHosts,
+		BlockedDomains:        s.BlockedDomains,
+		BlockedCIDRs:          s.BlockedCIDRs,
+		DenyMetadataEndpoints: s.DenyMetadataEndpoints,
+	}
 }
 
 func (s *WebhookSecurity) Validate() error {
@@ -132,7 +150,7 @@ func (s *WebhookSecurity) validateCIDRs(field string, cidrs []string) error {
 
 func (s *WebhookSecurity) validateHostList(field string, hosts []string) error {
 	for i, host := range hosts {
-		if normalizeWebhookHost(host) == "" {
+		if validation.NormalizeHost(host) == "" {
 			return fmt.Errorf("%s[%d] must not be empty", field, i)
 		}
 	}
@@ -142,7 +160,7 @@ func (s *WebhookSecurity) validateHostList(field string, hosts []string) error {
 
 func (s *WebhookSecurity) validateDomainList(field string, domains []string) error {
 	for i, domain := range domains {
-		normalized := normalizeWebhookHost(domain)
+		normalized := validation.NormalizeHost(domain)
 		if normalized == "" {
 			return fmt.Errorf("%s[%d] must not be empty", field, i)
 		}
@@ -309,101 +327,26 @@ func (w *Webhook) validateParsedURL(parsed *url.URL, sec *WebhookSecurity) error
 		return fmt.Errorf("callback scheme '%s' is not allowed", parsed.Scheme)
 	}
 
-	host := normalizeWebhookHost(parsed.Hostname())
-	if host == "" {
-		return fmt.Errorf("callback host must not be empty")
-	}
+	validator := validation.NewValidator(sec.ToWebhookSecurityPolicy())
+	host := parsed.Hostname()
 
-	if matchesHost(host, sec.BlockedHosts) {
-		return fmt.Errorf("callback host '%s' is blocked", host)
-	}
-
-	if matchesDomain(host, sec.BlockedDomains) {
-		return fmt.Errorf("callback host '%s' matches a blocked domain", host)
-	}
-
-	if err := w.validateAllowedHostPolicy(host, sec); err != nil {
-		return err
+	if err := validator.ValidateHost(host); err != nil {
+		return fmt.Errorf("callback %w", err)
 	}
 
 	return nil
 }
 
-func (w *Webhook) validateAllowedHostPolicy(host string, sec *WebhookSecurity) error {
-	switch sec.Mode {
-	case WebhookSecurityModeInsecure:
-		return nil
-	case WebhookSecurityModePublicOnly:
-		return nil
-	case WebhookSecurityModeCustom:
-		if len(sec.AllowedHosts) == 0 && len(sec.AllowedDomains) == 0 {
-			return nil
-		}
-
-		if matchesHost(host, sec.AllowedHosts) || matchesDomain(host, sec.AllowedDomains) {
-			return nil
-		}
-
-		return fmt.Errorf("callback host '%s' is not in the allowed host/domain list", host)
-	default:
-		return fmt.Errorf("unsupported webhook security mode '%s'", sec.Mode)
-	}
-}
-
 func (w *Webhook) validateLiteralIP(parsed *url.URL, sec *WebhookSecurity) error {
-	host := normalizeWebhookHost(parsed.Hostname())
+	host := validation.NormalizeHost(parsed.Hostname())
 	ip := net.ParseIP(host)
 	if ip == nil {
 		return nil
 	}
 
-	if err := w.validateAbsoluteDenies(ip, sec); err != nil {
-		return err
-	}
-
-	return w.validateModeDecision(ip, sec)
-}
-
-func (w *Webhook) validateAbsoluteDenies(ip net.IP, sec *WebhookSecurity) error {
-	if ipMatchesCIDRs(ip, sec.BlockedCIDRs) {
-		return fmt.Errorf("callback IP '%s' is blocked", ip.String())
-	}
-
-	if sec.DenyMetadataEndpoints && isMetadataIP(ip) {
-		return fmt.Errorf("metadata endpoint IP '%s' is blocked", ip.String())
-	}
-
-	return nil
-}
-
-func (w *Webhook) validateModeDecision(ip net.IP, sec *WebhookSecurity) error {
-	switch sec.Mode {
-	case WebhookSecurityModeInsecure:
-		return nil
-	case WebhookSecurityModePublicOnly:
-		return w.validatePublicOnly(ip)
-	case WebhookSecurityModeCustom:
-		return w.validateCustom(ip, sec)
-	default:
-		return fmt.Errorf("unsupported webhook security mode '%s'", sec.Mode)
-	}
-}
-
-func (w *Webhook) validatePublicOnly(ip net.IP) error {
-	if !isPublicRoutableIP(ip) {
-		return fmt.Errorf("non-public IP '%s' is not allowed in public_only mode", ip.String())
-	}
-
-	return nil
-}
-
-func (w *Webhook) validateCustom(ip net.IP, sec *WebhookSecurity) error {
-	if ipMatchesCIDRs(ip, sec.AllowedCIDRs) {
-		return nil
-	}
-
-	if !isPublicRoutableIP(ip) {
-		return fmt.Errorf("non-public IP '%s' is not allowed unless explicitly allowlisted", ip.String())
+	validator := validation.NewValidator(sec.ToWebhookSecurityPolicy())
+	if err := validator.ValidateIP(ip); err != nil {
+		return fmt.Errorf("callback %w", err)
 	}
 
 	return nil
@@ -420,80 +363,4 @@ func (w *Webhook) validateEvents() error {
 	}
 
 	return nil
-}
-
-func normalizeWebhookHost(value string) string {
-	return strings.TrimSuffix(strings.ToLower(strings.TrimSpace(value)), ".")
-}
-
-func matchesHost(host string, values []string) bool {
-	host = normalizeWebhookHost(host)
-	for _, value := range values {
-		if host == normalizeWebhookHost(value) {
-			return true
-		}
-	}
-	return false
-}
-
-func matchesDomain(host string, domains []string) bool {
-	host = normalizeWebhookHost(host)
-	for _, domain := range domains {
-		normalized := normalizeWebhookHost(domain)
-		if host == normalized || strings.HasSuffix(host, "."+normalized) {
-			return true
-		}
-	}
-	return false
-}
-
-func ipMatchesCIDRs(ip net.IP, cidrs []string) bool {
-	for _, value := range cidrs {
-		_, network, err := net.ParseCIDR(strings.TrimSpace(value))
-		if err != nil {
-			continue
-		}
-		if network.Contains(ip) {
-			return true
-		}
-	}
-
-	return false
-}
-
-func isPublicRoutableIP(ip net.IP) bool {
-	if ip.IsLoopback() ||
-		ip.IsPrivate() ||
-		ip.IsMulticast() ||
-		ip.IsUnspecified() ||
-		ip.IsLinkLocalUnicast() ||
-		ip.IsLinkLocalMulticast() ||
-		isReservedIP(ip) ||
-		isMetadataIP(ip) {
-		return false
-	}
-
-	return true
-}
-
-func isReservedIP(ip net.IP) bool {
-	return ipMatchesCIDRs(ip, []string{
-		"0.0.0.0/8",
-		"100.64.0.0/10",
-		"192.0.0.0/24",
-		"192.0.2.0/24",
-		"198.18.0.0/15",
-		"198.51.100.0/24",
-		"203.0.113.0/24",
-		"240.0.0.0/4",
-		"::/128",
-		"100::/64",
-		"2001:db8::/32",
-	})
-}
-
-func isMetadataIP(ip net.IP) bool {
-	return ipMatchesCIDRs(ip, []string{
-		"169.254.169.254/32",
-	})
 }
