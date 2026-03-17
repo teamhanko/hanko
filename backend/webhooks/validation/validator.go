@@ -28,6 +28,7 @@ type WebhookSecurityPolicy struct {
 	BlockedDomains        []string
 	BlockedCIDRs          []string
 	DenyMetadataEndpoints bool
+	SanitizeErrors        bool
 }
 
 // Validator provides shared validation logic for webhook callback URLs.
@@ -48,26 +49,30 @@ func NewValidator(security WebhookSecurityPolicy) *Validator {
 func (v *Validator) ValidateHost(host string) error {
 	host = NormalizeHost(host)
 	if host == "" {
-		return fmt.Errorf("host must not be empty")
+		err := fmt.Errorf("host must not be empty")
+		return SanitizeError(err, v.security.SanitizeErrors)
 	}
 
 	// Check if host is a known metadata endpoint
 	if v.security.DenyMetadataEndpoints && IsMetadataHost(host) {
-		return fmt.Errorf("metadata endpoint host '%s' is blocked", host)
+		err := fmt.Errorf("metadata endpoint host '%s' is blocked", host)
+		return SanitizeError(err, v.security.SanitizeErrors)
 	}
 
 	// Check blocked lists (applies to all modes)
 	if MatchesHost(host, v.security.BlockedHosts) {
-		return fmt.Errorf("host '%s' is blocked", host)
+		err := fmt.Errorf("host '%s' is blocked", host)
+		return SanitizeError(err, v.security.SanitizeErrors)
 	}
 
 	if MatchesDomain(host, v.security.BlockedDomains) {
-		return fmt.Errorf("host '%s' matches a blocked domain", host)
+		err := fmt.Errorf("host '%s' matches a blocked domain", host)
+		return SanitizeError(err, v.security.SanitizeErrors)
 	}
 
 	// Check allowed lists (only in custom mode with explicit allowlists)
 	if err := v.validateAllowedHostPolicy(host); err != nil {
-		return err
+		return SanitizeError(err, v.security.SanitizeErrors)
 	}
 
 	return nil
@@ -79,11 +84,12 @@ func (v *Validator) ValidateHost(host string) error {
 func (v *Validator) ValidateIP(ip net.IP) error {
 	// Absolute denies apply to all modes
 	if err := v.validateAbsoluteDenies(ip); err != nil {
-		return err
+		return SanitizeError(err, v.security.SanitizeErrors)
 	}
 
 	// Mode-specific validation
-	return v.validateModeDecision(ip)
+	err := v.validateModeDecision(ip)
+	return SanitizeError(err, v.security.SanitizeErrors)
 }
 
 // validateAllowedHostPolicy checks if the host is allowed based on the security mode

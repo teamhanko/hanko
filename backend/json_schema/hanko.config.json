@@ -1827,6 +1827,20 @@
           "description": "`max_redirects` defines the maximum number of redirects to follow.",
           "default": 0
         },
+        "allowed_hosts": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`allowed_hosts` defines exact hostnames that are explicitly allowed in `custom` mode."
+        },
+        "allowed_domains": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`allowed_domains` defines domains and subdomains that are explicitly allowed in `custom` mode."
+        },
         "allowed_cidrs": {
           "items": {
             "type": "string"
@@ -1841,6 +1855,13 @@
           "type": "array",
           "description": "`blocked_hosts` defines exact hostnames that are blocked."
         },
+        "blocked_domains": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "description": "`blocked_domains` defines domains and subdomains that are blocked."
+        },
         "blocked_cidrs": {
           "items": {
             "type": "string"
@@ -1852,6 +1873,11 @@
           "type": "boolean",
           "description": "`deny_metadata_endpoints` determines whether metadata service endpoints are blocked.",
           "default": true
+        },
+        "sanitize_errors": {
+          "type": "boolean",
+          "description": "`sanitize_errors` determines whether validation error messages are sanitized to prevent information disclosure.\nWhen enabled, generic error messages are returned instead of detailed validation errors.\nDetailed errors are still logged internally for debugging.",
+          "default": false
         }
       },
       "additionalProperties": false,

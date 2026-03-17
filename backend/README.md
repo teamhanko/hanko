@@ -792,6 +792,35 @@ The webhook system automatically blocks cloud provider metadata endpoints:
 
 This protection is **always active** when `deny_metadata_endpoints: true` (default).
 
+##### Error Message Sanitization
+
+To prevent information disclosure through error messages, enable error sanitization:
+
+```yaml
+webhooks:
+  security:
+    mode: public_only
+    sanitize_errors: true
+```
+
+When `sanitize_errors` is enabled:
+- **Returned errors** are generic and don't reveal internal network details
+  - Instead of: `"resolved IP '10.0.0.5' for host 'internal.local' is not allowed"`
+  - Returns: `"callback destination not allowed"`
+- **Detailed errors** are still logged internally for debugging
+- **Recommended for production** to prevent information leakage during attacks
+
+**Example sanitized error messages:**
+- `"callback URL validation failed"` - Generic validation failure
+- `"callback URL not allowed"` - Host/domain blocked
+- `"callback destination not allowed"` - IP blocked or invalid
+- `"redirect destination not allowed"` - Redirect target blocked
+
+**Security vs. Debugging Trade-off:**
+- **Development:** Set `sanitize_errors: false` for detailed debugging
+- **Production:** Set `sanitize_errors: true` to prevent information disclosure
+- Detailed errors are always available in server logs regardless of this setting
+
 For complete configuration options, see the [webhook configuration reference](https://github.com/teamhanko/hanko/wiki/config-properties-webhooks).
 
 ### Session JWT templates

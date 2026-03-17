@@ -46,6 +46,10 @@ type WebhookSecurity struct {
 
 	// `deny_metadata_endpoints` determines whether metadata service endpoints are blocked.
 	DenyMetadataEndpoints bool `yaml:"deny_metadata_endpoints" json:"deny_metadata_endpoints,omitempty" koanf:"deny_metadata_endpoints" jsonschema:"default=true"`
+	// `sanitize_errors` determines whether validation error messages are sanitized to prevent information disclosure.
+	// When enabled, generic error messages are returned instead of detailed validation errors.
+	// Detailed errors are still logged internally for debugging.
+	SanitizeErrors bool `yaml:"sanitize_errors" json:"sanitize_errors,omitempty" koanf:"sanitize_errors" jsonschema:"default=false"`
 }
 
 // ToWebhookSecurityPolicy converts WebhookSecurity to validation.WebhookSecurityPolicy to avoid circular dependencies.
@@ -62,6 +66,7 @@ func (s *WebhookSecurity) ToWebhookSecurityPolicy() validation.WebhookSecurityPo
 		BlockedDomains:        s.BlockedDomains,
 		BlockedCIDRs:          s.BlockedCIDRs,
 		DenyMetadataEndpoints: s.DenyMetadataEndpoints,
+		SanitizeErrors:        s.SanitizeErrors,
 	}
 }
 

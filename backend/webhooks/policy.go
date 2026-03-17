@@ -37,7 +37,8 @@ type ValidationResult struct {
 func (v *URLPolicyValidator) ValidateAndGetIPs(ctx context.Context, rawURL string) (*ValidationResult, error) {
 	parsed, err := url.Parse(rawURL)
 	if err != nil {
-		return nil, fmt.Errorf("invalid webhook callback URL: %w", err)
+		detailedErr := fmt.Errorf("invalid webhook callback URL: %w", err)
+		return nil, validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	host, err := v.validateParsedURL(parsed)
@@ -59,18 +60,21 @@ func (v *URLPolicyValidator) ValidateAndGetIPs(ctx context.Context, rawURL strin
 	// Resolve the hostname and validate all returned IPs
 	ips, err := v.resolver.LookupIP(ctx, "ip", host)
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve webhook callback host '%s': %w", host, err)
+		detailedErr := fmt.Errorf("failed to resolve webhook callback host '%s': %w", host, err)
+		return nil, validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	if len(ips) == 0 {
-		return nil, fmt.Errorf("webhook callback host '%s' did not resolve to any IP addresses", host)
+		detailedErr := fmt.Errorf("webhook callback host '%s' did not resolve to any IP addresses", host)
+		return nil, validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	// All resolved IPs must satisfy the outbound policy.
 	// Rejecting on any disallowed IP avoids mixed public/internal DNS answers.
 	for _, ip := range ips {
 		if err := v.validateResolvedIP(ip); err != nil {
-			return nil, fmt.Errorf("resolved IP '%s' for host '%s' is not allowed: %w", ip.String(), host, err)
+			detailedErr := fmt.Errorf("resolved IP '%s' for host '%s' is not allowed: %w", ip.String(), host, err)
+			return nil, validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 		}
 	}
 
@@ -90,15 +94,18 @@ func (v *URLPolicyValidator) Validate(ctx context.Context, rawURL string) error 
 
 func (v *URLPolicyValidator) validateParsedURL(parsed *url.URL) (string, error) {
 	if parsed.Scheme == "" {
-		return "", fmt.Errorf("webhook callback URL must include a scheme")
+		detailedErr := fmt.Errorf("webhook callback URL must include a scheme")
+		return "", validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	if parsed.Host == "" {
-		return "", fmt.Errorf("webhook callback URL must include a host")
+		detailedErr := fmt.Errorf("webhook callback URL must include a host")
+		return "", validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	if parsed.User != nil {
-		return "", fmt.Errorf("webhook callback URL must not include user info")
+		detailedErr := fmt.Errorf("webhook callback URL must not include user info")
+		return "", validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	schemeAllowed := false
@@ -110,13 +117,15 @@ func (v *URLPolicyValidator) validateParsedURL(parsed *url.URL) (string, error) 
 	}
 
 	if !schemeAllowed {
-		return "", fmt.Errorf("webhook callback scheme '%s' is not allowed", parsed.Scheme)
+		detailedErr := fmt.Errorf("webhook callback scheme '%s' is not allowed", parsed.Scheme)
+		return "", validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 	}
 
 	host := parsed.Hostname()
 	validator := validation.NewValidator(v.security.ToWebhookSecurityPolicy())
 
 	if err := validator.ValidateHost(host); err != nil {
+		// err is already sanitized by validator
 		return "", fmt.Errorf("webhook callback %w", err)
 	}
 

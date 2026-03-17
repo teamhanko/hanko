@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/validation"
 )
 
 type Webhook interface {
@@ -62,7 +63,10 @@ func (bh *BaseWebhook) Trigger(data JobData) error {
 	// Validate the callback URL and get the validated IPs to prevent DNS rebinding
 	validationResult, err := validator.ValidateAndGetIPs(validateCtx, bh.Callback)
 	if err != nil {
-		bh.logError(fmt.Errorf("webhook callback rejected by outbound policy: %w", err))
+		// Log detailed error for debugging
+		detailedErr := validation.GetDetailedError(err)
+		bh.logError(fmt.Errorf("webhook callback rejected by outbound policy: %w", detailedErr))
+		// Return sanitized error to caller
 		return err
 	}
 
@@ -113,6 +117,10 @@ func (bh *BaseWebhook) Trigger(data JobData) error {
 
 			redirectResult, err := validator.ValidateAndGetIPs(redirectCtx, req.URL.String())
 			if err != nil {
+				// Log detailed error for debugging
+				detailedErr := validation.GetDetailedError(err)
+				bh.logError(fmt.Errorf("redirect target rejected by outbound policy: %w", detailedErr))
+				// Return error with context (sanitization already applied by validator)
 				return fmt.Errorf("redirect target rejected by outbound policy: %w", err)
 			}
 
