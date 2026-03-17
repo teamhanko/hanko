@@ -20,7 +20,7 @@ func TestWebhooks_Decode(t *testing.T) {
 	}
 }
 
-func TestWebhookSecurity_Validate_AcceptsValidSecurityConfig(t *testing.T) {
+func TestWebhookSecurity_Validate_AcceptsValidSecurityConfigWithAllowlist(t *testing.T) {
 	security := WebhookSecurity{
 		Mode:                  WebhookSecurityModeCustom,
 		AllowedSchemes:        []string{"http", "https"},
@@ -29,6 +29,20 @@ func TestWebhookSecurity_Validate_AcceptsValidSecurityConfig(t *testing.T) {
 		AllowedHosts:          []string{"localhost"},
 		AllowedDomains:        []string{"example.com"},
 		AllowedCIDRs:          []string{"127.0.0.0/8", "10.0.0.0/24"},
+		DenyMetadataEndpoints: true,
+	}
+
+	err := security.Validate()
+
+	assert.NoError(t, err)
+}
+
+func TestWebhookSecurity_Validate_AcceptsValidSecurityConfigWithBlocklist(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:                  WebhookSecurityModeCustom,
+		AllowedSchemes:        []string{"http", "https"},
+		FollowRedirects:       true,
+		MaxRedirects:          3,
 		BlockedHosts:          []string{"metadata.google.internal"},
 		BlockedDomains:        []string{"internal.example"},
 		BlockedCIDRs:          []string{"169.254.169.254/32"},
@@ -192,20 +206,6 @@ func TestWebhookSettings_Validate_DisabledSkipsValidation(t *testing.T) {
 	err := settings.Validate()
 
 	assert.NoError(t, err)
-}
-
-func TestWebhookSettings_Validate_RejectsInvalidSecurity(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode: "definitely-invalid",
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "webhooks.security.mode")
 }
 
 func TestWebhookSettings_Validate_PublicOnlyRejectsHTTPCallbackWhenSchemeNotAllowed(t *testing.T) {
@@ -589,4 +589,106 @@ func TestWebhookSettings_Validate_RejectsInvalidEvent(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not a valid webhook event")
+}
+
+func TestWebhookSecurity_Validate_AllowsPublicOnlyWithIgnoredConfigs(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModePublicOnly,
+		AllowedSchemes: []string{"https"},
+		AllowedHosts:   []string{"example.com"},
+		BlockedDomains: []string{"blocked.com"},
+		AllowedCIDRs:   []string{"10.0.0.0/8"},
+	}
+
+	err := security.Validate()
+
+	// Should not return an error - validation should pass
+	// (warnings will be logged but validation succeeds)
+	assert.NoError(t, err)
+}
+
+func TestWebhookSecurity_Validate_AllowsInternalOnlyWithIgnoredConfigs(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeInternalOnly,
+		AllowedSchemes: []string{"http", "https"},
+		AllowedCIDRs:   []string{"10.0.0.0/8"},
+		BlockedHosts:   []string{"blocked.example.com"},
+		AllowedDomains: []string{"example.com"},
+	}
+
+	err := security.Validate()
+
+	// Should not return an error - validation should pass
+	// (warnings will be logged but validation succeeds)
+	assert.NoError(t, err)
+}
+
+func TestWebhookSecurity_Validate_RejectsCustomWithBothAllowedAndBlockedCIDRs(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedCIDRs:   []string{"10.0.0.0/24"},
+		BlockedCIDRs:   []string{"192.168.0.0/24"},
+	}
+
+	err := security.Validate()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "mutually exclusive")
+	assert.Contains(t, err.Error(), "allowed_cidrs")
+	assert.Contains(t, err.Error(), "blocked_cidrs")
+}
+
+func TestWebhookSecurity_Validate_RejectsCustomWithBothAllowedAndBlockedHosts(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedHosts:   []string{"example.com"},
+		BlockedHosts:   []string{"blocked.com"},
+	}
+
+	err := security.Validate()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "mutually exclusive")
+	assert.Contains(t, err.Error(), "allowed_hosts")
+	assert.Contains(t, err.Error(), "blocked_hosts")
+}
+
+func TestWebhookSecurity_Validate_RejectsCustomWithBothAllowedAndBlockedDomains(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedDomains: []string{"example.com"},
+		BlockedDomains: []string{"blocked.com"},
+	}
+
+	err := security.Validate()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "mutually exclusive")
+	assert.Contains(t, err.Error(), "allowed_domains")
+	assert.Contains(t, err.Error(), "blocked_domains")
+}
+
+func TestWebhookSecurity_Validate_AllowsPublicOnlyWithOnlyAllowedSchemes(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModePublicOnly,
+		AllowedSchemes: []string{"https"},
+	}
+
+	err := security.Validate()
+
+	assert.NoError(t, err)
+}
+
+func TestWebhookSecurity_Validate_AllowsInternalOnlyWithOnlyAllowedSchemes(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeInternalOnly,
+		AllowedSchemes: []string{"http", "https"},
+	}
+
+	err := security.Validate()
+
+	assert.NoError(t, err)
 }

@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/invopop/jsonschema"
+	"github.com/rs/zerolog/log"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/validation"
 )
@@ -84,28 +85,41 @@ func (s *WebhookSecurity) Validate() error {
 		return err
 	}
 
-	if err := s.validateHostList("webhooks.security.allowed_hosts", s.AllowedHosts); err != nil {
+	// Mode-specific validation
+	if err := s.validateModeSpecificSettings(); err != nil {
 		return err
 	}
 
-	if err := s.validateDomainList("webhooks.security.allowed_domains", s.AllowedDomains); err != nil {
-		return err
-	}
+	// Only validate allowed/blocked lists if they will be used
+	if s.Mode == WebhookSecurityModeCustom {
+		// Validate mutual exclusivity
+		if err := s.validateMutualExclusivity(); err != nil {
+			return err
+		}
 
-	if err := s.validateCIDRs("webhooks.security.allowed_cidrs", s.AllowedCIDRs); err != nil {
-		return err
-	}
+		if err := s.validateHostList("webhooks.security.allowed_hosts", s.AllowedHosts); err != nil {
+			return err
+		}
 
-	if err := s.validateHostList("webhooks.security.blocked_hosts", s.BlockedHosts); err != nil {
-		return err
-	}
+		if err := s.validateDomainList("webhooks.security.allowed_domains", s.AllowedDomains); err != nil {
+			return err
+		}
 
-	if err := s.validateDomainList("webhooks.security.blocked_domains", s.BlockedDomains); err != nil {
-		return err
-	}
+		if err := s.validateCIDRs("webhooks.security.allowed_cidrs", s.AllowedCIDRs); err != nil {
+			return err
+		}
 
-	if err := s.validateCIDRs("webhooks.security.blocked_cidrs", s.BlockedCIDRs); err != nil {
-		return err
+		if err := s.validateHostList("webhooks.security.blocked_hosts", s.BlockedHosts); err != nil {
+			return err
+		}
+
+		if err := s.validateDomainList("webhooks.security.blocked_domains", s.BlockedDomains); err != nil {
+			return err
+		}
+
+		if err := s.validateCIDRs("webhooks.security.blocked_cidrs", s.BlockedCIDRs); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -173,6 +187,56 @@ func (s *WebhookSecurity) validateDomainList(field string, domains []string) err
 		if strings.Contains(normalized, ":") {
 			return fmt.Errorf("%s[%d] must not contain a port", field, i)
 		}
+	}
+
+	return nil
+}
+
+func (s *WebhookSecurity) validateModeSpecificSettings() error {
+	// For public_only and internal_only modes, warn if allowed/blocked options are set
+	if s.Mode == WebhookSecurityModePublicOnly || s.Mode == WebhookSecurityModeInternalOnly {
+		var warnings []string
+
+		if len(s.AllowedHosts) > 0 {
+			warnings = append(warnings, "allowed_hosts")
+		}
+		if len(s.AllowedDomains) > 0 {
+			warnings = append(warnings, "allowed_domains")
+		}
+		if len(s.AllowedCIDRs) > 0 {
+			warnings = append(warnings, "allowed_cidrs")
+		}
+		if len(s.BlockedHosts) > 0 {
+			warnings = append(warnings, "blocked_hosts")
+		}
+		if len(s.BlockedDomains) > 0 {
+			warnings = append(warnings, "blocked_domains")
+		}
+		if len(s.BlockedCIDRs) > 0 {
+			warnings = append(warnings, "blocked_cidrs")
+		}
+
+		if len(warnings) > 0 {
+			log.Warn().
+				Msgf("webhooks.security.mode=%s: the following set configuration options are ignored: %s (only allowed_schemes is effective in this mode)", s.Mode, strings.Join(warnings, ", "))
+		}
+	}
+
+	return nil
+}
+
+func (s *WebhookSecurity) validateMutualExclusivity() error {
+	// Check pairwise mutual exclusivity for custom mode
+	if len(s.AllowedCIDRs) > 0 && len(s.BlockedCIDRs) > 0 {
+		return fmt.Errorf("webhooks.security: allowed_cidrs and blocked_cidrs are mutually exclusive - use either allowlist or blocklist, not both")
+	}
+
+	if len(s.AllowedHosts) > 0 && len(s.BlockedHosts) > 0 {
+		return fmt.Errorf("webhooks.security: allowed_hosts and blocked_hosts are mutually exclusive - use either allowlist or blocklist, not both")
+	}
+
+	if len(s.AllowedDomains) > 0 && len(s.BlockedDomains) > 0 {
+		return fmt.Errorf("webhooks.security: allowed_domains and blocked_domains are mutually exclusive - use either allowlist or blocklist, not both")
 	}
 
 	return nil

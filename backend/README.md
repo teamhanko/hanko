@@ -700,6 +700,8 @@ webhooks:
         - user
 ```
 
+> **Note:** In `public_only` mode, only `allowed_schemes` is effective. Any `allowed_*` or `blocked_*` configuration options (except `allowed_schemes`) will be ignored if configured, and a warning will be logged at startup.
+
 **`internal_only`**
 
 Only allows callbacks to internal/private IP addresses. Blocks all public IPs. Useful for deployments where webhooks should only target internal services:
@@ -718,9 +720,17 @@ webhooks:
         - user
 ```
 
-**`custom` (for internal webhooks)**
+> **Note:** In `internal_only` mode, only `allowed_schemes` is effective. Any `allowed_*` or `blocked_*` configuration options (except `allowed_schemes`) will be ignored if configured, and a warning will be logged at startup.
 
-Allows callbacks to private networks if explicitly allowlisted via CIDRs, hosts, or domains:
+**`custom` (allowlist or blocklist)**
+
+Allows fine-grained control over webhook destinations using either allowlists or blocklists. You can choose between:
+- **Allowlist approach**: Explicitly allow specific hosts, domains, or IP ranges (default deny)
+- **Blocklist approach**: Block specific hosts, domains, or IP ranges (default allow)
+
+> **Important:** For each category (hosts, domains, CIDRs), you must choose either allowlist OR blocklist, not both. Configuring both will result in a validation error.
+
+**Example: Allowlist approach**
 
 ```yaml
 webhooks:
@@ -745,28 +755,15 @@ webhooks:
         - user.create
 ```
 
-**`insecure` (development only)**
-
-Allows any destination (still respects blocklists). **Not recommended for production.**
+**Example: Blocklist approach**
 
 ```yaml
 webhooks:
   enabled: true
   security:
-    mode: insecure
+    mode: custom
     allowed_schemes:
-      - http
       - https
-```
-
-##### Blocking Specific Hosts or Networks
-
-You can block specific hosts, domains, or IP ranges regardless of security mode:
-
-```yaml
-webhooks:
-  security:
-    mode: public_only
     # Block specific hostnames
     blocked_hosts:
       - suspicious.example.com
@@ -776,6 +773,47 @@ webhooks:
     # Block IP ranges
     blocked_cidrs:
       - 203.0.113.0/24
+  hooks:
+    - callback: https://api.example.com/webhooks
+      events:
+        - user
+```
+
+**Example: Mixed approach (different categories)**
+
+You can use allowlist for one category and blocklist for another:
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: custom
+    allowed_schemes:
+      - https
+    # Allowlist domains (only these domains allowed)
+    allowed_domains:
+      - example.com
+    # Blocklist specific IP ranges (block these IPs)
+    blocked_cidrs:
+      - 203.0.113.0/24
+  hooks:
+    - callback: https://api.example.com/webhooks
+      events:
+        - user
+```
+
+**`insecure` (development only)**
+
+Allows any destination. **Not recommended for production.**
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: insecure
+    allowed_schemes:
+      - http
+      - https
 ```
 
 ##### Redirect Security
@@ -797,11 +835,13 @@ webhooks:
 1. **Choose the appropriate mode:**
    - Use `public_only` (default) for external webhooks to SaaS services
    - Use `internal_only` when webhooks should only target internal services
-   - Use `custom` when you need fine-grained control with allowlists
-2. **Use HTTPS only** by setting `allowed_schemes: ["https"]`
-3. **Disable redirects** unless required: `follow_redirects: false`
-4. **Regularly review** webhook destinations and events
-5. **Monitor webhook failures** for potential attack attempts
+   - Use `custom` when you need fine-grained control with allowlists or blocklists
+2. **In custom mode, use allowlists when possible** for better security (default deny)
+3. **Keep it simple:** For each category (hosts, domains, CIDRs), use either allowlist OR blocklist, not both
+4. **Use HTTPS only** by setting `allowed_schemes: ["https"]`
+5. **Disable redirects** unless required: `follow_redirects: false`
+6. **Regularly review** webhook destinations and events
+7. **Monitor webhook failures** for potential attack attempts
 
 ##### Metadata Endpoint Protection
 

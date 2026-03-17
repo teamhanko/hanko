@@ -1804,6 +1804,7 @@
           "type": "string",
           "enum": [
             "public_only",
+            "internal_only",
             "custom",
             "insecure"
           ],
