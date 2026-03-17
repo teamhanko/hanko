@@ -30,12 +30,22 @@ type WebhookSecurity struct {
 	FollowRedirects bool `yaml:"follow_redirects" json:"follow_redirects,omitempty" koanf:"follow_redirects" jsonschema:"default=false"`
 	// `max_redirects` defines the maximum number of redirects to follow.
 	MaxRedirects int `yaml:"max_redirects" json:"max_redirects,omitempty" koanf:"max_redirects" jsonschema:"default=0"`
+	// `skip_resolved_ip_validation` determines whether IP validation is skipped for hostnames
+	// that passed hostname validation in custom mode. When true, if a hostname is in allowed_hosts
+	// or allowed_domains, its resolved IPs are automatically trusted.
+	// WARNING: Only enable this if you fully trust your DNS infrastructure. If DNS is compromised,
+	// an attacker could make an allowed hostname resolve to a malicious IP (e.g., internal services).
+	// When false (default), both hostname AND resolved IPs must be explicitly allowed (defense-in-depth).
+	SkipResolvedIPValidation bool `yaml:"skip_resolved_ip_validation" json:"skip_resolved_ip_validation,omitempty" koanf:"skip_resolved_ip_validation" jsonschema:"default=false"`
 
-	// `allowed_hosts` defines exact hostnames that are explicitly allowed in `custom` mode.
+	// `allowed_hosts` defines exact hostnames or IP addresses that are explicitly allowed in `custom` mode.
+	// At least one of allowed_hosts, allowed_domains, or allowed_cidrs must be configured in custom mode.
 	AllowedHosts []string `yaml:"allowed_hosts" json:"allowed_hosts,omitempty" koanf:"allowed_hosts"`
 	// `allowed_domains` defines domains and subdomains that are explicitly allowed in `custom` mode.
+	// At least one of allowed_hosts, allowed_domains, or allowed_cidrs must be configured in custom mode.
 	AllowedDomains []string `yaml:"allowed_domains" json:"allowed_domains,omitempty" koanf:"allowed_domains"`
 	// `allowed_cidrs` defines IP ranges that are explicitly allowed in `custom` mode.
+	// At least one of allowed_hosts, allowed_domains, or allowed_cidrs must be configured in custom mode.
 	AllowedCIDRs []string `yaml:"allowed_cidrs" json:"allowed_cidrs,omitempty" koanf:"allowed_cidrs"`
 
 	// `blocked_hosts` defines exact hostnames that are blocked.
@@ -56,18 +66,19 @@ type WebhookSecurity struct {
 // ToWebhookSecurityPolicy converts WebhookSecurity to validation.WebhookSecurityPolicy to avoid circular dependencies.
 func (s *WebhookSecurity) ToWebhookSecurityPolicy() validation.WebhookSecurityPolicy {
 	return validation.WebhookSecurityPolicy{
-		Mode:                  validation.SecurityMode(s.Mode),
-		AllowedSchemes:        s.AllowedSchemes,
-		FollowRedirects:       s.FollowRedirects,
-		MaxRedirects:          s.MaxRedirects,
-		AllowedHosts:          s.AllowedHosts,
-		AllowedDomains:        s.AllowedDomains,
-		AllowedCIDRs:          s.AllowedCIDRs,
-		BlockedHosts:          s.BlockedHosts,
-		BlockedDomains:        s.BlockedDomains,
-		BlockedCIDRs:          s.BlockedCIDRs,
-		DenyMetadataEndpoints: s.DenyMetadataEndpoints,
-		SanitizeErrors:        s.SanitizeErrors,
+		Mode:                     validation.SecurityMode(s.Mode),
+		AllowedSchemes:           s.AllowedSchemes,
+		FollowRedirects:          s.FollowRedirects,
+		MaxRedirects:             s.MaxRedirects,
+		SkipResolvedIPValidation: s.SkipResolvedIPValidation,
+		AllowedHosts:             s.AllowedHosts,
+		AllowedDomains:           s.AllowedDomains,
+		AllowedCIDRs:             s.AllowedCIDRs,
+		BlockedHosts:             s.BlockedHosts,
+		BlockedDomains:           s.BlockedDomains,
+		BlockedCIDRs:             s.BlockedCIDRs,
+		DenyMetadataEndpoints:    s.DenyMetadataEndpoints,
+		SanitizeErrors:           s.SanitizeErrors,
 	}
 }
 
@@ -96,6 +107,11 @@ func (s *WebhookSecurity) Validate() error {
 
 	// Only validate allowed/blocked lists if they will be used
 	if s.Mode == WebhookSecurityModeCustom {
+		// Custom mode requires at least one allowlist to be configured
+		if len(s.AllowedHosts) == 0 && len(s.AllowedDomains) == 0 && len(s.AllowedCIDRs) == 0 {
+			return fmt.Errorf("webhooks.security: custom mode requires at least one allow list (allowed_hosts, allowed_domains, or allowed_cidrs) to be configured. If you want to allow all destinations, use 'insecure' mode instead")
+		}
+
 		// Validate mutual exclusivity
 		if err := s.validateMutualExclusivity(); err != nil {
 			return err

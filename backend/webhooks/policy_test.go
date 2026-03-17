@@ -3,46 +3,12 @@ package webhooks
 import (
 	"context"
 	"net"
-	"net/url"
 	"testing"
 
+	"github.com/foxcpp/go-mockdns"
 	"github.com/stretchr/testify/require"
 	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/validation"
 )
-
-func TestNormalizeHost(t *testing.T) {
-	require.Equal(t, "example.com", validation.NormalizeHost(" Example.com. "))
-}
-
-func TestMatchesHost(t *testing.T) {
-	require.True(t, validation.MatchesHost("Example.com", []string{"example.com"}))
-	require.False(t, validation.MatchesHost("api.example.com", []string{"example.com"}))
-}
-
-func TestMatchesDomain(t *testing.T) {
-	require.True(t, validation.MatchesDomain("example.com", []string{"example.com"}))
-	require.True(t, validation.MatchesDomain("api.example.com", []string{"example.com"}))
-	require.True(t, validation.MatchesDomain("a.b.example.com", []string{"example.com"}))
-	require.False(t, validation.MatchesDomain("badexample.com", []string{"example.com"}))
-}
-
-func TestIPMatchesCIDRs(t *testing.T) {
-	require.True(t, validation.IPMatchesCIDRs(net.ParseIP("10.0.0.5"), []string{"10.0.0.0/24"}))
-	require.False(t, validation.IPMatchesCIDRs(net.ParseIP("10.0.1.5"), []string{"10.0.0.0/24"}))
-}
-
-func TestIsMetadataIP(t *testing.T) {
-	require.True(t, validation.IsMetadataIP(net.ParseIP("169.254.169.254")))
-	require.False(t, validation.IsMetadataIP(net.ParseIP("169.254.169.253")))
-}
-
-func TestIsPublicRoutableIP(t *testing.T) {
-	require.True(t, validation.IsPublicRoutableIP(net.ParseIP("8.8.8.8")))
-	require.False(t, validation.IsPublicRoutableIP(net.ParseIP("127.0.0.1")))
-	require.False(t, validation.IsPublicRoutableIP(net.ParseIP("10.0.0.1")))
-	require.False(t, validation.IsPublicRoutableIP(net.ParseIP("169.254.169.254")))
-}
 
 func TestURLPolicyValidator_Validate_RejectsInvalidURL(t *testing.T) {
 	validator := NewURLPolicyValidator(config.WebhookSecurity{
@@ -92,321 +58,409 @@ func TestURLPolicyValidator_Validate_RejectsUserInfo(t *testing.T) {
 	require.ErrorContains(t, err, "user info")
 }
 
-func TestURLPolicyValidator_Validate_RejectsBlockedHost(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeInsecure,
-		AllowedSchemes: []string{"http", "https"},
-		BlockedHosts:   []string{"127.0.0.1"},
-	})
+// Removed: Tests that duplicate validator_test.go
+// These tests were testing the underlying validation logic which is already
+// thoroughly tested in validation/validator_test.go. The validator package
+// is the source of truth for validation logic (host/domain/IP/CIDR matching).
+//
+// Kept: URL-layer tests (parsing, schemes, userinfo) that are unique to policy.go
+// Kept: DNS resolution tests with go-mockdns (all tests below use mocked DNS)
 
-	err := validator.Validate(context.Background(), "http://127.0.0.1/webhook")
+func TestURLPolicyValidator_Validate_HostnameResolvesToIPInCIDR(t *testing.T) {
+	// Test that hostname resolution + IP validation works correctly
+	// Hostname resolves to IP that IS in allowed CIDR
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.test"},
+			AllowedCIDRs:   []string{"10.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.test.": {A: []string{"10.0.0.5"}}, // In 10.0.0.0/8
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	err = validator.Validate(context.Background(), "https://webhook.test/hook")
+
+	require.NoError(t, err)
+}
+
+func TestURLPolicyValidator_Validate_HostnameResolvesToIPNotInCIDR(t *testing.T) {
+	// Test that hostname resolution + IP validation correctly rejects IPs not in CIDR
+	// Hostname resolves to IP that is NOT in allowed CIDR
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.test"},
+			AllowedCIDRs:   []string{"192.168.1.0/24"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.test.": {A: []string{"10.0.0.5"}}, // NOT in 192.168.1.0/24
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	err = validator.Validate(context.Background(), "https://webhook.test/hook")
 
 	require.Error(t, err)
-	require.ErrorContains(t, err, "is blocked")
+	require.Contains(t, err.Error(), "not in the allowed CIDR")
 }
 
-func TestURLPolicyValidator_Validate_RejectsBlockedDomainViaParsedURL(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeInsecure,
-		AllowedSchemes: []string{"https"},
-		BlockedDomains: []string{"example.com"},
-	})
-
-	parsed, err := url.Parse("https://api.example.com/webhook")
+func TestURLPolicyValidator_Validate_HostnameResolvesAndReturnsMultipleIPs(t *testing.T) {
+	// Test that ValidateAndGetIPs returns all validated IPs for a hostname
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.test"},
+			AllowedCIDRs:   []string{"10.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.test.": {
+				A: []string{"10.0.0.5", "10.0.0.6"}, // Multiple IPs in allowed CIDR
+			},
+		},
+	)
 	require.NoError(t, err)
+	defer srv.Close()
 
-	_, err = validator.validateParsedURL(parsed)
+	result, err := validator.ValidateAndGetIPs(context.Background(), "https://webhook.test/hook")
 
-	require.Error(t, err)
-	require.ErrorContains(t, err, "blocked domain")
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.ValidatedIPs, 2)
+	require.Equal(t, "10.0.0.5", result.ValidatedIPs[0].String())
+	require.Equal(t, "10.0.0.6", result.ValidatedIPs[1].String())
+	require.Equal(t, "webhook.test", result.Host)
 }
 
-func TestURLPolicyValidator_Validate_CustomRejectsHostWhenAllowedHostListDoesNotMatchViaParsedURL(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"https"},
-		AllowedHosts:   []string{"api.example.com"},
-	})
-
-	parsed, err := url.Parse("https://other.example.com/webhook")
+func TestURLPolicyValidator_Validate_HostnameWithSkipResolvedIPValidation(t *testing.T) {
+	// Test that SkipResolvedIPValidation allows hostname whose resolved IP is not in CIDR
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:                     config.WebhookSecurityModeCustom,
+			AllowedSchemes:           []string{"https"},
+			AllowedHosts:             []string{"webhook.test"},
+			AllowedCIDRs:             []string{"10.0.0.0/8"},
+			SkipResolvedIPValidation: true,
+		},
+		map[string]mockdns.Zone{
+			"webhook.test.": {A: []string{"8.8.8.8"}}, // NOT in 10.0.0.0/8, but skip flag is set
+		},
+	)
 	require.NoError(t, err)
+	defer srv.Close()
 
-	_, err = validator.validateParsedURL(parsed)
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "allowed host/domain list")
-}
-
-func TestURLPolicyValidator_Validate_CustomRejectsHostWhenAllowedDomainListDoesNotMatchViaParsedURL(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"https"},
-		AllowedDomains: []string{"example.com"},
-	})
-
-	parsed, err := url.Parse("https://api.other.com/webhook")
-	require.NoError(t, err)
-
-	_, err = validator.validateParsedURL(parsed)
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "allowed host/domain list")
-}
-
-func TestURLPolicyValidator_Validate_CustomAllowsHostWhenAllowedHostMatchesViaParsedURL(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"https"},
-		AllowedHosts:   []string{"api.example.com"},
-	})
-
-	parsed, err := url.Parse("https://api.example.com/webhook")
-	require.NoError(t, err)
-
-	host, err := validator.validateParsedURL(parsed)
-
-	require.NoError(t, err)
-	require.Equal(t, "api.example.com", host)
-}
-
-func TestURLPolicyValidator_Validate_CustomAllowsHostWhenAllowedDomainMatchesViaParsedURL(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"https"},
-		AllowedDomains: []string{"example.com"},
-	})
-
-	parsed, err := url.Parse("https://api.example.com/webhook")
-	require.NoError(t, err)
-
-	host, err := validator.validateParsedURL(parsed)
-
-	require.NoError(t, err)
-	require.Equal(t, "api.example.com", host)
-}
-
-func TestURLPolicyValidator_Validate_InsecureAllowsPrivateLiteralIP(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeInsecure,
-		AllowedSchemes: []string{"http", "https"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
+	err = validator.Validate(context.Background(), "https://webhook.test/hook")
 
 	require.NoError(t, err)
 }
 
-func TestURLPolicyValidator_Validate_PublicOnlyRejectsLoopback(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModePublicOnly,
-		AllowedSchemes: []string{"http", "https"},
-	})
+func newValidatorWithMockDNS(security config.WebhookSecurity, zones map[string]mockdns.Zone) (*URLPolicyValidator, *mockdns.Server, error) {
+	srv, err := mockdns.NewServer(zones, false)
+	if err != nil {
+		return nil, nil, err
+	}
 
-	err := validator.Validate(context.Background(), "http://127.0.0.1/webhook")
+	validator := NewURLPolicyValidator(security)
+	validator.resolver = &net.Resolver{
+		PreferGo: true,
+		Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+			return net.Dial("udp", srv.LocalAddr().String())
+		},
+	}
+
+	return validator, srv, nil
+}
+
+func TestURLPolicyValidator_DNSRebinding_RejectsPrivateIPInPublicOnlyMode(t *testing.T) {
+	// Simulate an attacker controlling DNS to return a private IP
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModePublicOnly,
+			AllowedSchemes: []string{"https"},
+		},
+		map[string]mockdns.Zone{
+			"evil.example.com.": {A: []string{"10.0.0.1"}}, // Private IP
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	err = validator.Validate(context.Background(), "https://evil.example.com/webhook")
 
 	require.Error(t, err)
 	require.ErrorContains(t, err, "public_only")
 }
 
-func TestURLPolicyValidator_Validate_PublicOnlyRejectsPrivateLiteralIP(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModePublicOnly,
-		AllowedSchemes: []string{"http", "https"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "public_only")
-}
-
-func TestURLPolicyValidator_Validate_CustomAllowsExplicitCIDR(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"http", "https"},
-		AllowedCIDRs:   []string{"10.0.0.0/24"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
-
+func TestURLPolicyValidator_DNSRebinding_RejectsMetadataIP(t *testing.T) {
+	// Simulate DNS resolving to cloud metadata endpoint
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:                  config.WebhookSecurityModeInsecure,
+			AllowedSchemes:        []string{"https"},
+			DenyMetadataEndpoints: true,
+		},
+		map[string]mockdns.Zone{
+			"attacker.example.com.": {A: []string{"169.254.169.254"}}, // AWS metadata IP
+		},
+	)
 	require.NoError(t, err)
-}
+	defer srv.Close()
 
-func TestURLPolicyValidator_Validate_CustomRejectsPrivateLiteralIPWithoutAllowedCIDR(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"http", "https"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "explicitly allowlisted")
-}
-
-func TestURLPolicyValidator_Validate_BlockedCIDRWinsOverAllowedCIDR(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"http", "https"},
-		AllowedCIDRs:   []string{"10.0.0.0/24"},
-		BlockedCIDRs:   []string{"10.0.0.0/25"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "blocked CIDR")
-}
-
-func TestURLPolicyValidator_Validate_RejectsMetadataEndpoint(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:                  config.WebhookSecurityModeCustom,
-		AllowedSchemes:        []string{"http", "https"},
-		DenyMetadataEndpoints: true,
-	})
-
-	err := validator.Validate(context.Background(), "http://169.254.169.254/latest/meta-data")
+	err = validator.Validate(context.Background(), "https://attacker.example.com/webhook")
 
 	require.Error(t, err)
 	require.ErrorContains(t, err, "metadata")
 }
 
-func TestURLPolicyValidator_Validate_BlockedHostWinsInCustomMode(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"http", "https"},
-		AllowedHosts:   []string{"127.0.0.1"},
-		BlockedHosts:   []string{"127.0.0.1"},
-	})
-
-	err := validator.Validate(context.Background(), "http://127.0.0.1/webhook")
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "is blocked")
-}
-
-func TestURLPolicyValidator_Validate_CustomRequiresBothAllowedHostAndAllowedCIDRForLiteralPrivateIP(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"http", "https"},
-		AllowedHosts:   []string{"10.0.0.2"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
-
-	require.Error(t, err)
-	require.ErrorContains(t, err, "explicitly allowlisted")
-}
-
-func TestURLPolicyValidator_Validate_CustomAllowsLiteralPrivateIPWhenHostAndCIDRAreAllowed(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeCustom,
-		AllowedSchemes: []string{"http", "https"},
-		AllowedHosts:   []string{"10.0.0.2"},
-		AllowedCIDRs:   []string{"10.0.0.0/24"},
-	})
-
-	err := validator.Validate(context.Background(), "http://10.0.0.2/webhook")
-
+func TestURLPolicyValidator_DNSRebinding_RejectsBlockedCIDR(t *testing.T) {
+	// Simulate DNS resolving to a blocked CIDR range
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.example.com"},
+			AllowedCIDRs:   []string{"0.0.0.0/0"},
+			BlockedCIDRs:   []string{"127.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {A: []string{"127.0.0.1"}}, // Blocked loopback
+		},
+	)
 	require.NoError(t, err)
-}
+	defer srv.Close()
 
-func TestURLPolicyValidator_Validate_PublicAddressLiteralIPAllowed(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModePublicOnly,
-		AllowedSchemes: []string{"http", "https"},
-	})
-
-	err := validator.Validate(context.Background(), "http://8.8.8.8/webhook")
-
-	require.NoError(t, err)
-}
-
-func TestURLPolicyValidator_Validate_IPv6LoopbackRejected(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModePublicOnly,
-		AllowedSchemes: []string{"http", "https"},
-	})
-
-	err := validator.Validate(context.Background(), "http://[::1]/webhook")
+	err = validator.Validate(context.Background(), "https://webhook.example.com/webhook")
 
 	require.Error(t, err)
-	require.ErrorContains(t, err, "public_only")
+	require.ErrorContains(t, err, "blocked")
 }
 
-func TestURLPolicyValidator_ValidateAndGetIPs_ReturnsValidatedIPsForLiteralIP(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeInsecure,
-		AllowedSchemes: []string{"http", "https"},
-	})
+func TestURLPolicyValidator_DNSRebinding_RejectsIPNotInAllowedCIDR(t *testing.T) {
+	// Simulate hostname resolving to IP outside allowed CIDR
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.example.com"},
+			AllowedCIDRs:   []string{"10.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {A: []string{"8.8.8.8"}}, // Not in 10.0.0.0/8
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
 
-	result, err := validator.ValidateAndGetIPs(context.Background(), "http://8.8.8.8/webhook")
+	err = validator.Validate(context.Background(), "https://webhook.example.com/webhook")
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "not in the allowed CIDR")
+}
+
+func TestURLPolicyValidator_DNSRebinding_AllowsIPInAllowedCIDR(t *testing.T) {
+	// Simulate hostname correctly resolving to allowed CIDR
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.example.com"},
+			AllowedCIDRs:   []string{"10.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {A: []string{"10.0.0.5"}}, // In 10.0.0.0/8
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	result, err := validator.ValidateAndGetIPs(context.Background(), "https://webhook.example.com/webhook")
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
 	require.Len(t, result.ValidatedIPs, 1)
-	require.Equal(t, "8.8.8.8", result.ValidatedIPs[0].String())
-	require.Equal(t, "8.8.8.8", result.Host)
+	require.Equal(t, "10.0.0.5", result.ValidatedIPs[0].String())
 }
 
-func TestURLPolicyValidator_ValidateAndGetIPs_RejectsPrivateIPInPublicOnlyMode(t *testing.T) {
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModePublicOnly,
-		AllowedSchemes: []string{"http", "https"},
-	})
+func TestURLPolicyValidator_DNSRebinding_RejectsIfAnyIPInvalid(t *testing.T) {
+	// Simulate hostname resolving to multiple IPs where one is invalid
+	// This tests that ALL resolved IPs must pass validation
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.example.com"},
+			AllowedCIDRs:   []string{"10.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {
+				A: []string{
+					"10.0.0.5", // Valid: in allowed CIDR
+					"8.8.8.8",  // Invalid: not in allowed CIDR
+				},
+			},
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
 
-	result, err := validator.ValidateAndGetIPs(context.Background(), "http://10.0.0.1/webhook")
+	err = validator.Validate(context.Background(), "https://webhook.example.com/webhook")
 
 	require.Error(t, err)
-	require.Nil(t, result)
-	require.ErrorContains(t, err, "public_only")
+	require.ErrorContains(t, err, "not in the allowed CIDR")
+	require.ErrorContains(t, err, "8.8.8.8")
 }
 
-func TestURLPolicyValidator_ValidateAndGetIPs_ReturnsMultipleIPs(t *testing.T) {
-	// Note: This test uses google.com which typically has multiple A records
-	// In a real-world scenario, the validator would resolve DNS and return all IPs
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModePublicOnly,
-		AllowedSchemes: []string{"https"},
-	})
+func TestURLPolicyValidator_DNSRebinding_AcceptsMultipleValidIPs(t *testing.T) {
+	// Simulate hostname resolving to multiple valid IPs
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"webhook.example.com"},
+			AllowedCIDRs:   []string{"10.0.0.0/8"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {
+				A: []string{"10.0.0.5", "10.0.0.6"},
+			},
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
 
-	result, err := validator.ValidateAndGetIPs(context.Background(), "https://google.com/webhook")
-
-	// This test may fail in environments without internet access
-	// or if google.com is blocked, but demonstrates the functionality
-	if err == nil {
-		require.NotNil(t, result)
-		require.NotEmpty(t, result.ValidatedIPs)
-		require.Equal(t, "google.com", result.Host)
-
-		// Verify all IPs are public
-		for _, ip := range result.ValidatedIPs {
-			require.True(t, validation.IsPublicRoutableIP(ip),
-				"Expected all IPs to be public, got: %s", ip.String())
-		}
-	}
-}
-
-func TestURLPolicyValidator_ValidateAndGetIPs_PreventsDNSRebinding(t *testing.T) {
-	// This test verifies that ValidateAndGetIPs returns IPs at validation time
-	// which can then be pinned to prevent DNS rebinding
-
-	validator := NewURLPolicyValidator(config.WebhookSecurity{
-		Mode:           config.WebhookSecurityModeInsecure,
-		AllowedSchemes: []string{"http", "https"},
-	})
-
-	// Validate with a literal IP
-	result, err := validator.ValidateAndGetIPs(context.Background(), "http://127.0.0.1/webhook")
+	result, err := validator.ValidateAndGetIPs(context.Background(), "https://webhook.example.com/webhook")
 
 	require.NoError(t, err)
 	require.NotNil(t, result)
+	require.Len(t, result.ValidatedIPs, 2)
+	require.Equal(t, "10.0.0.5", result.ValidatedIPs[0].String())
+	require.Equal(t, "10.0.0.6", result.ValidatedIPs[1].String())
+}
 
-	// The returned IPs are from the validation time
-	// If these IPs are pinned in the HTTP client, DNS rebinding is prevented
-	validatedIP := result.ValidatedIPs[0]
-	require.Equal(t, "127.0.0.1", validatedIP.String())
+func TestURLPolicyValidator_DNSRebinding_PublicOnlyRejectsMixedIPs(t *testing.T) {
+	// Simulate hostname resolving to both public and private IPs
+	// This protects against attacks where DNS returns mixed public/internal IPs
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModePublicOnly,
+			AllowedSchemes: []string{"https"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {
+				A: []string{
+					"8.8.8.8",  // Public
+					"10.0.0.1", // Private - should cause rejection
+				},
+			},
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
 
-	// In production: these IPs would be used by ValidatedDialer
-	// to bypass DNS resolution during HTTP request, preventing rebinding
+	err = validator.Validate(context.Background(), "https://webhook.example.com/webhook")
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "public_only")
+}
+
+func TestURLPolicyValidator_DNSRebinding_SkipResolvedIPValidationStillRespectsBlocklist(t *testing.T) {
+	// Even with SkipResolvedIPValidation=true, blocked CIDRs should still be enforced
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:                     config.WebhookSecurityModeCustom,
+			AllowedSchemes:           []string{"https"},
+			AllowedHosts:             []string{"webhook.example.com"},
+			SkipResolvedIPValidation: true,
+			DenyMetadataEndpoints:    true,
+		},
+		map[string]mockdns.Zone{
+			"webhook.example.com.": {A: []string{"169.254.169.254"}}, // Metadata IP
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	err = validator.Validate(context.Background(), "https://webhook.example.com/webhook")
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "metadata")
+}
+
+func TestURLPolicyValidator_DNSRebinding_InternalOnlyRejectsPublicIP(t *testing.T) {
+	// Simulate hostname resolving to public IP in internal_only mode
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeInternalOnly,
+			AllowedSchemes: []string{"https"},
+		},
+		map[string]mockdns.Zone{
+			"webhook.internal.": {A: []string{"8.8.8.8"}}, // Public IP
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	err = validator.Validate(context.Background(), "https://webhook.internal/webhook")
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "internal_only")
+}
+
+func TestURLPolicyValidator_Validate_LiteralIPAddress(t *testing.T) {
+	// Test that when host is already a literal IP, it's validated directly without DNS resolution
+	validator := NewURLPolicyValidator(config.WebhookSecurity{
+		Mode:           config.WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedCIDRs:   []string{"10.0.0.0/8"},
+	})
+
+	result, err := validator.ValidateAndGetIPs(context.Background(), "https://10.0.0.5/webhook")
+
+	require.NoError(t, err)
+	require.NotNil(t, result)
+	require.Len(t, result.ValidatedIPs, 1)
+	require.Equal(t, "10.0.0.5", result.ValidatedIPs[0].String())
+	require.Equal(t, "10.0.0.5", result.Host)
+}
+
+func TestURLPolicyValidator_Validate_LiteralIPAddress_Rejected(t *testing.T) {
+	// Test that literal IP is rejected when not in allowed CIDR
+	validator := NewURLPolicyValidator(config.WebhookSecurity{
+		Mode:           config.WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedCIDRs:   []string{"10.0.0.0/8"},
+	})
+
+	err := validator.Validate(context.Background(), "https://192.168.1.5/webhook")
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "not in the allowed CIDR")
+}
+
+func TestURLPolicyValidator_Validate_HostnameResolvesToNoIPs(t *testing.T) {
+	// Test that hostname that fails to resolve is rejected with appropriate error
+	validator, srv, err := newValidatorWithMockDNS(
+		config.WebhookSecurity{
+			Mode:           config.WebhookSecurityModeCustom,
+			AllowedSchemes: []string{"https"},
+			AllowedHosts:   []string{"noips.test"},
+		},
+		map[string]mockdns.Zone{
+			"noips.test.": {A: []string{}}, // No IPs returned - results in "no such host"
+		},
+	)
+	require.NoError(t, err)
+	defer srv.Close()
+
+	err = validator.Validate(context.Background(), "https://noips.test/webhook")
+
+	require.Error(t, err)
+	require.ErrorContains(t, err, "failed to resolve webhook callback host")
 }

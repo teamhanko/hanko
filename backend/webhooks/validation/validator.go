@@ -18,18 +18,19 @@ const (
 // WebhookSecurityPolicy contains the security settings for webhook validation.
 // This mirrors config.WebhookSecurity but is defined here to avoid circular dependencies.
 type WebhookSecurityPolicy struct {
-	Mode                  SecurityMode
-	AllowedSchemes        []string
-	FollowRedirects       bool
-	MaxRedirects          int
-	AllowedHosts          []string
-	AllowedDomains        []string
-	AllowedCIDRs          []string
-	BlockedHosts          []string
-	BlockedDomains        []string
-	BlockedCIDRs          []string
-	DenyMetadataEndpoints bool
-	SanitizeErrors        bool
+	Mode                     SecurityMode
+	AllowedSchemes           []string
+	FollowRedirects          bool
+	MaxRedirects             int
+	SkipResolvedIPValidation bool
+	AllowedHosts             []string
+	AllowedDomains           []string
+	AllowedCIDRs             []string
+	BlockedHosts             []string
+	BlockedDomains           []string
+	BlockedCIDRs             []string
+	DenyMetadataEndpoints    bool
+	SanitizeErrors           bool
 }
 
 // Validator provides shared validation logic for webhook callback URLs.
@@ -82,10 +83,21 @@ func (v *Validator) ValidateHost(host string) error {
 // ValidateIP validates an IP address against the security policy.
 // This includes checking absolute denies (metadata IPs, blocked CIDRs)
 // and mode-specific rules (public-only, custom allowlists).
-func (v *Validator) ValidateIP(ip net.IP) error {
+//
+// The wasHostnameValidated parameter indicates whether this IP was resolved from
+// a hostname that already passed hostname validation. When true and
+// SkipResolvedIPValidation is enabled, mode-specific IP validation is skipped
+// (absolute denies like blocked CIDRs still apply).
+func (v *Validator) ValidateIP(ip net.IP, wasHostnameValidated bool) error {
 	// Absolute denies apply to all modes
 	if err := v.validateAbsoluteDenies(ip); err != nil {
 		return SanitizeError(err, v.security.SanitizeErrors)
+	}
+
+	// Skip mode-specific validation if this IP was resolved from a validated hostname
+	// and SkipResolvedIPValidation is enabled
+	if wasHostnameValidated && v.security.SkipResolvedIPValidation {
+		return nil
 	}
 
 	// Mode-specific validation
@@ -104,9 +116,18 @@ func (v *Validator) validateAllowedHostPolicy(host string) error {
 	case SecurityModeInternalOnly:
 		return nil
 	case SecurityModeCustom:
-		// If no allowlists are configured, allow all (except blocked)
+		// In custom mode, if no host/domain allowlists configured, skip host validation
+		// (IP validation will handle CIDR allowlists if configured)
 		if len(v.security.AllowedHosts) == 0 && len(v.security.AllowedDomains) == 0 {
 			return nil
+		}
+
+		// Check if host is a literal IP and matches allowed_cidrs
+		// This allows literal IPs in CIDR ranges to pass even when allowed_hosts is configured
+		if ip := net.ParseIP(host); ip != nil && len(v.security.AllowedCIDRs) > 0 {
+			if IPMatchesCIDRs(ip, v.security.AllowedCIDRs) {
+				return nil
+			}
 		}
 
 		// If allowlists exist, host must match
@@ -168,18 +189,28 @@ func (v *Validator) validateInternalOnly(ip net.IP) error {
 }
 
 // validateCustom validates the IP in custom mode.
-// Private IPs are only allowed if explicitly listed in AllowedCIDRs.
-// Public IPs are allowed unless blocked.
+// Custom mode requires explicit allowlist configuration (enforced at config validation).
+// IPs can be allowed via allowed_cidrs (CIDR notation) or allowed_hosts (literal IPs).
 func (v *Validator) validateCustom(ip net.IP) error {
-	// If IP is in allowed CIDRs, it's explicitly permitted
-	if IPMatchesCIDRs(ip, v.security.AllowedCIDRs) {
-		return nil
+	// Check if IP matches allowed CIDRs
+	if len(v.security.AllowedCIDRs) > 0 {
+		if IPMatchesCIDRs(ip, v.security.AllowedCIDRs) {
+			return nil
+		}
 	}
 
-	// Non-public IPs must be explicitly allowlisted
-	if !IsPublicRoutableIP(ip) {
-		return fmt.Errorf("non-public IP '%s' is not allowed unless explicitly allowlisted", ip.String())
+	// Check if IP matches allowed hosts (for literal IPs in allowed_hosts)
+	if len(v.security.AllowedHosts) > 0 {
+		ipStr := ip.String()
+		if MatchesHost(ipStr, v.security.AllowedHosts) {
+			return nil
+		}
 	}
 
-	return nil
+	// If no allow lists configured, this should never happen (caught by config validation)
+	if len(v.security.AllowedCIDRs) == 0 && len(v.security.AllowedHosts) == 0 && len(v.security.AllowedDomains) == 0 {
+		return fmt.Errorf("custom mode requires allowlist configuration")
+	}
+
+	return fmt.Errorf("IP '%s' is not in the allowed CIDR or host list", ip.String())
 }

@@ -87,7 +87,7 @@ func validateLiteralIP(parsed *url.URL, security WebhookSecurityConfig) error {
 	}
 
 	validator := NewValidator(security.ToWebhookSecurityPolicy())
-	if err := validator.ValidateIP(ip); err != nil {
+	if err := validator.ValidateIP(ip, false); err != nil {
 		return fmt.Errorf("callback %w", err)
 	}
 

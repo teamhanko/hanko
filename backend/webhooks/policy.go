@@ -48,7 +48,7 @@ func (v *URLPolicyValidator) ValidateAndGetIPs(ctx context.Context, rawURL strin
 
 	// If the host is already a literal IP, return it directly
 	if ip := net.ParseIP(host); ip != nil {
-		if err := v.validateResolvedIP(ip); err != nil {
+		if err := v.validateResolvedIP(ip, false); err != nil {
 			return nil, err
 		}
 		return &ValidationResult{
@@ -72,7 +72,7 @@ func (v *URLPolicyValidator) ValidateAndGetIPs(ctx context.Context, rawURL strin
 	// All resolved IPs must satisfy the outbound policy.
 	// Rejecting on any disallowed IP avoids mixed public/internal DNS answers.
 	for _, ip := range ips {
-		if err := v.validateResolvedIP(ip); err != nil {
+		if err := v.validateResolvedIP(ip, true); err != nil {
 			detailedErr := fmt.Errorf("resolved IP '%s' for host '%s' is not allowed: %w", ip.String(), host, err)
 			return nil, validation.SanitizeError(detailedErr, v.security.SanitizeErrors)
 		}
@@ -132,7 +132,7 @@ func (v *URLPolicyValidator) validateParsedURL(parsed *url.URL) (string, error) 
 	return validation.NormalizeHost(host), nil
 }
 
-func (v *URLPolicyValidator) validateResolvedIP(ip net.IP) error {
+func (v *URLPolicyValidator) validateResolvedIP(ip net.IP, wasHostnameValidated bool) error {
 	validator := validation.NewValidator(v.security.ToWebhookSecurityPolicy())
-	return validator.ValidateIP(ip)
+	return validator.ValidateIP(ip, wasHostnameValidated)
 }

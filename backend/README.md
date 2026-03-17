@@ -722,15 +722,20 @@ webhooks:
 
 > **Note:** In `internal_only` mode, only `allowed_schemes` is effective. Any `allowed_*` or `blocked_*` configuration options (except `allowed_schemes`) will be ignored if configured, and a warning will be logged at startup.
 
-**`custom` (allowlist or blocklist)**
+**`custom` (requires explicit configuration)**
 
-Allows fine-grained control over webhook destinations using either allowlists or blocklists. You can choose between:
-- **Allowlist approach**: Explicitly allow specific hosts, domains, or IP ranges (default deny)
-- **Blocklist approach**: Block specific hosts, domains, or IP ranges (default allow)
+Provides fine-grained control over webhook destinations. **At least one allowlist must be configured** (`allowed_hosts`, `allowed_domains`, or `allowed_cidrs`) - this follows the principle of least privilege with no implicit defaults.
 
-> **Important:** For each category (hosts, domains, CIDRs), you must choose either allowlist OR blocklist, not both. Configuring both will result in a validation error.
+You can define security rules using:
+- **Allowlists**: Explicitly permit specific hosts, domains, or IP ranges
+- **Blocklists** (optional): Further restrict the allowed set by blocking specific destinations
 
-**Example: Allowlist approach**
+> **Important:**
+> - `custom` mode requires **at least one allowlist** to be configured. Configuration will fail without one.
+> - For each category (hosts, domains, CIDRs), you must choose either allowlist OR blocklist, not both.
+> - If you want to allow all destinations, use `insecure` mode instead (not recommended for production).
+
+**Example: Allow specific hosts/domains**
 
 ```yaml
 webhooks:
@@ -739,23 +744,30 @@ webhooks:
     mode: custom
     allowed_schemes:
       - https
-    # Allow specific internal hosts
+    # Allow specific internal hosts (supports hostnames and IP addresses)
     allowed_hosts:
       - internal-webhook-server.local
-    # Allow internal domains and subdomains
+      - 192.168.1.100
+    # Allow internal domains and all subdomains
     allowed_domains:
       - internal.company.com
-    # Allow specific IP ranges
+    # IMPORTANT: For hostnames to work, you must also allow their resolved IPs
+    # See "Understanding DNS Resolution and IP Validation" section below
     allowed_cidrs:
-      - 10.0.0.0/24
-      - 192.168.1.0/24
+      - 192.168.1.0/24  # IP range where internal hostnames resolve
+    # Alternative: Use skip_resolved_ip_validation: true to trust DNS
   hooks:
     - callback: https://internal-webhook-server.local/hook
       events:
         - user.create
+    - callback: https://192.168.1.100/webhook
+      events:
+        - user.update
 ```
 
-**Example: Blocklist approach**
+> **Note:** When using hostnames in `custom` mode, both the hostname AND its resolved IPs must be allowed. See the [DNS Resolution and IP Validation](#understanding-dns-resolution-and-ip-validation-in-custom-mode) section for details.
+
+**Example: Allow IP ranges with CIDRs**
 
 ```yaml
 webhooks:
@@ -764,19 +776,41 @@ webhooks:
     mode: custom
     allowed_schemes:
       - https
-    # Block specific hostnames
-    blocked_hosts:
-      - suspicious.example.com
-    # Block domains and all subdomains
-    blocked_domains:
-      - untrusted.com
-    # Block IP ranges
-    blocked_cidrs:
-      - 203.0.113.0/24
+    # Allow specific IP ranges (use CIDR notation)
+    allowed_cidrs:
+      - 10.0.0.0/24        # Entire subnet
+      - 192.168.1.50/32    # Single IP
   hooks:
-    - callback: https://api.example.com/webhooks
+    - callback: https://10.0.0.15/webhook
       events:
         - user
+```
+
+**Example: Allowlist with additional blocklist restrictions**
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: custom
+    allowed_schemes:
+      - https
+    # Allow broad set of domains
+    allowed_domains:
+      - example.com
+    # For domain names to work, also allow their resolved IPs
+    allowed_cidrs:
+      - 93.184.216.0/24  # IP range where example.com resolves
+    # Or use: skip_resolved_ip_validation: true
+    # But block specific subdomains (blocklist further restricts the allowed set)
+    blocked_hosts:
+      - suspicious.example.com
+      - test.example.com
+  hooks:
+    - callback: https://api.example.com/webhooks  # ✅ Allowed
+      events:
+        - user
+    # callback: https://suspicious.example.com   # ❌ Blocked
 ```
 
 **Example: Mixed approach (different categories)**
@@ -790,17 +824,27 @@ webhooks:
     mode: custom
     allowed_schemes:
       - https
-    # Allowlist domains (only these domains allowed)
-    allowed_domains:
-      - example.com
-    # Blocklist specific IP ranges (block these IPs)
-    blocked_cidrs:
-      - 203.0.113.0/24
+    # Allowlist hostnames (only these hosts allowed)
+    allowed_hosts:
+      - api.example.com
+      - 93.184.216.34  # IP where api.example.com resolves
+    # Blocklist specific domains (further restrict by blocking subdomains)
+    blocked_domains:
+      - blocked.example.com
   hooks:
-    - callback: https://api.example.com/webhooks
+    - callback: https://api.example.com/webhooks  # ✅ Allowed
       events:
         - user
+    # callback: https://blocked.example.com/hook  # ❌ Blocked
 ```
+
+> **Note on `allowed_hosts`:** This field accepts both hostnames and IP addresses. For example:
+> ```yaml
+> allowed_hosts:
+>   - webhook.example.com  # hostname
+>   - 192.168.1.100        # IP address
+> ```
+> Alternatively, you can use `allowed_cidrs` for IP ranges in CIDR notation (e.g., `192.168.1.100/32` for a single IP).
 
 **`insecure` (development only)**
 
@@ -815,6 +859,98 @@ webhooks:
       - http
       - https
 ```
+
+##### Understanding DNS Resolution and IP Validation in Custom Mode
+
+**Important: Two-Phase Validation**
+
+When using hostnames in `custom` mode, webhook validation occurs in two phases:
+
+1. **Hostname Validation**: Checks if the hostname is in `allowed_hosts` or `allowed_domains`
+2. **IP Validation**: After DNS resolution, checks if all resolved IPs are in `allowed_cidrs` (or are literal IPs in `allowed_hosts`)
+
+**Both phases must pass.** This defense-in-depth approach protects against:
+- DNS hijacking/poisoning attacks
+- DNS rebinding attacks (mitigated through IP pinning)
+- Compromised DNS servers
+
+**Example - What Works:**
+
+```yaml
+webhooks:
+  security:
+    mode: custom
+    allowed_hosts:
+      - webhook.example.com
+    allowed_cidrs:
+      - 93.184.216.0/24  # IP range where webhook.example.com resolves
+```
+
+**Example - What Doesn't Work:**
+
+```yaml
+webhooks:
+  security:
+    mode: custom
+    allowed_hosts:
+      - webhook.example.com  # ❌ Hostname alone is not enough
+    # Missing: allowed_cidrs for the resolved IPs
+```
+
+**Error you'll see:**
+```
+resolved IP '93.184.216.34' for host 'webhook.example.com' is not allowed:
+IP '93.184.216.34' is not in the allowed CIDR or host list
+```
+
+**Configuration Strategies:**
+
+1. **For hostnames with known IP ranges:**
+   ```yaml
+   allowed_hosts: [webhook.example.com]
+   allowed_cidrs: [93.184.216.0/24]
+   ```
+
+2. **For hostnames with stable IPs:**
+   ```yaml
+   allowed_hosts: [webhook.example.com, 93.184.216.34]  # Add resolved IP
+   ```
+
+3. **For any public hostnames (simpler but less restrictive):**
+   ```yaml
+   mode: public_only  # Allows any hostname that resolves to public IPs
+   ```
+
+4. **For internal hostnames (trusted network):**
+   ```yaml
+   mode: internal_only  # Allows hostnames resolving to private IPs
+   ```
+
+**Trust DNS (Alternative Approach):**
+
+If you fully trust your DNS infrastructure, you can skip IP validation for allowed hostnames:
+
+```yaml
+webhooks:
+  security:
+    mode: custom
+    allowed_hosts:
+      - webhook.example.com
+    skip_resolved_ip_validation: true  # Trust DNS - resolved IPs auto-allowed
+```
+
+> ⚠️ **Security Warning:** Only enable `skip_resolved_ip_validation` if you fully trust your DNS infrastructure.
+> If DNS is compromised, an attacker could make `webhook.example.com` resolve to internal services like `127.0.0.1`.
+> The default (`false`) provides defense-in-depth by requiring both hostname AND IP validation.
+
+**Why This Design?**
+
+This two-phase approach provides defense-in-depth security:
+- Even if DNS is compromised, an attacker cannot make `webhook.example.com` resolve to an arbitrary IP (unless `skip_resolved_ip_validation` is enabled)
+- The resolved IP must also be in your allowed CIDR ranges
+- Combined with IP pinning (automatic), this prevents DNS rebinding attacks
+
+**Note:** The system automatically pins validated IPs during webhook delivery, so even if DNS changes between validation and delivery, the connection goes to the validated IP.
 
 ##### Redirect Security
 
@@ -835,13 +971,23 @@ webhooks:
 1. **Choose the appropriate mode:**
    - Use `public_only` (default) for external webhooks to SaaS services
    - Use `internal_only` when webhooks should only target internal services
-   - Use `custom` when you need fine-grained control with allowlists or blocklists
-2. **In custom mode, use allowlists when possible** for better security (default deny)
+   - Use `custom` when you need fine-grained control with explicit allowlists
+   - Never use `insecure` mode in production
+2. **Custom mode follows allowlist-first (principle of least privilege):**
+   - At least one allowlist (`allowed_hosts`, `allowed_domains`, or `allowed_cidrs`) is **required**
+   - Start with a narrow allowlist and expand as needed
+   - Use blocklists to further restrict if necessary
 3. **Keep it simple:** For each category (hosts, domains, CIDRs), use either allowlist OR blocklist, not both
 4. **Use HTTPS only** by setting `allowed_schemes: ["https"]`
-5. **Disable redirects** unless required: `follow_redirects: false`
-6. **Regularly review** webhook destinations and events
-7. **Monitor webhook failures** for potential attack attempts
+5. **`allowed_hosts` accepts both hostnames and IPs** - use whichever is most appropriate for your use case
+6. **Understand hostname vs IP validation in custom mode:**
+   - Hostnames must ALSO have their resolved IPs allowed via `allowed_cidrs` (default behavior)
+   - Or use `skip_resolved_ip_validation: true` if you fully trust your DNS
+   - For simpler configuration with hostnames, consider `public_only`/`internal_only` modes
+7. **Disable redirects** unless required: `follow_redirects: false`
+8. **Regularly review** webhook destinations and events
+9. **Monitor webhook failures** for potential attack attempts
+10. **Enable error sanitization in production** to prevent information disclosure: `sanitize_errors: true`
 
 ##### Metadata Endpoint Protection
 

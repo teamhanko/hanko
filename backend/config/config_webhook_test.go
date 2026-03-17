@@ -41,9 +41,9 @@ func TestWebhookSecurity_Validate_AcceptsValidSecurityConfigWithBlocklist(t *tes
 	security := WebhookSecurity{
 		Mode:                  WebhookSecurityModeCustom,
 		AllowedSchemes:        []string{"http", "https"},
+		AllowedHosts:          []string{"example.com"},
 		FollowRedirects:       true,
 		MaxRedirects:          3,
-		BlockedHosts:          []string{"metadata.google.internal"},
 		BlockedDomains:        []string{"internal.example"},
 		BlockedCIDRs:          []string{"169.254.169.254/32"},
 		DenyMetadataEndpoints: true,
@@ -120,6 +120,7 @@ func TestWebhookSecurity_Validate_RejectsInvalidAllowedCIDR(t *testing.T) {
 func TestWebhookSecurity_Validate_RejectsInvalidBlockedCIDR(t *testing.T) {
 	security := WebhookSecurity{
 		Mode:         WebhookSecurityModeCustom,
+		AllowedCIDRs: []string{"10.0.0.0/24"},
 		BlockedCIDRs: []string{"still-not-a-cidr"},
 	}
 
@@ -144,6 +145,7 @@ func TestWebhookSecurity_Validate_RejectsEmptyAllowedHost(t *testing.T) {
 func TestWebhookSecurity_Validate_RejectsEmptyBlockedHost(t *testing.T) {
 	security := WebhookSecurity{
 		Mode:         WebhookSecurityModeCustom,
+		AllowedHosts: []string{"example.com"},
 		BlockedHosts: []string{""},
 	}
 
@@ -180,6 +182,7 @@ func TestWebhookSecurity_Validate_RejectsAllowedDomainWithPort(t *testing.T) {
 func TestWebhookSecurity_Validate_RejectsBlockedDomainWithPort(t *testing.T) {
 	security := WebhookSecurity{
 		Mode:           WebhookSecurityModeCustom,
+		AllowedHosts:   []string{"allowed.com"},
 		BlockedDomains: []string{"example.com:443"},
 	}
 
@@ -208,366 +211,60 @@ func TestWebhookSettings_Validate_DisabledSkipsValidation(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-func TestWebhookSettings_Validate_PublicOnlyRejectsHTTPCallbackWhenSchemeNotAllowed(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModePublicOnly,
-			AllowedSchemes: []string{"https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
+// Removed: URL validation tests that duplicate validator_test.go
+// These tests validate callback URLs through WebhookSettings.Validate() which calls
+// validation.ValidateWebhook(), duplicating tests already in validator_test.go.
+// The validator_test.go file is the source of truth for validation logic.
+//
+// Integration testing of webhook validation is done in policy_test.go.
+
+func TestWebhookSecurity_Validate_CustomModeRequiresAtLeastOneAllowlist(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		// No allowlists configured
 	}
 
-	err := settings.Validate()
+	err := security.Validate()
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "scheme")
+	assert.Contains(t, err.Error(), "requires at least one allow list")
 }
 
-func TestWebhookSettings_Validate_InsecureStillRejectsDisallowedScheme(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeInsecure,
-			AllowedSchemes: []string{"https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
+func TestWebhookSecurity_Validate_CustomModeAcceptsAllowedHosts(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedHosts:   []string{"example.com"},
 	}
 
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "scheme")
-}
-
-func TestWebhookSettings_Validate_InsecureAllowsHTTPWhenConfigured(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeInsecure,
-			AllowedSchemes: []string{"http", "https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
+	err := security.Validate()
 
 	assert.NoError(t, err)
 }
 
-func TestWebhookSettings_Validate_RejectsBlockedHost(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-			BlockedHosts:   []string{"api.example.com"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "https://api.example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
+func TestWebhookSecurity_Validate_CustomModeAcceptsAllowedDomains(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedDomains: []string{"example.com"},
 	}
 
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "blocked")
-}
-
-func TestWebhookSettings_Validate_RejectsBlockedDomain(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-			BlockedDomains: []string{"example.com"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "https://api.example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "blocked domain")
-}
-
-func TestWebhookSettings_Validate_CustomAllowsHostnameWhenAllowedHostMatches(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"https"},
-			AllowedHosts:   []string{"api.example.com"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "https://api.example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
+	err := security.Validate()
 
 	assert.NoError(t, err)
 }
 
-func TestWebhookSettings_Validate_CustomAllowsHostnameWhenAllowedDomainMatches(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"https"},
-			AllowedDomains: []string{"example.com"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "https://api.example.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
+func TestWebhookSecurity_Validate_CustomModeAcceptsAllowedCIDRs(t *testing.T) {
+	security := WebhookSecurity{
+		Mode:           WebhookSecurityModeCustom,
+		AllowedSchemes: []string{"https"},
+		AllowedCIDRs:   []string{"10.0.0.0/24"},
 	}
 
-	err := settings.Validate()
+	err := security.Validate()
 
 	assert.NoError(t, err)
-}
-
-func TestWebhookSettings_Validate_CustomRejectsHostnameWhenAllowedListsExistButNoMatch(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"https"},
-			AllowedDomains: []string{"example.com"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "https://api.other.com/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "allowed host/domain list")
-}
-
-func TestWebhookSettings_Validate_CustomRejectsLiteralPrivateIPWithoutAllowedHostOrCIDR(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://10.0.0.2/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "explicitly allowlisted")
-}
-
-func TestWebhookSettings_Validate_CustomRejectsLiteralPrivateIPWhenHostAllowedButCIDRNotAllowed(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-			AllowedHosts:   []string{"10.0.0.2"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://10.0.0.2/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "explicitly allowlisted")
-}
-
-func TestWebhookSettings_Validate_CustomAllowsLiteralPrivateIPWhenHostAndCIDRAreAllowed(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-			AllowedHosts:   []string{"10.0.0.2"},
-			AllowedCIDRs:   []string{"10.0.0.0/24"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://10.0.0.2/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.NoError(t, err)
-}
-
-func TestWebhookSettings_Validate_PublicOnlyRejectsLiteralPrivateIP(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModePublicOnly,
-			AllowedSchemes: []string{"http", "https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://10.0.0.2/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "public_only")
-}
-
-func TestWebhookSettings_Validate_InternalOnlyAllowsLiteralPrivateIP(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeInternalOnly,
-			AllowedSchemes: []string{"http", "https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://10.0.0.2/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.NoError(t, err)
-}
-
-func TestWebhookSettings_Validate_InternalOnlyRejectsPublicIP(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeInternalOnly,
-			AllowedSchemes: []string{"http", "https"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://8.8.8.8/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "internal_only")
-}
-
-func TestWebhookSettings_Validate_CustomAllowsLiteralPrivateIPWhenCIDRAllowlisted(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-			AllowedCIDRs:   []string{"10.0.0.0/24"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://10.0.0.2/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.NoError(t, err)
-}
-
-func TestWebhookSettings_Validate_RejectsBlockedLiteralIP(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:           WebhookSecurityModeCustom,
-			AllowedSchemes: []string{"http", "https"},
-			BlockedCIDRs:   []string{"127.0.0.0/8"},
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://127.0.0.1/webhook",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "blocked")
-}
-
-func TestWebhookSettings_Validate_RejectsMetadataEndpointIP(t *testing.T) {
-	settings := WebhookSettings{
-		Enabled: true,
-		Security: WebhookSecurity{
-			Mode:                  WebhookSecurityModeCustom,
-			AllowedSchemes:        []string{"http", "https"},
-			DenyMetadataEndpoints: true,
-		},
-		Hooks: Webhooks{
-			{
-				Callback: "http://169.254.169.254/latest/meta-data",
-				Events:   events.Events{events.Event("user.create")},
-			},
-		},
-	}
-
-	err := settings.Validate()
-
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "metadata")
 }
 
 func TestWebhookSettings_Validate_RejectsInvalidEvent(t *testing.T) {
@@ -589,6 +286,29 @@ func TestWebhookSettings_Validate_RejectsInvalidEvent(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "not a valid webhook event")
+}
+
+// Integration test to ensure callback URL validation is wired up correctly
+func TestWebhookSettings_Validate_IntegrationCallbackValidation(t *testing.T) {
+	// Test that webhook validation is actually called during settings validation
+	settings := WebhookSettings{
+		Enabled: true,
+		Security: WebhookSecurity{
+			Mode:           WebhookSecurityModePublicOnly,
+			AllowedSchemes: []string{"https"},
+		},
+		Hooks: Webhooks{
+			{
+				Callback: "https://example.com/webhook",
+				Events:   events.Events{events.Event("user.create")},
+			},
+		},
+	}
+
+	err := settings.Validate()
+
+	// This should pass - the integration between WebhookSettings and validation package works
+	assert.NoError(t, err)
 }
 
 func TestWebhookSecurity_Validate_AllowsPublicOnlyWithIgnoredConfigs(t *testing.T) {
