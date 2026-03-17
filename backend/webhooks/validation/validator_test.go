@@ -133,6 +133,27 @@ func TestValidator_ValidateIP_PublicOnlyAllowsPublicIP(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestValidator_ValidateIP_InternalOnlyAllowsPrivateIP(t *testing.T) {
+	validator := NewValidator(WebhookSecurityPolicy{
+		Mode: SecurityModeInternalOnly,
+	})
+
+	err := validator.ValidateIP(net.ParseIP("10.0.0.1"))
+
+	assert.NoError(t, err)
+}
+
+func TestValidator_ValidateIP_InternalOnlyRejectsPublicIP(t *testing.T) {
+	validator := NewValidator(WebhookSecurityPolicy{
+		Mode: SecurityModeInternalOnly,
+	})
+
+	err := validator.ValidateIP(net.ParseIP("8.8.8.8"))
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "internal_only")
+}
+
 func TestValidator_ValidateIP_CustomAllowsPrivateIPInAllowedCIDR(t *testing.T) {
 	validator := NewValidator(WebhookSecurityPolicy{
 		Mode:         SecurityModeCustom,

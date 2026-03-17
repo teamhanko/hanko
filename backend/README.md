@@ -700,6 +700,24 @@ webhooks:
         - user
 ```
 
+**`internal_only`**
+
+Only allows callbacks to internal/private IP addresses. Blocks all public IPs. Useful for deployments where webhooks should only target internal services:
+
+```yaml
+webhooks:
+  enabled: true
+  security:
+    mode: internal_only
+    allowed_schemes:
+      - http
+      - https
+  hooks:
+    - callback: http://10.0.1.50/webhooks
+      events:
+        - user
+```
+
 **`custom` (for internal webhooks)**
 
 Allows callbacks to private networks if explicitly allowlisted via CIDRs, hosts, or domains:
@@ -776,7 +794,10 @@ webhooks:
 
 ##### Security Best Practices
 
-1. **Use `public_only` mode** unless you explicitly need internal webhooks
+1. **Choose the appropriate mode:**
+   - Use `public_only` (default) for external webhooks to SaaS services
+   - Use `internal_only` when webhooks should only target internal services
+   - Use `custom` when you need fine-grained control with allowlists
 2. **Use HTTPS only** by setting `allowed_schemes: ["https"]`
 3. **Disable redirects** unless required: `follow_redirects: false`
 4. **Regularly review** webhook destinations and events

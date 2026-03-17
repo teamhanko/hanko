@@ -464,6 +464,47 @@ func TestWebhookSettings_Validate_PublicOnlyRejectsLiteralPrivateIP(t *testing.T
 	assert.Contains(t, err.Error(), "public_only")
 }
 
+func TestWebhookSettings_Validate_InternalOnlyAllowsLiteralPrivateIP(t *testing.T) {
+	settings := WebhookSettings{
+		Enabled: true,
+		Security: WebhookSecurity{
+			Mode:           WebhookSecurityModeInternalOnly,
+			AllowedSchemes: []string{"http", "https"},
+		},
+		Hooks: Webhooks{
+			{
+				Callback: "http://10.0.0.2/webhook",
+				Events:   events.Events{events.Event("user.create")},
+			},
+		},
+	}
+
+	err := settings.Validate()
+
+	assert.NoError(t, err)
+}
+
+func TestWebhookSettings_Validate_InternalOnlyRejectsPublicIP(t *testing.T) {
+	settings := WebhookSettings{
+		Enabled: true,
+		Security: WebhookSecurity{
+			Mode:           WebhookSecurityModeInternalOnly,
+			AllowedSchemes: []string{"http", "https"},
+		},
+		Hooks: Webhooks{
+			{
+				Callback: "http://8.8.8.8/webhook",
+				Events:   events.Events{events.Event("user.create")},
+			},
+		},
+	}
+
+	err := settings.Validate()
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "internal_only")
+}
+
 func TestWebhookSettings_Validate_CustomAllowsLiteralPrivateIPWhenCIDRAllowlisted(t *testing.T) {
 	settings := WebhookSettings{
 		Enabled: true,

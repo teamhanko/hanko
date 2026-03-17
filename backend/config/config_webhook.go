@@ -15,14 +15,15 @@ import (
 type WebhookSecurityMode string
 
 const (
-	WebhookSecurityModePublicOnly WebhookSecurityMode = "public_only"
-	WebhookSecurityModeCustom     WebhookSecurityMode = "custom"
-	WebhookSecurityModeInsecure   WebhookSecurityMode = "insecure"
+	WebhookSecurityModePublicOnly   WebhookSecurityMode = "public_only"
+	WebhookSecurityModeInternalOnly WebhookSecurityMode = "internal_only"
+	WebhookSecurityModeCustom       WebhookSecurityMode = "custom"
+	WebhookSecurityModeInsecure     WebhookSecurityMode = "insecure"
 )
 
 type WebhookSecurity struct {
 	// `mode` defines the outbound destination policy for webhook callbacks.
-	Mode WebhookSecurityMode `yaml:"mode" json:"mode,omitempty" koanf:"mode" jsonschema:"default=public_only,enum=public_only,enum=custom,enum=insecure"`
+	Mode WebhookSecurityMode `yaml:"mode" json:"mode,omitempty" koanf:"mode" jsonschema:"default=public_only,enum=public_only,enum=internal_only,enum=custom,enum=insecure"`
 	// `allowed_schemes` defines the allowed URL schemes for webhook callbacks.
 	AllowedSchemes []string `yaml:"allowed_schemes" json:"allowed_schemes,omitempty" koanf:"allowed_schemes"`
 	// `follow_redirects` determines whether webhook delivery follows redirects.
@@ -112,10 +113,10 @@ func (s *WebhookSecurity) Validate() error {
 
 func (s *WebhookSecurity) validateMode() error {
 	switch s.Mode {
-	case WebhookSecurityModePublicOnly, WebhookSecurityModeCustom, WebhookSecurityModeInsecure:
+	case WebhookSecurityModePublicOnly, WebhookSecurityModeInternalOnly, WebhookSecurityModeCustom, WebhookSecurityModeInsecure:
 		return nil
 	default:
-		return fmt.Errorf("webhooks.security.mode must be one of: public_only, custom, insecure")
+		return fmt.Errorf("webhooks.security.mode must be one of: public_only, internal_only, custom, insecure")
 	}
 }
 

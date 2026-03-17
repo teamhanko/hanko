@@ -9,9 +9,10 @@ import (
 type SecurityMode string
 
 const (
-	SecurityModePublicOnly SecurityMode = "public_only"
-	SecurityModeCustom     SecurityMode = "custom"
-	SecurityModeInsecure   SecurityMode = "insecure"
+	SecurityModePublicOnly   SecurityMode = "public_only"
+	SecurityModeInternalOnly SecurityMode = "internal_only"
+	SecurityModeCustom       SecurityMode = "custom"
+	SecurityModeInsecure     SecurityMode = "insecure"
 )
 
 // WebhookSecurityPolicy contains the security settings for webhook validation.
@@ -100,6 +101,8 @@ func (v *Validator) validateAllowedHostPolicy(host string) error {
 		return nil
 	case SecurityModePublicOnly:
 		return nil
+	case SecurityModeInternalOnly:
+		return nil
 	case SecurityModeCustom:
 		// If no allowlists are configured, allow all (except blocked)
 		if len(v.security.AllowedHosts) == 0 && len(v.security.AllowedDomains) == 0 {
@@ -137,6 +140,8 @@ func (v *Validator) validateModeDecision(ip net.IP) error {
 		return nil
 	case SecurityModePublicOnly:
 		return v.validatePublicOnly(ip)
+	case SecurityModeInternalOnly:
+		return v.validateInternalOnly(ip)
 	case SecurityModeCustom:
 		return v.validateCustom(ip)
 	default:
@@ -148,6 +153,15 @@ func (v *Validator) validateModeDecision(ip net.IP) error {
 func (v *Validator) validatePublicOnly(ip net.IP) error {
 	if !IsPublicRoutableIP(ip) {
 		return fmt.Errorf("non-public IP '%s' is not allowed in public_only mode", ip.String())
+	}
+
+	return nil
+}
+
+// validateInternalOnly ensures the IP is non-public/internal (internal_only mode).
+func (v *Validator) validateInternalOnly(ip net.IP) error {
+	if IsPublicRoutableIP(ip) {
+		return fmt.Errorf("public IP '%s' is not allowed in internal_only mode", ip.String())
 	}
 
 	return nil
