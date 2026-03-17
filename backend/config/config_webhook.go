@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net"
-	"net/url"
 	"strings"
 
 	"github.com/invopop/jsonschema"
@@ -70,6 +69,11 @@ func (s *WebhookSecurity) ToWebhookSecurityPolicy() validation.WebhookSecurityPo
 		DenyMetadataEndpoints: s.DenyMetadataEndpoints,
 		SanitizeErrors:        s.SanitizeErrors,
 	}
+}
+
+// GetAllowedSchemes returns the allowed URL schemes.
+func (s *WebhookSecurity) GetAllowedSchemes() []string {
+	return s.AllowedSchemes
 }
 
 func (s *WebhookSecurity) Validate() error {
@@ -352,85 +356,11 @@ func (Webhook) JSONSchemaExtend(schema *jsonschema.Schema) {
 }
 
 func (w *Webhook) Validate(sec *WebhookSecurity) error {
-	parsed, err := url.Parse(w.Callback)
-	if err != nil {
-		return fmt.Errorf("callback is not a valid URL: %w", err)
+	// Convert events.Events to []string for the shared validation
+	eventsStr := make([]string, len(w.Events))
+	for i, e := range w.Events {
+		eventsStr[i] = string(e)
 	}
 
-	if err := w.validateParsedURL(parsed, sec); err != nil {
-		return err
-	}
-
-	if err := w.validateLiteralIP(parsed, sec); err != nil {
-		return err
-	}
-
-	if err := w.validateEvents(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (w *Webhook) validateParsedURL(parsed *url.URL, sec *WebhookSecurity) error {
-	if parsed.Scheme == "" {
-		return fmt.Errorf("callback URL must include a scheme")
-	}
-
-	if parsed.Host == "" {
-		return fmt.Errorf("callback URL must include a host")
-	}
-
-	if parsed.User != nil {
-		return fmt.Errorf("callback URL must not include user info")
-	}
-
-	schemeAllowed := false
-	for _, scheme := range sec.AllowedSchemes {
-		if strings.EqualFold(strings.TrimSpace(scheme), parsed.Scheme) {
-			schemeAllowed = true
-			break
-		}
-	}
-
-	if !schemeAllowed {
-		return fmt.Errorf("callback scheme '%s' is not allowed", parsed.Scheme)
-	}
-
-	validator := validation.NewValidator(sec.ToWebhookSecurityPolicy())
-	host := parsed.Hostname()
-
-	if err := validator.ValidateHost(host); err != nil {
-		return fmt.Errorf("callback %w", err)
-	}
-
-	return nil
-}
-
-func (w *Webhook) validateLiteralIP(parsed *url.URL, sec *WebhookSecurity) error {
-	host := validation.NormalizeHost(parsed.Hostname())
-	ip := net.ParseIP(host)
-	if ip == nil {
-		return nil
-	}
-
-	validator := validation.NewValidator(sec.ToWebhookSecurityPolicy())
-	if err := validator.ValidateIP(ip); err != nil {
-		return fmt.Errorf("callback %w", err)
-	}
-
-	return nil
-}
-
-func (w *Webhook) validateEvents() error {
-	if len(w.Events) > 0 {
-		for i, e := range w.Events {
-			isValid := events.IsValidEvent(e)
-			if !isValid {
-				return fmt.Errorf("event '%s' at events[%d] is not a valid webhook event", e, i)
-			}
-		}
-	}
-
-	return nil
+	return validation.ValidateWebhook(w.Callback, eventsStr, sec)
 }

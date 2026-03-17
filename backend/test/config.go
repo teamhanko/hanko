@@ -53,4 +53,14 @@ var DefaultConfig = config.Config{
 		Enabled:          true,
 		UserVerification: "preferred",
 	},
+	Webhooks: config.WebhookSettings{
+		Enabled: true,
+		Security: config.WebhookSecurity{
+			Mode:                  config.WebhookSecurityModeInsecure,
+			AllowedSchemes:        []string{"http", "https"},
+			FollowRedirects:       false,
+			MaxRedirects:          0,
+			DenyMetadataEndpoints: true,
+		},
+	},
 }
