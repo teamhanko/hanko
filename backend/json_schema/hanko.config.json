@@ -1828,26 +1828,31 @@
           "description": "`max_redirects` defines the maximum number of redirects to follow.",
           "default": 0
         },
+        "skip_resolved_ip_validation": {
+          "type": "boolean",
+          "description": "`skip_resolved_ip_validation` determines whether IP validation is skipped for hostnames\nthat passed hostname validation in custom mode. When true, if a hostname is in allowed_hosts\nor allowed_domains, its resolved IPs are automatically trusted.\nWARNING: Only enable this if you fully trust your DNS infrastructure. If DNS is compromised,\nan attacker could make an allowed hostname resolve to a malicious IP (e.g., internal services).\nWhen false (default), both hostname AND resolved IPs must be explicitly allowed (defense-in-depth).",
+          "default": false
+        },
         "allowed_hosts": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "`allowed_hosts` defines exact hostnames that are explicitly allowed in `custom` mode."
+          "description": "`allowed_hosts` defines exact hostnames or IP addresses that are explicitly allowed in `custom` mode.\nAt least one of allowed_hosts, allowed_domains, or allowed_cidrs must be configured in custom mode."
         },
         "allowed_domains": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "`allowed_domains` defines domains and subdomains that are explicitly allowed in `custom` mode."
+          "description": "`allowed_domains` defines domains and subdomains that are explicitly allowed in `custom` mode.\nAt least one of allowed_hosts, allowed_domains, or allowed_cidrs must be configured in custom mode."
         },
         "allowed_cidrs": {
           "items": {
             "type": "string"
           },
           "type": "array",
-          "description": "`allowed_cidrs` defines IP ranges that are explicitly allowed in `custom` mode."
+          "description": "`allowed_cidrs` defines IP ranges that are explicitly allowed in `custom` mode.\nAt least one of allowed_hosts, allowed_domains, or allowed_cidrs must be configured in custom mode."
         },
         "blocked_hosts": {
           "items": {

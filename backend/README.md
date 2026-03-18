@@ -678,7 +678,7 @@ Webhooks include comprehensive SSRF (Server-Side Request Forgery) protection to 
 
 The webhook security mode determines which destination IPs are allowed:
 
-**`public_only` (default, recommended)**
+**`public_only` (default)**
 
 Only allows callbacks to public, routable IP addresses. Blocks:
 - Private networks (10.0.0.0/8, 192.168.0.0/16, 172.16.0.0/12)
