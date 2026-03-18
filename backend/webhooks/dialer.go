@@ -62,7 +62,7 @@ func (d *ValidatedDialer) DialContext(ctx context.Context, network, address stri
 
 		conn, err := d.baseDialer.DialContext(ctx, network, targetAddr)
 		if err == nil {
-			// Update current index for next call (simple load balancing)
+			// Update the current index for the next call
 			d.currentIPIndex = (idx + 1) % len(d.validatedIPs)
 			return conn, nil
 		}
