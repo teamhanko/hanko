@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"net/http"
+
+	"github.com/teamhanko/hanko/backend/v2/config"
 )
 
 const (
@@ -16,7 +17,7 @@ type CookieOptions struct {
 	SameSite http.SameSite
 }
 
-func GenerateStateCookie(config *config.Config, name string, state string, options CookieOptions) *http.Cookie {
+func GenerateStateCookie(config *config.TenantConfig, name string, state string, options CookieOptions) *http.Cookie {
 	if options.Path == "" {
 		options.Path = "/"
 	}

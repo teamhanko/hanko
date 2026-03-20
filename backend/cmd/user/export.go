@@ -6,15 +6,18 @@ import (
 	"log"
 	"os"
 
+	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
+// TODO: should include a tenantID as parameter
 func NewExportCommand() *cobra.Command {
 	var (
 		configFile string
 		outputFile string
+		tenantID   string
 	)
 
 	cmd := &cobra.Command{
@@ -26,11 +29,22 @@ func NewExportCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			persister, err := persistence.New(cfg.Database)
+
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
-			err = export(persister, outputFile)
+
+			var tID uuid.UUID
+			if tenantID != "" {
+				tID, err = uuid.FromString(tenantID)
+				if err != nil {
+					log.Fatalf("invalid tenant_id: %s", err)
+				}
+			}
+			persister := persistence.New(dbConnection)
+
+			err = export(persister, outputFile, &tID)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -40,6 +54,7 @@ func NewExportCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().StringVarP(&outputFile, "outputFile", "o", "", "The path of the output file.")
+	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID (optional)")
 	err := cmd.MarkFlagRequired("outputFile")
 	if err != nil {
 		log.Println(err)
@@ -47,9 +62,9 @@ func NewExportCommand() *cobra.Command {
 	return cmd
 }
 
-func export(persister persistence.Persister, outFile string) error {
+func export(persister persistence.Persister, outFile string, tenantID *uuid.UUID) error {
 	var entries []ImportOrExportEntry
-	users, err := persister.GetUserPersister().All()
+	users, err := persister.GetUserPersister().All(tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}

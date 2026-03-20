@@ -11,7 +11,7 @@ import (
 
 type PasswordCredentialPersister interface {
 	Create(password models.PasswordCredential) error
-	GetByUserID(userId uuid.UUID) (*models.PasswordCredential, error)
+	GetByUserID(userId uuid.UUID, tenantID *uuid.UUID) (*models.PasswordCredential, error)
 	Update(password models.PasswordCredential) error
 	Delete(password models.PasswordCredential) error
 }
@@ -37,9 +37,14 @@ func (p *passwordCredentialPersister) Create(password models.PasswordCredential)
 	return nil
 }
 
-func (p *passwordCredentialPersister) GetByUserID(userId uuid.UUID) (*models.PasswordCredential, error) {
+func (p *passwordCredentialPersister) GetByUserID(userId uuid.UUID, tenantID *uuid.UUID) (*models.PasswordCredential, error) {
 	pw := models.PasswordCredential{}
 	query := p.db.Where("user_id = (?)", userId.String())
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
 	err := query.First(&pw)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

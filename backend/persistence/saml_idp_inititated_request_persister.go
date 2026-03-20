@@ -4,22 +4,29 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type SamlIDPInitiatedRequestPersister interface {
 	Create(samlIDPInitiatedRequest models.SamlIDPInitiatedRequest) error
-	GetByResponseIDAndIssuer(responseID, entityID string) (*models.SamlIDPInitiatedRequest, error)
+	GetByResponseIDAndIssuer(responseID, entityID string, tenantID *uuid.UUID) (*models.SamlIDPInitiatedRequest, error)
 }
 
 type samlIDPInitiatedRequestPersister struct {
 	db *pop.Connection
 }
 
-func (p samlIDPInitiatedRequestPersister) GetByResponseIDAndIssuer(responseID, entityID string) (*models.SamlIDPInitiatedRequest, error) {
+func (p samlIDPInitiatedRequestPersister) GetByResponseIDAndIssuer(responseID, entityID string, tenantID *uuid.UUID) (*models.SamlIDPInitiatedRequest, error) {
 	samlIDPInitiatedRequest := models.SamlIDPInitiatedRequest{}
 	query := p.db.Where("response_id = ? AND idp_entity_id = ?", responseID, entityID)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
 	err := query.First(&samlIDPInitiatedRequest)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

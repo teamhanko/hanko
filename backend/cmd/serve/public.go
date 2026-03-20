@@ -4,13 +4,14 @@ Copyright © 2022 Hanko GmbH <developers@hanko.io>
 package serve
 
 import (
+	"log"
+	"sync"
+
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/server"
-	"log"
-	"sync"
 )
 
 func NewServePublicCommand() *cobra.Command {
@@ -31,10 +32,11 @@ func NewServePublicCommand() *cobra.Command {
 
 			authenticatorMetadata := mapper.LoadAuthenticatorMetadata(&authenticatorMetadataFile)
 
-			persister, err := persistence.New(cfg.Database)
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
+			persister := persistence.New(dbConnection, nil)
 			var wg sync.WaitGroup
 			wg.Add(1)
 

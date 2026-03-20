@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
+	"time"
+
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/crypto"
 	"github.com/teamhanko/hanko/backend/v2/crypto/aes_gcm"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"strings"
-	"time"
 )
 
 type State struct {
@@ -30,7 +32,7 @@ func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	}
 }
 
-func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, options ...func(*State)) ([]byte, error) {
+func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID *uuid.UUID, options ...func(*State)) ([]byte, error) {
 	if strings.TrimSpace(provider) == "" {
 		return nil, errors.New("provider must be present")
 	}
@@ -69,7 +71,7 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 		return nil, fmt.Errorf("could not encrypt state: %w", err)
 	}
 
-	dbState, err := models.NewSamlState(nonce, encryptedState)
+	dbState, err := models.NewSamlState(nonce, encryptedState, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("could not create state model: %w", err)
 	}
@@ -84,13 +86,13 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 	return []byte(result), nil
 }
 
-func VerifyState(config *config.Config, persister persistence.SamlStatePersister, state string) (*State, error) {
+func VerifyState(config *config.Config, persister persistence.SamlStatePersister, state string, tenantID *uuid.UUID) (*State, error) {
 	decodedState, err := decodeState(config, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)
 	}
 
-	expectedState, err := persister.GetByNonce(decodedState.Nonce)
+	expectedState, err := persister.GetByNonce(decodedState.Nonce, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("could not fetch expected state from db: %w", err)
 	}

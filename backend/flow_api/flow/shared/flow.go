@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
@@ -31,6 +32,7 @@ type Dependencies struct {
 	Tx                          *pop.Connection
 	AuthenticatorMetadata       mapper.AuthenticatorMetadata
 	AuditLogger                 auditlog.Logger
+	TenantID                    *uuid.UUID
 }
 
 type Action struct{}

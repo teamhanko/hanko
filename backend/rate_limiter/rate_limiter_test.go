@@ -2,10 +2,11 @@ package rate_limiter
 
 import (
 	"context"
-	"github.com/rs/zerolog/log"
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"testing"
 	"time"
+
+	"github.com/rs/zerolog/log"
+	"github.com/teamhanko/hanko/backend/v2/config"
 )
 
 func TestNewRateLimiter(t *testing.T) {

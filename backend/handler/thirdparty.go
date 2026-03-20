@@ -7,6 +7,7 @@ import (
 	"net/url"
 
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -22,16 +23,16 @@ import (
 )
 
 type ThirdPartyHandler struct {
-	auditLogger    auditlog.Logger
-	cfg            *config.Config
+	auditLogger auditlog.Logger
+	//cfg            *config.Config
 	persister      persistence.Persister
 	sessionManager session.Manager
 }
 
 func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *ThirdPartyHandler {
 	return &ThirdPartyHandler{
-		auditLogger:    auditLogger,
-		cfg:            cfg,
+		auditLogger: auditLogger,
+		//cfg:            cfg,
 		persister:      persister,
 		sessionManager: sessionManager,
 	}
@@ -39,8 +40,12 @@ func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, s
 
 func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 	errorRedirectTo := c.Request().Header.Get("Referer")
+	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
+	if tenantConfig == nil {
+		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), errorRedirectTo)
+	}
 	if errorRedirectTo == "" {
-		errorRedirectTo = h.cfg.ThirdParty.ErrorRedirectURL
+		errorRedirectTo = tenantConfig.ThirdParty.ErrorRedirectURL
 	}
 
 	var request dto.ThirdPartyAuthRequest
@@ -54,23 +59,23 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	if ok := thirdparty.IsAllowedRedirect(h.cfg.ThirdParty, request.RedirectTo); !ok {
+	if ok := thirdparty.IsAllowedRedirect(tenantConfig.ThirdParty, request.RedirectTo); !ok {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", request.RedirectTo)), errorRedirectTo)
 	}
 
-	provider, err := thirdparty.GetProvider(h.cfg.ThirdParty, request.Provider)
+	provider, err := thirdparty.GetProvider(tenantConfig.ThirdParty, request.Provider)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	state, err := thirdparty.GenerateState(h.cfg, provider.ID(), request.RedirectTo)
+	state, err := thirdparty.GenerateState(tenantConfig, provider.ID(), request.RedirectTo)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
 	}
 
 	authCodeUrl := provider.AuthCodeURL(string(state))
 
-	cookie := utils.GenerateStateCookie(h.cfg, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
+	cookie := utils.GenerateStateCookie(tenantConfig, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
 		MaxAge:   300,
 		Path:     "/",
 		SameSite: http.SameSiteLaxMode,
@@ -82,14 +87,24 @@ func (h *ThirdPartyHandler) Auth(c echo.Context) error {
 }
 
 func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
+	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
+	if tenantConfig == nil {
+		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), "/error") // TODO:
+	}
 	q, err := c.FormParams()
 	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), h.cfg.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), tenantConfig.ThirdParty.ErrorRedirectURL)
 	}
 	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/thirdparty/callback?%s", q.Encode()))
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
+	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
+	if tenantConfig == nil {
+		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), "/error") // TODO:
+	}
+	tenantId := c.Get("tenant_id").(*uuid.UUID)
+
 	var redirectToURL *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
 	err := h.persister.Transaction(func(tx *pop.Connection) error {
@@ -122,7 +137,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			expectedState = expectedStateCookie.Value
 		}
 		var state *thirdparty.State
-		state, terr = thirdparty.VerifyState(h.cfg, callback.State, expectedState)
+		state, terr = thirdparty.VerifyState(tenantConfig, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -136,7 +151,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.NewThirdPartyError(callback.Error, callback.ErrorDescription)
 		}
 
-		provider, terr := thirdparty.GetProvider(h.cfg.ThirdParty, state.Provider)
+		provider, terr := thirdparty.GetProvider(tenantConfig.ThirdParty, state.Provider)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -159,13 +174,13 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, h.cfg, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID)
+		linkingResult, terr := thirdparty.LinkAccount(tx, tenantConfig, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenantId)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID())
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID(), tenantId)
 		if err != nil {
 			return thirdparty.ErrorServer("could not get identity").WithCause(err)
 		}
@@ -204,17 +219,17 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			Name:     utils.HankoThirdpartyStateCookie,
 			Value:    "",
 			Path:     "/",
-			Domain:   h.cfg.Session.Cookie.Domain,
+			Domain:   tenantConfig.Session.Cookie.Domain,
 			MaxAge:   -1,
-			Secure:   h.cfg.Session.Cookie.Secure,
-			HttpOnly: h.cfg.Session.Cookie.HttpOnly,
+			Secure:   tenantConfig.Session.Cookie.Secure,
+			HttpOnly: tenantConfig.Session.Cookie.HttpOnly,
 			SameSite: http.SameSiteLaxMode,
 		})
 
 		return nil
 	})
 
-	errorRedirect := h.cfg.ThirdParty.ErrorRedirectURL
+	errorRedirect := tenantConfig.ThirdParty.ErrorRedirectURL
 	if redirectToURL != nil {
 		errorRedirect = redirectToURL.String()
 	}
@@ -239,17 +254,18 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 }
 
 func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string) error {
-	redirectTo := h.cfg.ThirdParty.ErrorRedirectURL
-	if to != "" {
-		redirectTo = to
-	}
+	// TODO:
+	//redirectTo := h.cfg.ThirdParty.ErrorRedirectURL
+	//if to != "" {
+	//	redirectTo = to
+	//}
 
 	err := h.auditError(c, error)
 	if err != nil {
 		error = err
 	}
 
-	redirectURL := thirdparty.GetErrorUrl(redirectTo, error)
+	redirectURL := thirdparty.GetErrorUrl(to, error)
 	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 

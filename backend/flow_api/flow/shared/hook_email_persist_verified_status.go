@@ -38,21 +38,21 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 	}
 
-	user, err := deps.Persister.GetUserPersister().Get(userId)
+	user, err := deps.Persister.GetUserPersister().Get(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user by user_id: %w", err)
 	}
 
 	emailAddressToVerify := c.Stash().Get(StashPathEmail).String()
 
-	emailAddressToVerifyModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(emailAddressToVerify)
+	emailAddressToVerifyModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(emailAddressToVerify, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("could not fetch email: %w", err)
 	}
 
 	var emailCreated bool
 	if emailAddressToVerifyModel == nil {
-		newEmailModel := models.NewEmail(&userId, emailAddressToVerify)
+		newEmailModel := models.NewEmail(&userId, emailAddressToVerify, deps.TenantID)
 		newEmailModel.Verified = true
 
 		err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*newEmailModel)
@@ -60,7 +60,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			return fmt.Errorf("could not save email: %w", err)
 		}
 
-		emailModels, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(*newEmailModel.UserID)
+		emailModels, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByUserId(*newEmailModel.UserID, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("could fetch emails: %w", err)
 		}
@@ -72,7 +72,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 		if len(emailModels) == 1 && emailModels[0].ID.String() == newEmailModel.ID.String() {
 			// The user has only one 1 email and it is the email we just added. It makes sense then,
 			// to automatically set this as the primary email.
-			primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userId)
+			primaryEmailModel := models.NewPrimaryEmail(newEmailModel.ID, userId, deps.TenantID)
 			err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 			if err != nil {
 				return fmt.Errorf("could not save primary email: %w", err)

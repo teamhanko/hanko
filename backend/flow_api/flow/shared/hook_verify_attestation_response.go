@@ -3,6 +3,7 @@ package shared
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/dto/intern"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
@@ -40,6 +41,7 @@ func (h VerifyAttestationResponse) Execute(c flowpilot.HookExecutionContext) err
 		UserID:        userID,
 		Email:         &email,
 		Username:      &username,
+		TenantID:      deps.TenantID,
 	}
 
 	credential, err := deps.WebauthnService.VerifyAttestationResponse(params)
@@ -53,7 +55,7 @@ func (h VerifyAttestationResponse) Execute(c flowpilot.HookExecutionContext) err
 	}
 
 	mfaOnly := c.Stash().Get(StashPathCreateMFAOnlyCredential).Bool()
-	credentialModel := intern.WebauthnCredentialToModel(credential, userID, false, false, mfaOnly, deps.AuthenticatorMetadata)
+	credentialModel := intern.WebauthnCredentialToModel(credential, userID, false, false, mfaOnly, deps.AuthenticatorMetadata, deps.TenantID)
 	err = c.Stash().Set(fmt.Sprintf("%s.-1", StashPathWebauthnCredentials), credentialModel)
 	if err != nil {
 		return fmt.Errorf("failed to set webauthn_credential to the stash: %w", err)

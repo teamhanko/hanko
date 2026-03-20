@@ -84,7 +84,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	if primaryEmail == nil {
-		primaryEmail = models.NewPrimaryEmail(emailModel.ID, userModel.ID)
+		primaryEmail = models.NewPrimaryEmail(emailModel.ID, userModel.ID, deps.TenantID)
 		err := deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
 		if err != nil {
 			return fmt.Errorf("failed to store new primary email: %w", err)

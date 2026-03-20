@@ -1,0 +1,4 @@
+add_column("jwks", "state", "string", {"default": "active", "null": false})
+add_column("jwks", "encryption_key_version", "string", {"default": "v1", "null": false})
+
+add_index("jwks", ["tenant_id", "state"], {})

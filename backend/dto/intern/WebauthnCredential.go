@@ -2,15 +2,16 @@ package intern
 
 import (
 	"encoding/base64"
+	"time"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"time"
 )
 
-func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible, backupState, mfaOnly bool, authenticatorMetadata mapper.AuthenticatorMetadata) *models.WebauthnCredential {
+func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible, backupState, mfaOnly bool, authenticatorMetadata mapper.AuthenticatorMetadata, tenantID *uuid.UUID) *models.WebauthnCredential {
 	now := time.Now().UTC()
 	aaguid, _ := uuid.FromBytes(credential.Authenticator.AAGUID)
 	credentialID := base64.RawURLEncoding.EncodeToString(credential.ID)
@@ -29,6 +30,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 		BackupEligible:  backupEligible,
 		BackupState:     backupState,
 		MFAOnly:         mfaOnly,
+		TenantID:        tenantID,
 	}
 
 	for _, name := range credential.Transport {
@@ -38,6 +40,7 @@ func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID
 				ID:                   id,
 				Name:                 string(name),
 				WebauthnCredentialID: credentialID,
+				TenantID:             tenantID,
 			}
 			c.Transports = append(c.Transports, t)
 		}

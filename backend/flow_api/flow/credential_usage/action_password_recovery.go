@@ -3,6 +3,7 @@ package credential_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -54,7 +55,7 @@ func (a PasswordRecovery) Execute(c flowpilot.ExecutionContext) error {
 
 	authUserID := c.Stash().Get(shared.StashPathUserID).String()
 
-	err := deps.PasswordService.RecoverPassword(deps.Tx, uuid.FromStringOrNil(authUserID), newPassword)
+	err := deps.PasswordService.RecoverPassword(deps.Tx, uuid.FromStringOrNil(authUserID), newPassword, deps.TenantID)
 
 	if err != nil {
 		if errors.Is(err, services.ErrorPasswordInvalid) {

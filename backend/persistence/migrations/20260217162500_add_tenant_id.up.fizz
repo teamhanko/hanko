@@ -1,0 +1,103 @@
+add_column("users", "tenant_id", "uuid", {null: true})
+add_index("users", "tenant_id", {})
+add_foreign_key("users", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("passcodes", "tenant_id", "uuid", {null: true})
+add_index("passcodes", "tenant_id", {})
+add_foreign_key("passcodes", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webauthn_credentials", "tenant_id", "uuid", {null: true})
+add_index("webauthn_credentials", "tenant_id", {})
+add_foreign_key("webauthn_credentials", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webauthn_session_data", "tenant_id", "uuid", {null: true})
+add_index("webauthn_session_data", "tenant_id", {})
+add_foreign_key("webauthn_session_data", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webauthn_session_data_allowed_credentials", "tenant_id", "uuid", {null: true})
+add_index("webauthn_session_data_allowed_credentials", "tenant_id", {})
+add_foreign_key("webauthn_session_data_allowed_credentials", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("jwks", "tenant_id", "uuid", {null: true})
+add_index("jwks", "tenant_id", {})
+add_foreign_key("jwks", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("password_credentials", "tenant_id", "uuid", {null: true})
+add_index("password_credentials", "tenant_id", {})
+add_foreign_key("password_credentials", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webauthn_credential_transports", "tenant_id", "uuid", {null: true})
+add_index("webauthn_credential_transports", "tenant_id", {})
+add_foreign_key("webauthn_credential_transports", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("audit_logs", "tenant_id", "uuid", {null: true})
+add_index("audit_logs", "tenant_id", {})
+add_foreign_key("audit_logs", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("emails", "tenant_id", "uuid", {null: true})
+add_index("emails", "tenant_id", {})
+add_foreign_key("emails", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("primary_emails", "tenant_id", "uuid", {null: true})
+add_index("primary_emails", "tenant_id", {})
+add_foreign_key("primary_emails", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("identities", "tenant_id", "uuid", {null: true})
+add_index("identities", "tenant_id", {})
+add_foreign_key("identities", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("tokens", "tenant_id", "uuid", {null: true})
+add_index("tokens", "tenant_id", {})
+add_foreign_key("tokens", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("flows", "tenant_id", "uuid", {null: true})
+add_index("flows", "tenant_id", {})
+add_foreign_key("flows", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("saml_states", "tenant_id", "uuid", {null: true})
+add_index("saml_states", "tenant_id", {})
+add_foreign_key("saml_states", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("saml_certificates", "tenant_id", "uuid", {null: true})
+add_index("saml_certificates", "tenant_id", {})
+add_foreign_key("saml_certificates", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webhooks", "tenant_id", "uuid", {null: true})
+add_index("webhooks", "tenant_id", {})
+add_foreign_key("webhooks", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webhook_events", "tenant_id", "uuid", {null: true})
+add_index("webhook_events", "tenant_id", {})
+add_foreign_key("webhook_events", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("usernames", "tenant_id", "uuid", {null: true})
+add_index("usernames", "tenant_id", {})
+add_foreign_key("usernames", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("otp_secrets", "tenant_id", "uuid", {null: true})
+add_index("otp_secrets", "tenant_id", {})
+add_foreign_key("otp_secrets", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("sessions", "tenant_id", "uuid", {null: true})
+add_index("sessions", "tenant_id", {})
+add_foreign_key("sessions", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("trusted_devices", "tenant_id", "uuid", {null: true})
+add_index("trusted_devices", "tenant_id", {})
+add_foreign_key("trusted_devices", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("saml_identities", "tenant_id", "uuid", {null: true})
+add_index("saml_identities", "tenant_id", {})
+add_foreign_key("saml_identities", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("saml_idp_initiated_requests", "tenant_id", "uuid", {null: true})
+add_index("saml_idp_initiated_requests", "tenant_id", {})
+add_foreign_key("saml_idp_initiated_requests", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("user_metadata", "tenant_id", "uuid", {null: true})
+add_index("user_metadata", "tenant_id", {})
+add_foreign_key("user_metadata", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})
+
+add_column("webauthn_credential_user_handles", "tenant_id", "uuid", {null: true})
+add_index("webauthn_credential_user_handles", "tenant_id", {})
+add_foreign_key("webauthn_credential_user_handles", "tenant_id", {"tenants": ["id"]}, {"on_delete": "cascade", "on_update": "cascade"})

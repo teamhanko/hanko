@@ -19,7 +19,7 @@ func Session(cfg *config.Config, persister persistence.Persister, generator sess
 	c := echojwt.Config{
 		ContextKey:     "session",
 		TokenLookup:    fmt.Sprintf("header:Authorization:Bearer,cookie:%s", cfg.Session.Cookie.GetName()),
-		ParseTokenFunc: parseToken(cfg.Session, persister, generator),
+		ParseTokenFunc: parseToken(persister, generator),
 		ErrorHandler: func(c echo.Context, err error) error {
 			return echo.NewHTTPError(http.StatusUnauthorized).SetInternal(err)
 		},
@@ -29,8 +29,10 @@ func Session(cfg *config.Config, persister persistence.Persister, generator sess
 
 type ParseTokenFunc = func(c echo.Context, auth string) (interface{}, error)
 
-func parseToken(cfg config.Session, persister persistence.Persister, generator session.Manager) ParseTokenFunc {
+func parseToken(persister persistence.Persister, generator session.Manager) ParseTokenFunc {
 	return func(c echo.Context, auth string) (interface{}, error) {
+		tenantId := c.Get("tenant_id").(*uuid.UUID)
+
 		token, err := generator.Verify(auth)
 		if err != nil {
 			return nil, err
@@ -46,7 +48,7 @@ func parseToken(cfg config.Session, persister persistence.Persister, generator s
 			return nil, errors.New("session id has wrong format")
 		}
 
-		sessionModel, err := persister.GetSessionPersister().Get(sessionID)
+		sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantId)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get session from database: %w", err)
 		}

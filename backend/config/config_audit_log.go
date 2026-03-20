@@ -15,7 +15,7 @@ type AuditLog struct {
 	// `storage` controls audit log retention.
 	Storage AuditLogStorage `yaml:"storage" json:"storage,omitempty" koanf:"storage"`
 	// `retention` specifies the time duration after which log audit entries may be deleted.
-	Retention string `yaml:"retention" json:"retention,omitempty" koanf:"retention" jsonschema:"default=720h"`
+	Retention string `yaml:"retention" json:"retention,omitempty" koanf:"retention" jsonschema:"default=720h"` // TODO: deprecated
 }
 
 func (al *AuditLog) Validate() error {

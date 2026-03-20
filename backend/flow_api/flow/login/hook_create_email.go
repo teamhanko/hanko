@@ -2,6 +2,7 @@ package login
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -30,14 +31,14 @@ func (h CreateEmail) Execute(c flowpilot.HookExecutionContext) error {
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())
-	emailModel := models.NewEmail(&userID, c.Stash().Get(shared.StashPathEmail).String())
+	emailModel := models.NewEmail(&userID, c.Stash().Get(shared.StashPathEmail).String(), deps.TenantID)
 
 	err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 	if err != nil {
 		return fmt.Errorf("failed to create a new email: %w", err)
 	}
 
-	primaryEmail := models.NewPrimaryEmail(emailModel.ID, userID)
+	primaryEmail := models.NewPrimaryEmail(emailModel.ID, userID, deps.TenantID)
 	err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
 	if err != nil {
 		return fmt.Errorf("failed to create a new primary email: %w", err)

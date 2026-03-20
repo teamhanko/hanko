@@ -1,9 +1,10 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"net/http"
 )
 
 type StatusHandler struct {
@@ -18,7 +19,7 @@ func NewStatusHandler(persister persistence.Persister) *StatusHandler {
 
 func (h *StatusHandler) Status(c echo.Context) error {
 	// random query to check DB connectivity
-	_, err := h.persister.GetJwkPersister().GetAll()
+	_, err := h.persister.GetJwkPersister().GetAll(nil)
 	if err != nil {
 		return c.Render(http.StatusInternalServerError, "status", map[string]bool{"dbError": true})
 	}

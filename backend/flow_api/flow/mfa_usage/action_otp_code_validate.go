@@ -3,6 +3,7 @@ package mfa_usage
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/pquerna/otp/totp"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
@@ -55,7 +56,7 @@ func (a OTPCodeValidate) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userID)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user: %w", err)
 	}

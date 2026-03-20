@@ -44,7 +44,7 @@ func TestNewFlowLocker(t *testing.T) {
 					Address:  "localhost:6379",
 					Password: "secret",
 				},
-				TTL: 30 * time.Second,
+				TTL: config.Duration(30 * time.Second),
 			},
 			wantType: "redis",
 			wantErr:  false,
@@ -108,7 +108,7 @@ func TestNewFlowLocker(t *testing.T) {
 
 				// Verify configuration was passed correctly
 				if ok {
-					assert.Equal(t, tt.cfg.TTL, redisLocker.expiry)
+					assert.Equal(t, tt.cfg.TTL.ToTimeDuration(), redisLocker.expiry)
 				}
 			}
 		})

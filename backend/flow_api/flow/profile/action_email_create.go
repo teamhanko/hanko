@@ -51,7 +51,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 	newEmailAddress := c.Input().Get("email").String()
 
-	existingEmailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(newEmailAddress)
+	existingEmailModel, err := deps.Persister.GetEmailPersisterWithConnection(deps.Tx).FindByAddress(newEmailAddress, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("could not fetch email: %w", err)
 	}
@@ -98,7 +98,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		return c.Continue(shared.StatePasscodeConfirmation, shared.StateProfileInit)
 	} else {
-		emailModel := models.NewEmail(&userModel.ID, newEmailAddress)
+		emailModel := models.NewEmail(&userModel.ID, newEmailAddress, deps.TenantID)
 
 		err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 		if err != nil {
@@ -108,7 +108,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 		if len(userModel.Emails) == 0 {
 			// The user has only one 1 email and it is the email we just added. It makes sense then,
 			// to automatically set this as the primary email.
-			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userModel.ID)
+			primaryEmailModel := models.NewPrimaryEmail(emailModel.ID, userModel.ID, deps.TenantID)
 			err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmailModel)
 			if err != nil {
 				return fmt.Errorf("could not save primary email: %w", err)

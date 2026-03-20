@@ -20,12 +20,13 @@ import (
 
 // SamlCertificate is used by pop to map your saml_certs database table to your go code.
 type SamlCertificate struct {
-	ID            uuid.UUID `json:"id" db:"id"`
-	CertData      string    `json:"cert_data" db:"cert_data"`
-	CertKey       string    `json:"cert_key" db:"cert_key"`
-	EncryptionKey string    `json:"encryption_key" db:"encryption_key"`
-	CreatedAt     time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
+    ID            uuid.UUID `json:"id" db:"id"`
+    TenantID      *uuid.UUID `db:"tenant_id"`
+    CertData      string    `json:"cert_data" db:"cert_data"`
+    CertKey       string    `json:"cert_key" db:"cert_key"`
+    EncryptionKey string    `json:"encryption_key" db:"encryption_key"`
+    CreatedAt     time.Time `json:"created_at" db:"created_at"`
+    UpdatedAt     time.Time `json:"updated_at" db:"updated_at"`
 }
 
 func createTemplate(serviceName string, creationTime time.Time) *x509.Certificate {

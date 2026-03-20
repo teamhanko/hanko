@@ -6,12 +6,13 @@ import (
 	"fmt"
 	"strings"
 
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"time"
 )
 
 // DeviceTrustEntry represents a single user's device trust token entry
@@ -31,6 +32,7 @@ type DeviceTrustService struct {
 	Persister   persistence.TrustedDevicePersister
 	Cfg         config.Config
 	HttpContext echo.Context
+	TenantID    *uuid.UUID
 }
 
 func (s DeviceTrustService) CreateTrustedDevice(userID uuid.UUID, deviceToken string) error {
@@ -43,6 +45,7 @@ func (s DeviceTrustService) CreateTrustedDevice(userID uuid.UUID, deviceToken st
 		ID:          deviceID,
 		UserID:      userID,
 		DeviceToken: deviceToken,
+		TenantID:    s.TenantID,
 		ExpiresAt:   time.Now().Add(s.Cfg.MFA.DeviceTrustDuration).UTC(),
 		CreatedAt:   time.Now().UTC(),
 		UpdatedAt:   time.Now().UTC(),
@@ -73,7 +76,7 @@ func (s DeviceTrustService) CheckDeviceTrust(userID uuid.UUID) bool {
 	// Handle legacy format (single token without user ID)
 	if entries == nil && cookie.Value != "" {
 		// Legacy: look up token in DB to check if it belongs to this user
-		trustedDevice, err := s.Persister.FindByDeviceToken(cookie.Value)
+		trustedDevice, err := s.Persister.FindByDeviceToken(cookie.Value, s.TenantID)
 		if err == nil && trustedDevice != nil &&
 			time.Now().UTC().Before(trustedDevice.ExpiresAt.UTC()) &&
 			trustedDevice.UserID.String() == userID.String() {
@@ -85,7 +88,7 @@ func (s DeviceTrustService) CheckDeviceTrust(userID uuid.UUID) bool {
 	// New format: find entry for this user
 	for _, entry := range entries {
 		if entry.UserID.String() == userID.String() {
-			trustedDevice, err := s.Persister.FindByDeviceToken(entry.DeviceToken)
+			trustedDevice, err := s.Persister.FindByDeviceToken(entry.DeviceToken, s.TenantID)
 			if err == nil && trustedDevice != nil &&
 				time.Now().UTC().Before(trustedDevice.ExpiresAt.UTC()) &&
 				trustedDevice.UserID.String() == userID.String() {

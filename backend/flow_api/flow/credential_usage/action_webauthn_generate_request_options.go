@@ -2,6 +2,7 @@ package credential_usage
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
@@ -37,7 +38,7 @@ func (a WebauthnGenerateRequestOptions) Execute(c flowpilot.ExecutionContext) er
 	userIdStash := c.Stash().Get(shared.StashPathUserID)
 	if userIdStash.Exists() && deps.Cfg.Privacy.OnlyShowActualLoginMethods {
 		userId := uuid.FromStringOrNil(userIdStash.String())
-		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
+		userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
 		if err != nil {
 			return err
 		}

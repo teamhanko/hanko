@@ -18,6 +18,7 @@ type AuditLog struct {
 	ActorUserId       *uuid.UUID   `db:"actor_user_id" json:"actor_user_id,omitempty"`
 	ActorEmail        *string      `db:"actor_email" json:"actor_email,omitempty" mask:"email"`
 	Details           slices.Map   `db:"details" json:"details"`
+	TenantID          *uuid.UUID   `db:"tenant_id"`
 	CreatedAt         time.Time    `db:"created_at" json:"created_at"`
 	UpdatedAt         time.Time    `db:"updated_at" json:"updated_at"`
 }

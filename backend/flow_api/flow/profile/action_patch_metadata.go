@@ -49,7 +49,7 @@ func (a PatchMetadata) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorOperationNotPermitted)
 	}
 
-	userMetadataModel, err := deps.Persister.GetUserMetadataPersisterWithConnection(deps.Tx).Get(userModel.ID)
+	userMetadataModel, err := deps.Persister.GetUserMetadataPersisterWithConnection(deps.Tx).Get(userModel.ID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("could not fetch user metadata: %w", err)
 	}

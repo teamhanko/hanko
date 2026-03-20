@@ -2,10 +2,11 @@ package migrate
 
 import (
 	"fmt"
+	"log"
+
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"log"
 )
 
 func NewMigrateUpCommand() *cobra.Command {
@@ -25,10 +26,11 @@ func NewMigrateUpCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			persister, err := persistence.New(cfg.Database)
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
+			persister := persistence.New(dbConnection)
 			err = persister.MigrateUp()
 			if err != nil {
 				log.Fatal(err)

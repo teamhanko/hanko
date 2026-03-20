@@ -59,7 +59,7 @@ func NewManager(jwtGenerator jwk.Generator, config config.Config) (Manager, erro
 	if config.Session.Audience != nil && len(config.Session.Audience) > 0 {
 		audience = config.Session.Audience
 	} else {
-		audience = []string{config.Webauthn.RelyingParty.Id}
+		audience = []string{config.Webauthn.RelyingParty.Id} // TODO: this could be done in config validation and then we would only need config.Session as a parameter
 	}
 
 	return &manager{

@@ -91,17 +91,24 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	sessionMiddleware := hankoMiddleware.Session(cfg, persister, sessionManager)
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
+	tenantMiddleware := hankoMiddleware.TenantMiddleware(cfg.MultiTenancy, nil, persister)
 
-	e.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
-	e.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
-	e.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
+	var g *echo.Group
+	if cfg.MultiTenancy {
+		g = e.Group("/:tenant_id")
+	} else {
+		g = e.Group("")
+	}
+
+	g.POST("/registration", flowAPIHandler.RegistrationFlowHandler, tenantMiddleware, webhookMiddleware)
+	g.POST("/login", flowAPIHandler.LoginFlowHandler, tenantMiddleware, webhookMiddleware)
+	g.POST("/profile", flowAPIHandler.ProfileFlowHandler, tenantMiddleware, webhookMiddleware)
 
 	if cfg.Saml.Enabled {
 		e.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
 	}
 
 	e.HideBanner = true
-	g := e.Group("")
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
@@ -124,6 +131,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
 
+	// TODO: CORS origins are tenant specific
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
 		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
@@ -223,7 +231,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
-	thirdparty := g.Group("thirdparty")
+	thirdparty := g.Group("thirdparty", tenantMiddleware)
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)

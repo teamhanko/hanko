@@ -9,11 +9,12 @@ import (
 )
 
 type SamlIdentity struct {
-	ID         uuid.UUID `json:"id" db:"id"`
-	IdentityID uuid.UUID `json:"identity_id" db:"identity_id"`
-	Domain     string    `json:"domain" db:"domain"`
-	CreatedAt  time.Time `json:"created_at" db:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
+    ID         uuid.UUID `json:"id" db:"id"`
+    IdentityID uuid.UUID `json:"identity_id" db:"identity_id"`
+    Domain     string    `json:"domain" db:"domain"`
+    CreatedAt  time.Time `json:"created_at" db:"created_at"`
+    UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`
+    TenantID   *uuid.UUID `db:"tenant_id"`
 }
 
 type SamlIdentities []SamlIdentity

@@ -2,12 +2,14 @@ package saml
 
 import (
 	"fmt"
+	"net/url"
+
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
 	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
-	"net/url"
 )
 
 type Service interface {
@@ -16,7 +18,7 @@ type Service interface {
 	Providers() []provider.ServiceProvider
 	GetProviderByDomain(domain string) (provider.ServiceProvider, error)
 	GetProviderByIssuer(issuer string) (provider.ServiceProvider, error)
-	GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool) (string, error)
+	GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool, tenantID *uuid.UUID) (string, error)
 }
 
 type defaultService struct {
@@ -27,24 +29,24 @@ type defaultService struct {
 
 func NewSamlService(cfg *config.Config, persister persistence.Persister) Service {
 	providers := make([]provider.ServiceProvider, 0)
-	for _, idpConfig := range cfg.Saml.IdentityProviders {
-		if idpConfig.Enabled {
-			hostName := ""
-			hostName, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
-			if err != nil {
-				fmt.Printf("failed to parse provider '%s' from metadata url: %v\n", idpConfig.Name, err)
-				continue
-			}
-
-			newProvider, err := provider.GetProvider(hostName, cfg, idpConfig, persister.GetSamlCertificatePersister())
-			if err != nil {
-				fmt.Printf("failed to initialize provider '%s': %v\n", idpConfig.Name, err)
-				continue
-			}
-
-			providers = append(providers, newProvider)
-		}
-	}
+	//for _, idpConfig := range cfg.Saml.IdentityProviders {
+	//	if idpConfig.Enabled {
+	//		hostName := ""
+	//		hostName, err := parseProviderFromMetadataUrl(idpConfig.MetadataUrl)
+	//		if err != nil {
+	//			fmt.Printf("failed to parse provider '%s' from metadata url: %v\n", idpConfig.Name, err)
+	//			continue
+	//		}
+	//
+	//		newProvider, err := provider.GetProvider(hostName, cfg, idpConfig, persister.GetSamlCertificatePersister())
+	//		if err != nil {
+	//			fmt.Printf("failed to initialize provider '%s': %v\n", idpConfig.Name, err)
+	//			continue
+	//		}
+	//
+	//		providers = append(providers, newProvider)
+	//	}
+	//}
 
 	return &defaultService{
 		config:    cfg,
@@ -94,7 +96,7 @@ func (s *defaultService) GetProviderByIssuer(issuer string) (provider.ServicePro
 	return nil, fmt.Errorf("unknown provider for issuer %s", issuer)
 }
 
-func (s *defaultService) GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool) (string, error) {
+func (s *defaultService) GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool, tenantID *uuid.UUID) (string, error) {
 	if ok := samlUtils.IsAllowedRedirect(s.config.Saml, redirectTo); !ok {
 		return "", thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", redirectTo))
 	}
@@ -104,6 +106,7 @@ func (s *defaultService) GetAuthUrl(provider provider.ServiceProvider, redirectT
 		s.persister.GetSamlStatePersister(),
 		provider.GetDomain(),
 		redirectTo,
+		tenantID,
 		GenerateStateForFlowAPI(isFlow))
 
 	if err != nil {

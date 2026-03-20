@@ -3,6 +3,8 @@ package models
 import (
 	"encoding/base64"
 	"fmt"
+	"time"
+
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gobuffalo/nulls"
@@ -10,7 +12,6 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 type Operation string
@@ -31,6 +32,7 @@ type WebauthnSessionData struct {
 	Operation          Operation                              `db:"operation"`
 	AllowedCredentials []WebauthnSessionDataAllowedCredential `has_many:"webauthn_session_data_allowed_credentials"`
 	ExpiresAt          nulls.Time                             `db:"expires_at"`
+	TenantID           *uuid.UUID                             `db:"tenant_id"`
 }
 
 func (sd *WebauthnSessionData) decodeAllowedCredentials() [][]byte {
@@ -48,7 +50,7 @@ func (sd *WebauthnSessionData) decodeAllowedCredentials() [][]byte {
 	return allowedCredentials
 }
 
-func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Operation) (*WebauthnSessionData, error) {
+func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Operation, tenantID *uuid.UUID) (*WebauthnSessionData, error) {
 	now := time.Now().UTC()
 
 	sessionDataID, err := uuid.NewV4()
@@ -70,6 +72,7 @@ func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Ope
 			ID:                    allowedCredentialID,
 			CredentialId:          base64.RawURLEncoding.EncodeToString(credentialID),
 			WebauthnSessionDataID: sessionDataID,
+			TenantID:              tenantID,
 			CreatedAt:             now,
 			UpdatedAt:             now,
 		}

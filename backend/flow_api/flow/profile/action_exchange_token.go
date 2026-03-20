@@ -53,7 +53,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String())
+	tokenModel, err := deps.Persister.GetTokenPersisterWithConnection(deps.Tx).GetByValue(c.Input().Get("token").String(), deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch token from db: %w", err)
 	}
@@ -81,7 +81,7 @@ func (a ExchangeToken) Execute(c flowpilot.ExecutionContext) error {
 		))
 	}
 
-	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID)
+	identity, err := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx).GetByID(*tokenModel.IdentityID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch identity from db: %w", err)
 	}

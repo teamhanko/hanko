@@ -2,11 +2,12 @@ package device_trust
 
 import (
 	"fmt"
+	"net/http"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
-	"net/http"
 )
 
 type IssueTrustDeviceCookie struct {
@@ -34,6 +35,7 @@ func (h IssueTrustDeviceCookie) Execute(c flowpilot.HookExecutionContext) error 
 		Persister:   deps.Persister.GetTrustedDevicePersisterWithConnection(deps.Tx),
 		Cfg:         deps.Cfg,
 		HttpContext: deps.HttpContext,
+		TenantID:    deps.TenantID,
 	}
 
 	// Generate new token for this user

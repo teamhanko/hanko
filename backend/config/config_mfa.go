@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/invopop/jsonschema"
 	"time"
+
+	"github.com/invopop/jsonschema"
 )
 
 type SecurityKeys struct {

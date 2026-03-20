@@ -1,18 +1,20 @@
 package models
 
 import (
+	"slices"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"slices"
-	"time"
 )
 
 // Email is used by pop to map your users database table to your go code.
 type Email struct {
 	ID           uuid.UUID     `db:"id" json:"id"`
 	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"` // TODO: should not be a pointer anymore
+	TenantID     *uuid.UUID    `db:"tenant_id"`
 	Address      string        `db:"address" json:"address"`
 	Verified     bool          `db:"verified" json:"verified"`
 	PrimaryEmail *PrimaryEmail `has_one:"primary_emails" json:"primary_emails,omitempty"`
@@ -24,7 +26,7 @@ type Email struct {
 
 type Emails []Email
 
-func NewEmail(userId *uuid.UUID, address string) *Email {
+func NewEmail(userId *uuid.UUID, address string, tenantID *uuid.UUID) *Email {
 	id, _ := uuid.NewV4()
 	return &Email{
 		ID:           id,
@@ -33,6 +35,7 @@ func NewEmail(userId *uuid.UUID, address string) *Email {
 		Verified:     false,
 		PrimaryEmail: nil,
 		User:         nil,
+		TenantID:     tenantID,
 		CreatedAt:    time.Now(),
 		UpdatedAt:    time.Now(),
 	}

@@ -53,6 +53,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 		c.Stash().Get(shared.StashPathWebauthnCredentials).Array(),
 		c.Stash().Get(shared.StashPathNewPassword).String(),
 		c.Stash().Get(shared.StashPathOTPSecret).String(),
+		deps.TenantID,
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create user: %w", err)
@@ -63,7 +64,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string) error {
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string, tenantID *uuid.UUID) error {
 	deps := h.GetDeps(c)
 
 	now := time.Now().UTC()
@@ -85,14 +86,14 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	}
 
 	if email != "" {
-		emailModel := models.NewEmail(&id, email)
+		emailModel := models.NewEmail(&id, email, tenantID)
 		emailModel.Verified = emailVerified
 		err = deps.Persister.GetEmailPersisterWithConnection(deps.Tx).Create(*emailModel)
 		if err != nil {
 			return err
 		}
 
-		primaryEmail := models.NewPrimaryEmail(emailModel.ID, id)
+		primaryEmail := models.NewPrimaryEmail(emailModel.ID, id, tenantID)
 		err = deps.Persister.GetPrimaryEmailPersisterWithConnection(deps.Tx).Create(*primaryEmail)
 		if err != nil {
 			return err
@@ -134,7 +135,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	}
 
 	if otpSecret != "" {
-		otpSecretModel := models.NewOTPSecret(id, otpSecret)
+		otpSecretModel := models.NewOTPSecret(id, otpSecret, tenantID)
 		err = deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
 		if err != nil {
 			return err
@@ -144,7 +145,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		enrolledTotp = true
 	}
 
-	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(id)
+	user, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(id, tenantID)
 	if err != nil {
 		return err
 	}

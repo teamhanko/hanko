@@ -2,6 +2,7 @@ package shared
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -19,7 +20,7 @@ func (h GetUserData) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to parse stashed user_id into a uuid: %w", err)
 	}
 
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user from db: %w", err)
 	}

@@ -68,7 +68,7 @@ func (a DisconnectThirdpartyOauthProvider) Execute(c flowpilot.ExecutionContext)
 
 	identityPersister := deps.Persister.GetIdentityPersisterWithConnection(deps.Tx)
 
-	identity, err := identityPersister.GetByID(identityID)
+	identity, err := identityPersister.GetByID(identityID, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch identity from db: %w", err)
 	}

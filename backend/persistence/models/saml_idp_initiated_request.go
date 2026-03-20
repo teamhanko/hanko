@@ -9,11 +9,12 @@ import (
 )
 
 type SamlIDPInitiatedRequest struct {
-	ID         uuid.UUID `db:"id"`
-	ResponseID string    `db:"response_id"`
-	Issuer     string    `db:"issuer"`
-	ExpiresAt  time.Time `db:"expires_at"`
-	CreatedAt  time.Time `db:"created_at"`
+    ID         uuid.UUID `db:"id"`
+    ResponseID string    `db:"response_id"`
+    Issuer     string    `db:"issuer"`
+    ExpiresAt  time.Time `db:"expires_at"`
+    CreatedAt  time.Time `db:"created_at"`
+    TenantID   *uuid.UUID `db:"tenant_id"`
 }
 
 func NewSamlIDPInitiatedRequest(responseID, issuer string, expiresAt time.Time) (*SamlIDPInitiatedRequest, error) {

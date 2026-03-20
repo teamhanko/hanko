@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type TrustedDevicePersister interface {
 	Create(models.TrustedDevice) error
-	FindByDeviceToken(string) (*models.TrustedDevice, error)
+	FindByDeviceToken(token string, tenantID *uuid.UUID) (*models.TrustedDevice, error)
 }
 
 type trustedDevicePersister struct {
@@ -33,9 +35,15 @@ func (p *trustedDevicePersister) Create(trustedDevice models.TrustedDevice) erro
 	return nil
 }
 
-func (p *trustedDevicePersister) FindByDeviceToken(token string) (*models.TrustedDevice, error) {
+func (p *trustedDevicePersister) FindByDeviceToken(token string, tenantID *uuid.UUID) (*models.TrustedDevice, error) {
 	trustedDevice := models.TrustedDevice{}
-	err := p.db.Where("device_token = ?", token).First(&trustedDevice)
+	query := p.db.Where("device_token = ?", token)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.First(&trustedDevice)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
