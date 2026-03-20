@@ -2,11 +2,12 @@ package migrate
 
 import (
 	"fmt"
+	"log"
+	"strconv"
+
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"log"
-	"strconv"
 )
 
 var steps int
@@ -35,10 +36,12 @@ func NewMigrateDownCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			persister, err := persistence.New(cfg.Database)
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			persister := persistence.New(dbConnection)
 			err = persister.MigrateDown(steps)
 			if err != nil {
 				log.Fatal(err)

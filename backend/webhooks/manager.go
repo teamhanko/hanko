@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -14,7 +15,7 @@ import (
 )
 
 type Manager interface {
-	Trigger(tx *pop.Connection, evt events.Event, data interface{})
+	Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID *uuid.UUID)
 	GenerateJWT(data interface{}, event events.Event) (string, error)
 }
 
@@ -53,9 +54,9 @@ func NewManager(cfg *config.Config, persister persistence.Persister, jwtGenerato
 	}, nil
 }
 
-func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}) {
+func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID *uuid.UUID) {
 	// add db hooks - Done here to prevent a restart in case a hook is added or removed from the database
-	dbHooks, err := m.persister.GetWebhookPersister(tx).List(false)
+	dbHooks, err := m.persister.GetWebhookPersister(tx).List(false, tenantID)
 	if err != nil {
 		m.logger.Error(fmt.Errorf("unable to get database webhooks: %w", err))
 		return

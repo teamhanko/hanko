@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
@@ -16,15 +17,17 @@ func TriggerWebhooks(ctx echo.Context, tx *pop.Connection, evt events.Event, dat
 	if webhookCtx == nil {
 		return fmt.Errorf("unable to load webhooks manager from webhook middleware")
 	}
+	tenantId := ctx.Get("tenant_id").(*uuid.UUID)
 
 	webhookManager := webhookCtx.(webhooks.Manager)
-	webhookManager.Trigger(tx, evt, data)
+	webhookManager.Trigger(tx, evt, data, tenantId)
 
 	return nil
 }
 
 func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistence.Persister, event events.Event, userId uuid.UUID) {
-	updatedUser, err := persister.GetUserPersisterWithConnection(tx).Get(userId)
+	tenantId := ctx.Get("tenant_id").(*uuid.UUID)
+	updatedUser, err := persister.GetUserPersisterWithConnection(tx).Get(userId, tenantId)
 	if err != nil {
 		ctx.Logger().Warn(fmt.Errorf("failed to fetch updated user: %w", err))
 		return

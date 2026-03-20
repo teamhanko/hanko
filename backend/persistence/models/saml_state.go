@@ -3,21 +3,23 @@ package models
 import (
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"strings"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 type SamlState struct {
-	ID        uuid.UUID `db:"id"`
-	Nonce     string    `db:"nonce"`
-	State     string    `db:"state"`
-	ExpiresAt time.Time `db:"expires_at"`
-	CreatedAt time.Time `db:"created_at"`
-	UpdatedAt time.Time `db:"updated_at"`
+	ID        uuid.UUID  `db:"id"`
+	Nonce     string     `db:"nonce"`
+	State     string     `db:"state"`
+	ExpiresAt time.Time  `db:"expires_at"`
+	CreatedAt time.Time  `db:"created_at"`
+	UpdatedAt time.Time  `db:"updated_at"`
+	TenantID  *uuid.UUID `db:"tenant_id"`
 }
 
-func NewSamlState(nonce string, state string) (*SamlState, error) {
+func NewSamlState(nonce string, state string, tenantID *uuid.UUID) (*SamlState, error) {
 	if strings.TrimSpace(nonce) == "" {
 		return nil, errors.New("nonce is required")
 	}
@@ -38,6 +40,7 @@ func NewSamlState(nonce string, state string) (*SamlState, error) {
 		Nonce:     nonce,
 		State:     state,
 		ExpiresAt: now.Add(time.Minute),
+		TenantID:  tenantID,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}, nil

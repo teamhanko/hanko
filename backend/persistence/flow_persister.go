@@ -2,11 +2,12 @@ package persistence
 
 import (
 	"errors"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"time"
 )
 
 type FlowPersister interface {
@@ -19,13 +20,19 @@ type flowPersister struct {
 }
 
 func NewFlowPersister(tx *pop.Connection) FlowPersister {
-	return flowPersister{tx}
+	return flowPersister{tx: tx}
 }
 
-func (p flowPersister) GetFlow(flowID uuid.UUID) (*flowpilot.FlowModel, error) {
+func (p flowPersister) GetFlow(flowID uuid.UUID, tenantID *uuid.UUID) (*flowpilot.FlowModel, error) {
 	flowModel := models.Flow{}
 
-	err := p.tx.Find(&flowModel, flowID)
+	query := p.tx.Q()
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.Find(&flowModel, flowID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,14 +68,13 @@ func (p flowPersister) UpdateFlow(flowModel flowpilot.FlowModel) error {
 		ExpiresAt: flowModel.ExpiresAt,
 		CreatedAt: flowModel.CreatedAt,
 		UpdatedAt: flowModel.UpdatedAt,
+		TenantID:  flowModel.TenantID,
 	}
 
 	previousVersion := flowModel.Version - 1
 
-	count, err := p.tx.
-		Where("id = ?", f.ID).
-		Where("version = ?", previousVersion).
-		UpdateQuery(f, "version", "csrf_token", "data")
+	query := p.tx.Where("id = ?", f.ID).Where("version = ?", previousVersion)
+	count, err := query.UpdateQuery(f, "version", "csrf_token", "data")
 	if err != nil {
 		return err
 	}
@@ -80,13 +86,16 @@ func (p flowPersister) UpdateFlow(flowModel flowpilot.FlowModel) error {
 	return nil
 }
 
-func (p flowPersister) FindExpired(cutoffTime time.Time, page, perPage int) ([]models.Flow, error) {
+func (p flowPersister) FindExpired(cutoffTime time.Time, page, perPage int, tenantID *uuid.UUID) ([]models.Flow, error) {
 	var items []models.Flow
 
-	query := p.tx.
-		Where("expires_at < ?", cutoffTime).
-		Select("id").
-		Paginate(page, perPage)
+	query := p.tx.Where("expires_at < ?", cutoffTime)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	query = query.Select("id").Paginate(page, perPage)
 	err := query.All(&items)
 
 	return items, err

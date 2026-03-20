@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -35,7 +36,7 @@ func (a SessionDelete) Initialize(c flowpilot.InitializationContext) {
 	input := flowpilot.StringInput("session_id").Required(true).Hidden(true)
 
 	currentSessionID := uuid.FromStringOrNil(c.Get("session_id").(string))
-	sessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userModel.ID)
+	sessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userModel.ID, deps.TenantID)
 	if err != nil {
 		c.SuspendAction()
 		return
@@ -69,7 +70,7 @@ func (a SessionDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	sessionToBeDeleted := uuid.FromStringOrNil(c.Input().Get("session_id").String())
 
-	session, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Get(sessionToBeDeleted)
+	session, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).Get(sessionToBeDeleted, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get session from db: %w", err)
 	}

@@ -88,7 +88,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		if deps.Cfg.Saml.Enabled {
 			domain := strings.Split(identifierInputValue, "@")[1]
 			if provider, err := deps.SamlService.GetProviderByDomain(domain); err == nil && provider != nil {
-				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true)
+				authUrl, err := deps.SamlService.GetAuthUrl(provider, deps.Cfg.Saml.DefaultRedirectUrl, true, deps.TenantID)
 
 				if err != nil {
 					return fmt.Errorf("failed to get auth url: %w", err)
@@ -102,7 +102,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue)
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByEmailAddress(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return err
 		}
@@ -144,7 +144,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		// User has submitted a username.
 		var err error
 
-		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue)
+		userModel, err = deps.Persister.GetUserPersisterWithConnection(deps.Tx).GetByUsername(identifierInputValue, deps.TenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get user by username from db: %w", err)
 		}

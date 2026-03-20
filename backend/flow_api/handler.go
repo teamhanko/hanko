@@ -17,6 +17,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
@@ -75,7 +76,33 @@ func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
 }
 
 func (h *FlowPilotHandler) validateSession(c echo.Context) error {
-	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.Cfg.Session.Cookie.GetName())
+	persister := h.Persister
+	sessionManager := h.SessionManager
+	cfg := h.Cfg
+	tenantId := c.Get("tenant_id").(*uuid.UUID)
+	if h.Cfg.MultiTenancy {
+		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
+		if tenantConfig == nil {
+			return flowpilot.ErrorTechnical.Wrap(fmt.Errorf("tenant_config not found in context"))
+		}
+
+		persister = persistence.New(h.Persister.GetConnection())
+
+		jwkManager, err := jwk.NewManager(tenantConfig.Secrets, h.Persister) // TODO: JwkManager must be tenant specific
+		if err != nil {
+			return flowpilot.ErrorTechnical.Wrap(err)
+		}
+		cfg = config.Config{
+			ApplicationConfig: config.ApplicationConfig{},
+			TenantConfig:      *tenantConfig,
+		}
+		sessionManager, err = session.NewManager(jwkManager, cfg)
+		if err != nil {
+			return flowpilot.ErrorTechnical.Wrap(err)
+		}
+	}
+
+	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", cfg.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
 
 	if err != nil {
@@ -90,7 +117,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 			continue
 		}
 		for _, auth := range auths {
-			token, tokenErr := h.SessionManager.Verify(auth)
+			token, tokenErr := sessionManager.Verify(auth)
 			if tokenErr != nil {
 				lastTokenErr = tokenErr
 				continue
@@ -108,7 +135,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				continue
 			}
 
-			sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID)
+			sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantId)
 			if err != nil {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
@@ -137,7 +164,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 
 			// Update lastUsed field
 			sessionModel.LastUsed = time.Now().UTC()
-			err = h.Persister.GetSessionPersister().Update(*sessionModel)
+			err = persister.GetSessionPersister().Update(*sessionModel)
 			if err != nil {
 				return dto.ToHttpError(err)
 			}
@@ -166,6 +193,19 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	var unlock func(context.Context) error
 	var flowID uuid.UUID
 
+	var cfg = h.Cfg
+	var tenantID = c.Get("tenant_id").(*uuid.UUID)
+	if h.Cfg.MultiTenancy {
+		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
+		if tenantConfig == nil {
+			return flowpilot.ErrorTechnical.Wrap(fmt.Errorf("tenant_config not found in context"))
+		}
+		cfg = config.Config{
+			ApplicationConfig: h.Cfg.ApplicationConfig,
+			TenantConfig:      *tenantConfig,
+		}
+	}
+
 	if c.QueryParam(queryParamKey) != "" {
 		err = c.Bind(&inputData)
 		if err != nil {
@@ -189,24 +229,47 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		}
 	}
 
+	h.Persister.GetConnection()
+	/******** Start MultiTenantSpecific Services ********/
+	persister := persistence.New(h.Persister.GetConnection())
+
+	jwkManager, err := jwk.NewManager(h.Cfg.Secrets, h.Persister) // TODO: JwkManager must be tenant specific
+	sessionManager, err := session.NewManager(jwkManager, cfg)
+
+	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog) // TODO: AuditLogger needs to be changed, it should accept a tenantID in each function
+	passwordService := services.NewPasswordService(persister)
+	webauthnService := services.NewWebauthnService(cfg, persister)
+	samlService := saml.NewSamlService(&cfg, persister) // TODO: SamlService must be changed, because it gets the Saml Meadata when the service is created
+
+	emailService, err := services.NewEmailService()
+	if err != nil {
+		flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(fmt.Errorf("failed to create email service: %w", err)))
+		h.logFlowResult(c, flowResult)
+		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+	}
+
+	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
+	/******** End MultiTenantSpecific Services ********/
+
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
-			Cfg:                         h.Cfg,
-			OTPRateLimiter:              h.OTPRateLimiter,
-			PasscodeRateLimiter:         h.PasscodeRateLimiter,
-			PasswordRateLimiter:         h.PasswordRateLimiter,
-			TokenExchangeRateLimiter:    h.TokenExchangeRateLimiter,
-			Tx:                          tx,
-			Persister:                   h.Persister,
-			HttpContext:                 c,
-			SessionManager:              h.SessionManager,
-			SecurityNotificationService: h.SecurityNotificationService,
+			Cfg:                         cfg,
+			OTPRateLimiter:              h.OTPRateLimiter,           // already tenant specific
+			PasscodeRateLimiter:         h.PasscodeRateLimiter,      // already tenant specific
+			PasswordRateLimiter:         h.PasswordRateLimiter,      // already tenant specific
+			TokenExchangeRateLimiter:    h.TokenExchangeRateLimiter, // already tenant specific
+			Tx:                          tx,                         // does not need to be tenant-specific
+			Persister:                   persister,
+			HttpContext:                 c, // does not need to be tenant-specific, because it is request specific
+			SessionManager:              sessionManager,
+			SecurityNotificationService: securityNotificationService,
 			PasscodeService:             h.PasscodeService,
-			PasswordService:             h.PasswordService,
-			WebauthnService:             h.WebauthnService,
-			SamlService:                 h.SamlService,
-			AuthenticatorMetadata:       h.AuthenticatorMetadata,
-			AuditLogger:                 h.AuditLogger,
+			PasswordService:             passwordService,
+			WebauthnService:             webauthnService,
+			SamlService:                 samlService,
+			AuthenticatorMetadata:       h.AuthenticatorMetadata, // does not need to be tenant-specific
+			AuditLogger:                 auditLogger,
+			TenantID:                    tenantID,
 		}
 
 		flow.Set("deps", deps)
@@ -215,6 +278,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			flowpilot.WithQueryParamKey(queryParamKey),
 			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
 			flowpilot.WithInputData(inputData),
+			flowpilot.WithTenantID(tenantID),
 			flowpilot.UseCompression(!h.Cfg.Debug))
 
 		return err

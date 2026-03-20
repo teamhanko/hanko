@@ -27,11 +27,14 @@ type SendPasscodeParams struct {
 	Template     string
 	EmailAddress string
 	Language     string
+	Cfg          config.TenantConfig
+	TenantID     *uuid.UUID
 }
 
 type ValidatePasscodeParams struct {
 	Tx         *pop.Connection
 	PasscodeID uuid.UUID
+	TenantID   *uuid.UUID
 }
 
 type SendPasscodeResult struct {
@@ -45,33 +48,24 @@ type SendPasscodeResult struct {
 type Passcode interface {
 	ValidatePasscode(ValidatePasscodeParams) (bool, error)
 	SendPasscode(*pop.Connection, SendPasscodeParams) (*SendPasscodeResult, error)
-	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string) error
+	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string, tenantID *uuid.UUID) error
 }
 
 type passcode struct {
-	emailService      Email
-	passcodeGenerator crypto.PasscodeGenerator
-	persister         persistence.Persister
-	cfg               config.Config
+	emailService Email
+	persister    persistence.Persister
 }
 
-func NewPasscodeService(cfg config.Config, emailService Email, persister persistence.Persister) Passcode {
-	passcodeGenerator := crypto.NewNumericPasscodeGenerator()
-	switch cfg.Email.PasscodeCharset {
-	case config.PasscodeCharsetAlphanumeric:
-		passcodeGenerator = crypto.NewAlphanumericPasscodeGenerator()
-	}
+func NewPasscodeService(emailService Email, persister persistence.Persister) Passcode {
 	return &passcode{
 		emailService,
-		passcodeGenerator,
 		persister,
-		cfg,
 	}
 }
 
 func (s *passcode) ValidatePasscode(p ValidatePasscodeParams) (bool, error) {
 	if !p.PasscodeID.IsNil() {
-		_, err := s.getPasscode(p.Tx, p.PasscodeID)
+		_, err := s.getPasscode(p.Tx, p.PasscodeID, p.TenantID)
 		if err != nil {
 			if errors.Is(err, ErrorPasscodeNotFound) || errors.Is(err, ErrorPasscodeExpired) || errors.Is(err, ErrorPasscodeMaxAttemptsReached) {
 				return false, nil
@@ -86,9 +80,9 @@ func (s *passcode) ValidatePasscode(p ValidatePasscodeParams) (bool, error) {
 	return false, nil
 }
 
-func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, value string) error {
+func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, value string, tenantID *uuid.UUID) error {
 	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
-	passcodeModel, err := s.getPasscode(tx, passcodeID)
+	passcodeModel, err := s.getPasscode(tx, passcodeID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -118,7 +112,12 @@ func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, 
 }
 
 func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*SendPasscodeResult, error) {
-	code, err := s.passcodeGenerator.Generate()
+	passcodeGenerator := crypto.NewNumericPasscodeGenerator()
+	switch p.Cfg.Email.PasscodeCharset {
+	case config.PasscodeCharsetAlphanumeric:
+		passcodeGenerator = crypto.NewAlphanumericPasscodeGenerator()
+	}
+	code, err := passcodeGenerator.Generate()
 	if err != nil {
 		return nil, err
 	}
@@ -135,8 +134,9 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	now := time.Now().UTC()
 	passcodeModel := models.Passcode{
 		ID:        passcodeId,
-		Ttl:       s.cfg.Email.PasscodeTtl,
+		Ttl:       p.Cfg.Email.PasscodeTtl,
 		Code:      string(hashedPasscode),
+		TenantID:  p.TenantID,
 		TryCount:  0,
 		CreatedAt: now,
 		UpdatedAt: now,
@@ -159,7 +159,7 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	bodyData := map[string]interface{}{
 		"Code":        code,
 		"TTL":         fmt.Sprintf("%.0f", durationTTL.Minutes()),
-		"ServiceName": s.cfg.Service.Name,
+		"ServiceName": p.Cfg.Service.Name,
 		"Subject":     subject,
 	}
 
@@ -173,8 +173,8 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 		return nil, err
 	}
 
-	if s.cfg.EmailDelivery.Enabled {
-		err = s.emailService.SendEmail(p.EmailAddress, subject, bodyPlain, bodyHTML)
+	if p.Cfg.EmailDelivery.Enabled {
+		err = s.emailService.SendEmail(p.Cfg.EmailDelivery, p.EmailAddress, subject, bodyPlain, bodyHTML)
 		if err != nil {
 			return nil, err
 		}
@@ -189,10 +189,10 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	}, nil
 }
 
-func (s *passcode) getPasscode(tx *pop.Connection, passcodeID uuid.UUID) (*models.Passcode, error) {
+func (s *passcode) getPasscode(tx *pop.Connection, passcodeID uuid.UUID, tenantID *uuid.UUID) (*models.Passcode, error) {
 	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
 
-	passcodeModel, err := passcodePersister.Get(passcodeID)
+	passcodeModel, err := passcodePersister.Get(passcodeID, tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get passcode from db: %w", err)
 	}

@@ -44,7 +44,7 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 	s.T().Helper()
 	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
 
-	jwkMngr, err := local_db.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
+	jwkMngr, err := local_db.NewDefaultManager(cfg.Secrets.Keys, "v1", s.Storage.GetJwkPersister(), false)
 	s.Require().NoError(err)
 
 	sessionMngr, err := session.NewManager(jwkMngr, *cfg)

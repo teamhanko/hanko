@@ -15,8 +15,9 @@ import (
 )
 
 type DefaultManager struct {
-	encrypter *aes_gcm.AESGCM
-	persister persistence.JwkPersister
+	encrypter            *aes_gcm.AESGCM
+	persister            persistence.JwkPersister
+	encryptionKeyVersion string
 }
 
 // NewDefaultManager creates a DefaultManager that reads and persists private keys to the database and generates new private keys when a new secret is added to the config.
@@ -32,7 +33,7 @@ func NewDefaultManager(keys []string, persister persistence.JwkPersister) (*Defa
 	}
 	// for every key we should check if a jwk with index exists and create one if not.
 	for i := range keys {
-		j, err := persister.Get(i + 1)
+		j, err := persister.Get(i+1, nil)
 		if j == nil && err == nil {
 			_, err := manager.GenerateKey()
 			if err != nil {
@@ -73,11 +74,14 @@ func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 	return key, nil
 }
 
-// GetSigningKey returns the private key used for signing
+// GetSigningKey returns the active private key used for signing
 func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
-	sigModel, err := m.persister.GetLast()
+	sigModel, err := m.persister.GetLast(nil)
 	if err != nil {
 		return nil, err
+	}
+	if sigModel == nil {
+		return nil, fmt.Errorf("no active signing key found")
 	}
 	k, err := m.encrypter.Decrypt(sigModel.KeyData)
 	if err != nil {
@@ -91,9 +95,9 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 	return key, nil
 }
 
-// GetPublicKeys returns all public keys
+// GetPublicKeys returns all public keys that should be used for verification (active + rotating)
 func (m *DefaultManager) GetPublicKeys() (jwk.Set, error) {
-	modelList, err := m.persister.GetAll()
+	modelList, err := m.persister.GetAll(nil)
 	if err != nil {
 		return nil, err
 	}

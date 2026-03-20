@@ -61,7 +61,7 @@ func (a OTPCodeVerify) Execute(c flowpilot.ExecutionContext) error {
 			userID = userModel.ID
 		}
 
-		otpSecretModel := models.NewOTPSecret(userID, secret)
+		otpSecretModel := models.NewOTPSecret(userID, secret, deps.TenantID)
 
 		err := deps.Persister.GetOTPSecretPersisterWithConnection(deps.Tx).Create(*otpSecretModel)
 		if err != nil {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
@@ -36,6 +37,8 @@ func NewSamlHandler(sessionManager session.Manager, auditLogger auditlog.Logger,
 }
 
 func (handler *Handler) Metadata(c echo.Context) error {
+	tenantId := c.Get("tenant_id").(*uuid.UUID)
+
 	var request dto.SamlMetadataRequest
 	err := c.Bind(&request)
 	if err != nil {
@@ -48,7 +51,7 @@ func (handler *Handler) Metadata(c echo.Context) error {
 	}
 
 	if request.CertOnly {
-		cert, err := handler.samlService.Persister().GetSamlCertificatePersister().GetFirst()
+		cert, err := handler.samlService.Persister().GetSamlCertificatePersister().GetFirst(tenantId)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
 		}
@@ -92,7 +95,7 @@ func (handler *Handler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false)
+	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false, nil)
 	if err != nil {
 		return handler.redirectError(c, thirdparty.ErrorServer("could not generate auth url").WithCause(err), errorRedirectTo)
 	}
@@ -101,6 +104,7 @@ func (handler *Handler) Auth(c echo.Context) error {
 }
 
 func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse string) error {
+	tenantID := c.Get("tenant_id").(*uuid.UUID)
 	// ignore URL parse error because config validation already ensures it is a parseable URL
 	redirectTo, _ := url.Parse(handler.samlService.Config().Saml.DefaultRedirectUrl)
 
@@ -183,7 +187,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 
 	// We use the SAML response's ID to prevent replay attacks by persisting every IDP initiated request and
 	// checking whether an IDP initiated request already exists for this request.
-	existingSamlIDPInitiatedRequest, err := samlIDPInitiatedRequestPersister.GetByResponseIDAndIssuer(samlResponseID, issuer)
+	existingSamlIDPInitiatedRequest, err := samlIDPInitiatedRequestPersister.GetByResponseIDAndIssuer(samlResponseID, issuer, tenantID)
 	if existingSamlIDPInitiatedRequest != nil {
 		return handler.redirectError(
 			c,
@@ -247,6 +251,8 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	relayState := c.FormValue("RelayState")
 	samlResponse := c.FormValue("SAMLResponse")
 
+	tenantId := c.Get("tenant_id").(*uuid.UUID)
+
 	if handler.isIDPInitiated(relayState) {
 		return handler.callbackPostIdPInitiated(c, samlResponse)
 	} else {
@@ -254,6 +260,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 			handler.samlService.Config(),
 			handler.samlService.Persister().GetSamlStatePersister(),
 			strings.TrimPrefix(relayState, statePrefixServiceProviderInitiated),
+			tenantId,
 		)
 
 		if err != nil {
@@ -313,13 +320,14 @@ func (handler *Handler) isIDPInitiated(relayState string) bool {
 }
 
 func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow bool, provider provider.ServiceProvider, assertionInfo *saml2.AssertionInfo) (*url.URL, error) {
+	tenantID := c.Get("tenant_id").(*uuid.UUID)
 	var accountLinkingResult *thirdparty.AccountLinkingResult
 	var err error
 	err = handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
 		userdata := provider.GetUserData(assertionInfo)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
 		samlDomain := provider.GetDomain()
-		linkResult, errTx := thirdparty.LinkAccount(tx, handler.samlService.Config(), handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil)
+		linkResult, errTx := thirdparty.LinkAccount(tx, &handler.samlService.Config().TenantConfig, handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil, tenantID)
 		if errTx != nil {
 			return errTx
 		}

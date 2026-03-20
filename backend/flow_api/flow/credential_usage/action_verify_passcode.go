@@ -40,7 +40,7 @@ func (a VerifyPasscode) Execute(c flowpilot.ExecutionContext) error {
 	}
 
 	passcodeID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathPasscodeID).String())
-	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String())
+	err := deps.PasscodeService.VerifyPasscodeCode(deps.Tx, passcodeID, c.Input().Get("code").String(), deps.TenantID)
 	if err != nil {
 		if errors.Is(err, services.ErrorPasscodeInvalid) ||
 			errors.Is(err, services.ErrorPasscodeNotFound) ||

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/config"
 )
 
@@ -42,6 +43,8 @@ type Persister interface {
 	GetSamlIdentityPersisterWithConnection(tx *pop.Connection) SamlIdentityPersister
 	GetSamlIDPInitiatedRequestPersister() SamlIDPInitiatedRequestPersister
 	GetSamlIDPInitiatedRequestPersisterWithConnection(tx *pop.Connection) SamlIDPInitiatedRequestPersister
+	GetTenantPersister() TenantPersister
+	GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister
 	GetTokenPersister() TokenPersister
 	GetTokenPersisterWithConnection(tx *pop.Connection) TokenPersister
 	GetUserPersister() UserPersister
@@ -67,7 +70,7 @@ type Persister interface {
 }
 
 type Cleanup[T any] interface {
-	FindExpired(cutoffTime time.Time, page, perPage int) ([]T, error)
+	FindExpired(cutoffTime time.Time, page, perPage int, tenantID *uuid.UUID) ([]T, error)
 	Delete(item T) error
 }
 
@@ -82,7 +85,13 @@ type Storage interface {
 }
 
 // New return a new Persister Object with given configuration
-func New(config config.Database) (Storage, error) {
+func New(connection *pop.Connection) Storage {
+	return &persister{
+		DB: connection,
+	}
+}
+
+func NewConnection(config config.Database) (*pop.Connection, error) {
 	connectionDetails := &pop.ConnectionDetails{
 		Pool:            5,
 		IdlePool:        0,
@@ -110,9 +119,7 @@ func New(config config.Database) (Storage, error) {
 		return nil, err
 	}
 
-	return &persister{
-		DB: DB,
-	}, nil
+	return DB, nil
 }
 
 // MigrateUp applies all pending up migrations to the Database
@@ -331,4 +338,12 @@ func (p *persister) GetUserMetadataPersister() UserMetadataPersister {
 
 func (p *persister) GetUserMetadataPersisterWithConnection(tx *pop.Connection) UserMetadataPersister {
 	return NewUserMetadataPersister(tx)
+}
+
+func (p *persister) GetTenantPersister() TenantPersister {
+	return NewTenantPersister(p.DB)
+}
+
+func (p *persister) GetTenantPersisterWithConnection(tx *pop.Connection) TenantPersister {
+	return NewTenantPersister(tx)
 }

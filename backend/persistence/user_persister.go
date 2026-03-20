@@ -11,15 +11,15 @@ import (
 )
 
 type UserPersister interface {
-	Get(uuid.UUID) (*models.User, error)
-	GetByEmailAddress(string) (*models.User, error)
+	Get(id uuid.UUID, tenantID *uuid.UUID) (*models.User, error)
+	GetByEmailAddress(emailAddress string, tenantID *uuid.UUID) (*models.User, error)
 	Create(models.User) error
 	Update(models.User) error
 	Delete(models.User) error
-	List(page int, perPage int, userIDs []uuid.UUID, email string, username string, sortDirection string) ([]models.User, error)
-	All() ([]models.User, error)
-	Count(userIDs []uuid.UUID, email string, username string) (int, error)
-	GetByUsername(username string) (*models.User, error)
+	List(page int, perPage int, userIDs []uuid.UUID, email string, username string, sortDirection string, tenantID *uuid.UUID) ([]models.User, error)
+	All(tenantID *uuid.UUID) ([]models.User, error)
+	Count(userIDs []uuid.UUID, email string, username string, tenantID *uuid.UUID) (int, error)
+	GetByUsername(username string, tenantID *uuid.UUID) (*models.User, error)
 }
 
 type userPersister struct {
@@ -30,7 +30,7 @@ func NewUserPersister(db *pop.Connection) UserPersister {
 	return &userPersister{db: db}
 }
 
-func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
+func (p *userPersister) Get(id uuid.UUID, tenantID *uuid.UUID) (*models.User, error) {
 	user := models.User{}
 
 	eagerPreloadFields := []string{
@@ -47,7 +47,13 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 		"Identities.SamlIdentity",
 	}
 
-	err := p.db.EagerPreload(eagerPreloadFields...).Find(&user, id)
+	query := p.db.EagerPreload(eagerPreloadFields...)
+	if tenantID != nil {
+		query = query.Where("users.tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("users.tenant_id IS NULL")
+	}
+	err := query.Find(&user, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -58,9 +64,15 @@ func (p *userPersister) Get(id uuid.UUID) (*models.User, error) {
 	return &user, nil
 }
 
-func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, error) {
+func (p *userPersister) GetByEmailAddress(emailAddress string, tenantID *uuid.UUID) (*models.User, error) {
 	email := models.Email{}
-	err := p.db.Eager().Where("address = (?)", emailAddress).First(&email)
+	query := p.db.Eager().Where("address = (?)", emailAddress)
+	if tenantID != nil {
+		query = query.Where("emails.tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("emails.tenant_id IS NULL")
+	}
+	err := query.First(&email)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -74,12 +86,12 @@ func (p *userPersister) GetByEmailAddress(emailAddress string) (*models.User, er
 		return nil, nil
 	}
 
-	return p.Get(*email.UserID)
+	return p.Get(*email.UserID, tenantID)
 }
 
-func (p *userPersister) GetByUsername(username string) (*models.User, error) {
+func (p *userPersister) GetByUsername(username string, tenantID *uuid.UUID) (*models.User, error) {
 	user := models.User{}
-	err := p.db.EagerPreload(
+	query := p.db.EagerPreload(
 		"Emails",
 		"Emails.PrimaryEmail",
 		"Emails.Identities",
@@ -89,8 +101,13 @@ func (p *userPersister) GetByUsername(username string) (*models.User, error) {
 		"OTPSecret",
 		"Metadata").
 		LeftJoin("usernames", "usernames.user_id = users.id").
-		Where("usernames.username = (?)", username).
-		First(&user)
+		Where("usernames.username = (?)", username)
+	if tenantID != nil {
+		query = query.Where("users.tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("users.tenant_id IS NULL")
+	}
+	err := query.First(&user)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -147,7 +164,7 @@ func (p *userPersister) Delete(user models.User) error {
 	return nil
 }
 
-func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email string, username string, sortDirection string) ([]models.User, error) {
+func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email string, username string, sortDirection string, tenantID *uuid.UUID) ([]models.User, error) {
 	users := []models.User{}
 
 	query := p.db.
@@ -160,7 +177,7 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 			"Username").
 		LeftJoin("emails", "emails.user_id = users.id").
 		LeftJoin("usernames", "usernames.user_id = users.id")
-	query = p.addQueryParamsToSqlQuery(query, userIDs, email, username)
+	query = p.addQueryParamsToSqlQuery(query, userIDs, email, username, tenantID)
 	err := query.GroupBy("users.id").
 		Having("count(emails.id) > 0 OR count(usernames.id) > 0").
 		Order(fmt.Sprintf("users.created_at %s", sortDirection)).
@@ -177,17 +194,23 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 	return users, nil
 }
 
-func (p *userPersister) All() ([]models.User, error) {
+func (p *userPersister) All(tenantID *uuid.UUID) ([]models.User, error) {
 	users := []models.User{}
 
-	err := p.db.EagerPreload(
+	query := p.db.EagerPreload(
 		"Emails",
 		"Emails.PrimaryEmail",
 		"Emails.Identities",
 		"WebauthnCredentials",
 		"WebauthnCredentials.Transports",
 		"Username",
-	).All(&users)
+	)
+	if tenantID != nil {
+		query = query.Where("users.tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("users.tenant_id IS NULL")
+	}
+	err := query.All(&users)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return users, nil
@@ -200,12 +223,12 @@ func (p *userPersister) All() ([]models.User, error) {
 	return users, nil
 }
 
-func (p *userPersister) Count(userIDs []uuid.UUID, email string, username string) (int, error) {
+func (p *userPersister) Count(userIDs []uuid.UUID, email string, username string, tenantID *uuid.UUID) (int, error) {
 	query := p.db.
 		Q().
 		LeftJoin("emails", "emails.user_id = users.id").
 		LeftJoin("usernames", "usernames.user_id = users.id")
-	query = p.addQueryParamsToSqlQuery(query, userIDs, email, username)
+	query = p.addQueryParamsToSqlQuery(query, userIDs, email, username, tenantID)
 	count, err := query.GroupBy("users.id").
 		Having("count(emails.id) > 0 OR count(usernames.id) > 0").
 		Count(&models.User{})
@@ -216,7 +239,13 @@ func (p *userPersister) Count(userIDs []uuid.UUID, email string, username string
 	return count, nil
 }
 
-func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userIDs []uuid.UUID, email string, username string) *pop.Query {
+func (p *userPersister) addQueryParamsToSqlQuery(query *pop.Query, userIDs []uuid.UUID, email string, username string, tenantID *uuid.UUID) *pop.Query {
+	if tenantID != nil {
+		query = query.Where("users.tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("users.tenant_id IS NULL")
+	}
+
 	if email != "" && username != "" {
 		query = query.Where("emails.address LIKE ? OR usernames.username LIKE ?", "%"+email+"%", "%"+username+"%")
 	} else if email != "" {

@@ -1,12 +1,13 @@
 package user
 
 import (
+	"strings"
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"strings"
-	"time"
 )
 
 type Importer struct {
@@ -15,7 +16,7 @@ type Importer struct {
 	importTimestamp time.Time
 }
 
-func (i *Importer) createUser(newUser ImportOrExportEntry) (*models.User, error) {
+func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID *uuid.UUID) (*models.User, error) {
 	userID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
@@ -24,6 +25,7 @@ func (i *Importer) createUser(newUser ImportOrExportEntry) (*models.User, error)
 		ID:        userID,
 		CreatedAt: i.importTimestamp,
 		UpdatedAt: i.importTimestamp,
+		TenantID:  tenantID,
 	}
 
 	if newUser.UserID != "" {
@@ -46,7 +48,7 @@ func (i *Importer) createUser(newUser ImportOrExportEntry) (*models.User, error)
 	return &userModel, nil
 }
 
-func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportEmail) (*models.Email, error) {
+func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportEmail, tenantID *uuid.UUID) (*models.Email, error) {
 	emailID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
@@ -57,6 +59,7 @@ func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportE
 		UserID:    &userID,
 		Address:   strings.ToLower(newEmail.Address),
 		Verified:  newEmail.IsVerified,
+		TenantID:  tenantID,
 		CreatedAt: i.importTimestamp,
 		UpdatedAt: i.importTimestamp,
 	}
@@ -69,7 +72,7 @@ func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportE
 	return &emailModel, nil
 }
 
-func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID) error {
+func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID, tenantID *uuid.UUID) error {
 	entryID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -79,6 +82,7 @@ func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID
 		ID:        entryID,
 		EmailID:   emailID,
 		UserID:    userID,
+		TenantID:  tenantID,
 		CreatedAt: i.importTimestamp,
 		UpdatedAt: i.importTimestamp,
 	}
@@ -87,7 +91,7 @@ func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID
 	return err
 }
 
-func (i *Importer) createUsername(userID uuid.UUID, username string) error {
+func (i *Importer) createUsername(userID uuid.UUID, username string, tenantID *uuid.UUID) error {
 	entryID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -97,6 +101,7 @@ func (i *Importer) createUsername(userID uuid.UUID, username string) error {
 		ID:        entryID,
 		UserId:    userID,
 		Username:  username,
+		TenantID:  tenantID,
 		CreatedAt: i.importTimestamp,
 		UpdatedAt: i.importTimestamp,
 	}
@@ -105,7 +110,7 @@ func (i *Importer) createUsername(userID uuid.UUID, username string) error {
 	return err
 }
 
-func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential ImportWebauthnCredential) error {
+func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential ImportWebauthnCredential, tenantID *uuid.UUID) error {
 	createdAt := i.importTimestamp
 	updatedAt := i.importTimestamp
 	if webauthnCredential.CreatedAt != nil {
@@ -126,6 +131,7 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 			ID:                   transportID,
 			Name:                 transport,
 			WebauthnCredentialID: webauthnCredential.ID,
+			TenantID:             tenantID,
 		})
 	}
 
@@ -144,10 +150,11 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 		BackupEligible:  webauthnCredential.BackupEligible,
 		BackupState:     webauthnCredential.BackupState,
 		MFAOnly:         webauthnCredential.MFAOnly,
+		TenantID:        tenantID,
 	}
 
 	if webauthnCredential.UserHandle != nil {
-		existingUserHandle, err := i.persister.GetWebauthnCredentialUserHandlePersisterWithConnection(i.tx).GetByHandle(*webauthnCredential.UserHandle)
+		existingUserHandle, err := i.persister.GetWebauthnCredentialUserHandlePersisterWithConnection(i.tx).GetByHandle(*webauthnCredential.UserHandle, tenantID)
 		if err != nil {
 			return err
 		}
@@ -164,6 +171,7 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 				ID:        userHandleID,
 				UserID:    userID,
 				Handle:    *webauthnCredential.UserHandle,
+				TenantID:  tenantID,
 				CreatedAt: i.importTimestamp,
 				UpdatedAt: i.importTimestamp,
 			}
@@ -176,7 +184,7 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 	return err
 }
 
-func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential ImportPasswordCredential) error {
+func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential ImportPasswordCredential, tenantID *uuid.UUID) error {
 	passwordID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -196,6 +204,7 @@ func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential
 		ID:        passwordID,
 		UserId:    userID,
 		Password:  passwordCredential.Password,
+		TenantID:  tenantID,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	}
@@ -204,7 +213,7 @@ func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential
 	return err
 }
 
-func (i *Importer) createOTPSecret(userID uuid.UUID, otpSecret ImportOTPSecret) error {
+func (i *Importer) createOTPSecret(userID uuid.UUID, otpSecret ImportOTPSecret, tenantID *uuid.UUID) error {
 	otpSecretID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -224,6 +233,7 @@ func (i *Importer) createOTPSecret(userID uuid.UUID, otpSecret ImportOTPSecret) 
 		ID:        otpSecretID,
 		UserID:    userID,
 		Secret:    otpSecret.Secret,
+		TenantID:  tenantID,
 		CreatedAt: createdAt,
 		UpdatedAt: updatedAt,
 	}

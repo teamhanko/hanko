@@ -13,17 +13,18 @@ import (
 )
 
 type Token struct {
-	ID               uuid.UUID  `db:"id"`
-	UserID           uuid.UUID  `db:"user_id"`
-	IdentityID       *uuid.UUID `db:"identity_id"`
-	IsFlow           bool       `db:"is_flow"`
-	Value            string     `db:"value"`
-	UserCreated      bool       `db:"user_created"`
-	PKCECodeVerifier *string    `db:"code_verifier"`
-	LinkUser         bool       `db:"link_user"`
-	ExpiresAt        time.Time  `db:"expires_at"`
-	CreatedAt        time.Time  `db:"created_at"`
-	UpdatedAt        time.Time  `db:"updated_at"`
+    ID               uuid.UUID  `db:"id"`
+    UserID           uuid.UUID  `db:"user_id"`
+    IdentityID       *uuid.UUID `db:"identity_id"`
+    IsFlow           bool       `db:"is_flow"`
+    Value            string     `db:"value"`
+    UserCreated      bool       `db:"user_created"`
+    PKCECodeVerifier *string    `db:"code_verifier"`
+    LinkUser         bool       `db:"link_user"`
+    ExpiresAt        time.Time  `db:"expires_at"`
+    CreatedAt        time.Time  `db:"created_at"`
+    UpdatedAt        time.Time  `db:"updated_at"`
+    TenantID         *uuid.UUID `db:"tenant_id"`
 }
 
 func TokenWithIdentityID(identityID uuid.UUID) func(*Token) {

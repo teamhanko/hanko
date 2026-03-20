@@ -10,10 +10,10 @@ import (
 )
 
 type EmailPersister interface {
-	Get(emailId uuid.UUID) (*models.Email, error)
-	CountByUserId(uuid.UUID) (int, error)
-	FindByUserId(uuid.UUID) (models.Emails, error)
-	FindByAddress(string) (*models.Email, error)
+	Get(emailId uuid.UUID, tenantID *uuid.UUID) (*models.Email, error)
+	CountByUserId(userId uuid.UUID, tenantID *uuid.UUID) (int, error)
+	FindByUserId(userId uuid.UUID, tenantID *uuid.UUID) (models.Emails, error)
+	FindByAddress(address string, tenantID *uuid.UUID) (*models.Email, error)
 	Create(models.Email) error
 	Update(models.Email) error
 	Delete(models.Email) error
@@ -27,9 +27,15 @@ func NewEmailPersister(db *pop.Connection) EmailPersister {
 	return &emailPersister{db: db}
 }
 
-func (e *emailPersister) Get(emailId uuid.UUID) (*models.Email, error) {
+func (e *emailPersister) Get(emailId uuid.UUID, tenantID *uuid.UUID) (*models.Email, error) {
 	email := models.Email{}
-	err := e.db.Find(&email, emailId.String())
+	query := e.db.Q()
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.Find(&email, emailId.String())
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -41,13 +47,16 @@ func (e *emailPersister) Get(emailId uuid.UUID) (*models.Email, error) {
 	return &email, nil
 }
 
-func (e *emailPersister) FindByUserId(userId uuid.UUID) (models.Emails, error) {
+func (e *emailPersister) FindByUserId(userId uuid.UUID, tenantID *uuid.UUID) (models.Emails, error) {
 	var emails models.Emails
 
-	err := e.db.EagerPreload().
-		Where("user_id = ?", userId.String()).
-		Order("created_at asc").
-		All(&emails)
+	query := e.db.EagerPreload().Where("user_id = ?", userId.String())
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.Order("created_at asc").All(&emails)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return emails, nil
 	}
@@ -59,12 +68,16 @@ func (e *emailPersister) FindByUserId(userId uuid.UUID) (models.Emails, error) {
 	return emails, nil
 }
 
-func (e *emailPersister) CountByUserId(userId uuid.UUID) (int, error) {
+func (e *emailPersister) CountByUserId(userId uuid.UUID, tenantID *uuid.UUID) (int, error) {
 	var emails []models.Email
 
-	count, err := e.db.
-		Where("user_id = ?", userId.String()).
-		Count(&emails)
+	query := e.db.Where("user_id = ?", userId.String())
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	count, err := query.Count(&emails)
 
 	if err != nil {
 		return 0, err
@@ -73,10 +86,15 @@ func (e *emailPersister) CountByUserId(userId uuid.UUID) (int, error) {
 	return count, nil
 }
 
-func (e *emailPersister) FindByAddress(address string) (*models.Email, error) {
+func (e *emailPersister) FindByAddress(address string, tenantID *uuid.UUID) (*models.Email, error) {
 	var email models.Email
 
 	query := e.db.EagerPreload().Where("address = ?", address)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
 	err := query.First(&email)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

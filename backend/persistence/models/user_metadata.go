@@ -11,13 +11,14 @@ import (
 )
 
 type UserMetadata struct {
-	ID        uuid.UUID    `db:"id"`
-	UserID    uuid.UUID    `db:"user_id"`
-	Public    nulls.String `db:"public_metadata"`
-	Private   nulls.String `db:"private_metadata"`
-	Unsafe    nulls.String `db:"unsafe_metadata"`
-	CreatedAt time.Time    `db:"created_at"`
-	UpdatedAt time.Time    `db:"updated_at"`
+    ID        uuid.UUID    `db:"id"`
+    UserID    uuid.UUID    `db:"user_id"`
+    TenantID  *uuid.UUID   `db:"tenant_id"`
+    Public    nulls.String `db:"public_metadata"`
+    Private   nulls.String `db:"private_metadata"`
+    Unsafe    nulls.String `db:"unsafe_metadata"`
+    CreatedAt time.Time    `db:"created_at"`
+    UpdatedAt time.Time    `db:"updated_at"`
 }
 
 func (m *UserMetadata) Validate(tx *pop.Connection) (*validate.Errors, error) {

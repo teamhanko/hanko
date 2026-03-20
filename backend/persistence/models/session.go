@@ -1,17 +1,19 @@
 package models
 
 import (
+	"time"
+
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 type Session struct {
 	ID        uuid.UUID    `db:"id" json:"id"`
 	UserID    uuid.UUID    `db:"user_id" json:"user_id"`
+	TenantID  *uuid.UUID   `db:"tenant_id"`
 	UserAgent nulls.String `db:"user_agent" json:"user_agent"`
 	IpAddress nulls.String `db:"ip_address" json:"ip_address"`
 	CreatedAt time.Time    `db:"created_at" json:"created_at"`

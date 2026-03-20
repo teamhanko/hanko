@@ -2,9 +2,10 @@ package thirdparty
 
 import (
 	"fmt"
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"net/url"
 	"strings"
+
+	"github.com/teamhanko/hanko/backend/v2/config"
 )
 
 func IsAllowedRedirect(config config.ThirdParty, redirectTo string) bool {

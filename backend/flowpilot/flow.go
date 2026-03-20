@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"reflect"
 	"time"
+
+	"github.com/gofrs/uuid"
 )
 
 // FlowName represents the name of the flow.
@@ -40,6 +42,12 @@ func WithInputData(inputData InputData) func(*defaultFlow) {
 func UseCompression(b bool) func(*defaultFlow) {
 	return func(f *defaultFlow) {
 		f.useCompression = b
+	}
+}
+
+func WithTenantID(tenantID *uuid.UUID) func(*defaultFlow) {
+	return func(f *defaultFlow) {
+		f.tenantID = tenantID
 	}
 }
 
@@ -201,6 +209,7 @@ type defaultFlow struct {
 	useCompression    bool
 	queryParamKey     string
 	queryParamValue   string
+	tenantID          *uuid.UUID
 
 	*defaultFlowBase
 }

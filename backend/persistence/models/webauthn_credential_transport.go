@@ -9,10 +9,11 @@ import (
 
 // WebauthnCredentialTransport is used by pop to map your webauthn_credential_transport table to your go code.
 type WebauthnCredentialTransport struct {
-	ID                   uuid.UUID           `db:"id"`
-	Name                 string              `db:"name"`
-	WebauthnCredentialID string              `db:"webauthn_credential_id"`
-	WebauthnCredential   *WebauthnCredential `belongs_to:"webauthn_credential"`
+    ID                   uuid.UUID           `db:"id"`
+    Name                 string              `db:"name"`
+    WebauthnCredentialID string              `db:"webauthn_credential_id"`
+    WebauthnCredential   *WebauthnCredential `belongs_to:"webauthn_credential"`
+    TenantID             *uuid.UUID          `db:"tenant_id"`
 }
 
 type Transports []WebauthnCredentialTransport

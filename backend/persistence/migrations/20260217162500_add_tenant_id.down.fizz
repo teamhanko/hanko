@@ -1,0 +1,79 @@
+-- Remove tenant_id from all affected tables
+
+drop_foreign_key("webauthn_credential_user_handles", "users_tenant_id_fk", {})
+drop_column("webauthn_credential_user_handles", "tenant_id")
+
+drop_foreign_key("user_metadata", "user_metadata_tenant_id_fk", {})
+drop_column("user_metadata", "tenant_id")
+
+drop_foreign_key("saml_idp_initiated_requests", "saml_idp_initiated_requests_tenant_id_fk", {})
+drop_column("saml_idp_initiated_requests", "tenant_id")
+
+drop_foreign_key("saml_identities", "saml_identities_tenant_id_fk", {})
+drop_column("saml_identities", "tenant_id")
+
+drop_foreign_key("trusted_devices", "trusted_devices_tenant_id_fk", {})
+drop_column("trusted_devices", "tenant_id")
+
+drop_foreign_key("sessions", "sessions_tenant_id_fk", {})
+drop_column("sessions", "tenant_id")
+
+drop_foreign_key("otp_secrets", "otp_secrets_tenant_id_fk", {})
+drop_column("otp_secrets", "tenant_id")
+
+drop_foreign_key("usernames", "usernames_tenant_id_fk", {})
+drop_column("usernames", "tenant_id")
+
+drop_foreign_key("webhook_events", "webhook_events_tenant_id_fk", {})
+drop_column("webhook_events", "tenant_id")
+
+drop_foreign_key("webhooks", "webhooks_tenant_id_fk", {})
+drop_column("webhooks", "tenant_id")
+
+drop_foreign_key("saml_certificates", "saml_certificates_tenant_id_fk", {})
+drop_column("saml_certificates", "tenant_id")
+
+drop_foreign_key("saml_states", "saml_states_tenant_id_fk", {})
+drop_column("saml_states", "tenant_id")
+
+drop_foreign_key("flows", "flows_tenant_id_fk", {})
+drop_column("flows", "tenant_id")
+
+drop_foreign_key("tokens", "tokens_tenant_id_fk", {})
+drop_column("tokens", "tenant_id")
+
+drop_foreign_key("identities", "identities_tenant_id_fk", {})
+drop_column("identities", "tenant_id")
+
+drop_foreign_key("primary_emails", "primary_emails_tenant_id_fk", {})
+drop_column("primary_emails", "tenant_id")
+
+drop_foreign_key("emails", "emails_tenant_id_fk", {})
+drop_column("emails", "tenant_id")
+
+drop_foreign_key("audit_logs", "audit_logs_tenant_id_fk", {})
+drop_column("audit_logs", "tenant_id")
+
+drop_foreign_key("webauthn_credential_transports", "webauthn_credential_transports_tenant_id_fk", {})
+drop_column("webauthn_credential_transports", "tenant_id")
+
+drop_foreign_key("password_credentials", "password_credentials_tenant_id_fk", {})
+drop_column("password_credentials", "tenant_id")
+
+drop_foreign_key("jwks", "jwks_tenant_id_fk", {})
+drop_column("jwks", "tenant_id")
+
+drop_foreign_key("webauthn_session_data_allowed_credentials", "webauthn_session_data_allowed_credentials_tenant_id_fk", {})
+drop_column("webauthn_session_data_allowed_credentials", "tenant_id")
+
+drop_foreign_key("webauthn_session_data", "webauthn_session_data_tenant_id_fk", {})
+drop_column("webauthn_session_data", "tenant_id")
+
+drop_foreign_key("webauthn_credentials", "webauthn_credentials_tenant_id_fk", {})
+drop_column("webauthn_credentials", "tenant_id")
+
+drop_foreign_key("passcodes", "passcodes_tenant_id_fk", {})
+drop_column("passcodes", "tenant_id")
+
+drop_foreign_key("users", "users_tenant_id_fk", {})
+drop_column("users", "tenant_id")

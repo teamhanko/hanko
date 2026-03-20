@@ -4,14 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-playground/validator/v10"
-	"github.com/teamhanko/hanko/backend/v2/dto"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/gofrs/uuid"
+	"github.com/teamhanko/hanko/backend/v2/dto"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/spf13/cobra"
@@ -24,6 +26,7 @@ func NewImportCommand() *cobra.Command {
 		configFile string
 		inputFile  string
 		inputUrl   string
+		tenantID   string
 	)
 
 	cmd := &cobra.Command{
@@ -82,12 +85,24 @@ func NewImportCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
+
 			//Import Users
-			persister, err := persistence.New(cfg.Database)
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
-			err = addToDatabase(users, persister)
+
+			var tID uuid.UUID
+			if tenantID != "" {
+				tID, err = uuid.FromString(tenantID)
+				if err != nil {
+					log.Fatalf("invalid tenant_id: %s", err)
+				}
+			}
+
+			persister := persistence.New(dbConnection)
+
+			err = addToDatabase(users, persister, &tID)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -98,6 +113,7 @@ func NewImportCommand() *cobra.Command {
 	cmd.Flags().StringVar(&configFile, "config", config.DefaultConfigFilePath, "config file")
 	cmd.Flags().StringVarP(&inputFile, "inputFile", "i", "", "The json file where the users should be imported from.")
 	cmd.Flags().StringVarP(&inputUrl, "inputUrl", "u", "", "The url to a json file where the users should be imported from.")
+	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID (optional)")
 	cmd.MarkFlagsMutuallyExclusive("inputFile", "inputUrl")
 	return cmd
 }
@@ -154,7 +170,7 @@ func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 }
 
 // commits the list of ImportEntries to the database. Wrapped in a transaction so if something fails no new users are added.
-func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persister) error {
+func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persister, tenantID *uuid.UUID) error {
 	tx := persister.GetConnection()
 	err := tx.Transaction(func(tx *pop.Connection) error {
 		importer := Importer{
@@ -163,18 +179,18 @@ func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persiste
 			importTimestamp: time.Now().UTC(),
 		}
 		for i, v := range entries {
-			userModel, err := importer.createUser(v)
+			userModel, err := importer.createUser(v, tenantID)
 			if err != nil {
 				return fmt.Errorf("failed to create user entry nr. %d: %w", i, err)
 			}
 
 			for _, e := range v.Emails {
-				emailModel, err := importer.createEmailAddress(userModel.ID, e)
+				emailModel, err := importer.createEmailAddress(userModel.ID, e, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create email address \"%s\" for user entry nr. %d: %w", e.Address, i, err)
 				}
 				if e.IsPrimary {
-					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID)
+					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID, tenantID)
 					if err != nil {
 						return fmt.Errorf("failed to set email \"%s\" as primary for user entry nr. %d: %w", e.Address, i, err)
 					}
@@ -182,28 +198,28 @@ func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persiste
 			}
 
 			if v.Username != nil {
-				err = importer.createUsername(userModel.ID, *v.Username)
+				err = importer.createUsername(userModel.ID, *v.Username, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create username \"%v\" for user entry nr. %d: %w", v.Username, i, err)
 				}
 			}
 
 			for _, credential := range v.WebauthnCredentials {
-				err = importer.createWebauthnCredential(userModel.ID, credential)
+				err = importer.createWebauthnCredential(userModel.ID, credential, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create webauthn credential \"%s\" for user entry nr. %d: %w", credential.ID, i, err)
 				}
 			}
 
 			if v.Password != nil {
-				err = importer.createPasswordCredential(userModel.ID, *v.Password)
+				err = importer.createPasswordCredential(userModel.ID, *v.Password, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create password for user entry nr. %d: %w", i, err)
 				}
 			}
 
 			if v.OTPSecret != nil {
-				err = importer.createOTPSecret(userModel.ID, *v.OTPSecret)
+				err = importer.createOTPSecret(userModel.ID, *v.OTPSecret, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create otp secret for user entry nr. %d: %w", i, err)
 				}

@@ -31,6 +31,7 @@ func (h ScheduleTrustDeviceState) Execute(c flowpilot.HookExecutionContext) erro
 		Persister:   deps.Persister.GetTrustedDevicePersisterWithConnection(deps.Tx),
 		Cfg:         deps.Cfg,
 		HttpContext: deps.HttpContext,
+		TenantID:    deps.TenantID,
 	}
 
 	userID := uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String())

@@ -21,6 +21,7 @@ func NewCreateCommand() *cobra.Command {
 	var (
 		configFile string
 		pretty     bool
+		tenantID   string
 	)
 
 	cmd := &cobra.Command{
@@ -41,10 +42,19 @@ func NewCreateCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			persister, err := persistence.New(cfg.Database)
+			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			var tID uuid.UUID
+			if tenantID != "" {
+				tID, err = uuid.FromString(tenantID)
+				if err != nil {
+					log.Fatalf("invalid tenant_id: %s", err)
+				}
+			}
+			persister := persistence.New(dbConnection)
 			jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
@@ -59,7 +69,7 @@ func NewCreateCommand() *cobra.Command {
 
 			userId := uuid.FromStringOrNil(args[0])
 
-			userModel, err := persister.GetUserPersister().Get(userId)
+			userModel, err := persister.GetUserPersister().Get(userId, &tID)
 			if err != nil {
 				fmt.Printf("failed to get user from db: %s", err)
 				return
@@ -108,6 +118,7 @@ func NewCreateCommand() *cobra.Command {
 
 	cmd.Flags().StringVar(&configFile, "config", "", "config file")
 	cmd.Flags().BoolVar(&pretty, "pretty", true, "pretty print the JWT payload")
+	cmd.Flags().StringVar(&tenantID, "tenant_id", "", "tenant ID (optional)")
 
 	return cmd
 }

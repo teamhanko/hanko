@@ -12,6 +12,7 @@ func WebhookMiddleware(cfg *config.Config, jwkManager jwk.Generator, persister p
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 
+			// TODO: needs to be tenant specific
 			manager, err := webhooks.NewManager(cfg, persister, jwkManager, ctx.Logger())
 			if err != nil {
 				return err

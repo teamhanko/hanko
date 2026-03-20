@@ -32,7 +32,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("user_id not found in stash")
 	}
 
-	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId)
+	userModel, err := deps.Persister.GetUserPersisterWithConnection(deps.Tx).Get(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch user from db: %w", err)
 	}
@@ -67,7 +67,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		return fmt.Errorf("failed to set token claims to payload: %w", err)
 	}
 
-	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userId)
+	activeSessions, err := deps.Persister.GetSessionPersisterWithConnection(deps.Tx).ListActive(userId, deps.TenantID)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
@@ -92,6 +92,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 		UpdatedAt: rawToken.IssuedAt(),
 		ExpiresAt: &expirationTime,
 		LastUsed:  rawToken.IssuedAt(),
+		TenantID:  deps.TenantID,
 	}
 
 	if deps.Cfg.Session.AcquireIPAddress {

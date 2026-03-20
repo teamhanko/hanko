@@ -4,13 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type TokenPersister interface {
 	Create(token models.Token) error
-	GetByValue(value string) (*models.Token, error)
+	GetByValue(value string, tenantID *uuid.UUID) (*models.Token, error)
 	Delete(token models.Token) error
 }
 
@@ -35,9 +37,15 @@ func (t tokenPersister) Create(token models.Token) error {
 	return nil
 }
 
-func (t tokenPersister) GetByValue(value string) (*models.Token, error) {
+func (t tokenPersister) GetByValue(value string, tenantID *uuid.UUID) (*models.Token, error) {
 	token := models.Token{}
-	err := t.db.Where("value = ?", value).First(&token)
+	query := t.db.Where("value = ?", value)
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.First(&token)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

@@ -277,7 +277,7 @@ func (s *passcodeSuite) TestPasscodeHandler_Finish() {
 			err := s.LoadFixtures("../test/fixtures/passcode")
 			s.Require().NoError(err)
 
-			jwkManager, err := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, s.Storage.GetJwkPersister())
+			jwkManager, err := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, "v1", s.Storage.GetJwkPersister(), false)
 			s.Require().NoError(err)
 			sessionManager, err := session.NewManager(jwkManager, test.DefaultConfig)
 			s.Require().NoError(err)

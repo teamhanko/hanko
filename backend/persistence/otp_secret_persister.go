@@ -2,6 +2,7 @@ package persistence
 
 import (
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )

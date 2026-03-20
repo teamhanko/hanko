@@ -6,6 +6,10 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
+
 	saml2 "github.com/russellhaering/gosaml2"
 	"github.com/russellhaering/gosaml2/types"
 	dsig "github.com/russellhaering/goxmldsig"
@@ -15,9 +19,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
-	"io"
-	"net/http"
-	"strings"
 )
 
 type IdpMetadata struct {
@@ -36,7 +37,7 @@ type ServiceProvider interface {
 }
 
 func loadCertificate(cfg *config.Config, persister persistence.SamlCertificatePersister) (dsig.X509KeyStore, error) {
-	cert, err := persister.GetFirst()
+	cert, err := persister.GetFirst(nil) // TODO: tenantID
 	if err != nil {
 		return nil, err
 	}

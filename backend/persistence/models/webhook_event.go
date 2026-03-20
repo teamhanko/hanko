@@ -11,12 +11,13 @@ import (
 
 // WebhookEvent is used by pop to map your webhook_events database table to your go code.
 type WebhookEvent struct {
-	ID        uuid.UUID `json:"id" db:"id"`
-	Webhook   *Webhook  `json:"-" belongs_to:"webhook"`
-	WebhookID uuid.UUID `json:"-" db:"webhook_id"`
-	Event     string    `json:"event" db:"event"`
-	CreatedAt time.Time `json:"-" db:"created_at"`
-	UpdatedAt time.Time `json:"-" db:"updated_at"`
+    ID        uuid.UUID `json:"id" db:"id"`
+    Webhook   *Webhook  `json:"-" belongs_to:"webhook"`
+    WebhookID uuid.UUID `json:"-" db:"webhook_id"`
+    TenantID  *uuid.UUID `db:"tenant_id"`
+    Event     string    `json:"event" db:"event"`
+    CreatedAt time.Time `json:"-" db:"created_at"`
+    UpdatedAt time.Time `json:"-" db:"updated_at"`
 }
 
 // WebhookEvents is not required by pop and may be deleted

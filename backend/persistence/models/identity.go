@@ -19,6 +19,7 @@ type Identity struct {
 	Data           slices.Map    `json:"data" db:"data"`
 	EmailID        *uuid.UUID    `json:"email_id" db:"email_id"`
 	UserID         *uuid.UUID    `json:"user_id" db:"user_id"`
+	TenantID       *uuid.UUID    `db:"tenant_id"`
 	Email          *Email        `json:"email,omitempty" belongs_to:"email"`
 	CreatedAt      time.Time     `json:"created_at" db:"created_at"`
 	UpdatedAt      time.Time     `json:"updated_at" db:"updated_at"`
@@ -37,7 +38,7 @@ func (identities Identities) GetIdentity(providerID string, providerUserID strin
 	return nil
 }
 
-func NewIdentity(providerID string, identityData map[string]interface{}, emailID *uuid.UUID, userID *uuid.UUID) (*Identity, error) {
+func NewIdentity(providerID string, identityData map[string]interface{}, emailID *uuid.UUID, userID *uuid.UUID, tenantID *uuid.UUID) (*Identity, error) {
 	providerUserID, ok := identityData["sub"]
 	if !ok {
 		return nil, errors.New("missing provider user id")
@@ -52,6 +53,7 @@ func NewIdentity(providerID string, identityData map[string]interface{}, emailID
 		ProviderID:     providerID,
 		EmailID:        emailID,
 		UserID:         userID,
+		TenantID:       tenantID,
 		CreatedAt:      now,
 		UpdatedAt:      now,
 	}

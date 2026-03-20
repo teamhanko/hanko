@@ -1,30 +1,33 @@
 package models
 
 import (
+	"time"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"time"
 )
 
 type PrimaryEmail struct {
-	ID        uuid.UUID `db:"id" json:"id"`
-	EmailID   uuid.UUID `db:"email_id" json:"email_id"`
-	UserID    uuid.UUID `db:"user_id" json:"-"`
-	Email     *Email    `belongs_to:"email" json:"email"`
-	User      *User     `belongs_to:"user" json:"-"`
-	CreatedAt time.Time `db:"created_at" json:"-"`
-	UpdatedAt time.Time `db:"updated_at" json:"-"`
+	ID        uuid.UUID  `db:"id" json:"id"`
+	EmailID   uuid.UUID  `db:"email_id" json:"email_id"`
+	UserID    uuid.UUID  `db:"user_id" json:"-"`
+	TenantID  *uuid.UUID `db:"tenant_id"`
+	Email     *Email     `belongs_to:"email" json:"email"`
+	User      *User      `belongs_to:"user" json:"-"`
+	CreatedAt time.Time  `db:"created_at" json:"-"`
+	UpdatedAt time.Time  `db:"updated_at" json:"-"`
 }
 
-func NewPrimaryEmail(emailId uuid.UUID, userId uuid.UUID) *PrimaryEmail {
+func NewPrimaryEmail(emailId uuid.UUID, userId uuid.UUID, tenantID *uuid.UUID) *PrimaryEmail {
 	id, _ := uuid.NewV4()
 
 	return &PrimaryEmail{
 		ID:        id,
 		EmailID:   emailId,
 		UserID:    userId,
+		TenantID:  tenantID,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

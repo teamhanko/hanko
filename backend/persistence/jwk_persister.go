@@ -4,14 +4,16 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/gobuffalo/pop/v6"
+	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
 type JwkPersister interface {
-	Get(int) (*models.Jwk, error)
-	GetAll() ([]models.Jwk, error)
-	GetLast() (*models.Jwk, error)
+	Get(id int, tenantID *uuid.UUID) (*models.Jwk, error)
+	GetAll(tenantID *uuid.UUID) ([]models.Jwk, error)
+	GetLast(tenantID *uuid.UUID) (*models.Jwk, error)
 	Create(models.Jwk) error
 }
 
@@ -23,9 +25,15 @@ func NewJwkPersister(db *pop.Connection) JwkPersister {
 	return &jwkPersister{db: db}
 }
 
-func (p *jwkPersister) Get(id int) (*models.Jwk, error) {
+func (p *jwkPersister) Get(id int, tenantID *uuid.UUID) (*models.Jwk, error) {
 	jwk := models.Jwk{}
-	err := p.db.Find(&jwk, id)
+	query := p.db.Q()
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.Find(&jwk, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -35,9 +43,15 @@ func (p *jwkPersister) Get(id int) (*models.Jwk, error) {
 	return &jwk, nil
 }
 
-func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
+func (p *jwkPersister) GetAll(tenantID *uuid.UUID) ([]models.Jwk, error) {
 	jwks := []models.Jwk{}
-	err := p.db.All(&jwks)
+	query := p.db.Q()
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.All(&jwks)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}
@@ -47,9 +61,15 @@ func (p *jwkPersister) GetAll() ([]models.Jwk, error) {
 	return jwks, nil
 }
 
-func (p *jwkPersister) GetLast() (*models.Jwk, error) {
+func (p *jwkPersister) GetLast(tenantID *uuid.UUID) (*models.Jwk, error) {
 	jwk := models.Jwk{}
-	err := p.db.Last(&jwk)
+	query := p.db.Q()
+	if tenantID != nil {
+		query = query.Where("tenant_id = ?", tenantID)
+	} else {
+		query = query.Where("tenant_id IS NULL")
+	}
+	err := query.Last(&jwk)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
 	}

@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/mail"
 	"gopkg.in/gomail.v2"
@@ -9,37 +10,34 @@ import (
 
 type Email struct {
 	renderer *mail.Renderer
-	mailer   mail.Mailer
-	cfg      config.Config
 }
 
-func NewEmailService(cfg config.Config) (*Email, error) {
+func NewEmailService() (*Email, error) {
 	renderer, err := mail.NewRenderer()
 	if err != nil {
 		return nil, err
 	}
-	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
-	if err != nil {
-		panic(fmt.Errorf("failed to create mailer: %w", err))
-	}
 
 	return &Email{
 		renderer,
-		mailer,
-		cfg,
 	}, nil
 }
 
 // SendEmail sends an email to the emailAddress with the given subject and body.
-func (s *Email) SendEmail(emailAddress, subject, body, htmlBody string) error {
+func (s *Email) SendEmail(cfg config.EmailDelivery, emailAddress, subject, body, htmlBody string) error {
 	message := gomail.NewMessage()
 	message.SetAddressHeader("To", emailAddress, "")
-	message.SetAddressHeader("From", s.cfg.EmailDelivery.FromAddress, s.cfg.EmailDelivery.FromName)
+	message.SetAddressHeader("From", cfg.FromAddress, cfg.FromName)
 	message.SetHeader("Subject", subject)
 	message.SetBody("text/plain", body)
 	message.AddAlternative("text/html", htmlBody)
 
-	if err := s.mailer.Send(message); err != nil {
+	mailer, err := mail.NewMailer(cfg.SMTP)
+	if err != nil {
+		return fmt.Errorf("failed to create mailer: %w", err)
+	}
+
+	if err := mailer.Send(message); err != nil {
 		return err
 	}
 
