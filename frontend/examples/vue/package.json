@@ -16,7 +16,7 @@
     "@vue/tsconfig": "^0.8.1",
     "jiti": "^2.6.1",
     "prettier": "3.8.1",
-    "typescript": "~5.9.0",
+    "typescript": "~6.0.2",
     "vite": "^7.2.4",
     "vue-tsc": "^3.2.6"
   },
