@@ -13,7 +13,7 @@
     "@tsconfig/node24": "^24.0.4",
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^6.0.5",
-    "@vue/tsconfig": "^0.8.1",
+    "@vue/tsconfig": "^0.9.1",
     "jiti": "^2.6.1",
     "prettier": "3.8.1",
     "typescript": "~5.9.0",
