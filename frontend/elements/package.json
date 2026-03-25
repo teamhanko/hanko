@@ -129,7 +129,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-promise": "^6.1.1",
-    "sass": "^1.61.0",
+    "sass": "^1.98.0",
     "sass-loader": "^16.0.7",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.2",
