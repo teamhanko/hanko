@@ -55,7 +55,7 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-promise": "^6.1.1",
-    "jest": "^30.2.0",
+    "jest": "^30.3.0",
     "jest-environment-jsdom": "^29.7.0",
     "js-cookie": "^3.0.5",
     "jsdoc": "3.6.11",
