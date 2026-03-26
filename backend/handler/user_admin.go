@@ -16,7 +16,7 @@ import (
 	"github.com/gobuffalo/nulls"
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgconn"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
