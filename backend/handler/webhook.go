@@ -14,6 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/webhooks"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
+	"github.com/teamhanko/hanko/backend/v2/webhooks/validation"
 )
 
 type WebhookHandler interface {
@@ -65,6 +66,17 @@ func (w *webhookHandler) Create(ctx echo.Context) error {
 	}
 
 	err = ctx.Validate(dto)
+	if err != nil {
+		ctx.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	// Validate webhook callback URL with security policy
+	eventsStr := make([]string, len(dto.Events))
+	for i, e := range dto.Events {
+		eventsStr[i] = string(e)
+	}
+	err = validation.ValidateWebhook(dto.Callback, eventsStr, &w.cfg.Security)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)
@@ -194,6 +206,17 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 	}
 
 	err = ctx.Validate(dto)
+	if err != nil {
+		ctx.Logger().Error(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err)
+	}
+
+	// Validate webhook callback URL with security policy
+	eventsStr := make([]string, len(dto.Events))
+	for i, e := range dto.Events {
+		eventsStr[i] = string(e)
+	}
+	err = validation.ValidateWebhook(dto.Callback, eventsStr, &w.cfg.Security)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return echo.NewHTTPError(http.StatusBadRequest, err)

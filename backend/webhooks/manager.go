@@ -25,6 +25,7 @@ type manager struct {
 	audience        []string
 	persister       persistence.Persister
 	canExpireAtTime bool
+	security        config.WebhookSecurity
 }
 
 func NewManager(cfg *config.Config, persister persistence.Persister, jwtGenerator jwk.Generator, logger echo.Logger) (Manager, error) {
@@ -32,7 +33,7 @@ func NewManager(cfg *config.Config, persister persistence.Persister, jwtGenerato
 
 	if cfg.Webhooks.Enabled {
 		for _, cfgHook := range cfg.Webhooks.Hooks {
-			hooks = append(hooks, NewConfigHook(cfgHook, logger))
+			hooks = append(hooks, NewConfigHook(cfgHook, cfg.Webhooks.Security, logger))
 		}
 	}
 
@@ -50,11 +51,11 @@ func NewManager(cfg *config.Config, persister persistence.Persister, jwtGenerato
 		audience:        audience,
 		persister:       persister,
 		canExpireAtTime: cfg.Webhooks.AllowTimeExpiration,
+		security:        cfg.Webhooks.Security,
 	}, nil
 }
 
 func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}) {
-	// add db hooks - Done here to prevent a restart in case a hook is added or removed from the database
 	dbHooks, err := m.persister.GetWebhookPersister(tx).List(false)
 	if err != nil {
 		m.logger.Error(fmt.Errorf("unable to get database webhooks: %w", err))
@@ -63,7 +64,7 @@ func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}
 
 	hooks := m.webhooks
 	for _, dbHook := range dbHooks {
-		hooks = append(hooks, NewDatabaseHook(dbHook, m.persister.GetWebhookPersister(nil), m.logger))
+		hooks = append(hooks, NewDatabaseHook(dbHook, m.persister.GetWebhookPersister(nil), m.security, m.logger))
 	}
 
 	dataToken, err := m.GenerateJWT(data, evt)
