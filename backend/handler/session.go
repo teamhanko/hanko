@@ -2,14 +2,15 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
-	"net/http"
-	"time"
 )
 
 type SessionHandler struct {
@@ -55,6 +56,24 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
 			if sessionModel == nil {
+				continue
+			}
+
+			// Check idle timeout
+			idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
+			if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
+				sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
+				if sessionDeletionErr != nil {
+					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
+				}
+
+				cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+				if cookieDeletionErr != nil {
+					return fmt.Errorf("could not delete cookie: %w", cookieDeletionErr)
+				}
+				c.SetCookie(cookie)
+
+				// session expired due to idle timeout
 				continue
 			}
 
@@ -105,6 +124,24 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 	}
 
 	if sessionModel == nil {
+		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
+	}
+
+	// Check idle timeout
+	idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
+	if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
+		sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
+		if sessionDeletionErr != nil {
+			return dto.ToHttpError(fmt.Errorf("failed to delete session: %w", sessionDeletionErr))
+		}
+
+		cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+		if cookieDeletionErr != nil {
+			return dto.ToHttpError(fmt.Errorf("could not delete cookie: %w", cookieDeletionErr))
+		}
+		c.SetCookie(cookie)
+
+		// session expired due to idle timeout
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
 
