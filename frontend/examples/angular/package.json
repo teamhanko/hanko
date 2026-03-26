@@ -7,7 +7,7 @@
     "build": "ng build"
   },
   "dependencies": {
-    "@angular/animations": "^21.1.5",
+    "@angular/animations": "^21.2.6",
     "@angular/common": "^21.1.5",
     "@angular/compiler": "^21.1.5",
     "@angular/core": "^21.1.5",
