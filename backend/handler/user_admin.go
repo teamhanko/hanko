@@ -3,6 +3,7 @@ package handler
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -17,7 +18,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgconn"
 	"github.com/labstack/echo/v4"
-	"github.com/pkg/errors"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/pagination"
@@ -207,13 +207,11 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 		err := tx.Create(&u)
 		if err != nil {
-			var pgErr *pgconn.PgError
-			var mysqlErr *mysql.MySQLError
-			if errors.As(err, &pgErr) {
+			if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 				if pgErr.Code == "23505" {
 					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", u.ID, fmt.Errorf("user already exists")))
 				}
-			} else if errors.As(err, &mysqlErr) {
+			} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
 				if mysqlErr.Number == 1062 {
 					return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create user with id '%v': %w", u.ID, fmt.Errorf("user already exists")))
 				}
@@ -235,13 +233,11 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 			err := tx.Create(&mail)
 			if err != nil {
-				var pgErr *pgconn.PgError
-				var mysqlErr *mysql.MySQLError
-				if errors.As(err, &pgErr) {
+				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 					if pgErr.Code == "23505" {
 						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, fmt.Errorf("email already exists")))
 					}
-				} else if errors.As(err, &mysqlErr) {
+				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
 					if mysqlErr.Number == 1062 {
 						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create email '%s' for user '%v': %w", mail.Address, u.ID, fmt.Errorf("email already exists")))
 					}
@@ -265,13 +261,11 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 			username := models.NewUsername(u.ID, *body.Username)
 			err = tx.Create(username)
 			if err != nil {
-				var pgErr *pgconn.PgError
-				var mysqlErr *mysql.MySQLError
-				if errors.As(err, &pgErr) {
+				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
 					if pgErr.Code == "23505" {
 						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
 					}
-				} else if errors.As(err, &mysqlErr) {
+				} else if mysqlErr, ok2 := errors.AsType[*mysql.MySQLError](err); ok2 {
 					if mysqlErr.Number == 1062 {
 						return echo.NewHTTPError(http.StatusConflict, fmt.Errorf("failed to create username '%s' for user '%v': %w", username.Username, u.ID, fmt.Errorf("username already exists")))
 					}
