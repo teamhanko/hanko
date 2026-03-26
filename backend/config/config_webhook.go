@@ -269,7 +269,7 @@ type WebhookSettings struct {
 	// `enabled` enables the webhook feature.
 	Enabled bool `yaml:"enabled" json:"enabled,omitempty" koanf:"enabled" jsonschema:"default=false"`
 	// `security` defines the outbound destination policy for webhook callbacks.
-	Security WebhookSecurity `yaml:"security" json:"security,omitempty" koanf:"security" jsonschema:"title=security"`
+	Security WebhookSecurity `yaml:"security,omitempty" json:"security,omitempty" koanf:"security" jsonschema:"title=security"`
 	// `hooks` is a list of Webhook configurations.
 	//
 	// When using environment variables the value for the `WEBHOOKS_HOOKS` key must be specified in the following
