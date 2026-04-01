@@ -146,14 +146,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	if !cfg.MFA.Enabled && cfg.Password.Enabled {
-		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
-
-		password := g.Group("/password")
-		password.PUT("", passwordHandler.Set, sessionMiddleware)
-		password.POST("/login", passwordHandler.Login)
-	}
-
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
 	statusHandler := NewStatusHandler(persister)
 
