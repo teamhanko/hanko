@@ -410,18 +410,3 @@ func (handler *Handler) auditError(c echo.Context, err error) error {
 	}
 	return auditLogError
 }
-
-func (handler *Handler) GetProvider(c echo.Context) error {
-	var request dto.SamlRequest
-	err := c.Bind(&request)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, err)
-	}
-
-	foundProvider, err := handler.samlService.GetProviderByDomain(request.Domain)
-	if err != nil {
-		return c.NoContent(http.StatusNotFound)
-	}
-
-	return c.JSON(http.StatusOK, foundProvider.GetConfig())
-}
