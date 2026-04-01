@@ -56,8 +56,12 @@ func parseToken(persister persistence.Persister, generator session.Manager) Pars
 			return nil, fmt.Errorf("session id not found in database")
 		}
 
+		// We suppose that the session middleware is always applied after the tenant middleware, so a tenant config
+		// is always on the context.
+		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
+
 		// Check idle timeout
-		idleTimeout, _ := time.ParseDuration(cfg.IdleTimeout)
+		idleTimeout, _ := time.ParseDuration(tenantConfig.Session.IdleTimeout)
 		if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
 			sessionDeletionErr := persister.GetSessionPersister().Delete(*sessionModel)
 			if sessionDeletionErr != nil {
