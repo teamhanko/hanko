@@ -191,8 +191,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	emailHandler := NewEmailHandler(cfg, persister, auditLogger)
-
 	if cfg.Passkey.Enabled {
 		webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
 		if err != nil {
@@ -223,12 +221,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		passcodeLogin.POST("/initialize", passcodeHandler.Init)
 		passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 	}
-
-	email := g.Group("/emails", sessionMiddleware, webhookMiddleware)
-	email.GET("", emailHandler.List)
-	email.POST("", emailHandler.Create)
-	email.DELETE("/:id", emailHandler.Delete)
-	email.POST("/:id/set_primary", emailHandler.SetPrimaryEmail)
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
 	thirdparty := g.Group("thirdparty", tenantMiddleware)
