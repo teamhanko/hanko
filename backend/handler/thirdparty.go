@@ -38,54 +38,6 @@ func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, s
 	}
 }
 
-func (h *ThirdPartyHandler) Auth(c echo.Context) error {
-	errorRedirectTo := c.Request().Header.Get("Referer")
-	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
-	if tenantConfig == nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), errorRedirectTo)
-	}
-	if errorRedirectTo == "" {
-		errorRedirectTo = tenantConfig.ThirdParty.ErrorRedirectURL
-	}
-
-	var request dto.ThirdPartyAuthRequest
-	err := c.Bind(&request)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not decode request payload").WithCause(err), errorRedirectTo)
-	}
-
-	err = c.Validate(request)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
-	}
-
-	if ok := thirdparty.IsAllowedRedirect(tenantConfig.ThirdParty, request.RedirectTo); !ok {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", request.RedirectTo)), errorRedirectTo)
-	}
-
-	provider, err := thirdparty.GetProvider(tenantConfig.ThirdParty, request.Provider)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
-	}
-
-	state, err := thirdparty.GenerateState(tenantConfig, provider.ID(), request.RedirectTo)
-	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not generate state").WithCause(err), errorRedirectTo)
-	}
-
-	authCodeUrl := provider.AuthCodeURL(string(state))
-
-	cookie := utils.GenerateStateCookie(tenantConfig, utils.HankoThirdpartyStateCookie, string(state), utils.CookieOptions{
-		MaxAge:   300,
-		Path:     "/",
-		SameSite: http.SameSiteLaxMode,
-	})
-
-	c.SetCookie(cookie)
-
-	return c.Redirect(http.StatusTemporaryRedirect, authCodeUrl)
-}
-
 func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
 	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
 	if tenantConfig == nil {

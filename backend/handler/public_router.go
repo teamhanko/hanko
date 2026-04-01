@@ -178,7 +178,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
 	thirdparty := g.Group("thirdparty", tenantMiddleware)
-	thirdparty.GET("/auth", thirdPartyHandler.Auth)
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
 
