@@ -33,11 +33,11 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
-	emailService, _ := services.NewEmailService(*cfg)
-	passcodeService := services.NewPasscodeService(*cfg, *emailService, persister)
+	emailService, _ := services.NewEmailService()
+	passcodeService := services.NewPasscodeService(*emailService, persister)
 	passwordService := services.NewPasswordService(persister)
 	webauthnService := services.NewWebauthnService(*cfg, persister)
-	securityNotificationService := services.NewSecurityNotificationService(*cfg, *emailService, persister, auditLogger)
+	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
 
 	jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
 	if err != nil {
