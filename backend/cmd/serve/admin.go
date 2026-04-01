@@ -32,7 +32,7 @@ func NewServeAdminCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
-			persister := persistence.New(dbConnection, nil)
+			persister := persistence.New(dbConnection)
 			var wg sync.WaitGroup
 			wg.Add(1)
 
