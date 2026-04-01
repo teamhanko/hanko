@@ -177,26 +177,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
-	if cfg.Passkey.Enabled {
-		webauthnHandler, err := NewWebauthnHandler(cfg, persister, sessionManager, auditLogger, authenticatorMetadata)
-		if err != nil {
-			panic(fmt.Errorf("failed to create public webauthn handler: %w", err))
-		}
-		webauthn := g.Group("/webauthn")
-		webauthnRegistration := webauthn.Group("/registration", sessionMiddleware)
-		webauthnRegistration.POST("/initialize", webauthnHandler.BeginRegistration)
-		webauthnRegistration.POST("/finalize", webauthnHandler.FinishRegistration)
-
-		webauthnLogin := webauthn.Group("/login")
-		webauthnLogin.POST("/initialize", webauthnHandler.BeginAuthentication)
-		webauthnLogin.POST("/finalize", webauthnHandler.FinishAuthentication)
-
-		webauthnCredentials := webauthn.Group("/credentials", sessionMiddleware)
-		webauthnCredentials.GET("", webauthnHandler.ListCredentials)
-		webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
-		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
-	}
-
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
 	thirdparty := g.Group("thirdparty", tenantMiddleware)
 	thirdparty.GET("/auth", thirdPartyHandler.Auth)
