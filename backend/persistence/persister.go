@@ -84,7 +84,6 @@ type Storage interface {
 	Persister
 }
 
-// New return a new Persister Object with given configuration
 func New(connection *pop.Connection) Storage {
 	return &persister{
 		DB: connection,
