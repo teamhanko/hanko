@@ -175,7 +175,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	}
 	wellKnown := g.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
-	wellKnown.GET("/config", wellKnownHandler.GetConfig)
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
 	thirdparty := g.Group("thirdparty", tenantMiddleware)

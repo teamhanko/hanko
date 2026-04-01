@@ -1,11 +1,12 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	hankoJwk "github.com/teamhanko/hanko/backend/v2/crypto/jwk"
 	dto "github.com/teamhanko/hanko/backend/v2/dto"
-	"net/http"
 )
 
 type WellKnownHandler struct {
@@ -28,8 +29,4 @@ func (h *WellKnownHandler) GetPublicKeys(c echo.Context) error {
 
 	c.Response().Header().Add("Cache-Control", "max-age=600")
 	return c.JSON(http.StatusOK, keys)
-}
-
-func (h *WellKnownHandler) GetConfig(c echo.Context) error {
-	return c.JSON(http.StatusOK, h.config)
 }
