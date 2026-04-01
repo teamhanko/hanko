@@ -15,7 +15,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flow_api"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow_locker"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/mail"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
@@ -147,11 +146,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	e.Validator = dto.NewCustomValidator()
 
-	mailer, err := mail.NewMailer(cfg.EmailDelivery.SMTP)
-	if err != nil {
-		panic(fmt.Errorf("failed to create mailer: %w", err))
-	}
-
 	if !cfg.MFA.Enabled && cfg.Password.Enabled {
 		passwordHandler := NewPasswordHandler(persister, sessionManager, cfg, auditLogger)
 
@@ -209,17 +203,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		webauthnCredentials.GET("", webauthnHandler.ListCredentials)
 		webauthnCredentials.PATCH("/:id", webauthnHandler.UpdateCredential)
 		webauthnCredentials.DELETE("/:id", webauthnHandler.DeleteCredential)
-	}
-
-	if !cfg.MFA.Enabled && cfg.Email.Enabled && cfg.Email.UseForAuthentication {
-		passcodeHandler, err := NewPasscodeHandler(cfg, persister, sessionManager, mailer, auditLogger)
-		if err != nil {
-			panic(fmt.Errorf("failed to create public passcode handler: %w", err))
-		}
-		passcode := g.Group("/passcode")
-		passcodeLogin := passcode.Group("/login", webhookMiddleware)
-		passcodeLogin.POST("/initialize", passcodeHandler.Init)
-		passcodeLogin.POST("/finalize", passcodeHandler.Finish)
 	}
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
