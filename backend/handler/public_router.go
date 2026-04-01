@@ -152,16 +152,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	e.GET("/", statusHandler.Status)
 	g.GET("/me", userHandler.Me, sessionMiddleware)
 
-	user := g.Group("/users", webhookMiddleware)
-	user.POST("", userHandler.Create)
-	user.GET("/:id", userHandler.Get, sessionMiddleware)
-
-	g.POST("/user", userHandler.GetUserIdByEmail)
 	g.POST("/logout", userHandler.Logout, sessionMiddleware)
-
-	if cfg.Account.AllowDeletion {
-		g.DELETE("/user", userHandler.Delete, sessionMiddleware, webhookMiddleware)
-	}
 
 	healthHandler := NewHealthHandler()
 
