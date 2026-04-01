@@ -172,9 +172,6 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
 
-	tokenHandler := NewTokenHandler(cfg, persister, sessionManager, auditLogger)
-	g.POST("/token", tokenHandler.Validate)
-
 	sessionHandler := NewSessionHandler(persister, sessionManager, *cfg)
 	sessions := g.Group("sessions")
 	sessions.GET("/validate", sessionHandler.ValidateSession)
