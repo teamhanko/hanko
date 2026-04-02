@@ -162,6 +162,7 @@ export const fr: Translation = {
     trustDevice: "Faire confiance à ce navigateur",
     staySignedIn: "Rester connecté",
     connectAccount: "Connecter un compte",
+    restart: "Redémarrer",
   },
   errors: {
     somethingWentWrong:

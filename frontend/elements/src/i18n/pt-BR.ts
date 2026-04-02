@@ -162,6 +162,7 @@ export const ptBR: Translation = {
     trustDevice: "Confiar neste navegador",
     staySignedIn: "Manter-me conectado",
     connectAccount: "Conectar conta",
+    restart: "Reiniciar",
   },
   errors: {
     somethingWentWrong:
