@@ -77,16 +77,9 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				continue
 			}
 
-			// Update lastUsed field
-			sessionModel.LastUsed = time.Now().UTC()
-			err = h.persister.GetSessionPersister().Update(*sessionModel)
-			if err != nil {
-				return dto.ToHttpError(err)
-			}
-
 			var idleExpiresAt *time.Time
 			if idleTimeout > 0 {
-				expiresAt := time.Now().UTC().Add(idleTimeout)
+				expiresAt := sessionModel.LastUsed.Add(idleTimeout)
 				// Don't exceed JWT expiration
 				if expiresAt.After(claims.Expiration) {
 					expiresAt = claims.Expiration
@@ -165,7 +158,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 
 	var idleExpiresAt *time.Time
 	if idleTimeout > 0 {
-		expiresAt := time.Now().UTC().Add(idleTimeout)
+		expiresAt := sessionModel.LastUsed.Add(idleTimeout)
 		// Don't exceed JWT expiration
 		if expiresAt.After(claims.Expiration) {
 			expiresAt = claims.Expiration
