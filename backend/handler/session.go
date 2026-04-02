@@ -84,11 +84,22 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				return dto.ToHttpError(err)
 			}
 
+			var idleExpiresAt *time.Time
+			if idleTimeout > 0 {
+				expiresAt := time.Now().UTC().Add(idleTimeout)
+				// Don't exceed JWT expiration
+				if expiresAt.After(claims.Expiration) {
+					expiresAt = claims.Expiration
+				}
+				idleExpiresAt = &expiresAt
+			}
+
 			return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 				IsValid:        true,
 				Claims:         claims,
 				ExpirationTime: &claims.Expiration,
 				UserID:         &claims.Subject,
+				IdleExpiresAt:  idleExpiresAt,
 			})
 		}
 	}
@@ -152,10 +163,21 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	var idleExpiresAt *time.Time
+	if idleTimeout > 0 {
+		expiresAt := time.Now().UTC().Add(idleTimeout)
+		// Don't exceed JWT expiration
+		if expiresAt.After(claims.Expiration) {
+			expiresAt = claims.Expiration
+		}
+		idleExpiresAt = &expiresAt
+	}
+
 	return c.JSON(http.StatusOK, dto.ValidateSessionResponse{
 		IsValid:        true,
 		Claims:         claims,
 		ExpirationTime: &claims.Expiration,
 		UserID:         &claims.Subject,
+		IdleExpiresAt:  idleExpiresAt,
 	})
 }

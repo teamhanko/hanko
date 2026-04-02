@@ -178,6 +178,8 @@ type ValidateSessionResponse struct {
 	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
 	// deprecated
 	UserID *uuid.UUID `json:"user_id,omitempty"`
+	// IdleExpiresAt indicates when the session will expire due to inactivity, assuming no further activity occurs before this time
+	IdleExpiresAt *time.Time `json:"idle_expires_at,omitempty"`
 }
 
 type ValidateSessionRequest struct {
