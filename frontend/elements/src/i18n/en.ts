@@ -158,6 +158,7 @@ export const en: Translation = {
     trustDevice: "Trust this browser",
     staySignedIn: "Stay signed in",
     connectAccount: "Connect account",
+    restart: "Restart",
   },
   errors: {
     somethingWentWrong:
