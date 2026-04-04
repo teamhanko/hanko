@@ -82,7 +82,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 	expirationTime := rawToken.Expiration()
 	sessionModel := models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
-		UserID:    userID,
+		UserID:    nulls.NewUUID(userID),
 		CreatedAt: rawToken.IssuedAt(),
 		UpdatedAt: rawToken.IssuedAt(),
 		ExpiresAt: &expirationTime,
@@ -174,7 +174,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 
 	if sessionModel == nil {
 		return echo.NewHTTPError(http.StatusNotFound)
-	} else if sessionModel.UserID != userID {
+	} else if sessionModel.UserID.UUID != userID {
 		return echo.NewHTTPError(http.StatusNotFound).SetInternal(errors.New("session does not belong to user"))
 	}
 
