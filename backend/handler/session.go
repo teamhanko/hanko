@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -28,6 +29,8 @@ func NewSessionHandler(persister persistence.Persister, sessionManager session.M
 }
 
 func (h *SessionHandler) ValidateSession(c echo.Context) error {
+	tenantID := c.Get("tenant_id").(*uuid.UUID)
+
 	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.cfg.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
 
@@ -51,7 +54,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to parse token claims: %w", err))
 			}
 
-			sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID)
+			sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID, tenantID)
 			if err != nil {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
@@ -101,6 +104,8 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 }
 
 func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
+	tenantID := c.Get("tenant_id").(*uuid.UUID)
+
 	var request dto.ValidateSessionRequest
 	err := (&echo.DefaultBinder{}).BindBody(c, &request)
 	if err != nil {
@@ -122,7 +127,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to parse token claims: %w", err))
 	}
 
-	sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID)
+	sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID, tenantID)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
