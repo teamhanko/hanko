@@ -1,16 +1,17 @@
 package thirdparty
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/teamhanko/hanko/backend/v2/config"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/v2/config"
 )
 
 func TestThirdParty_GenerateState(t *testing.T) {
-	cfg := &config.Config{
+	cfg := &config.TenantConfig{
 		Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
 		ThirdParty: config.ThirdParty{
 			ErrorRedirectURL: "https://example.com/error",
@@ -53,7 +54,7 @@ func TestThirdParty_GenerateState_Error(t *testing.T) {
 	}
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
-			cfg := &config.Config{
+			cfg := &config.TenantConfig{
 				Secrets:    config.Secrets{Keys: []string{testData.secret}},
 				ThirdParty: config.ThirdParty{ErrorRedirectURL: testData.errorRedirectUrl},
 			}
@@ -65,7 +66,7 @@ func TestThirdParty_GenerateState_Error(t *testing.T) {
 }
 
 func TestThirdParty_VerifyState(t *testing.T) {
-	cfg := &config.Config{
+	cfg := &config.TenantConfig{
 		Secrets:    config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
 		ThirdParty: config.ThirdParty{ErrorRedirectURL: "https://example.com/error"},
 	}
@@ -113,7 +114,7 @@ func TestThirdParty_VerifyState_Error(t *testing.T) {
 	}
 	for _, testData := range tests {
 		t.Run(testData.name, func(t *testing.T) {
-			cfg := &config.Config{
+			cfg := &config.TenantConfig{
 				Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
 			}
 			_, err := VerifyState(cfg, testData.state, testData.expectedState)

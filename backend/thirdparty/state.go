@@ -35,7 +35,7 @@ func GenerateStateWithUserID(userID uuid.UUID) func(*State) {
 	}
 }
 
-func GenerateState(config *config.Config, provider string, redirectTo string, options ...func(*State)) ([]byte, error) {
+func GenerateState(config *config.TenantConfig, provider string, redirectTo string, options ...func(*State)) ([]byte, error) {
 	if provider == "" {
 		return nil, errors.New("provider must be present")
 	}
@@ -88,7 +88,7 @@ type State struct {
 	UserID       *uuid.UUID `json:"user_id,omitempty"`
 }
 
-func VerifyState(config *config.Config, state string, expectedState string) (*State, error) {
+func VerifyState(config *config.TenantConfig, state string, expectedState string) (*State, error) {
 	decodedState, err := decodeState(config, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)
@@ -115,7 +115,7 @@ func VerifyState(config *config.Config, state string, expectedState string) (*St
 	return decodedState, nil
 }
 
-func decodeState(config *config.Config, state string) (*State, error) {
+func decodeState(config *config.TenantConfig, state string) (*State, error) {
 	aes, err := aes_gcm.NewAESGCM(config.Secrets.Keys)
 	if err != nil {
 		return nil, fmt.Errorf("could not instantiate aesgcm: %w", err)
