@@ -57,13 +57,15 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	}
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
+	tenantMiddleware := hankoMiddleware.TenantMiddleware(cfg.MultiTenancy, nil, persister)
+
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	userHandler := NewUserHandlerAdmin(persister)
 	emailHandler := NewEmailAdminHandler(cfg, persister)
 	sessionsHandler := NewSessionAdminHandler(cfg, persister, sessionManager, auditLogger)
 
-	user := g.Group("/users")
+	user := g.Group("/users", tenantMiddleware)
 	user.GET("", userHandler.List)
 	user.POST("", userHandler.Create, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
@@ -74,7 +76,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	user.PATCH("/:id/metadata", metadataHandler.PatchMetadata)
 	user.GET("/:id/metadata", metadataHandler.GetMetadata)
 
-	email := user.Group("/:user_id/emails", webhookMiddleware)
+	email := user.Group("/:user_id/emails", tenantMiddleware, webhookMiddleware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.GET("/:email_id", emailHandler.Get)
@@ -82,13 +84,13 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	email.POST("/:email_id/set_primary", emailHandler.SetPrimaryEmail)
 
 	webauthnCredentialHandler := NewWebauthnCredentialAdminHandler(persister)
-	webauthnCredentials := user.Group("/:user_id/webauthn_credentials")
+	webauthnCredentials := user.Group("/:user_id/webauthn_credentials", tenantMiddleware)
 	webauthnCredentials.GET("", webauthnCredentialHandler.List)
 	webauthnCredentials.GET("/:credential_id", webauthnCredentialHandler.Get)
 	webauthnCredentials.DELETE("/:credential_id", webauthnCredentialHandler.Delete)
 
 	passwordCredentialHandler := NewPasswordAdminHandler(persister)
-	passwordCredentials := user.Group("/:user_id/password")
+	passwordCredentials := user.Group("/:user_id/password", tenantMiddleware)
 	passwordCredentials.GET("", passwordCredentialHandler.Get)
 	passwordCredentials.POST("", passwordCredentialHandler.Create)
 	passwordCredentials.PUT("", passwordCredentialHandler.Update)
@@ -99,24 +101,24 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	userSessions.DELETE("/:session_id", sessionsHandler.Delete)
 
 	otpHandler := NewOTPAdminHandler(persister)
-	otp := user.Group("/:user_id/otp")
+	otp := user.Group("/:user_id/otp", tenantMiddleware)
 	otp.GET("", otpHandler.Get)
 	otp.DELETE("", otpHandler.Delete)
 
 	auditLogHandler := NewAuditLogHandler(persister)
 
-	auditLogs := g.Group("/audit_logs")
+	auditLogs := g.Group("/audit_logs", tenantMiddleware)
 	auditLogs.GET("", auditLogHandler.List)
 
 	webhookHandler := NewWebhookHandler(cfg.Webhooks, persister)
-	webhooks := g.Group("/webhooks")
+	webhooks := g.Group("/webhooks", tenantMiddleware)
 	webhooks.GET("", webhookHandler.List)
 	webhooks.POST("", webhookHandler.Create)
 	webhooks.GET("/:id", webhookHandler.Get)
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
 
-	sessions := g.Group("/sessions")
+	sessions := g.Group("/sessions", tenantMiddleware)
 	sessions.POST("", sessionsHandler.Generate)
 
 	return e
