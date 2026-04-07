@@ -2,14 +2,16 @@ package handler
 
 import (
 	"fmt"
-	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/dto"
-	"github.com/teamhanko/hanko/backend/v2/pagination"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
+
+	"github.com/gofrs/uuid"
+	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v2/pagination"
+	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
 type AuditLogHandler struct {
@@ -41,6 +43,8 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		return dto.ToHttpError(err)
 	}
 
+	tenantID := c.Get("tenant_id").(*uuid.UUID)
+
 	if request.Page == 0 {
 		request.Page = 1
 	}
@@ -49,12 +53,12 @@ func (h AuditLogHandler) List(c echo.Context) error {
 		request.PerPage = 20
 	}
 
-	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString)
+	auditLogs, err := h.persister.GetAuditLogPersister().List(request.Page, request.PerPage, request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of audit logs: %w", err)
 	}
 
-	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString)
+	logCount, err := h.persister.GetAuditLogPersister().Count(request.StartTime, request.EndTime, request.Types, request.UserId, request.Email, request.IP, request.SearchString, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of audit logs: %w", err)
 	}
