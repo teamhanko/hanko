@@ -1,0 +1,5 @@
+add_column("flows", "session_id", "uuid", { "null": true} )
+add_foreign_key("flows", "session_id", {"sessions": ["id"]}, {
+    "on_delete": "set null",
+    "on_update": "cascade",
+})
