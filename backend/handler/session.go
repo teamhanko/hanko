@@ -5,13 +5,13 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gofrs/uuid"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type SessionHandler struct {
@@ -29,7 +29,10 @@ func NewSessionHandler(persister persistence.Persister, sessionManager session.M
 }
 
 func (h *SessionHandler) ValidateSession(c echo.Context) error {
-	tenantID := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.cfg.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
@@ -104,10 +107,13 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 }
 
 func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
-	tenantID := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	var request dto.ValidateSessionRequest
-	err := (&echo.DefaultBinder{}).BindBody(c, &request)
+	err = (&echo.DefaultBinder{}).BindBody(c, &request)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}

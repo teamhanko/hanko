@@ -28,6 +28,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type FlowPilotHandler struct {
@@ -79,7 +80,10 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 	persister := h.Persister
 	sessionManager := h.SessionManager
 	cfg := h.Cfg
-	tenantId := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 	if h.Cfg.MultiTenancy {
 		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
 		if tenantConfig == nil {
@@ -135,7 +139,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				continue
 			}
 
-			sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantId)
+			sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantID)
 			if err != nil {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
@@ -194,7 +198,10 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	var flowID uuid.UUID
 
 	var cfg = h.Cfg
-	var tenantID = c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 	if h.Cfg.MultiTenancy {
 		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
 		if tenantConfig == nil {

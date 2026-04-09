@@ -12,6 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 // Session is a convenience function to create a middleware.JWT with custom JWT verification
@@ -31,7 +32,10 @@ type ParseTokenFunc = func(c echo.Context, auth string) (interface{}, error)
 
 func parseToken(persister persistence.Persister, generator session.Manager) ParseTokenFunc {
 	return func(c echo.Context, auth string) (interface{}, error) {
-		tenantId := c.Get("tenant_id").(*uuid.UUID)
+		tenantID, err := utils.TenantIDFromContext(c)
+		if err != nil {
+			return nil, fmt.Errorf("invalid tenant identifier: %w", err)
+		}
 
 		token, err := generator.Verify(auth)
 		if err != nil {
@@ -48,7 +52,7 @@ func parseToken(persister persistence.Persister, generator session.Manager) Pars
 			return nil, errors.New("session id has wrong format")
 		}
 
-		sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantId)
+		sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get session from database: %w", err)
 		}

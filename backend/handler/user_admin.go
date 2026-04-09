@@ -37,6 +37,11 @@ func NewUserHandlerAdmin(persister persistence.Persister) *UserHandlerAdmin {
 }
 
 func (h *UserHandlerAdmin) Delete(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	userId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
@@ -44,7 +49,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		p := h.persister.GetUserPersisterWithConnection(tx)
-		user, err := p.Get(userId)
+		user, err := p.Get(userId, tenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -82,8 +87,13 @@ type UserListRequest struct {
 }
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	var request UserListRequest
-	err := (&echo.DefaultBinder{}).BindQueryParams(c, &request)
+	err = (&echo.DefaultBinder{}).BindQueryParams(c, &request)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
@@ -120,12 +130,12 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	email := strings.ToLower(request.Email)
 	username := strings.ToLower(request.Username)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userIDs, email, username, request.SortDirection)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userIDs, email, username, request.SortDirection, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}
 
-	userCount, err := h.persister.GetUserPersister().Count(userIDs, email, username)
+	userCount, err := h.persister.GetUserPersister().Count(userIDs, email, username, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of users: %w", err)
 	}
@@ -144,13 +154,18 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 }
 
 func (h *UserHandlerAdmin) Get(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	userId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(userId)
+	user, err := p.Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -163,6 +178,11 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 }
 
 func (h *UserHandlerAdmin) Create(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	var body admin.CreateUser
 	if err := (&echo.DefaultBinder{}).BindBody(c, &body); err != nil {
 		return dto.ToHttpError(err)
@@ -199,7 +219,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "only one primary email is allowed")
 	}
 
-	err := h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
+	err = h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
 		u := models.User{
 			ID:        body.ID,
 			CreatedAt: body.CreatedAt,
@@ -283,7 +303,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(body.ID)
+	user, err := p.Get(body.ID, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -337,6 +357,11 @@ type PatchUserAdminRequest struct {
 }
 
 func (h *UserHandlerAdmin) Patch(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	userId, err := uuid.FromString(c.Param("id"))
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
@@ -395,7 +420,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
 		usernamePersister := h.persister.GetUsernamePersisterWithConnection(tx)
 
-		user, err := userPersister.Get(userId)
+		user, err := userPersister.Get(userId, tenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -441,7 +466,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 					return echo.NewHTTPError(http.StatusBadRequest, "username is invalid")
 				}
 
-				dup, err := usernamePersister.GetByName(newUsername)
+				dup, err := usernamePersister.GetByName(newUsername, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to check duplicate username: %w", err)
 				}
@@ -482,7 +507,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		return err
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId)
+	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}

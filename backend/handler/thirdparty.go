@@ -7,7 +7,6 @@ import (
 	"net/url"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -55,11 +54,14 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 	if tenantConfig == nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), "/error") // TODO:
 	}
-	tenantId := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	var redirectToURL *url.URL
 	var accountLinkingResult *thirdparty.AccountLinkingResult
-	err := h.persister.Transaction(func(tx *pop.Connection) error {
+	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		var callback dto.ThirdPartyAuthCallback
 		terr := c.Bind(&callback)
 		if terr != nil {
@@ -126,13 +128,13 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, tenantConfig, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenantId)
+		linkingResult, terr := thirdparty.LinkAccount(tx, tenantConfig, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenantID)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID(), tenantId)
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID(), tenantID)
 		if err != nil {
 			return thirdparty.ErrorServer("could not get identity").WithCause(err)
 		}

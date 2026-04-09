@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gobuffalo/pop/v6"
-	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
@@ -37,10 +36,13 @@ func NewSamlHandler(sessionManager session.Manager, auditLogger auditlog.Logger,
 }
 
 func (handler *Handler) Metadata(c echo.Context) error {
-	tenantId := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	var request dto.SamlMetadataRequest
-	err := c.Bind(&request)
+	err = c.Bind(&request)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, thirdparty.ErrorInvalidRequest("domain is missing"))
 	}
@@ -51,7 +53,7 @@ func (handler *Handler) Metadata(c echo.Context) error {
 	}
 
 	if request.CertOnly {
-		cert, err := handler.samlService.Persister().GetSamlCertificatePersister().GetFirst(tenantId)
+		cert, err := handler.samlService.Persister().GetSamlCertificatePersister().GetFirst(tenantID)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
 		}
@@ -104,7 +106,11 @@ func (handler *Handler) Auth(c echo.Context) error {
 }
 
 func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse string) error {
-	tenantID := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	// ignore URL parse error because config validation already ensures it is a parseable URL
 	redirectTo, _ := url.Parse(handler.samlService.Config().Saml.DefaultRedirectUrl)
 
@@ -251,7 +257,10 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	relayState := c.FormValue("RelayState")
 	samlResponse := c.FormValue("SAMLResponse")
 
-	tenantId := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	if handler.isIDPInitiated(relayState) {
 		return handler.callbackPostIdPInitiated(c, samlResponse)
@@ -260,7 +269,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 			handler.samlService.Config(),
 			handler.samlService.Persister().GetSamlStatePersister(),
 			strings.TrimPrefix(relayState, statePrefixServiceProviderInitiated),
-			tenantId,
+			tenantID,
 		)
 
 		if err != nil {
@@ -320,9 +329,12 @@ func (handler *Handler) isIDPInitiated(relayState string) bool {
 }
 
 func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow bool, provider provider.ServiceProvider, assertionInfo *saml2.AssertionInfo) (*url.URL, error) {
-	tenantID := c.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return nil, fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	var accountLinkingResult *thirdparty.AccountLinkingResult
-	var err error
 	err = handler.samlService.Persister().Transaction(func(tx *pop.Connection) error {
 		userdata := provider.GetUserData(assertionInfo)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer

@@ -15,6 +15,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type SessionAdminHandler struct {
@@ -34,6 +35,8 @@ func NewSessionAdminHandler(cfg *config.Config, persister persistence.Persister,
 }
 
 func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
+	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+
 	var body admin.CreateSessionTokenDto
 	if err := (&echo.DefaultBinder{}).BindBody(ctx, &body); err != nil {
 		return dto.ToHttpError(err)
@@ -48,7 +51,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -62,7 +65,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID)
+	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
@@ -115,6 +118,8 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) List(ctx echo.Context) error {
+	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+
 	listDto, err := loadDto[admin.ListSessionsRequestDto](ctx)
 	if err != nil {
 		return err
@@ -125,7 +130,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -134,7 +139,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	sessions, err := h.persister.GetSessionPersister().ListActive(userID)
+	sessions, err := h.persister.GetSessionPersister().ListActive(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -143,6 +148,11 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	deleteDto, err := loadDto[admin.DeleteSessionRequestDto](ctx)
 	if err != nil {
 		return err
@@ -153,7 +163,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -167,7 +177,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf("failed to parse session_id as uuid: %s", err)
 	}
 
-	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
+	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID, tenantID)
 	if err != nil {
 		return err
 	}

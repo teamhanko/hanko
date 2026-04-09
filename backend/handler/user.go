@@ -14,6 +14,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/session"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type UserHandler struct {
@@ -33,12 +34,17 @@ func NewUserHandler(cfg *config.Config, persister persistence.Persister, session
 }
 
 func (h *UserHandler) Me(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("failed to cast session object")
 	}
 
-	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(sessionToken.Subject()))
+	user, err := h.persister.GetUserPersister().Get(uuid.FromStringOrNil(sessionToken.Subject()), tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -52,6 +58,11 @@ func (h *UserHandler) Me(c echo.Context) error {
 }
 
 func (h *UserHandler) Logout(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	sessionToken, ok := c.Get("session").(jwt.Token)
 	if !ok {
 		return errors.New("missing or malformed jwt")
@@ -59,7 +70,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 
 	userId := uuid.FromStringOrNil(sessionToken.Subject())
 
-	user, err := h.persister.GetUserPersister().Get(userId)
+	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -71,7 +82,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 		if err != nil {
 			return fmt.Errorf("failed to convert session id to uuid: %w", err)
 		}
-		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID)
+		sessionModel, err := h.persister.GetSessionPersister().Get(sessionID, tenantID)
 		if err != nil {
 			return fmt.Errorf("failed to get session from database: %w", err)
 		}

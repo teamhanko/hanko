@@ -7,11 +7,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/pagination"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type AuditLogHandler struct {
@@ -37,13 +37,16 @@ type AuditLogListRequest struct {
 }
 
 func (h AuditLogHandler) List(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	var request AuditLogListRequest
-	err := (&echo.DefaultBinder{}).BindQueryParams(c, &request)
+	err = (&echo.DefaultBinder{}).BindQueryParams(c, &request)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
-
-	tenantID := c.Get("tenant_id").(*uuid.UUID)
 
 	if request.Page == 0 {
 		request.Page = 1

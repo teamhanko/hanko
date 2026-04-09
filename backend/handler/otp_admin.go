@@ -2,10 +2,13 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/utils"
+
 	"net/http"
 )
 
@@ -23,6 +26,11 @@ func NewOTPAdminHandler(persister persistence.Persister) OTPAdminHandler {
 }
 
 func (h *otpAdminHandler) Get(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	getDto, err := loadDto[admin.GetOTPRequestDto](ctx)
 	if err != nil {
 		return err
@@ -33,7 +41,7 @@ func (h *otpAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	userModel, err := h.persister.GetUserPersister().Get(userID)
+	userModel, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -49,6 +57,11 @@ func (h *otpAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *otpAdminHandler) Delete(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	deleteDto, err := loadDto[admin.GetOTPRequestDto](ctx)
 	if err != nil {
 		return err
@@ -59,7 +72,7 @@ func (h *otpAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	userModel, err := h.persister.GetUserPersister().Get(userID)
+	userModel, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}

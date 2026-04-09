@@ -2,11 +2,14 @@ package handler
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/utils"
+
 	"net/http"
 )
 
@@ -30,6 +33,8 @@ func NewPasswordAdminHandler(persister persistence.Persister) PasswordAdminHandl
 }
 
 func (h *passwordAdminHandler) Get(ctx echo.Context) error {
+	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+
 	getDto, err := loadDto[admin.GetPasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
@@ -40,7 +45,7 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -49,7 +54,7 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -68,6 +73,8 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Create(ctx echo.Context) error {
+	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+
 	createDto, err := loadDto[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
@@ -78,7 +85,7 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -87,7 +94,7 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	existingCredential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	existingCredential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -96,12 +103,12 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusConflict)
 	}
 
-	err = h.passwordService.CreatePassword(h.persister.GetConnection(), userID, createDto.Password)
+	err = h.passwordService.CreatePassword(h.persister.GetConnection(), userID, createDto.Password, tenantID)
 	if err != nil {
 		return err
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -116,6 +123,11 @@ func (h *passwordAdminHandler) Create(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Update(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	updateDto, err := loadDto[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
@@ -126,7 +138,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -135,7 +147,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -149,7 +161,7 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 		return err
 	}
 
-	credential, err = h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	credential, err = h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -164,6 +176,11 @@ func (h *passwordAdminHandler) Update(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	getDto, err := loadDto[admin.GetPasswordCredentialRequestDto](ctx)
 	if err != nil {
 		return err
@@ -174,7 +191,7 @@ func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
 	if err != nil {
 		return err
 	}
@@ -183,7 +200,7 @@ func (h *passwordAdminHandler) Delete(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID)
+	credential, err := h.persister.GetPasswordCredentialPersister().GetByUserID(userID, tenantID)
 	if err != nil {
 		return err
 	}

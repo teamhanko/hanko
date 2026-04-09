@@ -14,7 +14,7 @@ import (
 )
 
 func getDefaultSessionManager(storage persistence.Persister) session.Manager {
-	jwkManager, _ := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, "v1", storage.GetJwkPersister(), false)
+	jwkManager, _ := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, storage.GetJwkPersister())
 	sessionManager, _ := session.NewManager(jwkManager, test.DefaultConfig)
 	return sessionManager
 }

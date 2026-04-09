@@ -3,6 +3,9 @@ package handler
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
@@ -10,10 +13,10 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/utils"
+
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
-	"net/http"
-	"strings"
+	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type EmailAdminHandler interface {
@@ -33,6 +36,7 @@ type emailAdminHandler struct {
 const (
 	parseUserUuidFailureMessage   = "failed to parse user_id as uuid: %w"
 	fetchUserFromDbFailureMessage = "failed to fetch user from db: %w"
+	invalidTenantIDFailureMessage = "invalid tenant identifier: %w"
 )
 
 func NewEmailAdminHandler(cfg *config.Config, persister persistence.Persister) EmailAdminHandler {
@@ -43,6 +47,11 @@ func NewEmailAdminHandler(cfg *config.Config, persister persistence.Persister) E
 }
 
 func (h *emailAdminHandler) List(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	listDto, err := loadDto[admin.ListEmailRequestDto](ctx)
 	if err != nil {
 		return err
@@ -53,7 +62,7 @@ func (h *emailAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	emails, err := h.persister.GetEmailPersister().FindByUserId(userId)
+	emails, err := h.persister.GetEmailPersister().FindByUserId(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch emails from db: %w", err)
 	}
@@ -68,6 +77,11 @@ func (h *emailAdminHandler) List(ctx echo.Context) error {
 }
 
 func (h *emailAdminHandler) Create(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	createDto, err := loadDto[admin.CreateEmailRequestDto](ctx)
 	if err != nil {
 		return err
@@ -78,7 +92,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	emailCount, err := h.persister.GetEmailPersister().CountByUserId(userId)
+	emailCount, err := h.persister.GetEmailPersister().CountByUserId(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to count user emails: %w", err)
 	}
@@ -89,12 +103,12 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 
 	newEmailAddress := strings.ToLower(createDto.Address)
 
-	email, err := h.persister.GetEmailPersister().FindByAddress(newEmailAddress)
+	email, err := h.persister.GetEmailPersister().FindByAddress(newEmailAddress, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to fetch email from db: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId)
+	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -118,7 +132,7 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 				return fmt.Errorf("failed to update the existing email: %w", err)
 			}
 		} else {
-			email = models.NewEmail(&user.ID, newEmailAddress)
+			email = models.NewEmail(&user.ID, newEmailAddress, tenantID)
 			email.Verified = createDto.IsVerified
 
 			err = h.persister.GetEmailPersisterWithConnection(tx).Create(*email)
@@ -129,17 +143,22 @@ func (h *emailAdminHandler) Create(ctx echo.Context) error {
 
 		// make email primary if user had no emails prior to email creation
 		if len(user.Emails) == 0 {
-			primaryEmail := models.NewPrimaryEmail(email.ID, user.ID)
+			primaryEmail := models.NewPrimaryEmail(email.ID, user.ID, tenantID)
 			err = h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 		}
 
-		utils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailCreate, userId)
+		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailCreate, userId)
 
 		return ctx.JSON(http.StatusCreated, admin.FromEmailModel(email))
 	})
 }
 
 func (h *emailAdminHandler) Get(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	getDto, err := loadDto[admin.GetEmailRequestDto](ctx)
 	if err != nil {
 		return err
@@ -155,7 +174,7 @@ func (h *emailAdminHandler) Get(ctx echo.Context) error {
 		return fmt.Errorf("failed to parse email_id as uuid: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId)
+	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -173,6 +192,11 @@ func (h *emailAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *emailAdminHandler) Delete(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	deleteDto, err := loadDto[admin.GetEmailRequestDto](ctx)
 	if err != nil {
 		return err
@@ -188,7 +212,7 @@ func (h *emailAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf("failed to parse email_id as uuid: %w", err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId)
+	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -212,13 +236,18 @@ func (h *emailAdminHandler) Delete(ctx echo.Context) error {
 			return fmt.Errorf("failed to delete email from db: %w", err)
 		}
 
-		utils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailDelete, userId)
+		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailDelete, userId)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})
 }
 
 func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	primaryDto, err := loadDto[admin.GetEmailRequestDto](ctx)
 	if err != nil {
 		return err
@@ -234,7 +263,7 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest).SetInternal(err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId)
+	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf(fetchUserFromDbFailureMessage, err)
 	}
@@ -253,25 +282,25 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
-		err := h.makeEmailPrimary(ctx, email, user, tx)
+		err := h.makeEmailPrimary(ctx, email, user, tx, tenantID)
 		if err != nil {
 			return err
 		}
 
-		utils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailPrimary, userId)
+		webhookUtils.NotifyUserChange(ctx, tx, h.persister, events.UserEmailPrimary, userId)
 
 		return ctx.NoContent(http.StatusNoContent)
 	})
 }
 
-func (h *emailAdminHandler) makeEmailPrimary(ctx echo.Context, email *models.Email, user *models.User, tx *pop.Connection) error {
+func (h *emailAdminHandler) makeEmailPrimary(ctx echo.Context, email *models.Email, user *models.User, tx *pop.Connection, tenantID *uuid.UUID) error {
 	var primaryEmail *models.PrimaryEmail
 	if e := user.Emails.GetPrimary(); e != nil {
 		primaryEmail = e.PrimaryEmail
 	}
 
 	if primaryEmail == nil {
-		primaryEmail = models.NewPrimaryEmail(email.ID, user.ID)
+		primaryEmail = models.NewPrimaryEmail(email.ID, user.ID, tenantID)
 		err := h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 		if err != nil {
 			ctx.Logger().Error(err)
