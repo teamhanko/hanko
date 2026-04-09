@@ -5,7 +5,7 @@
     "@teamhanko/hanko-elements": "^2.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "7.13.1"
+    "react-router-dom": "7.14.0"
   },
   "scripts": {
     "start": "vite --port 8888 --host",
