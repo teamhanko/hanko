@@ -31,12 +31,11 @@
     "vite": "^6.4.1"
   },
   "optionalDependencies": {
-    "@rollup/rollup-linux-x64-gnu": "*"
+    "@rollup/rollup-linux-x64-gnu": "^4.60.1"
   },
   "overrides": {
     "vite": {
       "rollup": "npm:@rollup/wasm-node"
     }
   }
-
 }
