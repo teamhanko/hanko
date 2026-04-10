@@ -135,7 +135,7 @@
     "style-loader": "^3.3.2",
     "ts-jest": "^29.4.9",
     "ts-loader": "^9.5.7",
-    "webpack": "^5.105.4",
+    "webpack": "^5.106.1",
     "webpack-cli": "^7.0.2"
   },
   "dependencies": {
