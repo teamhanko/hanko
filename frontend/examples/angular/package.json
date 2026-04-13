@@ -8,7 +8,7 @@
   },
   "dependencies": {
     "@angular/animations": "^21.1.5",
-    "@angular/common": "^21.1.5",
+    "@angular/common": "^21.2.8",
     "@angular/compiler": "^21.1.5",
     "@angular/core": "^21.1.5",
     "@angular/forms": "^21.1.5",
