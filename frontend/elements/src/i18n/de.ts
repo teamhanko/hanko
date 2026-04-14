@@ -163,6 +163,7 @@ export const de: Translation = {
     trustDevice: "Diesem Browser vertrauen",
     staySignedIn: "Angemeldet bleiben",
     connectAccount: "Verbinde Konto",
+    restart: "Neu starten",
   },
   errors: {
     somethingWentWrong:
