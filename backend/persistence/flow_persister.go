@@ -49,6 +49,7 @@ func (p flowPersister) CreateFlow(flowModel flowpilot.FlowModel) error {
 		ExpiresAt: flowModel.ExpiresAt,
 		CreatedAt: flowModel.CreatedAt,
 		UpdatedAt: flowModel.UpdatedAt,
+		TenantID:  flowModel.TenantID,
 	}
 
 	err := p.tx.Create(&f)
