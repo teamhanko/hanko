@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestPasswordAdminSuite(t *testing.T) {
@@ -158,7 +159,7 @@ func (s *passwordAdminSuite) TestPasswordAdminHandler_Create() {
 				s.NoError(json.Unmarshal(rec.Body.Bytes(), &passwordCredential))
 				s.NotNil(passwordCredential)
 
-				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId))
+				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId), nil)
 				s.Require().NoError(err)
 				s.Require().NotNil(cred)
 			} else {
@@ -246,7 +247,7 @@ func (s *passwordAdminSuite) TestPasswordAdminHandler_Update() {
 				s.NoError(json.Unmarshal(rec.Body.Bytes(), &passwordCredential))
 				s.NotNil(passwordCredential)
 
-				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId))
+				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId), nil)
 				s.Require().NoError(err)
 				s.NotEqual(currentTest.oldHashedPassword, cred.Password)
 			} else {
@@ -310,7 +311,7 @@ func (s *passwordAdminSuite) TestPasswordAdminHandler_Delete() {
 			s.Require().Equal(currentTest.expectedStatusCode, rec.Code)
 
 			if http.StatusNoContent == rec.Code {
-				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId))
+				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId), nil)
 				s.Require().NoError(err)
 				s.Require().Nil(cred)
 			}

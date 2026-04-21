@@ -33,7 +33,10 @@ func NewPasswordAdminHandler(persister persistence.Persister) PasswordAdminHandl
 }
 
 func (h *passwordAdminHandler) Get(ctx echo.Context) error {
-	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	getDto, err := loadDto[admin.GetPasswordCredentialRequestDto](ctx)
 	if err != nil {
@@ -73,7 +76,10 @@ func (h *passwordAdminHandler) Get(ctx echo.Context) error {
 }
 
 func (h *passwordAdminHandler) Create(ctx echo.Context) error {
-	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	createDto, err := loadDto[admin.CreateOrUpdatePasswordCredentialRequestDto](ctx)
 	if err != nil {

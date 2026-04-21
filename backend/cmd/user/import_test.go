@@ -212,8 +212,8 @@ func (s *importSuite) Test_addToDatabase() {
 		s.T().Run(tt.name, func(t *testing.T) {
 
 			s.SetupTest()
-			tt.wantErr(t, addToDatabase(tt.args.entries, tt.args.persister), fmt.Sprintf("addToDatabase(%v, %v)", tt.args.entries, tt.args.persister))
-			users, err := tt.args.persister.GetUserPersister().List(0, 100, []uuid.UUID{}, "", "", "")
+			tt.wantErr(t, addToDatabase(tt.args.entries, tt.args.persister, nil), fmt.Sprintf("addToDatabase(%v, %v)", tt.args.entries, tt.args.persister))
+			users, err := tt.args.persister.GetUserPersister().List(0, 100, []uuid.UUID{}, "", "", "", nil)
 			log.Println(users)
 			s.NoError(err)
 			s.Equal(tt.wantNumUsers, len(users))

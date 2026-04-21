@@ -1,6 +1,11 @@
 package webhooks
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -8,10 +13,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func TestManagerSuite(t *testing.T) {
@@ -58,7 +59,7 @@ func (s *managerSuite) TestManager_TriggerWithoutHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum")
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -80,9 +81,11 @@ func (s *managerSuite) TestManager_TriggerWithConfigHook() {
 	}}
 
 	cfg := config.Config{
-		Webhooks: config.WebhookSettings{
-			Enabled: true,
-			Hooks:   hooks,
+		TenantConfig: config.TenantConfig{
+			Webhooks: config.WebhookSettings{
+				Enabled: true,
+				Hooks:   hooks,
+			},
 		},
 	}
 
@@ -90,7 +93,7 @@ func (s *managerSuite) TestManager_TriggerWithConfigHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum")
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -113,9 +116,11 @@ func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
 	}}
 
 	cfg := config.Config{
-		Webhooks: config.WebhookSettings{
-			Enabled: false,
-			Hooks:   hooks,
+		TenantConfig: config.TenantConfig{
+			Webhooks: config.WebhookSettings{
+				Enabled: false,
+				Hooks:   hooks,
+			},
 		},
 	}
 
@@ -123,7 +128,7 @@ func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum")
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -148,7 +153,7 @@ func (s *managerSuite) TestManager_TriggerWithDbHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum")
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -172,7 +177,7 @@ func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum")
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)

@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/tidwall/gjson"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/tidwall/gjson"
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
@@ -482,7 +483,7 @@ func (s *metadataAdminSuite) TestMetadataAdminHandler_Patch() {
 					// Also verify the metadata was actually updated in the database
 					userID, err := uuid.FromString(currentTest.userId)
 					s.Require().NoError(err)
-					metadataModel, err := s.Storage.GetUserMetadataPersister().Get(userID)
+					metadataModel, err := s.Storage.GetUserMetadataPersister().Get(userID, nil)
 					s.Require().NoError(err)
 					if currentTest.expectedMetadata == nil {
 						s.False(metadataModel.Public.Valid)

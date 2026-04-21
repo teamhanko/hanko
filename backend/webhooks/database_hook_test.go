@@ -43,7 +43,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
 	err := dbHook.DisableOnExpiryDate(now)
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID)
+	updatedHook, err := whPersister.Get(hook.ID, nil)
 	s.Require().NoError(err)
 
 	s.False(updatedHook.Enabled)
@@ -57,7 +57,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
 	err := dbHook.DisableOnExpiryDate(now)
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID)
+	updatedHook, err := whPersister.Get(hook.ID, nil)
 	s.Require().NoError(err)
 
 	s.True(updatedHook.Enabled)
@@ -70,7 +70,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
 	err := dbHook.DisableOnFailure()
 	s.Require().NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID)
+	updatedHook, err := whPersister.Get(hook.ID, nil)
 	s.NoError(err)
 
 	s.False(updatedHook.Enabled)
@@ -83,7 +83,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 	err := dbHook.DisableOnFailure()
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID)
+	updatedHook, err := whPersister.Get(hook.ID, nil)
 	s.Require().NoError(err)
 
 	s.True(updatedHook.Enabled)
@@ -96,7 +96,7 @@ func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	err := dbHook.Reset()
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID)
+	updatedHook, err := whPersister.Get(hook.ID, nil)
 	s.Require().NoError(err)
 
 	// Failures should be reset
@@ -129,7 +129,7 @@ func (s *databaseHookSuite) loadWebhook(hookId string) (models.Webhook, persiste
 	s.Require().NoError(err)
 
 	whPersister := s.Storage.GetWebhookPersister(nil)
-	hook, err := whPersister.Get(uuid.FromStringOrNil(hookId))
+	hook, err := whPersister.Get(uuid.FromStringOrNil(hookId), nil)
 	s.Require().NoError(err)
 	s.Require().NotEmpty(hook)
 

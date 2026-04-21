@@ -31,12 +31,13 @@ type thirdPartySuite struct {
 	test.Suite
 }
 
-func (s *thirdPartySuite) setUpContext(request *http.Request) (echo.Context, *httptest.ResponseRecorder) {
+func (s *thirdPartySuite) setUpContext(request *http.Request, tenantConfig config.TenantConfig) (echo.Context, *httptest.ResponseRecorder) {
 	s.T().Helper()
 	e := echo.New()
 	e.Validator = dto.NewCustomValidator()
 	rec := httptest.NewRecorder()
 	c := e.NewContext(request, rec)
+	c.Set("tenant_config", &tenantConfig)
 	return c, rec
 }
 
@@ -44,7 +45,7 @@ func (s *thirdPartySuite) setUpHandler(cfg *config.Config) *ThirdPartyHandler {
 	s.T().Helper()
 	auditLogger := auditlog.NewLogger(s.Storage, cfg.AuditLog)
 
-	jwkMngr, err := local_db.NewDefaultManager(cfg.Secrets.Keys, "v1", s.Storage.GetJwkPersister(), false)
+	jwkMngr, err := local_db.NewDefaultManager(cfg.Secrets.Keys, s.Storage.GetJwkPersister())
 	s.Require().NoError(err)
 
 	sessionMngr, err := session.NewManager(jwkMngr, *cfg)

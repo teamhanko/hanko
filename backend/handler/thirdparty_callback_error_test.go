@@ -37,7 +37,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowed
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 	cfg.ThirdParty.Providers.Google.AllowLinking = false
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -46,7 +46,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowed
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -57,7 +57,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowed
 		s.Equal(thirdparty.ErrorCodeUserConflict, location.Query().Get("error"))
 		s.Equal("third party account linking for existing user with same email disallowed", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -88,7 +88,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -97,7 +97,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -108,7 +108,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 		s.Equal(thirdparty.ErrorCodeMultipleAccounts, location.Query().Get("error"))
 		s.Equal(fmt.Sprintf("cannot identify associated user: '%s' is used by multiple accounts", "provider-primary-email-changed@example.com"), location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -123,7 +123,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoState() {
 
 	req := httptest.NewRequest(http.MethodGet, "/thirdparty/callback?code=abcde", nil)
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -134,7 +134,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoState() {
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("State is a required field", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -147,10 +147,10 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
-	mismatchedState, err := thirdparty.GenerateState(cfg, "github", "https://foo.com")
+	mismatchedState, err := thirdparty.GenerateState(&cfg.TenantConfig, "github", "https://foo.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -159,7 +159,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 		Value: string(mismatchedState),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -170,7 +170,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("could not verify state", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -183,12 +183,12 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoThirdPartyCooki
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -199,7 +199,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoThirdPartyCooki
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("expected state must not be empty", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -212,7 +212,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderError() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	providerError := "access_denied"
@@ -222,7 +222,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderError() {
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -232,7 +232,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderError() {
 
 		s.Equal(providerError, location.Query().Get("error"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -245,7 +245,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 
 	cfg := s.setUpConfig([]string{"github"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -254,7 +254,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -265,7 +265,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("google provider is disabled", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -278,7 +278,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?state=%s", state), nil)
@@ -287,7 +287,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -298,7 +298,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("auth code missing from request", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -317,7 +317,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -326,7 +326,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -337,7 +337,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("could not exchange authorization code for access token", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -365,7 +365,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 	cfg := s.setUpConfig([]string{"google"}, []string{"https://example.com"})
 	cfg.Email.RequireVerification = true
 
-	state, err := thirdparty.GenerateState(cfg, "google", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "google", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -374,7 +374,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -385,7 +385,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
 		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -414,7 +414,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 	cfg := s.setUpConfig([]string{"microsoft"}, []string{"https://example.com"})
 	cfg.Emails.RequireVerification = true
 
-	state, err := thirdparty.GenerateState(cfg, "microsoft", "https://example.com")
+	state, err := thirdparty.GenerateState(&cfg.TenantConfig, "microsoft", "https://example.com")
 	s.NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, fmt.Sprintf("/thirdparty/callback?code=abcde&state=%s", state), nil)
@@ -423,7 +423,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 		Value: string(state),
 	})
 
-	c, rec := s.setUpContext(req)
+	c, rec := s.setUpContext(req, cfg.TenantConfig)
 	handler := s.setUpHandler(cfg)
 
 	if s.NoError(handler.Callback(c)) {
@@ -434,7 +434,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
 		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "")
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}

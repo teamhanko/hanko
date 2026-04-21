@@ -4,6 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+	"time"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -11,10 +16,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"net/http"
-	"net/http/httptest"
-	"testing"
-	"time"
 )
 
 func TestWebhookHandlerSuite(t *testing.T) {
@@ -216,10 +217,10 @@ func (s *webhookSuite) TestWebhookHandler_Delete() {
 
 	persister := s.Storage.GetWebhookPersister(nil)
 
-	entry, err := persister.Get(testUuid)
+	entry, err := persister.Get(testUuid, nil)
 	s.Require().NoError(err)
 
-	list, err := persister.List(true)
+	list, err := persister.List(true, nil)
 	s.Require().NoError(err)
 
 	s.Require().Nil(entry)
@@ -438,7 +439,7 @@ func (s *webhookSuite) TestWebhookHandler_Update() {
 	s.Require().True(result.ExpiresAt.After(time.Now().Add(29 * 24 * time.Hour))) // 30 Days
 	s.Require().True(result.CreatedAt.Before(result.UpdatedAt))
 
-	dbHook, err := s.Storage.GetWebhookPersister(nil).Get(testUuid)
+	dbHook, err := s.Storage.GetWebhookPersister(nil).Get(testUuid, nil)
 	s.Require().NoError(err)
 	s.Equal(updateDto.Callback, dbHook.Callback)
 	s.Equal(updateDto.Enabled, dbHook.Enabled)

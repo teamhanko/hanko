@@ -43,7 +43,9 @@ func TestGenerator_Verify(t *testing.T) {
 	sessionLifespan := "5m"
 	manager := test.JwkManager{}
 	cfg := config.Config{
-		Session: config.Session{Lifespan: sessionLifespan},
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{Lifespan: sessionLifespan},
+		},
 	}
 	sessionGenerator, err := NewManager(&manager, cfg)
 	assert.NoError(t, err)
@@ -94,13 +96,15 @@ func TestGenerator_Verify(t *testing.T) {
 func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{
-		Session: config.Session{
-			Issuer:   "hanko",
-			Lifespan: "5m",
-		},
-		Webauthn: config.WebauthnSettings{
-			RelyingParty: config.RelyingParty{
-				Id: "test.hanko.io",
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Issuer:   "hanko",
+				Lifespan: "5m",
+			},
+			Webauthn: config.WebauthnSettings{
+				RelyingParty: config.RelyingParty{
+					Id: "test.hanko.io",
+				},
 			},
 		},
 	}
@@ -123,17 +127,19 @@ func TestManager_GenerateJWT_IssAndAud(t *testing.T) {
 func TestManager_GenerateJWT_AdditionalAudiences(t *testing.T) {
 	manager := test.JwkManager{}
 	cfg := config.Config{
-		Session: config.Session{
-			Issuer:   "hanko",
-			Lifespan: "5m",
-			Audience: []string{
-				"additional.hanko.io",
-				"anotherOne",
+		TenantConfig: config.TenantConfig{
+			Session: config.Session{
+				Issuer:   "hanko",
+				Lifespan: "5m",
+				Audience: []string{
+					"additional.hanko.io",
+					"anotherOne",
+				},
 			},
-		},
-		Webauthn: config.WebauthnSettings{
-			RelyingParty: config.RelyingParty{
-				Id: "test.hanko.io",
+			Webauthn: config.WebauthnSettings{
+				RelyingParty: config.RelyingParty{
+					Id: "test.hanko.io",
+				},
 			},
 		},
 	}
@@ -165,7 +171,9 @@ func Test_GenerateJWT_SessionID(t *testing.T) {
 		{
 			name: "token has a session id claim",
 			config: config.Config{
-				Session: config.Session{Lifespan: "5m"},
+				TenantConfig: config.TenantConfig{
+					Session: config.Session{Lifespan: "5m"},
+				},
 			},
 			tokenShouldHaveSessionID: true,
 		},

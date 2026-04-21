@@ -35,7 +35,10 @@ func NewSessionAdminHandler(cfg *config.Config, persister persistence.Persister,
 }
 
 func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
-	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	var body admin.CreateSessionTokenDto
 	if err := (&echo.DefaultBinder{}).BindBody(ctx, &body); err != nil {
@@ -118,7 +121,10 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) List(ctx echo.Context) error {
-	tenantID := ctx.Get("tenant_id").(*uuid.UUID)
+	tenantID, err := utils.TenantIDFromContext(ctx)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
 
 	listDto, err := loadDto[admin.ListSessionsRequestDto](ctx)
 	if err != nil {

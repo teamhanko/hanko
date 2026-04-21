@@ -3,13 +3,14 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestSessionAdminSuite(t *testing.T) {
@@ -172,7 +173,7 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 			if http.StatusNoContent == rec.Code {
-				credentials, err := s.Storage.GetSessionPersister().ListActive(uuid.FromStringOrNil(currentTest.userID))
+				credentials, err := s.Storage.GetSessionPersister().ListActive(uuid.FromStringOrNil(currentTest.userID), nil)
 				s.Require().NoError(err)
 				s.Equal(currentTest.expectedCount, len(credentials))
 			}

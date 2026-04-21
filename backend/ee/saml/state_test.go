@@ -1,15 +1,16 @@
 package saml
 
 import (
+	"strings"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	samlConfig "github.com/teamhanko/hanko/backend/v2/ee/saml/config"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"strings"
-	"testing"
-	"time"
 )
 
 func TestSamlSuite(t *testing.T) {
@@ -23,30 +24,34 @@ type samlSuite struct {
 
 func (s *samlSuite) TestSaml_GenerateState() {
 	cfg := &config.Config{
-		Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
-		Saml: samlConfig.Saml{
-			DefaultRedirectUrl: "https://example.com",
+		TenantConfig: config.TenantConfig{
+			Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+			Saml: samlConfig.Saml{
+				DefaultRedirectUrl: "https://example.com",
+			},
 		},
 	}
 
 	persister := s.Storage.GetSamlStatePersister()
 
-	state, err := GenerateState(cfg, persister, "test-provider", "https://example.com")
+	state, err := GenerateState(cfg, persister, "test-provider", "https://example.com", nil)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), state)
 }
 
 func (s *samlSuite) TestSaml_GenerateStateWithDefaultRedirect() {
 	cfg := &config.Config{
-		Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
-		Saml: samlConfig.Saml{
-			DefaultRedirectUrl: "https://example.com",
+		TenantConfig: config.TenantConfig{
+			Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+			Saml: samlConfig.Saml{
+				DefaultRedirectUrl: "https://example.com",
+			},
 		},
 	}
 
 	persister := s.Storage.GetSamlStatePersister()
 
-	state, err := GenerateState(cfg, persister, "test-provider", "")
+	state, err := GenerateState(cfg, persister, "test-provider", "", nil)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), state)
 }
@@ -83,12 +88,14 @@ func (s *samlSuite) TestSaml_GenerateState_Error() {
 	for _, testData := range tests {
 		s.T().Run(testData.name, func(t *testing.T) {
 			cfg := &config.Config{
-				Secrets: config.Secrets{Keys: []string{testData.secret}},
+				TenantConfig: config.TenantConfig{
+					Secrets: config.Secrets{Keys: []string{testData.secret}},
+				},
 			}
 
 			persister := s.Storage.GetSamlStatePersister()
 
-			_, err := GenerateState(cfg, persister, testData.provider, testData.redirectTo)
+			_, err := GenerateState(cfg, persister, testData.provider, testData.redirectTo, nil)
 			assert.NotNil(t, err)
 			assert.True(t, strings.Contains(err.Error(), testData.expectedError))
 		})
@@ -97,7 +104,9 @@ func (s *samlSuite) TestSaml_GenerateState_Error() {
 
 func (s *samlSuite) TestSaml_VerifyState() {
 	cfg := &config.Config{
-		Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+		TenantConfig: config.TenantConfig{
+			Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+		},
 	}
 
 	err := s.LoadFixtures("../../test/fixtures/saml_state")
@@ -106,7 +115,7 @@ func (s *samlSuite) TestSaml_VerifyState() {
 	state := "HmD7wlGQ7bF_4MGtmFRQuuSGTshHETDs4RQa64JAx-6EsmNsUjaQwYNOnjWUs6qIOuQMBTKapDGVXVCk00pX2vSS-x-WVqdzZ8KyeQ-9IHu2mwb-AeRbb2QPE-GFnvp2wrbCskKvWvtOfipyeTsnYY5iM90DxssaUtvKnawaB5_MNNekfKyiOeepIkKjUfSJ6-yTR7AAA4B9jwOfDRB4zdV8kKPVJlGVBJFosL11YWJaLxRGQR69nah3Jf9Z6bSAGXxWp24PoBYhij-dH4JyDCcU7D-NeT2A8qFFFjQ1m28C8fsr6zqb4w=="
 
 	persister := s.Storage.GetSamlStatePersister()
-	validState, err := VerifyState(cfg, persister, state)
+	validState, err := VerifyState(cfg, persister, state, nil)
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), validState)
 	require.Equal(s.T(), "test-provider", validState.Provider)
@@ -148,12 +157,14 @@ func (s *samlSuite) TestSaml_VerifyState_Error() {
 	for _, testData := range tests {
 		s.T().Run(testData.name, func(t *testing.T) {
 			cfg := &config.Config{
-				Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+				TenantConfig: config.TenantConfig{
+					Secrets: config.Secrets{Keys: []string{"thirty-two-byte-long-test-secret"}},
+				},
 			}
 
 			persister := s.Storage.GetSamlStatePersister()
 
-			_, err := VerifyState(cfg, persister, testData.state)
+			_, err := VerifyState(cfg, persister, testData.state, nil)
 			assert.NotNil(s.T(), err)
 			assert.True(s.T(), strings.Contains(err.Error(), testData.expectedError))
 		})

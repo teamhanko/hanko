@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestEmailAdminSuite(t *testing.T) {
@@ -224,7 +225,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 
 			if rec.Code == http.StatusOK {
-				email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email)
+				email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email, nil)
 				s.Require().NoError(err)
 
 				if email != nil {
@@ -498,7 +499,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 				userUuid, err := uuid.FromString(currentTest.userId)
 				s.Require().NoError(err)
 
-				emails, err := s.Storage.GetEmailPersister().FindByUserId(userUuid)
+				emails, err := s.Storage.GetEmailPersister().FindByUserId(userUuid, nil)
 				s.Require().NoError(err)
 
 				s.Equal(3, len(emails))

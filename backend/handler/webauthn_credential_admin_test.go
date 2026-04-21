@@ -3,13 +3,14 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/test"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestWebauthnCredentialAdminSuite(t *testing.T) {
@@ -247,7 +248,7 @@ func (s *webauthnCredentialAdminSuite) TestWebauthnCredentialAdminHandler_Delete
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 			if http.StatusNoContent == rec.Code {
-				credentials, err := s.Storage.GetWebauthnCredentialPersister().GetFromUser(uuid.FromStringOrNil(currentTest.userID))
+				credentials, err := s.Storage.GetWebauthnCredentialPersister().GetFromUser(uuid.FromStringOrNil(currentTest.userID), nil)
 				s.Require().NoError(err)
 				s.Equal(currentTest.expectedCount, len(credentials))
 			}

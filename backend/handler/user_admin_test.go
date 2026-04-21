@@ -3,14 +3,15 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gofrs/uuid"
-	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/test"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/gofrs/uuid"
+	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v2/test"
 )
 
 func TestUserHandlerAdminSuite(t *testing.T) {
@@ -38,7 +39,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 
 	s.Equal(http.StatusNoContent, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", nil)
 	s.Require().NoError(err)
 	s.Equal(3, count)
 }
@@ -59,7 +60,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 
 	s.Equal(http.StatusNotFound, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "")
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", nil)
 	s.Require().NoError(err)
 	s.Equal(4, count)
 }

@@ -43,7 +43,7 @@ func (s *Suite) SetupSuite() {
 		Url: db.DatabaseUrl,
 	})
 	s.Require().NoError(err)
-	storage := persistence.New(dbConnection, nil)
+	storage := persistence.New(dbConnection)
 
 	if s.WithEmailServer {
 		s.EmailServer, err = StartMailslurper()
