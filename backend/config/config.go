@@ -68,6 +68,8 @@ type TenantConfig struct {
 	SecurityNotifications SecurityNotifications `yaml:"security_notifications" json:"security_notifications,omitempty" koanf:"security_notifications"`
 	// `server` configures address and CORS settings of the public and admin API.
 	//Server Server `yaml:"server" json:"server,omitempty" koanf:"server" jsonschema:"title=server"`
+	// `cors` configures Cross-Origin Resource Sharing settings for this tenant.
+	Cors Cors `yaml:"cors" json:"cors,omitempty" koanf:"cors" jsonschema:"title=cors"`
 	// `service` configures general service information.
 	Service Service `yaml:"service" json:"service,omitempty" koanf:"service" jsonschema:"title=service"`
 	// `session` configures settings for session JWTs and Cookies issued by the API.

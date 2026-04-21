@@ -141,25 +141,10 @@
     },
     "Config": {
       "properties": {
-        "account": {
-          "$ref": "#/$defs/Account",
-          "title": "account",
-          "description": "`account` configures settings related to user accounts."
-        },
         "audit_log": {
           "$ref": "#/$defs/AuditLog",
           "title": "audit_log",
           "description": "`audit_log` configures output and storage modalities of audit logs."
-        },
-        "convert_legacy_config": {
-          "type": "boolean",
-          "description": "`convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration\noptions, to new ones. If set to `false`, these values have to be set manually if non-default values should be\nused.",
-          "default": false
-        },
-        "convert_legacy_server_side_session_config": {
-          "type": "boolean",
-          "description": "`covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session\nconfiguration options to the new ones. If set to `false`, these values have to be set manually if non-default\nvalues should be used.",
-          "default": true
         },
         "database": {
           "$ref": "#/$defs/Database",
@@ -171,21 +156,6 @@
           "description": "`debug`, if set to `true`, adds additional debugging information to flow API responses.",
           "default": false
         },
-        "email": {
-          "$ref": "#/$defs/Email",
-          "title": "email",
-          "description": "`email` configures how email addresses of user accounts are acquired and used."
-        },
-        "email_delivery": {
-          "$ref": "#/$defs/EmailDelivery",
-          "title": "email_delivery",
-          "description": "`email_delivery` configures how outgoing mails are delivered."
-        },
-        "emails": {
-          "$ref": "#/$defs/Emails",
-          "title": "emails",
-          "description": "Deprecated. See child properties for suggested replacements."
-        },
         "flow_locker": {
           "$ref": "#/$defs/FlowLocker",
           "description": "`flow_locker` confgures flow locking"
@@ -195,6 +165,51 @@
           "title": "log",
           "description": "`log` configures application logging."
         },
+        "multi_tenancy": {
+          "type": "boolean",
+          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation.",
+          "default": false
+        },
+        "rate_limiter": {
+          "$ref": "#/$defs/RateLimiter",
+          "title": "rate_limiter",
+          "description": "`rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data."
+        },
+        "server": {
+          "$ref": "#/$defs/Server",
+          "title": "server",
+          "description": "`server` configures address and CORS settings of the public and admin API."
+        },
+        "email_delivery": {
+          "$ref": "#/$defs/EmailDelivery",
+          "title": "email_delivery",
+          "description": "`email_delivery` configures how outgoing mails are delivered."
+        },
+        "account": {
+          "$ref": "#/$defs/Account",
+          "title": "account",
+          "description": "`account` configures settings related to user accounts."
+        },
+        "convert_legacy_config": {
+          "type": "boolean",
+          "description": "`convert_legacy_config`, if set to `true`, automatically copies the set values of deprecated configuration\noptions, to new ones. If set to `false`, these values have to be set manually if non-default values should be\nused.",
+          "default": false
+        },
+        "convert_legacy_server_side_session_config": {
+          "type": "boolean",
+          "description": "`covert_legacy_session_config`, if set to `true`, automatically copies the set of deprecated server-side session\nconfiguration options to the new ones. If set to `false`, these values have to be set manually if non-default\nvalues should be used.",
+          "default": true
+        },
+        "email": {
+          "$ref": "#/$defs/Email",
+          "title": "email",
+          "description": "`email` configures how email addresses of user accounts are acquired and used."
+        },
+        "emails": {
+          "$ref": "#/$defs/Emails",
+          "title": "emails",
+          "description": "Deprecated. See child properties for suggested replacements."
+        },
         "mfa": {
           "$ref": "#/$defs/MFA",
           "title": "mfa",
@@ -203,7 +218,7 @@
         "passcode": {
           "$ref": "#/$defs/Passcode",
           "title": "passcode",
-          "description": "Deprecated. See child properties for suggested replacements."
+          "description": "MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation."
         },
         "passkey": {
           "$ref": "#/$defs/Passkey",
@@ -215,15 +230,10 @@
           "title": "password",
           "description": "`password` configures how passwords are acquired and used."
         },
-        "rate_limiter": {
-          "$ref": "#/$defs/RateLimiter",
-          "title": "rate_limiter",
-          "description": "`rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data."
-        },
         "saml": {
           "$ref": "#/$defs/Saml",
           "title": "saml",
-          "description": "`saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity\nproviders."
+          "description": "// `rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data.\nRateLimiter RateLimiter `yaml:\"rate_limiter\" json:\"rate_limiter,omitempty\" koanf:\"rate_limiter\" split_words:\"true\" jsonschema:\"title=rate_limiter\"`\n`saml` configures modalities of SAML (Security Assertion Markup Language) SSO authentication and SAML identity\nproviders."
         },
         "secrets": {
           "$ref": "#/$defs/Secrets",
@@ -234,10 +244,10 @@
           "$ref": "#/$defs/SecurityNotifications",
           "description": "`security_notifications` configures security notifications for important security-related events."
         },
-        "server": {
-          "$ref": "#/$defs/Server",
-          "title": "server",
-          "description": "`server` configures address and CORS settings of the public and admin API."
+        "cors": {
+          "$ref": "#/$defs/Cors",
+          "title": "cors",
+          "description": "`server` configures address and CORS settings of the public and admin API.\nServer Server `yaml:\"server\" json:\"server,omitempty\" koanf:\"server\" jsonschema:\"title=server\"`\n`cors` configures Cross-Origin Resource Sharing settings for this tenant."
         },
         "service": {
           "$ref": "#/$defs/Service",

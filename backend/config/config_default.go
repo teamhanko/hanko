@@ -317,6 +317,10 @@ func DefaultTenantConfig() TenantConfig {
 	return TenantConfig{
 		ConvertLegacyConfig:                  false,
 		ConvertLegacyServerSideSessionConfig: true,
+		Cors: Cors{
+			AllowOrigins:                []string{"http://localhost:8888"},
+			UnsafeWildcardOriginAllowed: false,
+		},
 		Service: Service{
 			Name: "Hanko Authentication Service",
 		},

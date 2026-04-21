@@ -33,7 +33,7 @@ type Saml struct {
 	//
 	// See [here](https://pkg.go.dev/github.com/gobwas/glob#Compile) for more on globbinh.
 	AllowedRedirectURLS   []string             `yaml:"allowed_redirect_urls" json:"allowed_redirect_urls,omitempty" koanf:"allowed_redirect_urls" split_words:"true"`
-	AllowedRedirectURLMap map[string]glob.Glob `jsonschema:"-"`
+	AllowedRedirectURLMap map[string]glob.Glob `yaml:"-" json:"-" koanf:"-" jsonschema:"-"`
 
 	// `options` allows setting optional features for service provider operations.
 	Options Options `yaml:"options" json:"options,omitempty" koanf:"options" jsonschema:"title=options"`

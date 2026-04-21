@@ -92,29 +92,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
 	tenantMiddleware := hankoMiddleware.TenantMiddleware(cfg.MultiTenancy, &cfg.TenantConfig, persister)
 
-	var g *echo.Group
-	if cfg.MultiTenancy {
-		g = e.Group("/:tenant_id")
-	} else {
-		g = e.Group("")
-	}
-
-	g.POST("/registration", flowAPIHandler.RegistrationFlowHandler, tenantMiddleware, webhookMiddleware)
-	g.POST("/login", flowAPIHandler.LoginFlowHandler, tenantMiddleware, webhookMiddleware)
-	g.POST("/profile", flowAPIHandler.ProfileFlowHandler, tenantMiddleware, webhookMiddleware)
-
-	if cfg.Saml.Enabled {
-		e.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
-	}
-
 	e.HideBanner = true
 
 	e.HTTPErrorHandler = dto.NewHTTPErrorHandler(dto.HTTPErrorHandlerConfig{Debug: false, Logger: e.Logger})
 	e.Use(middleware.RequestID())
 	if cfg.Log.LogHealthAndMetrics {
 		e.Use(hankoMiddleware.GetLoggerMiddleware())
-	} else {
-		g.Use(hankoMiddleware.GetLoggerMiddleware())
 	}
 
 	exposeHeader := []string{
@@ -130,15 +113,23 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 		exposeHeader = append(exposeHeader, "X-Auth-Token")
 	}
 
-	// TODO: CORS origins are tenant specific
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		UnsafeWildcardOriginWithAllowCredentials: cfg.Server.Public.Cors.UnsafeWildcardOriginAllowed,
-		AllowOrigins:                             cfg.Server.Public.Cors.AllowOrigins,
-		ExposeHeaders:                            exposeHeader,
-		AllowCredentials:                         true,
-		// Based on: Chromium (starting in v76) caps at 2 hours (7200 seconds).
-		MaxAge: 7200,
-	}))
+	var g *echo.Group
+	if cfg.MultiTenancy {
+		g = e.Group("/:tenant_id")
+	} else {
+		g = e.Group("")
+	}
+
+	// Apply tenant middleware first to load tenant context
+	// This runs for all requests including OPTIONS preflight
+	g.Use(tenantMiddleware)
+
+	// Apply CORS middleware after tenant - reads tenant config from context
+	g.Use(hankoMiddleware.TenantAwareCORS(cfg.MultiTenancy, cfg.Server.Public.Cors, exposeHeader))
+
+	if !cfg.Log.LogHealthAndMetrics {
+		g.Use(hankoMiddleware.GetLoggerMiddleware())
+	}
 
 	if prometheus != nil {
 		e.Use(prometheus)
@@ -148,15 +139,29 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 
 	userHandler := NewUserHandler(cfg, persister, sessionManager, auditLogger)
 	statusHandler := NewStatusHandler(persister)
-
-	e.GET("/", statusHandler.Status)
-	g.GET("/me", userHandler.Me, tenantMiddleware, sessionMiddleware)
-
-	g.POST("/logout", userHandler.Logout, tenantMiddleware, sessionMiddleware)
-
 	healthHandler := NewHealthHandler()
 
-	health := e.Group("/health")
+	// All routes below are under the tenant group (/:tenant_id when multitenancy is enabled)
+
+	g.POST("/registration", flowAPIHandler.RegistrationFlowHandler, webhookMiddleware)
+	g.POST("/login", flowAPIHandler.LoginFlowHandler, webhookMiddleware)
+	g.POST("/profile", flowAPIHandler.ProfileFlowHandler, webhookMiddleware)
+
+	if cfg.Saml.Enabled {
+		// SAML routes are now under tenant group
+		samlHandler := saml.NewSamlHandler(sessionManager, auditLogger, samlService)
+		samlGroup := g.Group("/saml")
+		samlGroup.GET("/metadata", samlHandler.Metadata)
+		samlGroup.GET("/auth", samlHandler.Auth)
+		samlGroup.POST("/callback", samlHandler.CallbackPost)
+		g.POST("/token_exchange", flowAPIHandler.TokenExchangeFlowHandler, webhookMiddleware)
+	}
+
+	g.GET("/", statusHandler.Status)
+	g.GET("/me", userHandler.Me, sessionMiddleware)
+	g.POST("/logout", userHandler.Logout, sessionMiddleware)
+
+	health := g.Group("/health")
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
@@ -168,12 +173,12 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 
 	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
-	thirdparty := g.Group("thirdparty", tenantMiddleware)
+	thirdparty := g.Group("thirdparty")
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
 
 	sessionHandler := NewSessionHandler(persister, sessionManager, *cfg)
-	sessions := g.Group("sessions", tenantMiddleware)
+	sessions := g.Group("sessions")
 	sessions.GET("/validate", sessionHandler.ValidateSession)
 	sessions.POST("/validate", sessionHandler.ValidateSessionFromBody)
 
