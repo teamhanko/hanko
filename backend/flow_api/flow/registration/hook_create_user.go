@@ -122,10 +122,8 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	}
 
 	if password != "" {
-		err = deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Create(models.PasswordCredential{
-			UserId:   id,
-			Password: password,
-		})
+		passwordCredentialModel := models.NewPasswordCredential(id, password, tenantID)
+		err = deps.Persister.GetPasswordCredentialPersisterWithConnection(deps.Tx).Create(*passwordCredentialModel)
 		if err != nil {
 			return err
 		}
