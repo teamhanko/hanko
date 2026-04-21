@@ -189,9 +189,12 @@ func Load(cfgFile *string) (*Config, error) {
 		log.Println("failed to load config, skipping...")
 	} else {
 		log.Println("Using config file:", *cfgFile)
-		err = k.Unmarshal("", c)
-		if err != nil {
-			return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+
+		if err := k.Unmarshal("", &c.ApplicationConfig); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal application config: %w", err)
+		}
+		if err := k.Unmarshal("", &c.TenantConfig); err != nil {
+			return nil, fmt.Errorf("failed to unmarshal tenant config: %w", err)
 		}
 	}
 
