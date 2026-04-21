@@ -278,7 +278,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		}
 
 		if body.Username != nil {
-			username := models.NewUsername(u.ID, *body.Username)
+			username := models.NewUsername(u.ID, *body.Username, tenantID)
 			err = tx.Create(username)
 			if err != nil {
 				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
@@ -475,7 +475,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 				}
 
 				if user.Username == nil {
-					usernameModel := models.NewUsername(user.ID, newUsername)
+					usernameModel := models.NewUsername(user.ID, newUsername, tenantID)
 					if err := usernamePersister.Create(*usernameModel); err != nil {
 						return fmt.Errorf("failed to create username: %w", err)
 					}
