@@ -90,7 +90,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	sessionMiddleware := hankoMiddleware.Session(cfg, persister, sessionManager)
 
 	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
-	tenantMiddleware := hankoMiddleware.TenantMiddleware(cfg.MultiTenancy, nil, persister)
+	tenantMiddleware := hankoMiddleware.TenantMiddleware(cfg.MultiTenancy, &cfg.TenantConfig, persister)
 
 	var g *echo.Group
 	if cfg.MultiTenancy {
