@@ -76,7 +76,7 @@ func (a UsernameCreate) Execute(c flowpilot.ExecutionContext) error {
 		return c.Error(flowpilot.ErrorFormDataInvalid)
 	}
 
-	usernameModel := models.NewUsername(userModel.ID, username)
+	usernameModel := models.NewUsername(userModel.ID, username, deps.TenantID)
 	err = deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Create(*usernameModel)
 	if err != nil {
 		return fmt.Errorf("failed to create username: %w", err)
