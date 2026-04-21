@@ -12,7 +12,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
-	"github.com/teamhanko/hanko/backend/v2/webhooks/utils"
+	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
 )
 
 type ReSendPasscode struct {
@@ -62,6 +62,8 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		Template:     passcodeTemplate,
 		EmailAddress: c.Stash().Get(shared.StashPathEmail).String(),
 		Language:     deps.HttpContext.Request().Header.Get("X-Language"),
+		Cfg:          deps.Cfg.TenantConfig,
+		TenantID:     deps.TenantID,
 	}
 	passcodeResult, err := deps.PasscodeService.SendPasscode(deps.Tx, sendParams)
 	if err != nil {
@@ -96,7 +98,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	err = utils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.EmailSend, webhookData)
+	err = webhookUtils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.EmailSend, webhookData)
 	if err != nil {
 		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}
