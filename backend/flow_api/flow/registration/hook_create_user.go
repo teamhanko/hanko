@@ -150,7 +150,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 	}
 
 	if username != "" {
-		usernameModel := models.NewUsername(user.ID, username)
+		usernameModel := models.NewUsername(user.ID, username, deps.TenantID)
 		err = deps.Persister.GetUsernamePersisterWithConnection(deps.Tx).Create(*usernameModel)
 		if err != nil {
 			return err
