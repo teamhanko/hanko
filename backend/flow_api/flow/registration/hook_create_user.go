@@ -80,6 +80,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		ID:        id,
 		CreatedAt: now,
 		UpdatedAt: now,
+		TenantID:  tenantID,
 	})
 	if err != nil {
 		return err
