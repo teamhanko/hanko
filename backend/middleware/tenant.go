@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/knadh/koanf/parsers/json"
@@ -13,28 +12,14 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
-// TenantMiddleware is a middleware function that retrieves tenant information using the tenant ID from the request path.
+// TenantMiddleware is a middleware function that retrieves tenant information using the tenant ID from the route params.
 // It loads the tenant configuration and sets it on the context for downstream middlewares and handlers to use.
-// This middleware should run early in the middleware chain, before other middlewares that need tenant context (like CORS).
 // TODO: maybe return flowErrors instead
 func TenantMiddleware(multiTenancy bool, tenantConfig *config.TenantConfig, persister persistence.Persister) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
-			// Skip if tenant config already loaded (avoid duplicate work)
-			if ctx.Get("tenant_config") != nil {
-				return next(ctx)
-			}
-
 			if multiTenancy {
-				// Try to get tenant_id from route param first, fallback to path extraction
-				var tenantIdStr string
-				tenantIdStr = ctx.Param("tenant_id")
-				if tenantIdStr == "" {
-					// Route param not available yet (e.g., early in middleware chain)
-					// Extract from path directly
-					tenantIdStr = extractTenantIDFromPath(ctx.Request().URL.Path)
-				}
-
+				tenantIdStr := ctx.Param("tenant_id")
 				if tenantIdStr == "" {
 					return echo.NewHTTPError(http.StatusBadRequest, "tenant ID required")
 				}
@@ -52,8 +37,7 @@ func TenantMiddleware(multiTenancy bool, tenantConfig *config.TenantConfig, pers
 					return echo.NewHTTPError(http.StatusNotFound, "tenant not found")
 				}
 
-				defaultTenantConfig := config.DefaultTenantConfig()
-				tenantConfig = &defaultTenantConfig
+				tenantConfig = new(config.DefaultTenantConfig())
 				k := koanf.New(".")
 
 				if err := k.Load(rawbytes.Provider(tenant.Config), json.Parser()); err != nil {
@@ -77,26 +61,4 @@ func TenantMiddleware(multiTenancy bool, tenantConfig *config.TenantConfig, pers
 			return next(ctx)
 		}
 	}
-}
-
-// extractTenantIDFromPath extracts the tenant ID from the URL path
-// Expected format: /{tenant_id}/... or /{tenant_id}
-func extractTenantIDFromPath(path string) string {
-	// Remove leading slash
-	if len(path) > 0 && path[0] == '/' {
-		path = path[1:]
-	}
-
-	// Find first slash (end of tenant_id segment)
-	slashIdx := strings.Index(path, "/")
-	if slashIdx == -1 {
-		// No slash found, entire remaining path might be tenant_id
-		if len(path) > 0 {
-			return path
-		}
-		return ""
-	}
-
-	// Return the first segment (tenant_id)
-	return path[:slashIdx]
 }

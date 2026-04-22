@@ -259,10 +259,6 @@ func DefaultApplicationConfig() ApplicationConfig {
 		Server: Server{
 			Public: ServerSettings{
 				Address: ":8000",
-				Cors: Cors{
-					AllowOrigins:                []string{"http://localhost:8888"},
-					UnsafeWildcardOriginAllowed: false,
-				},
 			},
 			Admin: ServerSettings{
 				Address: ":8001",

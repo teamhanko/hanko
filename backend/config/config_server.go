@@ -30,8 +30,6 @@ type ServerSettings struct {
 	//
 	// See [net.Dial](https://pkg.go.dev/net#Dial) for details of the address format.
 	Address string `yaml:"address" json:"address,omitempty" koanf:"address"`
-	// `cors` contains configuration options regarding Cross-Origin-Resource-Sharing.
-	Cors Cors `yaml:"cors" json:"cors,omitempty" koanf:"cors" jsonschema:"title=cors"`
 }
 
 type Cors struct {
@@ -65,9 +63,6 @@ func (cors *Cors) Validate() error {
 func (s *ServerSettings) Validate() error {
 	if len(strings.TrimSpace(s.Address)) == 0 {
 		return errors.New("field Address must not be empty")
-	}
-	if err := s.Cors.Validate(); err != nil {
-		return err
 	}
 	return nil
 }
