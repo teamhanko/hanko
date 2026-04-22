@@ -1,2 +1,0 @@
-drop_column("jwks", "encryption_key_version")
-drop_column("jwks", "state")
