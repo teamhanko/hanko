@@ -263,6 +263,9 @@ func DefaultApplicationConfig() ApplicationConfig {
 			Admin: ServerSettings{
 				Address: ":8001",
 			},
+			Management: ServerSettings{
+				Address: ":8002",
+			},
 		},
 		Database: Database{
 			Database: "hanko",

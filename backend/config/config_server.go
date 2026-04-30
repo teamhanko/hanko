@@ -11,6 +11,8 @@ type Server struct {
 	Public ServerSettings `yaml:"public" json:"public,omitempty" koanf:"public" jsonschema:"title=public"`
 	// `admin` contains the server configuration for the admin API.
 	Admin ServerSettings `yaml:"admin" json:"admin,omitempty" koanf:"admin" jsonschema:"title=admin"`
+	// `management` contains the server configuration for the management API.
+	Management ServerSettings `yaml:"management" json:"management,omitempty" koanf:"management" jsonschema:"title=management"`
 }
 
 func (s *Server) Validate() error {
@@ -21,6 +23,10 @@ func (s *Server) Validate() error {
 	err = s.Admin.Validate()
 	if err != nil {
 		return fmt.Errorf("error validating admin server settings: %w", err)
+	}
+	err = s.Management.Validate()
+	if err != nil {
+		return fmt.Errorf("error validating management server settings: %w", err)
 	}
 	return nil
 }

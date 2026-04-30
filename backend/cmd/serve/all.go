@@ -41,12 +41,13 @@ func NewServeAllCommand() *cobra.Command {
 			}
 			persister := persistence.New(dbConnection)
 			var wg sync.WaitGroup
-			wg.Add(2)
+			wg.Add(3)
 
 			prometheus := echoprometheus.NewMiddleware("hanko")
 
 			go server.StartPublic(cfg, &wg, persister, prometheus, authenticatorMetadata)
 			go server.StartAdmin(cfg, &wg, persister, prometheus)
+			go server.StartManagement(cfg, &wg, persister)
 
 			wg.Wait()
 		},

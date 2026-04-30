@@ -16,17 +16,6 @@ type Tenant struct {
 	UpdatedAt time.Time       `db:"updated_at" json:"updated_at"`
 }
 
-func (t *Tenant) BeforeCreate(tx *pop.Connection) error {
-	if t.ID == uuid.Nil {
-		id, err := uuid.NewV4()
-		if err != nil {
-			return err
-		}
-		t.ID = id
-	}
-	return nil
-}
-
 func (t *Tenant) Validate(tx *pop.Connection) (*validate.Errors, error) {
 	return validate.NewErrors(), nil
 }
