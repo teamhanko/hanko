@@ -2,6 +2,7 @@ package mfa_usage
 
 import (
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
@@ -30,8 +31,9 @@ func (a WebauthnGenerateRequestOptionsSecurityKey) Execute(c flowpilot.Execution
 	deps := a.GetDeps(c)
 
 	params := services.GenerateRequestOptionsSecurityKeyParams{
-		Tx:     deps.Tx,
-		UserID: uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String()),
+		Tx:       deps.Tx,
+		UserID:   uuid.FromStringOrNil(c.Stash().Get(shared.StashPathUserID).String()),
+		TenantID: deps.TenantID,
 	}
 
 	sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsSecurityKey(params)

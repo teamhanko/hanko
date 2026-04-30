@@ -102,7 +102,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	if cfg.MultiTenancy {
 		g = e.Group("/:tenant_id", tenantMiddleware)
 	} else {
-		g = e.Group("")
+		g = e.Group("", tenantMiddleware)
 	}
 
 	tenantGroup := g.Group("", corsMiddleware)

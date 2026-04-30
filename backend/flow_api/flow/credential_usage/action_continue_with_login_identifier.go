@@ -223,7 +223,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 		case passkeysAvailable:
 			//goland:noinspection GoDfaNilDereference
 			userModel.WebauthnCredentials = userModel.GetPasskeys()
-			params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: userModel}
+			params := services.GenerateRequestOptionsPasskeyParams{Tx: deps.Tx, User: userModel, TenantID: deps.TenantID}
 
 			sessionDataModel, requestOptions, err := deps.WebauthnService.GenerateRequestOptionsPasskey(params)
 			if err != nil {

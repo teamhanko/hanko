@@ -19,13 +19,13 @@ import (
 type GenerateRequestOptionsPasskeyParams struct {
 	Tx       *pop.Connection
 	User     *models.User
-	TenantID *uuid.UUID
+	TenantID uuid.UUID
 }
 
 type GenerateRequestOptionsSecurityKeyParams struct {
 	Tx       *pop.Connection
 	UserID   uuid.UUID
-	TenantID *uuid.UUID
+	TenantID uuid.UUID
 }
 
 type VerifyAssertionResponseParams struct {
@@ -119,7 +119,7 @@ func NewWebauthnService(cfg config.Config, persister persistence.Persister) Weba
 	return &webauthnService{cfg: cfg, persister: persister}
 }
 
-func (s *webauthnService) generateRequestOptions(tx *pop.Connection, user webauthn.User, tenantID *uuid.UUID, opts ...webauthn.LoginOption) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
+func (s *webauthnService) generateRequestOptions(tx *pop.Connection, user webauthn.User, tenantID uuid.UUID, opts ...webauthn.LoginOption) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
 	var options *protocol.CredentialAssertion
 	var sessionData *webauthn.SessionData
 	var err error
@@ -132,7 +132,7 @@ func (s *webauthnService) generateRequestOptions(tx *pop.Connection, user webaut
 		return nil, nil, fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 	}
 
-	webAuthnSessionDataModel, err := models.NewWebauthnSessionDataFrom(sessionData, models.WebauthnOperationAuthentication, *tenantID)
+	webAuthnSessionDataModel, err := models.NewWebauthnSessionDataFrom(sessionData, models.WebauthnOperationAuthentication, tenantID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to generate a new webauthn session data model: %w", err)
 	}
@@ -158,12 +158,12 @@ func (s *webauthnService) GenerateRequestOptionsPasskey(p GenerateRequestOptions
 func (s *webauthnService) GenerateRequestOptionsSecurityKey(p GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
 	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification)
 
-	userModel, err := s.persister.GetUserPersisterWithConnection(p.Tx).Get(p.UserID, *p.TenantID)
+	userModel, err := s.persister.GetUserPersisterWithConnection(p.Tx).Get(p.UserID, p.TenantID)
 	if err != nil || userModel == nil {
 		return nil, nil, fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	credentialModels, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).GetFromUser(p.UserID, *p.TenantID)
+	credentialModels, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).GetFromUser(p.UserID, p.TenantID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get webauthn credentials from db: %w", err)
 	}
