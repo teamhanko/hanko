@@ -98,7 +98,7 @@ func (a ReSendPasscode) Execute(c flowpilot.ExecutionContext) error {
 		}
 	}
 
-	err = webhookUtils.TriggerWebhooks(deps.HttpContext, deps.Tx, events.EmailSend, webhookData)
+	err = webhookUtils.TriggerWebhooks(deps.HttpContext, deps.Tx, deps.TenantID, events.EmailSend, webhookData)
 	if err != nil {
 		return fmt.Errorf("failed to trigger webhook: %w", err)
 	}

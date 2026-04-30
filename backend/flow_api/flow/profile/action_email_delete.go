@@ -106,6 +106,7 @@ func (a EmailDelete) Execute(c flowpilot.ExecutionContext) error {
 
 	if deps.Cfg.SecurityNotifications.Notifications.EmailDelete.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			TenantID:     deps.TenantID,
 			EmailAddress: currentPrimaryEmail,
 			Template:     "email_delete",
 			HttpContext:  deps.HttpContext,

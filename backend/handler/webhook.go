@@ -155,7 +155,7 @@ func (w *webhookHandler) Get(ctx echo.Context) error {
 	}
 
 	webhookId, _ := uuid.FromString(dto.ID)
-	webhook, err := w.getWebhook(webhookId, w.persister.GetWebhookPersister(nil), tenantID)
+	webhook, err := w.getWebhook(webhookId, w.persister.GetWebhookPersister(nil), &tenantID)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return err
@@ -186,7 +186,7 @@ func (w *webhookHandler) Delete(ctx echo.Context) error {
 	persister := w.persister.GetWebhookPersister(nil)
 
 	webhookId, _ := uuid.FromString(dto.ID)
-	webhook, err := w.getWebhook(webhookId, persister, tenantID)
+	webhook, err := w.getWebhook(webhookId, persister, &tenantID)
 	if err != nil {
 		ctx.Logger().Error(err)
 		return err
@@ -225,7 +225,7 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 
 		webhookId, _ := uuid.FromString(dto.ID)
 
-		webhook, err := w.getWebhook(webhookId, persister, tenantID)
+		webhook, err := w.getWebhook(webhookId, persister, &tenantID)
 		if err != nil {
 			ctx.Logger().Error(err)
 			return err
@@ -264,7 +264,7 @@ func (w *webhookHandler) Update(ctx echo.Context) error {
 }
 
 func (w *webhookHandler) getWebhook(id uuid.UUID, persister persistence.WebhookPersister, tenantID *uuid.UUID) (*models.Webhook, error) {
-	webhook, err := persister.Get(id, tenantID)
+	webhook, err := persister.Get(id, *tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("unable to fetch webhook from database: %w", err)
 	}

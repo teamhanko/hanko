@@ -70,7 +70,7 @@ type Persister interface {
 }
 
 type Cleanup[T any] interface {
-	FindExpired(cutoffTime time.Time, page, perPage int, tenantID *uuid.UUID) ([]T, error)
+	FindExpired(cutoffTime time.Time, page, perPage int, tenantID uuid.UUID) ([]T, error)
 	Delete(item T) error
 }
 

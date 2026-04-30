@@ -76,6 +76,7 @@ func (a SecurityKeyDelete) Execute(c flowpilot.ExecutionContext) error {
 	// Inform user that an MFA method has been deleted
 	if deps.Cfg.SecurityNotifications.Notifications.MFADelete.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			TenantID:     deps.TenantID,
 			EmailAddress: userModel.Emails.GetPrimary().Address,
 			Template:     "mfa_delete",
 			HttpContext:  deps.HttpContext,

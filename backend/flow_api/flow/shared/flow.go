@@ -32,7 +32,7 @@ type Dependencies struct {
 	Tx                          *pop.Connection
 	AuthenticatorMetadata       mapper.AuthenticatorMetadata
 	AuditLogger                 auditlog.Logger
-	TenantID                    *uuid.UUID
+	TenantID                    uuid.UUID
 }
 
 type Action struct{}

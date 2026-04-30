@@ -9,6 +9,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/require"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 )
 
@@ -16,7 +17,7 @@ type testManager struct {
 	TestFunc func()
 }
 
-func (tm *testManager) Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID *uuid.UUID) {
+func (tm *testManager) Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID uuid.UUID) {
 	tm.TestFunc()
 }
 
@@ -31,7 +32,7 @@ func TestWebhook_TriggerWithoutManager(t *testing.T) {
 
 	ctx := e.NewContext(req, rec)
 
-	err := TriggerWebhooks(ctx, nil, "user", "lorem")
+	err := TriggerWebhooks(ctx, nil, uuid.FromStringOrNil(config.DefaultTenantID), "user", "lorem")
 	require.Error(t, err)
 
 	err = e.Close()
@@ -50,7 +51,7 @@ func TestWebhook_Trigger(t *testing.T) {
 	ctx := e.NewContext(req, rec)
 	ctx.Set("webhook_manager", tm)
 
-	err := TriggerWebhooks(ctx, nil, "user", "lorem")
+	err := TriggerWebhooks(ctx, nil, uuid.FromStringOrNil(config.DefaultTenantID), "user", "lorem")
 	require.NoError(t, err)
 
 	err = e.Close()

@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/tidwall/gjson"
 
 	"github.com/gofrs/uuid"
@@ -482,8 +483,9 @@ func (s *metadataAdminSuite) TestMetadataAdminHandler_Patch() {
 
 					// Also verify the metadata was actually updated in the database
 					userID, err := uuid.FromString(currentTest.userId)
+					tenantID, err := uuid.FromString(config.DefaultTenantID)
 					s.Require().NoError(err)
-					metadataModel, err := s.Storage.GetUserMetadataPersister().Get(userID, nil)
+					metadataModel, err := s.Storage.GetUserMetadataPersister().Get(userID, tenantID)
 					s.Require().NoError(err)
 					if currentTest.expectedMetadata == nil {
 						s.False(metadataModel.Public.Valid)

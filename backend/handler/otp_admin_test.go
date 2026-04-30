@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/test"
 )
@@ -137,7 +138,7 @@ func (s *otpAdminSuite) TestOtpAdminHandler_Delete() {
 			s.Require().Equal(currentTest.expectedStatusCode, rec.Code)
 
 			if http.StatusNoContent == rec.Code {
-				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId), nil)
+				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId), uuid.FromStringOrNil(config.DefaultTenantID))
 				s.Require().NoError(err)
 				s.Require().Nil(cred)
 			}

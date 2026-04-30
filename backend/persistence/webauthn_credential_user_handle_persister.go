@@ -11,7 +11,7 @@ import (
 )
 
 type WebauthnCredentialUserHandlePersister interface {
-	GetByHandle(handle string, tenantID *uuid.UUID) (*models.WebauthnCredentialUserHandle, error)
+	GetByHandle(handle string, tenantID uuid.UUID) (*models.WebauthnCredentialUserHandle, error)
 }
 
 func NewWebauthnCredentialUserHandlePersister(db *pop.Connection) WebauthnCredentialUserHandlePersister {
@@ -22,14 +22,10 @@ type webauthnCredentialUserHandlePersister struct {
 	db *pop.Connection
 }
 
-func (p *webauthnCredentialUserHandlePersister) GetByHandle(handle string, tenantID *uuid.UUID) (*models.WebauthnCredentialUserHandle, error) {
+func (p *webauthnCredentialUserHandlePersister) GetByHandle(handle string, tenantID uuid.UUID) (*models.WebauthnCredentialUserHandle, error) {
 	handleModel := models.WebauthnCredentialUserHandle{}
 	query := p.db.Where("handle = ?", handle)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&handleModel)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

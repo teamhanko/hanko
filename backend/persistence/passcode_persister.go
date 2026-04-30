@@ -11,7 +11,7 @@ import (
 )
 
 type PasscodePersister interface {
-	Get(passcodeID uuid.UUID, tenantID *uuid.UUID) (*models.Passcode, error)
+	Get(passcodeID uuid.UUID, tenantID uuid.UUID) (*models.Passcode, error)
 	Create(models.Passcode) error
 	Update(models.Passcode) error
 	Delete(models.Passcode) error
@@ -25,14 +25,10 @@ func NewPasscodePersister(db *pop.Connection) PasscodePersister {
 	return &passcodePersister{db: db}
 }
 
-func (p *passcodePersister) Get(id uuid.UUID, tenantID *uuid.UUID) (*models.Passcode, error) {
+func (p *passcodePersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.Passcode, error) {
 	passcode := models.Passcode{}
 	query := p.db.EagerPreload("Email.User")
-	if tenantID != nil {
-		query = query.Where("passcodes.tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("passcodes.tenant_id IS NULL")
-	}
+	query = query.Where("passcodes.tenant_id = ?", tenantID)
 	err := query.Find(&passcode, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

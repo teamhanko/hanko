@@ -13,15 +13,10 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/webhooks/events"
 )
 
-func TriggerWebhooks(ctx echo.Context, tx *pop.Connection, evt events.Event, data interface{}) error {
+func TriggerWebhooks(ctx echo.Context, tx *pop.Connection, tenantID uuid.UUID, evt events.Event, data interface{}) error {
 	webhookCtx := ctx.Get("webhook_manager")
 	if webhookCtx == nil {
 		return fmt.Errorf("unable to load webhooks manager from webhook middleware")
-	}
-
-	tenantID, err := utils.TenantIDFromContext(ctx)
-	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
 	}
 
 	webhookManager := webhookCtx.(webhooks.Manager)
@@ -46,7 +41,7 @@ func NotifyUserChange(ctx echo.Context, tx *pop.Connection, persister persistenc
 	user.SetUserAgent(ctx.Request().UserAgent())
 	user.SetIPAddress(ctx.RealIP())
 
-	err = TriggerWebhooks(ctx, tx, event, user)
+	err = TriggerWebhooks(ctx, tx, tenantID, event, user)
 	if err != nil {
 		ctx.Logger().Warn(err)
 	}

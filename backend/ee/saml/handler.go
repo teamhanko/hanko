@@ -76,13 +76,18 @@ func (handler *Handler) Metadata(c echo.Context) error {
 }
 
 func (handler *Handler) Auth(c echo.Context) error {
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	errorRedirectTo := c.Request().Header.Get("Referer")
 	if errorRedirectTo == "" {
 		errorRedirectTo = handler.samlService.Config().Saml.DefaultRedirectUrl
 	}
 
 	var request dto.SamlAuthRequest
-	err := c.Bind(&request)
+	err = c.Bind(&request)
 	if err != nil {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
@@ -97,7 +102,7 @@ func (handler *Handler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false, nil)
+	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false, tenantID)
 	if err != nil {
 		return handler.redirectError(c, thirdparty.ErrorServer("could not generate auth url").WithCause(err), errorRedirectTo)
 	}

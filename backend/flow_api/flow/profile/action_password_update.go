@@ -65,6 +65,7 @@ func (a PasswordUpdate) Execute(c flowpilot.ExecutionContext) error {
 
 	if deps.Cfg.SecurityNotifications.Notifications.PasswordUpdate.Enabled {
 		deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+			TenantID:     deps.TenantID,
 			EmailAddress: userModel.Emails.GetPrimary().Address,
 			Template:     "password_update",
 			HttpContext:  deps.HttpContext,

@@ -15,7 +15,7 @@ import (
 
 type SamlCertificatePersister interface {
 	Create(cert *models.SamlCertificate) error
-	GetFirst(tenantID *uuid.UUID) (*models.SamlCertificate, error)
+	GetFirst(tenantID uuid.UUID) (*models.SamlCertificate, error)
 	Renew(cert *models.SamlCertificate, serviceName string) error
 	Delete(cert *models.SamlCertificate) error
 }
@@ -28,15 +28,11 @@ func NewSamlCertificatePersister(db *pop.Connection) SamlCertificatePersister {
 	return &samlCertificatePersister{db: db}
 }
 
-func (s samlCertificatePersister) GetFirst(tenantID *uuid.UUID) (*models.SamlCertificate, error) {
+func (s samlCertificatePersister) GetFirst(tenantID uuid.UUID) (*models.SamlCertificate, error) {
 	cert := models.SamlCertificate{}
 
 	query := s.db.Q()
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&cert)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

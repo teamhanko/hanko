@@ -64,7 +64,7 @@ func (h CreateUser) Execute(c flowpilot.HookExecutionContext) error {
 	return nil
 }
 
-func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string, tenantID *uuid.UUID) error {
+func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, email string, emailVerified bool, username string, webauthnCredentials []gjson.Result, password, otpSecret string, tenantID uuid.UUID) error {
 	deps := h.GetDeps(c)
 
 	now := time.Now().UTC()

@@ -16,10 +16,10 @@ type SamlState struct {
 	ExpiresAt time.Time  `db:"expires_at"`
 	CreatedAt time.Time  `db:"created_at"`
 	UpdatedAt time.Time  `db:"updated_at"`
-	TenantID  *uuid.UUID `db:"tenant_id"`
+	TenantID            uuid.UUID `db:"tenant_id"`
 }
 
-func NewSamlState(nonce string, state string, tenantID *uuid.UUID) (*SamlState, error) {
+func NewSamlState(nonce string, state string, tenantID uuid.UUID) (*SamlState, error) {
 	if strings.TrimSpace(nonce) == "" {
 		return nil, errors.New("nonce is required")
 	}

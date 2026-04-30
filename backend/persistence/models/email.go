@@ -14,7 +14,7 @@ import (
 type Email struct {
 	ID           uuid.UUID     `db:"id" json:"id"`
 	UserID       *uuid.UUID    `db:"user_id" json:"user_id,omitempty"` // TODO: should not be a pointer anymore
-	TenantID     *uuid.UUID    `db:"tenant_id"`
+	TenantID     uuid.UUID     `db:"tenant_id"`
 	Address      string        `db:"address" json:"address"`
 	Verified     bool          `db:"verified" json:"verified"`
 	PrimaryEmail *PrimaryEmail `has_one:"primary_emails" json:"primary_emails,omitempty"`
@@ -26,7 +26,7 @@ type Email struct {
 
 type Emails []Email
 
-func NewEmail(userId *uuid.UUID, address string, tenantID *uuid.UUID) *Email {
+func NewEmail(userId *uuid.UUID, address string, tenantID uuid.UUID) *Email {
 	id, _ := uuid.NewV4()
 	return &Email{
 		ID:           id,

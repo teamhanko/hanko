@@ -6,6 +6,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/cmd/cleanup"
+	hankoConfig "github.com/teamhanko/hanko/backend/v2/cmd/config"
 	"github.com/teamhanko/hanko/backend/v2/cmd/isready"
 	"github.com/teamhanko/hanko/backend/v2/cmd/jwk"
 	"github.com/teamhanko/hanko/backend/v2/cmd/jwt"
@@ -33,6 +34,7 @@ func NewRootCmd() *cobra.Command {
 	siwa.RegisterCommands(cmd)
 	schema.RegisterCommands(cmd)
 	cleanup.RegisterCommands(cmd)
+	hankoConfig.RegisterCommands(cmd)
 
 	return cmd
 }

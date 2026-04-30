@@ -11,7 +11,7 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 )
 
-func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible, backupState, mfaOnly bool, authenticatorMetadata mapper.AuthenticatorMetadata, tenantID *uuid.UUID) *models.WebauthnCredential {
+func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible, backupState, mfaOnly bool, authenticatorMetadata mapper.AuthenticatorMetadata, tenantID uuid.UUID) *models.WebauthnCredential {
 	now := time.Now().UTC()
 	aaguid, _ := uuid.FromBytes(credential.Authenticator.AAGUID)
 	credentialID := base64.RawURLEncoding.EncodeToString(credential.ID)

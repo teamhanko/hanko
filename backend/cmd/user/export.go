@@ -41,10 +41,12 @@ func NewExportCommand() *cobra.Command {
 				if err != nil {
 					log.Fatalf("invalid tenant_id: %s", err)
 				}
+			} else {
+				tID = uuid.Nil
 			}
 			persister := persistence.New(dbConnection)
 
-			err = export(persister, outputFile, &tID)
+			err = export(persister, outputFile, tID)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -62,7 +64,7 @@ func NewExportCommand() *cobra.Command {
 	return cmd
 }
 
-func export(persister persistence.Persister, outFile string, tenantID *uuid.UUID) error {
+func export(persister persistence.Persister, outFile string, tenantID uuid.UUID) error {
 	var entries []ImportOrExportEntry
 	users, err := persister.GetUserPersister().All(tenantID)
 	if err != nil {

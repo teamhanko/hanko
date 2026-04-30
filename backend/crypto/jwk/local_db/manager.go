@@ -33,7 +33,7 @@ func NewDefaultManager(keys []string, persister persistence.JwkPersister) (*Defa
 	}
 	// for every key we should check if a jwk with index exists and create one if not.
 	for i := range keys {
-		j, err := persister.Get(i+1, nil)
+		j, err := persister.Get(i+1, uuid.Nil)
 		if j == nil && err == nil {
 			_, err := manager.GenerateKey()
 			if err != nil {
@@ -76,7 +76,7 @@ func (m *DefaultManager) GenerateKey() (jwk.Key, error) {
 
 // GetSigningKey returns the active private key used for signing
 func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
-	sigModel, err := m.persister.GetLast(nil)
+	sigModel, err := m.persister.GetLast(uuid.Nil)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (m *DefaultManager) GetSigningKey() (jwk.Key, error) {
 
 // GetPublicKeys returns all public keys that should be used for verification (active + rotating)
 func (m *DefaultManager) GetPublicKeys() (jwk.Set, error) {
-	modelList, err := m.persister.GetAll(nil)
+	modelList, err := m.persister.GetAll(uuid.Nil)
 	if err != nil {
 		return nil, err
 	}

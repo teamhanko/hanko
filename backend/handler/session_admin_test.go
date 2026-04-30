@@ -9,6 +9,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/test"
 )
@@ -173,7 +174,10 @@ func (s *sessionAdminSuite) TestSessionAdminHandler_Delete() {
 
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 			if http.StatusNoContent == rec.Code {
-				credentials, err := s.Storage.GetSessionPersister().ListActive(uuid.FromStringOrNil(currentTest.userID), nil)
+				credentials, err := s.Storage.GetSessionPersister().ListActive(
+					uuid.FromStringOrNil(currentTest.userID),
+					uuid.FromStringOrNil(config.DefaultTenantID),
+				)
 				s.Require().NoError(err)
 				s.Equal(currentTest.expectedCount, len(credentials))
 			}

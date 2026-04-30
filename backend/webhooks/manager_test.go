@@ -59,7 +59,7 @@ func (s *managerSuite) TestManager_TriggerWithoutHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -93,7 +93,7 @@ func (s *managerSuite) TestManager_TriggerWithConfigHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -128,7 +128,7 @@ func (s *managerSuite) TestManager_TriggerWithDisabledConfigHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -153,7 +153,7 @@ func (s *managerSuite) TestManager_TriggerWithDbHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -177,7 +177,7 @@ func (s *managerSuite) TestManager_TriggerWithDisabledDbHook() {
 	manager, err := NewManager(&cfg, s.Storage, jwkManager, nil)
 	s.Require().NoError(err)
 
-	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", nil)
+	manager.Trigger(s.Storage.GetConnection(), events.UserCreate, "lorem-ipsum", uuid.FromStringOrNil(config.DefaultTenantID))
 
 	// give it 1 sec to trigger
 	time.Sleep(1 * time.Second)
@@ -191,6 +191,7 @@ func (s *managerSuite) createTestDatabaseWebhook(persister persistence.WebhookPe
 	err := persister.Create(
 		models.Webhook{
 			ID:        hookId,
+			TenantID:  uuid.FromStringOrNil(config.DefaultTenantID),
 			Callback:  callback,
 			Enabled:   isEnabled,
 			Failures:  0,
@@ -201,6 +202,7 @@ func (s *managerSuite) createTestDatabaseWebhook(persister persistence.WebhookPe
 		models.WebhookEvents{
 			models.WebhookEvent{
 				ID:        uuid.FromStringOrNil("8b00da9a-cacf-45ea-b25d-c1ce0f0d7da0"),
+				TenantID:  uuid.FromStringOrNil(config.DefaultTenantID),
 				WebhookID: hookId,
 				Event:     string(events.UserCreate),
 				CreatedAt: now,

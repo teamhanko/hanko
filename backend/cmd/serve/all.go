@@ -7,6 +7,7 @@ import (
 	"log"
 	"sync"
 
+	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
@@ -34,6 +35,7 @@ func NewServeAllCommand() *cobra.Command {
 			authenticatorMetadata := mapper.LoadAuthenticatorMetadata(&authenticatorMetadataFile)
 
 			dbConnection, err := persistence.NewConnection(cfg.Database)
+			pop.Debug = true
 			if err != nil {
 				log.Fatal(err)
 			}

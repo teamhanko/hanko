@@ -16,7 +16,7 @@ type Importer struct {
 	importTimestamp time.Time
 }
 
-func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID *uuid.UUID) (*models.User, error) {
+func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID uuid.UUID) (*models.User, error) {
 	userID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
@@ -48,7 +48,7 @@ func (i *Importer) createUser(newUser ImportOrExportEntry, tenantID *uuid.UUID) 
 	return &userModel, nil
 }
 
-func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportEmail, tenantID *uuid.UUID) (*models.Email, error) {
+func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportEmail, tenantID uuid.UUID) (*models.Email, error) {
 	emailID, err := uuid.NewV4()
 	if err != nil {
 		return nil, err
@@ -72,7 +72,7 @@ func (i *Importer) createEmailAddress(userID uuid.UUID, newEmail ImportOrExportE
 	return &emailModel, nil
 }
 
-func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID, tenantID *uuid.UUID) error {
+func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID, tenantID uuid.UUID) error {
 	entryID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -91,7 +91,7 @@ func (i *Importer) createPrimaryEmailAddress(userID uuid.UUID, emailID uuid.UUID
 	return err
 }
 
-func (i *Importer) createUsername(userID uuid.UUID, username string, tenantID *uuid.UUID) error {
+func (i *Importer) createUsername(userID uuid.UUID, username string, tenantID uuid.UUID) error {
 	entryID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -110,7 +110,7 @@ func (i *Importer) createUsername(userID uuid.UUID, username string, tenantID *u
 	return err
 }
 
-func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential ImportWebauthnCredential, tenantID *uuid.UUID) error {
+func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential ImportWebauthnCredential, tenantID uuid.UUID) error {
 	createdAt := i.importTimestamp
 	updatedAt := i.importTimestamp
 	if webauthnCredential.CreatedAt != nil {
@@ -184,7 +184,7 @@ func (i *Importer) createWebauthnCredential(userID uuid.UUID, webauthnCredential
 	return err
 }
 
-func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential ImportPasswordCredential, tenantID *uuid.UUID) error {
+func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential ImportPasswordCredential, tenantID uuid.UUID) error {
 	passwordID, err := uuid.NewV4()
 	if err != nil {
 		return err
@@ -213,7 +213,7 @@ func (i *Importer) createPasswordCredential(userID uuid.UUID, passwordCredential
 	return err
 }
 
-func (i *Importer) createOTPSecret(userID uuid.UUID, otpSecret ImportOTPSecret, tenantID *uuid.UUID) error {
+func (i *Importer) createOTPSecret(userID uuid.UUID, otpSecret ImportOTPSecret, tenantID uuid.UUID) error {
 	otpSecretID, err := uuid.NewV4()
 	if err != nil {
 		return err

@@ -11,9 +11,9 @@ import (
 )
 
 type JwkPersister interface {
-	Get(id int, tenantID *uuid.UUID) (*models.Jwk, error)
-	GetAll(tenantID *uuid.UUID) ([]models.Jwk, error)
-	GetLast(tenantID *uuid.UUID) (*models.Jwk, error)
+	Get(id int, tenantID uuid.UUID) (*models.Jwk, error)
+	GetAll(tenantID uuid.UUID) ([]models.Jwk, error)
+	GetLast(tenantID uuid.UUID) (*models.Jwk, error)
 	Create(models.Jwk) error
 }
 
@@ -25,14 +25,10 @@ func NewJwkPersister(db *pop.Connection) JwkPersister {
 	return &jwkPersister{db: db}
 }
 
-func (p *jwkPersister) Get(id int, tenantID *uuid.UUID) (*models.Jwk, error) {
+func (p *jwkPersister) Get(id int, tenantID uuid.UUID) (*models.Jwk, error) {
 	jwk := models.Jwk{}
 	query := p.db.Q()
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.Find(&jwk, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -43,14 +39,10 @@ func (p *jwkPersister) Get(id int, tenantID *uuid.UUID) (*models.Jwk, error) {
 	return &jwk, nil
 }
 
-func (p *jwkPersister) GetAll(tenantID *uuid.UUID) ([]models.Jwk, error) {
+func (p *jwkPersister) GetAll(tenantID uuid.UUID) ([]models.Jwk, error) {
 	jwks := []models.Jwk{}
 	query := p.db.Q()
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.All(&jwks)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -61,14 +53,10 @@ func (p *jwkPersister) GetAll(tenantID *uuid.UUID) ([]models.Jwk, error) {
 	return jwks, nil
 }
 
-func (p *jwkPersister) GetLast(tenantID *uuid.UUID) (*models.Jwk, error) {
+func (p *jwkPersister) GetLast(tenantID uuid.UUID) (*models.Jwk, error) {
 	jwk := models.Jwk{}
 	query := p.db.Q()
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.Last(&jwk)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

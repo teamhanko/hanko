@@ -9,19 +9,19 @@ import (
 
 // FlowModel represents the database model for a flow.
 type FlowModel struct {
-	ID        uuid.UUID  // Unique ID of the flow.
-	Data      string     // Stash data associated with the flow.
-	CSRFToken string     // Current CSRF token
-	Version   int        // Version of the flow.
-	ExpiresAt time.Time  // Expiry time of the flow.
-	TenantID  *uuid.UUID // Tenant ID associated with the flow.
-	CreatedAt time.Time  // Creation time of the flow.
-	UpdatedAt time.Time  // Update time of the flow.
+	ID        uuid.UUID // Unique ID of the flow.
+	Data      string    // Stash data associated with the flow.
+	CSRFToken string    // Current CSRF token
+	Version   int       // Version of the flow.
+	ExpiresAt time.Time // Expiry time of the flow.
+	TenantID  uuid.UUID // Tenant ID associated with the flow.
+	CreatedAt time.Time // Creation time of the flow.
+	UpdatedAt time.Time // Update time of the flow.
 }
 
 // FlowDB is the interface for interacting with the flow database.
 type FlowDB interface {
-	GetFlow(flowID uuid.UUID, tenantID *uuid.UUID) (*FlowModel, error)
+	GetFlow(flowID uuid.UUID, tenantID uuid.UUID) (*FlowModel, error)
 	CreateFlow(flowModel FlowModel) error
 	UpdateFlow(flowModel FlowModel) error
 }
@@ -45,10 +45,10 @@ func wrapDB(db FlowDB) flowDBWrapper {
 
 // flowCreationParam holds parameters for creating a new flow.
 type flowCreationParam struct {
-	data      string    //
-	csrfToken string    // Current CSRF token
-	expiresAt time.Time // Expiry time of the flow.
-	tenantID  *uuid.UUID
+	data      string     //
+	csrfToken string     // Current CSRF token
+	expiresAt time.Time  // Expiry time of the flow.
+	tenantID  uuid.UUID
 }
 
 // CreateFlowWithParam creates a new flow with the given parameters.
@@ -86,7 +86,7 @@ type flowUpdateParam struct {
 	data      string    // Updated stash data for the flow.
 	version   int       // Updated version of the flow.
 	csrfToken string    // Current CSRF tokens
-	tenantID  *uuid.UUID
+	tenantID  uuid.UUID
 	expiresAt time.Time // Updated expiry time of the flow.
 	createdAt time.Time // Original creation time of the flow.
 }

@@ -15,7 +15,7 @@ import (
 )
 
 type Manager interface {
-	Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID *uuid.UUID)
+	Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID uuid.UUID)
 	GenerateJWT(data interface{}, event events.Event) (string, error)
 }
 
@@ -54,7 +54,7 @@ func NewManager(cfg *config.Config, persister persistence.Persister, jwtGenerato
 	}, nil
 }
 
-func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID *uuid.UUID) {
+func (m *manager) Trigger(tx *pop.Connection, evt events.Event, data interface{}, tenantID uuid.UUID) {
 	// add db hooks - Done here to prevent a restart in case a hook is added or removed from the database
 	dbHooks, err := m.persister.GetWebhookPersister(tx).List(false, tenantID)
 	if err != nil {

@@ -179,18 +179,18 @@ func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persiste
 			importTimestamp: time.Now().UTC(),
 		}
 		for i, v := range entries {
-			userModel, err := importer.createUser(v, tenantID)
+			userModel, err := importer.createUser(v, *tenantID)
 			if err != nil {
 				return fmt.Errorf("failed to create user entry nr. %d: %w", i, err)
 			}
 
 			for _, e := range v.Emails {
-				emailModel, err := importer.createEmailAddress(userModel.ID, e, tenantID)
+				emailModel, err := importer.createEmailAddress(userModel.ID, e, *tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create email address \"%s\" for user entry nr. %d: %w", e.Address, i, err)
 				}
 				if e.IsPrimary {
-					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID, tenantID)
+					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID, *tenantID)
 					if err != nil {
 						return fmt.Errorf("failed to set email \"%s\" as primary for user entry nr. %d: %w", e.Address, i, err)
 					}
@@ -198,28 +198,28 @@ func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persiste
 			}
 
 			if v.Username != nil {
-				err = importer.createUsername(userModel.ID, *v.Username, tenantID)
+				err = importer.createUsername(userModel.ID, *v.Username, *tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create username \"%v\" for user entry nr. %d: %w", v.Username, i, err)
 				}
 			}
 
 			for _, credential := range v.WebauthnCredentials {
-				err = importer.createWebauthnCredential(userModel.ID, credential, tenantID)
+				err = importer.createWebauthnCredential(userModel.ID, credential, *tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create webauthn credential \"%s\" for user entry nr. %d: %w", credential.ID, i, err)
 				}
 			}
 
 			if v.Password != nil {
-				err = importer.createPasswordCredential(userModel.ID, *v.Password, tenantID)
+				err = importer.createPasswordCredential(userModel.ID, *v.Password, *tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create password for user entry nr. %d: %w", i, err)
 				}
 			}
 
 			if v.OTPSecret != nil {
-				err = importer.createOTPSecret(userModel.ID, *v.OTPSecret, tenantID)
+				err = importer.createOTPSecret(userModel.ID, *v.OTPSecret, *tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create otp secret for user entry nr. %d: %w", i, err)
 				}

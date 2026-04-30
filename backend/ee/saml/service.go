@@ -18,7 +18,7 @@ type Service interface {
 	Providers() []provider.ServiceProvider
 	GetProviderByDomain(domain string) (provider.ServiceProvider, error)
 	GetProviderByIssuer(issuer string) (provider.ServiceProvider, error)
-	GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool, tenantID *uuid.UUID) (string, error)
+	GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool, tenantID uuid.UUID) (string, error)
 }
 
 type defaultService struct {
@@ -96,7 +96,7 @@ func (s *defaultService) GetProviderByIssuer(issuer string) (provider.ServicePro
 	return nil, fmt.Errorf("unknown provider for issuer %s", issuer)
 }
 
-func (s *defaultService) GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool, tenantID *uuid.UUID) (string, error) {
+func (s *defaultService) GetAuthUrl(provider provider.ServiceProvider, redirectTo string, isFlow bool, tenantID uuid.UUID) (string, error) {
 	if ok := samlUtils.IsAllowedRedirect(s.config.Saml, redirectTo); !ok {
 		return "", thirdparty.ErrorInvalidRequest(fmt.Sprintf("redirect to '%s' not allowed", redirectTo))
 	}

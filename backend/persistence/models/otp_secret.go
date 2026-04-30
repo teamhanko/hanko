@@ -10,19 +10,19 @@ import (
 )
 
 type OTPSecret struct {
-	ID        uuid.UUID  `db:"id"`
-	UserID    uuid.UUID  `db:"user_id"`
-	TenantID  *uuid.UUID `db:"tenant_id"`
-	Secret    string     `db:"secret"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at"`
+	ID        uuid.UUID `db:"id"`
+	UserID    uuid.UUID `db:"user_id"`
+	TenantID  uuid.UUID `db:"tenant_id"`
+	Secret    string    `db:"secret"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
 func (otpSecret OTPSecret) TableName() string {
 	return "otp_secrets"
 }
 
-func NewOTPSecret(userID uuid.UUID, secret string, tenantID *uuid.UUID) *OTPSecret {
+func NewOTPSecret(userID uuid.UUID, secret string, tenantID uuid.UUID) *OTPSecret {
 	id, _ := uuid.NewV4()
 	return &OTPSecret{
 		ID:        id,

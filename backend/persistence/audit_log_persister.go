@@ -13,9 +13,9 @@ import (
 
 type AuditLogPersister interface {
 	Create(auditLog models.AuditLog) error
-	Get(id uuid.UUID, tenantID *uuid.UUID) (*models.AuditLog, error)
-	List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID *uuid.UUID) ([]models.AuditLog, error)
-	Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID *uuid.UUID) (int, error)
+	Get(id uuid.UUID, tenantID uuid.UUID) (*models.AuditLog, error)
+	List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID uuid.UUID) ([]models.AuditLog, error)
+	Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID uuid.UUID) (int, error)
 	Cleanup[models.AuditLog]
 }
 
@@ -39,14 +39,10 @@ func (p *auditLogPersister) Create(auditLog models.AuditLog) error {
 	return nil
 }
 
-func (p *auditLogPersister) Get(id uuid.UUID, tenantID *uuid.UUID) (*models.AuditLog, error) {
+func (p *auditLogPersister) Get(id uuid.UUID, tenantID uuid.UUID) (*models.AuditLog, error) {
 	auditLog := models.AuditLog{}
 	query := p.db.Eager().Q()
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.Find(&auditLog, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -58,7 +54,7 @@ func (p *auditLogPersister) Get(id uuid.UUID, tenantID *uuid.UUID) (*models.Audi
 	return &auditLog, nil
 }
 
-func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID *uuid.UUID) ([]models.AuditLog, error) {
+func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID uuid.UUID) ([]models.AuditLog, error) {
 	auditLogs := []models.AuditLog{}
 
 	query := p.db.Q()
@@ -75,7 +71,7 @@ func (p *auditLogPersister) List(page int, perPage int, startTime *time.Time, en
 	return auditLogs, nil
 }
 
-func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID *uuid.UUID) (int, error) {
+func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID uuid.UUID) (int, error) {
 	query := p.db.Q()
 	query = p.addQueryParamsToSqlQuery(query, startTime, endTime, types, userId, email, ip, searchString, tenantID)
 	count, err := query.Count(&models.AuditLog{})
@@ -86,12 +82,8 @@ func (p *auditLogPersister) Count(startTime *time.Time, endTime *time.Time, type
 	return count, nil
 }
 
-func (p *auditLogPersister) addQueryParamsToSqlQuery(query *pop.Query, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID *uuid.UUID) *pop.Query {
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+func (p *auditLogPersister) addQueryParamsToSqlQuery(query *pop.Query, startTime *time.Time, endTime *time.Time, types []string, userId string, email string, ip string, searchString string, tenantID uuid.UUID) *pop.Query {
+	query = query.Where("tenant_id = ?", tenantID)
 
 	if startTime != nil {
 		query = query.Where("created_at > ?", startTime)
@@ -135,15 +127,11 @@ func (p *auditLogPersister) addQueryParamsToSqlQuery(query *pop.Query, startTime
 	return query
 }
 
-func (p *auditLogPersister) FindExpired(cutoffTime time.Time, page, perPage int, tenantID *uuid.UUID) ([]models.AuditLog, error) {
+func (p *auditLogPersister) FindExpired(cutoffTime time.Time, page, perPage int, tenantID uuid.UUID) ([]models.AuditLog, error) {
 	var items []models.AuditLog
 
 	query := p.db.Where("created_at < ?", cutoffTime)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	query = query.Select("id").Paginate(page, perPage)
 	err := query.All(&items)
 

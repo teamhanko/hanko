@@ -12,21 +12,17 @@ import (
 
 type SamlIDPInitiatedRequestPersister interface {
 	Create(samlIDPInitiatedRequest models.SamlIDPInitiatedRequest) error
-	GetByResponseIDAndIssuer(responseID, entityID string, tenantID *uuid.UUID) (*models.SamlIDPInitiatedRequest, error)
+	GetByResponseIDAndIssuer(responseID, entityID string, tenantID uuid.UUID) (*models.SamlIDPInitiatedRequest, error)
 }
 
 type samlIDPInitiatedRequestPersister struct {
 	db *pop.Connection
 }
 
-func (p samlIDPInitiatedRequestPersister) GetByResponseIDAndIssuer(responseID, entityID string, tenantID *uuid.UUID) (*models.SamlIDPInitiatedRequest, error) {
+func (p samlIDPInitiatedRequestPersister) GetByResponseIDAndIssuer(responseID, entityID string, tenantID uuid.UUID) (*models.SamlIDPInitiatedRequest, error) {
 	samlIDPInitiatedRequest := models.SamlIDPInitiatedRequest{}
 	query := p.db.Where("response_id = ? AND idp_entity_id = ?", responseID, entityID)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&samlIDPInitiatedRequest)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

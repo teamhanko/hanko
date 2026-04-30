@@ -19,17 +19,17 @@ func TenantMiddleware(multiTenancy bool, tenantConfig *config.TenantConfig, pers
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(ctx echo.Context) error {
 			if multiTenancy {
-				tenantIdStr := ctx.Param("tenant_id")
-				if tenantIdStr == "" {
+				tenantIDStr := ctx.Param("tenant_id")
+				if tenantIDStr == "" {
 					return echo.NewHTTPError(http.StatusBadRequest, "tenant ID required")
 				}
 
-				tenantId, err := uuid.FromString(tenantIdStr)
+				tenantID, err := uuid.FromString(tenantIDStr)
 				if err != nil {
 					return echo.NewHTTPError(http.StatusBadRequest, "invalid tenant ID format").SetInternal(err)
 				}
 
-				tenant, err := persister.GetTenantPersister().Get(tenantId)
+				tenant, err := persister.GetTenantPersister().Get(tenantID)
 				if err != nil {
 					return echo.NewHTTPError(http.StatusInternalServerError, "failed to load tenant").SetInternal(err)
 				}
@@ -53,9 +53,11 @@ func TenantMiddleware(multiTenancy bool, tenantConfig *config.TenantConfig, pers
 				}
 
 				ctx.Set("tenant_config", tenantConfig)
-				ctx.Set("tenant_id", &tenantId)
+				ctx.Set("tenant_id", tenantID)
 			} else {
-				ctx.Set("tenant_id", nil)
+				// Single-tenant mode: use reserved default tenant ID
+				defaultID := uuid.Nil
+				ctx.Set("tenant_id", defaultID)
 				ctx.Set("tenant_config", tenantConfig)
 			}
 			return next(ctx)

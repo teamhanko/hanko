@@ -28,13 +28,13 @@ type SendPasscodeParams struct {
 	EmailAddress string
 	Language     string
 	Cfg          config.TenantConfig
-	TenantID     *uuid.UUID
+	TenantID     uuid.UUID
 }
 
 type ValidatePasscodeParams struct {
 	Tx         *pop.Connection
 	PasscodeID uuid.UUID
-	TenantID   *uuid.UUID
+	TenantID   uuid.UUID
 }
 
 type SendPasscodeResult struct {
@@ -48,7 +48,7 @@ type SendPasscodeResult struct {
 type Passcode interface {
 	ValidatePasscode(ValidatePasscodeParams) (bool, error)
 	SendPasscode(*pop.Connection, SendPasscodeParams) (*SendPasscodeResult, error)
-	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string, tenantID *uuid.UUID) error
+	VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, passcode string, tenantID uuid.UUID) error
 }
 
 type passcode struct {
@@ -80,7 +80,7 @@ func (s *passcode) ValidatePasscode(p ValidatePasscodeParams) (bool, error) {
 	return false, nil
 }
 
-func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, value string, tenantID *uuid.UUID) error {
+func (s *passcode) VerifyPasscodeCode(tx *pop.Connection, passcodeID uuid.UUID, value string, tenantID uuid.UUID) error {
 	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
 	passcodeModel, err := s.getPasscode(tx, passcodeID, tenantID)
 	if err != nil {
@@ -189,7 +189,7 @@ func (s *passcode) SendPasscode(tx *pop.Connection, p SendPasscodeParams) (*Send
 	}, nil
 }
 
-func (s *passcode) getPasscode(tx *pop.Connection, passcodeID uuid.UUID, tenantID *uuid.UUID) (*models.Passcode, error) {
+func (s *passcode) getPasscode(tx *pop.Connection, passcodeID uuid.UUID, tenantID uuid.UUID) (*models.Passcode, error) {
 	passcodePersister := s.persister.GetPasscodePersisterWithConnection(tx)
 
 	passcodeModel, err := passcodePersister.Get(passcodeID, tenantID)

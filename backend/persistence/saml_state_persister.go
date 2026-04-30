@@ -10,7 +10,7 @@ import (
 
 type SamlStatePersister interface {
 	Create(state models.SamlState) error
-	GetByNonce(nonce string, tenantID *uuid.UUID) (*models.SamlState, error)
+	GetByNonce(nonce string, tenantID uuid.UUID) (*models.SamlState, error)
 	Delete(state models.SamlState) error
 }
 
@@ -35,15 +35,11 @@ func (s samlStatePersister) Create(state models.SamlState) error {
 	return nil
 }
 
-func (s samlStatePersister) GetByNonce(nonce string, tenantID *uuid.UUID) (*models.SamlState, error) {
+func (s samlStatePersister) GetByNonce(nonce string, tenantID uuid.UUID) (*models.SamlState, error) {
 	state := models.SamlState{}
 
 	query := s.db.Where("nonce = ?", nonce)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&state)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get state by nonce: %w", err)

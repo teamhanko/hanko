@@ -73,6 +73,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 				// Send user an email informing of new MFA method
 				if deps.Cfg.SecurityNotifications.Notifications.MFACreate.Enabled {
 					deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+						TenantID:     deps.TenantID,
 						EmailAddress: emailAddress,
 						Template:     "mfa_create",
 						HttpContext:  deps.HttpContext,
@@ -83,6 +84,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 
 			if isPasskey && deps.Cfg.SecurityNotifications.Notifications.PasskeyCreate.Enabled {
 				deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+					TenantID:     deps.TenantID,
 					EmailAddress: emailAddress,
 					Template:     "passkey_create",
 					HttpContext:  deps.HttpContext,

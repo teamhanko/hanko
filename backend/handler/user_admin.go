@@ -63,7 +63,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
-		err = webhookUtils.TriggerWebhooks(c, tx, events.UserDelete, admin.FromUserModel(*user))
+		err = webhookUtils.TriggerWebhooks(c, tx, tenantID, events.UserDelete, admin.FromUserModel(*user))
 		if err != nil {
 			c.Logger().Warn(err)
 		}
@@ -314,7 +314,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 	userDto := admin.FromUserModel(*user)
 
-	err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), events.UserCreate, userDto)
+	err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenantID, events.UserCreate, userDto)
 	if err != nil {
 		c.Logger().Warn(err)
 	}

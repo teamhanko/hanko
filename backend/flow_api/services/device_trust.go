@@ -32,7 +32,7 @@ type DeviceTrustService struct {
 	Persister   persistence.TrustedDevicePersister
 	Cfg         config.Config
 	HttpContext echo.Context
-	TenantID    *uuid.UUID
+	TenantID    uuid.UUID
 }
 
 func (s DeviceTrustService) CreateTrustedDevice(userID uuid.UUID, deviceToken string) error {

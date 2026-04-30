@@ -41,7 +41,7 @@ type GenerateCreationOptionsParams struct {
 	UserID   uuid.UUID
 	Email    *string
 	Username *string
-	TenantID *uuid.UUID
+	TenantID uuid.UUID
 }
 
 type VerifyAttestationResponseParams struct {
@@ -51,7 +51,7 @@ type VerifyAttestationResponseParams struct {
 	UserID        uuid.UUID
 	Email         *string
 	Username      *string
-	TenantID      *uuid.UUID
+	TenantID      uuid.UUID
 }
 
 type WebauthnService interface {
@@ -132,7 +132,7 @@ func (s *webauthnService) generateRequestOptions(tx *pop.Connection, user webaut
 		return nil, nil, fmt.Errorf("failed to create webauthn assertion options for discoverable login: %w", err)
 	}
 
-	webAuthnSessionDataModel, err := models.NewWebauthnSessionDataFrom(sessionData, models.WebauthnOperationAuthentication, tenantID)
+	webAuthnSessionDataModel, err := models.NewWebauthnSessionDataFrom(sessionData, models.WebauthnOperationAuthentication, *tenantID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to generate a new webauthn session data model: %w", err)
 	}
@@ -158,12 +158,12 @@ func (s *webauthnService) GenerateRequestOptionsPasskey(p GenerateRequestOptions
 func (s *webauthnService) GenerateRequestOptionsSecurityKey(p GenerateRequestOptionsSecurityKeyParams) (*models.WebauthnSessionData, *protocol.CredentialAssertion, error) {
 	userVerificationRequirement := protocol.UserVerificationRequirement(s.cfg.MFA.SecurityKeys.UserVerification)
 
-	userModel, err := s.persister.GetUserPersisterWithConnection(p.Tx).Get(p.UserID, p.TenantID)
+	userModel, err := s.persister.GetUserPersisterWithConnection(p.Tx).Get(p.UserID, *p.TenantID)
 	if err != nil || userModel == nil {
 		return nil, nil, fmt.Errorf("failed to get user from db: %w", err)
 	}
 
-	credentialModels, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).GetFromUser(p.UserID, p.TenantID)
+	credentialModels, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).GetFromUser(p.UserID, *p.TenantID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to get webauthn credentials from db: %w", err)
 	}
@@ -187,12 +187,12 @@ func (s *webauthnService) VerifyAssertionResponse(p VerifyAssertionResponseParam
 		return nil, fmt.Errorf("%s: %w", err, ErrInvalidWebauthnCredential)
 	}
 
-	sessionDataModel, err := s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Get(p.SessionDataID, p.TenantID)
+	sessionDataModel, err := s.persister.GetWebauthnSessionDataPersisterWithConnection(p.Tx).Get(p.SessionDataID, *p.TenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get session data from db: %w", err)
 	}
 
-	credentialModel, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).Get(credentialAssertionData.ID, p.TenantID)
+	credentialModel, err := s.persister.GetWebauthnCredentialPersisterWithConnection(p.Tx).Get(credentialAssertionData.ID, *p.TenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get webauthncredential from db: %w", err)
 	}
@@ -366,7 +366,7 @@ func (s *webauthnService) VerifyAttestationResponse(p VerifyAttestationResponseP
 }
 
 func (s *webauthnService) GetWebAuthnUser(tx *pop.Connection, credential models.WebauthnCredential, tenantID *uuid.UUID) (webauthn.User, *models.User, error) {
-	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(credential.UserId, tenantID)
+	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(credential.UserId, *tenantID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to fetch user from db: %w", err)
 	}

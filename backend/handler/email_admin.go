@@ -282,7 +282,7 @@ func (h *emailAdminHandler) SetPrimaryEmail(ctx echo.Context) error {
 	}
 
 	return h.persister.Transaction(func(tx *pop.Connection) error {
-		err := h.makeEmailPrimary(ctx, email, user, tx, tenantID)
+		err := h.makeEmailPrimary(ctx, email, user, tx, &tenantID)
 		if err != nil {
 			return err
 		}
@@ -300,7 +300,7 @@ func (h *emailAdminHandler) makeEmailPrimary(ctx echo.Context, email *models.Ema
 	}
 
 	if primaryEmail == nil {
-		primaryEmail = models.NewPrimaryEmail(email.ID, user.ID, tenantID)
+		primaryEmail = models.NewPrimaryEmail(email.ID, user.ID, *tenantID)
 		err := h.persister.GetPrimaryEmailPersisterWithConnection(tx).Create(*primaryEmail)
 		if err != nil {
 			ctx.Logger().Error(err)

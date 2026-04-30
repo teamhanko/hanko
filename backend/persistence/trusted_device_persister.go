@@ -12,7 +12,7 @@ import (
 
 type TrustedDevicePersister interface {
 	Create(models.TrustedDevice) error
-	FindByDeviceToken(token string, tenantID *uuid.UUID) (*models.TrustedDevice, error)
+	FindByDeviceToken(token string, tenantID uuid.UUID) (*models.TrustedDevice, error)
 }
 
 type trustedDevicePersister struct {
@@ -35,14 +35,10 @@ func (p *trustedDevicePersister) Create(trustedDevice models.TrustedDevice) erro
 	return nil
 }
 
-func (p *trustedDevicePersister) FindByDeviceToken(token string, tenantID *uuid.UUID) (*models.TrustedDevice, error) {
+func (p *trustedDevicePersister) FindByDeviceToken(token string, tenantID uuid.UUID) (*models.TrustedDevice, error) {
 	trustedDevice := models.TrustedDevice{}
 	query := p.db.Where("device_token = ?", token)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&trustedDevice)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

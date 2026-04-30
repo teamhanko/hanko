@@ -15,19 +15,19 @@ func TestTenantIDFromContext(t *testing.T) {
 		c := e.NewContext(nil, nil)
 
 		tenantID, err := TenantIDFromContext(c)
-		require.NoError(t, err)
-		require.Nil(t, tenantID)
+		require.Error(t, err)
+		require.Equal(t, tenantID, uuid.Nil)
 	})
 
 	t.Run("returns tenant id when value is a uuid pointer", func(t *testing.T) {
 		c := e.NewContext(nil, nil)
 		id := uuid.Must(uuid.NewV4())
-		c.Set("tenant_id", &id)
+		c.Set("tenant_id", id)
 
 		tenantID, err := TenantIDFromContext(c)
 		require.NoError(t, err)
 		require.NotNil(t, tenantID)
-		require.Equal(t, id, *tenantID)
+		require.Equal(t, id, tenantID)
 	})
 
 	t.Run("returns error for unexpected type", func(t *testing.T) {
@@ -36,6 +36,6 @@ func TestTenantIDFromContext(t *testing.T) {
 
 		tenantID, err := TenantIDFromContext(c)
 		require.Error(t, err)
-		require.Nil(t, tenantID)
+		require.Equal(t, tenantID, uuid.Nil)
 	})
 }

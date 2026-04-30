@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
 )
@@ -39,7 +40,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete() {
 
 	s.Equal(http.StatusNoContent, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", nil)
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Equal(3, count)
 }
@@ -60,7 +61,7 @@ func (s *userAdminSuite) TestUserHandlerAdmin_Delete_UnknownUserId() {
 
 	s.Equal(http.StatusNotFound, rec.Code)
 
-	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", nil)
+	count, err := s.Storage.GetUserPersister().Count([]uuid.UUID{}, "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Equal(4, count)
 }

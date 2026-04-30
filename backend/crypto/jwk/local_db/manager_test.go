@@ -3,11 +3,13 @@ package local_db
 import (
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/test"
 )
 
@@ -27,7 +29,7 @@ func (s *jwkManagerSuite) TestDefaultManager() {
 
 	dm, err := NewDefaultManager(keys, persister)
 	require.NoError(s.T(), err)
-	all, err := persister.GetAll(nil)
+	all, err := persister.GetAll(uuid.FromStringOrNil(config.DefaultTenantID))
 
 	require.NoError(s.T(), err)
 	assert.Equal(s.T(), 2, len(all))

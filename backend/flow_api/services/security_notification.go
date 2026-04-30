@@ -19,6 +19,7 @@ import (
 type SendSecurityNotificationParams struct {
 	Template     string
 	UserID       uuid.UUID
+	TenantID     uuid.UUID
 	EmailAddress string
 	BodyData     map[string]interface{}            // Data used in templates
 	Data         *webhook.SecurityNotificationData // Data used for (serialized) webhook 'data' payload
@@ -95,7 +96,7 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		Data:             p.Data,
 	}
 
-	err = webhookUtils.TriggerWebhooks(p.HttpContext, tx, events.EmailSend, webhookData)
+	err = webhookUtils.TriggerWebhooks(p.HttpContext, tx, p.TenantID, events.EmailSend, webhookData)
 	if err != nil {
 		return err
 	}

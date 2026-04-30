@@ -12,7 +12,7 @@ import (
 
 type TokenPersister interface {
 	Create(token models.Token) error
-	GetByValue(value string, tenantID *uuid.UUID) (*models.Token, error)
+	GetByValue(value string, tenantID uuid.UUID) (*models.Token, error)
 	Delete(token models.Token) error
 }
 
@@ -37,14 +37,10 @@ func (t tokenPersister) Create(token models.Token) error {
 	return nil
 }
 
-func (t tokenPersister) GetByValue(value string, tenantID *uuid.UUID) (*models.Token, error) {
+func (t tokenPersister) GetByValue(value string, tenantID uuid.UUID) (*models.Token, error) {
 	token := models.Token{}
 	query := t.db.Where("value = ?", value)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(&token)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil

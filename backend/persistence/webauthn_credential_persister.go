@@ -11,11 +11,11 @@ import (
 )
 
 type WebauthnCredentialPersister interface {
-	Get(id string, tenantID *uuid.UUID) (*models.WebauthnCredential, error)
+	Get(id string, tenantID uuid.UUID) (*models.WebauthnCredential, error)
 	Create(models.WebauthnCredential) error
 	Update(models.WebauthnCredential) error
 	Delete(models.WebauthnCredential) error
-	GetFromUser(userId uuid.UUID, tenantID *uuid.UUID) (models.WebauthnCredentials, error)
+	GetFromUser(userId uuid.UUID, tenantID uuid.UUID) (models.WebauthnCredentials, error)
 }
 
 type webauthnCredentialPersister struct {
@@ -26,14 +26,10 @@ func NewWebauthnCredentialPersister(db *pop.Connection) WebauthnCredentialPersis
 	return &webauthnCredentialPersister{db: db}
 }
 
-func (p *webauthnCredentialPersister) Get(id string, tenantID *uuid.UUID) (*models.WebauthnCredential, error) {
+func (p *webauthnCredentialPersister) Get(id string, tenantID uuid.UUID) (*models.WebauthnCredential, error) {
 	credential := models.WebauthnCredential{}
 	query := p.db.Eager().Q()
-	if tenantID != nil {
-		query = query.Where("webauthn_credentials.tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("webauthn_credentials.tenant_id IS NULL")
-	}
+	query = query.Where("webauthn_credentials.tenant_id = ?", tenantID)
 	err := query.Find(&credential, id)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return nil, nil
@@ -103,14 +99,10 @@ func (p *webauthnCredentialPersister) Delete(credential models.WebauthnCredentia
 	return nil
 }
 
-func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID, tenantID *uuid.UUID) (models.WebauthnCredentials, error) {
+func (p *webauthnCredentialPersister) GetFromUser(userId uuid.UUID, tenantID uuid.UUID) (models.WebauthnCredentials, error) {
 	var credentials []models.WebauthnCredential
 	query := p.db.Eager().Where("user_id = ?", &userId)
-	if tenantID != nil {
-		query = query.Where("webauthn_credentials.tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("webauthn_credentials.tenant_id IS NULL")
-	}
+	query = query.Where("webauthn_credentials.tenant_id = ?", tenantID)
 	err := query.Order("created_at asc").All(&credentials)
 	if err != nil && errors.Is(err, sql.ErrNoRows) {
 		return credentials, nil

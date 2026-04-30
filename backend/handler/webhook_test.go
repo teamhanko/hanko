@@ -217,10 +217,10 @@ func (s *webhookSuite) TestWebhookHandler_Delete() {
 
 	persister := s.Storage.GetWebhookPersister(nil)
 
-	entry, err := persister.Get(testUuid, nil)
+	entry, err := persister.Get(testUuid, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
-	list, err := persister.List(true, nil)
+	list, err := persister.List(true, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	s.Require().Nil(entry)
@@ -439,7 +439,7 @@ func (s *webhookSuite) TestWebhookHandler_Update() {
 	s.Require().True(result.ExpiresAt.After(time.Now().Add(29 * 24 * time.Hour))) // 30 Days
 	s.Require().True(result.CreatedAt.Before(result.UpdatedAt))
 
-	dbHook, err := s.Storage.GetWebhookPersister(nil).Get(testUuid, nil)
+	dbHook, err := s.Storage.GetWebhookPersister(nil).Get(testUuid, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Equal(updateDto.Callback, dbHook.Callback)
 	s.Equal(updateDto.Enabled, dbHook.Enabled)

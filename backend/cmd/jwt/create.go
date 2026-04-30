@@ -69,7 +69,7 @@ func NewCreateCommand() *cobra.Command {
 
 			userId := uuid.FromStringOrNil(args[0])
 
-			userModel, err := persister.GetUserPersister().Get(userId, &tID)
+			userModel, err := persister.GetUserPersister().Get(userId, tID)
 			if err != nil {
 				fmt.Printf("failed to get user from db: %s", err)
 				return

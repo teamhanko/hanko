@@ -10,15 +10,15 @@ import (
 )
 
 type PasswordCredential struct {
-	ID        uuid.UUID  `db:"id"`
-	UserId    uuid.UUID  `db:"user_id"`
-	TenantID  *uuid.UUID `db:"tenant_id"`
-	Password  string     `db:"password"`
-	CreatedAt time.Time  `db:"created_at"`
-	UpdatedAt time.Time  `db:"updated_at"`
+	ID        uuid.UUID `db:"id"`
+	UserId    uuid.UUID `db:"user_id"`
+	TenantID  uuid.UUID `db:"tenant_id"`
+	Password  string    `db:"password"`
+	CreatedAt time.Time `db:"created_at"`
+	UpdatedAt time.Time `db:"updated_at"`
 }
 
-func NewPasswordCredential(userId uuid.UUID, password string, tenantID *uuid.UUID) *PasswordCredential {
+func NewPasswordCredential(userId uuid.UUID, password string, tenantID uuid.UUID) *PasswordCredential {
 	id, _ := uuid.NewV4()
 	return &PasswordCredential{
 		ID:        id,

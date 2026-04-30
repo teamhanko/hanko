@@ -32,7 +32,7 @@ func GenerateStateForFlowAPI(isFlow bool) func(*State) {
 	}
 }
 
-func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID *uuid.UUID, options ...func(*State)) ([]byte, error) {
+func GenerateState(config *config.Config, persister persistence.SamlStatePersister, provider string, redirectTo string, tenantID uuid.UUID, options ...func(*State)) ([]byte, error) {
 	if strings.TrimSpace(provider) == "" {
 		return nil, errors.New("provider must be present")
 	}
@@ -86,7 +86,7 @@ func GenerateState(config *config.Config, persister persistence.SamlStatePersist
 	return []byte(result), nil
 }
 
-func VerifyState(config *config.Config, persister persistence.SamlStatePersister, state string, tenantID *uuid.UUID) (*State, error) {
+func VerifyState(config *config.Config, persister persistence.SamlStatePersister, state string, tenantID uuid.UUID) (*State, error) {
 	decodedState, err := decodeState(config, state)
 	if err != nil {
 		return nil, fmt.Errorf("could not decode state: %w", err)

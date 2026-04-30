@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/spf13/cobra"
 	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
@@ -166,7 +167,7 @@ func cleanup[T any](param handlerParam, persister persistence.Cleanup[T], cutoff
 	)
 
 	for {
-		items, err := persister.FindExpired(cutoffTime, page, param.options.pageSize, nil)
+		items, err := persister.FindExpired(cutoffTime, page, param.options.pageSize, uuid.Nil)
 		if err != nil {
 			return err
 		}

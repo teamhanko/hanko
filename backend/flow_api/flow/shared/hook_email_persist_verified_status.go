@@ -116,6 +116,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 	if emailCreated {
 		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
 			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				TenantID:     deps.TenantID,
 				EmailAddress: user.Emails.GetPrimary().Address,
 				Template:     "email_create",
 				HttpContext:  deps.HttpContext,

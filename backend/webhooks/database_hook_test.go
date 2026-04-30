@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
 	"github.com/teamhanko/hanko/backend/v2/test"
@@ -43,7 +44,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnExpiryDate() {
 	err := dbHook.DisableOnExpiryDate(now)
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID, nil)
+	updatedHook, err := whPersister.Get(hook.ID, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	s.False(updatedHook.Enabled)
@@ -57,7 +58,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnExpiryDate() {
 	err := dbHook.DisableOnExpiryDate(now)
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID, nil)
+	updatedHook, err := whPersister.Get(hook.ID, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	s.True(updatedHook.Enabled)
@@ -70,7 +71,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DisableOnFailure() {
 	err := dbHook.DisableOnFailure()
 	s.Require().NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID, nil)
+	updatedHook, err := whPersister.Get(hook.ID, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.NoError(err)
 
 	s.False(updatedHook.Enabled)
@@ -83,7 +84,7 @@ func (s *databaseHookSuite) TestDatabaseHook_DoNotDisableOnFailure() {
 	err := dbHook.DisableOnFailure()
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID, nil)
+	updatedHook, err := whPersister.Get(hook.ID, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	s.True(updatedHook.Enabled)
@@ -96,7 +97,7 @@ func (s *databaseHookSuite) TestDatabaseHook_Reset() {
 	err := dbHook.Reset()
 	s.NoError(err)
 
-	updatedHook, err := whPersister.Get(hook.ID, nil)
+	updatedHook, err := whPersister.Get(hook.ID, uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	// Failures should be reset
@@ -129,7 +130,7 @@ func (s *databaseHookSuite) loadWebhook(hookId string) (models.Webhook, persiste
 	s.Require().NoError(err)
 
 	whPersister := s.Storage.GetWebhookPersister(nil)
-	hook, err := whPersister.Get(uuid.FromStringOrNil(hookId), nil)
+	hook, err := whPersister.Get(uuid.FromStringOrNil(hookId), uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	s.Require().NotEmpty(hook)
 

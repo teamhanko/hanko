@@ -20,7 +20,7 @@ type AccountLinkingResult struct {
 	UserCreated  bool
 }
 
-func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool, userID *uuid.UUID, tenantID *uuid.UUID) (*AccountLinkingResult, error) {
+func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, isFlow bool, userID *uuid.UUID, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	if !isFlow {
 		if cfg.Email.RequireVerification && !userData.Metadata.EmailVerified {
 			return nil, ErrorUnverifiedProviderEmail("third party provider email must be verified")
@@ -61,7 +61,7 @@ func LinkAccount(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Per
 	}
 }
 
-func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string, comesFromProfile bool, tenantID *uuid.UUID) (*AccountLinkingResult, error) {
+func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, user *models.User, isSaml bool, samlDomain *string, comesFromProfile bool, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	if !isSaml {
 		if strings.HasPrefix(providerID, "custom_") {
 			provider, ok := cfg.ThirdParty.CustomProviders[strings.TrimPrefix(providerID, "custom_")]
@@ -164,7 +164,7 @@ func link(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister,
 	}, nil
 }
 
-func signIn(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, identity *models.Identity, tenantID *uuid.UUID) (*AccountLinkingResult, error) {
+func signIn(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, identity *models.Identity, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	var linkingResult *AccountLinkingResult
 	var webhookEvent events.Event
 
@@ -263,7 +263,7 @@ func signIn(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persiste
 	return linkingResult, nil
 }
 
-func signUp(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, tenantID *uuid.UUID) (*AccountLinkingResult, error) {
+func signUp(tx *pop.Connection, cfg *config.TenantConfig, p persistence.Persister, userData *UserData, providerID string, isSaml bool, samlDomain *string, tenantID uuid.UUID) (*AccountLinkingResult, error) {
 	if !cfg.Account.AllowSignup {
 		return nil, ErrorSignUpDisabled("account signup is disabled")
 	}

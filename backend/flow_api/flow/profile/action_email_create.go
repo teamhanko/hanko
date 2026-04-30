@@ -131,6 +131,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 
 		if deps.Cfg.SecurityNotifications.Notifications.EmailCreate.Enabled {
 			deps.SecurityNotificationService.SendNotification(deps.Tx, services.SendSecurityNotificationParams{
+				TenantID:     deps.TenantID,
 				EmailAddress: currentPrimaryEmail,
 				Template:     "email_create",
 				HttpContext:  deps.HttpContext,

@@ -17,9 +17,9 @@ var (
 )
 
 type Password interface {
-	VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string, tenantID *uuid.UUID) error
-	RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID *uuid.UUID) error
-	CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID *uuid.UUID) error
+	VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string, tenantID uuid.UUID) error
+	RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error
+	CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error
 	UpdatePassword(tx *pop.Connection, passwordCredentialModel *models.PasswordCredential, newPassword string) error
 }
 
@@ -33,7 +33,7 @@ func NewPasswordService(persister persistence.Persister) Password {
 	}
 }
 
-func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string, tenantID *uuid.UUID) error {
+func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password string, tenantID uuid.UUID) error {
 	user, err := s.persister.GetUserPersisterWithConnection(tx).Get(userId, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
@@ -59,7 +59,7 @@ func (s password) VerifyPassword(tx *pop.Connection, userId uuid.UUID, password 
 	return nil
 }
 
-func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID *uuid.UUID) error {
+func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error {
 	passwordPersister := s.persister.GetPasswordCredentialPersisterWithConnection(tx)
 
 	passwordCredentialModel, err := passwordPersister.GetByUserID(userId, tenantID)
@@ -80,7 +80,7 @@ func (s password) RecoverPassword(tx *pop.Connection, userId uuid.UUID, newPassw
 	return nil
 }
 
-func (s password) CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID *uuid.UUID) error {
+func (s password) CreatePassword(tx *pop.Connection, userId uuid.UUID, newPassword string, tenantID uuid.UUID) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
 	if err != nil {
 		return ErrorPasswordInvalid

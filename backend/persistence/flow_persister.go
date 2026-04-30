@@ -23,15 +23,11 @@ func NewFlowPersister(tx *pop.Connection) FlowPersister {
 	return flowPersister{tx: tx}
 }
 
-func (p flowPersister) GetFlow(flowID uuid.UUID, tenantID *uuid.UUID) (*flowpilot.FlowModel, error) {
+func (p flowPersister) GetFlow(flowID uuid.UUID, tenantID uuid.UUID) (*flowpilot.FlowModel, error) {
 	flowModel := models.Flow{}
 
 	query := p.tx.Q()
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.Find(&flowModel, flowID)
 	if err != nil {
 		return nil, err
@@ -87,15 +83,11 @@ func (p flowPersister) UpdateFlow(flowModel flowpilot.FlowModel) error {
 	return nil
 }
 
-func (p flowPersister) FindExpired(cutoffTime time.Time, page, perPage int, tenantID *uuid.UUID) ([]models.Flow, error) {
+func (p flowPersister) FindExpired(cutoffTime time.Time, page, perPage int, tenantID uuid.UUID) ([]models.Flow, error) {
 	var items []models.Flow
 
 	query := p.tx.Where("expires_at < ?", cutoffTime)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	query = query.Select("id").Paginate(page, perPage)
 	err := query.All(&items)
 

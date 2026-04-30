@@ -10,8 +10,8 @@ import (
 )
 
 type IdentityPersister interface {
-	Get(providerUserID string, providerID string, tenantID *uuid.UUID) (*models.Identity, error)
-	GetByID(identityID uuid.UUID, tenantID *uuid.UUID) (*models.Identity, error)
+	Get(providerUserID string, providerID string, tenantID uuid.UUID) (*models.Identity, error)
+	GetByID(identityID uuid.UUID, tenantID uuid.UUID) (*models.Identity, error)
 	Create(identity models.Identity) error
 	Update(identity models.Identity) error
 	Delete(identity models.Identity) error
@@ -21,14 +21,10 @@ type identityPersister struct {
 	db *pop.Connection
 }
 
-func (p identityPersister) GetByID(identityID uuid.UUID, tenantID *uuid.UUID) (*models.Identity, error) {
+func (p identityPersister) GetByID(identityID uuid.UUID, tenantID uuid.UUID) (*models.Identity, error) {
 	identity := &models.Identity{}
 	query := p.db.EagerPreload("Email", "Email.User", "Email.User.Username", "SamlIdentity")
-	if tenantID != nil {
-		query = query.Where("identities.tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("identities.tenant_id IS NULL")
-	}
+	query = query.Where("identities.tenant_id = ?", tenantID)
 	if err := query.Find(identity, identityID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -38,14 +34,10 @@ func (p identityPersister) GetByID(identityID uuid.UUID, tenantID *uuid.UUID) (*
 	return identity, nil
 }
 
-func (p identityPersister) Get(providerUserID string, providerID string, tenantID *uuid.UUID) (*models.Identity, error) {
+func (p identityPersister) Get(providerUserID string, providerID string, tenantID uuid.UUID) (*models.Identity, error) {
 	identity := &models.Identity{}
 	query := p.db.EagerPreload().Where("provider_user_id = ? AND provider_id = ?", providerUserID, providerID)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	if err := query.First(identity); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

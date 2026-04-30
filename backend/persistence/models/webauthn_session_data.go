@@ -32,7 +32,7 @@ type WebauthnSessionData struct {
 	Operation          Operation                              `db:"operation"`
 	AllowedCredentials []WebauthnSessionDataAllowedCredential `has_many:"webauthn_session_data_allowed_credentials"`
 	ExpiresAt          nulls.Time                             `db:"expires_at"`
-	TenantID           *uuid.UUID                             `db:"tenant_id"`
+	TenantID           uuid.UUID                              `db:"tenant_id"`
 }
 
 func (sd *WebauthnSessionData) decodeAllowedCredentials() [][]byte {
@@ -50,7 +50,7 @@ func (sd *WebauthnSessionData) decodeAllowedCredentials() [][]byte {
 	return allowedCredentials
 }
 
-func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Operation, tenantID *uuid.UUID) (*WebauthnSessionData, error) {
+func NewWebauthnSessionDataFrom(sessionData *webauthn.SessionData, operation Operation, tenantID uuid.UUID) (*WebauthnSessionData, error) {
 	now := time.Now().UTC()
 
 	sessionDataID, err := uuid.NewV4()

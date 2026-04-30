@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -34,7 +35,7 @@ func (s *samlSuite) TestSaml_GenerateState() {
 
 	persister := s.Storage.GetSamlStatePersister()
 
-	state, err := GenerateState(cfg, persister, "test-provider", "https://example.com", nil)
+	state, err := GenerateState(cfg, persister, "test-provider", "https://example.com", uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), state)
 }
@@ -51,7 +52,7 @@ func (s *samlSuite) TestSaml_GenerateStateWithDefaultRedirect() {
 
 	persister := s.Storage.GetSamlStatePersister()
 
-	state, err := GenerateState(cfg, persister, "test-provider", "", nil)
+	state, err := GenerateState(cfg, persister, "test-provider", "", uuid.FromStringOrNil(config.DefaultTenantID))
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), state)
 }
@@ -95,7 +96,7 @@ func (s *samlSuite) TestSaml_GenerateState_Error() {
 
 			persister := s.Storage.GetSamlStatePersister()
 
-			_, err := GenerateState(cfg, persister, testData.provider, testData.redirectTo, nil)
+			_, err := GenerateState(cfg, persister, testData.provider, testData.redirectTo, uuid.FromStringOrNil(config.DefaultTenantID))
 			assert.NotNil(t, err)
 			assert.True(t, strings.Contains(err.Error(), testData.expectedError))
 		})
@@ -115,7 +116,7 @@ func (s *samlSuite) TestSaml_VerifyState() {
 	state := "HmD7wlGQ7bF_4MGtmFRQuuSGTshHETDs4RQa64JAx-6EsmNsUjaQwYNOnjWUs6qIOuQMBTKapDGVXVCk00pX2vSS-x-WVqdzZ8KyeQ-9IHu2mwb-AeRbb2QPE-GFnvp2wrbCskKvWvtOfipyeTsnYY5iM90DxssaUtvKnawaB5_MNNekfKyiOeepIkKjUfSJ6-yTR7AAA4B9jwOfDRB4zdV8kKPVJlGVBJFosL11YWJaLxRGQR69nah3Jf9Z6bSAGXxWp24PoBYhij-dH4JyDCcU7D-NeT2A8qFFFjQ1m28C8fsr6zqb4w=="
 
 	persister := s.Storage.GetSamlStatePersister()
-	validState, err := VerifyState(cfg, persister, state, nil)
+	validState, err := VerifyState(cfg, persister, state, uuid.FromStringOrNil(config.DefaultTenantID))
 	require.NoError(s.T(), err)
 	require.NotNil(s.T(), validState)
 	require.Equal(s.T(), "test-provider", validState.Provider)
@@ -164,7 +165,7 @@ func (s *samlSuite) TestSaml_VerifyState_Error() {
 
 			persister := s.Storage.GetSamlStatePersister()
 
-			_, err := VerifyState(cfg, persister, testData.state, nil)
+			_, err := VerifyState(cfg, persister, testData.state, uuid.FromStringOrNil(config.DefaultTenantID))
 			assert.NotNil(s.T(), err)
 			assert.True(s.T(), strings.Contains(err.Error(), testData.expectedError))
 		})

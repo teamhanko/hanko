@@ -225,7 +225,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_Create() {
 			s.Equal(currentTest.expectedStatusCode, rec.Code)
 
 			if rec.Code == http.StatusOK {
-				email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email, nil)
+				email, err := s.Storage.GetEmailPersister().FindByAddress(currentTest.email, uuid.Nil)
 				s.Require().NoError(err)
 
 				if email != nil {
@@ -499,7 +499,7 @@ func (s *emailAdminSuite) TestEmailAdminHandler_SetPrimaryEmail() {
 				userUuid, err := uuid.FromString(currentTest.userId)
 				s.Require().NoError(err)
 
-				emails, err := s.Storage.GetEmailPersister().FindByUserId(userUuid, nil)
+				emails, err := s.Storage.GetEmailPersister().FindByUserId(userUuid, uuid.FromStringOrNil(config.DefaultTenantID))
 				s.Require().NoError(err)
 
 				s.Equal(3, len(emails))

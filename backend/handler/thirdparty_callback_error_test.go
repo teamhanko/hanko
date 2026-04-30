@@ -6,7 +6,9 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gofrs/uuid"
 	"github.com/h2non/gock"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"github.com/teamhanko/hanko/backend/v2/utils"
 )
@@ -57,7 +59,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_LinkingNotAllowed
 		s.Equal(thirdparty.ErrorCodeUserConflict, location.Query().Get("error"))
 		s.Equal("third party account linking for existing user with same email disallowed", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -108,7 +110,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_SignInMultipleAcc
 		s.Equal(thirdparty.ErrorCodeMultipleAccounts, location.Query().Get("error"))
 		s.Equal(fmt.Sprintf("cannot identify associated user: '%s' is used by multiple accounts", "provider-primary-email-changed@example.com"), location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -134,7 +136,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoState() {
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("State is a required field", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -170,7 +172,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_StateMismatch() {
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("could not verify state", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -199,7 +201,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoThirdPartyCooki
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("expected state must not be empty", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -232,7 +234,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderError() {
 
 		s.Equal(providerError, location.Query().Get("error"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -265,7 +267,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_ProviderDisabled(
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("google provider is disabled", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -298,7 +300,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_NoAuthCode() {
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("auth code missing from request", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -337,7 +339,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_OAuthTokenExchang
 		s.Equal(thirdparty.ErrorCodeInvalidRequest, location.Query().Get("error"))
 		s.Equal("could not exchange authorization code for access token", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -385,7 +387,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_VerificationRequi
 		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
 		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}
@@ -434,7 +436,7 @@ func (s *thirdPartySuite) TestThirdPartyHandler_Callback_Error_MicrosoftUnverifi
 		s.Equal(thirdparty.ErrorCodeUnverifiedProviderEmail, location.Query().Get("error"))
 		s.Equal("third party provider email must be verified", location.Query().Get("error_description"))
 
-		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", nil)
+		logs, lerr := s.Storage.GetAuditLogPersister().List(0, 0, nil, nil, []string{"thirdparty_signin_signup_failed"}, "", "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 		s.NoError(lerr)
 		s.Len(logs, 1)
 	}

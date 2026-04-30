@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gofrs/uuid"
 	saml2 "github.com/russellhaering/gosaml2"
 	"github.com/russellhaering/gosaml2/types"
 	dsig "github.com/russellhaering/goxmldsig"
@@ -37,7 +38,7 @@ type ServiceProvider interface {
 }
 
 func loadCertificate(cfg *config.Config, persister persistence.SamlCertificatePersister) (dsig.X509KeyStore, error) {
-	cert, err := persister.GetFirst(nil) // TODO: tenantID
+	cert, err := persister.GetFirst(uuid.Nil) // TODO: tenantID
 	if err != nil {
 		return nil, err
 	}

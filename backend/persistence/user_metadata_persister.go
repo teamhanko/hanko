@@ -35,7 +35,7 @@ func IsMetadataLimitExceededError(err error) bool {
 }
 
 type UserMetadataPersister interface {
-	Get(userID uuid.UUID, tenantID *uuid.UUID) (*models.UserMetadata, error)
+	Get(userID uuid.UUID, tenantID uuid.UUID) (*models.UserMetadata, error)
 	Update(metadata *models.UserMetadata) error
 	Delete(metadata *models.UserMetadata) error
 }
@@ -48,14 +48,10 @@ func NewUserMetadataPersister(db *pop.Connection) UserMetadataPersister {
 	return &userMetadataPersister{db: db}
 }
 
-func (p *userMetadataPersister) Get(userID uuid.UUID, tenantID *uuid.UUID) (*models.UserMetadata, error) {
+func (p *userMetadataPersister) Get(userID uuid.UUID, tenantID uuid.UUID) (*models.UserMetadata, error) {
 	metadata := &models.UserMetadata{}
 	query := p.db.Where("user_id = ?", userID)
-	if tenantID != nil {
-		query = query.Where("tenant_id = ?", tenantID)
-	} else {
-		query = query.Where("tenant_id IS NULL")
-	}
+	query = query.Where("tenant_id = ?", tenantID)
 	err := query.First(metadata)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

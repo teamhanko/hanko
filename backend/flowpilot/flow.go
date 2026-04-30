@@ -45,7 +45,7 @@ func UseCompression(b bool) func(*defaultFlow) {
 	}
 }
 
-func WithTenantID(tenantID *uuid.UUID) func(*defaultFlow) {
+func WithTenantID(tenantID uuid.UUID) func(*defaultFlow) {
 	return func(f *defaultFlow) {
 		f.tenantID = tenantID
 	}
@@ -209,7 +209,7 @@ type defaultFlow struct {
 	useCompression    bool
 	queryParamKey     string
 	queryParamValue   string
-	tenantID          *uuid.UUID
+	tenantID          uuid.UUID
 
 	*defaultFlowBase
 }
