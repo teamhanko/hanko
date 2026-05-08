@@ -5,11 +5,11 @@ import (
 	"net/url"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
-	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/ee/saml/provider"
+	samlUtils "github.com/teamhanko/hanko/backend/v3/ee/saml/utils"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 )
 
 type Service interface {

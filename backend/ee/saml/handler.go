@@ -11,14 +11,14 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
-	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml/dto"
-	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
-	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
-	"github.com/teamhanko/hanko/backend/v2/utils"
+	auditlog "github.com/teamhanko/hanko/backend/v3/audit_log"
+	"github.com/teamhanko/hanko/backend/v3/ee/saml/dto"
+	"github.com/teamhanko/hanko/backend/v3/ee/saml/provider"
+	samlUtils "github.com/teamhanko/hanko/backend/v3/ee/saml/utils"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/session"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
+	"github.com/teamhanko/hanko/backend/v3/utils"
 )
 
 type Handler struct {

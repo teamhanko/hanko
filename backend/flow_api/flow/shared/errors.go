@@ -1,7 +1,7 @@
 package shared
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 	"net/http"
 )
 

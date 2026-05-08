@@ -3,7 +3,7 @@ package utils
 import (
 	"net/http"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 )
 
 const (

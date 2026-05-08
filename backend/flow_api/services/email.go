@@ -3,8 +3,8 @@ package services
 import (
 	"fmt"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/mail"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/mail"
 	"gopkg.in/gomail.v2"
 )
 

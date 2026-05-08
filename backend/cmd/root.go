@@ -5,17 +5,17 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/cmd/cleanup"
-	hankoConfig "github.com/teamhanko/hanko/backend/v2/cmd/config"
-	"github.com/teamhanko/hanko/backend/v2/cmd/isready"
-	"github.com/teamhanko/hanko/backend/v2/cmd/jwk"
-	"github.com/teamhanko/hanko/backend/v2/cmd/jwt"
-	"github.com/teamhanko/hanko/backend/v2/cmd/migrate"
-	"github.com/teamhanko/hanko/backend/v2/cmd/schema"
-	"github.com/teamhanko/hanko/backend/v2/cmd/serve"
-	"github.com/teamhanko/hanko/backend/v2/cmd/siwa"
-	"github.com/teamhanko/hanko/backend/v2/cmd/user"
-	"github.com/teamhanko/hanko/backend/v2/cmd/version"
+	"github.com/teamhanko/hanko/backend/v3/cmd/cleanup"
+	hankoConfig "github.com/teamhanko/hanko/backend/v3/cmd/config"
+	"github.com/teamhanko/hanko/backend/v3/cmd/isready"
+	"github.com/teamhanko/hanko/backend/v3/cmd/jwk"
+	"github.com/teamhanko/hanko/backend/v3/cmd/jwt"
+	"github.com/teamhanko/hanko/backend/v3/cmd/migrate"
+	"github.com/teamhanko/hanko/backend/v3/cmd/schema"
+	"github.com/teamhanko/hanko/backend/v3/cmd/serve"
+	"github.com/teamhanko/hanko/backend/v3/cmd/siwa"
+	"github.com/teamhanko/hanko/backend/v3/cmd/user"
+	"github.com/teamhanko/hanko/backend/v3/cmd/version"
 	"log"
 )
 

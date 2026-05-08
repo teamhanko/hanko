@@ -13,12 +13,12 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/dto"
+	"github.com/teamhanko/hanko/backend/v3/dto"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/spf13/cobra"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 func NewImportCommand() *cobra.Command {

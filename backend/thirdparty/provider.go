@@ -13,7 +13,7 @@ import (
 
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v3/config"
 	"golang.org/x/oauth2"
 )
 

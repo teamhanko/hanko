@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/dto/intern"
-	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
-	"github.com/teamhanko/hanko/backend/v2/flowpilot"
+	"github.com/teamhanko/hanko/backend/v3/dto/intern"
+	"github.com/teamhanko/hanko/backend/v3/flow_api/services"
+	"github.com/teamhanko/hanko/backend/v3/flowpilot"
 )
 
 type VerifyAttestationResponse struct {

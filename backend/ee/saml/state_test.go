@@ -9,9 +9,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	samlConfig "github.com/teamhanko/hanko/backend/v2/ee/saml/config"
-	"github.com/teamhanko/hanko/backend/v2/test"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	samlConfig "github.com/teamhanko/hanko/backend/v3/ee/saml/config"
+	"github.com/teamhanko/hanko/backend/v3/test"
 )
 
 func TestSamlSuite(t *testing.T) {

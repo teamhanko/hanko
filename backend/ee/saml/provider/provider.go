@@ -15,11 +15,11 @@ import (
 	"github.com/russellhaering/gosaml2/types"
 	dsig "github.com/russellhaering/goxmldsig"
 	dsigTypes "github.com/russellhaering/goxmldsig/types"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	samlConfig "github.com/teamhanko/hanko/backend/v2/ee/saml/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/thirdparty"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	samlConfig "github.com/teamhanko/hanko/backend/v3/ee/saml/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/thirdparty"
 )
 
 type IdpMetadata struct {

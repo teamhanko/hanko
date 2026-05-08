@@ -7,8 +7,8 @@ import (
 	"github.com/go-webauthn/webauthn/protocol"
 	"github.com/go-webauthn/webauthn/webauthn"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/mapper"
-	"github.com/teamhanko/hanko/backend/v2/persistence/models"
+	"github.com/teamhanko/hanko/backend/v3/mapper"
+	"github.com/teamhanko/hanko/backend/v3/persistence/models"
 )
 
 func WebauthnCredentialToModel(credential *webauthn.Credential, userId uuid.UUID, backupEligible, backupState, mfaOnly bool, authenticatorMetadata mapper.AuthenticatorMetadata, tenantID uuid.UUID) *models.WebauthnCredential {

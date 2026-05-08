@@ -1,6 +1,6 @@
 package test
 
-import "github.com/teamhanko/hanko/backend/v2/config"
+import "github.com/teamhanko/hanko/backend/v3/config"
 
 var DefaultConfig = config.Config{
 	TenantConfig: config.TenantConfig{

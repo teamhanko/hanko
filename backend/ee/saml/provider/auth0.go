@@ -1,9 +1,9 @@
 package provider
 
 import (
-	"github.com/teamhanko/hanko/backend/v2/config"
-	samlConfig "github.com/teamhanko/hanko/backend/v2/ee/saml/config"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	samlConfig "github.com/teamhanko/hanko/backend/v3/ee/saml/config"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
 )
 
 type Auth0Provider struct {

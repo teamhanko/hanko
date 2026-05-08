@@ -2,10 +2,10 @@ package middleware
 
 import (
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
-	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/webhooks"
+	"github.com/teamhanko/hanko/backend/v3/config"
+	"github.com/teamhanko/hanko/backend/v3/crypto/jwk"
+	"github.com/teamhanko/hanko/backend/v3/persistence"
+	"github.com/teamhanko/hanko/backend/v3/webhooks"
 )
 
 func WebhookMiddleware(cfg *config.Config, jwkManager jwk.Generator, persister persistence.Persister) echo.MiddlewareFunc {

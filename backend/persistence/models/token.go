@@ -9,7 +9,7 @@ import (
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
 	"github.com/gofrs/uuid"
-	"github.com/teamhanko/hanko/backend/v2/crypto"
+	"github.com/teamhanko/hanko/backend/v3/crypto"
 )
 
 type Token struct {
