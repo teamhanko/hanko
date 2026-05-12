@@ -1,27 +1,35 @@
+sql("ALTER TABLE webauthn_credential_user_handles DROP CONSTRAINT IF EXISTS webauthn_credential_user_handles_tenant_user_fkey;")
 drop_foreign_key("webauthn_credential_user_handles", "webauthn_credential_user_handles_tenants_id_fk", {})
 drop_column("webauthn_credential_user_handles", "tenant_id")
 
+sql("ALTER TABLE user_metadata DROP CONSTRAINT IF EXISTS user_metadata_tenant_user_fkey;")
 drop_foreign_key("user_metadata", "user_metadata_tenants_id_fk", {})
 drop_column("user_metadata", "tenant_id")
 
 drop_foreign_key("saml_idp_initiated_requests", "saml_idp_initiated_requests_tenants_id_fk", {})
 drop_column("saml_idp_initiated_requests", "tenant_id")
 
+sql("ALTER TABLE saml_identities DROP CONSTRAINT IF EXISTS saml_identities_tenant_identity_fkey;")
 drop_foreign_key("saml_identities", "saml_identities_tenants_id_fk", {})
 drop_column("saml_identities", "tenant_id")
 
+sql("ALTER TABLE trusted_devices DROP CONSTRAINT IF EXISTS trusted_devices_tenant_user_fkey;")
 drop_foreign_key("trusted_devices", "trusted_devices_tenants_id_fk", {})
 drop_column("trusted_devices", "tenant_id")
 
+sql("ALTER TABLE sessions DROP CONSTRAINT IF EXISTS sessions_tenant_user_fkey;")
 drop_foreign_key("sessions", "sessions_tenants_id_fk", {})
 drop_column("sessions", "tenant_id")
 
+sql("ALTER TABLE otp_secrets DROP CONSTRAINT IF EXISTS otp_secrets_tenant_user_fkey;")
 drop_foreign_key("otp_secrets", "otp_secrets_tenants_id_fk", {})
 drop_column("otp_secrets", "tenant_id")
 
+sql("ALTER TABLE usernames DROP CONSTRAINT IF EXISTS usernames_tenant_user_fkey;")
 drop_foreign_key("usernames", "usernames_tenants_id_fk", {})
 drop_column("usernames", "tenant_id")
 
+sql("ALTER TABLE webhook_events DROP CONSTRAINT IF EXISTS webhook_events_tenant_webhook_fkey;")
 drop_foreign_key("webhook_events", "webhook_events_tenants_id_fk", {})
 drop_column("webhook_events", "tenant_id")
 
@@ -37,39 +45,50 @@ drop_column("saml_states", "tenant_id")
 drop_foreign_key("flows", "flows_tenants_id_fk", {})
 drop_column("flows", "tenant_id")
 
+sql("ALTER TABLE tokens DROP CONSTRAINT IF EXISTS tokens_tenant_user_fkey;")
 drop_foreign_key("tokens", "tokens_tenants_id_fk", {})
 drop_column("tokens", "tenant_id")
 
+sql("ALTER TABLE identities DROP CONSTRAINT IF EXISTS identities_tenant_email_fkey;")
+sql("ALTER TABLE identities DROP CONSTRAINT IF EXISTS identities_tenant_user_fkey;")
 drop_foreign_key("identities", "identities_tenants_id_fk", {})
 drop_column("identities", "tenant_id")
 
+sql("ALTER TABLE primary_emails DROP CONSTRAINT IF EXISTS primary_emails_tenant_email_fkey;")
+sql("ALTER TABLE primary_emails DROP CONSTRAINT IF EXISTS primary_emails_tenant_user_fkey;")
 drop_foreign_key("primary_emails", "primary_emails_tenants_id_fk", {})
 drop_column("primary_emails", "tenant_id")
 
+sql("ALTER TABLE emails DROP CONSTRAINT IF EXISTS emails_tenant_user_fkey;")
 drop_foreign_key("emails", "emails_tenants_id_fk", {})
 drop_column("emails", "tenant_id")
 
 drop_foreign_key("audit_logs", "audit_logs_tenants_id_fk", {})
 drop_column("audit_logs", "tenant_id")
 
+sql("ALTER TABLE webauthn_credential_transports DROP CONSTRAINT IF EXISTS webauthn_credential_transports_tenant_credential_fkey;")
 drop_foreign_key("webauthn_credential_transports", "webauthn_credential_transports_tenants_id_fk", {})
 drop_column("webauthn_credential_transports", "tenant_id")
 
+sql("ALTER TABLE password_credentials DROP CONSTRAINT IF EXISTS password_credentials_tenant_user_fkey;")
 drop_foreign_key("password_credentials", "password_credentials_tenants_id_fk", {})
 drop_column("password_credentials", "tenant_id")
 
 drop_foreign_key("jwks", "jwks_tenants_id_fk", {})
 drop_column("jwks", "tenant_id")
 
+sql("ALTER TABLE webauthn_session_data_allowed_credentials DROP CONSTRAINT IF EXISTS webauthn_session_data_allowed_credentials_tenant_session_fkey;")
 drop_foreign_key("webauthn_session_data_allowed_credentials", "webauthn_session_data_allowed_credentials_tenants_id_fk", {})
 drop_column("webauthn_session_data_allowed_credentials", "tenant_id")
 
 drop_foreign_key("webauthn_session_data", "webauthn_session_data_tenants_id_fk", {})
 drop_column("webauthn_session_data", "tenant_id")
 
+sql("ALTER TABLE webauthn_credentials DROP CONSTRAINT IF EXISTS webauthn_credentials_tenant_user_fkey;")
 drop_foreign_key("webauthn_credentials", "webauthn_credentials_tenants_id_fk", {})
 drop_column("webauthn_credentials", "tenant_id")
 
+sql("ALTER TABLE passcodes DROP CONSTRAINT IF EXISTS passcodes_tenant_user_fkey;")
 drop_foreign_key("passcodes", "passcodes_tenants_id_fk", {})
 drop_column("passcodes", "tenant_id")
 
