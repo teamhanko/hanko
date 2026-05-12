@@ -14,7 +14,6 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"github.com/teamhanko/hanko/backend/v2/utils"
 	webhookUtils "github.com/teamhanko/hanko/backend/v2/webhooks/utils"
@@ -23,17 +22,13 @@ import (
 
 type ThirdPartyHandler struct {
 	auditLogger auditlog.Logger
-	//cfg            *config.Config
-	persister      persistence.Persister
-	sessionManager session.Manager
+	persister   persistence.Persister
 }
 
-func NewThirdPartyHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) *ThirdPartyHandler {
+func NewThirdPartyHandler(persister persistence.Persister, auditLogger auditlog.Logger) *ThirdPartyHandler {
 	return &ThirdPartyHandler{
 		auditLogger: auditLogger,
-		//cfg:            cfg,
-		persister:      persister,
-		sessionManager: sessionManager,
+		persister:   persister,
 	}
 }
 

@@ -143,7 +143,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	wellKnown := tenantGroup.Group("/.well-known")
 	wellKnown.GET("/jwks.json", wellKnownHandler.GetPublicKeys)
 
-	thirdPartyHandler := NewThirdPartyHandler(cfg, persister, sessionManager, auditLogger)
+	thirdPartyHandler := NewThirdPartyHandler(persister, auditLogger)
 	thirdparty := tenantGroup.Group("/thirdparty")
 	thirdparty.GET("/callback", thirdPartyHandler.Callback, webhookMiddleware)
 	thirdparty.POST("/callback", thirdPartyHandler.CallbackPost, webhookMiddleware)
