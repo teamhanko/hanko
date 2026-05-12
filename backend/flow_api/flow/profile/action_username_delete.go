@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -67,6 +68,7 @@ func (a UsernameDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogUsernameDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("username", *deletedUsername),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

@@ -121,6 +121,7 @@ func (a EmailSetPrimary) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPrimaryEmailChanged,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("email", emailModel.Address),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

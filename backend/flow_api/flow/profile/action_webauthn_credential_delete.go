@@ -2,6 +2,7 @@ package profile
 
 import (
 	"fmt"
+
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
@@ -58,6 +59,7 @@ func (a WebauthnCredentialDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasskeyDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("credential_id", webauthnCredentialModel.ID),
 		auditlog.Detail("flow_id", c.GetFlowID()))
 

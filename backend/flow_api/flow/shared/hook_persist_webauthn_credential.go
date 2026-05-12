@@ -105,6 +105,7 @@ func (h WebauthnCredentialSave) Execute(c flowpilot.HookExecutionContext) error 
 		auditLogType,
 		&models.User{ID: userId},
 		nil,
+		deps.TenantID,
 		auditLogDetails...)
 
 	if err != nil {

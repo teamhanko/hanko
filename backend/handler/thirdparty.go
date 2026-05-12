@@ -192,7 +192,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return h.redirectError(c, err, errorRedirect)
 	}
 
-	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
+	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenantID)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), errorRedirect)
 	}
@@ -226,9 +226,14 @@ func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string
 func (h *ThirdPartyHandler) auditError(c echo.Context, err error) error {
 	e, ok := err.(*thirdparty.ThirdPartyError)
 
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err)
+		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenantID)
 	}
 	return auditLogError
 }

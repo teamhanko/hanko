@@ -122,6 +122,7 @@ func (a EmailCreate) Execute(c flowpilot.ExecutionContext) error {
 			models.AuditLogEmailCreated,
 			&models.User{ID: userModel.ID},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("email", emailModel.Address),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 

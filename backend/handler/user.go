@@ -94,7 +94,7 @@ func (h *UserHandler) Logout(c echo.Context) error {
 		}
 	}
 
-	err = h.auditLogger.Create(c, models.AuditLogUserLoggedOut, user, nil)
+	err = h.auditLogger.Create(c, models.AuditLogUserLoggedOut, user, nil, tenantID)
 	if err != nil {
 		return fmt.Errorf("failed to write audit log: %w", err)
 	}

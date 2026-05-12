@@ -119,6 +119,7 @@ func (s securityNotification) SendNotification(tx *pop.Connection, p SendSecurit
 		models.AuditLogSecurityNotificationSent,
 		userForAudit,
 		nil,
+		p.TenantID,
 		auditLogDetails...,
 	)
 	if err != nil {

@@ -379,7 +379,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		return nil, err
 	}
 
-	err = handler.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil)
+	err = handler.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenantID)
 
 	if err != nil {
 		return nil, err
@@ -421,9 +421,14 @@ func (handler *Handler) auditError(c echo.Context, err error) error {
 	var e *thirdparty.ThirdPartyError
 	ok := errors.As(err, &e)
 
+	tenantID, err := utils.TenantIDFromContext(c)
+	if err != nil {
+		return fmt.Errorf("invalid tenant identifier: %w", err)
+	}
+
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err)
+		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenantID)
 	}
 	return auditLogError
 }

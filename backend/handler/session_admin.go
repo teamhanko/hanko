@@ -112,7 +112,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		SessionToken: encodedToken,
 	}
 
-	err = h.auditLogger.Create(ctx, models.AuditLogLoginSuccess, user, nil, auditlog.Detail("api", "admin"))
+	err = h.auditLogger.Create(ctx, models.AuditLogLoginSuccess, user, nil, tenantID, auditlog.Detail("api", "admin"))
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}

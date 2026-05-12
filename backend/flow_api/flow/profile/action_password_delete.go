@@ -57,6 +57,7 @@ func (a PasswordDelete) Execute(c flowpilot.ExecutionContext) error {
 		models.AuditLogPasswordDeleted,
 		&models.User{ID: userModel.ID},
 		nil,
+		deps.TenantID,
 		auditlog.Detail("flow_id", c.GetFlowID()))
 
 	if err != nil {

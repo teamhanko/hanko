@@ -116,6 +116,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				models.AuditLogLoginFailure,
 				nil,
 				flowInputError,
+				deps.TenantID,
 				auditlog.Detail("flow_id", c.GetFlowID()))
 
 			if err != nil {
@@ -157,6 +158,7 @@ func (a ContinueWithLoginIdentifier) Execute(c flowpilot.ExecutionContext) error
 				models.AuditLogLoginFailure,
 				nil,
 				flowInputError,
+				deps.TenantID,
 				auditlog.Detail("flow_id", c.GetFlowID()))
 
 			if err != nil {

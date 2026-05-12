@@ -105,6 +105,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			models.AuditLogEmailVerified,
 			&models.User{ID: userId},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("email", emailAddressToVerify),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 
@@ -136,6 +137,7 @@ func (h EmailPersistVerifiedStatus) Execute(c flowpilot.HookExecutionContext) er
 			models.AuditLogEmailCreated,
 			&models.User{ID: userId},
 			nil,
+			deps.TenantID,
 			auditlog.Detail("email", emailAddressToVerify),
 			auditlog.Detail("flow_id", c.GetFlowID()))
 

@@ -165,6 +165,7 @@ func (h CreateUser) createUser(c flowpilot.HookExecutionContext, id uuid.UUID, e
 		models.AuditLogUserCreated,
 		user,
 		nil,
+		tenantID,
 		auditLogDetails...,
 	)
 

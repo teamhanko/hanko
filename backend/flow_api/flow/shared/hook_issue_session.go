@@ -161,6 +161,7 @@ func (h IssueSession) Execute(c flowpilot.HookExecutionContext) error {
 			models.AuditLogLoginSuccess,
 			&models.User{ID: userId},
 			err,
+			deps.TenantID,
 			auditLogDetails...)
 
 		if err != nil {
