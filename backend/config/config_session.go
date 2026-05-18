@@ -1,7 +1,7 @@
 package config
 
 import (
-	"errors"
+	"fmt"
 	"time"
 
 	"github.com/invopop/jsonschema"
@@ -105,7 +105,7 @@ type Session struct {
 func (s *Session) Validate() error {
 	_, err := time.ParseDuration(s.Lifespan)
 	if err != nil {
-		return errors.New("failed to parse lifespan")
+		return fmt.Errorf("failed to parse lifespan: %w", err)
 	}
 
 	return nil
