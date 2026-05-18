@@ -9,12 +9,12 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 )
 
-func NewManager(cfg config.Secrets, persister persistence.Persister) (KeyProvider, error) {
+func NewManager(cfg config.Secrets, persister persistence.Persister, multitenancy bool) (KeyProvider, error) {
 	switch cfg.KeyManagement.Type {
 	case "local":
-		return local_db.NewDefaultManager(cfg.Keys, persister.GetJwkPersister())
+		return local_db.NewDefaultManager(cfg.Keys, persister.GetJwkPersister(), multitenancy)
 	case "aws_kms":
-		return aws_kms.NewAWSKMSManager(cfg.KeyManagement)
+		return aws_kms.NewAWSKMSManager(cfg.KeyManagement, multitenancy)
 	}
 
 	return nil, fmt.Errorf("unsupported key management type: %s", cfg.KeyManagement.Type)
