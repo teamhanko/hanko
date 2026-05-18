@@ -218,12 +218,28 @@ func Load(cfgFile *string) (*Config, error) {
 	return c, nil
 }
 
-func (c *Config) Validate() error {
+func (c *ApplicationConfig) Validate() error {
 	err := c.Server.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate server settings: %w", err)
 	}
-	err = c.Webauthn.Validate()
+	err = c.RateLimiter.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate rate-limiter settings: %w", err)
+	}
+	err = c.FlowLocker.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate flow_locker settings: %w", err)
+	}
+	err = c.Database.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate database settings: %w", err)
+	}
+	return nil
+}
+
+func (c *TenantConfig) Validate() error {
+	err := c.Webauthn.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate webauthn settings: %w", err)
 	}
@@ -232,10 +248,6 @@ func (c *Config) Validate() error {
 		if err != nil {
 			return fmt.Errorf("failed to validate smtp settings: %w", err)
 		}
-	}
-	err = c.Database.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate database settings: %w", err)
 	}
 	err = c.Secrets.Validate()
 	if err != nil {
@@ -249,10 +261,6 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate session settings: %w", err)
 	}
-	err = c.RateLimiter.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate rate-limiter settings: %w", err)
-	}
 	err = c.ThirdParty.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate third_party settings: %w", err)
@@ -265,10 +273,6 @@ func (c *Config) Validate() error {
 	if err != nil {
 		return fmt.Errorf("failed to validate webhook settings: %w", err)
 	}
-	err = c.FlowLocker.Validate()
-	if err != nil {
-		return fmt.Errorf("failed to validate flow_locker settings: %w", err)
-	}
 	err = c.Email.Validate()
 	if err != nil {
 		return fmt.Errorf("failed to validate email settings: %w", err)
@@ -276,7 +280,21 @@ func (c *Config) Validate() error {
 	return nil
 }
 
-func (c *Config) convertLegacyConfig() {
+func (c *Config) Validate() error {
+	err := c.ApplicationConfig.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate application config: %w", err)
+	}
+
+	err = c.TenantConfig.Validate()
+	if err != nil {
+		return fmt.Errorf("failed to validate tenant config: %w", err)
+	}
+
+	return nil
+}
+
+func (c *TenantConfig) convertLegacyConfig() {
 	c.Email.Limit = c.Emails.MaxNumOfAddresses
 	c.Email.RequireVerification = c.Emails.RequireVerification
 	c.Email.PasscodeTtl = c.Passcode.TTL
@@ -291,7 +309,7 @@ func (c *Config) convertLegacyConfig() {
 	c.Webauthn.Timeouts.Registration = c.Webauthn.Timeout
 }
 
-func (c *Config) convertLegacyServerSideSessionConfig() {
+func (c *TenantConfig) convertLegacyServerSideSessionConfig() {
 	if c.Session.ServerSide != nil && c.Session.ServerSide.Enabled {
 		c.Session.AllowRevocation = true
 		c.Session.AcquireIPAddress = true
@@ -301,7 +319,7 @@ func (c *Config) convertLegacyServerSideSessionConfig() {
 	}
 }
 
-func (c *Config) PostProcess() error {
+func (c *TenantConfig) PostProcess() error {
 	if c.ConvertLegacyConfig {
 		c.convertLegacyConfig()
 	}
@@ -328,6 +346,15 @@ func (c *Config) PostProcess() error {
 	err = c.Email.PostProcess()
 	if err != nil {
 		return fmt.Errorf("failed to post process email settings: %w", err)
+	}
+
+	return nil
+}
+
+func (c *Config) PostProcess() error {
+	err := c.TenantConfig.PostProcess()
+	if err != nil {
+		return fmt.Errorf("failed to post process tenant settings: %w", err)
 	}
 
 	return nil
