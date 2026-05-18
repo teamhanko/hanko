@@ -13,7 +13,7 @@ import (
 
 type ApplicationConfig struct {
 	// `audit_log` configures output and storage modalities of audit logs.
-	AuditLog AuditLog `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true" jsonschema:"title=audit_log"` // TODO: maybe tenantConfig???
+	AuditLog AuditLog `yaml:"audit_log" json:"audit_log,omitempty" koanf:"audit_log" split_words:"true" jsonschema:"title=audit_log"`
 	// `database` configures database connection settings.
 	Database Database `yaml:"database" json:"database,omitempty" koanf:"database" jsonschema:"title=database"`
 	// `debug`, if set to `true`, adds additional debugging information to flow API responses.
@@ -26,7 +26,7 @@ type ApplicationConfig struct {
 	MultiTenancy bool `yaml:"multi_tenancy" json:"multi_tenancy,omitempty" koanf:"multi_tenancy" jsonschema:"default=false"`
 	// `rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data.
 	RateLimiter RateLimiter `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true" jsonschema:"title=rate_limiter"`
-	// `server` configures address and CORS settings of the public and admin API.
+	// `server` configures address settings of the public and admin API.
 	Server Server `yaml:"server" json:"server,omitempty" koanf:"server" jsonschema:"title=server"`
 	// `default_email_delivery` configures how outgoing mails are delivered by default, when no `email_delivery` is configures as TenantConfig.
 	// TODO: this clashes (silent, no error) on json marshalling because there are duplicate json tag values; no errors, just none of the keys are present when json marshaling
