@@ -19,7 +19,7 @@ type WebauthnSettings struct {
 	Timeouts WebauthnTimeouts `yaml:"timeouts" json:"timeouts,omitempty" koanf:"timeouts" split_words:"true" jsonschema:"title=timeouts"`
 	// Deprecated, use `passkey.user_verification` instead
 	UserVerification string                `yaml:"user_verification" json:"user_verification,omitempty" koanf:"user_verification" split_words:"true" jsonschema:"default=preferred,enum=required,enum=preferred,enum=discouraged"`
-	Handler          *webauthnLib.WebAuthn `jsonschema:"-"`
+	Handler          *webauthnLib.WebAuthn `json:"-" jsonschema:"-"`
 }
 
 // Validate does not need to validate the config, because the library does this already
