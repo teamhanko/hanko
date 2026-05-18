@@ -14,16 +14,16 @@ import (
 )
 
 func getDefaultSessionManager(storage persistence.Persister) session.Manager {
-	jwkManager, _ := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, storage.GetJwkPersister())
-	sessionManager, _ := session.NewManager(jwkManager, test.DefaultConfig)
+	jwkManager, _ := local_db.NewDefaultManager(test.DefaultConfig.Secrets.Keys, storage.GetJwkPersister(), test.DefaultConfig.MultiTenancy)
+	sessionManager, _ := session.NewManager(jwkManager, test.DefaultConfig.TenantConfig)
 	return sessionManager
 }
 
-func generateSessionCookie(storage persistence.Persister, userId uuid.UUID) (*http.Cookie, error) {
+func generateSessionCookie(storage persistence.Persister, userId uuid.UUID, tenantID uuid.UUID) (*http.Cookie, error) {
 	manager := getDefaultSessionManager(storage)
 	token, rawToken, err := manager.GenerateJWT(dto.UserJWT{
 		UserID: userId.String(),
-	})
+	}, tenantID)
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +35,7 @@ func generateSessionCookie(storage persistence.Persister, userId uuid.UUID) (*ht
 		UpdatedAt: time.Now(),
 		ExpiresAt: nil,
 		LastUsed:  time.Now(),
+		TenantID:  tenantID,
 	})
 	cookie, err := manager.GenerateCookie(token)
 	if err != nil {

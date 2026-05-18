@@ -18,6 +18,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/labstack/echo/v4"
+	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/pagination"
@@ -37,9 +38,9 @@ func NewUserHandlerAdmin(persister persistence.Persister) *UserHandlerAdmin {
 }
 
 func (h *UserHandlerAdmin) Delete(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	userId, err := uuid.FromString(c.Param("id"))
@@ -49,7 +50,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 
 	err = h.persister.Transaction(func(tx *pop.Connection) error {
 		p := h.persister.GetUserPersisterWithConnection(tx)
-		user, err := p.Get(userId, tenantID)
+		user, err := p.Get(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -63,7 +64,7 @@ func (h *UserHandlerAdmin) Delete(c echo.Context) error {
 			return fmt.Errorf("failed to delete user: %w", err)
 		}
 
-		err = webhookUtils.TriggerWebhooks(c, tx, tenantID, events.UserDelete, admin.FromUserModel(*user))
+		err = webhookUtils.TriggerWebhooks(c, tx, tenant.ID, events.UserDelete, admin.FromUserModel(*user))
 		if err != nil {
 			c.Logger().Warn(err)
 		}
@@ -87,9 +88,9 @@ type UserListRequest struct {
 }
 
 func (h *UserHandlerAdmin) List(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var request UserListRequest
@@ -130,12 +131,12 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 	email := strings.ToLower(request.Email)
 	username := strings.ToLower(request.Username)
 
-	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userIDs, email, username, request.SortDirection, tenantID)
+	users, err := h.persister.GetUserPersister().List(request.Page, request.PerPage, userIDs, email, username, request.SortDirection, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get list of users: %w", err)
 	}
 
-	userCount, err := h.persister.GetUserPersister().Count(userIDs, email, username, tenantID)
+	userCount, err := h.persister.GetUserPersister().Count(userIDs, email, username, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get total count of users: %w", err)
 	}
@@ -154,9 +155,9 @@ func (h *UserHandlerAdmin) List(c echo.Context) error {
 }
 
 func (h *UserHandlerAdmin) Get(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	userId, err := uuid.FromString(c.Param("id"))
@@ -165,7 +166,7 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(userId, tenantID)
+	user, err := p.Get(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -178,9 +179,9 @@ func (h *UserHandlerAdmin) Get(c echo.Context) error {
 }
 
 func (h *UserHandlerAdmin) Create(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var body admin.CreateUser
@@ -222,6 +223,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	err = h.persister.GetConnection().Transaction(func(tx *pop.Connection) error {
 		u := models.User{
 			ID:        body.ID,
+			TenantID:  tenant.ID,
 			CreatedAt: body.CreatedAt,
 		}
 
@@ -244,6 +246,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 			emailId, _ := uuid.NewV4()
 			mail := models.Email{
 				ID:        emailId,
+				TenantID:  tenant.ID,
 				UserID:    &u.ID,
 				Address:   strings.ToLower(email.Address),
 				Verified:  email.IsVerified,
@@ -267,8 +270,9 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 			if email.IsPrimary {
 				primary := models.PrimaryEmail{
-					UserID:  u.ID,
-					EmailID: mail.ID,
+					UserID:   u.ID,
+					TenantID: tenant.ID,
+					EmailID:  mail.ID,
 				}
 				err := tx.Create(&primary)
 				if err != nil {
@@ -278,7 +282,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 		}
 
 		if body.Username != nil {
-			username := models.NewUsername(u.ID, *body.Username, tenantID)
+			username := models.NewUsername(u.ID, *body.Username, tenant.ID)
 			err = tx.Create(username)
 			if err != nil {
 				if pgErr, ok := errors.AsType[*pgconn.PgError](err); ok {
@@ -303,7 +307,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 	}
 
 	p := h.persister.GetUserPersister()
-	user, err := p.Get(body.ID, tenantID)
+	user, err := p.Get(body.ID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}
@@ -314,7 +318,7 @@ func (h *UserHandlerAdmin) Create(c echo.Context) error {
 
 	userDto := admin.FromUserModel(*user)
 
-	err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenantID, events.UserCreate, userDto)
+	err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, events.UserCreate, userDto)
 	if err != nil {
 		c.Logger().Warn(err)
 	}
@@ -357,9 +361,9 @@ type PatchUserAdminRequest struct {
 }
 
 func (h *UserHandlerAdmin) Patch(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	userId, err := uuid.FromString(c.Param("id"))
@@ -420,7 +424,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		userPersister := h.persister.GetUserPersisterWithConnection(tx)
 		usernamePersister := h.persister.GetUsernamePersisterWithConnection(tx)
 
-		user, err := userPersister.Get(userId, tenantID)
+		user, err := userPersister.Get(userId, tenant.ID)
 		if err != nil {
 			return fmt.Errorf("failed to get user: %w", err)
 		}
@@ -466,7 +470,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 					return echo.NewHTTPError(http.StatusBadRequest, "username is invalid")
 				}
 
-				dup, err := usernamePersister.GetByName(newUsername, tenantID)
+				dup, err := usernamePersister.GetByName(newUsername, tenant.ID)
 				if err != nil {
 					return fmt.Errorf("failed to check duplicate username: %w", err)
 				}
@@ -475,7 +479,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 				}
 
 				if user.Username == nil {
-					usernameModel := models.NewUsername(user.ID, newUsername, tenantID)
+					usernameModel := models.NewUsername(user.ID, newUsername, tenant.ID)
 					if err := usernamePersister.Create(*usernameModel); err != nil {
 						return fmt.Errorf("failed to create username: %w", err)
 					}
@@ -507,7 +511,7 @@ func (h *UserHandlerAdmin) Patch(c echo.Context) error {
 		return err
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userId, tenantID)
+	user, err := h.persister.GetUserPersister().Get(userId, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get user: %w", err)
 	}

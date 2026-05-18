@@ -34,7 +34,7 @@ type ProfileData struct {
 	Picture      string                       `json:"picture,omitempty"`
 }
 
-func ProfileDataFromUserModel(user *models.User, cfg *config.Config) *ProfileData {
+func ProfileDataFromUserModel(user *models.User, cfg *config.TenantConfig) *ProfileData {
 	var webauthnCredentials, securityKeys []WebauthnCredentialResponse
 	for _, webauthnCredentialModel := range user.WebauthnCredentials {
 		webauthnCredential := FromWebauthnCredentialModel(&webauthnCredentialModel)

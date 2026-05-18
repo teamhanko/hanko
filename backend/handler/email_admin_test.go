@@ -26,7 +26,7 @@ type emailAdminSuite struct {
 }
 
 func (s *emailAdminSuite) TestEmailAdminHandler_New() {
-	emailHandler := NewEmailAdminHandler(&config.Config{}, s.Storage)
+	emailHandler := NewEmailAdminHandler(s.Storage)
 	s.NotEmpty(emailHandler)
 }
 

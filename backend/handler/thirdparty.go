@@ -9,7 +9,7 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/labstack/echo/v4"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
@@ -33,25 +33,22 @@ func NewThirdPartyHandler(persister persistence.Persister, auditLogger auditlog.
 }
 
 func (h *ThirdPartyHandler) CallbackPost(c echo.Context) error {
-	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
-	if tenantConfig == nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), "/error") // TODO:
+	tenant, err := context.GetTenant(c)
+	if err != nil {
+		return h.redirectError(c, thirdparty.ErrorServer("failed to get tenant from context"), "/error") // TODO:
 	}
+
 	q, err := c.FormParams()
 	if err != nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), tenantConfig.ThirdParty.ErrorRedirectURL)
+		return h.redirectError(c, thirdparty.ErrorServer("could not get form parameters"), tenant.Config.ThirdParty.ErrorRedirectURL)
 	}
 	return c.Redirect(http.StatusSeeOther, fmt.Sprintf("/thirdparty/callback?%s", q.Encode()))
 }
 
 func (h *ThirdPartyHandler) Callback(c echo.Context) error {
-	tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
-	if tenantConfig == nil {
-		return h.redirectError(c, thirdparty.ErrorServer("could not get tenant config"), "/error") // TODO:
-	}
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return thirdparty.ErrorServer("failed to get tenant from context").WithCause(err)
 	}
 
 	var redirectToURL *url.URL
@@ -86,7 +83,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			expectedState = expectedStateCookie.Value
 		}
 		var state *thirdparty.State
-		state, terr = thirdparty.VerifyState(tenantConfig, callback.State, expectedState)
+		state, terr = thirdparty.VerifyState(&tenant.Config, callback.State, expectedState)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -100,7 +97,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.NewThirdPartyError(callback.Error, callback.ErrorDescription)
 		}
 
-		provider, terr := thirdparty.GetProvider(tenantConfig.ThirdParty, state.Provider)
+		provider, terr := thirdparty.GetProvider(tenant.Config.ThirdParty, state.Provider)
 		if terr != nil {
 			return thirdparty.ErrorInvalidRequest(terr.Error()).WithCause(terr)
 		}
@@ -123,13 +120,13 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			return thirdparty.ErrorInvalidRequest("could not retrieve user data from provider").WithCause(terr)
 		}
 
-		linkingResult, terr := thirdparty.LinkAccount(tx, tenantConfig, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenantID)
+		linkingResult, terr := thirdparty.LinkAccount(tx, &tenant.Config, h.persister, userData, provider.ID(), false, nil, state.IsFlow, state.UserID, tenant.ID)
 		if terr != nil {
 			return terr
 		}
 		accountLinkingResult = linkingResult
 
-		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID(), tenantID)
+		identityModel, err := h.persister.GetIdentityPersisterWithConnection(tx).Get(userData.Metadata.Subject, provider.ID(), tenant.ID)
 		if err != nil {
 			return thirdparty.ErrorServer("could not get identity").WithCause(err)
 		}
@@ -149,6 +146,7 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		}
 		token, terr := models.NewToken(
 			linkingResult.User.ID,
+			tenant.ID,
 			tokenOpts...,
 		)
 		if terr != nil {
@@ -168,17 +166,17 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 			Name:     utils.HankoThirdpartyStateCookie,
 			Value:    "",
 			Path:     "/",
-			Domain:   tenantConfig.Session.Cookie.Domain,
+			Domain:   tenant.Config.Session.Cookie.Domain,
 			MaxAge:   -1,
-			Secure:   tenantConfig.Session.Cookie.Secure,
-			HttpOnly: tenantConfig.Session.Cookie.HttpOnly,
+			Secure:   tenant.Config.Session.Cookie.Secure,
+			HttpOnly: tenant.Config.Session.Cookie.HttpOnly,
 			SameSite: http.SameSiteLaxMode,
 		})
 
 		return nil
 	})
 
-	errorRedirect := tenantConfig.ThirdParty.ErrorRedirectURL
+	errorRedirect := tenant.Config.ThirdParty.ErrorRedirectURL
 	if redirectToURL != nil {
 		errorRedirect = redirectToURL.String()
 	}
@@ -187,13 +185,13 @@ func (h *ThirdPartyHandler) Callback(c echo.Context) error {
 		return h.redirectError(c, err, errorRedirect)
 	}
 
-	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenantID)
+	err = h.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenant.ID)
 	if err != nil {
 		return h.redirectError(c, thirdparty.ErrorServer("could not create audit log").WithCause(err), errorRedirect)
 	}
 
 	if accountLinkingResult.WebhookEvent != nil {
-		err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenantID, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
+		err = webhookUtils.TriggerWebhooks(c, h.persister.GetConnection(), tenant.ID, *accountLinkingResult.WebhookEvent, admin.FromUserModel(*accountLinkingResult.User))
 		if err != nil {
 			c.Logger().Warn(err)
 		}
@@ -221,14 +219,14 @@ func (h *ThirdPartyHandler) redirectError(c echo.Context, error error, to string
 func (h *ThirdPartyHandler) auditError(c echo.Context, err error) error {
 	e, ok := err.(*thirdparty.ThirdPartyError)
 
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenantID)
+		auditLogError = h.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenant.ID)
 	}
 	return auditLogError
 }

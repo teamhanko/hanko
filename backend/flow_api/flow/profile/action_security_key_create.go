@@ -3,6 +3,7 @@ package profile
 import (
 	"errors"
 	"fmt"
+
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -71,6 +72,7 @@ func (a SecurityKeyCreate) Execute(c flowpilot.ExecutionContext) error {
 		UserID:   userModel.ID,
 		Email:    &primaryEmailAddress,
 		Username: userModel.GetUsername(),
+		TenantID: deps.TenantID,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsSecurityKey(params)

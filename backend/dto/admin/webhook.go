@@ -23,5 +23,5 @@ type GetWebhookRequestDto struct {
 type UpdateWebhookRequestDto struct {
 	GetWebhookRequestDto
 	CreateWebhookRequestDto
-	Enabled bool `json:"enabled" validate:"required,boolean"`
+	Enabled *bool `json:"enabled" validate:"required,boolean"`
 }

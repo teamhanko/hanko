@@ -12,33 +12,31 @@ import (
 	"github.com/labstack/echo/v4"
 	saml2 "github.com/russellhaering/gosaml2"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
+	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml/dto"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml/provider"
 	samlUtils "github.com/teamhanko/hanko/backend/v2/ee/saml/utils"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
 	"github.com/teamhanko/hanko/backend/v2/thirdparty"
 	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type Handler struct {
-	auditLogger    auditlog.Logger
-	sessionManager session.Manager
-	samlService    Service
+	auditLogger auditlog.Logger
+	samlService Service
 }
 
-func NewSamlHandler(sessionManager session.Manager, auditLogger auditlog.Logger, samlService Service) *Handler {
+func NewSamlHandler(auditLogger auditlog.Logger, samlService Service) *Handler {
 	return &Handler{
-		auditLogger:    auditLogger,
-		sessionManager: sessionManager,
-		samlService:    samlService,
+		auditLogger: auditLogger,
+		samlService: samlService,
 	}
 }
 
 func (handler *Handler) Metadata(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var request dto.SamlMetadataRequest
@@ -53,7 +51,7 @@ func (handler *Handler) Metadata(c echo.Context) error {
 	}
 
 	if request.CertOnly {
-		cert, err := handler.samlService.Persister().GetSamlCertificatePersister().GetFirst(tenantID)
+		cert, err := handler.samlService.Persister().GetSamlCertificatePersister().GetFirst(tenant.ID)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, thirdparty.ErrorServer("unable to provide metadata").WithCause(err))
 		}
@@ -76,9 +74,9 @@ func (handler *Handler) Metadata(c echo.Context) error {
 }
 
 func (handler *Handler) Auth(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	errorRedirectTo := c.Request().Header.Get("Referer")
@@ -102,7 +100,7 @@ func (handler *Handler) Auth(c echo.Context) error {
 		return handler.redirectError(c, thirdparty.ErrorInvalidRequest(err.Error()).WithCause(err), errorRedirectTo)
 	}
 
-	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false, tenantID)
+	redirectUrl, err := handler.samlService.GetAuthUrl(foundProvider, request.RedirectTo, false, tenant.ID)
 	if err != nil {
 		return handler.redirectError(c, thirdparty.ErrorServer("could not generate auth url").WithCause(err), errorRedirectTo)
 	}
@@ -111,9 +109,9 @@ func (handler *Handler) Auth(c echo.Context) error {
 }
 
 func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse string) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	// ignore URL parse error because config validation already ensures it is a parseable URL
@@ -198,7 +196,7 @@ func (handler *Handler) callbackPostIdPInitiated(c echo.Context, samlResponse st
 
 	// We use the SAML response's ID to prevent replay attacks by persisting every IDP initiated request and
 	// checking whether an IDP initiated request already exists for this request.
-	existingSamlIDPInitiatedRequest, err := samlIDPInitiatedRequestPersister.GetByResponseIDAndIssuer(samlResponseID, issuer, tenantID)
+	existingSamlIDPInitiatedRequest, err := samlIDPInitiatedRequestPersister.GetByResponseIDAndIssuer(samlResponseID, issuer, tenant.ID)
 	if existingSamlIDPInitiatedRequest != nil {
 		return handler.redirectError(
 			c,
@@ -262,9 +260,9 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 	relayState := c.FormValue("RelayState")
 	samlResponse := c.FormValue("SAMLResponse")
 
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	if handler.isIDPInitiated(relayState) {
@@ -274,7 +272,7 @@ func (handler *Handler) CallbackPost(c echo.Context) error {
 			handler.samlService.Config(),
 			handler.samlService.Persister().GetSamlStatePersister(),
 			strings.TrimPrefix(relayState, statePrefixServiceProviderInitiated),
-			tenantID,
+			tenant.ID,
 		)
 
 		if err != nil {
@@ -334,9 +332,9 @@ func (handler *Handler) isIDPInitiated(relayState string) bool {
 }
 
 func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow bool, provider provider.ServiceProvider, assertionInfo *saml2.AssertionInfo) (*url.URL, error) {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return nil, fmt.Errorf("invalid tenant identifier: %w", err)
+		return nil, fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var accountLinkingResult *thirdparty.AccountLinkingResult
@@ -344,7 +342,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		userdata := provider.GetUserData(assertionInfo)
 		identityProviderIssuer := assertionInfo.Assertions[0].Issuer
 		samlDomain := provider.GetDomain()
-		linkResult, errTx := thirdparty.LinkAccount(tx, &handler.samlService.Config().TenantConfig, handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil, tenantID)
+		linkResult, errTx := thirdparty.LinkAccount(tx, &handler.samlService.Config().TenantConfig, handler.samlService.Persister(), userdata, identityProviderIssuer.Value, true, &samlDomain, isFlow, nil, tenant.ID)
 		if errTx != nil {
 			return errTx
 		}
@@ -356,6 +354,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 
 		token, errTx := models.NewToken(
 			linkResult.User.ID,
+			tenant.ID,
 			models.TokenWithIdentityID(identityModel.ID),
 			models.TokenForFlowAPI(isFlow),
 			models.TokenUserCreated(linkResult.UserCreated))
@@ -379,7 +378,7 @@ func (handler *Handler) linkAccount(c echo.Context, redirectTo *url.URL, isFlow 
 		return nil, err
 	}
 
-	err = handler.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenantID)
+	err = handler.auditLogger.Create(c, accountLinkingResult.Type, accountLinkingResult.User, nil, tenant.ID)
 
 	if err != nil {
 		return nil, err
@@ -421,14 +420,14 @@ func (handler *Handler) auditError(c echo.Context, err error) error {
 	var e *thirdparty.ThirdPartyError
 	ok := errors.As(err, &e)
 
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	var auditLogError error
 	if ok && e.Code != thirdparty.ErrorCodeServerError {
-		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenantID)
+		auditLogError = handler.auditLogger.Create(c, models.AuditLogThirdPartySignInSignUpFailed, nil, err, tenant.ID)
 	}
 	return auditLogError
 }

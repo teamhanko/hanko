@@ -58,6 +58,7 @@ func FromUserModel(model models.User) User {
 	if model.PasswordCredential != nil {
 		passwordCredential = &PasswordCredential{
 			ID:        model.PasswordCredential.ID,
+			TenantID:  model.PasswordCredential.TenantID,
 			CreatedAt: model.PasswordCredential.CreatedAt,
 			UpdatedAt: model.PasswordCredential.UpdatedAt,
 		}

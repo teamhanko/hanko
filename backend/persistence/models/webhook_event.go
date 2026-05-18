@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/gobuffalo/validate/v3/validators"
 	"time"
+
+	"github.com/gobuffalo/validate/v3/validators"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
@@ -14,7 +15,7 @@ type WebhookEvent struct {
 	ID        uuid.UUID `json:"id" db:"id"`
 	Webhook   *Webhook  `json:"-" belongs_to:"webhook"`
 	WebhookID uuid.UUID `json:"-" db:"webhook_id"`
-	TenantID  uuid.UUID `db:"tenant_id"`
+	TenantID  uuid.UUID `json:"-" db:"tenant_id"`
 	Event     string    `json:"event" db:"event"`
 	CreatedAt time.Time `json:"-" db:"created_at"`
 	UpdatedAt time.Time `json:"-" db:"updated_at"`

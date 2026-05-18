@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/gofrs/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwa"
 	"github.com/lestrrat-go/jwx/v2/jwk"
 	"github.com/lestrrat-go/jwx/v2/jwt"
@@ -25,11 +26,11 @@ var privateKey = `{
 
 type JwkManager struct{}
 
-func (m JwkManager) GenerateKey() (jwk.Key, error) {
+func (m JwkManager) GenerateKey(tenantID uuid.UUID) (jwk.Key, error) {
 	return nil, errors.New("not implemented")
 }
 
-func (m JwkManager) GetPublicKeys() (jwk.Set, error) {
+func (m JwkManager) GetPublicKeys(tenantID uuid.UUID) (jwk.Set, error) {
 	key, err := getJwk()
 	if err != nil {
 		return nil, err
@@ -46,13 +47,13 @@ func (m JwkManager) GetPublicKeys() (jwk.Set, error) {
 	return set, nil
 }
 
-func (m JwkManager) GetSigningKey() (jwk.Key, error) {
+func (m JwkManager) GetSigningKey(tenantID uuid.UUID) (jwk.Key, error) {
 	return getJwk()
 }
 
 // Sign a JWT with the signing key and returns it
-func (m JwkManager) Sign(token jwt.Token) ([]byte, error) {
-	key, err := m.GetSigningKey()
+func (m JwkManager) Sign(token jwt.Token, tenantID uuid.UUID) ([]byte, error) {
+	key, err := m.GetSigningKey(tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get signing key: %w", err)
 	}
@@ -64,8 +65,8 @@ func (m JwkManager) Sign(token jwt.Token) ([]byte, error) {
 }
 
 // Verify verifies a JWT, using the verificationKeys and returns the parsed JWT
-func (m JwkManager) Verify(signed []byte) (jwt.Token, error) {
-	keys, err := m.GetPublicKeys()
+func (m JwkManager) Verify(signed []byte, tenantID uuid.UUID) (jwt.Token, error) {
+	keys, err := m.GetPublicKeys(tenantID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get public keys: %w", err)
 	}

@@ -7,34 +7,33 @@ import (
 
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type SessionHandler struct {
-	persister      persistence.Persister
-	sessionManager session.Manager
-	cfg            config.Config
+	persister persistence.Persister
 }
 
-func NewSessionHandler(persister persistence.Persister, sessionManager session.Manager, cfg config.Config) *SessionHandler {
+func NewSessionHandler(persister persistence.Persister) *SessionHandler {
 	return &SessionHandler{
-		persister:      persister,
-		sessionManager: sessionManager,
-		cfg:            cfg,
+		persister: persister,
 	}
 }
 
 func (h *SessionHandler) ValidateSession(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
-	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", h.cfg.Session.Cookie.GetName())
+	sessionManager, err := context.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to get session manager from context: %w", err)
+	}
+
+	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", tenant.Config.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
 
 	if err != nil {
@@ -47,7 +46,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 			continue
 		}
 		for _, auth := range auths {
-			token, tokenErr := h.sessionManager.Verify(auth)
+			token, tokenErr := sessionManager.Verify(auth, tenant.ID)
 			if tokenErr != nil {
 				continue
 			}
@@ -57,7 +56,7 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 				return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to parse token claims: %w", err))
 			}
 
-			sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID, tenantID)
+			sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID, tenant.ID)
 			if err != nil {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
@@ -66,14 +65,14 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 			}
 
 			// Check idle timeout
-			idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
+			idleTimeout, _ := time.ParseDuration(tenant.Config.Session.IdleTimeout)
 			if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
 				sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
 				if sessionDeletionErr != nil {
 					return fmt.Errorf("failed to delete session: %w", sessionDeletionErr)
 				}
 
-				cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+				cookie, cookieDeletionErr := sessionManager.DeleteCookie()
 				if cookieDeletionErr != nil {
 					return fmt.Errorf("could not delete cookie: %w", cookieDeletionErr)
 				}
@@ -107,9 +106,14 @@ func (h *SessionHandler) ValidateSession(c echo.Context) error {
 }
 
 func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	sessionManager, err := context.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to get session manager from context: %w", err)
 	}
 
 	var request dto.ValidateSessionRequest
@@ -123,7 +127,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err)
 	}
 
-	token, err := h.sessionManager.Verify(request.SessionToken)
+	token, err := sessionManager.Verify(request.SessionToken, tenant.ID)
 	if err != nil {
 		return c.JSON(http.StatusOK, dto.ValidateSessionResponse{IsValid: false})
 	}
@@ -133,7 +137,7 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, fmt.Errorf("failed to parse token claims: %w", err))
 	}
 
-	sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID, tenantID)
+	sessionModel, err := h.persister.GetSessionPersister().Get(claims.SessionID, tenant.ID)
 	if err != nil {
 		return dto.ToHttpError(err)
 	}
@@ -143,14 +147,14 @@ func (h *SessionHandler) ValidateSessionFromBody(c echo.Context) error {
 	}
 
 	// Check idle timeout
-	idleTimeout, _ := time.ParseDuration(h.cfg.Session.IdleTimeout)
+	idleTimeout, _ := time.ParseDuration(tenant.Config.Session.IdleTimeout)
 	if idleTimeout > 0 && time.Since(sessionModel.LastUsed) > idleTimeout {
 		sessionDeletionErr := h.persister.GetSessionPersister().Delete(*sessionModel)
 		if sessionDeletionErr != nil {
 			return dto.ToHttpError(fmt.Errorf("failed to delete session: %w", sessionDeletionErr))
 		}
 
-		cookie, cookieDeletionErr := h.sessionManager.DeleteCookie()
+		cookie, cookieDeletionErr := sessionManager.DeleteCookie()
 		if cookieDeletionErr != nil {
 			return dto.ToHttpError(fmt.Errorf("could not delete cookie: %w", cookieDeletionErr))
 		}

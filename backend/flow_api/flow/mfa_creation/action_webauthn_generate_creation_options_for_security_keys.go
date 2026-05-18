@@ -3,6 +3,7 @@ package mfa_creation
 import (
 	"errors"
 	"fmt"
+
 	"github.com/gofrs/uuid"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/services"
@@ -55,6 +56,7 @@ func (a WebauthnGenerateCreationOptionsForSecurityKeys) Execute(c flowpilot.Exec
 		UserID:   userID,
 		Email:    &email,
 		Username: &username,
+		TenantID: deps.TenantID,
 	}
 
 	sessionDataModel, creationOptions, err := deps.WebauthnService.GenerateCreationOptionsSecurityKey(params)

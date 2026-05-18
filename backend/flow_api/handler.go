@@ -17,7 +17,7 @@ import (
 	"github.com/sethvargo/go-limiter"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
+	context2 "github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/ee/saml"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow"
@@ -27,8 +27,8 @@ import (
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
 	"github.com/teamhanko/hanko/backend/v2/mapper"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
+	"github.com/teamhanko/hanko/backend/v2/rate_limiter"
 	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type FlowPilotHandler struct {
@@ -47,6 +47,49 @@ type FlowPilotHandler struct {
 	AuthenticatorMetadata       mapper.AuthenticatorMetadata
 	AuditLogger                 auditlog.Logger
 	FlowLocker                  flow_locker.FlowLocker
+}
+
+func NewFlowAPIHandler(cfg config.Config, persister persistence.Persister, auditLogger auditlog.Logger, authenticatorMetadata mapper.AuthenticatorMetadata) FlowPilotHandler {
+	var otpRateLimiter limiter.Store
+	var passcodeRateLimiter limiter.Store
+	var passwordRateLimiter limiter.Store
+	var tokenExchangeRateLimiter limiter.Store
+	if cfg.RateLimiter.Enabled {
+		otpRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.OTPLimits)
+		passcodeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasscodeLimits)
+		passwordRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.PasswordLimits)
+		tokenExchangeRateLimiter = rate_limiter.NewRateLimiter(cfg.RateLimiter, cfg.RateLimiter.TokenLimits)
+	}
+
+	emailService, _ := services.NewEmailService()
+	passcodeService := services.NewPasscodeService(*emailService, persister)
+	passwordService := services.NewPasswordService(persister)
+	webauthnService := services.NewWebauthnService(cfg, persister)
+	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
+	//samlService := saml.NewSamlService(&cfg, persister)
+
+	flowLocker, err := flow_locker.NewFlowLocker(cfg.FlowLocker)
+	if err != nil {
+		panic(fmt.Errorf("failed to initialize flow locker: %w", err))
+	}
+
+	return FlowPilotHandler{
+		Persister:                   persister,
+		Cfg:                         cfg,
+		SecurityNotificationService: securityNotificationService,
+		PasscodeService:             passcodeService,
+		PasswordService:             passwordService,
+		WebauthnService:             webauthnService,
+		SamlService:                 nil,
+		SessionManager:              nil, // Populated in executeFlow() from session manager middleware
+		OTPRateLimiter:              otpRateLimiter,
+		PasscodeRateLimiter:         passcodeRateLimiter,
+		PasswordRateLimiter:         passwordRateLimiter,
+		TokenExchangeRateLimiter:    tokenExchangeRateLimiter,
+		AuthenticatorMetadata:       authenticatorMetadata,
+		AuditLogger:                 auditLogger,
+		FlowLocker:                  flowLocker,
+	}
 }
 
 func (h *FlowPilotHandler) RegistrationFlowHandler(c echo.Context) error {
@@ -77,36 +120,17 @@ func (h *FlowPilotHandler) TokenExchangeFlowHandler(c echo.Context) error {
 }
 
 func (h *FlowPilotHandler) validateSession(c echo.Context) error {
-	persister := h.Persister
-	sessionManager := h.SessionManager
-	cfg := h.Cfg
-	tenantID, err := utils.TenantIDFromContext(c)
+	tenant, err := context2.GetTenant(c)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
-	}
-	if h.Cfg.MultiTenancy {
-		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
-		if tenantConfig == nil {
-			return flowpilot.ErrorTechnical.Wrap(fmt.Errorf("tenant_config not found in context"))
-		}
-
-		persister = persistence.New(h.Persister.GetConnection())
-
-		jwkManager, err := jwk.NewManager(tenantConfig.Secrets, h.Persister) // TODO: JwkManager must be tenant specific
-		if err != nil {
-			return flowpilot.ErrorTechnical.Wrap(err)
-		}
-		cfg = config.Config{
-			ApplicationConfig: config.ApplicationConfig{},
-			TenantConfig:      *tenantConfig,
-		}
-		sessionManager, err = session.NewManager(jwkManager, cfg)
-		if err != nil {
-			return flowpilot.ErrorTechnical.Wrap(err)
-		}
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
 	}
 
-	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", cfg.Session.Cookie.GetName())
+	sessionManager, err := context2.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch session manager from context: %w", err)
+	}
+
+	lookup := fmt.Sprintf("header:Authorization:Bearer,cookie:%s", tenant.Config.Session.Cookie.GetName())
 	extractors, err := echojwt.CreateExtractors(lookup)
 
 	if err != nil {
@@ -121,7 +145,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 			continue
 		}
 		for _, auth := range auths {
-			token, tokenErr := sessionManager.Verify(auth)
+			token, tokenErr := sessionManager.Verify(auth, tenant.ID)
 			if tokenErr != nil {
 				lastTokenErr = tokenErr
 				continue
@@ -139,7 +163,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 				continue
 			}
 
-			sessionModel, err := persister.GetSessionPersister().Get(sessionID, tenantID)
+			sessionModel, err := h.Persister.GetSessionPersister().Get(sessionID, tenant.ID)
 			if err != nil {
 				return fmt.Errorf("failed to get session from database: %w", err)
 			}
@@ -168,7 +192,7 @@ func (h *FlowPilotHandler) validateSession(c echo.Context) error {
 
 			// Update lastUsed field
 			sessionModel.LastUsed = time.Now().UTC()
-			err = persister.GetSessionPersister().Update(*sessionModel)
+			err = h.Persister.GetSessionPersister().Update(*sessionModel)
 			if err != nil {
 				return dto.ToHttpError(err)
 			}
@@ -197,22 +221,6 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 	var unlock func(context.Context) error
 	var flowID uuid.UUID
 
-	var cfg = h.Cfg
-	tenantID, err := utils.TenantIDFromContext(c)
-	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
-	}
-	if h.Cfg.MultiTenancy {
-		tenantConfig := c.Get("tenant_config").(*config.TenantConfig)
-		if tenantConfig == nil {
-			return flowpilot.ErrorTechnical.Wrap(fmt.Errorf("tenant_config not found in context"))
-		}
-		cfg = config.Config{
-			ApplicationConfig: h.Cfg.ApplicationConfig,
-			TenantConfig:      *tenantConfig,
-		}
-	}
-
 	if c.QueryParam(queryParamKey) != "" {
 		err = c.Bind(&inputData)
 		if err != nil {
@@ -236,27 +244,21 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 		}
 	}
 
-	h.Persister.GetConnection()
-	/******** Start MultiTenantSpecific Services ********/
-	persister := persistence.New(h.Persister.GetConnection())
-
-	jwkManager, err := jwk.NewManager(h.Cfg.Secrets, h.Persister) // TODO: JwkManager must be tenant specific
-	sessionManager, err := session.NewManager(jwkManager, cfg)
-
-	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog) // TODO: AuditLogger needs to be changed, it should accept a tenantID in each function
-	passwordService := services.NewPasswordService(persister)
-	webauthnService := services.NewWebauthnService(cfg, persister)
-	samlService := saml.NewSamlService(&cfg, persister) // TODO: SamlService must be changed, because it gets the Saml Meadata when the service is created
-
-	emailService, err := services.NewEmailService()
+	var cfg = h.Cfg
+	tenant, err := context2.GetTenant(c)
 	if err != nil {
-		flowResult = flow.ResultFromError(flowpilot.ErrorTechnical.Wrap(fmt.Errorf("failed to create email service: %w", err)))
-		h.logFlowResult(c, flowResult)
-		return c.JSON(flowResult.GetStatus(), flowResult.GetResponse())
+		return fmt.Errorf("failed to fetch tenant from context: %w", err)
 	}
 
-	securityNotificationService := services.NewSecurityNotificationService(*emailService, persister, auditLogger)
-	/******** End MultiTenantSpecific Services ********/
+	cfg = config.Config{
+		ApplicationConfig: h.Cfg.ApplicationConfig,
+		TenantConfig:      tenant.Config,
+	}
+
+	sessionManager, err := context2.GetSessionManager(c)
+	if err != nil {
+		return fmt.Errorf("failed to fetch session manager from context: %w", err)
+	}
 
 	txFunc := func(tx *pop.Connection) error {
 		deps := &shared.Dependencies{
@@ -266,17 +268,17 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			PasswordRateLimiter:         h.PasswordRateLimiter,      // already tenant specific
 			TokenExchangeRateLimiter:    h.TokenExchangeRateLimiter, // already tenant specific
 			Tx:                          tx,                         // does not need to be tenant-specific
-			Persister:                   persister,
+			Persister:                   h.Persister,
 			HttpContext:                 c, // does not need to be tenant-specific, because it is request specific
 			SessionManager:              sessionManager,
-			SecurityNotificationService: securityNotificationService,
+			SecurityNotificationService: h.SecurityNotificationService,
 			PasscodeService:             h.PasscodeService,
-			PasswordService:             passwordService,
-			WebauthnService:             webauthnService,
-			SamlService:                 samlService,
+			PasswordService:             h.PasswordService,
+			WebauthnService:             h.WebauthnService,
+			SamlService:                 h.SamlService,
 			AuthenticatorMetadata:       h.AuthenticatorMetadata, // does not need to be tenant-specific
-			AuditLogger:                 auditLogger,
-			TenantID:                    tenantID,
+			AuditLogger:                 h.AuditLogger,
+			TenantID:                    tenant.ID,
 		}
 
 		flow.Set("deps", deps)
@@ -285,7 +287,7 @@ func (h *FlowPilotHandler) executeFlow(c echo.Context, flow flowpilot.Flow) erro
 			flowpilot.WithQueryParamKey(queryParamKey),
 			flowpilot.WithQueryParamValue(c.QueryParam(queryParamKey)),
 			flowpilot.WithInputData(inputData),
-			flowpilot.WithTenantID(tenantID),
+			flowpilot.WithTenantID(tenant.ID),
 			flowpilot.UseCompression(!h.Cfg.Debug))
 
 		return err

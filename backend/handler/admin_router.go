@@ -1,18 +1,14 @@
 package handler
 
 import (
-	"fmt"
-
 	"github.com/labstack/echo-contrib/echoprometheus"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
-	"github.com/teamhanko/hanko/backend/v2/crypto/jwk"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	hankoMiddleware "github.com/teamhanko/hanko/backend/v2/middleware"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
-	"github.com/teamhanko/hanko/backend/v2/session"
 	"github.com/teamhanko/hanko/backend/v2/template"
 )
 
@@ -47,78 +43,80 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 	health.GET("/alive", healthHandler.Alive)
 	health.GET("/ready", healthHandler.Ready)
 
-	jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
-	if err != nil {
-		panic(fmt.Errorf("failed to create jwk manager: %w", err))
-	}
-	sessionManager, err := session.NewManager(jwkManager, *cfg)
-	if err != nil {
-		panic(fmt.Errorf("failed to create session generator: %w", err))
-	}
+	jwkMiddleware := hankoMiddleware.JWKMiddleware(cfg.ApplicationConfig, persister)
+	webhookMiddleware := hankoMiddleware.WebhookMiddleware(persister)
+	sessionManagerMiddleware := hankoMiddleware.SessionManager()
 
-	webhookMiddleware := hankoMiddleware.WebhookMiddleware(cfg, jwkManager, persister)
-	tenantMiddleware := hankoMiddleware.TenantMiddleware(cfg.MultiTenancy, nil, persister)
+	var tenantGroup *echo.Group
+	var tenantMiddleware echo.MiddlewareFunc
+	if cfg.MultiTenancy {
+		tenantMiddleware = hankoMiddleware.TenantMiddlewareMultitenancy(persister)
+		tenantGroup = g.Group("/:tenant_id", tenantMiddleware)
+	} else {
+		tenantMiddleware = hankoMiddleware.TenantMiddlewareSingleTenant(cfg.TenantConfig)
+		tenantGroup = g.Group("", tenantMiddleware)
+	}
 
 	auditLogger := auditlog.NewLogger(persister, cfg.AuditLog)
 
 	userHandler := NewUserHandlerAdmin(persister)
-	emailHandler := NewEmailAdminHandler(cfg, persister)
-	sessionsHandler := NewSessionAdminHandler(cfg, persister, sessionManager, auditLogger)
+	metadataHandler := NewMetadataAdminHandler(persister)
+	emailHandler := NewEmailAdminHandler(persister)
+	webauthnCredentialHandler := NewWebauthnCredentialAdminHandler(persister)
+	passwordCredentialHandler := NewPasswordAdminHandler(persister)
+	sessionsHandler := NewSessionAdminHandler(persister, auditLogger)
+	webhookHandler := NewWebhookHandler(cfg.Webhooks, persister)
 
-	user := g.Group("/users", tenantMiddleware)
+	user := tenantGroup.Group("/users")
 	user.GET("", userHandler.List)
-	user.POST("", userHandler.Create, webhookMiddleware)
+	user.POST("", userHandler.Create, jwkMiddleware, webhookMiddleware)
 	user.GET("/:id", userHandler.Get)
-	user.DELETE("/:id", userHandler.Delete, webhookMiddleware)
+	user.DELETE("/:id", userHandler.Delete, jwkMiddleware, webhookMiddleware)
 	user.PATCH("/:id", userHandler.Patch)
 
-	metadataHandler := NewMetadataAdminHandler(persister)
 	user.PATCH("/:id/metadata", metadataHandler.PatchMetadata)
 	user.GET("/:id/metadata", metadataHandler.GetMetadata)
 
-	email := user.Group("/:user_id/emails", tenantMiddleware, webhookMiddleware)
+	email := user.Group("/:user_id/emails", jwkMiddleware, webhookMiddleware)
 	email.GET("", emailHandler.List)
 	email.POST("", emailHandler.Create)
 	email.GET("/:email_id", emailHandler.Get)
 	email.DELETE("/:email_id", emailHandler.Delete)
 	email.POST("/:email_id/set_primary", emailHandler.SetPrimaryEmail)
 
-	webauthnCredentialHandler := NewWebauthnCredentialAdminHandler(persister)
-	webauthnCredentials := user.Group("/:user_id/webauthn_credentials", tenantMiddleware)
+	webauthnCredentials := user.Group("/:user_id/webauthn_credentials")
 	webauthnCredentials.GET("", webauthnCredentialHandler.List)
 	webauthnCredentials.GET("/:credential_id", webauthnCredentialHandler.Get)
 	webauthnCredentials.DELETE("/:credential_id", webauthnCredentialHandler.Delete)
 
-	passwordCredentialHandler := NewPasswordAdminHandler(persister)
-	passwordCredentials := user.Group("/:user_id/password", tenantMiddleware)
+	passwordCredentials := user.Group("/:user_id/password")
 	passwordCredentials.GET("", passwordCredentialHandler.Get)
 	passwordCredentials.POST("", passwordCredentialHandler.Create)
 	passwordCredentials.PUT("", passwordCredentialHandler.Update)
 	passwordCredentials.DELETE("", passwordCredentialHandler.Delete)
 
-	userSessions := user.Group("/:user_id/sessions")
+	userSessions := user.Group("/:user_id/sessions", jwkMiddleware, sessionManagerMiddleware)
 	userSessions.GET("", sessionsHandler.List)
 	userSessions.DELETE("/:session_id", sessionsHandler.Delete)
 
 	otpHandler := NewOTPAdminHandler(persister)
-	otp := user.Group("/:user_id/otp", tenantMiddleware)
+	otp := user.Group("/:user_id/otp")
 	otp.GET("", otpHandler.Get)
 	otp.DELETE("", otpHandler.Delete)
 
 	auditLogHandler := NewAuditLogHandler(persister)
 
-	auditLogs := g.Group("/audit_logs", tenantMiddleware)
+	auditLogs := tenantGroup.Group("/audit_logs")
 	auditLogs.GET("", auditLogHandler.List)
 
-	webhookHandler := NewWebhookHandler(cfg.Webhooks, persister)
-	webhooks := g.Group("/webhooks", tenantMiddleware)
+	webhooks := tenantGroup.Group("/webhooks")
 	webhooks.GET("", webhookHandler.List)
 	webhooks.POST("", webhookHandler.Create)
 	webhooks.GET("/:id", webhookHandler.Get)
 	webhooks.DELETE("/:id", webhookHandler.Delete)
 	webhooks.PUT("/:id", webhookHandler.Update)
 
-	sessions := g.Group("/sessions", tenantMiddleware)
+	sessions := tenantGroup.Group("/sessions", jwkMiddleware, sessionManagerMiddleware)
 	sessions.POST("", sessionsHandler.Generate)
 
 	return e

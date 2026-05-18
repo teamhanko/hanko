@@ -13,7 +13,7 @@ import (
 type Session struct {
 	ID        uuid.UUID    `db:"id" json:"id"`
 	UserID    uuid.UUID    `db:"user_id" json:"user_id"`
-	TenantID  uuid.UUID    `db:"tenant_id"`
+	TenantID  uuid.UUID    `db:"tenant_id" json:"-"`
 	UserAgent nulls.String `db:"user_agent" json:"user_agent"`
 	IpAddress nulls.String `db:"ip_address" json:"ip_address"`
 	CreatedAt time.Time    `db:"created_at" json:"created_at"`

@@ -4,8 +4,9 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/gofrs/uuid"
 	"strings"
+
+	"github.com/gofrs/uuid"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
@@ -56,7 +57,7 @@ func (p *userMetadataPersister) Get(userID uuid.UUID, tenantID uuid.UUID) (*mode
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			// Create new metadata if none exists
-			metadata = &models.UserMetadata{UserID: userID}
+			metadata = &models.UserMetadata{UserID: userID, TenantID: tenantID}
 			err = p.db.Create(metadata)
 			if err != nil {
 				return nil, err

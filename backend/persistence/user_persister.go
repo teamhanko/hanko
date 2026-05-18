@@ -183,6 +183,8 @@ func (p *userPersister) List(page int, perPage int, userIDs []uuid.UUID, email s
 func (p *userPersister) All(tenantID uuid.UUID) ([]models.User, error) {
 	users := []models.User{}
 
+	uS := tenantID.String()
+	fmt.Printf("%s", uS)
 	query := p.db.EagerPreload(
 		"Emails",
 		"Emails.PrimaryEmail",

@@ -248,7 +248,10 @@ func (s *passwordAdminSuite) TestPasswordAdminHandler_Update() {
 				s.NoError(json.Unmarshal(rec.Body.Bytes(), &passwordCredential))
 				s.NotNil(passwordCredential)
 
-				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(uuid.FromStringOrNil(currentTest.userId), uuid.Nil)
+				cred, err := s.Storage.GetPasswordCredentialPersister().GetByUserID(
+					uuid.FromStringOrNil(currentTest.userId),
+					uuid.FromStringOrNil(config.DefaultTenantID),
+				)
 				s.Require().NoError(err)
 				s.NotEqual(currentTest.oldHashedPassword, cred.Password)
 			} else {

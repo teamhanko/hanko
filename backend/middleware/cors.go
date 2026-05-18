@@ -6,24 +6,18 @@ import (
 	"github.com/labstack/echo/v4"
 	echomiddleware "github.com/labstack/echo/v4/middleware"
 	"github.com/sethvargo/go-limiter/httplimit"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/context"
 )
 
 func TenantAwareCORS() echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
-			// Tenant config should already be loaded by TenantMiddleware
-			tenantConfigRaw := c.Get("tenant_config")
-			if tenantConfigRaw == nil {
-				return echo.NewHTTPError(http.StatusInternalServerError, "tenant config not loaded - TenantMiddleware must run before CORS")
+			tenant, err := context.GetTenant(c)
+			if err != nil {
+				return echo.NewHTTPError(http.StatusInternalServerError, "failed to get tenant from context - TenantMiddleware must run before CORS")
 			}
 
-			tenantConfig, ok := tenantConfigRaw.(*config.TenantConfig)
-			if !ok {
-				return echo.NewHTTPError(http.StatusInternalServerError, "invalid tenant_config type in context")
-			}
-
-			corsConfig := tenantConfig.Cors
+			corsConfig := tenant.Config.Cors
 
 			exposeHeaders := []string{
 				httplimit.HeaderRetryAfter,
@@ -34,7 +28,7 @@ func TenantAwareCORS() echo.MiddlewareFunc {
 				"X-Session-Retention",
 			}
 
-			if tenantConfig.Session.EnableAuthTokenHeader {
+			if tenant.Config.Session.EnableAuthTokenHeader {
 				exposeHeaders = append(exposeHeaders, "X-Auth-Token")
 			}
 

@@ -26,7 +26,7 @@ type EmailUpdateRequest struct {
 }
 
 // FromEmailModel Converts the DB model to a DTO object
-func FromEmailModel(email *models.Email, cfg *config.Config) *EmailResponse {
+func FromEmailModel(email *models.Email, cfg *config.TenantConfig) *EmailResponse {
 	emailResponse := &EmailResponse{
 		ID:         email.ID,
 		Address:    email.Address,

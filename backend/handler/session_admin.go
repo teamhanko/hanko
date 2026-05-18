@@ -9,35 +9,34 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
-	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/dto/admin"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/persistence/models"
-	"github.com/teamhanko/hanko/backend/v2/session"
-	"github.com/teamhanko/hanko/backend/v2/utils"
 )
 
 type SessionAdminHandler struct {
-	cfg           *config.Config
-	persister     persistence.Persister
-	sessionManger session.Manager
-	auditLogger   auditlog.Logger
+	persister   persistence.Persister
+	auditLogger auditlog.Logger
 }
 
-func NewSessionAdminHandler(cfg *config.Config, persister persistence.Persister, sessionManager session.Manager, auditLogger auditlog.Logger) SessionAdminHandler {
+func NewSessionAdminHandler(persister persistence.Persister, auditLogger auditlog.Logger) SessionAdminHandler {
 	return SessionAdminHandler{
-		cfg:           cfg,
-		persister:     persister,
-		sessionManger: sessionManager,
-		auditLogger:   auditLogger,
+		persister:   persister,
+		auditLogger: auditLogger,
 	}
 }
 
 func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(ctx)
+	tenant, err := context.GetTenant(ctx)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
+	}
+
+	sessionManager, err := context.GetSessionManager(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get session manager from context: %w", err)
 	}
 
 	var body admin.CreateSessionTokenDto
@@ -54,7 +53,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "failed to parse userId as uuid").SetInternal(err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -63,19 +62,19 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound, "user not found")
 	}
 
-	encodedToken, rawToken, err := h.sessionManger.GenerateJWT(dto.UserJWTFromUserModel(user))
+	encodedToken, rawToken, err := sessionManager.GenerateJWT(dto.UserJWTFromUserModel(user), tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to generate JWT: %w", err)
 	}
 
-	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID, tenantID)
+	activeSessions, err := h.persister.GetSessionPersister().ListActive(userID, tenant.ID)
 	if err != nil {
 		return fmt.Errorf("failed to list active sessions: %w", err)
 	}
 
 	// remove all server side sessions that exceed the limit
-	if len(activeSessions) >= h.cfg.Session.Limit {
-		for i := h.cfg.Session.Limit - 1; i < len(activeSessions); i++ {
+	if len(activeSessions) >= tenant.Config.Session.Limit {
+		for i := tenant.Config.Session.Limit - 1; i < len(activeSessions); i++ {
 			err = h.persister.GetSessionPersister().Delete(activeSessions[i])
 			if err != nil {
 				return fmt.Errorf("failed to remove latest session: %w", err)
@@ -88,6 +87,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 	expirationTime := rawToken.Expiration()
 	sessionModel := models.Session{
 		ID:        uuid.FromStringOrNil(sessionID.(string)),
+		TenantID:  tenant.ID,
 		UserID:    userID,
 		CreatedAt: rawToken.IssuedAt(),
 		UpdatedAt: rawToken.IssuedAt(),
@@ -112,7 +112,7 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 		SessionToken: encodedToken,
 	}
 
-	err = h.auditLogger.Create(ctx, models.AuditLogLoginSuccess, user, nil, tenantID, auditlog.Detail("api", "admin"))
+	err = h.auditLogger.Create(ctx, models.AuditLogLoginSuccess, user, nil, tenant.ID, auditlog.Detail("api", "admin"))
 	if err != nil {
 		return fmt.Errorf("could not create audit log: %w", err)
 	}
@@ -121,9 +121,9 @@ func (h *SessionAdminHandler) Generate(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) List(ctx echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(ctx)
+	tenant, err := context.GetTenant(ctx)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	listDto, err := loadDto[admin.ListSessionsRequestDto](ctx)
@@ -136,7 +136,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 		return echo.NewHTTPError(http.StatusNotFound)
 	}
 
-	sessions, err := h.persister.GetSessionPersister().ListActive(userID, tenantID)
+	sessions, err := h.persister.GetSessionPersister().ListActive(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -154,9 +154,9 @@ func (h *SessionAdminHandler) List(ctx echo.Context) error {
 }
 
 func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
-	tenantID, err := utils.TenantIDFromContext(ctx)
+	tenant, err := context.GetTenant(ctx)
 	if err != nil {
-		return fmt.Errorf("invalid tenant identifier: %w", err)
+		return fmt.Errorf("failed to get tenant from context: %w", err)
 	}
 
 	deleteDto, err := loadDto[admin.DeleteSessionRequestDto](ctx)
@@ -169,7 +169,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf(parseUserUuidFailureMessage, err)
 	}
 
-	user, err := h.persister.GetUserPersister().Get(userID, tenantID)
+	user, err := h.persister.GetUserPersister().Get(userID, tenant.ID)
 	if err != nil {
 		return err
 	}
@@ -183,7 +183,7 @@ func (h *SessionAdminHandler) Delete(ctx echo.Context) error {
 		return fmt.Errorf("failed to parse session_id as uuid: %s", err)
 	}
 
-	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID, tenantID)
+	sessionModel, err := h.persister.GetSessionPersister().Get(sessionID, tenant.ID)
 	if err != nil {
 		return err
 	}

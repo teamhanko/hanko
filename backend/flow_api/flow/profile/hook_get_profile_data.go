@@ -3,6 +3,7 @@ package profile
 import (
 	"errors"
 	"fmt"
+
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/flow_api/flow/shared"
 	"github.com/teamhanko/hanko/backend/v2/flowpilot"
@@ -21,7 +22,7 @@ func (h GetProfileData) Execute(c flowpilot.HookExecutionContext) error {
 		return errors.New("no valid session")
 	}
 
-	profileData := dto.ProfileDataFromUserModel(userModel, &deps.Cfg)
+	profileData := dto.ProfileDataFromUserModel(userModel, &deps.Cfg.TenantConfig)
 
 	err := c.Payload().Set("user", profileData)
 	if err != nil {

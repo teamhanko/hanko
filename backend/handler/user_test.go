@@ -24,8 +24,6 @@ type userSuite struct {
 }
 
 func (s *userSuite) TestUserHandler_Me() {
-	s.T().Skip("Skipped due to complicated session manager setup") // TODO: Unskip
-
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
@@ -33,6 +31,7 @@ func (s *userSuite) TestUserHandler_Me() {
 	s.Require().NoError(err)
 
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+	tenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
 
 	cfg := test.DefaultConfig
 	cfg.Passkey.Enabled = true
@@ -41,7 +40,7 @@ func (s *userSuite) TestUserHandler_Me() {
 	cfg.MFA.SecurityKeys.Enabled = true
 	e := NewPublicRouter(&cfg, s.Storage, nil, nil)
 
-	cookie, err := generateSessionCookie(s.Storage, userId)
+	cookie, err := generateSessionCookie(s.Storage, userId, tenantID)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodGet, "/me", nil)
@@ -82,8 +81,6 @@ func (s *userSuite) TestUserHandler_Me() {
 }
 
 func (s *userSuite) TestUserHandler_Logout() {
-	s.T().Skip("Skipped due to complicated session manager setup") // TODO: Unskip
-
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
@@ -92,9 +89,11 @@ func (s *userSuite) TestUserHandler_Logout() {
 	s.Require().NoError(err)
 
 	userId := uuid.FromStringOrNil("b5dd5267-b462-48be-b70d-bcd6f1bbe7a5")
+	tenantID := uuid.FromStringOrNil("00000000-0000-0000-0000-000000000001")
+
 	e := NewPublicRouter(&test.DefaultConfig, s.Storage, nil, nil)
 
-	cookie, err := generateSessionCookie(s.Storage, userId)
+	cookie, err := generateSessionCookie(s.Storage, userId, tenantID)
 	s.Require().NoError(err)
 
 	req := httptest.NewRequest(http.MethodPost, "/logout", nil)

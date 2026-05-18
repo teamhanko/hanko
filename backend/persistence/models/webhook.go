@@ -1,8 +1,9 @@
 package models
 
 import (
-	"github.com/gobuffalo/validate/v3/validators"
 	"time"
+
+	"github.com/gobuffalo/validate/v3/validators"
 
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
@@ -12,7 +13,7 @@ import (
 // Webhook is used by pop to map your webhooks database table to your go code.
 type Webhook struct {
 	ID            uuid.UUID     `json:"id" db:"id"`
-	TenantID      uuid.UUID     `db:"tenant_id"`
+	TenantID      uuid.UUID     `json:"-" db:"tenant_id"`
 	Callback      string        `json:"callback" db:"callback"`
 	Enabled       bool          `json:"enabled" db:"enabled"`
 	Failures      int           `json:"failures" db:"failures"`

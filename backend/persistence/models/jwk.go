@@ -6,10 +6,12 @@ import (
 	"github.com/gobuffalo/pop/v6"
 	"github.com/gobuffalo/validate/v3"
 	"github.com/gobuffalo/validate/v3/validators"
+	"github.com/gofrs/uuid"
 )
 
 type Jwk struct {
 	ID        int       `db:"id"`
+	TenantId  uuid.UUID `db:"tenant_id"`
 	KeyData   string    `db:"key_data"`
 	CreatedAt time.Time `db:"created_at"`
 }

@@ -33,7 +33,7 @@ type Identity struct {
 
 type Identities []Identity
 
-func FromIdentitiesModel(identities models.Identities, cfg *config.Config) Identities {
+func FromIdentitiesModel(identities models.Identities, cfg *config.TenantConfig) Identities {
 	var result Identities
 	for _, i := range identities {
 		identity := FromIdentityModel(&i, cfg)
@@ -42,7 +42,7 @@ func FromIdentitiesModel(identities models.Identities, cfg *config.Config) Ident
 	return result
 }
 
-func FromIdentityModel(identity *models.Identity, cfg *config.Config) *Identity {
+func FromIdentityModel(identity *models.Identity, cfg *config.TenantConfig) *Identity {
 	if identity == nil {
 		return nil
 	}
@@ -54,7 +54,7 @@ func FromIdentityModel(identity *models.Identity, cfg *config.Config) *Identity 
 	}
 }
 
-func getProviderDisplayName(identity *models.Identity, cfg *config.Config) string {
+func getProviderDisplayName(identity *models.Identity, cfg *config.TenantConfig) string {
 	if identity.SamlIdentity != nil {
 		for _, ip := range cfg.Saml.IdentityProviders {
 			if ip.Enabled && ip.Domain == identity.SamlIdentity.Domain {

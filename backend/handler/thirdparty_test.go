@@ -16,6 +16,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	auditlog "github.com/teamhanko/hanko/backend/v2/audit_log"
 	"github.com/teamhanko/hanko/backend/v2/config"
+	"github.com/teamhanko/hanko/backend/v2/context"
 	"github.com/teamhanko/hanko/backend/v2/dto"
 	"github.com/teamhanko/hanko/backend/v2/test"
 	"github.com/teamhanko/hanko/backend/v2/utils"
@@ -24,10 +25,6 @@ import (
 func TestThirdPartySuite(t *testing.T) {
 	t.Parallel()
 	suite.Run(t, new(thirdPartySuite))
-}
-
-func (s *thirdPartySuite) SetupSuite() {
-	s.T().Skip("Skipping entire thirdparty suite") // TODO: unskip!
 }
 
 type thirdPartySuite struct {
@@ -40,8 +37,10 @@ func (s *thirdPartySuite) setUpContext(request *http.Request, tenantConfig confi
 	e.Validator = dto.NewCustomValidator()
 	rec := httptest.NewRecorder()
 	c := e.NewContext(request, rec)
-	c.Set("tenant_id", uuid.FromStringOrNil(config.DefaultTenantID))
-	c.Set("tenant_config", &tenantConfig)
+	c.Set("tenant", context.Tenant{
+		ID:     uuid.FromStringOrNil(config.DefaultTenantID),
+		Config: tenantConfig,
+	})
 	return c, rec
 }
 
@@ -137,7 +136,7 @@ func (s *thirdPartySuite) setUpConfig(enabledProviders []string, allowedRedirect
 func (s *thirdPartySuite) setUpFakeJwkSet() jwk2.Set {
 	s.T().Helper()
 	generator := test.JwkManager{}
-	keySet, err := generator.GetPublicKeys()
+	keySet, err := generator.GetPublicKeys(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 	return keySet
 }
@@ -157,7 +156,7 @@ func (s *thirdPartySuite) setUpAppleIdToken(sub, aud, email string, emailVerifie
 	}
 
 	generator := test.JwkManager{}
-	signingKey, err := generator.GetSigningKey()
+	signingKey, err := generator.GetSigningKey(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, signingKey))
@@ -177,7 +176,7 @@ func (s *thirdPartySuite) setUpMicrosoftIdToken(sub, aud, email string, edov boo
 	_ = token.Set("xms_edov", edov)
 
 	generator := test.JwkManager{}
-	signingKey, err := generator.GetSigningKey()
+	signingKey, err := generator.GetSigningKey(uuid.FromStringOrNil(config.DefaultTenantID))
 	s.Require().NoError(err)
 
 	signedToken, err := jwt.Sign(token, jwt.WithKey(jwa.RS256, signingKey))

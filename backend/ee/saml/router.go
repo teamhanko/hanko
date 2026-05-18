@@ -7,7 +7,7 @@ import (
 )
 
 func CreateSamlRoutes(e *echo.Echo, sessionManager session.Manager, auditLogger auditlog.Logger, samlService Service) {
-	handler := NewSamlHandler(sessionManager, auditLogger, samlService)
+	handler := NewSamlHandler(auditLogger, samlService)
 	routingGroup := e.Group("saml")
 	routingGroup.GET("/metadata", handler.Metadata)
 	routingGroup.GET("/auth", handler.Auth)
