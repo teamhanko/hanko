@@ -19,7 +19,7 @@ func JWKMiddleware(appConfig config.ApplicationConfig, persister persistence.Per
 			}
 
 			secrets := tenant.Config.Secrets
-			jwkManager, err := jwk.NewManager(secrets, persister, appConfig.MultiTenancy)
+			jwkManager, err := jwk.NewManager(secrets, persister, appConfig.MultiTenancy.Enabled)
 
 			ctx.Set("jwk_manager", jwkManager)
 

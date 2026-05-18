@@ -49,7 +49,7 @@ func NewAdminRouter(cfg *config.Config, persister persistence.Persister, prometh
 
 	var tenantGroup *echo.Group
 	var tenantMiddleware echo.MiddlewareFunc
-	if cfg.MultiTenancy {
+	if cfg.MultiTenancy.Enabled {
 		tenantMiddleware = hankoMiddleware.TenantMiddlewareMultitenancy(persister)
 		tenantGroup = g.Group("/:tenant_id", tenantMiddleware)
 	} else {

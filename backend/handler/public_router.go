@@ -58,7 +58,7 @@ func NewPublicRouter(cfg *config.Config, persister persistence.Persister, promet
 	sessionManagerMiddleware := hankoMiddleware.SessionManager()
 
 	var tenantGroupRoot *echo.Group
-	if cfg.MultiTenancy {
+	if cfg.MultiTenancy.Enabled {
 		tenantMiddleware := hankoMiddleware.TenantMiddlewareMultitenancy(persister)
 		tenantGroupRoot = e.Group("/:tenant_id", tenantMiddleware)
 	} else {

@@ -25,7 +25,7 @@ func StartAdmin(cfg *config.Config, wg *sync.WaitGroup, persister persistence.Pe
 func StartManagement(cfg *config.Config, wg *sync.WaitGroup, persister persistence.Persister) {
 	defer wg.Done()
 	// DO not start the management server if multi-tenancy is disabled
-	if cfg != nil && !cfg.MultiTenancy {
+	if cfg != nil && !cfg.MultiTenancy.Enabled {
 		return
 	}
 	router := handler.NewManagementRouter(cfg, persister)

@@ -92,7 +92,7 @@ func NewImportCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			if !cfg.ApplicationConfig.MultiTenancy {
+			if !cfg.ApplicationConfig.MultiTenancy.Enabled {
 				tenantID = config.DefaultTenantID
 			} else {
 				if tenantID == "" {

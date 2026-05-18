@@ -43,7 +43,7 @@ func NewCreateCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
-			if !cfg.ApplicationConfig.MultiTenancy {
+			if !cfg.ApplicationConfig.MultiTenancy.Enabled {
 				tenantID = config.DefaultTenantID
 			} else {
 				if tenantID == "" {
@@ -64,7 +64,7 @@ func NewCreateCommand() *cobra.Command {
 				}
 			}
 			persister := persistence.New(dbConnection)
-			jwkManager, err := jwk.NewManager(cfg.Secrets, persister, cfg.MultiTenancy)
+			jwkManager, err := jwk.NewManager(cfg.Secrets, persister, cfg.MultiTenancy.Enabled)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return

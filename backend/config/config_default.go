@@ -303,7 +303,7 @@ func DefaultApplicationConfig() ApplicationConfig {
 				Interval: 1 * time.Minute,
 			},
 		},
-		MultiTenancy: false,
+		MultiTenancy: MultiTenancy{Enabled: false},
 		Debug:        false,
 		FlowLocker: FlowLocker{
 			Enabled: true,

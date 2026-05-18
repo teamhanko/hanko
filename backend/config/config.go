@@ -23,7 +23,7 @@ type ApplicationConfig struct {
 	// `log` configures application logging.
 	Log LoggerConfig `yaml:"log" json:"log,omitempty" koanf:"log" jsonschema:"title=log"`
 	// MultiTenancy determines if the system supports multiple tenants, enabling tenant-specific configurations and isolation.
-	MultiTenancy bool `yaml:"multi_tenancy" json:"multi_tenancy,omitempty" koanf:"multi_tenancy" jsonschema:"default=false"`
+	MultiTenancy MultiTenancy `yaml:"multi_tenancy" json:"multi_tenancy,omitempty" koanf:"multi_tenancy" jsonschema:"default=false"`
 	// `rate_limiter` configures rate limits for rate limited API operations and storage modalities for rate limit data.
 	RateLimiter RateLimiter `yaml:"rate_limiter" json:"rate_limiter,omitempty" koanf:"rate_limiter" split_words:"true" jsonschema:"title=rate_limiter"`
 	// `server` configures address settings of the public and admin API.
