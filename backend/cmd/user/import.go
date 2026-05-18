@@ -92,6 +92,14 @@ func NewImportCommand() *cobra.Command {
 				log.Fatal(err)
 			}
 
+			if !cfg.ApplicationConfig.MultiTenancy {
+				tenantID = config.DefaultTenantID
+			} else {
+				if tenantID == "" {
+					log.Fatal("tenant_id must be present if multitenancy is enabled")
+				}
+			}
+
 			var tID uuid.UUID
 			if tenantID != "" {
 				tID, err = uuid.FromString(tenantID)
@@ -102,7 +110,7 @@ func NewImportCommand() *cobra.Command {
 
 			persister := persistence.New(dbConnection)
 
-			err = addToDatabase(users, persister, &tID)
+			err = addToDatabase(users, persister, tID)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -170,7 +178,7 @@ func loadAndValidate(input io.Reader) ([]ImportOrExportEntry, error) {
 }
 
 // commits the list of ImportEntries to the database. Wrapped in a transaction so if something fails no new users are added.
-func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persister, tenantID *uuid.UUID) error {
+func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persister, tenantID uuid.UUID) error {
 	tx := persister.GetConnection()
 	err := tx.Transaction(func(tx *pop.Connection) error {
 		importer := Importer{
@@ -178,48 +186,48 @@ func addToDatabase(entries []ImportOrExportEntry, persister persistence.Persiste
 			tx:              tx,
 			importTimestamp: time.Now().UTC(),
 		}
-		for i, v := range entries {
-			userModel, err := importer.createUser(v, *tenantID)
+		for i, userEntry := range entries {
+			userModel, err := importer.createUser(userEntry, tenantID)
 			if err != nil {
 				return fmt.Errorf("failed to create user entry nr. %d: %w", i, err)
 			}
 
-			for _, e := range v.Emails {
-				emailModel, err := importer.createEmailAddress(userModel.ID, e, *tenantID)
+			for _, e := range userEntry.Emails {
+				emailModel, err := importer.createEmailAddress(userModel.ID, e, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create email address \"%s\" for user entry nr. %d: %w", e.Address, i, err)
 				}
 				if e.IsPrimary {
-					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID, *tenantID)
+					err = importer.createPrimaryEmailAddress(userModel.ID, emailModel.ID, tenantID)
 					if err != nil {
 						return fmt.Errorf("failed to set email \"%s\" as primary for user entry nr. %d: %w", e.Address, i, err)
 					}
 				}
 			}
 
-			if v.Username != nil {
-				err = importer.createUsername(userModel.ID, *v.Username, *tenantID)
+			if userEntry.Username != nil {
+				err = importer.createUsername(userModel.ID, *userEntry.Username, tenantID)
 				if err != nil {
-					return fmt.Errorf("failed to create username \"%v\" for user entry nr. %d: %w", v.Username, i, err)
+					return fmt.Errorf("failed to create username \"%v\" for user entry nr. %d: %w", userEntry.Username, i, err)
 				}
 			}
 
-			for _, credential := range v.WebauthnCredentials {
-				err = importer.createWebauthnCredential(userModel.ID, credential, *tenantID)
+			for _, credential := range userEntry.WebauthnCredentials {
+				err = importer.createWebauthnCredential(userModel.ID, credential, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create webauthn credential \"%s\" for user entry nr. %d: %w", credential.ID, i, err)
 				}
 			}
 
-			if v.Password != nil {
-				err = importer.createPasswordCredential(userModel.ID, *v.Password, *tenantID)
+			if userEntry.Password != nil {
+				err = importer.createPasswordCredential(userModel.ID, *userEntry.Password, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create password for user entry nr. %d: %w", i, err)
 				}
 			}
 
-			if v.OTPSecret != nil {
-				err = importer.createOTPSecret(userModel.ID, *v.OTPSecret, *tenantID)
+			if userEntry.OTPSecret != nil {
+				err = importer.createOTPSecret(userModel.ID, *userEntry.OTPSecret, tenantID)
 				if err != nil {
 					return fmt.Errorf("failed to create otp secret for user entry nr. %d: %w", i, err)
 				}

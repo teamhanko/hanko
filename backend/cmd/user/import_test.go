@@ -11,6 +11,7 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
+	"github.com/teamhanko/hanko/backend/v2/config"
 	"github.com/teamhanko/hanko/backend/v2/persistence"
 	"github.com/teamhanko/hanko/backend/v2/test"
 )
@@ -103,8 +104,6 @@ func (s *importSuite) Test_loadAndValidate() {
 }
 
 func (s *importSuite) Test_addToDatabase() {
-	s.T().Skip("import needs to be reworked") // TODO: unskip test
-
 	if testing.Short() {
 		s.T().Skip("skipping test in short mode.")
 	}
@@ -214,8 +213,8 @@ func (s *importSuite) Test_addToDatabase() {
 		s.T().Run(tt.name, func(t *testing.T) {
 
 			s.SetupTest()
-			tt.wantErr(t, addToDatabase(tt.args.entries, tt.args.persister, nil), fmt.Sprintf("addToDatabase(%v, %v)", tt.args.entries, tt.args.persister))
-			users, err := tt.args.persister.GetUserPersister().List(0, 100, []uuid.UUID{}, "", "", "", uuid.Nil)
+			tt.wantErr(t, addToDatabase(tt.args.entries, tt.args.persister, uuid.FromStringOrNil(config.DefaultTenantID)), fmt.Sprintf("addToDatabase(%v, %v)", tt.args.entries, tt.args.persister))
+			users, err := tt.args.persister.GetUserPersister().List(0, 100, []uuid.UUID{}, "", "", "", uuid.FromStringOrNil(config.DefaultTenantID))
 			log.Println(users)
 			s.NoError(err)
 			s.Equal(tt.wantNumUsers, len(users))

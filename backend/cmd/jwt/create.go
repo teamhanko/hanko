@@ -42,6 +42,15 @@ func NewCreateCommand() *cobra.Command {
 			if err != nil {
 				log.Fatal(err)
 			}
+
+			if !cfg.ApplicationConfig.MultiTenancy {
+				tenantID = config.DefaultTenantID
+			} else {
+				if tenantID == "" {
+					log.Fatal("tenant_id must be present if multitenancy is enabled")
+				}
+			}
+
 			dbConnection, err := persistence.NewConnection(cfg.Database)
 			if err != nil {
 				log.Fatal(err)
@@ -55,13 +64,13 @@ func NewCreateCommand() *cobra.Command {
 				}
 			}
 			persister := persistence.New(dbConnection)
-			jwkManager, err := jwk.NewManager(cfg.Secrets, persister)
+			jwkManager, err := jwk.NewManager(cfg.Secrets, persister, cfg.MultiTenancy)
 			if err != nil {
 				fmt.Printf("failed to create jwk persister: %s", err)
 				return
 			}
 
-			sessionManager, err := session.NewManager(jwkManager, *cfg)
+			sessionManager, err := session.NewManager(jwkManager, cfg.TenantConfig)
 			if err != nil {
 				fmt.Printf("failed to create session generator: %s", err)
 				return
@@ -75,7 +84,12 @@ func NewCreateCommand() *cobra.Command {
 				return
 			}
 
-			token, rawToken, err := sessionManager.GenerateJWT(dto.UserJWTFromUserModel(userModel))
+			if userModel == nil {
+				fmt.Printf("user with id '%s' for tenant '%s' not found", userId, tID.String())
+				return
+			}
+
+			token, rawToken, err := sessionManager.GenerateJWT(dto.UserJWTFromUserModel(userModel), tID)
 			if err != nil {
 				fmt.Printf("failed to generate token: %s", err)
 				return
@@ -86,6 +100,7 @@ func NewCreateCommand() *cobra.Command {
 			expirationTime := rawToken.Expiration()
 			sessionModel := models.Session{
 				ID:        uuid.FromStringOrNil(sessionID.(string)),
+				TenantID:  tID,
 				UserID:    userId,
 				CreatedAt: rawToken.IssuedAt(),
 				UpdatedAt: rawToken.IssuedAt(),
