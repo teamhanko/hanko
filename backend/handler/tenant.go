@@ -281,6 +281,11 @@ func (h *TenantHandler) validateTenantConfig(configJSON json.RawMessage) (json.R
 		return nil, nil, fmt.Errorf("failed to post process tenant settings: %w", err)
 	}
 
+	err = tenantConfig.Validate()
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to validate tenant settings: %w", err)
+	}
+
 	b, err := json.Marshal(tenantConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("failed to marshal config JSON: %w", err)
