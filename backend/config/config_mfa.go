@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/invopop/jsonschema"
 	"time"
+
+	"github.com/invopop/jsonschema"
 )
 
 type SecurityKeys struct {
@@ -41,7 +42,7 @@ type MFA struct {
 	// `device_trust_max_users_per_device` limits how many users can have device trust on a single device/browser.
 	// Oldest entries are removed when the limit is exceeded. This allows multiple users to trust the same device
 	// without overwriting each other's trust tokens.
-	DeviceTrustMaxUsersPerDevice int `yaml:"device_trust_max_users_per_device" json:"device_trust_max_users_per_device,omitempty" koanf:"device_trust_max_users_per_device" jsonschema:"default=20"`
+	DeviceTrustMaxUsersPerDevice int `yaml:"device_trust_max_users_per_device,omitempty" json:"device_trust_max_users_per_device,omitempty" koanf:"device_trust_max_users_per_device" jsonschema:"default=20"`
 	// `device_trust_policy` determines the conditions under which a device or browser is considered trusted, allowing
 	// MFA to be skipped for subsequent logins.
 	DeviceTrustPolicy string `yaml:"device_trust_policy" json:"device_trust_policy,omitempty" koanf:"device_trust_policy" split_words:"true" jsonschema:"default=prompt,enum=always,enum=prompt,enum=never"`

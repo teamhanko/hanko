@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-elements",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "type": "module",
   "private": false,
   "publishConfig": {
@@ -129,18 +129,18 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "eslint-plugin-promise": "^6.1.1",
-    "sass": "^1.98.0",
+    "sass": "^1.99.0",
     "sass-loader": "^16.0.7",
     "source-map-loader": "^4.0.1",
     "style-loader": "^3.3.2",
-    "ts-jest": "^29.1.1",
-    "ts-loader": "^9.4.2",
-    "webpack": "^5.105.4",
+    "ts-jest": "^29.4.9",
+    "ts-loader": "^9.5.7",
+    "webpack": "^5.106.1",
     "webpack-cli": "^7.0.2"
   },
   "dependencies": {
     "@denysvuika/preact-translate": "^0.6.0",
-    "@teamhanko/hanko-frontend-sdk": "^2.5.0",
+    "@teamhanko/hanko-frontend-sdk": "^2.6.0",
     "@teamhanko/preact-custom-element": "^4.2.2",
     "classnames": "^2.3.2",
     "preact": "^10.28.4"

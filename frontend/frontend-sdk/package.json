@@ -1,6 +1,6 @@
 {
   "name": "@teamhanko/hanko-frontend-sdk",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "private": false,
   "publishConfig": {
     "access": "public"
@@ -60,8 +60,8 @@
     "js-cookie": "^3.0.5",
     "jsdoc": "3.6.11",
     "microbundle": "^0.15.1",
-    "ts-jest": "^29.1.1",
-    "ts-loader": "^9.4.2",
+    "ts-jest": "^29.4.9",
+    "ts-loader": "^9.5.7",
     "typescript": "^4.9.5"
   },
   "dependencies": {
